@@ -4,7 +4,6 @@ import MuiTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import Grid from '@mui/material/Grid';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
-import { useNavigate } from 'react-router-dom';
 import { ReputationLabel } from './ReputationLabel';
 import { EntityIcon } from './EntityIcon';
 import { TableHead } from './TableHead';
@@ -19,12 +18,11 @@ import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 import { getNetwork } from '@utils/config/networks';
 import { NetworkIcon } from '@components/NetworkIcon';
 import { colorPalette } from '@assets/styles/color-palette';
-import { Typography } from '@mui/material';
+import { TableRow, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { handleErrorMessage } from '@services/handle-error-message';
 import Loader from '@components/Loader';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
-import { TableRowWithCustomContextMenu } from '@components/TableRowWithCustomContextMenu/TableRowWithCustomContextMenu';
 
 export const Table = ({
 	data = [],
@@ -35,7 +33,6 @@ export const Table = ({
 	status: 'success' | 'error' | 'pending';
 	error: unknown;
 }) => {
-	const navigate = useNavigate();
 	const { mobile } = useBreakPoints();
 
 	const {
@@ -103,23 +100,15 @@ export const Table = ({
 				) : (
 					<>
 						{visibleRows.map((row, index) => (
-							<TableRowWithCustomContextMenu
+							<TableRow
 								key={index + row.address}
-								newTabLink={`/search/${row.chainId}/${row.address}`}
-								componentProps={{
-									onClick: () => {
-										navigate(`/search/${row.chainId}/${row.address}`, {
-											preventScrollReset: false,
-										});
+								className={'home-page-table-row'}
+								sx={{
+									paddingTop: '1px',
+									':hover': {
+										backgroundColor: colorPalette.overlay.light,
 									},
-									className: 'home-page-table-row',
-									sx: {
-										paddingTop: '1px',
-										':hover': {
-											backgroundColor: colorPalette.overlay.light,
-										},
-										textDecoration: 'none',
-									},
+									textDecoration: 'none',
 								}}
 							>
 								{mobile.isMobile ? null : (
@@ -151,10 +140,23 @@ export const Table = ({
 										gap="8px"
 										justifyContent="flex-start"
 									>
-										{mobile.isMobile ? null : <EntityIcon role={row.role} />}
-										<Typography variant="subtitle2" sx={{ wordBreak: 'unset' }}>
-											{row.role}
-										</Typography>
+										{mobile.isMobile ? (
+											<>
+												<Typography
+													variant="subtitle2"
+													sx={{ wordBreak: 'unset' }}
+												>
+													{row.role}
+												</Typography>
+											</>
+										) : (
+											<>
+												<EntityIcon role={row.role} />
+												<Typography variant="h6" sx={{ wordBreak: 'unset' }}>
+													{row.role}
+												</Typography>
+											</>
+										)}
 									</Grid>
 								</TableCell>
 								<TableCell>
@@ -164,26 +166,37 @@ export const Table = ({
 										alignItems="center"
 										sx={{ gap: '18px' }}
 									>
-										<AbbreviateClipboard value={row.address} />
+										<AbbreviateClipboard
+											value={row.address}
+											link={`/search/${row.chainId}/${row.address}`}
+										/>
 									</Grid>
 								</TableCell>
-								<TableCell>{row.amountStaked} HMT</TableCell>
 								<TableCell>
-									<Grid
-										container
-										wrap="nowrap"
-										alignItems="center"
-										justifyContent="center"
-									>
-										<NetworkIcon chainId={row.chainId} />
-										{getNetwork(row.chainId)?.name}
-									</Grid>
+									<Typography variant="body1">
+										{row.amountStaked} HMT
+									</Typography>
+								</TableCell>
+								<TableCell>
+									<Typography component="div" variant="body1">
+										<Grid
+											whiteSpace="nowrap"
+											container
+											wrap="nowrap"
+											alignItems="center"
+											justifyContent="center"
+											gap="6px"
+										>
+											<NetworkIcon chainId={row.chainId} />
+											{getNetwork(row.chainId)?.name}
+										</Grid>
+									</Typography>
 								</TableCell>
 								<TableCell>
 									<ReputationLabel reputation={row.reputation} />
 								</TableCell>
 								<TableCell>{row.fee}%</TableCell>
-							</TableRowWithCustomContextMenu>
+							</TableRow>
 						))}
 					</>
 				)}

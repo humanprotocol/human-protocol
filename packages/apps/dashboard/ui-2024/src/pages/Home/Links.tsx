@@ -6,6 +6,7 @@ import gate from '@assets/gate.png';
 import bing from '@assets/bing.png';
 import coinlist from '@assets/coinlist.png';
 import lbank from '@assets/lbank.png';
+import { Typography } from '@mui/material';
 
 export const Links = () => {
 	const bitfinexLink = env.VITE_BITFINEX_LINK;
@@ -29,10 +30,11 @@ export const Links = () => {
 
 	return (
 		<>
-			<span className="home-page-find-title-mobile">Find HMT at</span>
 			<SimpleBar>
 				<div className="home-page-find">
-					<span>Find HMT at</span>
+					<Typography component="span" variant="body2">
+						Find HMT at
+					</Typography>
 
 					{bitfinexLink ? (
 						<a href={bitfinexLink} target="_blank">

@@ -377,7 +377,7 @@ export const AreaChart = ({
 							title: 'Transfer Amount',
 							isAreaChart: true,
 							name: 'totalTransactionAmount',
-							amount: Number(sum.totalTransactionAmount.toFixed()),
+							amount: `${Number(sum.totalTransactionAmount.toFixed())}`,
 							color: colorPalette.primary.main,
 						},
 						{

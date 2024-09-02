@@ -7,11 +7,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import logo from '@assets/logo.png';
 import Search from '@components/Search';
-import logoMobile from '@assets/logo-mobile.png';
 import { env } from '@helpers/env';
 import { useNavigate } from 'react-router-dom';
+import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
+import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
 
 const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 	const navigate = useNavigate();
@@ -45,8 +45,12 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 					},
 				}}
 			>
-				<img className="logo" src={logo} alt="logo" />
-				<img className="logo-mobile" src={logoMobile} alt="logo" />
+				<span className="logo">
+					<LogoBlockIcon />
+				</span>
+				<span className="logo-mobile">
+					<LogoBlockIconMobile />
+				</span>
 			</Link>
 
 			{displaySearchBar && (

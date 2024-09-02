@@ -10,6 +10,7 @@ import { SelectNetwork } from './SelectNetwork';
 import { colorPalette } from '@assets/styles/color-palette';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { Order, SortableFieldsInLeaderBoardData } from '../helpers/sorting';
+import { Typography } from '@mui/material';
 
 interface TableHeadProps {
 	onRequestSort: (
@@ -57,7 +58,11 @@ export const TableHead = ({
 						direction={orderBy === 'role' ? order : 'asc'}
 						onClick={createSortHandler('role')}
 					>
-						ROLE
+						<div className="icon-table">
+							<Typography mt="3px" variant="body3">
+								ROLE
+							</Typography>
+						</div>
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
@@ -73,7 +78,9 @@ export const TableHead = ({
 							<Tooltip title="Address of the role" arrow>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
-							<span>ADDRESS</span>
+							<Typography mt="3px" component="span" variant="body3">
+								ADDRESS
+							</Typography>
 						</div>
 					</TableSortLabel>
 				</TableCell>
@@ -90,7 +97,9 @@ export const TableHead = ({
 							<Tooltip title="Amount of HMT staked" arrow>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
-							<span>STAKE</span>
+							<Typography mt="3px" component="span" variant="body3">
+								STAKE
+							</Typography>
 						</div>
 					</TableSortLabel>
 				</TableCell>
@@ -114,7 +123,9 @@ export const TableHead = ({
 							>
 								<HelpOutlineIcon color="sky" />
 							</Tooltip>
-							<span>REPUTATION SCORE</span>
+							<Typography mt="3px" component="span" variant="body3">
+								REPUTATION SCORE
+							</Typography>
 						</div>
 					</TableSortLabel>
 				</TableCell>
@@ -126,8 +137,15 @@ export const TableHead = ({
 						active={orderBy === 'fee'}
 						direction={orderBy === 'fee' ? order : 'asc'}
 						onClick={createSortHandler('fee')}
+						sx={{
+							display: 'flex',
+							justifyContent: 'center',
+							alignSelf: 'center',
+						}}
 					>
-						OPERATOR FEE
+						<Typography mt="3px" variant="body3" component="div">
+							OPERATOR FEE
+						</Typography>
 					</TableSortLabel>
 				</TableCell>
 			</TableRow>

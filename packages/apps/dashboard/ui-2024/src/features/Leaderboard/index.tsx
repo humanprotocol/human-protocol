@@ -1,5 +1,4 @@
 import { colorPalette } from '@assets/styles/color-palette';
-import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import TableContainer from '@mui/material/TableContainer';
 import { LeaderBoardData } from '@services/api/use-leaderboard-details';
@@ -7,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import SimpleBar from 'simplebar-react';
 import { SelectNetwork } from './components/SelectNetwork';
 import { Table } from './components/Table';
+import { Button, Typography } from '@mui/material';
 
 export type LeaderboardCommonProps = {
 	data: LeaderBoardData | undefined;
@@ -35,7 +35,7 @@ export const Leaderboard = ({
 				<Table data={data} status={status} error={error} />
 			</SimpleBar>
 			{viewAllBanner ? (
-				<Box
+				<Button
 					sx={{
 						height: '42px',
 						border: `1px ${colorPalette.primary.main} solid`,
@@ -45,12 +45,13 @@ export const Leaderboard = ({
 						alignItems: 'center',
 						cursor: 'pointer',
 					}}
+					fullWidth
 					onClick={() => {
 						navigate('/leaderboard');
 					}}
 				>
-					View All
-				</Box>
+					<Typography variant="Components/Button Large">View All</Typography>
+				</Button>
 			) : null}
 		</TableContainer>
 	);

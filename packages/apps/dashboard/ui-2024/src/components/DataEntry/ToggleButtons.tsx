@@ -62,7 +62,7 @@ const ToggleButtons = () => {
 					}}
 					value={elem.name}
 				>
-					<Typography fontWeight={600}>{elem.name}</Typography>
+					<Typography variant="Components/Button Small">{elem.name}</Typography>
 				</ToggleButton>
 			))}
 		</StyledToggleButtonGroup>

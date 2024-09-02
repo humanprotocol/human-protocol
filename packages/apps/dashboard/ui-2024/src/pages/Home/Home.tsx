@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Divider from '@mui/material/Divider';
 import { Link } from 'react-router-dom';
-import cup from '@assets/cup.png';
 import { Leaderboard } from './Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
 import { HMTPrice } from '@pages/Home/HMTPrice';
@@ -15,12 +14,20 @@ import { TotalNumberOfTasks } from '@pages/Home/TotalNumberOfTasks';
 import { Holders } from '@pages/Home/Holders';
 import { TotalTransactions } from '@pages/Home/TotalTransactions';
 import { Links } from '@pages/Home/Links';
+import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
 const Home: React.FC = () => {
+	const {
+		mobile: { isMobile },
+	} = useBreakPoints();
 	return (
 		<PageWrapper violetHeader>
 			<div className="home-page-header">
-				<Typography variant="h3" fontWeight={600}>
+				<Typography
+					fontWeight={isMobile ? undefined : 600}
+					variant={isMobile ? 'H6-Mobile' : 'h3'}
+				>
 					All HUMAN activity. In one place.
 				</Typography>
 				<Search className="home-page-search" />
@@ -93,9 +100,8 @@ const Home: React.FC = () => {
 			<ShadowIcon
 				className="home-page-leaderboard"
 				title="Leaderboard"
-				img={cup}
+				img={<LeaderboardIcon />}
 			/>
-
 			<Leaderboard />
 		</PageWrapper>
 	);

@@ -31,70 +31,77 @@ const EscrowAddress = ({
 		>
 			<Stack gap={4}>
 				<TitleSectionWrapper title="Token">
-					<Typography>{token}</Typography>
+					<Typography variant="body2">{token}</Typography>
 				</TitleSectionWrapper>
-				<TitleSectionWrapper
-					tooltip={{ description: 'Amount of HMT in Escrow' }}
-					title="Balance"
-				>
-					<Typography>
-						{balance}
-						<Typography
-							sx={{
-								marginLeft: 0.5,
-							}}
-							color={colorPalette.fog.main}
-							component="span"
-						>
-							HMT
-						</Typography>
-					</Typography>
-				</TitleSectionWrapper>
+				{balance !== undefined && balance !== null ? (
+					<TitleSectionWrapper
+						tooltip={{ description: 'Amount of HMT in Escrow' }}
+						title="Balance"
+					>
+						<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+							<Typography variant="body2">{balance}</Typography>
+							<Typography
+								sx={{
+									marginLeft: 0.5,
+								}}
+								color={colorPalette.fog.main}
+								component="span"
+								variant="body2"
+							>
+								HMT
+							</Typography>
+						</Stack>
+					</TitleSectionWrapper>
+				) : null}
 				<TitleSectionWrapper
 					title="Factory Address"
 					tooltip={{ description: 'Address of EscrowFactory contract' }}
 				>
-					<Typography>{factoryAddress}</Typography>
+					<Typography variant="body2">{factoryAddress}</Typography>
 				</TitleSectionWrapper>
 				<TitleSectionWrapper title="Total Funded Amount">
-					<Typography>
-						{totalFundedAmount}
+					<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+						<Typography variant="body2">{totalFundedAmount}</Typography>
 						<Typography
 							sx={{
 								marginLeft: 0.5,
 							}}
 							color={colorPalette.fog.main}
 							component="span"
+							variant="body2"
 						>
 							HMT
 						</Typography>
-					</Typography>
+					</Stack>
 				</TitleSectionWrapper>
 				<TitleSectionWrapper title="Paid Amount">
-					<Typography>
-						{amountPaid}
+					<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+						<Typography variant="body2">{amountPaid}</Typography>
 						<Typography
 							sx={{
 								marginLeft: 0.5,
 							}}
 							color={colorPalette.fog.main}
 							component="span"
+							variant="body2"
 						>
 							HMT
 						</Typography>
-					</Typography>
+					</Stack>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper title="Status">
 					<Box
 						sx={{
-							paddingX: 2,
-							paddingY: 1,
-							borderRadius: 4,
+							padding: '3px 8px',
+							borderRadius: '16px',
 							border: `1px solid ${colorPalette.secondary.light}`,
 						}}
 					>
-						<Typography color={colorPalette.secondary.main}>
+						<Typography
+							variant="Components/Chip"
+							color={colorPalette.secondary.main}
+						>
 							{status}
 						</Typography>
 					</Box>
@@ -106,7 +113,9 @@ const EscrowAddress = ({
 						description: 'Address of the Job Launcher that created the escrow',
 					}}
 				>
-					<Typography sx={{ wordBreak: 'break-word' }}>{launcher}</Typography>
+					<Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+						{launcher}
+					</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper
@@ -116,7 +125,7 @@ const EscrowAddress = ({
 							"The Exchange Oracle is HUMAN Protocol's powerhouse, routing tasks to skilled workers ensuring smooth communication.",
 					}}
 				>
-					<Typography>{exchangeOracle}</Typography>
+					<Typography variant="body2">{exchangeOracle}</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper
@@ -128,7 +137,7 @@ const EscrowAddress = ({
 							"From quality checks to reputation adjustments, it's the assurance you need for dependable results.",
 					}}
 				>
-					<Typography>{recordingOracle}</Typography>
+					<Typography variant="body2">{recordingOracle}</Typography>
 				</TitleSectionWrapper>
 
 				<TitleSectionWrapper
@@ -139,7 +148,7 @@ const EscrowAddress = ({
 							"It's the final seal of quality and trust within the ecosystem.",
 					}}
 				>
-					<Typography>{reputationOracle}</Typography>
+					<Typography variant="body2">{reputationOracle}</Typography>
 				</TitleSectionWrapper>
 			</Stack>
 		</Card>

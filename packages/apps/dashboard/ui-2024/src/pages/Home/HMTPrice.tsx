@@ -5,7 +5,7 @@ export function HMTPrice() {
 	const { data, status } = useHMTPrice();
 	return (
 		<div>
-			<Typography variant="h6" component="p">
+			<Typography variant="body1" component="p">
 				HMT Price
 			</Typography>
 			<div className="count">
