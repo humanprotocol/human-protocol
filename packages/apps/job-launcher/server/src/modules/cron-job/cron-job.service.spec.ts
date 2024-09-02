@@ -53,6 +53,7 @@ import { RateService } from '../payment/rate.service';
 import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { QualificationService } from '../qualification/qualification.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -119,6 +120,7 @@ describe('CronJobService', () => {
         CvatConfigService,
         PGPConfigService,
         NetworkConfigService,
+        QualificationService,
         {
           provide: NetworkConfigService,
           useValue: {

@@ -41,8 +41,18 @@ export async function setup(): Promise<void> {
 
   const kvStoreClient = await KVStoreClient.build(wallet);
   await kvStoreClient.setBulk(
-    [KVStoreKeys.role, KVStoreKeys.fee, KVStoreKeys.webhookUrl],
-    [Role.ReputationOracle, '1', 'http://localhost:5003/webhook'],
+    [
+      KVStoreKeys.role,
+      KVStoreKeys.fee,
+      KVStoreKeys.webhookUrl,
+      KVStoreKeys.url,
+    ],
+    [
+      Role.ReputationOracle,
+      '1',
+      'http://localhost:5003/webhook',
+      'http://localhost:5003',
+    ],
     { nonce: 0 },
   );
   await kvStoreClient.setFileUrlAndHash(
