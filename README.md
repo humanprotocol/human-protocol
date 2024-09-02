@@ -77,6 +77,18 @@ If you are a developer and would like to build on top of HUMAN please see [examp
 
 Navigate to the folder that you would like to install and follow the instructions in the README file
 
+Managing Git Blame with `.git-blame-ignore-revs`
+
+To improve `git blame` accuracy by ignoring non-functional commits (e.g., formatting or refactoring), we've added a `.git-blame-ignore-revs` file at the root of the repository.
+
+**To enable this:**  
+Run:
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+git config blame.markIgnoredLines true
+git config blame.markUnblamableLines true
+```
+
 ## LEGAL NOTICE
 
 The Protocol is an open-source, blockchain-based network that organizes, evaluates, and compensates human labor (the “Protocol”).  Your use of the Protocol is entirely at your own risk. The Protocol is available on an “as is” basis without warranties of any kind, either express or implied, including, but not limited to, warranties of merchantability, title, fitness for a particular purpose and non-infringement. You assume all risks associated with using the Protocol, and digital assets   and   decentralized   systems   generally,   including   but   not
