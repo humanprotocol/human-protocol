@@ -98,6 +98,11 @@ export class JobsDiscoveryResponseItem {
   chain_id: number;
   job_type: string;
   status: JobStatus;
+  created_at?: string;
+  job_description?: string;
+  reward_amount?: number;
+  reward_token?: string;
+  qualifications?: string[];
 }
 
 export class JobsDiscoveryResponse extends PageableResponse {

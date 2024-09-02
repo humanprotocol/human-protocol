@@ -109,6 +109,9 @@ export class JobDto {
   @ApiProperty({ name: 'updated_at' })
   updatedAt?: string;
 
+  @ApiProperty()
+  qualifications?: string[];
+
   constructor(
     escrowAddress: string,
     chainId: number,
