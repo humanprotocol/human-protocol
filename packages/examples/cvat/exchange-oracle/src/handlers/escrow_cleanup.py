@@ -48,5 +48,9 @@ def cleanup_escrow(escrow_address: str, chain_id: int, projects: list[Project]) 
     """
     Cleans up CVAT resources and storage related to the given escrow.
     """
-    _cleanup_cvat(projects)
-    _cleanup_storage(escrow_address, chain_id)
+    try:
+        _cleanup_cvat(projects)
+    finally:
+        # in case both _cleanup_cvat and _cleanup_storage raise an exception,
+        # both will be in the traceback
+        _cleanup_storage(escrow_address, chain_id)
