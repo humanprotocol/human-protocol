@@ -19,19 +19,16 @@ if TYPE_CHECKING:
 
 
 def _cleanup_cvat(projects: list[Project]) -> None:
-    deleted_cloud_storage_ids = set()
+    cloud_storage_ids_to_delete = set()  # probably will allways have one element
     for project in projects:
-        if (
-            project.cvat_cloudstorage_id is not None
-            and project.cvat_cloudstorage_id not in deleted_cloud_storage_ids
-        ):
-            with contextlib.suppress(NotFoundException):
-                # probably will allways call this just once
-                cvat_api.delete_cloudstorage(project.cvat_cloudstorage_id)
-            deleted_cloud_storage_ids.add(project.cvat_cloudstorage_id)
+        cloud_storage_ids_to_delete.add(project.cvat_cloudstorage_id)
         if project.cvat_id is not None:
             with contextlib.suppress(NotFoundException):
                 cvat_api.delete_project(project.cvat_id)
+
+    for cloud_storage_id in cloud_storage_ids_to_delete:
+        with contextlib.suppress(NotFoundException):
+            cvat_api.delete_cloudstorage(cloud_storage_id)
 
 
 def _cleanup_storage(escrow_address: str, chain_id: int) -> None:
