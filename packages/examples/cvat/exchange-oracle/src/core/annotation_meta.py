@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from pydantic import BaseModel
 
@@ -15,4 +14,4 @@ class JobMeta(BaseModel):
 
 
 class AnnotationMeta(BaseModel):
-    jobs: List[JobMeta]
+    jobs: list[JobMeta]

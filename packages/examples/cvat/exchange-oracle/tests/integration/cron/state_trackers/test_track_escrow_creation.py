@@ -46,7 +46,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         updated_projects = (
             self.session.query(Project).where(Project.cvat_id.in_(cvat_project_ids)).all()
         )
-        self.assertEqual(
-            [p.status for p in updated_projects],
-            [ProjectStatuses.annotation, ProjectStatuses.annotation],
-        )
+        assert [p.status for p in updated_projects] == [
+            ProjectStatuses.annotation,
+            ProjectStatuses.annotation,
+        ]

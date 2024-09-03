@@ -51,6 +51,9 @@ export class DetailsService {
       leaderDto.chainId = chainId;
       leaderDto.balance = await this.getHmtBalance(chainId, address);
 
+      const { reputation } = await this.fetchReputation(chainId, address);
+      leaderDto.reputation = reputation;
+
       return leaderDto;
     }
     const walletDto: WalletDto = plainToInstance(WalletDto, {
@@ -207,6 +210,28 @@ export class DetailsService {
     this.assignReputationsToLeaders(allLeaders, reputations);
 
     return allLeaders;
+  }
+
+  private async fetchReputation(
+    chainId: ChainId,
+    address: string,
+  ): Promise<{ address: string; reputation: string }> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(
+          this.configService.reputationSource + `/reputation/${address}`,
+          {
+            params: {
+              chain_id: chainId,
+            },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error fetching reputation:', error);
+      return { address, reputation: 'Not available' };
+    }
   }
 
   private async fetchReputations(): Promise<

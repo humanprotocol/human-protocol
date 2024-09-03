@@ -71,17 +71,6 @@ describe.only('QualificationService', () => {
 
       await expect(qualificationService.getQualifications()).rejects.toThrow(
         new ControlledError(
-          ErrorQualification.FailedToFetchQualifications,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
-    });
-
-    it('should throw a ControlledError when reputation oracle URL is not set', async () => {
-      (KVStoreUtils.get as any).mockResolvedValue('');
-
-      await expect(qualificationService.getQualifications()).rejects.toThrow(
-        new ControlledError(
           ErrorWeb3.ReputationOracleUrlNotSet,
           HttpStatus.BAD_REQUEST,
         ),

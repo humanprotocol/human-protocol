@@ -15,29 +15,131 @@ SQLAlchemy = "^2.0.17"
 psycopg2 = "^2.9.6"
 APScheduler = "^3.10.1"
 pytest = "^7.4.0"
-human-protocol-sdk = "^3.0.0"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
 numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
+human-protocol-sdk = "^3.0.4"
+hexbytes = ">=1.2.0" # required for to_0x_hex() function
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
-pre-commit = "^3.3.3"
 hypothesis = "^6.82.6"
-isort = "^5.12.0"
 
-[tool.isort]
-profile = "black"
-forced_separate = ["tests"]
-line_length = 100
-skip_gitignore = true # align tool behavior with Black
+[tool.poetry.group.lint.dependencies]
+pre-commit = "^3.3.3"
+ruff = "^0.6.0"
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py310']
+target-version = "py310"
+
+
+[tool.ruff.lint]
+select = ["ALL"]
+unfixable = [
+    "RUF005",  # messes up concantenation with numpy structures
+]
+ignore = [
+    "W191",    # Rules conflicting with ruff format (https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules)
+    "E111",    # |
+    "E114",    # |
+    "E117",    # |
+    "D206",    # |
+    "D300",    # |
+    "Q000",    # |
+    "Q001",    # |
+    "Q002",    # |
+    "Q003",    # |
+    "COM812",  # |
+    "COM819",  # |
+    "ISC001",  # |
+    "ISC002",  # |
+    "ANN101",  # Method args annotations (mypy will take care of that)
+    "ANN001",  # |
+    "ANN202",  # |
+    "ANN201",  # |
+    "ANN401",  # |
+    "ANN102",  # |
+    "RUF001",  # Allow cyrillic letters in comments
+
+    "B904",    # Raise from: modern pythons preserve previous exceptions
+    "EM",      # Forbids using literal strings in exceptions.
+               # Sujested way of dealing with exceptions increases verbosity
+               # while giving little to no benefit in readability
+    "TRY003",  # |
+    "G004",    # Forbids using f-strings in logging. This project doesn't rely on lazy % formatting when using logging.
+    "A003",    # Class attribute `id` is shadowing a Python builtin — it's ok in class body
+    "FIX001",  # Forbids using TODOs, but TODOs are useful
+    "FIX002",  # |
+    "TD001",   # |
+    "TD002",   # |
+    "TD003",   # |
+    "E711",    # Allow == None comparisons for sqlalchemy queries
+    "E712",    # Allow == True comparisons for sqlalchemy queries
+    "PERF203", # Noisy microoptimisation
+    # Want to resolve eventually, but not now:
+    "S101",    # Allow asserts (there are too many of them right now to fix)
+    "TRY401",  # Checks for excesive logging of exception objects
+    "G001",    # Forbid str.format for logging
+    "PTH123",  # Checks for uses of `os.path.splitext`
+    "D",       # Docstrings
+    "N806",    # Variable in function should be lowercase
+    "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
+    "SLF001",  # Private member accessed
+    "F811",    # Redefinition of unused
+    "RUF005",  # Consider iterable unpacking instead of concatenation
+    "A002",    # Argument is shadowing a Python builtin
+    "N818",    # Exception name should be named with an Error suffix
+    "TRY002",  # Create your own exception
+    "ANN003",  # Missing type annotation for `**kwargs`
+    "ANN204",  # Missing return type annotation for special method
+    "ERA001",  # Found commented-out code
+    "N801",    # Class name should use CapWords convention
+    "PLR0915", # Too many statements
+    "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
+    "ANN002",  # Missing type annotation for `*args`
+    "TRY300",  # Consider moving this statement to an `else` block
+    "C901",    # Function is too complex
+    "PLW2901", # Variable overwritten by assignment target
+    "PTH118",  # Prefer pathlib instead of os.path
+    "PTH119",  # `os.path.basename()` should be replaced by `Path.name`
+    "PTH122",  # `os.path.splitext()` should be replaced by `Path.suffix`, `Path.stem`, and `Path.parent`
+    "PTH207",  # Replace `glob` with `Path.glob` or `Path.rglob`
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "PLR0913", # Annotations and args
+    "ANN202",  # |
+    "ANN201",  # |
+    "ANN001",  # |
+    "ANN003",  # |
+    "ARG001",  # |
+    "SLF001",  # Allow private attrs access
+    "PLR2004", # Allow magic values
+    "S",       # security
+    "DTZ005",  # allow datetimes without timezones
+]
+# alembic is not a package in a traditional sense, so putting __init__.py there doesn't make sense
+"alembic/*" = ["INP001"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+    "pydantic.validator",
+]
+
+[tool.ruff.lint.pylint]
+max-args = 9  # Lower number might be beneficial to reduce cognitive load. Consider using data containers.
+
+[tool.ruff.lint.isort]
+forced-separate = ["tests"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
 
 [build-system]
 requires = ["poetry-core"]

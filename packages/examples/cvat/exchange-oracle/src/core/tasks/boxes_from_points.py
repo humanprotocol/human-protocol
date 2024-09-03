@@ -1,14 +1,14 @@
 import os
+from collections.abc import Sequence
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, Sequence
 
 import attrs
 import datumaro as dm
 from attrs import frozen
 from datumaro.util import dump_json, parse_json
 
-BboxPointMapping = Dict[int, int]
+BboxPointMapping = dict[int, int]
 
 
 @frozen
@@ -28,7 +28,7 @@ class RoiInfo:
 
 RoiInfos = Sequence[RoiInfo]
 
-RoiFilenames = Dict[int, str]
+RoiFilenames = dict[int, str]
 
 
 class TaskMetaLayout:

@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from fastapi import HTTPException
 
@@ -7,11 +7,11 @@ V = TypeVar("V")
 
 
 def get_or_404(
-    obj: Optional[T],
+    obj: T | None,
     object_id: V,
     object_type_name: str,
     *,
-    reason: Optional[str] = None,
+    reason: str | None = None,
 ) -> T:
     if obj is None:
         raise HTTPException(

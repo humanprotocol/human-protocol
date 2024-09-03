@@ -339,6 +339,9 @@ describe('JobService', () => {
       httpServicePostMock.mockRejectedValueOnce(
         new Error(ErrorJob.WebhookWasNotSent),
       );
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
 
       const newSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,

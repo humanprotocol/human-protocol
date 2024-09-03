@@ -22,7 +22,7 @@ export const TestnetChains: ChainWithAddresses[] = [
     name: 'Amoy',
     rpcUrl: 'https://rpc-amoy.polygon.technology',
     currency: 'MATIC',
-    explorerUrl: 'https://www.oklink.com/amoy',
+    explorerUrl: 'https://amoy.polygonscan.com/',
     addresses: TestnetContracts.Amoy,
   },
 ];

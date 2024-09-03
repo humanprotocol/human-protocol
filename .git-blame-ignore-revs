@@ -1,0 +1,34 @@
+# Purpose:
+# This file is used to improve the accuracy of `git blame` by ignoring specific commits that
+# introduce non-functional changes, such as formatting, refactoring, or large dependency updates.
+# By skipping these commits and using `git blame`, you can focus on meaningful code changes,
+# making it easier to trace the origin of code for debugging, understanding the history, or reviewing.
+#
+# Usage:
+# To automatically use this file with all `git blame` operations in this repository, run the following command:
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# And optionally:
+#
+#   git config blame.markIgnoredLines true
+#   git config blame.markUnblamableLines true
+#
+# This ensures that every `git blame` operation, whether invoked manually or through tools like IDEs,
+# ignores the revisions listed here.
+#
+# It also seamlessly works with GitHub. If you want to view original changes in GitHub, append ~ to viewed commit hash.
+#
+# For more details on the rationale and usage, see the following links:
+# - https://www.michaelheap.com/git-ignore-rev/
+# - https://git-scm.com/docs/git-blame#Documentation/git-blame.txt---ignore-revs-fileltfilegt
+# - https://docs.github.com/en/repositories/working-with-files/using-files/viewing-a-file#ignore-commits-in-the-blame-view
+#
+# Structure:
+# Below, you will find sections for different projects or types of changes.
+# Each commit hash should be accompanied by commit title and PR url.
+
+# [Exchange Oracle] Add ruff (#2395) - https://github.com/humanprotocol/human-protocol/pull/2395
+e9ad17660a38864a73b28c4a5b610dedb5d767b4
+# [Recording Oracle] Add ruff (#2396) - https://github.com/humanprotocol/human-protocol/pull/2396
+2736ceb685967feacfcacfd8453868444995aabf

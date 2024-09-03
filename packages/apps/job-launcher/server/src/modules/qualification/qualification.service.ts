@@ -18,13 +18,17 @@ export class QualificationService {
 
   public async getQualifications(): Promise<QualificationDto[]> {
     try {
-      const reputationOracleUrl = await KVStoreUtils.get(
-        ChainId.POLYGON_AMOY,
-        this.web3ConfigService.reputationOracleAddress,
-        KVStoreKeys.url,
-      );
+      let reputationOracleUrl = '';
 
-      if (!reputationOracleUrl) {
+      try {
+        reputationOracleUrl = await KVStoreUtils.get(
+          ChainId.POLYGON_AMOY,
+          this.web3ConfigService.reputationOracleAddress,
+          KVStoreKeys.url,
+        );
+      } catch {}
+
+      if (!reputationOracleUrl || reputationOracleUrl === '') {
         throw new ControlledError(
           ErrorWeb3.ReputationOracleUrlNotSet,
           HttpStatus.BAD_REQUEST,

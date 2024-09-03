@@ -1,5 +1,5 @@
 from human_protocol_sdk.constants import ChainId, KVStoreKeys
-from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
+from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError, KVStoreUtils
 from human_protocol_sdk.operator import OperatorUtils
 
 from src.chain.escrow import get_escrow
@@ -33,8 +33,8 @@ def register_in_kvstore() -> None:
             kvstore_public_key_url = None
 
             try:
-                kvstore_public_key_url = kvstore_client.get_file_url_and_verify_hash(
-                    network_config.addr, KVStoreKeys.public_key.value
+                kvstore_public_key_url = KVStoreUtils.get_file_url_and_verify_hash(
+                    network_config.chain_id, network_config.addr, KVStoreKeys.public_key.value
                 )
             except KVStoreClientError as ex:
                 if "Invalid hash" not in str(ex):
