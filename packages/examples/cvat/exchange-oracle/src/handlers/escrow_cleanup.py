@@ -49,7 +49,7 @@ def _cleanup_cvat(projects: list[Project]) -> None:
         cloud_storage_ids_to_delete.add(project.cvat_cloudstorage_id)
         if project.cvat_id is not None:
             with (
-                log_error(
+                _log_error(
                     errors, f"Encountered error while deliting CVAT project {project.cvat_id}"
                 ),
                 contextlib.suppress(NotFoundException),
@@ -58,7 +58,7 @@ def _cleanup_cvat(projects: list[Project]) -> None:
 
     for cloud_storage_id in cloud_storage_ids_to_delete:
         with (
-            log_error(
+            _log_error(
                 errors, f"Encountered error while deleting CVAT cloudstorage {cloud_storage_id}"
             ),
             contextlib.suppress(NotFoundException),
