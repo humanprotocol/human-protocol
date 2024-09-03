@@ -73,45 +73,6 @@ Initializes a Escrow instance.
 * **Parameters:**
   **web3** (`Web3`) – The Web3 object
 
-#### abort(escrow_address, tx_options=None)
-
-Cancels the specified escrow,
-sends the balance to the canceler and selfdestructs the escrow contract.
-
-* **Parameters:**
-  * **escrow_address** (`str`) – Address of the escrow to abort
-  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
-* **Return type:**
-  `None`
-* **Returns:**
-  None
-* **Raises:**
-  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.escrow import EscrowClient
-
-  def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-      gas_payer = w3.eth.account.from_key(priv_key)
-      w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
-      )
-      return (w3, gas_payer)
-
-  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-  escrow_client = EscrowClient(w3)
-
-  escrow_client.abort("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
-  ```
-
 #### add_trusted_handlers(escrow_address, handlers, tx_options=None)
 
 Adds an array of addresses to the trusted handlers list.
@@ -299,69 +260,6 @@ Sets the status of an escrow to completed.
   escrow_client = EscrowClient(w3)
 
   escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
-  ```
-
-#### create_and_setup_escrow(token_address, trusted_handlers, job_requester_id, escrow_config, amount)
-
-Creates and sets up an escrow.
-
-* **Parameters:**
-  * **token_address** (`str`) – Token to use for pay outs
-  * **trusted_handlers** (`List`[`str`]) – Array of addresses that can perform actions on the contract
-  * **job_requester_id** (`str`) – The id of the job requester
-  * **escrow_config** ([`EscrowConfig`](#human_protocol_sdk.escrow.escrow_client.EscrowConfig)) – Object containing all the necessary information to setup an escrow
-* **Return type:**
-  `str`
-* **Returns:**
-  The address of the escrow created
-* **Raises:**
-  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.escrow import EscrowClient
-
-  def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-      gas_payer = w3.eth.account.from_key(priv_key)
-      w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
-      )
-      return (w3, gas_payer)
-
-  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-  escrow_client = EscrowClient(w3)
-
-  token_address = '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4'
-  trusted_handlers = [
-      '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-      '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-  ]
-  job_requester_id = 'job-requester'
-  escrow_config = EscrowConfig(
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      10,
-      10,
-      10,
-      "htttp://localhost/manifest.json",
-      "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
-  )
-  amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-  escrow_address = escrow_client.create_and_setup_escrow(
-      token_address,
-      trusted_handlers,
-      job_requester_id,
-      escrow_config,
-      amount
-  )
   ```
 
 #### create_escrow(token_address, trusted_handlers, job_requester_id, tx_options=None)
