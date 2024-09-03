@@ -25,7 +25,7 @@ logger = logging.getLogger(get_logger_name(__name__))
 
 
 @contextlib.contextmanager
-def log_error(errors_container: list[Exception], message: str) -> Generator[None, None, None]:
+def _log_error(errors_container: list[Exception], message: str) -> Generator[None, None, None]:
     try:
         yield
     except Exception as e:
