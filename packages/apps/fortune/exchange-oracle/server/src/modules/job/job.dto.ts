@@ -20,6 +20,7 @@ export class ManifestDto {
   requesterDescription: string;
   submissionsRequired: number;
   fundAmount: number;
+  qualifications?: string[];
 }
 
 export class SolveJobDto {
