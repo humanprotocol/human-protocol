@@ -428,18 +428,23 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         cvat_job_1.status = JobStatuses.new.value  # validated and rejected return to 'new'
 
-        user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
-        user = User(
-            wallet_address=user_address,
-            cvat_email="test@hmt.ai",
+        previous_user = User(
+            wallet_address="0x86e83d346041E8806e352681f3F14549C0d2BC69",
+            cvat_email="previous@hmt.ai",
             cvat_id=1,
         )
-        self.session.add(user)
+        new_user = User(
+            wallet_address="0x69e83d346041E8806e352681f3F14549C0d2BC42",
+            cvat_email="new@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(previous_user)
+        self.session.add(new_user)
 
         now = datetime.now()
         assignment = Assignment(
             id=str(uuid.uuid4()),
-            user_wallet_address=user_address,
+            user_wallet_address=previous_user.wallet_address,
             cvat_job_id=cvat_job_1.cvat_id,
             created_at=now - timedelta(hours=1),
             completed_at=now - timedelta(minutes=40),
@@ -457,10 +462,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            assignment_id = create_assignment(cvat_project_1.id, user_address)
+            assignment_id = create_assignment(cvat_project_1.id, previous_user.wallet_address)
+            assert assignment_id is None  # should not assign job to the same user more than once
+            assignment_id = create_assignment(cvat_project_1.id, new_user.wallet_address)
 
-            assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
+        assignment = self.session.get(Assignment, assignment_id)
 
         assert assignment.cvat_job_id == cvat_job_1.cvat_id
-        assert assignment.user_wallet_address == user_address
+        assert assignment.user_wallet_address == new_user.wallet_address
         assert assignment.status == AssignmentStatuses.created
