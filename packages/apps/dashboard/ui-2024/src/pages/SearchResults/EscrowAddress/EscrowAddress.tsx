@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack';
 import { colorPalette } from '@assets/styles/color-palette';
 import TitleSectionWrapper from '@components/SearchResults';
 import { AddressDetailsEscrowSchema } from '@services/api/use-address-details';
+import { HMTBalance } from '@pages/SearchResults/EscrowAddress/HMTBalance';
 
 const EscrowAddress = ({
 	data: {
@@ -38,19 +39,7 @@ const EscrowAddress = ({
 						tooltip={{ description: 'Amount of HMT in Escrow' }}
 						title="Balance"
 					>
-						<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
-							<Typography variant="body2">{balance}</Typography>
-							<Typography
-								sx={{
-									marginLeft: 0.5,
-								}}
-								color={colorPalette.fog.main}
-								component="span"
-								variant="body2"
-							>
-								HMT
-							</Typography>
-						</Stack>
+						<HMTBalance HMTBalance={balance} />
 					</TitleSectionWrapper>
 				) : null}
 				<TitleSectionWrapper
