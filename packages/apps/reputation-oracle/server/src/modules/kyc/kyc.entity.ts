@@ -21,7 +21,7 @@ export class KycEntity extends BaseEntity {
   country: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public message?: string;
+  public message?: string | null;
 
   @JoinColumn()
   @OneToOne(() => UserEntity, (user) => user.kyc)
@@ -29,4 +29,7 @@ export class KycEntity extends BaseEntity {
 
   @Column({ type: 'int' })
   public userId: number;
+
+  @Column({ type: 'varchar', unique: true })
+  public url: string;
 }

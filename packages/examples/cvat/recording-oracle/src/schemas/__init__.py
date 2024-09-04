@@ -1,7 +1,4 @@
-# pylint: disable=too-few-public-methods
-""" Schema for API input&output"""
-
-from typing import List, Optional
+"""Schema for API input&output"""
 
 from pydantic import BaseModel
 
@@ -27,7 +24,7 @@ class ResponseError(BaseModel):
 
 class SupportedNetwork(BaseModel):
     chain_id: int
-    addr: Optional[str] = None
+    addr: str | None = None
 
 
 class MetaResponse(BaseModel):
@@ -35,4 +32,4 @@ class MetaResponse(BaseModel):
 
     message: str
     version: str
-    supported_networks: List[SupportedNetwork]
+    supported_networks: list[SupportedNetwork]

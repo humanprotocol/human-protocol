@@ -1,17 +1,16 @@
 import {
   JobAssignmentCommand,
   JobAssignmentData,
-  JobAssignmentDetails,
   JobAssignmentDto,
   JobAssignmentParams,
   JobAssignmentResponse,
   JobsFetchParams,
   JobsFetchParamsCommand,
   JobsFetchParamsData,
-  JobsFetchParamsDetails,
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
+  ResignJobCommand,
 } from '../model/job-assignment.model';
 import {
   AssignmentSortField,
@@ -28,17 +27,19 @@ const PAGE_SIZE = 5;
 const PAGE = 0;
 const SORT = SortOrder.ASC;
 const SORT_FIELD = AssignmentSortField.CREATED_AT;
-const ASSIGNMENT_ID = 'test_id';
+const ASSIGNMENT_ID = '2';
 const REWARD_AMOUNT = 'test_amount';
 const REWARD_TOKEN = 'test';
 const CREATED_AT = 'test_date_1';
 const UPDATED_AT = 'test_date_2';
 const EXPIRES_AT = 'test_date_3';
-const JOB_ASSIGNMENT_ID = 1;
+const JOB_ASSIGNMENT_ID = '1';
 const URL = 'test_url';
 const TOKEN = 'test_user_token';
+export const USER_ADDRESS = 'test_address';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
+export const workerRegisterUrl = EXCHANGE_ORACLE_URL;
 export const jobAssignmentDtoFixture: JobAssignmentDto = {
   escrow_address: ESCROW_ADDRESS,
   chain_id: CHAIN_ID,
@@ -52,10 +53,10 @@ export const jobAssignmentCommandFixture: JobAssignmentCommand = {
   data: jobAssignmentParams,
   token: TOKEN,
 };
-export const jobAssignmentDetailsFixture: JobAssignmentDetails = {
-  data: jobAssignmentParams,
+export const jobResignAssignedCommandFixture: ResignJobCommand = {
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
+  assignmentId: JOB_ASSIGNMENT_ID,
   token: TOKEN,
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
 };
 export const jobAssignmentDataFixture: JobAssignmentData = {
   escrow_address: ESCROW_ADDRESS,
@@ -77,7 +78,7 @@ export const jobAssignmentResponseFixture: JobAssignmentResponse = {
 };
 
 export const jobsFetchParamsDtoFixture: JobsFetchParamsDto = {
-  address: EXCHANGE_ORACLE_ADDRESS,
+  oracle_address: EXCHANGE_ORACLE_ADDRESS,
   escrow_address: ESCROW_ADDRESS,
   assignment_id: JOB_ASSIGNMENT_ID,
   chain_id: CHAIN_ID,
@@ -102,12 +103,7 @@ const jobsFetchParams: JobsFetchParams = {
 };
 export const jobsFetchParamsCommandFixture: JobsFetchParamsCommand = {
   data: jobsFetchParams,
-  address: EXCHANGE_ORACLE_ADDRESS,
-  token: TOKEN,
-};
-export const jobsFetchParamsDetailsFixture: JobsFetchParamsDetails = {
-  data: jobsFetchParams,
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
+  oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
 };
 
@@ -139,5 +135,9 @@ export const jobsFetchResponseItemFixture: JobsFetchResponseItem = {
 };
 
 export const jobsFetchResponseFixture: JobsFetchResponse = {
-  data: [jobsFetchResponseItemFixture],
+  page: 0,
+  page_size: 10,
+  total_pages: 1,
+  total_results: 1,
+  results: [jobsFetchResponseItemFixture],
 };

@@ -121,7 +121,7 @@ describe('EscrowFactory', () => {
     // Stats Entity
     assert.fieldEquals(
       'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'totalEscrowCount',
       '2'
     );
@@ -130,7 +130,7 @@ describe('EscrowFactory', () => {
     assert.fieldEquals(
       'Leader',
       launcherAddressString,
-      'amountJobsLaunched',
+      'amountJobsProcessed',
       '2'
     );
 

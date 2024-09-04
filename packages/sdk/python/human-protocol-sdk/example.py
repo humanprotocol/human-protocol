@@ -3,10 +3,9 @@ import json
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowUtils
-from human_protocol_sdk.filter import EscrowFilter
+from human_protocol_sdk.filter import EscrowFilter, StatisticsFilter
 from human_protocol_sdk.statistics import (
     StatisticsClient,
-    StatisticsParam,
     HMTHoldersParam,
 )
 from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
@@ -17,7 +16,7 @@ def get_escrow_statistics(statistics_client: StatisticsClient):
     print(statistics_client.get_escrow_statistics())
     print(
         statistics_client.get_escrow_statistics(
-            StatisticsParam(
+            StatisticsFilter(
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
             )
@@ -29,7 +28,7 @@ def get_worker_statistics(statistics_client: StatisticsClient):
     print(statistics_client.get_worker_statistics())
     print(
         statistics_client.get_worker_statistics(
-            StatisticsParam(
+            StatisticsFilter(
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
             )
@@ -41,7 +40,7 @@ def get_payment_statistics(statistics_client: StatisticsClient):
     print(statistics_client.get_payment_statistics())
     print(
         statistics_client.get_payment_statistics(
-            StatisticsParam(
+            StatisticsFilter(
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
             )
@@ -51,14 +50,6 @@ def get_payment_statistics(statistics_client: StatisticsClient):
 
 def get_hmt_statistics(statistics_client: StatisticsClient):
     print(statistics_client.get_hmt_statistics())
-    print(
-        statistics_client.get_hmt_statistics(
-            StatisticsParam(
-                date_from=datetime.datetime(2023, 5, 8),
-                date_to=datetime.datetime(2023, 6, 8),
-            )
-        )
-    )
 
 
 def get_hmt_holders(statistics_client: StatisticsClient):
@@ -83,11 +74,22 @@ def get_hmt_holders(statistics_client: StatisticsClient):
     )
 
 
+def get_hmt_daily_data(statistics_client: StatisticsClient):
+    print(
+        statistics_client.get_hmt_daily_data(
+            StatisticsFilter(
+                date_from=datetime.datetime(2024, 5, 8),
+                date_to=datetime.datetime(2024, 6, 8),
+            )
+        )
+    )
+
+
 def get_escrows():
     print(
         EscrowUtils.get_escrows(
             EscrowFilter(
-                networks=[ChainId.POLYGON_AMOY],
+                chain_id=ChainId.POLYGON_AMOY,
                 status=Status.Pending,
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
@@ -141,5 +143,6 @@ if __name__ == "__main__":
     get_hmt_statistics(statistics_client)
     get_payment_statistics(statistics_client)
     get_worker_statistics(statistics_client)
+    get_hmt_daily_data(statistics_client)
 
     agreement_example()

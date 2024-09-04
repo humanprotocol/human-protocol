@@ -11,9 +11,10 @@ import { toEventId } from './utils/event';
 import { isValidEthAddress } from './utils/ethAdrress';
 import { Address, BigInt } from '@graphprotocol/graph-ts';
 import { createTransaction } from './utils/transaction';
+import { toBytes } from './utils/string';
 
 export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
-  const entityId = `${leader.address.toHex()}-${key}`;
+  const entityId = leader.address.concat(toBytes(key));
   let leaderUrl = LeaderURL.load(entityId);
 
   if (!leaderUrl) {
@@ -29,10 +30,10 @@ export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
 export function createOrLoadReputationNetwork(
   address: Address
 ): ReputationNetwork {
-  let reputationNetwork = ReputationNetwork.load(address.toHex());
+  let reputationNetwork = ReputationNetwork.load(address);
 
   if (!reputationNetwork) {
-    reputationNetwork = new ReputationNetwork(address.toHex());
+    reputationNetwork = new ReputationNetwork(address);
     reputationNetwork.address = address;
     reputationNetwork.save();
   }
@@ -41,7 +42,7 @@ export function createOrLoadReputationNetwork(
 }
 
 export function createOrUpdateKVStore(event: DataSaved): void {
-  const kvstoreId = `${event.params.sender.toHex()}-${event.params.key.toString()}`;
+  const kvstoreId = event.params.sender.concat(toBytes(event.params.key));
   let kvstore = KVStore.load(kvstoreId);
 
   if (!kvstore) {
@@ -104,7 +105,7 @@ export function handleDataSaved(event: DataSaved): void {
     if (event.params.value == 'ACTIVE') {
       operator.reputationNetwork = reputationNetwork.id;
     } else if (event.params.value == 'INACTIVE') {
-      operator.reputationNetwork = '';
+      operator.reputationNetwork = null;
     }
     operator.save();
   }

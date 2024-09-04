@@ -1,22 +1,25 @@
-import { Entity, Column, OneToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from './user.entity';
-import { OracleType } from '../../common/enums';
+import { SiteKeyType } from '../../common/enums';
 
+// TypeORM doesn't natively support partial unique indices.
+// To ensure a user can only have one record in the site_keys table with the type 'hcaptcha',
+// we enforce a partial unique index at the database level.
 @Entity({ schema: NS, name: 'site_keys' })
-@Index(['siteKey', 'type'], { unique: true })
+@Unique(['siteKey', 'type', 'user'])
 export class SiteKeyEntity extends BaseEntity {
-  @Column({ type: 'varchar', unique: true })
+  @Column({ type: 'varchar' })
   public siteKey: string;
 
   @Column({
     type: 'enum',
-    enum: OracleType,
+    enum: SiteKeyType,
   })
-  public type: OracleType;
+  public type: SiteKeyType;
 
+  @ManyToOne(() => UserEntity, (user) => user.siteKeys)
   @JoinColumn()
-  @OneToOne(() => UserEntity, (user) => user.siteKey)
   public user: UserEntity;
 }

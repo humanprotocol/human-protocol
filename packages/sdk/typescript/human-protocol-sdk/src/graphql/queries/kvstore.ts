@@ -21,3 +21,14 @@ export const GET_KVSTORE_BY_ADDRESS_QUERY = () => {
     ${KVSTORE_FRAGMENT}
   `;
 };
+
+export const GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY = () => {
+  return gql`
+    query getKVStoreDataByKey($address: String!, $key: String!) {
+      kvstores(where: { address: $address, key: $key }) {
+        ...KVStoreFields
+      }
+    }
+    ${KVSTORE_FRAGMENT}
+  `;
+};

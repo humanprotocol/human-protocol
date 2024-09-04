@@ -5,15 +5,22 @@ import { EmailVerificationData } from '../../modules/email-confirmation/model/em
 import { ResendEmailVerificationData } from '../../modules/email-confirmation/model/resend-email-verification.model';
 import { PrepareSignatureData } from '../../modules/prepare-signature/model/prepare-signature.model';
 import { DisableOperatorData } from '../../modules/disable-operator/model/disable-operator.model';
-
-export class EmptyData {}
+import { RegisterAddressData } from '../../modules/register-address/model/register-address.model';
+import { RestorePasswordData } from '../../modules/password-reset/model/restore-password.model';
+import { TokenRefreshData } from '../../modules/token-refresh/model/token-refresh.model';
+import { SigninOperatorData } from '../../modules/user-operator/model/operator-signin.model';
+class Empty {}
 
 export type RequestDataType =
-  | EmptyData
   | SignupWorkerData
   | SignupOperatorData
   | SigninWorkerData
   | EmailVerificationData
   | ResendEmailVerificationData
   | PrepareSignatureData
-  | DisableOperatorData;
+  | DisableOperatorData
+  | SigninOperatorData
+  | RegisterAddressData
+  | RestorePasswordData
+  | TokenRefreshData
+  | Empty;

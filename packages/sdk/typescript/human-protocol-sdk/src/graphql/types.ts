@@ -13,11 +13,8 @@ export type EscrowData = {
   manifestHash?: string;
   manifestUrl?: string;
   recordingOracle?: string;
-  recordingOracleFee?: string;
   reputationOracle?: string;
-  reputationOracleFee?: string;
   exchangeOracle?: string;
-  exchangeOracleFee?: string;
   status: string;
   token: string;
   totalFundedAmount: string;
@@ -141,8 +138,6 @@ export type HMTStatistics = {
   totalTransferAmount: bigint;
   totalTransferCount: number;
   totalHolders: number;
-  holders: HMTHolder[];
-  dailyHMTData: DailyHMTData[];
 };
 
 export type IMDataEntity = {

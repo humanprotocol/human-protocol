@@ -92,23 +92,23 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
 
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
-        self.assertEqual(db_project.status, ProjectStatuses.creation.value)
+        assert db_project.status == ProjectStatuses.creation.value
 
         db_escrow_creation_tracker = (
             self.session.query(EscrowCreation)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
-        self.assertListEqual(db_escrow_creation_tracker.projects, [db_project])
-        self.assertEqual(db_escrow_creation_tracker.total_jobs, 1)
+        assert db_escrow_creation_tracker.projects == [db_project]
+        assert db_escrow_creation_tracker.total_jobs == 1
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_invalid_escrow_status(
         self,
@@ -138,8 +138,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         updated_webhook = self.session.query(Webhook).filter_by(id=webhok_id).first()
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_exceed_max_retries(
         self,
@@ -170,8 +170,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         updated_webhook = self.session.query(Webhook).filter_by(id=webhok_id).first()
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.failed.value)
-        self.assertEqual(updated_webhook.attempts, 6)
+        assert updated_webhook.status == OracleWebhookStatuses.failed.value
+        assert updated_webhook.attempts == 6
 
         new_webhook = (
             self.session.query(Webhook)
@@ -183,9 +183,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
 
-        self.assertEqual(new_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(new_webhook.event_type, ExchangeOracleEventTypes.task_creation_failed)
-        self.assertEqual(new_webhook.attempts, 0)
+        assert new_webhook.status == OracleWebhookStatuses.pending.value
+        assert new_webhook.event_type == ExchangeOracleEventTypes.task_creation_failed
+        assert new_webhook.attempts == 0
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type_remove_when_error(
         self,
@@ -240,15 +240,15 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
 
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
-        self.assertIsNone(db_project)
+        assert db_project is None
 
     def test_process_incoming_job_launcher_webhooks_escrow_canceled_type(self):
         project_id = str(uuid.uuid4())
@@ -290,17 +290,17 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
 
-        self.assertEqual(db_project.status, ProjectStatuses.canceled.value)
+        assert db_project.status == ProjectStatuses.canceled.value
 
-    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_with_multiple_creating_projects(
+    def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_with_multiple_creating_projects(  # noqa: E501
         self,
     ):
         project_ids = []
@@ -353,22 +353,22 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
 
-        self.assertEqual(db_project.status, ProjectStatuses.canceled.value)
+        assert db_project.status == ProjectStatuses.canceled.value
 
         db_escrow_creation_tracker = (
             self.session.query(EscrowCreation)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
-        self.assertTrue(bool(db_escrow_creation_tracker.finished_at))
+        assert bool(db_escrow_creation_tracker.finished_at)
 
     def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_status(
         self,
@@ -411,15 +411,15 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
 
-        self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
+        assert db_project.status == ProjectStatuses.annotation.value
 
     def test_process_incoming_job_launcher_webhooks_escrow_canceled_type_invalid_balance(
         self,
@@ -463,15 +463,15 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
         db_project = (
             self.session.query(Project)
             .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
 
-        self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
+        assert db_project.status == ProjectStatuses.annotation.value
 
     def test_process_outgoing_job_launcher_webhooks(self):
         chain_id = Networks.localhost.value
@@ -511,8 +511,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
         mock_httpx_post.assert_called_once()
 
     def test_process_outgoing_job_launcher_webhooks_invalid_type(self):
@@ -539,5 +539,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1

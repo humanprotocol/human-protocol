@@ -1,4 +1,5 @@
-""" API endpoints """
+"""API endpoints"""
+
 from fastapi import APIRouter, FastAPI
 from fastapi_pagination import add_pagination
 
@@ -26,11 +27,11 @@ def meta_route() -> MetaResponse:
     ]
 
     return MetaResponse.model_validate(
-        dict(
-            message="Exchange Oracle API",
-            version="0.1.0",
-            supported_networks=networks_info,
-        )
+        {
+            "message": "Exchange Oracle API",
+            "version": "0.1.0",
+            "supported_networks": networks_info,
+        }
     )
 
 

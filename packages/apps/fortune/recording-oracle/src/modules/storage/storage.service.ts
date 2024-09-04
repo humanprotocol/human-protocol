@@ -2,9 +2,9 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  KVStoreClient,
   EscrowClient,
   StorageClient,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
@@ -88,12 +88,12 @@ export class StorageService {
         const reputationOracleAddress =
           await escrowClient.getReputationOracleAddress(escrowAddress);
 
-        const kvstoreClient = await KVStoreClient.build(signer);
-
-        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+        const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
+          chainId,
           signer.address,
         );
-        const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
+        const reputationOraclePublicKey = await KVStoreUtils.getPublicKey(
+          chainId,
           reputationOracleAddress,
         );
         if (

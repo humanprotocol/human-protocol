@@ -69,7 +69,6 @@ describe('assignmentController', () => {
         query,
         userAddress,
         reputationNetwork,
-        expect.any(String),
       );
     });
   });

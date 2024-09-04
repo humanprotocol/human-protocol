@@ -1,8 +1,8 @@
-import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsUrl } from 'class-validator';
 
 export class KycProcedureStartResponse {
-  @IsString()
-  @ApiProperty({ example: 'string' })
-  session_id: string;
+  @ApiProperty({ name: 'url' })
+  @IsUrl()
+  public url: string;
 }

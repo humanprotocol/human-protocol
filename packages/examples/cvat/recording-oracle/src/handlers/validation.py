@@ -2,14 +2,13 @@ import io
 import os
 from collections import Counter
 from logging import Logger
-from typing import Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
-import src.chain.escrow as escrow
 import src.core.annotation_meta as annotation
 import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
+from src.chain import escrow
 from src.core.config import Config
 from src.core.manifest import TaskManifest, parse_manifest
 from src.core.oracle_events import (
@@ -48,9 +47,9 @@ class _TaskValidator:
 
         self.data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
-        self.annotation_meta: Optional[annotation.AnnotationMeta] = None
-        self.job_annotations: Optional[Dict[int, bytes]] = None
-        self.merged_annotations: Optional[bytes] = None
+        self.annotation_meta: annotation.AnnotationMeta | None = None
+        self.job_annotations: dict[int, bytes] | None = None
+        self.merged_annotations: bytes | None = None
 
     def set_logger(self, logger: Logger):
         self.logger = logger
@@ -93,6 +92,8 @@ class _TaskValidator:
     def _download_results(self):
         self._download_results_meta()
         self._download_annotations()
+
+    ValidationResult = ValidationSuccess | ValidationFailure
 
     def _process_annotation_results(self) -> ValidationResult:
         assert self.annotation_meta is not None
@@ -161,7 +162,7 @@ class _TaskValidator:
             escrow.store_results(
                 chain_id,
                 escrow_address,
-                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),
+                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),  # noqa: PTH120
                 compute_resulting_annotations_hash(validation_result.resulting_annotations),
             )
 

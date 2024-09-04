@@ -3,7 +3,7 @@ import {
   Encryption,
   EncryptionUtils,
   EscrowClient,
-  KVStoreClient,
+  KVStoreUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -51,16 +51,18 @@ export class StorageService {
 
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const kvstoreClient = await KVStoreClient.build(signer);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const reputationOraclePublicKey = await kvstoreClient.getPublicKey(
+    const reputationOraclePublicKey = await KVStoreUtils.getPublicKey(
+      chainId,
       signer.address,
     );
-    const jobLauncherPublicKey =
-      await kvstoreClient.getPublicKey(jobLauncherAddress);
+    const jobLauncherPublicKey = await KVStoreUtils.getPublicKey(
+      chainId,
+      jobLauncherAddress,
+    );
 
     if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
       throw new ControlledError('Missing public key', HttpStatus.BAD_REQUEST);

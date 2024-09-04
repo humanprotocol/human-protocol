@@ -55,7 +55,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Task).where(Task.id == task_id)).scalars().first()
         )
 
-        self.assertEqual(updated_task.status, TaskStatuses.completed.value)
+        assert updated_task.status == TaskStatuses.completed.value
 
     def test_track_completed_tasks_with_unfinished_job(self):
         project = Project(
@@ -104,4 +104,4 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Task).where(Task.id == task_id)).scalars().first()
         )
 
-        self.assertEqual(updated_task.status, TaskStatuses.annotation.value)
+        assert updated_task.status == TaskStatuses.annotation.value

@@ -63,7 +63,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BtC96WCK6ZpZ35v94MK6rZNiBzDEZYHFzDmhMYyZ369D',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWGUDcQG1e8bjp9LRcyWCo4xfWcVCdgApi59sY6rgdRkS',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -109,7 +109,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/UMLaZHtLE9LxzDyvBLBgfWj4erzYzYMeGUbQtxtyMaE',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmfCCRC1cGKWuoRtaj2ZJKyaw97Ry15TbGiC4u3veTq8iX',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -125,7 +125,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/JBJPC3YmRSNjyjRTTpazhhSX5CCZ4CeBx6ptRsM8PCBb',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWNVgcdzBkDyCNBYd7jBp1vChj9B3ah7nKMSXoDkzzXYm',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -141,7 +141,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BnaC4CDqgdbGvcgM7KoZ6d7Yeebsm7NvLFrr61Lxg6Ao',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmaEPv3KDMJJJ8EWfcKWX7FJGDBudHhuHDCMR2LkbYhdNR',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -158,7 +158,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HHYwCHBvDrjckpNB4jbB8k63pSot6rGtBYLBygGji3vD',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmS2jKUstRaGWyAhytjA2b84grhXFKouZ3fzP9fPp2etum',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -182,7 +182,7 @@ export const NETWORKS: {
   [ChainId.POLYGON_AMOY]: {
     chainId: ChainId.POLYGON_AMOY,
     title: 'Polygon Amoy',
-    scanUrl: 'https://www.oklink.com/amoy',
+    scanUrl: 'https://amoy.polygonscan.com/',
     factoryAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
     hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
     stakingAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
@@ -191,7 +191,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FmdCVzHV3bB4abPVYtBALtBHr7ZRZmZ67m5c432S7GZH',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVfssyiU81KwrTVL1QRjj4LPpTkA1ZmexHTRVg51J5YxP',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -207,7 +207,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/moonbeam/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/BH5Sm6exn76o5frV5VeCufChB43DCfMXCQsdtWt4AuQP',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmU5hSFUvu2fp8EWU3uqxcz477gWjXjRq3jnpMT3KG14Sg',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
     oldFactoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
@@ -224,7 +224,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/moonbase-alpha/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/AmmRkJszUbjfUwHubcRkU6CfG1Q9psRWRbbHADVmsLjE',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmf9qH6CCxBzxkruDLLJzJTm4ig8LkSZYErGCNfJC5vsgQ',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -240,7 +240,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/fuji/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CnZCDsWziQF3jNoqgQMkmJbF9frof5osM3hN5eUgyL5u',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXcSyzYPk4AFyWq4wubxrgVNYuse8zHiQYUZR7WFinRSj',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji',
     oldFactoryAddress: '0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88',
@@ -257,7 +257,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/avalanche/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/FweDaDWZ6ZDcsA63wsjnWgdgw4aCbkiVQYMYvtcP5p2u',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmbKoD9diMdiLoVgAzJmjM4Qj6jeUQAD8ztquPMMcaZVFA',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche',
     oldFactoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
@@ -274,7 +274,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/celo-alfajores/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/EGWCWuzBNkbypW8ipRKuyGwq8azoCy6LKKosGgSPMGRD',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWSLvacfR6xiJ8dYJbABtMg3r2TuoKBSjMGSofJVh2uoR',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -290,7 +290,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/celo/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/HTgMnYWGsdsw41o8dyph1bwhotuXh6va3L8r8DGgLjsA',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXCUVfazFdQ9s1gWHyr7eNGTUY1zLVhmVGoVYhLbkT4ib',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -306,7 +306,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/xlayer/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/CrratkbjCraj1BZLgJmck1GGxbMb2Y2iPZiW4Lh5DdcX',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmY7z7abXHxFBSqzeM67q5AYxF4uRLFvpVrQQQpwVJqMkQ',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -322,7 +322,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/xlayer-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/subgraphs/id/9zd1LcywWjuSUtde4ofC8oyyzpawPwGUiPsvqTq247xk',
+      'https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVw3K8cdbommhhH6jhmkLGQAbPjgWuYYeUfBCQv6rmJTr',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -349,6 +349,7 @@ export const KVStoreKeys = {
   webhookUrl: 'webhook_url',
   url: 'url',
   jobTypes: 'job_types',
+  registrationNeeded: 'registration_needed',
 };
 
 export const Role = {

@@ -1,4 +1,3 @@
-from contextlib import suppress
 from datetime import datetime
 from enum import auto
 from typing import List, Optional, Sequence
@@ -37,7 +36,7 @@ router = APIRouter()
 class JobsFilter(Filter):
     # Simply using Query is not enough to include parameter description in the OpenAPI schema
     # https://github.com/tiangolo/fastapi/issues/4700
-    escrow_address: Optional[str] = None
+    escrow_address: str | None = None
     chain_id: Optional[int] = None
     job_type: Optional[TaskTypes] = Field(
         Query(default=None, json_schema_extra={"enum": list(TaskTypes.__members__.values())})
@@ -186,7 +185,7 @@ async def register(token: AuthorizationData = AuthorizationParam) -> UserRespons
                     detail="User already exists",
                 )
 
-            elif (
+            if (
                 e.status == status.HTTP_400_BAD_REQUEST
                 and "Enter a valid email address." in e.body
             ):

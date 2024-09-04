@@ -6,11 +6,10 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, NamedTuple, Optional, Set, Type, TypeVar, Union
+from typing import TYPE_CHECKING, NamedTuple, TypeVar
 
 import datumaro as dm
 import numpy as np
-from sqlalchemy.orm import Session
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
 import src.core.tasks.simple as simple_task
@@ -18,7 +17,6 @@ import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
-from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import TaskTypes
 from src.core.validation_errors import DatasetValidationError, LowAccuracyError
@@ -37,6 +35,11 @@ from src.validation.dataset_comparison import (
     TooFewGtError,
 )
 
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+    from src.core.manifest import TaskManifest
+
 DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_person_keypoints",
@@ -54,7 +57,7 @@ DM_GT_DATASET_FORMAT_MAPPING = {
 }
 
 
-DATASET_COMPARATOR_TYPE_MAP: Dict[TaskTypes, Type[DatasetComparator]] = {
+DATASET_COMPARATOR_TYPE_MAP: dict[TaskTypes, type[DatasetComparator]] = {
     # TaskType.image_label_binary: TagDatasetComparator, # TODO: implement if support is needed
     TaskTypes.image_boxes: BboxDatasetComparator,
     TaskTypes.image_points: PointsDatasetComparator,
@@ -62,21 +65,21 @@ DATASET_COMPARATOR_TYPE_MAP: Dict[TaskTypes, Type[DatasetComparator]] = {
     TaskTypes.image_skeletons_from_boxes: SkeletonDatasetComparator,
 }
 
-_JobResults = Dict[int, float]
+_JobResults = dict[int, float]
 
-_RejectedJobs = Dict[int, DatasetValidationError]
+_RejectedJobs = dict[int, DatasetValidationError]
 
-_FailedGtAttempts = Dict[str, int]
+_FailedGtAttempts = dict[str, int]
 "gt key -> attempts"
 
 
 @dataclass
 class _UpdatedFailedGtInfo:
-    failed_jobs: Set[int] = field(default_factory=set)
+    failed_jobs: set[int] = field(default_factory=set)
     occurrences: int = 0
 
 
-_UpdatedFailedGtStats = Dict[str, _UpdatedFailedGtInfo]
+_UpdatedFailedGtStats = dict[str, _UpdatedFailedGtInfo]
 
 
 @dataclass
@@ -100,27 +103,27 @@ class _TaskValidator:
         chain_id: int,
         manifest: TaskManifest,
         *,
-        job_annotations: Dict[int, io.IOBase],
+        job_annotations: dict[int, io.IOBase],
         merged_annotations: io.IOBase,
-        gt_stats: Optional[_FailedGtAttempts] = None,
-    ):
+        gt_stats: _FailedGtAttempts | None = None,
+    ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.manifest = manifest
 
         self._initial_gt_attempts: _FailedGtAttempts = gt_stats or {}
-        self._job_annotations: Dict[int, io.IOBase] = job_annotations
+        self._job_annotations: dict[int, io.IOBase] = job_annotations
         self._merged_annotations: io.IOBase = merged_annotations
 
-        self._updated_merged_dataset_archive: Optional[io.IOBase] = None
-        self._updated_gt_stats: Optional[_UpdatedFailedGtStats] = None
-        self._job_results: Optional[_JobResults] = None
-        self._rejected_jobs: Optional[_RejectedJobs] = None
+        self._updated_merged_dataset_archive: io.IOBase | None = None
+        self._updated_gt_stats: _UpdatedFailedGtStats | None = None
+        self._job_results: _JobResults | None = None
+        self._rejected_jobs: _RejectedJobs | None = None
 
-        self._temp_dir: Optional[Path] = None
-        self._gt_dataset: Optional[dm.Dataset] = None
+        self._temp_dir: Path | None = None
+        self._gt_dataset: dm.Dataset | None = None
 
-    def _require_field(self, field: Optional[T]) -> T:
+    def _require_field(self, field: T | None) -> T:
         assert field is not None
         return field
 
@@ -133,7 +136,7 @@ class _TaskValidator:
 
         return weight
 
-    def _get_gt_weights(self) -> Dict[str, float]:
+    def _get_gt_weights(self) -> dict[str, float]:
         weights = {}
 
         ban_threshold = Config.validation.gt_ban_threshold
@@ -164,7 +167,7 @@ class _TaskValidator:
             )
         )
 
-    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
+    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:  # noqa: ARG002
         manifest = self._require_field(self.manifest)
 
         return dm.Dataset.import_from(
@@ -217,7 +220,7 @@ class _TaskValidator:
 
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
-            def __init__(self, extractor: dm.IExtractor, *, prefix: str):
+            def __init__(self, extractor: dm.IExtractor, *, prefix: str) -> None:
                 super().__init__(extractor)
                 self._prefix = prefix
 
@@ -262,7 +265,7 @@ class _TaskValidator:
     @classmethod
     def _put_gt_into_merged_dataset(
         cls, gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
-    ):
+    ) -> None:
         """
         Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
         """
@@ -309,7 +312,7 @@ class _TaskValidator:
                 )
                 merged_dataset.update(gt_dataset)
             case _:
-                assert False, f"Unknown task type {manifest.annotation.type}"
+                raise AssertionError(f"Unknown task type {manifest.annotation.type}")
 
     def validate(self) -> _ValidationResult:
         with TemporaryDirectory() as tempdir:
@@ -331,7 +334,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
     def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
         raise NotImplementedError
 
-    def _get_gt_weights(self, *, job_cvat_id: int, job_gt_dataset: dm.Dataset) -> Dict[str, float]:
+    def _get_gt_weights(self, *, job_cvat_id: int, job_gt_dataset: dm.Dataset) -> dict[str, float]:
         weights = {}
 
         ban_threshold = Config.validation.gt_ban_threshold
@@ -350,8 +353,12 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
         return weights
 
     def _gt_key_to_sample_id(
-        self, gt_key: str, *, job_cvat_id: int, job_gt_dataset: dm.Dataset
-    ) -> Optional[str]:
+        self,
+        gt_key: str,
+        *,
+        job_cvat_id: int,  # noqa: ARG002
+        job_gt_dataset: dm.Dataset,  # noqa: ARG002
+    ) -> str | None:
         return gt_key
 
     def _update_gt_stats(
@@ -418,7 +425,7 @@ class _TaskValidatorWithPerJobGt(_TaskValidator):
 
 
 class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         (
@@ -448,7 +455,7 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
         self._point_key_to_bbox_key = {v: k for k, v in boxes_to_points_mapping.items()}
         self._roi_info_by_id = {roi_info.point_id: roi_info for roi_info in roi_infos}
-        self._roi_name_to_roi_info: Dict[str, boxes_from_points_task.RoiInfo] = {
+        self._roi_name_to_roi_info: dict[str, boxes_from_points_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: self._roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -521,7 +528,7 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
         return boxes_to_points_mapping, roi_filenames, rois, gt_dataset, points_dataset
 
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
+    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:  # noqa: ARG002
         job_gt_dataset = dm.Dataset(categories=self._gt_dataset.categories(), media_type=dm.Image)
 
         for job_sample in job_dataset:
@@ -554,7 +561,7 @@ class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
 
 
 class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         (
@@ -589,7 +596,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
 
         self._bbox_key_to_skeleton_key = {v: k for k, v in skeletons_to_boxes_mapping.items()}
         self._roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in roi_infos}
-        self._roi_name_to_roi_info: Dict[str, skeletons_from_boxes_task.RoiInfo] = {
+        self._roi_name_to_roi_info: dict[str, skeletons_from_boxes_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: self._roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -731,7 +738,7 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
 
         return updated_dataset
 
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
+    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:  # noqa: ARG002
         job_label_cat: dm.LabelCategories = job_dataset.categories()[dm.AnnotationType.label]
         assert len(job_label_cat) == 2
         job_skeleton_label_id, job_skeleton_label = next(
@@ -832,8 +839,8 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
     def _get_gt_dataset_label_id(self, job_gt_dataset: dm.Dataset) -> _LabelId:
         label_cat: dm.LabelCategories = job_gt_dataset.categories()[dm.AnnotationType.label]
         assert len(label_cat) == 2
-        job_skeleton_label = next(l for l in label_cat if not l.parent)
-        job_point_label = next(l for l in label_cat if l.parent)
+        job_skeleton_label = next(label for label in label_cat if not label.parent)
+        job_point_label = next(label for label in label_cat if label.parent)
 
         return self._LabelId(
             *next(
@@ -846,8 +853,12 @@ class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
         )
 
     def _gt_key_to_sample_id(
-        self, gt_key: str, *, job_cvat_id: int, job_gt_dataset: dm.Dataset
-    ) -> Optional[str]:
+        self,
+        gt_key: str,
+        *,
+        job_cvat_id: int,  # noqa: ARG002
+        job_gt_dataset: dm.Dataset,
+    ) -> str | None:
         parsed_gt_key = self._parse_gt_key(gt_key)
         job_label_id = self._get_gt_dataset_label_id(job_gt_dataset)
         if (parsed_gt_key.skeleton_id, parsed_gt_key.point_id) != job_label_id:
@@ -904,17 +915,17 @@ def _compute_gt_stats_update(
     return updated_gt_stats
 
 
-def process_intermediate_results(
+def process_intermediate_results(  # noqa: PLR0912
     session: Session,
     *,
     escrow_address: str,
     chain_id: int,
     meta: AnnotationMeta,
-    job_annotations: Dict[int, io.RawIOBase],
+    job_annotations: dict[int, io.RawIOBase],
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
-) -> Union[ValidationSuccess, ValidationFailure]:
+) -> ValidationSuccess | ValidationFailure:
     # actually validate jobs
 
     task_type = manifest.annotation.type
@@ -979,7 +990,7 @@ def process_intermediate_results(
 
         db_service.update_gt_stats(session, task.id, updated_gt_stats)
 
-    job_final_result_ids: Dict[int, str] = {}
+    job_final_result_ids: dict[int, str] = {}
     for job_meta in meta.jobs:
         job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
         if not job:
@@ -1006,13 +1017,12 @@ def process_intermediate_results(
 
     should_complete = False
 
-    if 0 < Config.validation.max_escrow_iterations:
+    if Config.validation.max_escrow_iterations > 0:
         escrow_iteration = task.iteration
         if escrow_iteration and Config.validation.max_escrow_iterations <= escrow_iteration:
             logger.info(
-                "Validation for escrow_address={}: too many iterations, stopping annotation".format(
-                    escrow_address
-                )
+                f"Validation for escrow_address={escrow_address}:"
+                f" too many iterations, stopping annotation"
             )
             should_complete = True
 
@@ -1028,24 +1038,18 @@ def process_intermediate_results(
             < unverifiable_jobs_count
         ):
             logger.info(
-                "Validation for escrow_address={}: "
-                "too many assignments have insufficient GT for validation ({} of {} ({:.2f}%)), "
-                "stopping annotation".format(
-                    escrow_address,
-                    unverifiable_jobs_count,
-                    total_jobs,
-                    unverifiable_jobs_count / total_jobs * 100,
-                )
+                f"Validation for escrow_address={escrow_address}: "
+                f"too many assignments have insufficient GT for validation "
+                f"({unverifiable_jobs_count} of {total_jobs} "
+                f"({unverifiable_jobs_count / total_jobs * 100:.2f}%)), stopping annotation"
             )
             should_complete = True
         elif len(rejected_jobs) == unverifiable_jobs_count:
             if unverifiable_jobs_count:
                 logger.info(
-                    "Validation for escrow_address={}: "
-                    "only unverifiable assignments left ({}), stopping annotation".format(
-                        escrow_address,
-                        unverifiable_jobs_count,
-                    )
+                    f"Validation for escrow_address={escrow_address}: "
+                    f"only unverifiable assignments left ({unverifiable_jobs_count}),"
+                    f" stopping annotation"
                 )
 
             should_complete = True
@@ -1083,7 +1087,7 @@ def process_intermediate_results(
         validation_meta=validation_meta,
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
         average_quality=np.mean(
-            list(v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0)
+            [v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0]
             or [0]
         ),
     )

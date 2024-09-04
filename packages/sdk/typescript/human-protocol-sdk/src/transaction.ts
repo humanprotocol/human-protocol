@@ -50,7 +50,7 @@ export class TransactionUtils {
       hash: hash.toLowerCase(),
     });
 
-    return transaction;
+    return transaction || null;
   }
 
   /**

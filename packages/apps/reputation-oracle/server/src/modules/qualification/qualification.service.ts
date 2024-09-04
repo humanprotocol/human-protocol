@@ -95,6 +95,13 @@ export class QualificationService {
       );
     }
 
+    if (qualificationEntity.userQualifications.length > 0) {
+      throw new ControlledError(
+        ErrorQualification.CannotDeleteAssignedQualification,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return this.qualificationRepository.deleteOne(qualificationEntity);
   }
 

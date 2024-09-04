@@ -14,7 +14,7 @@ from src.models.cvat import Assignment, Job, Project, Task, User
 def generate_cvat_signature(data: dict):
     b_data = json.dumps(data).encode("utf-8")
 
-    signature = (
+    return (
         "sha256="
         + hmac.new(
             CvatConfig.cvat_webhook_secret.encode("utf-8"),
@@ -22,8 +22,6 @@ def generate_cvat_signature(data: dict):
             digestmod=sha256,
         ).hexdigest()
     )
-
-    return signature
 
 
 def add_cvat_project_to_db(cvat_id: int) -> str:

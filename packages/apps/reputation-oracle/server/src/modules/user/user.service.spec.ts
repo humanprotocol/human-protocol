@@ -18,7 +18,7 @@ import {
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { DeepPartial } from 'typeorm';
-import { ChainId, KVStoreClient } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
@@ -36,14 +36,17 @@ import {
 } from '../../common/constants/errors';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { SiteKeyType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       set: jest.fn(),
-      get: jest.fn(),
     })),
+  },
+  KVStoreUtils: {
+    get: jest.fn(),
   },
 }));
 
@@ -52,6 +55,7 @@ describe('UserService', () => {
   let userRepository: UserRepository;
   let web3Service: Web3Service;
   let hcaptchaService: HCaptchaService;
+  let siteKeyRepository: SiteKeyRepository;
 
   jest
     .spyOn(NetworkConfigService.prototype, 'networks', 'get')
@@ -73,6 +77,10 @@ describe('UserService', () => {
         UserService,
         HCaptchaService,
         { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: SiteKeyRepository,
+          useValue: createMock<SiteKeyRepository>(),
+        },
         {
           provide: SiteKeyRepository,
           useValue: createMock<SiteKeyRepository>(),
@@ -104,6 +112,7 @@ describe('UserService', () => {
     userRepository = moduleRef.get(UserRepository);
     web3Service = moduleRef.get(Web3Service);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
+    siteKeyRepository = moduleRef.get(SiteKeyRepository);
   });
 
   describe('create', () => {
@@ -238,7 +247,7 @@ describe('UserService', () => {
         role: Role.WORKER,
         kyc: {
           country: 'FR',
-          status: KycStatus.PENDING_VERIFICATION,
+          status: KycStatus.REVIEW,
         },
         save: jest.fn(),
       };
@@ -252,6 +261,7 @@ describe('UserService', () => {
       const siteKeyEntity: DeepPartial<SiteKeyEntity> = {
         id: 1,
         siteKey: 'site_key',
+        type: SiteKeyType.HCAPTCHA,
       };
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
@@ -262,7 +272,7 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        siteKey: siteKeyEntity,
+        siteKeys: [siteKeyEntity],
         save: jest.fn(),
       };
 
@@ -428,7 +438,7 @@ describe('UserService', () => {
         email: '',
         kyc: {
           country: 'FR',
-          status: KycStatus.PENDING_VERIFICATION,
+          status: KycStatus.REVIEW,
         },
       };
 
@@ -578,13 +588,14 @@ describe('UserService', () => {
 
     it('should enable an operator', async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
         set: jest.fn(),
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.INACTIVE);
+
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       const result = await userService.enableOperator(
@@ -599,24 +610,26 @@ describe('UserService', () => {
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
-      expect(kvstoreClientMock.get).toHaveBeenCalledWith(
+      expect(KVStoreUtils.get).toHaveBeenCalledWith(
+        ChainId.POLYGON_AMOY,
         MOCK_ADDRESS,
         MOCK_ADDRESS,
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
-        MOCK_ADDRESS,
+        MOCK_ADDRESS.toLowerCase(),
         OperatorStatus.ACTIVE,
       );
     });
 
     it("should throw ConflictException if signature doesn't match", async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
         set: jest.fn(),
       };
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
+
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.INACTIVE);
 
       (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
         throw new ControlledError(
@@ -641,13 +654,8 @@ describe('UserService', () => {
     });
 
     it('should throw BadRequestException if operator already enabled in KVStore', async () => {
-      const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
-      };
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.ACTIVE);
 
-      (KVStoreClient.build as any).mockImplementationOnce(
-        () => kvstoreClientMock,
-      );
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       await expect(
@@ -684,15 +692,16 @@ describe('UserService', () => {
       jest.resetAllMocks();
     });
 
-    it('should disable an user', async () => {
+    it('should disable a user', async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
         set: jest.fn(),
       };
 
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
+
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.ACTIVE);
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       const result = await userService.disableOperator(
@@ -707,25 +716,26 @@ describe('UserService', () => {
       );
       expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.POLYGON_AMOY);
 
-      expect(kvstoreClientMock.get).toHaveBeenCalledWith(
+      expect(KVStoreUtils.get).toHaveBeenCalledWith(
+        ChainId.POLYGON_AMOY,
         MOCK_ADDRESS,
         MOCK_ADDRESS,
       );
       expect(kvstoreClientMock.set).toHaveBeenCalledWith(
-        MOCK_ADDRESS,
+        MOCK_ADDRESS.toLowerCase(),
         OperatorStatus.INACTIVE,
       );
     });
 
     it("should throw ConflictException if signature doesn't match", async () => {
       const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.ACTIVE),
         set: jest.fn(),
       };
       (KVStoreClient.build as any).mockImplementationOnce(
         () => kvstoreClientMock,
       );
 
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.ACTIVE);
       (verifySignature as jest.Mock) = jest.fn().mockImplementation(() => {
         throw new ControlledError(
           ErrorSignature.SignatureNotVerified,
@@ -749,13 +759,7 @@ describe('UserService', () => {
     });
 
     it('should throw BadRequestException if operator already disabled in KVStore', async () => {
-      const kvstoreClientMock = {
-        get: jest.fn().mockResolvedValue(OperatorStatus.INACTIVE),
-      };
-
-      (KVStoreClient.build as any).mockImplementationOnce(
-        () => kvstoreClientMock,
-      );
+      KVStoreUtils.get = jest.fn().mockResolvedValue(OperatorStatus.INACTIVE);
       const signature = await signMessage(signatureBody, MOCK_PRIVATE_KEY);
 
       await expect(
@@ -804,6 +808,51 @@ describe('UserService', () => {
       );
 
       expect(result).toStrictEqual(expectedData);
+    });
+  });
+
+  describe('registerOracle', () => {
+    it('should register a new oracle for the user', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const oracleAddress = '0xOracleAddress';
+
+      await userService.registerOracle(userEntity as UserEntity, oracleAddress);
+
+      expect(siteKeyRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          siteKey: oracleAddress,
+          type: SiteKeyType.REGISTRATION,
+          user: userEntity,
+        }),
+      );
+    });
+  });
+
+  describe('getRegisteredOracles', () => {
+    it('should return a list of registered oracles for the user', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const siteKeys: SiteKeyEntity[] = [
+        { siteKey: '0xOracleAddress1' } as SiteKeyEntity,
+        { siteKey: '0xOracleAddress2' } as SiteKeyEntity,
+      ];
+
+      jest
+        .spyOn(siteKeyRepository, 'findByUserAndType')
+        .mockResolvedValue(siteKeys);
+
+      const result = await userService.getRegisteredOracles(
+        userEntity as UserEntity,
+      );
+
+      expect(result).toEqual(['0xOracleAddress1', '0xOracleAddress2']);
     });
   });
 });

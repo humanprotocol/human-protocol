@@ -1,5 +1,6 @@
+from argparse import ArgumentParser
+from collections.abc import Iterable
 from copy import deepcopy
-from typing import Iterable, Optional, Tuple, Union
 
 import datumaro as dm
 import numpy as np
@@ -38,7 +39,7 @@ def shift_ann(
             ]
         )
     else:
-        assert False, f"Unsupported annotation type '{ann.type}'"
+        raise TypeError(f"Unsupported annotation type '{ann.type}'")
 
     return shifted_ann
 
@@ -65,7 +66,7 @@ class ProjectLabels(dm.ItemTransform):
     """
 
     @classmethod
-    def build_cmdline_parser(cls, **kwargs):
+    def build_cmdline_parser(cls, **kwargs) -> ArgumentParser:
         parser = super().build_cmdline_parser(**kwargs)
         parser.add_argument(
             "-l",
@@ -76,19 +77,19 @@ class ProjectLabels(dm.ItemTransform):
         )
         return parser
 
-    def __init__(
+    def __init__(  # noqa: PLR0912
         self,
         extractor: dm.IExtractor,
-        dst_labels: Union[Iterable[Union[str, Tuple[str, str]]], dm.LabelCategories],
-    ):
+        dst_labels: Iterable[str | tuple[str, str]] | dm.LabelCategories,
+    ) -> None:
         super().__init__(extractor)
 
         self._categories = {}
 
         src_categories = self._extractor.categories()
 
-        src_label_cat: Optional[dm.LabelCategories] = src_categories.get(dm.AnnotationType.label)
-        src_point_cat: Optional[dm.PointsCategories] = src_categories.get(dm.AnnotationType.points)
+        src_label_cat: dm.LabelCategories | None = src_categories.get(dm.AnnotationType.label)
+        src_point_cat: dm.PointsCategories | None = src_categories.get(dm.AnnotationType.points)
 
         if isinstance(dst_labels, dm.LabelCategories):
             dst_label_cat = deepcopy(dst_labels)
@@ -99,7 +100,7 @@ class ProjectLabels(dm.ItemTransform):
                 dst_label_cat = dm.LabelCategories(attributes=deepcopy(src_label_cat.attributes))
 
                 for dst_label in dst_labels:
-                    assert isinstance(dst_label, str) or isinstance(dst_label, tuple)
+                    assert isinstance(dst_label, str | tuple)
 
                     dst_parent = ""
                     if isinstance(dst_label, tuple):
@@ -181,7 +182,7 @@ class ProjectLabels(dm.ItemTransform):
             src_id: dst_label_cat.find(src_label_cat[src_id].name, src_label_cat[src_id].parent)[0]
             for src_id in range(len(src_label_cat or ()))
         }
-        self._map_id = lambda src_id: id_mapping.get(src_id, None)
+        self._map_id = lambda src_id: id_mapping.get(src_id)
 
     def categories(self):
         return self._categories

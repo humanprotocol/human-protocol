@@ -76,11 +76,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.recorded.value)
+        assert db_project.status == ProjectStatuses.recorded.value
 
     def test_process_incoming_recording_oracle_webhooks_job_completed_type_invalid_project_status(
         self,
@@ -119,12 +119,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
 
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.completed.value)
+        assert db_project.status == ProjectStatuses.completed.value
 
     def test_process_incoming_recording_oracle_webhooks_submission_rejected_type(self):
         cvat_id = 1
@@ -202,25 +202,25 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
+        assert db_project.status == ProjectStatuses.annotation.value
 
         db_task = self.session.query(Task).filter_by(id=task_id).first()
 
-        self.assertEqual(db_task.status, TaskStatuses.annotation.value)
+        assert db_task.status == TaskStatuses.annotation.value
 
         db_job = self.session.query(Job).filter_by(id=job_id).first()
 
-        self.assertEqual(db_job.status, JobStatuses.new.value)
+        assert db_job.status == JobStatuses.new.value
 
         db_assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
 
         self.assertEqual(db_assignment.status, AssignmentStatuses.rejected)
 
-    def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_project_status(
+    def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_project_status(  # noqa: E501
         self,
     ):
         cvat_id = 1
@@ -262,12 +262,12 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
 
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.completed.value)
+        assert db_project.status == ProjectStatuses.completed.value
 
     def test_process_outgoing_recording_oracle_webhooks(self):
         chain_id = Networks.localhost.value
@@ -307,8 +307,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed.value
+        assert updated_webhook.attempts == 1
         mock_httpx_post.assert_called_once()
 
     def test_process_outgoing_recording_oracle_webhooks_invalid_type(self):
@@ -335,5 +335,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1

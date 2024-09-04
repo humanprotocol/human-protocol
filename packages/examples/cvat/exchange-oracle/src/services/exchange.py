@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Optional
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
@@ -16,7 +15,7 @@ class UserHasUnfinishedAssignmentError(Exception):
 
 def create_assignment(
     escrow_address: str, chain_id: Networks, wallet_address: str
-) -> Optional[str]:
+) -> str | None:
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),

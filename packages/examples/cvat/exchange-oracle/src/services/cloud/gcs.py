@@ -1,5 +1,4 @@
 from io import BytesIO
-from typing import Dict, List, Optional
 from urllib.parse import unquote
 
 from google.cloud import storage
@@ -13,8 +12,8 @@ class GcsClient(StorageClient):
     def __init__(
         self,
         *,
-        bucket: Optional[str] = None,
-        service_account_key: Optional[Dict] = None,
+        bucket: str | None = None,
+        service_account_key: dict | None = None,
     ) -> None:
         super().__init__(bucket)
 
@@ -23,22 +22,22 @@ class GcsClient(StorageClient):
         else:
             self.client = storage.Client.create_anonymous_client()
 
-    def create_file(self, key: str, data: bytes = b"", *, bucket: Optional[str] = None) -> None:
+    def create_file(self, key: str, data: bytes = b"", *, bucket: str | None = None) -> None:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)
         bucket_client.blob(unquote(key)).upload_from_string(data)
 
-    def remove_file(self, key: str, *, bucket: Optional[str] = None) -> None:
+    def remove_file(self, key: str, *, bucket: str | None = None) -> None:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)
         bucket_client.delete_blob(unquote(key))
 
-    def file_exists(self, key: str, *, bucket: Optional[str] = None) -> bool:
+    def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)
         return bucket_client.blob(unquote(key)).exists()
 
-    def download_file(self, key: str, *, bucket: Optional[str] = None) -> bytes:
+    def download_file(self, key: str, *, bucket: str | None = None) -> bytes:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)
         blob = bucket_client.blob(unquote(key))
@@ -47,9 +46,7 @@ class GcsClient(StorageClient):
             self.client.download_blob_to_file(blob, data)
             return data.getvalue()
 
-    def list_files(
-        self, *, bucket: Optional[str] = None, prefix: Optional[str] = None
-    ) -> List[str]:
+    def list_files(self, *, bucket: str | None = None, prefix: str | None = None) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         prefix = self.normalize_prefix(prefix)
 

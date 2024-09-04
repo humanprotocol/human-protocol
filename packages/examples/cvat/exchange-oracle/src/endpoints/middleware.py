@@ -1,6 +1,7 @@
 import json
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import fastapi
 import packaging.version as pv
@@ -61,7 +62,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """
 
     @staticmethod
-    async def _set_body(request: Request, body: bytes):
+    async def _set_body(request: Request, body: bytes) -> None:
         # Before FastAPI 0.108.0 infinite hang is expected,
         # if request body is awaited more than once.
         # It's not needed when using FastAPI >= 0.108.0.
@@ -119,7 +120,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         try:
             body = await request.body()
             await self._set_body(request, body)
-        except Exception:
+        except Exception:  # noqa: BLE001
             body = None
         else:
             if body is not None:
@@ -188,7 +189,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         except Exception as e:
             self.logger.exception({"path": request.url.path, "method": request.method, "reason": e})
-            raise e
+            raise
 
         else:
             return response

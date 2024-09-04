@@ -215,7 +215,12 @@ export class CronJobService {
 
       for (const jobEntity of jobEntities) {
         try {
-          if (jobEntity.escrowAddress) {
+          if (
+            await this.jobService.isEscrowFunded(
+              jobEntity.chainId,
+              jobEntity.escrowAddress,
+            )
+          ) {
             const { amountRefunded } =
               await this.jobService.processEscrowCancellation(jobEntity);
             await this.paymentService.createRefundPayment({
@@ -378,7 +383,12 @@ export class CronJobService {
         const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
         const job = jobMap.get(key);
 
-        if (!job || job.status === JobStatus.TO_CANCEL) continue;
+        if (
+          !job ||
+          job.status === JobStatus.TO_CANCEL ||
+          job.status === JobStatus.CANCELED
+        )
+          continue;
 
         let newStatus: JobStatus | null = null;
         if (

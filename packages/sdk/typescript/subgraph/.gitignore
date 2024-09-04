@@ -10,3 +10,5 @@ subgraph.yaml
 # Graph test generated
 tests/.bin
 tests/.latest.json
+
+src/mapping/HMToken.ts

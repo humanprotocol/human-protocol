@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict
 
 from src.core.validation_errors import DatasetValidationError
 from src.core.validation_meta import ValidationMeta
@@ -7,7 +6,7 @@ from src.core.validation_meta import ValidationMeta
 
 @dataclass
 class ValidationResult:
-    job_results: Dict[int, float]
+    job_results: dict[int, float]
 
 
 @dataclass
@@ -19,4 +18,4 @@ class ValidationSuccess(ValidationResult):
 
 @dataclass
 class ValidationFailure(ValidationResult):
-    rejected_jobs: Dict[int, DatasetValidationError]
+    rejected_jobs: dict[int, DatasetValidationError]

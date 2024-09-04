@@ -1,7 +1,13 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, IsDate } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsDate,
+} from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
@@ -116,6 +122,7 @@ export class AssignmentDto {
     rewardToken: string,
     createdAt: string,
     expiresAt: string,
+    updatedAt: string,
   ) {
     this.assignmentId = assignmentId;
     this.escrowAddress = escrowAddress;
@@ -126,6 +133,7 @@ export class AssignmentDto {
     this.rewardToken = rewardToken;
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
+    this.updatedAt = updatedAt;
   }
 }
 

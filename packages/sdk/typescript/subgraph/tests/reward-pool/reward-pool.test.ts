@@ -8,6 +8,7 @@ import {
 } from 'matchstick-as/assembly';
 
 import { handleRewardAdded } from '../../src/mapping/RewardPool';
+import { toEventId } from '../../src/mapping/utils/event';
 import { createRewardAddedEvent } from './fixtures';
 
 describe('RewardPool', () => {
@@ -34,12 +35,8 @@ describe('RewardPool', () => {
     handleRewardAdded(data1);
     handleRewardAdded(data2);
 
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
-      data2.block.timestamp
-    }`;
+    const id1 = toEventId(data1).toHex();
+    const id2 = toEventId(data2).toHex();
 
     // Data 1
     assert.fieldEquals(

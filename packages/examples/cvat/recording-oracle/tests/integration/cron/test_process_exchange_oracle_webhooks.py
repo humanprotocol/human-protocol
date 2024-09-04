@@ -63,8 +63,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         updated_webhook = (
             self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()
         )
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.completed
+        assert updated_webhook.attempts == 1
 
     def test_process_recording_oracle_webhooks_invalid_escrow_address(self):
         escrow_address = "invalid_address"
@@ -83,8 +83,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
 
     def test_process_recording_oracle_webhooks_invalid_escrow_balance(self):
         escrow_address = create_escrow(self.w3)
@@ -103,8 +103,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
 
     @patch("src.chain.escrow.EscrowClient.get_manifest_url")
     def test_process_job_launcher_webhooks_invalid_manifest_url(self, mock_manifest_url):
@@ -123,5 +123,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1

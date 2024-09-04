@@ -1,52 +1,53 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JobAssignmentService } from '../job-assignment.service';
-import { KvStoreGateway } from '../../../integrations/kv-store/kv-store-gateway.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
+import { JobAssignmentService } from '../job-assignment.service';
 import {
   jobAssignmentCommandFixture,
-  jobAssignmentDetailsFixture,
-  jobAssignmentOracleUrl,
   jobsFetchParamsCommandFixture,
-  jobsFetchParamsDetailsFixture,
+  jobsFetchResponseFixture,
+  USER_ADDRESS,
 } from './job-assignment.fixtures';
-import { AutomapperModule } from '@automapper/nestjs';
-import { classes } from '@automapper/classes';
-import { JobAssignmentProfile } from '../job-assignment.mapper';
 import { EscrowUtilsGateway } from '../../../integrations/escrow/escrow-utils-gateway.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ResignJobCommand } from '../model/job-assignment.model';
+import { JOB_ASSIGNMENT_CACHE_KEY } from '../../../common/constants/cache';
 
+const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${USER_ADDRESS}`;
 describe('JobAssignmentService', () => {
   let service: JobAssignmentService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
-  let kvStoreGatewayMock: Partial<KvStoreGateway>;
-  let escrowUtilsGatewayMock: Partial<EscrowUtilsGateway>;
+  let cacheManagerMock: any;
+
   beforeEach(async () => {
+    cacheManagerMock = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+
     exchangeOracleGatewayMock = {
       postNewJobAssignment: jest.fn(),
       fetchAssignedJobs: jest.fn(),
-    };
-    kvStoreGatewayMock = {
-      getExchangeOracleUrlByAddress: jest.fn(),
-    };
-    escrowUtilsGatewayMock = {
-      getExchangeOracleAddressByEscrowAddress: jest.fn(),
+      resignAssignedJob: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        AutomapperModule.forRoot({
-          strategyInitializer: classes(),
-        }),
-      ],
       providers: [
         JobAssignmentService,
-        JobAssignmentProfile,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
-        { provide: KvStoreGateway, useValue: kvStoreGatewayMock },
-        { provide: EscrowUtilsGateway, useValue: escrowUtilsGatewayMock },
+        {
+          provide: EscrowUtilsGateway,
+          useValue: {
+            getExchangeOracleAddressByEscrowAddress: jest.fn(),
+          },
+        },
+        { provide: CACHE_MANAGER, useValue: cacheManagerMock },
       ],
     }).compile();
 
     service = module.get<JobAssignmentService>(JobAssignmentService);
+    jest
+      .spyOn(service as any, 'getEvmAddressFromToken')
+      .mockReturnValue(USER_ADDRESS);
   });
 
   it('should be defined', () => {
@@ -55,59 +56,112 @@ describe('JobAssignmentService', () => {
 
   describe('processJobAssignment', () => {
     it('should process job assignment correctly', async () => {
-      const escrowUtilExchangeOracleAddress = '0x';
       const command = jobAssignmentCommandFixture;
-      const details = jobAssignmentDetailsFixture;
-      (
-        escrowUtilsGatewayMock.getExchangeOracleAddressByEscrowAddress as jest.Mock
-      ).mockResolvedValue(escrowUtilExchangeOracleAddress);
-      (
-        kvStoreGatewayMock.getExchangeOracleUrlByAddress as jest.Mock
-      ).mockResolvedValue(jobAssignmentOracleUrl);
       (
         exchangeOracleGatewayMock.postNewJobAssignment as jest.Mock
       ).mockResolvedValue({
         assignment_id: '123',
       });
+      (
+        exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
+      ).mockResolvedValue(jobsFetchResponseFixture);
 
       const result = await service.processJobAssignment(command);
 
       expect(
-        escrowUtilsGatewayMock.getExchangeOracleAddressByEscrowAddress,
-      ).toHaveBeenCalledWith(command.data.chainId, command.data.escrowAddress);
-      expect(
-        kvStoreGatewayMock.getExchangeOracleUrlByAddress,
-      ).toHaveBeenCalledWith(escrowUtilExchangeOracleAddress);
-      expect(
         exchangeOracleGatewayMock.postNewJobAssignment,
-      ).toHaveBeenCalledWith(details);
+      ).toHaveBeenCalledWith(command);
       expect(result).toEqual({ assignment_id: '123' });
     });
   });
 
   describe('processGetAssignedJobs', () => {
-    it('should fetch assigned jobs correctly', async () => {
+    it('should fetch assigned jobs correctly when not cached', async () => {
       const command = jobsFetchParamsCommandFixture;
-      const details = jobsFetchParamsDetailsFixture;
+      const jobsFetchResponse = jobsFetchResponseFixture;
 
       (
-        kvStoreGatewayMock.getExchangeOracleUrlByAddress as jest.Mock
-      ).mockResolvedValue(jobAssignmentOracleUrl);
-      (
         exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
-      ).mockResolvedValue({
-        data: [],
-      });
+      ).mockResolvedValue(jobsFetchResponse);
+
+      cacheManagerMock.get.mockResolvedValueOnce(undefined);
 
       const result = await service.processGetAssignedJobs(command);
 
-      expect(
-        kvStoreGatewayMock.getExchangeOracleUrlByAddress,
-      ).toHaveBeenCalledWith(command.address);
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
-        details,
+        command,
       );
-      expect(result).toEqual({ data: [] });
+      expect(result).toEqual({
+        results: jobsFetchResponse.results,
+        page: 0,
+        page_size: 5,
+        total_pages: 1,
+        total_results: jobsFetchResponse.total_results,
+      });
+    });
+
+    it('should fetch assigned jobs correctly when cached', async () => {
+      const command = jobsFetchParamsCommandFixture;
+      const cachedJobs = jobsFetchResponseFixture.results;
+
+      cacheManagerMock.get.mockResolvedValueOnce(cachedJobs);
+
+      const result = await service.processGetAssignedJobs(command);
+
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
+      expect(
+        exchangeOracleGatewayMock.fetchAssignedJobs,
+      ).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: cachedJobs,
+        page: 0,
+        page_size: 5,
+        total_pages: 1,
+        total_results: cachedJobs.length,
+      });
+    });
+  });
+
+  describe('updateAssignmentsCache', () => {
+    it('should update assignments cache correctly', async () => {
+      const command = jobsFetchParamsCommandFixture;
+      const newAssignments = jobsFetchResponseFixture.results;
+
+      cacheManagerMock.get.mockResolvedValueOnce([]);
+      (
+        exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
+      ).mockResolvedValue({ results: newAssignments });
+
+      await service['updateAssignmentsCache'](command, USER_ADDRESS);
+
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
+      expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
+        command,
+      );
+      expect(cacheManagerMock.set).toHaveBeenCalledWith(
+        cacheKey,
+        newAssignments,
+      );
+    });
+  });
+
+  describe('resignJob', () => {
+    it('should resign job and update cache correctly', async () => {
+      const command = new ResignJobCommand();
+      (
+        exchangeOracleGatewayMock.resignAssignedJob as jest.Mock
+      ).mockResolvedValue({ success: true });
+
+      (
+        exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
+      ).mockResolvedValue(jobsFetchResponseFixture);
+
+      await service.resignJob(command);
+
+      expect(exchangeOracleGatewayMock.resignAssignedJob).toHaveBeenCalledWith(
+        command,
+      );
     });
   });
 });

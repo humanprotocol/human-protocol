@@ -30,7 +30,7 @@ import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient } from '@human-protocol/sdk';
+import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -49,8 +49,10 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       set: jest.fn(),
-      get: jest.fn(),
     })),
+  },
+  KVStoreUtils: {
+    get: jest.fn(),
   },
 }));
 
@@ -263,6 +265,7 @@ describe('AuthService', () => {
       id: 1,
       email: 'user@example.com',
       status: UserStatus.ACTIVE,
+      evmAddress: MOCK_ADDRESS,
     };
 
     beforeEach(() => {
@@ -293,9 +296,11 @@ describe('AuthService', () => {
           email: userEntity.email,
           status: userEntity.status,
           userId: userEntity.id,
-          address: userEntity.evmAddress,
+          wallet_address: userEntity.evmAddress,
           kyc_status: userEntity.kyc?.status,
           reputation_network: MOCK_ADDRESS,
+          qualifications: [],
+          role: userEntity.role,
         },
         {
           expiresIn: authConfigService.accessTokenExpiresIn,
@@ -754,14 +759,14 @@ describe('AuthService', () => {
 
         it('should create a new web3 user and return the token', async () => {
           (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest
-              .fn()
-              .mockResolvedValueOnce('Job Launcher')
-              .mockResolvedValueOnce('url')
-              .mockResolvedValueOnce(1)
-              .mockResolvedValueOnce(JobRequestType.FORTUNE),
             set: jest.fn(),
           }));
+          KVStoreUtils.get = jest
+            .fn()
+            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce('url')
+            .mockResolvedValueOnce(1)
+            .mockResolvedValueOnce(JobRequestType.FORTUNE);
 
           const signature = await signMessage(
             preSignUpDataMock,
@@ -821,9 +826,7 @@ describe('AuthService', () => {
           );
         });
         it('should throw ControlledError if fee is not in KVStore', async () => {
-          (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest.fn().mockResolvedValueOnce('Job Launcher'),
-          }));
+          KVStoreUtils.get = jest.fn().mockResolvedValueOnce('Job Launcher');
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
@@ -840,12 +843,11 @@ describe('AuthService', () => {
           );
         });
         it('should throw ControlledError if url is not in KVStore', async () => {
-          (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest
-              .fn()
-              .mockResolvedValueOnce('Job Launcher')
-              .mockResolvedValueOnce('url'),
-          }));
+          KVStoreUtils.get = jest
+            .fn()
+            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce('url');
+
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
@@ -862,13 +864,12 @@ describe('AuthService', () => {
           );
         });
         it('should throw ControlledError if job type is not in KVStore', async () => {
-          (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            get: jest
-              .fn()
-              .mockResolvedValueOnce('Job Launcher')
-              .mockResolvedValueOnce('url')
-              .mockResolvedValueOnce(1),
-          }));
+          KVStoreUtils.get = jest
+            .fn()
+            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce('url')
+            .mockResolvedValueOnce(1);
+
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
