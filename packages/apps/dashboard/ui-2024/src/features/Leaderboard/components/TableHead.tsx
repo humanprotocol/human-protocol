@@ -82,7 +82,7 @@ export const TableHead = ({
 					>
 						<div className="icon-table">
 							<Tooltip title="Address of the role" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 							<Typography mt="3px" component="span" variant="body3">
 								ADDRESS
@@ -102,7 +102,7 @@ export const TableHead = ({
 					>
 						<div className="icon-table">
 							<Tooltip title="Amount of HMT staked" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 							<Typography mt="3px" component="span" variant="body3">
 								STAKE
@@ -132,7 +132,7 @@ export const TableHead = ({
 								title="Reputation of the role as per their activities "
 								arrow
 							>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 							<Typography mt="3px" component="span" variant="body3">
 								REPUTATION SCORE

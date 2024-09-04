@@ -211,7 +211,7 @@ const TopSearchBar: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 							position="end"
 						>
 							<IconButton onClick={handleClearClick} edge="end">
-								<CloseIcon color={`${focus ? 'textSecondary' : 'primary'}`} />
+								<CloseIcon fill={`${focus ? 'textSecondary' : 'primary'}`} />
 							</IconButton>
 							<IconButton
 								className="search-button"
@@ -224,7 +224,7 @@ const TopSearchBar: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 								}}
 							>
 								<SearchIcon
-									color={`${displaySearchBar ? 'textSecondary' : 'white'}`}
+									fill={`${displaySearchBar ? 'textSecondary' : 'white'}`}
 								/>
 							</IconButton>
 						</InputAdornment>

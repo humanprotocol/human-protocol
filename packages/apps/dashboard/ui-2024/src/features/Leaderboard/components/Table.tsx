@@ -80,6 +80,11 @@ export const Table = ({
 		};
 	}, [handleVisibleTablePart, status]);
 
+	useEffect(() => {
+		handleVisibleTablePart();
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- ...
+	}, []);
+
 	return (
 		<MuiTable
 			sx={{
@@ -104,19 +109,31 @@ export const Table = ({
 				}}
 			>
 				{status === 'pending' ? (
-					<TableBodyWrapper width={`${visibleTablePartWidth}px`}>
+					<TableBodyWrapper
+						width={
+							visibleTablePartWidth ? `${visibleTablePartWidth}px` : undefined
+						}
+					>
 						<Loader height="30vh" />
 					</TableBodyWrapper>
 				) : null}
 
 				{status === 'error' ? (
-					<TableBodyWrapper width={`${visibleTablePartWidth}px`}>
+					<TableBodyWrapper
+						width={
+							visibleTablePartWidth ? `${visibleTablePartWidth}px` : undefined
+						}
+					>
 						{handleErrorMessage(error)}
 					</TableBodyWrapper>
 				) : null}
 
 				{tableIsEmpty ? (
-					<TableBodyWrapper width={`${visibleTablePartWidth}px`}>
+					<TableBodyWrapper
+						width={
+							visibleTablePartWidth ? `${visibleTablePartWidth}px` : undefined
+						}
+					>
 						No data
 					</TableBodyWrapper>
 				) : (

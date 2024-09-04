@@ -37,7 +37,7 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Token Current Price" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 						</div>
 						<HMTPrice />
@@ -50,7 +50,7 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Number of users holding HMT" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 						</div>
 						<Holders />
@@ -72,7 +72,7 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Total number of transactions" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 						</div>
 						<TotalTransactions />
@@ -85,7 +85,7 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Number of tasks that have been launched" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon fill="sky" />
 							</Tooltip>
 						</div>
 						<TotalNumberOfTasks />

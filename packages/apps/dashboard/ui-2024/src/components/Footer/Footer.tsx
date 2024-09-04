@@ -44,7 +44,7 @@ const Footer: FC = () => {
 				</div>
 				<div className="footer-icon">
 					<GitHubIcon
-						color="sky"
+						fill="sky"
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<DiscordIcon
@@ -52,15 +52,15 @@ const Footer: FC = () => {
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<TwitterIcon
-						color="sky"
+						fill="sky"
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<TelegramIcon
-						color="sky"
+						fill="sky"
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<LinkedInIcon
-						color="sky"
+						fill="sky"
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 				</div>
