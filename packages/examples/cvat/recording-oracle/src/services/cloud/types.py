@@ -173,15 +173,15 @@ class BucketAccessInfo:
 
     @classmethod
     def parse_obj(
-        cls, data: Union[str, Type[IStorageConfig], manifest.BucketUrl, pydantic.AnyUrl]
+        cls, data: str | type[IStorageConfig] | manifest.BucketUrl | pydantic.AnyUrl
     ) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)
         if isinstance(data, str):
             return cls.from_url(data)
-        elif isinstance(data, pydantic.AnyUrl):
+        if isinstance(data, pydantic.AnyUrl):
             return cls.from_url(str(data))
-        elif isclass(data) and issubclass(data, IStorageConfig):
+        if isclass(data) and issubclass(data, IStorageConfig):
             return cls.from_storage_config(data)
 
         raise TypeError(f"Unsupported data type ({type(data)}) was provided")
