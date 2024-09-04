@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Grid from '@mui/material/Grid';
 import { useEffect } from 'react';
+import { t } from 'i18next';
 import { UserStatsDetails } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-details';
 import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
@@ -42,7 +43,9 @@ export function UserStatsAccordion() {
           id="panel1-header"
           sx={{ ...accordionWidth, height: '76px' }}
         >
-          <Typography variant="subtitle2">hCapcha Statistics</Typography>
+          <Typography variant="subtitle2">
+            {t('worker.hcaptchaLabelingStats.statistics')}
+          </Typography>
         </AccordionSummary>
         {hcaptchaUserStats ? (
           <AccordionDetails sx={{ ...accordionWidth }}>

@@ -14,7 +14,11 @@ export function ProfileData() {
     <Grid container flexDirection="column" gap="2rem">
       <Grid>
         <Typography variant="subtitle2">{t('worker.profile.email')}</Typography>
-        <Typography color={colorPalette.text.primary} variant="subtitle1">
+        <Typography
+          color={colorPalette.text.primary}
+          sx={{ wordBreak: 'break-all' }}
+          variant="subtitle1"
+        >
           {user.email}
         </Typography>
       </Grid>

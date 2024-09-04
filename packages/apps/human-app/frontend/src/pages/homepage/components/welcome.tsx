@@ -9,9 +9,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
 import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
+import type { HomePageStageType } from '@/pages/homepage/home.page';
 
 interface WelcomeProps {
   setStage: (step: HomePageStageType) => void;

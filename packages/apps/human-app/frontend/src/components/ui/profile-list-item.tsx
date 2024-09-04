@@ -52,6 +52,7 @@ export function ProfileListItem({
                   : colorPalette.text.primary
               }
               component="span"
+              sx={{ wordBreak: 'break-all' }}
               variant="body1"
             >
               {paragraph}

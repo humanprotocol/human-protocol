@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/components/ui/page-card';
+import type { HomePageStageType } from '@/pages/homepage/home.page';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
@@ -15,6 +15,7 @@ interface ChooseSignUpAccountType {
 export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
+  const isMobileMd = useIsMobile('md');
 
   const backToWelcomeStage = () => {
     setStage('welcome');
@@ -24,10 +25,11 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
     <PageCard
       backArrowPath={backToWelcomeStage}
       cancelRouterPathOrCallback={backToWelcomeStage}
-      childrenMaxWidth="876px"
+      childrenMaxWidth="100%"
+      hiddenCancelButton={!isMobileMd}
       title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >
-      <Grid container spacing={4} width="100%">
+      <Grid container spacing={4}>
         <Grid item xs={12}>
           <Typography variant="h4">{t('homepage.howWillUse')}</Typography>
         </Grid>
@@ -51,35 +53,37 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
               justifyContent: 'space-between',
             }}
           >
-            <Typography color={colorPalette.primary.light} variant="h6">
-              {t('homepage.iWantToEarn')}
-            </Typography>
-            <List
-              sx={{
-                listStyleType: 'disc',
-                listStylePosition: 'inside',
-                paddingLeft: '0.5rem',
-              }}
-            >
-              <ListItemText
-                primary={t('homepage.completeTask')}
-                primaryTypographyProps={{
-                  variant: 'subtitle2',
-                  sx: {
-                    display: 'list-item',
-                  },
+            <div>
+              <Typography color={colorPalette.primary.light} variant="h6">
+                {t('homepage.iWantToEarn')}
+              </Typography>
+              <List
+                sx={{
+                  listStyleType: 'disc',
+                  listStylePosition: 'inside',
+                  paddingLeft: '0.5rem',
                 }}
-              />
-              <ListItemText
-                primary={t('homepage.workAnywhere')}
-                primaryTypographyProps={{
-                  variant: 'subtitle2',
-                  sx: {
-                    display: 'list-item',
-                  },
-                }}
-              />
-            </List>
+              >
+                <ListItemText
+                  primary={t('homepage.completeTask')}
+                  primaryTypographyProps={{
+                    variant: 'subtitle2',
+                    sx: {
+                      display: 'list-item',
+                    },
+                  }}
+                />
+                <ListItemText
+                  primary={t('homepage.workAnywhere')}
+                  primaryTypographyProps={{
+                    variant: 'subtitle2',
+                    sx: {
+                      display: 'list-item',
+                    },
+                  }}
+                />
+              </List>
+            </div>
             <Grid
               sx={{
                 display: 'flex',
@@ -105,38 +109,43 @@ export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
           item
           sx={{
             paddingTop: '44px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
           }}
           xs={isMobile ? 12 : 6}
         >
-          <Typography color={colorPalette.primary.light} variant="h6">
-            {t('homepage.joinAsOperator')}
-          </Typography>
-          <List
-            sx={{
-              listStyleType: 'disc',
-              listStylePosition: 'inside',
-              paddingLeft: '0.5rem',
-            }}
-          >
-            <ListItemText
-              primary={t('homepage.runAsOracle')}
-              primaryTypographyProps={{
-                variant: 'subtitle2',
-                sx: {
-                  display: 'list-item',
-                },
+          <div>
+            <Typography color={colorPalette.primary.light} variant="h6">
+              {t('homepage.joinAsOperator')}
+            </Typography>
+            <List
+              sx={{
+                listStyleType: 'disc',
+                listStylePosition: 'inside',
+                paddingLeft: '0.5rem',
               }}
-            />
-            <ListItemText
-              primary={t('homepage.becomePartner')}
-              primaryTypographyProps={{
-                variant: 'subtitle2',
-                sx: {
-                  display: 'list-item',
-                },
-              }}
-            />
-          </List>
+            >
+              <ListItemText
+                primary={t('homepage.runAsOracle')}
+                primaryTypographyProps={{
+                  variant: 'subtitle2',
+                  sx: {
+                    display: 'list-item',
+                  },
+                }}
+              />
+              <ListItemText
+                primary={t('homepage.becomePartner')}
+                primaryTypographyProps={{
+                  variant: 'subtitle2',
+                  sx: {
+                    display: 'list-item',
+                  },
+                }}
+              />
+            </List>
+          </div>
           <Grid
             sx={{
               display: 'flex',

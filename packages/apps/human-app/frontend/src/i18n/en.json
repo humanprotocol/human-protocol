@@ -9,7 +9,7 @@
   "protectedPagesHeaders": {
     "profile": "Profile",
     "jobsDiscovery": "Jobs Discovery",
-    "hcaptchaLabeling": "hCaptcha Labeling",
+    "hcaptchaLabeling": "Labeling",
     "jobs": "Jobs"
   },
   "web3ProtectedPagesHeaders": {
@@ -49,7 +49,7 @@
     },
     "DrawerNavigation": {
       "jobs": "Jobs",
-      "captchaLabelling": "hCaptcha labelling",
+      "captchaLabelling": "Labeling",
       "jobsDiscovery": "Jobs discovery",
       "profile": "Profile",
       "help": "Help",
@@ -79,7 +79,7 @@
     },
     "pageCardError": {
       "reload": "Reload",
-      "goHome": "Home page"
+      "goHome": "Home Page"
     }
   },
   "homepage": {
@@ -93,14 +93,14 @@
     "welcome": "Welcome",
     "howWillUse": "How will you use HUMAN App?",
     "selectOption": "Please select an option below.",
-    "iWantToEarn": "I want to earn HMT",
-    "completeTask": "Complete simple tasks and get paid.",
+    "iWantToEarn": "I want to complete tasks, and earn HMT",
+    "completeTask": "Complete multiple task types, and get paid.",
     "workAnywhere": "Work anywhere, any time.",
-    "signUpToComplete": "Sign Up to Complete Tasks",
-    "joinAsOperator": "I want to join as an Operator",
-    "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
-    "becomePartner": "Become a HUMAN App partner.",
-    "signAsOperator": "Sign Up as an Operator",
+    "signUpToComplete": "Worker Sign Up",
+    "joinAsOperator": "I want to join as an operator",
+    "runAsOracle": "Run an oracle, or other essential service, and earn fees.",
+    "becomePartner": "Become a HUMAN App operator.",
+    "signAsOperator": "Operator Sign Up",
     "termsAndConditions": "Terms & conditions",
     "cancel": "Cancel"
   },
@@ -162,7 +162,7 @@
       "paragraph1": "We've sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
-      "btn": "Resend Reset Password Email",
+      "btn": "Resend Email",
       "btnAfterSend": "Resend Email",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
@@ -198,7 +198,7 @@
       "emailNotifications": "Email Notifications",
       "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
-        "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
+        "noKYC": "Please set up your profile by completing the steps below.",
         "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
         "registerAddress": "Register Address"
       }
@@ -263,11 +263,11 @@
       "noJobs": "No jobs available at the moment. Please come back in:"
     },
     "enableHCaptchaLabeling": {
-      "description": "To earn HMT, you must enable data-labeling. Rewards will be automatically sent to your wallet according to a predefined schedule.",
-      "enableButton": "Enable Labeling"
+      "description": "CAPTCHA tasks involve the correct labeling of images in a group of images. Read the instructional prompt, and select the images that best correspond to that prompt.",
+      "enableButton": "Begin Labeling"
     },
     "hcaptchaLabelingStats": {
-      "hCapchaStatistics": "hCapcha Statistics",
+      "hCapchaStatistics": "Statistics",
       "statistics": "Statistics",
       "allTime": "All Time",
       "jobsServed": "Jobs served",

@@ -54,7 +54,7 @@ export function WorkerProfilePage() {
         backgroundColor: colorPalette.white,
         height: '100%',
         boxShadow: 'none',
-        padding: isMobile ? '20px' : '40px',
+        padding: isMobile ? '60px 20px' : '100px 40px',
         display: 'flex',
         flexDirection: 'column',
         borderRadius: '20px',
