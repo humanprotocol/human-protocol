@@ -43,7 +43,7 @@ class PostgresConfig:
 
 class RedisConfig:
     port = os.environ.get("REDIS_PORT", "6379")
-    host = os.environ.get("REDIS_HOST", "0.0.0.0")
+    host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
 
     @classmethod
     def connection_url(cls) -> str:

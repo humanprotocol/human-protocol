@@ -57,7 +57,7 @@ def process_incoming_recording_oracle_webhooks():
         logger.debug("Finishing cron job")
 
 
-def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logger: logging.Logger):
+def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logger: logging.Logger):  # noqa: PLR0912
     assert webhook.type == OracleWebhookTypes.recording_oracle
 
     match webhook.event_type:

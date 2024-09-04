@@ -218,7 +218,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         db_assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
 
-        self.assertEqual(db_assignment.status, AssignmentStatuses.rejected)
+        assert db_assignment.status == AssignmentStatuses.rejected
 
     def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_project_status(  # noqa: E501
         self,

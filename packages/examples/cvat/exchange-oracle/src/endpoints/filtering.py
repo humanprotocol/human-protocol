@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, ClassVar, Optional, Type, TypeVar, Union
+from typing import Annotated, Any, ClassVar, TypeVar
 
 import fastapi
 import fastapi.params
@@ -18,7 +18,11 @@ class OrderingDirection(str, Enum, metaclass=BetterEnumMeta):
     desc = "desc"
 
 
-T = TypeVar("T", bound=BaseModel)
+ModelT = TypeVar("ModelT", bound=BaseModel)
+
+T = TypeVar("T")
+
+OptionalQuery = Annotated[T | None, fastapi.Query()]
 
 
 class Filter(_Filter):
@@ -29,16 +33,16 @@ class Filter(_Filter):
         # The schema name changes, but it doesn't get parsed. In the validation errors
         # it also uses the class member name instead of alias.
         # Probably, it requires using "by_alias" in several places
-        sorting_direction_field_name: ClassVar[Optional[str]] = None
-        sorting_field_name: ClassVar[Optional[str]] = None
+        sorting_direction_field_name: ClassVar[str | None] = None
+        sorting_field_name: ClassVar[str | None] = None
 
-        selector_field_name: ClassVar[Optional[str]] = None
-        selectable_fields_enum_name: ClassVar[Optional[str]] = None
+        selector_field_name: ClassVar[str | None] = None
+        selectable_fields_enum_name: ClassVar[str | None] = None
 
     @classmethod
-    def _default_sorting_direction_param(cls) -> tuple[Type, FieldInfo]:
+    def _default_sorting_direction_param(cls) -> tuple[type, FieldInfo]:
         return (
-            Optional[OrderingDirection],
+            OrderingDirection | None,
             Field(
                 fastapi.Query(
                     default=OrderingDirection.asc,
@@ -62,8 +66,8 @@ class Filter(_Filter):
         return fields.items()
 
     def sort_(
-        self, query: Union[sqlalchemy.orm.Query, sqlalchemy.Select]
-    ) -> Union[sqlalchemy.orm.Query, sqlalchemy.Select]:
+        self, query: sqlalchemy.orm.Query | sqlalchemy.Select
+    ) -> sqlalchemy.orm.Query | sqlalchemy.Select:
         if self.Constants.sorting_field_name:
             direction_param_info = self._get_field_info(self.Constants.sorting_direction_field_name)
             order_by_param_info = self._get_field_info(self.Constants.sorting_field_name)
@@ -82,11 +86,11 @@ class Filter(_Filter):
         return query
 
     def filter_(
-        self, query: Union[sqlalchemy.orm.Query, sqlalchemy.Select]
-    ) -> Union[sqlalchemy.orm.Query, sqlalchemy.Select]:
+        self, query: sqlalchemy.orm.Query | sqlalchemy.Select
+    ) -> sqlalchemy.orm.Query | sqlalchemy.Select:
         return super().filter(query)
 
-    def select_fields_(self, value: T) -> dict[str, Any]:
+    def select_fields_(self, value: ModelT) -> dict[str, Any]:
         if not self.Constants.selector_field_name:
             return value
 
@@ -109,15 +113,14 @@ class Filter(_Filter):
         return _get_instance_field_info(self, field_name)
 
     @property
-    def _selectable_fields(self) -> Optional[list[str]]:
+    def _selectable_fields(self) -> list[str] | None:
         if not self.Constants.selectable_fields_enum_name:
             return None
 
-        selectable_fields_enum: Type[Enum] = getattr(
+        selectable_fields_enum: type[Enum] = getattr(
             self, self.Constants.selectable_fields_enum_name
         )
-        selectable_fields = list(selectable_fields_enum.__members__)
-        return selectable_fields
+        return list(selectable_fields_enum.__members__)
 
     @field_validator("*", mode="before")
     def split_selectable_fields(cls, value, field: ValidationInfo):
@@ -132,7 +135,7 @@ def _get_instance_field_info(instance: BaseModel, field_name: str) -> FieldInfo:
     return _get_field_info(instance.__class__, field_name)
 
 
-def _get_field_info(klass: Type[BaseModel], field_name: str):
+def _get_field_info(klass: type[BaseModel], field_name: str):
     return klass.model_fields[field_name]
 
 

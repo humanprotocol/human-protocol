@@ -85,12 +85,9 @@ def get_project_by_escrow_address(
     escrow_address: str,
     *,
     for_update: bool | ForUpdateParams = False,
-    status_in: Optional[List[ProjectStatuses]] = None,
+    status_in: list[ProjectStatuses] | None = None,
 ) -> Project | None:
-    if status_in:
-        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
-    else:
-        status_filter_arg = []
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
         .where(Project.escrow_address == escrow_address, *status_filter_arg)

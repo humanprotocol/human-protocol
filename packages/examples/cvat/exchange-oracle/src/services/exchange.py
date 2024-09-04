@@ -13,9 +13,7 @@ class UserHasUnfinishedAssignmentError(Exception):
     pass
 
 
-def create_assignment(
-    escrow_address: str, chain_id: Networks, wallet_address: str
-) -> str | None:
+def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: str) -> str | None:  # noqa: ARG001 (don't we want to use chain_id for filter?)
     with SessionLocal.begin() as session:
         user = get_or_404(
             cvat_service.get_user_by_id(session, wallet_address, for_update=True),
@@ -91,15 +89,15 @@ async def resign_assignment(assignment_id: int, wallet_address: str) -> None:
         # TODO: maybe optimize to a single DB request
 
         if assignment.is_finished:
-            raise NoAccessError()  # TODO: maybe can be ignored
+            raise NoAccessError  # TODO: maybe can be ignored
 
         if assignment.user_wallet_address != wallet_address:
-            raise NoAccessError()
+            raise NoAccessError
 
         last_job_assignment = cvat_service.get_latest_assignment_by_cvat_job_id(
             session, assignment.cvat_job_id, for_update=True
         )
         if assignment.id != last_job_assignment.id:
-            raise NoAccessError()
+            raise NoAccessError
 
         cvat_service.cancel_assignment(session, assignment_id)
