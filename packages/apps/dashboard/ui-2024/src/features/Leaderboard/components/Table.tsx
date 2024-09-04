@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import MuiTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -34,6 +34,7 @@ export const Table = ({
 	error: unknown;
 }) => {
 	const { mobile } = useBreakPoints();
+	const [visibleTablePartWidth, setVisibleTablePartWidth] = useState(0);
 
 	const {
 		filterParams: { chainId },
@@ -62,6 +63,23 @@ export const Table = ({
 	const tableIsEmpty = status === 'success' && visibleRows.length === 0;
 	const tableMinHeight = status === 'success' && !tableIsEmpty ? 'unset' : 400;
 
+	const handleVisibleTablePart = useCallback(() => {
+		const width = document.querySelector(
+			'.simplebar-scrollable-x'
+		)?.clientWidth;
+		if (width) {
+			setVisibleTablePartWidth(width);
+		}
+	}, []);
+
+	useEffect(() => {
+		handleVisibleTablePart();
+		window.addEventListener('resize', handleVisibleTablePart);
+		return () => {
+			window.removeEventListener('resize', handleVisibleTablePart);
+		};
+	}, [handleVisibleTablePart, status]);
+
 	return (
 		<MuiTable
 			sx={{
@@ -86,17 +104,21 @@ export const Table = ({
 				}}
 			>
 				{status === 'pending' ? (
-					<TableBodyWrapper>
+					<TableBodyWrapper width={`${visibleTablePartWidth}px`}>
 						<Loader height="30vh" />
 					</TableBodyWrapper>
 				) : null}
 
 				{status === 'error' ? (
-					<TableBodyWrapper>{handleErrorMessage(error)}</TableBodyWrapper>
+					<TableBodyWrapper width={`${visibleTablePartWidth}px`}>
+						{handleErrorMessage(error)}
+					</TableBodyWrapper>
 				) : null}
 
 				{tableIsEmpty ? (
-					<TableBodyWrapper>No data</TableBodyWrapper>
+					<TableBodyWrapper width={`${visibleTablePartWidth}px`}>
+						No data
+					</TableBodyWrapper>
 				) : (
 					<>
 						{visibleRows.map((row, index) => (
@@ -118,6 +140,7 @@ export const Table = ({
 								)}
 								<TableCell
 									sx={{
+										justifyContent: 'flex-start',
 										[mobile.mediaQuery]: {
 											position: 'sticky',
 											left: 0,
@@ -159,7 +182,7 @@ export const Table = ({
 										)}
 									</Grid>
 								</TableCell>
-								<TableCell>
+								<TableCell sx={{ justifyContent: 'flex-start' }}>
 									<Grid
 										container
 										wrap="nowrap"
@@ -172,7 +195,7 @@ export const Table = ({
 										/>
 									</Grid>
 								</TableCell>
-								<TableCell>
+								<TableCell sx={{ justifyContent: 'flex-start' }}>
 									<Typography variant="body1">
 										{row.amountStaked} HMT
 									</Typography>
@@ -184,7 +207,7 @@ export const Table = ({
 											container
 											wrap="nowrap"
 											alignItems="center"
-											justifyContent="center"
+											justifyContent="flex-start"
 											gap="6px"
 										>
 											<NetworkIcon chainId={row.chainId} />
@@ -192,7 +215,7 @@ export const Table = ({
 										</Grid>
 									</Typography>
 								</TableCell>
-								<TableCell>
+								<TableCell sx={{ justifyContent: 'flex-start' }}>
 									<ReputationLabel reputation={row.reputation} />
 								</TableCell>
 								<TableCell>{row.fee}%</TableCell>
@@ -205,7 +228,13 @@ export const Table = ({
 	);
 };
 
-function TableBodyWrapper({ children }: { children: JSX.Element | string }) {
+function TableBodyWrapper({
+	children,
+	width = '100%',
+}: {
+	children: JSX.Element | string;
+	width?: string;
+}) {
 	return (
 		<Stack
 			component="tr"
@@ -213,7 +242,7 @@ function TableBodyWrapper({ children }: { children: JSX.Element | string }) {
 				position: 'absolute',
 				top: 0,
 				left: 0,
-				width: '100%',
+				width,
 				height: '100%',
 				display: 'flex',
 				justifyContent: 'center',

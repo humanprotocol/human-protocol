@@ -7,12 +7,6 @@ const envSchema = z.object({
 	VITE_NAVBAR_LINK_HUMAN_WEBSITE: z.string(),
 	VITE_NAVBAR_LINK_LAUNCH_JOBS: z.string(),
 	VITE_NAVBAR_LINK_WORK_AND_EARN: z.string(),
-	VITE_BITFINEX_LINK: z.string().optional(),
-	VITE_PROBITGLOBAL_LINK: z.string().optional(),
-	VITE_GATEIO_LINK: z.string().optional(),
-	VITE_BINGX_LINK: z.string().optional(),
-	VITE_COINLISTPRO_LINK: z.string().optional(),
-	VITE_LBANK_LINK: z.string().optional(),
 	VITE_HUMANPROTOCOL_CORE_ARCHITECTURE: z.string().optional(),
 });
 

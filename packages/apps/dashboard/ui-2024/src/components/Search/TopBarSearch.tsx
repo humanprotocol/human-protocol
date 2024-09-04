@@ -18,14 +18,9 @@ import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { NetworkIcon } from '@components/NetworkIcon';
 
-const Search: FC<{
-	className?: string;
-	displaySearchBar?: boolean;
-	borderColor?: string;
-}> = ({
+const TopSearchBar: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 	className,
 	displaySearchBar,
-	borderColor = colorPalette.secondary.main,
 }) => {
 	const { mobile } = useBreakPoints();
 	const { filterParams, setAddress, setChainId } = useWalletSearch();
@@ -113,7 +108,7 @@ const Search: FC<{
 						width: '100%',
 						height: '100%',
 						borderRadius: '10px',
-						border: `1px solid ${borderColor}`,
+						border: `1px solid ${colorPalette.skyOpacity}`,
 						backgroundColor: `${colorPalette.white}`,
 						fontSize: 'inherit',
 						'input::placeholder': {
@@ -136,7 +131,6 @@ const Search: FC<{
 								displayEmpty
 								sx={{
 									backgroundColor: `${colorPalette.white}`,
-									width: '220px',
 									fontSize: '16px',
 									boxShadow: 'none',
 									outline: 'none',
@@ -241,4 +235,4 @@ const Search: FC<{
 	);
 };
 
-export default Search;
+export default TopSearchBar;

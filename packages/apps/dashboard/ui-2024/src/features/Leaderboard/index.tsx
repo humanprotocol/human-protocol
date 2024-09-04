@@ -26,7 +26,12 @@ export const Leaderboard = ({
 	return (
 		<TableContainer
 			component={Paper}
-			sx={{ padding: '32px', marginTop: '30px' }}
+			sx={{
+				padding: '32px',
+				marginTop: '30px',
+				borderRadius: '16px',
+				boxShadow: 'none',
+			}}
 		>
 			<div className="mobile-select">
 				<SelectNetwork />

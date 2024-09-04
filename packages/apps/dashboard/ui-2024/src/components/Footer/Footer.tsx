@@ -5,7 +5,6 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import DiscordIcon from '@components/Icons/DiscordIcon';
-import { colorPalette } from '@assets/styles/color-palette';
 
 const Footer: FC = () => {
 	const handleClick = (url: string) => {
@@ -39,7 +38,7 @@ const Footer: FC = () => {
 							HUMAN Protocol
 						</Typography>
 					</div>
-					<Typography variant="subtitle1" color={colorPalette.secondary.main}>
+					<Typography variant="subtitle1" color="text.secondary">
 						© 2021 HPF. HUMAN Protocol® is a registered trademark
 					</Typography>
 				</div>

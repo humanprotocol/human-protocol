@@ -69,7 +69,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 					margin={{
 						top: 5,
 						right: 50,
-						left: 0,
+						left: 20,
 					}}
 				>
 					<defs>

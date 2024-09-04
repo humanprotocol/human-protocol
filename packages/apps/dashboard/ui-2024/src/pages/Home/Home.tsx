@@ -13,7 +13,6 @@ import { HMTPrice } from '@pages/Home/HMTPrice';
 import { TotalNumberOfTasks } from '@pages/Home/TotalNumberOfTasks';
 import { Holders } from '@pages/Home/Holders';
 import { TotalTransactions } from '@pages/Home/TotalTransactions';
-import { Links } from '@pages/Home/Links';
 import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
@@ -96,7 +95,6 @@ const Home: React.FC = () => {
 					<GraphSwiper />
 				</div>
 			</div>
-			<Links />
 			<ShadowIcon
 				className="home-page-leaderboard"
 				title="Leaderboard"

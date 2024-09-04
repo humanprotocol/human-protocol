@@ -5,7 +5,7 @@ export const colorPalette = {
 	skyOpacity: '#DADEF0CC',
 	primary: {
 		main: '#320a8d',
-		light: '#320a8d', 
+		light: '#320a8d',
 	},
 	secondary: {
 		main: '#6309ff',

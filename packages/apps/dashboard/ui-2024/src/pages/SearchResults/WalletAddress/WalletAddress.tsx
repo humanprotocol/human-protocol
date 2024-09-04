@@ -59,6 +59,8 @@ const WalletAddress = ({
 					paddingX: { xs: 2, md: 8 },
 					paddingY: { xs: 4, md: 6 },
 					marginBottom: 4,
+					borderRadius: '16px',
+					boxShadow: 'none',
 				}}
 			>
 				<Stack gap={4}>

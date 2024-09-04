@@ -6,7 +6,7 @@ export const XLayerIcon: FC<SvgIconProps> = (props) => {
 		<SvgIcon
 			{...props}
 			style={{
-				width: '20',
+				width: '24',
 			}}
 		>
 			<svg

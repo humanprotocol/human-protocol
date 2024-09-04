@@ -28,6 +28,8 @@ const EscrowAddress = ({
 			sx={{
 				paddingX: { xs: 2, md: 8 },
 				paddingY: { xs: 4, md: 6 },
+				borderRadius: '16px',
+				boxShadow: 'none',
 			}}
 		>
 			<Stack gap={4}>

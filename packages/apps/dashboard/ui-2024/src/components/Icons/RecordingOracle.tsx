@@ -22,7 +22,7 @@ export const RecordingOracle: FC<SvgIconProps> = (props) => {
 					height="52"
 					rx="10"
 					fill="#1406B2"
-					fill-opacity="0.04"
+					fillOpacity="0.04"
 				/>
 				<path
 					d="M32 36C33.1046 36 34 35.1046 34 34C34 32.8954 33.1046 32 32 32C30.8954 32 30 32.8954 30 34C30 35.1046 30.8954 36 32 36Z"

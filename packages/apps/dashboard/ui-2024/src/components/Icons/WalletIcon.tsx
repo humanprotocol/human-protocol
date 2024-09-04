@@ -25,15 +25,15 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 				</g>
 				<g filter="url(#filter1_d_1100_5433)">
 					<path
-						fill-rule="evenodd"
-						clip-rule="evenodd"
+						fillRule="evenodd"
+						clipRule="evenodd"
 						d="M65 69.9304C80.9778 69.9304 93.9304 56.9778 93.9304 41C93.9304 25.0222 80.9778 12.0696 65 12.0696C49.0222 12.0696 36.0696 25.0222 36.0696 41C36.0696 56.9778 49.0222 69.9304 65 69.9304ZM65 74C83.2254 74 98 59.2254 98 41C98 22.7746 83.2254 8 65 8C46.7746 8 32 22.7746 32 41C32 59.2254 46.7746 74 65 74Z"
 						fill="url(#paint1_linear_1100_5433)"
 					/>
 				</g>
 				<path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
+					fillRule="evenodd"
+					clipRule="evenodd"
 					d="M55.615 34.3625C55.8631 34.0318 56.2152 33.794 56.6147 33.6875L72.3849 29.4821C75.5591 28.6356 78.6732 31.0281 78.6732 34.3133L78.6732 34.4467C80.4627 35.208 81.7175 36.9824 81.7175 39.0498V39.8517C83.0931 40.4843 84.0481 41.8745 84.0481 43.4877V44.8097C84.0481 46.4229 83.0931 47.8131 81.7175 48.4457V50.0244C81.7175 52.7858 79.479 55.0244 76.7175 55.0244H57.9746C55.2132 55.0244 52.9746 52.7858 52.9746 50.0244V39.0498C52.9746 37.2385 53.9378 35.6522 55.3798 34.775C55.4382 34.6328 55.5162 34.4943 55.615 34.3625Z"
 					fill="url(#paint2_linear_1100_5433)"
 				/>
@@ -44,7 +44,7 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 					height="20.5514"
 					rx="4.4"
 					stroke="#320A8D"
-					stroke-width="1.2"
+					strokeWidth="1.2"
 				/>
 				<rect
 					x="69.1107"
@@ -54,13 +54,13 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 					rx="3.4"
 					fill="#DFE4F5"
 					stroke="#320A8D"
-					stroke-width="1.2"
+					strokeWidth="1.2"
 				/>
 				<circle cx="72.395" cy="41.4053" r="0.776836" fill="#320A8D" />
 				<mask id="path-7-inside-1_1100_5433" fill="white">
 					<path
-						fill-rule="evenodd"
-						clip-rule="evenodd"
+						fillRule="evenodd"
+						clipRule="evenodd"
 						d="M52.7297 29.8047C52.3302 29.9112 51.9781 30.149 51.7301 30.4797C51.323 31.0225 51.2697 31.6797 51.48 32.236C52.2396 31.7703 53.1333 31.5018 54.0896 31.5018H72.9796C73.5673 31.5018 74.1313 31.6032 74.6552 31.7895C74.7421 31.4202 74.7882 31.0343 74.7882 30.6364L74.7882 30.4305C74.7882 27.1453 71.6741 24.7528 68.4999 25.5993L52.7297 29.8047Z"
 					/>
 				</mask>
@@ -77,9 +77,9 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 						width="130"
 						height="130"
 						filterUnits="userSpaceOnUse"
-						color-interpolation-filters="sRGB"
+						colorInterpolationFilters="sRGB"
 					>
-						<feFlood flood-opacity="0" result="BackgroundImageFix" />
+						<feFlood floodOpacity="0" result="BackgroundImageFix" />
 						<feColorMatrix
 							in="SourceAlpha"
 							type="matrix"
@@ -112,9 +112,9 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 						width="130"
 						height="130"
 						filterUnits="userSpaceOnUse"
-						color-interpolation-filters="sRGB"
+						colorInterpolationFilters="sRGB"
 					>
-						<feFlood flood-opacity="0" result="BackgroundImageFix" />
+						<feFlood floodOpacity="0" result="BackgroundImageFix" />
 						<feColorMatrix
 							in="SourceAlpha"
 							type="matrix"
@@ -148,9 +148,9 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 						gradientUnits="userSpaceOnUse"
 						gradientTransform="translate(65 18.6895) rotate(90) scale(55.3105)"
 					>
-						<stop stop-color="#F0F0FF" />
-						<stop stop-color="#F1F1FD" />
-						<stop offset="0.703125" stop-color="white" />
+						<stop stopColor="#F0F0FF" />
+						<stop stopColor="#F1F1FD" />
+						<stop offset="0.703125" stopColor="white" />
 					</radialGradient>
 					<linearGradient
 						id="paint1_linear_1100_5433"
@@ -160,8 +160,8 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 						y2="52.1101"
 						gradientUnits="userSpaceOnUse"
 					>
-						<stop stop-color="#F7F8FD" />
-						<stop offset="1" stop-color="white" />
+						<stop stopColor="#F7F8FD" />
+						<stop offset="1" stopColor="white" />
 					</linearGradient>
 					<linearGradient
 						id="paint2_linear_1100_5433"
@@ -171,8 +171,8 @@ export const WalletIcon: FC<SvgIconProps> = (props) => {
 						y2="53.1421"
 						gradientUnits="userSpaceOnUse"
 					>
-						<stop stop-color="#244CB3" stop-opacity="0.2" />
-						<stop offset="1" stop-color="#B4C2E5" stop-opacity="0.07" />
+						<stop stopColor="#244CB3" stopOpacity="0.2" />
+						<stop offset="1" stopColor="#B4C2E5" stopOpacity="0.07" />
 					</linearGradient>
 				</defs>
 			</svg>
