@@ -141,6 +141,7 @@ ignore = [
 [tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
     "pydantic.validator",
+    "pydantic.field_validator"
 ]
 
 [tool.ruff.lint.pylint]
