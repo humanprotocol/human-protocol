@@ -31,7 +31,6 @@ import { CvatManifestDto } from '../../common/dto/manifest';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
 import { ControlledError } from '../../common/errors/controlled';
-import { ethers } from 'ethers';
 
 @Injectable()
 export class ReputationService {
@@ -331,20 +330,18 @@ export class ReputationService {
     chainId: ChainId,
     address: string,
   ): Promise<ReputationDto> {
-    const checksumAddress = ethers.getAddress(address);
-
     // https://github.com/humanprotocol/human-protocol/issues/1047
-    if (checksumAddress === this.web3Service.getOperatorAddress()) {
+    if (address === this.web3Service.getOperatorAddress()) {
       return {
         chainId,
-        address: checksumAddress,
+        address,
         reputation: ReputationLevel.HIGH,
       };
     }
 
     const reputationEntity =
       await this.reputationRepository.findOneByAddressAndChainId(
-        checksumAddress,
+        address,
         chainId,
       );
 
