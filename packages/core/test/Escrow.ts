@@ -128,65 +128,10 @@ describe('Escrow', function () {
     });
   });
 
-  describe('abort', () => {
-    describe('Validations', function () {
-      before(async () => {
-        await deployEscrow();
-        await setupEscrow();
-      });
-
-      it('Should revert when aborting with not trusted address', async function () {
-        await expect(
-          escrow.connect(externalAddress).abort()
-        ).to.be.revertedWith('Address calling not trusted');
-      });
-
-      it('Should revert when aborting from reputation oracle', async function () {
-        await expect(
-          escrow.connect(reputationOracle).abort()
-        ).to.be.revertedWith('Address calling not trusted');
-      });
-
-      it('Should revert when aborting from recording oracle', async function () {
-        await expect(
-          escrow.connect(recordingOracle).abort()
-        ).to.be.revertedWith('Address calling not trusted');
-      });
-    });
-
-    describe('Calling abort', function () {
-      beforeEach(async () => {
-        await deployEscrow();
-        await setupEscrow();
-      });
-
-      it('Should transfer tokens to owner if contract funded when abort is called', async function () {
-        const amount = 100;
-        await token.connect(owner).transfer(escrow.getAddress(), amount);
-
-        await escrow.connect(owner).abort();
-
-        expect(
-          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
-        ).to.equal('0', 'Escrow has not been properly aborted');
-      });
-
-      it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
-        const amount = 100;
-        await token.connect(owner).transfer(escrow.getAddress(), amount);
-
-        await escrow.connect(trustedHandlers[0]).abort();
-
-        expect(
-          (await token.connect(owner).balanceOf(escrow.getAddress())).toString()
-        ).to.equal('0', 'Escrow has not been properly aborted');
-      });
-    });
-  });
-
   describe('addTrustedHandlers', async () => {
     before(async () => {
       await deployEscrow();
+      await fundEscrow();
       await setupEscrow();
     });
 
@@ -199,7 +144,7 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it('Should revert when aborting from reputation oracle', async function () {
+      it('Should revert when adding trusted handlers from reputation oracle', async function () {
         await expect(
           escrow
             .connect(reputationOracle)
@@ -207,7 +152,7 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it('Should revert when aborting from recording oracle', async function () {
+      it('Should revert when adding trusted handlers from recording oracle', async function () {
         await expect(
           escrow
             .connect(recordingOracle)
@@ -279,6 +224,7 @@ describe('Escrow', function () {
     describe('Events', function () {
       before(async () => {
         await deployEscrow();
+        await fundEscrow();
         await setupEscrow();
       });
 
@@ -294,6 +240,7 @@ describe('Escrow', function () {
     describe('Store results', async function () {
       before(async () => {
         await deployEscrow();
+        await fundEscrow();
         await setupEscrow();
       });
 
@@ -416,6 +363,7 @@ describe('Escrow', function () {
     describe('Events', function () {
       before(async () => {
         await deployEscrow();
+        await fundEscrow();
       });
 
       it('Should emit an event on pending', async function () {
@@ -433,14 +381,16 @@ describe('Escrow', function () {
               MOCK_HASH
             )
         )
-          .to.emit(escrow, 'Pending')
+          .to.emit(escrow, 'PendingV2')
           .withArgs(
             MOCK_URL,
             MOCK_HASH,
             await reputationOracle.getAddress(),
             await recordingOracle.getAddress(),
             await exchangeOracle.getAddress()
-          );
+          )
+          .to.emit(escrow, 'Fund')
+          .withArgs(100);
       });
     });
 
@@ -664,8 +614,8 @@ describe('Escrow', function () {
             .connect(owner)
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
-          .to.emit(escrow, 'BulkTransfer')
-          .withArgs(anyValue, recepients, [7], true, MOCK_URL);
+          .to.emit(escrow, 'BulkTransferV2')
+          .withArgs(anyValue, recepients, [10], true, MOCK_URL);
       });
     });
 
@@ -749,6 +699,8 @@ describe('Escrow', function () {
         expect(
           (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
         ).to.equal('6');
+
+        expect((await escrow.remainingFunds()).toString()).to.equal('40');
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {

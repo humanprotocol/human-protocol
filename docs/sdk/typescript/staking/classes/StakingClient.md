@@ -92,7 +92,9 @@ const stakingClient = await StakingClient.build(provider);
 
 The Runner object to interact with the Ethereum network
 
-• **networkData**: `NetworkData`
+• **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
+
+The network information required to connect to the Staking contract
 
 #### Returns
 
@@ -104,7 +106,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
+[staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
 
 ## Properties
 
@@ -114,13 +116,13 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
+[staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
 
 ***
 
 ### networkData
 
-> **networkData**: `NetworkData`
+> **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
 #### Inherited from
 
@@ -128,7 +130,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -138,7 +140,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
+[staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
 
 ***
 
@@ -152,7 +154,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ***
 
@@ -162,7 +164,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
+[staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
 
 ***
 
@@ -172,7 +174,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
+[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
 
 ## Methods
 
@@ -223,7 +225,7 @@ await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amoun
 
 #### Defined in
 
-[staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
+[staking.ts:457](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L457)
 
 ***
 
@@ -268,7 +270,7 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
-[staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
+[staking.ts:202](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L202)
 
 ***
 
@@ -315,7 +317,7 @@ await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
 #### Defined in
 
-[staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
+[staking.ts:510](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L510)
 
 ***
 
@@ -361,13 +363,13 @@ await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f
 
 #### Defined in
 
-[staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
+[staking.ts:553](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L553)
 
 ***
 
 ### getAllocation()
 
-> **getAllocation**(`escrowAddress`): `Promise`\<`IAllocation`\>
+> **getAllocation**(`escrowAddress`): `Promise`\<[`IAllocation`](../../interfaces/interfaces/IAllocation.md)\>
 
 This function returns information about the allocation of the specified escrow.
 
@@ -379,7 +381,7 @@ Escrow address from which we want to get allocation information.
 
 #### Returns
 
-`Promise`\<`IAllocation`\>
+`Promise`\<[`IAllocation`](../../interfaces/interfaces/IAllocation.md)\>
 
 Returns allocation info if exists.
 
@@ -399,7 +401,7 @@ const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c
 
 #### Defined in
 
-[staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
+[staking.ts:590](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L590)
 
 ***
 
@@ -456,7 +458,7 @@ await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd
 
 #### Defined in
 
-[staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
+[staking.ts:386](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L386)
 
 ***
 
@@ -504,7 +506,7 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
-[staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
+[staking.ts:257](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L257)
 
 ***
 
@@ -551,7 +553,7 @@ await stakingClient.unstake(amount);
 
 #### Defined in
 
-[staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
+[staking.ts:302](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L302)
 
 ***
 
@@ -593,7 +595,7 @@ await stakingClient.withdraw();
 
 #### Defined in
 
-[staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
+[staking.ts:348](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L348)
 
 ***
 
@@ -625,4 +627,4 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/ed7a99848a28519be4e8ea091625a8561a5351a9/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)
+[staking.ts:144](https://github.com/humanprotocol/human-protocol/blob/4a3215384185ef582e4acd06a275b32ffdf0b6ea/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L144)

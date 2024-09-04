@@ -106,7 +106,7 @@ export class StakingClient extends BaseEthersClient {
    * **StakingClient constructor**
    *
    * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {NetworkData} network - The network information required to connect to the Staking contract
+   * @param {NetworkData} networkData - The network information required to connect to the Staking contract
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
@@ -136,7 +136,6 @@ export class StakingClient extends BaseEthersClient {
    * Creates an instance of StakingClient from a Runner.
    *
    * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    *
    * @returns {Promise<StakingClient>} - An instance of StakingClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer

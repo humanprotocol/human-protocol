@@ -63,7 +63,11 @@
       "./src/staking.ts",
       "./src/storage.ts",
       "./src/statistics.ts",
-      "./src/transaction.ts"
+      "./src/transaction.ts",
+      "./src/enums.ts",
+      "./src/graphql/types.ts",
+      "./src/interfaces.ts",
+      "./src/types.ts"
     ]
   }
 }
