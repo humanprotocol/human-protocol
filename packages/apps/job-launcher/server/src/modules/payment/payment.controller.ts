@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
 import {
+  CardConfirmDto,
   GetRateDto,
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
@@ -41,6 +42,59 @@ export class PaymentController {
     private readonly serverConfigService: ServerConfigService,
     private readonly rateService: RateService,
   ) {}
+
+  @ApiOperation({
+    summary: 'Assign a card to a user',
+    description: 'Endpoint to assign a card to an user.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment created successfully',
+    type: String,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @Post('/fiat/setup-card')
+  public async assignCard(@Request() req: RequestWithUser): Promise<string> {
+    return this.paymentService.createCustomerAndAssignCard(req.user);
+  }
+
+  @ApiOperation({
+    summary: 'Confirm a card',
+    description:
+      'Endpoint to confirm that a card was successfully assigned to an user.',
+  })
+  @ApiBody({ type: PaymentFiatConfirmDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Card confirmed successfully',
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  @Post('/fiat/confirm-card')
+  public async confirmSetupCard(
+    @Request() req: RequestWithUser,
+    @Body() data: CardConfirmDto,
+  ): Promise<boolean> {
+    return this.paymentService.confirmCard(req.user, data);
+  }
 
   @ApiOperation({
     summary: 'Create a fiat payment',

@@ -32,6 +32,7 @@ export enum ErrorWebhook {
   NotFound = 'Webhook not found',
   UrlNotFound = 'Webhook URL not found',
   NotCreated = 'Webhook has not been created',
+  InvalidEscrow = 'Invalid escrow data provided',
 }
 
 /**
@@ -89,7 +90,10 @@ export enum ErrorPayment {
   NotFound = 'Payment not found',
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
-  ClientSecretDoesNotExist = 'Payment intent was not created',
+  CardNotAssigned = 'Card not assigned',
+  CardAssigned = 'User already has a card assigned',
+  SetupNotFound = 'Setup not found',
+  ClientSecretDoesNotExist = 'Client secret does not exist',
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
   IncorrectAmount = 'Incorrect amount',

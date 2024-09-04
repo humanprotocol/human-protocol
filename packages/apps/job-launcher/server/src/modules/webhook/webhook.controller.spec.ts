@@ -19,6 +19,7 @@ import {
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { JobRepository } from '../job/job.repository';
 
 jest.mock('@human-protocol/sdk');
 
@@ -47,6 +48,10 @@ describe('WebhookController', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: JobRepository,
+          useValue: createMock<JobRepository>(),
         },
         {
           provide: ConfigService,
