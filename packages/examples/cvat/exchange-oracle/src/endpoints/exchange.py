@@ -1,6 +1,7 @@
+from collections.abc import Sequence
 from datetime import datetime
 from enum import auto
-from typing import List, Optional, Sequence
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import Field
@@ -14,7 +15,7 @@ from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
 from src.endpoints.authentication import AuthorizationData, AuthorizationParam
-from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
+from src.endpoints.filtering import Filter, FilterDepends, OptionalQuery, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.endpoints.throttling import RateLimiter
@@ -37,10 +38,8 @@ class JobsFilter(Filter):
     # Simply using Query is not enough to include parameter description in the OpenAPI schema
     # https://github.com/tiangolo/fastapi/issues/4700
     escrow_address: str | None = None
-    chain_id: Optional[int] = None
-    job_type: Optional[TaskTypes] = Field(
-        Query(default=None, json_schema_extra={"enum": list(TaskTypes.__members__.values())})
-    )
+    chain_id: int | None = None
+    job_type: OptionalQuery[TaskTypes] = None
 
     class SortingFields(StrEnum, metaclass=BetterEnumMeta):
         created_at = auto()
@@ -48,13 +47,8 @@ class JobsFilter(Filter):
         job_type = auto()
         reward_amount = auto()
 
-    sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
-    sort_field: Optional[SortingFields] = Field(
-        Query(
-            default=SortingFields.created_at,
-            json_schema_extra={"enum": list(SortingFields.__members__.values())},
-        )
-    )
+    sort: OptionalQuery[OrderingDirection] = OrderingDirection.asc
+    sort_field: OptionalQuery[SortingFields] = SortingFields.created_at
 
     class SelectableFields(StrEnum, metaclass=BetterEnumMeta):
         job_description = auto()
@@ -62,7 +56,7 @@ class JobsFilter(Filter):
         reward_token = auto()
         created_at = auto()
 
-    fields: List[SelectableFields] = Query(default_factory=list)
+    fields: Annotated[list[SelectableFields], Query(default_factory=list)]
 
     class Constants(Filter.Constants):
         model = cvat_service.Project
@@ -81,13 +75,11 @@ class JobsFilter(Filter):
     response_model_by_alias=True,  # required for pagination
 )
 async def list_jobs(
-    filter: JobsFilter = FilterDepends(JobsFilter),
-    created_after: Optional[datetime] = Query(default=None),
-    updated_after: Optional[datetime] = Query(default=None),
-    status: Optional[JobStatuses] = Query(
-        default=None, json_schema_extra={"enum": list(JobStatuses.__members__.values())}
-    ),
-    token: AuthorizationData = AuthorizationParam,
+    filter: Annotated[JobsFilter, FilterDepends(JobsFilter)],
+    token: Annotated[AuthorizationData, AuthorizationParam],
+    created_after: OptionalQuery[datetime] = None,
+    updated_after: OptionalQuery[datetime] = None,
+    status: OptionalQuery[JobStatuses] = None,
 ) -> Page[JobResponse]:
     wallet_address = token.wallet_address
 
@@ -158,7 +150,7 @@ async def list_jobs(
 
 
 @router.post("/register", description="Binds a CVAT user to a HUMAN App user")
-async def register(token: AuthorizationData = AuthorizationParam) -> UserResponse:
+async def register(token: Annotated[AuthorizationData, AuthorizationParam]) -> UserResponse:
     user_email = token.email
     user_wallet_address = token.wallet_address
 
@@ -185,10 +177,7 @@ async def register(token: AuthorizationData = AuthorizationParam) -> UserRespons
                     detail="User already exists",
                 )
 
-            if (
-                e.status == status.HTTP_400_BAD_REQUEST
-                and "Enter a valid email address." in e.body
-            ):
+            if e.status == status.HTTP_400_BAD_REQUEST and "Enter a valid email address." in e.body:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email address"
                 )
@@ -209,7 +198,7 @@ async def register(token: AuthorizationData = AuthorizationParam) -> UserRespons
 
 
 class AssignmentFilter(Filter):
-    id: Optional[str] = Field(Query(default=None, alias="assignment_id"))
+    id: str | None = Field(Query(default=None, alias="assignment_id"))
 
     class SortingFields(StrEnum, metaclass=BetterEnumMeta):
         chain_id = auto()
@@ -219,8 +208,8 @@ class AssignmentFilter(Filter):
         created_at = auto()
         expires_at = auto()
 
-    sort: Optional[OrderingDirection] = Filter._default_sorting_direction_param()[1]
-    sort_field: Optional[SortingFields] = Field(
+    sort: OrderingDirection | None = Filter._default_sorting_direction_param()[1]
+    sort_field: SortingFields | None = Field(
         Query(
             default=SortingFields.created_at,
             json_schema_extra={"enum": list(SortingFields.__members__.values())},
@@ -241,19 +230,14 @@ class AssignmentFilter(Filter):
     response_model_by_alias=True,  # required for pagination
 )
 async def list_assignments(
-    filter: AssignmentFilter = FilterDepends(AssignmentFilter),
-    created_after: Optional[datetime] = Query(default=None),
-    updated_after: Optional[datetime] = Query(default=None),
-    escrow_address: Optional[str] = Query(default=None),
-    chain_id: Optional[int] = Query(default=None),
-    job_type: Optional[TaskTypes] = Query(
-        default=None, json_schema_extra={"enum": list(TaskTypes.__members__.values())}
-    ),
-    status: Optional[AssignmentStatuses] = Query(
-        default=None,
-        json_schema_extra={"enum": list(AssignmentStatuses.__members__.values())},
-    ),
-    token: AuthorizationData = AuthorizationParam,
+    filter: Annotated[AssignmentFilter, FilterDepends(AssignmentFilter)],
+    token: Annotated[AuthorizationData, AuthorizationParam],
+    created_after: OptionalQuery[datetime],
+    updated_after: OptionalQuery[datetime],
+    escrow_address: OptionalQuery[str],
+    chain_id: OptionalQuery[int],
+    job_type: OptionalQuery[TaskTypes],
+    status: OptionalQuery[AssignmentStatuses],
 ) -> Page[AssignmentResponse]:
     query = select(cvat_service.Assignment)
 
@@ -357,7 +341,7 @@ async def list_assignments(
     description="Start an assignment within the task for the annotator",
 )
 async def create_assignment(
-    data: AssignmentRequest, token: AuthorizationData = AuthorizationParam
+    data: AssignmentRequest, token: Annotated[AuthorizationData, AuthorizationParam]
 ) -> AssignmentResponse:
     try:
         assignment_id = oracle_service.create_assignment(
@@ -382,16 +366,18 @@ async def create_assignment(
     description="Allows to reject an assignment",
 )
 async def resign_assignment(
-    assignment_id: int, token: AuthorizationData = AuthorizationParam
+    assignment_id: int, token: Annotated[AuthorizationData, AuthorizationParam]
 ) -> None:
     try:
         await oracle_service.resign_assignment(assignment_id, wallet_address=token.wallet_address)
-    except oracle_service.NoAccessError as e:
+    except oracle_service.NoAccessError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 
 @router.get("/stats/assignment", description="Get oracle statistics for the user")
-async def get_user_stats(token: AuthorizationData = AuthorizationParam) -> UserStatsResponse:
+async def get_user_stats(
+    token: Annotated[AuthorizationData, AuthorizationParam],
+) -> UserStatsResponse:
     wallet_address = token.wallet_address
 
     with SessionLocal.begin() as session:

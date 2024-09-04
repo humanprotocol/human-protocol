@@ -4,7 +4,6 @@ import json
 from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum, auto
 from inspect import isclass
-from typing import Type, Union
 from urllib.parse import urlparse
 
 import pydantic
@@ -176,7 +175,7 @@ class BucketAccessInfo:
 
     @classmethod
     def parse_obj(
-        cls, data: Union[str, Type[StorageConfig], manifest.BucketUrl, pydantic.AnyUrl]
+        cls, data: str | type[StorageConfig] | manifest.BucketUrl | pydantic.AnyUrl
     ) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)

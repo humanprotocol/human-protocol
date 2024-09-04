@@ -60,7 +60,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert isinstance(data.job_time_limit, int)
         assert isinstance(data.job_size, int)
         assert data.job_type == cvat_project.job_type
-        assert data.platform == PlatformTypes.CVAT
+        assert data.platform == PlatformTypes.CVAT  # noqa: F821
         assert data.status == cvat_project.status
         assert data.assignment is None
         assert isinstance(data, service_api.JobResponse)
@@ -107,7 +107,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert isinstance(data.job_time_limit, int)
         assert isinstance(data.job_size, int)
         assert data.job_type == cvat_project.job_type
-        assert data.platform == PlatformTypes.CVAT
+        assert data.platform == PlatformTypes.CVAT  # noqa: F821
         assert data.status == cvat_project.status
         assert data.assignment is not None
         assert isinstance(data.assignment.assignment_url, Url)

@@ -1,6 +1,7 @@
+from typing import Annotated
+
 import pydantic
 from fastapi import Depends, HTTPException, status
-from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel
@@ -18,7 +19,7 @@ class AuthorizationData(BaseModel):
 
 
 async def authenticate_token(
-    token: AuthorizationToken = Depends(AuthorizationDependency),
+    token: Annotated[AuthorizationToken, Depends(AuthorizationDependency)],
 ) -> AuthorizationData:
     # Can't use a custom pydantic model in Depends() (as a sub-dependancy),
     # and have fields correctly parsed as non-query params

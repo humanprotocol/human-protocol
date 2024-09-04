@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from src.core.types import Networks, TaskTypes
 from src.utils.enums import BetterEnumMeta, StrEnum
 
-DEFAULT_TOKEN = "HMT"
+DEFAULT_TOKEN = "HMT"  # noqa: S105 (it's  not a credential)
 
 
 class JobStatuses(StrEnum, metaclass=BetterEnumMeta):
@@ -21,10 +21,10 @@ class JobResponse(BaseModel):
     chain_id: int  # not Networks, as existing DB entries can be different from the current enum
     job_type: TaskTypes
     status: JobStatuses
-    job_description: Optional[str] = None
-    reward_amount: Optional[str] = None
-    reward_token: Optional[str] = DEFAULT_TOKEN
-    created_at: Optional[datetime] = None
+    job_description: str | None = None
+    reward_amount: str | None = None
+    reward_token: str | None = DEFAULT_TOKEN
+    created_at: datetime | None = None
     qualifications: list[str] = Field(default_factory=list)
 
 
@@ -52,10 +52,10 @@ class AssignmentResponse(BaseModel):
     escrow_address: str
     chain_id: int  # not Networks, as existing DB entries can be different from the current enum
     job_type: TaskTypes
-    url: Optional[str]
+    url: str | None
     status: AssignmentStatuses
-    reward_amount: Optional[str] = None
-    reward_token: Optional[str] = DEFAULT_TOKEN
+    reward_amount: str | None = None
+    reward_token: str | None = DEFAULT_TOKEN
     created_at: datetime
     updated_at: datetime
     expires_at: datetime

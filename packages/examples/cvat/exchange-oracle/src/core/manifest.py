@@ -81,7 +81,7 @@ class SkeletonLabelInfo(LabelInfoBase):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_type(cls, values):
+    def validate_type(cls, values: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(values, dict):
             raise NotImplementedError
 
@@ -140,7 +140,7 @@ class AnnotationInfo(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_label_type(cls, values):
+    def validate_label_type(cls, values: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(values, dict):
             raise NotImplementedError
 
@@ -179,7 +179,7 @@ class TaskManifest(BaseModel):
     job_bounty: Decimal = Field(ge=0)
     "Assignment bounty, a decimal value in HMT"
 
-    qualifications: List[str] = Field(default_factory=list)
+    qualifications: list[str] = Field(default_factory=list)
     "A list of annotator qualifications required for participation"
 
 

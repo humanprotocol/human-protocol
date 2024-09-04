@@ -14,10 +14,10 @@ from src.utils.assignments import compose_assignment_url, parse_manifest
 
 
 def serialize_job(
-    project: Union[str, cvat_service.Project],
+    project: str | cvat_service.Project,
     *,
-    manifest: Union[None, TaskManifest, Literal[False]] = None,
-    session: Optional[Session] = None,
+    manifest: None | TaskManifest | Literal[False] = None,
+    session: Session | None = None,
 ) -> service_api.JobResponse:
     with ExitStack() as es:
         if not session:
@@ -27,7 +27,10 @@ def serialize_job(
             project = cvat_service.get_project_by_id(session, project)
             assert project
         elif not isinstance(project, cvat_service.Project):
-            assert False
+            raise TypeError(
+                f"Project must be either project id "
+                f"or a cvat_service.Project instance, not {project!r}"
+            )
 
         if manifest is None:
             with suppress(StorageFileNotFoundError):
@@ -61,11 +64,11 @@ def serialize_job(
 
 
 def serialize_assignment(
-    assignment: Union[str, cvat_service.Assignment],
+    assignment: str | cvat_service.Assignment,
     *,
-    project: Union[None, str, cvat_service.Project] = None,
-    manifest: Union[None, TaskManifest, Literal[False]] = None,
-    session: Optional[Session] = None,
+    project: None | str | cvat_service.Project = None,
+    manifest: None | TaskManifest | Literal[False] = None,
+    session: Session | None = None,
 ) -> service_api.AssignmentResponse:
     with ExitStack() as es:
         if not session:
@@ -74,7 +77,10 @@ def serialize_assignment(
         if isinstance(assignment, str):
             assignment = cvat_service.get_assignments_by_id(session, [assignment])[0]
         elif not isinstance(assignment, cvat_service.Assignment):
-            assert False
+            raise TypeError(
+                f"Assignment must be either assignment id "
+                f"or a cvat_service.Project instance, not {assignment!r}"
+            )
 
         if project is None:
             project = assignment.job.project
@@ -82,7 +88,10 @@ def serialize_assignment(
             project = cvat_service.get_project_by_id(session, project)
             assert project
         elif not isinstance(project, cvat_service.Project):
-            assert False
+            raise TypeError(
+                f"Project must be either project id "
+                f"or a cvat_service.Project instance, not {project!r}"
+            )
 
         if manifest is None:
             with suppress(StorageFileNotFoundError):

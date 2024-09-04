@@ -15,7 +15,7 @@ class OracleWebhook(BaseModel):
 
     @field_validator("escrow_address")
     @classmethod
-    def validate_escrow_(cls, value):
+    def validate_escrow_(cls, value: str) -> str:
         return validate_address(value)
 
     model_config = ConfigDict(

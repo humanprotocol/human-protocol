@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Header, HTTPException, Request
 
 import src.services.webhook as oracle_db_service
@@ -12,7 +14,7 @@ router = APIRouter()
 async def receive_oracle_webhook(
     webhook: OracleWebhook,
     request: Request,
-    human_signature: str | None = Header(default=None),
+    human_signature: Annotated[str | None, Header()] = None,
 ) -> OracleWebhookResponse:
     try:
         sender_type = await validate_oracle_webhook_signature(request, human_signature, webhook)

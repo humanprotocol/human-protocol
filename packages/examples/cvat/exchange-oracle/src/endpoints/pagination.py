@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional, Sequence, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, TypeVar
 
 import fastapi_pagination.bases
 import fastapi_pagination.default
@@ -9,6 +9,9 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from pydantic import Field
 
 from src.core.config import Config
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class PaginationParams(fastapi_pagination.default.Params):
@@ -28,13 +31,13 @@ class Page(fastapi_pagination.default.Page[T]):
     __params_type__ = PaginationParams
 
     items: Sequence[T] = Field(alias="results", validation_alias="items")
-    total: Optional[fastapi_pagination.default.GreaterEqualZero] = Field(
+    total: fastapi_pagination.default.GreaterEqualZero | None = Field(
         alias="total_results", validation_alias="total"
     )
-    pages: Optional[fastapi_pagination.default.GreaterEqualZero] = Field(
+    pages: fastapi_pagination.default.GreaterEqualZero | None = Field(
         default=None, alias="total_pages", validation_alias="pages"
     )
-    size: Optional[fastapi_pagination.default.GreaterEqualOne] = Field(
+    size: fastapi_pagination.default.GreaterEqualOne | None = Field(
         alias="page_size", validation_alias="size"
     )
 
@@ -44,7 +47,7 @@ class Page(fastapi_pagination.default.Page[T]):
         items: Sequence[T],
         params: fastapi_pagination.bases.AbstractParams,
         *,
-        total: Optional[int] = None,
+        total: int | None = None,
         **kwargs: Any,
     ) -> Page[T]:
         assert isinstance(params, PaginationParams)

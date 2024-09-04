@@ -1,5 +1,6 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any
 
 import redis.asyncio as redis
 from fastapi import FastAPI
@@ -26,9 +27,8 @@ def add_throttling(app: FastAPI):
 
     @asynccontextmanager
     async def wrapped_lifespan(app: FastAPI) -> AsyncIterator[Any]:
-        async with lifespan(app):
-            async with original_lifespan_context(app) as maybe_state:
-                yield maybe_state
+        async with lifespan(app), original_lifespan_context(app) as maybe_state:
+            yield maybe_state
 
     router.lifespan_context = wrapped_lifespan
     return app
