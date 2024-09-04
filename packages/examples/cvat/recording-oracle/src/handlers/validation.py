@@ -20,7 +20,7 @@ from src.core.storage import (
 )
 from src.core.types import OracleWebhookTypes
 from src.core.validation_errors import TooFewGtError
-from src.core.validation_results import ValidationFailure, ValidationResult, ValidationSuccess
+from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.handlers.process_intermediate_results import (
     parse_annotation_metafile,
     process_intermediate_results,
@@ -216,7 +216,7 @@ class _TaskValidator:
                 ),
             )
         else:
-            assert False
+            raise TypeError(f"Unexpected validation result {type(validation_result)=}")
 
 
 def validate_results(
