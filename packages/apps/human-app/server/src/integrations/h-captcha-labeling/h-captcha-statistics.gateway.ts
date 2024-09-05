@@ -11,7 +11,6 @@ import { RequestDataType } from '../reputation-oracle/reputation-oracle.interfac
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
-  DateValue,
   UserStatsApiResponse,
   UserStatsResponse,
 } from '../../modules/h-captcha/model/user-stats.model';
@@ -74,21 +73,14 @@ export class HCaptchaStatisticsGateway {
       await this.handleRequestToHCaptchaLabelingApi<UserStatsApiResponse>(
         options,
       );
-    const dropoffLength = response.dropoff_data.length;
-    const earningsLength = response.earnings_data.length;
+
     return {
       balance: response.balance,
       served: response.served,
       solved: response.solved,
       verified: response.verified,
-      currentDateStats:
-        dropoffLength > 0
-          ? response.dropoff_data[dropoffLength - 1]
-          : ({} as DateValue),
-      currentEarningsStats:
-        earningsLength > 0
-          ? response.earnings_data[earningsLength - 1]
-          : ({} as DateValue),
+      currentDateStats: Object.values(response.dropoff_data).pop(),
+      currentEarningsStats: Object.values(response.earnings_data).pop()
     } as UserStatsResponse;
   }
 }
