@@ -10,7 +10,7 @@ from src.core.types import (
     AssignmentStatuses,
     ProjectStatuses,
 )
-from src.crons.state_trackers import track_assignments
+from src.crons.cvat.state_trackers import track_assignments
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Project, User
 
@@ -66,7 +66,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert db_assignments[0].status == AssignmentStatuses.created.value
         assert db_assignments[1].status == AssignmentStatuses.created.value
 
-        with patch("src.crons.state_trackers.cvat_api.update_job_assignee") as mock_cvat_api:
+        with patch("src.crons.cvat.state_trackers.cvat_api.update_job_assignee") as mock_cvat_api:
             track_assignments()
             mock_cvat_api.assert_called_once_with(assignment_2.cvat_job_id, assignee_id=None)
 
@@ -81,7 +81,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     @pytest.mark.xfail(
         strict=True,
         reason="""
-Fix src/crons/state_trackers.py
+Fix src.crons.cvat.state_trackers.py
 Where in `cvat_service.get_active_assignments()` return value will be empty
 because it actually looking for the expired assignments
 """,
@@ -138,7 +138,7 @@ because it actually looking for the expired assignments
         assert db_assignments[0].status == AssignmentStatuses.created.value
         assert db_assignments[1].status == AssignmentStatuses.created.value
 
-        with patch("src.crons.state_trackers.cvat_api.update_job_assignee") as mock_cvat_api:
+        with patch("src.crons.cvat.state_trackers.cvat_api.update_job_assignee") as mock_cvat_api:
             track_assignments()
             mock_cvat_api.assert_called_once_with(assignment_2.cvat_job_id, assignee_id=None)
 

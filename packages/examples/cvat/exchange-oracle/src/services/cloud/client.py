@@ -16,6 +16,9 @@ class StorageClient(metaclass=ABCMeta):
     def remove_file(self, key: str, *, bucket: str | None = None): ...
 
     @abstractmethod
+    def remove_files(self, prefix: str, *, bucket: str | None = None): ...
+
+    @abstractmethod
     def file_exists(self, key: str, *, bucket: str | None = None) -> bool: ...
 
     @abstractmethod

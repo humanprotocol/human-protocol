@@ -20,7 +20,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.crons.state_trackers import track_completed_escrows
+from src.crons.cvat.state_trackers import track_completed_escrows
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Image, Job, Project, Task, User
 from src.models.webhook import Webhook
