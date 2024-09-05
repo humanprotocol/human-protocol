@@ -4,14 +4,16 @@ import abbreviateValue from '@helpers/abbreviateValue';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { colorPalette } from '@assets/styles/color-palette';
-import { Link } from '@mui/material';
+import { Link, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 interface AbbreviateClipboardProps {
 	value: string;
 	link?: string;
 }
 const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
+	const [tooltipOpen, setTooltipOpen] = useState(false);
 	const navigate = useNavigate();
 	return (
 		<Stack direction="row" gap={1}>
@@ -37,17 +39,23 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
 			<IconButton
 				onClick={() => {
 					navigator.clipboard.writeText(value);
+					setTooltipOpen(true);
+					setTimeout(() => {
+						setTooltipOpen(false);
+					}, 1500);
 				}}
 				sx={{
 					p: 0,
 				}}
 			>
-				<ContentCopyIcon
-					fontSize="small"
-					sx={{
-						color: colorPalette.fog.main,
-					}}
-				/>
+				<Tooltip title="Copied!" arrow open={tooltipOpen}>
+					<ContentCopyIcon
+						fontSize="small"
+						sx={{
+							color: colorPalette.fog.main,
+						}}
+					/>
+				</Tooltip>
 			</IconButton>
 		</Stack>
 	);
