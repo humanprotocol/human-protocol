@@ -5,6 +5,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import DiscordIcon from '@components/Icons/DiscordIcon';
+import { colorPalette } from '@assets/styles/color-palette';
 
 const Footer: FC = () => {
 	const handleClick = (url: string) => {
@@ -44,23 +45,33 @@ const Footer: FC = () => {
 				</div>
 				<div className="footer-icon">
 					<GitHubIcon
-						fill="sky"
+						style={{
+							color: colorPalette.sky.main,
+						}}
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<DiscordIcon
-						color="sky"
+						style={{
+							color: colorPalette.sky.main,
+						}}
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<TwitterIcon
-						fill="sky"
+						style={{
+							color: colorPalette.sky.main,
+						}}
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<TelegramIcon
-						fill="sky"
+						style={{
+							color: colorPalette.sky.main,
+						}}
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 					<LinkedInIcon
-						fill="sky"
+						style={{
+							color: colorPalette.sky.main,
+						}}
 						onClick={() => handleClick('https://app.humanprotocol.org/')}
 					/>
 				</div>

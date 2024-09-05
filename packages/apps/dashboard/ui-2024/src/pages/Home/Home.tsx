@@ -15,6 +15,7 @@ import { Holders } from '@pages/Home/Holders';
 import { TotalTransactions } from '@pages/Home/TotalTransactions';
 import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { colorPalette } from '@assets/styles/color-palette';
 
 const Home: React.FC = () => {
 	const {
@@ -37,7 +38,11 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Token Current Price" arrow>
-								<HelpOutlineIcon fill="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
 						</div>
 						<HMTPrice />
@@ -50,7 +55,11 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Number of users holding HMT" arrow>
-								<HelpOutlineIcon fill="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
 						</div>
 						<Holders />
@@ -72,7 +81,11 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Total number of transactions" arrow>
-								<HelpOutlineIcon fill="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
 						</div>
 						<TotalTransactions />
@@ -85,7 +98,11 @@ const Home: React.FC = () => {
 					<div className="box-content">
 						<div className="box-icon">
 							<Tooltip title="Number of tasks that have been launched" arrow>
-								<HelpOutlineIcon fill="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
 						</div>
 						<TotalNumberOfTasks />

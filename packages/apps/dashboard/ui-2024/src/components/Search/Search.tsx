@@ -217,7 +217,13 @@ const Search: FC<{
 							position="end"
 						>
 							<IconButton onClick={handleClearClick} edge="end">
-								<CloseIcon fill={`${focus ? 'textSecondary' : 'primary'}`} />
+								<CloseIcon
+									style={{
+										color: focus
+											? colorPalette.textSecondary.main
+											: colorPalette.primary.main,
+									}}
+								/>
 							</IconButton>
 							<IconButton
 								className="search-button"
@@ -230,7 +236,11 @@ const Search: FC<{
 								}}
 							>
 								<SearchIcon
-									fill={`${displaySearchBar ? 'textSecondary' : 'white'}`}
+									style={{
+										color: displaySearchBar
+											? colorPalette.textSecondary.main
+											: colorPalette.white,
+									}}
 								/>
 							</IconButton>
 						</InputAdornment>

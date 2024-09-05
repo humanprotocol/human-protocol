@@ -107,12 +107,7 @@ const theme: ThemeOptions = createTheme({
 			dark: '#fff',
 			contrastText: '#fff',
 		},
-		textSecondary: {
-			main: '#858ec6',
-			light: '#858ec6',
-			dark: '#858ec6',
-			contrastText: '#858ec6',
-		},
+		textSecondary: colorPalette.textSecondary,
 	},
 	typography: {
 		fontFamily: 'Inter, Arial, sans-serif',
