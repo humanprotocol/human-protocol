@@ -6,6 +6,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import DiscordIcon from '@components/Icons/DiscordIcon';
 import { colorPalette } from '@assets/styles/color-palette';
+import { env } from '@helpers/env';
 
 const Footer: FC = () => {
 	const handleClick = (url: string) => {
@@ -48,31 +49,31 @@ const Footer: FC = () => {
 						style={{
 							color: colorPalette.sky.main,
 						}}
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_GITHUB)}
 					/>
 					<DiscordIcon
 						style={{
 							color: colorPalette.sky.main,
 						}}
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_DISCORD)}
 					/>
 					<TwitterIcon
 						style={{
 							color: colorPalette.sky.main,
 						}}
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_X)}
 					/>
 					<TelegramIcon
 						style={{
 							color: colorPalette.sky.main,
 						}}
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_TELEGRAM)}
 					/>
 					<LinkedInIcon
 						style={{
 							color: colorPalette.sky.main,
 						}}
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_LINKEDIN)}
 					/>
 				</div>
 			</div>

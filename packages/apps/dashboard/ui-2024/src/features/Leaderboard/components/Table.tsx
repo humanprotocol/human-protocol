@@ -24,6 +24,8 @@ import { handleErrorMessage } from '@services/handle-error-message';
 import Loader from '@components/Loader';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
+const ROWS_SPACING = '4px';
+
 export const Table = ({
 	data = [],
 	status,
@@ -90,7 +92,7 @@ export const Table = ({
 			sx={{
 				minWidth: 650,
 				minHeight: tableMinHeight,
-				borderCollapse: 'separate',
+				borderCollapse: 'collapse',
 				[`& .${tableCellClasses.root}`]: {
 					borderBottom: 'none',
 				},
@@ -144,14 +146,21 @@ export const Table = ({
 								className={'home-page-table-row'}
 								sx={{
 									paddingTop: '1px',
+									borderTop: `4px solid ${colorPalette.whiteBackground}`,
 									':hover': {
 										backgroundColor: colorPalette.overlay.light,
+									},
+									':first-child': {
+										borderTop: `15px solid ${colorPalette.whiteBackground}`,
+									},
+									':last-child': {
+										borderBottom: `15px solid ${colorPalette.whiteBackground}`,
 									},
 									textDecoration: 'none',
 								}}
 							>
 								{mobile.isMobile ? null : (
-									<TableCell>
+									<TableCell sx={{ marginTop: '5px' }}>
 										<Typography variant="body1">{index + 1}</Typography>
 									</TableCell>
 								)}
@@ -281,7 +290,7 @@ function getAfterElementProperties(
 			position: 'absolute',
 			bottom: '0',
 			right: '0',
-			height: '85%',
+			height: '100%',
 			width: '1px',
 		};
 	}
@@ -290,9 +299,9 @@ function getAfterElementProperties(
 		return {
 			content: '""',
 			position: 'absolute',
-			top: '0',
+			bottom: '0',
 			right: '0',
-			height: '85%',
+			height: `calc(100% + ${ROWS_SPACING})`,
 			width: '1px',
 		};
 	}
@@ -302,7 +311,7 @@ function getAfterElementProperties(
 		position: 'absolute',
 		bottom: '0',
 		right: '0',
-		height: '100%',
+		height: `calc(100% + ${ROWS_SPACING})`,
 		width: '1px',
 	};
 }
