@@ -99,10 +99,8 @@ export function ProfileActions() {
           <RegisterAddressBtn />
         </Grid>
       ) : null}
-      {kycApproved && !user.wallet_address && isWalletConnected ? (
-        <Grid>
-          <DoneLabel>{t('worker.profile.walletAddressMessage')}</DoneLabel>
-        </Grid>
+      {kycApproved && !user.wallet_address ? (
+        <Grid>{t('worker.profile.walletAddressMessage')}</Grid>
       ) : null}
       {/* <Grid>
         {kycApproved && user.wallet_address ? (
