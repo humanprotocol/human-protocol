@@ -20,7 +20,7 @@
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.0",
     "node-cache": "^5.1.2",
-    "web3": "^4.9.0"
+    "web3": "^4.12.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

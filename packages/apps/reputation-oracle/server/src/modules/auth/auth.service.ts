@@ -194,6 +194,11 @@ export class AuthService {
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       reputation_network: this.web3Service.getOperatorAddress(),
+      qualifications: userEntity.userQualifications
+        ? userEntity.userQualifications.map(
+            (userQualification) => userQualification.qualification.reference,
+          )
+        : [],
     };
 
     if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
