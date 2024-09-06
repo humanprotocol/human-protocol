@@ -20,17 +20,18 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
 } from '../../../components/Accordion';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { getQualifications } from '../../../services/qualification';
 import {
   AWSRegions,
   CvatJobType,
   GCSRegions,
-  StorageProviders,
   Label,
+  StorageProviders,
 } from '../../../types';
 import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
 
@@ -39,12 +40,16 @@ export const CvatJobRequestForm = () => {
     useCreateJobPageUI();
   const [searchParams] = useSearchParams();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
+  const [qualificationsOptions, setQualificationsOptions] = useState<string[]>(
+    [],
+  );
 
   const initialValues = {
     labels: [],
     nodes: [],
     type: CvatJobType.IMAGE_BOXES,
     description: '',
+    qualifications: [],
     userGuide: '',
     accuracyTarget: 80,
     dataProvider: StorageProviders.AWS,
@@ -61,6 +66,22 @@ export const CvatJobRequestForm = () => {
     gtPath: '',
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedQualifications = await getQualifications();
+        setQualificationsOptions(
+          fetchedQualifications.map((qualification) => qualification.reference),
+        );
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       if (newExpanded) {
@@ -75,6 +96,7 @@ export const CvatJobRequestForm = () => {
     nodes,
     type,
     description,
+    qualifications,
     dataProvider,
     dataRegion,
     dataBucketName,
@@ -120,6 +142,7 @@ export const CvatJobRequestForm = () => {
         labels: labelArray,
         type,
         description,
+        qualifications,
         data: {
           dataset: {
             provider: dataProvider,
@@ -348,6 +371,39 @@ export const CvatJobRequestForm = () => {
                     helperText={errors.description}
                     multiline
                     rows={4}
+                  />
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <Autocomplete
+                    multiple
+                    options={qualificationsOptions}
+                    getOptionLabel={(option) => option}
+                    value={values.qualifications}
+                    onChange={(event, newValues) => {
+                      setFieldValue('qualifications', newValues);
+                    }}
+                    selectOnFocus
+                    onBlur={handleBlur}
+                    handleHomeEndKeys
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => (
+                        <Chip label={option} {...getTagProps({ index })} />
+                      ))
+                    }
+                    renderInput={(params) => (
+                      <Box display="flex" alignItems="center" width="100%">
+                        <TextField
+                          {...params}
+                          label="Qualifications"
+                          variant="outlined"
+                          onBlur={handleBlur}
+                          fullWidth
+                        />
+                      </Box>
+                    )}
                   />
                 </FormControl>
               </Grid>
