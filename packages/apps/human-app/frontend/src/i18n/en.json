@@ -259,11 +259,11 @@
       "next": "Next"
     },
     "hcaptchaLabeling": {
-      "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",
       "noJobs": "No jobs available at the moment. Please come back in:"
     },
     "enableHCaptchaLabeling": {
-      "description": "CAPTCHA tasks involve the correct labeling of images in a group of images. Read the instructional prompt, and select the images that best correspond to that prompt.",
+      "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",
       "enableButton": "Begin Labeling"
     },
     "hcaptchaLabelingStats": {
@@ -274,7 +274,7 @@
       "jobsComplete": "Jobs complete",
       "hmtEarned": "HMT earned",
       "lastHour": "Last hour",
-      "earnedLastHour": "HMT earned in last hour",
+      "earnedLastHour": "HMT earned in the last hour",
       "statisticsNotLive": "Statistics are not live. Please refresh to view live statistics.",
       "solvedSuccess": "HCaptcha solved!"
     }
