@@ -14,7 +14,6 @@ import {
   UserStatsApiResponse,
   UserStatsCommand,
   UserStatsResponse,
-  DateValue,
 } from '../model/user-stats.model';
 import {
   EnableLabelingCommand,
@@ -39,11 +38,36 @@ const BALANCE = {
   total: 7,
 } as BalanceStats;
 export const JWT_TOKEN = 'jwt.token.1';
-const DROPOFF_DATA_1 = { date: '2021-01-01', value: 10 } as DateValue;
-const DROPOFF_DATA_2 = { date: '2021-01-02', value: 20 } as DateValue;
-const DROPOFF_DATA_3 = { date: '2021-01-03', value: 30 } as DateValue;
-const EARNINGS_DATA_1 = { date: '2021-01-04', value: 140 } as DateValue;
-const EARNINGS_DATA_2 = { date: '2021-01-22', value: 209 } as DateValue;
+export const DROPOFF_DATA_1 = {
+  "2024-07-02": {
+    billing_units: 68,
+    bypass: 0,
+    served: 68,
+    solved: 60,
+  },
+};
+export const DROPOFF_DATA_2 = {
+  "2024-07-03": {
+    billing_units: 35,
+    bypass: 0,
+    served: 35,
+    solved: 34,
+  },
+};
+export const DROPOFF_DATA_3 = {
+  "2024-07-04": {
+    billing_units: 45,
+    bypass: 0,
+    served: 45,
+    solved: 42,
+  },
+};
+const EARNINGS_DATA_1 = {
+  "2024-07-02": 0.2,
+};
+const EARNINGS_DATA_2 = {
+  "2024-07-03": 0.1,
+};
 const SUCCESSFULLY_ENABLED = 'Enabled labeling for this account successfully';
 export const jwtUserDataFixture: JwtUserData = {
   userId: ID,
@@ -119,15 +143,8 @@ export const errorMessagesFixture = {
   withUndefinedErrorCodes:
     'Failed to verify h-captcha token. "error-codes" array is undefined. Response data: {"success":false}',
 };
-export const dropoffDataFixture: DateValue[] = [
-  DROPOFF_DATA_1,
-  DROPOFF_DATA_2,
-  DROPOFF_DATA_3,
-];
-export const earningsDataFixture: DateValue[] = [
-  EARNINGS_DATA_1,
-  EARNINGS_DATA_2,
-];
+export const dropoffDataFixture = { ...DROPOFF_DATA_1, ...DROPOFF_DATA_2, ...DROPOFF_DATA_3};
+export const earningsDataFixture = { ...EARNINGS_DATA_1, ...EARNINGS_DATA_2};
 
 export const userStatsApiResponseFixture: UserStatsApiResponse = {
   solved: SOLVED,
@@ -143,8 +160,8 @@ export const userStatsResponseFixture: UserStatsResponse = {
   served: SERVED,
   verified: VERIFIED,
   balance: BALANCE,
-  currentDateStats: DROPOFF_DATA_3,
-  currentEarningsStats: EARNINGS_DATA_2,
+  currentDateStats: DROPOFF_DATA_3['2024-07-04'],
+  currentEarningsStats: EARNINGS_DATA_2['2024-07-03'],
 };
 
 export const userStatsCommandFixture: UserStatsCommand = {

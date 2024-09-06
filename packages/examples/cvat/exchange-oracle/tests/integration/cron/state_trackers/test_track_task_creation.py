@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import src.cvat.api_calls as cvat_api
 from src.core.types import ExchangeOracleEventTypes, JobStatuses
-from src.crons.state_trackers import track_task_creation
+from src.crons.cvat.state_trackers import track_task_creation
 from src.db import SessionLocal
 from src.models.cvat import DataUpload, Job
 from src.models.webhook import Webhook
@@ -31,7 +31,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with patch(
-            "src.crons.state_trackers.cvat_api.get_task_upload_status"
+            "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
         ) as mock_get_task_upload_status:
             mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FAILED, "Failed")
 
@@ -56,9 +56,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         new_cvat_job_id = 2
         with (
             patch(
-                "src.crons.state_trackers.cvat_api.get_task_upload_status"
+                "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
             ) as mock_get_task_upload_status,
-            patch("src.crons.state_trackers.cvat_api.fetch_task_jobs") as mock_fetch_task_jobs,
+            patch("src.crons.cvat.state_trackers.cvat_api.fetch_task_jobs") as mock_fetch_task_jobs,
         ):
             mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
             mock_cvat_job_1 = Mock()
@@ -93,10 +93,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             patch(
-                "src.crons.state_trackers.cvat_api.get_task_upload_status"
+                "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
             ) as mock_get_task_upload_status,
             patch(
-                "src.crons.state_trackers.cvat_api.fetch_task_jobs",
+                "src.crons.cvat.state_trackers.cvat_api.fetch_task_jobs",
                 side_effect=cvat_api.exceptions.ApiException("Error"),
             ),
         ):

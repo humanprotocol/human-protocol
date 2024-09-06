@@ -32,6 +32,20 @@ class GcsClient(StorageClient):
         bucket_client = self.client.get_bucket(bucket)
         bucket_client.delete_blob(unquote(key))
 
+    def remove_files(self, prefix: str, *, bucket: str | None = None):
+        import warnings
+
+        warnings.warn(
+            "Avoid usage of `GcsClient.remove_files`. See: "
+            "https://cloud.google.com/storage/docs/deleting-objects#delete-objects-in-bulk",
+            UserWarning,
+            stacklevel=2,
+        )
+        bucket = unquote(bucket) if bucket else self._bucket
+        bucket_client = self.client.get_bucket(bucket)
+        keys = self.list_files(prefix=prefix)
+        bucket_client.delete_blobs([unquote(key) for key in keys])
+
     def file_exists(self, key: str, *, bucket: str | None = None) -> bool:
         bucket = unquote(bucket) if bucket else self._bucket
         bucket_client = self.client.get_bucket(bucket)

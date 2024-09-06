@@ -10,6 +10,7 @@ from sqlalchemy.sql import select
 from src.core.config import Config
 from src.core.oracle_events import OracleEvent, validate_event
 from src.core.types import OracleWebhookStatuses, OracleWebhookTypes
+from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.webhook import Webhook
 from src.utils.enums import BetterEnumMeta
@@ -91,7 +92,7 @@ class OracleWebhookQueue:
         type: OracleWebhookTypes,
         *,
         limit: int = 10,
-        for_update: bool = False,
+        for_update: bool | ForUpdateParams = False,
     ) -> list[Webhook]:
         return (
             _maybe_for_update(session.query(Webhook), enable=for_update)

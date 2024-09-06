@@ -220,6 +220,7 @@ def update_project_statuses_by_escrow_address(
             Project.chain_id == chain_id,
         )
         .values(status=status.value)
+        .returning(Project.cvat_id)
     )
     session.execute(statement)
 
@@ -227,6 +228,15 @@ def update_project_statuses_by_escrow_address(
 def delete_project(session: Session, project_id: str) -> None:
     project = session.query(Project).filter_by(id=project_id).first()
     session.delete(project)
+
+
+def delete_projects(session: Session, escrow_address: str, chain_id: int) -> None:
+    session.execute(
+        delete(Project).where(
+            Project.escrow_address == escrow_address,
+            Project.chain_id == chain_id,
+        )
+    )
 
 
 def is_project_completed(session: Session, project_id: str) -> bool:
