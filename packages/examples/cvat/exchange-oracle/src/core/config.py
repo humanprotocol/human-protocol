@@ -51,13 +51,13 @@ class RedisConfig:
 
     @classmethod
     def connection_url(cls) -> str:
-        scheme = 'redis'
+        scheme = "redis"
         if cls.use_ssl:
-            scheme += 's'
+            scheme += "s"
 
-        auth_params = ''
+        auth_params = ""
         if cls.user or cls.password:
-            auth_params = f'{cls.user}:{cls.password}@'
+            auth_params = f"{cls.user}:{cls.password}@"
 
         return f"{scheme}://{auth_params}{cls.host}:{cls.port}/{cls.database}"
 

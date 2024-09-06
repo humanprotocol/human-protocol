@@ -1,10 +1,10 @@
-from typing import Annotated
+from typing import Annotated, TypeVar
 
 import pydantic
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, params, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from src.core.config import Config
 
@@ -12,30 +12,61 @@ from src.core.config import Config
 AuthorizationDependency = HTTPBearer(scheme_name="jwt_bearer")
 AuthorizationToken = HTTPAuthorizationCredentials
 
+HUMAN_APP_ROLE = "HUMAN_APP"
+
 
 class AuthorizationData(BaseModel):
     wallet_address: str
     email: str
 
 
-async def authenticate_token(
-    token: Annotated[AuthorizationToken, Depends(AuthorizationDependency)],
-) -> AuthorizationData:
-    # Can't use a custom pydantic model in Depends() (as a sub-dependancy),
-    # and have fields correctly parsed as non-query params
-    # Read more https://github.com/tiangolo/fastapi/issues/1474
-    # Without Depends schema works, but not validation.
-    # Thus, just use it as a separate function explicitly.
-
-    try:
-        payload = jwt.decode(token.credentials, Config.human_app_config.jwt_key)
-        return AuthorizationData.model_validate(payload)
-    except (JWTError, pydantic.ValidationError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from e
+AuthDataT = TypeVar("AuthDataT", bound=AuthorizationData)
 
 
-AuthorizationParam = Depends(authenticate_token)
+class JobListAuthorizationData(AuthorizationData):
+    wallet_address: str | None = None
+    email: str
+    role: str | None = None
+
+    @model_validator(mode="after")
+    def validate_optional_fields(self):
+        if not self.wallet_address and self.role != HUMAN_APP_ROLE:
+            raise ValueError(f"'wallet_address' cannot be empty when role is '{self.role}'")
+
+        return self
+
+
+class TokenAuthenticator:
+    def __init__(self, *, auth_data_class: AuthDataT = AuthorizationData) -> None:
+        self._auth_data_class = auth_data_class
+
+    async def authenticate_token(
+        self, token: Annotated[AuthorizationToken, Depends(AuthorizationDependency)]
+    ) -> AuthDataT:
+        # Can't use a custom pydantic model in Depends() (as a sub-dependancy),
+        # and have fields correctly parsed as non-query params
+        # Read more https://github.com/tiangolo/fastapi/issues/1474
+        # Without Depends schema works, but not validation.
+        # Thus, just use it as a separate function explicitly.
+
+        try:
+            payload = jwt.decode(token.credentials, Config.human_app_config.jwt_key)
+            return self.auth_data_class.model_validate(payload)
+        except (JWTError, pydantic.ValidationError) as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from e
+
+
+def make_auth_dependency(auth_data_class: AuthDataT | None = None) -> params.Depends:
+    if auth_data_class:
+        authenticator = TokenAuthenticator(auth_data_class=auth_data_class)
+    else:
+        authenticator = TokenAuthenticator()
+
+    return Depends(authenticator.authenticate_token)
+
+
+AuthorizationParam = make_auth_dependency()

@@ -1,5 +1,5 @@
 from contextlib import ExitStack, suppress
-from typing import Literal, Optional, Union
+from typing import Literal
 
 from human_protocol_sdk.storage import StorageFileNotFoundError
 from sqlalchemy.orm import Session

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Annotated, Any, ClassVar, TypeVar
+from typing import Any, ClassVar, TypeVar
 
 import fastapi
 import fastapi.params
@@ -19,10 +19,6 @@ class OrderingDirection(str, Enum, metaclass=BetterEnumMeta):
 
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-
-T = TypeVar("T")
-
-OptionalQuery = Annotated[T | None, fastapi.Query()]
 
 
 class Filter(_Filter):

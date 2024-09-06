@@ -14,11 +14,17 @@ from src.core.config import Config
 from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import engine as db_engine
-from src.endpoints.authentication import AuthorizationData, AuthorizationParam
-from src.endpoints.filtering import Filter, FilterDepends, OptionalQuery, OrderingDirection
+from src.endpoints.authentication import (
+    AuthorizationData,
+    AuthorizationParam,
+    JobListAuthorizationData,
+    make_auth_dependency,
+)
+from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.endpoints.throttling import RateLimiter
+from src.endpoints.utils import OptionalQuery
 from src.schemas.exchange import (
     AssignmentRequest,
     AssignmentResponse,
@@ -35,8 +41,6 @@ router = APIRouter()
 
 
 class JobsFilter(Filter):
-    # Simply using Query is not enough to include parameter description in the OpenAPI schema
-    # https://github.com/tiangolo/fastapi/issues/4700
     escrow_address: str | None = None
     chain_id: int | None = None
     job_type: OptionalQuery[TaskTypes] = None
@@ -76,7 +80,7 @@ class JobsFilter(Filter):
 )
 async def list_jobs(
     filter: Annotated[JobsFilter, FilterDepends(JobsFilter)],
-    token: Annotated[AuthorizationData, AuthorizationParam],
+    token: Annotated[JobListAuthorizationData, make_auth_dependency(JobListAuthorizationData)],
     created_after: OptionalQuery[datetime] = None,
     updated_after: OptionalQuery[datetime] = None,
     status: OptionalQuery[JobStatuses] = None,
