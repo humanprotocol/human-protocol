@@ -1,5 +1,5 @@
 services:
-  postgres:
+  oracle-postgres:
     image: postgres:14.4
     restart: on-failure
     environment:
@@ -10,8 +10,8 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data/pgdata
     ports:
-      - 5434:5432
+      - 5431:5432
     command: ["postgres", "-c", "log_statement=all"]
 
 volumes:
-  postgres:    
+  postgres:

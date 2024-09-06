@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "examples/cvat/exchange-oracle",
+        "examples/cvat/recording-oracle",
+        "sdk/python/human_protocol_sdk"
+    ]
+}
