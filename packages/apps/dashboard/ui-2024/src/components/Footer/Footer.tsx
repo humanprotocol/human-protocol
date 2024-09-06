@@ -21,21 +21,21 @@ const Footer: FC = () => {
 						<Typography
 							component="span"
 							color="text.secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_FOOTER_LINK_PRIVACY_POLICY)}
 						>
 							Privacy Policy
 						</Typography>
 						<Typography
 							component="span"
 							color="text.secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_FOOTER_LINK_TERMS_OF_SERVICE)}
 						>
 							Terms of Service
 						</Typography>
 						<Typography
 							component="span"
 							color="text.secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_FOOTER_LINK_HUMAN_PROTOCOL)}
 						>
 							HUMAN Protocol
 						</Typography>
