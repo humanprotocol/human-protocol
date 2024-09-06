@@ -23,6 +23,10 @@ services:
       "redis-server",
       "--save", "60", "100",
       "--appendonly", "yes",
+      # Uncomment if you want to configure a password
+      # "--requirepass", "password",
+      # "--user", "username", "on", ">password", "~*", "allcommands",
+      # "--user", "default", "off", "nopass", "nocommands",
     ]
     volumes:
       - redis:/data

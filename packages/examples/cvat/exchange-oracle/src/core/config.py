@@ -44,10 +44,22 @@ class PostgresConfig:
 class RedisConfig:
     port = os.environ.get("REDIS_PORT", "6379")
     host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
+    database = os.environ.get("REDIS_DB", "")
+    user = os.environ.get("REDIS_USER", "")
+    password = os.environ.get("REDIS_PASSWORD", "")
+    use_ssl = to_bool(os.environ.get("REDIS_USE_SSL", "false"))
 
     @classmethod
     def connection_url(cls) -> str:
-        return f"redis://{cls.host}:{cls.port}/"
+        scheme = 'redis'
+        if cls.use_ssl:
+            scheme += 's'
+
+        auth_params = ''
+        if cls.user or cls.password:
+            auth_params = f'{cls.user}:{cls.password}@'
+
+        return f"{scheme}://{auth_params}{cls.host}:{cls.port}/{cls.database}"
 
 
 class _NetworkConfig:
