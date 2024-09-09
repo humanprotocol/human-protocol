@@ -441,8 +441,8 @@ export class AuthService {
 
     if (
       !role ||
-      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        role,
+      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].some(
+        (r) => r.toLowerCase() === role.toLowerCase(),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
