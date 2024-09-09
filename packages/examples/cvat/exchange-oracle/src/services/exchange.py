@@ -136,7 +136,10 @@ def create_assignment(project_id: int, wallet_address: str) -> str | None:
             )
 
         unassigned_job = cvat_service.get_free_job(
-            session, cvat_projects=[project.cvat_id], for_update=True
+            session,
+            cvat_projects=[project.cvat_id],
+            user_wallet_address=wallet_address,
+            for_update=True,
         )
         if not unassigned_job:
             return None
