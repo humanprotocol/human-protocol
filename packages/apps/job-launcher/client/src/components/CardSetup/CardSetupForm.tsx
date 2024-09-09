@@ -1,35 +1,36 @@
 import { LoadingButton } from '@mui/lab';
+import { Box, Grid, Link, Typography } from '@mui/material';
 import {
-  Box,
-  FormControl,
-  Grid,
-  Link,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { useElements, useStripe } from '@stripe/react-stripe-js';
+  PaymentElement,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 import { useState } from 'react';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
 import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
-import { TopUpSuccess } from './TopUpSuccess';
 
-export const FiatTopUpForm = () => {
+interface CardSetupFormProps {
+  onCardSetup: () => void; // Prop para notificar cuando la tarjeta está lista
+}
+
+export const CardSetupForm: React.FC<CardSetupFormProps> = ({
+  onCardSetup,
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [amount, setAmount] = useState<string>();
   const dispatch = useAppDispatch();
   const { showError } = useSnackbar();
 
-  const handleTopUpAccount = async () => {
+  const handleCardSetup = async () => {
     if (!stripe || !elements) {
       showError('Stripe.js has not yet loaded.');
       return;
     }
-    // Trigger form validation and wallet collection
+
+    // Trigger form validation and card details collection
     const { error: submitError } = await elements.submit();
     if (submitError) {
       showError(submitError);
@@ -38,53 +39,48 @@ export const FiatTopUpForm = () => {
 
     setIsLoading(true);
     try {
-      // get client secret
-      const clientSecret = await paymentService.createFiatPayment({
-        amount: Number(amount),
-        currency: 'usd',
-      });
+      const clientSecret = await paymentService.createSetupIntent();
 
-      // stripe payment
-      const { error: stripeError, paymentIntent } =
-        await stripe.confirmCardPayment(clientSecret);
+      if (!clientSecret) {
+        throw new Error('Failed to create SetupIntent.');
+      }
+
+      const { error: stripeError, setupIntent } = await stripe.confirmSetup({
+        elements,
+        clientSecret,
+        confirmParams: {
+          return_url: window.location.href,
+        },
+        redirect: 'if_required',
+      });
 
       if (stripeError) {
         throw stripeError;
       }
 
-      // confirm payment
-      const success = await paymentService.confirmFiatPayment(paymentIntent.id);
+      const success = await paymentService.confirmSetupIntent(
+        setupIntent?.id ?? '',
+      );
 
       if (!success) {
-        throw new Error('Payment confirmation failed.');
+        throw new Error('Card setup confirmation failed.');
       }
 
       dispatch(fetchUserBalanceAsync());
-
-      setIsSuccess(true);
+      onCardSetup();
     } catch (err: any) {
       showError(err.message || 'An error occurred while setting up the card.');
-      setIsSuccess(false);
     }
     setIsLoading(false);
   };
 
-  return isSuccess ? (
-    <TopUpSuccess />
-  ) : (
+  return (
     <Box>
       <Grid container spacing={4}>
         <Grid item xs={12}>
-          <FormControl fullWidth>
-            <TextField
-              fullWidth
-              placeholder="Amount USD"
-              variant="outlined"
-              value={amount}
-              type="number"
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </FormControl>
+          <PaymentElement
+            options={{ fields: { billingDetails: { name: 'auto' } } }}
+          />
         </Grid>
         <Grid item xs={12}>
           <LoadingButton
@@ -92,10 +88,10 @@ export const FiatTopUpForm = () => {
             variant="contained"
             fullWidth
             size="large"
-            onClick={handleTopUpAccount}
+            onClick={handleCardSetup}
             loading={isLoading}
           >
-            Top up account
+            Save card details
           </LoadingButton>
         </Grid>
         <Grid item xs={12}>

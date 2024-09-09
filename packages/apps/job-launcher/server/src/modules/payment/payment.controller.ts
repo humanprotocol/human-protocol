@@ -123,7 +123,7 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: PaymentFiatCreateDto,
   ): Promise<string> {
-    return this.paymentService.createFiatPayment(req.user.id, data);
+    return this.paymentService.createFiatPayment(req.user, data);
   }
 
   @ApiOperation({
@@ -245,5 +245,26 @@ export class PaymentController {
   @Get('/min-fee')
   public async getMinFee(): Promise<number> {
     return this.serverConfigService.minimunFeeUsd;
+  }
+
+  @ApiOperation({
+    summary: 'Check if a card has already been assigned to the user',
+    description:
+      'Endpoint to check if a card has already been assigned to the user.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Card assigned succesfully',
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @Get('/check-card')
+  public async checkUserCard(
+    @Request() req: RequestWithUser,
+  ): Promise<boolean> {
+    return !!req.user?.paymentInfo?.paymentMethodId;
   }
 }
