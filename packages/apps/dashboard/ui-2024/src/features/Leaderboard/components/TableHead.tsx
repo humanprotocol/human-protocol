@@ -10,6 +10,7 @@ import { SelectNetwork } from './SelectNetwork';
 import { colorPalette } from '@assets/styles/color-palette';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { Order, SortableFieldsInLeaderBoardData } from '../helpers/sorting';
+import { Typography } from '@mui/material';
 
 interface TableHeadProps {
 	onRequestSort: (
@@ -39,10 +40,15 @@ export const TableHead = ({
 				sx={{ whiteSpace: 'nowrap' }}
 				className="home-page-table-header"
 			>
-				{mobile.isMobile ? null : <TableCell></TableCell>}
+				{mobile.isMobile ? null : (
+					<TableCell sx={{ minWidth: '52px' }}></TableCell>
+				)}
 				<TableCell
 					sx={{
+						minWidth: '300px',
+						justifyContent: 'flex-start',
 						[mobile.mediaQuery]: {
+							minWidth: 'unset',
 							position: 'sticky',
 							left: 0,
 							zIndex: 2,
@@ -57,10 +63,15 @@ export const TableHead = ({
 						direction={orderBy === 'role' ? order : 'asc'}
 						onClick={createSortHandler('role')}
 					>
-						ROLE
+						<div className="icon-table">
+							<Typography mt="3px" variant="body3">
+								ROLE
+							</Typography>
+						</div>
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
+					sx={{ minWidth: '240px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="address"
 					sortDirection={orderBy === 'address' ? order : false}
 				>
@@ -71,13 +82,20 @@ export const TableHead = ({
 					>
 						<div className="icon-table">
 							<Tooltip title="Address of the role" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
-							<span>ADDRESS</span>
+							<Typography mt="3px" component="span" variant="body3">
+								ADDRESS
+							</Typography>
 						</div>
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
+					sx={{ minWidth: '246px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="amountStaked"
 					sortDirection={orderBy === 'amountStaked' ? order : false}
 				>
@@ -88,17 +106,27 @@ export const TableHead = ({
 					>
 						<div className="icon-table">
 							<Tooltip title="Amount of HMT staked" arrow>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
-							<span>STAKE</span>
+							<Typography mt="3px" component="span" variant="body3">
+								STAKE
+							</Typography>
 						</div>
 					</TableSortLabel>
 				</TableCell>
-				<TableCell className="table-filter-select">
+				<TableCell
+					sx={{ minWidth: '246px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
+					className="table-filter-select"
+				>
 					<SelectNetwork />
 					<span className="mobile-title">NETWORK</span>
 				</TableCell>
 				<TableCell
+					sx={{ minWidth: '246px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="reputation"
 					sortDirection={orderBy === 'reputation' ? order : false}
 				>
@@ -112,13 +140,20 @@ export const TableHead = ({
 								title="Reputation of the role as per their activities "
 								arrow
 							>
-								<HelpOutlineIcon color="sky" />
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</Tooltip>
-							<span>REPUTATION SCORE</span>
+							<Typography mt="3px" component="span" variant="body3">
+								REPUTATION SCORE
+							</Typography>
 						</div>
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
+					sx={{ minWidth: '157px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="operator"
 					sortDirection={orderBy === 'operator' ? order : false}
 				>
@@ -126,8 +161,15 @@ export const TableHead = ({
 						active={orderBy === 'fee'}
 						direction={orderBy === 'fee' ? order : 'asc'}
 						onClick={createSortHandler('fee')}
+						sx={{
+							display: 'flex',
+							justifyContent: 'center',
+							alignSelf: 'center',
+						}}
 					>
-						OPERATOR FEE
+						<Typography mt="3px" variant="body3" component="div">
+							OPERATOR FEE
+						</Typography>
 					</TableSortLabel>
 				</TableCell>
 			</TableRow>

@@ -22,7 +22,7 @@ export const SelectNetwork = () => {
 	};
 
 	return (
-		<FormControl fullWidth size="small">
+		<FormControl fullWidth size="small" sx={{ width: '210px' }}>
 			<InputLabel id="network-select-label">By Network</InputLabel>
 			<Select<number>
 				labelId="network-select-label"

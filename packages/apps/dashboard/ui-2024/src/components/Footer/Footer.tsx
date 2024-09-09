@@ -6,6 +6,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import DiscordIcon from '@components/Icons/DiscordIcon';
 import { colorPalette } from '@assets/styles/color-palette';
+import { env } from '@helpers/env';
 
 const Footer: FC = () => {
 	const handleClick = (url: string) => {
@@ -20,49 +21,59 @@ const Footer: FC = () => {
 						<Typography
 							component="span"
 							color="text.secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_FOOTER_LINK_PRIVACY_POLICY)}
 						>
 							Privacy Policy
 						</Typography>
 						<Typography
 							component="span"
 							color="text.secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_FOOTER_LINK_TERMS_OF_SERVICE)}
 						>
 							Terms of Service
 						</Typography>
 						<Typography
 							component="span"
 							color="text.secondary"
-							onClick={() => handleClick('https://app.humanprotocol.org/')}
+							onClick={() => handleClick(env.VITE_FOOTER_LINK_HUMAN_PROTOCOL)}
 						>
 							HUMAN Protocol
 						</Typography>
 					</div>
-					<Typography variant="subtitle1" color={colorPalette.secondary.main}>
+					<Typography variant="subtitle1" color="text.secondary">
 						© 2021 HPF. HUMAN Protocol® is a registered trademark
 					</Typography>
 				</div>
 				<div className="footer-icon">
 					<GitHubIcon
-						color="sky"
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						style={{
+							color: colorPalette.sky.main,
+						}}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_GITHUB)}
 					/>
 					<DiscordIcon
-						color="sky"
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						style={{
+							color: colorPalette.sky.main,
+						}}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_DISCORD)}
 					/>
 					<TwitterIcon
-						color="sky"
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						style={{
+							color: colorPalette.sky.main,
+						}}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_X)}
 					/>
 					<TelegramIcon
-						color="sky"
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						style={{
+							color: colorPalette.sky.main,
+						}}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_TELEGRAM)}
 					/>
 					<LinkedInIcon
-						color="sky"
-						onClick={() => handleClick('https://app.humanprotocol.org/')}
+						style={{
+							color: colorPalette.sky.main,
+						}}
+						onClick={() => handleClick(env.VITE_FOOTER_LINK_LINKEDIN)}
 					/>
 				</div>
 			</div>
