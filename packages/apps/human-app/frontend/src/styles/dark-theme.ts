@@ -8,7 +8,7 @@ export const darkTheme: ThemeOptions = {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: darkColorPalette.backgroundColor,
+          backgroundColor: darkColorPalette.white,
         },
       },
     },
@@ -130,6 +130,13 @@ export const darkTheme: ThemeOptions = {
       styleOverrides: {
         root: {
           backgroundColor: 'rgb(28,19,63)',
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(212, 207, 255, 0.7)',
         },
       },
     },

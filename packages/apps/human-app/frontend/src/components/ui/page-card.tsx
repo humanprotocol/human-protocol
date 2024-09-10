@@ -49,7 +49,10 @@ const commonStylesDark: SxProps<Theme> = {
   minHeight: '70vh',
   maxWidth: '1200px',
   width: '100%',
-  background: constDarkColorPalette.white,
+  background: constDarkColorPalette.paper.main,
+  [breakpoints.mobile]: {
+    background: constDarkColorPalette.backgroundColor,
+  },
 };
 
 type ButtonsProps = string | -1 | (() => void);
@@ -83,7 +86,7 @@ export function PageCard({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (withLayoutBackground) {
+    if (withLayoutBackground && !isDarkMode) {
       setGrayBackground();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once

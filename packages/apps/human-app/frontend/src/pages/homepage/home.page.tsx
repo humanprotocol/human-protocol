@@ -14,7 +14,7 @@ import { HomeContainer } from './components/home-container';
 export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';
 
 export function HomePage() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const [stage, setStage] = useState<HomePageStageType>('welcome');
   const isMobile = useIsMobile();
   const isMobileMd = useIsMobile('md');
@@ -28,11 +28,24 @@ export function HomePage() {
     return <Navigate replace to={routerPaths.operator.profile} />;
   }
 
+  const paperBackgroundColor = (() => {
+    if (isDarkMode) {
+      if (isMobile) {
+        return colorPalette.backgroundColor;
+      }
+      return stage === 'chooseSignUpAccountType'
+        ? colorPalette.paper.main
+        : 'unset';
+    }
+
+    return colorPalette.white;
+  })();
+
   return (
     <Box width="100%">
       <Paper
         sx={{
-          backgroundColor: colorPalette.white,
+          backgroundColor: paperBackgroundColor,
           mx: !isMobile ? '30px' : 0,
           boxShadow: 'none',
           borderRadius: '20px',

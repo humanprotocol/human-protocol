@@ -51,6 +51,9 @@ export function WalletConnectModal() {
                 1: (
                   <Link
                     rel="noreferrer"
+                    style={{
+                      color: 'inherit',
+                    }}
                     target="_blank"
                     to={env.VITE_WALLET_CONNECT_MODAL_LINK}
                   />

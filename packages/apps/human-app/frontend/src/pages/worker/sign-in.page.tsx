@@ -21,6 +21,7 @@ import { Alert } from '@/components/ui/alert';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -29,6 +30,7 @@ function formattedSignInErrorMessage(unknownError: unknown) {
 }
 
 export function SignInWorkerPage() {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -91,9 +93,13 @@ export function SignInWorkerPage() {
               name="password"
             />
             <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
-            <Typography variant="body1">
+            <Typography color={colorPalette.text.primary} variant="body1">
               <Link
-                style={{ textDecoration: 'none', fontWeight: 600 }}
+                style={{
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  color: 'inherit',
+                }}
                 to={routerPaths.worker.sendResetLink}
               >
                 {t('worker.signInForm.forgotPassword')}

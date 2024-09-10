@@ -12,9 +12,15 @@ interface LayoutProps {
 }
 
 export function Layout({ withNavigation = true }: LayoutProps) {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { backgroundColor } = useBackgroundColorStore();
   const isMobile = useIsMobile();
+  const layoutBackgroundColor = (() => {
+    if (isDarkMode) {
+      return colorPalette.backgroundColor;
+    }
+    return isMobile ? colorPalette.white : backgroundColor;
+  })();
 
   return (
     <Grid
@@ -28,7 +34,7 @@ export function Layout({ withNavigation = true }: LayoutProps) {
         width: '100%',
         pt: '0',
         px: isMobile ? 0 : '120px',
-        backgroundColor: isMobile ? colorPalette.white : backgroundColor,
+        backgroundColor: layoutBackgroundColor,
       }}
     >
       <Navbar withNavigation={withNavigation} />

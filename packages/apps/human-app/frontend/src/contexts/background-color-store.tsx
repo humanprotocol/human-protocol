@@ -15,11 +15,13 @@ export const BackgroundContext = createContext<
 interface BackgroundProviderProps {
   children: ReactNode;
   colorPalette: ColorPalette;
+  isDarkMode: boolean;
 }
 
 export function BackgroundProvider({
   children,
   colorPalette,
+  isDarkMode,
 }: BackgroundProviderProps) {
   const [backgroundColor, setBackgroundColor] = useState<string>(
     colorPalette.white
@@ -30,7 +32,11 @@ export function BackgroundProvider({
   };
 
   const setGrayBackground = () => {
-    setBackgroundColor(colorPalette.paper.main);
+    if (isDarkMode) {
+      setBackgroundColor(colorPalette.backgroundColor);
+    } else {
+      setBackgroundColor(colorPalette.paper.main);
+    }
   };
 
   return (

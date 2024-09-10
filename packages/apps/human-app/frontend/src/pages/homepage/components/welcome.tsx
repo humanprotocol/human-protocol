@@ -18,7 +18,7 @@ interface WelcomeProps {
 }
 
 export function Welcome({ setStage }: WelcomeProps) {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
@@ -98,8 +98,11 @@ export function Welcome({ setStage }: WelcomeProps) {
             }}
             size="large"
             sx={{
-              backgroundColor: colorPalette.primary.light,
+              backgroundColor: isDarkMode
+                ? '#5D0CE9'
+                : colorPalette.primary.light,
               mb: '1.5625rem',
+              color: isDarkMode ? '#CDC7FF' : undefined,
             }}
             variant="contained"
           >

@@ -66,7 +66,7 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
   return (
     <ThemeProvider theme={themes}>
       <ColorModeContext.Provider value={{ isDarkMode, colorPalette }}>
-        <BackgroundProvider colorPalette={colorPalette}>
+        <BackgroundProvider colorPalette={colorPalette} isDarkMode={isDarkMode}>
           {children}
         </BackgroundProvider>
       </ColorModeContext.Provider>
