@@ -10,7 +10,8 @@ const DEFAULT_HMT_PRICE_FROM = 'human-protocol';
 const DEFAULT_HMT_PRICE_TO = 'usd';
 const DEFAULT_HCAPTCHA_STATS_SOURCE =
   'https://foundation-accounts.hmt.ai/support/summary-stats';
-export const HCAPTCHA_STATS_START_DATE = '2022-07-01';
+const DEFAULT_HCAPTCHA_STATS_FILE = 'hcaptchaStats.json';
+export const HCAPTCHA_STATS_START_DATE = '2024-09-09';
 export const HMT_STATS_START_DATE = '2021-04-06';
 
 @Injectable()
@@ -67,6 +68,13 @@ export class EnvironmentConfigService {
     return this.configService.get<string>(
       'HCAPTCHA_STATS_SOURCE',
       DEFAULT_HCAPTCHA_STATS_SOURCE,
+    );
+  }
+
+  get hCaptchaStatsFile(): string {
+    return this.configService.get<string>(
+      'HCAPTCHA_STATS_FILE',
+      DEFAULT_HCAPTCHA_STATS_FILE,
     );
   }
   get reputationSource(): string {
