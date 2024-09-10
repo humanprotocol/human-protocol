@@ -1,9 +1,11 @@
 import CloseIcon from '@mui/icons-material/Close';
 import type { CustomButtonProps } from '@/components/ui/button';
 import { TableButton } from '@/components/ui/table-button';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function RejectButton(props: CustomButtonProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <TableButton
       {...props}

@@ -8,7 +8,6 @@ import {
   PageCardLoader,
 } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { colorPalette } from '@/styles/color-palette';
 import { Buttons } from '@/pages/operator/sign-up/add-stake/buttons';
 import { StakeForm } from '@/pages/operator/sign-up/add-stake/stake-form';
 import { Alert } from '@/components/ui/alert';
@@ -18,8 +17,10 @@ import {
 } from '@/api/services/operator/get-stacked-amount';
 import { useAddStakeMutationState } from '@/api/services/operator/add-stake';
 import { useHMTokenDecimals } from '@/api/services/operator/human-token-decimals';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function AddStakeOperatorPage() {
+  const { colorPalette } = useColorMode();
   const [displayForm, setDisplayForm] = useState(false);
   const {
     data: stakedAmount,

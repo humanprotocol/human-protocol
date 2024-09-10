@@ -29,10 +29,13 @@ import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { JOB_TYPES } from '@/shared/consts';
+import type { ColorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
 
 const getColumnsDefinition = (
-  resignJob: (assignment_id: string) => void
+  resignJob: (assignment_id: string) => void,
+  colorPalette: ColorPalette
 ): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -139,7 +142,7 @@ const getColumnsDefinition = (
       const status = props.row.original.status;
       return (
         <Chip
-          backgroundColor={parseJobStatusChipColor(status)}
+          backgroundColor={parseJobStatusChipColor(status, colorPalette)}
           label={status}
         />
       );
@@ -189,6 +192,7 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
+  const { colorPalette } = useColorMode();
   const { setSearchEscrowAddress, setPageParams, filterParams } =
     useMyJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
@@ -224,7 +228,10 @@ export function MyJobsTable() {
   }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(rejectTask(oracle_address || '')),
+    columns: getColumnsDefinition(
+      rejectTask(oracle_address || ''),
+      colorPalette
+    ),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',

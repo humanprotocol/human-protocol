@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { t } from 'i18next';
 import { Button } from '@/components/ui/button';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
-import { colorPalette } from '@/styles/color-palette';
+import { colorPalette as constColorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
+import { darkColorPalette as constDarkColorPalette } from '@/styles/dark-color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -19,7 +21,6 @@ const IconWrapper = styled('div')(() => ({
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: '50%',
-  backgroundColor: colorPalette.paper.main,
   cursor: 'pointer',
   ':hover': {
     cursor: 'pointer',
@@ -36,7 +37,19 @@ const commonStyles: SxProps<Theme> = {
   minHeight: '70vh',
   maxWidth: '1200px',
   width: '100%',
-  background: colorPalette.white,
+  background: constColorPalette.white,
+};
+
+const commonStylesDark: SxProps<Theme> = {
+  padding: '2rem 2rem 6rem 2rem',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: '20px',
+  minHeight: '70vh',
+  maxWidth: '1200px',
+  width: '100%',
+  background: constDarkColorPalette.white,
 };
 
 type ButtonsProps = string | -1 | (() => void);
@@ -65,6 +78,7 @@ export function PageCard({
   hiddenCancelButton = false,
   hiddenArrowButton = false,
 }: FormCardProps) {
+  const { isDarkMode, colorPalette } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
 
@@ -88,7 +102,7 @@ export function PageCard({
   };
 
   return (
-    <Grid container sx={commonStyles}>
+    <Grid container sx={isDarkMode ? commonStylesDark : commonStyles}>
       {!hiddenCancelButton && (
         <Grid
           sx={{
@@ -154,6 +168,7 @@ export function PageCard({
                   width: '25px',
                   height: '25px',
                   fontSize: '18px',
+                  backgroundColor: colorPalette.paper.main,
                 }}
               >
                 <ArrowBackIcon fontSize="inherit" />
@@ -206,7 +221,12 @@ export function PageCard({
             xs={12}
           >
             {backArrowPath && !hiddenArrowButton ? (
-              <IconWrapper onClick={goBack.bind(null, backArrowPath)}>
+              <IconWrapper
+                onClick={goBack.bind(null, backArrowPath)}
+                sx={{
+                  backgroundColor: colorPalette.paper.main,
+                }}
+              >
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
             ) : null}
@@ -231,6 +251,7 @@ export function PageCardLoader({
   cardMaxWidth?: string;
   withLayoutBackground?: boolean;
 }) {
+  const { isDarkMode } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
 
   useEffect(() => {
@@ -239,9 +260,15 @@ export function PageCardLoader({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
   }, []);
+
+  const commonStyleForTheme = isDarkMode ? commonStylesDark : commonStyles;
+
   const sx = cardMaxWidth
-    ? { ...commonStyles, maxWidth: cardMaxWidth }
-    : commonStyles;
+    ? {
+        ...commonStyleForTheme,
+        maxWidth: cardMaxWidth,
+      }
+    : commonStyleForTheme;
 
   return (
     <Grid container sx={sx}>
@@ -267,12 +294,14 @@ export function PageCardError({
       cardMaxWidth?: string;
       withLayoutBackground?: boolean;
     }) {
+  const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
   const { setGrayBackground } = useBackgroundColorStore();
+  const commonStyleForTheme = isDarkMode ? commonStylesDark : commonStyles;
 
   const sx = cardMaxWidth
-    ? { ...commonStyles, maxWidth: cardMaxWidth }
-    : commonStyles;
+    ? { ...commonStyleForTheme, maxWidth: cardMaxWidth }
+    : commonStyleForTheme;
 
   useEffect(() => {
     if (withLayoutBackground) {

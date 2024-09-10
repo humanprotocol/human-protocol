@@ -3,8 +3,8 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useFormContext } from 'react-hook-form';
 import { Typography } from '@mui/material';
 import { env } from '@/shared/env';
-import { colorPalette } from '@/styles/color-palette';
 import { FetchError } from '@/api/fetcher';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface CaptchaProps {
   setCaptchaToken: (token: string) => void;
@@ -35,6 +35,7 @@ interface FormCaptchaProps {
 }
 
 export function FormCaptcha({ name, error }: FormCaptchaProps) {
+  const { colorPalette } = useColorMode();
   const { setValue, formState } = useFormContext<Record<string, unknown>>();
 
   function setCaptchaToken(token: string) {

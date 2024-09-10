@@ -1,14 +1,21 @@
 import type { ThemeOptions } from '@mui/material';
-import { colorPalette } from '@/styles/color-palette';
+import { darkColorPalette } from '@/styles/dark-color-palette';
 import { typography } from '@/styles/typography';
 
-export const theme: ThemeOptions = {
+export const darkTheme: ThemeOptions = {
   typography,
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: darkColorPalette.backgroundColor,
+        },
+      },
+    },
     MuiTypography: {
       defaultProps: {
         variant: 'body1',
-        color: colorPalette.primary.main,
+        color: darkColorPalette.primary.main,
         fontFamily: 'Inter',
         variantMapping: {
           subtitle1: 'p',
@@ -26,8 +33,8 @@ export const theme: ThemeOptions = {
           fontWeight: 600,
           textTransform: 'none',
           '&.Mui-disabled': {
-            backgroundColor: colorPalette.button.disabled,
-            color: colorPalette.text.secondary,
+            backgroundColor: darkColorPalette.button.disabled,
+            color: darkColorPalette.text.secondary,
           },
         },
       },
@@ -36,7 +43,7 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         root: {
           '&.Mui-checked': {
-            color: colorPalette.primary.main,
+            color: darkColorPalette.primary.main,
           },
         },
       },
@@ -44,10 +51,10 @@ export const theme: ThemeOptions = {
     MuiSvgIcon: {
       styleOverrides: {
         colorPrimary: {
-          fill: colorPalette.primary.main,
+          fill: darkColorPalette.primary.main,
         },
         colorSecondary: {
-          fill: colorPalette.text.disabled,
+          fill: darkColorPalette.text.disabled,
         },
       },
     },
@@ -62,9 +69,9 @@ export const theme: ThemeOptions = {
       styleOverrides: {
         tooltip: {
           fontSize: 'inherit',
-          backgroundColor: colorPalette.white,
+          backgroundColor: darkColorPalette.white,
           boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
-          color: colorPalette.text.primary,
+          color: darkColorPalette.text.primary,
         },
       },
     },
@@ -78,7 +85,7 @@ export const theme: ThemeOptions = {
     MuiOutlinedInput: {
       styleOverrides: {
         notchedOutline: {
-          borderColor: colorPalette.primary.main,
+          borderColor: darkColorPalette.primary.main,
         },
       },
     },
@@ -119,6 +126,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgb(28,19,63)',
+        },
+      },
+    },
   },
   breakpoints: {
     values: {
@@ -129,5 +143,5 @@ export const theme: ThemeOptions = {
       xl: 1536,
     },
   },
-  palette: colorPalette,
+  palette: darkColorPalette,
 };

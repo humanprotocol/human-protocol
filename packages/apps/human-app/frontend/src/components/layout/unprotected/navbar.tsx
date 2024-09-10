@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Button } from '@/components/ui/button';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
 

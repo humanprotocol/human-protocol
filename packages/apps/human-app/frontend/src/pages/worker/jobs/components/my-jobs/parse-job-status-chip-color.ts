@@ -1,6 +1,9 @@
-import { colorPalette } from '@/styles/color-palette';
+import type { ColorPalette } from '@/styles/color-palette';
 
-export const parseJobStatusChipColor = (status: string) => {
+export const parseJobStatusChipColor = (
+  status: string,
+  colorPalette: ColorPalette
+) => {
   if (status === 'OVERDUE') {
     return colorPalette.error.main;
   }

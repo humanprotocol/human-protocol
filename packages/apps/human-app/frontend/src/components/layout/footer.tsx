@@ -1,16 +1,17 @@
 import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { colorPalette } from '@/styles/color-palette';
 import { env } from '@/shared/env';
 import { Chat } from '@/pages/homepage/components/chat';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface FooterProps {
   displayChatIcon?: boolean;
   isProtected?: boolean;
 }
 export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile('md');
 

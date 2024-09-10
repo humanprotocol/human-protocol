@@ -2,12 +2,13 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { colorPalette } from '@/styles/color-palette';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function ProfileData() {
+  const { colorPalette } = useColorMode();
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   return (

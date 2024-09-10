@@ -3,17 +3,18 @@ import { Paper } from '@mui/material';
 import { Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';
+import { useColorMode } from '@/hooks/use-color-mode';
 import { HomeContainer } from './components/home-container';
 
 export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';
 
 export function HomePage() {
+  const { colorPalette } = useColorMode();
   const [stage, setStage] = useState<HomePageStageType>('welcome');
   const isMobile = useIsMobile();
   const isMobileMd = useIsMobile('md');

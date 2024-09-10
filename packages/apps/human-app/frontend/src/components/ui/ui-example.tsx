@@ -3,7 +3,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/ui/loader';
-import { colorPalette } from '@/styles/color-palette';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import {
   HomepageLogoIcon,
@@ -34,8 +33,10 @@ import {
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function UiExample() {
+  const { colorPalette } = useColorMode();
   const { openModal } = useModalStore();
   return (
     <div>

@@ -7,17 +7,18 @@ import {
   MobileHomeIcons,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
 import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
 import type { HomePageStageType } from '@/pages/homepage/home.page';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface WelcomeProps {
   setStage: (step: HomePageStageType) => void;
 }
 
 export function Welcome({ setStage }: WelcomeProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');

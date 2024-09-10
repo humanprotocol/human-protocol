@@ -3,7 +3,6 @@ import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
@@ -23,6 +22,7 @@ import { ListItem } from '@/components/ui/list-item';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { Chips } from '@/components/ui/chips';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -31,6 +31,7 @@ interface MyJobsTableMobileProps {
 export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
+  const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<MyJob[]>([]);
   const { filterParams, setPageParams } = useMyJobsFilterStore();
 

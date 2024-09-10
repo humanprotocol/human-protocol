@@ -1,18 +1,19 @@
 import { Grid, List, ListItemText, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/components/ui/page-card';
 import type { HomePageStageType } from '@/pages/homepage/home.page';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
 }
 
 export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
   const isMobileMd = useIsMobile('md');

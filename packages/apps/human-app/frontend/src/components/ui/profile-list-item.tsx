@@ -2,8 +2,8 @@ import { ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
-import { colorPalette } from '@/styles/color-palette';
 import { Chips } from '@/components/ui/chips';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface ProfileListItemProps {
   header: string;
@@ -16,6 +16,7 @@ export function ProfileListItem({
   paragraph,
   isStatusListItem,
 }: ProfileListItemProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
   return (

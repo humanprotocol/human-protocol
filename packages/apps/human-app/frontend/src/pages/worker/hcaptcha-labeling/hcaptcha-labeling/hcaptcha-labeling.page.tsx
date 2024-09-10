@@ -4,10 +4,9 @@ import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { Counter } from '@/components/ui/counter';
 import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
@@ -17,8 +16,10 @@ import { getTomorrowDate } from '@/shared/helpers/counter-helpers';
 import { useSolveHCaptchaMutation } from '@/api/services/worker/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function HcaptchaLabelingPage() {
+  const { colorPalette } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();

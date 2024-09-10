@@ -1,6 +1,7 @@
 export const colorPalette = {
   white: '#FFFFFF',
   black: '#000000',
+  backgroundColor: '#FFFFFF',
   text: {
     primary: '#320A8D',
     secondary: '#858EC6',
@@ -45,4 +46,6 @@ export const colorPalette = {
   },
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
-} as const;
+};
+
+export type ColorPalette = typeof colorPalette;

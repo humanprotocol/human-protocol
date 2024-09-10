@@ -5,13 +5,14 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OraclesTable } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table';
 import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-job-types-select';
 import { JOB_TYPES } from '@/shared/consts';
-import { colorPalette } from '@/styles/color-palette';
 import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export type OraclesDataQueryResult = UseQueryResult<OraclesSuccessResponse>;
 
 export function JobsDiscoveryPage() {
+  const { colorPalette } = useColorMode();
   const oraclesQueryResult = useGetOracles();
   const isMobile = useIsMobile();
 

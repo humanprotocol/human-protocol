@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 
 export function ExpirationModal() {
   const { closeModal } = useModalStore();

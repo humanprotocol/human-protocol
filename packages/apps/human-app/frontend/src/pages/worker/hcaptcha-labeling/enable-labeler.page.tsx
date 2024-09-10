@@ -4,18 +4,19 @@ import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
 import { Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useEnableHCaptchaLabelingMutation } from '@/api/services/worker/enable-hcaptcha-labeling';
 import { Button } from '@/components/ui/button';
 import { PageCardError } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function EnableLabeler() {
+  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const { closeNotification } = useProtectedLayoutNotification();
   const { user } = useAuthenticatedUser();

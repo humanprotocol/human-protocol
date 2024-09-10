@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
-import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Modal } from '@/components/ui/modal/modal';
 import { useIsMobile } from '@/hooks/use-is-mobile';
@@ -10,6 +9,7 @@ import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/mobile
 import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-table';
 import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-drawer-mobile';
+import { useColorMode } from '@/hooks/use-color-mode';
 import { AvailableJobsTableMobile } from './components/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
 import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
@@ -22,6 +22,7 @@ function generateTabA11yProps(index: number) {
 }
 
 export function JobsPage() {
+  const { colorPalette } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);

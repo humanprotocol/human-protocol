@@ -20,13 +20,14 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
-import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { JOB_TYPES } from '@/shared/consts';
 import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-network-filter';
 import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-reward-amount-sort';
 import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-job-type-filter';
+import { useColorMode } from '@/hooks/use-color-mode';
+import type { ColorPalette } from '@/styles/color-palette';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -35,9 +36,12 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const getColumns = (callbacks: {
-  assignJob: (data: AssignJobBody) => undefined;
-}): MRT_ColumnDef<AvailableJob>[] => {
+const getColumns = (
+  callbacks: {
+    assignJob: (data: AssignJobBody) => undefined;
+  },
+  colorPalette: ColorPalette
+): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
       accessorKey: 'job_description',
@@ -149,6 +153,8 @@ const getColumns = (callbacks: {
 };
 
 export function AvailableJobsTable() {
+  const { colorPalette } = useColorMode();
+
   const { setSearchEscrowAddress, setPageParams, filterParams } =
     useJobsFilterStore();
   const { onJobAssignmentError, onJobAssignmentSuccess } =
@@ -184,11 +190,14 @@ export function AvailableJobsTable() {
   }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
-    columns: getColumns({
-      assignJob: (data) => {
-        assignJobMutation(data);
+    columns: getColumns(
+      {
+        assignJob: (data) => {
+          assignJobMutation(data);
+        },
       },
-    }),
+      colorPalette
+    ),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',

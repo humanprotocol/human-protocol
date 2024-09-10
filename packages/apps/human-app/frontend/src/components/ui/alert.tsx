@@ -4,7 +4,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import MuiAlert from '@mui/material/Alert';
 import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import { Typography } from '@mui/material';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const getIcon = (severity: MuiAlertProps['severity']) => {
   switch (severity) {
@@ -23,6 +23,7 @@ const getIcon = (severity: MuiAlertProps['severity']) => {
 };
 
 export function Alert({ severity, color, children, ...rest }: MuiAlertProps) {
+  const { colorPalette } = useColorMode();
   const icon = getIcon(severity);
   const fontColor = color === 'error' ? colorPalette.error.main : 'inherit';
   return (

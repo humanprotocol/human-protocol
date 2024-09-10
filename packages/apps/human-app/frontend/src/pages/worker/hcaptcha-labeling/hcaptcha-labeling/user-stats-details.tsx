@@ -1,8 +1,8 @@
 import { Divider, Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
 import { RefreshIcon } from '@/components/ui/icons';
 import type { HCaptchaUserStatsSuccess } from '@/api/services/worker/hcaptcha-user-stats';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function UserStatsDetails({
   stats,
@@ -11,6 +11,8 @@ export function UserStatsDetails({
   stats: HCaptchaUserStatsSuccess;
   refetch: () => void;
 }) {
+  const { colorPalette } = useColorMode();
+
   return (
     <Grid>
       <Divider sx={{ borderBottomWidth: '2px' }} />

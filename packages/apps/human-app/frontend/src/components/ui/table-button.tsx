@@ -1,9 +1,11 @@
 import Typography from '@mui/material/Typography';
 import type { CustomButtonProps } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function TableButton(props: CustomButtonProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <Button
       {...props}

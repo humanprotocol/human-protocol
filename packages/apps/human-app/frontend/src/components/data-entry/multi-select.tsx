@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
   options: string[];
@@ -36,6 +36,7 @@ export function MultiSelect({
   label,
   ...props
 }: MultiSelectProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const context = useFormContext();
 

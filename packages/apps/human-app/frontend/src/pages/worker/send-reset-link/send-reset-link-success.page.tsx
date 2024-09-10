@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
 import { PageCard } from '@/components/ui/page-card';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { useLocationState } from '@/hooks/use-location-state';
 import { env } from '@/shared/env';
 import type { SendResetLinkHcaptcha } from '@/api/services/worker/send-reset-link';
@@ -19,8 +18,10 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { FormCaptcha } from '@/components/h-captcha';
 import { MailTo } from '@/components/ui/mail-to';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function SendResetLinkWorkerSuccessPage() {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { field: email } = useLocationState({
     keyInStorage: 'email',

@@ -2,8 +2,8 @@ import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { colorPalette } from '@/styles/color-palette';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
+import { useColorMode } from '@/hooks/use-color-mode';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -12,6 +12,7 @@ interface LayoutProps {
 }
 
 export function Layout({ withNavigation = true }: LayoutProps) {
+  const { colorPalette } = useColorMode();
   const { backgroundColor } = useBackgroundColorStore();
   const isMobile = useIsMobile();
 

@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useGetKeys } from '@/api/services/operator/get-keys';
 import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
@@ -13,8 +12,10 @@ import { ProfileListItem } from '@/components/ui/profile-list-item';
 import { useGetOperatorStats } from '@/api/services/operator/get-stats';
 import { ProfileEnableButton } from '@/pages/operator/profile/profile-enable-button';
 import { CheckmarkIcon, LockerIcon } from '@/components/ui/icons';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function OperatorProfilePage() {
+  const { colorPalette } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');

@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { colorPalette } from '@/styles/color-palette';
 import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
 import { env } from '@/shared/env';
@@ -23,8 +22,10 @@ import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { MailTo } from '@/components/ui/mail-to';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function VerifyEmailWorkerPage() {
+  const { colorPalette } = useColorMode();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const isAuthenticated = Boolean(user);

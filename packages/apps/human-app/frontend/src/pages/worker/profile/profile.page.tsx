@@ -1,7 +1,6 @@
 import { Grid, Paper } from '@mui/material';
 import { useEffect } from 'react';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
 import { ProfileData } from '@/pages/worker/profile/profile-data';
 import { ProfileActions } from '@/pages/worker/profile/profile-actions';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
@@ -10,6 +9,7 @@ import type { UserData } from '@/auth/auth-context';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const getNotificationMessage = (
   user: UserData & { isWalletConnected: boolean }
@@ -25,6 +25,7 @@ const getNotificationMessage = (
 };
 
 export function WorkerProfilePage() {
+  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
   const { isConnected } = useWalletConnect();

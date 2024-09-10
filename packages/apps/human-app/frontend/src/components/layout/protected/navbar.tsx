@@ -4,9 +4,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import { t } from 'i18next';
 import { HumanLogoIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export const NAVBAR_PADDING = '44px';
 
@@ -23,6 +23,7 @@ export function Navbar({
   userStatsDrawerOpen,
   toggleUserStatsDrawer,
 }: NavbarProps) {
+  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
   const getIcon = () => {
