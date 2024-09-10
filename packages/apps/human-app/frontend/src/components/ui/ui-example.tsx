@@ -9,21 +9,13 @@ import {
   HomepageUserIcon,
   HomepageWorkIcon,
   HumanLogoIcon,
-  HumanLogoCircleIcon,
-  BackArrowIcon,
   ChatIcon,
   HandIcon,
-  InfoIcon,
   RefreshIcon,
-  UserFilledIcon,
   UserOutlinedIcon,
-  UserSecondaryIcon,
   WorkIcon,
-  WorkSecondaryIcon,
   HumanLogoNavbarIcon,
-  DiscordIcon,
   HelpIcon,
-  MobileHeaderIcon,
   ProfileIcon,
   CheckmarkIcon,
   LockerIcon,
@@ -198,52 +190,28 @@ export function UiExample() {
           <HumanLogoIcon />
         </Grid>
         <Grid>
-          <HumanLogoCircleIcon />
-        </Grid>
-        <Grid>
           <HandIcon />
         </Grid>
         <Grid>
           <RefreshIcon />
         </Grid>
         <Grid>
-          <UserFilledIcon />
-        </Grid>
-        <Grid>
           <UserOutlinedIcon />
-        </Grid>
-        <Grid>
-          <UserSecondaryIcon />
         </Grid>
         <Grid>
           <WorkIcon />
         </Grid>
         <Grid>
-          <WorkSecondaryIcon />
-        </Grid>
-        <Grid>
-          <BackArrowIcon />
-        </Grid>
-        <Grid>
           <ChatIcon />
         </Grid>
         <Grid>
-          <InfoIcon />
-        </Grid>
-        <Grid>
           <HumanLogoNavbarIcon />
-        </Grid>
-        <Grid>
-          <DiscordIcon />
         </Grid>
         <Grid>
           <HelpIcon />
         </Grid>
       </Stack>
       <Stack alignItems="center" direction="row" spacing={4}>
-        <Grid>
-          <MobileHeaderIcon />
-        </Grid>
         <Grid>
           <ProfileIcon />
         </Grid>

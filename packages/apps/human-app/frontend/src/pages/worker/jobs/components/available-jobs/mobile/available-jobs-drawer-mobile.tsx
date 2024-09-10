@@ -129,7 +129,7 @@ export function AvailableJobsDrawerMobile({
             }}
           >
             <SortArrow />
-          </Box>{' '}
+          </Box>
           <Typography
             onClick={() => {
               setFilterParams({
