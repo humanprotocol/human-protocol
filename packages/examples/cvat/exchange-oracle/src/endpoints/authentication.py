@@ -2,11 +2,28 @@ from typing import Annotated, TypeVar
 
 import pydantic
 from fastapi import Depends, HTTPException, params, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.exceptions import HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer as BaseHTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, model_validator
+from starlette.requests import Request
 
 from src.core.config import Config
+
+
+# https://github.com/fastapi/fastapi/issues/2026
+class HTTPBearer(BaseHTTPBearer):
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
+        try:
+            return await super().__call__(request)
+        except HTTPException as ex:
+            if ex.status_code == status.HTTP_403_FORBIDDEN and ex.detail == "Not authenticated":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=ex.detail,
+                ) from ex
+
 
 # Customized JWT-token authorization
 AuthorizationDependency = HTTPBearer(scheme_name="jwt_bearer")
@@ -51,7 +68,7 @@ class TokenAuthenticator:
 
         try:
             payload = jwt.decode(token.credentials, Config.human_app_config.jwt_key)
-            return self.auth_data_class.model_validate(payload)
+            return self._auth_data_class.model_validate(payload)
         except (JWTError, pydantic.ValidationError) as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
