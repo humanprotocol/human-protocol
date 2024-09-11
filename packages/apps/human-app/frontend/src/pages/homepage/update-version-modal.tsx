@@ -37,7 +37,7 @@ export function UpdateVersionModal() {
           To continue using the app, please:
           <ol>
             <li>
-              If you don&#39;t have a wallet yet,
+              If you don&#39;t have a wallet yet, &nbsp;
               <a
                 href="https://docs.google.com/presentation/d/1rtOGNhWLcSWhIA3b-EIDObCvOAjQmXsRQL1gpT2bbqA"
                 rel="noopener noreferrer"
