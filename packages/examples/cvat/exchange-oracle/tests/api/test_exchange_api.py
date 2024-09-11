@@ -51,7 +51,6 @@ def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
     response = client.get(
         "/job",
         headers=get_auth_header(),
-        params={"wallet_address": user_address},
     )
 
     assert response.status_code == 200
@@ -66,7 +65,7 @@ def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
 def test_empty_list_jobs_200_without_address(client: TestClient) -> None:
     response = client.get(
         "/job",
-        headers=get_auth_header(),
+        headers=get_auth_header(generate_jwt_token(wallet_address=None)),
     )
 
     assert response.status_code == 200
@@ -114,7 +113,6 @@ def test_list_jobs_200_with_address(client: TestClient) -> None:
             response = client.get(
                 "/job",
                 headers=get_auth_header(),
-                params={"wallet_address": user_address},
             )
 
             assert response.status_code == 200
