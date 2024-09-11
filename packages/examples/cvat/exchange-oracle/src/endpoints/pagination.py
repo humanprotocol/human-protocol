@@ -35,7 +35,10 @@ class Page(fastapi_pagination.default.Page[T]):
         alias="total_results", validation_alias="total"
     )
     pages: fastapi_pagination.default.GreaterEqualZero | None = Field(
-        default=None, alias="total_pages", validation_alias="pages"
+        # FIXME: inconsistent behavior when total_pages == 0 but page == 1
+        default=None,
+        alias="total_pages",
+        validation_alias="pages",
     )
     size: fastapi_pagination.default.GreaterEqualOne | None = Field(
         alias="page_size", validation_alias="size"

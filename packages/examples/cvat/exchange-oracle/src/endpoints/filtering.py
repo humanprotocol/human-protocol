@@ -75,6 +75,7 @@ class Filter(_Filter):
             order_by_param_value = getattr(
                 self, self.Constants.sorting_field_name
             ) or order_by_param_info.get_default(call_default_factory=True)
+            # FIXME: sorting by field from another model
             order_by_model_field = getattr(self.Constants.model, order_by_param_value)
 
             query = query.order_by(getattr(order_by_model_field, direction_value.value)())
