@@ -16,6 +16,7 @@ import { AuthModule } from '../auth/auth.module';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
+import { QualificationModule } from '../qualification/qualification.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MutexManagerService } from '../mutex/mutex-manager.service';
     Web3Module,
     EncryptionModule,
     StorageModule,
+    QualificationModule,
   ],
   controllers: [JobController],
   providers: [
