@@ -7,7 +7,7 @@ export function TotalTransactions() {
 
 	return (
 		<div>
-			<Typography variant="h6" component="p">
+			<Typography variant="body1" component="p">
 				Total Transactions
 			</Typography>
 			<div className="count">

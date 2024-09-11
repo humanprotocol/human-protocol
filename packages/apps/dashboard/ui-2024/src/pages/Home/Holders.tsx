@@ -7,7 +7,7 @@ export function Holders() {
 
 	return (
 		<div>
-			<Typography variant="h6" component="p">
+			<Typography variant="body1" component="p">
 				Holders
 			</Typography>
 			<div className="count">

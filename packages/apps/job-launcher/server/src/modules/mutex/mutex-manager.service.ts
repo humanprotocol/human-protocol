@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Mutex, MutexInterface, withTimeout, E_TIMEOUT } from 'async-mutex';
+import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class MutexManagerService implements OnModuleDestroy {
@@ -59,6 +60,9 @@ export class MutexManagerService implements OnModuleDestroy {
       });
       return result;
     } catch (e) {
+      if (e instanceof ControlledError) {
+        throw e;
+      }
       if (e === E_TIMEOUT) {
         this.logger.error(
           `Function execution timed out for ${(key as any).id as string}`,

@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from datetime import datetime
 from enum import auto
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -359,8 +360,8 @@ async def create_assignment(
 
     if not assignment_id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No assignments available",
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="No assignments available for this wallet address.",
         )
 
     return serialize_assignment(assignment_id)

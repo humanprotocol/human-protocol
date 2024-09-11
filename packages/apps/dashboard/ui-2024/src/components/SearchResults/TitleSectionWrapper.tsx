@@ -21,6 +21,7 @@ const TitleSectionWrapper = ({
 			alignItems={{ xs: 'start', md: 'center' }}
 			gap={{ xs: 1, md: 0 }}
 			direction={{ sm: 'column', md: 'row' }}
+			sx={{ whiteSpace: 'nowrap' }}
 		>
 			{tooltip ? (
 				<Stack
@@ -31,18 +32,20 @@ const TitleSectionWrapper = ({
 					alignItems="center"
 				>
 					<Tooltip title={tooltip.description}>
-						<IconButton sx={{ padding: 0, paddingRight: 1, color: colorPalette.fog.main }}>
+						<IconButton
+							sx={{ padding: 0, paddingRight: 1, color: colorPalette.fog.main }}
+						>
 							<HelpOutlineIcon fontSize="small" />
 						</IconButton>
 					</Tooltip>
-					<Typography fontWeight={600}>{title}</Typography>
+					<Typography variant="subtitle2">{title}</Typography>
 				</Stack>
 			) : (
 				<Typography
 					sx={{
 						width: 300,
 					}}
-					fontWeight={600}
+					variant="subtitle2"
 				>
 					{title}
 				</Typography>
