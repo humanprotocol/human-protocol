@@ -486,15 +486,15 @@ def test_list_assignments_200_with_sorting(client: TestClient) -> None:
         for sort_field in (
             # FIXME: sorting by these fields does not work
             # AttributeError: type object 'Assignment' has no attribute 'job_type'
-            # "chain_id", FIXME: sorting does not work
+            # "chain_id",
             # "job_type",
             # "reward_amount",
             # "status",
             # FIXME: sorting by status works incorrectly
             # when there are assignments with the same status e.g.
             # created assignments: A1(complied), A2(created), A3(complied)
-            # asc sorting is return A1(complied), A3(complied), A2(created) - correct
-            # desc sorting is return A2(created), A1(complied), A3(complied) - incorrect,
+            # asc sorting returns A1(complied), A3(complied), A2(created) - correct
+            # desc sorting returns A2(created), A1(complied), A3(complied) - incorrect,
             # should be A2(created), A3(complied), A1(complied)
             "created_at",
             "expires_at",
