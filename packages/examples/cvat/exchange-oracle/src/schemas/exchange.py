@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -36,6 +35,10 @@ class UserResponse(BaseModel):
 class AssignmentRequest(BaseModel):
     escrow_address: str
     chain_id: Networks
+
+
+class AssignmentIdRequest(BaseModel):
+    assignment_id: str
 
 
 class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):

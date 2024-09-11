@@ -26,6 +26,7 @@ from src.endpoints.serializers import serialize_assignment, serialize_job
 from src.endpoints.throttling import RateLimiter
 from src.endpoints.utils import OptionalQuery
 from src.schemas.exchange import (
+    AssignmentIdRequest,
     AssignmentRequest,
     AssignmentResponse,
     AssignmentStatuses,
@@ -236,12 +237,12 @@ class AssignmentFilter(Filter):
 async def list_assignments(
     filter: Annotated[AssignmentFilter, FilterDepends(AssignmentFilter)],
     token: Annotated[AuthorizationData, AuthorizationParam],
-    created_after: OptionalQuery[datetime],
-    updated_after: OptionalQuery[datetime],
-    escrow_address: OptionalQuery[str],
-    chain_id: OptionalQuery[int],
-    job_type: OptionalQuery[TaskTypes],
-    status: OptionalQuery[AssignmentStatuses],
+    created_after: OptionalQuery[datetime] = None,
+    updated_after: OptionalQuery[datetime] = None,
+    escrow_address: OptionalQuery[str] = None,
+    chain_id: OptionalQuery[int] = None,
+    job_type: OptionalQuery[TaskTypes] = None,
+    status: OptionalQuery[AssignmentStatuses] = None,
 ) -> Page[AssignmentResponse]:
     query = select(cvat_service.Assignment)
 
@@ -370,10 +371,12 @@ async def create_assignment(
     description="Allows to reject an assignment",
 )
 async def resign_assignment(
-    assignment_id: int, token: Annotated[AuthorizationData, AuthorizationParam]
+    data: AssignmentIdRequest, token: Annotated[AuthorizationData, AuthorizationParam]
 ) -> None:
     try:
-        await oracle_service.resign_assignment(assignment_id, wallet_address=token.wallet_address)
+        await oracle_service.resign_assignment(
+            data.assignment_id, wallet_address=token.wallet_address
+        )
     except oracle_service.NoAccessError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -387,52 +390,31 @@ async def get_user_stats(
     with SessionLocal.begin() as session:
         stats = {}
 
-        stats["assignments_total"] = (
-            session.query(cvat_service.Assignment.id)
-            .where(cvat_service.Assignment.user_wallet_address == wallet_address)
-            .count()
+        query = session.query(cvat_service.Assignment.id).where(
+            cvat_service.Assignment.user_wallet_address == wallet_address
         )
+        stats["assignments_total"] = query.count()
 
-        stats["submissions_sent"] = (
-            session.query(cvat_service.Assignment.id)
-            .where(
-                cvat_service.Assignment.user_wallet_address == wallet_address,
-                cvat_service.Assignment.status.in_(
-                    [
-                        cvat_service.AssignmentStatuses.completed,
-                        cvat_service.AssignmentStatuses.rejected,
-                    ]
-                ),
-            )
-            .count()
-        )
+        stats["submissions_sent"] = query.where(
+            cvat_service.Assignment.status.in_(
+                [
+                    cvat_service.AssignmentStatuses.completed,
+                    cvat_service.AssignmentStatuses.rejected,
+                ]
+            ),
+        ).count()
 
-        stats["assignments_completed"] = (
-            session.query(cvat_service.Assignment.id)
-            .where(
-                cvat_service.Assignment.user_wallet_address == wallet_address,
-                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed,
-            )
-            .count()
-        )
+        stats["assignments_completed"] = query.where(
+            cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed,
+        ).count()
 
-        stats["assignments_rejected"] = (
-            session.query(cvat_service.Assignment.id)
-            .where(
-                cvat_service.Assignment.user_wallet_address == wallet_address,
-                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.rejected,
-            )
-            .count()
-        )
+        stats["assignments_rejected"] = query.where(
+            cvat_service.Assignment.status == cvat_service.AssignmentStatuses.rejected,
+        ).count()
 
-        stats["assignments_expired"] = (
-            session.query(cvat_service.Assignment.id)
-            .where(
-                cvat_service.Assignment.user_wallet_address == wallet_address,
-                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.expired,
-            )
-            .count()
-        )
+        stats["assignments_expired"] = query.where(
+            cvat_service.Assignment.status == cvat_service.AssignmentStatuses.expired,
+        ).count()
 
         return UserStatsResponse(**stats)
 

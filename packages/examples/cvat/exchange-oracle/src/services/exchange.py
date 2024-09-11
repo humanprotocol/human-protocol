@@ -80,7 +80,7 @@ class NoAccessError(Exception):
     pass
 
 
-async def resign_assignment(assignment_id: int, wallet_address: str) -> None:
+async def resign_assignment(assignment_id: str, wallet_address: str) -> None:
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_assignments_by_id(session, [assignment_id], for_update=True)
         assignment = get_or_404(next(iter(assignments), None), assignment_id, "assignment")
