@@ -9,7 +9,6 @@ import type { UserData } from '@/auth/auth-context';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { useColorMode } from '@/hooks/use-color-mode';
 
 const getNotificationMessage = (
   user: UserData & { isWalletConnected: boolean }
@@ -25,7 +24,6 @@ const getNotificationMessage = (
 };
 
 export function WorkerProfilePage() {
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
   const { isConnected } = useWalletConnect();
@@ -52,7 +50,6 @@ export function WorkerProfilePage() {
   return (
     <Paper
       sx={{
-        backgroundColor: colorPalette.white,
         height: '100%',
         boxShadow: 'none',
         padding: isMobile ? '60px 20px' : '100px 40px',

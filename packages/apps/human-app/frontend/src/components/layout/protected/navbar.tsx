@@ -94,7 +94,7 @@ export function Navbar({
             {t('translation:worker.hcaptchaLabelingStats.statistics')}
           </Button>
         ) : null}
-        <IconButton>{getIcon()}</IconButton>
+        <IconButton color="primary">{getIcon()}</IconButton>
       </Grid>
     </Stack>
   );

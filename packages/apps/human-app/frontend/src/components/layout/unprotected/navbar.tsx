@@ -74,6 +74,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
+              color="primary"
               onClick={() => {
                 setIsDrawerOpen(!isDrawerOpen);
               }}

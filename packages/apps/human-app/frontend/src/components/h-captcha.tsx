@@ -12,6 +12,7 @@ interface CaptchaProps {
 }
 
 export function Captcha({ setCaptchaToken, error }: CaptchaProps) {
+  const { isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export function Captcha({ setCaptchaToken, error }: CaptchaProps) {
       onVerify={setCaptchaToken}
       ref={captchaRef}
       sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
+      theme={isDarkMode ? 'dark' : 'light'}
     />
   );
 }

@@ -1,6 +1,7 @@
 import type { ThemeOptions } from '@mui/material';
 import { darkColorPalette } from '@/styles/dark-color-palette';
 import { typography } from '@/styles/typography';
+import { breakpoints } from '@/styles/breakpoints';
 
 export const darkTheme: ThemeOptions = {
   typography,
@@ -79,6 +80,11 @@ export const darkTheme: ThemeOptions = {
       styleOverrides: {
         root: {
           zIndex: 50,
+          '& .MuiDrawer-paper': {
+            [breakpoints.mobile]: {
+              backgroundColor: darkColorPalette.backgroundColor,
+            },
+          },
         },
       },
     },
