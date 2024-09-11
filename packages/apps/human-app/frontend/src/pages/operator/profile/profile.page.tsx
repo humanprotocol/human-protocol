@@ -64,7 +64,6 @@ export function OperatorProfilePage() {
       <Grid item xs={isMobile ? 12 : 8}>
         <Paper
           sx={{
-            backgroundColor: colorPalette.white,
             height: '100%',
             boxShadow: 'none',
             padding: isMobile ? '60px 20px' : '100px 40px',
@@ -171,7 +170,6 @@ export function OperatorProfilePage() {
       <Grid item xs={isMobile ? 12 : 4}>
         <Paper
           sx={{
-            backgroundColor: colorPalette.white,
             height: '100%',
             boxShadow: 'none',
             width: '100%',

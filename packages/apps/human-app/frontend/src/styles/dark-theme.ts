@@ -16,7 +16,7 @@ export const darkTheme: ThemeOptions = {
     MuiTypography: {
       defaultProps: {
         variant: 'body1',
-        color: darkColorPalette.primary.main,
+        color: darkColorPalette.text.primary,
         fontFamily: 'Inter',
         variantMapping: {
           subtitle1: 'p',

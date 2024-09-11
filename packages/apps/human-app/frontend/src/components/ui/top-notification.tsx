@@ -5,17 +5,17 @@ import { Typography } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import { breakpoints } from '@/styles/breakpoints';
 import { useColorMode } from '@/hooks/use-color-mode';
-import type { ColorPalette } from '@/styles/color-palette';
+import { colorPalette as lightColorPalette } from '@/styles/color-palette';
 
 export type TopNotificationType = 'success' | 'warning';
 
-const getIcon = (type: TopNotificationType, colorPalette: ColorPalette) => {
+const getIcon = (type: TopNotificationType) => {
   switch (type) {
     case 'success':
-      return <CheckCircleIcon sx={{ fill: colorPalette.white }} />;
+      return <CheckCircleIcon sx={{ fill: lightColorPalette.white }} />;
 
     case 'warning':
-      return <ErrorIcon sx={{ fill: colorPalette.white }} />;
+      return <ErrorIcon sx={{ fill: lightColorPalette.white }} />;
   }
 };
 
@@ -30,16 +30,20 @@ export function TopNotification({
 }: TopNotificationProps) {
   const { colorPalette } = useColorMode();
 
-  const icon = getIcon(type, colorPalette);
-  const color =
-    type === 'success' ? colorPalette.success.main : colorPalette.primary.light;
+  const icon = getIcon(type);
+  const backgroundColor =
+    type === 'success'
+      ? colorPalette.success.main
+      : colorPalette.secondary.main;
+  const fontColor = lightColorPalette.white;
+
   return (
     <MuiAlert
       icon={icon}
       {...rest}
       sx={{
-        backgroundColor: color,
-        color: colorPalette.white,
+        backgroundColor,
+        color: fontColor,
         position: 'absolute',
         top: 0,
         left: 0,
@@ -50,7 +54,7 @@ export function TopNotification({
       }}
       variant="standard"
     >
-      <Typography color={colorPalette.white} variant="subtitle2">
+      <Typography color={fontColor} variant="subtitle2">
         {children}
       </Typography>
     </MuiAlert>
