@@ -380,12 +380,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             open("tests/utils/manifest.json") as data,
-            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
             patch("src.services.exchange.cvat_api"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            assignment_id = create_assignment(cvat_project_1.id, new_user.wallet_address)
+            assignment_id = create_assignment(
+                cvat_project_1.escrow_address, cvat_project_1.chain_id, new_user.wallet_address
+            )
 
         assignment = self.session.get(Assignment, assignment_id)
 

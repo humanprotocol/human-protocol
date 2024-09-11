@@ -33,11 +33,8 @@ def generate_jwt_token(
 ) -> str:
     return jwt.encode(
         {
-            **(
-                {"wallet_address": wallet_address} if wallet_address else {}
-            ),  # TODO: why can it be optional in GET /job api?
+            **({"wallet_address": wallet_address} if wallet_address else {"role": "HUMAN_APP"}),
             "email": email,
-            "role": "HUMAN_APP",
         },
         Config.human_app_config.jwt_key,
     )
@@ -137,8 +134,6 @@ def test_list_jobs_200_with_address(client: TestClient) -> None:
                 }
 
 
-# TODO: this test used to check that only jobs without assignment
-# would be listed when wallet_address was not provided but now API changed
 def test_list_jobs_200_without_address(client: TestClient) -> None:
     with SessionLocal.begin() as session:
         _, _, cvat_job_1 = create_project_task_and_job(
@@ -216,7 +211,6 @@ def test_register_200(client: TestClient) -> None:
             response = client.post(
                 "/register",
                 headers=get_auth_header(),
-                json={"wallet_address": user_address, "cvat_email": cvat_email},
             )
 
         assert response.status_code == 200
@@ -240,7 +234,6 @@ def test_register_400_duplicated_address(client: TestClient) -> None:
         response = client.post(
             "/register",
             headers=get_auth_header(generate_jwt_token(email=new_cvat_email)),
-            json={"wallet_address": user_address, "cvat_email": new_cvat_email},
         )
         assert response.status_code == 400
         assert response.json() == {"message": "User already exists"}
@@ -259,7 +252,6 @@ def test_register_400_duplicated_user(client: TestClient) -> None:
         response = client.post(
             "/register",
             headers=get_auth_header(),
-            json={"wallet_address": user_address, "cvat_email": cvat_email},
         )
         assert response.status_code == 400
         assert response.json() == {"message": "User already exists"}
@@ -274,7 +266,6 @@ def test_register_401(client: TestClient) -> None:
         response = client.post(
             "/register",
             headers=get_auth_header(token) if token else None,
-            json={"wallet_address": user_address, "cvat_email": cvat_email},
         )
 
         assert response.status_code == 401

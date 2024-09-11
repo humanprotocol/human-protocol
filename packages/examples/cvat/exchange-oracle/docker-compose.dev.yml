@@ -31,6 +31,8 @@ services:
       - redis:/data
     ports:
       - 6380:6379
+    networks:
+      - test-network
 
   minio:
     container_name: minio

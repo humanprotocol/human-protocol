@@ -23,6 +23,8 @@ services:
     ]
     ports:
       - 6379:6379
+    networks:
+      - test-network
 
   minio:
     container_name: minio
@@ -82,8 +84,11 @@ services:
       STORAGE_USE_SSL: False
       STORAGE_PROVIDER: 'aws'
       ENABLE_CUSTOM_CLOUD_HOST: Yes
+      REDIS_HOST: 'redis'
     depends_on:
       postgres:
+        condition: service_started
+      redis:
         condition: service_started
       minio-mc:
         condition: service_completed_successfully

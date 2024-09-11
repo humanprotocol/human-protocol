@@ -212,7 +212,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         outgoing_webhook = outgoing_webhooks[0]
 
         assert outgoing_webhook.type == OracleWebhookTypes.job_launcher
-        assert outgoing_webhook.event_type == ExchangeOracleEventTypes.task_creation_failed
+        assert outgoing_webhook.event_type == ExchangeOracleEventTypes.job_creation_failed
 
         assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
