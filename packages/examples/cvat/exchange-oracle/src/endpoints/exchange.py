@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import Field
 from sqlalchemy import select
+from strenum import StrEnum  # added in python 3.11
 
 import src.cvat.api_calls as cvat_api
 import src.services.cvat as cvat_service
@@ -37,7 +38,7 @@ from src.schemas.exchange import (
     UserResponse,
     UserStatsResponse,
 )
-from src.utils.enums import BetterEnumMeta, StrEnum
+from src.utils.enums import BetterEnumMeta
 
 router = APIRouter()
 

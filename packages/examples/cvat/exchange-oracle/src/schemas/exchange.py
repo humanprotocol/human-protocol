@@ -2,9 +2,10 @@ from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field
+from strenum import StrEnum  # added in python 3.11
 
 from src.core.types import Networks, TaskTypes
-from src.utils.enums import BetterEnumMeta, StrEnum
+from src.utils.enums import BetterEnumMeta
 
 DEFAULT_TOKEN = "HMT"  # noqa: S105 (it's  not a credential)
 
