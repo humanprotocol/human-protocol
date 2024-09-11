@@ -75,7 +75,7 @@ export function UpdateVersionModal() {
               >
                 Associate your wallet
               </a>
-              with your account.
+              &nbsp;with your account.
             </li>
           </ol>
           This helps us ensure the safety of your information and provide you
