@@ -193,7 +193,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
         assert new_webhook.status == OracleWebhookStatuses.pending.value
-        assert new_webhook.event_type == ExchangeOracleEventTypes.task_creation_failed
+        assert new_webhook.event_type == ExchangeOracleEventTypes.job_creation_failed
         assert new_webhook.attempts == 0
         assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),

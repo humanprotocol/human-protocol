@@ -444,7 +444,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
 
         db_projects = (
             self.session.query(Project)
@@ -583,7 +583,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
 
         db_projects = (
             self.session.query(Project)
