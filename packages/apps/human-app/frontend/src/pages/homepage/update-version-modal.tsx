@@ -57,8 +57,26 @@ export function UpdateVersionModal() {
               </a>
               .
             </li>
-            <li>Complete the KYC (Know Your Customer) verification process.</li>
-            <li>Associate your wallet with your account.</li>
+            <li>
+              <a
+                href="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/kyc-verification"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Complete the KYC
+              </a>
+              (Know Your Customer) verification process.
+            </li>
+            <li>
+              <a
+                href="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/wallet-address-registration"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Associate your wallet
+              </a>
+              with your account.
+            </li>
           </ol>
           This helps us ensure the safety of your information and provide you
           with a better experience. Thank you for your understanding!
