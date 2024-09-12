@@ -118,7 +118,7 @@ export const darkTheme: ThemeOptions = {
         root: {
           boxShadow: 'none',
           borderRadius: '16px !important',
-          border: 'solid 1px rgba(218, 222, 240, 0.8) !important',
+          border: 'solid 1px rgba(255, 255, 255, 0.12) !important',
         },
       },
     },

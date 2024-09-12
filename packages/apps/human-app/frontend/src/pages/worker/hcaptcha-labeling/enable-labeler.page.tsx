@@ -13,10 +13,8 @@ import { breakpoints } from '@/styles/breakpoints';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
-import { useColorMode } from '@/hooks/use-color-mode';
 
 export function EnableLabeler() {
-  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const { closeNotification } = useProtectedLayoutNotification();
   const { user } = useAuthenticatedUser();
@@ -51,9 +49,6 @@ export function EnableLabeler() {
     >
       <Paper
         sx={{
-          backgroundColor: isMobile
-            ? colorPalette.paper.main
-            : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
           padding: isMobile ? '20px' : '40px',

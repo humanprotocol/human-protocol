@@ -10,10 +10,12 @@ import { UserStatsDetails } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labe
 import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const accordionWidth = { width: '284px' };
 
 export function UserStatsAccordion() {
+  const { colorPalette } = useColorMode();
   const {
     data: hcaptchaUserStats,
     isPending: isHcaptchaUserStatsPending,
@@ -39,7 +41,13 @@ export function UserStatsAccordion() {
         <AccordionSummary
           aria-controls="panel1-content"
           disabled={isHcaptchaUserStatsPending || isHcaptchaUserStatsError}
-          expandIcon={<ExpandMoreIcon />}
+          expandIcon={
+            <ExpandMoreIcon
+              sx={{
+                fill: colorPalette.text.primary,
+              }}
+            />
+          }
           id="panel1-header"
           sx={{ ...accordionWidth, height: '76px' }}
         >

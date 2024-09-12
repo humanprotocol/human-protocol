@@ -7,12 +7,10 @@ import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracle
 import { JOB_TYPES } from '@/shared/consts';
 import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
-import { useColorMode } from '@/hooks/use-color-mode';
 
 export type OraclesDataQueryResult = UseQueryResult<OraclesSuccessResponse>;
 
 export function JobsDiscoveryPage() {
-  const { colorPalette } = useColorMode();
   const oraclesQueryResult = useGetOracles();
   const isMobile = useIsMobile();
 
@@ -21,9 +19,6 @@ export function JobsDiscoveryPage() {
       <Grid item xs={12}>
         <Paper
           sx={{
-            backgroundColor: isMobile
-              ? colorPalette.paper.main
-              : colorPalette.white,
             height: '100%',
             boxShadow: 'none',
             padding: isMobile ? '20px' : '40px',

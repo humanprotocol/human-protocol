@@ -9,7 +9,6 @@ import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/mobile
 import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-table';
 import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-drawer-mobile';
-import { useColorMode } from '@/hooks/use-color-mode';
 import { AvailableJobsTableMobile } from './components/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
 import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
@@ -22,7 +21,6 @@ function generateTabA11yProps(index: number) {
 }
 
 export function JobsPage() {
-  const { colorPalette } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
@@ -67,9 +65,6 @@ export function JobsPage() {
         <Grid item xs={12}>
           <Paper
             sx={{
-              backgroundColor: isMobile
-                ? colorPalette.paper.main
-                : colorPalette.white,
               height: '100%',
               boxShadow: 'none',
               padding: isMobile ? '20px' : '40px',

@@ -112,6 +112,7 @@ export function Welcome({ setStage }: WelcomeProps) {
             component="div"
             sx={{
               mb: '1.5625rem',
+              mx: '7.5px',
             }}
             variant="middle"
           />

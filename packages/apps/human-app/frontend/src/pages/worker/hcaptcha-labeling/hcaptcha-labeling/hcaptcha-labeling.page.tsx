@@ -19,7 +19,7 @@ import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-
 import { useColorMode } from '@/hooks/use-color-mode';
 
 export function HcaptchaLabelingPage() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();
@@ -93,9 +93,6 @@ export function HcaptchaLabelingPage() {
     >
       <Paper
         sx={{
-          backgroundColor: isMobile
-            ? colorPalette.paper.main
-            : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
           padding: isMobile ? '20px' : '40px',
@@ -137,6 +134,7 @@ export function HcaptchaLabelingPage() {
                   ref={captchaRef}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
                   sitekey={user.site_key || ''}
+                  theme={isDarkMode ? 'dark' : 'light'}
                 />
               </Grid>
             ) : (

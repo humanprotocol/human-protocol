@@ -6,9 +6,10 @@ import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function ProfileData() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
   return (
@@ -25,10 +26,12 @@ export function ProfileData() {
       </Grid>
       <Grid>
         <Button
-          color="secondary"
           component={Link}
           sx={{
             padding: 0,
+            color: isDarkMode
+              ? onlyDarkModeColor.additionalTextColor
+              : colorPalette.secondary.main,
             ':hover': {
               backgroundColor: 'inherit',
             },

@@ -122,6 +122,9 @@ export function MultiSelect({
               labelId={`${name}-${label}`}
               multiple
               renderValue={renderValue}
+              sx={{
+                '& .MuiSvgIcon-root': { color: colorPalette.primary.main },
+              }}
               {...props}
               onChange={(event) => {
                 handleChange(event, field);

@@ -19,9 +19,10 @@ import { FormCaptcha } from '@/components/h-captcha';
 import { MailTo } from '@/components/ui/mail-to';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function SendResetLinkWorkerSuccessPage() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { t } = useTranslation();
   const { field: email } = useLocationState({
     keyInStorage: 'email',
@@ -70,7 +71,14 @@ export function SendResetLinkWorkerSuccessPage() {
                 values={{ email }}
               />
             </Typography>
-            <Typography color={colorPalette.primary.light} variant="body1">
+            <Typography
+              color={
+                isDarkMode
+                  ? onlyDarkModeColor.additionalTextColor
+                  : colorPalette.primary.light
+              }
+              variant="body1"
+            >
               {t('worker.sendResetLinkSuccess.paragraph2')}
             </Typography>
             <Typography variant="body1">

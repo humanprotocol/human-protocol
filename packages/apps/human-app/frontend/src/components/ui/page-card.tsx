@@ -11,7 +11,10 @@ import { colorPalette as constColorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
-import { darkColorPalette as constDarkColorPalette } from '@/styles/dark-color-palette';
+import {
+  darkColorPalette as constDarkColorPalette,
+  onlyDarkModeColor,
+} from '@/styles/dark-color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
 
 const IconWrapper = styled('div')(() => ({
@@ -171,7 +174,9 @@ export function PageCard({
                   width: '25px',
                   height: '25px',
                   fontSize: '18px',
-                  backgroundColor: colorPalette.paper.main,
+                  backgroundColor: isDarkMode
+                    ? onlyDarkModeColor.backArrowBg
+                    : colorPalette.paper.main,
                 }}
               >
                 <ArrowBackIcon fontSize="inherit" />
@@ -227,7 +232,9 @@ export function PageCard({
               <IconWrapper
                 onClick={goBack.bind(null, backArrowPath)}
                 sx={{
-                  backgroundColor: colorPalette.paper.main,
+                  backgroundColor: isDarkMode
+                    ? onlyDarkModeColor.backArrowBg
+                    : colorPalette.paper.main,
                 }}
               >
                 <ArrowBackIcon fontSize="inherit" />

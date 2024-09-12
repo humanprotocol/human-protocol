@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import type { ColorPalette } from '@/styles/color-palette';
 
 export interface BackgroundContextProps {
@@ -27,17 +27,33 @@ export function BackgroundProvider({
     colorPalette.white
   );
 
-  const setWhiteBackground = () => {
-    setBackgroundColor(colorPalette.white);
-  };
+  const isGrayBackground = (() => {
+    if (isDarkMode) {
+      return backgroundColor === colorPalette.backgroundColor;
+    }
 
-  const setGrayBackground = () => {
+    return backgroundColor === colorPalette.paper.main;
+  })();
+
+  const setWhiteBackground = useCallback(() => {
+    setBackgroundColor(colorPalette.white);
+  }, [colorPalette.white]);
+
+  const setGrayBackground = useCallback(() => {
     if (isDarkMode) {
       setBackgroundColor(colorPalette.backgroundColor);
     } else {
       setBackgroundColor(colorPalette.paper.main);
     }
-  };
+  }, [colorPalette.backgroundColor, colorPalette.paper.main, isDarkMode]);
+
+  useEffect(() => {
+    if (isGrayBackground) {
+      setGrayBackground();
+    } else {
+      setWhiteBackground();
+    }
+  }, [isGrayBackground, setGrayBackground, setWhiteBackground]);
 
   return (
     <BackgroundContext.Provider
