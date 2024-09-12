@@ -2,7 +2,7 @@ import unittest
 import uuid
 
 from src.core.types import ProjectStatuses
-from src.crons.state_trackers import track_escrow_creation
+from src.crons.cvat.state_trackers import track_escrow_creation
 from src.db import SessionLocal
 from src.models.cvat import EscrowCreation, Project
 

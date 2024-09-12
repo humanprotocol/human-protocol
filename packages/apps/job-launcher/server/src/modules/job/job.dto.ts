@@ -43,6 +43,11 @@ export class JobDto {
   @IsEnum(ChainId)
   @IsOptional()
   public chainId?: ChainId;
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public qualifications?: string[];
 }
 
 export class JobQuickLaunchDto extends JobDto {
@@ -377,6 +382,10 @@ export class FortuneManifestDto {
   @ApiProperty({ enum: JobRequestType, name: 'request_type' })
   @IsEnum(JobRequestType)
   public requestType: JobRequestType;
+
+  @IsArray()
+  @IsOptional()
+  public qualifications?: string[];
 }
 
 export class CvatData {
@@ -408,6 +417,10 @@ export class Annotation {
   @IsNumber()
   @IsPositive()
   public job_size: number;
+
+  @IsArray()
+  @IsOptional()
+  public qualifications?: string[];
 }
 
 export class Validation {
@@ -746,6 +759,10 @@ export class HCaptchaManifestDto {
   @IsArray()
   @ValidateNested({ each: true })
   taskdata?: TaskData[];
+
+  @IsArray()
+  @IsOptional()
+  public qualifications?: string[];
 }
 
 class DatapointText {

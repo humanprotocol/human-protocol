@@ -7,13 +7,15 @@ const envSchema = z.object({
 	VITE_NAVBAR_LINK_HUMAN_WEBSITE: z.string(),
 	VITE_NAVBAR_LINK_LAUNCH_JOBS: z.string(),
 	VITE_NAVBAR_LINK_WORK_AND_EARN: z.string(),
-	VITE_BITFINEX_LINK: z.string().optional(),
-	VITE_PROBITGLOBAL_LINK: z.string().optional(),
-	VITE_GATEIO_LINK: z.string().optional(),
-	VITE_BINGX_LINK: z.string().optional(),
-	VITE_COINLISTPRO_LINK: z.string().optional(),
-	VITE_LBANK_LINK: z.string().optional(),
 	VITE_HUMANPROTOCOL_CORE_ARCHITECTURE: z.string().optional(),
+	VITE_FOOTER_LINK_TERMS_OF_SERVICE: z.string(),
+	VITE_FOOTER_LINK_PRIVACY_POLICY: z.string(),
+	VITE_FOOTER_LINK_HUMAN_PROTOCOL: z.string(),
+	VITE_FOOTER_LINK_GITHUB: z.string(),
+	VITE_FOOTER_LINK_DISCORD: z.string(),
+	VITE_FOOTER_LINK_X: z.string(),
+	VITE_FOOTER_LINK_TELEGRAM: z.string(),
+	VITE_FOOTER_LINK_LINKEDIN: z.string(),
 });
 
 let validEnvs;

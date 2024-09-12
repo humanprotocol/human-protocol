@@ -7,10 +7,10 @@ import { validateResponse } from '../../services/validate-response';
 import { reputationSchema } from '@services/api/use-leaderboard-details';
 
 const transformOptionalTokenAmount = (
-	value: string | undefined,
+	value: string | undefined | null,
 	ctx: z.RefinementCtx
 ) => {
-	if (value === undefined) return value;
+	if (value === undefined || value === null) return value;
 
 	const valueAsNumber = Number(value);
 
@@ -27,7 +27,7 @@ const transformOptionalTokenAmount = (
 const walletSchema = z.object({
 	chainId: z.number(),
 	address: z.string(),
-	balance: z.string(),
+	balance: z.string().transform(transformOptionalTokenAmount),
 });
 
 export type AddressDetailsWallet = z.infer<typeof walletSchema>;
@@ -35,11 +35,23 @@ export type AddressDetailsWallet = z.infer<typeof walletSchema>;
 const escrowSchema = z.object({
 	chainId: z.number().optional().nullable(),
 	address: z.string().optional().nullable(),
-	balance: z.string().optional().nullable(),
+	balance: z
+		.string()
+		.optional()
+		.nullable()
+		.transform(transformOptionalTokenAmount),
 	token: z.string().optional().nullable(),
 	factoryAddress: z.string().optional().nullable(),
-	totalFundedAmount: z.string().optional().nullable(),
-	amountPaid: z.string().optional().nullable(),
+	totalFundedAmount: z
+		.string()
+		.optional()
+		.nullable()
+		.transform(transformOptionalTokenAmount),
+	amountPaid: z
+		.string()
+		.optional()
+		.nullable()
+		.transform(transformOptionalTokenAmount),
 	status: z.string().optional().nullable(),
 	manifest: z.string().optional().nullable(),
 	launcher: z.string().optional().nullable(),
@@ -62,7 +74,7 @@ export enum Roles {
 const leaderSchema = z.object({
 	chainId: z.number(),
 	address: z.string(),
-	balance: z.string(),
+	balance: z.string().transform(transformOptionalTokenAmount),
 	role: z.nativeEnum(Roles),
 	amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
 	amountAllocated: z
@@ -94,8 +106,9 @@ export function useAddressDetails() {
 
 	return useQuery({
 		queryFn: async () => {
+			const address = filterParams.address || '0x0';
 			const { data } = await httpService.get(
-				`${apiPaths.addressDetails.path}/${filterParams.address || '0x0'}`,
+				`${apiPaths.addressDetails.path}/${address}`,
 				{ params: { chainId: filterParams.chainId || -1 } }
 			);
 

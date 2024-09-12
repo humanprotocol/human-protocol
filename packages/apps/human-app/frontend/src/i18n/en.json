@@ -189,6 +189,7 @@
       "KYCInProgress": "KYC in progress",
       "confirmEmail": "Confirm email",
       "kycCompleted": "KYC Completed",
+      "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
       "addKYCInfoOnChain": "Add KYC Info On-chain",

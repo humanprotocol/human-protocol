@@ -14,6 +14,7 @@ import { EnableLabelingCommand } from './model/enable-labeling.model';
 import { DailyHmtSpentCommand } from './model/daily-hmt-spent.model';
 import { UserStatsCommand } from './model/user-stats.model';
 import { VerifyTokenCommand } from './model/verify-token.model';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class HCaptchaMapperProfile extends AutomapperProfile {
@@ -51,7 +52,7 @@ export class HCaptchaMapperProfile extends AutomapperProfile {
         ),
         forMember(
           (destination) => destination.secret,
-          mapFrom((source) => source.wallet_address),
+          mapFrom((source) => ethers.getAddress(source.wallet_address)),
         ),
       );
     };

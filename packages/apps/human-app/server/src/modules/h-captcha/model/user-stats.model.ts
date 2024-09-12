@@ -16,9 +16,9 @@ export class UserStatsApiResponse {
   @AutoMap()
   balance: BalanceStats;
   @AutoMap()
-  earnings_data: DateValue[];
+  earnings_data: object;
   @AutoMap()
-  dropoff_data: DateValue[];
+  dropoff_data: object;
 }
 
 export type BalanceStats = {
@@ -27,9 +27,12 @@ export type BalanceStats = {
   recent: number;
   total: number;
 };
-export type DateValue = {
-  date: string;
-  value: number;
+
+export type CurrentDayStats = {
+  billing_units: number;
+  bypass: number;
+  served: number;
+  solved: number;
 };
 
 export class UserStatsResponse {
@@ -42,7 +45,7 @@ export class UserStatsResponse {
   @AutoMap()
   balance: BalanceStats;
   @AutoMap()
-  currentDateStats: DateValue;
+  currentDateStats: CurrentDayStats;
   @AutoMap()
-  currentEarningsStats: DateValue;
+  currentEarningsStats: number;
 }

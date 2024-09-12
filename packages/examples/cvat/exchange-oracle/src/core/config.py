@@ -83,18 +83,25 @@ class LocalhostConfig(_NetworkConfig):
 
     recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
+    reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
 class CronConfig:
     process_job_launcher_webhooks_int = int(os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
-    process_job_launcher_webhooks_chunk_size = os.environ.get(
-        "PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5
+    process_job_launcher_webhooks_chunk_size = int(
+        os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_recording_oracle_webhooks_int = int(
         os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30)
     )
-    process_recording_oracle_webhooks_chunk_size = os.environ.get(
-        "PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
+    process_recording_oracle_webhooks_chunk_size = int(
+        os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
+    )
+    process_reputation_oracle_webhooks_chunk_size = int(
+        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
+    )
+    process_reputation_oracle_webhooks_int = int(
+        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
     track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)

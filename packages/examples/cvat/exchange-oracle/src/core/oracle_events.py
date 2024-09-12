@@ -1,5 +1,3 @@
-from typing import Union
-
 from pydantic import BaseModel
 
 from src.core.types import (
@@ -7,6 +5,7 @@ from src.core.types import (
     JobLauncherEventTypes,
     OracleWebhookTypes,
     RecordingOracleEventTypes,
+    ReputationOracleEventTypes,
 )
 
 EventTypeTag = ExchangeOracleEventTypes | JobLauncherEventTypes | RecordingOracleEventTypes
@@ -44,6 +43,14 @@ class ExchangeOracleEvent_TaskFinished(OracleEvent):
     pass  # escrow is enough for now
 
 
+class ExchangeOracleEvent_EscrowCleaned(OracleEvent):
+    pass
+
+
+class ReputationOracleEvent_EscrowCompleted(OracleEvent):
+    pass
+
+
 _event_type_map = {
     JobLauncherEventTypes.escrow_created: JobLauncherEvent_EscrowCreated,
     JobLauncherEventTypes.escrow_canceled: JobLauncherEvent_EscrowCanceled,
@@ -51,6 +58,8 @@ _event_type_map = {
     RecordingOracleEventTypes.task_rejected: RecordingOracleEvent_TaskRejected,
     ExchangeOracleEventTypes.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
     ExchangeOracleEventTypes.task_finished: ExchangeOracleEvent_TaskFinished,
+    ExchangeOracleEventTypes.escrow_cleaned: ExchangeOracleEvent_EscrowCleaned,
+    ReputationOracleEventTypes.escrow_completed: ReputationOracleEvent_EscrowCompleted,
 }
 
 
@@ -83,6 +92,7 @@ def parse_event(
         OracleWebhookTypes.job_launcher: JobLauncherEventTypes,
         OracleWebhookTypes.recording_oracle: RecordingOracleEventTypes,
         OracleWebhookTypes.exchange_oracle: ExchangeOracleEventTypes,
+        OracleWebhookTypes.reputation_oracle: ReputationOracleEventTypes,
     }
 
     sender_events = sender_events_mapping.get(sender)

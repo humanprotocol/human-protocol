@@ -124,6 +124,8 @@ import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { CronJobType } from '../../common/enums/cron-job';
+import { QualificationService } from '../qualification/qualification.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -247,6 +249,8 @@ describe('JobService', () => {
         CvatConfigService,
         PGPConfigService,
         S3ConfigService,
+        QualificationService,
+        NetworkConfigService,
         {
           provide: Web3Service,
           useValue: {

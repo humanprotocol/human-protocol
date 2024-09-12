@@ -30,6 +30,7 @@ import {
   ErrorBucket,
   ErrorEscrow,
   ErrorJob,
+  ErrorQualification,
 } from '../../common/constants/errors';
 import {
   JobRequestType,
@@ -123,6 +124,7 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 import { CronJobType } from '../../common/enums/cron-job';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { ModuleRef } from '@nestjs/core';
+import { QualificationService } from '../qualification/qualification.service';
 
 @Injectable()
 export class JobService {
@@ -147,6 +149,7 @@ export class JobService {
     private readonly rateService: RateService,
     private moduleRef: ModuleRef,
     @Inject(Encryption) private readonly encryption: Encryption,
+    private readonly qualificationService: QualificationService,
   ) {}
 
   onModuleInit() {
@@ -187,6 +190,9 @@ export class JobService {
         user_guide: dto.userGuide,
         type: requestType,
         job_size: this.cvatConfigService.jobSize,
+        ...(dto.qualifications && {
+          qualifications: dto.qualifications,
+        }),
       },
       validation: {
         min_quality: dto.minQuality,
@@ -224,6 +230,9 @@ export class JobService {
       oracle_stake: HCAPTCHA_ORACLE_STAKE,
       repo_uri: this.web3ConfigService.hCaptchaReputationOracleURI,
       ro_uri: this.web3ConfigService.hCaptchaRecordingOracleURI,
+      ...(jobDto.qualifications && {
+        qualifications: jobDto.qualifications,
+      }),
     };
 
     let groundTruthsData;
@@ -719,6 +728,24 @@ export class JobService {
       this.web3Service.validateChainId(chainId);
     } else {
       chainId = this.routingProtocolService.selectNetwork();
+    }
+
+    if (dto.qualifications) {
+      const validQualifications =
+        await this.qualificationService.getQualifications();
+
+      const validQualificationReferences = validQualifications.map(
+        (q) => q.reference,
+      );
+
+      dto.qualifications.forEach((qualification) => {
+        if (!validQualificationReferences.includes(qualification)) {
+          throw new ControlledError(
+            ErrorQualification.InvalidQualification,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      });
     }
 
     const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
@@ -1461,18 +1488,30 @@ export class JobService {
         description: manifest.requesterDescription,
         requestType: JobRequestType.FORTUNE,
         submissionsRequired: manifest.submissionsRequired,
+        ...(manifest.qualifications &&
+          manifest.qualifications?.length > 0 && {
+            qualifications: manifest.qualifications,
+          }),
       };
     } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
       manifest = manifest as HCaptchaManifestDto;
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
         submissionsRequired: manifest.job_total_tasks,
+        ...(manifest.qualifications &&
+          manifest.qualifications?.length > 0 && {
+            qualifications: manifest.qualifications,
+          }),
       };
     } else {
       manifest = manifest as CvatManifestDto;
       specificManifestDetails = {
         requestType: manifest.annotation?.type,
         submissionsRequired: manifest.annotation?.job_size,
+        ...(manifest.annotation.qualifications &&
+          manifest.annotation.qualifications?.length > 0 && {
+            qualifications: manifest.annotation.qualifications,
+          }),
       };
     }
 

@@ -60,24 +60,20 @@
   gap: 32px;
   align-items: center;
   height: 60px;
+  white-space: nowrap;
   span{
     display: flex;
     align-items: center;
     gap: 16px;
   }
   @media (max-width: 1100px) {
-    margin-top: 0;
     span {
       min-width: 120px;
-    }
-    span:first-child{
-      display: none;
     }
   }
 }
 
 .home-page-find-title-mobile{
-  display: none;
   margin-top: 32px;
   font-size: 14px;
   @media (max-width: 1100px) {
@@ -146,7 +142,6 @@
   &:hover {
     transition: opacity 8ms;
     opacity: 0.8;
-    cursor: pointer;
   }
 }
 
@@ -180,6 +175,7 @@
   }
   .mobile-title {
     display: none;
+    font-weight: 400;
     @media (max-width: 1100px) {
       display: block;
     }

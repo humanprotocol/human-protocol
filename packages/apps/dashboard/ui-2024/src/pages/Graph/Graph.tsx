@@ -31,7 +31,11 @@ const Graph = () => {
 						sx={{
 							width: { xs: '50%', sm: 'auto' },
 						}}
-						label={<Typography fontWeight={600}>Bucketed</Typography>}
+						label={
+							<Typography variant="Components/Button Large">
+								Bucketed
+							</Typography>
+						}
 						value="bucketed"
 					/>
 				</Tabs>

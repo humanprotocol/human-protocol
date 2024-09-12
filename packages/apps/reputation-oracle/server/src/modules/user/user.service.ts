@@ -33,6 +33,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class UserService {
@@ -154,7 +155,7 @@ export class UserService {
       email: user.email,
       language: this.hcaptchaConfigService.defaultLabelerLang,
       country: user.kyc.country,
-      address: user.evmAddress,
+      address: ethers.getAddress(user.evmAddress),
     });
 
     if (!registeredLabeler) {

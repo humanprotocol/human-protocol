@@ -16,6 +16,15 @@ def get_recording_oracle_url(chain_id: int, escrow_address: str) -> str:
     return OperatorUtils.get_leader(ChainId(chain_id), escrow.recording_oracle).webhook_url
 
 
+def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
+    if url := Config.localhost.recording_oracle_url:
+        return url
+
+    escrow = get_escrow(chain_id, escrow_address)
+
+    return OperatorUtils.get_leader(ChainId(chain_id), escrow.recording_oracle).webhook_url
+
+
 def get_job_launcher_url(chain_id: int, escrow_address: str) -> str:
     if url := Config.localhost.job_launcher_url:
         return url

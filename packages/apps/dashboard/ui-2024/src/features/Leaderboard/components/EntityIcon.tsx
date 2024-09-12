@@ -1,37 +1,22 @@
-import recording from '@assets/recording.png';
-import reputation from '@assets/reputation.png';
-import exchange from '@assets/exchange.png';
-import human from '@assets/human.png';
+import { ExchangeOracleIcon } from '@components/Icons/ExchangeOracleIcon';
+import HumanIcon from '@components/Icons/HumanIcon';
+import { JobLauncher } from '@components/Icons/JobLauncher';
+import { RecordingOracle } from '@components/Icons/RecordingOracle';
+import { ReputationOracle } from '@components/Icons/ReputationOracle';
 
 export const EntityIcon: React.FC<{ role: string }> = ({ role }) => {
-	let src = '';
 	switch (role) {
 		case 'Job Launcher':
-			return (
-				<div className="icon-table">
-					<span>JL</span>
-				</div>
-			);
+			return <JobLauncher />;
 		case 'Recording Oracle':
-			src = recording;
-			break;
+			return <RecordingOracle />;
 		case 'Reputation Oracle':
-			src = reputation;
-			break;
+			return <ReputationOracle />;
 		case 'Exchange Oracle':
-			src = exchange;
-			break;
+			return <ExchangeOracleIcon />;
 		case 'HUMAN App':
-			src = human;
-			break;
+			return <HumanIcon />;
 		default:
-			src = human;
-			break;
+			return <HumanIcon />;
 	}
-
-	return (
-		<div className="icon-table">
-			<img src={src} alt="logo" />
-		</div>
-	);
 };
