@@ -39,10 +39,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     }
 
     this.logger.error(
-      `HTTP Status: ${status} | Error Message: ${JSON.stringify(message)} | Request URL: ${request.url}`,
+      `HTTP Status: ${status} | Error Message: ${JSON.stringify(message)} | Request URL: ${request?.url}`,
       exception.stack,
     );
 
-    response.status(status).json({ statusCode: status, message });
+    response.status(status).json(message);
   }
 }
