@@ -80,7 +80,7 @@ export class HCaptchaStatisticsGateway {
       solved: response.solved,
       verified: response.verified,
       currentDateStats: Object.values(response.dropoff_data).pop(),
-      currentEarningsStats: Object.values(response.earnings_data).pop()
+      currentEarningsStats: Object.values(response.earnings_data).pop(),
     } as UserStatsResponse;
   }
 }

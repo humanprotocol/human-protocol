@@ -72,4 +72,3 @@ export const oracleStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
   url: `${EXCHANGE_ORACLE_URL}/stats`,
 };
-

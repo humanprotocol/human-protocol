@@ -5,7 +5,7 @@ const CONFIG_FOLDER_PATH = path.join(__dirname, '../src/common/config');
 const OUTPUT_FILE_PATH = path.join(__dirname, '../ENV.md');
 
 const envVarRegex =
-  /(?:\+\s*)?this\.configService\.get(?:<[\w<>\[\]]+>)?\(\s*'(\w+)'\s*(?:,\s*[^)]*)?\)/gs;
+  /(?:this\.configService\.)?(?:getOrThrow|get)(?:<[\w<>\[\]]+>)?\(\s*'(\w+)'\s*(?:,\s*[^)]*)?\)/gs;
 const commentRegex = /\/\*\*([^*]*\*+([^/*][^*]*\*+)*)\//g;
 
 function extractEnvVarsWithComments(content: string) {
@@ -73,7 +73,7 @@ function processConfigFiles() {
     .filter(
       (file) =>
         file.endsWith('.ts') &&
-        !['index.ts', 'env-schema.ts', 'config.module.ts'].includes(file),
+        !['index.ts', 'env-schema.ts', 'config.module.ts', 'cache-factory.config.ts', 'common-config.module.ts', 'gateway-config.service.ts', 'gateway-config.types.ts', 'params-decorators.ts', 'spec'].includes(file),
     );
 
   let allEnvVarsWithComments: { comment: string; envVar: string }[] = [];

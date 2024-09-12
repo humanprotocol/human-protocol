@@ -39,7 +39,7 @@ const BALANCE = {
 } as BalanceStats;
 export const JWT_TOKEN = 'jwt.token.1';
 export const DROPOFF_DATA_1 = {
-  "2024-07-02": {
+  '2024-07-02': {
     billing_units: 68,
     bypass: 0,
     served: 68,
@@ -47,7 +47,7 @@ export const DROPOFF_DATA_1 = {
   },
 };
 export const DROPOFF_DATA_2 = {
-  "2024-07-03": {
+  '2024-07-03': {
     billing_units: 35,
     bypass: 0,
     served: 35,
@@ -55,7 +55,7 @@ export const DROPOFF_DATA_2 = {
   },
 };
 export const DROPOFF_DATA_3 = {
-  "2024-07-04": {
+  '2024-07-04': {
     billing_units: 45,
     bypass: 0,
     served: 45,
@@ -63,10 +63,10 @@ export const DROPOFF_DATA_3 = {
   },
 };
 const EARNINGS_DATA_1 = {
-  "2024-07-02": 0.2,
+  '2024-07-02': 0.2,
 };
 const EARNINGS_DATA_2 = {
-  "2024-07-03": 0.1,
+  '2024-07-03': 0.1,
 };
 const SUCCESSFULLY_ENABLED = 'Enabled labeling for this account successfully';
 export const jwtUserDataFixture: JwtUserData = {
@@ -143,8 +143,12 @@ export const errorMessagesFixture = {
   withUndefinedErrorCodes:
     'Failed to verify h-captcha token. "error-codes" array is undefined. Response data: {"success":false}',
 };
-export const dropoffDataFixture = { ...DROPOFF_DATA_1, ...DROPOFF_DATA_2, ...DROPOFF_DATA_3};
-export const earningsDataFixture = { ...EARNINGS_DATA_1, ...EARNINGS_DATA_2};
+export const dropoffDataFixture = {
+  ...DROPOFF_DATA_1,
+  ...DROPOFF_DATA_2,
+  ...DROPOFF_DATA_3,
+};
+export const earningsDataFixture = { ...EARNINGS_DATA_1, ...EARNINGS_DATA_2 };
 
 export const userStatsApiResponseFixture: UserStatsApiResponse = {
   solved: SOLVED,
