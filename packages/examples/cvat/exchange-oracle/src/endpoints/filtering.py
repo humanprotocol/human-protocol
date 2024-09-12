@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import Any, ClassVar, TypeVar
 
@@ -124,7 +125,9 @@ class Filter(_Filter):
         if field.field_name == cls.Constants.selector_field_name:
             if not value:
                 return cls.model_fields[field.field_name].get_default(call_default_factory=True)
-            return list(value.split(","))
+            if value.startswith("[") and value.endswith("]"):
+                return json.loads(value)
+            return [v.strip() for v in value.split(",")]
         return value
 
 

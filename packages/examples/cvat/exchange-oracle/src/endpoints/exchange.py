@@ -63,6 +63,7 @@ class JobsFilter(Filter):
         reward_token = auto()
         created_at = auto()
 
+    # FIXME: incorrect swagger specification
     fields: Annotated[list[SelectableFields], Query(default_factory=list)]
 
     class Constants(Filter.Constants):
