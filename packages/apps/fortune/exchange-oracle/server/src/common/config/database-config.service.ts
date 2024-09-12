@@ -10,7 +10,7 @@ export class DatabaseConfigService {
    * Default: undefined
    */
   get url(): string | undefined {
-    return this.configService.get<string>('POSTGRES_URL', '');
+    return this.configService.get<string>('POSTGRES_URL');
   }
 
   /**
@@ -18,7 +18,7 @@ export class DatabaseConfigService {
    * Default: undefined
    */
   get host(): string | undefined {
-    return this.configService.get<string>('POSTGRES_HOST', '');
+    return this.configService.get<string>('POSTGRES_HOST');
   }
 
   /**
