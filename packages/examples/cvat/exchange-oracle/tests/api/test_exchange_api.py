@@ -1,9 +1,12 @@
 import json
+import math
 import uuid
 from datetime import datetime, timedelta
+from itertools import combinations
 from time import sleep
 from unittest.mock import patch
 
+from fastapi.responses import Response
 from fastapi.testclient import TestClient
 from jose import jwt
 
@@ -44,6 +47,15 @@ def get_auth_header(token: str = generate_jwt_token()) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
+empty_result = {
+    "page": 0,
+    "total_pages": 0,
+    "total_results": 0,
+    "results": [],
+    "page_size": 5,  # default page size
+}
+
+
 def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
     response = client.get(
         "/job",
@@ -52,11 +64,7 @@ def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
 
     assert response.status_code == 200
     paginated_result = response.json()
-    # FIXME: total_pages 0
-    assert paginated_result["page"] == 1
-    assert isinstance(paginated_result["results"], list)
-    assert len(paginated_result["results"]) == 0
-    assert paginated_result["total_results"] == 0
+    assert paginated_result == empty_result
 
 
 def test_empty_list_jobs_200_without_address(client: TestClient) -> None:
@@ -67,71 +75,165 @@ def test_empty_list_jobs_200_without_address(client: TestClient) -> None:
 
     assert response.status_code == 200
     paginated_result = response.json()
-    # FIXME: total_pages 0
-    assert paginated_result["page"] == 1
-    assert isinstance(paginated_result["results"], list)
-    assert len(paginated_result["results"]) == 0
-    assert paginated_result["total_results"] == 0
+    assert paginated_result == empty_result
 
 
-def test_list_jobs_200_with_address(client: TestClient) -> None:
-    with SessionLocal.begin() as session:
-        _, _, cvat_job_1 = create_project_task_and_job(
-            session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+def test_list_jobs_400_with_unsupported_page_size(client: TestClient) -> None:
+    response = client.get("/job", headers=get_auth_header(), params={"page_size": 1000})
+
+    assert response.status_code == 400
+    assert (
+        response.text
+        == '{"errors":[{"field":"page_size","message":"Input should be less than or equal to 10"}]}'
+    )
+
+
+def test_list_jobs_200_with_address_and_pagination(client: TestClient) -> None:
+    def validate_result(
+        response: Response,
+        result_to_compare_with: list[str],
+        *,
+        page: int = 0,
+        page_size: int = 5,
+        total_pages: int | None = None,
+    ) -> None:
+        total_results = len(result_to_compare_with)
+        if total_pages is None:
+            total_pages = math.ceil(total_results / page_size)
+
+        assert response.status_code == 200
+        paginated_result = response.json()
+
+        assert paginated_result["page"] == page
+        assert paginated_result["total_pages"] == total_pages
+        assert paginated_result["total_results"] == total_results
+        assert isinstance(paginated_result["results"], list)
+        assert (
+            len(paginated_result["results"]) == page_size
+            if page != total_pages - 1
+            else total_results - page * page_size
         )
-        create_project_task_and_job(session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", 2)
-        create_project_task_and_job(session, "0x86e83d346041E8806e352681f3F14549C0d2BC69", 3)
+        assert [j["escrow_address"] for j in paginated_result["results"]] == result_to_compare_with[
+            page * page_size : (page + 1) * page_size
+        ]
 
-        user = User(
-            wallet_address=user_address,
-            cvat_email=cvat_email,
-            cvat_id=1,
+    session = SessionLocal()
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    jobs_count = 10
+    escrows = []
+    for i in range(jobs_count):
+        cvat_project, _, cvat_job = create_project_task_and_job(
+            session, f"0x86e83d346041E8806e352681f3F14549C0d2BC6{i}", i + 1
         )
-        session.add(user)
-
         assignment = Assignment(
             id=str(uuid.uuid4()),
             user_wallet_address=user_address,
-            cvat_job_id=cvat_job_1.cvat_id,
+            cvat_job_id=cvat_job.cvat_id,
             expires_at=datetime.now() + timedelta(days=1),
         )
         session.add(assignment)
-
+        escrows.append(cvat_project.escrow_address)
         session.commit()
 
-        with (
-            open("tests/utils/manifest.json") as data,
-            patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
-        ):
-            manifest = json.load(data)
-            mock_get_manifest.return_value = manifest
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
 
+        # check default pagination parameters
+        response = client.get(
             # With wallet address
+            "/job",
+            headers=get_auth_header(),
+        )
+        validate_result(response, escrows)
+
+        # check custom pagination parameters
+        for page_size in range(1, jobs_count + 1):
+            total_pages = math.ceil(jobs_count / page_size)
+            for page in range(total_pages):
+                response = client.get(
+                    "/job",
+                    headers=get_auth_header(),
+                    params={
+                        "page_size": page_size,
+                        "page": page,
+                    },
+                )
+
+                validate_result(
+                    response, escrows, page=page, page_size=page_size, total_pages=total_pages
+                )
+    session.close()
+
+
+def test_list_jobs_200_with_fields(client: TestClient) -> None:
+    session = SessionLocal()
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    _, _, cvat_job = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC66", 1
+    )
+    assignment = Assignment(
+        id=str(uuid.uuid4()),
+        user_wallet_address=user_address,
+        cvat_job_id=cvat_job.cvat_id,
+        expires_at=datetime.now() + timedelta(days=1),
+    )
+    session.add(assignment)
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        required_fields = {
+            "escrow_address",
+            "chain_id",
+            "job_type",
+            "status",
+            "qualifications",  # TODO: not marked as required in the specification
+        }  # TODO: updated_at
+        selectable_fields = {"job_description", "created_at", "reward_amount", "reward_token"}
+
+        all_schema_fields = required_fields | selectable_fields
+
+        for fields in [None] + [
+            list(combination)
+            for fields_len in range(1, len(selectable_fields) + 1)
+            for combination in combinations(selectable_fields, fields_len)
+        ]:
             response = client.get(
                 "/job",
                 headers=get_auth_header(),
+                # TODO: fields=val1&fields=val2 is not supported
+                params={"fields": ",".join(fields)} if fields else None,
+            )
+            assert response.status_code == 200
+            jobs = response.json()["results"]
+            assert set(jobs[0].keys()) == (
+                (required_fields | set(fields)) if fields else all_schema_fields
             )
 
-            assert response.status_code == 200
-            paginated_result = response.json()
-            assert paginated_result["page"] == 1
-            assert paginated_result["total_pages"] == 1
-            assert isinstance(paginated_result["results"], list)
-            assert len(paginated_result["results"]) == 1
-            assert paginated_result["total_results"] == 1
-
-            for job in paginated_result["results"]:
-                assert set(job.keys()) == {
-                    "escrow_address",
-                    "chain_id",
-                    "job_type",
-                    "status",
-                    "job_description",
-                    "reward_amount",
-                    "reward_token",
-                    "created_at",
-                    "qualifications",
-                }
+    session.close()
 
 
 def test_list_jobs_200_without_address(client: TestClient) -> None:
@@ -173,7 +275,7 @@ def test_list_jobs_200_without_address(client: TestClient) -> None:
 
             assert response.status_code == 200
             paginated_result = response.json()
-            assert paginated_result["page"] == 1
+            assert paginated_result["page"] == 0
             assert paginated_result["total_pages"] == 1
             assert isinstance(paginated_result["results"], list)
             assert len(paginated_result["results"]) == 3
