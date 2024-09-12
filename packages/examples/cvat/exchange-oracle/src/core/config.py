@@ -244,6 +244,8 @@ class HumanAppConfig:
 
 class ApiConfig:
     default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
+    min_page_size = int(os.environ.get("MIN_API_PAGE_SIZE", 1))
+    max_page_size = int(os.environ.get("MAX_API_PAGE_SIZE", 10))
 
     stats_rps_limit = int(os.environ.get("STATS_RPS_LIMIT", 4))
 
