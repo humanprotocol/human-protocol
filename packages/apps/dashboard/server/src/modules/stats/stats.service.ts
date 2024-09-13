@@ -7,6 +7,7 @@ import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import {
   EnvironmentConfigService,
+  HCAPTCHA_STATS_API_START_DATE,
   HMT_STATS_START_DATE,
 } from '../../common/config/env-config.service';
 import {
@@ -58,7 +59,7 @@ export class StatsService implements OnModuleInit {
 
   private async fetchHistoricalHcaptchaStats(): Promise<void> {
     this.logger.log('Fetching historical hCaptcha stats.');
-    let startDate = dayjs(HCAPTCHA_STATS_START_DATE);
+    let startDate = dayjs(HCAPTCHA_STATS_API_START_DATE);
     const currentDate = dayjs();
     const dates = [];
 
