@@ -1,9 +1,11 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
-import { StyledTabs, StyledTab } from '../../../components/Tabs';
+import { useEffect, useState } from 'react';
+import { CardSetupForm } from '../../../components/CardSetup/CardSetupForm';
+import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { IS_TESTNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';
+import { checkUserCard } from '../../../services/payment';
 import { PayMethod } from '../../../types';
 import { CryptoPayForm } from './CryptoPayForm';
 import { FiatPayForm } from './FiatPayForm';
@@ -12,7 +14,17 @@ import { LaunchJobProgress } from './LaunchJobProgress';
 export const PayJob = () => {
   const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
   const [isPaying, setIsPaying] = useState(false);
+  const [hasCard, setHasCard] = useState<boolean | null>(null);
   const { showError } = useSnackbar();
+
+  useEffect(() => {
+    const fetchCardStatus = async () => {
+      const result = await checkUserCard();
+      setHasCard(result);
+    };
+
+    fetchCardStatus();
+  }, []);
 
   const handleStart = () => {
     setIsPaying(true);
@@ -32,6 +44,54 @@ export const PayJob = () => {
       showError(err);
     }
   };
+
+  if (hasCard === null) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        flex={1}
+        sx={{
+          background: '#fff',
+          border: '1px solid #dbe1f6',
+          borderRadius: '20px',
+          borderTopLeftRadius: payMethod === 0 ? '0px' : '20px',
+          borderTopRightRadius: payMethod === 1 ? '0px' : '20px',
+          px: '10%',
+          pt: 10,
+          pb: 5,
+        }}
+      >
+        <div>Loading...</div>
+      </Box>
+    );
+  }
+
+  if (!hasCard) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        flex={1}
+        sx={{
+          background: '#fff',
+          border: '1px solid #dbe1f6',
+          borderRadius: '20px',
+          borderTopLeftRadius: payMethod === 0 ? '0px' : '20px',
+          borderTopRightRadius: payMethod === 1 ? '0px' : '20px',
+          px: '10%',
+          pt: 10,
+          pb: 5,
+        }}
+      >
+        <CardSetupForm onCardSetup={() => setHasCard(true)} />
+      </Box>
+    );
+  }
 
   return !isPaying ? (
     <Box

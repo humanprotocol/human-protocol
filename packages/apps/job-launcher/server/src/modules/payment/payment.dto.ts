@@ -35,6 +35,12 @@ export class PaymentCryptoCreateDto {
   public transactionHash: string;
 }
 
+export class CardConfirmDto {
+  @ApiProperty({ name: 'payment_id' })
+  @IsString()
+  public setupId: string;
+}
+
 export class GetRateDto {
   @ApiProperty()
   @IsString()

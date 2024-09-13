@@ -4,6 +4,19 @@ import { PAYMENT_SIGNATURE_KEY } from '../constants/payment';
 import { CryptoPaymentRequest, FiatPaymentRequest } from '../types';
 import api from '../utils/api';
 
+export const createSetupIntent = async () => {
+  const { data } = await api.post('/payment/fiat/setup-card');
+  return data;
+};
+
+export const confirmSetupIntent = async (setupIntentId: string) => {
+  const { data } = await api.post('/payment/fiat/confirm-card', {
+    setupId: setupIntentId,
+  });
+
+  return data;
+};
+
 export const createCryptoPayment = async (
   signer: WalletClient,
   body: CryptoPaymentRequest,
@@ -51,6 +64,12 @@ export const getFee = async () => {
 
 export const getOperatorAddress = async () => {
   const { data } = await api.get('/web3/operator-address');
+
+  return data;
+};
+
+export const checkUserCard = async () => {
+  const { data } = await api.get('/payment/check-card');
 
   return data;
 };

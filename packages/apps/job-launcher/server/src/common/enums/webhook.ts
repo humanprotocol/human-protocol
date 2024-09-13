@@ -4,6 +4,7 @@ export enum EventType {
   ESCROW_COMPLETED = 'escrow_completed',
   TASK_CREATION_FAILED = 'task_creation_failed',
   ESCROW_FAILED = 'escrow_failed',
+  ABUSE = 'abuse',
 }
 
 export enum OracleType {

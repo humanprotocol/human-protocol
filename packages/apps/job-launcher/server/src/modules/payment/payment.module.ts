@@ -10,11 +10,13 @@ import { PaymentRepository } from './payment.repository';
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
 import { RateService } from './rate.service';
+import { PaymentInfoEntity } from './payment-info.entity';
+import { PaymentInfoRepository } from './payment-info.repository';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([PaymentEntity]),
+    TypeOrmModule.forFeature([PaymentEntity, PaymentInfoEntity]),
     ConfigModule,
     Web3Module,
     MinioModule.registerAsync({
@@ -32,7 +34,17 @@ import { RateService } from './rate.service';
     }),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, PaymentRepository, RateService],
-  exports: [PaymentService, PaymentRepository, RateService],
+  providers: [
+    PaymentService,
+    PaymentRepository,
+    RateService,
+    PaymentInfoRepository,
+  ],
+  exports: [
+    PaymentService,
+    PaymentRepository,
+    RateService,
+    PaymentInfoRepository,
+  ],
 })
 export class PaymentModule {}

@@ -3,7 +3,6 @@ import { KVStoreKeys, NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
-  BoxProps,
   Button,
   Checkbox,
   FormControl,
@@ -14,38 +13,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import {
-  CardCvcElement,
-  CardExpiryElement,
-  CardNumberElement,
-  useElements,
-  useStripe,
-} from '@stripe/react-stripe-js';
+import { useElements, useStripe } from '@stripe/react-stripe-js';
 import { useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
 import { useReadContract } from 'wagmi';
 import { CURRENCY } from '../../../constants/payment';
+
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
 import { useAppDispatch, useAppSelector } from '../../../state';
 import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
 import { JobType } from '../../../types';
-
-const StripeElement = styled(Box)<BoxProps & { disabled?: boolean }>(
-  (props) => ({
-    border: '1px solid rgba(50,10,141,0.5)',
-    borderRadius: '4px',
-    height: '56px',
-    padding: '18px 16px',
-    pointerEvents: props.disabled ? 'none' : 'auto',
-    opacity: props.disabled ? 0.2 : 1,
-    '&:focus-within': {
-      borderColor: '#32108D',
-    },
-  }),
-);
 
 export const FiatPayForm = ({
   onStart,
@@ -64,10 +43,7 @@ export const FiatPayForm = ({
 
   const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentData, setPaymentData] = useState({
-    amount: '',
-    name: '',
-  });
+  const [amount, setAmount] = useState<string>('');
   const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
   const [minFee, setMinFee] = useState<number>(0.01);
 
@@ -94,7 +70,7 @@ export const FiatPayForm = ({
     },
   });
 
-  const fundAmount = paymentData.amount ? Number(paymentData.amount) : 0;
+  const fundAmount = amount ? Number(amount) : 0;
   const feeAmount = Math.max(
     minFee,
     fundAmount * (Number(jobLauncherFee) / 100),
@@ -114,78 +90,27 @@ export const FiatPayForm = ({
     return totalAmount - accountAmount;
   }, [payWithAccountBalance, totalAmount, accountAmount]);
 
-  const cardElementsDisabled = useMemo(() => {
-    if (paymentData.amount) {
-      return creditCardPayAmount <= 0;
-    } else {
-      if (payWithAccountBalance) return true;
-      return false;
-    }
-  }, [paymentData, payWithAccountBalance, creditCardPayAmount]);
-
-  const handlePaymentDataFormFieldChange = (
-    fieldName: string,
-    fieldValue: any,
-  ) => {
-    setPaymentData({ ...paymentData, [fieldName]: fieldValue });
-  };
-
   const handlePay = async () => {
     if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
-      // Make sure to disable form submission until Stripe.js has loaded.
-      // eslint-disable-next-line no-console
-      console.error('Stripe.js has not yet loaded.');
+      onError('Stripe.js has not yet loaded.');
       return;
     }
 
     setIsLoading(true);
-
     try {
       if (creditCardPayAmount > 0) {
-        if (!paymentData.name) {
-          throw new Error('Please enter name on card.');
-        }
-
-        // Stripe elements validation
-        const cardNumber = elements.getElement(CardNumberElement) as any;
-        const cardExpiry = elements.getElement(CardExpiryElement) as any;
-        const cardCvc = elements.getElement(CardCvcElement) as any;
-
-        if (!cardNumber || !cardExpiry || !cardCvc) {
-          throw new Error('Card elements are not initialized');
-        }
-        if (cardNumber._invalid || cardNumber._empty) {
-          throw new Error('Your card number is incomplete.');
-        }
-        if (cardExpiry._invalid || cardExpiry._empty) {
-          throw new Error("Your card's expiration date is incomplete.");
-        }
-        if (cardCvc._invalid || cardCvc._empty) {
-          throw new Error("Your card's security code is incomplete.");
-        }
-
-        // send payment if creditCardPayment > 0
         const clientSecret = await paymentService.createFiatPayment({
           amount: creditCardPayAmount,
-          currency: CURRENCY.usd,
+          currency: 'usd',
         });
 
-        // stripe payment
         const { error: stripeError, paymentIntent } =
-          await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-              card: cardNumber,
-              billing_details: {
-                name: paymentData.name,
-              },
-            },
-          });
+          await stripe.confirmCardPayment(clientSecret);
+
         if (stripeError) {
           throw stripeError;
         }
 
-        // confirm payment
         const success = await paymentService.confirmFiatPayment(
           paymentIntent.id,
         );
@@ -255,43 +180,14 @@ export const FiatPayForm = ({
               </Box>
             </Grid>
             <Grid item xs={12}>
-              <StripeElement disabled={cardElementsDisabled}>
-                <CardNumberElement id="card-number" />
-              </StripeElement>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <StripeElement disabled={cardElementsDisabled}>
-                <CardExpiryElement id="card-expiry" />
-              </StripeElement>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <StripeElement disabled={cardElementsDisabled}>
-                <CardCvcElement id="card-cvc" />
-              </StripeElement>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Name on Card"
-                value={paymentData.name}
-                onChange={(e) =>
-                  handlePaymentDataFormFieldChange('name', e.target.value)
-                }
-                disabled={cardElementsDisabled}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <FormControl fullWidth>
                 <TextField
                   fullWidth
                   placeholder="Amount USD"
                   variant="outlined"
-                  value={paymentData.amount}
+                  value={amount}
                   type="number"
-                  onChange={(e) =>
-                    handlePaymentDataFormFieldChange('amount', e.target.value)
-                  }
+                  onChange={(e) => setAmount(e.target.value)}
                 />
               </FormControl>
             </Grid>
@@ -324,18 +220,6 @@ export const FiatPayForm = ({
                 </Typography>
               )}
             </Box>
-            {/* <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                py: 2,
-                borderBottom: '1px solid #E5E7EB',
-              }}
-            >
-              <Typography>Amount due</Typography>
-              <Typography color="text.secondary">{totalAmount} USD</Typography>
-            </Box> */}
             <Box
               sx={{
                 display: 'flex',
@@ -373,16 +257,6 @@ export const FiatPayForm = ({
                     {creditCardPayAmount.toFixed(2)} USD
                   </Typography>
                 </Stack>
-                {/* <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography color="text.secondary">Fees</Typography>
-                  <Typography color="text.secondary">
-                    ({JOB_LAUNCHER_FEE}%) {feeAmount} USD
-                  </Typography>
-                </Stack> */}
                 <Stack
                   direction="row"
                   justifyContent="space-between"
@@ -412,7 +286,7 @@ export const FiatPayForm = ({
             size="large"
             onClick={handlePay}
             loading={isLoading}
-            disabled={!paymentData.amount}
+            disabled={!amount}
           >
             Pay now
           </LoadingButton>
