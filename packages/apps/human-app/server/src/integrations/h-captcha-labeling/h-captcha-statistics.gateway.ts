@@ -79,8 +79,13 @@ export class HCaptchaStatisticsGateway {
       served: response.served,
       solved: response.solved,
       verified: response.verified,
-      currentDateStats: Object.values(response.dropoff_data).pop(),
-      currentEarningsStats: Object.values(response.earnings_data).pop()
+      currentDateStats: Object.values(response.dropoff_data).pop() || {
+        billing_units: 0,
+        bypass: 0,
+        served: 0,
+        solved: 0,
+      },
+      currentEarningsStats: Object.values(response.earnings_data).pop() || 0,
     } as UserStatsResponse;
   }
 }
