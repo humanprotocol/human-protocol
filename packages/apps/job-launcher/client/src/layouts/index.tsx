@@ -9,12 +9,12 @@ export default function Layout() {
 
   return (
     <>
-      <BetaDisclaimer />
       {isAuthed && user?.status === UserStatus.ACTIVE ? (
         <AuthLayout />
       ) : (
         <DefaultLayout />
       )}
+      <BetaDisclaimer />
     </>
   );
 }
