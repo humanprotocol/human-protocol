@@ -31,7 +31,7 @@ export class CronJobService {
 
   @Cron('*/3 * * * *')
   async updateJobsListCron() {
-    console.log('CRON START');
+    this.logger.log('CRON START');
 
     const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
     const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
@@ -49,7 +49,7 @@ export class CronJobService {
       await this.updateJobsListCache(oracle, 'Bearer ' + response.access_token);
     }
 
-    console.log('CRON END');
+    this.logger.log('CRON END');
   }
 
   async updateJobsListCache(oracle: OracleDiscoveryResponse, token: string) {
