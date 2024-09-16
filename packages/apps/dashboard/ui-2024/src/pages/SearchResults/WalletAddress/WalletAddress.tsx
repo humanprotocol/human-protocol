@@ -8,6 +8,7 @@ import { useHMTPrice } from '@services/api/use-hmt-price';
 import { WalletAddressTransactionsTable } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
+import { NumericFormat } from 'react-number-format';
 
 const HmtPrice = () => {
 	const {
@@ -67,7 +68,12 @@ const WalletAddress = ({
 					<TitleSectionWrapper title="Balance">
 						<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
 							<Typography variant="body2">
-								<FormatNumberWithDecimals value={balance} />
+								<NumericFormat
+									displayType="text"
+									value={Number(balance) < 1 ? Number(balance) * 1e18 : balance}
+									thousandSeparator=","
+									decimalScale={0}
+								/>
 							</Typography>
 							<Typography
 								sx={{
