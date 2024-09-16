@@ -8,6 +8,7 @@ import { useHMTPrice } from '@services/api/use-hmt-price';
 import { WalletAddressTransactionsTable } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { NumericFormat } from 'react-number-format';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
 const HmtPrice = () => {
 	const {
@@ -51,6 +52,7 @@ const WalletAddress = ({
 	data: AddressDetailsWallet;
 }) => {
 	const { filterParams } = useWalletSearch();
+	const { mobile } = useBreakPoints();
 
 	return (
 		<>
@@ -71,7 +73,7 @@ const WalletAddress = ({
 									displayType="text"
 									value={Number(balance) < 1 ? Number(balance) * 1e18 : balance}
 									thousandSeparator=","
-									decimalScale={0}
+									decimalScale={mobile.isMobile ? 4 : undefined}
 								/>
 							</Typography>
 							<Typography
