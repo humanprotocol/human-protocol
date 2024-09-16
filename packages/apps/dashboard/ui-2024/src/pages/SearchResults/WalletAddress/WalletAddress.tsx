@@ -7,7 +7,6 @@ import { AddressDetailsWallet } from '@services/api/use-address-details';
 import { useHMTPrice } from '@services/api/use-hmt-price';
 import { WalletAddressTransactionsTable } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
 import { NumericFormat } from 'react-number-format';
 
 const HmtPrice = () => {
