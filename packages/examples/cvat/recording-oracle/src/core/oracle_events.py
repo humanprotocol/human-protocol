@@ -24,12 +24,12 @@ class RecordingOracleEvent_JobCompleted(OracleEvent):
 
 
 class RecordingOracleEvent_SubmissionRejected(OracleEvent):
-    class RejectedTaskInfo(BaseModel):
-        task_id: str
+    class RejectedAssignmentInfo(BaseModel):
+        assignment_id: str
         reason: str
 
     # no task_id, escrow is enough for now
-    assignments: list[RejectedTaskInfo]
+    assignments: list[RejectedAssignmentInfo]
 
 
 class ExchangeOracleEvent_JobCreationFailed(OracleEvent):

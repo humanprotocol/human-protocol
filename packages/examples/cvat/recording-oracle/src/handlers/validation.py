@@ -203,8 +203,8 @@ class _TaskValidator:
                     # TODO: send all assignments, handle rejection reason in Exchange Oracle
                     # change validation frames in these jobs once possible
                     assignments=[
-                        RecordingOracleEvent_SubmissionRejected.RejectedTaskInfo(
-                            task_id=job_id_to_assignment_id[rejected_job_id],
+                        RecordingOracleEvent_SubmissionRejected.RejectedAssignmentInfo(
+                            assignment_id=job_id_to_assignment_id[rejected_job_id],
                             reason=self._LOW_QUALITY_REASON_MESSAGE_TEMPLATE.format(
                                 validation_result.job_results[rejected_job_id],
                                 self.manifest.validation.min_quality,
