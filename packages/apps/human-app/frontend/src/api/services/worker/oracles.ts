@@ -11,6 +11,8 @@ const OracleSuccessSchema = z.object({
   role: z.string(),
   url: z.string().optional().nullable(),
   jobTypes: z.array(z.string()),
+  registrationNeeded: z.boolean(),
+  registrationInstructions: z.string(),
 });
 
 const OraclesSuccessSchema = z.array(OracleSuccessSchema);
