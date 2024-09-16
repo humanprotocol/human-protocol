@@ -189,7 +189,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
             event_type=RecordingOracleEventTypes.submission_rejected.value,
-            event_data={"assignments": [{"task_id": assignment_id, "reason": "sample reason"}]},
+            event_data={
+                "assignments": [{"assignment_id": assignment_id, "reason": "sample reason"}]
+            },
             direction=OracleWebhookDirectionTags.incoming,
         )
         self.session.add(webhook)
@@ -248,7 +250,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             status=OracleWebhookStatuses.pending.value,
             event_type=RecordingOracleEventTypes.submission_rejected.value,
             event_data={
-                "assignments": [{"task_id": "sample assignment id", "reason": "sample reason"}]
+                "assignments": [
+                    {"assignment_id": "sample assignment id", "reason": "sample reason"}
+                ]
             },
             direction=OracleWebhookDirectionTags.incoming,
         )

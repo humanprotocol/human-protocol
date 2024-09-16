@@ -85,7 +85,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
             event = RecordingOracleEvent_SubmissionRejected.model_validate(webhook.event_data)
 
             rejected_assignments = cvat_db_service.get_assignments_by_id(
-                db_session, [t.task_id for t in event.assignments]
+                db_session, [t.assignment_id for t in event.assignments]
             )
             rejected_jobs = cvat_db_service.get_jobs_by_cvat_id(
                 db_session, [a.cvat_job_id for a in rejected_assignments]
