@@ -20,7 +20,7 @@ export class ServerConfigService {
   get host(): string {
     return this.configService.get<string>('HOST', 'localhost');
   }
-  
+
   /**
    * The port number on which the server will listen for incoming connections.
    * Default: 5000

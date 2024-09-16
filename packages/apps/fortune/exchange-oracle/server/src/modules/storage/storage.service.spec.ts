@@ -7,7 +7,7 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { MOCK_ADDRESS, MOCK_RPC_URL } from '../../../test/constants';
+import { MOCK_ADDRESS } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';

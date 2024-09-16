@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class S3ConfigService {
   constructor(private configService: ConfigService) {}
-  
+
   /**
    * The endpoint URL for connecting to the S3 service.
    * Default: '127.0.0.1'
