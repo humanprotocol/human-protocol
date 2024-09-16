@@ -11,8 +11,6 @@ from pydantic import ValidationError
 from src.core.types import AssignmentStatuses, JobStatuses, Networks
 from src.db import SessionLocal
 from src.endpoints.serializers import serialize_job
-
-# TODO: test for serialize_assignment, resign_assignment
 from src.models.cvat import Assignment, User
 from src.schemas import exchange as service_api
 from src.services.exchange import create_assignment
