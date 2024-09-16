@@ -34,7 +34,7 @@ import languages from '../../../data/languages.json';
 import locations from '../../../data/locations.json';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { getQualifications } from '../../../services/qualification';
-import { HCaptchaJobType } from '../../../types';
+import { HCaptchaJobType, Qualification } from '../../../types';
 import { HCaptchaJobRequesteValidationSchema } from './schema';
 
 export const HCaptchaJobRequestForm = () => {
@@ -42,9 +42,9 @@ export const HCaptchaJobRequestForm = () => {
     useCreateJobPageUI();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
   const [searchParams] = useSearchParams();
-  const [qualificationsOptions, setQualificationsOptions] = useState<string[]>(
-    [],
-  );
+  const [qualificationsOptions, setQualificationsOptions] = useState<
+    Qualification[]
+  >([]);
 
   const initialValues = {
     dataUrl: '',
@@ -82,7 +82,10 @@ export const HCaptchaJobRequestForm = () => {
       accuracyTarget: Number(data.accuracyTarget) / 100,
       minRequests: Number(data.minRequests),
       maxRequests: Number(data.maxRequests),
-      qualifications: data.qualifications,
+
+      qualifications: (data.qualifications as Qualification[]).map(
+        (qualification) => qualification.reference,
+      ),
       advanced: {
         workerLanguage: data.workerLanguage,
         workerLocation: data.workerLocation,
@@ -132,10 +135,7 @@ export const HCaptchaJobRequestForm = () => {
     }
     const fetchData = async () => {
       try {
-        const fetchedQualifications = await getQualifications();
-        setQualificationsOptions(
-          fetchedQualifications.map((qualification) => qualification.reference),
-        );
+        setQualificationsOptions(await getQualifications());
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error fetching data:', error);
@@ -306,7 +306,7 @@ export const HCaptchaJobRequestForm = () => {
                   <Autocomplete
                     multiple
                     options={qualificationsOptions}
-                    getOptionLabel={(option) => option}
+                    getOptionLabel={(option) => option.title}
                     value={values.qualifications}
                     onChange={(event, newValues) => {
                       setFieldValue('qualifications', newValues);
@@ -316,7 +316,10 @@ export const HCaptchaJobRequestForm = () => {
                     handleHomeEndKeys
                     renderTags={(value, getTagProps) =>
                       value.map((option, index) => (
-                        <Chip label={option} {...getTagProps({ index })} />
+                        <Chip
+                          label={option.title}
+                          {...getTagProps({ index })}
+                        />
                       ))
                     }
                     renderInput={(params) => (

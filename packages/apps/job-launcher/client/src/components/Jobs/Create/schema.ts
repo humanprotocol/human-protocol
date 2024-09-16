@@ -19,7 +19,7 @@ export const CvatJobRequestValidationSchema = Yup.object().shape({
     .required('Accuracy target is required')
     .moreThan(0, 'Accuracy target must be greater than 0')
     .max(100, 'Accuracy target must be less than or equal to 100'),
-  qualifications: Yup.array().of(Yup.string()),
+  qualifications: Yup.array().of(Yup.object()),
 });
 
 export const dataValidationSchema = (type: CvatJobType) => {
@@ -60,7 +60,7 @@ export const FortuneJobRequestValidationSchema = Yup.object().shape({
   fortunesRequested: Yup.number()
     .required('FortunesRequested is required')
     .moreThan(0, 'FortunesRequested must be greater than 0'),
-  qualifications: Yup.array().of(Yup.string()),
+  qualifications: Yup.array().of(Yup.object()),
 });
 
 export const HCaptchaJobRequesteValidationSchema = Yup.object().shape({
@@ -87,5 +87,5 @@ export const HCaptchaJobRequesteValidationSchema = Yup.object().shape({
     .max(100, 'Accuracy target must be less than or equal to 100'),
   targetBrowser: Yup.string().required('Target Browser is required'),
   images: Yup.array().of(Yup.string().url('Invalid Image URL')),
-  qualifications: Yup.array().of(Yup.string()),
+  qualifications: Yup.array().of(Yup.object()),
 });

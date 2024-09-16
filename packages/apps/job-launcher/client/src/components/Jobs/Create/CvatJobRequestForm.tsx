@@ -31,6 +31,7 @@ import {
   CvatJobType,
   GCSRegions,
   Label,
+  Qualification,
   StorageProviders,
 } from '../../../types';
 import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
@@ -40,9 +41,9 @@ export const CvatJobRequestForm = () => {
     useCreateJobPageUI();
   const [searchParams] = useSearchParams();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
-  const [qualificationsOptions, setQualificationsOptions] = useState<string[]>(
-    [],
-  );
+  const [qualificationsOptions, setQualificationsOptions] = useState<
+    Qualification[]
+  >([]);
 
   const initialValues = {
     labels: [],
@@ -69,10 +70,7 @@ export const CvatJobRequestForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedQualifications = await getQualifications();
-        setQualificationsOptions(
-          fetchedQualifications.map((qualification) => qualification.reference),
-        );
+        setQualificationsOptions(await getQualifications());
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error fetching data:', error);
@@ -142,7 +140,9 @@ export const CvatJobRequestForm = () => {
         labels: labelArray,
         type,
         description,
-        qualifications,
+        qualifications: (qualifications as Qualification[]).map(
+          (qualification) => qualification.reference,
+        ),
         data: {
           dataset: {
             provider: dataProvider,
@@ -380,7 +380,7 @@ export const CvatJobRequestForm = () => {
                   <Autocomplete
                     multiple
                     options={qualificationsOptions}
-                    getOptionLabel={(option) => option}
+                    getOptionLabel={(option) => option.title}
                     value={values.qualifications}
                     onChange={(event, newValues) => {
                       setFieldValue('qualifications', newValues);
@@ -390,7 +390,10 @@ export const CvatJobRequestForm = () => {
                     handleHomeEndKeys
                     renderTags={(value, getTagProps) =>
                       value.map((option, index) => (
-                        <Chip label={option} {...getTagProps({ index })} />
+                        <Chip
+                          label={option.title}
+                          {...getTagProps({ index })}
+                        />
                       ))
                     }
                     renderInput={(params) => (
