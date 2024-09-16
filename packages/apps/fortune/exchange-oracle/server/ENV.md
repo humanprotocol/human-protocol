@@ -28,6 +28,10 @@ Default: 'exchange-oracle'
 Indicates whether to use SSL for connections to the PostgreSQL database.
 Default: false
 
+### POSTGRES_LOGGING
+The logging level for PostgreSQL operations (e.g., 'debug', 'info').
+Required
+
 ### RPC_URL_SEPOLIA
 The RPC URL for the Sepolia network.
 Required
@@ -64,6 +68,14 @@ Required
 Indicates whether PGP encryption should be used.
 Default: false
 
+### PGP_PRIVATE_KEY
+The private key used for PGP encryption or decryption.
+Required
+
+### PGP_PASSPHRASE
+The passphrase associated with the PGP private key.
+Required
+
 ### S3_ENDPOINT
 The endpoint URL for connecting to the S3 service.
 Default: '127.0.0.1'
@@ -72,13 +84,21 @@ Default: '127.0.0.1'
 The port number for connecting to the S3 service.
 Default: 9000
 
-### S3_BUCKET
+### S3_ACCESS_KEY
 The access key ID used to authenticate requests to the S3 service.
 Required
 
-### S3_USE_SSL
+### S3_SECRET_KEY
 The secret access key used to authenticate requests to the S3 service.
 Required
+
+### S3_BUCKET
+The name of the S3 bucket where files will be stored.
+Default: 'exchange'
+
+### S3_USE_SSL
+Indicates whether to use SSL (HTTPS) for connections to the S3 service.
+Default: false
 
 ### NODE_ENV
 The environment in which the server is running (e.g., 'development', 'production').
@@ -103,4 +123,8 @@ Default: 5
 ### WEB3_ENV
 The environment in which the Web3 application is running.
 Default: 'testnet'
+
+### WEB3_PRIVATE_KEY
+The private key used for signing transactions.
+Required
 

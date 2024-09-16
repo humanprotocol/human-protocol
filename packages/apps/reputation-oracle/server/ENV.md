@@ -1,20 +1,28 @@
 # Environment Variables
 
-### JWT_ACCESS_TOKEN_EXPIRES_IN
+### JWT_PRIVATE_KEY
 The private key used for signing JSON Web Tokens (JWT).
 Required
 
-### JWT_REFRESH_TOKEN_EXPIRES_IN
+### JWT_PUBLIC_KEY
 The public key used for verifying JSON Web Tokens (JWT).
 Required
 
-### VERIFY_EMAIL_TOKEN_EXPIRES_IN
+### JWT_ACCESS_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for access tokens.
 Default: 600
 
-### FORGOT_PASSWORD_TOKEN_EXPIRES_IN
+### JWT_REFRESH_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for refresh tokens.
 Default: 3600
+
+### VERIFY_EMAIL_TOKEN_EXPIRES_IN
+The expiration time (in seconds) for email verification tokens.
+Default: 86400
+
+### FORGOT_PASSWORD_TOKEN_EXPIRES_IN
+The expiration time (in seconds) for forgot password tokens.
+Default: 86400
 
 ### POSTGRES_URL
 The URL for connecting to the PostgreSQL database.
@@ -43,6 +51,10 @@ Default: 'reputation-oracle'
 ### POSTGRES_SSL
 Indicates whether to use SSL for connections to the PostgreSQL database.
 Default: false
+
+### POSTGRES_LOGGING
+The logging level for PostgreSQL operations (e.g., 'debug', 'info').
+Required
 
 ### HCAPTCHA_SITE_KEY
 The site key for the hCaptcha service, used for client-side verification.
@@ -120,6 +132,14 @@ Required
 Indicates whether PGP encryption should be used.
 Default: false
 
+### PGP_PRIVATE_KEY
+The private key used for PGP encryption or decryption.
+Required
+
+### PGP_PASSPHRASE
+The passphrase associated with the PGP private key.
+Required
+
 ### REPUTATION_LEVEL_LOW
 The threshold value that defines the lower boundary of reputation level.
 Users with a reputation below this value are considered to have a low reputation.
@@ -138,13 +158,21 @@ Default: '127.0.0.1'
 The port number for connecting to the S3 service.
 Default: 9000
 
-### S3_BUCKET
+### S3_ACCESS_KEY
 The access key ID used to authenticate requests to the S3 service.
 Required
 
-### S3_USE_SSL
+### S3_SECRET_KEY
 The secret access key used to authenticate requests to the S3 service.
 Required
+
+### S3_BUCKET
+The name of the S3 bucket where files will be stored.
+Default: 'reputation'
+
+### S3_USE_SSL
+Indicates whether to use SSL (HTTPS) for connections to the S3 service.
+Default: false
 
 ### SENDGRID_API_KEY
 The API key used for authenticating requests to the SendGrid API.
@@ -190,7 +218,11 @@ Default: 1 day
 The environment in which the Web3 application is running.
 Default: 'testnet'
 
-### GAS_PRICE_MULTIPLIER
+### WEB3_PRIVATE_KEY
 The private key used for signing transactions.
 Required
+
+### GAS_PRICE_MULTIPLIER
+Multiplier for gas price adjustments.
+Default: 1
 

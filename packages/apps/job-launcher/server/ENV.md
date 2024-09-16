@@ -1,32 +1,48 @@
 # Environment Variables
 
-### JWT_ACCESS_TOKEN_EXPIRES_IN
+### JWT_PRIVATE_KEY
 The private key used for signing JSON Web Tokens (JWT).
 Required
 
-### REFRESH_TOKEN_EXPIRES_IN
+### JWT_PUBLIC_KEY
 The public key used for verifying JSON Web Tokens (JWT).
 Required
 
-### VERIFY_EMAIL_TOKEN_EXPIRES_IN
+### JWT_ACCESS_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for access tokens.
 Default: 600
 
-### FORGOT_PASSWORD_TOKEN_EXPIRES_IN
+### REFRESH_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for refresh tokens.
 Default: 3600
 
-### APIKEY_ITERATIONS
+### VERIFY_EMAIL_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for email verification tokens.
 Default: 86400
 
-### APIKEY_KEY_LENGTH
+### FORGOT_PASSWORD_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for forgot password tokens.
 Default: 86400
 
-### HCAPTCHA_PROTECTION_URL
+### APIKEY_ITERATIONS
 The number of iterations used for generating API keys.
 Default: 1000
+
+### APIKEY_KEY_LENGTH
+The length of the API key in characters.
+Default: 64
+
+### HCAPTCHA_SITE_KEY
+The site key for hCaptcha, used for CAPTCHA protection.
+Required
+
+### HCAPTCHA_SECRET
+The secret key for hCaptcha, used for verifying CAPTCHA responses.
+Required
+
+### HCAPTCHA_PROTECTION_URL
+The URL for the hCaptcha protection service.
+Default: 'https://api.hcaptcha.com'
 
 ### CVAT_JOB_SIZE
 The size of the job in CVAT, typically representing the number of items or tasks.
@@ -72,6 +88,10 @@ Default: 'job-launcher'
 Indicates whether to use SSL for connections to the PostgreSQL database.
 Default: false
 
+### POSTGRES_LOGGING
+The logging level for PostgreSQL operations (e.g., 'debug', 'info').
+Required
+
 ### RPC_URL_SEPOLIA
 The RPC URL for the Sepolia network.
 Required
@@ -112,6 +132,14 @@ Required
 Indicates whether PGP encryption should be used.
 Default: false
 
+### PGP_PRIVATE_KEY
+The private key used for PGP encryption or decryption.
+Required
+
+### PGP_PASSPHRASE
+The passphrase associated with the PGP private key.
+Required
+
 ### S3_ENDPOINT
 The endpoint URL for connecting to the S3 service.
 Default: '127.0.0.1'
@@ -120,21 +148,33 @@ Default: '127.0.0.1'
 The port number for connecting to the S3 service.
 Default: 9000
 
-### S3_BUCKET
+### S3_ACCESS_KEY
 The access key ID used to authenticate requests to the S3 service.
 Required
 
-### S3_USE_SSL
+### S3_SECRET_KEY
 The secret access key used to authenticate requests to the S3 service.
 Required
 
-### SENDGRID_FROM_EMAIL
+### S3_BUCKET
+The name of the S3 bucket where files will be stored.
+Default: 'launcher'
+
+### S3_USE_SSL
+Indicates whether to use SSL (HTTPS) for connections to the S3 service.
+Default: false
+
+### SENDGRID_API_KEY
 The API key used for authenticating requests to the SendGrid API.
 Required
 
-### SENDGRID_FROM_NAME
+### SENDGRID_FROM_EMAIL
 The email address that will be used as the sender's address in emails sent via SendGrid.
 Default: 'job-launcher@hmt.ai'
+
+### SENDGRID_FROM_NAME
+The name that will be used as the sender's name in emails sent via SendGrid.
+Default: 'Human Protocol Job Launcher'
 
 ### NODE_ENV
 The environment in which the server is running (e.g., 'development', 'production').
@@ -164,27 +204,79 @@ Default: 0.01
 The time (in seconds) for which rate information will be cached.
 Default: 30
 
-### STRIPE_API_VERSION
+### COINMARKETCAP_API_KEY
+The API key for accessing CoinMarketCap data.
+Required
+
+### COINGECKO_API_KEY
+The API key for accessing CoinGecko data.
+Required
+
+### STRIPE_SECRET_KEY
 The secret key used for authenticating requests to the Stripe API.
 Required
 
-### STRIPE_APP_NAME
+### STRIPE_API_VERSION
 The version of the Stripe API to use for requests.
 Default: '2022-11-15'
 
-### STRIPE_APP_VERSION
+### STRIPE_APP_NAME
 The name of the application interacting with the Stripe API.
 Default: 'Fortune'
 
-### STRIPE_APP_INFO_URL
+### STRIPE_APP_VERSION
 The version of the application interacting with the Stripe API.
 Default: '0.0.1'
+
+### STRIPE_APP_INFO_URL
+The URL of the application's information page.
+Default: 'https://hmt.ai'
 
 ### WEB3_ENV
 The environment in which the Web3 application is running.
 Default: 'testnet'
 
-### GAS_PRICE_MULTIPLIER
+### WEB3_PRIVATE_KEY
 The private key used for signing transactions.
+Required
+
+### GAS_PRICE_MULTIPLIER
+Multiplier for gas price adjustments.
+Default: 1
+
+### REPUTATION_ORACLE_ADDRESS
+Address of the reputation oracle contract.
+Required
+
+### REPUTATION_ORACLES
+List of reputation oracle addresses, typically comma-separated.
+Required
+
+### FORTUNE_EXCHANGE_ORACLE_ADDRESS
+Address of the Fortune exchange oracle contract.
+Required
+
+### FORTUNE_RECORDING_ORACLE_ADDRESS
+Address of the Fortune recording oracle contract.
+Required
+
+### CVAT_EXCHANGE_ORACLE_ADDRESS
+Address of the CVAT exchange oracle contract.
+Required
+
+### CVAT_RECORDING_ORACLE_ADDRESS
+Address of the CVAT recording oracle contract.
+Required
+
+### HCAPTCHA_RECORDING_ORACLE_URI
+URI for the hCaptcha recording oracle service.
+Required
+
+### HCAPTCHA_REPUTATION_ORACLE_URI
+URI for the hCaptcha reputation oracle service.
+Required
+
+### HCAPTCHA_ORACLE_ADDRESS
+Address of the hCaptcha oracle contract.
 Required
 
