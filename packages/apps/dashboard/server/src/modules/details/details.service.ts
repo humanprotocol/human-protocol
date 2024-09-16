@@ -88,6 +88,7 @@ export class DetailsService {
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,
+      toAddress: address,
       first,
       skip,
     });
