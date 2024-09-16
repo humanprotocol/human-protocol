@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from enum import auto
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import Field
@@ -55,7 +55,8 @@ class JobsFilter(Filter):
         reward_amount = auto()
 
     sort: OptionalQuery[OrderingDirection] = OrderingDirection.asc
-    sort_field: OptionalQuery[SortingFields] = SortingFields.created_at
+    default_sort_field: ClassVar[SortingFields] = SortingFields.created_at
+    sort_field: OptionalQuery[SortingFields] = default_sort_field
 
     class SelectableFields(StrEnum, metaclass=BetterEnumMeta):
         job_description = auto()
@@ -63,7 +64,7 @@ class JobsFilter(Filter):
         reward_token = auto()
         created_at = auto()
 
-    # FIXME: incorrect swagger specification
+    # TODO: add description to swagger specification
     fields: Annotated[list[SelectableFields], Query(default_factory=list)]
 
     class Constants(Filter.Constants):
@@ -217,9 +218,10 @@ class AssignmentFilter(Filter):
         expires_at = auto()
 
     sort: OrderingDirection | None = Filter._default_sorting_direction_param()[1]
+    default_sort_field: ClassVar[SortingFields] = SortingFields.created_at
     sort_field: SortingFields | None = Field(
         Query(
-            default=SortingFields.created_at,
+            default=default_sort_field,
             json_schema_extra={"enum": list(SortingFields.__members__.values())},
         )
     )
@@ -309,6 +311,12 @@ async def list_assignments(
         )
 
     query = filter.filter_(query)
+
+    if (sort_by := AssignmentFilter.Constants.sorting_field_name) and getattr(
+        filter, sort_by, None
+    ) in {AssignmentFilter.SortingFields.chain_id, AssignmentFilter.SortingFields.job_type}:
+        query = query.join(cvat_service.Job).join(cvat_service.Project)
+
     query = filter.sort_(query)
 
     with SessionLocal.begin() as session:
