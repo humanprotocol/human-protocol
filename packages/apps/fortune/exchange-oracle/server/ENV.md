@@ -2,23 +2,23 @@
 
 ### POSTGRES_URL
 The URL for connecting to the PostgreSQL database.
-Default: undefined
+Required
 
 ### POSTGRES_HOST
 The hostname or IP address of the PostgreSQL database server.
-Default: undefined
+Required
 
 ### POSTGRES_PORT
 The port number on which the PostgreSQL database server is listening.
-Default: undefined
+Required
 
 ### POSTGRES_USER
 The username for authenticating with the PostgreSQL database.
-Default: undefined
+Required
 
 ### POSTGRES_PASSWORD
 The password for authenticating with the PostgreSQL database.
-Default: undefined
+Required
 
 ### POSTGRES_DATABASE
 The name of the PostgreSQL database to connect to.
@@ -28,53 +28,41 @@ Default: 'exchange-oracle'
 Indicates whether to use SSL for connections to the PostgreSQL database.
 Default: false
 
-### POSTGRES_LOGGING
-The logging level for PostgreSQL operations (e.g., 'debug', 'info').
-Default: ''
-
 ### RPC_URL_SEPOLIA
 The RPC URL for the Sepolia network.
-Default: undefined
+Required
 
 ### RPC_URL_POLYGON
 The RPC URL for the Polygon network.
-Default: undefined
+Required
 
 ### RPC_URL_POLYGON_AMOY
 The RPC URL for the Polygon Amoy network.
-Default: undefined
+Required
 
 ### RPC_URL_BSC_MAINNET
 The RPC URL for the BSC Mainnet network.
-Default: undefined
+Required
 
 ### RPC_URL_BSC_TESTNET
 The RPC URL for the BSC Testnet network.
-Default: undefined
+Required
 
 ### RPC_URL_MOONBEAM
 The RPC URL for the Moonbeam network.
-Default: undefined
+Required
 
 ### RPC_URL_XLAYER
 The RPC URL for the XLayer network.
-Default: undefined
+Required
 
 ### RPC_URL_LOCALHOST
 The RPC URL for the Localhost network.
-Default: undefined
+Required
 
 ### PGP_ENCRYPT
 Indicates whether PGP encryption should be used.
 Default: false
-
-### PGP_PRIVATE_KEY
-The private key used for PGP encryption or decryption.
-Default: ''
-
-### PGP_PASSPHRASE
-The passphrase associated with the PGP private key.
-Default: ''
 
 ### S3_ENDPOINT
 The endpoint URL for connecting to the S3 service.
@@ -84,21 +72,13 @@ Default: '127.0.0.1'
 The port number for connecting to the S3 service.
 Default: 9000
 
-### S3_ACCESS_KEY
-The access key ID used to authenticate requests to the S3 service.
-Default: ''
-
-### S3_SECRET_KEY
-The secret access key used to authenticate requests to the S3 service.
-Default: ''
-
 ### S3_BUCKET
-The name of the S3 bucket where files will be stored.
-Default: 'exchange'
+The access key ID used to authenticate requests to the S3 service.
+Required
 
 ### S3_USE_SSL
-Indicates whether to use SSL (HTTPS) for connections to the S3 service.
-Default: false
+The secret access key used to authenticate requests to the S3 service.
+Required
 
 ### NODE_ENV
 The environment in which the server is running (e.g., 'development', 'production').
@@ -123,8 +103,4 @@ Default: 5
 ### WEB3_ENV
 The environment in which the Web3 application is running.
 Default: 'testnet'
-
-### WEB3_PRIVATE_KEY
-The private key used for signing transactions.
-Default: ''
 

@@ -2,43 +2,35 @@
 
 ### RPC_URL_POLYGON
 The RPC URL for the Polygon network.
-Default: undefined
+Required
 
 ### RPC_URL_POLYGON_AMOY
 The RPC URL for the Polygon Amoy network.
-Default: undefined
+Required
 
 ### RPC_URL_SEPOLIA
 The RPC URL for the Sepolia network.
-Default: undefined
+Required
 
 ### RPC_URL_BSC_MAINNET
 The RPC URL for the BSC Mainnet network.
-Default: undefined
+Required
 
 ### RPC_URL_BSC_TESTNET
 The RPC URL for the BSC Testnet network.
-Default: undefined
+Required
 
 ### RPC_URL_MOONBEAM
 The RPC URL for the Moonbeam network.
-Default: undefined
+Required
 
 ### RPC_URL_LOCALHOST
 The RPC URL for the Localhost network.
-Default: undefined
+Required
 
 ### PGP_ENCRYPT
 Indicates whether PGP encryption should be used.
 Default: false
-
-### PGP_PRIVATE_KEY
-The private key used for PGP encryption or decryption.
-Default: ''
-
-### PGP_PASSPHRASE
-The passphrase associated with the PGP private key.
-Default: ''
 
 ### S3_ENDPOINT
 The endpoint URL for connecting to the S3 service.
@@ -48,21 +40,13 @@ Default: '127.0.0.1'
 The port number for connecting to the S3 service.
 Default: 9000
 
-### S3_ACCESS_KEY
-The access key ID used to authenticate requests to the S3 service.
-Default: ''
-
-### S3_SECRET_KEY
-The secret access key used to authenticate requests to the S3 service.
-Default: ''
-
 ### S3_BUCKET
-The name of the S3 bucket where files will be stored.
-Default: 'recording'
+The access key ID used to authenticate requests to the S3 service.
+Required
 
 ### S3_USE_SSL
-Indicates whether to use SSL (HTTPS) for connections to the S3 service.
-Default: false
+The secret access key used to authenticate requests to the S3 service.
+Required
 
 ### NODE_ENV
 The environment in which the server is running (e.g., 'development', 'production').
@@ -79,8 +63,4 @@ Default: 5000
 ### SESSION_SECRET
 The secret key used for session encryption and validation.
 Default: 'session_key'
-
-### WEB3_PRIVATE_KEY
-The private key used for signing transactions.
-Default: ''
 

@@ -1,48 +1,32 @@
 # Environment Variables
 
-### JWT_PRIVATE_KEY
-The private key used for signing JSON Web Tokens (JWT).
-Default: ''
-
-### JWT_PUBLIC_KEY
-The public key used for verifying JSON Web Tokens (JWT).
-Default: ''
-
 ### JWT_ACCESS_TOKEN_EXPIRES_IN
+The private key used for signing JSON Web Tokens (JWT).
+Required
+
+### REFRESH_TOKEN_EXPIRES_IN
+The public key used for verifying JSON Web Tokens (JWT).
+Required
+
+### VERIFY_EMAIL_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for access tokens.
 Default: 600
 
-### REFRESH_TOKEN_EXPIRES_IN
+### FORGOT_PASSWORD_TOKEN_EXPIRES_IN
 The expiration time (in seconds) for refresh tokens.
 Default: 3600
 
-### VERIFY_EMAIL_TOKEN_EXPIRES_IN
+### APIKEY_ITERATIONS
 The expiration time (in seconds) for email verification tokens.
 Default: 86400
 
-### FORGOT_PASSWORD_TOKEN_EXPIRES_IN
+### APIKEY_KEY_LENGTH
 The expiration time (in seconds) for forgot password tokens.
 Default: 86400
 
-### APIKEY_ITERATIONS
+### HCAPTCHA_PROTECTION_URL
 The number of iterations used for generating API keys.
 Default: 1000
-
-### APIKEY_KEY_LENGTH
-The length of the API key in characters.
-Default: 64
-
-### HCAPTCHA_SITE_KEY
-The site key for hCaptcha, used for CAPTCHA protection.
-Default: ''
-
-### HCAPTCHA_SECRET
-The secret key for hCaptcha, used for verifying CAPTCHA responses.
-Default: ''
-
-### HCAPTCHA_PROTECTION_URL
-The URL for the hCaptcha protection service.
-Default: 'https://api.hcaptcha.com'
 
 ### CVAT_JOB_SIZE
 The size of the job in CVAT, typically representing the number of items or tasks.
@@ -62,7 +46,7 @@ Default: 6
 
 ### POSTGRES_URL
 The URL for connecting to the PostgreSQL database.
-Default: undefined
+Required
 
 ### POSTGRES_HOST
 The hostname or IP address of the PostgreSQL database server.
@@ -88,57 +72,45 @@ Default: 'job-launcher'
 Indicates whether to use SSL for connections to the PostgreSQL database.
 Default: false
 
-### POSTGRES_LOGGING
-The logging level for PostgreSQL operations (e.g., 'debug', 'info').
-Default: ''
-
 ### RPC_URL_SEPOLIA
 The RPC URL for the Sepolia network.
-Default: undefined
+Required
 
 ### RPC_URL_POLYGON
 The RPC URL for the Polygon network.
-Default: undefined
+Required
 
 ### RPC_URL_POLYGON_AMOY
 The RPC URL for the Polygon Amoy network.
-Default: undefined
+Required
 
 ### RPC_URL_BSC_MAINNET
 The RPC URL for the BSC Mainnet network.
-Default: undefined
+Required
 
 ### RPC_URL_BSC_TESTNET
 The RPC URL for the BSC Testnet network.
-Default: undefined
+Required
 
 ### RPC_URL_MOONBEAM
 The RPC URL for the Moonbeam network.
-Default: undefined
+Required
 
 ### RPC_URL_XLAYER_TESTNET
 The RPC URL for the XLayer Testnet network.
-Default: undefined
+Required
 
 ### RPC_URL_XLAYER
 The RPC URL for the XLayer network.
-Default: undefined
+Required
 
 ### RPC_URL_LOCALHOST
 The RPC URL for the Localhost network.
-Default: undefined
+Required
 
 ### PGP_ENCRYPT
 Indicates whether PGP encryption should be used.
 Default: false
-
-### PGP_PRIVATE_KEY
-The private key used for PGP encryption or decryption.
-Default: ''
-
-### PGP_PASSPHRASE
-The passphrase associated with the PGP private key.
-Default: ''
 
 ### S3_ENDPOINT
 The endpoint URL for connecting to the S3 service.
@@ -148,33 +120,21 @@ Default: '127.0.0.1'
 The port number for connecting to the S3 service.
 Default: 9000
 
-### S3_ACCESS_KEY
-The access key ID used to authenticate requests to the S3 service.
-Default: ''
-
-### S3_SECRET_KEY
-The secret access key used to authenticate requests to the S3 service.
-Default: ''
-
 ### S3_BUCKET
-The name of the S3 bucket where files will be stored.
-Default: 'launcher'
+The access key ID used to authenticate requests to the S3 service.
+Required
 
 ### S3_USE_SSL
-Indicates whether to use SSL (HTTPS) for connections to the S3 service.
-Default: false
-
-### SENDGRID_API_KEY
-The API key used for authenticating requests to the SendGrid API.
-Default: ''
+The secret access key used to authenticate requests to the S3 service.
+Required
 
 ### SENDGRID_FROM_EMAIL
-The email address that will be used as the sender's address in emails sent via SendGrid.
-Default: 'job-launcher@hmt.ai'
+The API key used for authenticating requests to the SendGrid API.
+Required
 
 ### SENDGRID_FROM_NAME
-The name that will be used as the sender's name in emails sent via SendGrid.
-Default: 'Human Protocol Job Launcher'
+The email address that will be used as the sender's address in emails sent via SendGrid.
+Default: 'job-launcher@hmt.ai'
 
 ### NODE_ENV
 The environment in which the server is running (e.g., 'development', 'production').
@@ -204,79 +164,27 @@ Default: 0.01
 The time (in seconds) for which rate information will be cached.
 Default: 30
 
-### COINMARKETCAP_API_KEY
-The API key for accessing CoinMarketCap data.
-Default: ''
-
-### COINGECKO_API_KEY
-The API key for accessing CoinGecko data.
-Default: ''
-
-### STRIPE_SECRET_KEY
-The secret key used for authenticating requests to the Stripe API.
-Default: ''
-
 ### STRIPE_API_VERSION
+The secret key used for authenticating requests to the Stripe API.
+Required
+
+### STRIPE_APP_NAME
 The version of the Stripe API to use for requests.
 Default: '2022-11-15'
 
-### STRIPE_APP_NAME
+### STRIPE_APP_VERSION
 The name of the application interacting with the Stripe API.
 Default: 'Fortune'
 
-### STRIPE_APP_VERSION
+### STRIPE_APP_INFO_URL
 The version of the application interacting with the Stripe API.
 Default: '0.0.1'
-
-### STRIPE_APP_INFO_URL
-The URL of the application's information page.
-Default: 'https://hmt.ai'
 
 ### WEB3_ENV
 The environment in which the Web3 application is running.
 Default: 'testnet'
 
-### WEB3_PRIVATE_KEY
-The private key used for signing transactions.
-Default: ''
-
 ### GAS_PRICE_MULTIPLIER
-Multiplier for gas price adjustments.
-Default: 1
-
-### REPUTATION_ORACLE_ADDRESS
-Address of the reputation oracle contract.
-Default: ''
-
-### REPUTATION_ORACLES
-List of reputation oracle addresses, typically comma-separated.
-Default: ''
-
-### FORTUNE_EXCHANGE_ORACLE_ADDRESS
-Address of the Fortune exchange oracle contract.
-Default: ''
-
-### FORTUNE_RECORDING_ORACLE_ADDRESS
-Address of the Fortune recording oracle contract.
-Default: ''
-
-### CVAT_EXCHANGE_ORACLE_ADDRESS
-Address of the CVAT exchange oracle contract.
-Default: ''
-
-### CVAT_RECORDING_ORACLE_ADDRESS
-Address of the CVAT recording oracle contract.
-Default: ''
-
-### HCAPTCHA_RECORDING_ORACLE_URI
-URI for the hCaptcha recording oracle service.
-Default: ''
-
-### HCAPTCHA_REPUTATION_ORACLE_URI
-URI for the hCaptcha reputation oracle service.
-Default: ''
-
-### HCAPTCHA_ORACLE_ADDRESS
-Address of the hCaptcha oracle contract.
-Default: ''
+The private key used for signing transactions.
+Required
 

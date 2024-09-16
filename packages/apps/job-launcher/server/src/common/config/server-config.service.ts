@@ -63,17 +63,17 @@ export class ServerConfigService {
 
   /**
    * The API key for accessing CoinMarketCap data.
-   * Default: ''
+   * Required
    */
   get coinmarketcapApiKey(): string {
-    return this.configService.get<string>('COINMARKETCAP_API_KEY', '');
+    return this.configService.getOrThrow<string>('COINMARKETCAP_API_KEY');
   }
 
   /**
    * The API key for accessing CoinGecko data.
-   * Default: ''
+   * Required
    */
   get coingeckoApiKey(): string {
-    return this.configService.get<string>('COINGECKO_API_KEY', '');
+    return this.configService.getOrThrow<string>('COINGECKO_API_KEY');
   }
 }

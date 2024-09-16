@@ -23,18 +23,18 @@ export class S3ConfigService {
 
   /**
    * The access key ID used to authenticate requests to the S3 service.
-   * Default: ''
+   * Required
    */
   get accessKey(): string {
-    return this.configService.get<string>('S3_ACCESS_KEY', '');
+    return this.configService.getOrThrow<string>('S3_ACCESS_KEY');
   }
 
   /**
    * The secret access key used to authenticate requests to the S3 service.
-   * Default: ''
+   * Required
    */
   get secretKey(): string {
-    return this.configService.get<string>('S3_SECRET_KEY', '');
+    return this.configService.getOrThrow<string>('S3_SECRET_KEY');
   }
 
   /**

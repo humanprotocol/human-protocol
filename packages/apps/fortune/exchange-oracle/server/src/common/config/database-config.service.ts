@@ -7,7 +7,7 @@ export class DatabaseConfigService {
 
   /**
    * The URL for connecting to the PostgreSQL database.
-   * Default: undefined
+   * Required
    */
   get url(): string | undefined {
     return this.configService.get<string>('POSTGRES_URL');
@@ -15,7 +15,7 @@ export class DatabaseConfigService {
 
   /**
    * The hostname or IP address of the PostgreSQL database server.
-   * Default: undefined
+   * Required
    */
   get host(): string | undefined {
     return this.configService.get<string>('POSTGRES_HOST');
@@ -23,7 +23,7 @@ export class DatabaseConfigService {
 
   /**
    * The port number on which the PostgreSQL database server is listening.
-   * Default: undefined
+   * Required
    */
   get port(): number | undefined {
     return this.configService.get<number>('POSTGRES_PORT');
@@ -31,7 +31,7 @@ export class DatabaseConfigService {
 
   /**
    * The username for authenticating with the PostgreSQL database.
-   * Default: undefined
+   * Required
    */
   get user(): string | undefined {
     return this.configService.get<string>('POSTGRES_USER');
@@ -39,7 +39,7 @@ export class DatabaseConfigService {
 
   /**
    * The password for authenticating with the PostgreSQL database.
-   * Default: undefined
+   * Required
    */
   get password(): string | undefined {
     return this.configService.get<string>('POSTGRES_PASSWORD');
@@ -66,9 +66,9 @@ export class DatabaseConfigService {
 
   /**
    * The logging level for PostgreSQL operations (e.g., 'debug', 'info').
-   * Default: ''
+   * Required
    */
   get logging(): string {
-    return this.configService.get<string>('POSTGRES_LOGGING', '');
+    return this.configService.getOrThrow<string>('POSTGRES_LOGGING');
   }
 }

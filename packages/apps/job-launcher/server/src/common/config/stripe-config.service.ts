@@ -7,10 +7,10 @@ export class StripeConfigService {
 
   /**
    * The secret key used for authenticating requests to the Stripe API.
-   * Default: ''
+   * Required
    */
   get secretKey(): string {
-    return this.configService.get<string>('STRIPE_SECRET_KEY', '');
+    return this.configService.getOrThrow<string>('STRIPE_SECRET_KEY');
   }
 
   /**

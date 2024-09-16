@@ -32,7 +32,7 @@ export class NetworkConfigService {
           chainId: ChainId.SEPOLIA,
           /**
            * The RPC URL for the Sepolia network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
           tokens: {
@@ -45,7 +45,7 @@ export class NetworkConfigService {
           chainId: ChainId.POLYGON,
           /**
            * The RPC URL for the Polygon network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
           tokens: {
@@ -59,7 +59,7 @@ export class NetworkConfigService {
           chainId: ChainId.POLYGON_AMOY,
           /**
            * The RPC URL for the Polygon Amoy network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON_AMOY'),
           tokens: {
@@ -72,7 +72,7 @@ export class NetworkConfigService {
           chainId: ChainId.BSC_MAINNET,
           /**
            * The RPC URL for the BSC Mainnet network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_MAINNET'),
           tokens: {
@@ -86,7 +86,7 @@ export class NetworkConfigService {
           chainId: ChainId.BSC_TESTNET,
           /**
            * The RPC URL for the BSC Testnet network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
           tokens: {
@@ -99,7 +99,7 @@ export class NetworkConfigService {
           chainId: ChainId.MOONBEAM,
           /**
            * The RPC URL for the Moonbeam network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
           tokens: {
@@ -112,7 +112,7 @@ export class NetworkConfigService {
           chainId: ChainId.XLAYER_TESTNET,
           /**
            * The RPC URL for the XLayer Testnet network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_XLAYER_TESTNET'),
           tokens: {
@@ -125,7 +125,7 @@ export class NetworkConfigService {
           chainId: ChainId.XLAYER,
           /**
            * The RPC URL for the XLayer network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_XLAYER'),
           tokens: {
@@ -138,7 +138,7 @@ export class NetworkConfigService {
           chainId: ChainId.LOCALHOST,
           /**
            * The RPC URL for the Localhost network.
-           * Default: undefined
+           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
           tokens: {

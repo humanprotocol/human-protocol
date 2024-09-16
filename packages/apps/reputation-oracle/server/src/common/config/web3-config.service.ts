@@ -15,10 +15,10 @@ export class Web3ConfigService {
 
   /**
    * The private key used for signing transactions.
-   * Default: ''
+   * Required
    */
   get privateKey(): string {
-    return this.configService.get<string>('WEB3_PRIVATE_KEY', '');
+    return this.configService.getOrThrow<string>('WEB3_PRIVATE_KEY');
   }
 
   /**

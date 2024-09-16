@@ -10,11 +10,11 @@ Default: 5000
 
 ### REPUTATION_ORACLE_URL
 The URL of the reputation oracle service.
-Default: undefined
+Required
 
 ### REPUTATION_ORACLE_ADDRESS
 The address of the reputation oracle service.
-Default: undefined
+Required
 
 ### IS_AXIOS_REQUEST_LOGGING_ENABLED
 Flag indicating if Axios request logging is enabled.
@@ -22,15 +22,15 @@ Default: false
 
 ### ALLOWED_HOST
 The allowed host for the application.
-Default: undefined
+Required
 
 ### REDIS_PORT
 The port number for the Redis cache server.
-Default: undefined
+Required
 
 ### REDIS_HOST
 The hostname or IP address of the Redis cache server.
-Default: undefined
+Required
 
 ### CACHE_TTL_ORACLE_STATS
 The cache time-to-live (TTL) for oracle statistics.
@@ -54,7 +54,7 @@ Default: 24 hours
 
 ### RPC_URL
 The RPC URL used for communication.
-Default: undefined
+Required
 
 ### CORS_ENABLED
 Flag indicating if CORS is enabled.
@@ -78,19 +78,19 @@ Default: 24 hours
 
 ### HCAPTCHA_LABELING_STATS_API_URL
 The API URL for hCaptcha labeling statistics.
-Default: undefined
+Required
 
 ### HCAPTCHA_LABELING_VERIFY_API_URL
 The API URL for hCaptcha labeling verification.
-Default: undefined
+Required
 
 ### HCAPTCHA_LABELING_API_KEY
 The API key for hCaptcha labeling.
-Default: undefined
+Required
 
 ### CHAIN_IDS_ENABLED
 The list of enabled chain IDs.
-Default: undefined
+Required
 
 ### IS_CACHE_TO_RESTART
 Flag indicating if the cache should be restarted.
@@ -98,11 +98,11 @@ Default: false
 
 ### HUMAN_APP_EMAIL
 The email address for the human app.
-Default: undefined
+Required
 
 ### HUMAN_APP_PASSWORD
 The password for the human app.
-Default: undefined
+Required
 
 ### MAX_REQUEST_RETRIES
 The maximum number of retries for requests.

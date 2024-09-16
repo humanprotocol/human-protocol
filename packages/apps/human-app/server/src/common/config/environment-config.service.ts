@@ -35,7 +35,7 @@ export class EnvironmentConfigService {
 
   /**
    * The URL of the reputation oracle service.
-   * Default: undefined
+   * Required
    */
   get reputationOracleUrl(): string {
     return this.configService.getOrThrow<string>('REPUTATION_ORACLE_URL');
@@ -43,7 +43,7 @@ export class EnvironmentConfigService {
 
   /**
    * The address of the reputation oracle service.
-   * Default: undefined
+   * Required
    */
   get reputationOracleAddress(): string {
     return this.configService
@@ -63,7 +63,7 @@ export class EnvironmentConfigService {
 
   /**
    * The allowed host for the application.
-   * Default: undefined
+   * Required
    */
   get allowedHost(): string {
     return this.configService.getOrThrow('ALLOWED_HOST');
@@ -71,7 +71,7 @@ export class EnvironmentConfigService {
 
   /**
    * The port number for the Redis cache server.
-   * Default: undefined
+   * Required
    */
   get cachePort(): number {
     return this.configService.getOrThrow<number>('REDIS_PORT');
@@ -79,7 +79,7 @@ export class EnvironmentConfigService {
 
   /**
    * The hostname or IP address of the Redis cache server.
-   * Default: undefined
+   * Required
    */
   get cacheHost(): string {
     return this.configService.getOrThrow<string>('REDIS_HOST');
@@ -142,7 +142,7 @@ export class EnvironmentConfigService {
 
   /**
    * The RPC URL used for communication.
-   * Default: undefined
+   * Required
    */
   get rpcUrl(): string {
     return this.configService.getOrThrow<string>('RPC_URL');
@@ -201,7 +201,7 @@ export class EnvironmentConfigService {
 
   /**
    * The API URL for hCaptcha labeling statistics.
-   * Default: undefined
+   * Required
    */
   get hcaptchaLabelingStatsApiUrl(): string {
     return this.configService.getOrThrow<string>(
@@ -211,7 +211,7 @@ export class EnvironmentConfigService {
 
   /**
    * The API URL for hCaptcha labeling verification.
-   * Default: undefined
+   * Required
    */
   get hcaptchaLabelingVerifyApiUrl(): string {
     return this.configService.getOrThrow<string>(
@@ -221,7 +221,7 @@ export class EnvironmentConfigService {
 
   /**
    * The API key for hCaptcha labeling.
-   * Default: undefined
+   * Required
    */
   get hcaptchaLabelingApiKey(): string {
     return this.configService.getOrThrow<string>('HCAPTCHA_LABELING_API_KEY');
@@ -229,7 +229,7 @@ export class EnvironmentConfigService {
 
   /**
    * The list of enabled chain IDs.
-   * Default: undefined
+   * Required
    */
   get chainIdsEnabled(): string[] {
     const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');
@@ -246,7 +246,7 @@ export class EnvironmentConfigService {
 
   /**
    * The email address for the human app.
-   * Default: undefined
+   * Required
    */
   get email(): string {
     return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
@@ -254,7 +254,7 @@ export class EnvironmentConfigService {
 
   /**
    * The password for the human app.
-   * Default: undefined
+   * Required
    */
   get password(): string {
     return this.configService.getOrThrow<string>('HUMAN_APP_PASSWORD');

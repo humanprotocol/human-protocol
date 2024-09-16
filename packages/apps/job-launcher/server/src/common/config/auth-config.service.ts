@@ -7,18 +7,18 @@ export class AuthConfigService {
 
   /**
    * The private key used for signing JSON Web Tokens (JWT).
-   * Default: ''
+   * Required
    */
   get jwtPrivateKey(): string {
-    return this.configService.get<string>('JWT_PRIVATE_KEY', '');
+    return this.configService.getOrThrow<string>('JWT_PRIVATE_KEY');
   }
 
   /**
    * The public key used for verifying JSON Web Tokens (JWT).
-   * Default: ''
+   * Required
    */
   get jwtPublicKey(): string {
-    return this.configService.get<string>('JWT_PUBLIC_KEY', '');
+    return this.configService.getOrThrow<string>('JWT_PUBLIC_KEY');
   }
 
   /**
@@ -77,18 +77,18 @@ export class AuthConfigService {
 
   /**
    * The site key for hCaptcha, used for CAPTCHA protection.
-   * Default: ''
+   * Required
    */
   get hCaptchaSiteKey(): string {
-    return this.configService.get<string>('HCAPTCHA_SITE_KEY', '');
+    return this.configService.getOrThrow<string>('HCAPTCHA_SITE_KEY');
   }
 
   /**
    * The secret key for hCaptcha, used for verifying CAPTCHA responses.
-   * Default: ''
+   * Required
    */
   get hCaptchaSecret(): string {
-    return this.configService.get<string>('HCAPTCHA_SECRET', '');
+    return this.configService.getOrThrow<string>('HCAPTCHA_SECRET');
   }
 
   /**

@@ -7,7 +7,7 @@ export class DatabaseConfigService {
 
   /**
    * The URL for connecting to the PostgreSQL database.
-   * Default: undefined
+   * Required
    */
   get url(): string | undefined {
     return this.configService.get<string>('POSTGRES_URL');
@@ -66,9 +66,9 @@ export class DatabaseConfigService {
 
   /**
    * The logging level for PostgreSQL operations (e.g., 'debug', 'info').
-   * Default: ''
+   * Required
    */
   get logging(): string {
-    return this.configService.get<string>('POSTGRES_LOGGING', '');
+    return this.configService.getOrThrow<string>('POSTGRES_LOGGING');
   }
 }

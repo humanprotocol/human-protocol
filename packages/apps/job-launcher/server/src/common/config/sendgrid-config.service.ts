@@ -7,10 +7,10 @@ export class SendgridConfigService {
 
   /**
    * The API key used for authenticating requests to the SendGrid API.
-   * Default: ''
+   * Required
    */
   get apiKey(): string {
-    return this.configService.get<string>('SENDGRID_API_KEY', '');
+    return this.configService.getOrThrow<string>('SENDGRID_API_KEY');
   }
 
   /**

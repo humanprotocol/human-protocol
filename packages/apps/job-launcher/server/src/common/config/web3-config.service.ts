@@ -15,10 +15,10 @@ export class Web3ConfigService {
 
   /**
    * The private key used for signing transactions.
-   * Default: ''
+   * Required
    */
   get privateKey(): string {
-    return this.configService.get<string>('WEB3_PRIVATE_KEY', '');
+    return this.configService.getOrThrow<string>('WEB3_PRIVATE_KEY');
   }
 
   /**
@@ -31,79 +31,85 @@ export class Web3ConfigService {
 
   /**
    * Address of the reputation oracle contract.
-   * Default: ''
+   * Required
    */
   get reputationOracleAddress(): string {
-    return this.configService.get<string>('REPUTATION_ORACLE_ADDRESS', '');
+    return this.configService.getOrThrow<string>('REPUTATION_ORACLE_ADDRESS');
   }
 
   /**
    * List of reputation oracle addresses, typically comma-separated.
-   * Default: ''
+   * Required
    */
   get reputationOracles(): string {
-    return this.configService.get<string>('REPUTATION_ORACLES', '');
+    return this.configService.getOrThrow<string>('REPUTATION_ORACLES');
   }
 
   /**
    * Address of the Fortune exchange oracle contract.
-   * Default: ''
+   * Required
    */
   get fortuneExchangeOracleAddress(): string {
-    return this.configService.get<string>(
+    return this.configService.getOrThrow<string>(
       'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
-      '',
     );
   }
 
   /**
    * Address of the Fortune recording oracle contract.
-   * Default: ''
+   * Required
    */
   get fortuneRecordingOracleAddress(): string {
-    return this.configService.get<string>(
+    return this.configService.getOrThrow<string>(
       'FORTUNE_RECORDING_ORACLE_ADDRESS',
-      '',
     );
   }
 
   /**
    * Address of the CVAT exchange oracle contract.
-   * Default: ''
+   * Required
    */
   get cvatExchangeOracleAddress(): string {
-    return this.configService.get<string>('CVAT_EXCHANGE_ORACLE_ADDRESS', '');
+    return this.configService.getOrThrow<string>(
+      'CVAT_EXCHANGE_ORACLE_ADDRESS',
+    );
   }
 
   /**
    * Address of the CVAT recording oracle contract.
-   * Default: ''
+   * Required
    */
   get cvatRecordingOracleAddress(): string {
-    return this.configService.get<string>('CVAT_RECORDING_ORACLE_ADDRESS', '');
+    return this.configService.getOrThrow<string>(
+      'CVAT_RECORDING_ORACLE_ADDRESS',
+    );
   }
 
   /**
    * URI for the hCaptcha recording oracle service.
-   * Default: ''
+   * Required
    */
   get hCaptchaRecordingOracleURI(): string {
-    return this.configService.get<string>('HCAPTCHA_RECORDING_ORACLE_URI', '');
+    return this.configService.getOrThrow<string>(
+      'HCAPTCHA_RECORDING_ORACLE_URI',
+    );
   }
 
   /**
    * URI for the hCaptcha reputation oracle service.
-   * Default: ''
+   * Required
    */
   get hCaptchaReputationOracleURI(): string {
-    return this.configService.get<string>('HCAPTCHA_REPUTATION_ORACLE_URI', '');
+    return this.configService.getOrThrow<string>(
+      'HCAPTCHA_REPUTATION_ORACLE_URI',
+    );
   }
 
   /**
    * Address of the hCaptcha oracle contract.
-   * Default: ''
+   * Required
    */
   get hCaptchaOracleAddress(): string {
-    return this.configService.get<string>('HCAPTCHA_ORACLE_ADDRESS', '');
+    return this.configService.getOrThrow<string>('HCAPTCHA_ORACLE_ADDRESS');
   }
 }
