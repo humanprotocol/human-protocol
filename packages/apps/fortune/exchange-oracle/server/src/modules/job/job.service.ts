@@ -158,6 +158,7 @@ export class JobService {
           data.fields?.includes(JobFieldName.JobDescription) ||
           data.fields?.includes(JobFieldName.RewardAmount) ||
           data.fields?.includes(JobFieldName.RewardToken) ||
+          data.fields?.includes(JobFieldName.Qualifications) ||
           data.sortField === JobSortField.REWARD_AMOUNT
         ) {
           const manifest = await this.getManifest(
@@ -176,6 +177,9 @@ export class JobService {
           }
           if (data.fields?.includes(JobFieldName.RewardToken)) {
             job.rewardToken = TOKEN;
+          }
+          if (data.fields?.includes(JobFieldName.Qualifications)) {
+            job.qualifications = manifest.qualifications;
           }
         }
 

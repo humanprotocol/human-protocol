@@ -68,6 +68,7 @@ export class CronJobService {
         JobDiscoveryFieldName.JobDescription,
         JobDiscoveryFieldName.RewardAmount,
         JobDiscoveryFieldName.RewardToken,
+        JobDiscoveryFieldName.Qualifications,
       ];
       const initialResponse =
         await this.exchangeOracleGateway.fetchJobs(command);
