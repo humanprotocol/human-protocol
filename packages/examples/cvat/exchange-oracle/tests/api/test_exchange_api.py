@@ -11,10 +11,11 @@ from fastapi.testclient import TestClient
 from jose import jwt
 
 from src.core.config import Config
-from src.core.types import AssignmentStatuses, ProjectStatuses
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Project, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
+from src.schemas.exchange import JobStatuses as APIJobStatuses
 
 from tests.utils.db_helper import (
     create_job,
@@ -210,8 +211,9 @@ def test_list_jobs_200_with_fields(client: TestClient) -> None:
             "chain_id",
             "job_type",
             "status",
-            "qualifications",  # TODO: not marked as required in the specification
-        }  # TODO: updated_at
+            "qualifications",
+            "updated_at",
+        }
         selectable_fields = {"job_description", "created_at", "reward_amount", "reward_token"}
 
         all_schema_fields = required_fields | selectable_fields
@@ -231,6 +233,69 @@ def test_list_jobs_200_with_fields(client: TestClient) -> None:
             assert set(jobs[0].keys()) == (
                 (required_fields | set(fields)) if fields else all_schema_fields
             )
+
+    session.close()
+
+
+def test_list_jobs_200_check_values(client: TestClient) -> None:
+    session = SessionLocal()
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    cvat_project, cvat_task, cvat_first_job = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC66", 1
+    )
+
+    cvat_second_job = create_job(session, 2, cvat_task.cvat_id, cvat_project.cvat_id)
+    session.commit()
+
+    for job in (cvat_second_job, cvat_first_job):
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=user_address,
+            cvat_job_id=job.cvat_id,
+            expires_at=datetime.now() + timedelta(days=1),
+        )
+        session.add(assignment)
+        job.status = JobStatuses.in_progress
+        session.commit()
+        sleep(0.5)
+
+    assert cvat_second_job.updated_at < cvat_first_job.updated_at
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(),
+        )
+        assert response.status_code == 200
+        jobs = response.json()["results"]
+        assert len(jobs) == 1
+        job = jobs[0]
+
+        assert job == {
+            "escrow_address": cvat_project.escrow_address,
+            "chain_id": cvat_project.chain_id,
+            "job_type": cvat_project.job_type,
+            "status": APIJobStatuses.active,
+            "job_description": manifest["annotation"]["description"],
+            "reward_amount": manifest["job_bounty"],
+            "reward_token": "HMT",
+            "created_at": cvat_project.created_at.isoformat().replace("+00:00", "Z"),
+            "updated_at": cvat_first_job.updated_at.isoformat().replace("+00:00", "Z"),
+            "qualifications": manifest.get("qualifications", []),
+        }
 
     session.close()
 
@@ -290,6 +355,7 @@ def test_list_jobs_200_without_address(client: TestClient) -> None:
                     "reward_amount",
                     "reward_token",
                     "created_at",
+                    "updated_at",
                     "qualifications",
                 }
 

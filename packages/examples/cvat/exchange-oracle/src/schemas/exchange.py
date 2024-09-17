@@ -25,6 +25,7 @@ class JobResponse(BaseModel):
     reward_amount: str | None = None
     reward_token: str | None = DEFAULT_TOKEN
     created_at: datetime | None = None
+    updated_at: datetime | None = None
     qualifications: list[str] = Field(default_factory=list)
 
 

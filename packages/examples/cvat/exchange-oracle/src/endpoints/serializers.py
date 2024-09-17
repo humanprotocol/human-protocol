@@ -2,6 +2,7 @@ from contextlib import ExitStack, suppress
 from typing import Literal
 
 from human_protocol_sdk.storage import StorageFileNotFoundError
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 import src.services.cvat as cvat_service
@@ -51,6 +52,11 @@ def serialize_job(
         else:
             raise NotImplementedError(f"Unknown status {project.status}")
 
+        updated_at = (
+            session.query(func.max(cvat_service.Job.updated_at))
+            .filter(cvat_service.Job.cvat_project_id == project.cvat_id)
+            .scalar()
+        )
         return service_api.JobResponse(
             escrow_address=project.escrow_address,
             chain_id=project.chain_id,
@@ -61,6 +67,7 @@ def serialize_job(
             # TODO: this field is removed due to response_model_exclude_unset=True
             reward_token=service_api.DEFAULT_TOKEN,
             created_at=project.created_at,
+            updated_at=updated_at,
             qualifications=manifest.qualifications,
         )
 
