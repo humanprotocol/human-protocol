@@ -13,8 +13,7 @@
   },
   "workspaces": {
     "packages": [
-      "packages/**/*",
-      "!packages/apps/dashboard/admin"
+      "packages/**/*"
     ]
   },
   "devDependencies": {
