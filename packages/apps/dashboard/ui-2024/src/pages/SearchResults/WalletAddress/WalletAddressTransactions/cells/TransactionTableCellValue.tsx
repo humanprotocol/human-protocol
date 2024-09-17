@@ -15,7 +15,7 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
 
 	return (
 		<Typography>
-			{Number(ethers.formatEther(value)).toFixed()}
+			{Number(ethers.formatEther(value)).toFixed(4)}
 			<Typography component="span">HMT</Typography>
 		</Typography>
 	);
