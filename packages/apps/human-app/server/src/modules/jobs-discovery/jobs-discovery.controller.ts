@@ -38,7 +38,7 @@ export class JobsDiscoveryController {
     @JwtPayload() jwtPayload: JwtUserData,
     @Authorization() token: string,
   ): Promise<JobsDiscoveryResponse> {
-    // throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
+    throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(
         jobsDiscoveryParamsDto,
