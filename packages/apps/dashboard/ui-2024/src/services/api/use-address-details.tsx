@@ -75,7 +75,7 @@ const leaderSchema = z.object({
 	chainId: z.number(),
 	address: z.string(),
 	balance: z.string().transform(transformOptionalTokenAmount),
-	role: z.nativeEnum(Roles),
+	role: z.nativeEnum(Roles).nullable(),
 	amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
 	amountAllocated: z
 		.string()

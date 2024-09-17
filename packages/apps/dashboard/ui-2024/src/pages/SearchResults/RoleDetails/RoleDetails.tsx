@@ -50,6 +50,10 @@ const RenderRoleDetailsInfo = ({
 }: {
 	role: AddressDetailsLeader['role'];
 }) => {
+	if (!role) {
+		return null;
+	}
+
 	const roleDetailsInfo: Partial<
 		Record<Roles, { title: string; points: string[] }>
 	> = {
@@ -148,6 +152,7 @@ const renderReputationTitle = (reputation: Reputation) => {
 };
 
 const renderRoleIcon = (role: AddressDetailsLeader['role']) => {
+	if (!role) return null;
 	const roleIcons = {
 		[Roles.reputationOracle]: <ReputationOracleIcon />,
 		[Roles.exchangeOracle]: <ExchangeOracleIcon />,
