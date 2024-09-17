@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
@@ -7,6 +6,7 @@ from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageUtils
 
 from src.core.config import Config
+from src.core.types import OracleWebhookTypes
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -21,9 +21,11 @@ def validate_escrow(
     chain_id: int,
     escrow_address: str,
     *,
-    accepted_states: List[Status] = [Status.Pending],
+    accepted_states: list[Status] | None = None,
     allow_no_funds: bool = False,
 ) -> None:
+    if accepted_states is None:
+        accepted_states = [Status.Pending]
     assert accepted_states
 
     escrow = get_escrow(chain_id, escrow_address)
@@ -36,9 +38,8 @@ def validate_escrow(
             )
         )
 
-    if status == Status.Pending and not allow_no_funds:
-        if int(escrow.balance) == 0:
-            raise ValueError("Escrow doesn't have funds")
+    if status == Status.Pending and not allow_no_funds and int(escrow.balance) == 0:
+        raise ValueError("Escrow doesn't have funds")
 
 
 def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
@@ -46,8 +47,7 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
 
     manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
 
-    # if EncryptionUtils.is_encrypted(manifest_content):
-    if is_data_encrypted(manifest_content):
+    if EncryptionUtils.is_encrypted(manifest_content):
         encryption = Encryption(
             Config.encryption_config.pgp_private_key,
             passphrase=Config.encryption_config.pgp_passphrase,
@@ -57,22 +57,16 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     return json.loads(manifest_content)
 
 
-def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
-    return get_escrow(chain_id, escrow_address).launcher
-
-
-def get_recording_oracle_address(chain_id: int, escrow_address: str) -> str:
-    if address := Config.localhost.recording_oracle_address:
-        return address
-
-    return get_escrow(chain_id, escrow_address).recording_oracle
-
-
-# FUTURE-TODO: workaround until a new Human Protocol SDK version is released.
-# Check wether data is encrypted without adding new dependencies (like PGPy) to Exchange Oracle.
-# Should be replaced with EncryptionUtils.is_encrypted method.
-def is_data_encrypted(data: str) -> bool:
-    normalized_data = data.strip()
-    return normalized_data.startswith("-----BEGIN PGP MESSAGE-----") and normalized_data.endswith(
-        "-----END PGP MESSAGE-----"
-    )
+def get_available_webhook_types(
+    chain_id: int, escrow_address: str
+) -> dict[str, OracleWebhookTypes]:
+    escrow = get_escrow(chain_id, escrow_address)
+    return {
+        escrow.launcher.lower(): OracleWebhookTypes.job_launcher,
+        (
+            Config.localhost.recording_oracle_address or escrow.recording_oracle
+        ).lower(): OracleWebhookTypes.recording_oracle,
+        (
+            Config.localhost.reputation_oracle_url or escrow.reputation_oracle
+        ).lower(): OracleWebhookTypes.reputation_oracle,
+    }

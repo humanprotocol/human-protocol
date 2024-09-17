@@ -1,0 +1,10 @@
+.swiper-button-next, .swiper-button-prev {
+  top: 35%
+}
+
+.swiper-button-next::after, .swiper-button-prev::after {
+  top: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: $primary;
+}

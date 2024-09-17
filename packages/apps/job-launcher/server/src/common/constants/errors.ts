@@ -169,4 +169,5 @@ export enum ErrorCronJob {
  */
 export enum ErrorQualification {
   FailedToFetchQualifications = 'Failed to fetch qualifications',
+  InvalidQualification = `Invalid qualification`,
 }

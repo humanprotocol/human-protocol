@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import zipfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import timedelta
@@ -9,7 +10,7 @@ from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
 from time import sleep
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
@@ -50,7 +51,7 @@ def _get_annotations(
     cvat_id: int,
     format_name: str,
     attempt_interval: int = 5,
-    timeout: Optional[int] = _NOTSET,
+    timeout: int | None = _NOTSET,
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -125,13 +126,13 @@ def create_cloudstorage(
     provider: str,
     bucket_name: str,
     *,
-    credentials: Optional[Dict[str, Any]] = None,
-    bucket_host: Optional[str] = None,
+    credentials: dict[str, Any] | None = None,
+    bucket_host: str | None = None,
 ) -> models.CloudStorageRead:
     # credentials: access_key | secret_key | service_account_key
     # CVAT credentials: key | secret_key | key_file
-    def _to_cvat_credentials(credentials: Dict[str, Any]) -> Dict:
-        cvat_credentials = dict()
+    def _to_cvat_credentials(credentials: dict[str, Any]) -> dict:
+        cvat_credentials = {}
         for cvat_field, field in {
             "key": "access_key",
             "secret_key": "secret_key",
@@ -147,7 +148,7 @@ def create_cloudstorage(
                     cvat_credentials[cvat_field] = value
         return cvat_credentials
 
-    request_kwargs = dict()
+    request_kwargs = {}
 
     if credentials:
         request_kwargs.update(_to_cvat_credentials(credentials))
@@ -186,7 +187,7 @@ def create_cloudstorage(
 
 
 def create_project(
-    name: str, *, labels: Optional[list] = None, user_guide: str = ""
+    name: str, *, labels: list | None = None, user_guide: str = ""
 ) -> models.ProjectRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -239,7 +240,7 @@ def request_project_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_project_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -314,7 +315,7 @@ def create_task(project_id: int, name: str) -> models.TaskRead:
             raise
 
 
-def get_cloudstorage_contents(cloudstorage_id: int) -> List[str]:
+def get_cloudstorage_contents(cloudstorage_id: int) -> list[str]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
@@ -332,7 +333,7 @@ def put_task_data(
     task_id: int,
     cloudstorage_id: int,
     *,
-    filenames: Optional[list[str]] = None,
+    filenames: list[str] | None = None,
     sort_images: bool = True,
 ) -> None:
     logger = logging.getLogger("app")
@@ -355,7 +356,7 @@ def put_task_data(
         )
         try:
             (_, response) = api_client.tasks_api.create_data(task_id, data_request=data_request)
-            return None
+            return
 
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.put_task_data: {e}\n")
@@ -388,7 +389,7 @@ def request_task_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_task_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -418,16 +419,15 @@ def get_task_annotations(
             raise
 
 
-def fetch_task_jobs(task_id: int) -> List[models.JobRead]:
+def fetch_task_jobs(task_id: int) -> list[models.JobRead]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            data = get_paginated_collection(
+            return get_paginated_collection(
                 api_client.jobs_api.list_endpoint,
                 task_id=task_id,
                 type="annotation",
             )
-            return data
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.list: {e}\n")
             raise
@@ -459,7 +459,7 @@ def request_job_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_job_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -509,13 +509,13 @@ def delete_cloudstorage(cvat_id: int) -> None:
             raise
 
 
-def fetch_projects(assignee: str = "") -> List[models.ProjectRead]:
+def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
             return get_paginated_collection(
                 api_client.projects_api.list_endpoint,
-                **(dict(assignee=assignee) if assignee else {}),
+                **({"assignee": assignee} if assignee else {}),
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
@@ -529,7 +529,7 @@ class UploadStatus(str, Enum, metaclass=BetterEnumMeta):
     FAILED = "Failed"
 
 
-def get_task_upload_status(cvat_id: int) -> Tuple[Optional[UploadStatus], str]:
+def get_task_upload_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -557,13 +557,13 @@ def clear_job_annotations(job_id: int) -> None:
             )
         except exceptions.ApiException as e:
             if e.status == 404:
-                return None
+                return
 
             logger.exception(f"Exception when calling JobsApi.partial_update_annotations(): {e}\n")
             raise
 
 
-def update_job_assignee(id: str, assignee_id: Optional[int]):
+def update_job_assignee(id: str, assignee_id: int | None):
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -577,7 +577,7 @@ def update_job_assignee(id: str, assignee_id: Optional[int]):
             raise
 
 
-def restart_job(id: str, *, assignee_id: Optional[int] = None):
+def restart_job(id: str, *, assignee_id: int | None = None):
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -615,7 +615,7 @@ def remove_user_from_org(user_id: int):
     with get_api_client() as api_client:
         try:
             (page, _) = api_client.users_api.list(
-                filter='{"==":[{"var":"id"},"%s"]}' % (user_id,),
+                filter='{"==":[{"var":"id"},"%s"]}' % user_id,  # noqa: UP031
                 org=Config.cvat_config.cvat_org_slug,
             )
             if not page.results:

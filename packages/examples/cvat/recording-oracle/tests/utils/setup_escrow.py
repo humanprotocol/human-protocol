@@ -25,7 +25,7 @@ def create_escrow(web3: Web3):
     escrow_client = EscrowClient(web3)
     staking_client.approve_stake(amount)
     staking_client.stake(amount)
-    escrow_address = escrow_client.create_and_setup_escrow(
+    return escrow_client.create_and_setup_escrow(
         token_address=NETWORKS[ChainId.LOCALHOST]["hmt_address"],
         trusted_handlers=[web3.eth.default_account],
         job_requester_id=JOB_REQUESTER_ID,
@@ -40,7 +40,6 @@ def create_escrow(web3: Web3):
             hash=DEFAULT_HASH,
         ),
     )
-    return escrow_address
 
 
 def fund_escrow(web3: Web3, escrow_address: str):
@@ -57,7 +56,6 @@ def bulk_payout(web3: Web3, escrow_address: str, recipient: str, amount: Decimal
 
 def get_intermediate_results_url(web3: Web3, escrow_address: str):
     escrow_client = EscrowClient(web3)
-    intermediate_results_url = (
+    return (
         escrow_client._get_escrow_contract(escrow_address).functions.intermediateResultsUrl().call()
     )
-    return intermediate_results_url

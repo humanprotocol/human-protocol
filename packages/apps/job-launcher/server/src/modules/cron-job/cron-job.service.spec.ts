@@ -53,6 +53,7 @@ import { RateService } from '../payment/rate.service';
 import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { QualificationService } from '../qualification/qualification.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -119,6 +120,7 @@ describe('CronJobService', () => {
         CvatConfigService,
         PGPConfigService,
         NetworkConfigService,
+        QualificationService,
         {
           provide: NetworkConfigService,
           useValue: {
@@ -746,6 +748,8 @@ describe('CronJobService', () => {
 
     it('should cancel all of the jobs with status TO_CANCEL', async () => {
       jest.spyOn(webhookRepository, 'createUnique');
+      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
+
       const result = await service.cancelCronJob();
 
       expect(result).toBeTruthy();
@@ -760,6 +764,8 @@ describe('CronJobService', () => {
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {
+      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(false);
+
       const jobEntityWithoutEscrow = {
         ...jobEntityMock1,
         escrowAddress: undefined,
@@ -777,6 +783,7 @@ describe('CronJobService', () => {
     });
 
     it('should increase retriesCount by 1 if the job cancellation fails', async () => {
+      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
       jest
         .spyOn(jobService, 'processEscrowCancellation')
         .mockRejectedValueOnce(new Error('cancellation failed'));
@@ -791,9 +798,11 @@ describe('CronJobService', () => {
     });
 
     it('should mark job as failed if the job cancellation fails more than max retries count', async () => {
+      jest.spyOn(jobService, 'isEscrowFunded').mockResolvedValue(true);
       jest
         .spyOn(jobService, 'processEscrowCancellation')
         .mockRejectedValueOnce(new Error('cancellation failed'));
+
       jobEntityMock1.retriesCount = MOCK_MAX_RETRY_COUNT;
 
       await service.cancelCronJob();

@@ -156,7 +156,7 @@ export function Layout({
                 [breakpoints.mobile]: {
                   height: 'unset',
                   position: 'absolute',
-                  zIndex: 2000,
+                  zIndex: 200,
                   top: '0',
                   left: '0',
                   width: notificationWith ? `${notificationWith}px` : 'unset',

@@ -172,17 +172,18 @@ export class AuthService {
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
-      //Try to fetch status from subgraph, in case the data is not indexed yet, just use status from database.
+      let operatorStatus: string | undefined;
       try {
-        const operatorStatus = await KVStoreUtils.get(
+        operatorStatus = await KVStoreUtils.get(
           chainId,
           this.web3Service.getOperatorAddress(),
           userEntity.evmAddress.toLowerCase(),
         );
-        if (operatorStatus && operatorStatus !== '') {
-          status = operatorStatus;
-        }
-      } catch (e) {}
+      } catch {}
+
+      if (operatorStatus && operatorStatus !== '') {
+        status = operatorStatus;
+      }
     }
 
     const payload: any = {
@@ -193,10 +194,15 @@ export class AuthService {
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       reputation_network: this.web3Service.getOperatorAddress(),
+      qualifications: userEntity.userQualifications
+        ? userEntity.userQualifications.map(
+            (userQualification) => userQualification.qualification.reference,
+          )
+        : [],
     };
 
     if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
-      const existingHcaptchaSiteKey = userEntity.siteKeys?.find(
+      const existingHcaptchaSiteKey = userEntity.siteKeys.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
       );
       if (existingHcaptchaSiteKey) {
@@ -428,25 +434,48 @@ export class AuthService {
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
+    let role: string | undefined;
+    try {
+      role = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role);
+    } catch {}
+
     if (
-      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role),
+      !role ||
+      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].some(
+        (r) => r.toLowerCase() === role.toLowerCase(),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee))) {
+    let fee: string | undefined;
+    try {
+      fee = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee);
+    } catch {}
+
+    if (!fee || fee === '') {
       throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
     }
 
-    if (!(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url))) {
+    let url: string | undefined;
+    try {
+      url = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url);
+    } catch {}
+
+    if (!url || url === '') {
       throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      !(await KVStoreUtils.get(chainId, data.address, KVStoreKeys.jobTypes))
-    ) {
+    let jobTypes: string | undefined;
+    try {
+      jobTypes = await KVStoreUtils.get(
+        chainId,
+        data.address,
+        KVStoreKeys.jobTypes,
+      );
+    } catch {}
+
+    if (!jobTypes || jobTypes === '') {
       throw new ControlledError(
         ErrorAuth.InvalidJobType,
         HttpStatus.BAD_REQUEST,

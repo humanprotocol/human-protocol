@@ -1,10 +1,15 @@
-""" Config for the application logger"""
+"""Config for the application logger"""
+
 import logging
 from logging.config import dictConfig
 
 from src.core.config import Config
 
 ROOT_LOGGER_NAME = "app"
+
+
+def get_logger_name(module_name: str) -> str:
+    return f"{ROOT_LOGGER_NAME}.{module_name.removeprefix('src.')}"
 
 
 def setup_logging():

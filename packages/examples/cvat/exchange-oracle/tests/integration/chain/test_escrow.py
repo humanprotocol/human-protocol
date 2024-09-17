@@ -2,20 +2,22 @@ import json
 import unittest
 from unittest.mock import patch
 
+import pytest
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 
 from src.chain.escrow import (
+    get_available_webhook_types,
     get_escrow_manifest,
-    get_job_launcher_address,
-    get_recording_oracle_address,
     validate_escrow,
 )
+from src.core.types import OracleWebhookTypes
 
 from tests.utils.constants import (
     DEFAULT_MANIFEST_URL,
     ESCROW_ADDRESS,
+    EXCHANGE_ORACLE_ADDRESS,
     FACTORY_ADDRESS,
     JOB_LAUNCHER_ADDRESS,
     PGP_PASSPHRASE,
@@ -23,6 +25,7 @@ from tests.utils.constants import (
     PGP_PUBLIC_KEY1,
     PGP_PUBLIC_KEY2,
     RECORDING_ORACLE_ADDRESS,
+    REPUTATION_ORACLE_ADDRESS,
     TOKEN_ADDRESS,
 )
 
@@ -47,51 +50,48 @@ class ServiceIntegrationTest(unittest.TestCase):
             created_at="",
             manifest_url=DEFAULT_MANIFEST_URL,
             recording_oracle=RECORDING_ORACLE_ADDRESS,
+            exchange_oracle=EXCHANGE_ORACLE_ADDRESS,
+            reputation_oracle=REPUTATION_ORACLE_ADDRESS,
         )
 
     def test_validate_escrow(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
             mock_function.return_value = self.escrow_data
             validation = validate_escrow(chain_id, escrow_address)
-            self.assertIsNone(validation)
+            assert validation is None
 
     def test_validate_escrow_invalid_address(self):
-        with self.assertRaises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
             validate_escrow(chain_id, "invalid_address")
-
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_validate_escrow_invalid_status(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
             self.escrow_data.status = Status.Launched.name
             mock_function.return_value = self.escrow_data
-            with self.assertRaises(ValueError) as error:
+            with pytest.raises(
+                ValueError,
+                match=rf"Escrow is not in any of the accepted states \(Pending\). "
+                f"Current state: {self.escrow_data.status}",
+            ):
                 validate_escrow(chain_id, escrow_address)
-        self.assertEqual(
-            f"Escrow is not in any of the accepted states (Pending). Current state: {self.escrow_data.status}",
-            str(error.exception),
-        )
 
     def test_validate_escrow_without_funds(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
             self.escrow_data.balance = "0"
             mock_function.return_value = self.escrow_data
-            with self.assertRaises(ValueError) as error:
+            with pytest.raises(ValueError, match="Escrow doesn't have funds"):
                 validate_escrow(chain_id, escrow_address)
-        self.assertEqual(
-            f"Escrow doesn't have funds",
-            str(error.exception),
-        )
 
     def test_get_escrow_manifest(self):
-        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function, patch(
-            "src.chain.escrow.StorageUtils.download_file_from_url"
-        ) as mock_download:
+        with (
+            patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function,
+            patch("src.chain.escrow.StorageUtils.download_file_from_url") as mock_download,
+        ):
             mock_download.return_value = json.dumps({"title": "test"}).encode()
             mock_function.return_value = self.escrow_data
             manifest = get_escrow_manifest(chain_id, escrow_address)
-            self.assertIsInstance(manifest, dict)
-            self.assertIsNotNone(manifest)
+            assert isinstance(manifest, dict)
+            assert manifest is not None
 
     def test_get_encrypted_escrow_manifest(self):
         with (
@@ -112,62 +112,36 @@ class ServiceIntegrationTest(unittest.TestCase):
             encrypted_manifest = EncryptionUtils.encrypt(
                 original_manifest, public_keys=[PGP_PUBLIC_KEY1, PGP_PUBLIC_KEY2]
             )
-            self.assertNotEqual(encrypted_manifest, original_manifest)
+            assert encrypted_manifest != original_manifest
 
             mock_download.return_value = encrypted_manifest.encode()
             downloaded_manifest_content = get_escrow_manifest(chain_id, escrow_address)
-            self.assertDictEqual(downloaded_manifest_content, original_manifest_content)
+            assert downloaded_manifest_content == original_manifest_content
 
     def test_get_escrow_manifest_invalid_address(self):
-        with self.assertRaises(EscrowClientError) as error:
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
             get_escrow_manifest(chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
-    def test_get_job_launcher_address(self):
+    def test_get_available_webhook_types(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
             mock_function.return_value = self.escrow_data
-            job_launcher_address = get_job_launcher_address(chain_id, escrow_address)
-            self.assertIsInstance(job_launcher_address, str)
-            self.assertEqual(job_launcher_address, JOB_LAUNCHER_ADDRESS)
+            webhook_types = get_available_webhook_types(chain_id, escrow_address)
+            assert webhook_types == {
+                JOB_LAUNCHER_ADDRESS.lower(): OracleWebhookTypes.job_launcher,
+                REPUTATION_ORACLE_ADDRESS.lower(): OracleWebhookTypes.reputation_oracle,
+                RECORDING_ORACLE_ADDRESS.lower(): OracleWebhookTypes.recording_oracle,
+            }
 
-    def test_get_job_launcher_address_invalid_address(self):
-        with self.assertRaises(EscrowClientError) as error:
-            get_job_launcher_address(chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+    def test_get_available_webhook_types_invalid_address(self):
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
+            get_available_webhook_types(chain_id, "invalid_address")
 
-    def test_get_job_launcher_address_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as error:
-            get_job_launcher_address(123, escrow_address)
-        self.assertEqual(f"123 is not a valid ChainId", str(error.exception))
+    def test_get_available_webhook_types_invalid_chain_id(self):
+        with pytest.raises(ValueError, match="123 is not a valid ChainId"):
+            get_available_webhook_types(123, escrow_address)
 
-    def test_get_job_launcher_address_empty_escrow(self):
+    def test_get_available_webhook_types_empty_escrow(self):
         with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
             mock_function.return_value = None
-            with self.assertRaises(Exception) as error:
-                get_job_launcher_address(chain_id, escrow_address)
-            self.assertEqual(f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception))
-
-    def test_get_recording_oracle_address(self):
-        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
-            self.escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
-            mock_function.return_value = self.escrow_data
-            recording_oracle_address = get_recording_oracle_address(chain_id, escrow_address)
-            self.assertIsInstance(recording_oracle_address, str)
-            self.assertEqual(recording_oracle_address, RECORDING_ORACLE_ADDRESS)
-
-    def test_get_recording_oracle_address_invalid_address(self):
-        with self.assertRaises(EscrowClientError) as error:
-            get_recording_oracle_address(chain_id, "invalid_address")
-        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
-
-    def test_get_recording_oracle_address_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as error:
-            get_recording_oracle_address(123, escrow_address)
-        self.assertEqual(f"123 is not a valid ChainId", str(error.exception))
-
-    def test_get_recording_oracle_address_empty_escrow(self):
-        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
-            mock_function.return_value = None
-            with self.assertRaises(Exception) as error:
-                get_recording_oracle_address(chain_id, escrow_address)
-            self.assertEqual(f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception))
+            with pytest.raises(Exception, match=f"Can't find escrow {ESCROW_ADDRESS}"):
+                get_available_webhook_types(chain_id, escrow_address)

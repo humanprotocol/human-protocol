@@ -2,7 +2,7 @@ import unittest
 import uuid
 
 from src.core.types import ProjectStatuses
-from src.crons.state_trackers import track_escrow_creation
+from src.crons.cvat.state_trackers import track_escrow_creation
 from src.db import SessionLocal
 from src.models.cvat import EscrowCreation, Project
 
@@ -46,7 +46,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         updated_projects = (
             self.session.query(Project).where(Project.cvat_id.in_(cvat_project_ids)).all()
         )
-        self.assertEqual(
-            [p.status for p in updated_projects],
-            [ProjectStatuses.annotation, ProjectStatuses.annotation],
-        )
+        assert [p.status for p in updated_projects] == [
+            ProjectStatuses.annotation,
+            ProjectStatuses.annotation,
+        ]

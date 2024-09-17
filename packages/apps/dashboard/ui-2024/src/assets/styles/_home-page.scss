@@ -1,0 +1,183 @@
+.home-page-header{
+  color: $white;
+  .home-page-search{
+    margin-top: 24px;
+  }
+}
+
+.home-page-boxes{
+  display: flex;
+  gap: 24px;
+  margin-top: 62px;
+
+  .home-page-box{
+    color: $primary;
+    background-color: $white;
+    border-radius: 16px;
+    padding: 24px 32px;
+    width: calc(38% - 24px);
+
+    @media (max-width: 660px) {
+      padding: 24px 16px;
+    }
+
+    .box-title{
+      font-size: 14px;
+      height: 32px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .box-content{
+      display: flex;
+      .count{
+        font-size: 20px;
+        font-weight: 500;
+        margin-top: 3px;
+      }
+      .box-icon{
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .home-page-box:first-child{
+    width: 24%;
+  }
+  @media (max-width: 1250px) {
+    flex-wrap: wrap;
+    .home-page-box, .home-page-box:first-child{
+      width: 100%;
+    }
+  }
+}
+
+.home-page-find{
+  font-size: 14px;
+  margin-top: 32px;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  height: 60px;
+  white-space: nowrap;
+  span{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  @media (max-width: 1100px) {
+    span {
+      min-width: 120px;
+    }
+  }
+}
+
+.home-page-find-title-mobile{
+  margin-top: 32px;
+  font-size: 14px;
+  @media (max-width: 1100px) {
+    display: block;
+  }
+}
+.home-page-leaderboard{
+  margin-top: 60px;
+}
+
+.home-page-table-header{
+  background-color: $whiteSolid;
+  th{
+    font-size: 12px;
+  }
+  .icon-table{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+}
+
+.home-page-table-row{
+  td{
+    padding: 32px 16px;
+    font-size: 16px;
+  }
+
+  .icon-table{
+    background-color: $groundwaterOpacity;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .reputation-table{
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 13px;
+    display: inline-block;
+  }
+
+  .reputation-table-medium{
+    color: $medium;
+    border: 1px solid $mediumBorder;
+  }
+
+  .reputation-table-low{
+    color: $low;
+    border: 1px solid $lowBorder;
+  }
+
+  .reputation-table-high{
+    color: $high;
+    border: 1px solid $highBorder;
+  }
+  .reputation-table-soon{
+    color: $soon;
+    border: 1px solid $soonBorder;
+  }
+
+  &:hover {
+    transition: opacity 8ms;
+    opacity: 0.8;
+  }
+}
+
+#network-select{
+  svg {
+    display: none;
+  }
+}
+
+.select-item{
+  display: flex;
+  gap: 10px;
+}
+
+.mobile-select{
+  width: 270px;
+  background-color: $whiteSolid;
+  padding: 10px;
+  display: none;
+  margin-bottom: 20px;
+  @media (max-width: 1100px) {
+    display: block;
+  }
+}
+
+.table-filter-select{
+  @media (max-width: 1100px) {
+    div{
+      display: none;
+    }
+  }
+  .mobile-title {
+    display: none;
+    font-weight: 400;
+    @media (max-width: 1100px) {
+      display: block;
+    }
+  }
+}

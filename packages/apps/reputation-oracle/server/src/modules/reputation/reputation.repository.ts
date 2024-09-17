@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable, Logger } from '@nestjs/common';
-import { DataSource, In } from 'typeorm';
+import { DataSource, ILike, In } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationEntityType } from '../../common/enums';
@@ -24,7 +24,7 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     chainId: ChainId,
   ): Promise<ReputationEntity | null> {
     return this.findOne({
-      where: { address, chainId },
+      where: { address: ILike(address), chainId },
     });
   }
 

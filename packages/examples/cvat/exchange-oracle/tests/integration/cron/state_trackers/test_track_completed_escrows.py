@@ -20,7 +20,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.crons.state_trackers import track_completed_escrows
+from src.crons.cvat.state_trackers import track_completed_escrows
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Image, Job, Project, Task, User
 from src.models.webhook import Webhook
@@ -141,14 +141,13 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost.value)
             .first()
         )
-        self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished)
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.validation)
+        assert db_project.status == ProjectStatuses.validation
 
-    @patch("src.cvat.api_calls.get_job_annotations")
-    def test_retrieve_annotations_error_getting_annotations(self, mock_annotations):
+    def test_retrieve_annotations_error_getting_annotations(self):
         cvat_project_id = 1
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         project_id = str(uuid.uuid4())
@@ -232,11 +231,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost.value)
             .first()
         )
-        self.assertIsNone(webhook)
+        assert webhook is None
 
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.completed.value)
+        assert db_project.status == ProjectStatuses.completed.value
 
     def test_retrieve_annotations_error_uploading_files(self):
         cvat_project_id = 1
@@ -311,11 +310,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost.value)
             .first()
         )
-        self.assertIsNone(webhook)
+        assert webhook is None
 
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
-        self.assertEqual(db_project.status, ProjectStatuses.completed.value)
+        assert db_project.status == ProjectStatuses.completed.value
 
     def test_retrieve_annotations_multiple_projects_per_escrow_all_completed(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -394,9 +393,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             def _fake_get_annotations(*args, **kwargs):
                 dummy_zip_file = io.BytesIO()
-                with zipfile.ZipFile(
-                    dummy_zip_file, "w"
-                ) as archive, TemporaryDirectory() as tempdir:
+                with (
+                    zipfile.ZipFile(dummy_zip_file, "w") as archive,
+                    TemporaryDirectory() as tempdir,
+                ):
                     mock_dataset = dm.Dataset(
                         media_type=dm.Image,
                         categories={
@@ -443,17 +443,17 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost.value)
             .first()
         )
-        self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished)
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
 
         db_projects = (
             self.session.query(Project)
             .where(Project.id.in_([project1.id, project2.id, project3.id]))
             .all()
         )
-        self.assertEqual(len(db_projects), 3)
+        assert len(db_projects) == 3
         for db_project in db_projects:
-            self.assertEqual(db_project.status, ProjectStatuses.validation)
+            assert db_project.status == ProjectStatuses.validation
 
     def test_retrieve_annotations_multiple_projects_per_escrow_some_completed_some_validation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -532,9 +532,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             def _fake_get_annotations(*args, **kwargs):
                 dummy_zip_file = io.BytesIO()
-                with zipfile.ZipFile(
-                    dummy_zip_file, "w"
-                ) as archive, TemporaryDirectory() as tempdir:
+                with (
+                    zipfile.ZipFile(dummy_zip_file, "w") as archive,
+                    TemporaryDirectory() as tempdir,
+                ):
                     mock_dataset = dm.Dataset(
                         media_type=dm.Image,
                         categories={
@@ -581,17 +582,17 @@ class ServiceIntegrationTest(unittest.TestCase):
             .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost.value)
             .first()
         )
-        self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished)
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
 
         db_projects = (
             self.session.query(Project)
             .where(Project.id.in_([project1.id, project2.id, project3.id]))
             .all()
         )
-        self.assertEqual(len(db_projects), 3)
+        assert len(db_projects) == 3
         for db_project in db_projects:
-            self.assertEqual(db_project.status, ProjectStatuses.validation)
+            assert db_project.status == ProjectStatuses.validation
 
     def test_retrieve_annotations_multiple_projects_per_escrow_all_validation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -671,13 +672,13 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         mock_postprocess_annotations.assert_not_called()
 
-        self.assertEqual(self.session.query(Webhook).count(), 0)
+        assert self.session.query(Webhook).count() == 0
 
         db_projects = (
             self.session.query(Project)
             .where(Project.id.in_([project1.id, project2.id, project3.id]))
             .all()
         )
-        self.assertEqual(len(db_projects), 3)
+        assert len(db_projects) == 3
         for db_project in db_projects:
-            self.assertEqual(db_project.status, ProjectStatuses.validation)
+            assert db_project.status == ProjectStatuses.validation

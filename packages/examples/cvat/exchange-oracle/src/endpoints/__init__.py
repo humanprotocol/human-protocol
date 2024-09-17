@@ -1,4 +1,5 @@
-""" API endpoints """
+"""API endpoints"""
+
 from fastapi import APIRouter, FastAPI
 
 from src.core.config import Config
@@ -24,11 +25,11 @@ def meta_route() -> MetaResponse:
     ]
 
     return MetaResponse.parse_obj(
-        dict(
-            message="Exchange Oracle API",
-            version="0.1.0",
-            supported_networks=networks_info,
-        )
+        {
+            "message": "Exchange Oracle API",
+            "version": "0.1.0",
+            "supported_networks": networks_info,
+        }
     )
 
 

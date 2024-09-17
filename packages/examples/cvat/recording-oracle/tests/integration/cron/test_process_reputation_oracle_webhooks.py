@@ -53,13 +53,13 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_process_reputation_oracle_webhooks(self):
         expected_url = "expected_url"
-        with patch(
-            "src.crons.process_reputation_oracle_webhooks.httpx.Client.post"
-        ) as mock_httpx, patch(
-            "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"
-        ) as mock_get_repo_url, patch(
-            "src.crons.process_reputation_oracle_webhooks.prepare_signed_message"
-        ) as mock_signature:
+        with (
+            patch("src.crons._utils.httpx.Client.post") as mock_httpx,
+            patch("src.crons._utils.prepare_signed_message") as mock_signature,
+            patch(
+                "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"
+            ) as mock_get_repo_url,
+        ):
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx.return_value = mock_response
@@ -68,7 +68,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id = Networks.localhost.value
             escrow_address = create_escrow(self.w3)
             store_kvstore_value("webhook_url", expected_url)
-            event_data = dict()
+            event_data = {}
             mock_signature.return_value = (None, SIGNATURE)
 
             webhook = self.get_webhook(escrow_address, chain_id, event_data)
@@ -94,8 +94,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                     "event_type": RecordingOracleEventTypes.task_completed.value,
                 },
             )
-            self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
-            self.assertEqual(updated_webhook.attempts, 1)
+            assert updated_webhook.status == OracleWebhookStatuses.completed.value
+            assert updated_webhook.attempts == 1
 
     def test_process_reputation_oracle_webhooks_invalid_escrow_address(self):
         chain_id = Networks.localhost.value
@@ -112,8 +112,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Webhook).where(Webhook.id == webhook.id)).scalars().first()
         )
 
-        self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(updated_webhook.attempts, 1)
+        assert updated_webhook.status == OracleWebhookStatuses.pending.value
+        assert updated_webhook.attempts == 1
 
     def test_process_reputation_oracle_webhooks_invalid_reputation_oracle_url(self):
         with patch(
@@ -131,5 +131,5 @@ class ServiceIntegrationTest(unittest.TestCase):
                 .scalars()
                 .first()
             )
-            self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
-            self.assertEqual(updated_webhook.attempts, 1)
+            assert updated_webhook.status == OracleWebhookStatuses.pending.value
+            assert updated_webhook.attempts == 1

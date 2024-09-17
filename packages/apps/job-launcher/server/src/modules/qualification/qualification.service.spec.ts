@@ -4,11 +4,15 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { of, throwError } from 'rxjs';
-import { KVStoreUtils } from '@human-protocol/sdk';
-import { MOCK_REPUTATION_ORACLE_URL } from '../../../test/constants';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+import {
+  MOCK_REPUTATION_ORACLE_URL,
+  MOCK_WEB3_RPC_URL,
+} from '../../../test/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { HttpStatus } from '@nestjs/common';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -26,6 +30,7 @@ describe.only('QualificationService', () => {
         QualificationService,
         ConfigService,
         Web3ConfigService,
+        NetworkConfigService,
         {
           provide: HttpService,
           useValue: {
@@ -33,7 +38,17 @@ describe.only('QualificationService', () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideProvider(NetworkConfigService)
+      .useValue({
+        networks: [
+          {
+            chainId: ChainId.LOCALHOST,
+            rpcUrl: MOCK_WEB3_RPC_URL,
+          },
+        ],
+      })
+      .compile();
 
     qualificationService =
       moduleRef.get<QualificationService>(QualificationService);
@@ -68,17 +83,6 @@ describe.only('QualificationService', () => {
 
     it('should throw a ControlledError when KVStoreUtils.get fails', async () => {
       (KVStoreUtils.get as any).mockRejectedValue(new Error('KV store error'));
-
-      await expect(qualificationService.getQualifications()).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.FailedToFetchQualifications,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
-    });
-
-    it('should throw a ControlledError when reputation oracle URL is not set', async () => {
-      (KVStoreUtils.get as any).mockResolvedValue('');
 
       await expect(qualificationService.getQualifications()).rejects.toThrow(
         new ControlledError(

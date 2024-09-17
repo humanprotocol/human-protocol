@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypeVar, Union
+from typing import TypeVar
 
 from sqlalchemy import Select
 from sqlalchemy.orm import Query
@@ -14,14 +14,11 @@ class ForUpdateParams:
 T = TypeVar("T", Query, Select)
 
 
-def maybe_for_update(query: T, enable: Union[bool, ForUpdateParams]) -> T:
+def maybe_for_update(query: T, enable: bool | ForUpdateParams) -> T:
     if not enable:
         return query
 
-    if isinstance(enable, ForUpdateParams):
-        params = enable
-    else:
-        params = ForUpdateParams()
+    params = enable if isinstance(enable, ForUpdateParams) else ForUpdateParams()
 
     return query.with_for_update(
         skip_locked=params.skip_locked,
