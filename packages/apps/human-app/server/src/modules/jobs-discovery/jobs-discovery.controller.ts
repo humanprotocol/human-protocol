@@ -38,7 +38,7 @@ export class JobsDiscoveryController {
     @JwtPayload() jwtPayload: JwtUserData,
     @Authorization() token: string,
   ): Promise<JobsDiscoveryResponse> {
-    throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
+    // throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(
         jobsDiscoveryParamsDto,
@@ -46,9 +46,7 @@ export class JobsDiscoveryController {
         JobsDiscoveryParamsCommand,
       );
     jobsDiscoveryParamsCommand.token = token;
-    return await this.service.processJobsDiscovery(
-      jobsDiscoveryParamsCommand,
-      jwtPayload.qualifications,
-    );
+    jobsDiscoveryParamsCommand.data.qualifications = jwtPayload.qualifications;
+    return await this.service.processJobsDiscovery(jobsDiscoveryParamsCommand);
   }
 }

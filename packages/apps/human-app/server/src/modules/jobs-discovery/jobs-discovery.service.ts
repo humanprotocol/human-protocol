@@ -16,14 +16,9 @@ export class JobsDiscoveryService {
 
   async processJobsDiscovery(
     command: JobsDiscoveryParamsCommand,
-    qualifications?: string[],
   ): Promise<JobsDiscoveryResponse> {
     const allJobs = await this.getCachedJobs(command.oracleAddress);
-    const filteredJobs = this.applyFilters(
-      allJobs || [],
-      command.data,
-      qualifications,
-    );
+    const filteredJobs = this.applyFilters(allJobs || [], command.data);
 
     return paginateAndSortResults(
       filteredJobs,
@@ -37,7 +32,6 @@ export class JobsDiscoveryService {
   private applyFilters(
     jobs: JobsDiscoveryResponseItem[],
     filters: JobsDiscoveryParamsCommand['data'],
-    qualifications?: string[],
   ): JobsDiscoveryResponseItem[] {
     const difference = Object.values(JobDiscoveryFieldName).filter(
       (value) => !filters.fields.includes(value),
@@ -62,12 +56,15 @@ export class JobsDiscoveryService {
           matches = matches && job.status === filters.status;
         }
 
-        if (qualifications !== undefined && qualifications !== null) {
+        if (
+          filters.qualifications !== undefined &&
+          filters.qualifications !== null
+        ) {
           if (job.qualifications && job.qualifications.length > 0) {
             matches =
               matches &&
               job.qualifications.every((qualification) =>
-                qualifications.includes(qualification),
+                filters.qualifications?.includes(qualification),
               );
           }
         }

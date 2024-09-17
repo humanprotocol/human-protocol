@@ -67,6 +67,7 @@ export class JobsDiscoveryParams extends PageableParams {
   status: JobStatus;
   @AutoMap()
   updatedAfter?: string;
+  qualifications?: string[];
 }
 export class JobsDiscoveryParamsData extends PageableData {
   @AutoMap()
