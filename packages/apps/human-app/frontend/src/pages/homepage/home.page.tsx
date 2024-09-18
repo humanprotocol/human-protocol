@@ -57,7 +57,7 @@ export function HomePage() {
             onClick={() => {
               setStage('welcome');
             }}
-            sx={{ position: 'absolute', top: '15px', right: '15px' }}
+            sx={{ position: 'absolute', top: '24px', right: '24px' }}
           >
             {t('homepage.cancel')}
           </Button>
