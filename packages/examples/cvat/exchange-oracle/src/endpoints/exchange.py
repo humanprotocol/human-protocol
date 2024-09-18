@@ -5,6 +5,7 @@ from http import HTTPStatus
 from typing import Annotated, ClassVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.openapi.models import Example
 from pydantic import Field
 from sqlalchemy import select
 from strenum import StrEnum  # added in python 3.11
@@ -64,8 +65,24 @@ class JobsFilter(Filter):
         reward_token = auto()
         created_at = auto()
 
-    # TODO: add description to swagger specification
-    fields: Annotated[list[SelectableFields], Query(default_factory=list)]
+    # https://github.com/fastapi/fastapi/issues/4700#issuecomment-1153108450
+    fields: Annotated[
+        list[SelectableFields] | None,
+        Query(
+            Query(
+                # NOTE: default_factory=list should not be used since
+                # FilterDepends changes valid types from list to str
+                default=None,
+                description="Comma separated fields to be returned for every available job",
+                openapi_examples={
+                    "one_field": Example(value=SelectableFields.job_description),
+                    "several_fields": Example(
+                        value=f"{SelectableFields.job_description},{SelectableFields.created_at}"
+                    ),
+                },
+            ),
+        ),
+    ]
 
     class Constants(Filter.Constants):
         model = cvat_service.Project

@@ -1,4 +1,3 @@
-import json
 from enum import Enum
 from typing import Any, ClassVar, TypeVar
 
@@ -107,10 +106,13 @@ class Filter(_Filter):
         if not selectable_fields:
             return value
 
-        selector_field_info = self._get_field_info(self.Constants.selector_field_name)
-        selector_field_value = getattr(
-            self, self.Constants.selector_field_name
-        ) or selector_field_info.get_default(call_default_factory=True)
+        default_selector_field_value = self.get_default_field_value(
+            self.Constants.selector_field_name
+        )
+
+        selector_field_value = (
+            getattr(self, self.Constants.selector_field_name) or default_selector_field_value
+        )
 
         if not selector_field_value:
             return value
@@ -131,13 +133,19 @@ class Filter(_Filter):
         )
         return list(selectable_fields_enum.__members__)
 
+    @classmethod
+    def get_default_field_value(cls, field_name: str) -> Any:
+        default_value = cls.model_fields[field_name].get_default()
+        if isinstance(default_value, fastapi.params.Query):
+            default_value = default_value.get_default()
+
+        return default_value
+
     @field_validator("*", mode="before")
     def split_selectable_fields(cls, value, field: ValidationInfo):
         if field.field_name == cls.Constants.selector_field_name:
             if not value:
-                return cls.model_fields[field.field_name].get_default(call_default_factory=True)
-            if value.startswith("[") and value.endswith("]"):
-                return json.loads(value)
+                return cls.get_default_field_value(field.field_name)
             return [v.strip() for v in value.split(",")]
         return value
 
