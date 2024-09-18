@@ -2,20 +2,21 @@ import Box from '@mui/material/Box';
 import { Paper } from '@mui/material';
 import { Navigate } from 'react-router-dom';
 import { t } from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';
+import { useHomePageState } from '@/contexts/homepage-state';
 import { useModalStore } from '../../components/ui/modal/modal.store';
 import { HomeContainer } from './components/home-container';
 
 export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';
 
 export function HomePage() {
-  const [stage, setStage] = useState<HomePageStageType>('welcome');
+  const { pageView, setPageView } = useHomePageState();
   const isMobile = useIsMobile();
   const isMobileMd = useIsMobile('md');
   const { user: worker } = useAuth();
@@ -51,11 +52,11 @@ export function HomePage() {
           position: 'relative',
         }}
       >
-        <HomeContainer setStage={setStage} stage={stage} />
-        {stage === 'chooseSignUpAccountType' && !isMobileMd ? (
+        <HomeContainer />
+        {pageView === 'chooseSignUpAccountType' && !isMobileMd ? (
           <Button
             onClick={() => {
-              setStage('welcome');
+              setPageView('welcome');
             }}
             sx={{ position: 'absolute', top: '24px', right: '24px' }}
           >

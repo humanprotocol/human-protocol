@@ -2,24 +2,24 @@ import { useState } from 'react';
 import { Box, Drawer, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { HumanLogoIcon, HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/theme';
-import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
+import { useHomePageState } from '@/contexts/homepage-state';
 
 interface NavbarProps {
   withNavigation: boolean;
 }
 
 export function Navbar({ withNavigation }: NavbarProps) {
+  const { isMainPage } = useHomePageState();
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
-  const location = useLocation();
-  const isMainPage = location.pathname === routerPaths.homePage;
+
   return (
     <Box
       position="static"
