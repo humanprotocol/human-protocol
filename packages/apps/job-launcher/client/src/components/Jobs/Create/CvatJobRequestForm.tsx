@@ -701,7 +701,7 @@ export const CvatJobRequestForm = () => {
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Tooltip title="This field should contain a URL or link to the ground truth data. Ground truth data serves as the reference or gold standard for your annotations. It represents the correct or desired data, against which the annotations are compared for accuracy and quality assessment.">
+                            <Tooltip title="This field should contain the relative path to the ground truth data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points_15.json', the input should only include 'annotations/points_15.json'. Ground truth data serves as the reference or gold standard for your annotations, representing the correct data against which annotations are compared for accuracy and quality assessment.">
                               <HelpOutlineIcon
                                 color="secondary"
                                 sx={{ cursor: 'pointer' }}
