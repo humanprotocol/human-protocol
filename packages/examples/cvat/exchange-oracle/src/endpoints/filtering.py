@@ -136,7 +136,7 @@ class Filter(_Filter):
     @classmethod
     def get_default_field_value(cls, field_name: str) -> Any:
         default_value = cls.model_fields[field_name].get_default()
-        if isinstance(default_value, fastapi.params.Query):
+        if isinstance(default_value, fastapi.params.FieldInfo):
             default_value = default_value.get_default()
 
         return default_value
