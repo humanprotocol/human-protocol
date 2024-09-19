@@ -34,7 +34,7 @@ const commonStyles: SxProps<Theme> = {
   alignItems: 'center',
   borderRadius: '20px',
   minHeight: '70vh',
-  maxWidth: '1200px',
+  maxWidth: '1600px',
   width: '100%',
   background: colorPalette.white,
 };
