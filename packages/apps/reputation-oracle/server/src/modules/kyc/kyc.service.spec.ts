@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { DeepPartial } from 'typeorm';
-import { MOCK_ADDRESS } from '../../../test/constants';
+import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { KycConfigService } from '../../common/config/kyc-config.service';
@@ -40,8 +40,19 @@ describe('Kyc Service', () => {
 
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         KycService,
-        ConfigService,
         KycConfigService,
         HCaptchaConfigService,
         {

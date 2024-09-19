@@ -15,18 +15,13 @@ import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_URL,
-  MOCK_PGP_PASSPHRASE,
-  MOCK_PGP_PRIVATE_KEY,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
   MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
   MOCK_WEB3_PRIVATE_KEY,
+  mockConfig,
 } from '../../../test/constants';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
@@ -97,17 +92,6 @@ describe('JobService', () => {
     .mockReturnValue(of({ status: 201, data: {} }));
 
   beforeEach(async () => {
-    const mockConfig: any = {
-      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
-      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
-      S3_ENDPOINT: MOCK_S3_ENDPOINT,
-      S3_PORT: MOCK_S3_PORT,
-      S3_USE_SSL: MOCK_S3_USE_SSL,
-      S3_BUCKET: MOCK_S3_BUCKET,
-      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
-      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         {

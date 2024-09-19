@@ -11,14 +11,7 @@ import { Test } from '@nestjs/testing';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_URL,
-  MOCK_PGP_PASSPHRASE,
-  MOCK_PGP_PRIVATE_KEY,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
+  mockConfig,
 } from '../../../test/constants';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
@@ -69,17 +62,6 @@ describe('StorageService', () => {
   };
 
   beforeAll(async () => {
-    const mockConfig: any = {
-      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
-      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
-      S3_ENDPOINT: MOCK_S3_ENDPOINT,
-      S3_PORT: MOCK_S3_PORT,
-      S3_USE_SSL: MOCK_S3_USE_SSL,
-      S3_BUCKET: MOCK_S3_BUCKET,
-      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
-      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         {

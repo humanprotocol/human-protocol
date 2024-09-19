@@ -230,6 +230,7 @@ export const MOCK_CVAT_GT = {
 
 export const MOCK_MINIMUM_FEE_USD = 0.01;
 export const MOCK_RATE_CACHE_TIME = 30;
+export const MOCK_FE_URL = 'http://localhost:3001';
 
 export const mockConfig: any = {
   MINIMUM_FEE_USD: MOCK_MINIMUM_FEE_USD,
@@ -271,4 +272,5 @@ export const mockConfig: any = {
   REPUTATION_ORACLES: MOCK_REPUTATION_ORACLES,
   WEB3_ENV: Web3Env.TESTNET,
   COINGECKO_API_KEY: MOCK_COINGECKO_API_KEY,
+  FE_URL: MOCK_FE_URL,
 };

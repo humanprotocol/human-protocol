@@ -7,17 +7,7 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import {
-  MOCK_ADDRESS,
-  MOCK_PGP_PASSPHRASE,
-  MOCK_PGP_PRIVATE_KEY,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-} from '../../../test/constants';
+import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
@@ -68,17 +58,6 @@ describe('StorageService', () => {
   };
 
   beforeAll(async () => {
-    const mockConfig: any = {
-      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
-      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
-      S3_ENDPOINT: MOCK_S3_ENDPOINT,
-      S3_PORT: MOCK_S3_PORT,
-      S3_USE_SSL: MOCK_S3_USE_SSL,
-      S3_BUCKET: MOCK_S3_BUCKET,
-      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
-      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         StorageService,

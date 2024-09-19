@@ -8,15 +8,7 @@ import { ReputationLevel } from '../../common/enums';
 import { ReputationDto } from './reputation.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import {
-  MOCK_ADDRESS,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
-} from '../../../test/constants';
+import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
@@ -34,15 +26,6 @@ describe('ReputationController', () => {
   };
 
   beforeAll(async () => {
-    const mockConfig: any = {
-      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
-      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
-      S3_ENDPOINT: MOCK_S3_ENDPOINT,
-      S3_PORT: MOCK_S3_PORT,
-      S3_USE_SSL: MOCK_S3_USE_SSL,
-      S3_BUCKET: MOCK_S3_BUCKET,
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [ConfigModule.forFeature(registerAs('s3', () => mockConfig))],
       providers: [

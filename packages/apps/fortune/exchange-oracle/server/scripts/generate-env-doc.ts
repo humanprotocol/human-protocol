@@ -87,7 +87,6 @@ function processConfigFiles() {
 
   const markdown = generateEnvMarkdown(allEnvVarsWithComments);
   fs.writeFileSync(OUTPUT_FILE_PATH, markdown, 'utf-8');
-  console.log('ENV.md file generated successfully!');
 }
 
 processConfigFiles();

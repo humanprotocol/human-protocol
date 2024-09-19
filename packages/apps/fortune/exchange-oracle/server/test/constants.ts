@@ -1,3 +1,5 @@
+import { Web3Env } from '../src/common/enums/web3';
+
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
 export const MOCK_PGP_PRIVATE_KEY = `
@@ -29,3 +31,19 @@ export const MOCK_EXCHANGE_ORACLE = 'http://localhost:3000/';
 export const MOCK_MANIFEST_URL = 'http://localhost/manifest.json';
 export const JOB_LAUNCHER_WEBHOOK_URL = 'https://example.com/joblauncher';
 export const MOCK_RPC_URL = 'http://rpc.url';
+
+export const mockConfig: any = {
+  S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
+  S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
+  S3_ENDPOINT: MOCK_S3_ENDPOINT,
+  S3_PORT: MOCK_S3_PORT,
+  S3_USE_SSL: MOCK_S3_USE_SSL,
+  S3_BUCKET: MOCK_S3_BUCKET,
+  WEB3_PRIVATE_KEY: MOCK_PRIVATE_KEY,
+  PGP_ENCRYPT: false,
+  PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
+  PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
+  MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT,
+  RPC_URL_POLYGON_AMOY: MOCK_RPC_URL,
+  WEB3_ENV: Web3Env.TESTNET,
+};

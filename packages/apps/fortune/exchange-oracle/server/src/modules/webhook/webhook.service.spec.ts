@@ -8,17 +8,9 @@ import { of } from 'rxjs';
 import {
   JOB_LAUNCHER_WEBHOOK_URL,
   MOCK_ADDRESS,
-  MOCK_MAX_RETRY_COUNT,
-  MOCK_PGP_PASSPHRASE,
-  MOCK_PGP_PRIVATE_KEY,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_WEBHOOK_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
+  mockConfig,
 } from '../../../test/constants';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
@@ -71,18 +63,6 @@ describe('WebhookService', () => {
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeEach(async () => {
-    const mockConfig: any = {
-      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
-      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
-      S3_ENDPOINT: MOCK_S3_ENDPOINT,
-      S3_PORT: MOCK_S3_PORT,
-      S3_USE_SSL: MOCK_S3_USE_SSL,
-      S3_BUCKET: MOCK_S3_BUCKET,
-      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
-      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
-      MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT,
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         WebhookService,

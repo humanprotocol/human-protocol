@@ -1,3 +1,4 @@
+import { Web3Env } from '../src/common/enums/web3';
 import { ImageLabelBinaryJobResults } from '../src/common/dto/result';
 import { JobRequestType } from '../src/common/enums';
 import { IFortuneManifest } from '../src/common/interfaces/manifest';
@@ -240,7 +241,6 @@ fIZLubRoCz4FQH4j2i0WiXgAAGBzAQDyOy3WfJOJUAb5V41TFd4ZZEBrSqfh
 Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
 =IMAe
 -----END PGP PUBLIC KEY BLOCK-----`;
-
 export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
@@ -248,3 +248,30 @@ export const MOCK_BUCKET_FILE =
 export const MOCK_HCAPTCHA_TOKEN = 'test-token';
 export const MOCK_HCAPTCHA_PROTECTION_URL = 'https://api.hcaptcha.com';
 export const MOCK_HCAPTCHA_LABELING_URL = 'https://foundation-accounts.hmt.ai';
+export const MOCK_WEB3_RPC_URL = 'http://localhost:8545';
+export const MOCK_QUALIFICATION_MIN_VALIDITY = 100;
+export const MOCK_FE_URL = 'http://localhost:3001';
+
+export const mockConfig: any = {
+  S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
+  S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
+  S3_ENDPOINT: MOCK_S3_ENDPOINT,
+  S3_PORT: MOCK_S3_PORT,
+  S3_USE_SSL: MOCK_S3_USE_SSL,
+  S3_BUCKET: MOCK_S3_BUCKET,
+  PGP_ENCRYPT: false,
+  PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
+  PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
+  WEB3_PRIVATE_KEY: MOCK_PRIVATE_KEY,
+  REPUTATION_LEVEL_LOW: 300,
+  REPUTATION_LEVEL_HIGH: 700,
+  JWT_ACCESS_TOKEN_EXPIRES_IN: MOCK_EXPIRES_IN,
+  MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT,
+  RPC_URL_POLYGON_AMOY: MOCK_WEB3_RPC_URL,
+  SENDGRID_API_KEY: MOCK_SENDGRID_API_KEY,
+  SENDGRID_FROM_EMAIL: MOCK_SENDGRID_FROM_EMAIL,
+  SENDGRID_FROM_NAME: MOCK_SENDGRID_FROM_NAME,
+  WEB3_ENV: Web3Env.TESTNET,
+  QUALIFICATION_MIN_VALIDITY: 1,
+  FE_URL: MOCK_FE_URL,
+};

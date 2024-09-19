@@ -13,6 +13,7 @@ import {
   MOCK_ACCESS_TOKEN,
   MOCK_EMAIL,
   MOCK_EXPIRES_IN,
+  MOCK_FE_URL,
   MOCK_HASHED_PASSWORD,
   MOCK_PASSWORD,
   MOCK_REFRESH_TOKEN,
@@ -355,7 +356,9 @@ describe('AuthService', () => {
             {
               dynamicTemplateData: {
                 service_name: SERVICE_NAME,
-                url: expect.stringContaining('undefined/reset-password?token='),
+                url: expect.stringContaining(
+                  `${MOCK_FE_URL}/reset-password?token=`,
+                ),
               },
               to: email,
             },
