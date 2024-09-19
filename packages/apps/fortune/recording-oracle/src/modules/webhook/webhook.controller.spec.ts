@@ -6,7 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_FILE_URL, MOCK_SIGNATURE } from '../../../test/constants';
+import { MOCK_FILE_URL, MOCK_MAX_RETRY_COUNT, MOCK_PGP_PASSPHRASE, MOCK_PGP_PRIVATE_KEY, MOCK_S3_ACCESS_KEY, MOCK_S3_BUCKET, MOCK_S3_ENDPOINT, MOCK_S3_PORT, MOCK_S3_SECRET_KEY, MOCK_S3_USE_SSL, MOCK_SIGNATURE } from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
 import { verifySignature } from '../../common/utils/signature';
 import { JobService } from '../job/job.service';
@@ -31,12 +31,35 @@ describe('webhookController', () => {
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeAll(async () => {
+    const mockConfig: any = {
+      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
+      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
+      S3_ENDPOINT: MOCK_S3_ENDPOINT,
+      S3_PORT: MOCK_S3_PORT,
+      S3_USE_SSL: MOCK_S3_USE_SSL,
+      S3_BUCKET: MOCK_S3_BUCKET,
+      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
+      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
+      MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT,
+    };
+
     const moduleRef = await Test.createTestingModule({
       controllers: [WebhookController],
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         WebhookService,
         JobService,
-        ConfigService,
         Web3ConfigService,
         PGPConfigService,
         S3ConfigService,
