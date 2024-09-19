@@ -11,14 +11,7 @@ import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import {
   MOCK_MANIFEST_URL,
-  MOCK_PGP_PASSPHRASE,
-  MOCK_PGP_PRIVATE_KEY,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
+  mockConfig,
 } from '../../../test/constants';
 import {
   AssignmentStatus,
@@ -94,17 +87,6 @@ describe('JobService', () => {
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeAll(async () => {
-    const mockConfig: any = {
-      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
-      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
-      S3_ENDPOINT: MOCK_S3_ENDPOINT,
-      S3_PORT: MOCK_S3_PORT,
-      S3_USE_SSL: MOCK_S3_USE_SSL,
-      S3_BUCKET: MOCK_S3_BUCKET,
-      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
-      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
