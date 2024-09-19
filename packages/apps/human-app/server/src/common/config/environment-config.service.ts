@@ -134,4 +134,10 @@ export class EnvironmentConfigService {
       DEFAULT_MAX_REQUEST_RETRIES,
     );
   }
+  get jobsDiscoveryFlag(): boolean {
+    return this.configService.get<boolean>(
+      'FEATURE_FLAG_JOBS_DISCOVERY',
+      false,
+    );
+  }
 }

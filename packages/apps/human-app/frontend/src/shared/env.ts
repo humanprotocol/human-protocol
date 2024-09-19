@@ -31,6 +31,10 @@ const envSchema = z.object({
     return iconsArray;
   }),
   VITE_NETWORK: z.enum(['mainnet', 'testnet']),
+  VITE_FEATURE_FLAG_JOBS_DISCOVERY: z
+    .string()
+    .default('false')
+    .transform((value) => value === 'true'),
 });
 
 let validEnvs;

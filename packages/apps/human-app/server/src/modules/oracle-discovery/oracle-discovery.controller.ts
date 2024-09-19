@@ -16,11 +16,13 @@ import {
 } from './model/oracle-discovery.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 
 @Controller()
 export class OracleDiscoveryController {
   constructor(
     private readonly service: OracleDiscoveryService,
+    private readonly environmentConfigService: EnvironmentConfigService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
   @ApiTags('Oracle-Discovery')
@@ -30,7 +32,12 @@ export class OracleDiscoveryController {
   public getOracles(
     @Query() dto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryResponse[]> {
-    throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
+    if (!this.environmentConfigService.jobsDiscoveryFlag) {
+      throw new HttpException(
+        'Oracles discovery is disabled',
+        HttpStatus.FORBIDDEN,
+      );
+    }
     const command = this.mapper.map(
       dto,
       OracleDiscoveryDto,

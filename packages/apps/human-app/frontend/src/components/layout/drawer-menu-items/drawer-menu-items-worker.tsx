@@ -7,6 +7,7 @@ import type {
 } from '@/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
+import { env } from '@/shared/env';
 
 export const workerDrawerTopMenuItems = (
   addressRegistered: boolean
@@ -31,11 +32,15 @@ export const workerDrawerTopMenuItems = (
       link: routerPaths.worker.enableLabeler,
       disabled: !addressRegistered,
     },
-    // {
-    //   label: t('components.DrawerNavigation.jobsDiscovery'),
-    //   link: routerPaths.worker.jobsDiscovery,
-    //   disabled: !addressRegistered,
-    // },
+    ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
+      ? [
+          {
+            label: t('components.DrawerNavigation.jobsDiscovery'),
+            link: routerPaths.worker.jobsDiscovery,
+            disabled: !addressRegistered,
+          },
+        ]
+      : []),
   ];
 };
 
