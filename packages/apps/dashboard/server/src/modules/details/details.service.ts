@@ -94,9 +94,11 @@ export class DetailsService {
     });
     const result = transactions.map((transaction) => {
       const transcationPaginationObject: TransactionPaginationDto =
-        plainToInstance(TransactionPaginationDto, transaction, {
-          excludeExtraneousValues: true,
-        });
+        plainToInstance(
+          TransactionPaginationDto,
+          { ...transaction, currentAddress: address },
+          { excludeExtraneousValues: true },
+        );
       return transcationPaginationObject;
     });
 
