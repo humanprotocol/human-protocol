@@ -42,9 +42,8 @@ export function UpdateVersionModal() {
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Re-register your account
+                Reregister your account
               </a>
-              .
             </li>
             <li>
               <a
@@ -52,9 +51,8 @@ export function UpdateVersionModal() {
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Complete the KYC
+                Verify your identity
               </a>
-              (Know Your Customer) verification.
             </li>
             <li>
               <a
