@@ -44,6 +44,7 @@ describe('CronJobService', () => {
       password: 'Test1234*',
       cacheTtlOracleDiscovery: 600,
       chainIdsEnabled: ['137', '1'],
+      jobsDiscoveryFlag: true,
     };
 
     const module: TestingModule = await Test.createTestingModule({

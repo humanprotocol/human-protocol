@@ -33,6 +33,8 @@ export class CronJobService {
   async updateJobsListCron() {
     this.logger.log('CRON START');
 
+    if (!this.configService.jobsDiscoveryFlag) return;
+
     const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
     const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
       oracleDiscoveryCommand,
