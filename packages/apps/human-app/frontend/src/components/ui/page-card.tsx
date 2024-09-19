@@ -28,7 +28,7 @@ const IconWrapper = styled('div')(() => ({
 }));
 
 const commonStyles: SxProps<Theme> = {
-  padding: '2rem 2rem 6rem 2rem',
+  padding: '2rem 2rem 8.75rem 2rem',
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
