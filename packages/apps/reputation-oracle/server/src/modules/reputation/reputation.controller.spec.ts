@@ -34,19 +34,17 @@ describe('ReputationController', () => {
   };
 
   beforeAll(async () => {
+    const mockConfig: any = {
+      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
+      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
+      S3_ENDPOINT: MOCK_S3_ENDPOINT,
+      S3_PORT: MOCK_S3_PORT,
+      S3_USE_SSL: MOCK_S3_USE_SSL,
+      S3_BUCKET: MOCK_S3_BUCKET,
+    };
+
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-      ],
+      imports: [ConfigModule.forFeature(registerAs('s3', () => mockConfig))],
       providers: [
         {
           provide: Web3Service,
@@ -64,7 +62,18 @@ describe('ReputationController', () => {
             findOne: jest.fn(),
           },
         },
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         ReputationConfigService,
         S3ConfigService,
         PGPConfigService,

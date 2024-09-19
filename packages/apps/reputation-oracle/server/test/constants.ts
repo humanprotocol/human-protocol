@@ -179,6 +179,19 @@ export const MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS: ImageLabelBinaryJobResults = {
 };
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
+export const MOCK_PGP_PRIVATE_KEY = `
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lQOYBGD1Xl8BCAC1vL3mnVZ2S2Ooz1GF6bkxKZR8G+yYQOITriLZ5YXQQyzTveVl
+mYk1mkIaWjFJHQ4tTT1cJe5Og6WV2ycRo5EhHzvXw5bAhdDkLHPQEKyRgIUG8IQC
+FjGp13DtiY8P2zNL5eMxGiMTp8xQJ7jC3HVZROqUOujcdLPglfE7b5n/Ao9TBwFO
+...
+...
+-----END PGP PRIVATE KEY BLOCK-----
+`;
+
+export const MOCK_PGP_PASSPHRASE = 'secure-passphrase';
+
 export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_PASSWORD = 'password123';
 export const MOCK_HASHED_PASSWORD = 'hashedPassword';
