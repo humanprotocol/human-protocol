@@ -7,7 +7,6 @@ import {
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
-  MOCK_BUCKET_NAME,
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
@@ -19,6 +18,7 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  mockConfig,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import stringify from 'json-stable-stringify';
@@ -55,17 +55,6 @@ describe('StorageService', () => {
   let storageService: StorageService;
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'MOCK_PGP_PRIVATE_KEY':
-            return MOCK_PGP_PRIVATE_KEY;
-          case 'S3_BUCKET':
-            return MOCK_BUCKET_NAME;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -80,13 +69,24 @@ describe('StorageService', () => {
         ),
       ],
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         StorageService,
         S3ConfigService,
         {
           provide: Encryption,
           useValue: await Encryption.build(MOCK_PGP_PRIVATE_KEY),
         },
-        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -107,7 +107,7 @@ describe('StorageService', () => {
         hash: expect.any(String),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
-        MOCK_BUCKET_NAME,
+        'solution',
         expect.any(String),
         expect.any(String),
         {

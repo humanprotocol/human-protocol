@@ -48,6 +48,7 @@ export class RateService {
 
     const cacheKey = `${from}_${to}`;
     const cachedRate = this.cache.get(cacheKey);
+
     if (cachedRate && this.isCacheValid(cachedRate.timestamp)) {
       return cachedRate.rate;
     }
@@ -80,6 +81,8 @@ export class RateService {
 
       return finalRate;
     } catch (error) {
+      console.log(error);
+
       //   try {
       //     const coinMarketCapFrom = CoinMarketCupTokenId[from];
       //     const coinMarketCapTo = to;
