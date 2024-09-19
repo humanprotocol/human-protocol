@@ -191,7 +191,6 @@ FjGp13DtiY8P2zNL5eMxGiMTp8xQJ7jC3HVZROqUOujcdLPglfE7b5n/Ao9TBwFO
 `;
 
 export const MOCK_PGP_PASSPHRASE = 'secure-passphrase';
-
 export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_PASSWORD = 'password123';
 export const MOCK_HASHED_PASSWORD = 'hashedPassword';

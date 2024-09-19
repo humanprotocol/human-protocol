@@ -9,7 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_MANIFEST_URL } from '../../../test/constants';
+import { MOCK_MANIFEST_URL, MOCK_PGP_PASSPHRASE, MOCK_PGP_PRIVATE_KEY, MOCK_S3_ACCESS_KEY, MOCK_S3_BUCKET, MOCK_S3_ENDPOINT, MOCK_S3_PORT, MOCK_S3_SECRET_KEY, MOCK_S3_USE_SSL } from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -84,11 +84,33 @@ describe('JobService', () => {
     .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeAll(async () => {
+    const mockConfig: any = {
+      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
+      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
+      S3_ENDPOINT: MOCK_S3_ENDPOINT,
+      S3_PORT: MOCK_S3_PORT,
+      S3_USE_SSL: MOCK_S3_USE_SSL,
+      S3_BUCKET: MOCK_S3_BUCKET,
+      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
+      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         PGPConfigService,
         S3ConfigService,
         {
