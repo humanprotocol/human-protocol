@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class PGPConfigService {
   constructor(private configService: ConfigService) {}
-  
+
   /**
    * Indicates whether PGP encryption should be used.
    * Default: false

@@ -9,7 +9,17 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_MANIFEST_URL, MOCK_PGP_PASSPHRASE, MOCK_PGP_PRIVATE_KEY, MOCK_S3_ACCESS_KEY, MOCK_S3_BUCKET, MOCK_S3_ENDPOINT, MOCK_S3_PORT, MOCK_S3_SECRET_KEY, MOCK_S3_USE_SSL } from '../../../test/constants';
+import {
+  MOCK_MANIFEST_URL,
+  MOCK_PGP_PASSPHRASE,
+  MOCK_PGP_PRIVATE_KEY,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+} from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,

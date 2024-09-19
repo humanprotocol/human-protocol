@@ -128,7 +128,7 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   public async handleWebhookError(webhookEntity: WebhookEntity): Promise<void> {
-    console.log(3333, this.serverConfigService.maxRetryCount)
+    console.log(3333, this.serverConfigService.maxRetryCount);
     if (webhookEntity.retriesCount >= this.serverConfigService.maxRetryCount) {
       webhookEntity.status = WebhookStatus.FAILED;
     } else {

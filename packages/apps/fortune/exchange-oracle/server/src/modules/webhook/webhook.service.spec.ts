@@ -80,7 +80,7 @@ describe('WebhookService', () => {
       S3_BUCKET: MOCK_S3_BUCKET,
       PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
       PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
-      MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT
+      MAX_RETRY_COUNT: MOCK_MAX_RETRY_COUNT,
     };
 
     const moduleRef = await Test.createTestingModule({

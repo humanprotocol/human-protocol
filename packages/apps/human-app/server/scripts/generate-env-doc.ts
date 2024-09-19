@@ -5,7 +5,7 @@ const CONFIG_FOLDER_PATH = path.join(__dirname, '../src/common/config');
 const OUTPUT_FILE_PATH = path.join(__dirname, '../ENV.md');
 
 const envVarRegex =
-  /(?:this\.configService\.)?(?:getOrThrow|get)(?:<[\w<>\[\]]+>)?\(\s*'(\w+)'\s*(?:,\s*[^)]*)?\)/gs;
+  /(?:this\.configService\.)?(?:getOrThrow|get)(?:<[\w<>[\]]+>)?\(\s*'(\w+)'\s*(?:,\s*[^)]*)?\)/gs;
 const commentRegex = /\/\*\*([^*]*\*+([^/*][^*]*\*+)*)\//g;
 
 function extractEnvVarsWithComments(content: string) {
