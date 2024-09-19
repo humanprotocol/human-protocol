@@ -12,6 +12,9 @@ import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
 import { HttpService } from '@nestjs/axios';
+import { CommonConfigModule } from '../../../common/config/common-config.module';
+import { ConfigModule } from '@nestjs/config';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
@@ -24,10 +27,16 @@ describe('JobsDiscoveryController', () => {
         AutomapperModule.forRoot({
           strategyInitializer: classes(),
         }),
+        CommonConfigModule,
+        ConfigModule.forRoot({
+          envFilePath: '.env',
+          isGlobal: true,
+        }),
       ],
       providers: [
         JobsDiscoveryService,
         JobsDiscoveryProfile,
+        EnvironmentConfigService,
         {
           provide: HttpService,
           useValue: {
