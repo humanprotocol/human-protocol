@@ -135,9 +135,10 @@ export class EnvironmentConfigService {
     );
   }
   get jobsDiscoveryFlag(): boolean {
-    return this.configService.get<boolean>(
+    const flag = this.configService.get<string>(
       'FEATURE_FLAG_JOBS_DISCOVERY',
-      false,
+      'false',
     );
+    return flag === 'true';
   }
 }

@@ -12,6 +12,7 @@ import {
 import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
 import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 describe('CronJobService', () => {
   let service: CronJobService;
@@ -44,7 +45,6 @@ describe('CronJobService', () => {
       password: 'Test1234*',
       cacheTtlOracleDiscovery: 600,
       chainIdsEnabled: ['137', '1'],
-      jobsDiscoveryFlag: true,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -58,6 +58,7 @@ describe('CronJobService', () => {
         { provide: WorkerService, useValue: workerServiceMock },
         { provide: CACHE_MANAGER, useValue: cacheManagerMock },
         { provide: EnvironmentConfigService, useValue: configServiceMock },
+        SchedulerRegistry,
       ],
     }).compile();
 

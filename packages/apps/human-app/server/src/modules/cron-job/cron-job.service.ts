@@ -1,7 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { Cron } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import {
   JobsDiscoveryParams,
@@ -17,6 +17,7 @@ import {
 } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -27,13 +28,24 @@ export class CronJobService {
     private configService: EnvironmentConfigService,
     private oracleDiscoveryService: OracleDiscoveryService,
     private workerService: WorkerService,
-  ) {}
+    private schedulerRegistry: SchedulerRegistry,
+  ) {
+    if (this.configService.jobsDiscoveryFlag) {
+      this.initializeCronJob();
+    }
+  }
 
-  @Cron('*/3 * * * *')
+  initializeCronJob() {
+    const job = new CronJob('*/30 * * * * *', () => {
+      this.updateJobsListCron();
+    });
+
+    this.schedulerRegistry.addCronJob('updateJobsList', job);
+    job.start();
+  }
+
   async updateJobsListCron() {
     this.logger.log('CRON START');
-
-    if (!this.configService.jobsDiscoveryFlag) return;
 
     const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
     const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
