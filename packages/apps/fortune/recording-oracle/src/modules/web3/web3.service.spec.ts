@@ -1,12 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants';
+import { MOCK_WEB3_PRIVATE_KEY, mockConfig } from '../../../test/constants';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { Web3Service } from './web3.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 
 describe('Web3Service', () => {
-  let mockConfigService: Partial<ConfigService>;
   let web3Service: Web3Service;
   let networkConfigService: NetworkConfigService;
 
@@ -15,23 +14,21 @@ describe('Web3Service', () => {
     .mockReturnValue(MOCK_WEB3_PRIVATE_KEY);
 
   beforeAll(async () => {
-    mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'RPC_URL_LOCALHOST':
-            return 'http://localhost:8545/';
-          default:
-            return defaultValue;
-        }
-      }),
-    };
     const moduleRef = await Test.createTestingModule({
       providers: [
-        Web3Service,
         {
           provide: ConfigService,
-          useValue: mockConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
         },
+        Web3Service,
         Web3ConfigService,
         NetworkConfigService,
       ],

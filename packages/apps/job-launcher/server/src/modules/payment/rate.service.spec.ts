@@ -7,6 +7,7 @@ import { ErrorCurrency } from '../../common/constants/errors';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { mockConfig } from '../../../test/constants';
 
 describe('RateService', () => {
   let service: RateService;
@@ -15,6 +16,18 @@ describe('RateService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         RateService,
         {
           provide: HttpService,
@@ -23,7 +36,6 @@ describe('RateService', () => {
           },
         },
         ServerConfigService,
-        ConfigService,
       ],
     }).compile();
 

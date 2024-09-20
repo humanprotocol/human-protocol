@@ -927,7 +927,6 @@ export class JobService {
     } else {
       totalJobs = Math.ceil(elementsCount / jobSize);
     }
-
     const jobBounty =
       ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
     return ethers.formatEther(jobBounty);
@@ -1144,6 +1143,7 @@ export class JobService {
     data: any,
   ): Promise<any> {
     let manifestFile = data;
+
     if (this.pgpConfigService.encrypt) {
       const { getOracleAddresses } =
         this.getOraclesSpecificActions[requestType];
@@ -1157,7 +1157,6 @@ export class JobService {
         const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
         if (publicKey) publicKeys.push(publicKey);
       }
-
       const encryptedManifest = await this.encryption.signAndEncrypt(
         JSON.stringify(data),
         publicKeys,
@@ -1169,6 +1168,7 @@ export class JobService {
       .createHash('sha1')
       .update(stringify(manifestFile))
       .digest('hex');
+
     const uploadedFile = await this.storageService.uploadFile(
       manifestFile,
       hash,
