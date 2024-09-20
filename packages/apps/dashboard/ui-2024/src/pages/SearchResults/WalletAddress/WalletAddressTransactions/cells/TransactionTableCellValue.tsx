@@ -1,6 +1,6 @@
+import { formatHMTDecimals } from '@helpers/formatHMTDecimals';
 import Typography from '@mui/material/Typography';
 import { useHMTPrice } from '@services/api/use-hmt-price';
-import { ethers } from 'ethers';
 
 export const TransactionTableCellValue = ({ value }: { value: string }) => {
 	const { isError, isPending } = useHMTPrice();
@@ -13,14 +13,9 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
 		return '...';
 	}
 
-	const formattedValue = Number(ethers.formatEther(value));
-	const displayValue = Number.isInteger(formattedValue)
-		? formattedValue
-		: formattedValue.toFixed(4);
-
 	return (
 		<Typography>
-			{displayValue}
+			{formatHMTDecimals(value)}
 			<Typography component="span">HMT</Typography>
 		</Typography>
 	);
