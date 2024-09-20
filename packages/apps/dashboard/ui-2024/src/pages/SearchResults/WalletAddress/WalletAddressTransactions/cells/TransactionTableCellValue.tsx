@@ -13,9 +13,14 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
 		return '...';
 	}
 
+	const formattedValue = Number(ethers.formatEther(value));
+	const displayValue = Number.isInteger(formattedValue)
+		? formattedValue
+		: formattedValue.toFixed(4);
+
 	return (
 		<Typography>
-			{Number(ethers.formatEther(value)).toFixed(4)}
+			{displayValue}
 			<Typography component="span">HMT</Typography>
 		</Typography>
 	);
