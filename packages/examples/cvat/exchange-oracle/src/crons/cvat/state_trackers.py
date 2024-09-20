@@ -21,31 +21,20 @@ from src.handlers.completed_escrows import handle_completed_escrows
 def track_completed_projects(logger: logging.Logger, session: Session) -> None:
     """
     Tracks completed projects:
-    1. Retrieves projects with "annotation" status
-    2. Retrieves tasks related to this project
-    3. If all tasks are completed -> updates project status to "completed"
+    Updates projects with "annotation" status to "completed" if all their tasks are completed,
+    and logs the cvat_ids of the updated projects.
     """
-    projects = cvat_service.get_projects_by_status(
+    updated_project_cvat_ids = cvat_service.update_projects_by_status(
         session,
-        ProjectStatuses.annotation,
-        task_status=TaskStatuses.completed,
-        limit=CronConfig.track_completed_projects_chunk_size,
-        for_update=ForUpdateParams(skip_locked=True),
+        status=ProjectStatuses.annotation,
+        new_status=ProjectStatuses.completed,
+        included_types=None,  # Add included_types if needed
     )
 
-    completed_project_ids = []
-
-    for project in projects:
-        tasks = cvat_service.get_tasks_by_cvat_project_id(session, project.cvat_id)
-        if tasks and all(task.status == TaskStatuses.completed for task in tasks):
-            cvat_service.update_project_status(session, project.id, ProjectStatuses.completed)
-
-            completed_project_ids.append(project.cvat_id)
-
-    if completed_project_ids:
+    if updated_project_cvat_ids:
         logger.info(
             "Found new completed projects: {}".format(
-                ", ".join(str(t) for t in completed_project_ids)
+                ", ".join(str(t) for t in updated_project_cvat_ids)
             )
         )
 
@@ -54,31 +43,19 @@ def track_completed_projects(logger: logging.Logger, session: Session) -> None:
 def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
     """
     Tracks completed tasks:
-    1. Retrieves tasks with "annotation" status
-    2. Retrieves jobs related to this task
-    3. If all jobs are completed -> updates task status to "completed"
+    Updates tasks with "annotation" status to "completed" if all their jobs are completed,
+    and logs the cvat_ids of the updated tasks.
     """
-    tasks = cvat_service.get_tasks_by_status(
+    updated_task_cvat_ids = cvat_service.update_tasks_by_status(
         session,
-        TaskStatuses.annotation,
-        job_status=JobStatuses.completed,
+        status=TaskStatuses.annotation,
+        new_status=TaskStatuses.completed,
         project_status=ProjectStatuses.annotation,
-        limit=CronConfig.track_completed_tasks_chunk_size,
-        for_update=ForUpdateParams(skip_locked=True),
     )
 
-    completed_task_ids = []
-
-    for task in tasks:
-        jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
-        if jobs and all(job.status == JobStatuses.completed for job in jobs):
-            cvat_service.update_task_status(session, task.id, TaskStatuses.completed)
-
-            completed_task_ids.append(task.cvat_id)
-
-    if completed_task_ids:
+    if updated_task_cvat_ids:
         logger.info(
-            "Found new completed tasks: {}".format(", ".join(str(t) for t in completed_task_ids))
+            "Found new completed tasks: {}".format(", ".join(str(t) for t in updated_task_cvat_ids))
         )
 
 
