@@ -591,6 +591,24 @@ def get_jobs_by_cvat_project_id(
     )
 
 
+def get_jobs_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    *,
+    for_update: bool | ForUpdateParams = False,
+) -> list[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(
+            Job.project.has(
+                (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+            )
+        )
+        .all()
+    )
+
+
 def count_jobs_by_escrow_address(
     session: Session, escrow_address: str, chain_id: int, status: JobStatuses
 ) -> int:

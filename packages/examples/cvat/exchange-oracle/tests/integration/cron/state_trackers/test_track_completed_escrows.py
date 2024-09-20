@@ -389,6 +389,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             ) as mock_postprocess_annotations,
         ):
             manifest = json.load(manifest_data)
+            manifest["annotation"]["type"] = TaskTypes.image_skeletons_from_boxes.value
+
             mock_get_manifest.return_value = manifest
 
             def _fake_get_annotations(*args, **kwargs):
@@ -528,6 +530,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             ) as mock_postprocess_annotations,
         ):
             manifest = json.load(manifest_data)
+            manifest["annotation"]["type"] = TaskTypes.image_skeletons_from_boxes.value
+
             mock_get_manifest.return_value = manifest
 
             def _fake_get_annotations(*args, **kwargs):
