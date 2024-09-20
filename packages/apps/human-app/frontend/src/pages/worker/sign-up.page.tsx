@@ -91,7 +91,6 @@ export function SignUpWorkerPage() {
               label={t('worker.signUpForm.fields.confirmPassword')}
               name="confirmPassword"
             />
-            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
             <Grid>
               <Typography fontSize="0.75rem" variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
@@ -101,6 +100,7 @@ export function SignUpWorkerPage() {
                 </Trans>
               </Typography>
             </Grid>
+            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
             <Button
               fullWidth
               loading={isSignUpWorkerPending}
