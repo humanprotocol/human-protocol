@@ -11,6 +11,7 @@ import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -28,13 +29,13 @@ const IconWrapper = styled('div')(() => ({
 }));
 
 const commonStyles: SxProps<Theme> = {
-  padding: '2rem 2rem 6rem 2rem',
+  padding: '2rem 2rem 8.75rem 2rem',
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: '20px',
   minHeight: '70vh',
-  maxWidth: '1200px',
+  maxWidth: '1600px',
   width: '100%',
   background: colorPalette.white,
 };
@@ -67,6 +68,7 @@ export function PageCard({
 }: FormCardProps) {
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
+  const isMobile = useIsMobile('md');
 
   useEffect(() => {
     if (withLayoutBackground) {
@@ -88,7 +90,13 @@ export function PageCard({
   };
 
   return (
-    <Grid container sx={commonStyles}>
+    <Grid
+      container
+      sx={{
+        ...commonStyles,
+        padding: isMobile ? '0 1rem 7.25rem 1rem' : '2rem 2rem 8.75rem 2rem',
+      }}
+    >
       {!hiddenCancelButton && (
         <Grid
           sx={{

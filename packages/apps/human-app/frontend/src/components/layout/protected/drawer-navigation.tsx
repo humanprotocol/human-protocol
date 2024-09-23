@@ -6,13 +6,14 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { Stack, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
 import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoNavbarIcon } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { NAVBAR_PADDING } from '@/components/layout/protected/navbar';
+import { colorPalette } from '@/styles/color-palette';
 
 const drawerWidth = 240;
 
@@ -44,6 +45,7 @@ export function DrawerNavigation({
 }: DrawerNavigationProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const location = useLocation();
 
   return (
     <Box
@@ -99,6 +101,8 @@ export function DrawerNavigation({
               }
 
               const { link, label, disabled, href, onClick } = item;
+              const isActive = Boolean(link && location.pathname === link);
+
               return (
                 <ListItem disablePadding key={link}>
                   <ListItemButton
@@ -121,6 +125,12 @@ export function DrawerNavigation({
                       if (link && !href) {
                         navigate(link);
                       }
+                    }}
+                    selected={isActive}
+                    sx={{
+                      '&.Mui-selected': {
+                        backgroundColor: colorPalette.primary.shades,
+                      },
                     }}
                   >
                     <Stack
@@ -151,54 +161,63 @@ export function DrawerNavigation({
             })}
           </List>
           <List>
-            {bottomMenuItems?.map(({ label, link, icon, href, onClick }) => (
-              <ListItem alignItems="center" disablePadding key={link}>
-                <ListItemButton
-                  alignItems="center"
-                  onClick={() => {
-                    if (onClick) {
-                      onClick();
-                      return;
-                    }
-                    if (isMobile) setDrawerOpen(false);
-                    if (href) {
-                      const element = document.createElement('a');
-                      element.href = href;
-                      element.target = '_blank';
-                      document.body.appendChild(element);
-                      element.click();
-                      return;
-                    }
-                    if (link && !href) {
-                      navigate(link);
-                    }
-                  }}
-                >
-                  <Stack
+            {bottomMenuItems?.map(({ label, link, icon, href, onClick }) => {
+              const isActive = location.pathname === link;
+              return (
+                <ListItem alignItems="center" disablePadding key={link}>
+                  <ListItemButton
                     alignItems="center"
-                    direction="row"
-                    justifyContent="center"
+                    onClick={() => {
+                      if (onClick) {
+                        onClick();
+                        return;
+                      }
+                      if (isMobile) setDrawerOpen(false);
+                      if (href) {
+                        const element = document.createElement('a');
+                        element.href = href;
+                        element.target = '_blank';
+                        document.body.appendChild(element);
+                        element.click();
+                        return;
+                      }
+                      if (link && !href) {
+                        navigate(link);
+                      }
+                    }}
+                    selected={isActive}
                     sx={{
-                      ml: isMobile ? '28px' : NAVBAR_PADDING,
+                      '&.Mui-selected': {
+                        backgroundColor: colorPalette.primary.shades,
+                      },
                     }}
                   >
-                    {icon}
-                    <ListItemText
-                      disableTypography
-                      primary={
-                        <Typography component="span" variant="body1">
-                          {label}
-                        </Typography>
-                      }
+                    <Stack
+                      alignItems="center"
+                      direction="row"
+                      justifyContent="center"
                       sx={{
-                        textAlign: 'center',
-                        marginLeft: '10px',
+                        ml: isMobile ? '28px' : NAVBAR_PADDING,
                       }}
-                    />
-                  </Stack>
-                </ListItemButton>
-              </ListItem>
-            ))}
+                    >
+                      {icon}
+                      <ListItemText
+                        disableTypography
+                        primary={
+                          <Typography component="span" variant="body1">
+                            {label}
+                          </Typography>
+                        }
+                        sx={{
+                          textAlign: 'center',
+                          marginLeft: '10px',
+                        }}
+                      />
+                    </Stack>
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
           </List>
         </Stack>
         <Button

@@ -21,6 +21,7 @@ import { Alert } from '@/components/ui/alert';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { MAX_INPUT_WIDTH } from '@/shared/consts';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
@@ -79,7 +80,12 @@ export function SignInWorkerPage() {
             void methods.handleSubmit(handleWorkerSignIn)(event)
           }
         >
-          <Grid container gap="2rem" sx={{ paddingTop: '1rem' }}>
+          <Grid
+            container
+            gap="2rem"
+            maxWidth={`${MAX_INPUT_WIDTH}px`}
+            sx={{ paddingTop: '1rem' }}
+          >
             <Input
               fullWidth
               label={t('worker.signInForm.fields.email')}
@@ -90,7 +96,6 @@ export function SignInWorkerPage() {
               label={t('worker.signInForm.fields.password')}
               name="password"
             />
-            <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
             <Typography variant="body1">
               <Link
                 style={{ textDecoration: 'none', fontWeight: 600 }}
@@ -99,6 +104,7 @@ export function SignInWorkerPage() {
                 {t('worker.signInForm.forgotPassword')}
               </Link>
             </Typography>
+            <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
             <Button
               fullWidth
               loading={isSignInWorkerPending}

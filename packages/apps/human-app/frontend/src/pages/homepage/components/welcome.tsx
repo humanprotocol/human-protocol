@@ -11,13 +11,10 @@ import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
 import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
-import type { HomePageStageType } from '@/pages/homepage/home.page';
+import { useHomePageState } from '@/contexts/homepage-state';
 
-interface WelcomeProps {
-  setStage: (step: HomePageStageType) => void;
-}
-
-export function Welcome({ setStage }: WelcomeProps) {
+export function Welcome() {
+  const { setPageView } = useHomePageState();
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
@@ -93,7 +90,7 @@ export function Welcome({ setStage }: WelcomeProps) {
           <Button
             fullWidth
             onClick={() => {
-              setStage('chooseSignUpAccountType');
+              setPageView('chooseSignUpAccountType');
             }}
             size="large"
             sx={{

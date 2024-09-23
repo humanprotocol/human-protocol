@@ -52,6 +52,7 @@ export function Input({
           }
           label={label}
           name={name}
+          sx={{ maxWidth: '376px' }}
           variant="outlined"
           {...rest}
         />
