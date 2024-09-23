@@ -30,7 +30,7 @@ const myJobSchema = z.object({
   reward_token: z.string(),
   created_at: z.string(),
   expires_at: z.string(),
-  url: z.string().optional(),
+  url: z.string().optional().nullable(),
 });
 
 const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
@@ -63,7 +63,6 @@ export function useGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
   const { address } = useParams<{ address: string }>();
   const dto = { ...filterParams, oracle_address: address || '' };
-
   return useQuery({
     queryKey: ['myJobs', dto],
     queryFn: () => getMyJobsTableData(dto),
