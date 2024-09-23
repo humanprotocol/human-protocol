@@ -513,6 +513,18 @@ export const CvatJobRequestForm = () => {
                       }
                       error={touched.dataPath && Boolean(errors.dataPath)}
                       helperText={errors.dataPath}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/bucket_name/data', the input should only include 'data'.">
+                              <HelpOutlineIcon
+                                color="secondary"
+                                sx={{ cursor: 'pointer' }}
+                              />
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                   </FormControl>
                 </Grid>
@@ -609,6 +621,18 @@ export const CvatJobRequestForm = () => {
                         }
                         error={touched.bpPath && Boolean(errors.bpPath)}
                         helperText={errors.bpPath}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points_15.json', the input should only include 'annotations/points_15.json'.">
+                                <HelpOutlineIcon
+                                  color="secondary"
+                                  sx={{ cursor: 'pointer' }}
+                                />
+                              </Tooltip>
+                            </InputAdornment>
+                          ),
+                        }}
                       />
                     </FormControl>
                   </Grid>
@@ -616,9 +640,17 @@ export const CvatJobRequestForm = () => {
               )}
               <Grid item container xs={12} spacing={2}>
                 <Grid item xs={12}>
-                  <Typography variant="body2" fontWeight={700}>
-                    Ground truth
-                  </Typography>
+                  <Box display="flex">
+                    <Typography variant="body2" fontWeight={700}>
+                      Ground truth
+                    </Typography>
+                    <Tooltip title="Ground truth data serves as the reference or gold standard for your annotations, representing the correct data against which annotations are compared for accuracy and quality assessment.">
+                      <HelpOutlineIcon
+                        color="secondary"
+                        sx={{ cursor: 'pointer', ml: 1 }}
+                      />
+                    </Tooltip>
+                  </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={6}>
                   <FormControl variant="outlined" fullWidth>
@@ -701,7 +733,7 @@ export const CvatJobRequestForm = () => {
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Tooltip title="This field should contain the relative path to the ground truth data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points_15.json', the input should only include 'annotations/points_15.json'. Ground truth data serves as the reference or gold standard for your annotations, representing the correct data against which annotations are compared for accuracy and quality assessment.">
+                            <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/gt_name.json', the input should only include 'annotations/gt_name.json'.">
                               <HelpOutlineIcon
                                 color="secondary"
                                 sx={{ cursor: 'pointer' }}
