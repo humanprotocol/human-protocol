@@ -7,7 +7,7 @@ export function RewardAmount({
   reward_token,
   color,
 }: {
-  reward_amount?: number;
+  reward_amount?: string;
   reward_token?: string;
   color?: string;
 }) {
