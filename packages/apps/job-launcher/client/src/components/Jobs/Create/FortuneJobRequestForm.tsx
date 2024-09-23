@@ -1,45 +1,74 @@
 import {
+  Autocomplete,
   Box,
   Button,
+  Chip,
   FormControl,
   Grid,
   TextField,
   Typography,
 } from '@mui/material';
 import { Formik } from 'formik';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
 } from '../../../components/Accordion';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { getQualifications } from '../../../services/qualification';
+import { Qualification } from '../../../types';
 import { FortuneJobRequestValidationSchema } from './schema';
 
 export const FortuneJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
     useCreateJobPageUI();
   const [expanded, setExpanded] = useState<string | false>('panel1');
+  const [qualificationsOptions, setQualificationsOptions] = useState<
+    Qualification[]
+  >([]);
 
   const initialValues = {
     title: '',
     fortunesRequested: undefined,
     description: '',
+    qualifications: [],
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setQualificationsOptions(await getQualifications());
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
     };
 
-  const handleNext = ({ title, fortunesRequested, description }: any) => {
+  const handleNext = ({
+    title,
+    fortunesRequested,
+    description,
+    qualifications,
+  }: any) => {
     updateJobRequest?.({
       ...jobRequest,
       fortuneRequest: {
         title,
         fortunesRequested,
         description,
+        qualifications: (qualifications as Qualification[]).map(
+          (qualification) => qualification.reference,
+        ),
       },
     });
     goToNextStep?.();
@@ -62,7 +91,7 @@ export const FortuneJobRequestForm = () => {
           handleBlur,
           setFieldValue,
         }) => (
-          <form>
+          <form onSubmit={handleSubmit}>
             <Accordion
               expanded={expanded === 'panel1'}
               onChange={handleChange('panel1')}
@@ -128,6 +157,42 @@ export const FortuneJobRequestForm = () => {
                           touched.description && Boolean(errors.description)
                         }
                         helperText={errors.description}
+                      />
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormControl fullWidth>
+                      <Autocomplete
+                        multiple
+                        options={qualificationsOptions}
+                        getOptionLabel={(option) => option.title}
+                        value={values.qualifications}
+                        onChange={(event, newValues) => {
+                          setFieldValue('qualifications', newValues);
+                        }}
+                        selectOnFocus
+                        onBlur={handleBlur}
+                        handleHomeEndKeys
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => (
+                            <Chip
+                              label={option.title}
+                              {...getTagProps({ index })}
+                            />
+                          ))
+                        }
+                        renderInput={(params) => (
+                          <Box display="flex" alignItems="center" width="100%">
+                            <TextField
+                              {...params}
+                              label="Qualifications"
+                              variant="outlined"
+                              onBlur={handleBlur}
+                              fullWidth
+                            />
+                          </Box>
+                        )}
                       />
                     </FormControl>
                   </Grid>

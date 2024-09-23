@@ -4,12 +4,11 @@ import { IKeyPair } from './interfaces';
 /**
  * ## Introduction
  *
- * Class for sign and decrypt messages.
+ * Class for signing and decrypting messages.
  *
- * The algorithm includes the implementation of the [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs) multi-public key encryption on typescript.
- * Using the vanilla [ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) implementation Schnorr signatures for signature and [curve25519](https://en.wikipedia.org/wiki/Curve25519) for encryption. [Learn more](https://wiki.polkadot.network/docs/learn-cryptography).
+ * The algorithm includes the implementation of the [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs) multi-public key encryption on typescript, and uses the vanilla [ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) implementation Schnorr signature for signatures and [curve25519](https://en.wikipedia.org/wiki/Curve25519) for encryption. [Learn more](https://wiki.polkadot.network/docs/learn-cryptography).
  *
- * To get an instance of this class, is recommended to initialize it using the static `build` method.
+ * To get an instance of this class, initialization is recommended using the static `build` method.
  *
  * ```ts
  * static async build(privateKeyArmored: string, passphrase?: string): Promise<Encryption>
@@ -147,10 +146,10 @@ export class Encryption {
   }
 
   /**
-   * This function decrypt message message using the private key. In addition, the public key can be added for signature verification.
+   * This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
    *
    * @param {string} message Message to decrypt.
-   * @param {string} publicKey Public key used to verify signature if needed. Optional.
+   * @param {string} publicKey Public key used to verify signature if needed. This is optional.
    * @returns {Promise<string>} Message decrypted.
    *
    * **Code example**

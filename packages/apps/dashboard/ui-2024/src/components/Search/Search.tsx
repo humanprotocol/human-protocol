@@ -10,15 +10,24 @@ import {
 	MenuItem,
 	Select as MuiSelect,
 	SelectChangeEvent,
+	Grid,
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 import { getNetwork, networks } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { NetworkIcon } from '@components/NetworkIcon';
 
-const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
+const Search: FC<{
+	className?: string;
+	displaySearchBar?: boolean;
+	borderColor?: string;
+}> = ({
 	className,
 	displaySearchBar,
+	borderColor = colorPalette.secondary.main,
 }) => {
+	const { mobile } = useBreakPoints();
 	const { filterParams, setAddress, setChainId } = useWalletSearch();
 	const [inputValue, setInputValue] = useState<string>('');
 	const [selectValue, setSelectValue] = useState<string>('');
@@ -26,7 +35,7 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 	const navigate = useNavigate();
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddress(event.target.value);
+		setInputValue(event.target.value);
 	};
 
 	const handleSelectChange = (event: SelectChangeEvent<string>) => {
@@ -51,9 +60,8 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		navigate(
-			`/search/${filterParams.chainId || -1}/${filterParams.address || '0x0'}`
-		);
+		setAddress(inputValue);
+		navigate(`/search/${filterParams.chainId || -1}/${inputValue || '0x0'}`);
 	};
 
 	useEffect(() => {
@@ -77,18 +85,20 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 			<TextField
 				id="search-bar"
 				placeholder="Search by Wallet/Escrow"
-				value={filterParams.address}
+				value={inputValue}
 				onChange={handleInputChange}
 				onBlur={handleInputBlur}
 				onFocus={handleInputFocus}
 				fullWidth
 				sx={{
-					outline: 'none',
-					border: 'none',
 					fontSize: '16px',
-
-					'& .MuiInputBase-inputAdornedStart': {
-						root: {
+					'& .MuiOutlinedInput-root': {
+						'& input': {
+							[mobile.mediaQuery]: {
+								padding: '12px 0px',
+							},
+						},
+						'& fieldset': {
 							border: 'none',
 						},
 					},
@@ -101,8 +111,10 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 					sx: {
 						width: '100%',
 						height: '100%',
+						borderRadius: '10px',
+						border: `1px solid ${borderColor}`,
+						backgroundColor: `${colorPalette.white}`,
 						fontSize: 'inherit',
-						border: 'none',
 						'input::placeholder': {
 							color: `${colorPalette.sky.main}`,
 							opacity: 1,
@@ -113,10 +125,6 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 						<InputAdornment
 							position="start"
 							sx={{
-								root: {
-									backgroundColor: 'red',
-								},
-								width: displaySearchBar ? '100px' : '220px',
 								height: '100%',
 								backgroundColor: `${colorPalette.white}`,
 								marginLeft: '1rem',
@@ -127,10 +135,11 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 								displayEmpty
 								sx={{
 									backgroundColor: `${colorPalette.white}`,
-									width: displaySearchBar ? '100px' : '220px',
+									width: '220px',
 									fontSize: '16px',
 									boxShadow: 'none',
-									'.MuiOutlinedInput-notchedOutline': { border: 0 },
+									outline: 'none',
+									'& .MuiOutlinedInput-notchedOutline': { border: 0 },
 									'& .MuiSelect-select': {
 										padding: 0,
 										paddingRight: '24px',
@@ -140,14 +149,19 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 									'& .MuiInputBase-input': {
 										backgroundColor: `${colorPalette.white}`,
 									},
-									'&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline':
+									'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline':
 										{
 											border: 0,
+											outline: 'none',
 										},
-									'&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+									'& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
 										{
 											border: 0,
+											outline: 'none',
 										},
+									[mobile.mediaQuery]: {
+										width: 'unset',
+									},
 								}}
 								onChange={handleSelectChange}
 								renderValue={
@@ -157,12 +171,34 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 													Network
 												</span>
 											)
-										: () => selectValue
+										: () => {
+												return (
+													<Grid
+														sx={{
+															display: 'flex',
+															justifyContent: 'flex-start',
+															alignItems: 'center',
+															gap: '8px',
+															textOverflow: 'ellipsis',
+															overflow: 'hidden',
+														}}
+													>
+														<NetworkIcon chainId={filterParams.chainId} />
+														<div>
+															{mobile.isMobile
+																? null
+																: getNetwork(filterParams.chainId)?.name}
+														</div>
+													</Grid>
+												);
+											}
 								}
 							>
 								{networks.map((network) => (
 									<MenuItem key={network.name} value={network.id}>
-										{network.name}
+										<Grid sx={{ display: 'flex', gap: '8px' }}>
+											<NetworkIcon chainId={network.id} /> {network.name}
+										</Grid>
 									</MenuItem>
 								))}
 							</MuiSelect>
@@ -179,15 +215,30 @@ const Search: FC<{ className?: string; displaySearchBar?: boolean }> = ({
 							position="end"
 						>
 							<IconButton onClick={handleClearClick} edge="end">
-								<CloseIcon color={`${focus ? 'textSecondary' : 'primary'}`} />
+								<CloseIcon
+									style={{
+										color: focus
+											? colorPalette.textSecondary.main
+											: colorPalette.primary.main,
+									}}
+								/>
 							</IconButton>
 							<IconButton
 								className="search-button"
 								type="submit"
 								aria-label="search"
+								sx={{
+									[mobile.mediaQuery]: {
+										padding: '4px',
+									},
+								}}
 							>
 								<SearchIcon
-									color={`${displaySearchBar ? 'textSecondary' : 'white'}`}
+									style={{
+										color: displaySearchBar
+											? colorPalette.textSecondary.main
+											: colorPalette.white,
+									}}
 								/>
 							</IconButton>
 						</InputAdornment>

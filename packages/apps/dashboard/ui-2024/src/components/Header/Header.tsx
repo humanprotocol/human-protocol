@@ -7,11 +7,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import logo from '@assets/logo.png';
 import Search from '@components/Search';
-import logoMobile from '@assets/logo-mobile.png';
 import { env } from '@helpers/env';
 import { useNavigate } from 'react-router-dom';
+import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
+import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
+import TopSearchBar from '@components/Search/TopBarSearch';
 
 const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 	const navigate = useNavigate();
@@ -45,33 +46,37 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 					},
 				}}
 			>
-				<img className="logo" src={logo} alt="logo" />
-				<img className="logo-mobile" src={logoMobile} alt="logo" />
+				<span className="logo">
+					<LogoBlockIcon />
+				</span>
+				<span className="logo-mobile">
+					<LogoBlockIconMobile />
+				</span>
 			</Link>
 
 			{displaySearchBar && (
-				<Search displaySearchBar className="search-header" />
+				<TopSearchBar displaySearchBar className="search-header" />
 			)}
 
 			<div className="header-list-link">
-				<div
+				<span
 					className="header-link"
 					onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
 				>
 					GitBook
-				</div>
-				<div
+				</span>
+				<span
 					className="header-link"
 					onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
 				>
 					Faucet
-				</div>
-				<div
+				</span>
+				<span
 					className="header-link"
 					onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
 				>
 					HUMAN Website
-				</div>
+				</span>
 				<Button
 					variant="contained"
 					color="primary"
@@ -111,23 +116,29 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
 			>
 				<Box className="header-mobile-menu">
 					<div className="header-list-link">
-						<div
-							className="header-link"
-							onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
-						>
-							GitBook
+						<div>
+							<span
+								className="header-link"
+								onClick={() => handleClick(env.VITE_NAVBAR_LINK_GITBOOK)}
+							>
+								GitBook
+							</span>
 						</div>
-						<div
-							className="header-link"
-							onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
-						>
-							Faucet
+						<div>
+							<span
+								className="header-link"
+								onClick={() => handleClick(env.VITE_NAVBAR_LINK_FAUCETS)}
+							>
+								Faucet
+							</span>
 						</div>
-						<div
-							className="header-link"
-							onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
-						>
-							HUMAN Website
+						<div>
+							<span
+								className="header-link"
+								onClick={() => handleClick(env.VITE_NAVBAR_LINK_HUMAN_WEBSITE)}
+							>
+								HUMAN Website
+							</span>
 						</div>
 						<Button
 							variant="contained"

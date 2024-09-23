@@ -20,6 +20,7 @@ export class ManifestDto {
   requesterDescription: string;
   submissionsRequired: number;
   fundAmount: number;
+  qualifications?: string[];
 }
 
 export class SolveJobDto {
@@ -108,6 +109,9 @@ export class JobDto {
 
   @ApiProperty({ name: 'updated_at' })
   updatedAt?: string;
+
+  @ApiProperty()
+  qualifications?: string[];
 
   constructor(
     escrowAddress: string,

@@ -27,7 +27,9 @@ export const TransactionsTableHead = () => {
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
 						</Tooltip>
-						<Typography fontWeight={600}>Transaction Hash</Typography>
+						<Typography variant="Components/Table Header">
+							Transaction Hash
+						</Typography>
 					</Stack>
 				</TableCell>
 				<TableCell>
@@ -37,7 +39,7 @@ export const TransactionsTableHead = () => {
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
 						</Tooltip>
-						<Typography fontWeight={600}>Method</Typography>
+						<Typography variant="Components/Table Header">Method</Typography>
 					</Stack>
 				</TableCell>
 				<TableCell>
@@ -47,7 +49,7 @@ export const TransactionsTableHead = () => {
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
 						</Tooltip>
-						<Typography fontWeight={600}>Block</Typography>
+						<Typography variant="Components/Table Header">Block</Typography>
 					</Stack>
 				</TableCell>
 				<TableCell>
@@ -57,11 +59,13 @@ export const TransactionsTableHead = () => {
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
 						</Tooltip>
-						<Typography fontWeight={600}>Value</Typography>
+						<Typography variant="Components/Table Header">Value</Typography>
 					</Stack>
 				</TableCell>
 				<TableCell>
-					<Typography fontWeight={600}>Escrow Address</Typography>
+					<Typography variant="Components/Table Header">
+						Escrow Address
+					</Typography>
 				</TableCell>
 			</TableRow>
 		</TableHead>

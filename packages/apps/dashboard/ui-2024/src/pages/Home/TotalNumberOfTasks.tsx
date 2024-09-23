@@ -7,7 +7,7 @@ export function TotalNumberOfTasks() {
 
 	return (
 		<div>
-			<Typography variant="h6" component="p">
+			<Typography variant="body1" component="p">
 				Total Number of Tasks
 			</Typography>
 			<div className="count">

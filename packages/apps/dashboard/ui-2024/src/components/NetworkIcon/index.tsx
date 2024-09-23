@@ -4,8 +4,9 @@ import PolygonIcon from '@components/Icons/PolygonIcon';
 import MoonbeamIcon from '@components/Icons/MoonbeamIcon';
 import MoonbaseAlphaIcon from '@components/Icons/MoonbaseAlphaIcon';
 import CeloIcon from '@assets/icons/celo.svg';
-import SvgIcon from '@mui/material/SvgIcon';
+import { XLayerIcon } from '@components/Icons/XLayerIcon';
 import HumanIcon from '@components/Icons/HumanIcon';
+import { AvalancheIcon } from '@components/Icons/AvalancheIcon';
 
 export const NetworkIcon = ({ chainId }: { chainId: number }) => {
 	const icon = (() => {
@@ -29,16 +30,16 @@ export const NetworkIcon = ({ chainId }: { chainId: number }) => {
 			case 42220:
 			case 44787:
 				return <CeloIcon />;
-			case 43113: // Avalanche Fuji Testnet
-			case 43114: // Avalanche C-Chain
-			case 195: // X Layer Testnet
-			case 196: // X Layer Mainnet
-			case 1338: // Elysium Testnet
-				return <HumanIcon />;
+			case 195:
+			case 196:
+				return <XLayerIcon />;
+			case 43113:
+			case 43114:
+				return <AvalancheIcon />;
 			default:
 				return <HumanIcon />;
 		}
 	})();
 
-	return <SvgIcon>{icon}</SvgIcon>;
+	return <>{icon}</>;
 };

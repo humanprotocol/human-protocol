@@ -1,68 +1,74 @@
 .header-toolbar {
-  height: 82px;
-  justify-content: space-between;
+	height: 82px;
+	justify-content: space-between;
 
-  .header-list-link {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    .header-link{
-      font-weight: 600;
-      padding: 6px 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-  }
+	.header-list-link {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+		.header-link {
+			font-weight: 600;
+			padding: 6px 8px;
+			cursor: pointer;
+			font-size: 14px;
+		}
+	}
 
-  .mobile-icon {
-    display: none;
-  }
+	.mobile-icon {
+		display: none;
+	}
 
-  .logo-mobile, .search-header-mobile {
-    display: none;
-  }
+	.logo-mobile,
+	.search-header-mobile {
+		display: none;
+	}
 
-  @media (max-width: 1300px) {
-    .logo{
-      display: none;
-    }
-    .logo-mobile{
-      display: block;
-    }
-  }
+	@media (max-width: 1300px) {
+		.logo {
+			display: none;
+		}
+		.logo-mobile {
+			display: block;
+		}
+	}
 
-  @media (max-width: 1100px) {
-    height: 62px;
-    .mobile-icon, .search-header-mobile {
-      display: block;
-    }
-    .header-list-link, .search-header {
-      display: none;
-    }
-  }
+	@media (max-width: 1100px) {
+		height: 62px;
+		.mobile-icon,
+		.search-header-mobile {
+			display: block;
+		}
+		.header-list-link,
+		.search-header {
+			display: none;
+		}
+	}
 }
 
-.header-toolbar-search{
-  @media (max-width: 1100px) {
-    height: 118px;
-    flex-wrap: wrap;
-  }
-  .search-header-mobile{
-    width: 100%;
-  }
+.header-toolbar-search {
+	@media (max-width: 1100px) {
+		height: 118px;
+		flex-wrap: wrap;
+	}
+	.search-header-mobile {
+		width: 100%;
+	}
 }
 
-.header-mobile-menu{
-  padding: 20px 10px;
-  .header-list-link {
-    display: flex;
-    gap: 16px;
-    flex-direction: column;
-    .header-link{
-      font-weight: 600;
-      padding: 6px 8px;
-      font-size: 14px;
-    }
-  }
-}
+.header-mobile-menu {
+	padding: 20px 10px;
+	.header-list-link {
+		display: flex;
+		gap: 16px;
+		flex-direction: column;
+		.header-link {
+			font-weight: 600;
+			padding: 6px 8px;
+			font-size: 14px;
+		}
 
+		span {
+			cursor: pointer;
+		}
+	}
+}

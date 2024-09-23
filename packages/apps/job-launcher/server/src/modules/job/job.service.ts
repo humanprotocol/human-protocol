@@ -30,6 +30,7 @@ import {
   ErrorBucket,
   ErrorEscrow,
   ErrorJob,
+  ErrorQualification,
 } from '../../common/constants/errors';
 import {
   JobRequestType,
@@ -123,6 +124,7 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 import { CronJobType } from '../../common/enums/cron-job';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { ModuleRef } from '@nestjs/core';
+import { QualificationService } from '../qualification/qualification.service';
 
 @Injectable()
 export class JobService {
@@ -147,6 +149,7 @@ export class JobService {
     private readonly rateService: RateService,
     private moduleRef: ModuleRef,
     @Inject(Encryption) private readonly encryption: Encryption,
+    private readonly qualificationService: QualificationService,
   ) {}
 
   onModuleInit() {
@@ -187,6 +190,9 @@ export class JobService {
         user_guide: dto.userGuide,
         type: requestType,
         job_size: this.cvatConfigService.jobSize,
+        ...(dto.qualifications && {
+          qualifications: dto.qualifications,
+        }),
       },
       validation: {
         min_quality: dto.minQuality,
@@ -224,6 +230,9 @@ export class JobService {
       oracle_stake: HCAPTCHA_ORACLE_STAKE,
       repo_uri: this.web3ConfigService.hCaptchaReputationOracleURI,
       ro_uri: this.web3ConfigService.hCaptchaRecordingOracleURI,
+      ...(jobDto.qualifications && {
+        qualifications: jobDto.qualifications,
+      }),
     };
 
     let groundTruthsData;
@@ -532,7 +541,7 @@ export class JobService {
         const gt = await this.storageService.download(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         );
-        if (!gt || gt.length === 0)
+        if (!gt || !gt.images || gt.images.length === 0)
           throw new ControlledError(
             ErrorJob.GroundThuthValidationFailed,
             HttpStatus.BAD_REQUEST,
@@ -565,7 +574,18 @@ export class JobService {
         const gt = await this.storageService.download(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         );
+        if (!gt || !gt.images || gt.images.length === 0)
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
         const data = await listObjectsInBucket(urls.dataUrl);
+        if (!data || data.length === 0 || !data[0])
+          throw new ControlledError(
+            ErrorJob.DatasetValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
 
         await this.checkImageConsistency(gt.images, data);
 
@@ -721,6 +741,24 @@ export class JobService {
       chainId = this.routingProtocolService.selectNetwork();
     }
 
+    if (dto.qualifications) {
+      const validQualifications =
+        await this.qualificationService.getQualifications();
+
+      const validQualificationReferences = validQualifications.map(
+        (q) => q.reference,
+      );
+
+      dto.qualifications.forEach((qualification) => {
+        if (!validQualificationReferences.includes(qualification)) {
+          throw new ControlledError(
+            ErrorQualification.InvalidQualification,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      });
+    }
+
     const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
@@ -853,6 +891,13 @@ export class JobService {
     const data = await this.storageService.download(dataUrl.href);
     const gt = await this.storageService.download(gtUrl.href);
 
+    if (!gt || !gt.images || gt.images.length === 0) {
+      throw new ControlledError(
+        ErrorJob.GroundThuthValidationFailed,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     let gtEntries = 0;
 
     gt.images.forEach((gtImage: CvatImageData) => {
@@ -900,7 +945,6 @@ export class JobService {
     } else {
       totalJobs = Math.ceil(elementsCount / jobSize);
     }
-
     const jobBounty =
       ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
     return ethers.formatEther(jobBounty);
@@ -1104,6 +1148,7 @@ export class JobService {
         jobId: jobEntity.id,
       });
     }
+
     jobEntity.status = status;
 
     jobEntity.retriesCount = 0;
@@ -1116,6 +1161,7 @@ export class JobService {
     data: any,
   ): Promise<any> {
     let manifestFile = data;
+
     if (this.pgpConfigService.encrypt) {
       const { getOracleAddresses } =
         this.getOraclesSpecificActions[requestType];
@@ -1129,7 +1175,6 @@ export class JobService {
         const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
         if (publicKey) publicKeys.push(publicKey);
       }
-
       const encryptedManifest = await this.encryption.signAndEncrypt(
         JSON.stringify(data),
         publicKeys,
@@ -1141,6 +1186,7 @@ export class JobService {
       .createHash('sha1')
       .update(stringify(manifestFile))
       .digest('hex');
+
     const uploadedFile = await this.storageService.uploadFile(
       manifestFile,
       hash,
@@ -1460,18 +1506,30 @@ export class JobService {
         description: manifest.requesterDescription,
         requestType: JobRequestType.FORTUNE,
         submissionsRequired: manifest.submissionsRequired,
+        ...(manifest.qualifications &&
+          manifest.qualifications?.length > 0 && {
+            qualifications: manifest.qualifications,
+          }),
       };
     } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
       manifest = manifest as HCaptchaManifestDto;
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
         submissionsRequired: manifest.job_total_tasks,
+        ...(manifest.qualifications &&
+          manifest.qualifications?.length > 0 && {
+            qualifications: manifest.qualifications,
+          }),
       };
     } else {
       manifest = manifest as CvatManifestDto;
       specificManifestDetails = {
         requestType: manifest.annotation?.type,
         submissionsRequired: manifest.annotation?.job_size,
+        ...(manifest.annotation.qualifications &&
+          manifest.annotation.qualifications?.length > 0 && {
+            qualifications: manifest.annotation.qualifications,
+          }),
       };
     }
 
@@ -1603,5 +1661,20 @@ export class JobService {
 
     jobEntity.status = JobStatus.COMPLETED;
     await this.jobRepository.updateOne(jobEntity);
+  }
+
+  public async isEscrowFunded(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<boolean> {
+    if (escrowAddress) {
+      const signer = this.web3Service.getSigner(chainId);
+      const escrowClient = await EscrowClient.build(signer);
+      const balance = await escrowClient.getBalance(escrowAddress);
+
+      return balance !== 0n;
+    }
+
+    return false;
   }
 }

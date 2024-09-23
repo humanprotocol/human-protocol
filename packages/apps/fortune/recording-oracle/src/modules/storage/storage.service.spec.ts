@@ -8,7 +8,11 @@ import {
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { MOCK_ADDRESS, MOCK_FILE_URL } from '../../../test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_FILE_URL,
+  mockConfig,
+} from '../../../test/constants';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { Web3Service } from '../web3/web3.service';
@@ -60,6 +64,18 @@ describe('StorageService', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         StorageService,
         {
           provide: Web3Service,
@@ -67,7 +83,6 @@ describe('StorageService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
-        ConfigService,
         PGPConfigService,
         S3ConfigService,
       ],

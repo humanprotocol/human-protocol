@@ -1,10 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import MuiTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import Grid from '@mui/material/Grid';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
-import { useNavigate } from 'react-router-dom';
 import { ReputationLabel } from './ReputationLabel';
 import { EntityIcon } from './EntityIcon';
 import { TableHead } from './TableHead';
@@ -19,12 +18,13 @@ import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 import { getNetwork } from '@utils/config/networks';
 import { NetworkIcon } from '@components/NetworkIcon';
 import { colorPalette } from '@assets/styles/color-palette';
-import { Typography } from '@mui/material';
+import { TableRow, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import { handleErrorMessage } from '@services/handle-error-message';
 import Loader from '@components/Loader';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
-import { TableRowWithCustomContextMenu } from '@components/TableRowWithCustomContextMenu/TableRowWithCustomContextMenu';
+
+const ROWS_SPACING = '4px';
 
 export const Table = ({
 	data = [],
@@ -35,8 +35,8 @@ export const Table = ({
 	status: 'success' | 'error' | 'pending';
 	error: unknown;
 }) => {
-	const navigate = useNavigate();
 	const { mobile } = useBreakPoints();
+	const [visibleTablePartWidth, setVisibleTablePartWidth] = useState(0);
 
 	const {
 		filterParams: { chainId },
@@ -65,12 +65,34 @@ export const Table = ({
 	const tableIsEmpty = status === 'success' && visibleRows.length === 0;
 	const tableMinHeight = status === 'success' && !tableIsEmpty ? 'unset' : 400;
 
+	const handleVisibleTablePart = useCallback(() => {
+		const width = document.querySelector(
+			'.simplebar-scrollable-x'
+		)?.clientWidth;
+		if (width) {
+			setVisibleTablePartWidth(width);
+		}
+	}, []);
+
+	useEffect(() => {
+		handleVisibleTablePart();
+		window.addEventListener('resize', handleVisibleTablePart);
+		return () => {
+			window.removeEventListener('resize', handleVisibleTablePart);
+		};
+	}, [handleVisibleTablePart, status]);
+
+	useEffect(() => {
+		handleVisibleTablePart();
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- ...
+	}, []);
+
 	return (
 		<MuiTable
 			sx={{
 				minWidth: 650,
 				minHeight: tableMinHeight,
-				borderCollapse: 'separate',
+				borderCollapse: 'collapse',
 				[`& .${tableCellClasses.root}`]: {
 					borderBottom: 'none',
 				},
@@ -89,46 +111,62 @@ export const Table = ({
 				}}
 			>
 				{status === 'pending' ? (
-					<TableBodyWrapper>
+					<TableBodyWrapper
+						width={
+							visibleTablePartWidth ? `${visibleTablePartWidth}px` : undefined
+						}
+					>
 						<Loader height="30vh" />
 					</TableBodyWrapper>
 				) : null}
 
 				{status === 'error' ? (
-					<TableBodyWrapper>{handleErrorMessage(error)}</TableBodyWrapper>
+					<TableBodyWrapper
+						width={
+							visibleTablePartWidth ? `${visibleTablePartWidth}px` : undefined
+						}
+					>
+						{handleErrorMessage(error)}
+					</TableBodyWrapper>
 				) : null}
 
 				{tableIsEmpty ? (
-					<TableBodyWrapper>No data</TableBodyWrapper>
+					<TableBodyWrapper
+						width={
+							visibleTablePartWidth ? `${visibleTablePartWidth}px` : undefined
+						}
+					>
+						No data
+					</TableBodyWrapper>
 				) : (
 					<>
 						{visibleRows.map((row, index) => (
-							<TableRowWithCustomContextMenu
+							<TableRow
 								key={index + row.address}
-								newTabLink={`/search/${row.chainId}/${row.address}`}
-								componentProps={{
-									onClick: () => {
-										navigate(`/search/${row.chainId}/${row.address}`, {
-											preventScrollReset: false,
-										});
+								className={'home-page-table-row'}
+								sx={{
+									paddingTop: '1px',
+									borderTop: `4px solid ${colorPalette.whiteBackground}`,
+									':hover': {
+										backgroundColor: colorPalette.overlay.light,
 									},
-									className: 'home-page-table-row',
-									sx: {
-										paddingTop: '1px',
-										':hover': {
-											backgroundColor: colorPalette.overlay.light,
-										},
-										textDecoration: 'none',
+									':first-child': {
+										borderTop: `15px solid ${colorPalette.whiteBackground}`,
 									},
+									':last-child': {
+										borderBottom: `15px solid ${colorPalette.whiteBackground}`,
+									},
+									textDecoration: 'none',
 								}}
 							>
 								{mobile.isMobile ? null : (
-									<TableCell>
+									<TableCell sx={{ marginTop: '5px' }}>
 										<Typography variant="body1">{index + 1}</Typography>
 									</TableCell>
 								)}
 								<TableCell
 									sx={{
+										justifyContent: 'flex-start',
 										[mobile.mediaQuery]: {
 											position: 'sticky',
 											left: 0,
@@ -151,39 +189,63 @@ export const Table = ({
 										gap="8px"
 										justifyContent="flex-start"
 									>
-										{mobile.isMobile ? null : <EntityIcon role={row.role} />}
-										<Typography variant="subtitle2" sx={{ wordBreak: 'unset' }}>
-											{row.role}
-										</Typography>
+										{mobile.isMobile ? (
+											<>
+												<Typography
+													variant="subtitle2"
+													sx={{ wordBreak: 'unset' }}
+												>
+													{row.role}
+												</Typography>
+											</>
+										) : (
+											<>
+												<EntityIcon role={row.role} />
+												<Typography variant="h6" sx={{ wordBreak: 'unset' }}>
+													{row.role}
+												</Typography>
+											</>
+										)}
 									</Grid>
 								</TableCell>
-								<TableCell>
+								<TableCell sx={{ justifyContent: 'flex-start' }}>
 									<Grid
 										container
 										wrap="nowrap"
 										alignItems="center"
 										sx={{ gap: '18px' }}
 									>
-										<AbbreviateClipboard value={row.address} />
+										<AbbreviateClipboard
+											value={row.address}
+											link={`/search/${row.chainId}/${row.address}`}
+										/>
 									</Grid>
 								</TableCell>
-								<TableCell>{row.amountStaked} HMT</TableCell>
-								<TableCell>
-									<Grid
-										container
-										wrap="nowrap"
-										alignItems="center"
-										justifyContent="center"
-									>
-										<NetworkIcon chainId={row.chainId} />
-										{getNetwork(row.chainId)?.name}
-									</Grid>
+								<TableCell sx={{ justifyContent: 'flex-start' }}>
+									<Typography variant="body1">
+										{row.amountStaked} HMT
+									</Typography>
 								</TableCell>
 								<TableCell>
+									<Typography component="div" variant="body1">
+										<Grid
+											whiteSpace="nowrap"
+											container
+											wrap="nowrap"
+											alignItems="center"
+											justifyContent="flex-start"
+											gap="6px"
+										>
+											<NetworkIcon chainId={row.chainId} />
+											{getNetwork(row.chainId)?.name}
+										</Grid>
+									</Typography>
+								</TableCell>
+								<TableCell sx={{ justifyContent: 'flex-start' }}>
 									<ReputationLabel reputation={row.reputation} />
 								</TableCell>
 								<TableCell>{row.fee}%</TableCell>
-							</TableRowWithCustomContextMenu>
+							</TableRow>
 						))}
 					</>
 				)}
@@ -192,7 +254,13 @@ export const Table = ({
 	);
 };
 
-function TableBodyWrapper({ children }: { children: JSX.Element | string }) {
+function TableBodyWrapper({
+	children,
+	width = '100%',
+}: {
+	children: JSX.Element | string;
+	width?: string;
+}) {
 	return (
 		<Stack
 			component="tr"
@@ -200,7 +268,7 @@ function TableBodyWrapper({ children }: { children: JSX.Element | string }) {
 				position: 'absolute',
 				top: 0,
 				left: 0,
-				width: '100%',
+				width,
 				height: '100%',
 				display: 'flex',
 				justifyContent: 'center',
@@ -222,7 +290,7 @@ function getAfterElementProperties(
 			position: 'absolute',
 			bottom: '0',
 			right: '0',
-			height: '85%',
+			height: '100%',
 			width: '1px',
 		};
 	}
@@ -231,9 +299,9 @@ function getAfterElementProperties(
 		return {
 			content: '""',
 			position: 'absolute',
-			top: '0',
+			bottom: '0',
 			right: '0',
-			height: '85%',
+			height: `calc(100% + ${ROWS_SPACING})`,
 			width: '1px',
 		};
 	}
@@ -243,7 +311,7 @@ function getAfterElementProperties(
 		position: 'absolute',
 		bottom: '0',
 		right: '0',
-		height: '100%',
+		height: `calc(100% + ${ROWS_SPACING})`,
 		width: '1px',
 	};
 }

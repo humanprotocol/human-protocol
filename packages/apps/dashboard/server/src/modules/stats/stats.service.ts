@@ -5,9 +5,9 @@ import * as dayjs from 'dayjs';
 import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
-
 import {
   EnvironmentConfigService,
+  HCAPTCHA_STATS_API_START_DATE,
   HMT_STATS_START_DATE,
 } from '../../common/config/env-config.service';
 import {
@@ -22,6 +22,7 @@ import { MainnetsId } from '../../common/utils/constants';
 import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -31,6 +32,7 @@ export class StatsService implements OnModuleInit {
     private readonly redisConfigService: RedisConfigService,
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
+    private readonly storageService: StorageService,
   ) {}
 
   async onModuleInit() {
@@ -57,7 +59,7 @@ export class StatsService implements OnModuleInit {
 
   private async fetchHistoricalHcaptchaStats(): Promise<void> {
     this.logger.log('Fetching historical hCaptcha stats.');
-    let startDate = dayjs(HCAPTCHA_STATS_START_DATE);
+    let startDate = dayjs(HCAPTCHA_STATS_API_START_DATE);
     const currentDate = dayjs();
     const dates = [];
 
@@ -70,7 +72,10 @@ export class StatsService implements OnModuleInit {
       startDate = startDate.add(1, 'month');
     }
 
-    const results = [];
+    const results = await this.storageService.downloadFile(
+      this.envConfigService.hCaptchaStatsFile,
+    );
+
     for (const range of dates) {
       const { data } = await lastValueFrom(
         this.httpService.get(this.envConfigService.hCaptchaStatsSource, {

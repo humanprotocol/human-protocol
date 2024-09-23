@@ -464,7 +464,10 @@ export class KVStoreUtils {
     const content = await fetch(url).then((res) => res.text());
     const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
 
-    if (hash !== contentHash) {
+    const formattedHash = hash?.replace(/^0x/, '');
+    const formattedContentHash = contentHash?.replace(/^0x/, '');
+
+    if (formattedHash !== formattedContentHash) {
       throw ErrorInvalidHash;
     }
 

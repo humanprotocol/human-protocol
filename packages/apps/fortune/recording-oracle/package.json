@@ -20,7 +20,8 @@
     "postgres": "docker compose up -d postgres",
     "docker": "docker compose up -d",
     "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn recording-oracle:dev\" )",
-    "setup:local": "ts-node ./test/setup.ts"
+    "setup:local": "ts-node ./test/setup.ts",
+    "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",

@@ -13,9 +13,11 @@ import {
   MOCK_ACCESS_TOKEN,
   MOCK_EMAIL,
   MOCK_EXPIRES_IN,
+  MOCK_FE_URL,
   MOCK_HASHED_PASSWORD,
   MOCK_PASSWORD,
   MOCK_REFRESH_TOKEN,
+  mockConfig,
 } from '../../../test/constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
@@ -47,17 +49,20 @@ describe('AuthService', () => {
   let sendGridService: SendGridService;
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
-            return MOCK_EXPIRES_IN;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         AuthService,
         UserService,
         ServerConfigService,
@@ -70,7 +75,6 @@ describe('AuthService', () => {
         },
         { provide: TokenRepository, useValue: createMock<TokenRepository>() },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
@@ -352,7 +356,9 @@ describe('AuthService', () => {
             {
               dynamicTemplateData: {
                 service_name: SERVICE_NAME,
-                url: expect.stringContaining('undefined/reset-password?token='),
+                url: expect.stringContaining(
+                  `${MOCK_FE_URL}/reset-password?token=`,
+                ),
               },
               to: email,
             },

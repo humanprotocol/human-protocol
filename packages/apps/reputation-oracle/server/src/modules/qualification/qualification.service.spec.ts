@@ -16,6 +16,7 @@ import { UserEntity } from '../user/user.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { ConfigService } from '@nestjs/config';
+import { mockConfig } from '../../../test/constants';
 
 describe.only('QualificationService', () => {
   let qualificationService: QualificationService;
@@ -25,13 +26,24 @@ describe.only('QualificationService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         QualificationService,
         {
           provide: QualificationRepository,
           useValue: createMock<QualificationRepository>(),
         },
         { provide: UserRepository, useValue: createMock<UserRepository>() },
-        ConfigService,
         ServerConfigService,
       ],
     }).compile();

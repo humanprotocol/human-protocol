@@ -215,6 +215,7 @@ def update_project_statuses_by_escrow_address(
             Project.chain_id == chain_id,
         )
         .values(status=status.value)
+        .returning(Project.cvat_id)
     )
     session.execute(statement)
 
@@ -222,6 +223,15 @@ def update_project_statuses_by_escrow_address(
 def delete_project(session: Session, project_id: str) -> None:
     project = session.query(Project).filter_by(id=project_id).first()
     session.delete(project)
+
+
+def delete_projects(session: Session, escrow_address: str, chain_id: int) -> None:
+    session.execute(
+        delete(Project).where(
+            Project.escrow_address == escrow_address,
+            Project.chain_id == chain_id,
+        )
+    )
 
 
 def is_project_completed(session: Session, project_id: str) -> bool:
@@ -515,17 +525,24 @@ def get_free_job(
     session: Session,
     cvat_projects: list[int],
     *,
+    user_wallet_address: str,
     for_update: bool | ForUpdateParams = False,
 ) -> Job | None:
+    """
+    Returns the first available job that wasn't previously assigned to that user_walled_address.
+    """
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(
             Job.cvat_project_id.in_(cvat_projects),
             Job.status == JobStatuses.new,
             ~Job.assignments.any(
-                (Assignment.status == AssignmentStatuses.created.value)
-                & (Assignment.completed_at == None)
-                & (utcnow() < Assignment.expires_at)
+                (
+                    (Assignment.status == AssignmentStatuses.created.value)
+                    & (Assignment.completed_at == None)
+                    & (utcnow() < Assignment.expires_at)
+                )
+                | (Assignment.user_wallet_address == user_wallet_address),
             ),
         )
         .first()
