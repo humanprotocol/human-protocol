@@ -422,15 +422,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert assignment_id == None
 
-    def test_create_assignment_in_validated_and_rejected_job(self):
+    def test_create_assignment_wont_reassign_job_to_previous_user(self):
         cvat_project_1, _, cvat_job_1 = create_project_task_and_job(
             self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
         )
         cvat_job_1.status = JobStatuses.new.value  # validated and rejected return to 'new'
 
-        user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
         user = User(
-            wallet_address=user_address,
+            wallet_address="0x86e83d346041E8806e352681f3F14549C0d2BC69",
             cvat_email="test@hmt.ai",
             cvat_id=1,
         )
@@ -439,7 +438,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         now = datetime.now()
         assignment = Assignment(
             id=str(uuid.uuid4()),
-            user_wallet_address=user_address,
+            user_wallet_address=user.wallet_address,
             cvat_job_id=cvat_job_1.cvat_id,
             created_at=now - timedelta(hours=1),
             completed_at=now - timedelta(minutes=40),
@@ -457,10 +456,54 @@ class ServiceIntegrationTest(unittest.TestCase):
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
-            assignment_id = create_assignment(cvat_project_1.id, user_address)
+            assignment_id = create_assignment(cvat_project_1.id, user.wallet_address)
 
-            assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
+        assert assignment_id is None
+
+    def test_create_assignment_can_assign_job_to_new_user(self):
+        cvat_project_1, _, cvat_job_1 = create_project_task_and_job(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+        cvat_job_1.status = JobStatuses.new.value  # validated and rejected return to 'new'
+
+        previous_user = User(
+            wallet_address="0x86e83d346041E8806e352681f3F14549C0d2BC69",
+            cvat_email="previous@hmt.ai",
+            cvat_id=1,
+        )
+        new_user = User(
+            wallet_address="0x69e83d346041E8806e352681f3F14549C0d2BC42",
+            cvat_email="new@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(previous_user)
+        self.session.add(new_user)
+
+        now = datetime.now()
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=previous_user.wallet_address,
+            cvat_job_id=cvat_job_1.cvat_id,
+            created_at=now - timedelta(hours=1),
+            completed_at=now - timedelta(minutes=40),
+            expires_at=datetime.now() + timedelta(days=1),
+            status=AssignmentStatuses.completed.value,
+        )
+        self.session.add(assignment)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+            patch("src.services.exchange.cvat_api"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            assignment_id = create_assignment(cvat_project_1.id, new_user.wallet_address)
+
+        assignment = self.session.get(Assignment, assignment_id)
 
         assert assignment.cvat_job_id == cvat_job_1.cvat_id
-        assert assignment.user_wallet_address == user_address
+        assert assignment.user_wallet_address == new_user.wallet_address
         assert assignment.status == AssignmentStatuses.created

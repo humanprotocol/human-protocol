@@ -7,6 +7,7 @@ import { AddressDetailsWallet } from '@services/api/use-address-details';
 import { useHMTPrice } from '@services/api/use-hmt-price';
 import { WalletAddressTransactionsTable } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/WalletAddressTransactionsTable';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
+import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
 
 const HmtPrice = () => {
 	const {
@@ -25,18 +26,21 @@ const HmtPrice = () => {
 
 	return (
 		<TitleSectionWrapper title="HMT Price">
-			<Typography>
-				<>{hmtPrice.hmtPrice}</>
+			<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+				<Typography variant="body2">
+					<>{hmtPrice.hmtPrice}</>
+				</Typography>
 				<Typography
 					sx={{
 						marginLeft: 0.5,
 					}}
 					color={colorPalette.fog.main}
 					component="span"
+					variant="body2"
 				>
 					HMT
 				</Typography>
-			</Typography>
+			</Stack>
 		</TitleSectionWrapper>
 	);
 };
@@ -55,22 +59,27 @@ const WalletAddress = ({
 					paddingX: { xs: 2, md: 8 },
 					paddingY: { xs: 4, md: 6 },
 					marginBottom: 4,
+					borderRadius: '16px',
+					boxShadow: 'none',
 				}}
 			>
 				<Stack gap={4}>
 					<TitleSectionWrapper title="Balance">
-						<Typography>
-							{balance}
+						<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+							<Typography variant="body2">
+								<FormatNumberWithDecimals value={balance} />
+							</Typography>
 							<Typography
 								sx={{
 									marginLeft: 0.5,
 								}}
 								color={colorPalette.fog.main}
 								component="span"
+								variant="body2"
 							>
 								HMT
 							</Typography>
-						</Typography>
+						</Stack>
 					</TitleSectionWrapper>
 					<HmtPrice />
 				</Stack>

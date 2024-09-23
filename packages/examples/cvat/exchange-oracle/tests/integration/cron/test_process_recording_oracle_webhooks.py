@@ -16,7 +16,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.crons.process_recording_oracle_webhooks import (
+from src.crons.webhooks.recording_oracle import (
     process_incoming_recording_oracle_webhooks,
     process_outgoing_recording_oracle_webhooks,
 )

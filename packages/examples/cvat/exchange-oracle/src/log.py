@@ -8,6 +8,10 @@ from src.core.config import Config
 ROOT_LOGGER_NAME = "app"
 
 
+def get_logger_name(module_name: str) -> str:
+    return f"{ROOT_LOGGER_NAME}.{module_name.removeprefix('src.')}"
+
+
 def setup_logging():
     log_level_name = logging.getLevelName(
         Config.loglevel or (logging.DEBUG if Config.environment == "development" else logging.INFO)

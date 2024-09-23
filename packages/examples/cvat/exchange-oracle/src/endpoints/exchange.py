@@ -111,7 +111,7 @@ async def create_assignment(
     if not assignment_id:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail="No assignments available",
+            detail="No assignments available for this wallet address.",
         )
 
     return oracle_service.serialize_task(project_id, assignment_id=assignment_id)

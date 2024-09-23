@@ -69,7 +69,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 					margin={{
 						top: 5,
 						right: 50,
-						left: 0,
+						left: 20,
 					}}
 				>
 					<defs>
@@ -122,7 +122,7 @@ const SmallGraph = ({ title, graphData }: SmallGraphProps) => {
 				alignItems="center"
 				gap={2}
 			>
-				<Typography fontWeight={400} variant="h6" component="p">
+				<Typography fontWeight={400} variant="body1" component="p">
 					{title}
 				</Typography>
 				<ToggleButtons />

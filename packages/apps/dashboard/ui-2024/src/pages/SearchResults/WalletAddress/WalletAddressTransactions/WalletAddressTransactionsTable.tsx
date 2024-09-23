@@ -22,6 +22,8 @@ export const WalletAddressTransactionsTable = () => {
 			sx={{
 				paddingX: { xs: 2, md: 8 },
 				paddingY: { xs: 4, md: 6 },
+				borderRadius: '16px',
+				boxShadow: 'none',
 			}}
 		>
 			<Typography sx={{ marginBottom: 2 }} variant="h5" component="p">
@@ -41,38 +43,42 @@ export const WalletAddressTransactionsTable = () => {
 						<TransactionsTableHead />
 						<TransactionsTableBody />
 						<TableFooter>
-							<TablePagination
-								// count is unknown but required as props
-								count={9999}
-								// onPageChange is required as props
-								onPageChange={() => {}}
-								page={page}
-								rowsPerPage={pageSize}
-								onRowsPerPageChange={(event) => {
-									setPageSize(Number(event.target.value));
-								}}
-								rowsPerPageOptions={[5, 10]}
-								labelDisplayedRows={({ from, to }) => {
-									return `${from}–${to}`;
-								}}
-								slotProps={{
-									actions: {
-										nextButton: {
-											onClick: () => {
-												setNextPage();
+							<tr>
+								<TablePagination
+									// count is unknown but required as props
+									count={9999}
+									// onPageChange is required as props
+									onPageChange={() => {}}
+									page={page}
+									component="td"
+									rowsPerPage={pageSize}
+									onRowsPerPageChange={(event) => {
+										setPageSize(Number(event.target.value));
+									}}
+									rowsPerPageOptions={[5, 10]}
+									labelDisplayedRows={({ from, to }) => {
+										return `${from}–${to}`;
+									}}
+									slotProps={{
+										actions: {
+											nextButton: {
+												onClick: () => {
+													setNextPage();
+												},
+												disabled:
+													lastPageIndex !== undefined &&
+													(page === lastPageIndex ||
+														lastPageIndex - 1 === page),
 											},
-											disabled:
-												lastPageIndex !== undefined &&
-												(page === lastPageIndex || lastPageIndex - 1 === page),
-										},
-										previousButton: {
-											onClick: () => {
-												setPrevPage();
+											previousButton: {
+												onClick: () => {
+													setPrevPage();
+												},
 											},
 										},
-									},
-								}}
-							/>
+									}}
+								/>
+							</tr>
 						</TableFooter>
 					</Table>
 				</SimpleBar>
