@@ -101,7 +101,7 @@ export function DrawerNavigation({
               }
 
               const { link, label, disabled, href, onClick } = item;
-              const isActive = link && location.pathname === link;
+              const isActive = Boolean(link && location.pathname === link);
 
               return (
                 <ListItem disablePadding key={link}>
@@ -126,10 +126,11 @@ export function DrawerNavigation({
                         navigate(link);
                       }
                     }}
+                    selected={isActive}
                     sx={{
-                      backgroundColor: isActive
-                        ? colorPalette.chip.main
-                        : 'transparent',
+                      '&.Mui-selected': {
+                        backgroundColor: colorPalette.primary.shades,
+                      },
                     }}
                   >
                     <Stack
@@ -184,10 +185,11 @@ export function DrawerNavigation({
                         navigate(link);
                       }
                     }}
+                    selected={isActive}
                     sx={{
-                      backgroundColor: isActive
-                        ? colorPalette.chip.main
-                        : 'transparent',
+                      '&.Mui-selected': {
+                        backgroundColor: colorPalette.primary.shades,
+                      },
                     }}
                   >
                     <Stack

@@ -10,7 +10,7 @@ import { routerPaths } from '@/router/router-paths';
 
 export const workerDrawerTopMenuItems = (
   addressRegistered: boolean,
-  hasSiteKey: boolean
+  labelingEnabled: boolean
 ): TopMenuItem[] => {
   return [
     <Grid
@@ -29,7 +29,7 @@ export const workerDrawerTopMenuItems = (
     </Grid>,
     {
       label: t('components.DrawerNavigation.captchaLabelling'),
-      link: hasSiteKey
+      link: labelingEnabled
         ? routerPaths.worker.HcaptchaLabeling
         : routerPaths.worker.enableLabeler,
       disabled: !addressRegistered,
