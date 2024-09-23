@@ -101,6 +101,8 @@ export function DrawerNavigation({
               }
 
               const { link, label, disabled, href, onClick } = item;
+              const isActive = link && location.pathname === link;
+
               return (
                 <ListItem disablePadding key={link}>
                   <ListItemButton
@@ -123,6 +125,11 @@ export function DrawerNavigation({
                       if (link && !href) {
                         navigate(link);
                       }
+                    }}
+                    sx={{
+                      backgroundColor: isActive
+                        ? colorPalette.chip.main
+                        : 'transparent',
                     }}
                   >
                     <Stack

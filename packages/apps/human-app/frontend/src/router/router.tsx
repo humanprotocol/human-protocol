@@ -22,6 +22,7 @@ import { useAuth } from '@/auth/use-auth';
 
 export function Router() {
   const { user } = useAuth();
+
   return (
     <Routes>
       <Route element={<LayoutUnprotected />}>
@@ -60,7 +61,8 @@ export function Router() {
                     });
                   }}
                   topMenuItems={workerDrawerTopMenuItems(
-                    Boolean(user?.wallet_address)
+                    Boolean(user?.wallet_address),
+                    Boolean(user?.site_key)
                   )}
                 />
               )}
