@@ -65,16 +65,13 @@ class Filter(_Filter):
         self, query: sqlalchemy.orm.Query | sqlalchemy.Select
     ) -> sqlalchemy.orm.Query | sqlalchemy.Select:
         if self.Constants.sorting_field_name:
-            direction_param_info = self._get_field_info(self.Constants.sorting_direction_field_name)
-            order_by_param_info = self._get_field_info(self.Constants.sorting_field_name)
-
             direction_value = getattr(
                 self, self.Constants.sorting_direction_field_name
-            ) or direction_param_info.get_default(call_default_factory=True)
+            ) or self.get_default_field_value(self.Constants.sorting_direction_field_name)
 
             order_by_param_value = getattr(
                 self, self.Constants.sorting_field_name
-            ) or order_by_param_info.get_default(call_default_factory=True)
+            ) or self.get_default_field_value(self.Constants.sorting_field_name)
 
             sorting_func = {
                 OrderingDirection.asc: sqlalchemy.asc,
@@ -106,22 +103,15 @@ class Filter(_Filter):
         if not selectable_fields:
             return value
 
-        default_selector_field_value = self.get_default_field_value(
-            self.Constants.selector_field_name
-        )
-
-        selector_field_value = (
-            getattr(self, self.Constants.selector_field_name) or default_selector_field_value
-        )
+        selector_field_value = getattr(
+            self, self.Constants.selector_field_name
+        ) or self.get_default_field_value(self.Constants.selector_field_name)
 
         if not selector_field_value:
             return value
 
         excluded_fields = set(selectable_fields).difference(selector_field_value)
         return value.model_dump(exclude=excluded_fields)
-
-    def _get_field_info(self, field_name: str) -> FieldInfo:
-        return _get_instance_field_info(self, field_name)
 
     @property
     def _selectable_fields(self) -> list[str] | None:
@@ -135,7 +125,7 @@ class Filter(_Filter):
 
     @classmethod
     def get_default_field_value(cls, field_name: str) -> Any:
-        default_value = cls.model_fields[field_name].get_default()
+        default_value = _get_field_info(cls, field_name).get_default()
         if isinstance(default_value, fastapi.params.FieldInfo):
             default_value = default_value.get_default()
 
@@ -148,10 +138,6 @@ class Filter(_Filter):
                 return cls.get_default_field_value(field.field_name)
             return [v.strip() for v in value.split(",")]
         return value
-
-
-def _get_instance_field_info(instance: BaseModel, field_name: str) -> FieldInfo:
-    return _get_field_info(instance.__class__, field_name)
 
 
 def _get_field_info(klass: type[BaseModel], field_name: str):
