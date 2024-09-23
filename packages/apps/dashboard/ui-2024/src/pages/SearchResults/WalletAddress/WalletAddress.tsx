@@ -39,7 +39,7 @@ const HmtPrice = () => {
 					component="span"
 					variant="body2"
 				>
-					HMT
+					$
 				</Typography>
 			</Stack>
 		</TitleSectionWrapper>

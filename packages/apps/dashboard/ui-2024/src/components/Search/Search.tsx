@@ -35,7 +35,7 @@ const Search: FC<{
 	const navigate = useNavigate();
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setAddress(event.target.value);
+		setInputValue(event.target.value);
 	};
 
 	const handleSelectChange = (event: SelectChangeEvent<string>) => {
@@ -60,9 +60,8 @@ const Search: FC<{
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		navigate(
-			`/search/${filterParams.chainId || -1}/${filterParams.address || '0x0'}`
-		);
+		setAddress(inputValue);
+		navigate(`/search/${filterParams.chainId || -1}/${inputValue || '0x0'}`);
 	};
 
 	useEffect(() => {
@@ -86,7 +85,7 @@ const Search: FC<{
 			<TextField
 				id="search-bar"
 				placeholder="Search by Wallet/Escrow"
-				value={filterParams.address}
+				value={inputValue}
 				onChange={handleInputChange}
 				onBlur={handleInputBlur}
 				onFocus={handleInputFocus}
@@ -146,7 +145,6 @@ const Search: FC<{
 										paddingRight: '24px',
 										backgroundColor: `${colorPalette.white}`,
 										border: 0,
-										outline: 'none',
 									},
 									'& .MuiInputBase-input': {
 										backgroundColor: `${colorPalette.white}`,
