@@ -64,8 +64,9 @@ def serialize_job(
             status=api_status,
             job_description=manifest.annotation.description if manifest else None,
             reward_amount=str(manifest.job_bounty) if manifest else None,
-            # TODO: this field is removed due to response_model_exclude_unset=True
-            reward_token=service_api.DEFAULT_TOKEN,
+            reward_token=(
+                service_api.DEFAULT_TOKEN
+            ), # TODO: this field requires a value to be kept by response_model_exclude_unset=True
             created_at=project.created_at,
             updated_at=updated_at,
             qualifications=manifest.qualifications,
@@ -141,8 +142,9 @@ def serialize_assignment(
             job_type=project.job_type,
             status=api_status,
             reward_amount=str(manifest.job_bounty) if manifest else None,
-            # TODO: this field is removed due to response_model_exclude_unset=True
-            reward_token=service_api.DEFAULT_TOKEN,
+            reward_token=(
+                service_api.DEFAULT_TOKEN
+            ), # TODO: this field requires a value to be kept by response_model_exclude_unset=True
             url=compose_assignment_url(
                 task_id=assignment.job.cvat_task_id,
                 job_id=assignment.cvat_job_id,
