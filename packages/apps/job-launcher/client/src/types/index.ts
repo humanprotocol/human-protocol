@@ -40,11 +40,13 @@ export type CreateFortuneJobRequest = {
   requesterDescription: string;
   currency: string;
   fundAmount: number;
+  qualifications?: string[];
 };
 
 export type CreateCvatJobRequest = {
   chainId: number;
   requesterDescription: string;
+  qualifications?: string[];
   fundAmount: number;
   currency: string;
   data: CvatDataSource;
@@ -92,6 +94,7 @@ export type FortuneRequest = {
   title: string;
   fortunesRequested: number;
   description: string;
+  qualifications?: string[];
 };
 
 export enum StorageProviders {
@@ -199,6 +202,7 @@ export type CvatRequest = {
   labels: Label[];
   type: CvatJobType;
   description: string;
+  qualifications?: string[];
   data: CvatData;
   groundTruth: CvatDataSource;
   userGuide: string;
@@ -211,6 +215,7 @@ export type HCaptchaRequest = {
   completionDate: Date;
   minRequests: number;
   maxRequests: number;
+  qualifications?: string[];
   advanced: {
     workerLanguage: string;
     workerLocation: string;
@@ -268,6 +273,7 @@ export type JobDetailsResponse = {
     exchangeOracleAddress: string;
     recordingOracleAddress: string;
     reputationOracleAddress: string;
+    qualifications?: string[];
   };
   staking: {
     staker: string;
@@ -284,4 +290,11 @@ export type FortuneFinalResult = {
   exchangeAddress: string;
   workerAddress: string;
   solution: string;
+};
+
+export type Qualification = {
+  reference: string;
+  title: string;
+  description: string;
+  expires_at: string;
 };

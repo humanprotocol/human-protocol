@@ -4,8 +4,10 @@ import CloudIcon from '@mui/icons-material/Cloud';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import {
+  Autocomplete,
   Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -24,14 +26,15 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
 } from '../../../components/Accordion';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
 import languages from '../../../data/languages.json';
 import locations from '../../../data/locations.json';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
-import { HCaptchaJobType } from '../../../types';
+import { getQualifications } from '../../../services/qualification';
+import { HCaptchaJobType, Qualification } from '../../../types';
 import { HCaptchaJobRequesteValidationSchema } from './schema';
 
 export const HCaptchaJobRequestForm = () => {
@@ -39,6 +42,9 @@ export const HCaptchaJobRequestForm = () => {
     useCreateJobPageUI();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
   const [searchParams] = useSearchParams();
+  const [qualificationsOptions, setQualificationsOptions] = useState<
+    Qualification[]
+  >([]);
 
   const initialValues = {
     dataUrl: '',
@@ -46,6 +52,7 @@ export const HCaptchaJobRequestForm = () => {
     completionDate: null,
     minRequests: null,
     maxRequests: null,
+    qualifications: [],
     // Advanced
     workerLanguage: null,
     workerLocation: null,
@@ -75,6 +82,10 @@ export const HCaptchaJobRequestForm = () => {
       accuracyTarget: Number(data.accuracyTarget) / 100,
       minRequests: Number(data.minRequests),
       maxRequests: Number(data.maxRequests),
+
+      qualifications: (data.qualifications as Qualification[]).map(
+        (qualification) => qualification.reference,
+      ),
       advanced: {
         workerLanguage: data.workerLanguage,
         workerLocation: data.workerLocation,
@@ -122,6 +133,16 @@ export const HCaptchaJobRequestForm = () => {
     ) {
       setFieldValue('type', type);
     }
+    const fetchData = async () => {
+      try {
+        setQualificationsOptions(await getQualifications());
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -277,6 +298,41 @@ export const HCaptchaJobRequestForm = () => {
                     onBlur={handleBlur}
                     error={touched.maxRequests && Boolean(errors.maxRequests)}
                     type="number"
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <Autocomplete
+                    multiple
+                    options={qualificationsOptions}
+                    getOptionLabel={(option) => option.title}
+                    value={values.qualifications}
+                    onChange={(event, newValues) => {
+                      setFieldValue('qualifications', newValues);
+                    }}
+                    selectOnFocus
+                    onBlur={handleBlur}
+                    handleHomeEndKeys
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => (
+                        <Chip
+                          label={option.title}
+                          {...getTagProps({ index })}
+                        />
+                      ))
+                    }
+                    renderInput={(params) => (
+                      <Box display="flex" alignItems="center" width="100%">
+                        <TextField
+                          {...params}
+                          label="Qualifications"
+                          variant="outlined"
+                          onBlur={handleBlur}
+                          fullWidth
+                        />
+                      </Box>
+                    )}
                   />
                 </FormControl>
               </Grid>

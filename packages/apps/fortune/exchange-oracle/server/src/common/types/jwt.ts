@@ -10,4 +10,5 @@ export interface JwtUser {
   address: string;
   kycStatus: string;
   reputationNetwork: string;
+  qualifications?: string[];
 }

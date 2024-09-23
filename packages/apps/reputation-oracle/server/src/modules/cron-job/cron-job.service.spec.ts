@@ -11,6 +11,7 @@ import {
   MOCK_FILE_URL,
   MOCK_MAX_RETRY_COUNT,
   MOCK_WEBHOOK_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { WebhookService } from '../webhook/webhook.service';
@@ -71,6 +72,18 @@ describe('CronJobService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         CronJobService,
         {
           provide: CronJobRepository,
@@ -87,7 +100,6 @@ describe('CronJobService', () => {
         WebhookService,
         PayoutService,
         ReputationService,
-        ConfigService,
         ServerConfigService,
         Web3ConfigService,
         ReputationConfigService,

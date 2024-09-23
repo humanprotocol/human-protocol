@@ -14,7 +14,31 @@ fragment TransactionFields on Transaction {
 
 
 def get_transactions_query(filter: TransactionFilter) -> str:
-    return """
+    from_address = filter.from_address
+    to_address = filter.to_address
+
+    if from_address == to_address:
+        address_condition = f"""
+        {f'{{ from: $fromAddress }}' if from_address else ''}
+        {f'{{ to: $toAddress }}' if to_address else ''}
+        """
+    else:
+        address_condition = f"""
+        {f'from: $fromAddress' if from_address else ''}
+        {f'to: $toAddress' if to_address else ''}
+        """
+
+    where_clause = f"""
+    where: {{
+        {"or: [" + address_condition + "]," if from_address == to_address else address_condition}
+        {f'timestamp_gte: $startDate,' if filter.start_date else ''}
+        {f'timestamp_lte: $endDate,' if filter.end_date else ''}
+        {f'block_gte: $startBlock,' if filter.start_block else ''}
+        {f'block_lte: $endBlock,' if filter.end_block else ''}
+    }}
+    """
+
+    return f"""
 query GetTransactions(
     $fromAddress: String
     $toAddress: String
@@ -27,32 +51,17 @@ query GetTransactions(
     $skip: Int
 ) {{
     transactions(
-        where: {{
-        {from_address_clause}
-        {to_address_clause}
-        {start_date_clause}
-        {end_date_clause}
-        {start_block_clause}
-        {end_block_clause}
-        }}
-        orderBy: timestamp
-        orderDirection: $orderDirection
-        first: $first
+        {where_clause}
+        orderBy: timestamp,
+        orderDirection: $orderDirection,
+        first: $first,
         skip: $skip
     ) {{
         ...TransactionFields
     }}
 }}
 {transaction_fragment}
-""".format(
-        transaction_fragment=transaction_fragment,
-        from_address_clause="from: $fromAddress" if filter.from_address else "",
-        to_address_clause="to: $toAddress" if filter.to_address else "",
-        start_date_clause="timestamp_gte: $startDate" if filter.start_date else "",
-        end_date_clause="timestamp_lte: $endDate" if filter.end_date else "",
-        start_block_clause="block_gte: $startBlock" if filter.start_block else "",
-        end_block_clause="block_lte: $endBlock" if filter.end_block else "",
-    )
+"""
 
 
 def get_transaction_query() -> str:

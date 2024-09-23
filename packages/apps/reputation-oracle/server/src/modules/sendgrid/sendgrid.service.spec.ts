@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { SendGridService } from './sendgrid.service';
 import { MailService } from '@sendgrid/mail';
 import { ErrorSendGrid } from '../../common/constants/errors';
-import { MOCK_SENDGRID_API_KEY } from '../../../test/constants';
+import { MOCK_SENDGRID_API_KEY, mockConfig } from '../../../test/constants';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
@@ -25,12 +25,23 @@ describe('SendGridService', () => {
 
     const app = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         SendGridService,
         {
           provide: MailService,
           useValue: mockMailService,
         },
-        ConfigService,
         SendgridConfigService,
       ],
     }).compile();
@@ -71,9 +82,7 @@ describe('SendGridService', () => {
 
       expect(mock).toHaveBeenCalledWith(
         expect.objectContaining({
-          from: expect.objectContaining({
-            email: 'app@humanprotocol.org',
-          }),
+          from: 'test@example.com',
         }),
       );
     });

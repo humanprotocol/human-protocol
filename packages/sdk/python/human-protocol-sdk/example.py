@@ -10,6 +10,7 @@ from human_protocol_sdk.statistics import (
 )
 from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 from human_protocol_sdk.agreement import agreement
+from human_protocol_sdk.transaction import TransactionUtils, TransactionFilter
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):

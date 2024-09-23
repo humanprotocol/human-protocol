@@ -69,6 +69,17 @@ export class AssignmentService {
       data.escrowAddress,
     );
 
+    // Check if all required qualifications are present
+    const userQualificationsSet = new Set(jwtUser.qualifications);
+    const missingQualifications = manifest.qualifications?.filter(
+      (qualification) => !userQualificationsSet.has(qualification),
+    );
+    if (missingQualifications && missingQualifications.length > 0) {
+      throw new BadRequestException(
+        ErrorAssignment.InvalidAssignmentQualification,
+      );
+    }
+
     if (currentAssignments >= manifest.submissionsRequired) {
       this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.FullyAssigned);

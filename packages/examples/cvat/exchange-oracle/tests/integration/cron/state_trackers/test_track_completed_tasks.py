@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy.sql import select
 
 from src.core.types import JobStatuses, Networks, ProjectStatuses, TaskStatuses, TaskTypes
-from src.crons.state_trackers import track_completed_tasks
+from src.crons.cvat.state_trackers import track_completed_tasks
 from src.db import SessionLocal
 from src.models.cvat import Job, Project, Task
 

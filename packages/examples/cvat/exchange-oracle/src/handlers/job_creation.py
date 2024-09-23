@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from itertools import chain, groupby
 from math import ceil
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import cv2
 import datumaro as dm
@@ -2554,14 +2554,3 @@ def create_task(escrow_address: str, chain_id: int) -> None:
     with builder_type(manifest, escrow_address, chain_id) as task_builder:
         task_builder.set_logger(logger)
         task_builder.build()
-
-
-def remove_task(escrow_address: str) -> None:
-    with SessionLocal.begin() as session:
-        project = db_service.get_project_by_escrow_address(session, escrow_address)
-        if project is not None:
-            if project.cvat_cloudstorage_id:
-                cvat_api.delete_cloudstorage(project.cvat_cloudstorage_id)
-            if project.cvat_id:
-                cvat_api.delete_project(project.cvat_id)
-            db_service.delete_project(session, project.id)

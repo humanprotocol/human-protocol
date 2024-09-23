@@ -158,7 +158,7 @@ NETWORKS = {
     },
     ChainId.POLYGON_AMOY: {
         "title": "Polygon Amoy",
-        "scan_url": "https://amoy.polygonscan.com/y",
+        "scan_url": "https://amoy.polygonscan.com",
         "subgraph_url": (
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),

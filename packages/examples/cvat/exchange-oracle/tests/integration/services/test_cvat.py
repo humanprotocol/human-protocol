@@ -17,6 +17,7 @@ from src.core.types import (
 )
 from src.db import SessionLocal
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
+from src.utils.time import utcnow
 
 from tests.utils.db_helper import (
     create_project,
@@ -414,7 +415,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             session=self.session,
             wallet_address=wallet_address_2,
             cvat_job_id=cvat_id_2,
-            expires_at=datetime.now(),
+            expires_at=utcnow(),
         )
 
         projects = cvat_service.get_projects_by_assignee(self.session, wallet_address_1)

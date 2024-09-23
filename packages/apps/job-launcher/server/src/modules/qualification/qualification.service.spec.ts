@@ -4,11 +4,16 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { of, throwError } from 'rxjs';
-import { KVStoreUtils } from '@human-protocol/sdk';
-import { MOCK_REPUTATION_ORACLE_URL } from '../../../test/constants';
+import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+import {
+  MOCK_REPUTATION_ORACLE_URL,
+  MOCK_WEB3_RPC_URL,
+  mockConfig,
+} from '../../../test/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { HttpStatus } from '@nestjs/common';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -23,9 +28,21 @@ describe.only('QualificationService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         QualificationService,
-        ConfigService,
         Web3ConfigService,
+        NetworkConfigService,
         {
           provide: HttpService,
           useValue: {
@@ -33,7 +50,17 @@ describe.only('QualificationService', () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideProvider(NetworkConfigService)
+      .useValue({
+        networks: [
+          {
+            chainId: ChainId.LOCALHOST,
+            rpcUrl: MOCK_WEB3_RPC_URL,
+          },
+        ],
+      })
+      .compile();
 
     qualificationService =
       moduleRef.get<QualificationService>(QualificationService);
