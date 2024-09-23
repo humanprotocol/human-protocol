@@ -96,7 +96,6 @@ export function SignInWorkerPage() {
               label={t('worker.signInForm.fields.password')}
               name="password"
             />
-            <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
             <Typography variant="body1">
               <Link
                 style={{ textDecoration: 'none', fontWeight: 600 }}
@@ -105,6 +104,7 @@ export function SignInWorkerPage() {
                 {t('worker.signInForm.forgotPassword')}
               </Link>
             </Typography>
+            <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
             <Button
               fullWidth
               loading={isSignInWorkerPending}
