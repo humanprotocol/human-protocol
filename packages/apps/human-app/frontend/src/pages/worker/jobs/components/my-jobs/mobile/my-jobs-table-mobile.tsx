@@ -150,15 +150,17 @@ export function MyJobsTableMobile({
                       width: '100%',
                     }}
                   >
-                    <TableButton
-                      component={Link}
-                      disabled={buttonDisabled}
-                      fullWidth
-                      target="_blank"
-                      to={d.url}
-                    >
-                      {t('worker.jobs.solve')}
-                    </TableButton>
+                    {d.url ? (
+                      <TableButton
+                        component={Link}
+                        disabled={buttonDisabled}
+                        fullWidth
+                        target="_blank"
+                        to={d.url}
+                      >
+                        {t('worker.jobs.solve')}
+                      </TableButton>
+                    ) : null}
                     <RejectButton
                       disabled={buttonDisabled}
                       onClick={() => {
