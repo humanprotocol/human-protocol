@@ -541,7 +541,7 @@ export class JobService {
         const gt = await this.storageService.download(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         );
-        if (!gt || gt.length === 0)
+        if (!gt || !gt.images || gt.images.length === 0)
           throw new ControlledError(
             ErrorJob.GroundThuthValidationFailed,
             HttpStatus.BAD_REQUEST,
@@ -574,7 +574,18 @@ export class JobService {
         const gt = await this.storageService.download(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         );
+        if (!gt || !gt.images || gt.images.length === 0)
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
         const data = await listObjectsInBucket(urls.dataUrl);
+        if (!data || data.length === 0 || !data[0])
+          throw new ControlledError(
+            ErrorJob.DatasetValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
 
         await this.checkImageConsistency(gt.images, data);
 
@@ -879,6 +890,13 @@ export class JobService {
   public async getCvatElementsCount(gtUrl: URL, dataUrl: URL): Promise<number> {
     const data = await this.storageService.download(dataUrl.href);
     const gt = await this.storageService.download(gtUrl.href);
+
+    if (!gt || !gt.images || gt.images.length === 0) {
+      throw new ControlledError(
+        ErrorJob.GroundThuthValidationFailed,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     let gtEntries = 0;
 
