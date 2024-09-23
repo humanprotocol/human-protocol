@@ -1,6 +1,5 @@
 import io
 import logging
-from collections import Counter
 from collections.abc import Callable, Sequence
 from functools import partial
 from typing import Any
@@ -139,8 +138,8 @@ def _handle_completed_escrow(
     )
 
     logger.info(
-        f"The escrow ({escrow_address=}) "
-        "is completed, resulting annotations are processed successfully"
+        f"The escrow ({escrow_address=}) is completed, "
+        f"resulting annotations are processed successfully"
     )
 
 
@@ -166,23 +165,6 @@ def _upload_annotations(
             ),
             file_descriptor.file.read(),
         )
-
-
-def _have_valid_statuses(escrow_projects: list[Project]) -> bool:
-    # Some escrow projects can be in the validation status,
-    # e.g. if jobs from some projects were rejected
-    # (their projects have been reannotated and become completed now),
-    # and other jobs were validated successfully
-    # (they will hang in the validation state).
-    #
-    # We need to make sure that all the projects are in any of these 2 states,
-    # but also that there's at least 1 completed project in the list.
-    # It's possible that this function is entered 2 times sequentially
-    # before the validation, e.g. in 2 different threads.
-    escrow_project_statuses = Counter(p.status for p in escrow_projects)
-    completed_count = escrow_project_statuses.get(ProjectStatuses.completed.value, 0)
-    validation_count = escrow_project_statuses.get(ProjectStatuses.validation.value, 0)
-    return completed_count and completed_count + validation_count == len(escrow_projects)
 
 
 def _download_project_annotations(
@@ -250,9 +232,8 @@ def handle_completed_escrows(logger: logging.Logger) -> None:
     # Here we can have several projects per escrow, so the handling is done in project groups
     # Find potentially finished escrows first
     with SessionLocal.begin() as session:
-        escrows_with_completed_projects = cvat_service.get_escrows_by_project_status(
+        escrows_with_completed_projects = cvat_service.get_escrows_for_completion(
             session,
-            ProjectStatuses.completed,
             limit=CronConfig.track_completed_escrows_chunk_size,
         )
 
@@ -280,8 +261,5 @@ def handle_completed_escrows(logger: logging.Logger) -> None:
                 if isinstance(ex.orig, db_errors.LockNotAvailable):
                     continue
                 raise
-
-            if not _have_valid_statuses(escrow_projects):
-                continue
 
             _handle_completed_escrow(logger, chain_id, escrow_address, escrow_projects, session)

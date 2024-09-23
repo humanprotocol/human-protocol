@@ -3,13 +3,22 @@ import uuid
 from collections.abc import Sequence
 from datetime import datetime
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import case, delete, func, insert, select, update
 from sqlalchemy.orm import Session
 
 from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
-from src.models.cvat import Assignment, DataUpload, EscrowCreation, Image, Job, Project, Task, User
+from src.models.cvat import (
+    Assignment,
+    DataUpload,
+    EscrowCreation,
+    Image,
+    Job,
+    Project,
+    Task,
+    User,
+)
 from src.utils.time import utcnow
 
 
@@ -223,23 +232,28 @@ def update_tasks_by_status(
     return [row.cvat_id for row in updated_tasks]
 
 
-def get_escrows_by_project_status(
-    session: Session,
-    project_status: ProjectStatuses,
-    *,
-    included_types: Sequence[TaskTypes] | None = None,
-    limit: int = 5,
-) -> list[tuple[str, int]]:
-    escrows = (
-        session.query(Project.escrow_address, Project.chain_id)
+def get_escrows_for_completion(session: Session, limit=100):
+    # Escrow projects can be in either 'validation' or 'completed' status:
+    # - 'completed': Some jobs were rejected and reannotated.
+    # - 'validation': Other jobs were successfully validated and remain in this state.
+    #
+    # Ensure all projects are in one of these two states
+    # and that at least one project is 'completed'.
+    # This prevents multiple threads from processing the same escrow concurrently
+    # before validation finishes.
+    allowed_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
+    at_least_one_is_completed = (
+        func.count(case([(Project.status == ProjectStatuses.completed, 1)], else_=0)) > 0
+    )
+    stmt = (
+        select(Project.escrow_address, Project.chain_id)
+        .where(Project.status.in_(allowed_statuses))
         .group_by(Project.escrow_address, Project.chain_id)
-        .where(Project.status == project_status.value)
+        .having(at_least_one_is_completed)
+        .limit(limit)
     )
 
-    if included_types:
-        escrows = escrows.where(Project.job_type.in_([t.value for t in included_types]))
-
-    return escrows.limit(limit).all()
+    return session.execute(stmt).all()
 
 
 def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:
