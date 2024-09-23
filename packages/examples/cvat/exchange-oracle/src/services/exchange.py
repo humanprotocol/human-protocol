@@ -21,7 +21,7 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
             "user",
         )
 
-        # There can be several projects with under one escrow, we need any
+        # There can be several projects under one escrow, we need any
         project = cvat_service.get_project_by_escrow_address(
             session,
             escrow_address,
