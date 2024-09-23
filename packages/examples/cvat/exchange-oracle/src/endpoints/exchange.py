@@ -97,7 +97,7 @@ class JobsFilter(Filter):
 @router.get(
     "/job",
     description="Lists available jobs",
-    response_model_exclude_unset=True,  # required for field selection
+    response_model_exclude_unset=True,  # required for response field selection
     response_model_by_alias=True,  # required for pagination
 )
 async def list_jobs(
@@ -253,7 +253,7 @@ class AssignmentFilter(Filter):
 @router.get(
     "/assignment",
     description="Lists assignments",
-    response_model_exclude_unset=True,  # required for field selection
+    response_model_exclude_unset=True,  # required for response field selection
     response_model_by_alias=True,  # required for pagination
 )
 async def list_assignments(
