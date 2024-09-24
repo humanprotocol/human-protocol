@@ -8,10 +8,11 @@ from unittest.mock import patch
 from fastapi.responses import Response
 from fastapi.testclient import TestClient
 from jose import jwt
+from sqlalchemy.orm import Session
 
 from src.core.config import Config
 from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
-from src.db import SessionLocal
+
 from src.models.cvat import Assignment, Project, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
 from src.schemas.exchange import JobStatuses as APIJobStatuses
@@ -90,7 +91,9 @@ def test_cannot_list_jobs_400_with_unsupported_page_size(client: TestClient) -> 
     )
 
 
-def test_can_list_jobs_200_with_address_and_pagination(client: TestClient) -> None:
+def test_can_list_jobs_200_with_address_and_pagination(
+    client: TestClient, session: Session
+) -> None:
     def validate_result(
         response: Response,
         expected_result: list[str],
@@ -119,7 +122,6 @@ def test_can_list_jobs_200_with_address_and_pagination(client: TestClient) -> No
             page * page_size : (page + 1) * page_size
         ]
 
-    session = SessionLocal()
     session.begin()
     user = User(
         wallet_address=user_address,
@@ -175,11 +177,9 @@ def test_can_list_jobs_200_with_address_and_pagination(client: TestClient) -> No
                 validate_result(
                     response, escrows, page=page, page_size=page_size, total_pages=total_pages
                 )
-    session.close()
 
 
-def test_can_list_jobs_200_with_fields(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
         wallet_address=user_address,
@@ -235,11 +235,8 @@ def test_can_list_jobs_200_with_fields(client: TestClient) -> None:
                 (required_fields | set(fields)) if fields else all_schema_fields
             )
 
-    session.close()
 
-
-def test_can_list_jobs_200_check_values(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_list_jobs_200_check_values(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
         wallet_address=user_address,
@@ -297,67 +294,65 @@ def test_can_list_jobs_200_check_values(client: TestClient) -> None:
             "qualifications": manifest.get("qualifications", []),
         }
 
-    session.close()
 
+def test_can_list_jobs_200_without_address(client: TestClient, session: Session) -> None:
+    session.begin()
+    _, _, cvat_job_1 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+    )
+    create_project_task_and_job(session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", 2)
+    create_project_task_and_job(session, "0x86e83d346041E8806e352681f3F14549C0d2BC69", 3)
 
-def test_can_list_jobs_200_without_address(client: TestClient) -> None:
-    with SessionLocal.begin() as session:
-        _, _, cvat_job_1 = create_project_task_and_job(
-            session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    assignment = Assignment(
+        id=str(uuid.uuid4()),
+        user_wallet_address=user_address,
+        cvat_job_id=cvat_job_1.cvat_id,
+        expires_at=datetime.now() + timedelta(days=1),
+    )
+    session.add(assignment)
+
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(generate_jwt_token(wallet_address=None)),
         )
-        create_project_task_and_job(session, "0x86e83d346041E8806e352681f3F14549C0d2BC68", 2)
-        create_project_task_and_job(session, "0x86e83d346041E8806e352681f3F14549C0d2BC69", 3)
 
-        user = User(
-            wallet_address=user_address,
-            cvat_email=cvat_email,
-            cvat_id=1,
-        )
-        session.add(user)
+        assert response.status_code == 200
+        paginated_result = response.json()
+        assert paginated_result["page"] == 0
+        assert paginated_result["total_pages"] == 1
+        assert isinstance(paginated_result["results"], list)
+        assert len(paginated_result["results"]) == 3
+        assert paginated_result["total_results"] == 3
 
-        assignment = Assignment(
-            id=str(uuid.uuid4()),
-            user_wallet_address=user_address,
-            cvat_job_id=cvat_job_1.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
-        )
-        session.add(assignment)
-
-        session.commit()
-
-        with (
-            open("tests/utils/manifest.json") as data,
-            patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
-        ):
-            manifest = json.load(data)
-            mock_get_manifest.return_value = manifest
-
-            response = client.get(
-                "/job",
-                headers=get_auth_header(generate_jwt_token(wallet_address=None)),
-            )
-
-            assert response.status_code == 200
-            paginated_result = response.json()
-            assert paginated_result["page"] == 0
-            assert paginated_result["total_pages"] == 1
-            assert isinstance(paginated_result["results"], list)
-            assert len(paginated_result["results"]) == 3
-            assert paginated_result["total_results"] == 3
-
-            for job in paginated_result["results"]:
-                assert set(job.keys()) == {
-                    "escrow_address",
-                    "chain_id",
-                    "job_type",
-                    "status",
-                    "job_description",
-                    "reward_amount",
-                    "reward_token",
-                    "created_at",
-                    "updated_at",
-                    "qualifications",
-                }
+        for job in paginated_result["results"]:
+            assert set(job.keys()) == {
+                "escrow_address",
+                "chain_id",
+                "job_type",
+                "status",
+                "job_description",
+                "reward_amount",
+                "reward_token",
+                "created_at",
+                "updated_at",
+                "qualifications",
+            }
 
 
 def test_cannot_list_jobs_401(client: TestClient) -> None:
@@ -372,58 +367,58 @@ def test_cannot_list_jobs_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_can_register_200(client: TestClient) -> None:
-    with SessionLocal.begin() as session:
-        with patch("src.endpoints.exchange.cvat_api.get_user_id") as mock_get_user:
-            mock_get_user.return_value = 1
-            response = client.post(
-                "/register",
-                headers=get_auth_header(),
-            )
-
-        assert response.status_code == 200
-        user = response.json()
-        db_user = session.query(User).where(User.wallet_address == user_address).first()
-        assert user["wallet_address"] == db_user.wallet_address == user_address
-        assert user["email"] == db_user.cvat_email == cvat_email
-
-
-def test_cannot_register_400_with_duplicated_address(client: TestClient) -> None:
-    with SessionLocal.begin() as session:
-        user = User(
-            wallet_address=user_address,
-            cvat_email=cvat_email,
-            cvat_id=1,
-        )
-        session.add(user)
-        session.commit()
-        new_cvat_email = "test2@hmt.ai"
-
-        response = client.post(
-            "/register",
-            headers=get_auth_header(generate_jwt_token(email=new_cvat_email)),
-        )
-        assert response.status_code == 400
-        assert response.json() == {"message": "User already exists"}
-
-
-def test_cannot_register_400_with_duplicated_user(client: TestClient) -> None:
-    with SessionLocal.begin() as session:
-        new_user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
-        user = User(
-            wallet_address=new_user_address,
-            cvat_email=cvat_email,
-            cvat_id=1,
-        )
-        session.add(user)
-        session.commit()
+def test_can_register_200(client: TestClient, session: Session) -> None:
+    session.begin()
+    with patch("src.endpoints.exchange.cvat_api.get_user_id") as mock_get_user:
+        mock_get_user.return_value = 1
         response = client.post(
             "/register",
             headers=get_auth_header(),
         )
-        assert response.status_code == 400
-        assert response.json() == {"message": "User already exists"}
-        assert new_user_address != user_address
+
+    assert response.status_code == 200
+    user = response.json()
+    db_user = session.query(User).where(User.wallet_address == user_address).first()
+    assert user["wallet_address"] == db_user.wallet_address == user_address
+    assert user["email"] == db_user.cvat_email == cvat_email
+
+
+def test_cannot_register_400_with_duplicated_address(client: TestClient, session: Session) -> None:
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+    session.commit()
+    new_cvat_email = "test2@hmt.ai"
+
+    response = client.post(
+        "/register",
+        headers=get_auth_header(generate_jwt_token(email=new_cvat_email)),
+    )
+    assert response.status_code == 400
+    assert response.json() == {"message": "User already exists"}
+
+
+def test_cannot_register_400_with_duplicated_user(client: TestClient, session: Session) -> None:
+    session.begin()
+    new_user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
+    user = User(
+        wallet_address=new_user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+    session.commit()
+    response = client.post(
+        "/register",
+        headers=get_auth_header(),
+    )
+    assert response.status_code == 400
+    assert response.json() == {"message": "User already exists"}
+    assert new_user_address != user_address
 
 
 def test_cannot_register_401(client: TestClient) -> None:
@@ -441,8 +436,7 @@ def test_cannot_register_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_can_create_assignment_200(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_create_assignment_200(client: TestClient, session: Session) -> None:
     session.begin()
     cvat_project, _, cvat_job = create_project_task_and_job(
         session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -500,8 +494,6 @@ def test_can_create_assignment_200(client: TestClient) -> None:
         assert db_assignment.status == AssignmentStatuses.created
         assert db_assignment.cvat_job_id == cvat_job.cvat_id
 
-    session.close()
-
 
 def test_cannot_create_assignment_401(client: TestClient) -> None:
     # Test API endpoint when auth token is missing or invalid
@@ -519,8 +511,7 @@ def test_cannot_create_assignment_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_can_list_assignments_200(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
     session.begin()
     user_1 = User(
         wallet_address=user_address,
@@ -602,13 +593,10 @@ def test_can_list_assignments_200(client: TestClient) -> None:
                 paginated_result = response.json()
                 assert paginated_result["total_results"] == expected_count
 
-    session.close()
 
-
-def test_can_list_assignments_200_with_sorting(client: TestClient) -> None:
+def test_can_list_assignments_200_with_sorting(client: TestClient, session: Session) -> None:
     # sort_field: chain_id|job_type|status|reward_amount|created_at|expires_at
     # sort: asc, desc
-    session = SessionLocal()
     session.begin()
     user = User(
         wallet_address=user_address,
@@ -669,8 +657,7 @@ def test_can_list_assignments_200_with_sorting(client: TestClient) -> None:
             assert result_acs == result_desc
 
 
-def test_can_resign_job_200(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_resign_job_200(client: TestClient, session: Session) -> None:
     session.begin()
     _, _, cvat_job_1 = create_project_task_and_job(
         session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -699,7 +686,6 @@ def test_can_resign_job_200(client: TestClient) -> None:
     assert response.status_code == 200
     session.expire(assignment)
     assert assignment.status == AssignmentStatuses.canceled
-    session.close()
 
 
 def test_cannot_resign_job_401(client: TestClient) -> None:
@@ -720,8 +706,9 @@ def test_cannot_resign_job_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_cannot_resign_job_400_when_assignment_is_finished(client: TestClient) -> None:
-    session = SessionLocal()
+def test_cannot_resign_job_400_when_assignment_is_finished(
+    client: TestClient, session: Session
+) -> None:
     session.begin()
     _, _, cvat_job_1 = create_project_task_and_job(
         session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -752,11 +739,11 @@ def test_cannot_resign_job_400_when_assignment_is_finished(client: TestClient) -
     assert response.status_code == 400
     session.expire(assignment)
     assert assignment.status == AssignmentStatuses.completed
-    session.close()
 
 
-def test_cannot_resign_job_400_with_someone_elses_wallet_address(client: TestClient) -> None:
-    session = SessionLocal()
+def test_cannot_resign_job_400_with_someone_elses_wallet_address(
+    client: TestClient, session: Session
+) -> None:
     session.begin()
     _, _, cvat_job_1 = create_project_task_and_job(
         session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -793,11 +780,9 @@ def test_cannot_resign_job_400_with_someone_elses_wallet_address(client: TestCli
     assert response.status_code == 400
     session.expire(assignment)
     assert assignment.status == AssignmentStatuses.created
-    session.close()
 
 
-def test_can_get_assignment_stats_by_worker_200(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_get_assignment_stats_by_worker_200(client: TestClient, session: Session) -> None:
     session.begin()
     cvat_jobs, assignments = [], []
 
@@ -853,8 +838,6 @@ def test_can_get_assignment_stats_by_worker_200(client: TestClient) -> None:
     assert stats["assignments_rejected"] == 1
     assert stats["assignments_expired"] == 1
 
-    session.close()
-
 
 def test_cannot_get_assignment_stats_by_worker_401(client: TestClient) -> None:
     # Test API endpoint when auth token is missing or invalid
@@ -871,10 +854,8 @@ def test_cannot_get_assignment_stats_by_worker_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_can_get_oracle_stats(client: TestClient) -> None:
-    session = SessionLocal()
+def test_can_get_oracle_stats(client: TestClient, session: Session) -> None:
     session.begin()
-
     user_1 = User(
         wallet_address="0x86e83d346041E8806e352681f3F14549C0d2BC60",
         cvat_email="user_1@hmt.ai",
@@ -949,5 +930,3 @@ def test_can_get_oracle_stats(client: TestClient) -> None:
         "assignments_rejected": 1,
         "assignments_expired": 1,
     }
-
-    session.close()

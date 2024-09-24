@@ -5,9 +5,7 @@ from http import HTTPStatus
 
 from fastapi import HTTPException, Request
 
-from src.chain.escrow import (
-    get_available_webhook_types,
-)
+from src.chain.escrow import get_available_webhook_types
 from src.chain.web3 import recover_signer
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
