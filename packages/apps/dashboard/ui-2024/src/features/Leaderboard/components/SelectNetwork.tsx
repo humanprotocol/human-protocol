@@ -8,6 +8,7 @@ import {
 	useLeaderboardSearch,
 } from '@utils/hooks/use-leaderboard-search';
 import { NetworkIcon } from '@components/NetworkIcon';
+import { Box } from '@mui/material';
 
 export const SelectNetwork = () => {
 	const {
@@ -51,7 +52,10 @@ export const SelectNetwork = () => {
 							className="select-item"
 							value={selectItem.id}
 						>
-							<NetworkIcon chainId={selectItem.id} />
+							<Box sx={{ svg: { width: '24px', height: '24px' } }}>
+								<NetworkIcon chainId={selectItem.id} />
+							</Box>
+
 							{selectItem.name}
 						</MenuItem>
 					);
