@@ -375,40 +375,55 @@ export const CvatJobRequestForm = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <Autocomplete
-                    multiple
-                    options={qualificationsOptions}
-                    getOptionLabel={(option) => option.title}
-                    value={values.qualifications}
-                    onChange={(event, newValues) => {
-                      setFieldValue('qualifications', newValues);
-                    }}
-                    selectOnFocus
-                    onBlur={handleBlur}
-                    handleHomeEndKeys
-                    renderTags={(value, getTagProps) =>
-                      value.map((option, index) => (
-                        <Chip
-                          label={option.title}
-                          {...getTagProps({ index })}
-                        />
-                      ))
-                    }
-                    renderInput={(params) => (
-                      <Box display="flex" alignItems="center" width="100%">
-                        <TextField
-                          {...params}
-                          label="Qualifications"
-                          variant="outlined"
-                          onBlur={handleBlur}
-                          fullWidth
-                        />
-                      </Box>
-                    )}
-                  />
-                </FormControl>
+              <Grid item container xs={12} mt={0} spacing={2}>
+                <Grid item xs={12}>
+                  <Box display="flex">
+                    <Typography variant="body2" fontWeight={700}>
+                      Qualifications
+                    </Typography>
+                    <Tooltip title="Specify the required credentials or qualifications workers must have to get access to this job (e.g., english).">
+                      <HelpOutlineIcon
+                        color="secondary"
+                        sx={{ cursor: 'pointer', ml: 1 }}
+                      />
+                    </Tooltip>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <Autocomplete
+                      multiple
+                      options={qualificationsOptions}
+                      getOptionLabel={(option) => option.title}
+                      value={values.qualifications}
+                      onChange={(event, newValues) => {
+                        setFieldValue('qualifications', newValues);
+                      }}
+                      selectOnFocus
+                      onBlur={handleBlur}
+                      handleHomeEndKeys
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            label={option.title}
+                            {...getTagProps({ index })}
+                          />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <Box display="flex" alignItems="center" width="100%">
+                          <TextField
+                            {...params}
+                            label="Qualifications"
+                            variant="outlined"
+                            onBlur={handleBlur}
+                            fullWidth
+                          />
+                        </Box>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
               </Grid>
             </Grid>
           </AccordionDetails>
@@ -624,7 +639,7 @@ export const CvatJobRequestForm = () => {
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
-                              <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points_15.json', the input should only include 'annotations/points_15.json'.">
+                              <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points.json', the input should only include 'annotations/points.json'.">
                                 <HelpOutlineIcon
                                   color="secondary"
                                   sx={{ cursor: 'pointer' }}
