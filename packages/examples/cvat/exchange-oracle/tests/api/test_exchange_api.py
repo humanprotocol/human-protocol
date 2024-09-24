@@ -3,7 +3,6 @@ import math
 import uuid
 from datetime import datetime, timedelta
 from itertools import combinations
-from time import sleep
 from unittest.mock import patch
 
 from fastapi.responses import Response
@@ -57,7 +56,7 @@ empty_result = {
 }
 
 
-def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
+def test_can_list_empty_jobs_200_with_address(client: TestClient) -> None:
     response = client.get(
         "/job",
         headers=get_auth_header(),
@@ -68,7 +67,7 @@ def test_empty_list_jobs_200_with_address(client: TestClient) -> None:
     assert paginated_result == empty_result
 
 
-def test_empty_list_jobs_200_without_address(client: TestClient) -> None:
+def test_can_list_empty_jobs_200_without_address(client: TestClient) -> None:
     response = client.get(
         "/job",
         headers=get_auth_header(generate_jwt_token(wallet_address=None)),
@@ -79,8 +78,10 @@ def test_empty_list_jobs_200_without_address(client: TestClient) -> None:
     assert paginated_result == empty_result
 
 
-def test_list_jobs_400_with_unsupported_page_size(client: TestClient) -> None:
-    response = client.get("/job", headers=get_auth_header(), params={"page_size": 1000})
+def test_cannot_list_jobs_400_with_unsupported_page_size(client: TestClient) -> None:
+    response = client.get(
+        "/job", headers=get_auth_header(), params={"page_size": Config.api_config.max_page_size + 1}
+    )
 
     assert response.status_code == 400
     assert (
@@ -89,16 +90,16 @@ def test_list_jobs_400_with_unsupported_page_size(client: TestClient) -> None:
     )
 
 
-def test_list_jobs_200_with_address_and_pagination(client: TestClient) -> None:
+def test_can_list_jobs_200_with_address_and_pagination(client: TestClient) -> None:
     def validate_result(
         response: Response,
-        result_to_compare_with: list[str],
+        expected_result: list[str],
         *,
         page: int = 0,
         page_size: int = 5,
         total_pages: int | None = None,
     ) -> None:
-        total_results = len(result_to_compare_with)
+        total_results = len(expected_result)
         if total_pages is None:
             total_pages = math.ceil(total_results / page_size)
 
@@ -114,7 +115,7 @@ def test_list_jobs_200_with_address_and_pagination(client: TestClient) -> None:
             if page != total_pages - 1
             else total_results - page * page_size
         )
-        assert [j["escrow_address"] for j in paginated_result["results"]] == result_to_compare_with[
+        assert [j["escrow_address"] for j in paginated_result["results"]] == expected_result[
             page * page_size : (page + 1) * page_size
         ]
 
@@ -177,7 +178,7 @@ def test_list_jobs_200_with_address_and_pagination(client: TestClient) -> None:
     session.close()
 
 
-def test_list_jobs_200_with_fields(client: TestClient) -> None:
+def test_can_list_jobs_200_with_fields(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     user = User(
@@ -237,7 +238,7 @@ def test_list_jobs_200_with_fields(client: TestClient) -> None:
     session.close()
 
 
-def test_list_jobs_200_check_values(client: TestClient) -> None:
+def test_can_list_jobs_200_check_values(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     user = User(
@@ -264,7 +265,6 @@ def test_list_jobs_200_check_values(client: TestClient) -> None:
         session.add(assignment)
         job.status = JobStatuses.in_progress
         session.commit()
-        sleep(0.5)
 
     assert cvat_second_job.updated_at < cvat_first_job.updated_at
 
@@ -300,7 +300,7 @@ def test_list_jobs_200_check_values(client: TestClient) -> None:
     session.close()
 
 
-def test_list_jobs_200_without_address(client: TestClient) -> None:
+def test_can_list_jobs_200_without_address(client: TestClient) -> None:
     with SessionLocal.begin() as session:
         _, _, cvat_job_1 = create_project_task_and_job(
             session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
@@ -360,7 +360,8 @@ def test_list_jobs_200_without_address(client: TestClient) -> None:
                 }
 
 
-def test_list_jobs_401(client: TestClient) -> None:
+def test_cannot_list_jobs_401(client: TestClient) -> None:
+    # Test API endpoint when auth token is missing or invalid
     for token, message in (
         (None, "Not authenticated"),
         ("invalid", "Could not validate credentials"),
@@ -371,7 +372,7 @@ def test_list_jobs_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_register_200(client: TestClient) -> None:
+def test_can_register_200(client: TestClient) -> None:
     with SessionLocal.begin() as session:
         with patch("src.endpoints.exchange.cvat_api.get_user_id") as mock_get_user:
             mock_get_user.return_value = 1
@@ -387,7 +388,7 @@ def test_register_200(client: TestClient) -> None:
         assert user["email"] == db_user.cvat_email == cvat_email
 
 
-def test_register_400_duplicated_address(client: TestClient) -> None:
+def test_cannot_register_400_with_duplicated_address(client: TestClient) -> None:
     with SessionLocal.begin() as session:
         user = User(
             wallet_address=user_address,
@@ -406,7 +407,7 @@ def test_register_400_duplicated_address(client: TestClient) -> None:
         assert response.json() == {"message": "User already exists"}
 
 
-def test_register_400_duplicated_user(client: TestClient) -> None:
+def test_cannot_register_400_with_duplicated_user(client: TestClient) -> None:
     with SessionLocal.begin() as session:
         new_user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC61"
         user = User(
@@ -425,7 +426,8 @@ def test_register_400_duplicated_user(client: TestClient) -> None:
         assert new_user_address != user_address
 
 
-def test_register_401(client: TestClient) -> None:
+def test_cannot_register_401(client: TestClient) -> None:
+    # Test API endpoint when auth token is missing or invalid
     for token, message in (
         (None, "Not authenticated"),
         ("invalid", "Could not validate credentials"),
@@ -439,7 +441,7 @@ def test_register_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_create_assignment_200(client: TestClient) -> None:
+def test_can_create_assignment_200(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     cvat_project, _, cvat_job = create_project_task_and_job(
@@ -501,7 +503,8 @@ def test_create_assignment_200(client: TestClient) -> None:
     session.close()
 
 
-def test_create_assignment_401(client: TestClient) -> None:
+def test_cannot_create_assignment_401(client: TestClient) -> None:
+    # Test API endpoint when auth token is missing or invalid
     for token, message in (
         (None, "Not authenticated"),
         ("invalid", "Could not validate credentials"),
@@ -516,7 +519,7 @@ def test_create_assignment_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_list_assignments_200(client: TestClient) -> None:
+def test_can_list_assignments_200(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     user_1 = User(
@@ -566,7 +569,6 @@ def test_list_assignments_200(client: TestClient) -> None:
             session.add(assignment)
             assignments.append(assignment)
             session.commit()
-            sleep(0.5)
 
     with (
         open("tests/utils/manifest.json") as data,
@@ -603,7 +605,7 @@ def test_list_assignments_200(client: TestClient) -> None:
     session.close()
 
 
-def test_list_assignments_200_with_sorting(client: TestClient) -> None:
+def test_can_list_assignments_200_with_sorting(client: TestClient) -> None:
     # sort_field: chain_id|job_type|status|reward_amount|created_at|expires_at
     # sort: asc, desc
     session = SessionLocal()
@@ -630,7 +632,6 @@ def test_list_assignments_200_with_sorting(client: TestClient) -> None:
         )
         session.add(assignment)
         session.commit()
-        sleep(0.5)
 
     with (
         open("tests/utils/manifest.json") as data,
@@ -642,7 +643,6 @@ def test_list_assignments_200_with_sorting(client: TestClient) -> None:
         for sort_field in (
             "chain_id",
             "job_type",
-            # TODO: "reward_amount",
             "status",
             "created_at",
             "expires_at",
@@ -669,7 +669,7 @@ def test_list_assignments_200_with_sorting(client: TestClient) -> None:
             assert result_acs == result_desc
 
 
-def test_resign_job_200(client: TestClient) -> None:
+def test_can_resign_job_200(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     _, _, cvat_job_1 = create_project_task_and_job(
@@ -702,7 +702,8 @@ def test_resign_job_200(client: TestClient) -> None:
     session.close()
 
 
-def test_resign_job_401(client: TestClient) -> None:
+def test_cannot_resign_job_401(client: TestClient) -> None:
+    # Test API endpoint when auth token is missing or invalid
     for token, message in (
         (None, "Not authenticated"),
         ("invalid", "Could not validate credentials"),
@@ -719,7 +720,7 @@ def test_resign_job_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_resign_job_400_when_assignment_is_finished(client: TestClient) -> None:
+def test_cannot_resign_job_400_when_assignment_is_finished(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     _, _, cvat_job_1 = create_project_task_and_job(
@@ -754,7 +755,7 @@ def test_resign_job_400_when_assignment_is_finished(client: TestClient) -> None:
     session.close()
 
 
-def test_resign_job_400_with_someone_elses_wallet_address(client: TestClient) -> None:
+def test_cannot_resign_job_400_with_someone_elses_wallet_address(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     _, _, cvat_job_1 = create_project_task_and_job(
@@ -795,7 +796,7 @@ def test_resign_job_400_with_someone_elses_wallet_address(client: TestClient) ->
     session.close()
 
 
-def test_get_assignment_stats_by_worker_200(client: TestClient) -> None:
+def test_can_get_assignment_stats_by_worker_200(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
     cvat_jobs, assignments = [], []
@@ -855,7 +856,8 @@ def test_get_assignment_stats_by_worker_200(client: TestClient) -> None:
     session.close()
 
 
-def test_get_assignment_stats_by_worker_401(client: TestClient) -> None:
+def test_cannot_get_assignment_stats_by_worker_401(client: TestClient) -> None:
+    # Test API endpoint when auth token is missing or invalid
     for token, message in (
         (None, "Not authenticated"),
         ("invalid", "Could not validate credentials"),
@@ -869,7 +871,7 @@ def test_get_assignment_stats_by_worker_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_get_oracle_stats(client: TestClient) -> None:
+def test_can_get_oracle_stats(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
 
