@@ -34,7 +34,7 @@ export function SearchForm({
           sx: { color: colorPalette.text.secondary },
           startAdornment: (
             <InputAdornment position="start">
-              <Search />
+              <Search sx={{ fill: colorPalette.text.primary }} />
             </InputAdornment>
           ),
         }}

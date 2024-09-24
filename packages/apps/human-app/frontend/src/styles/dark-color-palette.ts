@@ -37,7 +37,7 @@ export const darkColorPalette = {
   paper: {
     main: '#1c133f',
     light: '#1c133f',
-    text: '#CBCFE8',
+    text: '#372f56CC',
     disabled: '#FBFBFE',
   },
   chip: {

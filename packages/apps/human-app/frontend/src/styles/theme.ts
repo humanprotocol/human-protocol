@@ -119,6 +119,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          borderBottomColor: 'none !important',
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

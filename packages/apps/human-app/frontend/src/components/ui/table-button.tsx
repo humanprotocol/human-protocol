@@ -12,7 +12,7 @@ export function TableButton(props: CustomButtonProps) {
       size="small"
       sx={{
         backgroundColor: colorPalette.secondary.main,
-        color: colorPalette.white,
+        color: 'white',
         paddingTop: '0.4rem',
         paddingBottom: '0.4rem',
         whiteSpace: 'nowrap',
@@ -22,7 +22,7 @@ export function TableButton(props: CustomButtonProps) {
       type="button"
       variant="contained"
     >
-      <Typography color={colorPalette.white} variant="buttonSmall">
+      <Typography color="white" variant="buttonSmall">
         {props.children}
       </Typography>
     </Button>

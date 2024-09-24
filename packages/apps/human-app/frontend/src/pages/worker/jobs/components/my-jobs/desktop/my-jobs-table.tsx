@@ -31,6 +31,7 @@ import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { JOB_TYPES } from '@/shared/consts';
 import type { ColorPalette } from '@/styles/color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
 
 const getColumnsDefinition = (
@@ -192,7 +193,7 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { setSearchEscrowAddress, setPageParams, filterParams } =
     useMyJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
@@ -236,7 +237,6 @@ export function MyJobsTable() {
     state: {
       isLoading: tableStatus === 'pending',
       showAlertBanner: tableStatus === 'error',
-      showProgressBars: tableStatus === 'pending',
       pagination: paginationState,
     },
     enablePagination: Boolean(tableData?.total_pages),
@@ -263,6 +263,17 @@ export function MyJobsTable() {
         }}
       />
     ),
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

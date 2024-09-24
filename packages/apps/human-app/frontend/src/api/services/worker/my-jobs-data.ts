@@ -15,7 +15,7 @@ const myJobSchema = z.object({
   chain_id: z.number(),
   job_type: z.string(),
   status: z.string(),
-  reward_amount: z.string().transform((value, ctx) => {
+  reward_amount: z.union([z.string(), z.number()]).transform((value, ctx) => {
     const parsedNumber = Number(value);
     if (Number.isNaN(parsedNumber)) {
       ctx.addIssue({

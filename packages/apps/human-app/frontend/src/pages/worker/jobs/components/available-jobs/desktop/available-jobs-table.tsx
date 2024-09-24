@@ -28,6 +28,7 @@ import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/av
 import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-job-type-filter';
 import { useColorMode } from '@/hooks/use-color-mode';
 import type { ColorPalette } from '@/styles/color-palette';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -153,7 +154,7 @@ const getColumns = (
 };
 
 export function AvailableJobsTable() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
 
   const { setSearchEscrowAddress, setPageParams, filterParams } =
     useJobsFilterStore();
@@ -165,11 +166,10 @@ export function AvailableJobsTable() {
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation, isPending: isAssignJobMutationPending } =
-    useAssignJobMutation({
-      onSuccess: onJobAssignmentSuccess,
-      onError: onJobAssignmentError,
-    });
+  const { mutate: assignJobMutation } = useAssignJobMutation({
+    onSuccess: onJobAssignmentSuccess,
+    onError: onJobAssignmentError,
+  });
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -202,14 +202,29 @@ export function AvailableJobsTable() {
     state: {
       isLoading: tableStatus === 'pending',
       showAlertBanner: tableStatus === 'error',
-      showProgressBars: tableStatus === 'pending' || isAssignJobMutationPending,
       pagination: paginationState,
     },
     enablePagination: Boolean(tableData?.total_pages),
     manualPagination: true,
     onPaginationChange: setPaginationState,
     muiPaginationProps: {
-      rowsPerPageOptions: [5, 10],
+      disabled: false,
+      SelectProps: {
+        sx: {
+          '.MuiSelect-icon': {
+            ':hover': {
+              backgroundColor: 'blue',
+            },
+            fill: colorPalette.text.primary,
+          },
+        },
+      },
+      sx: {
+        '& .MuiPaginationItem-previousNext': {
+          fill: 'red',
+        },
+      },
+      rowsPerPageOptions: [2, 10],
     },
     pageCount: tableData?.total_pages || -1,
     rowCount: tableData?.total_results,
@@ -228,6 +243,17 @@ export function AvailableJobsTable() {
         }}
       />
     ),
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

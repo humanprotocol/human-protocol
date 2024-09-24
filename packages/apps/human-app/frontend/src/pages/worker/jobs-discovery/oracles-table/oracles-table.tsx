@@ -14,6 +14,8 @@ import { TableButton } from '@/components/ui/table-button';
 import { routerPaths } from '@/router/router-paths';
 import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 
 const getColumns = (
   selectOracle: (oracleAddress: string) => void
@@ -68,10 +70,10 @@ export function OraclesTable({
 }: {
   oraclesQueryDataResult: OraclesDataQueryResult;
 }) {
+  const { colorPalette, isDarkMode } = useColorMode();
   const {
     data: oraclesData,
     isError: isOraclesDataError,
-    isRefetching: isOraclesDataRefetching,
     isPending: isOraclesDataPending,
   } = oraclesQueryDataResult;
   const navigate = useNavigate();
@@ -84,7 +86,6 @@ export function OraclesTable({
     state: {
       isLoading: isOraclesDataPending,
       showAlertBanner: isOraclesDataError,
-      showProgressBars: isOraclesDataRefetching,
     },
     columns: getColumns(selectOracle),
     data: oraclesData || [],
@@ -93,6 +94,17 @@ export function OraclesTable({
     enableSorting: false,
     enablePagination: false,
     enableTopToolbar: false,
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return (
