@@ -322,10 +322,7 @@ async def list_assignments(
         query = query.filter(created_after < cvat_service.Assignment.created_at)
 
     if updated_after:
-        query = query.filter(
-            (updated_after < cvat_service.Assignment.completed_at)
-            | (updated_after < cvat_service.Assignment.created_at)
-        )
+        query = query.filter(updated_after < cvat_service.Assignment.updated_at)
 
     query = filter.filter_(query)
 

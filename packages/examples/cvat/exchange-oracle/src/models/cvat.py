@@ -188,7 +188,10 @@ class User(Base):
 class Assignment(Base):
     __tablename__ = "assignments"
     id = Column(String, primary_key=True, index=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
     expires_at = Column(DateTime(timezone=True), nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True, server_default=None)
     user_wallet_address = Column(

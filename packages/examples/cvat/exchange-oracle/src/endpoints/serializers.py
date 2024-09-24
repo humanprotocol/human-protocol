@@ -125,16 +125,6 @@ def serialize_assignment(
         else:
             api_status = assignment_status_mapping[assignment.status]
 
-        updated_at = assignment.created_at
-        if assignment.status == AssignmentStatuses.completed:
-            updated_at = assignment.completed_at
-        elif assignment.status in [
-            AssignmentStatuses.expired,
-            AssignmentStatuses.canceled,
-            AssignmentStatuses.rejected,
-        ]:
-            updated_at = assignment.expires_at
-
         return service_api.AssignmentResponse(
             assignment_id=assignment.id,
             escrow_address=project.escrow_address,
@@ -154,5 +144,5 @@ def serialize_assignment(
             else None,
             created_at=assignment.created_at,
             expires_at=assignment.expires_at,
-            updated_at=updated_at,
+            updated_at=assignment.updated_at,
         )
