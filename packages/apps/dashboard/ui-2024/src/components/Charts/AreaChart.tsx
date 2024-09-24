@@ -162,6 +162,8 @@ export const AreaChart = ({
 			sx={{
 				paddingY: { xs: 4, md: 4 },
 				paddingX: { xs: 2, md: 8 },
+				boxShadow: 'none',
+				borderRadius: '16px',
 			}}
 		>
 			<Stack
@@ -366,6 +368,8 @@ export const AreaChart = ({
 					marginTop: 3,
 					marginLeft: { xs: 0, xl: 6 },
 					backgroundColor: colorPalette.overlay.light,
+					boxShadow: 'none',
+					borderRadius: '16px',
 				}}
 			>
 				<ToggleCharts
