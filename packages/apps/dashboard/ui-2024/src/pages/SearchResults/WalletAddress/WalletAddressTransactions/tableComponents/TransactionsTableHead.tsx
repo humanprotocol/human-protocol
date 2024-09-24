@@ -4,9 +4,9 @@ import { colorPalette } from '@assets/styles/color-palette';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
-import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import CustomTooltip from '@components/CustomTooltip';
 
 export const TransactionsTableHead = () => {
 	return (
@@ -22,11 +22,11 @@ export const TransactionsTableHead = () => {
 					}}
 				>
 					<Stack direction="row" alignItems="center">
-						<Tooltip title="Transaction identifier">
+						<CustomTooltip title="Transaction identifier">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
-						</Tooltip>
+						</CustomTooltip>
 						<Typography variant="Components/Table Header">
 							Transaction Hash
 						</Typography>
@@ -34,31 +34,31 @@ export const TransactionsTableHead = () => {
 				</TableCell>
 				<TableCell>
 					<Stack direction="row" alignItems="center">
-						<Tooltip title="Function executed in the transaction">
+						<CustomTooltip title="Function executed in the transaction">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
-						</Tooltip>
+						</CustomTooltip>
 						<Typography variant="Components/Table Header">Method</Typography>
 					</Stack>
 				</TableCell>
 				<TableCell>
 					<Stack direction="row" alignItems="center">
-						<Tooltip title="Identifier of the block that contains the transaction">
+						<CustomTooltip title="Identifier of the block that contains the transaction">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
-						</Tooltip>
+						</CustomTooltip>
 						<Typography variant="Components/Table Header">Block</Typography>
 					</Stack>
 				</TableCell>
 				<TableCell>
 					<Stack direction="row" alignItems="center">
-						<Tooltip title="Amount of HMT transferred in the transaction">
+						<CustomTooltip title="Amount of HMT transferred in the transaction">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
 								<HelpOutlineIcon fontSize="small" />
 							</IconButton>
-						</Tooltip>
+						</CustomTooltip>
 						<Typography variant="Components/Table Header">Value</Typography>
 					</Stack>
 				</TableCell>

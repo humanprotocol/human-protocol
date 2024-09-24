@@ -3,14 +3,14 @@ import MuiTableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Tooltip from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { Typography } from '@mui/material';
 
 import { SelectNetwork } from './SelectNetwork';
 import { colorPalette } from '@assets/styles/color-palette';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { Order, SortableFieldsInLeaderBoardData } from '../helpers/sorting';
-import { Typography } from '@mui/material';
+import CustomTooltip from '@components/CustomTooltip';
 
 interface TableHeadProps {
 	onRequestSort: (
@@ -81,13 +81,13 @@ export const TableHead = ({
 						onClick={createSortHandler('address')}
 					>
 						<div className="icon-table">
-							<Tooltip title="Address of the role" arrow>
+							<CustomTooltip title="Address of the role" arrow>
 								<HelpOutlineIcon
 									style={{
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 							<Typography mt="3px" component="span" variant="body3">
 								ADDRESS
 							</Typography>
@@ -105,13 +105,13 @@ export const TableHead = ({
 						onClick={createSortHandler('amountStaked')}
 					>
 						<div className="icon-table">
-							<Tooltip title="Amount of HMT staked" arrow>
+							<CustomTooltip title="Amount of HMT staked" arrow>
 								<HelpOutlineIcon
 									style={{
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 							<Typography mt="3px" component="span" variant="body3">
 								STAKE
 							</Typography>
@@ -136,7 +136,7 @@ export const TableHead = ({
 						onClick={createSortHandler('reputation')}
 					>
 						<div className="icon-table">
-							<Tooltip
+							<CustomTooltip
 								title="Reputation of the role as per their activities "
 								arrow
 							>
@@ -145,7 +145,7 @@ export const TableHead = ({
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 							<Typography mt="3px" component="span" variant="body3">
 								REPUTATION SCORE
 							</Typography>
