@@ -13,7 +13,6 @@ from src.db import SessionLocal
 from src.schemas import exchange as service_api
 from src.utils.assignments import compose_assignment_url, parse_manifest
 
-
 PROJECT_ACTIVE_STATUSES = [
     ProjectStatuses.annotation,
     ProjectStatuses.completed,

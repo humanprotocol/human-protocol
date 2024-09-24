@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 
 from src.core.config import Config
 from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskTypes
-
 from src.models.cvat import Assignment, Project, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
 from src.schemas.exchange import JobStatuses as APIJobStatuses
