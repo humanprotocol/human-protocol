@@ -22,6 +22,9 @@ export enum ErrorJob {
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
   CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
+  ReputationOracleNotFound = 'Provided Reputation Oracle address not found in available oracles',
+  ExchangeOracleNotFound = 'Provided Exchange Oracle address not found in available oracles',
+  RecordingOracleNotFound = 'Provided Recording Oracle address not found in available oracles',
 }
 
 /**

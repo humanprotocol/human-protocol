@@ -10,6 +10,7 @@ import {
   Encryption,
   KVStoreKeys,
   KVStoreUtils,
+  Role,
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -47,7 +48,12 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { isPGPMessage, isValidJSON, parseUrl } from '../../common/utils';
+import {
+  isPGPMessage,
+  isValidJSON,
+  mapJobType,
+  parseUrl,
+} from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -728,20 +734,188 @@ export class JobService {
     }
   }
 
+  private async validateOracle(
+    chainId: ChainId,
+    jobType: string,
+    reputationOracle: string,
+    exchangeOracle?: string,
+    recordingOracle?: string,
+  ) {
+    const reputationOracles = this.web3ConfigService.reputationOracles
+      .split(',')
+      .map((address) => address.trim());
+
+    if (!reputationOracles.includes(reputationOracle)) {
+      throw new ControlledError(
+        ErrorJob.ReputationOracleNotFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const availableOracles = await this.web3Service.findAvailableOracles(
+      chainId,
+      jobType,
+      reputationOracle,
+    );
+
+    if (
+      exchangeOracle &&
+      !this.isOracleAvailable(
+        availableOracles,
+        exchangeOracle,
+        Role.ExchangeOracle,
+      )
+    ) {
+      throw new ControlledError(
+        ErrorJob.ExchangeOracleNotFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      recordingOracle &&
+      !this.isOracleAvailable(
+        availableOracles,
+        recordingOracle,
+        Role.RecordingOracle,
+      )
+    ) {
+      throw new ControlledError(
+        ErrorJob.RecordingOracleNotFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  private isOracleAvailable(
+    availableOracles: any[],
+    oracle: string,
+    role: string,
+  ): boolean {
+    return availableOracles.some(
+      (o) =>
+        o.address.toLowerCase() === oracle.toLowerCase() && o.role === role,
+    );
+  }
+
   public async createJob(
     userId: number,
     requestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
-    let { chainId } = dto;
+    let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
+    const mappedJobType = mapJobType(requestType);
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
+
+      if (reputationOracle) {
+        this.validateOracle(
+          chainId,
+          mappedJobType,
+          reputationOracle,
+          exchangeOracle,
+          recordingOracle,
+        );
+      } else {
+        ({ reputationOracle, exchangeOracle, recordingOracle } =
+          await this.routingProtocolService.selectOracles(
+            chainId,
+            mappedJobType,
+          ));
+      }
     } else {
       chainId = this.routingProtocolService.selectNetwork();
+      ({ reputationOracle, exchangeOracle, recordingOracle } =
+        await this.routingProtocolService.selectOracles(
+          chainId,
+          mappedJobType,
+        ));
     }
 
-    if (dto.qualifications) {
+    //chainId = this.routingProtocolService.selectNetwork();
+    if (chainId) {
+      this.web3Service.validateChainId(chainId);
+
+      if (reputationOracle) {
+        if (
+          !this.web3ConfigService.reputationOracles
+            .split(',')
+            .includes(reputationOracle)
+        ) {
+          throw new ControlledError(
+            ErrorJob.ReputationOracleNotFound,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        const availableOracles = await this.web3Service.findAvailableOracles(
+          chainId,
+          mappedJobType,
+          reputationOracle,
+        );
+
+        if (
+          exchangeOracle &&
+          !availableOracles.some(
+            (oracle) =>
+              oracle.address.toLowerCase() === exchangeOracle?.toLowerCase() &&
+              oracle.role === Role.ExchangeOracle,
+          )
+        ) {
+          throw new ControlledError(
+            ErrorJob.ExchangeOracleNotFound,
+            HttpStatus.NOT_FOUND,
+          );
+        } else {
+          exchangeOracle = await this.routingProtocolService.selectOracle(
+            chainId,
+            reputationOracle,
+            Role.ExchangeOracle,
+            mappedJobType,
+          );
+        }
+
+        if (
+          recordingOracle &&
+          !availableOracles.some(
+            (oracle) =>
+              oracle.address.toLowerCase() === recordingOracle?.toLowerCase() &&
+              oracle.role === Role.RecordingOracle,
+          )
+        ) {
+          throw new ControlledError(
+            ErrorJob.RecordingOracleNotFound,
+            HttpStatus.NOT_FOUND,
+          );
+        } else {
+          recordingOracle = await this.routingProtocolService.selectOracle(
+            chainId,
+            reputationOracle,
+            Role.RecordingOracle,
+            mappedJobType,
+          );
+        }
+      } else {
+        console.log('NO ORACLES PROVIDED: ');
+        // Select all oracles using the round-robin algorithm
+        ({ reputationOracle, exchangeOracle, recordingOracle } =
+          await this.routingProtocolService.selectOracles(
+            chainId,
+            mappedJobType,
+          ));
+      }
+    } else {
+      // Select network and oracles if chainId is not provided
+      chainId = this.routingProtocolService.selectNetwork();
+      ({ reputationOracle, exchangeOracle, recordingOracle } =
+        await this.routingProtocolService.selectOracles(
+          chainId,
+          mappedJobType,
+        ));
+    }
+
+    /*if (dto.qualifications) {
       const validQualifications =
         await this.qualificationService.getQualifications();
 
@@ -851,6 +1025,9 @@ export class JobService {
     }
 
     jobEntity.chainId = chainId;
+    jobEntity.reputationOracle = reputationOracle;
+    jobEntity.exchangeOracle = exchangeOracle || null;
+    jobEntity.recordingOracle = exchangeOracle || null;
     jobEntity.userId = userId;
     jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;
@@ -884,7 +1061,8 @@ export class JobService {
     jobEntity.status = JobStatus.PAID;
     await this.jobRepository.updateOne(jobEntity);
 
-    return jobEntity.id;
+    return jobEntity.id;*/
+    return 1;
   }
 
   public async getCvatElementsCount(gtUrl: URL, dataUrl: URL): Promise<number> {

@@ -14,6 +14,15 @@ export class JobEntity extends BaseEntity implements IJob {
   public chainId: number;
 
   @Column({ type: 'varchar', nullable: true })
+  public reputationOracle: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  public exchangeOracle: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  public recordingOracle: string;
+
+  @Column({ type: 'varchar', nullable: true })
   public escrowAddress: string;
 
   @Column({ type: 'decimal', precision: 30, scale: 18 })
@@ -28,6 +37,9 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: 'varchar' })
   public manifestHash: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  public failedReason: string;
+
   @Column({
     type: 'enum',
     enum: JobRequestType,
@@ -39,9 +51,6 @@ export class JobEntity extends BaseEntity implements IJob {
     enum: JobStatus,
   })
   public status: JobStatus;
-
-  @Column({ type: 'varchar', nullable: true })
-  public failedReason: string;
 
   @ManyToOne(() => UserEntity, (user) => user.jobs, { eager: true })
   user: UserEntity;
