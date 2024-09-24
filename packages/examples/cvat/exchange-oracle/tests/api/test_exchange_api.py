@@ -11,7 +11,7 @@ from jose import jwt
 from sqlalchemy.orm import Session
 
 from src.core.config import Config
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses
+from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskTypes
 
 from src.models.cvat import Assignment, Project, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
@@ -520,13 +520,18 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
     )
     session.add(user_1)
 
+    pre_init_time = datetime.now()
+
     cvat_projects: list[Project] = []
     assignments: list[Assignment] = []
     for idx, (escrow_address, project_status) in enumerate(
         [
             ("0x86e83d346041E8806e352681f3F14549C0d2BC65", ProjectStatuses.annotation),
-            ("0x86e83d346041E8806e352681f3F14549C0d2BC66", ProjectStatuses.validation),
-            ("0x86e83d346041E8806e352681f3F14549C0d2BC68", ProjectStatuses.completed),
+            ("0x86e83d346041E8806e352681f3F14549C0d2BC66", ProjectStatuses.completed),
+            ("0x86e83d346041E8806e352681f3F14549C0d2BC67", ProjectStatuses.validation),
+            ("0x86e83d346041E8806e352681f3F14549C0d2BC68", ProjectStatuses.recorded),
+            ("0x86e83d346041E8806e352681f3F14549C0d2BC69", ProjectStatuses.canceled),
+            ("0x86e83d346041E8806e352681f3F14549C0d2BC70", ProjectStatuses.deleted),
         ]
     ):
         cvat_project = create_project(session, escrow_address, idx + 1, status=project_status)
@@ -536,13 +541,24 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
         cvat_projects.append(cvat_project)
 
         assignment_statuses = {
-            ProjectStatuses.annotation: (AssignmentStatuses.expired, AssignmentStatuses.created),
-            ProjectStatuses.validation: (
+            ProjectStatuses.annotation: (
+                AssignmentStatuses.created,
                 AssignmentStatuses.completed,
+                AssignmentStatuses.expired,
                 AssignmentStatuses.canceled,
                 AssignmentStatuses.rejected,
             ),
             ProjectStatuses.completed: (AssignmentStatuses.completed,),
+            ProjectStatuses.validation: (AssignmentStatuses.completed,),
+            ProjectStatuses.recorded: (AssignmentStatuses.completed,),
+            ProjectStatuses.canceled: (
+                AssignmentStatuses.created,
+                AssignmentStatuses.completed,
+            ),
+            ProjectStatuses.deleted: (
+                AssignmentStatuses.created,
+                AssignmentStatuses.completed,
+            ),
         }[project_status]
 
         for assignment_status in assignment_statuses:
@@ -552,14 +568,24 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
                 cvat_job_id=cvat_job.cvat_id,
                 status=assignment_status,
                 expires_at=datetime.now()
-                + timedelta(hours=1 if assignment_status != AssignmentStatuses.expired else 0),
-                completed_at=datetime.now()
+                if assignment_status == AssignmentStatuses.expired
+                else pre_init_time + timedelta(hours=1),
+                completed_at=pre_init_time + timedelta(minutes=30)
                 if assignment_status == AssignmentStatuses.completed
                 else None,
             )
+            if assignment_status == AssignmentStatuses.expired:
+                assignment.updated_at = assignment.expires_at
+            elif assignment_status == AssignmentStatuses.completed:
+                assignment.updated_at = assignment.completed_at
+            elif assignment.status in [AssignmentStatuses.canceled, AssignmentStatuses.rejected]:
+                assignment.updated_at = pre_init_time + timedelta(minutes=5)
+
             session.add(assignment)
             assignments.append(assignment)
             session.commit()
+
+    post_init_time = datetime.now() + timedelta(seconds=1)
 
     with (
         open("tests/utils/manifest.json") as data,
@@ -570,19 +596,33 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
 
         for filter_key, filter_values in {
             "status": (
-                (APIAssignmentStatuses.active.value, 1),
-                (APIAssignmentStatuses.completed.value, 2),
+                (APIAssignmentStatuses.active.value, 3),
+                (APIAssignmentStatuses.completed.value, 3),
                 (APIAssignmentStatuses.canceled.value, 1),
                 (APIAssignmentStatuses.expired.value, 1),
                 (APIAssignmentStatuses.rejected.value, 1),
-                (APIAssignmentStatuses.validation.value, 1),
+                (APIAssignmentStatuses.validation.value, 3),
             ),
-            "escrow_address": ((cvat_projects[0].escrow_address, 2),),
+            "escrow_address": ((cvat_projects[0].escrow_address, 5),),
             "chain_id": ((cvat_projects[0].chain_id, len(assignments)),),
-            "assignment_id": ((assignments[0].id, 1),),
-            "job_type": ((cvat_projects[0].job_type, len(assignments)),),
-            "created_after": ((str(assignments[0].created_at), len(assignments) - 1),),
-            "updated_after": ((str(assignments[0].created_at), len(assignments) - 1),),
+            "assignment_id": (
+                (assignments[0].id, 1),
+                ("unknown", 0),
+            ),
+            "job_type": (
+                (cvat_projects[0].job_type, len(assignments)),
+                (TaskTypes.image_boxes_from_points.value, 0),
+            ),
+            "created_after": (
+                (str(pre_init_time - timedelta(minutes=1)), len(assignments)),
+                (str(post_init_time), 0),
+            ),
+            "updated_after": (
+                (str(pre_init_time - timedelta(minutes=1)), len(assignments)),
+                (str(post_init_time), len(assignments) - 4),
+                (str(post_init_time + timedelta(minutes=5)), len(assignments) - 6),
+                (str(post_init_time + timedelta(minutes=30)), len(assignments) - 12),
+            ),
         }.items():
             for filter_value, expected_count in filter_values:
                 response = client.get(
@@ -591,7 +631,10 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
 
                 assert response.status_code == 200
                 paginated_result = response.json()
-                assert paginated_result["total_results"] == expected_count
+                assert paginated_result["total_results"] == expected_count, (
+                    filter_key,
+                    filter_value,
+                )
 
 
 def test_can_list_assignments_200_with_sorting(client: TestClient, session: Session) -> None:
