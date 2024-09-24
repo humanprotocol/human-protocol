@@ -14,6 +14,13 @@ from src.schemas import exchange as service_api
 from src.utils.assignments import compose_assignment_url, parse_manifest
 
 
+PROJECT_ACTIVE_STATUSES = [
+    ProjectStatuses.annotation,
+    ProjectStatuses.completed,
+    ProjectStatuses.validation,
+]
+
+
 def serialize_job(
     project: str | cvat_service.Project,
     *,
@@ -41,11 +48,7 @@ def serialize_job(
 
         if project.status == ProjectStatuses.canceled:
             api_status = service_api.JobStatuses.canceled
-        elif project.status in [
-            ProjectStatuses.annotation,
-            ProjectStatuses.validation,
-            ProjectStatuses.completed,
-        ]:
+        elif project.status in PROJECT_ACTIVE_STATUSES:
             api_status = service_api.JobStatuses.active
         elif project.status == ProjectStatuses.recorded:
             api_status = service_api.JobStatuses.completed
@@ -71,6 +74,13 @@ def serialize_job(
             updated_at=updated_at,
             qualifications=manifest.qualifications,
         )
+
+
+ASSIGNMENT_PROJECT_VALIDATION_STATUSES = [
+    cvat_service.ProjectStatuses.annotation,
+    cvat_service.ProjectStatuses.completed,
+    cvat_service.ProjectStatuses.validation,
+]
 
 
 def serialize_assignment(
@@ -116,11 +126,10 @@ def serialize_assignment(
             AssignmentStatuses.rejected: service_api.AssignmentStatuses.rejected,
             AssignmentStatuses.canceled: service_api.AssignmentStatuses.canceled,
         }
-        if assignment.status == AssignmentStatuses.completed and project.status in [
-            ProjectStatuses.validation,
-            ProjectStatuses.completed,
-            ProjectStatuses.annotation,
-        ]:
+        if (
+            assignment.status == AssignmentStatuses.completed
+            and project.status in ASSIGNMENT_PROJECT_VALIDATION_STATUSES
+        ):
             api_status = service_api.AssignmentStatuses.validation
         else:
             api_status = assignment_status_mapping[assignment.status]

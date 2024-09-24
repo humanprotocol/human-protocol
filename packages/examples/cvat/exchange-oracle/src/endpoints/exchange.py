@@ -25,7 +25,12 @@ from src.endpoints.authentication import (
 )
 from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
-from src.endpoints.serializers import serialize_assignment, serialize_job
+from src.endpoints.serializers import (
+    ASSIGNMENT_PROJECT_VALIDATION_STATUSES,
+    PROJECT_ACTIVE_STATUSES,
+    serialize_assignment,
+    serialize_job,
+)
 from src.endpoints.throttling import RateLimiter
 from src.endpoints.utils import OptionalQuery
 from src.schemas.exchange import (
@@ -135,15 +140,7 @@ async def list_jobs(
     if status:
         match status:
             case JobStatuses.active:
-                query = query.filter(
-                    cvat_service.Project.status.in_(
-                        [
-                            cvat_service.ProjectStatuses.annotation,
-                            cvat_service.ProjectStatuses.completed,
-                            cvat_service.ProjectStatuses.validation,
-                        ]
-                    )
-                )
+                query = query.filter(cvat_service.Project.status.in_(PROJECT_ACTIVE_STATUSES))
             case JobStatuses.canceled:
                 query = query.filter(
                     cvat_service.Project.status == cvat_service.ProjectStatuses.canceled
@@ -297,17 +294,22 @@ async def list_assignments(
             AssignmentStatuses.rejected: cvat_service.AssignmentStatuses.rejected,
             AssignmentStatuses.canceled: cvat_service.AssignmentStatuses.canceled,
         }
+
         if status == AssignmentStatuses.validation:
             query = query.filter(
                 cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed,
                 cvat_service.Assignment.job.has(
                     cvat_service.Job.project.has(
-                        cvat_service.Project.status.in_(
-                            [
-                                cvat_service.ProjectStatuses.annotation,
-                                cvat_service.ProjectStatuses.validation,
-                            ]
-                        )
+                        cvat_service.Project.status.in_(ASSIGNMENT_PROJECT_VALIDATION_STATUSES)
+                    )
+                ),
+            )
+        elif status == AssignmentStatuses.completed:
+            query = query.filter(
+                cvat_service.Assignment.status == cvat_service.AssignmentStatuses.completed,
+                cvat_service.Assignment.job.has(
+                    cvat_service.Job.project.has(
+                        cvat_service.Project.status.not_in(ASSIGNMENT_PROJECT_VALIDATION_STATUSES)
                     )
                 ),
             )
