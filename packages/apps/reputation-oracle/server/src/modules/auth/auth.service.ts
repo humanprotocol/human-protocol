@@ -26,7 +26,11 @@ import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../common/utils/signature';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import {
+  SENDGRID_MESSAGES,
+  SENDGRID_TEMPLATES,
+  SERVICE_NAME,
+} from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
 import {
   ChainId,
@@ -125,6 +129,7 @@ export class AuthService {
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
             url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+            preview: SENDGRID_MESSAGES.signup,
           },
         },
       ],
@@ -385,6 +390,7 @@ export class AuthService {
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
             url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+            preview: SENDGRID_MESSAGES.signup,
           },
         },
       ],

@@ -29,7 +29,11 @@ import { v4 } from 'uuid';
 import { UserStatus, Role } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { HttpStatus } from '@nestjs/common';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import {
+  SENDGRID_MESSAGES,
+  SENDGRID_TEMPLATES,
+  SERVICE_NAME,
+} from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
 import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
@@ -615,6 +619,7 @@ describe('AuthService', () => {
                 dynamicTemplateData: {
                   service_name: SERVICE_NAME,
                   url: expect.stringContaining('/verify?token='),
+                  preview: SENDGRID_MESSAGES.signup,
                 },
                 to: email,
               },

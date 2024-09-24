@@ -16,6 +16,11 @@ export const SENDGRID_TEMPLATES = {
   passwordChanged: 'd-ca0ac7e6fff845829cd0167af09f25cf',
 };
 
+export const SENDGRID_MESSAGES = {
+  signup:
+    "It's time to verify your email, and join the HUMAN community of contributors.",
+};
+
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
 
