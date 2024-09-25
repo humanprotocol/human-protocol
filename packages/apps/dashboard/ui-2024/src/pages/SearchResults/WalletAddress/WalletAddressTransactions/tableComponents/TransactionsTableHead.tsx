@@ -24,7 +24,12 @@ export const TransactionsTableHead = () => {
 					<Stack direction="row" alignItems="center">
 						<CustomTooltip title="Transaction identifier">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-								<HelpOutlineIcon fontSize="small" />
+								<HelpOutlineIcon
+									fontSize="small"
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</IconButton>
 						</CustomTooltip>
 						<Typography variant="Components/Table Header">
@@ -36,7 +41,12 @@ export const TransactionsTableHead = () => {
 					<Stack direction="row" alignItems="center">
 						<CustomTooltip title="Function executed in the transaction">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-								<HelpOutlineIcon fontSize="small" />
+								<HelpOutlineIcon
+									fontSize="small"
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</IconButton>
 						</CustomTooltip>
 						<Typography variant="Components/Table Header">Method</Typography>
@@ -46,7 +56,12 @@ export const TransactionsTableHead = () => {
 					<Stack direction="row" alignItems="center">
 						<CustomTooltip title="Identifier of the block that contains the transaction">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-								<HelpOutlineIcon fontSize="small" />
+								<HelpOutlineIcon
+									fontSize="small"
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</IconButton>
 						</CustomTooltip>
 						<Typography variant="Components/Table Header">Block</Typography>
@@ -56,7 +71,12 @@ export const TransactionsTableHead = () => {
 					<Stack direction="row" alignItems="center">
 						<CustomTooltip title="Amount of HMT transferred in the transaction">
 							<IconButton sx={{ padding: 0, paddingRight: 1 }}>
-								<HelpOutlineIcon fontSize="small" />
+								<HelpOutlineIcon
+									fontSize="small"
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
 							</IconButton>
 						</CustomTooltip>
 						<Typography variant="Components/Table Header">Value</Typography>
