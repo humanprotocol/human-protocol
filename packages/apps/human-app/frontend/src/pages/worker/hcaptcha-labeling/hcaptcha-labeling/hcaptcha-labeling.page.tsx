@@ -17,12 +17,16 @@ import { useSolveHCaptchaMutation } from '@/api/services/worker/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function HcaptchaLabelingPage() {
   const { colorPalette, isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();
+  const statsColor = isDarkMode
+    ? onlyDarkModeColor.additionalTextColor
+    : colorPalette.primary.light;
 
   const resetCaptcha = () => {
     if (captchaRef.current) {
@@ -143,7 +147,7 @@ export function HcaptchaLabelingPage() {
                 <Typography variant="subtitle2">
                   {t('worker.hcaptchaLabeling.noJobs')}
                 </Typography>
-                <Typography color={colorPalette.primary.light} variant="h4">
+                <Typography color={statsColor} variant="h4">
                   <Counter
                     date={getTomorrowDate().toISOString()}
                     onFinish={() => {

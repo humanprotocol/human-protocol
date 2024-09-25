@@ -27,7 +27,6 @@ import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/avail
 import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-reward-amount-sort';
 import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-job-type-filter';
 import { useColorMode } from '@/hooks/use-color-mode';
-import type { ColorPalette } from '@/styles/color-palette';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 
 export type AvailableJobsTableData = AvailableJob & {
@@ -37,12 +36,9 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const getColumns = (
-  callbacks: {
-    assignJob: (data: AssignJobBody) => undefined;
-  },
-  colorPalette: ColorPalette
-): MRT_ColumnDef<AvailableJob>[] => {
+const getColumns = (callbacks: {
+  assignJob: (data: AssignJobBody) => undefined;
+}): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
       accessorKey: 'job_description',
@@ -142,7 +138,7 @@ const getColumns = (
                 callbacks.assignJob({ escrow_address, chain_id });
               }}
             >
-              <Typography color={colorPalette.white} variant="buttonSmall">
+              <Typography sx={{ color: 'white' }} variant="buttonSmall">
                 {t('worker.jobs.selectJob')}
               </Typography>
             </TableButton>
@@ -190,14 +186,11 @@ export function AvailableJobsTable() {
   }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
-    columns: getColumns(
-      {
-        assignJob: (data) => {
-          assignJobMutation(data);
-        },
+    columns: getColumns({
+      assignJob: (data) => {
+        assignJobMutation(data);
       },
-      colorPalette
-    ),
+    }),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
@@ -217,11 +210,6 @@ export function AvailableJobsTable() {
             },
             fill: colorPalette.text.primary,
           },
-        },
-      },
-      sx: {
-        '& .MuiPaginationItem-previousNext': {
-          fill: 'red',
         },
       },
       rowsPerPageOptions: [2, 10],

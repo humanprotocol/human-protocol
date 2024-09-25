@@ -53,7 +53,7 @@ export function BackgroundProvider({
     } else {
       setWhiteBackground();
     }
-  }, [isGrayBackground, setGrayBackground, setWhiteBackground]);
+  }, [isGrayBackground, setGrayBackground, setWhiteBackground, isDarkMode]);
 
   return (
     <BackgroundContext.Provider
