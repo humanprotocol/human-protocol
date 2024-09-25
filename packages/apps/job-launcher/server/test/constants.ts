@@ -7,6 +7,7 @@ import {
   Label,
 } from '../src/modules/job/job.dto';
 import { Web3Env } from '../src/common/enums/web3';
+import { Role } from '@human-protocol/sdk';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -29,6 +30,8 @@ export const MOCK_PRIVATE_KEY =
 export const MOCK_GAS_PRICE_MULTIPLIER = 1;
 export const MOCK_REPUTATION_ORACLES =
   '0x0000000000000000000000000000000000000001,0x0000000000000000000000000000000000000002,0x0000000000000000000000000000000000000003';
+export const MOCK_REPUTATION_ORACLE_1 =
+  '0x0000000000000000000000000000000000000001';
 export const MOCK_WEB3_RPC_URL = 'http://localhost:8545';
 export const MOCK_WEB3_NODE_HOST = 'localhost';
 export const MOCK_BUCKET_NAME = 'bucket-name';
@@ -42,6 +45,7 @@ export const MOCK_EXCHANGE_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
 ('0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473');
 export const MOCK_REPUTATION_ORACLE_URL = 'http://reporacle:3000';
 export const MOCK_RECORDING_ORACLE_URL = 'http://recoracle:3000';
+export const MOCK_EXCHANGE_ORACLE_URL = 'http://exoracle:3000';
 export const MOCK_SECRET = 'secrete';
 export const MOCK_JOB_LAUNCHER_FEE = 5;
 export const MOCK_ORACLE_FEE = 5;
@@ -231,6 +235,75 @@ export const MOCK_CVAT_GT = {
 export const MOCK_MINIMUM_FEE_USD = 0.01;
 export const MOCK_RATE_CACHE_TIME = 30;
 export const MOCK_FE_URL = 'http://localhost:3001';
+
+export const MOCK_AVAILABLE_ORACLES = [
+  {
+    address: '0x0000000000000000000000000000000000000001',
+    role: Role.ExchangeOracle,
+    url: MOCK_EXCHANGE_ORACLE_URL,
+    jobTypes: [
+      'Points',
+      'Bounding Boxes',
+      'Bounding Boxes from points',
+      'Skeletons from Bounding Boxes',
+    ],
+  },
+  {
+    address: '0x0000000000000000000000000000000000000002',
+    role: Role.ExchangeOracle,
+    url: MOCK_EXCHANGE_ORACLE_URL,
+    jobTypes: [
+      'Points',
+      'Bounding Boxes',
+      'Bounding Boxes from points',
+      'Skeletons from Bounding Boxes',
+    ],
+  },
+  {
+    address: '0x0000000000000000000000000000000000000003',
+    role: Role.ExchangeOracle,
+    url: MOCK_EXCHANGE_ORACLE_URL,
+    jobTypes: [
+      'Points',
+      'Bounding Boxes',
+      'Bounding Boxes from points',
+      'Skeletons from Bounding Boxes',
+    ],
+  },
+  {
+    address: '0x0000000000000000000000000000000000000004',
+    role: Role.RecordingOracle,
+    url: MOCK_RECORDING_ORACLE_URL,
+    jobTypes: [
+      'Points',
+      'Bounding Boxes',
+      'Bounding Boxes from points',
+      'Skeletons from Bounding Boxes',
+    ],
+  },
+  {
+    address: '0x0000000000000000000000000000000000000005',
+    role: Role.RecordingOracle,
+    url: MOCK_RECORDING_ORACLE_URL,
+    jobTypes: [
+      'Points',
+      'Bounding Boxes',
+      'Bounding Boxes from points',
+      'Skeletons from Bounding Boxes',
+    ],
+  },
+  {
+    address: '0x0000000000000000000000000000000000000006',
+    role: Role.RecordingOracle,
+    url: MOCK_RECORDING_ORACLE_URL,
+    jobTypes: [
+      'Points',
+      'Bounding Boxes',
+      'Bounding Boxes from points',
+      'Skeletons from Bounding Boxes',
+    ],
+  },
+];
 
 export const mockConfig: any = {
   MINIMUM_FEE_USD: MOCK_MINIMUM_FEE_USD,

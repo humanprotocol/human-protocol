@@ -2,7 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ChainId, NETWORKS, Role } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { mapJobType } from 'src/common/utils';
+import { hashString } from '../../common/utils';
+
+interface OracleOrder {
+  [chainId: number]: {
+    [reputationOracle: string]: {
+      [role: string]: string[];
+    };
+  };
+}
 
 @Injectable()
 export class RoutingProtocolService {
@@ -18,6 +26,8 @@ export class RoutingProtocolService {
   };
   private chainCurrentIndex = 0;
   private reputationOracleIndex = 0;
+  private oraclesHash: string | null = null;
+  private oracleOrder: OracleOrder = {};
 
   constructor(
     private readonly web3Service: Web3Service,
@@ -32,36 +42,24 @@ export class RoutingProtocolService {
     this.reputationOraclePriorityOrder = this.shuffleArray(
       this.reputationOracles.map((_, i) => i),
     );
-    this.oracleIndex = this.initializeOracleIndex();
+
+    this.oracleOrder = this.chains.reduce((acc: OracleOrder, chainId) => {
+      acc[chainId] = this.reputationOracles.reduce(
+        (oracleAcc, reputationOracle) => {
+          oracleAcc[reputationOracle] = {
+            [Role.ExchangeOracle]: [],
+            [Role.RecordingOracle]: [],
+          };
+          return oracleAcc;
+        },
+        {} as { [reputationOracle: string]: { [role: string]: string[] } },
+      );
+      return acc;
+    }, {} as OracleOrder);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
     return array.sort(() => Math.random() - 0.5);
-  }
-
-  private initializeOracleIndex(): {
-    [chainId: number]: {
-      [reputationOracle: string]: { [role: string]: number };
-    };
-  } {
-    const indexMap: {
-      [chainId: number]: {
-        [reputationOracle: string]: { [role: string]: number };
-      };
-    } = {};
-
-    this.chains.forEach((chainId) => {
-      indexMap[chainId] = {};
-
-      this.reputationOracles.forEach((reputationOracle) => {
-        indexMap[chainId][reputationOracle] = {
-          [Role.ExchangeOracle]: 0,
-          [Role.RecordingOracle]: 0,
-        };
-      });
-    });
-
-    return indexMap;
   }
 
   public selectNetwork(): ChainId {
@@ -82,30 +80,37 @@ export class RoutingProtocolService {
     return reputationOracle;
   }
 
-  public async selectOracle(
+  public async selectOracleFromAvailable(
+    availableOracles: any[],
+    oracleType: string,
     chainId: ChainId,
     reputationOracle: string,
-    oracleType: string,
-    jobType: string,
-  ): Promise<string> {
-    const availableOracles = await this.web3Service.findAvailableOracles(
-      chainId,
-      jobType,
-      reputationOracle,
-    );
+  ): Promise<string | null> {
     const oraclesOfType = availableOracles
       .filter((oracle) => oracle.role === oracleType)
       .map((oracle) => oracle.address);
 
-    const oracleIdx = this.oracleIndex[chainId][reputationOracle][oracleType];
-    const selectedOracle = oraclesOfType[oracleIdx];
+    if (!oraclesOfType.length) {
+      return null;
+    }
 
-    this.oracleIndex[chainId][reputationOracle][oracleType] =
-      (oracleIdx + 1) % oraclesOfType.length;
+    const latestOraclesHash = hashString(JSON.stringify(oraclesOfType));
+    // Check if we need to shuffle and store the new order
+    if (this.oraclesHash !== latestOraclesHash) {
+      this.oraclesHash = latestOraclesHash;
+      const shuffledOracles = this.shuffleArray(oraclesOfType);
+      this.oracleOrder[chainId][reputationOracle][oracleType] = shuffledOracles;
+    }
 
-    this.logger.log(
-      `Selected ${oracleType} oracle: ${selectedOracle} for chainId ${chainId}`,
-    );
+    const orderedOracles =
+      this.oracleOrder[chainId][reputationOracle][oracleType];
+
+    const currentIndex = this.reputationOracleIndex % orderedOracles.length;
+    const selectedOracle = orderedOracles[currentIndex];
+
+    this.reputationOracleIndex =
+      (this.reputationOracleIndex + 1) % orderedOracles.length;
+
     return selectedOracle;
   }
 
@@ -114,21 +119,27 @@ export class RoutingProtocolService {
     jobType: string,
   ): Promise<{
     reputationOracle: string;
-    exchangeOracle: string;
-    recordingOracle: string;
+    exchangeOracle: string | null;
+    recordingOracle: string | null;
   }> {
     const reputationOracle = this.selectReputationOracle();
-    const exchangeOracle = await this.selectOracle(
+    const availableOracles = await this.web3Service.findAvailableOracles(
       chainId,
-      reputationOracle,
-      Role.ExchangeOracle,
       jobType,
+      reputationOracle,
     );
-    const recordingOracle = await this.selectOracle(
+
+    const exchangeOracle = await this.selectOracleFromAvailable(
+      availableOracles,
+      Role.ExchangeOracle,
       chainId,
       reputationOracle,
+    );
+    const recordingOracle = await this.selectOracleFromAvailable(
+      availableOracles,
       Role.RecordingOracle,
-      jobType,
+      chainId,
+      reputationOracle,
     );
 
     return { reputationOracle, exchangeOracle, recordingOracle };

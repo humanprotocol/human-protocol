@@ -22,9 +22,6 @@ export enum ErrorJob {
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
   CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
-  ReputationOracleNotFound = 'Provided Reputation Oracle address not found in available oracles',
-  ExchangeOracleNotFound = 'Provided Exchange Oracle address not found in available oracles',
-  RecordingOracleNotFound = 'Provided Recording Oracle address not found in available oracles',
 }
 
 /**
@@ -134,6 +131,9 @@ export enum ErrorWeb3 {
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
   ReputationOracleUrlNotSet = 'Reputation oracle URL not set',
+  ReputationOracleNotFound = 'The specified Reputation Oracle address is not found in the set of available oracles. Ensure the address is correct and check available oracles for this network.',
+  ExchangeOracleNotFound = 'The specified Exchange Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
+  RecordingOracleNotFound = 'The specified Recording Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
 }
 
 /**

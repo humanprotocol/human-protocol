@@ -6,6 +6,8 @@ import { Web3Env } from '../../common/enums/web3';
 import { Web3Service } from './web3.service';
 import {
   MOCK_ADDRESS,
+  MOCK_EXCHANGE_ORACLE_URL,
+  MOCK_RECORDING_ORACLE_URL,
   MOCK_REPUTATION_ORACLES,
   mockConfig,
 } from './../../../test/constants';
@@ -13,7 +15,7 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
-import { OracleDataDto } from './web3.dto';
+import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
 
 jest.mock('@human-protocol/sdk', () => {
   const actualSdk = jest.requireActual('@human-protocol/sdk');
@@ -156,111 +158,239 @@ describe('Web3Service', () => {
     });
   });
 
+  describe('validateOracles', () => {
+    it('should validate oracles successfully', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const reputationOracle = '0xReputationOracle';
+      const exchangeOracle = '0xExchangeOracle';
+      const recordingOracle = '0xRecordingOracle';
+
+      jest
+        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
+        .mockReturnValue(`${reputationOracle},otherOracle`);
+      jest.spyOn(web3Service, 'findAvailableOracles').mockResolvedValue([
+        { address: exchangeOracle, role: Role.ExchangeOracle },
+        { address: recordingOracle, role: Role.RecordingOracle },
+      ]);
+
+      await expect(
+        web3Service.validateOracles(
+          chainId,
+          jobType,
+          reputationOracle,
+          exchangeOracle,
+          recordingOracle,
+        ),
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw error if reputation oracle not found', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const invalidReputationOracle = 'invalidOracle';
+
+      jest
+        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
+        .mockReturnValue('validReputationOracle,otherOracle');
+
+      await expect(
+        web3Service.validateOracles(chainId, jobType, invalidReputationOracle),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorWeb3.ReputationOracleNotFound,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+
+    it('should throw error if exchange oracle not found', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const reputationOracle = '0xReputationOracle';
+
+      jest
+        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
+        .mockReturnValue(reputationOracle);
+      jest
+        .spyOn(web3Service, 'findAvailableOracles')
+        .mockResolvedValue([
+          { address: 'anotherOracle', role: Role.ExchangeOracle },
+        ]);
+
+      await expect(
+        web3Service.validateOracles(
+          chainId,
+          jobType,
+          reputationOracle,
+          'invalidExchangeOracle',
+        ),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorWeb3.ExchangeOracleNotFound,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+
+    it('should throw error if recording oracle not found', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const reputationOracle = '0xReputationOracle';
+
+      jest
+        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
+        .mockReturnValue(reputationOracle);
+      jest
+        .spyOn(web3Service, 'findAvailableOracles')
+        .mockResolvedValue([
+          { address: 'anotherOracle', role: Role.RecordingOracle },
+        ]);
+
+      await expect(
+        web3Service.validateOracles(
+          chainId,
+          jobType,
+          reputationOracle,
+          undefined,
+          'invalidRecordingOracle',
+        ),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorWeb3.RecordingOracleNotFound,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+  });
+
   describe('getAvailableOracles', () => {
-    it('should return data if available', async () => {
-      const mockData: OracleDataDto[] = [
+    it('should return available oracles with provided parameters', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'Points';
+      const reputationOracleAddress = '0xReputationOracle';
+
+      const expectedResult = {
+        exchangeOracles: ['0xExchangeOracle1', '0xExchangeOracle2'],
+        recordingOracles: ['0xRecordingOracle1', '0xRecordingOracle2'],
+      };
+
+      const mockOracles: OracleDataDto[] = [
         {
-          address: 'address1',
+          address: '0xExchangeOracle1',
           role: Role.ExchangeOracle,
-          url: 'http://oracle1.com',
-          jobTypes: ['Points'],
+          url: MOCK_EXCHANGE_ORACLE_URL,
+          jobTypes: [jobType],
         },
         {
-          address: 'address2',
+          address: '0xExchangeOracle2',
           role: Role.ExchangeOracle,
-          url: 'http://oracle2.com',
-          jobTypes: ['Fortune'],
+          url: MOCK_EXCHANGE_ORACLE_URL,
+          jobTypes: [jobType],
+        },
+        {
+          address: '0xRecordingOracle1',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
+          jobTypes: [jobType],
+        },
+        {
+          address: '0xRecordingOracle2',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
+          jobTypes: [jobType],
         },
       ];
+
       jest
-        .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-        .mockResolvedValueOnce(mockData);
+        .spyOn(web3Service, 'findAvailableOracles')
+        .mockResolvedValue(mockOracles);
 
       const result = await web3Service.getAvailableOracles(
-        ChainId.POLYGON_AMOY,
-        'Points',
-        'address1',
+        chainId,
+        jobType,
+        reputationOracleAddress,
       );
 
-      expect(result).toEqual({
-        exchangeOracles: ['address1'],
-        recordingOracles: [],
-      });
-      expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
-        ChainId.POLYGON_AMOY,
-        'address1',
+      expect(result).toEqual(expectedResult);
+      expect(result.exchangeOracles).toEqual(
+        expect.arrayContaining(['0xExchangeOracle1', '0xExchangeOracle2']),
+      );
+      expect(result.recordingOracles).toEqual(
+        expect.arrayContaining(['0xRecordingOracle1', '0xRecordingOracle2']),
       );
     });
   });
 
   describe('filterOracles', () => {
-    it('should return oracles with matching job types', () => {
+    it('should return filtered oracles based on job types', () => {
+      const jobType = 'Points';
+
       const mockOracles: OracleDataDto[] = [
         {
-          address: 'address1',
+          address: '0xExchangeOracle1',
           role: Role.ExchangeOracle,
-          url: 'http://oracle1.com',
-          jobTypes: ['Points'],
+          url: MOCK_EXCHANGE_ORACLE_URL,
+          jobTypes: [jobType],
         },
         {
-          address: 'address2',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle2.com',
-          jobTypes: ['Fortune'],
-        },
-        {
-          address: 'address3',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle3.com',
-          jobTypes: ['Points'],
+          address: '0xRecordingOracle1',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
+          jobTypes: [jobType],
         },
       ];
 
-      const result = (web3Service as any).filterOracles(mockOracles, 'Points');
-      expect(result).toEqual([
+      const result = web3Service.filterOracles(mockOracles, jobType);
+
+      expect(result).toEqual(mockOracles);
+    });
+
+    it('should return an empty array if no oracles match the job type', () => {
+      const mockOracles: OracleDataDto[] = [
         {
-          address: 'address1',
+          address: '0xExchangeOracle1',
           role: Role.ExchangeOracle,
-          url: 'http://oracle1.com',
-          jobTypes: ['Points'],
+          url: MOCK_EXCHANGE_ORACLE_URL,
+          jobTypes: ['SomeJobType'],
         },
         {
-          address: 'address3',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle3.com',
-          jobTypes: ['Points'],
+          address: '0xRecordingOracle1',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
+          jobTypes: ['SomeJobType'],
         },
-      ]);
+      ];
+
+      const jobType = 'Points';
+
+      const result = web3Service.filterOracles(mockOracles, jobType);
+
+      expect(result).toEqual([]);
     });
 
     it('should filter out oracles with invalid URLs', () => {
       const mockOracles: OracleDataDto[] = [
         {
-          address: 'address1',
-          role: Role.ExchangeOracle,
-          url: null as any,
+          address: '0xRecordingOracle1',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
           jobTypes: ['Points'],
         },
         {
-          address: 'address2',
-          role: Role.ExchangeOracle,
+          address: '0xRecordingOracle2',
+          role: Role.RecordingOracle,
           url: '',
-          jobTypes: ['Fortune'],
-        },
-        {
-          address: 'address3',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle3.com',
           jobTypes: ['Points'],
         },
       ];
 
-      const result = (web3Service as any).filterOracles(mockOracles, 'Points');
+      const result = web3Service.filterOracles(mockOracles, 'Points');
       expect(result).toEqual([
         {
-          address: 'address3',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle3.com',
+          address: '0xRecordingOracle1',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
           jobTypes: ['Points'],
         },
       ]);
@@ -269,30 +399,29 @@ describe('Web3Service', () => {
     it('should return all oracles if jobType is not provided', () => {
       const mockOracles: OracleDataDto[] = [
         {
-          address: 'address1',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle1.com',
+          address: '0xRecordingOracle1',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
           jobTypes: ['Points'],
         },
         {
-          address: 'address2',
-          role: Role.ExchangeOracle,
-          url: 'http://oracle2.com',
-          jobTypes: ['Fortune'],
+          address: '0xRecordingOracle2',
+          role: Role.RecordingOracle,
+          url: MOCK_RECORDING_ORACLE_URL,
+          jobTypes: ['Points'],
         },
       ];
 
-      const result = (web3Service as any).filterOracles(mockOracles, '');
+      const result = web3Service.filterOracles(mockOracles, '');
       expect(result).toEqual(mockOracles);
     });
   });
 
   describe('getReputationOraclesByJobType', () => {
     beforeEach(async () => {
-      jest.spyOn(configService, 'get').mockImplementation((key: string) => {
-        if (key === 'REPUTATION_ORACLES') return MOCK_REPUTATION_ORACLES;
-        return mockConfig[key];
-      });
+      jest
+        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
+        .mockReturnValue(MOCK_REPUTATION_ORACLES);
     });
 
     afterEach(() => {
@@ -374,11 +503,8 @@ describe('Web3Service', () => {
 
     it('should return an empty array if no reputation oracles are configured', async () => {
       jest
-        .spyOn(configService, 'getOrThrow')
-        .mockImplementation((key: string) => {
-          if (key === 'REPUTATION_ORACLES') return '';
-          return mockConfig[key];
-        });
+        .spyOn(web3Service.web3ConfigService, 'reputationOracles', 'get')
+        .mockReturnValue('');
 
       const result = await web3Service.getReputationOraclesByJobType(
         ChainId.POLYGON_AMOY,

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddOraclesToJobTable1727176664946 implements MigrationInterface {
-  name = 'AddOraclesToJobTable1727176664946';
+export class AddOraclesToJobTable1727190080540 implements MigrationInterface {
+  name = 'AddOraclesToJobTable1727190080540';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
