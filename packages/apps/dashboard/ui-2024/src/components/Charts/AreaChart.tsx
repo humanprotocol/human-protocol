@@ -28,6 +28,8 @@ import {
 	useGraphPageChartParams,
 } from '@utils/hooks/use-graph-page-chart-params';
 
+const MINIMAL_DATE_FOR_DATE_PICKER = '2021-04-06';
+
 export type GraphPageChartDataConfigObject<T> = Partial<
 	Record<keyof GraphPageChartData[number], T>
 >;
@@ -95,6 +97,9 @@ export const AreaChart = ({
 	const [currentHoveredChart, setCurrentHoveredChart] = useState(
 		HOVERED_CHARTS_DEFAULT_STATE
 	);
+
+	const minDate = dayjs(MINIMAL_DATE_FOR_DATE_PICKER);
+	const maxDate = dayjs();
 
 	const toggleChart = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setCheckedCharts((prevState) => ({
