@@ -16,7 +16,7 @@ import { colorPalette } from '@assets/styles/color-palette';
 import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
 import DatePicker from '@components/DataEntry/DatePicker';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import ToggleCharts from '@components/Charts/ToggleCharts';
 import { formatNumber } from '@helpers/formatNumber';
 import {
@@ -24,6 +24,8 @@ import {
 	useGraphPageChartData,
 } from '@services/api/use-graph-page-chart-data';
 import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-params';
+
+const MINIMAL_DATE_FOR_DATE_PICKER = '2021-04-06';
 
 export type GraphPageChartDataConfigObject<T> = Partial<
 	Record<keyof GraphPageChartData[number], T>
@@ -93,6 +95,9 @@ export const AreaChart = ({
 	const [currentHoveredChart, setCurrentHoveredChart] = useState(
 		HOVERED_CHARTS_DEFAULT_STATE
 	);
+
+	const minDate = dayjs(MINIMAL_DATE_FOR_DATE_PICKER);
+	const maxDate = dayjs();
 
 	const toggleChart = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setCheckedCharts((prevState) => ({
@@ -178,8 +183,8 @@ export const AreaChart = ({
 						value={from}
 						customProps={{
 							disableFuture: true,
-							maxDate: to,
-							minDate: effectiveFromAllTimeDate,
+							maxDate: to.isBefore(maxDate) ? to : maxDate,
+							minDate: minDate,
 						}}
 					/>
 					<Typography>-</Typography>
@@ -188,7 +193,8 @@ export const AreaChart = ({
 						value={to}
 						customProps={{
 							disableFuture: true,
-							minDate: from,
+							minDate: from.isAfter(minDate) ? from : minDate,
+							maxDate: maxDate,
 						}}
 					/>
 				</Stack>
