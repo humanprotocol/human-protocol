@@ -250,10 +250,6 @@ export function UiExample() {
         <Alert color="success" severity="success">
           Your password has been successfully updated!
         </Alert>
-        <Alert color="warning" severity="warning">
-          We have switched to the Polygon network. You’ll need to replace your
-          Ethereum wallet address with one connected to Polygon.
-        </Alert>
       </Stack>
     </div>
   );
