@@ -4,11 +4,9 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { ChainId, NETWORKS, Role } from '@human-protocol/sdk';
 import {
   MOCK_ADDRESS,
-  MOCK_EXCHANGE_ORACLE_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
-  MOCK_RECORDING_ORACLE_URL,
   MOCK_REPUTATION_ORACLE_1,
   mockConfig,
 } from '../../../test/constants';

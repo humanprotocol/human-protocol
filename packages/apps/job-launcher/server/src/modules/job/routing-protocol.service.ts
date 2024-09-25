@@ -19,11 +19,6 @@ export class RoutingProtocolService {
   private readonly reputationOracles: string[];
   private readonly chainPriorityOrder: number[];
   private readonly reputationOraclePriorityOrder: number[];
-  private oracleIndex: {
-    [chainId: number]: {
-      [reputationOracle: string]: { [role: string]: number };
-    };
-  };
   private chainCurrentIndex = 0;
   private reputationOracleIndex = 0;
   private oraclesHash: string | null = null;
