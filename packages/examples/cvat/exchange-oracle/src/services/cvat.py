@@ -383,7 +383,6 @@ def update_project_statuses_by_escrow_address(
         .returning(Project.cvat_id)
     )
     session.execute(statement).fetchall()
-    session.commit()
 
 
 def delete_project(session: Session, project_id: str) -> None:
