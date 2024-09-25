@@ -172,8 +172,9 @@ export class JobService {
             data.fields?.includes(JobFieldName.RewardAmount) ||
             data.sortField === JobSortField.REWARD_AMOUNT
           ) {
-            job.rewardAmount =
-              manifest.fundAmount / manifest.submissionsRequired;
+            job.rewardAmount = (
+              manifest.fundAmount / manifest.submissionsRequired
+            ).toString();
           }
           if (data.fields?.includes(JobFieldName.RewardToken)) {
             job.rewardToken = TOKEN;
@@ -189,8 +190,8 @@ export class JobService {
 
     if (data.sortField === JobSortField.REWARD_AMOUNT) {
       jobs.sort((a, b) => {
-        const rewardA = a.rewardAmount ?? 0;
-        const rewardB = b.rewardAmount ?? 0;
+        const rewardA = Number(a.rewardAmount ?? 0);
+        const rewardB = Number(b.rewardAmount ?? 0);
         if (data.sort === SortDirection.DESC) {
           return rewardB - rewardA;
         } else {
