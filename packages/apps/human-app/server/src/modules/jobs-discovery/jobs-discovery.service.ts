@@ -8,6 +8,7 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
+import { JobDiscoveryFieldName } from '../../common/enums/global-common';
 
 @Injectable()
 export class JobsDiscoveryService {
@@ -32,27 +33,52 @@ export class JobsDiscoveryService {
     jobs: JobsDiscoveryResponseItem[],
     filters: JobsDiscoveryParamsCommand['data'],
   ): JobsDiscoveryResponseItem[] {
-    return jobs.filter((job) => {
-      let matches = true;
+    const difference = Object.values(JobDiscoveryFieldName).filter(
+      (value) => !filters.fields.includes(value),
+    );
+    return jobs
+      .filter((job) => {
+        let matches = true;
 
-      if (filters.escrowAddress) {
-        matches = matches && job.escrow_address === filters.escrowAddress;
-      }
+        if (filters.escrowAddress) {
+          matches = matches && job.escrow_address === filters.escrowAddress;
+        }
 
-      if (filters.chainId !== undefined && filters.chainId !== null) {
-        matches = matches && job.chain_id === filters.chainId;
-      }
+        if (filters.chainId !== undefined && filters.chainId !== null) {
+          matches = matches && job.chain_id === filters.chainId;
+        }
 
-      if (filters.jobType) {
-        matches = matches && job.job_type === filters.jobType;
-      }
+        if (filters.jobType) {
+          matches = matches && job.job_type === filters.jobType;
+        }
 
-      if (filters.status !== undefined && filters.status !== null) {
-        matches = matches && job.status === filters.status;
-      }
+        if (filters.status !== undefined && filters.status !== null) {
+          matches = matches && job.status === filters.status;
+        }
 
-      return matches;
-    });
+        if (
+          filters.qualifications !== undefined &&
+          filters.qualifications !== null
+        ) {
+          if (job.qualifications && job.qualifications.length > 0) {
+            matches =
+              matches &&
+              job.qualifications.every((qualification) =>
+                filters.qualifications?.includes(qualification),
+              );
+          }
+        }
+
+        return matches;
+      })
+      .map((job) => {
+        if (difference && difference.length > 0) {
+          difference.forEach((field) => {
+            delete job[field];
+          });
+        }
+        return job;
+      });
   }
 
   async getCachedJobs(

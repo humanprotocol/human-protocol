@@ -37,25 +37,13 @@ export function UpdateVersionModal() {
           To continue using the app, please:
           <ol>
             <li>
-              If you don&#39;t have a wallet yet, &nbsp;
-              <a
-                href="https://docs.google.com/presentation/d/1rtOGNhWLcSWhIA3b-EIDObCvOAjQmXsRQL1gpT2bbqA"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                create one
-              </a>
-              .
-            </li>
-            <li>
               <a
                 href="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/sign-up"
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Re-register your account
+                Reregister your account
               </a>
-              .
             </li>
             <li>
               <a
@@ -63,9 +51,8 @@ export function UpdateVersionModal() {
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Complete the KYC
+                Verify your identity
               </a>
-              (Know Your Customer) verification process.
             </li>
             <li>
               <a
@@ -73,13 +60,20 @@ export function UpdateVersionModal() {
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Associate your wallet
+                Connect your wallet
               </a>
-              &nbsp;with your account.
             </li>
           </ol>
-          This helps us ensure the safety of your information and provide you
-          with a better experience. Thank you for your understanding!
+          These steps help us ensure the safety of your account and provide you
+          with a better experience. Thank you for your understanding! For
+          assistance, reach out on&nbsp;
+          <a
+            href="https://discord.com/invite/5sHfvE8y8p"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Discord
+          </a>
         </Typography>
         <Button
           fullWidth

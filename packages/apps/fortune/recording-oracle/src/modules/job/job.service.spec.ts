@@ -21,6 +21,7 @@ import {
   MOCK_S3_ENDPOINT,
   MOCK_S3_PORT,
   MOCK_WEB3_PRIVATE_KEY,
+  mockConfig,
 } from '../../../test/constants';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
@@ -93,9 +94,20 @@ describe('JobService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         JobService,
         StorageService,
-        ConfigService,
         Web3ConfigService,
         S3ConfigService,
         PGPConfigService,

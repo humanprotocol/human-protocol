@@ -11,6 +11,9 @@ import {
 } from '../model/oracle-discovery.model';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper.profile';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
+import { CommonConfigModule } from '../../../common/config/common-config.module';
+import { ConfigModule } from '@nestjs/config';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
@@ -23,8 +26,17 @@ describe('OracleDiscoveryController', () => {
         AutomapperModule.forRoot({
           strategyInitializer: classes(),
         }),
+        CommonConfigModule,
+        ConfigModule.forRoot({
+          envFilePath: '.env',
+          isGlobal: true,
+        }),
       ],
-      providers: [OracleDiscoveryService, OracleDiscoveryProfile],
+      providers: [
+        OracleDiscoveryService,
+        OracleDiscoveryProfile,
+        EnvironmentConfigService,
+      ],
     })
       .overrideProvider(OracleDiscoveryService)
       .useValue(oracleDiscoveryServiceMock)

@@ -13,8 +13,27 @@ import { createMock } from '@golevelup/ts-jest';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import {
   MOCK_ADDRESS,
-  MOCK_MAX_RETRY_COUNT,
+  MOCK_CVAT_JOB_SIZE,
+  MOCK_CVAT_MAX_TIME,
+  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
+  MOCK_CVAT_VAL_SIZE,
+  MOCK_EXPIRES_IN,
+  MOCK_HCAPTCHA_SITE_KEY,
+  MOCK_PGP_PASSPHRASE,
+  MOCK_PGP_PRIVATE_KEY,
   MOCK_PRIVATE_KEY,
+  MOCK_RECORDING_ORACLE_URL,
+  MOCK_REPUTATION_ORACLE_URL,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+  MOCK_SECRET,
+  MOCK_STRIPE_API_VERSION,
+  MOCK_STRIPE_APP_INFO_URL,
+  MOCK_STRIPE_SECRET_KEY,
 } from '../../../test/constants';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -27,9 +46,50 @@ describe('WebhookController', () => {
   let jobService: JobService;
 
   beforeEach(async () => {
+    const mockConfig: any = {
+      S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
+      S3_SECRET_KEY: MOCK_S3_SECRET_KEY,
+      S3_ENDPOINT: MOCK_S3_ENDPOINT,
+      S3_PORT: MOCK_S3_PORT,
+      S3_USE_SSL: MOCK_S3_USE_SSL,
+      S3_BUCKET: MOCK_S3_BUCKET,
+      PGP_PRIVATE_KEY: MOCK_PGP_PRIVATE_KEY,
+      PGP_PASSPHRASE: MOCK_PGP_PASSPHRASE,
+      REPUTATION_ORACLE_ADDRESS: MOCK_ADDRESS,
+      CVAT_EXCHANGE_ORACLE_ADDRESS: MOCK_ADDRESS,
+      FORTUNE_EXCHANGE_ORACLE_ADDRESS: MOCK_ADDRESS,
+      FORTUNE_RECORDING_ORACLE_ADDRESS: MOCK_ADDRESS,
+      WEB3_PRIVATE_KEY: MOCK_PRIVATE_KEY,
+      STRIPE_SECRET_KEY: MOCK_STRIPE_SECRET_KEY,
+      STRIPE_API_VERSION: MOCK_STRIPE_API_VERSION,
+      STRIPE_APP_INFO_URL: MOCK_STRIPE_APP_INFO_URL,
+      HCAPTCHA_SITE_KEY: MOCK_HCAPTCHA_SITE_KEY,
+      HCAPTCHA_RECORDING_ORACLE_URI: MOCK_RECORDING_ORACLE_URL,
+      HCAPTCHA_REPUTATION_ORACLE_URI: MOCK_REPUTATION_ORACLE_URL,
+      HCAPTCHA_SECRET: MOCK_SECRET,
+      JWT_ACCESS_TOKEN_EXPIRES_IN: MOCK_EXPIRES_IN,
+      CVAT_JOB_SIZE: MOCK_CVAT_JOB_SIZE,
+      CVAT_MAX_TIME: MOCK_CVAT_MAX_TIME,
+      CVAT_VAL_SIZE: MOCK_CVAT_VAL_SIZE,
+      CVAT_SKELETONS_JOB_SIZE_MULTIPLIER:
+        MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [WebhookController],
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         WebhookService,
         ServerConfigService,
         Web3ConfigService,
@@ -47,25 +107,6 @@ describe('WebhookController', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
-        },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              switch (key) {
-                case 'HOST':
-                  return '127.0.0.1';
-                case 'PORT':
-                  return 5000;
-                case 'WEB3_PRIVATE_KEY':
-                  return MOCK_PRIVATE_KEY;
-                case 'MAX_RETRY_COUNT':
-                  return MOCK_MAX_RETRY_COUNT;
-                default:
-                  return null;
-              }
-            }),
-          },
         },
         {
           provide: HttpService,

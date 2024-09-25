@@ -8,6 +8,7 @@ import {
   MOCK_MAX_RETRY_COUNT,
   MOCK_PRIVATE_KEY,
   MOCK_WEBHOOK_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
@@ -48,6 +49,18 @@ describe('WebhookService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         WebhookService,
         {
           provide: Web3Service,
@@ -59,7 +72,6 @@ describe('WebhookService', () => {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
         },
-        ConfigService,
         Web3ConfigService,
         ServerConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },

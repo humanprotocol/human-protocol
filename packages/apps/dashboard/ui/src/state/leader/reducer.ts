@@ -9,6 +9,7 @@ import {
   UnknownAsyncThunkFulfilledAction,
   UnknownAsyncThunkPendingAction,
   UnknownAsyncThunkRejectedAction,
+  // eslint-disable-next-line import/no-unresolved
 } from '@reduxjs/toolkit/dist/matchers';
 import stringify from 'fast-json-stable-stringify';
 import { LeaderData, LeaderEscrowData } from './types';

@@ -8,7 +8,7 @@ import {
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_MAX_RETRY_COUNT,
-  MOCK_PRIVATE_KEY,
+  mockConfig,
 } from '../../../test/constants';
 import { ErrorWebhook } from '../../common/constants/errors';
 import {
@@ -49,23 +49,20 @@ describe('WebhookService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'HOST':
-            return '127.0.0.1';
-          case 'PORT':
-            return 5000;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         WebhookService,
         ServerConfigService,
         Web3ConfigService,
@@ -83,7 +80,6 @@ describe('WebhookService', () => {
           provide: JobService,
           useValue: createMock<JobService>(),
         },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
