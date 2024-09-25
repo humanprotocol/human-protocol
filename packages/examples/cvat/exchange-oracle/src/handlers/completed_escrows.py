@@ -243,9 +243,6 @@ def _handle_escrow_validations(
         try:
             validate_escrow(chain_id, escrow_address)
         except Exception as e:
-            # TODO: such escrows can fill all the queried completed projects
-            # need to improve handling for such projects
-            # (e.g. cancel depending on the escrow status)
             logger.exception(
                 f"Failed to handle completed projects for escrow {escrow_address}: {e}"
             )
