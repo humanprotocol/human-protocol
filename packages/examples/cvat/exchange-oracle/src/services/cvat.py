@@ -1,18 +1,27 @@
 import itertools
 import uuid
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import datetime
 
-from sqlalchemy import case, delete, func, insert, select, update
+from sqlalchemy import case, delete, func, literal, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
+from src.core.types import (
+    AssignmentStatuses,
+    EscrowValidationStatuses,
+    JobStatuses,
+    ProjectStatuses,
+    TaskStatuses,
+    TaskTypes,
+)
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import (
     Assignment,
     DataUpload,
     EscrowCreation,
+    EscrowValidation,
     Image,
     Job,
     Project,
@@ -232,7 +241,7 @@ def update_tasks_by_status(
     return [row.cvat_id for row in updated_tasks]
 
 
-def get_escrows_for_completion(session: Session, limit=100):
+def create_escrow_validations(session: Session):
     # Escrow projects can be in either 'validation' or 'completed' status:
     # - 'completed': Some jobs were rejected and reannotated.
     # - 'validation': Other jobs were successfully validated and remain in this state.
@@ -243,17 +252,74 @@ def get_escrows_for_completion(session: Session, limit=100):
     # before validation finishes.
     allowed_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
     at_least_one_is_completed = (
-        func.count(case([(Project.status == ProjectStatuses.completed, 1)], else_=0)) > 0
+        func.count(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
     )
-    stmt = (
-        select(Project.escrow_address, Project.chain_id)
+    select_stmt = (
+        select(
+            Project.escrow_address,
+            Project.chain_id,
+            literal(EscrowValidationStatuses.awaiting).label("status"),
+        )
         .where(Project.status.in_(allowed_statuses))
         .group_by(Project.escrow_address, Project.chain_id)
         .having(at_least_one_is_completed)
-        .limit(limit)
     )
 
-    return session.execute(stmt).all()
+    insert_stmt = (
+        insert(EscrowValidation)
+        .from_select(("escrow_address", "chain_id", "status"), select_stmt)
+        .on_conflict_do_update(
+            index_elements=("escrow_address", "chain_id"),
+            set_={
+                "status": EscrowValidationStatuses.awaiting,
+            },
+        )
+        .returning(EscrowValidation.id)
+    )
+
+    return session.execute(insert_stmt).fetchall()
+
+
+def get_escrows_for_validation(session: Session, limit=100) -> Sequence[tuple[str, str, int]]:
+    subquery = (
+        select(EscrowValidation.id)
+        .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
+        .limit(limit)
+        .order_by(EscrowValidation.attempts.asc())
+        .subquery()
+    )
+    update_stmt = (
+        update(EscrowValidation)
+        .where(EscrowValidation.id.in_(subquery))
+        .values(status=EscrowValidationStatuses.in_progress, attempts=EscrowValidation.attempts + 1)
+        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
+    )
+    return session.execute(update_stmt).fetchall()
+
+
+def update_escrow_validation_status(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    status: EscrowValidationStatuses,
+) -> None:
+    stmt = (
+        update(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .values(status=status)
+    )
+    session.execute(stmt)
+
+
+def update_escrow_validation_statuses_by_ids(
+    session: Session,
+    ids: Iterable[str],
+    status: EscrowValidationStatuses,
+) -> None:
+    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
+    session.execute(stmt)
 
 
 def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:
@@ -316,7 +382,8 @@ def update_project_statuses_by_escrow_address(
         .values(status=status.value)
         .returning(Project.cvat_id)
     )
-    session.execute(statement)
+    session.execute(statement).fetchall()
+    session.commit()
 
 
 def delete_project(session: Session, project_id: str) -> None:

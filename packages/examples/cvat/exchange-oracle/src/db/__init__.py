@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import DDL, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 import src.utils.logging
@@ -13,3 +14,6 @@ engine = sqlalchemy.create_engine(
 SessionLocal = sessionmaker(autocommit=False, bind=engine)
 
 Base = declarative_base()
+
+create_uuid_extension = DDL('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+event.listen(Base.metadata, "before_create", create_uuid_extension)

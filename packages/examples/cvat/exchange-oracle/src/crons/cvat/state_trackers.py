@@ -14,7 +14,7 @@ from src.crons._cron_job import cron_job
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
-from src.handlers.completed_escrows import handle_completed_escrows
+from src.handlers.completed_escrows import handle_escrows_validations
 
 
 @cron_job
@@ -127,8 +127,17 @@ def track_assignments(logger: logging.Logger) -> None:
 
 
 @cron_job
-def track_completed_escrows(logger: logging.Logger) -> None:
-    handle_completed_escrows(logger)
+def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
+    awaiting_validations = cvat_service.create_escrow_validations(session)
+    logger.info(
+        f"{len(awaiting_validations)} escrow validations "
+        f"are in awaiting state: {awaiting_validations}"
+    )
+
+
+@cron_job
+def track_escrow_validations(logger: logging.Logger) -> None:
+    handle_escrows_validations(logger)
 
 
 @cron_job

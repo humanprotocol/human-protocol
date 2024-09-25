@@ -9,6 +9,7 @@ from src.chain.kvstore import get_recording_oracle_url
 from src.core.config import CronConfig
 from src.core.oracle_events import RecordingOracleEvent_TaskRejected
 from src.core.types import (
+    EscrowValidationStatuses,
     JobStatuses,
     OracleWebhookTypes,
     ProjectStatuses,
@@ -79,6 +80,13 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                         )
                     )
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
+
+            cvat_db_service.update_escrow_validation_status(
+                db_session,
+                webhook.escrow_address,
+                webhook.chain_id,
+                EscrowValidationStatuses.completed,
+            )
 
         case RecordingOracleEventTypes.task_rejected:
             event = RecordingOracleEvent_TaskRejected.parse_obj(webhook.event_data)

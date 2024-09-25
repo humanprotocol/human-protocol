@@ -17,7 +17,7 @@ from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
 from src.core.storage import compose_results_bucket_filename
-from src.core.types import OracleWebhookTypes, ProjectStatuses, TaskTypes
+from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
@@ -234,16 +234,12 @@ def _download_job_annotations(
     return job_annotations
 
 
-def handle_completed_escrows(logger: logging.Logger) -> None:
-    # Here we can have several projects per escrow, so the handling is done in project groups
-    # Find potentially finished escrows first
-    with SessionLocal.begin() as session:
-        escrows_with_completed_projects = cvat_service.get_escrows_for_completion(
-            session,
-            limit=CronConfig.track_completed_escrows_chunk_size,
-        )
-
-    for escrow_address, chain_id in escrows_with_completed_projects:
+def _handle_escrow_validations(
+    logger: logging.Logger,
+    escrow_validations: Sequence[tuple[str, str, int]],
+    handled_validations: set[str],
+):
+    for validation_id, escrow_address, chain_id in escrow_validations:
         try:
             validate_escrow(chain_id, escrow_address)
         except Exception as e:
@@ -269,3 +265,24 @@ def handle_completed_escrows(logger: logging.Logger) -> None:
                 raise
 
             _handle_completed_escrow(logger, chain_id, escrow_address, escrow_projects, session)
+            handled_validations.add(validation_id)
+
+
+def handle_escrows_validations(logger: logging.Logger) -> None:
+    with SessionLocal.begin() as session:
+        escrow_validations = cvat_service.get_escrows_for_validation(
+            session,
+            limit=CronConfig.track_completed_escrows_chunk_size,
+        )
+
+    unhandled_validations = set(validation_id for validation_id, _, __ in escrow_validations)
+    handled_validations = set()
+    try:
+        _handle_escrow_validations(logger, escrow_validations, handled_validations)
+    finally:
+        with SessionLocal.begin() as session:
+            cvat_service.update_escrow_validation_statuses_by_ids(
+                session,
+                unhandled_validations - handled_validations,
+                EscrowValidationStatuses.awaiting,
+            )

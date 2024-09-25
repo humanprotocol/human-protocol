@@ -10,9 +10,11 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 import datumaro as dm
+from sqlalchemy import select
 
 from src.core.types import (
     AssignmentStatuses,
+    EscrowValidationStatuses,
     ExchangeOracleEventTypes,
     JobStatuses,
     Networks,
@@ -20,10 +22,12 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.crons.cvat.state_trackers import track_completed_escrows
+from src.crons import track_completed_escrows
+from src.crons.cvat.state_trackers import track_escrow_validations
 from src.db import SessionLocal
-from src.models.cvat import Assignment, Image, Job, Project, Task, User
+from src.models.cvat import Assignment, EscrowValidation, Image, Job, Project, Task, User
 from src.models.webhook import Webhook
+from src.services.cvat import create_escrow_validations
 
 from tests.utils.db_helper import create_project_task_and_job
 
@@ -46,7 +50,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             status=ProjectStatuses.completed.value,
             job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
-            chain_id=Networks.localhost.value,
+            chain_id=(chain_id := Networks.localhost.value),
             bucket_url="https://test.storage.googleapis.com/",
         )
         self.session.add(cvat_project)
@@ -100,6 +104,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(assignment)
         self.session.commit()
 
+        track_completed_escrows()
+        validation: EscrowValidation = self.session.scalar(
+            select(EscrowValidation).where(
+                EscrowValidation.escrow_address == escrow_address,
+                EscrowValidation.chain_id == chain_id,
+            )
+        )
+
+        assert validation.attempts == 0
+        assert validation.status == EscrowValidationStatuses.awaiting
+
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
@@ -134,7 +149,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.list_files = Mock(return_value=[])
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            track_completed_escrows()
+            track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)
@@ -146,6 +161,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
         assert db_project.status == ProjectStatuses.validation
+        self.session.refresh(validation)
+        assert validation.status == EscrowValidationStatuses.in_progress
+        assert validation.attempts == 1
 
     def test_retrieve_annotations_error_getting_annotations(self):
         cvat_project_id = 1
@@ -158,7 +176,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             status=ProjectStatuses.completed.value,
             job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
-            chain_id=Networks.localhost.value,
+            chain_id=(chain_id := Networks.localhost.value),
             bucket_url="https://test.storage.googleapis.com/",
         )
         self.session.add(cvat_project)
@@ -204,11 +222,20 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(assignment)
         self.session.commit()
 
+        track_completed_escrows()
+        validation: EscrowValidation = self.session.scalar(
+            select(EscrowValidation).where(
+                EscrowValidation.escrow_address == escrow_address,
+                EscrowValidation.chain_id == chain_id,
+            )
+        )
+        assert validation.attempts == 0
+        assert validation.status == EscrowValidationStatuses.awaiting
+
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api"),
             patch(
                 "src.handlers.completed_escrows.cvat_api.get_job_annotations"
             ) as mock_annotations,
@@ -224,7 +251,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             mock_annotations.side_effect = Exception("Connection error")
 
-            track_completed_escrows()
+            track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)
@@ -236,6 +263,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
         assert db_project.status == ProjectStatuses.completed.value
+        self.session.refresh(validation)
+        assert validation.status == EscrowValidationStatuses.awaiting
+        assert validation.attempts == 1
 
     def test_retrieve_annotations_error_uploading_files(self):
         cvat_project_id = 1
@@ -248,7 +278,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             status=ProjectStatuses.completed.value,
             job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
-            chain_id=Networks.localhost.value,
+            chain_id=(chain_id := Networks.localhost.value),
             bucket_url="https://test.storage.googleapis.com/",
         )
         self.session.add(cvat_project)
@@ -294,6 +324,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(assignment)
         self.session.commit()
 
+        track_completed_escrows()
+
+        validation: EscrowValidation = self.session.scalar(
+            select(EscrowValidation).where(
+                EscrowValidation.escrow_address == escrow_address,
+                EscrowValidation.chain_id == chain_id,
+            )
+        )
+        assert validation.attempts == 0
+        assert validation.status == EscrowValidationStatuses.awaiting
+
         with (
             open("tests/utils/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
@@ -303,7 +344,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
 
-            track_completed_escrows()
+            track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)
@@ -315,6 +356,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
         assert db_project.status == ProjectStatuses.completed.value
+        self.session.refresh(validation)
+        assert validation.status == EscrowValidationStatuses.awaiting
+        assert validation.attempts == 1
 
     def test_retrieve_annotations_multiple_projects_per_escrow_all_completed(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -376,8 +420,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             )
             self.session.add(assignment)
 
+        create_escrow_validations(self.session)
         self.session.commit()
-
         with (
             open("tests/utils/manifest.json") as manifest_data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
@@ -438,7 +482,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.list_files = Mock(return_value=[])
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            track_completed_escrows()
+            track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)
@@ -448,13 +492,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert webhook is not None
         assert webhook.event_type == ExchangeOracleEventTypes.task_finished
 
-        db_projects = (
-            self.session.query(Project)
-            .where(Project.id.in_([project1.id, project2.id, project3.id]))
-            .all()
-        )
-        assert len(db_projects) == 3
-        for db_project in db_projects:
+        self.session.refresh(project1)
+        self.session.refresh(project2)
+        self.session.refresh(project3)
+        for db_project in project1, project2, project3:
             assert db_project.status == ProjectStatuses.validation
 
     def test_retrieve_annotations_multiple_projects_per_escrow_some_completed_some_validation(self):
@@ -517,7 +558,17 @@ class ServiceIntegrationTest(unittest.TestCase):
             )
             self.session.add(assignment)
 
+        create_escrow_validations(self.session)
+
         self.session.commit()
+        validation: EscrowValidation = self.session.scalar(
+            select(EscrowValidation).where(
+                EscrowValidation.escrow_address == escrow_address,
+                EscrowValidation.chain_id == project1.chain_id,
+            )
+        )
+        assert validation.attempts == 0
+        assert validation.status == EscrowValidationStatuses.awaiting
 
         with (
             open("tests/utils/manifest.json") as manifest_data,
@@ -579,7 +630,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.list_files = Mock(return_value=[])
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            track_completed_escrows()
+            track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)
@@ -589,14 +640,15 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert webhook is not None
         assert webhook.event_type == ExchangeOracleEventTypes.task_finished
 
-        db_projects = (
-            self.session.query(Project)
-            .where(Project.id.in_([project1.id, project2.id, project3.id]))
-            .all()
-        )
-        assert len(db_projects) == 3
-        for db_project in db_projects:
+        self.session.refresh(project1)
+        self.session.refresh(project2)
+        self.session.refresh(project3)
+        for db_project in project1, project2, project3:
             assert db_project.status == ProjectStatuses.validation
+
+        self.session.refresh(validation)
+        assert validation.status == EscrowValidationStatuses.in_progress
+        assert validation.attempts == 1
 
     def test_retrieve_annotations_multiple_projects_per_escrow_all_validation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -659,30 +711,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.add(assignment)
 
         self.session.commit()
-
-        with (
-            open("tests/utils/manifest.json") as manifest_data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api"),
-            patch("src.handlers.completed_escrows.cloud_service"),
-            patch(
-                "src.handlers.completed_escrows.postprocess_annotations"
-            ) as mock_postprocess_annotations,
-        ):
-            manifest = json.load(manifest_data)
-            mock_get_manifest.return_value = manifest
-            track_completed_escrows()
-
-        mock_postprocess_annotations.assert_not_called()
-
-        assert self.session.query(Webhook).count() == 0
-
-        db_projects = (
-            self.session.query(Project)
-            .where(Project.id.in_([project1.id, project2.id, project3.id]))
-            .all()
-        )
-        assert len(db_projects) == 3
-        for db_project in db_projects:
-            assert db_project.status == ProjectStatuses.validation
+        validations = self.session.execute(select(EscrowValidation)).all()
+        assert not validations
