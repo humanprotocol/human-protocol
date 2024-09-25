@@ -84,7 +84,13 @@ def _handle_completed_escrow(
         project_images = None
     else:
         # escrows with simple task types are ought to have only one project
-        (project,) = escrow_projects
+        try:
+            (project,) = escrow_projects
+        except ValueError:
+            raise NotImplementedError(
+                f"{manifest.annotation.type} is expected to have exactly one project,"
+                f" not {len(escrow_projects)}"
+            )
         project_annotations_file = _download_project_annotations(
             logger,
             annotation_format,
