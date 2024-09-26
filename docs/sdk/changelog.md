@@ -1,34 +1,39 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+#### Deprecated
 
-### Fixed
+#### Removed
 
-### Security
+#### Fixed
 
-# How to upgrade
+* **Hash comparisson issue:** remove 0x from file hashes in getFileUrlAndVerifyHash (KVStoreUtils) function.
+* **Subgraph get transactions query issue**: fix subgraph query.
 
-## Typescript
+#### Security
 
-### yarn
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
