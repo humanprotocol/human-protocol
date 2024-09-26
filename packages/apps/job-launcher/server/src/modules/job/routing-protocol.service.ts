@@ -1,8 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ChainId, NETWORKS, Role } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { hashString } from '../../common/utils';
+import { ErrorRoutingProtocol } from '../../common/constants/errors';
+import { ControlledError } from '../../common/errors/controlled';
 
 interface OracleOrder {
   [chainId: number]: {
@@ -25,8 +27,8 @@ export class RoutingProtocolService {
   private oracleOrder: OracleOrder = {};
 
   constructor(
-    private readonly web3Service: Web3Service,
-    private readonly web3ConfigService: Web3ConfigService,
+    public readonly web3Service: Web3Service,
+    public readonly web3ConfigService: Web3ConfigService,
   ) {
     this.chains = Object.keys(NETWORKS).map((chainId) => +chainId);
     this.reputationOracles = this.web3ConfigService.reputationOracles
@@ -138,5 +140,69 @@ export class RoutingProtocolService {
     );
 
     return { reputationOracle, exchangeOracle, recordingOracle };
+  }
+
+  public async validateOracles(
+    chainId: ChainId,
+    jobType: string,
+    reputationOracle: string,
+    exchangeOracle?: string | null,
+    recordingOracle?: string | null,
+  ) {
+    const reputationOracles = this.web3ConfigService.reputationOracles
+      .split(',')
+      .map((address) => address.trim());
+
+    if (!reputationOracles.includes(reputationOracle)) {
+      throw new ControlledError(
+        ErrorRoutingProtocol.ReputationOracleNotFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const availableOracles = await this.web3Service.findAvailableOracles(
+      chainId,
+      jobType,
+      reputationOracle,
+    );
+
+    if (
+      exchangeOracle &&
+      !this.isOracleAvailable(
+        availableOracles,
+        exchangeOracle,
+        Role.ExchangeOracle,
+      )
+    ) {
+      throw new ControlledError(
+        ErrorRoutingProtocol.ExchangeOracleNotFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      recordingOracle &&
+      !this.isOracleAvailable(
+        availableOracles,
+        recordingOracle,
+        Role.RecordingOracle,
+      )
+    ) {
+      throw new ControlledError(
+        ErrorRoutingProtocol.RecordingOracleNotFound,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  private isOracleAvailable(
+    availableOracles: any[],
+    oracle: string,
+    role: string,
+  ): boolean {
+    return availableOracles.some(
+      (o) =>
+        o.address.toLowerCase() === oracle.toLowerCase() && o.role === role,
+    );
   }
 }

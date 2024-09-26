@@ -13,6 +13,9 @@ import {
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
+import { ControlledError } from '../../common/errors/controlled';
+import { ErrorRoutingProtocol } from '../../common/constants/errors';
+import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -261,6 +264,132 @@ describe('RoutingProtocolService', () => {
       );
       expect(result.exchangeOracle).toBeNull();
       expect(result.recordingOracle).toBeNull();
+    });
+  });
+
+  describe('validateOracles', () => {
+    it('should validate oracles successfully', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const reputationOracle = '0xReputationOracle';
+      const exchangeOracle = '0xExchangeOracle';
+      const recordingOracle = '0xRecordingOracle';
+
+      jest
+        .spyOn(
+          routingProtocolService.web3ConfigService,
+          'reputationOracles',
+          'get',
+        )
+        .mockReturnValue(`${reputationOracle},otherOracle`);
+      jest.spyOn(web3Service, 'findAvailableOracles').mockResolvedValue([
+        { address: exchangeOracle, role: Role.ExchangeOracle },
+        { address: recordingOracle, role: Role.RecordingOracle },
+      ]);
+
+      await expect(
+        routingProtocolService.validateOracles(
+          chainId,
+          jobType,
+          reputationOracle,
+          exchangeOracle,
+          recordingOracle,
+        ),
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw error if reputation oracle not found', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const invalidReputationOracle = 'invalidOracle';
+
+      jest
+        .spyOn(
+          routingProtocolService.web3ConfigService,
+          'reputationOracles',
+          'get',
+        )
+        .mockReturnValue('validReputationOracle,otherOracle');
+
+      await expect(
+        routingProtocolService.validateOracles(
+          chainId,
+          jobType,
+          invalidReputationOracle,
+        ),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorRoutingProtocol.ReputationOracleNotFound,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+
+    it('should throw error if exchange oracle not found', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const reputationOracle = '0xReputationOracle';
+
+      jest
+        .spyOn(
+          routingProtocolService.web3ConfigService,
+          'reputationOracles',
+          'get',
+        )
+        .mockReturnValue(reputationOracle);
+      jest
+        .spyOn(web3Service, 'findAvailableOracles')
+        .mockResolvedValue([
+          { address: 'anotherOracle', role: Role.ExchangeOracle },
+        ]);
+
+      await expect(
+        routingProtocolService.validateOracles(
+          chainId,
+          jobType,
+          reputationOracle,
+          'invalidExchangeOracle',
+        ),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorRoutingProtocol.ExchangeOracleNotFound,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+
+    it('should throw error if recording oracle not found', async () => {
+      const chainId = ChainId.POLYGON_AMOY;
+      const jobType = 'someJobType';
+      const reputationOracle = '0xReputationOracle';
+
+      jest
+        .spyOn(
+          routingProtocolService.web3ConfigService,
+          'reputationOracles',
+          'get',
+        )
+        .mockReturnValue(reputationOracle);
+      jest
+        .spyOn(web3Service, 'findAvailableOracles')
+        .mockResolvedValue([
+          { address: 'anotherOracle', role: Role.RecordingOracle },
+        ]);
+
+      await expect(
+        routingProtocolService.validateOracles(
+          chainId,
+          jobType,
+          reputationOracle,
+          undefined,
+          'invalidRecordingOracle',
+        ),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorRoutingProtocol.RecordingOracleNotFound,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 });

@@ -227,7 +227,6 @@ describe('JobService', () => {
             validateChainId: jest.fn().mockReturnValue(new Error()),
             calculateGasPrice: jest.fn().mockReturnValue(1000n),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
-            validateOracles: jest.fn(),
           },
         },
         {
@@ -260,6 +259,7 @@ describe('JobService', () => {
           useValue: {
             selectNetwork: jest.fn().mockReturnValue(ChainId.POLYGON_AMOY),
             selectOracles: jest.fn().mockReturnValue(selectedOraclesMock),
+            validateOracles: jest.fn(),
           },
         },
         {
@@ -344,7 +344,7 @@ describe('JobService', () => {
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
-      expect(web3Service.validateOracles).toHaveBeenCalledWith(
+      expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
         MOCK_CHAIN_ID,
         mappedJobType,
         providedReputationOracle,

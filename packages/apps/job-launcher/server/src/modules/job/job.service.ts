@@ -10,7 +10,6 @@ import {
   Encryption,
   KVStoreKeys,
   KVStoreUtils,
-  Role,
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -32,7 +31,6 @@ import {
   ErrorEscrow,
   ErrorJob,
   ErrorQualification,
-  ErrorWeb3,
 } from '../../common/constants/errors';
 import {
   JobRequestType,
@@ -749,7 +747,7 @@ export class JobService {
 
     // Select oracles
     if (reputationOracle) {
-      await this.web3Service.validateOracles(
+      await this.routingProtocolService.validateOracles(
         chainId,
         mappedJobType,
         reputationOracle,

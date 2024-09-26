@@ -131,6 +131,12 @@ export enum ErrorWeb3 {
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
   ReputationOracleUrlNotSet = 'Reputation oracle URL not set',
+}
+
+/**
+ * Represents error messages related to routing protocol.
+ */
+export enum ErrorRoutingProtocol {
   ReputationOracleNotFound = 'The specified Reputation Oracle address is not found in the set of available oracles. Ensure the address is correct and check available oracles for this network.',
   ExchangeOracleNotFound = 'The specified Exchange Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
   RecordingOracleNotFound = 'The specified Recording Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
