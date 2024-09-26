@@ -42,6 +42,7 @@ createRoot(root).render(
             <HomePageStateProvider>
               <Web3AuthProvider>
                 <AuthProvider>
+                  <DisplayModal />
                   <JWTExpirationCheck>
                     <Router />
                   </JWTExpirationCheck>
@@ -49,7 +50,6 @@ createRoot(root).render(
               </Web3AuthProvider>
             </HomePageStateProvider>
             <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
-            <DisplayModal />
           </WalletConnectProvider>
         </BrowserRouter>
       </QueryClientProvider>
