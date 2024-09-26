@@ -96,9 +96,6 @@ export const AreaChart = ({
 		HOVERED_CHARTS_DEFAULT_STATE
 	);
 
-	const minDate = dayjs(MINIMAL_DATE_FOR_DATE_PICKER);
-	const maxDate = dayjs();
-
 	const toggleChart = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setCheckedCharts((prevState) => ({
 			...prevState,
