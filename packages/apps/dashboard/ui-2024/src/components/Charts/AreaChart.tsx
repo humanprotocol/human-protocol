@@ -23,9 +23,10 @@ import {
 	GraphPageChartData,
 	useGraphPageChartData,
 } from '@services/api/use-graph-page-chart-data';
-import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-params';
-
-const MINIMAL_DATE_FOR_DATE_PICKER = '2021-04-06';
+import {
+	initialAllTime,
+	useGraphPageChartParams,
+} from '@utils/hooks/use-graph-page-chart-params';
 
 export type GraphPageChartDataConfigObject<T> = Partial<
 	Record<keyof GraphPageChartData[number], T>
@@ -85,7 +86,6 @@ export const AreaChart = ({
 		setToDate,
 		clearTimePeriod,
 		dateRangeParams: { from, to },
-		effectiveFromAllTimeDate,
 	} = useGraphPageChartParams();
 	const sum = sumNumericProperties(chartData);
 	const [checkedCharts, setCheckedCharts] = useState(
@@ -95,9 +95,6 @@ export const AreaChart = ({
 	const [currentHoveredChart, setCurrentHoveredChart] = useState(
 		HOVERED_CHARTS_DEFAULT_STATE
 	);
-
-	const minDate = dayjs(MINIMAL_DATE_FOR_DATE_PICKER);
-	const maxDate = dayjs();
 
 	const toggleChart = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setCheckedCharts((prevState) => ({
@@ -140,7 +137,7 @@ export const AreaChart = ({
 					}
 					setFromDate(from.add(1, 'day'));
 				} else if (event.deltaY > 0) {
-					if (effectiveFromAllTimeDate?.isSame(from)) {
+					if (from?.isSame(from)) {
 						return;
 					}
 					setFromDate(from.subtract(1, 'day'));
@@ -153,14 +150,7 @@ export const AreaChart = ({
 				currentRef.removeEventListener('wheel', handleScrollChangeDate);
 			};
 		}
-	}, [
-		changeDateOnScroll,
-		clearTimePeriod,
-		effectiveFromAllTimeDate,
-		from,
-		setFromDate,
-		to,
-	]);
+	}, [changeDateOnScroll, clearTimePeriod, from, setFromDate, to]);
 
 	return (
 		<Card
@@ -183,8 +173,8 @@ export const AreaChart = ({
 						value={from}
 						customProps={{
 							disableFuture: true,
-							maxDate: to.isBefore(maxDate) ? to : maxDate,
-							minDate: minDate,
+							maxDate: to.isBefore(dayjs()) ? to : dayjs(),
+							minDate: initialAllTime,
 						}}
 					/>
 					<Typography>-</Typography>
@@ -193,8 +183,8 @@ export const AreaChart = ({
 						value={to}
 						customProps={{
 							disableFuture: true,
-							minDate: from.isAfter(minDate) ? from : minDate,
-							maxDate: maxDate,
+							minDate: from.isAfter(initialAllTime) ? from : initialAllTime,
+							maxDate: dayjs(),
 						}}
 					/>
 				</Stack>
