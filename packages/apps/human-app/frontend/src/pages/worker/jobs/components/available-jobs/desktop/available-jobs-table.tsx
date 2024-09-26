@@ -138,7 +138,10 @@ const getColumns = (callbacks: {
                 callbacks.assignJob({ escrow_address, chain_id });
               }}
             >
-              <Typography sx={{ color: 'white' }} variant="buttonSmall">
+              <Typography
+                sx={{ color: 'white !important' }}
+                variant="buttonSmall"
+              >
                 {t('worker.jobs.selectJob')}
               </Typography>
             </TableButton>
