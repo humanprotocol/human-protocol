@@ -219,5 +219,5 @@ class ServiceIntegrationTest(unittest.TestCase):
             assert reputation_url == DEFAULT_MANIFEST_URL
 
     def test_get_reputation_oracle_url_invalid_escrow(self):
-        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid_address"):
-            get_reputation_oracle_url(self.w3.eth.chain_id, "invalid_address")
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid address"):
+            get_reputation_oracle_url(self.w3.eth.chain_id, "invalid address")
