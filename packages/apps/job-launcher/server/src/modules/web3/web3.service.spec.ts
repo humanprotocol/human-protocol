@@ -15,7 +15,7 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
-import { AvailableOraclesDto, OracleDataDto } from './web3.dto';
+import { OracleDataDto } from './web3.dto';
 
 jest.mock('@human-protocol/sdk', () => {
   const actualSdk = jest.requireActual('@human-protocol/sdk');
