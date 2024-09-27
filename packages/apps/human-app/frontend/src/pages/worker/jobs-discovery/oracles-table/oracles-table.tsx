@@ -93,6 +93,11 @@ export function OraclesTable({
     enableSorting: false,
     enablePagination: false,
     enableTopToolbar: false,
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
   });
 
   return (
