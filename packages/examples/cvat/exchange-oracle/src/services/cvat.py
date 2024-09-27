@@ -175,10 +175,7 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     )
 
     result = session.execute(stmt)
-    updated_projects = result.all()
-    session.commit()
-
-    return [row.cvat_id for row in updated_projects]
+    return [row.cvat_id for row in result.all()]
 
 
 def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
@@ -201,10 +198,7 @@ def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
     )
 
     result = session.execute(stmt)
-    updated_tasks = result.all()
-    session.commit()
-
-    return [row.cvat_id for row in updated_tasks]
+    return [row.cvat_id for row in result.all()]
 
 
 def create_escrow_validations(session: Session):

@@ -22,6 +22,7 @@ def track_completed_projects(logger: logging.Logger, session: Session) -> None:
     updated_project_cvat_ids = cvat_service.complete_projects_with_completed_tasks(session)
 
     if updated_project_cvat_ids:
+        session.commit()
         logger.info(
             "Found new completed projects: {}".format(
                 ", ".join(str(t) for t in updated_project_cvat_ids)
@@ -34,6 +35,7 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
     updated_task_cvat_ids = cvat_service.complete_tasks_with_completed_jobs(session)
 
     if updated_task_cvat_ids:
+        session.commit()
         logger.info(
             "Found new completed tasks: {}".format(", ".join(str(t) for t in updated_task_cvat_ids))
         )
@@ -109,10 +111,12 @@ def track_assignments(logger: logging.Logger) -> None:
 @cron_job
 def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
     awaiting_validations = cvat_service.create_escrow_validations(session)
-    logger.info(
-        f"Got {len(awaiting_validations)} new escrows"
-        f"awaiting validation: {format_list(awaiting_validations)}"
-    )
+    if awaiting_validations:
+        session.commit()
+        logger.info(
+            f"Got {len(awaiting_validations)} new escrows"
+            f"awaiting validation: {format_list(awaiting_validations)}"
+        )
 
 
 @cron_job
