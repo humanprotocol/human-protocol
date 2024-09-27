@@ -130,7 +130,7 @@ describe('webhookController', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_COMPLETED,
+        eventType: EventType.JOB_COMPLETED,
       };
       jest.spyOn(webhookService, 'handleWebhook');
 

@@ -114,7 +114,7 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_COMPLETED,
+        eventType: EventType.JOB_COMPLETED,
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
