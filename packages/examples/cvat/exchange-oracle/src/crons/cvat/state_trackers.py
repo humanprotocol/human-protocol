@@ -15,6 +15,7 @@ from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_escrows_validations
+from src.log import format_sequence
 
 
 @cron_job
@@ -23,11 +24,7 @@ def track_completed_projects(logger: logging.Logger, session: Session) -> None:
 
     if updated_project_cvat_ids:
         session.commit()
-        logger.info(
-            "Found new completed projects: {}".format(
-                ", ".join(str(t) for t in updated_project_cvat_ids)
-            )
-        )
+        logger.info(f"Found new completed projects: {format_sequence(updated_project_cvat_ids)}")
 
 
 @cron_job
@@ -36,9 +33,7 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
 
     if updated_task_cvat_ids:
         session.commit()
-        logger.info(
-            "Found new completed tasks: {}".format(", ".join(str(t) for t in updated_task_cvat_ids))
-        )
+        logger.info(f"Found new completed projects: {format_sequence(updated_task_cvat_ids)}")
 
 
 @cron_job
@@ -114,8 +109,8 @@ def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
     if awaiting_validations:
         session.commit()
         logger.info(
-            f"Got {len(awaiting_validations)} new escrows"
-            f"awaiting validation: {format_list(awaiting_validations)}"
+            f"Got {len(awaiting_validations)} escrows "
+            f"awaiting validation: {format_sequence(awaiting_validations)}"
         )
 
 
@@ -202,8 +197,8 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                 "; ".join(
                     f"{k}: {v}"
                     for k, v in {
-                        "success": ", ".join(str(u.task_id) for u in completed),
-                        "failed": ", ".join(str(u.task_id) for u in failed),
+                        "success": format_sequence([u.task_id for u in completed]),
+                        "failed": format_sequence([u.task_id for u in failed]),
                     }.items()
                     if v
                 )
@@ -259,6 +254,6 @@ def track_escrow_creation(logger: logging.Logger, session: Session) -> None:
 
         logger.info(
             "Updated creation status of escrows: {}".format(
-                ", ".join(c.escrow_address for c in finished)
+                format_sequence([c.escrow_address for c in finished])
             )
         )
