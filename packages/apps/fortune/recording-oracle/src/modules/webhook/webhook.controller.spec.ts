@@ -138,7 +138,7 @@ describe('webhookController', () => {
 
       await expect(
         webhookController.processWebhook(MOCK_SIGNATURE, webhook),
-      ).rejects.toThrow('Invalid webhook event type: task_completed');
+      ).rejects.toThrow('Invalid webhook event type: job_completed');
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });

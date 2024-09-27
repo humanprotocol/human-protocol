@@ -118,7 +118,7 @@ describe('WebhookService', () => {
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: task_completed',
+        'Invalid webhook event type: job_completed',
       );
     });
   });
