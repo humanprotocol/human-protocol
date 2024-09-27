@@ -50,7 +50,7 @@ export function PendingKeysForm({
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem',
+          gap: '1.5rem',
         }}
       >
         <EditPendingKeysForm existingKeysInitialState={keysData} />

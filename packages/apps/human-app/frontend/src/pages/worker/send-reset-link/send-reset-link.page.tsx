@@ -17,7 +17,6 @@ import { useAuth } from '@/auth/use-auth';
 import { FormCaptcha } from '@/components/h-captcha';
 import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
-import { MAX_INPUT_WIDTH } from '@/shared/consts';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
@@ -63,7 +62,7 @@ export function SendResetLinkWorkerPage() {
             void methods.handleSubmit(handleWorkerSendResetLink)(event);
           }}
         >
-          <Grid container gap="2rem" maxWidth={`${MAX_INPUT_WIDTH}px`}>
+          <Grid container gap="1.5rem">
             <Typography variant="body1">
               {t('worker.sendResetLinkForm.description')}
             </Typography>

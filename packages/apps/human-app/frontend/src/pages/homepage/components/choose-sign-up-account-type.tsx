@@ -22,8 +22,9 @@ export function ChooseSignUpAccountType() {
     <PageCard
       backArrowPath={backToWelcomeStage}
       cancelRouterPathOrCallback={backToWelcomeStage}
-      childrenMaxWidth="100%"
+      childrenMaxWidth="876px"
       hiddenCancelButton={!isMobileMd}
+      maxContentWidth="748px"
       title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >
       <Grid container spacing={4}>
