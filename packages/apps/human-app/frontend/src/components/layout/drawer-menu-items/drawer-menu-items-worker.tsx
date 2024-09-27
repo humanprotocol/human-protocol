@@ -9,7 +9,8 @@ import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 
 export const workerDrawerTopMenuItems = (
-  addressRegistered: boolean
+  addressRegistered: boolean,
+  labelingEnabled: boolean
 ): TopMenuItem[] => {
   return [
     <Grid
@@ -28,7 +29,9 @@ export const workerDrawerTopMenuItems = (
     </Grid>,
     {
       label: t('components.DrawerNavigation.captchaLabelling'),
-      link: routerPaths.worker.enableLabeler,
+      link: labelingEnabled
+        ? routerPaths.worker.HcaptchaLabeling
+        : routerPaths.worker.enableLabeler,
       disabled: !addressRegistered,
     },
     // {

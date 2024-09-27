@@ -17,6 +17,7 @@ import { WalletConnectProvider } from '@/contexts/wallet-connect';
 import { Web3AuthProvider } from '@/auth-web3/web3-auth-context';
 import { JWTExpirationCheck } from '@/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/contexts/color-mode-context';
+import { HomePageStateProvider } from '@/contexts/homepage-state';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -35,15 +36,17 @@ createRoot(root).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <WalletConnectProvider>
-            <Web3AuthProvider>
-              <AuthProvider>
-                <JWTExpirationCheck>
-                  <Router />
-                </JWTExpirationCheck>
-              </AuthProvider>
-            </Web3AuthProvider>
+            <HomePageStateProvider>
+              <Web3AuthProvider>
+                <AuthProvider>
+                  <DisplayModal />
+                  <JWTExpirationCheck>
+                    <Router />
+                  </JWTExpirationCheck>
+                </AuthProvider>
+              </Web3AuthProvider>
+            </HomePageStateProvider>
             <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
-            <DisplayModal />
           </WalletConnectProvider>
         </BrowserRouter>
       </QueryClientProvider>

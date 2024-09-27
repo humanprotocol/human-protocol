@@ -1,33 +1,26 @@
 import { Container } from '@mui/material';
 import { useEffect } from 'react';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
-import type { HomePageStageType } from '@/pages/homepage/home.page';
+import { useHomePageState } from '@/contexts/homepage-state';
 import { Welcome } from './welcome';
 import { ChooseSignUpAccountType } from './choose-sign-up-account-type';
 
-export function HomeContainer({
-  stage,
-  setStage,
-}: {
-  stage: HomePageStageType;
-  setStage: (step: HomePageStageType) => void;
-}) {
+export function HomeContainer() {
+  const { pageView } = useHomePageState();
   const { setWhiteBackground, setGrayBackground } = useBackgroundColorStore();
 
   useEffect(() => {
-    if (stage === 'chooseSignUpAccountType') {
+    if (pageView === 'chooseSignUpAccountType') {
       setGrayBackground();
     } else {
       setWhiteBackground();
     }
-  }, [setGrayBackground, setWhiteBackground, stage]);
+  }, [setGrayBackground, setWhiteBackground, pageView]);
 
   return (
     <Container sx={{ position: 'relative' }}>
-      {stage === 'welcome' && <Welcome setStage={setStage} />}
-      {stage === 'chooseSignUpAccountType' && (
-        <ChooseSignUpAccountType setStage={setStage} />
-      )}
+      {pageView === 'welcome' && <Welcome />}
+      {pageView === 'chooseSignUpAccountType' && <ChooseSignUpAccountType />}
     </Container>
   );
 }

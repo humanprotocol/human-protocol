@@ -22,7 +22,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
     if (isProtected) {
       return '200px';
     }
-    return '44px';
+    return '0';
   };
 
   return (
@@ -30,7 +30,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
       component="footer"
       container
       sx={{
-        pr: isMobile ? 0 : '44px',
+        pr: 0,
         pl: parseLeftPadding(),
         pb: isMobile ? 0 : '44px',
         pt: '32px',

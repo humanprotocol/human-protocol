@@ -16,6 +16,7 @@ import {
   onlyDarkModeColor,
 } from '@/styles/dark-color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -32,19 +33,17 @@ const IconWrapper = styled('div')(() => ({
 }));
 
 const commonStyles: SxProps<Theme> = {
-  padding: '2rem 2rem 6rem 2rem',
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
   borderRadius: '20px',
   minHeight: '70vh',
-  maxWidth: '1200px',
+  maxWidth: '1600px',
   width: '100%',
   background: constColorPalette.white,
 };
 
 const commonStylesDark: SxProps<Theme> = {
-  padding: '2rem 2rem 6rem 2rem',
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
@@ -87,6 +86,7 @@ export function PageCard({
   const { isDarkMode, colorPalette } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
+  const isMobile = useIsMobile('md');
 
   useEffect(() => {
     if (withLayoutBackground && !isDarkMode) {
@@ -108,7 +108,13 @@ export function PageCard({
   };
 
   return (
-    <Grid container sx={isDarkMode ? commonStylesDark : commonStyles}>
+    <Grid
+      container
+      sx={{
+        ...(isDarkMode ? commonStylesDark : commonStyles),
+        padding: isMobile ? '0 1rem 7.25rem 1rem' : '2rem 2rem 8.75rem 2rem',
+      }}
+    >
       {!hiddenCancelButton && (
         <Grid
           sx={{

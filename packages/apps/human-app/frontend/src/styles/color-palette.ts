@@ -13,6 +13,7 @@ export const colorPalette = {
     light: '#6309FF',
     dark: '#100735',
     contrastText: '#F9FAFF',
+    shades: '#DADEF0CC',
   },
   secondary: {
     main: '#6309FF',

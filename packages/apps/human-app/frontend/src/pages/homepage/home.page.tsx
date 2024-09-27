@@ -2,13 +2,14 @@ import Box from '@mui/material/Box';
 import { Paper } from '@mui/material';
 import { Navigate } from 'react-router-dom';
 import { t } from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useHomePageState } from '@/contexts/homepage-state';
 import { useModalStore } from '../../components/ui/modal/modal.store';
 import { HomeContainer } from './components/home-container';
 
@@ -16,7 +17,7 @@ export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';
 
 export function HomePage() {
   const { colorPalette, isDarkMode } = useColorMode();
-  const [stage, setStage] = useState<HomePageStageType>('welcome');
+  const { pageView, setPageView } = useHomePageState();
   const isMobile = useIsMobile();
   const isMobileMd = useIsMobile('md');
   const { user: worker } = useAuth();
@@ -46,9 +47,7 @@ export function HomePage() {
       if (isMobile) {
         return colorPalette.backgroundColor;
       }
-      return stage === 'chooseSignUpAccountType'
-        ? colorPalette.paper.main
-        : 'unset';
+      return colorPalette.paper.main;
     }
 
     return colorPalette.white;
@@ -65,13 +64,13 @@ export function HomePage() {
           position: 'relative',
         }}
       >
-        <HomeContainer setStage={setStage} stage={stage} />
-        {stage === 'chooseSignUpAccountType' && !isMobileMd ? (
+        <HomeContainer />
+        {pageView === 'chooseSignUpAccountType' && !isMobileMd ? (
           <Button
             onClick={() => {
-              setStage('welcome');
+              setPageView('welcome');
             }}
-            sx={{ position: 'absolute', top: '15px', right: '15px' }}
+            sx={{ position: 'absolute', top: '24px', right: '24px' }}
           >
             {t('homepage.cancel')}
           </Button>

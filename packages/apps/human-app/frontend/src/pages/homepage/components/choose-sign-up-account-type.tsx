@@ -7,19 +7,21 @@ import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/components/ui/page-card';
 import type { HomePageStageType } from '@/pages/homepage/home.page';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useHomePageState } from '@/contexts/homepage-state';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
 }
 
-export function ChooseSignUpAccountType({ setStage }: ChooseSignUpAccountType) {
+export function ChooseSignUpAccountType() {
   const { colorPalette } = useColorMode();
+  const { setPageView } = useHomePageState();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
   const isMobileMd = useIsMobile('md');
 
   const backToWelcomeStage = () => {
-    setStage('welcome');
+    setPageView('welcome');
   };
 
   return (

@@ -23,6 +23,7 @@ import { FetchError } from '@/api/fetcher';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { MAX_INPUT_WIDTH } from '@/shared/consts';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -80,7 +81,7 @@ export function SignUpWorkerPage() {
             void methods.handleSubmit(handleWorkerSignUp)(event);
           }}
         >
-          <Grid container gap="2rem">
+          <Grid container gap="2rem" maxWidth={`${MAX_INPUT_WIDTH}px`}>
             <Input label={t('worker.signUpForm.fields.email')} name="email" />
             <Password
               label={t('worker.signUpForm.fields.password')}
@@ -90,7 +91,6 @@ export function SignUpWorkerPage() {
               label={t('worker.signUpForm.fields.confirmPassword')}
               name="confirmPassword"
             />
-            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
             <Grid>
               <Typography fontSize="0.75rem" variant="textField">
                 <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
@@ -100,6 +100,7 @@ export function SignUpWorkerPage() {
                 </Trans>
               </Typography>
             </Grid>
+            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
             <Button
               fullWidth
               loading={isSignUpWorkerPending}
