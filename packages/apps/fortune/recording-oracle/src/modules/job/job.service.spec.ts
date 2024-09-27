@@ -485,7 +485,7 @@ describe('JobService', () => {
       const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
-        event_type: EventType.TASK_COMPLETED,
+        event_type: EventType.JOB_COMPLETED,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -577,7 +577,7 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.TASK_COMPLETED,
+      event_type: EventType.JOB_COMPLETED,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
