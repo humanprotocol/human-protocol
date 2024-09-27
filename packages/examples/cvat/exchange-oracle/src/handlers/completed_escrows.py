@@ -265,7 +265,7 @@ def _handle_escrow_validation(
 
 def handle_escrows_validations(logger: logging.Logger) -> None:
     with SessionLocal.begin() as session:
-        escrow_validations = cvat_service.get_escrows_for_validation(
+        escrow_validations = cvat_service.prepare_escrows_for_validation(
             session,
             limit=CronConfig.track_completed_escrows_chunk_size,
         )
