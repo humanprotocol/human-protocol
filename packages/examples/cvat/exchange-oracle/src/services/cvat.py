@@ -156,41 +156,23 @@ def get_projects_by_status(
     return projects.limit(limit).all()
 
 
-def update_projects_by_status(
-    session: Session,
-    status: ProjectStatuses,
-    new_status: ProjectStatuses,
-    *,
-    included_types: Sequence[TaskTypes] | None = None,
-) -> list[int]:
-    """
-    Updates projects with the given status to new_status if all their tasks are completed.
-    Returns the cvat_ids of the updated projects.
-    """
-    # Subquery to check if there are any incomplete tasks for a project
+def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     incomplete_tasks_exist = (
         select(1)
         .where(
             Task.cvat_project_id == Project.cvat_id,
-            Task.status != TaskStatuses.completed.value,
+            Task.status != TaskStatuses.completed,
         )
         .limit(1)
         .correlate(Project)
     ).exists()
 
-    # Build the update statement
     stmt = (
         update(Project)
-        .where(
-            Project.status == status.value,
-            ~incomplete_tasks_exist,
-        )
-        .values(status=new_status.value)
+        .where(Project.status == ProjectStatuses.annotation, ~incomplete_tasks_exist)
+        .values(status=ProjectStatuses.completed)
         .returning(Project.cvat_id)
     )
-
-    if included_types is not None:
-        stmt = stmt.where(Project.job_type.in_([t.value for t in included_types]))
 
     result = session.execute(stmt)
     updated_projects = result.fetchall()
@@ -199,24 +181,10 @@ def update_projects_by_status(
     return [row.cvat_id for row in updated_projects]
 
 
-def update_tasks_by_status(
-    session: Session,
-    status: TaskStatuses,
-    new_status: TaskStatuses,
-    *,
-    project_status: ProjectStatuses | None = None,
-) -> list[int]:
-    """
-    Updates tasks with the given status to new_status if all their jobs are completed.
-    Returns the cvat_ids of the updated tasks.
-    """
-    # Subquery to check if there are any incomplete jobs for a task
+def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
     incomplete_jobs_exist = (
         select(1)
-        .where(
-            Job.cvat_task_id == Task.cvat_id,
-            Job.status != JobStatuses.completed.value,
-        )
+        .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
         .limit(1)
         .correlate(Task)
     ).exists()
@@ -224,15 +192,13 @@ def update_tasks_by_status(
     stmt = (
         update(Task)
         .where(
-            Task.status == status.value,
+            Task.status == TaskStatuses.annotation,
             ~incomplete_jobs_exist,
+            Task.project.has(Project.status == ProjectStatuses.annotation),
         )
-        .values(status=new_status.value)
+        .values(status=TaskStatuses.completed)
         .returning(Task.cvat_id)
     )
-
-    if project_status:
-        stmt = stmt.where(Task.project.has(Project.status == project_status.value))
 
     result = session.execute(stmt)
     updated_tasks = result.fetchall()

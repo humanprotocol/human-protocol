@@ -9,7 +9,7 @@ import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
 from src.core.config import CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
-from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
+from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
 from src.db import SessionLocal
 from src.db import errors as db_errors
@@ -19,17 +19,7 @@ from src.handlers.completed_escrows import handle_escrows_validations
 
 @cron_job
 def track_completed_projects(logger: logging.Logger, session: Session) -> None:
-    """
-    Tracks completed projects:
-    Updates projects with "annotation" status to "completed" if all their tasks are completed,
-    and logs the cvat_ids of the updated projects.
-    """
-    updated_project_cvat_ids = cvat_service.update_projects_by_status(
-        session,
-        status=ProjectStatuses.annotation,
-        new_status=ProjectStatuses.completed,
-        included_types=None,  # Add included_types if needed
-    )
+    updated_project_cvat_ids = cvat_service.complete_projects_with_completed_tasks(session)
 
     if updated_project_cvat_ids:
         logger.info(
@@ -41,17 +31,7 @@ def track_completed_projects(logger: logging.Logger, session: Session) -> None:
 
 @cron_job
 def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
-    """
-    Tracks completed tasks:
-    Updates tasks with "annotation" status to "completed" if all their jobs are completed,
-    and logs the cvat_ids of the updated tasks.
-    """
-    updated_task_cvat_ids = cvat_service.update_tasks_by_status(
-        session,
-        status=TaskStatuses.annotation,
-        new_status=TaskStatuses.completed,
-        project_status=ProjectStatuses.annotation,
-    )
+    updated_task_cvat_ids = cvat_service.complete_tasks_with_completed_jobs(session)
 
     if updated_task_cvat_ids:
         logger.info(
