@@ -1,3 +1,7 @@
+"""
+Functions in this module are grouped by various categories, look for separators like  `# Job`, etc.
+"""
+
 import itertools
 import uuid
 from collections.abc import Iterable, Sequence
@@ -178,29 +182,6 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     return [row.cvat_id for row in result.all()]
 
 
-def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
-    incomplete_jobs_exist = (
-        select(1)
-        .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
-        .limit(1)
-        .correlate(Task)
-    ).exists()
-
-    stmt = (
-        update(Task)
-        .where(
-            Task.status == TaskStatuses.annotation,
-            ~incomplete_jobs_exist,
-            Task.project.has(Project.status == ProjectStatuses.annotation),
-        )
-        .values(status=TaskStatuses.completed)
-        .returning(Task.cvat_id)
-    )
-
-    result = session.execute(stmt)
-    return [row.cvat_id for row in result.all()]
-
-
 def create_escrow_validations(session: Session):
     # if escrow have projects with `validation` AND `completed` statuses
     # it means, some jobs were rejected and re-annotated
@@ -234,50 +215,6 @@ def create_escrow_validations(session: Session):
     )
 
     return session.execute(insert_stmt).all()
-
-
-def prepare_escrows_for_validation(
-    session: Session, *, limit: int = 100
-) -> Sequence[tuple[str, str, int]]:
-    subquery = (
-        select(EscrowValidation.id)
-        .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
-        .limit(limit)
-        .order_by(EscrowValidation.attempts.asc())
-        .subquery()
-    )
-    update_stmt = (
-        update(EscrowValidation)
-        .where(EscrowValidation.id.in_(subquery))
-        .values(status=EscrowValidationStatuses.in_progress, attempts=EscrowValidation.attempts + 1)
-        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
-    )
-    return session.execute(update_stmt).all()
-
-
-def update_escrow_validation_status(
-    session: Session,
-    escrow_address: str,
-    chain_id: int,
-    status: EscrowValidationStatuses,
-) -> None:
-    stmt = (
-        update(EscrowValidation)
-        .where(
-            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
-        )
-        .values(status=status)
-    )
-    session.execute(stmt)
-
-
-def update_escrow_validation_statuses_by_ids(
-    session: Session,
-    ids: Iterable[str],
-    status: EscrowValidationStatuses,
-) -> None:
-    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
-    session.execute(stmt)
 
 
 def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:
@@ -363,7 +300,7 @@ def is_project_completed(session: Session, project_id: str) -> bool:
     return bool(len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs))
 
 
-# EscrowCreation
+# Escrow
 def create_escrow_creation(
     session: Session,
     escrow_address: str,
@@ -447,6 +384,53 @@ def finish_escrow_creations_by_escrow_address(
         .values(finished_at=utcnow())
     )
     session.execute(statement)
+
+
+# EscrowValidation
+
+
+def prepare_escrows_for_validation(
+    session: Session, *, limit: int = 100
+) -> Sequence[tuple[str, str, int]]:
+    subquery = (
+        select(EscrowValidation.id)
+        .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
+        .limit(limit)
+        .order_by(EscrowValidation.attempts.asc())
+        .subquery()
+    )
+    update_stmt = (
+        update(EscrowValidation)
+        .where(EscrowValidation.id.in_(subquery))
+        .values(status=EscrowValidationStatuses.in_progress, attempts=EscrowValidation.attempts + 1)
+        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
+    )
+    return session.execute(update_stmt).all()
+
+
+def update_escrow_validation_status(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    status: EscrowValidationStatuses,
+) -> None:
+    stmt = (
+        update(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .values(status=status)
+    )
+    session.execute(stmt)
+
+
+def update_escrow_validation_statuses_by_ids(
+    session: Session,
+    ids: Iterable[str],
+    status: EscrowValidationStatuses,
+) -> None:
+    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
+    session.execute(stmt)
 
 
 # Task
@@ -559,6 +543,29 @@ def get_active_task_uploads(
 def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
     statement = delete(DataUpload).where(DataUpload.id.in_([upload.id for upload in uploads]))
     session.execute(statement)
+
+
+def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
+    incomplete_jobs_exist = (
+        select(1)
+        .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
+        .limit(1)
+        .correlate(Task)
+    ).exists()
+
+    stmt = (
+        update(Task)
+        .where(
+            Task.status == TaskStatuses.annotation,
+            ~incomplete_jobs_exist,
+            Task.project.has(Project.status == ProjectStatuses.annotation),
+        )
+        .values(status=TaskStatuses.completed)
+        .returning(Task.cvat_id)
+    )
+
+    result = session.execute(stmt)
+    return [row.cvat_id for row in result.all()]
 
 
 # Job
