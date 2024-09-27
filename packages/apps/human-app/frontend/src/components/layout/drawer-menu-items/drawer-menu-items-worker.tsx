@@ -34,11 +34,11 @@ export const workerDrawerTopMenuItems = (
         : routerPaths.worker.enableLabeler,
       disabled: !addressRegistered,
     },
-    // {
-    //   label: t('components.DrawerNavigation.jobsDiscovery'),
-    //   link: routerPaths.worker.jobsDiscovery,
-    //   disabled: !addressRegistered,
-    // },
+    {
+      label: t('components.DrawerNavigation.jobsDiscovery'),
+      link: routerPaths.worker.jobsDiscovery,
+      disabled: !addressRegistered,
+    },
   ];
 };
 
