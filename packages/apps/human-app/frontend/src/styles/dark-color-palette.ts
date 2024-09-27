@@ -15,6 +15,7 @@ export const darkColorPalette = {
     light: '#EDEBFD',
     dark: '#9D7CD6',
     contrastText: 'rgba(0, 0, 0, 0.87)',
+    shades: '',
   },
   secondary: {
     main: '#5D0CE9',
@@ -54,4 +55,6 @@ export const darkColorPalette = {
 export const onlyDarkModeColor = {
   backArrowBg: 'rgba(246, 247, 254, 0.1)',
   additionalTextColor: '#9387FF',
+  mainColorWithOpacity: '#CDC7FFCC',
+  listItemColor: '#CDC7FF29',
 };

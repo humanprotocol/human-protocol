@@ -8,7 +8,10 @@ import { colorPalette } from '@/styles/color-palette';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { useColorMode } from '@/hooks/use-color-mode';
-import { darkColorPalette } from '@/styles/dark-color-palette';
+import {
+  darkColorPalette,
+  onlyDarkModeColor,
+} from '@/styles/dark-color-palette';
 
 const CustomTextField = styled(TextField)(() => ({
   '& .Mui-disabled': {
@@ -20,6 +23,11 @@ const CustomTextFieldDark = styled(TextField)(() => ({
   '& .Mui-disabled': {
     color: darkColorPalette.text.disabledSecondary,
     '-webkit-text-fill-color': darkColorPalette.text.disabledSecondary,
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: `${onlyDarkModeColor.mainColorWithOpacity} !important`,
+    },
   },
 }));
 

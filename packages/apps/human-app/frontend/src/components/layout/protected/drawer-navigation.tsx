@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { NAVBAR_PADDING } from '@/components/layout/protected/navbar';
 import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 const drawerWidth = 240;
 
@@ -43,6 +45,7 @@ export function DrawerNavigation({
   bottomMenuItems,
   signOut,
 }: DrawerNavigationProps) {
+  const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
@@ -129,7 +132,9 @@ export function DrawerNavigation({
                     selected={isActive}
                     sx={{
                       '&.Mui-selected': {
-                        backgroundColor: colorPalette.primary.shades,
+                        backgroundColor: isDarkMode
+                          ? onlyDarkModeColor.listItemColor
+                          : colorPalette.primary.shades,
                       },
                     }}
                   >
@@ -188,7 +193,9 @@ export function DrawerNavigation({
                     selected={isActive}
                     sx={{
                       '&.Mui-selected': {
-                        backgroundColor: colorPalette.primary.shades,
+                        backgroundColor: isDarkMode
+                          ? onlyDarkModeColor.listItemColor
+                          : colorPalette.primary.shades,
                       },
                     }}
                   >

@@ -8,13 +8,14 @@ import { PageCard } from '@/components/ui/page-card';
 import type { HomePageStageType } from '@/pages/homepage/home.page';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { useHomePageState } from '@/contexts/homepage-state';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
 }
 
 export function ChooseSignUpAccountType() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const { setPageView } = useHomePageState();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
@@ -33,13 +34,8 @@ export function ChooseSignUpAccountType() {
       title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >
       <Grid container spacing={4}>
-        <Grid item xs={12}>
+        <Grid item sx={{ paddingBottom: '16px' }} xs={12}>
           <Typography variant="h4">{t('homepage.howWillUse')}</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography variant="subtitle1">
-            {t('homepage.selectOption')}
-          </Typography>
         </Grid>
         <Grid
           item
@@ -57,7 +53,14 @@ export function ChooseSignUpAccountType() {
             }}
           >
             <div>
-              <Typography color={colorPalette.primary.light} variant="h6">
+              <Typography
+                color={
+                  isDarkMode
+                    ? onlyDarkModeColor.additionalTextColor
+                    : colorPalette.primary.light
+                }
+                variant="h6"
+              >
                 {t('homepage.iWantToEarn')}
               </Typography>
               <List
@@ -119,7 +122,14 @@ export function ChooseSignUpAccountType() {
           xs={isMobile ? 12 : 6}
         >
           <div>
-            <Typography color={colorPalette.primary.light} variant="h6">
+            <Typography
+              color={
+                isDarkMode
+                  ? onlyDarkModeColor.additionalTextColor
+                  : colorPalette.primary.light
+              }
+              variant="h6"
+            >
               {t('homepage.joinAsOperator')}
             </Typography>
             <List

@@ -215,7 +215,7 @@ export function AvailableJobsTable() {
           },
         },
       },
-      rowsPerPageOptions: [2, 10],
+      rowsPerPageOptions: [5, 10],
     },
     pageCount: tableData?.total_pages || -1,
     rowCount: tableData?.total_results,

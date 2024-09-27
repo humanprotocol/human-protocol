@@ -31,9 +31,9 @@ export function EnableLabeler() {
     return <Navigate replace to={routerPaths.worker.profile} />;
   }
 
-  if (user.site_key) {
-    return <Navigate replace to={routerPaths.worker.HcaptchaLabeling} />;
-  }
+  // if (user.site_key) {
+  //   return <Navigate replace to={routerPaths.worker.HcaptchaLabeling} />;
+  // }
 
   if (isError) {
     return <PageCardError errorMessage={defaultErrorMessage(error)} />;

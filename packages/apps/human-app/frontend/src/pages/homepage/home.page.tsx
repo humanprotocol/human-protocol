@@ -57,7 +57,10 @@ export function HomePage() {
     <Box width="100%">
       <Paper
         sx={{
-          backgroundColor: paperBackgroundColor,
+          backgroundColor:
+            isDarkMode && pageView === 'welcome'
+              ? 'inherit'
+              : paperBackgroundColor,
           mx: !isMobile ? '30px' : 0,
           boxShadow: 'none',
           borderRadius: '20px',
