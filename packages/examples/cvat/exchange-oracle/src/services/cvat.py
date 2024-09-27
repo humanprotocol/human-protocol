@@ -175,7 +175,7 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     )
 
     result = session.execute(stmt)
-    updated_projects = result.fetchall()
+    updated_projects = result.all()
     session.commit()
 
     return [row.cvat_id for row in updated_projects]
@@ -201,7 +201,7 @@ def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
     )
 
     result = session.execute(stmt)
-    updated_tasks = result.fetchall()
+    updated_tasks = result.all()
     session.commit()
 
     return [row.cvat_id for row in updated_tasks]
@@ -243,7 +243,7 @@ def create_escrow_validations(session: Session):
         .returning(EscrowValidation.id)
     )
 
-    return session.execute(insert_stmt).fetchall()
+    return session.execute(insert_stmt).all()
 
 
 def get_escrows_for_validation(session: Session, *, limit: int = 100) -> Sequence[tuple[str, str, int]]:
@@ -260,7 +260,7 @@ def get_escrows_for_validation(session: Session, *, limit: int = 100) -> Sequenc
         .values(status=EscrowValidationStatuses.in_progress, attempts=EscrowValidation.attempts + 1)
         .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
     )
-    return session.execute(update_stmt).fetchall()
+    return session.execute(update_stmt).all()
 
 
 def update_escrow_validation_status(
@@ -348,7 +348,7 @@ def update_project_statuses_by_escrow_address(
         .values(status=status.value)
         .returning(Project.cvat_id)
     )
-    session.execute(statement).fetchall()
+    session.execute(statement).all()
 
 
 def delete_project(session: Session, project_id: str) -> None:
