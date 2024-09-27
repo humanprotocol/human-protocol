@@ -1,6 +1,4 @@
-import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
-import Grid from '@mui/material/Grid';
 import type {
   BottomMenuItem,
   TopMenuItem,
@@ -9,33 +7,12 @@ import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 
 export const workerDrawerTopMenuItems = (
-  addressRegistered: boolean,
-  labelingEnabled: boolean
+  addressRegistered: boolean
 ): TopMenuItem[] => {
   return [
-    <Grid
-      key={crypto.randomUUID()}
-      sx={{
-        display: 'inline-flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '0.8rem',
-      }}
-    >
-      <WorkIcon />
-      <Typography variant="body6">
-        {t('components.DrawerNavigation.jobs')}
-      </Typography>
-    </Grid>,
     {
-      label: t('components.DrawerNavigation.captchaLabelling'),
-      link: labelingEnabled
-        ? routerPaths.worker.HcaptchaLabeling
-        : routerPaths.worker.enableLabeler,
-      disabled: !addressRegistered,
-    },
-    {
-      label: t('components.DrawerNavigation.jobsDiscovery'),
+      label: t('components.DrawerNavigation.jobs'),
+      icon: <WorkIcon />,
       link: routerPaths.worker.jobsDiscovery,
       disabled: !addressRegistered,
     },

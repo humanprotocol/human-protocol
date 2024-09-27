@@ -8,9 +8,9 @@
   "dashboard": {},
   "protectedPagesHeaders": {
     "profile": "Profile",
-    "jobsDiscovery": "Jobs Discovery",
+    "jobsDiscovery": "Tasks",
     "hcaptchaLabeling": "Labeling",
-    "jobs": "Jobs"
+    "jobs": "Tasks"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
@@ -48,9 +48,7 @@
       "howItWorks": "How It Works"
     },
     "DrawerNavigation": {
-      "jobs": "Jobs",
-      "captchaLabelling": "Labeling",
-      "jobsDiscovery": "Jobs discovery",
+      "jobs": "Tasks",
       "profile": "Profile",
       "help": "Help",
       "logout": "Log Out"
@@ -207,15 +205,15 @@
     "oraclesTable": {
       "annotationTool": "Annotation tool",
       "oracleAddress": "Oracle address",
-      "jobTypes": "Job types",
-      "seeJobs": "See Jobs",
-      "allJobs": "All jobs"
+      "jobTypes": "Task types",
+      "seeJobs": "See tasks",
+      "allJobs": "All tasks"
     },
     "jobs": {
-      "successFullyAssignedJob": "Successfully assigned a job!",
+      "successFullyAssignedJob": "Successfully assigned a task!",
       "errorFetchingData": "There was an error while fetching data, please try again",
-      "availableJobs": "Available Jobs",
-      "myJobs": "My Jobs",
+      "availableJobs": "Available Tasks",
+      "myJobs": "My Tasks",
       "jobsDiscovery": "Jobs Discovery",
       "jobDescription": "Job description",
       "escrowAddress": "Escrow address",
@@ -224,7 +222,7 @@
       "jobType": "Job type",
       "expiresAt": "Expires at",
       "status": "Status",
-      "selectJob": "Select Job",
+      "selectJob": "Select Task",
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
