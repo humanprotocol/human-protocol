@@ -228,6 +228,7 @@ def create_escrow_validations(session: Session):
             set_={
                 "status": EscrowValidationStatuses.awaiting,
             },
+            where=EscrowValidation.status != EscrowValidationStatuses.awaiting,
         )
         .returning(EscrowValidation.id)
     )
