@@ -130,8 +130,8 @@ def track_assignments(logger: logging.Logger) -> None:
 def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
     awaiting_validations = cvat_service.create_escrow_validations(session)
     logger.info(
-        f"{len(awaiting_validations)} escrow validations "
-        f"are in awaiting state: {awaiting_validations}"
+        f"Got {len(awaiting_validations)} new escrows"
+        f"awaiting validation: {format_list(awaiting_validations)}"
     )
 
 

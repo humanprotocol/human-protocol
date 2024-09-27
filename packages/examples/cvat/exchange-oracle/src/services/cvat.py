@@ -280,7 +280,7 @@ def create_escrow_validations(session: Session):
     return session.execute(insert_stmt).fetchall()
 
 
-def get_escrows_for_validation(session: Session, limit=100) -> Sequence[tuple[str, str, int]]:
+def get_escrows_for_validation(session: Session, *, limit: int = 100) -> Sequence[tuple[str, str, int]]:
     subquery = (
         select(EscrowValidation.id)
         .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)

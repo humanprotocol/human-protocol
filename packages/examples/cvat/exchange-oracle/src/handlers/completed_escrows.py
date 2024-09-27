@@ -83,7 +83,7 @@ def _export_escrow_annotations(
         project_annotations_file = None
         project_images = None
     else:
-        # escrows with simple task types are ought to have only one project
+        # escrows with simple task types must have only one project
         try:
             (project,) = escrow_projects
         except ValueError:
