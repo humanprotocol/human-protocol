@@ -208,15 +208,10 @@ def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
 
 
 def create_escrow_validations(session: Session):
-    # Escrow projects can be in either 'validation' or 'completed' status:
-    # - 'completed': Some jobs were rejected and reannotated.
-    # - 'validation': Other jobs were successfully validated and remain in this state.
-    #
-    # Ensure all projects are in one of these two states
-    # and that at least one project is 'completed'.
-    # This prevents multiple threads from processing the same escrow concurrently
-    # before validation finishes.
+    # if escrow have projects with `validation` AND `completed` statuses
+    # it means, some jobs were rejected and re-annotated
     allowed_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
+    # excluding escrows where all projects are still have `validation` status
     at_least_one_is_completed = (
         func.count(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
     )
