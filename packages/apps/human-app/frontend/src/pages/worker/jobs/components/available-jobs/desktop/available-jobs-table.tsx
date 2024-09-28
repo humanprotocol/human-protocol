@@ -204,7 +204,6 @@ export function AvailableJobsTable() {
     manualPagination: true,
     onPaginationChange: setPaginationState,
     muiPaginationProps: {
-      disabled: false,
       SelectProps: {
         sx: {
           '.MuiSelect-icon': {

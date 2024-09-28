@@ -8,6 +8,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
+import { Box } from '@mui/material';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
@@ -29,14 +30,12 @@ import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { JOB_TYPES } from '@/shared/consts';
-import type { ColorPalette } from '@/styles/color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
-import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 
 const getColumnsDefinition = (
-  resignJob: (assignment_id: string) => void,
-  colorPalette: ColorPalette
+  resignJob: (assignment_id: string) => void
 ): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -142,10 +141,19 @@ const getColumnsDefinition = (
     Cell: (props) => {
       const status = props.row.original.status;
       return (
-        <Chip
-          backgroundColor={parseJobStatusChipColor(status, colorPalette)}
-          label={status}
-        />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '3px 4px',
+            color: lightModeColorPalette.white,
+            backgroundColor: '#5D0CE9',
+            borderRadius: '16px',
+          }}
+        >
+          {status}
+        </Box>
       );
     },
     muiTableHeadCellProps: () => ({
@@ -229,10 +237,7 @@ export function MyJobsTable() {
   }, [filterParams.page, filterParams.page_size]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(
-      rejectTask(oracle_address || ''),
-      colorPalette
-    ),
+    columns: getColumnsDefinition(rejectTask(oracle_address || '')),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
@@ -245,6 +250,16 @@ export function MyJobsTable() {
       setPaginationState(updater);
     },
     muiPaginationProps: {
+      SelectProps: {
+        sx: {
+          '.MuiSelect-icon': {
+            ':hover': {
+              backgroundColor: 'blue',
+            },
+            fill: colorPalette.text.primary,
+          },
+        },
+      },
       rowsPerPageOptions: [5, 10],
     },
     pageCount: tableData?.total_pages || -1,

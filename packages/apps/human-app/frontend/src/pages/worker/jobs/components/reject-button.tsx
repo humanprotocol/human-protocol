@@ -4,7 +4,7 @@ import { TableButton } from '@/components/ui/table-button';
 import { useColorMode } from '@/hooks/use-color-mode';
 
 export function RejectButton(props: CustomButtonProps) {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
 
   return (
     <TableButton
@@ -21,6 +21,7 @@ export function RejectButton(props: CustomButtonProps) {
     >
       <CloseIcon
         sx={{
+          fill: isDarkMode ? 'black' : undefined,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
