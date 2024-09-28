@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
 import { useColorMode } from '@/hooks/use-color-mode';
 
-export const NAVBAR_PADDING = '44px';
+export const NAVBAR_PADDING = '16px';
 
 interface NavbarProps {
   open: boolean;

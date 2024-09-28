@@ -273,6 +273,11 @@ export function MyJobsTable() {
         borderColor: colorPalette.paper.text,
       },
     },
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
     ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 

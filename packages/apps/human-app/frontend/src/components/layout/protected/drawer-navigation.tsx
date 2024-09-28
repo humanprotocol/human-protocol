@@ -103,7 +103,7 @@ export function DrawerNavigation({
                 );
               }
 
-              const { link, label, disabled, href, onClick } = item;
+              const { link, label, disabled, href, onClick, icon } = item;
               const isActive = Boolean(link && location.pathname === link);
 
               return (
@@ -131,6 +131,7 @@ export function DrawerNavigation({
                     }}
                     selected={isActive}
                     sx={{
+                      px: 0,
                       '&.Mui-selected': {
                         backgroundColor: isDarkMode
                           ? onlyDarkModeColor.listItemColor
@@ -139,19 +140,19 @@ export function DrawerNavigation({
                     }}
                   >
                     <Stack
+                      alignItems="center"
                       direction="row"
+                      gap="32px"
+                      justifyContent="center"
                       sx={{
                         ml: isMobile ? '28px' : NAVBAR_PADDING,
                       }}
                     >
+                      {icon}
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography
-                            component="span"
-                            fontWeight={index === 0 ? '600' : '500'}
-                            variant="body2"
-                          >
+                          <Typography component="span" variant="body1">
                             {label}
                           </Typography>
                         }
@@ -192,6 +193,7 @@ export function DrawerNavigation({
                     }}
                     selected={isActive}
                     sx={{
+                      px: 0,
                       '&.Mui-selected': {
                         backgroundColor: isDarkMode
                           ? onlyDarkModeColor.listItemColor
@@ -202,6 +204,7 @@ export function DrawerNavigation({
                     <Stack
                       alignItems="center"
                       direction="row"
+                      gap="32px"
                       justifyContent="center"
                       sx={{
                         ml: isMobile ? '28px' : NAVBAR_PADDING,
