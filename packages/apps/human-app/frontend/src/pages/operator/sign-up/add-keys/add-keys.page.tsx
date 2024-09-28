@@ -69,7 +69,7 @@ export function Form({
   ).length;
 
   return (
-    <Grid container gap="2rem" marginTop="1rem">
+    <Grid container gap="2rem">
       <div
         style={{
           width: '100%',

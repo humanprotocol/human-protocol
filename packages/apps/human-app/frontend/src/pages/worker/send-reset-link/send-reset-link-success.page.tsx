@@ -59,7 +59,7 @@ export function SendResetLinkWorkerSuccessPage() {
             void methods.handleSubmit(handleWorkerSendResetLink)(event);
           }}
         >
-          <Grid container gap="2rem">
+          <Grid container gap="1.5rem">
             <Typography>
               <Trans
                 components={{
