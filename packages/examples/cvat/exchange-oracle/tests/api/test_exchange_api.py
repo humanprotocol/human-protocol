@@ -1,7 +1,7 @@
 import json
 import math
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from itertools import combinations
 from unittest.mock import patch
 
@@ -11,10 +11,11 @@ from jose import jwt
 from sqlalchemy.orm import Session
 
 from src.core.config import Config
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskTypes
-from src.models.cvat import Assignment, Project, User
+from src.core.types import AssignmentStatuses, ProjectStatuses, TaskTypes
+from src.models.cvat import Assignment, Job, Project, Task, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
 from src.schemas.exchange import JobStatuses as APIJobStatuses
+from src.utils.time import utcnow
 
 from tests.utils.db_helper import (
     create_job,
@@ -139,7 +140,7 @@ def test_can_list_jobs_200_with_address_and_pagination(
             id=str(uuid.uuid4()),
             user_wallet_address=user_address,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         session.add(assignment)
         escrows.append(cvat_project.escrow_address)
@@ -194,7 +195,7 @@ def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> 
         id=str(uuid.uuid4()),
         user_wallet_address=user_address,
         cvat_job_id=cvat_job.cvat_id,
-        expires_at=datetime.now() + timedelta(days=1),
+        expires_at=utcnow() + timedelta(days=1),
     )
     session.add(assignment)
     session.commit()
@@ -235,6 +236,192 @@ def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> 
             )
 
 
+def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) -> None:
+    # sort: asc, desc; sort_field: chain_id|job_type|created_at|updated_at
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    cvat_projects: list[Project] = []
+    cvat_tasks: list[Task] = []
+    cvat_jobs: list[Job] = []
+
+    for i in range(3):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            session, f"0x86e83d346041E8806e352681f3F14549C0d2BC6{i}", i + 1
+        )
+        cvat_job.touch(session, touch_parent=True)
+        cvat_projects.append(cvat_project)
+        cvat_tasks.append(cvat_task)
+        cvat_jobs.append(cvat_job)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=user_address,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=utcnow() + timedelta(hours=i + 1),
+            status=AssignmentStatuses.created if i % 2 else AssignmentStatuses.completed,
+            completed_at=utcnow() if not i % 2 else None,
+        )
+        session.add(assignment)
+        session.commit()
+
+    last_updated_job = cvat_jobs[1]
+    last_updated_job.touch(session, touch_parent=True)
+    session.commit()
+
+    assert all(obj.updated_at is not None for obj in cvat_jobs + cvat_tasks + cvat_projects)
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        for sort_field in (
+            "chain_id",
+            "job_type",
+            "created_at",
+            "updated_at",
+        ):
+            response_asc = client.get(
+                "/job",
+                headers=get_auth_header(),
+                params={"sort_field": sort_field, "sort": "asc"},
+            )
+            assert response_asc.status_code == 200
+            result_acs = [job["escrow_address"] for job in response_asc.json()["results"]]
+            assert result_acs
+
+            response_desc = client.get(
+                "/job",
+                headers=get_auth_header(),
+                params={"sort_field": sort_field, "sort": "desc"},
+            )
+
+            assert response_desc.status_code == 200
+            result_desc = [job["escrow_address"] for job in response_desc.json()["results"]]
+            assert result_desc
+            result_acs.reverse()
+            assert result_acs == result_desc
+
+            if sort_field == "updated_at":
+                assert result_desc[0] == last_updated_job.task.project.escrow_address
+
+
+def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
+    session.begin()
+    user_1 = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user_1)
+
+    pre_init_time = utcnow()
+
+    cvat_projects: list[Project] = []
+    cvat_jobs: list[Job] = []
+    assignments: list[Assignment] = []
+    for idx, project_status in enumerate(
+        [
+            ProjectStatuses.annotation,
+            ProjectStatuses.completed,
+            ProjectStatuses.validation,
+            ProjectStatuses.canceled,
+            ProjectStatuses.recorded,
+            # TODO: ProjectStatuses.deleted,
+            # raise NotImplementedError(f"Unknown status {project.status}")
+            # NotImplementedError: Unknown status deleted
+        ]
+    ):
+        cvat_project = create_project(
+            session,
+            f"0x86e83d346041E8806e352681f3F14549C0d2BC{idx}",
+            idx + 1,
+            status=project_status,
+        )
+        cvat_task = create_task(session, idx + 1, cvat_project.cvat_id)
+        cvat_job = create_job(session, idx + 1, cvat_task.cvat_id, cvat_project.cvat_id)
+
+        cvat_projects.append(cvat_project)
+        cvat_jobs.append(cvat_job)
+
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=user_1.wallet_address,
+            cvat_job_id=cvat_job.cvat_id,
+            status=AssignmentStatuses.created,
+            expires_at=utcnow() + timedelta(hours=1),
+            completed_at=pre_init_time + timedelta(seconds=1)
+            if project_status == ProjectStatuses.completed
+            else None,
+        )
+
+        session.add(assignment)
+        assignments.append(assignment)
+        cvat_job.touch(session)
+        session.commit()  # imitate different created_dates
+
+    middle_init_time = utcnow()
+
+    updated_cvat_project_ids = set()
+    for job in cvat_jobs[len(cvat_jobs) // 2 :]:
+        job.touch(session)
+        updated_cvat_project_ids.add(job.task.cvat_project_id)
+    session.commit()
+
+    post_init_time = utcnow() + timedelta(seconds=1)
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        for filter_key, filter_values in {
+            "status": (
+                (
+                    APIJobStatuses.active.value,
+                    3,
+                ),  # ProjectStatuses::annotation,completed,validation
+                (APIJobStatuses.completed.value, 1),
+                (APIJobStatuses.canceled.value, 1),
+            ),
+            "chain_id": ((cvat_projects[0].chain_id, len(cvat_projects)),),
+            "job_type": (
+                (cvat_projects[0].job_type, len(cvat_projects)),
+                (TaskTypes.image_boxes_from_points.value, 0),
+            ),
+            "created_after": (
+                (str(pre_init_time - timedelta(minutes=1)), len(cvat_projects)),
+                (str(post_init_time), 0),
+            ),
+            "updated_after": (
+                (str(pre_init_time - timedelta(minutes=1)), len(cvat_projects)),
+                (str(middle_init_time), len(updated_cvat_project_ids)),
+                (str(post_init_time + timedelta(minutes=1)), 0),
+            ),
+        }.items():
+            for filter_value, expected_count in filter_values:
+                response = client.get(
+                    "/job", headers=get_auth_header(), params={filter_key: filter_value}
+                )
+
+                assert response.status_code == 200
+                paginated_result = response.json()
+                assert paginated_result["total_results"] == expected_count, (
+                    filter_key,
+                    filter_value,
+                )
+
+
 def test_can_list_jobs_200_check_values(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
@@ -256,13 +443,11 @@ def test_can_list_jobs_200_check_values(client: TestClient, session: Session) ->
             id=str(uuid.uuid4()),
             user_wallet_address=user_address,
             cvat_job_id=job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
+            expires_at=utcnow() + timedelta(days=1),
         )
         session.add(assignment)
-        job.status = JobStatuses.in_progress
+        job.touch(session)
         session.commit()
-
-    assert cvat_second_job.updated_at < cvat_first_job.updated_at
 
     with (
         open("tests/utils/manifest.json") as data,
@@ -289,7 +474,7 @@ def test_can_list_jobs_200_check_values(client: TestClient, session: Session) ->
             "reward_amount": manifest["job_bounty"],
             "reward_token": "HMT",
             "created_at": cvat_project.created_at.isoformat().replace("+00:00", "Z"),
-            "updated_at": cvat_first_job.updated_at.isoformat().replace("+00:00", "Z"),
+            "updated_at": cvat_first_job.task.project.updated_at.isoformat().replace("+00:00", "Z"),
             "qualifications": manifest.get("qualifications", []),
         }
 
@@ -313,7 +498,7 @@ def test_can_list_jobs_200_without_address(client: TestClient, session: Session)
         id=str(uuid.uuid4()),
         user_wallet_address=user_address,
         cvat_job_id=cvat_job_1.cvat_id,
-        expires_at=datetime.now() + timedelta(days=1),
+        expires_at=utcnow() + timedelta(days=1),
     )
     session.add(assignment)
 
@@ -437,7 +622,7 @@ def test_cannot_register_401(client: TestClient) -> None:
 
 def test_can_create_assignment_200(client: TestClient, session: Session) -> None:
     session.begin()
-    cvat_project, _, cvat_job = create_project_task_and_job(
+    cvat_project, cvat_task, cvat_job = create_project_task_and_job(
         session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
     )
     user = User(
@@ -455,6 +640,7 @@ def test_can_create_assignment_200(client: TestClient, session: Session) -> None
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
 
+        assert {cvat_project.updated_at, cvat_task.updated_at, cvat_job.updated_at} == {None}
         response = client.post(
             "/assignment",
             headers=get_auth_header(),
@@ -493,6 +679,13 @@ def test_can_create_assignment_200(client: TestClient, session: Session) -> None
         assert db_assignment.status == AssignmentStatuses.created
         assert db_assignment.cvat_job_id == cvat_job.cvat_id
 
+        for obj, Class in zip(
+            (cvat_project, cvat_task, cvat_job), (Project, Task, Job), strict=False
+        ):
+            session.expire(obj, attribute_names=[Class.updated_at.name])
+            assert obj.updated_at is not None
+        assert cvat_project.updated_at > cvat_task.updated_at > cvat_job.updated_at
+
 
 def test_cannot_create_assignment_401(client: TestClient) -> None:
     # Test API endpoint when auth token is missing or invalid
@@ -519,7 +712,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
     )
     session.add(user_1)
 
-    pre_init_time = datetime.now()
+    pre_init_time = utcnow()
 
     cvat_projects: list[Project] = []
     assignments: list[Assignment] = []
@@ -566,7 +759,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
                 user_wallet_address=user_1.wallet_address,
                 cvat_job_id=cvat_job.cvat_id,
                 status=assignment_status,
-                expires_at=datetime.now()
+                expires_at=utcnow()
                 if assignment_status == AssignmentStatuses.expired
                 else pre_init_time + timedelta(hours=1),
                 completed_at=pre_init_time + timedelta(minutes=30)
@@ -584,7 +777,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
             assignments.append(assignment)
             session.commit()
 
-    post_init_time = datetime.now() + timedelta(seconds=1)
+    post_init_time = utcnow() + timedelta(seconds=1)
 
     with (
         open("tests/utils/manifest.json") as data,
@@ -637,7 +830,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
 
 
 def test_can_list_assignments_200_with_sorting(client: TestClient, session: Session) -> None:
-    # sort_field: chain_id|job_type|status|reward_amount|created_at|expires_at
+    # sort_field: chain_id|job_type|status|created_at|expires_at
     # sort: asc, desc
     session.begin()
     user = User(
@@ -656,9 +849,9 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
             id=str(uuid.uuid4()),
             user_wallet_address=user_address,
             cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(hours=i + 1),
+            expires_at=utcnow() + timedelta(hours=i + 1),
             status=AssignmentStatuses.created if i % 2 else AssignmentStatuses.completed,
-            completed_at=datetime.now() if not i % 2 else None,
+            completed_at=utcnow() if not i % 2 else None,
         )
         session.add(assignment)
         session.commit()
@@ -699,9 +892,9 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
             assert result_acs == result_desc
 
 
-def test_can_resign_job_200(client: TestClient, session: Session) -> None:
+def test_can_resign_assignment_200(client: TestClient, session: Session) -> None:
     session.begin()
-    _, _, cvat_job_1 = create_project_task_and_job(
+    cvat_project, cvat_task, cvat_job = create_project_task_and_job(
         session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
     )
     user = User(
@@ -709,16 +902,17 @@ def test_can_resign_job_200(client: TestClient, session: Session) -> None:
         cvat_email=cvat_email,
         cvat_id=1,
     )
-    session.add(user)
+
     assignment = Assignment(
         id=str(uuid.uuid4()),
         user_wallet_address=user_address,
-        cvat_job_id=cvat_job_1.cvat_id,
-        expires_at=datetime.now() + timedelta(hours=1),
+        cvat_job_id=cvat_job.cvat_id,
+        expires_at=utcnow() + timedelta(hours=1),
     )
-    session.add(assignment)
+    session.add_all([user, assignment])
     session.commit()
 
+    assert {cvat_job.updated_at, cvat_task.updated_at, cvat_job.updated_at} == {None}
     response = client.post(
         "/assignment/resign",
         headers=get_auth_header(),
@@ -729,8 +923,13 @@ def test_can_resign_job_200(client: TestClient, session: Session) -> None:
     session.expire(assignment)
     assert assignment.status == AssignmentStatuses.canceled
 
+    for obj, Class in zip((cvat_project, cvat_task, cvat_job), (Project, Task, Job), strict=False):
+        session.expire(obj, attribute_names=[Class.updated_at.name])
+        assert obj.updated_at is not None
+    assert cvat_project.updated_at > cvat_task.updated_at > cvat_job.updated_at
 
-def test_cannot_resign_job_401(client: TestClient) -> None:
+
+def test_cannot_resign_assignment_401(client: TestClient) -> None:
     # Test API endpoint when auth token is missing or invalid
     for token, message in (
         (None, "Not authenticated"),
@@ -748,7 +947,7 @@ def test_cannot_resign_job_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
-def test_cannot_resign_job_400_when_assignment_is_finished(
+def test_cannot_resign_assignment_400_when_assignment_is_finished(
     client: TestClient, session: Session
 ) -> None:
     session.begin()
@@ -765,9 +964,9 @@ def test_cannot_resign_job_400_when_assignment_is_finished(
         id=str(uuid.uuid4()),
         user_wallet_address=user_address,
         cvat_job_id=cvat_job_1.cvat_id,
-        expires_at=datetime.now() + timedelta(hours=1),
+        expires_at=utcnow() + timedelta(hours=1),
         status=AssignmentStatuses.completed.value,
-        completed_at=datetime.now(),
+        completed_at=utcnow(),
     )
     session.add(assignment)
     session.commit()
@@ -783,7 +982,7 @@ def test_cannot_resign_job_400_when_assignment_is_finished(
     assert assignment.status == AssignmentStatuses.completed
 
 
-def test_cannot_resign_job_400_with_someone_elses_wallet_address(
+def test_cannot_resign_assignment_400_with_someone_elses_wallet_address(
     client: TestClient, session: Session
 ) -> None:
     session.begin()
@@ -806,7 +1005,7 @@ def test_cannot_resign_job_400_with_someone_elses_wallet_address(
         id=str(uuid.uuid4()),
         user_wallet_address=user_1.wallet_address,
         cvat_job_id=cvat_job_1.cvat_id,
-        expires_at=datetime.now() + timedelta(hours=1),
+        expires_at=utcnow() + timedelta(hours=1),
     )
     session.add(assignment)
     session.commit()
@@ -859,9 +1058,9 @@ def test_can_get_assignment_stats_by_worker_200(client: TestClient, session: Ses
             id=str(uuid.uuid4()),
             user_wallet_address=user_address,
             cvat_job_id=cvat_jobs[i].cvat_id,
-            expires_at=datetime.now() + timedelta(hours=1),
+            expires_at=utcnow() + timedelta(hours=1),
             status=status,
-            completed_at=datetime.now() if status == AssignmentStatuses.completed else None,
+            completed_at=utcnow() if status == AssignmentStatuses.completed else None,
         )
         session.add(assignment)
         assignments.append(assignment)
@@ -949,9 +1148,9 @@ def test_can_get_oracle_stats(client: TestClient, session: Session) -> None:
                 user_wallet_address=worker.wallet_address,
                 cvat_job_id=cvat_job.cvat_id,
                 status=assignment_status,
-                expires_at=datetime.now()
+                expires_at=utcnow()
                 + timedelta(hours=1 if assignment_status != AssignmentStatuses.expired else 0),
-                completed_at=datetime.now()
+                completed_at=utcnow()
                 if assignment_status == AssignmentStatuses.completed
                 else None,
             )
@@ -972,3 +1171,67 @@ def test_can_get_oracle_stats(client: TestClient, session: Session) -> None:
         "assignments_rejected": 1,
         "assignments_expired": 1,
     }
+
+
+def test_can_list_jobs_200_check_updated_at(client: TestClient, session: Session) -> None:
+    session.begin()
+
+    jobs_count = 3
+    users = [
+        User(
+            wallet_address=f"0x86e83d346041E8806e352681f3F14549C0d2BC6{i}",
+            cvat_email=f"user_{i}@hmt.ai",
+            cvat_id=i,
+        )
+        for i in range(1, jobs_count + 1)
+    ]
+    session.add_all(users)
+
+    utcnow()
+    cvat_project = create_project(session, "0x86e83d346041E8806e352681f3F14549C0d2BC66", 1)
+    cvat_tasks: list[Task] = []
+    cvat_jobs: list[Job] = []
+
+    for i in range(jobs_count):
+        cvat_tasks.append(create_task(session, i + 1, cvat_project.cvat_id))
+        cvat_jobs.append(create_job(session, i + 1, cvat_tasks[i].cvat_id, cvat_project.cvat_id))
+
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+        patch("src.services.exchange.cvat_api"),
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        # create assignment in each job
+        for i in range(jobs_count):
+            response = client.post(
+                "assignment",
+                headers=get_auth_header(
+                    generate_jwt_token(
+                        wallet_address=users[i].wallet_address,
+                        email=users[i].cvat_email,
+                    )
+                ),
+                json={
+                    "escrow_address": cvat_project.escrow_address,
+                    "chain_id": cvat_project.chain_id,
+                },
+            )
+            assert (
+                response.status_code == 200
+            ), f"Status: {response.status_code}, reason: {response.text}"
+
+            response = client.get(
+                "/job",
+                headers=get_auth_header(
+                    generate_jwt_token(
+                        wallet_address=users[i].wallet_address,
+                        email=users[i].cvat_email,
+                    )
+                ),
+            )
+            assert response.status_code == 200

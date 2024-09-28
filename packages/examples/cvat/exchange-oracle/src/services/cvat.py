@@ -1,9 +1,11 @@
 import itertools
 import uuid
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import datetime
+from itertools import islice
+from typing import Any
 
-from sqlalchemy import delete, insert, update
+from sqlalchemy import Column, delete, insert, update
 from sqlalchemy.orm import Session
 
 from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
@@ -11,6 +13,13 @@ from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import Assignment, DataUpload, EscrowCreation, Image, Job, Project, Task, User
 from src.utils.time import utcnow
+
+
+def batched(iterable: Iterable, *, batch_size: int) -> Iterable[Any]:
+    assert batch_size > 0
+    iterator = iter(iterable)
+    while batch := tuple(islice(iterator, batch_size)):
+        yield batch
 
 
 # Project
@@ -225,6 +234,20 @@ def update_project_statuses_by_escrow_address(
     session.execute(statement)
 
 
+def touch_projects(
+    session: Session,
+    list_to_update: Iterable[str | int],
+    *,
+    field: Column = Project.id,
+    batch_size: int = 1000,
+) -> None:
+    assert field is Project.id or field is Project.cvat_id
+    updated_at = utcnow()
+    for batch in batched(list_to_update, batch_size=batch_size):
+        stmt = update(Project).where(field.in_(batch)).values({Project.updated_at: updated_at})
+        session.execute(stmt)
+
+
 def delete_project(session: Session, project_id: str) -> None:
     project = session.query(Project).filter_by(id=project_id).first()
     session.delete(project)
@@ -392,9 +415,23 @@ def get_tasks_by_status(
     return query.all()
 
 
-def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:
+def update_task_status(session: Session, task_id: str, status: TaskStatuses) -> None:
     upd = update(Task).where(Task.id == task_id).values(status=status.value)
     session.execute(upd)
+
+
+def touch_tasks(
+    session: Session,
+    list_to_update: Iterable[str | int],
+    *,
+    field: Column = Task.id,
+    batch_size: int = 1000,
+) -> None:
+    assert field is Task.id or field is Task.cvat_id
+    updated_at = utcnow()
+    for batch in batched(list_to_update, batch_size=batch_size):
+        stmt = update(Task).where(field.in_(batch)).values({Task.updated_at: updated_at})
+        session.execute(stmt)
 
 
 def get_tasks_by_cvat_project_id(
@@ -486,9 +523,23 @@ def get_jobs_by_cvat_id(
     )
 
 
-def update_job_status(session: Session, job_id: int, status: JobStatuses) -> None:
+def update_job_status(session: Session, job_id: str, status: JobStatuses) -> None:
     upd = update(Job).where(Job.id == job_id).values(status=status.value)
     session.execute(upd)
+
+
+def touch_jobs(
+    session: Session,
+    list_to_update: Iterable[str | int],
+    *,
+    field: Column = Job.id,
+    batch_size: int = 1000,
+) -> None:
+    assert field is Job.id or field is Job.cvat_id
+    updated_at = utcnow()
+    for batch in batched(list_to_update, batch_size=batch_size):
+        stmt = update(Job).where(field.in_(batch)).values({Job.updated_at: updated_at})
+        session.execute(stmt)
 
 
 def get_jobs_by_cvat_task_id(

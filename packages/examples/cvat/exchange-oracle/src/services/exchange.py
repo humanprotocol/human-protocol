@@ -62,6 +62,10 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
         if not unassigned_job:
             return None
 
+        cvat_service.get_task_by_id(
+            session, unassigned_job.task.id, for_update=True
+        )  # lock the row
+
         assignment_id = cvat_service.create_assignment(
             session,
             wallet_address=user.wallet_address,
@@ -69,6 +73,8 @@ def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: s
             expires_at=utcnow()
             + timedelta(seconds=get_default_assignment_timeout(TaskTypes(project.job_type))),
         )
+
+        unassigned_job.touch(session)  # project|task|job rows are locked for update
 
         with cvat_api.api_client_context(cvat_api.get_api_client()):
             cvat_api.clear_job_annotations(unassigned_job.cvat_id)
@@ -104,3 +110,12 @@ async def resign_assignment(assignment_id: str, wallet_address: str) -> None:
             raise NoAccessError
 
         cvat_service.cancel_assignment(session, assignment_id)
+
+        job = assignment.job
+        task = job.task
+        project = task.project
+        cvat_service.get_job_by_id(session, job.id, for_update=True)  # lock the row
+        cvat_service.get_task_by_id(session, task.id, for_update=True)  # lock the row
+        cvat_service.get_project_by_id(session, project.id, for_update=True)  # lock the row
+
+        assignment.job.touch(session)  # project|task rows are locked for update

@@ -56,9 +56,9 @@ class JobsFilter(Filter):
 
     class SortingFields(StrEnum, metaclass=BetterEnumMeta):
         created_at = auto()
+        updated_at = auto()
         chain_id = auto()
         job_type = auto()
-        reward_amount = auto()
 
     sort: OptionalQuery[OrderingDirection] = OrderingDirection.asc
     default_sort_field: ClassVar[SortingFields] = SortingFields.created_at
@@ -227,7 +227,6 @@ class AssignmentFilter(Filter):
         chain_id = auto()
         job_type = auto()
         status = auto()
-        reward_amount = auto()
         created_at = auto()
         expires_at = auto()
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, Session, relationship
 from sqlalchemy.sql import func
 
 from src.core.types import (
@@ -65,6 +65,9 @@ class Project(Base):
     def __repr__(self) -> str:
         return f"Project. id={self.id}"
 
+    def touch(self, session: Session) -> None:
+        session.query(Project).filter(Project.id == self.id).update({Project.updated_at: utcnow()})
+
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -91,6 +94,12 @@ class Task(Base):
 
     def __repr__(self) -> str:
         return f"Task. id={self.id}"
+
+    def touch(self, session: Session, *, touch_parent: bool = True) -> None:
+        session.query(Task).filter(Task.id == self.id).update({Task.updated_at: utcnow()})
+
+        if touch_parent:
+            self.project.touch(session)
 
 
 class EscrowCreation(Base):
@@ -169,6 +178,13 @@ class Job(Base):
 
     def __repr__(self) -> str:
         return f"Job. id={self.id}"
+
+    def touch(self, session: Session, *, touch_parent: bool = True) -> None:
+        # TODO: check .update({})
+        session.query(Job).filter(Job.id == self.id).update({Job.updated_at: utcnow()})
+
+        if touch_parent:
+            self.task.touch(session, touch_parent=touch_parent)
 
 
 class User(Base):

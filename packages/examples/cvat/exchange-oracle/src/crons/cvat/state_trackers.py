@@ -77,6 +77,11 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
             completed_task_ids.append(task.cvat_id)
 
     if completed_task_ids:
+        # TODO: for_update
+        cvat_service.touch_projects(
+            session, {t.project.id for t in tasks if t.cvat_id in completed_task_ids}
+        )
+
         logger.info(
             "Found new completed tasks: {}".format(", ".join(str(t) for t in completed_task_ids))
         )
@@ -118,6 +123,16 @@ def track_assignments(logger: logging.Logger) -> None:
 
             cvat_service.expire_assignment(session, assignment.id)
 
+        jobs_to_be_updated = [a.job for a in assignments]
+        tasks_to_be_updated = [j.task for j in jobs_to_be_updated]
+        projects_to_be_updated = [t.project for t in tasks_to_be_updated]
+        cvat_service.touch_jobs(session, {job.id for job in jobs_to_be_updated})
+        cvat_service.touch_tasks(session, {task.id for task in tasks_to_be_updated})
+        cvat_service.touch_projects(session, {project.id for project in projects_to_be_updated})
+        del jobs_to_be_updated
+        del tasks_to_be_updated
+        del projects_to_be_updated
+
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_active_assignments(
             session,
@@ -147,6 +162,14 @@ def track_assignments(logger: logging.Logger) -> None:
                     )  # note that calling it in a loop can take too much time
 
                 cvat_service.cancel_assignment(session, assignment.id)
+
+        # touch jobs/tasks/projects updated_at
+        jobs_to_be_updated = [a.job for a in assignments]
+        tasks_to_be_updated = [j.task for j in jobs_to_be_updated]
+        projects_to_be_updated = [t.project for t in tasks_to_be_updated]
+        cvat_service.touch_jobs(session, {job.id for job in jobs_to_be_updated})
+        cvat_service.touch_tasks(session, {task.id for task in tasks_to_be_updated})
+        cvat_service.touch_projects(session, {project.id for project in projects_to_be_updated})
 
 
 @cron_job
@@ -213,6 +236,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                     )
 
                 completed.append(upload)
+                upload.task.touch(session, touch_parent=True)
             except cvat_api.exceptions.ApiException as e:
                 failed.append(upload)
 

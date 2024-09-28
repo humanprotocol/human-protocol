@@ -358,6 +358,7 @@ class SimpleTaskBuilder:
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
+            db_service.touch_projects(session, [project_id])
 
 
 class BoxesFromPointsTaskBuilder:
@@ -1394,6 +1395,7 @@ class BoxesFromPointsTaskBuilder:
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
+            db_service.touch_projects(session, [project_id])
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
@@ -2466,6 +2468,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         )
 
                         db_service.create_data_upload(session, cvat_task.id)
+                    db_service.touch_projects(session, [project_id])
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:

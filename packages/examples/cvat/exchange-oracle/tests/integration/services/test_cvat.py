@@ -459,6 +459,27 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert project.chain_id == chain_id
         assert project.bucket_url == bucket_url
 
+    def test_can_touch_projects(self):
+        cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
+        assert cvat_project.updated_at is None
+
+        # touch by id
+        cvat_service.touch_projects(self.session, [cvat_project.id])
+        self.session.expire(cvat_project)
+        prev_updated_at = cvat_project.updated_at
+        assert isinstance(prev_updated_at, datetime)
+
+        # touch by cvat_id
+        cvat_service.touch_projects(
+            self.session, [cvat_project.cvat_id], field=cvat_service.Project.cvat_id
+        )
+        self.session.expire(cvat_project)
+        assert prev_updated_at < cvat_project.updated_at
+
+        # check passing invalid field
+        with pytest.raises(AssertionError):
+            cvat_service.touch_projects(self.session, [cvat_project.id], field="invalid")
+
     def test_delete_project(self):
         cvat_id_1 = 456
 
@@ -641,6 +662,27 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert task.cvat_id == cvat_project.cvat_id
         assert task.cvat_project_id == cvat_project.cvat_id
         assert task.status == TaskStatuses.completed.value
+
+    def test_can_touch_tasks(self):
+        _, cvat_task = create_project_and_task(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+        assert cvat_task.updated_at is None
+
+        # touch by id
+        cvat_service.touch_tasks(self.session, [cvat_task.id])
+        self.session.expire(cvat_task)
+        prev_updated_at = cvat_task.updated_at
+        assert isinstance(prev_updated_at, datetime)
+
+        # touch by cvat_id
+        cvat_service.touch_tasks(self.session, [cvat_task.cvat_id], field=cvat_service.Task.cvat_id)
+        self.session.expire(cvat_task)
+        assert prev_updated_at < cvat_task.updated_at
+
+        # check passing invalid field
+        with pytest.raises(AssertionError):
+            cvat_service.touch_tasks(self.session, [cvat_task.id], field="invalid")
 
     def test_get_tasks_by_cvat_project_id(self):
         cvat_project = create_project(self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1)
@@ -955,6 +997,54 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert job.cvat_task_id == cvat_task.cvat_id
         assert job.cvat_project_id == cvat_project.cvat_id
         assert job.status == new_status
+
+    def test_can_touch_jobs(self):
+        _, _, cvat_job = create_project_task_and_job(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+        assert cvat_job.updated_at is None
+
+        # touch by id
+        cvat_service.touch_jobs(self.session, [cvat_job.id])
+        self.session.expire(cvat_job)
+        prev_updated_at = cvat_job.updated_at
+        assert isinstance(prev_updated_at, datetime)
+
+        # touch by cvat_id
+        cvat_service.touch_jobs(self.session, [cvat_job.cvat_id], field=cvat_service.Job.cvat_id)
+        self.session.expire(cvat_job)
+        assert prev_updated_at < cvat_job.updated_at
+
+        # check passing invalid field
+        with pytest.raises(AssertionError):
+            cvat_service.touch_jobs(self.session, [cvat_job.id], field="invalid")
+
+    def test_can_touch_job(self):
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+        )
+        assert {cvat_project.updated_at, cvat_task.updated_at, cvat_job.updated_at} == {None}
+
+        # touch job with parents
+        cvat_job.touch(self.session, touch_parent=True)
+        self.session.expire_all()
+
+        assert isinstance(cvat_project.updated_at, datetime)
+        assert isinstance(cvat_task.updated_at, datetime)
+        assert isinstance(cvat_job.updated_at, datetime)
+        assert cvat_project.updated_at > cvat_task.updated_at > cvat_job.updated_at
+
+        # touch only job updated_at
+        prev_project_updated_at, prev_task_updated_at, prev_job_updated_at = (
+            cvat_project.updated_at,
+            cvat_task.updated_at,
+            cvat_job.updated_at,
+        )
+        cvat_job.touch(self.session, touch_parent=False)
+        assert isinstance(cvat_job.updated_at, datetime)
+        assert cvat_job.updated_at > prev_job_updated_at
+        assert prev_task_updated_at == cvat_task.updated_at
+        assert prev_project_updated_at == cvat_project.updated_at
 
     def test_get_jobs_by_cvat_task_id(self):
         (cvat_project, cvat_task) = create_project_and_task(
