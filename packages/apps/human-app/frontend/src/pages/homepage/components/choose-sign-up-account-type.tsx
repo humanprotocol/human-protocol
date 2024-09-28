@@ -31,11 +31,6 @@ export function ChooseSignUpAccountType() {
         <Grid item xs={12}>
           <Typography variant="h4">{t('homepage.howWillUse')}</Typography>
         </Grid>
-        <Grid item xs={12}>
-          <Typography variant="subtitle1">
-            {t('homepage.selectOption')}
-          </Typography>
-        </Grid>
         <Grid
           item
           sx={{
