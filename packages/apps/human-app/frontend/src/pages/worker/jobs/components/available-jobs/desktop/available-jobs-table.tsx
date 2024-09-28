@@ -219,6 +219,11 @@ export function AvailableJobsTable() {
         }}
       />
     ),
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
   });
 
   return <MaterialReactTable table={table} />;

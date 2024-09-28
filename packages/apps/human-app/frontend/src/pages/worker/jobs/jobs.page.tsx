@@ -1,6 +1,8 @@
+/* eslint-disable camelcase */
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Paper, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
 import { colorPalette } from '@/styles/color-palette';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
@@ -10,6 +12,9 @@ import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/mobile
 import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-table';
 import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-drawer-mobile';
+import { useGetOracles } from '@/api/services/worker/oracles';
+import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
+import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { AvailableJobsTableMobile } from './components/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
 import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
@@ -22,6 +27,8 @@ function generateTabA11yProps(index: number) {
 }
 
 export function JobsPage() {
+  const { data, isError, isPending, error } = useGetOracles();
+  const { address: oracle_address } = useParams<{ address: string }>();
   const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
@@ -46,6 +53,18 @@ export function JobsPage() {
     setGrayBackground();
   }, [setGrayBackground]);
 
+  const oracleName = data?.find(
+    ({ address }) => address === oracle_address
+  )?.role;
+
+  if (isError) {
+    return <PageCardError errorMessage={defaultErrorMessage(error)} />;
+  }
+
+  if (isPending) {
+    return <PageCardLoader />;
+  }
+
   return (
     <>
       <Modal
@@ -66,16 +85,30 @@ export function JobsPage() {
         <Grid item xs={12}>
           <Paper
             sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
               backgroundColor: isMobile
                 ? colorPalette.paper.main
                 : colorPalette.white,
               height: '100%',
               boxShadow: 'none',
-              padding: isMobile ? '20px' : '40px',
+              padding: isMobile ? '20px' : '64px 144px',
               minHeight: '800px',
               borderRadius: '20px',
             }}
           >
+            <div>
+              <Box
+                sx={{
+                  padding: '8px 42px',
+                  backgroundColor: '#1406B20A',
+                  display: 'inline-block',
+                }}
+              >
+                <Typography variant="h6">{oracleName}</Typography>
+              </Box>
+            </div>
             <Stack>
               <TableQueryContextProvider>
                 <Box sx={{ width: '100%' }}>
