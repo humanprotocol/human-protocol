@@ -23,7 +23,6 @@ import { FetchError } from '@/api/fetcher';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
-import { MAX_INPUT_WIDTH } from '@/shared/consts';
 
 function formattedSignUpErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 409) {
@@ -81,7 +80,7 @@ export function SignUpWorkerPage() {
             void methods.handleSubmit(handleWorkerSignUp)(event);
           }}
         >
-          <Grid container gap="2rem" maxWidth={`${MAX_INPUT_WIDTH}px`}>
+          <Grid container gap="1.5rem">
             <Input label={t('worker.signUpForm.fields.email')} name="email" />
             <Password
               label={t('worker.signUpForm.fields.password')}

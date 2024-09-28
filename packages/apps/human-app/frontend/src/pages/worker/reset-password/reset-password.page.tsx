@@ -20,7 +20,6 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { routerPaths } from '@/router/router-paths';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
-import { MAX_INPUT_WIDTH } from '@/shared/consts';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
@@ -70,7 +69,7 @@ export function ResetPasswordWorkerPage() {
             void methods.handleSubmit(handleWorkerResetPassword)(event);
           }}
         >
-          <Grid container gap="2rem" maxWidth={`${MAX_INPUT_WIDTH}px`}>
+          <Grid container gap="1.5rem">
             <Typography variant="body1">
               {t('worker.resetPassword.description')}
             </Typography>

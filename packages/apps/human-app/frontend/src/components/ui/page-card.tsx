@@ -61,9 +61,10 @@ type ButtonsProps = string | -1 | (() => void);
 
 interface FormCardProps {
   children: React.JSX.Element;
+  maxContentWidth?: string;
+  childrenMaxWidth?: string;
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
-  childrenMaxWidth?: string;
   backArrowPath?: ButtonsProps;
   cancelRouterPathOrCallback?: ButtonsProps;
   hiddenCancelButton?: boolean;
@@ -76,6 +77,7 @@ export function PageCard({
   children,
   title,
   alert,
+  maxContentWidth = '376px',
   childrenMaxWidth = '486px',
   backArrowPath = -1,
   cancelRouterPathOrCallback = routerPaths.homePage,
@@ -87,6 +89,13 @@ export function PageCard({
   const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
+  const contentStyles = {
+    maxWidth: maxContentWidth,
+    width: '100%',
+    [breakpoints.mobile]: {
+      maxWidth: 'unset',
+    },
+  };
 
   useEffect(() => {
     if (withLayoutBackground && !isDarkMode) {
@@ -112,7 +121,7 @@ export function PageCard({
       container
       sx={{
         ...(isDarkMode ? commonStylesDark : commonStyles),
-        padding: isMobile ? '0 1rem 7.25rem 1rem' : '2rem 2rem 8.75rem 2rem',
+        padding: isMobile ? '0 1rem 7.25rem 1rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
       {!hiddenCancelButton && (
@@ -150,6 +159,9 @@ export function PageCard({
           width: '100%',
           justifyContent: 'center',
           alignItems: 'center',
+          [breakpoints.mobile]: {
+            maxWidth: '100%',
+          },
         }}
       >
         <Grid
@@ -219,7 +231,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            {alert ? <>{alert}</> : null}
+            <Grid sx={contentStyles}>{alert ? <>{alert}</> : null}</Grid>
           </Grid>
           <Grid
             item
@@ -228,6 +240,7 @@ export function PageCard({
             sx={{
               display: 'flex',
               justifyContent: 'flex-end',
+              mt: '5px',
               [breakpoints.mobile]: {
                 display: 'none',
               },
@@ -247,12 +260,20 @@ export function PageCard({
               </IconWrapper>
             ) : null}
           </Grid>
-          <Grid item md={10} order={{ xs: 4, md: 4 }} xs={12}>
-            <Typography variant="h4">{title}</Typography>
+          <Grid
+            item
+            md={10}
+            order={{ xs: 4, md: 4 }}
+            sx={{ marginBottom: '24px' }}
+            xs={12}
+          >
+            <Grid sx={contentStyles}>
+              <Typography variant="h4">{title}</Typography>
+            </Grid>
           </Grid>
           <Grid item md={1} order={{ xs: 5, md: 5 }} xs={1} />
           <Grid item md={10} order={{ xs: 6, md: 6 }} xs={12}>
-            {children}
+            <Grid sx={contentStyles}>{children}</Grid>
           </Grid>
         </Grid>
       </Grid>

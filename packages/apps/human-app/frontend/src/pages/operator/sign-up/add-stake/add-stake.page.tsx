@@ -79,7 +79,7 @@ export function AddStakeOperatorPage() {
     <PageCard alert={getAlert()} title={t('operator.addStake.title')}>
       <Grid
         container
-        sx={{ flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}
+        sx={{ flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}
       >
         <Typography variant="body4">
           {t('operator.addStake.formHeader')}
