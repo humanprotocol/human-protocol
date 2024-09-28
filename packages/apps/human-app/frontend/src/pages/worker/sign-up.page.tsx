@@ -92,11 +92,25 @@ export function SignUpWorkerPage() {
             />
             <Grid>
               <Typography fontSize="0.75rem" variant="textField">
-                <Trans i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy">
-                  Terms
-                  <Link href={env.VITE_TERMS_OF_SERVICE_URL} target="_blank" />
-                  <Link href={env.VITE_PRIVACY_POLICY_URL} target="_blank" />
-                </Trans>
+                <Trans
+                  components={{
+                    1: (
+                      <Link
+                        href={env.VITE_TERMS_OF_SERVICE_URL}
+                        sx={{ textDecoration: 'underline' }}
+                        target="_blank"
+                      />
+                    ),
+                    2: (
+                      <Link
+                        href={env.VITE_TERMS_OF_SERVICE_URL}
+                        sx={{ textDecoration: 'underline' }}
+                        target="_blank"
+                      />
+                    ),
+                  }}
+                  i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy"
+                />
               </Typography>
             </Grid>
             <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
