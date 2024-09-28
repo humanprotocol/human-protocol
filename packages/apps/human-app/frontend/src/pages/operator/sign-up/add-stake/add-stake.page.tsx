@@ -18,9 +18,10 @@ import {
 import { useAddStakeMutationState } from '@/api/services/operator/add-stake';
 import { useHMTokenDecimals } from '@/api/services/operator/human-token-decimals';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function AddStakeOperatorPage() {
-  const { colorPalette } = useColorMode();
+  const { colorPalette, isDarkMode } = useColorMode();
   const [displayForm, setDisplayForm] = useState(false);
   const {
     data: stakedAmount,
@@ -87,7 +88,14 @@ export function AddStakeOperatorPage() {
         <Typography variant="subtitle2">
           {t('operator.addStake.label')}
         </Typography>
-        <Typography color={colorPalette.primary.light} variant="body5">
+        <Typography
+          color={
+            isDarkMode
+              ? onlyDarkModeColor.additionalTextColor
+              : colorPalette.primary.light
+          }
+          variant="body5"
+        >
           {stakedAmountFormatter(stakedAmount)}
         </Typography>
         {displayForm ? (
