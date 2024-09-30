@@ -32,8 +32,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
       sx={{
         pr: 0,
         pl: parseLeftPadding(),
-        pb: isMobile ? 0 : '44px',
-        pt: '32px',
+        pb: isMobile ? 0 : '32px',
         [breakpoints.mobile]: {
           pr: 0,
           pl: 0,
@@ -48,13 +47,13 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
         alignItems="flex-start"
         display="flex"
         flexDirection="column"
-        gap="24px"
         item
         justifyContent="center"
         xs={isMobile ? 12 : 11}
       >
         <Stack
           direction={isMobile ? 'column' : 'row'}
+          lineHeight="166%"
           sx={{
             gap: '24px',
             [breakpoints.mobile]: {

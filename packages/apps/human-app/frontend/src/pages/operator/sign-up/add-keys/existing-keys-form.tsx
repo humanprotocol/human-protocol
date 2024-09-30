@@ -43,7 +43,7 @@ export function ExistingKeysForm({
   useResetMutationErrors(existingKeysMethods.watch, existingKeysMutation.reset);
 
   return (
-    <Grid container gap="1.5rem">
+    <Grid container gap="2rem">
       <div
         style={{
           width: '100%',

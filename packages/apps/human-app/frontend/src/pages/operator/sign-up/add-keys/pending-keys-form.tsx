@@ -50,7 +50,7 @@ export function PendingKeysForm({
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.5rem',
+          gap: '2rem',
         }}
       >
         <EditPendingKeysForm existingKeysInitialState={keysData} />
@@ -58,6 +58,7 @@ export function PendingKeysForm({
         <Button
           fullWidth
           loading={pendingKeysMutation.isPending}
+          sx={{ mt: '10px' }}
           type="submit"
           variant="contained"
         >
