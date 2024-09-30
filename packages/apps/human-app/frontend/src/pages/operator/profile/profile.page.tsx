@@ -66,7 +66,7 @@ export function OperatorProfilePage() {
           sx={{
             height: '100%',
             boxShadow: 'none',
-            padding: isMobile ? '60px 20px' : '100px 40px',
+            padding: isMobile ? '40px 20px' : '40px 40px',
             borderRadius: '20px',
           }}
         >

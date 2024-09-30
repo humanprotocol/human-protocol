@@ -262,7 +262,7 @@
       "noJobs": "No jobs available at the moment. Please come back in:"
     },
     "enableHCaptchaLabeling": {
-      "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",
+      "description": "CAPTCHA tasks involve the correct labeling of images in a group of images. Read the instructional prompt, and select the images that best correspond to that prompt.",
       "enableButton": "Begin Labeling"
     },
     "hcaptchaLabelingStats": {

@@ -4,41 +4,22 @@ import { t } from 'i18next';
 import { ProfileData } from '@/pages/worker/profile/profile-data';
 import { ProfileActions } from '@/pages/worker/profile/profile-actions';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
-import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
-import type { UserData } from '@/auth/auth-context';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 
-const getNotificationMessage = (
-  user: UserData & { isWalletConnected: boolean }
-) => {
-  switch (true) {
-    case user.kyc_status !== 'approved':
-      return t('worker.profile.topNotifications.noKYC');
-    case user.kyc_status === 'approved' && !user.wallet_address:
-      return t('worker.profile.topNotifications.registerAddress');
-    default:
-      return null;
-  }
-};
-
 export function WorkerProfilePage() {
   const isMobile = useIsMobile();
-  const { user } = useAuthenticatedUser();
   const { isConnected } = useWalletConnect();
   const { setGrayBackground } = useBackgroundColorStore();
   const { setTopNotification: setTopNotificationInLayout } =
     useProtectedLayoutNotification();
 
   const setNotifications = () => {
-    const notification = getNotificationMessage({
-      ...user,
-      isWalletConnected: isConnected,
+    setTopNotificationInLayout({
+      type: 'warning',
+      content: t('worker.profile.topNotifications.noKYC'),
     });
-    if (notification) {
-      setTopNotificationInLayout({ type: 'warning', content: notification });
-    }
   };
 
   useEffect(() => {

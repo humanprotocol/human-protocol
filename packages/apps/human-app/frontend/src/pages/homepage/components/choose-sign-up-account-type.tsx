@@ -104,6 +104,7 @@ export function ChooseSignUpAccountType() {
                 component={Link}
                 fullWidth
                 size="large"
+                sx={{ fontFamily: 'Inter' }}
                 to={routerPaths.worker.signUp}
                 variant="contained"
               >
@@ -141,7 +142,7 @@ export function ChooseSignUpAccountType() {
               }}
             >
               <ListItemText
-                primary={t('homepage.runAsOracle')}
+                primary={t('homepage.becomePartner')}
                 primaryTypographyProps={{
                   variant: 'subtitle2',
                   sx: {
@@ -150,7 +151,7 @@ export function ChooseSignUpAccountType() {
                 }}
               />
               <ListItemText
-                primary={t('homepage.becomePartner')}
+                primary={t('homepage.runAsOracle')}
                 primaryTypographyProps={{
                   variant: 'subtitle2',
                   sx: {
@@ -173,6 +174,7 @@ export function ChooseSignUpAccountType() {
               component={Link}
               fullWidth
               size="large"
+              sx={{ fontFamily: 'Inter' }}
               to={routerPaths.operator.connectWallet}
               variant="contained"
             >
