@@ -49,7 +49,12 @@ export function Navbar({ withNavigation }: NavbarProps) {
         >
           <Box
             sx={{
-              display: { xs: 'none', md: 'flex', height: '2rem' },
+              display: {
+                xs: 'none',
+                md: 'flex',
+                height: '2rem',
+                gap: '1.5rem',
+              },
             }}
           >
             {isMainPage ? (
