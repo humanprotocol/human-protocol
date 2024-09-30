@@ -40,7 +40,12 @@ export function Welcome() {
               <MobileHomeIcons />
             </Stack>
           ) : (
-            <Stack direction="row" sx={{ transform: 'translateX(-6%)' }}>
+            <Stack
+              direction="row"
+              maxHeight="80px"
+              mb="1.5rem"
+              sx={{ transform: 'translateX(-6%)' }}
+            >
               <HomepageWorkIcon />
               <HomepageUserIcon />
               <HomepageLogoIcon />
