@@ -110,7 +110,6 @@ export function Welcome() {
             component="div"
             sx={{
               mb: '1.5625rem',
-              mx: '0px',
             }}
             variant="middle"
           />
