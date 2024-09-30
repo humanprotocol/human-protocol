@@ -9,6 +9,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { ListItem } from '@/components/ui/list-item';
+import type { OracleSuccessResponse } from '@/api/services/worker/oracles';
 
 export function OraclesTableMobile({
   selectOracle,
@@ -19,7 +20,7 @@ export function OraclesTableMobile({
     isPending: isOraclesDataPending,
   },
 }: {
-  selectOracle: (oracleAddress: string, jobTypes: string[]) => void;
+  selectOracle: (oracle: OracleSuccessResponse, jobTypes: string[]) => void;
   oraclesQueryDataResult: OraclesDataQueryResult;
 }) {
   if (isOraclesDataPending) {
@@ -72,7 +73,7 @@ export function OraclesTableMobile({
           <TableButton
             fullWidth
             onClick={() => {
-              selectOracle(d.address, d.jobTypes);
+              selectOracle(d, d.jobTypes);
             }}
           >
             {t('worker.oraclesTable.seeJobs')}
