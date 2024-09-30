@@ -799,10 +799,7 @@ export class JobService {
       div(1, rate),
     );
     const feePercentage = Number(
-      await this.getOracleFee(
-        await this.web3Service.getOperatorAddress(),
-        chainId,
-      ),
+      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
 
     let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
@@ -883,8 +880,8 @@ export class JobService {
 
     jobEntity.chainId = chainId;
     jobEntity.reputationOracle = reputationOracle;
-    jobEntity.exchangeOracle = exchangeOracle || null;
-    jobEntity.recordingOracle = recordingOracle || null;
+    jobEntity.exchangeOracle = exchangeOracle;
+    jobEntity.recordingOracle = recordingOracle;
     jobEntity.userId = userId;
     jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;

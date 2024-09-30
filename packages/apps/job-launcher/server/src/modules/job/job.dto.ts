@@ -63,7 +63,7 @@ export class JobDto {
   })
   @IsEthereumAddress()
   @IsOptional()
-  public exchangeOracle?: string | null;
+  public exchangeOracle?: string;
 
   @ApiPropertyOptional({
     type: String,
@@ -71,7 +71,7 @@ export class JobDto {
   })
   @IsEthereumAddress()
   @IsOptional()
-  public recordingOracle?: string | null;
+  public recordingOracle?: string;
 }
 
 export class JobQuickLaunchDto extends JobDto {

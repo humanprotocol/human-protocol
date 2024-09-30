@@ -9,7 +9,19 @@ import { ControlledError } from '../../common/errors/controlled';
 interface OracleOrder {
   [chainId: number]: {
     [reputationOracle: string]: {
-      [role: string]: string[];
+      [oracleType: string]: {
+        [jobType: string]: string[];
+      };
+    };
+  };
+}
+
+interface OracleIndex {
+  [chainId: number]: {
+    [reputationOracle: string]: {
+      [oracleType: string]: {
+        [jobType: string]: number;
+      };
     };
   };
 }
@@ -25,6 +37,7 @@ export class RoutingProtocolService {
   private reputationOracleIndex = 0;
   private oraclesHash: string | null = null;
   private oracleOrder: OracleOrder = {};
+  private oracleIndexes: OracleIndex = {};
 
   constructor(
     public readonly web3Service: Web3Service,
@@ -44,15 +57,37 @@ export class RoutingProtocolService {
       acc[chainId] = this.reputationOracles.reduce(
         (oracleAcc, reputationOracle) => {
           oracleAcc[reputationOracle] = {
-            [Role.ExchangeOracle]: [],
-            [Role.RecordingOracle]: [],
+            [Role.ExchangeOracle]: {},
+            [Role.RecordingOracle]: {},
           };
           return oracleAcc;
         },
-        {} as { [reputationOracle: string]: { [role: string]: string[] } },
+        {} as {
+          [reputationOracle: string]: {
+            [oracleType: string]: { [jobType: string]: string[] };
+          };
+        },
       );
       return acc;
     }, {} as OracleOrder);
+
+    this.oracleIndexes = this.chains.reduce((acc: OracleIndex, chainId) => {
+      acc[chainId] = this.reputationOracles.reduce(
+        (oracleAcc, reputationOracle) => {
+          oracleAcc[reputationOracle] = {
+            [Role.ExchangeOracle]: {},
+            [Role.RecordingOracle]: {},
+          };
+          return oracleAcc;
+        },
+        {} as {
+          [reputationOracle: string]: {
+            [oracleType: string]: { [jobType: string]: number };
+          };
+        },
+      );
+      return acc;
+    }, {} as OracleIndex);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -77,36 +112,40 @@ export class RoutingProtocolService {
     return reputationOracle;
   }
 
-  public async selectOracleFromAvailable(
+  public selectOracleFromAvailable(
     availableOracles: any[],
     oracleType: string,
     chainId: ChainId,
     reputationOracle: string,
-  ): Promise<string | null> {
+    jobType: string,
+  ): string {
     const oraclesOfType = availableOracles
       .filter((oracle) => oracle.role === oracleType)
       .map((oracle) => oracle.address);
 
-    if (!oraclesOfType.length) {
-      return null;
-    }
+    if (!oraclesOfType.length) return '';
 
-    const latestOraclesHash = hashString(JSON.stringify(oraclesOfType));
-    // Check if we need to shuffle and store the new order
-    if (this.oraclesHash !== latestOraclesHash) {
+    const latestOraclesHash = hashString(JSON.stringify(availableOracles));
+
+    if (
+      !this.oracleOrder[chainId][reputationOracle][oracleType][jobType] ||
+      this.oraclesHash !== latestOraclesHash
+    ) {
       this.oraclesHash = latestOraclesHash;
       const shuffledOracles = this.shuffleArray(oraclesOfType);
-      this.oracleOrder[chainId][reputationOracle][oracleType] = shuffledOracles;
+      this.oracleOrder[chainId][reputationOracle][oracleType][jobType] =
+        shuffledOracles;
+      this.oracleIndexes[chainId][reputationOracle][oracleType][jobType] = 0;
     }
 
     const orderedOracles =
-      this.oracleOrder[chainId][reputationOracle][oracleType];
-
-    const currentIndex = this.reputationOracleIndex % orderedOracles.length;
+      this.oracleOrder[chainId][reputationOracle][oracleType][jobType];
+    const currentIndex =
+      this.oracleIndexes[chainId][reputationOracle][oracleType][jobType] || 0;
     const selectedOracle = orderedOracles[currentIndex];
 
-    this.reputationOracleIndex =
-      (this.reputationOracleIndex + 1) % orderedOracles.length;
+    this.oracleIndexes[chainId][reputationOracle][oracleType][jobType] =
+      (currentIndex + 1) % orderedOracles.length;
 
     return selectedOracle;
   }
@@ -116,8 +155,8 @@ export class RoutingProtocolService {
     jobType: string,
   ): Promise<{
     reputationOracle: string;
-    exchangeOracle: string | null;
-    recordingOracle: string | null;
+    exchangeOracle: string;
+    recordingOracle: string;
   }> {
     const reputationOracle = this.selectReputationOracle();
     const availableOracles = await this.web3Service.findAvailableOracles(
@@ -126,17 +165,19 @@ export class RoutingProtocolService {
       reputationOracle,
     );
 
-    const exchangeOracle = await this.selectOracleFromAvailable(
+    const exchangeOracle = this.selectOracleFromAvailable(
       availableOracles,
       Role.ExchangeOracle,
       chainId,
       reputationOracle,
+      jobType,
     );
-    const recordingOracle = await this.selectOracleFromAvailable(
+    const recordingOracle = this.selectOracleFromAvailable(
       availableOracles,
       Role.RecordingOracle,
       chainId,
       reputationOracle,
+      jobType,
     );
 
     return { reputationOracle, exchangeOracle, recordingOracle };

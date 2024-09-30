@@ -17,10 +17,10 @@ export class JobEntity extends BaseEntity implements IJob {
   public reputationOracle: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public exchangeOracle: string | null;
+  public exchangeOracle: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public recordingOracle: string | null;
+  public recordingOracle: string;
 
   @Column({ type: 'varchar', nullable: true })
   public escrowAddress: string;

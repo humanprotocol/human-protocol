@@ -146,13 +146,14 @@ describe('RoutingProtocolService', () => {
 
   describe('selectOracleFromAvailable', () => {
     it('should return null if no oracles of specified type', async () => {
-      const result = await routingProtocolService.selectOracleFromAvailable(
+      const result = routingProtocolService.selectOracleFromAvailable(
         [],
         Role.ExchangeOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
-      expect(result).toBeNull();
+      expect(result).toBe('');
     });
 
     it('should select the first available oracle of specified type', async () => {
@@ -161,11 +162,12 @@ describe('RoutingProtocolService', () => {
         { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
       ];
 
-      const result = await routingProtocolService.selectOracleFromAvailable(
+      const result = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.ExchangeOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
       expect(result).toEqual(expect.stringContaining('0xExchangeOracle')); // 0xExchangeOraclex;
     });
@@ -176,17 +178,19 @@ describe('RoutingProtocolService', () => {
         { role: Role.ExchangeOracle, address: '0xExchangeOracle2' },
       ];
 
-      const result1 = await routingProtocolService.selectOracleFromAvailable(
+      const result1 = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.ExchangeOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
-      const result2 = await routingProtocolService.selectOracleFromAvailable(
+      const result2 = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.ExchangeOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
 
       expect(result1).not.toBe(result2); // Ensure that the order has been shuffled
@@ -200,32 +204,36 @@ describe('RoutingProtocolService', () => {
         { role: Role.RecordingOracle, address: '0xRecordingOracle2' },
       ];
 
-      const result1 = await routingProtocolService.selectOracleFromAvailable(
+      const result1 = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.ExchangeOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
 
-      const result2 = await routingProtocolService.selectOracleFromAvailable(
+      const result2 = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.RecordingOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
 
-      const result3 = await routingProtocolService.selectOracleFromAvailable(
+      const result3 = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.ExchangeOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
 
-      const result4 = await routingProtocolService.selectOracleFromAvailable(
+      const result4 = routingProtocolService.selectOracleFromAvailable(
         availableOracles,
         Role.RecordingOracle,
         ChainId.POLYGON_AMOY,
         MOCK_REPUTATION_ORACLE_1,
+        'jobType',
       );
 
       expect(result1).toEqual(expect.stringContaining('0xExchangeOracle')); // 0xExchangeOraclex;
@@ -262,8 +270,8 @@ describe('RoutingProtocolService', () => {
         ChainId.POLYGON_AMOY,
         'jobType',
       );
-      expect(result.exchangeOracle).toBeNull();
-      expect(result.recordingOracle).toBeNull();
+      expect(result.exchangeOracle).toBe('');
+      expect(result.recordingOracle).toBe('');
     });
   });
 
