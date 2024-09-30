@@ -30,7 +30,7 @@ import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/avail
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
-    reward_amount?: number;
+    reward_amount?: string;
     reward_token?: string;
   };
 };

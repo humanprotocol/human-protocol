@@ -12,6 +12,7 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  mockConfig,
 } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
@@ -69,6 +70,18 @@ describe('ReputationService', () => {
       ],
       providers: [
         {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
+        {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
@@ -86,7 +99,6 @@ describe('ReputationService', () => {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
         },
-        ConfigService,
         ReputationConfigService,
       ],
     }).compile();

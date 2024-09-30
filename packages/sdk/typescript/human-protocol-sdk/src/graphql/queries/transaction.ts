@@ -17,16 +17,30 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
   const { startDate, endDate, startBlock, endBlock, fromAddress, toAddress } =
     filter;
 
+  const addressCondition =
+    fromAddress === toAddress
+      ? `
+        ${fromAddress ? `{ from: $fromAddress }` : ''}
+        ${toAddress ? `{ to: $toAddress }` : ''}
+      `
+      : `
+        ${fromAddress ? `from: $fromAddress` : ''}
+        ${toAddress ? `to: $toAddress` : ''}
+      `;
+
   const WHERE_CLAUSE = `
-    where: {
-      ${fromAddress ? `from: $fromAddress,` : ''}
-      ${toAddress ? `to: $toAddress,` : ''}
-      ${startDate ? `timestamp_gte: $startDate,` : ''}
-      ${endDate ? `timestamp_lte: $endDate,` : ''}
-      ${startBlock ? `block_gte: $startBlock,` : ''}
-      ${endBlock ? `block_lte: $endBlock,` : ''}
-    }
-  `;
+      where: {
+        ${
+          fromAddress === toAddress
+            ? `or: [ ${addressCondition} ],`
+            : addressCondition
+        }
+        ${startDate ? `timestamp_gte: $startDate,` : ''}
+        ${endDate ? `timestamp_lte: $endDate,` : ''}
+        ${startBlock ? `block_gte: $startBlock,` : ''}
+        ${endBlock ? `block_lte: $endBlock,` : ''}
+      }
+    `;
 
   return gql`
     query getTransactions(

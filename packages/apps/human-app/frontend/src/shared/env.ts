@@ -38,6 +38,10 @@ const envSchema = z.object({
     const jobTypesArray = value.split(',');
     return jobTypesArray;
   }),
+  VITE_FEATURE_FLAG_JOBS_DISCOVERY: z
+    .string()
+    .default('false')
+    .transform((value) => value === 'true'),
 });
 
 let validEnvs;

@@ -9,7 +9,10 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_MANIFEST_URL } from '../../../test/constants';
+import {
+  MOCK_MANIFEST_URL,
+  mockConfig,
+} from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -88,7 +91,18 @@ describe('JobService', () => {
       providers: [
         JobService,
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         PGPConfigService,
         S3ConfigService,
         {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   GatewayConfig,
   GatewayEndpointConfig,
@@ -23,6 +23,7 @@ import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 Injectable();
 export class HCaptchaVerifyGateway {
   private readonly gatewayConfig: GatewayConfig;
+  private readonly logger = new Logger(HCaptchaVerifyGateway.name);
   constructor(
     private httpService: HttpService,
     gatewayConfigService: GatewayConfigService,
@@ -78,7 +79,7 @@ export class HCaptchaVerifyGateway {
         options,
       );
     } catch (e) {
-      console.log('Error: ', e);
+      this.logger.error('Error: ', e);
     }
   }
 }

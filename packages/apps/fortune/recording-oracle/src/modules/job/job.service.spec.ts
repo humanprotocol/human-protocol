@@ -21,6 +21,7 @@ import {
   MOCK_S3_ENDPOINT,
   MOCK_S3_PORT,
   MOCK_WEB3_PRIVATE_KEY,
+  mockConfig,
 } from '../../../test/constants';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
@@ -93,9 +94,20 @@ describe('JobService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         JobService,
         StorageService,
-        ConfigService,
         Web3ConfigService,
         S3ConfigService,
         PGPConfigService,
@@ -473,7 +485,7 @@ describe('JobService', () => {
       const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
-        event_type: EventType.TASK_COMPLETED,
+        event_type: EventType.JOB_COMPLETED,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -565,7 +577,7 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.TASK_COMPLETED,
+      event_type: EventType.JOB_COMPLETED,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(

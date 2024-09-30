@@ -10,6 +10,7 @@ import {
   MOCK_ADDRESS,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_WEBHOOK_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
@@ -76,7 +77,18 @@ describe('WebhookService', () => {
           useValue: createMock<AssignmentRepository>(),
         },
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         Web3ConfigService,
         ServerConfigService,
         PGPConfigService,

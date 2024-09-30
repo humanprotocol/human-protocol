@@ -24,6 +24,7 @@ export const createFortuneJob = async (
     requesterDescription: data.description,
     currency: currency,
     fundAmount: Number(amount),
+    qualifications: data.qualifications,
   };
   await api.post('/job/fortune', body);
 };
@@ -45,6 +46,7 @@ export const createCvatJob = async (
     groundTruth: data.groundTruth,
     userGuide: data.userGuide,
     type: data.type,
+    qualifications: data.qualifications,
   };
   await api.post('/job/cvat', body);
 };

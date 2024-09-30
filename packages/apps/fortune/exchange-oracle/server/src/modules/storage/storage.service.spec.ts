@@ -7,7 +7,7 @@ import {
   KVStoreUtils,
 } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
-import { MOCK_ADDRESS, MOCK_RPC_URL } from '../../../test/constants';
+import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
@@ -61,7 +61,18 @@ describe('StorageService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         S3ConfigService,
         PGPConfigService,
         {

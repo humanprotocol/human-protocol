@@ -12,6 +12,8 @@ export class JwtUserData {
   @AutoMap()
   reputation_network: string;
   @AutoMap()
+  qualifications?: string[];
+  @AutoMap()
   site_key: string;
   @AutoMap()
   iat: number;
