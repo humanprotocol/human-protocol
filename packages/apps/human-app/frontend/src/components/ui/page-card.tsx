@@ -49,7 +49,7 @@ const commonStylesDark: SxProps<Theme> = {
   alignItems: 'center',
   borderRadius: '20px',
   minHeight: '70vh',
-  maxWidth: '1200px',
+  maxWidth: '1600px',
   width: '100%',
   background: constDarkColorPalette.paper.main,
   [breakpoints.mobile]: {

@@ -19,11 +19,17 @@ function LightModeIcons() {
       direction="row"
       maxHeight="80px"
       mb="1.5rem"
-      sx={{ transform: 'translateX(-6%)' }}
+      sx={{ transform: 'translateX(-4.5%)' }}
     >
-      <HomepageWorkIcon />
-      <HomepageUserIcon />
-      <HomepageLogoIcon />
+      <Grid sx={{ mx: '-8px' }}>
+        <HomepageWorkIcon />
+      </Grid>
+      <Grid sx={{ mx: '-8px' }}>
+        <HomepageUserIcon />
+      </Grid>
+      <Grid sx={{ mx: '-8px' }}>
+        <HomepageLogoIcon />
+      </Grid>
     </Stack>
   );
 }
@@ -62,8 +68,8 @@ export function Welcome() {
         paddingBottom: isMobile ? '44px' : 0,
       }}
     >
-      <Grid item justifyContent="flex-end" xs={isMobile ? 12 : 6}>
-        <Grid container direction="column">
+      <Grid container item justifyContent="center" xs={isMobile ? 12 : 6}>
+        <Grid container direction="column" justifyContent="center">
           {isMobile ? (
             <Stack
               alignItems="center"
