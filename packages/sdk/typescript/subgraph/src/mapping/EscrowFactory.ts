@@ -32,6 +32,7 @@ export function handleLaunched(event: Launched): void {
   entity.token = event.params.token;
   entity.factoryAddress = event.address;
   entity.launcher = event.transaction.from;
+  entity.canceler = event.transaction.from;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;
@@ -72,6 +73,7 @@ export function handleLaunchedV2(event: LaunchedV2): void {
   entity.jobRequesterId = event.params.jobRequesterId;
   entity.factoryAddress = event.address;
   entity.launcher = event.transaction.from;
+  entity.canceler = event.transaction.from;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;

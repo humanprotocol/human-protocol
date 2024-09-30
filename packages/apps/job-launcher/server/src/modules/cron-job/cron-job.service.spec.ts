@@ -543,7 +543,7 @@ describe('CronJobService', () => {
       };
 
       jobEntityMock1 = {
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         fundAmount: 100,
         userId: 1,
         id: 1,
@@ -555,7 +555,7 @@ describe('CronJobService', () => {
       };
 
       jobEntityMock2 = {
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         fundAmount: 100,
         userId: 1,
         id: 1,
@@ -639,7 +639,7 @@ describe('CronJobService', () => {
 
       expect(fundEscrowMock).toHaveBeenCalledTimes(2);
       expect(jobEntityMock1.status).toBe(JobStatus.FAILED);
-      expect(jobEntityMock2.status).toBe(JobStatus.SET_UP);
+      expect(jobEntityMock2.status).toBe(JobStatus.FUNDED);
     });
 
     it('should complete the cron job entity on database to unlock', async () => {

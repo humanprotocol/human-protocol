@@ -27,6 +27,7 @@ import {
   handleFund,
   handlePendingV2,
   handleBulkTransferV2,
+  handleWithdraw,
 } from '../../src/mapping/Escrow';
 import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
@@ -39,6 +40,7 @@ import {
   createFundEvent,
   createPendingV2Event,
   createBulkTransferV2Event,
+  createWithdrawEvent,
 } from './fixtures';
 
 const escrowAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a';
@@ -62,6 +64,8 @@ const exchangeOracleAddressString =
 const exchangeOracleAddress = Address.fromString(exchangeOracleAddressString);
 const launcherAddressString = '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65';
 const launcherAddress = Address.fromString(launcherAddressString);
+const tokenAddressString = '0x15d34aaf54267db7d7c367839aaf71a00a2c6a62';
+const tokenAddress = Address.fromString(tokenAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
@@ -92,6 +96,7 @@ describe('Escrow', () => {
     escrow.token = Address.zero();
     escrow.factoryAddress = Address.zero();
     escrow.launcher = launcherAddress;
+    escrow.canceler = launcherAddress;
     escrow.count = ZERO_BI;
     escrow.balance = ZERO_BI;
     escrow.totalFundedAmount = ZERO_BI;
@@ -601,15 +606,25 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'Transaction',
       fund.transaction.hash.toHex(),
-      'to',
-      escrowAddressString
-    );
-    assert.fieldEquals(
-      'Transaction',
-      fund.transaction.hash.toHex(),
       'value',
       '100'
     );
+
+    const transferId = toEventId(fund).toHex();
+    assert.fieldEquals(
+      'Transfer',
+      transferId,
+      'transaction',
+      fund.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transfer',
+      transferId,
+      'from',
+      fund.transaction.from.toHex()
+    );
+    assert.fieldEquals('Transfer', transferId, 'to', escrowAddressString);
+    assert.fieldEquals('Transfer', transferId, 'value', '100');
   });
 
   test('Should skip Fund event if balance is greater than 0', () => {
@@ -933,7 +948,6 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Partial');
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '98');
 
     // Bulk 2
     const bulk2 = createBulkTransferEvent(
@@ -1024,7 +1038,7 @@ describe('Escrow', () => {
       'finalResultsUrl',
       'test.com'
     );
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
+
     assert.fieldEquals(
       'Transaction',
       bulk1.transaction.hash.toHex(),
@@ -1057,7 +1071,7 @@ describe('Escrow', () => {
     );
   });
 
-  test('Should properly handle BulkTransfer events', () => {
+  test('Should properly handle BulkTransferV2 events', () => {
     // Bulk 1
     const bulk1 = createBulkTransferV2Event(
       operatorAddress,
@@ -1143,6 +1157,7 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Partial');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '98');
 
     // Bulk 2
     const bulk2 = createBulkTransferV2Event(
@@ -1234,6 +1249,8 @@ describe('Escrow', () => {
       'finalResultsUrl',
       'test.com'
     );
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
+
     assert.fieldEquals(
       'Transaction',
       bulk1.transaction.hash.toHex(),
@@ -1424,6 +1441,96 @@ describe('Escrow', () => {
       'to',
       escrowAddressString
     );
+  });
+
+  test('Should properly handle Withdraw event', () => {
+    const withdraw = createWithdrawEvent(
+      operatorAddress,
+      tokenAddress,
+      100,
+      BigInt.fromI32(10)
+    );
+
+    handleWithdraw(withdraw);
+
+    const id = toEventId(withdraw).toHex();
+
+    // WithdrawEvent
+    assert.fieldEquals(
+      'WithdrawEvent',
+      id,
+      'block',
+      withdraw.block.number.toString()
+    );
+    assert.fieldEquals(
+      'WithdrawEvent',
+      id,
+      'timestamp',
+      withdraw.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'WithdrawEvent',
+      id,
+      'txHash',
+      withdraw.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'WithdrawEvent',
+      id,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals('WithdrawEvent', id, 'sender', operatorAddressString);
+    assert.fieldEquals('WithdrawEvent', id, 'receiver', launcherAddressString);
+    assert.fieldEquals('WithdrawEvent', id, 'amount', '100');
+    assert.fieldEquals('WithdrawEvent', id, 'token', tokenAddressString);
+
+    assert.fieldEquals(
+      'Transaction',
+      withdraw.transaction.hash.toHex(),
+      'txHash',
+      withdraw.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      withdraw.transaction.hash.toHex(),
+      'method',
+      'withdraw'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      withdraw.transaction.hash.toHex(),
+      'block',
+      withdraw.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      withdraw.transaction.hash.toHex(),
+      'from',
+      operatorAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      withdraw.transaction.hash.toHex(),
+      'value',
+      '100'
+    );
+
+    const transferId = toEventId(withdraw).toHex();
+    assert.fieldEquals(
+      'Transfer',
+      transferId,
+      'transaction',
+      withdraw.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transfer',
+      transferId,
+      'from',
+      withdraw.transaction.from.toHex()
+    );
+    assert.fieldEquals('Transfer', transferId, 'to', launcherAddressString);
+    assert.fieldEquals('Transfer', transferId, 'value', '100');
   });
 
   describe('Statistics', () => {
@@ -1701,6 +1808,7 @@ describe('Escrow', () => {
       escrow.token = Address.zero();
       escrow.factoryAddress = Address.zero();
       escrow.launcher = launcherAddress;
+      escrow.canceler = launcherAddress;
       escrow.count = ZERO_BI;
       escrow.balance = ZERO_BI;
       escrow.totalFundedAmount = ZERO_BI;

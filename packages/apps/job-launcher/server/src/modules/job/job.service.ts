@@ -1021,7 +1021,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.SET_UP;
+    jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
@@ -1040,7 +1040,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.LAUNCHED;
+    jobEntity.status = JobStatus.FUNDED;
     await this.jobRepository.updateOne(jobEntity);
 
     const oracleType = this.getOracleType(jobEntity.requestType);
@@ -1124,7 +1124,7 @@ export class JobService {
           status = JobStatus.FAILED;
         }
         break;
-      case JobStatus.SET_UP:
+      case JobStatus.FUNDED:
         if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
           status = JobStatus.FAILED;
         }

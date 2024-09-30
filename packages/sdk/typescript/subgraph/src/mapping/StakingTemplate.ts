@@ -23,6 +23,7 @@ import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
 export const STATISTICS_ENTITY_ID = toBytes('leader-statistics-id');
+export const TOKEN_ADDRESS = '{{ HMToken.address }}';
 
 function constructStatsEntity(): LeaderStatistics {
   const entity = new LeaderStatistics(STATISTICS_ENTITY_ID);
@@ -63,7 +64,13 @@ export function createOrLoadLeader(address: Address): Leader {
 }
 
 export function handleStakeDeposited(event: StakeDeposited): void {
-  createTransaction(event, 'stake', event.transaction.to, event.params.tokens);
+  createTransaction(
+    event,
+    'stake',
+    event.transaction.to,
+    event.params.tokens,
+    Address.fromString(TOKEN_ADDRESS)
+  );
   // Create StakeDepostiedEvent entity
   const eventEntity = new StakeDepositedEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -97,7 +104,8 @@ export function handleStakeLocked(event: StakeLocked): void {
     event,
     'unstake',
     event.transaction.to,
-    event.params.tokens
+    event.params.tokens,
+    Address.fromString(TOKEN_ADDRESS)
   );
   // Create StakeLockedEvent entity
   const eventEntity = new StakeLockedEvent(toEventId(event));
@@ -121,7 +129,8 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
     event,
     'withdraw',
     event.transaction.to,
-    event.params.tokens
+    event.params.tokens,
+    Address.fromString(TOKEN_ADDRESS)
   );
   // Create StakeWithdrawnEvent entity
   const eventEntity = new StakeWithdrawnEvent(toEventId(event));
@@ -148,7 +157,8 @@ export function handleStakeAllocated(event: StakeAllocated): void {
     event,
     'allocate',
     event.params.escrowAddress,
-    event.params.tokens
+    event.params.tokens,
+    Address.fromString(TOKEN_ADDRESS)
   );
   // Create StakeAllocatedEvent entity
   const eventEntity = new StakeAllocatedEvent(toEventId(event));
@@ -171,7 +181,8 @@ export function handleAllocationClosed(event: AllocationClosed): void {
     event,
     'closeAllocation',
     event.params.escrowAddress,
-    event.params.tokens
+    event.params.tokens,
+    Address.fromString(TOKEN_ADDRESS)
   );
   // Create AllocationClosedEvent entity
   const eventEntity = new AllocationClosedEvent(toEventId(event));
@@ -190,7 +201,13 @@ export function handleAllocationClosed(event: AllocationClosed): void {
 }
 
 export function handleStakeSlashed(event: StakeSlashed): void {
-  createTransaction(event, 'slash', event.params.slasher, event.params.tokens);
+  createTransaction(
+    event,
+    'slash',
+    event.params.slasher,
+    event.params.tokens,
+    Address.fromString(TOKEN_ADDRESS)
+  );
   // Create StakeSlashedEvent entity
   const eventEntity = new StakeSlashedEvent(toEventId(event));
   eventEntity.block = event.block.number;

@@ -10,7 +10,9 @@ import {
   Fund,
   PendingV2,
   BulkTransferV2,
+  Withdraw,
 } from '../../generated/templates/Escrow/Escrow';
+import { generateUniqueHash } from '../../tests/utils';
 
 export function createPendingEvent(
   sender: Address,
@@ -18,6 +20,11 @@ export function createPendingEvent(
   hash: string
 ): Pending {
   const newPendingEvent = changetype<Pending>(newMockEvent());
+  newPendingEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    newPendingEvent.transaction.nonce,
+    newPendingEvent.transaction.nonce
+  );
 
   newPendingEvent.transaction.from = sender;
 
@@ -47,6 +54,11 @@ export function createPendingV2Event(
   exchangeOracleAddress: Address
 ): PendingV2 {
   const newPendingEvent = changetype<PendingV2>(newMockEvent());
+  newPendingEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    newPendingEvent.transaction.nonce,
+    newPendingEvent.transaction.nonce
+  );
 
   newPendingEvent.transaction.from = sender;
 
@@ -89,6 +101,11 @@ export function createISEvent(
 ): IntermediateStorage {
   const newIntermediateStorageEvent =
     changetype<IntermediateStorage>(newMockEvent());
+  newIntermediateStorageEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    newIntermediateStorageEvent.transaction.nonce,
+    newIntermediateStorageEvent.transaction.nonce
+  );
 
   newIntermediateStorageEvent.transaction.from = sender;
 
@@ -118,6 +135,11 @@ export function createBulkTransferEvent(
   timestamp: BigInt
 ): BulkTransfer {
   const newBTEvent = changetype<BulkTransfer>(newMockEvent());
+  newBTEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newBTEvent.transaction.nonce
+  );
 
   newBTEvent.block.timestamp = timestamp;
   newBTEvent.transaction.from = sender;
@@ -159,6 +181,11 @@ export function createBulkTransferV2Event(
   timestamp: BigInt
 ): BulkTransferV2 {
   const newBTEvent = changetype<BulkTransferV2>(newMockEvent());
+  newBTEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newBTEvent.transaction.nonce
+  );
 
   newBTEvent.block.timestamp = timestamp;
   newBTEvent.transaction.from = sender;
@@ -197,6 +224,11 @@ export function createBulkTransferV2Event(
 
 export function createCancelledEvent(sender: Address): Cancelled {
   const newCancelledEvent = changetype<Cancelled>(newMockEvent());
+  newCancelledEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    newCancelledEvent.transaction.nonce,
+    newCancelledEvent.transaction.nonce
+  );
 
   newCancelledEvent.transaction.from = sender;
 
@@ -221,6 +253,11 @@ export function createFundEvent(
   timestamp: BigInt
 ): Fund {
   const newFundEvent = changetype<Fund>(newMockEvent());
+  newFundEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newFundEvent.transaction.nonce
+  );
 
   newFundEvent.block.timestamp = timestamp;
 
@@ -236,4 +273,39 @@ export function createFundEvent(
   newFundEvent.parameters.push(amountParam);
 
   return newFundEvent;
+}
+
+export function createWithdrawEvent(
+  sender: Address,
+  token: Address,
+  amount: i32,
+  timestamp: BigInt
+): Withdraw {
+  const newWithdrawEvent = changetype<Withdraw>(newMockEvent());
+  newWithdrawEvent.transaction.hash = generateUniqueHash(
+    sender.toString() + token.toString(),
+    timestamp,
+    newWithdrawEvent.transaction.nonce
+  );
+
+  newWithdrawEvent.block.timestamp = timestamp;
+
+  newWithdrawEvent.transaction.from = sender;
+
+  newWithdrawEvent.parameters = [];
+
+  const tokenParam = new ethereum.EventParam(
+    '_token',
+    ethereum.Value.fromAddress(token)
+  );
+
+  const amountParam = new ethereum.EventParam(
+    '_amount',
+    ethereum.Value.fromI32(amount)
+  );
+
+  newWithdrawEvent.parameters.push(tokenParam);
+  newWithdrawEvent.parameters.push(amountParam);
+
+  return newWithdrawEvent;
 }

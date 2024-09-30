@@ -6,6 +6,7 @@ import {
   Pending,
   BulkTransfer,
 } from '../../../generated/templates/LegacyEscrow/Escrow';
+import { generateUniqueHash } from '../../../tests/utils';
 
 export function createPendingEvent(
   sender: Address,
@@ -13,6 +14,11 @@ export function createPendingEvent(
   hash: string
 ): Pending {
   const newPendingEvent = changetype<Pending>(newMockEvent());
+  newPendingEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    newPendingEvent.transaction.nonce,
+    newPendingEvent.transaction.nonce
+  );
 
   newPendingEvent.transaction.from = sender;
 
@@ -40,6 +46,11 @@ export function createISEvent(
 ): IntermediateStorage {
   const newIntermediateStorageEvent =
     changetype<IntermediateStorage>(newMockEvent());
+  newIntermediateStorageEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    newIntermediateStorageEvent.transaction.nonce,
+    newIntermediateStorageEvent.transaction.nonce
+  );
 
   newIntermediateStorageEvent.transaction.from = sender;
 
@@ -67,6 +78,11 @@ export function createBulkTransferEvent(
   timestamp: BigInt
 ): BulkTransfer {
   const newBTEvent = changetype<BulkTransfer>(newMockEvent());
+  newBTEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newBTEvent.transaction.nonce
+  );
 
   newBTEvent.block.timestamp = timestamp;
   newBTEvent.transaction.from = sender;

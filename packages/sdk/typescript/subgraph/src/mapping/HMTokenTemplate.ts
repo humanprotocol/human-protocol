@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts';
 
 import {
   Approval,
@@ -181,9 +181,21 @@ export function handleTransfer(event: Transfer): void {
     );
     escrow.save();
 
-    createTransaction(event, 'fund', event.params._to, event.params._value);
+    createTransaction(
+      event,
+      'fund',
+      event.params._to,
+      event.params._value,
+      dataSource.address()
+    );
   } else {
-    createTransaction(event, 'transfer', event.params._to, event.params._value);
+    createTransaction(
+      event,
+      'transfer',
+      event.params._to,
+      event.params._value,
+      dataSource.address()
+    );
   }
 
   // Update holders
@@ -286,7 +298,7 @@ export function handleTransfer(event: Transfer): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  createTransaction(event, 'transferBulk');
+  createTransaction(event, 'transferBulk', null, null, dataSource.address());
   // Create HMTBulkTransferEvent entity
   const eventEntity = new HMTBulkTransferEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -308,7 +320,8 @@ export function handleApproval(event: Approval): void {
     event,
     'approve',
     event.params._spender,
-    event.params._value
+    event.params._value,
+    dataSource.address()
   );
   // Create HMTApprovalEvent entity
   const eventEntity = new HMTApprovalEvent(toEventId(event));
@@ -328,7 +341,13 @@ export function handleApproval(event: Approval): void {
 }
 
 export function handleBulkApproval(event: BulkApproval): void {
-  createTransaction(event, 'increaseApprovalBulk');
+  createTransaction(
+    event,
+    'increaseApprovalBulk',
+    null,
+    null,
+    dataSource.address()
+  );
   // Create HMTBulkApprovalEvent entity
   const eventEntity = new HMTBulkApprovalEvent(toEventId(event));
   eventEntity.block = event.block.number;

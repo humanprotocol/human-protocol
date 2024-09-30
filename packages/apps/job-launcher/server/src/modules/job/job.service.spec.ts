@@ -1775,7 +1775,7 @@ describe('JobService', () => {
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.SET_UP;
+      mockJobEntity.status = JobStatus.FUNDED;
       expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
@@ -1861,7 +1861,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -1887,7 +1887,7 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.FORTUNE,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         userId: 1,
         fundAmount: 100,
         save: jest.fn().mockResolvedValue(true),
@@ -2218,7 +2218,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -2262,7 +2262,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),

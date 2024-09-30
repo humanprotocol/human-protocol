@@ -72,6 +72,7 @@ type Escrow @entity {
   token: Bytes! # address
   factoryAddress: Bytes! # address
   launcher: Bytes! # address
+  canceler: Bytes! # address
   count: BigInt!
   balance: BigInt!
   totalFundedAmount: BigInt!
@@ -206,6 +207,19 @@ type EscrowStatusEvent @entity(immutable: true) {
   launcher: Bytes # address
   sender: Bytes! # address
   status: String!
+}
+
+type WithdrawEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+
+  escrowAddress: Bytes! # address
+  sender: Bytes! # address
+  receiver: Bytes! # address
+  token: Bytes! # address
+  amount: BigInt!
 }
 
 # KVStore
@@ -363,13 +377,23 @@ type LeaderStatistics @entity {
   leaders: BigInt!
 }
 
-type Transaction @entity(immutable: true) {
+type Transaction @entity {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
   from: Bytes!
   to: Bytes
-  value: BigInt
+  value: BigInt!
   method: String!
+  token: Bytes
+  transfers: [Transfer!] @derivedFrom(field: "transaction")
+}
+
+type Transfer @entity {
+  id: Bytes!
+  from: Bytes!
+  to: Bytes
+  value: BigInt!
+  transaction: Transaction!
 }
