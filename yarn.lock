@@ -3513,10 +3513,10 @@
   resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-toolbox/-/hardhat-toolbox-4.0.0.tgz#eb1f619218dd1414fa161dfec92d3e5e53a2f407"
   integrity sha512-jhcWHp0aHaL0aDYj8IJl80v4SZXWMS1A2XxXa1CA6pBiFfJKuZinCkO6wb+POAt0LIfXB3gA3AgdcOccrcwBwA==
 
-"@nomicfoundation/hardhat-verify@^2.0.3", "@nomicfoundation/hardhat-verify@^2.0.8":
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-verify/-/hardhat-verify-2.0.9.tgz#98a1c9a3742b008be71a709d074f10dec23bc5f0"
-  integrity sha512-7kD8hu1+zlnX87gC+UN4S0HTKBnIsDfXZ/pproq1gYsK94hgCk+exvzXbwR0X2giiY/RZPkqY9oKRi0Uev91hQ==
+"@nomicfoundation/hardhat-verify@^2.0.11", "@nomicfoundation/hardhat-verify@^2.0.8":
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-verify/-/hardhat-verify-2.0.11.tgz#4ce12b592e01ee93a81933924609c233ed00d951"
+  integrity sha512-lGIo4dNjVQFdsiEgZp3KP6ntLiF7xJEJsbNHfSyIiFCyI0Yv0518ElsFtMC5uCuHEChiBBMrib9jWQvHHT+X3Q==
   dependencies:
     "@ethersproject/abi" "^5.1.2"
     "@ethersproject/address" "^5.0.2"
