@@ -13,6 +13,38 @@ import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { useHomePageState } from '@/contexts/homepage-state';
 
+function LightModeIcons() {
+  return (
+    <Stack
+      direction="row"
+      maxHeight="80px"
+      mb="1.5rem"
+      sx={{ transform: 'translateX(-6%)' }}
+    >
+      <HomepageWorkIcon />
+      <HomepageUserIcon />
+      <HomepageLogoIcon />
+    </Stack>
+  );
+}
+
+function DarkModeIcons() {
+  return (
+    <Stack
+      sx={{
+        width: '288px',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      }}
+    >
+      <HomepageWorkIcon />
+      <HomepageUserIcon />
+      <HomepageLogoIcon />
+    </Stack>
+  );
+}
+
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();
 
@@ -42,16 +74,7 @@ export function Welcome() {
               <MobileHomeIcons />
             </Stack>
           ) : (
-            <Stack
-              direction="row"
-              maxHeight="80px"
-              mb="1.5rem"
-              sx={{ transform: 'translateX(-6%)' }}
-            >
-              <HomepageWorkIcon />
-              <HomepageUserIcon />
-              <HomepageLogoIcon />
-            </Stack>
+            <>{isDarkMode ? <DarkModeIcons /> : <LightModeIcons />}</>
           )}
           <Stack
             direction="row"
