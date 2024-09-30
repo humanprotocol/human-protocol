@@ -14,6 +14,7 @@ import Loader from '@components/Loader';
 import { getNetwork } from '@utils/config/networks';
 import {
 	AddressDetails,
+	AddressDetailsWallet,
 	useAddressDetails,
 } from '@services/api/use-address-details';
 import { handleErrorMessage } from '@services/handle-error-message';
@@ -83,6 +84,10 @@ const Results = () => {
 		return <ResultError error={error} />;
 	}
 
+	const selectedWalletData: AddressDetailsWallet | undefined =
+		data.wallet ||
+		(data.leader && data.leader.role === null ? data.leader : undefined);
+
 	return (
 		<>
 			<Stack
@@ -93,9 +98,12 @@ const Results = () => {
 			>
 				{renderCurrentResultType(data, filterParams.address)}
 			</Stack>
-			{data.leader ? <RoleDetails data={data.leader} /> : null}
+
+			{data.leader && data.leader.role ? (
+				<RoleDetails data={data.leader} />
+			) : null}
+			{selectedWalletData ? <WalletAddress data={selectedWalletData} /> : null}
 			{data.escrow ? <EscrowAddress data={data.escrow} /> : null}
-			{data.wallet ? <WalletAddress data={data.wallet} /> : null}
 		</>
 	);
 };

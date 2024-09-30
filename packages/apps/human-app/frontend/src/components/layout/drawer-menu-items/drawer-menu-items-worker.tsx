@@ -5,17 +5,22 @@ import type {
 } from '@/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
+import { env } from '@/shared/env';
 
 export const workerDrawerTopMenuItems = (
   addressRegistered: boolean
 ): TopMenuItem[] => {
   return [
-    {
-      label: t('components.DrawerNavigation.jobs'),
-      icon: <WorkIcon />,
-      link: routerPaths.worker.jobsDiscovery,
-      disabled: !addressRegistered,
-    },
+    ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
+      ? [
+          {
+            label: t('components.DrawerNavigation.jobs'),
+            icon: <WorkIcon />,
+            link: routerPaths.worker.jobsDiscovery,
+            disabled: !addressRegistered,
+          },
+        ]
+      : []),
   ];
 };
 

@@ -16,11 +16,13 @@ import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
   MOCK_EMAIL,
+  MOCK_FE_URL,
   MOCK_HASHED_PASSWORD,
   MOCK_HCAPTCHA_TOKEN,
   MOCK_PASSWORD,
   MOCK_PRIVATE_KEY,
   MOCK_REFRESH_TOKEN,
+  mockConfig,
 } from '../../../test/constants';
 import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
@@ -86,12 +88,23 @@ describe('AuthService', () => {
 
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         AuthService,
         UserService,
         AuthConfigService,
         ServerConfigService,
         Web3ConfigService,
-        ConfigService,
         HCaptchaService,
         HCaptchaConfigService,
         {
@@ -372,7 +385,7 @@ describe('AuthService', () => {
                 dynamicTemplateData: {
                   service_name: SERVICE_NAME,
                   url: expect.stringContaining(
-                    'http://localhost:3001/reset-password?token=',
+                    `${MOCK_FE_URL}/reset-password?token=`,
                   ),
                 },
                 to: email,
@@ -397,7 +410,7 @@ describe('AuthService', () => {
                 dynamicTemplateData: {
                   service_name: SERVICE_NAME,
                   url: expect.stringContaining(
-                    'http://localhost:3001/reset-password?token=',
+                    `${MOCK_FE_URL}/reset-password?token=`,
                   ),
                 },
                 to: email,

@@ -18,6 +18,7 @@ export enum JobFieldName {
   RewardToken = 'reward_token',
   CreatedAt = 'created_at',
   UpdatedAt = 'updated_at',
+  Qualifications = 'qualifications',
 }
 
 export enum AssignmentStatus {

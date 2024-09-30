@@ -11,6 +11,7 @@ import { Test } from '@nestjs/testing';
 import {
   MOCK_ENCRYPTION_PUBLIC_KEY,
   MOCK_FILE_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import crypto from 'crypto';
@@ -70,7 +71,18 @@ describe('StorageService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         PGPConfigService,
         S3ConfigService,
         {

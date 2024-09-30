@@ -31,7 +31,7 @@ import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
-    reward_amount?: number;
+    reward_amount?: string;
     reward_token?: string;
   };
 };

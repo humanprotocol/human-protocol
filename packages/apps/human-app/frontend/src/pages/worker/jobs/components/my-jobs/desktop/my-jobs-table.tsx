@@ -179,14 +179,16 @@ const getColumnsDefinition = (
       const buttonDisabled = status !== 'ACTIVE';
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-          <TableButton
-            component={Link}
-            disabled={buttonDisabled}
-            target="_blank"
-            to={url}
-          >
-            {t('worker.jobs.solve')}
-          </TableButton>
+          {url ? (
+            <TableButton
+              component={Link}
+              disabled={buttonDisabled}
+              target="_blank"
+              to={url}
+            >
+              {t('worker.jobs.solve')}
+            </TableButton>
+          ) : null}
           <RejectButton
             disabled={buttonDisabled}
             onClick={() => {

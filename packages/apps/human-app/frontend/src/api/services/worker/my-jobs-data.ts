@@ -15,22 +15,11 @@ const myJobSchema = z.object({
   chain_id: z.number(),
   job_type: z.string(),
   status: z.string(),
-  reward_amount: z.union([z.string(), z.number()]).transform((value, ctx) => {
-    const parsedNumber = Number(value);
-    if (Number.isNaN(parsedNumber)) {
-      ctx.addIssue({
-        path: ['results', 'reward_amount'],
-        message: 'Not a numeric string',
-        code: 'custom',
-      });
-    }
-
-    return parsedNumber;
-  }),
+  reward_amount: z.string(),
   reward_token: z.string(),
   created_at: z.string(),
   expires_at: z.string(),
-  url: z.string().optional(),
+  url: z.string().optional().nullable(),
 });
 
 const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
@@ -63,7 +52,6 @@ export function useGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
   const { address } = useParams<{ address: string }>();
   const dto = { ...filterParams, oracle_address: address || '' };
-
   return useQuery({
     queryKey: ['myJobs', dto],
     queryFn: () => getMyJobsTableData(dto),

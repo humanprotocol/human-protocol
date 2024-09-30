@@ -20,6 +20,7 @@ export class ManifestDto {
   requesterDescription: string;
   submissionsRequired: number;
   fundAmount: number;
+  qualifications?: string[];
 }
 
 export class SolveJobDto {
@@ -98,7 +99,7 @@ export class JobDto {
   jobDescription?: string;
 
   @ApiProperty({ name: 'reward_amount' })
-  rewardAmount?: number;
+  rewardAmount?: string;
 
   @ApiProperty({ name: 'reward_token' })
   rewardToken?: string;
@@ -108,6 +109,9 @@ export class JobDto {
 
   @ApiProperty({ name: 'updated_at' })
   updatedAt?: string;
+
+  @ApiProperty()
+  qualifications?: string[];
 
   constructor(
     escrowAddress: string,

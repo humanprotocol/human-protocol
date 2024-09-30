@@ -7,6 +7,7 @@ import {
   MOCK_SENDGRID_API_KEY,
   MOCK_SENDGRID_FROM_EMAIL,
   MOCK_SENDGRID_FROM_NAME,
+  mockConfig,
 } from '../../../test/constants';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
 import { ControlledError } from '../../common/errors/controlled';
@@ -15,7 +16,7 @@ import { HttpStatus } from '@nestjs/common';
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
   let mailService: MailService;
-  let mockConfigService: Partial<ConfigService>;
+  let configService: ConfigService;
 
   beforeAll(async () => {
     const mockMailService = {
@@ -23,35 +24,31 @@ describe('SendGridService', () => {
       setApiKey: jest.fn(),
     };
 
-    mockConfigService = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'SENDGRID_API_KEY':
-            return MOCK_SENDGRID_API_KEY;
-          case 'SENDGRID_FROM_EMAIL':
-            return MOCK_SENDGRID_FROM_EMAIL;
-          case 'SENDGRID_FROM_NAME':
-            return MOCK_SENDGRID_FROM_NAME;
-        }
-      }),
-    };
-
     const app = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         SendGridService,
         SendgridConfigService,
         {
           provide: MailService,
           useValue: mockMailService,
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
       ],
     }).compile();
     sendGridService = app.get<SendGridService>(SendGridService);
     mailService = app.get(MailService);
+    configService = app.get<ConfigService>(ConfigService);
   });
 
   describe('sendEmail', () => {
@@ -123,12 +120,17 @@ describe('SendGridService', () => {
     });
 
     it('should throw an error with invalid API key', async () => {
-      mockConfigService.get = jest.fn().mockReturnValue('invalid-api-key');
+      jest
+        .spyOn(configService, 'getOrThrow')
+        .mockImplementation((key: string) => {
+          if (key === 'SENDGRID_API_KEY') return 'invalid-api-key';
+          return mockConfig[key];
+        });
 
       expect(() => {
         sendGridService = new SendGridService(
           mailService,
-          mockConfigService as any,
+          configService as any,
         );
       }).toThrow(
         new ControlledError(ErrorSendGrid.InvalidApiKey, HttpStatus.CONFLICT),

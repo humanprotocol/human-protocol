@@ -125,6 +125,7 @@ export class TransactionUtils {
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
+
     const { transactions } = await gqlFetch<{
       transactions: ITransaction[];
     }>(getSubgraphUrl(networkData), GET_TRANSACTIONS_QUERY(filter), {

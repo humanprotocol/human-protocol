@@ -1,5 +1,5 @@
 export enum EventType {
-  TASK_COMPLETED = 'task_completed',
+  JOB_COMPLETED = 'job_completed',
   ESCROW_COMPLETED = 'escrow_completed',
 }
 

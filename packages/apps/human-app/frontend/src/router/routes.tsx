@@ -26,6 +26,7 @@ import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.p
 import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/hcaptcha-labeling.page';
 import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
 import { SetUpOperatorPage } from '@/pages/operator/sign-up/set-up-operator';
+import { env } from '@/shared/env';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -88,16 +89,20 @@ export const protectedRoutes: {
       headerText: t('protectedPagesHeaders.profile'),
     },
   },
-  {
-    routerProps: {
-      path: routerPaths.worker.jobsDiscovery,
-      element: <JobsDiscoveryPage />,
-    },
-    pageHeaderProps: {
-      headerIcon: <HomepageWorkIcon />,
-      headerText: t('protectedPagesHeaders.jobsDiscovery'),
-    },
-  },
+  ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
+    ? [
+        {
+          routerProps: {
+            path: routerPaths.worker.jobsDiscovery,
+            element: <JobsDiscoveryPage />,
+          },
+          pageHeaderProps: {
+            headerIcon: <HomepageWorkIcon />,
+            headerText: t('protectedPagesHeaders.jobsDiscovery'),
+          },
+        },
+      ]
+    : []),
   {
     routerProps: {
       path: `${routerPaths.worker.jobs}/:address`,
