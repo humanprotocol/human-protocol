@@ -1,5 +1,6 @@
 import { Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -12,6 +13,7 @@ import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
 import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { useHomePageState } from '@/contexts/homepage-state';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 function LightModeIcons() {
   return (
@@ -53,12 +55,19 @@ function DarkModeIcons() {
 
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();
-
+  const { setWhiteBackground } = useBackgroundColorStore();
   const { setPageView } = useHomePageState();
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('lg');
+
+  useEffect(() => {
+    if (!isDarkMode) {
+      setWhiteBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Grid

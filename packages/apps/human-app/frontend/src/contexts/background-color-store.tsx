@@ -39,21 +39,35 @@ export function BackgroundProvider({
     setBackgroundColor(colorPalette.white);
   }, [colorPalette.white]);
 
-  const setGrayBackground = useCallback(() => {
+  const setGrayBackground = () => {
     if (isDarkMode) {
       setBackgroundColor(colorPalette.backgroundColor);
     } else {
       setBackgroundColor(colorPalette.paper.main);
     }
-  }, [colorPalette.backgroundColor, colorPalette.paper.main, isDarkMode]);
+  };
+
+  const setGrayBackgroundInternal = useCallback(
+    (_isDarkMode: boolean) => {
+      if (isDarkMode) {
+        setBackgroundColor(colorPalette.backgroundColor);
+      } else {
+        setBackgroundColor(colorPalette.paper.main);
+      }
+    },
+    [colorPalette.backgroundColor, colorPalette.paper.main, isDarkMode]
+  );
 
   useEffect(() => {
     if (isGrayBackground) {
-      setGrayBackground();
-    } else {
-      setWhiteBackground();
+      setGrayBackgroundInternal(isDarkMode);
     }
-  }, [isGrayBackground, setGrayBackground, setWhiteBackground, isDarkMode]);
+  }, [
+    isGrayBackground,
+    setWhiteBackground,
+    isDarkMode,
+    setGrayBackgroundInternal,
+  ]);
 
   return (
     <BackgroundContext.Provider
