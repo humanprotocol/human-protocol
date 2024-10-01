@@ -36,6 +36,7 @@ export class CronJobService {
   }
 
   initializeCronJob() {
+    console.log('initializeCronJob')
     const job = new CronJob('*/3 * * * *', () => {
       this.updateJobsListCron();
     });
@@ -51,16 +52,20 @@ export class CronJobService {
     const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
       oracleDiscoveryCommand,
     );
-
+    
     if (!oracles || oracles.length < 1) return;
 
-    const response = await this.workerService.signinWorker({
-      email: this.configService.email,
-      password: this.configService.password,
-    });
+    try {
+      const response = await this.workerService.signinWorker({
+        email: this.configService.email,
+        password: this.configService.password,
+      });
 
-    for (const oracle of oracles) {
-      await this.updateJobsListCache(oracle, 'Bearer ' + response.access_token);
+      for (const oracle of oracles) {
+        await this.updateJobsListCache(oracle, 'Bearer ' + response.access_token);
+      }
+    } catch (e) {
+      this.logger.error(e);
     }
 
     this.logger.log('CRON END');
