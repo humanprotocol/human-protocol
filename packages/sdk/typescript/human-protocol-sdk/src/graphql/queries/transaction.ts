@@ -10,6 +10,12 @@ const TRANSACTION_FRAGMENT = gql`
     timestamp
     value
     method
+    transfers {
+      from
+      id
+      to
+      value
+    }
   }
 `;
 
@@ -21,16 +27,16 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
     fromAddress === toAddress
       ? `
         ${fromAddress ? `{ from: $fromAddress }` : ''}
-        ${toAddress ? `{ to: $toAddress }` : ''}
+        ${toAddress ? `{ or: [{to: $toAddress}, {transfers_: {to: $toAddress}}]}` : ''}
       `
       : `
         ${fromAddress ? `from: $fromAddress` : ''}
-        ${toAddress ? `to: $toAddress` : ''}
+        ${toAddress ? `or: [{to: $toAddress}, {transfers_: {to: $toAddress}}]` : ''}
       `;
 
   const WHERE_CLAUSE = `
       where: {
-        ${fromAddress === toAddress ? `or: [ ${addressCondition} ],` : addressCondition}
+        ${fromAddress && fromAddress === toAddress ? `or: [ ${addressCondition} ],` : addressCondition}
         ${startDate ? `timestamp_gte: $startDate,` : ''}
         ${endDate ? `timestamp_lte: $endDate,` : ''}
         ${startBlock ? `block_gte: $startBlock,` : ''}

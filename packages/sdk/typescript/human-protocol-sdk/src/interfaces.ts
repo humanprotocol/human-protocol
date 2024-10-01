@@ -123,6 +123,12 @@ export interface IKVStore {
   value: string;
 }
 
+export interface Transfer {
+  from: string;
+  to: string;
+  value: string;
+}
+
 export interface ITransaction {
   block: bigint;
   txHash: string;
@@ -131,6 +137,7 @@ export interface ITransaction {
   timestamp: bigint;
   value: string;
   method: string;
+  transfers: Transfer[];
 }
 
 export interface ITransactionsFilter extends IPagination {

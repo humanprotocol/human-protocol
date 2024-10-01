@@ -26,6 +26,13 @@ class TestTransactionUtils(unittest.TestCase):
                 "timestamp": 1622700000,
                 "value": "1000000000000000000",
                 "method": "transfer",
+                "transfers": [
+                    {
+                        "from": "0x1234567890123456789012345678901234567890",
+                        "to": "0x9876543210987654321098765432109876543211",
+                        "value": "1000000000000000000",
+                    }
+                ],
             }
             mock_transaction_2 = {
                 "block": 456,
@@ -35,6 +42,13 @@ class TestTransactionUtils(unittest.TestCase):
                 "timestamp": 1622800000,
                 "value": "2000000000000000000",
                 "method": "transfer",
+                "transfers": [
+                    {
+                        "from": "0x9876543210987654321098765432109876543210",
+                        "to": "0x9876543210987654321098765432109876543211",
+                        "value": "1000000000000000000",
+                    }
+                ],
             }
 
             mock_function.return_value = {
@@ -136,6 +150,13 @@ class TestTransactionUtils(unittest.TestCase):
                 "timestamp": 1622700000,
                 "value": "1000000000000000000",
                 "method": "transfer",
+                "transfers": [
+                    {
+                        "from": "0x1234567890123456789012345678901234567890",
+                        "to": "0x9876543210987654321098765432109876543211",
+                        "value": "1000000000000000000",
+                    }
+                ],
             }
 
             mock_function.return_value = {"data": {"transaction": mock_transaction}}
