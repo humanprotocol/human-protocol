@@ -9,7 +9,11 @@ const envVarRegex =
 const commentRegex = /\/\*\*([^*]*\*+([^/*][^*]*\*+)*)\//g; // captures comments
 
 function extractEnvVarsWithComments(content: string) {
-  const envVarsWithComments: { comment: string; envVar: string; defaultValue?: string }[] = [];
+  const envVarsWithComments: {
+    comment: string;
+    envVar: string;
+    defaultValue?: string;
+  }[] = [];
   let match: RegExpExecArray | null;
 
   // Extract comments
@@ -24,7 +28,10 @@ function extractEnvVarsWithComments(content: string) {
   }
 
   // Extract environment variables and their comments
-  const envVarsMap = new Map<string, { comment: string; defaultValue?: string; required?: boolean }>();
+  const envVarsMap = new Map<
+    string,
+    { comment: string; defaultValue?: string; required?: boolean }
+  >();
   let commentIndex = 0;
 
   while ((match = envVarRegex.exec(content)) !== null) {
@@ -33,7 +40,7 @@ function extractEnvVarsWithComments(content: string) {
 
     if (!envVarsMap.has(envVar)) {
       const comment = comments[commentIndex] || '';
-      let required: boolean = false;
+      let required = false;
       let defaultValue: string | undefined;
 
       // Check if the additional options include a default value or a required marker
@@ -46,7 +53,9 @@ function extractEnvVarsWithComments(content: string) {
       }
 
       // Check for default values in comments
-      const defaultCommentMatch = comment.match(/Default:\s*['"]?([^'"]+)['"]?/);
+      const defaultCommentMatch = comment.match(
+        /Default:\s*['"]?([^'"]+)['"]?/,
+      );
       if (defaultCommentMatch) {
         defaultValue = defaultCommentMatch[1];
       }
@@ -68,7 +77,11 @@ function extractEnvVarsWithComments(content: string) {
 }
 
 function generateEnvMarkdown(
-  envVarsWithComments: { comment: string; envVar: string; defaultValue?: string }[],
+  envVarsWithComments: {
+    comment: string;
+    envVar: string;
+    defaultValue?: string;
+  }[],
 ) {
   let markdown = '# Environment Variables\n\n';
 
@@ -85,10 +98,24 @@ function processConfigFiles() {
     .filter(
       (file) =>
         file.endsWith('.ts') &&
-        !['index.ts', 'env-schema.ts', 'config.module.ts', 'cache-factory.config.ts', 'common-config.module.ts', 'gateway-config.service.ts', 'gateway-config.types.ts', 'params-decorators.ts', 'spec'].includes(file),
+        ![
+          'index.ts',
+          'env-schema.ts',
+          'config.module.ts',
+          'cache-factory.config.ts',
+          'common-config.module.ts',
+          'gateway-config.service.ts',
+          'gateway-config.types.ts',
+          'params-decorators.ts',
+          'spec',
+        ].includes(file),
     );
 
-  let allEnvVarsWithComments: { comment: string; envVar: string; defaultValue?: string }[] = [];
+  let allEnvVarsWithComments: {
+    comment: string;
+    envVar: string;
+    defaultValue?: string;
+  }[] = [];
 
   files.forEach((file) => {
     const filePath = path.join(CONFIG_FOLDER_PATH, file);

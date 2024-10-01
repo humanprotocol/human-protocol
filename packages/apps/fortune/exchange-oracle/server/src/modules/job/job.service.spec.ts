@@ -9,10 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import {
-  MOCK_MANIFEST_URL,
-  mockConfig,
-} from '../../../test/constants';
+import { MOCK_MANIFEST_URL, mockConfig } from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
