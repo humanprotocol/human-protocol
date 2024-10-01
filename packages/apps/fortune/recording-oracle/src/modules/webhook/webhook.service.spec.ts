@@ -114,11 +114,11 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_COMPLETED,
+        eventType: EventType.JOB_COMPLETED,
       };
 
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: task_completed',
+        'Invalid webhook event type: job_completed',
       );
     });
   });

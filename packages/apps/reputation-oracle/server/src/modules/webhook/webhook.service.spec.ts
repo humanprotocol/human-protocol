@@ -105,7 +105,7 @@ describe('WebhookService', () => {
       const validDto: WebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        eventType: EventType.TASK_COMPLETED,
+        eventType: EventType.JOB_COMPLETED,
       };
 
       jest
@@ -141,7 +141,7 @@ describe('WebhookService', () => {
       const validDto: WebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        eventType: EventType.TASK_COMPLETED,
+        eventType: EventType.JOB_COMPLETED,
       };
 
       jest

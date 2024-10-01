@@ -99,7 +99,7 @@ export class JobDto {
   jobDescription?: string;
 
   @ApiProperty({ name: 'reward_amount' })
-  rewardAmount?: number;
+  rewardAmount?: string;
 
   @ApiProperty({ name: 'reward_token' })
   rewardToken?: string;

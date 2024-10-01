@@ -130,7 +130,7 @@ describe('webhookController', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_COMPLETED,
+        eventType: EventType.JOB_COMPLETED,
       };
       jest.spyOn(webhookService, 'handleWebhook');
 
@@ -138,7 +138,7 @@ describe('webhookController', () => {
 
       await expect(
         webhookController.processWebhook(MOCK_SIGNATURE, webhook),
-      ).rejects.toThrow('Invalid webhook event type: task_completed');
+      ).rejects.toThrow('Invalid webhook event type: job_completed');
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });

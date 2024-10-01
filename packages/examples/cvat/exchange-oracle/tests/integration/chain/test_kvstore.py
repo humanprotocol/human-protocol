@@ -6,7 +6,12 @@ from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 from human_protocol_sdk.kvstore import KVStoreClientError, KVStoreUtils
 
-from src.chain.kvstore import get_job_launcher_url, get_recording_oracle_url, register_in_kvstore
+from src.chain.kvstore import (
+    get_job_launcher_url,
+    get_recording_oracle_url,
+    get_reputation_oracle_url,
+    register_in_kvstore,
+)
 from src.core.config import LocalhostConfig
 
 from tests.utils.constants import (
@@ -194,3 +199,25 @@ class ServiceIntegrationTest(unittest.TestCase):
                     )
                     == PGP_PUBLIC_KEY_URL_2
                 )
+
+    def test_get_reputation_oracle_url_config_url(self):
+        with patch(
+            "src.chain.kvstore.Config.localhost.reputation_oracle_url", DEFAULT_MANIFEST_URL
+        ):
+            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
+            assert reputation_url == DEFAULT_MANIFEST_URL
+
+    def test_get_reputation_oracle_url_from_escrow(self):
+        with (
+            patch("src.chain.kvstore.get_escrow") as mock_escrow,
+            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.Config.localhost.reputation_oracle_url", None),
+        ):
+            mock_escrow.return_value = self.escrow_data
+            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
+            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
+            assert reputation_url == DEFAULT_MANIFEST_URL
+
+    def test_get_reputation_oracle_url_invalid_escrow(self):
+        with pytest.raises(EscrowClientError, match="Invalid escrow address: invalid address"):
+            get_reputation_oracle_url(self.w3.eth.chain_id, "invalid address")
