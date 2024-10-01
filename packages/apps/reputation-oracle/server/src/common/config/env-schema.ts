@@ -9,8 +9,8 @@ export const envValidator = Joi.object({
   MAX_RETRY_COUNT: Joi.number(),
   QUALIFICATION_MIN_VALIDITY: Joi.number(),
   // Auth
-  JWT_PRIVATE_KEY: Joi.string(),
-  JWT_PUBLIC_KEY: Joi.string(),
+  JWT_PRIVATE_KEY: Joi.string().required(),
+  JWT_PUBLIC_KEY: Joi.string().required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.number(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.number(),
   VERIFY_EMAIL_TOKEN_EXPIRES_IN: Joi.number(),
@@ -32,7 +32,7 @@ export const envValidator = Joi.object({
   POSTGRES_DATABASE: Joi.string(),
   POSTGRES_PORT: Joi.string(),
   POSTGRES_SSL: Joi.string(),
-  POSTGRES_LOGGING: Joi.string(),
+  POSTGRES_LOGGING: Joi.string().required(),
   // Web3
   WEB3_ENV: Joi.string(),
   WEB3_PRIVATE_KEY: Joi.string().required(),
@@ -61,8 +61,8 @@ export const envValidator = Joi.object({
   REPUTATION_LEVEL_LOW: Joi.number(),
   REPUTATION_LEVEL_HIGH: Joi.number(),
   // Encryption
-  PGP_PRIVATE_KEY: Joi.string(),
-  PGP_PASSPHRASE: Joi.string(),
+  PGP_PRIVATE_KEY: Joi.string().required(),
+  PGP_PASSPHRASE: Joi.string().required(),
   PGP_ENCRYPT: Joi.string(),
   // Kyc
   KYC_API_KEY: Joi.string().required(),

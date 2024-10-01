@@ -42,14 +42,14 @@ POSTGRES_SSL="false"
 ### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Required
 POSTGRES_LOGGING=
 
-### The site key for the hCaptcha service, used for client-side verification. Default: an empty string
-HCAPTCHA_SITE_KEY="an empty string"
+### The site key for the hCaptcha service, used for client-side verification. Required
+HCAPTCHA_SITE_KEY=
 
-### The API key for the hCaptcha service, used for server-side verification and operations. Default: an empty string
-HCAPTCHA_API_KEY="an empty string"
+### The API key for the hCaptcha service, used for server-side verification and operations. Required
+HCAPTCHA_API_KEY=
 
-### The secret key for the hCaptcha service, used for server-side authentication. Default: an empty string
-HCAPTCHA_SECRET="an empty string"
+### The secret key for the hCaptcha service, used for server-side authentication. Required
+HCAPTCHA_SECRET=
 
 ### The URL for hCaptcha API endpoints used for protection and verification. Default: 'https://api.hcaptcha.com'
 HCAPTCHA_PROTECTION_URL="https://api.hcaptcha.com"

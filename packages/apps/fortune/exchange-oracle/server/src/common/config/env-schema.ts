@@ -35,6 +35,6 @@ export const envValidator = Joi.object({
   S3_USE_SSL: Joi.string(),
   // PGP
   PGP_ENCRYPT: Joi.boolean(),
-  PGP_PRIVATE_KEY: Joi.string(),
-  PGP_PASSPHRASE: Joi.string(),
+  PGP_PRIVATE_KEY: Joi.string().required(),
+  PGP_PASSPHRASE: Joi.string().required(),
 });
