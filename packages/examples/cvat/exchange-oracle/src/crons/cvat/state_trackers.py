@@ -77,7 +77,6 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
             completed_task_ids.append(task.cvat_id)
 
     if completed_task_ids:
-        # TODO: for_update
         cvat_service.touch_projects(
             session, {t.project.id for t in tasks if t.cvat_id in completed_task_ids}
         )
