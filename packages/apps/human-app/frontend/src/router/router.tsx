@@ -61,8 +61,7 @@ export function Router() {
                     });
                   }}
                   topMenuItems={workerDrawerTopMenuItems(
-                    Boolean(user?.wallet_address),
-                    Boolean(user?.site_key)
+                    Boolean(user?.wallet_address)
                   )}
                 />
               )}
