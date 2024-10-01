@@ -63,8 +63,8 @@ HCAPTCHA_DEFAULT_LABELER_LANG="en"
 ### The API key for the KYC service, used for authentication with the KYC provider's API. Default: KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled)
 KYC_API_KEY="KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled)"
 
-### The private key associated with the KYC API, used for secure server-to-server communication. Default: an empty string
-KYC_API_PRIVATE_KEY="an empty string"
+### The private key associated with the KYC API, used for secure server-to-server communication. Required
+KYC_API_PRIVATE_KEY=
 
 ### The base URL for the KYC provider's API, which is used to send verification requests and retrieve results. Default: 'https://stationapi.veriff.com/v1'
 KYC_BASE_URL="https://stationapi.veriff.com/v1"

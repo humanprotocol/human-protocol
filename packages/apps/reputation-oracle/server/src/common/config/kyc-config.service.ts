@@ -16,10 +16,10 @@ export class KycConfigService {
 
   /**
    * The private key associated with the KYC API, used for secure server-to-server communication.
-   * Default: an empty string
+   * Required
    */
   get apiPrivateKey(): string {
-    return this.configService.get<string>('KYC_API_PRIVATE_KEY', '');
+    return this.configService.getOrThrow<string>('KYC_API_PRIVATE_KEY');
   }
 
   /**
