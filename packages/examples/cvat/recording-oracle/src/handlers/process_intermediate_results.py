@@ -1094,7 +1094,7 @@ def process_intermediate_results(  # noqa: PLR0912
 
 
 def parse_annotation_metafile(metafile: io.RawIOBase) -> AnnotationMeta:
-    return AnnotationMeta.model_validate(metafile.read())
+    return AnnotationMeta.model_validate_json(metafile.read())
 
 
 def serialize_validation_meta(validation_meta: ValidationMeta) -> bytes:
