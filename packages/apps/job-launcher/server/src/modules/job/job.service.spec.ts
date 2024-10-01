@@ -9,7 +9,6 @@ import {
   EscrowUtils,
   Encryption,
   KVStoreUtils,
-  Role,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { HttpStatus } from '@nestjs/common';

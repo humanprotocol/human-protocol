@@ -7,7 +7,6 @@ import {
   Label,
 } from '../src/modules/job/job.dto';
 import { Web3Env } from '../src/common/enums/web3';
-import { Role } from '@human-protocol/sdk';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
