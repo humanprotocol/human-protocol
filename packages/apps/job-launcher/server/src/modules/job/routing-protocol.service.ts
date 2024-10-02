@@ -5,26 +5,18 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { hashString } from '../../common/utils';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import {
+  OracleHash,
+  OracleIndex,
+  OracleOrder,
+} from './routing-protocol.interface';
 
-interface OracleOrder {
-  [chainId: number]: {
-    [reputationOracle: string]: {
-      [oracleType: string]: {
-        [jobType: string]: string[];
-      };
-    };
+type OracleValue<T> = {
+  [reputationOracle: string]: {
+    [oracleType: string]: { [jobType: string]: T };
   };
-}
-
-interface OracleIndex {
-  [chainId: number]: {
-    [reputationOracle: string]: {
-      [oracleType: string]: {
-        [jobType: string]: number;
-      };
-    };
-  };
-}
+};
 
 @Injectable()
 export class RoutingProtocolService {
@@ -35,15 +27,18 @@ export class RoutingProtocolService {
   private readonly reputationOraclePriorityOrder: number[];
   private chainCurrentIndex = 0;
   private reputationOracleIndex = 0;
-  private oraclesHash: string | null = null;
-  private oracleOrder: OracleOrder = {};
   private oracleIndexes: OracleIndex = {};
+  public oracleHashes: OracleHash = {};
+  public oracleOrder: OracleOrder = {};
 
   constructor(
     public readonly web3Service: Web3Service,
     public readonly web3ConfigService: Web3ConfigService,
+    private readonly networkConfigService: NetworkConfigService,
   ) {
-    this.chains = Object.keys(NETWORKS).map((chainId) => +chainId);
+    this.chains = this.networkConfigService.networks.map(
+      (network) => network.chainId,
+    );
     this.reputationOracles = this.web3ConfigService.reputationOracles
       .split(',')
       .map((address) => address.trim());
@@ -53,44 +48,43 @@ export class RoutingProtocolService {
       this.reputationOracles.map((_, i) => i),
     );
 
-    this.oracleOrder = this.chains.reduce((acc: OracleOrder, chainId) => {
-      acc[chainId] = this.reputationOracles.reduce(
-        (oracleAcc, reputationOracle) => {
-          oracleAcc[reputationOracle] = {
-            [Role.ExchangeOracle]: {},
-            [Role.RecordingOracle]: {},
-          };
-          return oracleAcc;
-        },
-        {} as {
-          [reputationOracle: string]: {
-            [oracleType: string]: { [jobType: string]: string[] };
-          };
-        },
-      );
-      return acc;
-    }, {} as OracleOrder);
-
-    this.oracleIndexes = this.chains.reduce((acc: OracleIndex, chainId) => {
-      acc[chainId] = this.reputationOracles.reduce(
-        (oracleAcc, reputationOracle) => {
-          oracleAcc[reputationOracle] = {
-            [Role.ExchangeOracle]: {},
-            [Role.RecordingOracle]: {},
-          };
-          return oracleAcc;
-        },
-        {} as {
-          [reputationOracle: string]: {
-            [oracleType: string]: { [jobType: string]: number };
-          };
-        },
-      );
-      return acc;
-    }, {} as OracleIndex);
+    this.oracleOrder = this.createOracleStructure<string[]>(
+      this.chains,
+      this.reputationOracles,
+    );
+    this.oracleIndexes = this.createOracleStructure<number>(
+      this.chains,
+      this.reputationOracles,
+    );
+    this.oracleHashes = this.createOracleStructure<string>(
+      this.chains,
+      this.reputationOracles,
+    );
   }
 
-  private shuffleArray<T>(array: T[]): T[] {
+  private createOracleStructure<T>(
+    chains: ChainId[],
+    reputationOracles: string[],
+  ): { [chainId: string]: OracleValue<T> } {
+    return chains.reduce(
+      (acc: { [chainId: string]: OracleValue<T> }, chainId) => {
+        acc[chainId] = reputationOracles.reduce(
+          (oracleAcc: OracleValue<T>, reputationOracle) => {
+            oracleAcc[reputationOracle] = {
+              [Role.ExchangeOracle]: {},
+              [Role.RecordingOracle]: {},
+            };
+            return oracleAcc;
+          },
+          {} as OracleValue<T>,
+        );
+        return acc;
+      },
+      {} as { [chainId: string]: OracleValue<T> },
+    );
+  }
+
+  public shuffleArray<T>(array: T[]): T[] {
     return array.sort(() => Math.random() - 0.5);
   }
 
@@ -129,9 +123,12 @@ export class RoutingProtocolService {
 
     if (
       !this.oracleOrder[chainId][reputationOracle][oracleType][jobType] ||
-      this.oraclesHash !== latestOraclesHash
+      this.oracleHashes[chainId][reputationOracle][oracleType][jobType] !==
+        latestOraclesHash
     ) {
-      this.oraclesHash = latestOraclesHash;
+      this.oracleHashes[chainId][reputationOracle][oracleType][jobType] =
+        latestOraclesHash;
+
       const shuffledOracles = this.shuffleArray(oraclesOfType);
       this.oracleOrder[chainId][reputationOracle][oracleType][jobType] =
         shuffledOracles;
@@ -146,7 +143,6 @@ export class RoutingProtocolService {
 
     this.oracleIndexes[chainId][reputationOracle][oracleType][jobType] =
       (currentIndex + 1) % orderedOracles.length;
-
     return selectedOracle;
   }
 
