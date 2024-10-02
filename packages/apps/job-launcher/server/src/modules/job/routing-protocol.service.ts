@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ChainId, NETWORKS, Role } from '@human-protocol/sdk';
+import { ChainId, Role } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { hashString } from '../../common/utils';
