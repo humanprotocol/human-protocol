@@ -45,10 +45,8 @@ export const TableHead = ({
 				)}
 				<TableCell
 					sx={{
-						minWidth: '300px',
 						justifyContent: 'flex-start',
 						[mobile.mediaQuery]: {
-							minWidth: 'unset',
 							position: 'sticky',
 							left: 0,
 							zIndex: 2,
@@ -71,7 +69,6 @@ export const TableHead = ({
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
-					sx={{ minWidth: '240px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="address"
 					sortDirection={orderBy === 'address' ? order : false}
 				>
@@ -95,7 +92,6 @@ export const TableHead = ({
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
-					sx={{ minWidth: '246px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="amountStaked"
 					sortDirection={orderBy === 'amountStaked' ? order : false}
 				>
@@ -126,7 +122,6 @@ export const TableHead = ({
 					<span className="mobile-title">NETWORK</span>
 				</TableCell>
 				<TableCell
-					sx={{ minWidth: '246px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="reputation"
 					sortDirection={orderBy === 'reputation' ? order : false}
 				>
@@ -153,7 +148,6 @@ export const TableHead = ({
 					</TableSortLabel>
 				</TableCell>
 				<TableCell
-					sx={{ minWidth: '157px', [mobile.mediaQuery]: { minWidth: 'unset' } }}
 					key="operator"
 					sortDirection={orderBy === 'operator' ? order : false}
 				>
