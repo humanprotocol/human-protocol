@@ -802,51 +802,70 @@ describe('Escrow with USDT', function () {
     });
   });
 
-  describe('can fund hmtoken to escrow, and then withdraw', () => {
-    before(async () => {
-      await deployEscrow();
-      await fundEscrow();
-      await setupEscrow();
+  describe('withdraw', () => {
+    describe('can fund hmtoken to escrow, and then withdraw', () => {
+      before(async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+      });
+
+      it('Should fund escrow with HMTokens', async () => {
+        const amount = 10;
+        await hmtoken.connect(owner).transfer(escrow.getAddress(), amount);
+
+        const result = await hmtoken
+          .connect(owner)
+          .balanceOf(escrow.getAddress());
+        expect(result.toString()).to.equal(amount.toString());
+
+        expect(await escrow.remainingFunds()).to.equal('100');
+      });
+
+      it('Should withdraw HMTokens from escrow', async () => {
+        await escrow.connect(owner).withdraw(hmtoken.getAddress());
+
+        const result = await hmtoken
+          .connect(owner)
+          .balanceOf(escrow.getAddress());
+        expect(result.toString()).to.equal('0');
+
+        expect(await escrow.remainingFunds()).to.equal('100');
+      });
+
+      it('Should not allow USDT withdrawal from escrow', async () => {
+        await expect(
+          escrow.connect(owner).withdraw(usdt.getAddress())
+        ).to.be.revertedWith('No funds to withdraw');
+      });
+
+      it('Should allow additional USDT withdrawal from escrow', async () => {
+        await usdt.connect(owner).transfer(escrow.getAddress(), 100);
+
+        await escrow.connect(owner).withdraw(usdt.getAddress());
+
+        const result = await usdt.connect(owner).balanceOf(escrow.getAddress());
+        expect(result.toString()).to.equal('100');
+
+        expect(await escrow.remainingFunds()).to.equal('100');
+      });
     });
 
-    it('Should fund escrow with HMTokens', async () => {
+    describe('Events', function () {
       const amount = 10;
-      await hmtoken.connect(owner).transfer(escrow.getAddress(), amount);
+      before(async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
 
-      const result = await hmtoken
-        .connect(owner)
-        .balanceOf(escrow.getAddress());
-      expect(result.toString()).to.equal(amount.toString());
+        await usdt.connect(owner).transfer(escrow.getAddress(), amount);
+      });
 
-      expect(await escrow.remainingFunds()).to.equal('100');
-    });
-
-    it('Should withdraw HMTokens from escrow', async () => {
-      await escrow.connect(owner).withdraw(hmtoken.getAddress());
-
-      const result = await hmtoken
-        .connect(owner)
-        .balanceOf(escrow.getAddress());
-      expect(result.toString()).to.equal('0');
-
-      expect(await escrow.remainingFunds()).to.equal('100');
-    });
-
-    it('Should not allow USDT withdrawal from escrow', async () => {
-      await expect(
-        escrow.connect(owner).withdraw(usdt.getAddress())
-      ).to.be.revertedWith('No funds to withdraw');
-    });
-
-    it('Should allow additional USDT withdrawal from escrow', async () => {
-      await usdt.connect(owner).transfer(escrow.getAddress(), 100);
-
-      await escrow.connect(owner).withdraw(usdt.getAddress());
-
-      const result = await usdt.connect(owner).balanceOf(escrow.getAddress());
-      expect(result.toString()).to.equal('100');
-
-      expect(await escrow.remainingFunds()).to.equal('100');
+      it('Should emit an event on withdraw', async function () {
+        await expect(await escrow.connect(owner).withdraw(usdt.getAddress()))
+          .to.emit(escrow, 'Withdraw')
+          .withArgs(usdt.getAddress(), amount);
+      });
     });
   });
 });
