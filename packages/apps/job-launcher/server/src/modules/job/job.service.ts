@@ -746,7 +746,17 @@ export class JobService {
     this.web3Service.validateChainId(chainId);
 
     // Select oracles
-    if (reputationOracle) {
+    if (!reputationOracle || !exchangeOracle || !recordingOracle) {
+      const selectedOracles = await this.routingProtocolService.selectOracles(
+        chainId,
+        mappedJobType,
+      );
+
+      exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
+      recordingOracle = recordingOracle || selectedOracles.recordingOracle;
+      reputationOracle = reputationOracle || selectedOracles.reputationOracle;
+    } else {
+      // Validate if all oracles are provided
       await this.routingProtocolService.validateOracles(
         chainId,
         mappedJobType,
@@ -754,22 +764,6 @@ export class JobService {
         exchangeOracle,
         recordingOracle,
       );
-    } else {
-      ({ reputationOracle, exchangeOracle, recordingOracle } =
-        await this.routingProtocolService.selectOracles(
-          chainId,
-          mappedJobType,
-        ));
-    }
-
-    // Fill in missing exchangeOracle or recordingOracle if not provided
-    if (!exchangeOracle || !recordingOracle) {
-      const selectedOracles = await this.routingProtocolService.selectOracles(
-        chainId,
-        mappedJobType,
-      );
-      exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
-      recordingOracle = recordingOracle || selectedOracles.recordingOracle;
     }
 
     if (dto.qualifications) {
