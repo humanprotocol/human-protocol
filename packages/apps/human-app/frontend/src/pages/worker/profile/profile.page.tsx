@@ -24,9 +24,12 @@ export function WorkerProfilePage() {
 
   useEffect(() => {
     setNotifications();
-    setGrayBackground();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this once
   }, [isConnected]);
+
+  useEffect(() => {
+    setGrayBackground();
+  }, [setGrayBackground]);
 
   return (
     <Paper
