@@ -5,14 +5,14 @@ import {
   jobAssignmentCommandFixture,
   jobsFetchParamsCommandFixture,
   jobsFetchResponseFixture,
+  EXCHANGE_ORACLE_ADDRESS,
   USER_ADDRESS,
 } from './job-assignment.fixtures';
 import { EscrowUtilsGateway } from '../../../integrations/escrow/escrow-utils-gateway.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ResignJobCommand } from '../model/job-assignment.model';
-import { JOB_ASSIGNMENT_CACHE_KEY } from '../../../common/constants/cache';
 
-const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${USER_ADDRESS}`;
+const cacheKey = `jobs:assigned:${USER_ADDRESS}:${EXCHANGE_ORACLE_ADDRESS}`;
 describe('JobAssignmentService', () => {
   let service: JobAssignmentService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;

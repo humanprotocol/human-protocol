@@ -29,6 +29,10 @@ export class JobAssignmentService {
     return decoded.wallet_address;
   }
 
+  private makeJobAssignmentCacheKey(userWalledAddress: string, oracleAddress: string): string {
+    return `${JOB_ASSIGNMENT_CACHE_KEY}:${userWalledAddress}:${oracleAddress}`;
+  }
+
   async processJobAssignment(
     command: JobAssignmentCommand,
   ): Promise<JobAssignmentResponse> {
@@ -67,7 +71,7 @@ export class JobAssignmentService {
     command: JobsFetchParamsCommand,
   ): Promise<JobsFetchResponse> {
     const evmAddress = this.getEvmAddressFromToken(command.token);
-    const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
+    const cacheKey = this.makeJobAssignmentCacheKey(evmAddress, command.oracleAddress);
 
     const cachedData =
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
@@ -96,7 +100,7 @@ export class JobAssignmentService {
     command: JobsFetchParamsCommand,
     evmAddress: string,
   ): Promise<void> {
-    const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
+    const cacheKey = this.makeJobAssignmentCacheKey(evmAddress, command.oracleAddress);
 
     const cachedData =
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
