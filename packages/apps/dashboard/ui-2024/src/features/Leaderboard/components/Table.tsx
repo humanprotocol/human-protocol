@@ -167,7 +167,9 @@ export const Table = ({
 								<TableCell
 									sx={{
 										justifyContent: 'flex-start',
+										px: '0.5rem',
 										[mobile.mediaQuery]: {
+											px: '1rem',
 											position: 'sticky',
 											left: 0,
 											zIndex: 2,
@@ -208,7 +210,15 @@ export const Table = ({
 										)}
 									</Grid>
 								</TableCell>
-								<TableCell sx={{ justifyContent: 'flex-start' }}>
+								<TableCell
+									sx={{
+										justifyContent: 'flex-start',
+										px: '0.5rem',
+										[mobile.mediaQuery]: {
+											px: '1rem',
+										},
+									}}
+								>
 									<Grid
 										container
 										wrap="nowrap"
