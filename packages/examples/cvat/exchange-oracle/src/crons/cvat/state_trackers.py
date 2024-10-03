@@ -1,12 +1,12 @@
 import logging
 
-from sqlalchemy import exc as sa_errors
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
+from src import db
 from src.core.config import CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses
@@ -235,19 +235,14 @@ def track_escrow_creation(logger: logging.Logger, session: Session) -> None:
         if created_jobs_count != creation.total_jobs:
             continue
 
-        with session.begin_nested():
-            try:
-                cvat_service.update_project_statuses_by_escrow_address(
-                    session=session,
-                    escrow_address=creation.escrow_address,
-                    chain_id=creation.chain_id,
-                    status=ProjectStatuses.annotation,
-                )
-                finished.append(creation)
-            except sa_errors.OperationalError as e:
-                if isinstance(e.orig, db_errors.LockNotAvailable):
-                    continue
-                raise
+        with session.begin_nested(), db.suppress(db_errors.LockNotAvailable):
+            cvat_service.update_project_statuses_by_escrow_address(
+                session=session,
+                escrow_address=creation.escrow_address,
+                chain_id=creation.chain_id,
+                status=ProjectStatuses.annotation,
+            )
+            finished.append(creation)
 
     if finished:
         cvat_service.finish_escrow_creations(session, finished)
