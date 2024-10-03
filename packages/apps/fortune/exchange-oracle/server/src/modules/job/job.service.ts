@@ -250,6 +250,16 @@ export class JobService {
 
         if (foundSolution) {
           foundSolution.error = true;
+          const assignment =
+            await this.assignmentRepository.findOneByEscrowAndWorker(
+              invalidJobSolution.escrowAddress,
+              invalidJobSolution.chainId,
+              foundSolution.workerAddress,
+            );
+          if (assignment) {
+            assignment.status = AssignmentStatus.REJECTED;
+            this.assignmentRepository.updateOne(assignment);
+          }
         } else {
           throw new BadRequestException(
             `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
