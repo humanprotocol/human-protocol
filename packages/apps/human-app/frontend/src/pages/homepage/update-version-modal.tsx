@@ -33,11 +33,10 @@ export function UpdateVersionModal() {
         }}
       >
         <Typography textAlign="center" variant="h4">
-          We&#39;ve just released a new version of HUMAN App with enhanced
-          features.
+          {t('updateVersionModal.newVersion')}
         </Typography>
         <Typography variant="body1">
-          To continue using the app, please:
+          {t('updateVersionModal.please')}
           <ol>
             <li>
               <Link

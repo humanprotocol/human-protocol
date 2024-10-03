@@ -388,6 +388,8 @@
     "logIn": "Log In"
   },
   "updateVersionModal": {
+    "newVersion": "We've just released a new version of HUMAN App with enhanced features.",
+    "please": "To continue using the app, please:",
     "reregister": "Reregister your account",
     "verify": "Verify your identity",
     "connect": "Connect your wallet",
