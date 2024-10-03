@@ -402,24 +402,48 @@ def prepare_escrows_for_validation(
     update_stmt = (
         update(EscrowValidation)
         .where(EscrowValidation.id.in_(subquery))
-        .values(status=EscrowValidationStatuses.in_progress, attempts=EscrowValidation.attempts + 1)
-        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
+        .values(attempts=EscrowValidation.attempts + 1)
+        .returning(EscrowValidation.escrow_address, EscrowValidation.chain_id)
     )
     return session.execute(update_stmt).all()
 
 
-def update_escrow_validation_status(
+def lock_escrow_for_validation(
+    session: Session,
+    *,
+    escrow_address: str,
+    chain_id: int,
+) -> Sequence[tuple[str, str, int]]:
+    stmt = (
+        select(EscrowValidation.escrow_address, EscrowValidation.chain_id)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .with_for_update(nowait=True)
+    )
+    return session.execute(stmt)
+
+
+def update_escrow_validation(
     session: Session,
     escrow_address: str,
     chain_id: int,
-    status: EscrowValidationStatuses,
+    *,
+    status: EscrowValidationStatuses | None = None,
+    increase_attempts: bool = False,
 ) -> None:
+    values = {}
+    if increase_attempts:
+        values["attempts"] = EscrowValidation.attempts + 1
+    if status is not None:
+        values["status"] = status
+
     stmt = (
         update(EscrowValidation)
         .where(
             EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
         )
-        .values(status=status)
+        .values(**values)
     )
     session.execute(stmt)
 

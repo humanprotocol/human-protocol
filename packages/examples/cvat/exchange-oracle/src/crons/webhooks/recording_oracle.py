@@ -81,11 +81,11 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                     )
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
-            cvat_db_service.update_escrow_validation_status(
+            cvat_db_service.update_escrow_validation(
                 db_session,
                 webhook.escrow_address,
                 webhook.chain_id,
-                EscrowValidationStatuses.completed,
+                status=EscrowValidationStatuses.completed,
             )
 
         case RecordingOracleEventTypes.task_rejected:

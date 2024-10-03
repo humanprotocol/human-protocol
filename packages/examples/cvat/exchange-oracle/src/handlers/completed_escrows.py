@@ -5,13 +5,13 @@ from functools import partial
 from typing import Any
 
 from datumaro.util import take_by
-from sqlalchemy import exc as sa_errors
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
+from src import db
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
@@ -236,6 +236,7 @@ def _download_job_annotations(
 
 def _handle_escrow_validation(
     logger: logging.Logger,
+    session: Session,
     escrow_address: str,
     chain_id: int,
 ) -> bool:
@@ -245,22 +246,18 @@ def _handle_escrow_validation(
         logger.exception(f"Failed to handle completed projects for escrow {escrow_address}: {e}")
         return False
 
-    # Need to work in separate transactions for each escrow, as a failing DB call
-    # (e.g. a failed lock attempt) will abort the transaction. A nested transaction
-    # can also be used for handling this.
-    with SessionLocal.begin() as session:
-        try:
-            escrow_projects = cvat_service.get_projects_by_escrow_address(
-                session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
-            )
-        except sa_errors.OperationalError as ex:
-            if isinstance(ex.orig, db_errors.LockNotAvailable):
-                return False
-            raise
-
+    # try to get pessimistic lock for projects and lock escrow validation
+    # if we fail to do that, simply skip the escrow
+    with db.suppress(db_errors.LockNotAvailable):
+        cvat_service.lock_escrow_for_validation(
+            session, escrow_address=escrow_address, chain_id=chain_id
+        )
+        escrow_projects = cvat_service.get_projects_by_escrow_address(
+            session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
+        )
         _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
-
-    return True
+        return True
+    return False
 
 
 def handle_escrows_validations(logger: logging.Logger) -> None:
@@ -269,17 +266,19 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
             session,
             limit=CronConfig.track_completed_escrows_chunk_size,
         )
-
-    unhandled_validations = set(validation_id for validation_id, _, __ in escrow_validations)
-    handled_validations = set()
-    try:
-        for validation_id, escrow_address, chain_id in escrow_validations:
-            if _handle_escrow_validation(logger, escrow_address, chain_id):
-                handled_validations.add(validation_id)
-    finally:
+    for escrow_address, chain_id in escrow_validations:
         with SessionLocal.begin() as session:
-            cvat_service.update_escrow_validation_statuses_by_ids(
+            # Need to work in separate transactions for each escrow, as a failing DB call
+            # (e.g. a failed lock attempt) will abort the transaction. A nested transaction
+            # can also be used for handling this.
+            handled = _handle_escrow_validation(logger, session, escrow_address, chain_id)
+            if not handled:
+                # either escrow is invalid, or we couldn't get lock for projects/validations
+                continue
+            # change status so validation won't be attempted again
+            cvat_service.update_escrow_validation(
                 session,
-                unhandled_validations - handled_validations,
-                EscrowValidationStatuses.awaiting,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+                status=EscrowValidationStatuses.in_progress,
             )
