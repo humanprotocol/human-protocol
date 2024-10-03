@@ -390,7 +390,7 @@ def finish_escrow_creations_by_escrow_address(
 
 
 def prepare_escrows_for_validation(
-    session: Session, *, limit: int = 100
+    session: Session, *, limit: int = 5
 ) -> Sequence[tuple[str, str, int]]:
     subquery = (
         select(EscrowValidation.id)
