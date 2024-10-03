@@ -45,7 +45,7 @@ CVAT_VAL_SIZE="2"
 ### The multiplier for the size of skeleton jobs in CVAT, used to scale the job size for skeleton tasks. Default: 6
 CVAT_SKELETONS_JOB_SIZE_MULTIPLIER="6"
 
-### The URL for connecting to the PostgreSQL database. Required
+### The URL for connecting to the PostgreSQL database.
 POSTGRES_URL=
 
 ### The hostname or IP address of the PostgreSQL database server. Default: '127.0.0.1'
@@ -66,46 +66,43 @@ POSTGRES_DATABASE="job-launcher"
 ### Indicates whether to use SSL for connections to the PostgreSQL database. Default: false
 POSTGRES_SSL="false"
 
-### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Required
-POSTGRES_LOGGING=
+### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Default: 'log,info,warn,error'
+POSTGRES_LOGGING="log,info,warn,error"
 
-### The RPC URL for the Sepolia network. Required
+### The RPC URL for the Sepolia network.
 RPC_URL_SEPOLIA=
 
-### The RPC URL for the Polygon network. Required
+### The RPC URL for the Polygon network.
 RPC_URL_POLYGON=
 
-### The RPC URL for the Polygon Amoy network. Required
+### The RPC URL for the Polygon Amoy network.
 RPC_URL_POLYGON_AMOY=
 
-### The RPC URL for the BSC Mainnet network. Required
+### The RPC URL for the BSC Mainnet network.
 RPC_URL_BSC_MAINNET=
 
-### The RPC URL for the BSC Testnet network. Required
+### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
 
-### The RPC URL for the Moonbeam network. Required
+### The RPC URL for the Moonbeam network.
 RPC_URL_MOONBEAM=
 
-### The RPC URL for the XLayer Testnet network. Required
+### The RPC URL for the XLayer Testnet network.
 RPC_URL_XLAYER_TESTNET=
 
-### The RPC URL for the XLayer network. Required
+### The RPC URL for the XLayer network.
 RPC_URL_XLAYER=
 
-### The RPC URL for the Localhost network. Required
+### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
-
-### 
-WEB3_ENV=
 
 ### Indicates whether PGP encryption should be used. Default: false
 PGP_ENCRYPT="false"
 
-### The private key used for PGP encryption or decryption. Required
+### The private key used for PGP encryption or decryption.
 PGP_PRIVATE_KEY=
 
-### The passphrase associated with the PGP private key. Required
+### The passphrase associated with the PGP private key.
 PGP_PASSPHRASE=
 
 ### The endpoint URL for connecting to the S3 service. Default: '127.0.0.1'
@@ -156,10 +153,10 @@ MINIMUM_FEE_USD="0.01"
 ### The time (in seconds) for which rate information will be cached. Default: 30
 RATE_CACHE_TIME="30"
 
-### The API key for accessing CoinMarketCap data. Required
+### The API key for accessing CoinMarketCap data.
 COINMARKETCAP_API_KEY=
 
-### The API key for accessing CoinGecko data. Required
+### The API key for accessing CoinGecko data.
 COINGECKO_API_KEY=
 
 ### The secret key used for authenticating requests to the Stripe API. Required

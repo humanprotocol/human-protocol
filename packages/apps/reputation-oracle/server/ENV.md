@@ -18,7 +18,7 @@ VERIFY_EMAIL_TOKEN_EXPIRES_IN="86400"
 ### The expiration time (in seconds) for forgot password tokens. Default: 86400
 FORGOT_PASSWORD_TOKEN_EXPIRES_IN="86400"
 
-### The URL for connecting to the PostgreSQL database. Required
+### The URL for connecting to the PostgreSQL database.
 POSTGRES_URL=
 
 ### The hostname or IP address of the PostgreSQL database server. Default: '127.0.0.1'
@@ -39,8 +39,8 @@ POSTGRES_DATABASE="reputation-oracle"
 ### Indicates whether to use SSL for connections to the PostgreSQL database. Default: false
 POSTGRES_SSL="false"
 
-### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Required
-POSTGRES_LOGGING=
+### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Default: 'log,info,warn,error'
+POSTGRES_LOGGING="log,info,warn,error"
 
 ### The site key for the hCaptcha service, used for client-side verification. Required
 HCAPTCHA_SITE_KEY=
@@ -60,8 +60,8 @@ HCAPTCHA_LABELING_URL="https://foundation-accounts.hmt.ai"
 ### The default language code for the hCaptcha labeler interface. Default: 'en'
 HCAPTCHA_DEFAULT_LABELER_LANG="en"
 
-### The API key for the KYC service, used for authentication with the KYC provider's API. Default: KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled)
-KYC_API_KEY="KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled)"
+### The API key for the KYC service, used for authentication with the KYC provider's API. KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled) Default: 'kyc-disabled'
+KYC_API_KEY="kyc-disabled"
 
 ### The private key associated with the KYC API, used for secure server-to-server communication. Required
 KYC_API_PRIVATE_KEY=
@@ -69,43 +69,40 @@ KYC_API_PRIVATE_KEY=
 ### The base URL for the KYC provider's API, which is used to send verification requests and retrieve results. Default: 'https://stationapi.veriff.com/v1'
 KYC_BASE_URL="https://stationapi.veriff.com/v1"
 
-### The RPC URL for the Sepolia network. Required
+### The RPC URL for the Sepolia network.
 RPC_URL_SEPOLIA=
 
-### The RPC URL for the Polygon network. Required
+### The RPC URL for the Polygon network.
 RPC_URL_POLYGON=
 
-### The RPC URL for the Polygon Amoy network. Required
+### The RPC URL for the Polygon Amoy network.
 RPC_URL_POLYGON_AMOY=
 
-### The RPC URL for the BSC Mainnet network. Required
+### The RPC URL for the BSC Mainnet network.
 RPC_URL_BSC_MAINNET=
 
-### The RPC URL for the BSC Testnet network. Required
+### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
 
-### The RPC URL for the Moonbeam network. Required
+### The RPC URL for the Moonbeam network.
 RPC_URL_MOONBEAM=
 
-### The RPC URL for the XLayer Testnet network. Required
+### The RPC URL for the XLayer Testnet network.
 RPC_URL_XLAYER_TESTNET=
 
-### The RPC URL for the XLayer network. Required
+### The RPC URL for the XLayer network.
 RPC_URL_XLAYER=
 
-### The RPC URL for the Localhost network. Required
+### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
-
-### 
-WEB3_ENV=
 
 ### Indicates whether PGP encryption should be used. Default: false
 PGP_ENCRYPT="false"
 
-### The private key used for PGP encryption or decryption. Required
+### The private key used for PGP encryption or decryption.
 PGP_PRIVATE_KEY=
 
-### The passphrase associated with the PGP private key. Required
+### The passphrase associated with the PGP private key.
 PGP_PASSPHRASE=
 
 ### The threshold value that defines the lower boundary of reputation level. Users with a reputation below this value are considered to have a low reputation. Default: 300

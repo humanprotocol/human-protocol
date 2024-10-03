@@ -81,9 +81,6 @@ HUMAN_APP_PASSWORD=
 ### The maximum number of retries for requests. Default: 5
 MAX_REQUEST_RETRIES="5"
 
-### 
-FEATURE_FLAG_JOBS_DISCOVERY="false"
-
 ### The email address used for end-to-end (E2E) testing. Default: empty string
 E2E_TESTING_EMAIL_ADDRESS="empty string"
 

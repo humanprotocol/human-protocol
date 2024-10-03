@@ -38,6 +38,12 @@ function extractEnvVarsWithComments(content: string) {
     const envVar = match[1];
     const additionalOptions = match[2]; // capture additional options
 
+    // Skip variables without comments
+    if (!comments[commentIndex]) {
+      commentIndex++;
+      continue;
+    }
+
     if (!envVarsMap.has(envVar)) {
       const comment = comments[commentIndex] || '';
       let required = false;

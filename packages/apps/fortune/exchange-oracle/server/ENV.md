@@ -1,19 +1,19 @@
 # Environment Variables
 
-### The URL for connecting to the PostgreSQL database. Required
+### The URL for connecting to the PostgreSQL database.
 POSTGRES_URL=
 
-### The hostname or IP address of the PostgreSQL database server. Required
-POSTGRES_HOST=
+### The hostname or IP address of the PostgreSQL database server. Default: '127.0.0.1'
+POSTGRES_HOST="127.0.0.1"
 
-### The port number on which the PostgreSQL database server is listening. Required
-POSTGRES_PORT=
+### The port number on which the PostgreSQL database server is listening. Default: 5432
+POSTGRES_PORT="5432"
 
-### The username for authenticating with the PostgreSQL database. Required
-POSTGRES_USER=
+### The username for authenticating with the PostgreSQL database. Default: 'operator'
+POSTGRES_USER="operator"
 
-### The password for authenticating with the PostgreSQL database. Required
-POSTGRES_PASSWORD=
+### The password for authenticating with the PostgreSQL database. Default: 'qwerty'
+POSTGRES_PASSWORD="qwerty"
 
 ### The name of the PostgreSQL database to connect to. Default: 'exchange-oracle'
 POSTGRES_DATABASE="exchange-oracle"
@@ -21,40 +21,40 @@ POSTGRES_DATABASE="exchange-oracle"
 ### Indicates whether to use SSL for connections to the PostgreSQL database. Default: false
 POSTGRES_SSL="false"
 
-### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Required
-POSTGRES_LOGGING=
+### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Default: 'log,info,warn,error'
+POSTGRES_LOGGING="log,info,warn,error"
 
-### The RPC URL for the Sepolia network. Required
+### The RPC URL for the Sepolia network.
 RPC_URL_SEPOLIA=
 
-### The RPC URL for the Polygon network. Required
+### The RPC URL for the Polygon network.
 RPC_URL_POLYGON=
 
-### The RPC URL for the Polygon Amoy network. Required
+### The RPC URL for the Polygon Amoy network.
 RPC_URL_POLYGON_AMOY=
 
-### The RPC URL for the BSC Mainnet network. Required
+### The RPC URL for the BSC Mainnet network.
 RPC_URL_BSC_MAINNET=
 
-### The RPC URL for the BSC Testnet network. Required
+### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
 
-### The RPC URL for the Moonbeam network. Required
+### The RPC URL for the Moonbeam network.
 RPC_URL_MOONBEAM=
 
-### The RPC URL for the XLayer network. Required
+### The RPC URL for the XLayer network.
 RPC_URL_XLAYER=
 
-### The RPC URL for the Localhost network. Required
+### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
 
 ### Indicates whether PGP encryption should be used. Default: false
 PGP_ENCRYPT="false"
 
-### The private key used for PGP encryption or decryption. Required
+### The private key used for PGP encryption or decryption.
 PGP_PRIVATE_KEY=
 
-### The passphrase associated with the PGP private key. Required
+### The passphrase associated with the PGP private key.
 PGP_PASSPHRASE=
 
 ### The endpoint URL for connecting to the S3 service. Default: '127.0.0.1'

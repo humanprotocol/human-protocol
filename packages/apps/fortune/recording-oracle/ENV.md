@@ -1,33 +1,33 @@
 # Environment Variables
 
-### The RPC URL for the Polygon network. Required
+### The RPC URL for the Polygon network.
 RPC_URL_POLYGON=
 
-### The RPC URL for the Polygon Amoy network. Required
+### The RPC URL for the Polygon Amoy network.
 RPC_URL_POLYGON_AMOY=
 
-### The RPC URL for the Sepolia network. Required
+### The RPC URL for the Sepolia network.
 RPC_URL_SEPOLIA=
 
-### The RPC URL for the BSC Mainnet network. Required
+### The RPC URL for the BSC Mainnet network.
 RPC_URL_BSC_MAINNET=
 
-### The RPC URL for the BSC Testnet network. Required
+### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
 
-### The RPC URL for the Moonbeam network. Required
+### The RPC URL for the Moonbeam network.
 RPC_URL_MOONBEAM=
 
-### The RPC URL for the Localhost network. Required
+### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
 
 ### Indicates whether PGP encryption should be used. Default: false
 PGP_ENCRYPT="false"
 
-### The private key used for PGP encryption or decryption. Required
+### The private key used for PGP encryption or decryption.
 PGP_PRIVATE_KEY=
 
-### The passphrase associated with the PGP private key. Required
+### The passphrase associated with the PGP private key.
 PGP_PASSPHRASE=
 
 ### The endpoint URL for connecting to the S3 service. Default: '127.0.0.1'
