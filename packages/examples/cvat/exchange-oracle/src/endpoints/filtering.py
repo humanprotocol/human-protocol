@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import Any, ClassVar, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
 import fastapi
 import fastapi.params
@@ -8,14 +10,25 @@ import sqlalchemy.orm
 from fastapi_filter import FilterDepends, with_prefix
 from fastapi_filter.contrib.sqlalchemy import Filter as _Filter
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
-from pydantic.fields import FieldInfo
 
 from src.utils.enums import BetterEnumMeta
+
+if TYPE_CHECKING:
+    from pydantic.fields import FieldInfo
 
 
 class OrderingDirection(str, Enum, metaclass=BetterEnumMeta):
     asc = "ASC"
     desc = "DESC"
+
+    @classmethod
+    def _missing_(cls, value) -> OrderingDirection:
+        # allow registry independency for convenience
+        value = value.upper()
+        for member in cls:
+            if member.upper() == value:
+                return member
+        return None
 
 
 ModelT = TypeVar("ModelT", bound=BaseModel)

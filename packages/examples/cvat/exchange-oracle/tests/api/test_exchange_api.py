@@ -2,7 +2,7 @@ import json
 import math
 import uuid
 from datetime import timedelta
-from itertools import combinations
+from itertools import combinations, product
 from unittest.mock import patch
 
 from fastapi.responses import Response
@@ -283,16 +283,19 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
 
-        for sort_field in (
-            "chain_id",
-            "job_type",
-            "created_at",
-            "updated_at",
+        for sort_field, case_converter in product(
+            (
+                "chain_id",
+                "job_type",
+                "created_at",
+                "updated_at",
+            ),
+            (str.upper, str.lower),
         ):
             response_asc = client.get(
                 "/job",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "ASC"},
+                params={"sort_field": sort_field, "sort": case_converter("ASC")},
             )
             assert response_asc.status_code == 200
             result_acs = [job["escrow_address"] for job in response_asc.json()["results"]]
@@ -301,7 +304,7 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
             response_desc = client.get(
                 "/job",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "DESC"},
+                params={"sort_field": sort_field, "sort": case_converter("DESC")},
             )
 
             assert response_desc.status_code == 200
@@ -863,17 +866,20 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
         manifest = json.load(data)
         mock_get_manifest.return_value = manifest
 
-        for sort_field in (
-            "chain_id",
-            "job_type",
-            "status",
-            "created_at",
-            "expires_at",
+        for sort_field, case_converter in product(
+            (
+                "chain_id",
+                "job_type",
+                "status",
+                "created_at",
+                "expires_at",
+            ),
+            (str.upper, str.lower),
         ):
             response_asc = client.get(
                 "/assignment",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "ASC"},
+                params={"sort_field": sort_field, "sort": case_converter("ASC")},
             )
             assert response_asc.status_code == 200
             result_acs = [a["assignment_id"] for a in response_asc.json()["results"]]
@@ -882,7 +888,7 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
             response_desc = client.get(
                 "/assignment",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "DESC"},
+                params={"sort_field": sort_field, "sort": case_converter("DESC")},
             )
 
             assert response_desc.status_code == 200
