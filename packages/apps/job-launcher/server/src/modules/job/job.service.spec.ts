@@ -316,65 +316,16 @@ describe('JobService', () => {
       jest.restoreAllMocks();
     });
 
-    it('should validate the provided reputation oracle and auto-fill missing oracles', async () => {
-      const fundAmount = 10;
-      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
-      const userBalance = 25;
-
-      const userId = 1;
-      const providedReputationOracle = '0xProvidedReputationOracle';
-
-      const fortuneJobDto: JobFortuneDto = {
-        chainId: MOCK_CHAIN_ID,
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: fundAmount,
-        currency: JobCurrency.HMT,
-        reputationOracle: providedReputationOracle,
-      };
-
-      getUserBalanceMock.mockResolvedValue(userBalance);
-      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
-      KVStoreUtils.getPublicKey = jest
-        .fn()
-        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
-
-      jest.spyOn(routingProtocolService, 'selectOracles').mockResolvedValue({
-        reputationOracle: selectedOraclesMock.reputationOracle,
-        exchangeOracle: selectedOraclesMock.exchangeOracle,
-        recordingOracle: selectedOraclesMock.recordingOracle,
-      });
-
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
-
-      expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
-        MOCK_CHAIN_ID,
-        mappedJobType,
-        providedReputationOracle,
-        undefined, // exchangeOracle is not provided
-        undefined, // recordingOracle is not provided
-      );
-
-      expect(jobRepository.createUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          reputationOracle: providedReputationOracle,
-          exchangeOracle: selectedOraclesMock.exchangeOracle,
-          recordingOracle: selectedOraclesMock.recordingOracle,
-        }),
-      );
-    });
-
     it('should use all oracles provided by the user and skip oracle selection', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
 
+      const userId = 1;
       const providedReputationOracle = '0xProvidedReputationOracle';
       const providedExchangeOracle = '0xProvidedExchangeOracle';
       const providedRecordingOracle = '0xProvidedRecordingOracle';
 
-      const userId = 1;
       const fortuneJobDto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
         submissionsRequired: MOCK_SUBMISSION_REQUIRED,
@@ -395,7 +346,13 @@ describe('JobService', () => {
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
-      expect(routingProtocolService.selectOracles).toHaveBeenCalledTimes(0);
+      expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
+        MOCK_CHAIN_ID,
+        mappedJobType,
+        providedReputationOracle,
+        providedExchangeOracle,
+        providedRecordingOracle, // recordingOracle is not provided
+      );
 
       expect(jobRepository.createUnique).toHaveBeenCalledWith(
         expect.objectContaining({
