@@ -9,7 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_MANIFEST_URL } from '../../../test/constants';
+import { MOCK_MANIFEST_URL, mockConfig } from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -88,7 +88,18 @@ describe('JobService', () => {
       providers: [
         JobService,
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         PGPConfigService,
         S3ConfigService,
         {
@@ -563,7 +574,7 @@ describe('JobService', () => {
     });
   });
 
-  describe('processInvalidJob', () => {
+  describe('processInvalidJobSolution', () => {
     it('should mark a job solution as invalid', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'test';
@@ -577,6 +588,12 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(existingJobSolutions);
       storageService.uploadJobSolutions = jest.fn();
+      assignmentRepository.findOneByEscrowAndWorker = jest
+        .fn()
+        .mockResolvedValue({
+          id: 1,
+          status: AssignmentStatus.VALIDATION,
+        });
 
       await jobService.processInvalidJobSolution({
         chainId,
@@ -596,6 +613,10 @@ describe('JobService', () => {
           },
         ],
       );
+      expect(assignmentRepository.updateOne).toHaveBeenCalledWith({
+        id: 1,
+        status: AssignmentStatus.REJECTED,
+      });
     });
 
     it('should throw an error if solution was not previously in S3', async () => {

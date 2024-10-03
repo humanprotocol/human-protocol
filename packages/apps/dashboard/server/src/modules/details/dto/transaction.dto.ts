@@ -28,7 +28,11 @@ export class TransactionPaginationDto {
   public to: string;
 
   @ApiProperty({ example: '0.123' })
-  @Transform(({ value }) => value.toString())
+  @Transform(({ value, obj }) => {
+    return obj.currentAddress.toLowerCase() === obj.from.toLowerCase()
+      ? `-${value.toString()}`
+      : value.toString();
+  })
   @IsString()
   @Expose()
   public value: string;

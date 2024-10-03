@@ -14,12 +14,18 @@ import {
   JobsDiscoveryParamsDto,
   JobsDiscoveryResponse,
 } from './model/jobs-discovery.model';
-import { Authorization } from '../../common/config/params-decorators';
+import {
+  Authorization,
+  JwtPayload,
+} from '../../common/config/params-decorators';
+import { JwtUserData } from '../../common/utils/jwt-token.model';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 
 @Controller()
 export class JobsDiscoveryController {
   constructor(
     private readonly service: JobsDiscoveryService,
+    private readonly environmentConfigService: EnvironmentConfigService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -31,9 +37,15 @@ export class JobsDiscoveryController {
   })
   public async getJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
+    @JwtPayload() jwtPayload: JwtUserData,
     @Authorization() token: string,
   ): Promise<JobsDiscoveryResponse> {
-    throw new HttpException('Jobs discovery is disabled', HttpStatus.FORBIDDEN);
+    if (!this.environmentConfigService.jobsDiscoveryFlag) {
+      throw new HttpException(
+        'Jobs discovery is disabled',
+        HttpStatus.FORBIDDEN,
+      );
+    }
     const jobsDiscoveryParamsCommand: JobsDiscoveryParamsCommand =
       this.mapper.map(
         jobsDiscoveryParamsDto,
@@ -41,6 +53,7 @@ export class JobsDiscoveryController {
         JobsDiscoveryParamsCommand,
       );
     jobsDiscoveryParamsCommand.token = token;
+    jobsDiscoveryParamsCommand.data.qualifications = jwtPayload.qualifications;
     return await this.service.processJobsDiscovery(jobsDiscoveryParamsCommand);
   }
 }

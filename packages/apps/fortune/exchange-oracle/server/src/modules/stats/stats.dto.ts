@@ -20,7 +20,7 @@ export class OracleStatsDto {
     name: 'assignments_expired',
   })
   assignmentsExpired: number;
-  
+
   @ApiProperty({
     name: 'escrows_processed',
   })

@@ -30,6 +30,7 @@ export enum ErrorAssignment {
   NotFound = 'Assignment not found',
   InvalidStatus = 'Invalid assignment status',
   InvalidAssignment = 'Invalid assignment',
+  InvalidAssignmentQualification = 'Invalid assignment qualification',
   InvalidUser = 'Assignment does not belong to the user',
   AlreadyExists = 'Assignment already exists',
   FullyAssigned = 'Fully assigned job',

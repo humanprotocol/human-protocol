@@ -160,7 +160,6 @@ export function useGraphPageChartData() {
 				(!effectiveFromAllTimeDate &&
 					latestDate?.isAfter(fromDateInLatestDateFormat))
 			) {
-				console.log({ fromDateInLatestDateFormat, latestDate });
 				setEffectiveFromAllTimeDate(latestDate);
 				setFromDate(latestDate);
 			}

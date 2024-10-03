@@ -541,7 +541,7 @@ export class JobService {
         const gt = await this.storageService.download(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         );
-        if (!gt || gt.length === 0)
+        if (!gt || !gt.images || gt.images.length === 0)
           throw new ControlledError(
             ErrorJob.GroundThuthValidationFailed,
             HttpStatus.BAD_REQUEST,
@@ -574,7 +574,18 @@ export class JobService {
         const gt = await this.storageService.download(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
         );
+        if (!gt || !gt.images || gt.images.length === 0)
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
         const data = await listObjectsInBucket(urls.dataUrl);
+        if (!data || data.length === 0 || !data[0])
+          throw new ControlledError(
+            ErrorJob.DatasetValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
 
         await this.checkImageConsistency(gt.images, data);
 
@@ -880,6 +891,13 @@ export class JobService {
     const data = await this.storageService.download(dataUrl.href);
     const gt = await this.storageService.download(gtUrl.href);
 
+    if (!gt || !gt.images || gt.images.length === 0) {
+      throw new ControlledError(
+        ErrorJob.GroundThuthValidationFailed,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     let gtEntries = 0;
 
     gt.images.forEach((gtImage: CvatImageData) => {
@@ -927,7 +945,6 @@ export class JobService {
     } else {
       totalJobs = Math.ceil(elementsCount / jobSize);
     }
-
     const jobBounty =
       ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
     return ethers.formatEther(jobBounty);
@@ -1144,6 +1161,7 @@ export class JobService {
     data: any,
   ): Promise<any> {
     let manifestFile = data;
+
     if (this.pgpConfigService.encrypt) {
       const { getOracleAddresses } =
         this.getOraclesSpecificActions[requestType];
@@ -1157,7 +1175,6 @@ export class JobService {
         const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
         if (publicKey) publicKeys.push(publicKey);
       }
-
       const encryptedManifest = await this.encryption.signAndEncrypt(
         JSON.stringify(data),
         publicKeys,
@@ -1169,6 +1186,7 @@ export class JobService {
       .createHash('sha1')
       .update(stringify(manifestFile))
       .digest('hex');
+
     const uploadedFile = await this.storageService.uploadFile(
       manifestFile,
       hash,

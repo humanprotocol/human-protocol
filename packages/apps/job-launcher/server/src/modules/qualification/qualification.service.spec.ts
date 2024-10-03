@@ -8,6 +8,7 @@ import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 import {
   MOCK_REPUTATION_ORACLE_URL,
   MOCK_WEB3_RPC_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
@@ -27,8 +28,19 @@ describe.only('QualificationService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         QualificationService,
-        ConfigService,
         Web3ConfigService,
         NetworkConfigService,
         {

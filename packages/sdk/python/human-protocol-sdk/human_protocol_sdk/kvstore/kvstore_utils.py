@@ -198,7 +198,10 @@ class KVStoreUtils:
         content = requests.get(url).text
         content_hash = Web3.keccak(text=content).hex()
 
-        if hash != content_hash:
+        formatted_hash = hash.replace("0x", "")
+        formatted_content_hash = content_hash.replace("0x", "")
+
+        if formatted_hash != formatted_content_hash:
             raise KVStoreClientError(f"Invalid hash")
 
         return url

@@ -88,14 +88,17 @@ export class DetailsService {
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,
+      toAddress: address,
       first,
       skip,
     });
     const result = transactions.map((transaction) => {
       const transcationPaginationObject: TransactionPaginationDto =
-        plainToInstance(TransactionPaginationDto, transaction, {
-          excludeExtraneousValues: true,
-        });
+        plainToInstance(
+          TransactionPaginationDto,
+          { ...transaction, currentAddress: address },
+          { excludeExtraneousValues: true },
+        );
       return transcationPaginationObject;
     });
 

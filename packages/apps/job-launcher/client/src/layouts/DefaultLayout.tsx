@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import bagImg from '../assets/bag.png';
 import humanImg from '../assets/human.png';
@@ -8,7 +7,7 @@ import { DefaultHeader } from '../components/Headers/DefaultHeader';
 
 export default function DefaultLayout() {
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', pt: '48px' }}>
       <DefaultHeader />
       <Box
         sx={{
@@ -26,7 +25,7 @@ export default function DefaultLayout() {
                 height: '100%',
               }}
             >
-              <Box sx={{ display: 'flex', alignItmes: 'center', ml: -4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', ml: -4 }}>
                 <img src={bagImg} alt="bag" />
                 <img src={userImg} alt="user" />
                 <img src={humanImg} alt="human" />
