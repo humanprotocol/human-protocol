@@ -39,6 +39,19 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     });
   }
 
+  public async findOneByEscrowAndWorker(
+    escrowAddress: string,
+    chainId: ChainId,
+    workerAddress: string,
+  ): Promise<AssignmentEntity | null> {
+    return this.findOne({
+      where: {
+        job: { escrowAddress, chainId },
+        workerAddress,
+      },
+    });
+  }
+
   public async findOneById(
     assignmentId: number,
   ): Promise<AssignmentEntity | null> {
