@@ -237,7 +237,7 @@ def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> 
 
 
 def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) -> None:
-    # sort: asc, desc; sort_field: chain_id|job_type|created_at|updated_at
+    # sort: ASC, DESC; sort_field: chain_id|job_type|created_at|updated_at
     session.begin()
     user = User(
         wallet_address=user_address,
@@ -292,7 +292,7 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
             response_asc = client.get(
                 "/job",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "asc"},
+                params={"sort_field": sort_field, "sort": "ASC"},
             )
             assert response_asc.status_code == 200
             result_acs = [job["escrow_address"] for job in response_asc.json()["results"]]
@@ -301,7 +301,7 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
             response_desc = client.get(
                 "/job",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "desc"},
+                params={"sort_field": sort_field, "sort": "DESC"},
             )
 
             assert response_desc.status_code == 200
@@ -831,7 +831,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
 
 def test_can_list_assignments_200_with_sorting(client: TestClient, session: Session) -> None:
     # sort_field: chain_id|job_type|status|created_at|expires_at
-    # sort: asc, desc
+    # sort: ASC, DESC
     session.begin()
     user = User(
         wallet_address=user_address,
@@ -873,7 +873,7 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
             response_asc = client.get(
                 "/assignment",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "asc"},
+                params={"sort_field": sort_field, "sort": "ASC"},
             )
             assert response_asc.status_code == 200
             result_acs = [a["assignment_id"] for a in response_asc.json()["results"]]
@@ -882,7 +882,7 @@ def test_can_list_assignments_200_with_sorting(client: TestClient, session: Sess
             response_desc = client.get(
                 "/assignment",
                 headers=get_auth_header(),
-                params={"sort_field": sort_field, "sort": "desc"},
+                params={"sort_field": sort_field, "sort": "DESC"},
             )
 
             assert response_desc.status_code == 200

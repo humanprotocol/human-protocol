@@ -14,8 +14,8 @@ from src.utils.enums import BetterEnumMeta
 
 
 class OrderingDirection(str, Enum, metaclass=BetterEnumMeta):
-    asc = "asc"
-    desc = "desc"
+    asc = "ASC"
+    desc = "DESC"
 
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
