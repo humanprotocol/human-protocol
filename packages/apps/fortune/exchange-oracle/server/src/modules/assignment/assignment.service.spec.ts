@@ -144,7 +144,7 @@ describe('AssignmentService', () => {
       );
     });
 
-    it('should reassign user  who has previously canceled', async () => {
+    it('should reassign user who has previously canceled', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue({
