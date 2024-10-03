@@ -21,7 +21,7 @@
     "@hcaptcha/react-hcaptcha": "^0.3.6",
     "@hookform/resolvers": "^3.3.4",
     "@human-protocol/sdk": "*",
-    "@mui/icons-material": "^5.15.7",
+    "@mui/icons-material": "^6.1.1",
     "@mui/material": "^5.16.7",
     "@synaps-io/verify-sdk": "^4.0.45",
     "@tanstack/react-query": "^5.18.1",
