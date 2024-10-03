@@ -32,6 +32,10 @@ import FiltersIconLight from '@/assets/icons/filters-icon.svg';
 import FiltersIconDark from '@/assets/icons-dark-mode/filters-icon.svg';
 import MobileHomeIconsLight from '@/assets/icons/icons-homepage/mobile-home-icons.svg';
 import MobileHomeIconsDark from '@/assets/icons-dark-mode/icons-homepage/mobile-home-icons.svg';
+import SunIconDark from '@/assets/icons-dark-mode/sun.svg';
+import SunIconLight from '@/assets/icons/sun.svg';
+import MoonIconDark from '@/assets/icons-dark-mode/moon.svg';
+import MoonIconLight from '@/assets/icons/moon.svg';
 import { useColorMode } from '@/hooks/use-color-mode';
 
 function HomepageLogoIcon() {
@@ -102,6 +106,14 @@ function FiltersIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <FiltersIconDark /> : <FiltersIconLight />;
 }
+function SunIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <SunIconDark /> : <SunIconLight />;
+}
+function MoonIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <MoonIconDark /> : <MoonIconLight />;
+}
 
 export {
   HomepageLogoIcon,
@@ -122,4 +134,6 @@ export {
   FiltersButtonIcon,
   SortArrow,
   FiltersIcon,
+  SunIcon,
+  MoonIcon,
 };
