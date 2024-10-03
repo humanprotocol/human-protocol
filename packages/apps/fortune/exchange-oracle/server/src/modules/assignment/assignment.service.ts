@@ -55,7 +55,10 @@ export class AssignmentService {
         jwtUser.address,
       );
 
-    if (assignmentEntity) {
+    if (
+      assignmentEntity &&
+      assignmentEntity.status !== AssignmentStatus.CANCELED
+    ) {
       this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.AlreadyExists);
     }
@@ -91,6 +94,12 @@ export class AssignmentService {
     if (expirationDate < new Date()) {
       this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.ExpiredEscrow);
+    }
+
+    // Allow reassignation when status is Canceled
+    if (assignmentEntity) {
+      assignmentEntity.status = AssignmentStatus.ACTIVE;
+      return this.assignmentRepository.updateOne(assignmentEntity);
     }
 
     const newAssignmentEntity = new AssignmentEntity();
