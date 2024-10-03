@@ -81,7 +81,6 @@ describe('RoutingProtocolService', () => {
     it('should initialize chains and reputation oracles from config', () => {
       const chains = routingProtocolService['chains'];
       const reputationOracles = routingProtocolService['reputationOracles'];
-      console.log(11111, routingProtocolService['chains']);
 
       expect(chains).toHaveLength(routingProtocolService['chains'].length);
       expect(reputationOracles).toEqual(
