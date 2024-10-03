@@ -8,11 +8,14 @@ import {
   EXCHANGE_ORACLE_ADDRESS,
   USER_ADDRESS,
 } from './job-assignment.fixtures';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { EscrowUtilsGateway } from '../../../integrations/escrow/escrow-utils-gateway.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ResignJobCommand } from '../model/job-assignment.model';
 
+const TEST_RETENTION_TTL = 60 * 60 * 24;
 const cacheKey = `jobs:assigned:${USER_ADDRESS}:${EXCHANGE_ORACLE_ADDRESS}`;
+
 describe('JobAssignmentService', () => {
   let service: JobAssignmentService;
   let exchangeOracleGatewayMock: Partial<ExchangeOracleGateway>;
@@ -41,6 +44,12 @@ describe('JobAssignmentService', () => {
           },
         },
         { provide: CACHE_MANAGER, useValue: cacheManagerMock },
+        {
+          provide: EnvironmentConfigService,
+          useValue: {
+            cacheTtlJobAssignments: TEST_RETENTION_TTL,
+          },
+        },
       ],
     }).compile();
 
@@ -48,6 +57,10 @@ describe('JobAssignmentService', () => {
     jest
       .spyOn(service as any, 'getEvmAddressFromToken')
       .mockReturnValue(USER_ADDRESS);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('should be defined', () => {
@@ -77,6 +90,9 @@ describe('JobAssignmentService', () => {
 
   describe('processGetAssignedJobs', () => {
     it('should fetch assigned jobs correctly when not cached', async () => {
+      const now = Date.now();
+      jest.useFakeTimers().setSystemTime(now);
+
       const command = jobsFetchParamsCommandFixture;
       const jobsFetchResponse = jobsFetchResponseFixture;
 
@@ -91,6 +107,14 @@ describe('JobAssignmentService', () => {
       expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
         command,
+      );
+      expect(command.data.updatedAfter).toBe(
+        new Date(now - TEST_RETENTION_TTL * 1000).toISOString(),
+      );
+
+      expect(cacheManagerMock.set).toHaveBeenCalledWith(
+        cacheKey,
+        jobsFetchResponse.results,
       );
       expect(result).toEqual({
         results: jobsFetchResponse.results,
@@ -124,7 +148,7 @@ describe('JobAssignmentService', () => {
   });
 
   describe('updateAssignmentsCache', () => {
-    it('should update assignments cache correctly', async () => {
+    it('should update assignments cache when empty', async () => {
       const command = jobsFetchParamsCommandFixture;
       const newAssignments = jobsFetchResponseFixture.results;
 
