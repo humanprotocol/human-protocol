@@ -386,5 +386,13 @@
     "header": "Session Expired",
     "description": "Please log in again to continue using the app.",
     "logIn": "Log In"
+  },
+  "updateVersionModal": {
+    "reregister": "Reregister your account",
+    "verify": "Verify your identity",
+    "connect": "Connect your wallet",
+    "assistance": "These steps help us ensure the safety of your account and provide you with a better experience. Thank you for your understanding! For assistance, reach out on ",
+    "discord": "Discord",
+    "gotIt": "Got it!"
   }
 }
