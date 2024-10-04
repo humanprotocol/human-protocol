@@ -1,6 +1,7 @@
 import io
 import os
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
 
@@ -68,7 +69,7 @@ class _TaskProcessor:
         self,
         escrow_address: str,
         chain_id: int,
-        annotations: list[FileDescriptor],
+        annotations: Sequence[FileDescriptor],
         merged_annotation: FileDescriptor,
         *,
         manifest: TaskManifest,
@@ -571,7 +572,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
 def postprocess_annotations(
     escrow_address: str,
     chain_id: int,
-    annotations: list[FileDescriptor],
+    annotations: Sequence[FileDescriptor],
     merged_annotation: FileDescriptor,
     *,
     manifest: TaskManifest,
