@@ -6,7 +6,7 @@ import { EnvironmentConfigService } from '../config/environment-config.service';
 export class ForbidUnauthorizedHostMiddleware implements NestMiddleware {
   constructor(private readonly envConfigService: EnvironmentConfigService) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, _res: Response, next: NextFunction) {
     const allowedHost = this.envConfigService.allowedHost;
     const requestHost = req.get('host');
 
