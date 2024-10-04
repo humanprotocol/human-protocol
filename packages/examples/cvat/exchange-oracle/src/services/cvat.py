@@ -797,6 +797,7 @@ def touch(
                 )
             )
             .values({parent_cls.updated_at: time})
+            .returning(parent_cls.id)
         )
-        session.execute(parent_update_stmt)
+        ids = session.execute(parent_update_stmt).scalars().all()
         cls = parent_cls

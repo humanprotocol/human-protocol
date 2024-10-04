@@ -929,11 +929,11 @@ def test_can_resign_assignment_200(client: TestClient, session: Session) -> None
     )
 
     assert response.status_code == 200
-    session.expire(assignment)
+    session.refresh(assignment)
     assert assignment.status == AssignmentStatuses.canceled
 
-    for obj, Class in zip((cvat_project, cvat_task, cvat_job), (Project, Task, Job), strict=False):
-        session.expire(obj, attribute_names=[Class.updated_at.name])
+    for obj in cvat_project, cvat_task, cvat_job:
+        session.refresh(obj)
         assert obj.updated_at is not None
     assert cvat_project.updated_at == cvat_task.updated_at == cvat_job.updated_at
 

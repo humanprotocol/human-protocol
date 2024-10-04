@@ -223,7 +223,6 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                     )
 
                 completed.append(upload)
-                upload.task.touch(session, touch_parent=True)
             except cvat_api.exceptions.ApiException as e:
                 failed.append(upload)
 
@@ -234,6 +233,9 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                     type=OracleWebhookTypes.job_launcher,
                     event=ExchangeOracleEvent_JobCreationFailed(reason=str(e)),
                 )
+
+    if completed:
+        cvat_service.touch(session, cvat_models.Task, [upload.task.id for upload in completed])
 
     if completed or failed:
         cvat_service.finish_data_uploads(session, failed + completed)

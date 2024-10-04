@@ -66,7 +66,7 @@ def handle_update_job_event(payload: dict) -> None:
                             "Assignment is expired, rejecting the update"
                         )
                         cvat_service.expire_assignment(session, matching_assignment.id)
-                        matching_assignment.job.touch(session, touch_parent=True)
+                        cvat_service.touch(session, models.Job, [matching_assignment.job.id])
 
                         if matching_assignment.id == latest_assignment.id:
                             cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
@@ -89,7 +89,7 @@ def handle_update_job_event(payload: dict) -> None:
                         session, matching_assignment.id, completed_at=webhook_time
                     )
                     cvat_service.update_job_status(session, job.id, new_status)
-                    job.task.touch(session, touch_parent=True)
+                    cvat_service.touch(session, models.Job, [job.id])
 
                     cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
 

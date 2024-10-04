@@ -28,32 +28,8 @@ class Base(DeclarativeBase):
     __abstract__ = True
     __tablename__: ClassVar[str]
 
-    def touch(
-        self, session: Session, *, touch_parent: bool = True, time: datetime | None = None
-    ) -> None:
-        cls = self.__class__
-        if time is None:
-            time = utcnow()
-        session.execute(update(cls).where(cls.id == self.id).values({cls.updated_at: time}))
-        if touch_parent and isinstance(self, ChildOf):
-            self.parent.touch(session, touch_parent=True, time=time)
-
 
 ParentT = TypeVar("ParentT", bound=type[Base])
-
-
-class InstrumentedAttributeProxy:
-    def __init__(self, instrumented_attribute: InstrumentedAttribute) -> None:
-        self._instrumented_attribute = instrumented_attribute
-
-    def __get__(self, instance: Any, owner: Any) -> Any:
-        return self._instrumented_attribute.__get__(instance, owner)
-
-    def __set__(self, instance: Any, value: Any) -> None:
-        self._instrumented_attribute.__set__(instance, value)
-
-    def __delete__(self, instance: Any) -> None:
-        self._instrumented_attribute.__delete__(instance)
 
 
 class ChildOf(Base, Generic[ParentT]):
