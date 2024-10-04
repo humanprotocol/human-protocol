@@ -1032,7 +1032,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert isinstance(cvat_project.updated_at, datetime)
         assert isinstance(cvat_task.updated_at, datetime)
         assert isinstance(cvat_job.updated_at, datetime)
-        assert cvat_project.updated_at > cvat_task.updated_at > cvat_job.updated_at
+        assert cvat_project.updated_at == cvat_task.updated_at == cvat_job.updated_at
 
         # touch only job updated_at
         prev_project_updated_at, prev_task_updated_at, prev_job_updated_at = (

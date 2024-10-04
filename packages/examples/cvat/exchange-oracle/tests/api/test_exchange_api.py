@@ -274,7 +274,10 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
     last_updated_job.touch(session, touch_parent=True)
     session.commit()
 
-    assert all(obj.updated_at is not None for obj in cvat_jobs + cvat_tasks + cvat_projects)
+    assert {
+        (obj.__class__.__name__, obj.id): obj.updated_at is not None
+        for obj in cvat_jobs + cvat_tasks + cvat_projects
+    } == {(obj.__class__.__name__, obj.id): True for obj in cvat_jobs + cvat_tasks + cvat_projects}
 
     with (
         open("tests/utils/manifest.json") as data,
@@ -687,7 +690,7 @@ def test_can_create_assignment_200(client: TestClient, session: Session) -> None
         ):
             session.expire(obj, attribute_names=[Class.updated_at.name])
             assert obj.updated_at is not None
-        assert cvat_project.updated_at > cvat_task.updated_at > cvat_job.updated_at
+        assert cvat_project.updated_at == cvat_task.updated_at == cvat_job.updated_at
 
 
 def test_cannot_create_assignment_401(client: TestClient) -> None:
@@ -932,7 +935,7 @@ def test_can_resign_assignment_200(client: TestClient, session: Session) -> None
     for obj, Class in zip((cvat_project, cvat_task, cvat_job), (Project, Task, Job), strict=False):
         session.expire(obj, attribute_names=[Class.updated_at.name])
         assert obj.updated_at is not None
-    assert cvat_project.updated_at > cvat_task.updated_at > cvat_job.updated_at
+    assert cvat_project.updated_at == cvat_task.updated_at == cvat_job.updated_at
 
 
 def test_cannot_resign_assignment_401(client: TestClient) -> None:

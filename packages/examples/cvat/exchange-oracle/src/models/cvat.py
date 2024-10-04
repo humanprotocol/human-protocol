@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
-from sqlalchemy.orm import Mapped, Session, relationship
+from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
 
 from src.core.types import (
@@ -13,7 +13,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.db import Base
+from src.db import Base, ChildOf
 from src.utils.time import utcnow
 
 
@@ -65,11 +65,8 @@ class Project(Base):
     def __repr__(self) -> str:
         return f"Project. id={self.id}"
 
-    def touch(self, session: Session) -> None:
-        session.query(Project).filter(Project.id == self.id).update({Project.updated_at: utcnow()})
 
-
-class Task(Base):
+class Task(ChildOf[Project]):
     __tablename__ = "tasks"
     id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
@@ -94,12 +91,6 @@ class Task(Base):
 
     def __repr__(self) -> str:
         return f"Task. id={self.id}"
-
-    def touch(self, session: Session, *, touch_parent: bool = True) -> None:
-        session.query(Task).filter(Task.id == self.id).update({Task.updated_at: utcnow()})
-
-        if touch_parent:
-            self.project.touch(session)
 
 
 class EscrowCreation(Base):
@@ -148,7 +139,7 @@ class DataUpload(Base):
         return f"DataUpload. id={self.id} task={self.task_id}"
 
 
-class Job(Base):
+class Job(ChildOf[Task]):
     __tablename__ = "jobs"
     id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
@@ -178,13 +169,6 @@ class Job(Base):
 
     def __repr__(self) -> str:
         return f"Job. id={self.id}"
-
-    def touch(self, session: Session, *, touch_parent: bool = True) -> None:
-        # TODO: check .update({})
-        session.query(Job).filter(Job.id == self.id).update({Job.updated_at: utcnow()})
-
-        if touch_parent:
-            self.task.touch(session, touch_parent=touch_parent)
 
 
 class User(Base):
