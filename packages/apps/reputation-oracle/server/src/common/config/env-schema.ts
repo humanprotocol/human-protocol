@@ -66,7 +66,7 @@ export const envValidator = Joi.object({
   PGP_PASSPHRASE: Joi.string().optional(),
   PGP_ENCRYPT: Joi.string(),
   // Kyc
-  KYC_API_KEY: Joi.string(),
+  KYC_API_KEY: Joi.string().required(),
   KYC_API_PRIVATE_KEY: Joi.string().required(),
   KYC_BASE_URL: Joi.string(),
 });
