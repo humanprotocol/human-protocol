@@ -77,8 +77,10 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
             completed_task_ids.append(task.cvat_id)
 
     if completed_task_ids:
-        cvat_service.touch_projects(
-            session, {t.project.id for t in tasks if t.cvat_id in completed_task_ids}
+        cvat_service.touch(
+            session,
+            cvat_models.Project,
+            [t.project.id for t in tasks if t.cvat_id in completed_task_ids],
         )
 
         logger.info(
@@ -122,15 +124,7 @@ def track_assignments(logger: logging.Logger) -> None:
 
             cvat_service.expire_assignment(session, assignment.id)
 
-        jobs_to_be_updated = [a.job for a in assignments]
-        tasks_to_be_updated = [j.task for j in jobs_to_be_updated]
-        projects_to_be_updated = [t.project for t in tasks_to_be_updated]
-        cvat_service.touch_jobs(session, {job.id for job in jobs_to_be_updated})
-        cvat_service.touch_tasks(session, {task.id for task in tasks_to_be_updated})
-        cvat_service.touch_projects(session, {project.id for project in projects_to_be_updated})
-        del jobs_to_be_updated
-        del tasks_to_be_updated
-        del projects_to_be_updated
+        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
 
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_active_assignments(
@@ -162,13 +156,7 @@ def track_assignments(logger: logging.Logger) -> None:
 
                 cvat_service.cancel_assignment(session, assignment.id)
 
-        # touch jobs/tasks/projects updated_at
-        jobs_to_be_updated = [a.job for a in assignments]
-        tasks_to_be_updated = [j.task for j in jobs_to_be_updated]
-        projects_to_be_updated = [t.project for t in tasks_to_be_updated]
-        cvat_service.touch_jobs(session, {job.id for job in jobs_to_be_updated})
-        cvat_service.touch_tasks(session, {task.id for task in tasks_to_be_updated})
-        cvat_service.touch_projects(session, {project.id for project in projects_to_be_updated})
+        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
 
 
 @cron_job

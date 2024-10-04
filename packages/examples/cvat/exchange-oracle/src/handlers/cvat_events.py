@@ -117,19 +117,14 @@ def handle_create_job_event(payload: dict) -> None:
         jobs = cvat_service.get_jobs_by_cvat_id(session, [payload.job["id"]])
 
         if not jobs:
-            cvat_service.create_job(
+            job_id = cvat_service.create_job(
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
                 payload.job["project_id"],
                 status=JobStatuses[payload.job["state"]],
             )
-            cvat_service.touch_tasks(
-                session, [payload.job["task_id"]], field=cvat_service.Task.cvat_id
-            )
-            cvat_service.touch_projects(
-                session, [payload.job["project_id"]], field=cvat_service.Project.cvat_id
-            )
+            cvat_service.touch(session, models.Job, [job_id])
 
         try:
             projects = cvat_service.get_projects_by_cvat_ids(

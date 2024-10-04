@@ -29,6 +29,7 @@ from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
+from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
@@ -358,7 +359,7 @@ class SimpleTaskBuilder:
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
-            db_service.touch_projects(session, [project_id])
+            db_service.touch(session, Project, [project_id])
 
 
 class BoxesFromPointsTaskBuilder:
@@ -1364,7 +1365,6 @@ class BoxesFromPointsTaskBuilder:
                 ),
                 cvat_webhook_id=cvat_webhook.id,
             )
-
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(
                 session,
@@ -1395,7 +1395,7 @@ class BoxesFromPointsTaskBuilder:
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
-            db_service.touch_projects(session, [project_id])
+            db_service.touch(session, Project, [project_id])
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
@@ -2393,7 +2393,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 chain_id=self.chain_id,
                 total_jobs=total_jobs,
             )
-
+            created_projects = []
             for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
                 # Each skeleton point uses the same file layout in jobs
                 skeleton_label_filenames = []
@@ -2438,6 +2438,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         ),
                         cvat_webhook_id=cvat_webhook.id,
                     )
+                    created_projects.append(project_id)
 
                     db_service.get_project_by_id(
                         session, project_id, for_update=True
@@ -2468,7 +2469,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         )
 
                         db_service.create_data_upload(session, cvat_task.id)
-                    db_service.touch_projects(session, [project_id])
+            db_service.touch(session, Project, created_projects)
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
