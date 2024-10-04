@@ -8,6 +8,7 @@ import { of, firstValueFrom } from 'rxjs';
 import {
   MOCK_HCAPTCHA_PROTECTION_URL,
   MOCK_HCAPTCHA_LABELING_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { TokenType } from '../../common/enums';
 
@@ -22,6 +23,7 @@ jest.mock('rxjs', () => {
 describe('hCaptchaService', () => {
   let hcaptchaService: HCaptchaService;
   let httpService: HttpService;
+  let configService: ConfigService;
 
   beforeAll(async () => {
     const mockHttpService: DeepPartial<HttpService> = {
@@ -33,8 +35,19 @@ describe('hCaptchaService', () => {
 
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         HCaptchaService,
-        ConfigService,
         HCaptchaConfigService,
         {
           provide: HttpService,
@@ -44,6 +57,7 @@ describe('hCaptchaService', () => {
     }).compile();
 
     httpService = moduleRef.get<HttpService>(HttpService);
+    configService = moduleRef.get<ConfigService>(ConfigService);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
   });
 

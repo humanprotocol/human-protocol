@@ -7,6 +7,7 @@ from sqlalchemy.sql import func
 
 from src.core.types import (
     AssignmentStatuses,
+    EscrowValidationStatuses,
     JobStatuses,
     Networks,
     ProjectStatuses,
@@ -57,6 +58,18 @@ class Project(Base):
             "and_("
             "Project.escrow_address == EscrowCreation.escrow_address, "
             "Project.chain_id == EscrowCreation.chain_id"
+            ")"
+        ),
+        foreign_keys=[escrow_address, chain_id],
+    )
+    escrow_validation: Mapped[EscrowValidation] = relationship(
+        back_populates="projects",
+        passive_deletes=True,
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowValidation.escrow_address, "
+            "Project.chain_id == EscrowValidation.chain_id"
             ")"
         ),
         foreign_keys=[escrow_address, chain_id],
@@ -120,6 +133,31 @@ class EscrowCreation(Base):
 
     def __repr__(self) -> str:
         return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"
+
+
+class EscrowValidation(Base):
+    __tablename__ = "escrow_validations"
+    __table_args__ = (UniqueConstraint("escrow_address", "chain_id", name="uix_escrow_chain"),)
+
+    id = Column(String, primary_key=True, index=True, server_default=func.uuid_generate_v4())
+
+    escrow_address = Column(String(42), index=True, nullable=False)
+    chain_id = Column(Integer, Enum(Networks), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    attempts = Column(Integer, default=0, server_default="0")
+    status = Column(String, Enum(EscrowValidationStatuses), nullable=False)
+    projects: Mapped[list[Project]] = relationship(
+        back_populates="escrow_validation",
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowValidation.escrow_address, "
+            "Project.chain_id == EscrowValidation.chain_id"
+            ")"
+        ),
+        foreign_keys=[Project.escrow_address, Project.chain_id],
+    )
 
 
 class DataUpload(Base):

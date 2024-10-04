@@ -1,91 +1,45 @@
 import logging
 
-from sqlalchemy import exc as sa_errors
 from sqlalchemy.orm import Session
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as cvat_models
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
+from src import db
 from src.core.config import CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_JobCreationFailed
-from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatuses
+from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
-from src.handlers.completed_escrows import handle_completed_escrows
+from src.handlers.completed_escrows import handle_escrows_validations
+from src.log import format_sequence
 
 
 @cron_job
 def track_completed_projects(logger: logging.Logger, session: Session) -> None:
-    """
-    Tracks completed projects:
-    1. Retrieves projects with "annotation" status
-    2. Retrieves tasks related to this project
-    3. If all tasks are completed -> updates project status to "completed"
-    """
-    projects = cvat_service.get_projects_by_status(
-        session,
-        ProjectStatuses.annotation,
-        task_status=TaskStatuses.completed,
-        limit=CronConfig.track_completed_projects_chunk_size,
-        for_update=ForUpdateParams(skip_locked=True),
-    )
+    updated_project_cvat_ids = cvat_service.complete_projects_with_completed_tasks(session)
 
-    completed_project_ids = []
-
-    for project in projects:
-        tasks = cvat_service.get_tasks_by_cvat_project_id(session, project.cvat_id)
-        if tasks and all(task.status == TaskStatuses.completed for task in tasks):
-            cvat_service.update_project_status(session, project.id, ProjectStatuses.completed)
-
-            completed_project_ids.append(project.cvat_id)
-
-    if completed_project_ids:
-        logger.info(
-            "Found new completed projects: {}".format(
-                ", ".join(str(t) for t in completed_project_ids)
-            )
-        )
+    if updated_project_cvat_ids:
+        session.commit()
+        logger.info(f"Found new completed projects: {format_sequence(updated_project_cvat_ids)}")
 
 
 @cron_job
 def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
-    """
-    Tracks completed tasks:
-    1. Retrieves tasks with "annotation" status
-    2. Retrieves jobs related to this task
-    3. If all jobs are completed -> updates task status to "completed"
-    """
-    tasks = cvat_service.get_tasks_by_status(
-        session,
-        TaskStatuses.annotation,
-        job_status=JobStatuses.completed,
-        project_status=ProjectStatuses.annotation,
-        limit=CronConfig.track_completed_tasks_chunk_size,
-        for_update=ForUpdateParams(skip_locked=True),
-    )
+    updated_tasks = cvat_service.complete_tasks_with_completed_jobs(session)
 
-    completed_task_ids = []
-
-    for task in tasks:
-        jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
-        if jobs and all(job.status == JobStatuses.completed for job in jobs):
-            cvat_service.update_task_status(session, task.id, TaskStatuses.completed)
-
-            completed_task_ids.append(task.cvat_id)
-
-    if completed_task_ids:
+    if updated_tasks:
+        session.commit()
         cvat_service.touch(
             session,
-            cvat_models.Project,
-            [t.project.id for t in tasks if t.cvat_id in completed_task_ids],
+            cvat_models.Task,
+            [t[0] for t in updated_tasks],
         )
 
-        logger.info(
-            "Found new completed tasks: {}".format(", ".join(str(t) for t in completed_task_ids))
-        )
+        logger.info(f"Found new completed projects: {format_sequence(updated_tasks)}")
 
 
 @cron_job
@@ -160,8 +114,19 @@ def track_assignments(logger: logging.Logger) -> None:
 
 
 @cron_job
-def track_completed_escrows(logger: logging.Logger) -> None:
-    handle_completed_escrows(logger)
+def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
+    awaiting_validations = cvat_service.create_escrow_validations(session)
+    if awaiting_validations:
+        session.commit()
+        logger.info(
+            f"Got {len(awaiting_validations)} escrows "
+            f"awaiting validation: {format_sequence(awaiting_validations)}"
+        )
+
+
+@cron_job
+def track_escrow_validations(logger: logging.Logger) -> None:
+    handle_escrows_validations(logger)
 
 
 @cron_job
@@ -245,8 +210,8 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                 "; ".join(
                     f"{k}: {v}"
                     for k, v in {
-                        "success": ", ".join(str(u.task_id) for u in completed),
-                        "failed": ", ".join(str(u.task_id) for u in failed),
+                        "success": format_sequence([u.task_id for u in completed]),
+                        "failed": format_sequence([u.task_id for u in failed]),
                     }.items()
                     if v
                 )
@@ -283,25 +248,20 @@ def track_escrow_creation(logger: logging.Logger, session: Session) -> None:
         if created_jobs_count != creation.total_jobs:
             continue
 
-        with session.begin_nested():
-            try:
-                cvat_service.update_project_statuses_by_escrow_address(
-                    session=session,
-                    escrow_address=creation.escrow_address,
-                    chain_id=creation.chain_id,
-                    status=ProjectStatuses.annotation,
-                )
-                finished.append(creation)
-            except sa_errors.OperationalError as e:
-                if isinstance(e.orig, db_errors.LockNotAvailable):
-                    continue
-                raise
+        with session.begin_nested(), db.suppress(db_errors.LockNotAvailable):
+            cvat_service.update_project_statuses_by_escrow_address(
+                session=session,
+                escrow_address=creation.escrow_address,
+                chain_id=creation.chain_id,
+                status=ProjectStatuses.annotation,
+            )
+            finished.append(creation)
 
     if finished:
         cvat_service.finish_escrow_creations(session, finished)
 
         logger.info(
             "Updated creation status of escrows: {}".format(
-                ", ".join(c.escrow_address for c in finished)
+                format_sequence([c.escrow_address for c in finished])
             )
         )

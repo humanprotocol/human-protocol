@@ -139,6 +139,11 @@ class CronConfig:
             "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
         )
     )
+    track_escrow_validations_int = int(
+        os.environ.get(
+            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
+        )
+    )
     track_completed_escrows_chunk_size = os.environ.get(
         # backward compatibility
         "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",

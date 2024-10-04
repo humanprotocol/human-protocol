@@ -1,19 +1,19 @@
-from datetime import datetime
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
 import sqlalchemy
-from sqlalchemy import update
+from psycopg2.errors import Error
+from sqlalchemy import DDL, event
+from sqlalchemy.exc import SQLAlchemyError, StatementError
 from sqlalchemy.orm import (
     DeclarativeBase,
     InstrumentedAttribute,
     Relationship,
-    Session,
     sessionmaker,
 )
 
 import src.utils.logging
 from src.core.config import Config
-from src.utils.time import utcnow
 
 DATABASE_URL = Config.postgres_config.connection_url()
 engine = sqlalchemy.create_engine(
@@ -67,3 +67,21 @@ class ChildOf(Base, Generic[ParentT]):
             f"Could not find relationship with parent type"
             f" {parent_type.__name__} on {cls.__name__}"
         )
+
+
+create_uuid_extension = DDL('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+event.listen(Base.metadata, "before_create", create_uuid_extension)
+
+
+@contextmanager
+def suppress(*exceptions: type[SQLAlchemyError] | type[Error]):
+    """
+    Works similarly to `contextlib.suppress`, but also checks for `e.orig`.
+    """
+    try:
+        yield
+    except exceptions:
+        pass
+    except StatementError as e:
+        if not isinstance(e.orig, exceptions):
+            raise
