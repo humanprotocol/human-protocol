@@ -49,7 +49,7 @@
     },
     "DrawerNavigation": {
       "jobs": "Jobs",
-      "captchaLabelling": "hCaptcha labelling",
+      "captchaLabeling": "hCaptcha labeling",
       "jobsDiscovery": "Jobs discovery",
       "profile": "Profile",
       "help": "Help",
