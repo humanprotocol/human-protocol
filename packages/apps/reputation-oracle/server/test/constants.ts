@@ -245,12 +245,17 @@ export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
 
+export const MOCK_HCAPTCHA_SITE_KEY = 'site-key';
+export const MOCK_HCAPTCHA_API_KEY = 'api-key';
 export const MOCK_HCAPTCHA_TOKEN = 'test-token';
+export const MOCK_HCAPTCHA_SECRET = 'secret';
+export const MOCK_HCAPTCHA_DEFAULT_LABELER_LANG = 'en';
 export const MOCK_HCAPTCHA_PROTECTION_URL = 'https://api.hcaptcha.com';
 export const MOCK_HCAPTCHA_LABELING_URL = 'https://foundation-accounts.hmt.ai';
 export const MOCK_WEB3_RPC_URL = 'http://localhost:8545';
 export const MOCK_QUALIFICATION_MIN_VALIDITY = 100;
 export const MOCK_FE_URL = 'http://localhost:3001';
+export const MOCK_KYC_API_PRIVATE_KEY = 'api-private-key';
 
 export const mockConfig: any = {
   S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
@@ -274,4 +279,11 @@ export const mockConfig: any = {
   WEB3_ENV: Web3Env.TESTNET,
   QUALIFICATION_MIN_VALIDITY: 1,
   FE_URL: MOCK_FE_URL,
+  HCAPTCHA_SITE_KEY: MOCK_HCAPTCHA_SITE_KEY,
+  HCAPTCHA_API_KEY: MOCK_HCAPTCHA_API_KEY,
+  HCAPTCHA_SECRET: MOCK_HCAPTCHA_SECRET,
+  HCAPTCHA_PROTECTION_URL: MOCK_HCAPTCHA_PROTECTION_URL,
+  HCAPTCHA_LABELING_URL: MOCK_HCAPTCHA_LABELING_URL,
+  HCAPTCHA_DEFAULT_LABELER_LANG: MOCK_HCAPTCHA_DEFAULT_LABELER_LANG,
+  KYC_API_PRIVATE_KEY: MOCK_KYC_API_PRIVATE_KEY,
 };

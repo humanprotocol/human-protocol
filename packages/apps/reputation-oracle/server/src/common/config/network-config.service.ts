@@ -31,7 +31,6 @@ export class NetworkConfigService {
           chainId: ChainId.SEPOLIA,
           /**
            * The RPC URL for the Sepolia network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
         },
@@ -41,7 +40,6 @@ export class NetworkConfigService {
           chainId: ChainId.POLYGON,
           /**
            * The RPC URL for the Polygon network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
         },
@@ -51,7 +49,6 @@ export class NetworkConfigService {
           chainId: ChainId.POLYGON_AMOY,
           /**
            * The RPC URL for the Polygon Amoy network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON_AMOY'),
         },
@@ -61,7 +58,6 @@ export class NetworkConfigService {
           chainId: ChainId.BSC_MAINNET,
           /**
            * The RPC URL for the BSC Mainnet network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_MAINNET'),
         },
@@ -71,7 +67,6 @@ export class NetworkConfigService {
           chainId: ChainId.BSC_TESTNET,
           /**
            * The RPC URL for the BSC Testnet network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
         },
@@ -81,7 +76,6 @@ export class NetworkConfigService {
           chainId: ChainId.MOONBEAM,
           /**
            * The RPC URL for the Moonbeam network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
         },
@@ -91,7 +85,6 @@ export class NetworkConfigService {
           chainId: ChainId.XLAYER_TESTNET,
           /**
            * The RPC URL for the XLayer Testnet network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_XLAYER_TESTNET'),
         },
@@ -101,7 +94,6 @@ export class NetworkConfigService {
           chainId: ChainId.XLAYER,
           /**
            * The RPC URL for the XLayer network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_XLAYER'),
         },
@@ -111,7 +103,6 @@ export class NetworkConfigService {
           chainId: ChainId.LOCALHOST,
           /**
            * The RPC URL for the Localhost network.
-           * Required
            */
           rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
         },
