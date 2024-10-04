@@ -326,7 +326,7 @@ export class JobService {
     ) {
       try {
         const encryption = await Encryption.build(
-          this.pgpConfigService.privateKey,
+          this.pgpConfigService.privateKey!,
           this.pgpConfigService.passphrase,
         );
 
