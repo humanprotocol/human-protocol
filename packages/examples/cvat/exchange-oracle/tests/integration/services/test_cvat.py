@@ -998,7 +998,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert {cvat_project.updated_at, cvat_task.updated_at, cvat_job.updated_at} == {None}
 
         # touch job with parents
-        cvat_job.touch(self.session, touch_parent=True)
+        cvat_service.touch(self.session, Job, [cvat_job.id])
         self.session.expire_all()
 
         assert isinstance(cvat_project.updated_at, datetime)
@@ -1012,8 +1012,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task.updated_at,
             cvat_job.updated_at,
         )
-        cvat_job.touch(self.session, touch_parent=False)
+        cvat_service.touch(self.session, Job, [cvat_job.id], touch_parents=False)
         assert isinstance(cvat_job.updated_at, datetime)
+        self.session.expire(cvat_job)
+        self.session.expire(cvat_task)
+        self.session.expire(cvat_project)
         assert cvat_job.updated_at > prev_job_updated_at
         assert prev_task_updated_at == cvat_task.updated_at
         assert prev_project_updated_at == cvat_project.updated_at

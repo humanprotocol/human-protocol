@@ -15,6 +15,7 @@ from src.core.types import AssignmentStatuses, ProjectStatuses, TaskTypes
 from src.models.cvat import Assignment, Job, Project, Task, User
 from src.schemas.exchange import AssignmentStatuses as APIAssignmentStatuses
 from src.schemas.exchange import JobStatuses as APIJobStatuses
+from src.services import cvat
 from src.utils.time import utcnow
 
 from tests.utils.db_helper import (
@@ -254,7 +255,7 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
         cvat_project, cvat_task, cvat_job = create_project_task_and_job(
             session, f"0x86e83d346041E8806e352681f3F14549C0d2BC6{i}", i + 1
         )
-        cvat_job.touch(session, touch_parent=True)
+        cvat.touch(session, Job, [cvat_job.id])
         cvat_projects.append(cvat_project)
         cvat_tasks.append(cvat_task)
         cvat_jobs.append(cvat_job)
@@ -271,7 +272,7 @@ def test_can_list_jobs_200_with_sorting(client: TestClient, session: Session) ->
         session.commit()
 
     last_updated_job = cvat_jobs[1]
-    last_updated_job.touch(session, touch_parent=True)
+    cvat.touch(session, Job, [last_updated_job.id])
     session.commit()
 
     assert {
@@ -371,14 +372,14 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
 
         session.add(assignment)
         assignments.append(assignment)
-        cvat_job.touch(session)
+        cvat.touch(session, Job, [cvat_job.id])
         session.commit()  # imitate different created_dates
 
     middle_init_time = utcnow()
 
     updated_cvat_project_ids = set()
     for job in cvat_jobs[len(cvat_jobs) // 2 :]:
-        job.touch(session)
+        cvat.touch(session, Job, [job.id])
         updated_cvat_project_ids.add(job.task.cvat_project_id)
     session.commit()
 
@@ -452,7 +453,7 @@ def test_can_list_jobs_200_check_values(client: TestClient, session: Session) ->
             expires_at=utcnow() + timedelta(days=1),
         )
         session.add(assignment)
-        job.touch(session)
+        cvat.touch(session, Job, [job.id])
         session.commit()
 
     with (
