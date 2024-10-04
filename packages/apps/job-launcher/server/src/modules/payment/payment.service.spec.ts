@@ -88,7 +88,12 @@ describe('PaymentService', () => {
           },
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
-        { provide: RateService, useValue: createMock<RateService>() },
+        {
+          provide: RateService,
+          useValue: {
+            getRate: jest.fn().mockResolvedValue(1.5),
+          },
+        },
         NetworkConfigService,
       ],
     }).compile();

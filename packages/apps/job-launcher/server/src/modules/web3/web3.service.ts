@@ -155,7 +155,6 @@ export class Web3Service {
       leader.reputationNetworks.map(async (address) => {
         try {
           const networkLeader = await OperatorUtils.getLeader(chainId, address);
-          console.log(1111, networkLeader);
 
           return networkLeader?.jobTypes &&
             this.matchesJobType(networkLeader.jobTypes, jobType)

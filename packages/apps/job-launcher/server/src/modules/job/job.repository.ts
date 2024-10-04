@@ -93,7 +93,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
           JobStatus.PENDING,
           JobStatus.PAID,
           JobStatus.CREATED,
-          JobStatus.SET_UP,
+          JobStatus.FUNDED,
         ];
         break;
       case JobStatusFilter.CANCELED:

@@ -8,6 +8,7 @@ import {
   Pending,
   Fund,
   PendingV2,
+  Withdraw,
 } from '../../generated/templates/Escrow/Escrow';
 import {
   BulkPayoutEvent,
@@ -20,6 +21,8 @@ import {
   Worker,
   Payout,
   DailyWorker,
+  Transfer,
+  WithdrawEvent,
 } from '../../generated/schema';
 import {
   Address,
@@ -27,6 +30,7 @@ import {
   Bytes,
   dataSource,
   ethereum,
+  log,
 } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventDayId, toEventId } from './utils/event';
@@ -401,6 +405,38 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     const escrowContract = EscrowContract.bind(event.address);
     const finalResultsUrl = escrowContract.try_finalResultsUrl();
 
+    updateEscrowEntityForBulkTransfer(
+      escrowEntity,
+      event.params._isPartial,
+      !finalResultsUrl.reverted ? finalResultsUrl.value : null
+    );
+
+    // Create and save EscrowStatusEvent entity
+    createAndSaveStatusEventForBulkTransfer(
+      event,
+      escrowEntity.status,
+      escrowEntity
+    );
+  }
+}
+
+export function handleBulkTransferV2(event: BulkTransferV2): void {
+  // Create BulkPayoutEvent entity
+  createBulkPayoutEvent(
+    event,
+    event.params._txId,
+    event.params._recipients.length
+  );
+
+  // Update escrow statistics
+  updateEscrowStatisticsForBulkTransfer(event.params._isPartial);
+
+  // Update event day data
+  updateEventDayDataForBulkTransfer(event, event.params._isPartial);
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address());
+  if (escrowEntity !== null) {
     // If the escrow is non-HMT, track the balance data
     if (escrowEntity.isNonHMT) {
       for (let i = 0; i < event.params._recipients.length; i++) {
@@ -448,44 +484,34 @@ export function handleBulkTransfer(event: BulkTransfer): void {
             eventDayData.dailyWorkerCount.plus(ONE_BI);
         }
 
+        const transaction = createTransaction(
+          event,
+          'bulkTransfer',
+          null,
+          null,
+          Address.fromBytes(escrowEntity.token)
+        );
+
+        // Create a transfer per recipient and amount
+        for (let i = 0; i < event.params._recipients.length; i++) {
+          const recipient = event.params._recipients[i];
+          const amount = event.params._amounts[i];
+          const transfer = new Transfer(
+            event.transaction.hash
+              .concatI32(i)
+              .concatI32(event.block.timestamp.toI32())
+          );
+          transfer.from = escrowEntity.address;
+          transfer.to = recipient;
+          transfer.value = amount;
+          transfer.transaction = transaction.id;
+          transfer.save();
+        }
+
         eventDayData.save();
       }
     }
 
-    updateEscrowEntityForBulkTransfer(
-      escrowEntity,
-      event.params._isPartial,
-      !finalResultsUrl.reverted ? finalResultsUrl.value : null
-    );
-
-    // Create and save EscrowStatusEvent entity
-    createAndSaveStatusEventForBulkTransfer(
-      event,
-      escrowEntity.status,
-      escrowEntity
-    );
-  }
-}
-
-export function handleBulkTransferV2(event: BulkTransferV2): void {
-  createTransaction(event, 'bulkTransfer');
-
-  // Create BulkPayoutEvent entity
-  createBulkPayoutEvent(
-    event,
-    event.params._txId,
-    event.params._recipients.length
-  );
-
-  // Update escrow statistics
-  updateEscrowStatisticsForBulkTransfer(event.params._isPartial);
-
-  // Update event day data
-  updateEventDayDataForBulkTransfer(event, event.params._isPartial);
-
-  // Update escrow entity
-  const escrowEntity = Escrow.load(dataSource.address());
-  if (escrowEntity) {
     // Assign finalResultsUrl directly from the event
     updateEscrowEntityForBulkTransfer(
       escrowEntity,
@@ -499,11 +525,12 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
       escrowEntity.status,
       escrowEntity
     );
+  } else {
+    createTransaction(event, 'bulkTransfer');
   }
 }
 
 export function handleCancelled(event: Cancelled): void {
-  createTransaction(event, 'cancel');
   // Create EscrowStatusEvent entity
   const eventEntity = new EscrowStatusEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -530,15 +557,30 @@ export function handleCancelled(event: Cancelled): void {
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address());
+
   if (escrowEntity) {
     if (escrowEntity.isNonHMT) {
+      const transaction = createTransaction(
+        event,
+        'cancel',
+        null,
+        null,
+        Address.fromBytes(escrowEntity.token)
+      );
       // If escrow is funded with HMT, balance is already tracked by HMT transfer
+      const transfer = new Transfer(toEventId(event));
+      transfer.from = escrowEntity.address;
+      transfer.to = escrowEntity.canceler;
+      transfer.value = escrowEntity.balance;
+      transfer.transaction = transaction.id;
+      transfer.save();
       escrowEntity.balance = ZERO_BI;
     }
     escrowEntity.status = 'Cancelled';
     escrowEntity.save();
     eventEntity.launcher = escrowEntity.launcher;
   }
+  createTransaction(event, 'cancel');
   eventEntity.save();
 }
 
@@ -590,7 +632,13 @@ export function handleFund(event: Fund): void {
     return;
   }
 
-  createTransaction(event, 'fund', event.address, event.params._amount);
+  createTransaction(
+    event,
+    'fund',
+    event.address,
+    event.params._amount,
+    Address.fromBytes(escrowEntity.token)
+  );
 
   // Create FundEvent entity
   const fundEventEntity = new FundEvent(toEventId(event));
@@ -624,4 +672,32 @@ export function handleFund(event: Fund): void {
   );
 
   escrowEntity.save();
+}
+
+export function handleWithdraw(event: Withdraw): void {
+  const escrowEntity = Escrow.load(dataSource.address());
+
+  if (!escrowEntity) {
+    return;
+  }
+
+  createTransaction(
+    event,
+    'withdraw',
+    Address.fromBytes(escrowEntity.canceler),
+    event.params._amount,
+    event.params._token
+  );
+
+  // Crear entidad WithdrawEvent similar a FundEvent
+  const withdrawEventEntity = new WithdrawEvent(toEventId(event));
+  withdrawEventEntity.block = event.block.number;
+  withdrawEventEntity.timestamp = event.block.timestamp;
+  withdrawEventEntity.txHash = event.transaction.hash;
+  withdrawEventEntity.escrowAddress = event.address;
+  withdrawEventEntity.sender = event.transaction.from;
+  withdrawEventEntity.receiver = escrowEntity.canceler;
+  withdrawEventEntity.amount = event.params._amount;
+  withdrawEventEntity.token = event.params._token;
+  withdrawEventEntity.save();
 }

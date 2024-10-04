@@ -18,6 +18,7 @@ export function handleLaunched(event: Launched): void {
   entity.token = event.params.eip20;
   entity.factoryAddress = event.address;
   entity.launcher = event.transaction.from;
+  entity.canceler = event.transaction.from;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;

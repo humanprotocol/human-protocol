@@ -43,6 +43,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event Cancelled();
     event Completed();
     event Fund(uint256 _amount);
+    event Withdraw(address _token, uint256 _amount);
 
     EscrowStatuses public override status;
 
@@ -212,6 +213,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
 
         _safeTransfer(_token, canceler, _amount);
+
+        emit Withdraw(_token, _amount);
         return true;
     }
 
