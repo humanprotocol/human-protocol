@@ -34,8 +34,6 @@ export class JobAssignmentService {
   ): Promise<JobAssignmentResponse> {
     const response =
       await this.exchangeOracleGateway.postNewJobAssignment(command);
-
-    const evmAddress = this.getEvmAddressFromToken(command.token);
     const assignmentsParamsCommand = new JobsFetchParamsCommand();
     assignmentsParamsCommand.oracleAddress =
       await this.escrowUtilsGateway.getExchangeOracleAddressByEscrowAddress(
@@ -44,7 +42,7 @@ export class JobAssignmentService {
       );
     assignmentsParamsCommand.token = command.token;
 
-    this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+    this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -53,12 +51,11 @@ export class JobAssignmentService {
     const response =
       await this.exchangeOracleGateway.resignAssignedJob(command);
 
-    const evmAddress = this.getEvmAddressFromToken(command.token);
     const assignmentsParamsCommand = new JobsFetchParamsCommand();
     assignmentsParamsCommand.oracleAddress = command.oracleAddress;
     assignmentsParamsCommand.token = command.token;
 
-    await this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+    await this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -92,10 +89,10 @@ export class JobAssignmentService {
     );
   }
 
-  private async updateAssignmentsCache(
+  public async updateAssignmentsCache(
     command: JobsFetchParamsCommand,
-    evmAddress: string,
   ): Promise<void> {
+    const evmAddress = this.getEvmAddressFromToken(command.token);
     const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
 
     const cachedData =

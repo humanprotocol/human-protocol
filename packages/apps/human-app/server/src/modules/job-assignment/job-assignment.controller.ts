@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -20,6 +21,7 @@ import {
   JobsFetchResponse,
   ResignJobDto,
   ResignJobCommand,
+  RefreshJobDto,
 } from './model/job-assignment.model';
 import { Authorization } from '../../common/config/params-decorators';
 
@@ -81,5 +83,20 @@ export class JobAssignmentController {
     const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
     command.token = token;
     return this.service.resignJob(command);
+  }
+
+  @Put('/refresh')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Request to resign from assigment',
+  })
+  public async refreshAssigments(
+    @Body() dto: RefreshJobDto,
+    @Authorization() token: string,
+  ) {
+    const command = new JobsFetchParamsCommand();
+    command.oracleAddress = dto.oracle_address;
+    command.token = token;
+    return this.service.updateAssignmentsCache(command);
   }
 }
