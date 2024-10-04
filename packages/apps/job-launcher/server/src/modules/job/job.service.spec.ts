@@ -351,7 +351,7 @@ describe('JobService', () => {
         mappedJobType,
         providedReputationOracle,
         providedExchangeOracle,
-        providedRecordingOracle, // recordingOracle is not provided
+        providedRecordingOracle,
       );
 
       expect(jobRepository.createUnique).toHaveBeenCalledWith(
