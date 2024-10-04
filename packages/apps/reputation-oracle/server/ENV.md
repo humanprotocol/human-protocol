@@ -60,8 +60,8 @@ HCAPTCHA_LABELING_URL="https://foundation-accounts.hmt.ai"
 ### The default language code for the hCaptcha labeler interface. Default: 'en'
 HCAPTCHA_DEFAULT_LABELER_LANG="en"
 
-### The API key for the KYC service, used for authentication with the KYC provider's API. KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled) Default: 'kyc-disabled'
-KYC_API_KEY="kyc-disabled"
+### The API key for the KYC service, used for authentication with the KYC provider's API. KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled) Required
+KYC_API_KEY=
 
 ### The private key associated with the KYC API, used for secure server-to-server communication. Required
 KYC_API_PRIVATE_KEY=

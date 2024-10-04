@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { KYC_API_KEY_DISABLED } from '../constants';
 
 @Injectable()
 export class KycConfigService {
@@ -8,10 +7,10 @@ export class KycConfigService {
 
   /**
    * The API key for the KYC service, used for authentication with the KYC provider's API. KYC_API_KEY_DISABLED (a constant indicating that the API key is disabled)
-   * Default: 'kyc-disabled'
+   * Required
    */
   get apiKey(): string {
-    return this.configService.get<string>('KYC_API_KEY', KYC_API_KEY_DISABLED);
+    return this.configService.getOrThrow<string>('KYC_API_KEY');
   }
 
   /**
