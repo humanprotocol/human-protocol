@@ -5,6 +5,7 @@ import {
   jobAssignmentCommandFixture,
   jobsFetchParamsCommandFixture,
   jobsFetchResponseFixture,
+  jobsFetchResponseItemFixture,
   EXCHANGE_ORACLE_ADDRESS,
   USER_ADDRESS,
 } from './job-assignment.fixtures';
@@ -167,6 +168,44 @@ describe('JobAssignmentService', () => {
         cacheKey,
         newAssignments,
       );
+    });
+
+    it('should apply retention config to cached assignments', async () => {
+      const latestUpdatedAt = new Date().toISOString();
+      cacheManagerMock.get.mockResolvedValueOnce([
+        {
+          ...jobsFetchResponseItemFixture,
+          updated_at: new Date(
+            /**
+             * Extract extra ms to avoid test being flaky
+             * if executed too quick
+             */
+            Date.now() - TEST_RETENTION_TTL - 1,
+          ).toISOString(),
+        },
+        {
+          ...jobsFetchResponseItemFixture,
+          updated_at: latestUpdatedAt,
+        },
+      ]);
+
+      const newAssignments = jobsFetchResponseFixture.results;
+      (
+        exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
+      ).mockResolvedValueOnce({ results: newAssignments });
+
+      const command = jobsFetchParamsCommandFixture;
+
+      await service['updateAssignmentsCache'](command, USER_ADDRESS);
+
+      expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
+      expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
+        command,
+      );
+      expect(command.data.updatedAfter).toBe(latestUpdatedAt);
+      expect(cacheManagerMock.set).toHaveBeenCalledWith(cacheKey, [
+        jobsFetchResponseItemFixture,
+      ]);
     });
   });
 
