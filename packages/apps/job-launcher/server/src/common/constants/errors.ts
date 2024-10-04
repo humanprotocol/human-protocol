@@ -171,3 +171,10 @@ export enum ErrorQualification {
   FailedToFetchQualifications = 'Failed to fetch qualifications',
   InvalidQualification = `Invalid qualification`,
 }
+
+/**
+ * Represents error messages associated with encryption.
+ */
+export enum ErrorEncryption {
+  MissingPrivateKey = 'Encryption private key cannot be empty, when it is enabled',
+}

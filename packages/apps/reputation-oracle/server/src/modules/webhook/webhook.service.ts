@@ -30,7 +30,7 @@ export class WebhookService {
    * @throws {Error} - An error object if an error occurred.
    */
   public async createIncomingWebhook(dto: WebhookDto): Promise<void> {
-    if (dto.eventType !== EventType.TASK_COMPLETED) {
+    if (dto.eventType !== EventType.JOB_COMPLETED) {
       throw new ControlledError(
         ErrorWebhook.InvalidEventType,
         HttpStatus.BAD_REQUEST,

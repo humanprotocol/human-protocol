@@ -15,17 +15,15 @@ export class PGPConfigService {
 
   /**
    * The private key used for PGP encryption or decryption.
-   * Required
    */
-  get privateKey(): string {
-    return this.configService.getOrThrow<string>('PGP_PRIVATE_KEY');
+  get privateKey(): string | undefined {
+    return this.configService.get<string>('PGP_PRIVATE_KEY');
   }
 
   /**
    * The passphrase associated with the PGP private key.
-   * Required
    */
-  get passphrase(): string {
-    return this.configService.getOrThrow<string>('PGP_PASSPHRASE');
+  get passphrase(): string | undefined {
+    return this.configService.get<string>('PGP_PASSPHRASE');
   }
 }

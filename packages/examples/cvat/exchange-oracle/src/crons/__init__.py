@@ -8,6 +8,7 @@ from src.crons.cvat.state_trackers import (
     track_completed_projects,
     track_completed_tasks,
     track_escrow_creation,
+    track_escrow_validations,
     track_task_creation,
 )
 from src.crons.webhooks.job_launcher import (
@@ -62,6 +63,11 @@ def setup_cron_jobs(app: FastAPI) -> None:
         )
         scheduler.add_job(
             track_completed_escrows,
+            "interval",
+            seconds=Config.cron_config.track_completed_escrows_int,
+        )
+        scheduler.add_job(
+            track_escrow_validations,
             "interval",
             seconds=Config.cron_config.track_completed_escrows_int,
         )

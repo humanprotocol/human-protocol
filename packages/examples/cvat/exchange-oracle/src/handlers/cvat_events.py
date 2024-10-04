@@ -1,9 +1,9 @@
 from dateutil.parser import parse as parse_aware_datetime
-from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
+from src import db
 from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.db import errors as db_errors
@@ -123,7 +123,8 @@ def handle_create_job_event(payload: dict) -> None:
                 status=JobStatuses[payload.job["state"]],
             )
 
-        try:
+        escrow_creation = None
+        with db.suppress(db_errors.LockNotAvailable):
             projects = cvat_service.get_projects_by_cvat_ids(
                 session, project_cvat_ids=[payload.job["project_id"]], for_update=True
             )
@@ -138,12 +139,9 @@ def handle_create_job_event(payload: dict) -> None:
                 chain_id=project.chain_id,
                 for_update=True,
             )
-            if not escrow_creation:
-                return
-        except sa_errors.OperationalError as e:
-            if isinstance(e.orig, db_errors.LockNotAvailable):
-                return
-            raise
+
+        if not escrow_creation:
+            return
 
         created_jobs_count = cvat_service.count_jobs_by_escrow_address(
             session,
