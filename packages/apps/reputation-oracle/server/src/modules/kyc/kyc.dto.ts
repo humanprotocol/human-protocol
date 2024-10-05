@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsEnum,
   IsObject,
   IsOptional,
@@ -63,6 +64,11 @@ export class KycStatusDto {
   @ApiProperty({ type: TechnicalDataDto })
   @IsObject()
   public technicalData: TechnicalDataDto;
+
+  // TODO: Remove temp fix
+  @ApiProperty()
+  @IsArray()
+  public deviceDetails: any;
 }
 
 export class KycSignedAddressDto {
