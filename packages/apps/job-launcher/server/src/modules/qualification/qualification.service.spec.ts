@@ -88,7 +88,9 @@ describe.only('QualificationService', () => {
           }) as any,
       );
 
-      const result = await qualificationService.getQualifications();
+      const result = await qualificationService.getQualifications(
+        ChainId.LOCALHOST,
+      );
 
       expect(result).toEqual(qualifications);
     });
@@ -96,7 +98,9 @@ describe.only('QualificationService', () => {
     it('should throw a ControlledError when KVStoreUtils.get fails', async () => {
       (KVStoreUtils.get as any).mockRejectedValue(new Error('KV store error'));
 
-      await expect(qualificationService.getQualifications()).rejects.toThrow(
+      await expect(
+        qualificationService.getQualifications(ChainId.LOCALHOST),
+      ).rejects.toThrow(
         new ControlledError(
           ErrorWeb3.ReputationOracleUrlNotSet,
           HttpStatus.BAD_REQUEST,
@@ -111,7 +115,9 @@ describe.only('QualificationService', () => {
         .spyOn(httpService, 'get')
         .mockImplementation(() => throwError(new Error('HTTP error')) as any);
 
-      await expect(qualificationService.getQualifications()).rejects.toThrow(
+      await expect(
+        qualificationService.getQualifications(ChainId.LOCALHOST),
+      ).rejects.toThrow(
         new ControlledError(
           ErrorQualification.FailedToFetchQualifications,
           HttpStatus.BAD_REQUEST,

@@ -768,7 +768,7 @@ export class JobService {
 
     if (dto.qualifications) {
       const validQualifications =
-        await this.qualificationService.getQualifications();
+        await this.qualificationService.getQualifications(chainId);
 
       const validQualificationReferences = validQualifications.map(
         (q) => q.reference,
