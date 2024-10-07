@@ -1,11 +1,11 @@
 from typing import Annotated, TypeVar
 
+import jwt
 import pydantic
 from fastapi import Depends, HTTPException, params, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.security import HTTPBearer as BaseHTTPBearer
-from jose import JWTError, jwt
 from pydantic import BaseModel, model_validator
 from starlette.requests import Request
 
@@ -67,9 +67,11 @@ class TokenAuthenticator:
         # Thus, just use it as a separate function explicitly.
 
         try:
-            payload = jwt.decode(token.credentials, Config.human_app_config.jwt_key)
+            payload = jwt.decode(
+                token.credentials, Config.human_app_config.jwt_key, algorithms=["HS256"]
+            )
             return self._auth_data_class.model_validate(payload)
-        except (JWTError, pydantic.ValidationError) as e:
+        except (jwt.PyJWTError, pydantic.ValidationError) as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",

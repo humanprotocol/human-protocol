@@ -31,8 +31,7 @@ fastapi-pagination = "^0.12.17"
 fastapi-filter = "^1.1.0"
 fastapi-limiter = "^0.1.6"
 strenum = "^0.4.15"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-cryptography = "^43.0.1"
+pyjwt = "^2.9.0"
 
 
 [tool.poetry.group.dev.dependencies]

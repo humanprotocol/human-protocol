@@ -5,9 +5,9 @@ from datetime import timedelta
 from itertools import combinations, product
 from unittest.mock import patch
 
+import jwt
 from fastapi.responses import Response
 from fastapi.testclient import TestClient
-from jose import jwt
 from sqlalchemy.orm import Session
 
 from src.core.config import Config
