@@ -91,7 +91,7 @@ export class JobAssignmentService {
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
     if (cachedData && cachedData.length > 0) {
       return paginateAndSortResults(
-        cachedData,
+        this.applyFilters(cachedData, command.data),
         command.data.page,
         command.data.pageSize,
         command.data.sortField as keyof JobsFetchResponseItem,
@@ -103,12 +103,37 @@ export class JobAssignmentService {
     const allJobsData = await this.fetchAllAssignedJobs(command);
     await this.cacheManager.set(cacheKey, allJobsData);
     return paginateAndSortResults(
-      allJobsData,
+      this.applyFilters(allJobsData, command.data),
       command.data.page,
       command.data.pageSize,
       command.data.sortField as keyof JobsFetchResponseItem,
       command.data.sort,
     );
+  }
+
+  private applyFilters(
+    assignments: JobsFetchResponseItem[],
+    { chainId, jobType, status, escrowAddress }: JobsFetchParamsCommand['data'],
+  ): JobsFetchResponseItem[] {
+    return assignments.filter((assignment) => {
+      if (chainId && assignment.chain_id !== chainId) {
+        return false;
+      }
+
+      if (status && assignment.status !== status) {
+        return false;
+      }
+
+      if (escrowAddress && assignment.escrow_address !== escrowAddress) {
+        return false;
+      }
+
+      if (jobType && assignment.job_type !== jobType) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   private async updateAssignmentsCache(
