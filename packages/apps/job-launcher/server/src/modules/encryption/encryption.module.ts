@@ -7,7 +7,7 @@ import { ErrorEncryption } from '../../common/constants/errors';
 const encryptionProvider: Provider = {
   provide: Encryption,
   useFactory: async (pgpConfigService: PGPConfigService) => {
-    if (!pgpConfigService.encrypt && !pgpConfigService.privateKey) {
+    if (!pgpConfigService.encrypt || !pgpConfigService.privateKey) {
       return null;
     }
     const privateKey = pgpConfigService.privateKey;
