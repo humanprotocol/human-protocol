@@ -2,6 +2,7 @@ import { t } from 'i18next';
 import type { BottomMenuItem } from '@/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
+import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
 
 export const operatorDrawerBottomMenuItems: BottomMenuItem[] = [
   {
@@ -22,4 +23,5 @@ export const operatorDrawerBottomMenuItems: BottomMenuItem[] = [
       }
     },
   },
+  <DarkModeSwitch key={crypto.randomUUID()} />,
 ];

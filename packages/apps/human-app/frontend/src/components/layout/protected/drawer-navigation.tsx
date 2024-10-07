@@ -29,7 +29,7 @@ export interface DrawerItem {
 }
 
 export type TopMenuItem = DrawerItem | JSX.Element;
-export type BottomMenuItem = DrawerItem;
+export type BottomMenuItem = DrawerItem | JSX.Element;
 interface DrawerNavigationProps {
   open: boolean;
   setDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -167,7 +167,24 @@ export function DrawerNavigation({
             })}
           </List>
           <List>
-            {bottomMenuItems?.map(({ label, link, icon, href, onClick }) => {
+            {bottomMenuItems?.map((item) => {
+              if (!('label' in item)) {
+                return (
+                  <ListItem key={crypto.randomUUID()}>
+                    <Stack
+                      direction="row"
+                      sx={{
+                        width: '100%',
+                        mx: isMobile ? '28px' : NAVBAR_PADDING,
+                      }}
+                    >
+                      {item}
+                    </Stack>
+                  </ListItem>
+                );
+              }
+
+              const { label, link, icon, href, onClick } = item;
               const isActive = location.pathname === link;
               return (
                 <ListItem alignItems="center" disablePadding key={link}>

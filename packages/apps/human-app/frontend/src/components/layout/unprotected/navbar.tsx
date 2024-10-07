@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/breakpoints';
 import { env } from '@/shared/env';
 import { useHomePageState } from '@/contexts/homepage-state';
+import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -50,31 +51,38 @@ export function Navbar({ withNavigation }: NavbarProps) {
           <Box
             sx={{
               display: {
+                width: '100%',
                 xs: 'none',
                 md: 'flex',
                 height: '2rem',
                 gap: '1.5rem',
+                whiteSpace: 'nowrap',
               },
             }}
           >
             {isMainPage ? (
               <>
-                <Button
-                  component={Link}
-                  size="large"
-                  to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
-                  variant="text"
-                >
-                  {t('components.navbar.humanProtocol')}
-                </Button>
-                <Button
-                  component={Link}
-                  size="large"
-                  to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
-                  variant="text"
-                >
-                  {t('components.navbar.howItWorks')}
-                </Button>
+                <div>
+                  <Button
+                    component={Link}
+                    size="large"
+                    to={env.VITE_NAVBAR__LINK__PROTOCOL_URL}
+                    variant="text"
+                  >
+                    {t('components.navbar.humanProtocol')}
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    component={Link}
+                    size="large"
+                    to={env.VITE_NAVBAR__LINK__HOW_IT_WORK_URL}
+                    variant="text"
+                  >
+                    {t('components.navbar.howItWorks')}
+                  </Button>
+                </div>
+                <DarkModeSwitch />
               </>
             ) : null}
           </Box>
@@ -119,6 +127,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
                 >
                   {t('components.navbar.howItWorks')}
                 </Button>
+                <DarkModeSwitch />
               </Box>
             </Drawer>
           </Box>
