@@ -8,8 +8,10 @@ import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-not
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 
 export function WorkerProfilePage() {
+  const { user } = useAuthenticatedUser();
   const isMobile = useIsMobile();
   const { isConnected } = useWalletConnect();
   const { setGrayBackground } = useBackgroundColorStore();
@@ -17,9 +19,12 @@ export function WorkerProfilePage() {
     useProtectedLayoutNotification();
 
   const setNotifications = () => {
+    if (user.wallet_address) {
+      return;
+    }
     setTopNotificationInLayout({
       type: 'warning',
-      content: t('worker.profile.topNotifications.noKYC'),
+      content: t('worker.profile.topNotifications.completeSteps'),
     });
   };
 
