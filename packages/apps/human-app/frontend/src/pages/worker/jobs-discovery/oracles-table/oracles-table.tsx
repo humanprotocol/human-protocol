@@ -17,6 +17,7 @@ import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { env } from '@/shared/env';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 
 const getColumns = (
   selectOracle: (oracleAddress: string) => void
@@ -79,8 +80,14 @@ export function OraclesTable({
   } = oraclesQueryDataResult;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user } = useAuthenticatedUser();
   const selectOracle = (oracleAddress: string) => {
     if (oracleAddress === env.VITE_H_CAPTCHA_ORACLE_ADDRESS) {
+      if (!user.site_key) {
+        navigate(routerPaths.worker.enableLabeler);
+        return;
+      }
+
       navigate(routerPaths.worker.HcaptchaLabeling);
       return;
     }
