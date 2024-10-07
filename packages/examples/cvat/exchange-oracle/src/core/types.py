@@ -95,3 +95,9 @@ class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
     completed = "completed"
     expired = "expired"
     canceled = "canceled"
+
+
+class EscrowValidationStatuses(str, Enum, metaclass=BetterEnumMeta):
+    awaiting = "awaiting"
+    in_progress = "in_progress"
+    completed = "completed"

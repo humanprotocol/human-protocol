@@ -55,40 +55,36 @@ export class JobService {
 
     filteredExchangeSolution.forEach((exchangeSolution) => {
       if (errorSolutions.includes(exchangeSolution)) return;
-
-      const duplicatedInRecording = recordingSolutions.filter(
+      const duplicatedInUnique = uniqueSolutions.filter(
         (solution) =>
           solution.workerAddress === exchangeSolution.workerAddress ||
           solution.solution === exchangeSolution.solution,
       );
+      if (
+        duplicatedInUnique.length > 0 &&
+        !errorSolutions.includes(exchangeSolution)
+      ) {
+        errorSolutions.push({
+          ...exchangeSolution,
+          error: SolutionError.Duplicated,
+        });
+        return;
+      }
+
+      const duplicatedInRecording = recordingSolutions.filter(
+        (solution) =>
+          solution.workerAddress === exchangeSolution.workerAddress &&
+          solution.solution === exchangeSolution.solution,
+      );
 
       if (duplicatedInRecording.length === 0) {
-        const duplicatedInExchange = filteredExchangeSolution.filter(
-          (solution) =>
-            solution.workerAddress === exchangeSolution.workerAddress ||
-            solution.solution === exchangeSolution.solution,
-        );
-        if (duplicatedInExchange.length > 1) {
-          duplicatedInExchange.forEach((duplicated) => {
-            if (
-              (duplicated.solution !== exchangeSolution.solution ||
-                duplicated.workerAddress !== exchangeSolution.workerAddress) &&
-              !errorSolutions.includes(duplicated)
-            ) {
-              errorSolutions.push({
-                ...duplicated,
-                error: SolutionError.Duplicated,
-              });
-            }
-          });
-        }
         if (checkCurseWords(exchangeSolution.solution))
           errorSolutions.push({
             ...exchangeSolution,
             error: SolutionError.CurseWord,
           });
         else uniqueSolutions.push(exchangeSolution);
-      }
+      } else uniqueSolutions.push(exchangeSolution);
     });
     return { errorSolutions, uniqueSolutions };
   }
@@ -161,7 +157,6 @@ export class JobService {
     );
 
     const recordingOracleSolutions: ISolution[] = [
-      ...existingJobSolutions,
       ...uniqueSolutions,
       ...errorSolutions,
     ];

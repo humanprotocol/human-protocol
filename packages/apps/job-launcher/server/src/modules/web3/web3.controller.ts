@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UsePipes } from '@nestjs/common';
 import { Public } from '../../common/decorators';
-import { ApiTags, ApiResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { Web3Service } from './web3.service';
 import { ChainId } from '@human-protocol/sdk';
 import { NetworkConfigService } from '../../common/config/network-config.service';
