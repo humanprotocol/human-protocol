@@ -10,7 +10,26 @@ import { BackgroundProvider } from '@/contexts/background-color-store';
 export interface ColorModeContextProps {
   isDarkMode: boolean;
   colorPalette: typeof defaultColorPalette;
+  switchMode: () => void;
 }
+
+const MODE_LOCAL_STORAGE_KEY = 'mode';
+
+const setModeInLocalStorage = (mode: 'dark' | 'light') => {
+  localStorage.setItem(MODE_LOCAL_STORAGE_KEY, mode);
+};
+
+const isDarkInModeLocalStorage = () => {
+  const mode = localStorage.getItem(MODE_LOCAL_STORAGE_KEY);
+  if (mode === 'dark') {
+    return true;
+  }
+  return false;
+};
+
+const isModeSetILocalStorage = () => {
+  return Boolean(localStorage.getItem(MODE_LOCAL_STORAGE_KEY));
+};
 
 export const ColorModeContext = createContext<
   ColorModeContextProps | undefined
@@ -21,7 +40,17 @@ interface ColorModeProviderProps {
 }
 
 export function ColorModeProvider({ children }: ColorModeProviderProps) {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(
+    isDarkInModeLocalStorage()
+  );
+
+  const switchMode = () => {
+    setIsDarkMode((current) => {
+      const newMode = !current;
+      setModeInLocalStorage(newMode ? 'dark' : 'light');
+      return newMode;
+    });
+  };
 
   const runColorMode = (
     fn: (matches: boolean) => void
@@ -41,6 +70,9 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
 
   useEffect(() => {
     const handleColorModeChange = (matches: boolean) => {
+      if (isModeSetILocalStorage()) {
+        return;
+      }
       setIsDarkMode(matches);
       if (matches) {
         document.body.classList.add('dark-mode');
@@ -65,7 +97,9 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
   );
   return (
     <ThemeProvider theme={themes}>
-      <ColorModeContext.Provider value={{ isDarkMode, colorPalette }}>
+      <ColorModeContext.Provider
+        value={{ isDarkMode, colorPalette, switchMode }}
+      >
         <BackgroundProvider colorPalette={colorPalette} isDarkMode={isDarkMode}>
           {children}
         </BackgroundProvider>

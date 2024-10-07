@@ -6,6 +6,7 @@ import type {
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
+import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
 
 export const workerDrawerTopMenuItems = (
   addressRegistered: boolean
@@ -43,4 +44,5 @@ export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
       }
     },
   },
+  <DarkModeSwitch key={crypto.randomUUID()} />,
 ];
