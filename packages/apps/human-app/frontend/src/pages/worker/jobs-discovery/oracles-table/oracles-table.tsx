@@ -15,6 +15,7 @@ import { routerPaths } from '@/router/router-paths';
 import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { env } from '@/shared/env';
+import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 
 const getColumns = (
   selectOracle: (oracleAddress: string) => void
@@ -77,8 +78,14 @@ export function OraclesTable({
   } = oraclesQueryDataResult;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user } = useAuthenticatedUser();
   const selectOracle = (oracleAddress: string) => {
     if (oracleAddress === env.VITE_H_CAPTCHA_ORACLE_ADDRESS) {
+      if (!user.site_key) {
+        navigate(routerPaths.worker.enableLabeler);
+        return;
+      }
+
       navigate(routerPaths.worker.HcaptchaLabeling);
       return;
     }
