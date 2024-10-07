@@ -167,9 +167,9 @@ export const Table = ({
 								<TableCell
 									sx={{
 										justifyContent: 'flex-start',
-										px: '0.5rem',
+										px: '0.5rem !important',
 										[mobile.mediaQuery]: {
-											px: '1rem',
+											px: '1rem !important',
 											position: 'sticky',
 											left: 0,
 											zIndex: 2,
@@ -213,9 +213,9 @@ export const Table = ({
 								<TableCell
 									sx={{
 										justifyContent: 'flex-start',
-										px: '0.5rem',
+										px: '0.5rem !important',
 										[mobile.mediaQuery]: {
-											px: '1rem',
+											px: '1rem !important',
 										},
 									}}
 								>
@@ -231,12 +231,27 @@ export const Table = ({
 										/>
 									</Grid>
 								</TableCell>
-								<TableCell sx={{ justifyContent: 'flex-start' }}>
+								<TableCell
+									sx={{
+										justifyContent: 'flex-start',
+										px: '0.5rem !important',
+										[mobile.mediaQuery]: {
+											px: '1rem !important',
+										},
+									}}
+								>
 									<Typography variant="body1">
 										{row.amountStaked} HMT
 									</Typography>
 								</TableCell>
-								<TableCell>
+								<TableCell
+									sx={{
+										px: '0.5rem !important',
+										[mobile.mediaQuery]: {
+											px: '1rem !important',
+										},
+									}}
+								>
 									<Typography component="div" variant="body1">
 										<Grid
 											whiteSpace="nowrap"
@@ -251,7 +266,15 @@ export const Table = ({
 										</Grid>
 									</Typography>
 								</TableCell>
-								<TableCell sx={{ justifyContent: 'flex-start' }}>
+								<TableCell
+									sx={{
+										justifyContent: 'flex-start',
+										px: '0.5rem !important',
+										[mobile.mediaQuery]: {
+											px: '1rem !important',
+										},
+									}}
+								>
 									<ReputationLabel reputation={row.reputation} />
 								</TableCell>
 								<TableCell>{row.fee}%</TableCell>

@@ -46,11 +46,11 @@ export const TableHead = ({
 				<TableCell
 					sx={{
 						minWidth: '220px',
-						padding: '0.5rem',
+						px: '0.5rem',
 						justifyContent: 'flex-start',
 						[mobile.mediaQuery]: {
 							minWidth: 'unset',
-							padding: '1rem',
+							px: '1rem',
 							position: 'sticky',
 							left: 0,
 							zIndex: 2,
@@ -74,9 +74,9 @@ export const TableHead = ({
 				</TableCell>
 				<TableCell
 					sx={{
-						minWidth: '200px',
-						padding: '0.5rem',
-						[mobile.mediaQuery]: { minWidth: 'unset', padding: '1rem' },
+						minWidth: '180px',
+						px: '0.5rem',
+						[mobile.mediaQuery]: { minWidth: 'unset', px: '1rem' },
 					}}
 					key="address"
 					sortDirection={orderBy === 'address' ? order : false}
@@ -102,9 +102,9 @@ export const TableHead = ({
 				</TableCell>
 				<TableCell
 					sx={{
-						minWidth: '150px',
-						padding: '0.5rem',
-						[mobile.mediaQuery]: { minWidth: 'unset', padding: '1rem' },
+						minWidth: '140px',
+						px: '0.5rem',
+						[mobile.mediaQuery]: { minWidth: 'unset', px: '1rem' },
 					}}
 					key="amountStaked"
 					sortDirection={orderBy === 'amountStaked' ? order : false}
@@ -130,9 +130,9 @@ export const TableHead = ({
 				</TableCell>
 				<TableCell
 					sx={{
-						minWidth: '200px',
-						padding: '0.5rem',
-						[mobile.mediaQuery]: { minWidth: 'unset', padding: '1rem' },
+						minWidth: '190px',
+						px: '0.5rem',
+						[mobile.mediaQuery]: { minWidth: 'unset', px: '1rem' },
 					}}
 					className="table-filter-select"
 				>
@@ -141,9 +141,9 @@ export const TableHead = ({
 				</TableCell>
 				<TableCell
 					sx={{
-						minWidth: '180px',
-						padding: '0.5rem',
-						[mobile.mediaQuery]: { minWidth: 'unset', padding: '1rem' },
+						minWidth: '170px',
+						px: '0.5rem',
+						[mobile.mediaQuery]: { minWidth: 'unset', px: '1rem' },
 					}}
 					key="reputation"
 					sortDirection={orderBy === 'reputation' ? order : false}
@@ -172,8 +172,8 @@ export const TableHead = ({
 				</TableCell>
 				<TableCell
 					sx={{
-						minWidth: '120px',
-						padding: '0.5rem',
+						minWidth: '90px',
+						px: '0.5rem',
 						[mobile.mediaQuery]: {
 							padding: '1rem',
 							minWidth: 'unset',
