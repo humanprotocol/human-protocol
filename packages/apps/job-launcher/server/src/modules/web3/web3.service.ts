@@ -139,19 +139,26 @@ export class Web3Service {
     chainId: ChainId,
     jobType: string,
   ): Promise<string[]> {
-    const oracleAddresses = this.web3ConfigService.reputationOracles
-      .split(',')
-      .map((address) => address.trim())
-      .filter((address) => address);
+    const leader = await OperatorUtils.getLeader(
+      chainId,
+      this.getOperatorAddress(),
+    );
+
+    if (!leader || !leader.reputationNetworks) {
+      this.logger.error(
+        `Leader or reputation networks not found for chain ${chainId}.`,
+      );
+      return [];
+    }
 
     const matchingOracles = await Promise.all(
-      oracleAddresses.map(async (address) => {
+      leader.reputationNetworks.map(async (address) => {
         try {
-          const leader = await OperatorUtils.getLeader(chainId, address);
+          const networkLeader = await OperatorUtils.getLeader(chainId, address);
 
-          return leader?.jobTypes &&
-            this.matchesJobType(leader.jobTypes, jobType)
-            ? leader.address
+          return networkLeader?.jobTypes &&
+            this.matchesJobType(networkLeader.jobTypes, jobType)
+            ? networkLeader.address
             : null;
         } catch (error) {
           this.logger.error(

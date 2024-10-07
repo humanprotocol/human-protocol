@@ -9,7 +9,7 @@ import {
 import {
   BulkPayoutEvent,
   Escrow,
-  SetupEvent,
+  PendingEvent,
   StoreResultsEvent,
 } from '../../../generated/schema';
 import { createOrLoadEscrowStatistics } from '../Escrow';
@@ -29,18 +29,17 @@ enum EscrowStatuses {
 
 export function handlePending(event: Pending): void {
   createTransaction(event, 'setup');
-  // Create SetupEvent entity
-  const setupEventEntity = new SetupEvent(toEventId(event));
-  setupEventEntity.block = event.block.number;
-  setupEventEntity.timestamp = event.block.timestamp;
-  setupEventEntity.txHash = event.transaction.hash;
-  setupEventEntity.escrowAddress = event.address;
-  setupEventEntity.sender = event.transaction.from;
-  setupEventEntity.save();
+  // Create PendingEvent entity
+  const pendingEventEntity = new PendingEvent(toEventId(event));
+  pendingEventEntity.block = event.block.number;
+  pendingEventEntity.timestamp = event.block.timestamp;
+  pendingEventEntity.txHash = event.transaction.hash;
+  pendingEventEntity.escrowAddress = event.address;
+  pendingEventEntity.sender = event.transaction.from;
+  pendingEventEntity.save();
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.setupEventCount = statsEntity.setupEventCount.plus(ONE_BI);
   statsEntity.pendingStatusEventCount =
     statsEntity.pendingStatusEventCount.plus(ONE_BI);
   statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
@@ -50,8 +49,6 @@ export function handlePending(event: Pending): void {
 
   // Update event day data
   const eventDayData = getEventDayData(event);
-  eventDayData.dailySetupEventCount =
-    eventDayData.dailySetupEventCount.plus(ONE_BI);
   eventDayData.dailyPendingStatusEventCount =
     eventDayData.dailyPendingStatusEventCount.plus(ONE_BI);
   eventDayData.dailyTotalEventCount = eventDayData.dailyTotalEventCount.plus(

@@ -10,6 +10,8 @@ export class OracleDiscoveryResponse implements IOperator {
   role?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
   retriesCount = 0;
   constructor(
     address: string,
@@ -17,12 +19,16 @@ export class OracleDiscoveryResponse implements IOperator {
     role?: string,
     url?: string,
     jobTypes?: string[],
+    registrationNeeded?: boolean,
+    registrationInstructions?: string,
   ) {
     this.address = address;
     this.chainId = chainId;
     this.role = role;
     this.url = url;
     this.jobTypes = jobTypes;
+    this.registrationNeeded = registrationNeeded;
+    this.registrationInstructions = registrationInstructions;
   }
 }
 export class OracleDiscoveryDto {

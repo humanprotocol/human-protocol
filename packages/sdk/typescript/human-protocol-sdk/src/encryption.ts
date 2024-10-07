@@ -382,7 +382,7 @@ export class EncryptionUtils {
    * This function encrypts a message using the specified public keys.
    *
    * @param {string} message Message to encrypt.
-   * @param {string} publicKey Array of public keys to use for encryption.
+   * @param {string} publicKeys Array of public keys to use for encryption.
    * @returns {Promise<string>} Message encrypted.
    *
    * **Code example**

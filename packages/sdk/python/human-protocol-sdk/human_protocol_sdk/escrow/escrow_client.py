@@ -85,6 +85,20 @@ class EscrowCancel:
         self.amountRefunded = amount_refunded
 
 
+class EscrowWithdraw:
+    def __init__(self, tx_hash: str, token_address: str, amount_withdrawn: any):
+        """
+        Represents the result of an escrow cancellation transaction.
+
+        :param tx_hash: The hash of the transaction associated with the escrow withdrawal.
+        :param token_address: The address of the token used for the withdrawal.
+        :param amount_withdrawn: The amount withdrawn from the escrow.
+        """
+        self.txHash = tx_hash
+        self.tokenAddress = token_address
+        self.amountWithdrawn = amount_withdrawn
+
+
 class EscrowClientError(Exception):
     """
     Raises when some error happens when interacting with escrow.
@@ -341,79 +355,6 @@ class EscrowClient:
             EscrowClientError,
             tx_options,
         )
-
-    def create_and_setup_escrow(
-        self,
-        token_address: str,
-        trusted_handlers: List[str],
-        job_requester_id: str,
-        escrow_config: EscrowConfig,
-    ) -> str:
-        """
-        Creates and sets up an escrow.
-
-        :param token_address: Token to use for pay outs
-        :param trusted_handlers: Array of addresses that can perform actions on the contract
-        :param job_requester_id: The id of the job requester
-        :param escrow_config: Object containing all the necessary information to setup an escrow
-
-        :return: The address of the escrow created
-
-        :raise EscrowClientError: If an error occurs while checking the parameters
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.escrow import EscrowClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                escrow_client = EscrowClient(w3)
-
-                token_address = '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4'
-                trusted_handlers = [
-                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-                ]
-                job_requester_id = 'job-requester'
-                escrow_config = EscrowConfig(
-                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                    10,
-                    10,
-                    10,
-                    "htttp://localhost/manifest.json",
-                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
-                )
-                escrow_address = escrow_client.create_and_setup_escrow(
-                    token_address,
-                    trusted_handlers,
-                    job_requester_id,
-                    escrow_config
-                )
-        """
-
-        escrow_address = self.create_escrow(
-            token_address, trusted_handlers, job_requester_id
-        )
-        self.setup(escrow_address, escrow_config)
-
-        return escrow_address
 
     def fund(
         self,
@@ -776,54 +717,6 @@ class EscrowClient:
 
         return escrow_cancel_data
 
-    def abort(self, escrow_address: str, tx_options: Optional[TxParams] = None) -> None:
-        """Cancels the specified escrow,
-        sends the balance to the canceler and selfdestructs the escrow contract.
-
-        :param escrow_address: Address of the escrow to abort
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :raise EscrowClientError: If an error occurs while checking the parameters
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.escrow import EscrowClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                escrow_client = EscrowClient(w3)
-
-                escrow_client.abort("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
-        """
-
-        if not Web3.is_address(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-
-        handle_transaction(
-            self.w3,
-            "Abort",
-            self._get_escrow_contract(escrow_address).functions.abort(),
-            EscrowClientError,
-            tx_options,
-        )
-
     def add_trusted_handlers(
         self,
         escrow_address: str,
@@ -888,6 +781,97 @@ class EscrowClient:
             tx_options,
         )
 
+    def withdraw(
+        self,
+        escrow_address: str,
+        token_address: str,
+        tx_options: Optional[TxParams] = None,
+    ) -> EscrowWithdraw:
+        """Withdraws additional tokens in the escrow to the canceler.
+
+        :param escrow_address: Address of the escrow to withdraw
+        :param token_address: Address of the token to withdraw
+        :param tx_options: (Optional) Additional transaction parameters
+
+        :return: EscrowWithdraw:
+            An instance of the EscrowWithdraw class containing details of the withdrawal transaction,
+            including the transaction hash and the token address and amount withdrawn.
+
+        :raise EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If the transfer event associated with the withdrawal
+                                is not found in the transaction logs
+
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                escrow_cancel_data = escrow_client.withdraw(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                    "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+                )
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        if not Web3.is_address(token_address):
+            raise EscrowClientError(f"Invalid token address: {token_address}")
+
+        transaction_receipt = handle_transaction(
+            self.w3,
+            "Withdraw",
+            self._get_escrow_contract(escrow_address).functions.withdraw(token_address),
+            EscrowClientError,
+            tx_options,
+        )
+
+        amount_transferred = None
+
+        erc20_interface = get_erc20_interface()
+        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
+
+        for log in transaction_receipt["logs"]:
+            if log["address"] == token_address:
+                processed_log = token_contract.events.Transfer().process_log(log)
+
+                if (
+                    processed_log["event"] == "Transfer"
+                    and processed_log["args"]["from"] == escrow_address
+                ):
+                    amount_transferred = processed_log["args"]["value"]
+                    break
+
+        if amount_transferred is None:
+            raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
+
+        escrow_withdraw_data = EscrowWithdraw(
+            tx_hash=transaction_receipt["transactionHash"].hex(),
+            token_address=token_address,
+            amount_withdrawn=amount_transferred,
+        )
+
+        return escrow_withdraw_data
+
     def get_balance(self, escrow_address: str) -> Decimal:
         """Gets the balance for a specified escrow address.
 
@@ -916,6 +900,16 @@ class EscrowClient:
 
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        try:
+            return (
+                self._get_escrow_contract(escrow_address)
+                .functions.remainingFunds()
+                .call()
+            )
+        except:
+            # Use getBalance for older contracts
+            pass
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 

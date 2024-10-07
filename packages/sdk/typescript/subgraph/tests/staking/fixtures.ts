@@ -1,3 +1,5 @@
+import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
   AllocationClosed,
   StakeAllocated,
@@ -6,8 +8,7 @@ import {
   StakeSlashed,
   StakeWithdrawn,
 } from '../../generated/Staking/Staking';
-import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, Address, BigInt } from '@graphprotocol/graph-ts';
+import { generateUniqueHash } from '../../tests/utils';
 
 export function createStakeDepositedEvent(
   staker: string,
@@ -15,7 +16,11 @@ export function createStakeDepositedEvent(
   timestamp: BigInt
 ): StakeDeposited {
   const newStakeDepositedEvent = changetype<StakeDeposited>(newMockEvent());
-
+  newStakeDepositedEvent.transaction.hash = generateUniqueHash(
+    staker,
+    timestamp,
+    newStakeDepositedEvent.transaction.nonce
+  );
   newStakeDepositedEvent.block.timestamp = timestamp;
 
   newStakeDepositedEvent.parameters = [];
@@ -39,6 +44,11 @@ export function createStakeLockedEvent(
   timestamp: BigInt
 ): StakeLocked {
   const newStakeLockedEvent = changetype<StakeLocked>(newMockEvent());
+  newStakeLockedEvent.transaction.hash = generateUniqueHash(
+    staker,
+    timestamp,
+    newStakeLockedEvent.transaction.nonce
+  );
 
   newStakeLockedEvent.block.timestamp = timestamp;
 
@@ -65,6 +75,11 @@ export function createStakeWithdrawnEvent(
   timestamp: BigInt
 ): StakeWithdrawn {
   const newStakeWithdrawnEvent = changetype<StakeWithdrawn>(newMockEvent());
+  newStakeWithdrawnEvent.transaction.hash = generateUniqueHash(
+    staker,
+    timestamp,
+    newStakeWithdrawnEvent.transaction.nonce
+  );
 
   newStakeWithdrawnEvent.block.timestamp = timestamp;
 
@@ -90,6 +105,11 @@ export function createStakeSlashedEvent(
   timestamp: BigInt
 ): StakeSlashed {
   const newStakeSlashedEvent = changetype<StakeSlashed>(newMockEvent());
+  newStakeSlashedEvent.transaction.hash = generateUniqueHash(
+    staker,
+    timestamp,
+    newStakeSlashedEvent.transaction.nonce
+  );
 
   newStakeSlashedEvent.block.timestamp = timestamp;
 
@@ -127,6 +147,11 @@ export function createStakeAllocatedEvent(
   timestamp: BigInt
 ): StakeAllocated {
   const newStakeAllocatedEvent = changetype<StakeAllocated>(newMockEvent());
+  newStakeAllocatedEvent.transaction.hash = generateUniqueHash(
+    staker,
+    timestamp,
+    newStakeAllocatedEvent.transaction.nonce
+  );
 
   newStakeAllocatedEvent.block.timestamp = timestamp;
 
@@ -161,6 +186,11 @@ export function createAllocationClosedEvent(
   timestamp: BigInt
 ): AllocationClosed {
   const newAllocationClosedEvent = changetype<AllocationClosed>(newMockEvent());
+  newAllocationClosedEvent.transaction.hash = generateUniqueHash(
+    staker,
+    timestamp,
+    newAllocationClosedEvent.transaction.nonce
+  );
 
   newAllocationClosedEvent.block.timestamp = timestamp;
 

@@ -24,7 +24,6 @@ export interface ILeader {
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  reputation: bigint;
   reward: bigint;
   amountJobsProcessed: bigint;
   role?: string;
@@ -33,10 +32,15 @@ export interface ILeader {
   webhookUrl?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
+  reputationNetworks?: string[];
 }
 
-export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+export interface ILeaderSubgraph
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks'> {
   jobTypes?: string;
+  reputationNetworks?: { address: string }[];
 }
 
 export interface ILeadersFilter {
@@ -60,6 +64,8 @@ export interface IOperator {
   role?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
 }
 
 export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {
@@ -117,6 +123,12 @@ export interface IKVStore {
   value: string;
 }
 
+export interface Transfer {
+  from: string;
+  to: string;
+  value: string;
+}
+
 export interface ITransaction {
   block: bigint;
   txHash: string;
@@ -125,6 +137,7 @@ export interface ITransaction {
   timestamp: bigint;
   value: string;
   method: string;
+  transfers: Transfer[];
 }
 
 export interface ITransactionsFilter extends IPagination {

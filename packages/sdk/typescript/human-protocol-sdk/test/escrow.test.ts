@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  ERC20__factory,
   EscrowFactory__factory,
   Escrow__factory,
   HMToken__factory,
@@ -71,15 +72,15 @@ describe('EscrowClient', () => {
     mockEscrowContract = {
       createEscrow: vi.fn(),
       setup: vi.fn(),
-      createAndSetupEscrow: vi.fn(),
       fund: vi.fn(),
       storeResults: vi.fn(),
       complete: vi.fn(),
       bulkPayOut: vi.fn(),
       cancel: vi.fn(),
-      abort: vi.fn(),
+      withdraw: vi.fn(),
       addTrustedHandlers: vi.fn(),
       getBalance: vi.fn(),
+      remainingFunds: vi.fn(),
       manifestHash: vi.fn(),
       manifestUrl: vi.fn(),
       finalResultsUrl: vi.fn(),
@@ -603,90 +604,6 @@ describe('EscrowClient', () => {
     });
   });
 
-  describe('createAndSetupEscrow', () => {
-    test('should successfully create and setup escrow', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-      const tokenAddress = ethers.ZeroAddress;
-      const trustedHandlers = [ethers.ZeroAddress];
-      const jobRequesterId = 'job-requester';
-
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.createEscrow = vi.fn().mockReturnValue(escrowAddress);
-      const setupSpy = vi
-        .spyOn(escrowClient.escrowContract, 'setup')
-        .mockImplementation(() => ({
-          wait: vi.fn().mockResolvedValue(true),
-        }));
-
-      await escrowClient.createAndSetupEscrow(
-        tokenAddress,
-        trustedHandlers,
-        jobRequesterId,
-        escrowConfig
-      );
-
-      expect(escrowClient.createEscrow).toHaveBeenCalledWith(
-        tokenAddress,
-        trustedHandlers,
-        jobRequesterId
-      );
-      expect(setupSpy).toHaveBeenCalledWith(
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
-        VALID_URL,
-        FAKE_HASH,
-        {}
-      );
-    });
-
-    test('should throw an error if setup escrow fails', async () => {
-      const escrowConfig = {
-        recordingOracle: ethers.ZeroAddress,
-        reputationOracle: ethers.ZeroAddress,
-        exchangeOracle: ethers.ZeroAddress,
-        recordingOracleFee: 10n,
-        reputationOracleFee: 10n,
-        exchangeOracleFee: 10n,
-        manifestUrl: VALID_URL,
-        manifestHash: FAKE_HASH,
-      };
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.setup.mockRejectedValueOnce(new Error());
-
-      await expect(
-        escrowClient.setup(ethers.ZeroAddress, escrowConfig)
-      ).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        10n,
-        10n,
-        10n,
-        VALID_URL,
-        FAKE_HASH,
-        {}
-      );
-    });
-  });
-
   describe('fund', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
@@ -1165,7 +1082,6 @@ describe('EscrowClient', () => {
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.getBalance = vi.fn().mockReturnValue(100n);
 
       const bulkPayOutSpy = vi
         .spyOn(escrowClient.escrowContract, 'bulkPayOut')
@@ -1189,17 +1105,6 @@ describe('EscrowClient', () => {
         DEFAULT_TX_ID,
         {}
       );
-    });
-
-    test('should throw an error if bulkPayOut fails', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.abort.mockRejectedValueOnce(new Error());
-
-      await expect(escrowClient.abort(escrowAddress)).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({});
     });
 
     test('should successfully bulkPayOut escrow with transaction options', async () => {
@@ -1394,68 +1299,6 @@ describe('EscrowClient', () => {
     });
   });
 
-  describe('abort', () => {
-    test('should throw an error if escrowAddress is an invalid address', async () => {
-      const invalidAddress = FAKE_ADDRESS;
-
-      await expect(escrowClient.abort(invalidAddress)).rejects.toThrow(
-        ErrorInvalidEscrowAddressProvided
-      );
-    });
-
-    test('should throw an error if hasEscrow returns false', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
-
-      await expect(escrowClient.abort(escrowAddress)).rejects.toThrow(
-        ErrorEscrowAddressIsNotProvidedByFactory
-      );
-    });
-
-    test('should successfully abort escrow', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      const abortSpy = vi
-        .spyOn(escrowClient.escrowContract, 'abort')
-        .mockImplementation(() => ({
-          wait: vi.fn().mockResolvedValue(true),
-        }));
-
-      await escrowClient.abort(escrowAddress);
-
-      expect(abortSpy).toHaveBeenCalledWith({});
-    });
-
-    test('should throw an error if abort fails', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.abort.mockRejectedValueOnce(new Error());
-
-      await expect(escrowClient.abort(escrowAddress)).rejects.toThrow();
-
-      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({});
-    });
-
-    test('should successfully abort escrow with transaction options', async () => {
-      const escrowAddress = ethers.ZeroAddress;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      const abortSpy = vi
-        .spyOn(escrowClient.escrowContract, 'abort')
-        .mockImplementation(() => ({
-          wait: vi.fn().mockResolvedValue(true),
-        }));
-      const txOptions: Overrides = { gasLimit: 45000 };
-
-      await escrowClient.abort(escrowAddress, txOptions);
-
-      expect(abortSpy).toHaveBeenCalledWith(txOptions);
-    });
-  });
-
   describe('addTrustedHandlers', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const escrowAddress = FAKE_ADDRESS;
@@ -1558,6 +1401,183 @@ describe('EscrowClient', () => {
     });
   });
 
+  describe('withdraw', () => {
+    const escrowAddress = ethers.ZeroAddress;
+    const tokenAddress = ethers.ZeroAddress;
+
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidEscrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.withdraw(invalidEscrowAddress, tokenAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if tokenAddress is an invalid address', async () => {
+      const invalidTokenAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.withdraw(escrowAddress, invalidTokenAddress)
+      ).rejects.toThrow(ErrorInvalidTokenAddress);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.withdraw(escrowAddress, tokenAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully withdraw from escrow', async () => {
+      const amountWithdrawn = 1n;
+
+      const log = {
+        address: ethers.ZeroAddress,
+        name: 'Transfer',
+        args: [ethers.ZeroAddress, ethers.ZeroAddress, amountWithdrawn],
+      };
+      mockTx.wait.mockResolvedValueOnce({
+        hash: FAKE_HASH,
+        logs: [log],
+      });
+
+      const mockERC20FactoryContract = {
+        interface: {
+          parseLog: vi.fn().mockReturnValueOnce(log),
+        },
+      };
+
+      vi.spyOn(ERC20__factory, 'connect').mockReturnValue(
+        mockERC20FactoryContract as any
+      );
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.withdraw.mockResolvedValueOnce(mockTx);
+
+      const result = await escrowClient.withdraw(escrowAddress, tokenAddress);
+
+      expect(result).toStrictEqual({
+        amountWithdrawn,
+        tokenAddress,
+        txHash: FAKE_HASH,
+      });
+      expect(escrowClient.escrowContract.withdraw).toHaveBeenCalledWith(
+        tokenAddress,
+        {}
+      );
+    });
+
+    test('should throw an error if the withdraw fails', async () => {
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.withdraw.mockRejectedValueOnce(new Error());
+
+      await expect(
+        escrowClient.withdraw(escrowAddress, tokenAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.withdraw).toHaveBeenCalledWith(
+        tokenAddress,
+        {}
+      );
+    });
+
+    test('should throw an error if the wait fails', async () => {
+      mockTx.wait.mockRejectedValueOnce(new Error());
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.withdraw.mockResolvedValueOnce(mockTx);
+
+      await expect(
+        escrowClient.withdraw(escrowAddress, tokenAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.withdraw).toHaveBeenCalledWith(
+        tokenAddress,
+        {}
+      );
+    });
+
+    test('should throw an error if transfer event not found in transaction logs', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      mockTx.wait.mockResolvedValueOnce({
+        transactionHash: FAKE_HASH,
+        logs: [
+          {
+            address: ethers.ZeroAddress,
+            name: 'NotTransfer',
+            args: [ethers.ZeroAddress, ethers.ZeroAddress, undefined],
+          },
+        ],
+      });
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.withdraw.mockResolvedValueOnce(mockTx);
+
+      const mockERC20FactoryContract = {
+        interface: {
+          parseLog: vi.fn(),
+        },
+      };
+
+      vi.spyOn(ERC20__factory, 'connect').mockReturnValue(
+        mockERC20FactoryContract as any
+      );
+
+      await expect(
+        escrowClient.withdraw(escrowAddress, tokenAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.withdraw).toHaveBeenCalledWith(
+        tokenAddress,
+        {}
+      );
+    });
+
+    test('should successfully withdraw from escrow with transaction options', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const amountWithdrawn = 1n;
+
+      const log = {
+        address: ethers.ZeroAddress,
+        name: 'Transfer',
+        args: [ethers.ZeroAddress, ethers.ZeroAddress, amountWithdrawn],
+      };
+      mockTx.wait.mockResolvedValueOnce({
+        hash: FAKE_HASH,
+        logs: [log],
+      });
+
+      const mockERC20FactoryContract = {
+        interface: {
+          parseLog: vi.fn().mockReturnValueOnce(log),
+        },
+      };
+
+      vi.spyOn(ERC20__factory, 'connect').mockReturnValue(
+        mockERC20FactoryContract as any
+      );
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.withdraw.mockResolvedValueOnce(mockTx);
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      const result = await escrowClient.withdraw(
+        escrowAddress,
+        tokenAddress,
+        txOptions
+      );
+
+      expect(result).toStrictEqual({
+        amountWithdrawn,
+        tokenAddress,
+        txHash: FAKE_HASH,
+      });
+      expect(escrowClient.escrowContract.withdraw).toHaveBeenCalledWith(
+        tokenAddress,
+        txOptions
+      );
+    });
+  });
+
   describe('getBalance', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const escrowAddress = FAKE_ADDRESS;
@@ -1582,6 +1602,9 @@ describe('EscrowClient', () => {
       const amount = 100n;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.remainingFunds.mockRejectedValueOnce(
+        new Error()
+      );
       escrowClient.escrowContract.getBalance.mockReturnValue(amount);
 
       const balance = await escrowClient.getBalance(escrowAddress);
@@ -1594,11 +1617,27 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.ZeroAddress;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.remainingFunds.mockRejectedValueOnce(
+        new Error()
+      );
       escrowClient.escrowContract.getBalance.mockRejectedValueOnce(new Error());
 
       await expect(escrowClient.getBalance(escrowAddress)).rejects.toThrow();
 
       expect(escrowClient.escrowContract.getBalance).toHaveBeenCalledWith();
+    });
+
+    test('should successfully get balance of new escrow contracts', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const amount = 100n;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.remainingFunds.mockResolvedValueOnce(amount);
+
+      const balance = await escrowClient.getBalance(escrowAddress);
+
+      expect(balance).toEqual(amount);
+      expect(escrowClient.escrowContract.remainingFunds).toHaveBeenCalledWith();
     });
   });
 

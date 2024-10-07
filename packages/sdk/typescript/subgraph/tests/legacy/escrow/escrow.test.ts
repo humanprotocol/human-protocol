@@ -89,6 +89,7 @@ describe('Escrow', () => {
     escrow.token = Address.zero();
     escrow.factoryAddress = Address.zero();
     escrow.launcher = launcherAddress;
+    escrow.canceler = launcherAddress;
     escrow.count = ZERO_BI;
     escrow.balance = BigInt.fromI32(100);
     escrow.totalFundedAmount = BigInt.fromI32(100);
@@ -113,27 +114,32 @@ describe('Escrow', () => {
 
     const id = toEventId(newPending1).toHex();
 
-    // SetupEvent
+    // PendingEvent
     assert.fieldEquals(
-      'SetupEvent',
+      'PendingEvent',
       id,
       'block',
       newPending1.block.number.toString()
     );
     assert.fieldEquals(
-      'SetupEvent',
+      'PendingEvent',
       id,
       'timestamp',
       newPending1.block.timestamp.toString()
     );
     assert.fieldEquals(
-      'SetupEvent',
+      'PendingEvent',
       id,
       'txHash',
       newPending1.transaction.hash.toHex()
     );
-    assert.fieldEquals('SetupEvent', id, 'escrowAddress', escrowAddressString);
-    assert.fieldEquals('SetupEvent', id, 'sender', operatorAddressString);
+    assert.fieldEquals(
+      'PendingEvent',
+      id,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals('PendingEvent', id, 'sender', operatorAddressString);
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
@@ -437,12 +443,6 @@ describe('Escrow', () => {
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID.toHex(),
-        'setupEventCount',
-        '2'
-      );
-      assert.fieldEquals(
-        'EscrowStatistics',
-        STATISTICS_ENTITY_ID.toHex(),
         'pendingStatusEventCount',
         '2'
       );
@@ -488,7 +488,6 @@ describe('Escrow', () => {
 
       [
         'fundEventCount',
-        'setupEventCount',
         'bulkPayoutEventCount',
         'pendingStatusEventCount',
         'cancelledStatusEventCount',
@@ -524,6 +523,7 @@ describe('Escrow', () => {
       escrow.token = Address.zero();
       escrow.factoryAddress = Address.zero();
       escrow.launcher = Address.zero();
+      escrow.canceler = Address.zero();
       escrow.count = ZERO_BI;
       escrow.balance = BigInt.fromI32(100);
       escrow.totalFundedAmount = BigInt.fromI32(100);
@@ -570,7 +570,6 @@ describe('Escrow', () => {
 
       [
         'fundEventCount',
-        'setupEventCount',
         'storeResultsEventCount',
         'pendingStatusEventCount',
         'cancelledStatusEventCount',

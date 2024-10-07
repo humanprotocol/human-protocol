@@ -92,7 +92,9 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 The Runner object to interact with the Ethereum network
 
-• **networkData**: `NetworkData`
+• **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
+
+The network information required to connect to the KVStore contract
 
 #### Returns
 
@@ -104,13 +106,13 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
 
 ## Properties
 
 ### networkData
 
-> **networkData**: `NetworkData`
+> **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
 #### Inherited from
 
@@ -118,7 +120,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -132,7 +134,7 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -182,7 +184,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
 
 ***
 
@@ -234,7 +236,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
+[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
 
 ***
 
@@ -283,7 +285,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 
 #### Defined in
 
-[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
+[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
 
 ***
 
@@ -315,4 +317,4 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/11c280a968c4e19e21e43f468baa71bfd0766e56/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
+[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)

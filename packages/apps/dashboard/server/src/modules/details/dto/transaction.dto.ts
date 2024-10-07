@@ -2,6 +2,12 @@ import { Expose, Transform } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export interface Transfer {
+  from: string;
+  to: string;
+  value: string;
+}
+
 export class TransactionPaginationDto {
   @ApiProperty({ example: 12345 })
   @Transform(({ value }) => Number(value))
@@ -41,4 +47,11 @@ export class TransactionPaginationDto {
   @IsString()
   @Expose()
   public method: string;
+
+  @ApiProperty({
+    type: [Object],
+    description: 'List of transfers associated with the transaction',
+  })
+  @Expose()
+  public transfers: Transfer[];
 }

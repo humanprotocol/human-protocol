@@ -69,3 +69,7 @@ export class RegisterWorkerResponse {
   email: string;
   wallet_address: string;
 }
+
+export class RegisteredOraclesResponse {
+  oracle_addresses: string[];
+}

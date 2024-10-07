@@ -368,3 +368,4 @@ class KVStoreKeys(Enum):
     url = "url"
     job_types = "job_types"
     registration_needed = "registration_needed"
+    registration_instructions = "registration_instructions"

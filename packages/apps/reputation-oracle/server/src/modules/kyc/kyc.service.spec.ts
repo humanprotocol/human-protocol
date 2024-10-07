@@ -245,6 +245,9 @@ describe('Kyc Service', () => {
 
     it('Should update the Kyc status of the user', async () => {
       jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
+      jest
+        .spyOn(kycRepository, 'findOneBySessionId')
+        .mockResolvedValue({} as any);
 
       await kycService.updateKycStatus(mockKycUpdate);
 

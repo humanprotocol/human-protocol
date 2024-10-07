@@ -14,3 +14,5 @@ both the contracts and subgraph.
     * [`TransactionUtils.get_transaction()`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils.get_transaction)
     * [`TransactionUtils.get_transactions()`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils.get_transactions)
   * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
+  * [`Transfer`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.Transfer)
+    * [`Transfer.__init__()`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.Transfer.__init__)

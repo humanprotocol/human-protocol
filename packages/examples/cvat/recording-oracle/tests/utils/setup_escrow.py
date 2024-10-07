@@ -25,10 +25,17 @@ def create_escrow(web3: Web3):
     escrow_client = EscrowClient(web3)
     staking_client.approve_stake(amount)
     staking_client.stake(amount)
-    return escrow_client.create_and_setup_escrow(
+    return escrow_client.create_escrow(
         token_address=NETWORKS[ChainId.LOCALHOST]["hmt_address"],
         trusted_handlers=[web3.eth.default_account],
         job_requester_id=JOB_REQUESTER_ID,
+    )
+
+
+def setup_escrow(web3: Web3, escrow_address: str):
+    escrow_client = EscrowClient(web3)
+    escrow_client.setup(
+        escrow_address=escrow_address,
         escrow_config=EscrowConfig(
             exchange_oracle_address=EXCHANGE_ORACLE_ADDRESS,
             exchange_oracle_fee=EXCHANGE_ORACLE_FEE,

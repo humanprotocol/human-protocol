@@ -93,13 +93,13 @@ export class DetailsService {
       skip,
     });
     const result = transactions.map((transaction) => {
-      const transcationPaginationObject: TransactionPaginationDto =
+      const transactionPaginationObject: TransactionPaginationDto =
         plainToInstance(
           TransactionPaginationDto,
           { ...transaction, currentAddress: address },
           { excludeExtraneousValues: true },
         );
-      return transcationPaginationObject;
+      return transactionPaginationObject;
     });
 
     return result;

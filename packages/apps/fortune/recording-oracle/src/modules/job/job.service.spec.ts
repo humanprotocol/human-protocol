@@ -53,9 +53,7 @@ jest.mock('minio', () => {
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-    })),
+    build: jest.fn().mockImplementation(() => ({})),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
     downloadFileFromUrl: jest.fn().mockResolvedValue(

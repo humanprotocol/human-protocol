@@ -103,7 +103,7 @@ export class KVStoreClient extends BaseEthersClient {
    * **KVStoreClient constructor**
    *
    * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {NetworkData} network - The network information required to connect to the KVStore contract
+   * @param {NetworkData} networkData - The network information required to connect to the KVStore contract
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);

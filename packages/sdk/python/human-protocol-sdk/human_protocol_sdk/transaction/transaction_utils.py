@@ -33,6 +33,13 @@ from human_protocol_sdk.filter import TransactionFilter
 from human_protocol_sdk.utils import get_data_from_subgraph
 
 
+class Transfer:
+    def __init__(self, from_address: str, to_address: str, value: str):
+        self.from_address = from_address
+        self.to_address = to_address
+        self.value = value
+
+
 class TransactionData:
     def __init__(
         self,
@@ -44,6 +51,7 @@ class TransactionData:
         timestamp: int,
         value: str,
         method: str,
+        transfers: list[Transfer],  # Aquí añadimos la lista de transfers
     ):
         self.chain_id = chain_id
         self.block = block
@@ -53,6 +61,7 @@ class TransactionData:
         self.timestamp = timestamp
         self.value = value
         self.method = method
+        self.transfers = transfers
 
 
 class TransactionUtilsError(Exception):
@@ -120,6 +129,7 @@ class TransactionUtils:
             timestamp=transaction.get("timestamp", 0),
             value=transaction.get("value", ""),
             method=transaction.get("method", ""),
+            transfers=transaction.get("transfers", []),
         )
 
     @staticmethod
@@ -197,6 +207,7 @@ class TransactionUtils:
                     timestamp=transaction.get("timestamp", 0),
                     value=transaction.get("value", ""),
                     method=transaction.get("method", ""),
+                    transfers=transaction.get("transfers", []),
                 )
                 for transaction in transactions_raw
             ]

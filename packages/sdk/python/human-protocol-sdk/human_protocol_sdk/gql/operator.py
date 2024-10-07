@@ -12,15 +12,19 @@ fragment LeaderFields on Leader {
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
-    reputation
     reward
     amountJobsProcessed
     role
     fee
     publicKey
     webhookUrl
-    url,
+    url
     jobTypes
+    registrationNeeded
+    registrationInstructions
+    reputationNetworks {
+      address
+    }
 }
 """
 
@@ -72,7 +76,10 @@ query getReputationNetwork(
       address,
       role,
       url,
-      jobTypes
+      jobTypes,
+      registrationNeeded,
+      registrationInstructions
+
     }}
   }}
 }}
