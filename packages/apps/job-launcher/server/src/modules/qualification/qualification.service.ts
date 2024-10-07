@@ -5,8 +5,8 @@ import { HttpService } from '@nestjs/axios';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
-import { KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ChainId, KVStoreKeys, KVStoreUtils } from '@human-protocol/sdk';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class QualificationService {
@@ -15,16 +15,20 @@ export class QualificationService {
   constructor(
     private httpService: HttpService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly networkConfigService: NetworkConfigService,
+    private readonly web3Service: Web3Service,
   ) {}
 
-  public async getQualifications(): Promise<QualificationDto[]> {
+  public async getQualifications(
+    chainId: ChainId,
+  ): Promise<QualificationDto[]> {
     try {
       let reputationOracleUrl = '';
 
+      this.web3Service.validateChainId(chainId);
+
       try {
         reputationOracleUrl = await KVStoreUtils.get(
-          this.networkConfigService.networks[0].chainId,
+          chainId,
           this.web3ConfigService.reputationOracleAddress,
           KVStoreKeys.url,
         );

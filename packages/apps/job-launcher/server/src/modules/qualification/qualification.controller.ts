@@ -1,13 +1,15 @@
-import { Controller, Get, HttpCode, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
   ApiResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { QualificationService } from './qualification.service';
 import { QualificationDto } from './qualification.dto';
 import { JwtAuthGuard } from '../../common/guards';
+import { ChainId } from '@human-protocol/sdk';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -21,8 +23,20 @@ export class QualificationController {
   @ApiOperation({
     summary: 'Get list of qualifications from Reputation Oracle',
   })
-  @ApiResponse({ status: 200, description: 'List of qualifications' })
-  getQualifications(): Promise<QualificationDto[]> {
-    return this.qualificationService.getQualifications();
+  @ApiResponse({
+    status: 200,
+    description: 'List of qualifications',
+    type: [QualificationDto],
+  })
+  @ApiQuery({
+    name: 'chainId',
+    required: true,
+    type: String,
+    description: 'The chain ID to get qualifications',
+  })
+  getQualifications(
+    @Query('chainId') chainId: ChainId,
+  ): Promise<QualificationDto[]> {
+    return this.qualificationService.getQualifications(chainId);
   }
 }
