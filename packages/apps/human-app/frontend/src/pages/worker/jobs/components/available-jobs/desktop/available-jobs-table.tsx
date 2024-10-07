@@ -125,6 +125,7 @@ const getColumns = (callbacks: {
     },
     {
       accessorKey: 'escrow_address',
+      id: 'selectJobAction',
       header: '',
       size: 100,
       enableSorting: false,

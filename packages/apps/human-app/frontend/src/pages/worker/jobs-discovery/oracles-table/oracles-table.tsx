@@ -43,6 +43,7 @@ const getColumns = (
     },
     {
       accessorKey: 'url',
+      id: 'seeJobsAction',
       header: '',
       size: 100,
       enableSorting: false,
