@@ -45,11 +45,20 @@ export class OracleDiscoveryService {
     address: string,
     selectedJobTypes: string[] | undefined,
   ): Promise<OracleDiscoveryResponse[]> {
+    const jobTypesKey =
+      selectedJobTypes && selectedJobTypes.length > 0
+        ? selectedJobTypes.join(',')
+        : 'all';
+
+    const cacheKey = `${chainId}-${jobTypesKey}`;
+
     const receivedOracles: OracleDiscoveryResponse[] | undefined =
-      await this.cacheManager.get(chainId);
+      await this.cacheManager.get(cacheKey);
+
     if (receivedOracles) {
       return receivedOracles;
     }
+
     try {
       const operators: IOperator[] =
         await OperatorUtils.getReputationNetworkOperators(
@@ -69,22 +78,25 @@ export class OracleDiscoveryService {
           ),
       );
 
-      // Filter based on selected job types, and cache the result
       const filteredOracles = this.filterOracles(
         oraclesWithRetryData,
         selectedJobTypes,
       );
+
       await this.cacheManager.set(
-        chainId,
+        cacheKey,
         filteredOracles,
         this.configService.cacheTtlOracleDiscovery,
       );
+
       return filteredOracles;
     } catch (error) {
       this.logger.error(`Error processing chainId ${chainId}:`, error);
     }
+
     return [];
   }
+
   private filterOracles(
     foundOracles: OracleDiscoveryResponse[] | undefined,
     selectedJobTypes: string[] | undefined,

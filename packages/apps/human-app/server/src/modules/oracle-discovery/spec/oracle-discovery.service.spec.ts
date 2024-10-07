@@ -126,9 +126,10 @@ describe('OracleDiscoveryService', () => {
 
     expect(result).toEqual([mockData[0]]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
-      expect(cacheManager.get).toHaveBeenCalledWith(chainId);
+      const cacheKey = `${chainId}-all`;
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(cacheManager.set).toHaveBeenCalledWith(
-        chainId,
+        cacheKey,
         [mockData[0]],
         TTL,
       );
@@ -188,7 +189,8 @@ describe('OracleDiscoveryService', () => {
 
     expect(result).toEqual([]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
-      expect(cacheManager.get).toHaveBeenCalledWith(chainId);
+      const cacheKey = `${chainId}-all`;
+      expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
     });
   });
 
