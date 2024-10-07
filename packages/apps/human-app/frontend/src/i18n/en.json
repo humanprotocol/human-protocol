@@ -197,9 +197,7 @@
       "emailNotifications": "Email Notifications",
       "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
-        "noKYC": "Please set up your profile by completing the steps below.",
-        "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
-        "registerAddress": "Register Address"
+        "completeSteps": "Please set up your profile by completing the steps below."
       }
     },
     "oraclesTable": {
