@@ -1,9 +1,9 @@
 import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 import { colorPalette } from '@assets/styles/color-palette';
+import CustomTooltip from '@components/CustomTooltip';
 
 const TitleSectionWrapper = ({
 	title,
@@ -31,13 +31,13 @@ const TitleSectionWrapper = ({
 					direction="row"
 					alignItems="center"
 				>
-					<Tooltip title={tooltip.description}>
+					<CustomTooltip title={tooltip.description}>
 						<IconButton
 							sx={{ padding: 0, paddingRight: 1, color: colorPalette.fog.main }}
 						>
 							<HelpOutlineIcon fontSize="small" />
 						</IconButton>
-					</Tooltip>
+					</CustomTooltip>
 					<Typography variant="subtitle2">{title}</Typography>
 				</Stack>
 			) : (

@@ -4,12 +4,16 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { colorPalette } from '@assets/styles/color-palette';
+import CustomTooltip from '@components/CustomTooltip';
+import { useState } from 'react';
 
 interface ClipboardProps {
 	value: string;
 }
 
 const Clipboard = ({ value }: ClipboardProps) => {
+	const [tooltipOpen, setTooltipOpen] = useState(false);
+
 	return (
 		<Card
 			sx={{
@@ -34,19 +38,26 @@ const Clipboard = ({ value }: ClipboardProps) => {
 				>
 					{value}
 				</Typography>
+
 				<IconButton
 					onClick={() => {
 						navigator.clipboard.writeText(value);
+						setTooltipOpen(true);
+						setTimeout(() => {
+							setTooltipOpen(false);
+						}, 1500);
 					}}
 					sx={{
 						p: 0,
 					}}
 				>
-					<ContentCopyIcon
-						sx={{
-							color: colorPalette.fog.main,
-						}}
-					/>
+					<CustomTooltip title="Copied!" arrow open={tooltipOpen}>
+						<ContentCopyIcon
+							sx={{
+								color: colorPalette.fog.main,
+							}}
+						/>
+					</CustomTooltip>
 				</IconButton>
 			</Stack>
 		</Card>

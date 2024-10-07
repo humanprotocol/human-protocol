@@ -4,9 +4,10 @@ import abbreviateValue from '@helpers/abbreviateValue';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { colorPalette } from '@assets/styles/color-palette';
-import { Link, Tooltip } from '@mui/material';
+import { Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import CustomTooltip from '@components/CustomTooltip';
 
 interface AbbreviateClipboardProps {
 	value: string;
@@ -48,14 +49,14 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
 					p: 0,
 				}}
 			>
-				<Tooltip title="Copied!" arrow open={tooltipOpen}>
+				<CustomTooltip title="Copied!" arrow open={tooltipOpen}>
 					<ContentCopyIcon
 						fontSize="small"
 						sx={{
 							color: colorPalette.fog.main,
 						}}
 					/>
-				</Tooltip>
+				</CustomTooltip>
 			</IconButton>
 		</Stack>
 	);

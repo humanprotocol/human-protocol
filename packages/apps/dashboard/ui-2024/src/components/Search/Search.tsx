@@ -196,7 +196,13 @@ const Search: FC<{
 							>
 								{networks.map((network) => (
 									<MenuItem key={network.name} value={network.id}>
-										<Grid sx={{ display: 'flex', gap: '8px' }}>
+										<Grid
+											sx={{
+												display: 'flex',
+												gap: '8px',
+												svg: { width: '24px', height: '24px' },
+											}}
+										>
 											<NetworkIcon chainId={network.id} /> {network.name}
 										</Grid>
 									</MenuItem>

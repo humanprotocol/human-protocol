@@ -19,19 +19,13 @@ export const StyledToggleButtonGroup = styled(ToggleButtonGroup)({
 });
 
 const ToggleButtons = () => {
-	const {
-		setTimePeriod,
-		selectedTimePeriod,
-		dateRangeParams,
-		effectiveFromAllTimeDate,
-	} = useGraphPageChartParams();
+	const { setTimePeriod, selectedTimePeriod, dateRangeParams } =
+		useGraphPageChartParams();
 
 	const checkIfSelected = (element: TimePeriod) => {
-		if (element.name !== 'ALL' || !effectiveFromAllTimeDate) {
+		if (element.name !== 'ALL') {
 			return element.value.isSame(dateRangeParams.from);
 		}
-
-		return dateRangeParams.from.isSame(effectiveFromAllTimeDate);
 	};
 
 	return (
