@@ -167,9 +167,9 @@ export const Table = ({
 								<TableCell
 									sx={{
 										justifyContent: 'flex-start',
-										px: '0.5rem',
+										px: '0.5rem !important',
 										[mobile.mediaQuery]: {
-											px: '1rem',
+											px: '1rem !important',
 											position: 'sticky',
 											left: 0,
 											zIndex: 2,
