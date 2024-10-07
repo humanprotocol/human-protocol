@@ -2,7 +2,12 @@ import { JobsDiscoveryService } from '../jobs-discovery.service';
 import { JobsDiscoveryController } from '../jobs-discovery.controller';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
-import { responseFixture } from './jobs-discovery.fixtures';
+import {
+  // jobsDiscoveryParamsCommandFixture,
+  // dtoFixture,
+  // jobDiscoveryToken,
+  responseFixture,
+} from './jobs-discovery.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
 import { JobsDiscoveryProfile } from '../jobs-discovery.mapper.profile';
@@ -13,6 +18,7 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
+  // let jobsDiscoveryService: JobsDiscoveryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,9 +54,22 @@ describe('JobsDiscoveryController', () => {
       .compile();
 
     controller = module.get<JobsDiscoveryController>(JobsDiscoveryController);
+    // jobsDiscoveryService =
+    //   module.get<JobsDiscoveryService>(JobsDiscoveryService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  // describe('processJobsDiscovery', () => {
+  //   it('should call service processJobsDiscovery method with proper fields set', async () => {
+  //     const dto = dtoFixture;
+  //     const command = jobsDiscoveryParamsCommandFixture;
+  //     await controller.getJobs(dto, jobDiscoveryToken);
+  //     expect(jobsDiscoveryService.processJobsDiscovery).toHaveBeenCalledWith(
+  //       command,
+  //     );
+  //   });
+  // });
 });
