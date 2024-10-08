@@ -30,7 +30,7 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { RateService } from './rate.service';
-import { WhitelistAuthGuard } from 'src/common/guards/whitelist.auth';
+// import { WhitelistAuthGuard } from 'src/common/guards/whitelist.auth';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -129,7 +129,7 @@ export class PaymentController {
     status: 409,
     description: 'Conflict. Conflict with the current state of the server.',
   })
-  @UseGuards(WhitelistAuthGuard)
+  // @UseGuards(WhitelistAuthGuard)
   @Post('/crypto')
   public async createCryptoPayment(
     @Headers(HEADER_SIGNATURE_KEY) signature: string,
