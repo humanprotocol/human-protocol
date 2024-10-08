@@ -4,12 +4,12 @@ import { classes } from '@automapper/classes';
 import { OracleDiscoveryController } from '../oracle-discovery.controller';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryDto,
-  OracleDiscoveryResponse,
-} from '../model/oracle-discovery.model';
-import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
+// import {
+//   OracleDiscoveryCommand,
+//   OracleDiscoveryDto,
+//   OracleDiscoveryResponse,
+// } from '../model/oracle-discovery.model';
+// import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper.profile';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
@@ -17,7 +17,7 @@ import { ConfigModule } from '@nestjs/config';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
-  let serviceMock: OracleDiscoveryService;
+  // let serviceMock: OracleDiscoveryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,7 +45,7 @@ describe('OracleDiscoveryController', () => {
     controller = module.get<OracleDiscoveryController>(
       OracleDiscoveryController,
     );
-    serviceMock = module.get<OracleDiscoveryService>(OracleDiscoveryService);
+    // serviceMock = module.get<OracleDiscoveryService>(OracleDiscoveryService);
   });
 
   it('should be defined', () => {

@@ -35,7 +35,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Redis Data
-./redis_data
+/redis_data
 
 .env.development
 .env.production

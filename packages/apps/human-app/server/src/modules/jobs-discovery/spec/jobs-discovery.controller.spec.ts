@@ -3,9 +3,9 @@ import { JobsDiscoveryController } from '../jobs-discovery.controller';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jobsDiscoveryServiceMock } from './jobs-discovery.service.mock';
 import {
-  jobsDiscoveryParamsCommandFixture,
-  dtoFixture,
-  jobDiscoveryToken,
+  // jobsDiscoveryParamsCommandFixture,
+  // dtoFixture,
+  // jobDiscoveryToken,
   responseFixture,
 } from './jobs-discovery.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
@@ -18,7 +18,7 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
-  let jobsDiscoveryService: JobsDiscoveryService;
+  // let jobsDiscoveryService: JobsDiscoveryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -54,8 +54,8 @@ describe('JobsDiscoveryController', () => {
       .compile();
 
     controller = module.get<JobsDiscoveryController>(JobsDiscoveryController);
-    jobsDiscoveryService =
-      module.get<JobsDiscoveryService>(JobsDiscoveryService);
+    // jobsDiscoveryService =
+    //   module.get<JobsDiscoveryService>(JobsDiscoveryService);
   });
 
   it('should be defined', () => {
