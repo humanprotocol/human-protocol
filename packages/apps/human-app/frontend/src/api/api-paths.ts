@@ -1,28 +1,22 @@
 export const apiPaths = {
   test: {
     path: '/test',
-    withAuthRetry: false,
   },
   worker: {
     signIn: {
       path: '/auth/signin',
-      withAuthRetry: false,
     },
     signUp: {
       path: '/auth/signup',
-      withAuthRetry: false,
     },
     obtainAccessToken: {
       path: '/auth/refresh',
-      withAuthRetry: false,
     },
     sendResetLink: {
       path: '/password-reset/forgot-password',
-      withAuthRetry: false,
     },
     resetPassword: {
       path: '/password-reset/restore-password',
-      withAuthRetry: false,
     },
     verifyEmail: {
       path: '/email-confirmation/email-verification',
@@ -38,7 +32,6 @@ export const apiPaths = {
     },
     oracles: {
       path: '/oracles',
-      withAuthRetry: false,
     },
     jobs: {
       path: '/jobs',
