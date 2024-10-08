@@ -88,7 +88,7 @@ export class JobAssignmentController {
   @Put('/refresh')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Request to resign from assigment',
+    summary: 'Request to refresh assigments data',
   })
   public async refreshAssigments(
     @Body() dto: RefreshJobDto,
