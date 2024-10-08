@@ -129,6 +129,7 @@ export class PaymentController {
     status: 409,
     description: 'Conflict. Conflict with the current state of the server.',
   })
+  // Disabled until billing system is active
   // @UseGuards(WhitelistAuthGuard)
   @Post('/crypto')
   public async createCryptoPayment(
