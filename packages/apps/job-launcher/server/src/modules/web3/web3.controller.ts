@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UsePipes } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { Web3Service } from './web3.service';
