@@ -68,7 +68,7 @@ class TokenAuthenticator:
 
         try:
             payload = jwt.decode(
-                token.credentials, Config.human_app_config.jwt_key, algorithms=["HS256"]
+                token.credentials, Config.human_app_config.jwt_key, algorithms=["ES256"]
             )
             return self._auth_data_class.model_validate(payload)
         except (jwt.PyJWTError, pydantic.ValidationError) as e:
