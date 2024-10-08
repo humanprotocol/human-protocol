@@ -1,13 +1,13 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Whitelist1728056930604 implements MigrationInterface {
-  name = 'Whitelist1728056930604';
+export class Whitelist1728374018070 implements MigrationInterface {
+  name = 'Whitelist1728374018070';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             CREATE TABLE "hmt"."whitelist" (
                 "id" SERIAL NOT NULL,
-                "user_id" integer,
+                "user_id" integer NOT NULL,
                 CONSTRAINT "REL_963f4d9041f735ed614cf1f3ac" UNIQUE ("user_id"),
                 CONSTRAINT "PK_0169bfbd49b0511243f7a068cec" PRIMARY KEY ("id")
             )
