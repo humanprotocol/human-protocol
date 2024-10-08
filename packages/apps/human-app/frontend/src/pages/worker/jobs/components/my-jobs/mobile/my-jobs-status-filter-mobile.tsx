@@ -5,7 +5,7 @@ import {
 } from '@/hooks/use-my-jobs-filter-store';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 
-export function MyJobsStatusFilter() {
+export function MyJobsStatusFilterMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
   return (

@@ -4,7 +4,7 @@ import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { JOB_TYPES } from '@/shared/consts';
 
-export function MyJobsJobTypeFilter() {
+export function MyJobsJobTypeFilterMobile() {
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
