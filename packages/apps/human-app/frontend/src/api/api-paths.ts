@@ -1,27 +1,28 @@
 export const apiPaths = {
   test: {
     path: '/test',
+    withAuthRetry: false,
   },
   worker: {
     signIn: {
       path: '/auth/signin',
-      withAuthRetry: true,
+      withAuthRetry: false,
     },
     signUp: {
       path: '/auth/signup',
-      withAuthRetry: true,
+      withAuthRetry: false,
     },
     obtainAccessToken: {
       path: '/auth/refresh',
-      withAuthRetry: true,
+      withAuthRetry: false,
     },
     sendResetLink: {
       path: '/password-reset/forgot-password',
-      withAuthRetry: true,
+      withAuthRetry: false,
     },
     resetPassword: {
       path: '/password-reset/restore-password',
-      withAuthRetry: true,
+      withAuthRetry: false,
     },
     verifyEmail: {
       path: '/email-confirmation/email-verification',
@@ -37,6 +38,7 @@ export const apiPaths = {
     },
     oracles: {
       path: '/oracles',
+      withAuthRetry: false,
     },
     jobs: {
       path: '/jobs',
@@ -75,15 +77,12 @@ export const apiPaths = {
     web3Auth: {
       prepareSignature: {
         path: '/prepare-signature',
-        withAuthRetry: true,
       },
       signUp: {
         path: '/auth/web3/signup',
-        withAuthRetry: true,
       },
       signIn: {
         path: '/auth/web3/signin',
-        withAuthRetry: true,
       },
       stats: {
         path: '/stats',
@@ -91,6 +90,7 @@ export const apiPaths = {
     },
     disableOperator: {
       path: '/disable-operator',
+      withAuthRetry: true,
     },
   },
 } as const;
