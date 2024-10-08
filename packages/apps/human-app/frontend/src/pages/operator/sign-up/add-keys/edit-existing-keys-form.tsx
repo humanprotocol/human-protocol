@@ -64,7 +64,10 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
     <MultiSelect
       label={t('operator.addKeysPage.existingKeys.jobType')}
       name={EthKVStoreKeys.JobTypes}
-      options={JOB_TYPES}
+      options={JOB_TYPES.map((jobType) => ({
+        label: t(`jobTypeLabels.${jobType}`),
+        value: jobType,
+      }))}
     />
   ),
 };

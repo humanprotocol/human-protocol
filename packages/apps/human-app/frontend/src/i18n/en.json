@@ -396,5 +396,12 @@
     "assistance": "These steps help us ensure the safety of your account and provide you with a better experience. Thank you for your understanding! For assistance, reach out on ",
     "discord": "Discord",
     "gotIt": "Got it!"
+  },
+  "jobTypeLabels": {
+    "FORTUNE": "Fortune",
+    "IMAGE_POINTS": "Points",
+    "IMAGE_BOXES": "Bounding Boxes",
+    "IMAGE_BOXES_FROM_POINTS": "Bounding Boxes from Points",
+    "IMAGE_SKELETONS_FROM_BOXES": "Skeletons from Bounding Boxes"
   }
 }
