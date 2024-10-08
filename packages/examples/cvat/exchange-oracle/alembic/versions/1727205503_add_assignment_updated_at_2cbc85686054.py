@@ -1,4 +1,4 @@
-"""add-assignment-updated-at
+"""Add assignment updated-at
 
 Revision ID: 2cbc85686054
 Revises: 0f3fb7bfcbcf
