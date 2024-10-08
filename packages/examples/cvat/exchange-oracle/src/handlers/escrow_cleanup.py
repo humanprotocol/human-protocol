@@ -9,10 +9,7 @@ from cvat_sdk.api_client.exceptions import NotFoundException
 import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
 from src.core.config import Config
-from src.core.storage import (
-    compose_data_bucket_prefix,
-    compose_results_bucket_prefix,
-)
+from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
 from src.log import get_logger_name
 from src.services.cloud.utils import BucketAccessInfo
 

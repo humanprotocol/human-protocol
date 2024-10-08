@@ -12,8 +12,8 @@ from src.chain import escrow
 from src.core.config import Config
 from src.core.manifest import TaskManifest, parse_manifest
 from src.core.oracle_events import (
-    RecordingOracleEvent_TaskCompleted,
-    RecordingOracleEvent_TaskRejected,
+    RecordingOracleEvent_JobCompleted,
+    RecordingOracleEvent_SubmissionRejected,
 )
 from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
@@ -122,6 +122,10 @@ class _TaskValidator:
     def _compose_validation_results_bucket_filename(self, filename: str) -> str:
         return f"{self.escrow_address}@{self.chain_id}/{filename}"
 
+    _LOW_QUALITY_REASON_MESSAGE_TEMPLATE = (
+        "Annotation quality ({}) is below the required threshold ({})"
+    )
+
     def _handle_validation_result(self, validation_result: ValidationResult):
         logger = self.logger
         escrow_address = self.escrow_address
@@ -167,41 +171,52 @@ class _TaskValidator:
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.reputation_oracle,
-                event=RecordingOracleEvent_TaskCompleted(),
+                event=RecordingOracleEvent_JobCompleted(),
             )
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
-                event=RecordingOracleEvent_TaskCompleted(),
+                event=RecordingOracleEvent_JobCompleted(),
             )
-        else:
+        elif isinstance(validation_result, ValidationFailure):
             error_type_counts = Counter(
                 type(e).__name__ for e in validation_result.rejected_jobs.values()
             )
             logger.info(
-                f"Validation for escrow_address={escrow_address}: failed, "
+                f"Validation for escrow_address={escrow_address} failed, "
                 f"rejected {len(validation_result.rejected_jobs)} jobs. "
                 f"Problems: {dict(error_type_counts)}"
             )
+
+            job_id_to_assignment_id = {
+                job_meta.job_id: job_meta.assignment_id for job_meta in self.annotation_meta.jobs
+            }
 
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
-                event=RecordingOracleEvent_TaskRejected(
-                    # TODO: update wrt. M2 API changes, send reason
-                    rejected_job_ids=[
-                        jid
-                        for jid, reason in validation_result.rejected_jobs.items()
-                        if not isinstance(
-                            reason, TooFewGtError
-                        )  # prevent such jobs from reannotation, can also be handled in ExcOr
+                event=RecordingOracleEvent_SubmissionRejected(
+                    # TODO: send all assignments, handle rejection reason in Exchange Oracle
+                    # change validation frames in these jobs once possible
+                    assignments=[
+                        RecordingOracleEvent_SubmissionRejected.RejectedAssignmentInfo(
+                            assignment_id=job_id_to_assignment_id[rejected_job_id],
+                            reason=self._LOW_QUALITY_REASON_MESSAGE_TEMPLATE.format(
+                                validation_result.job_results[rejected_job_id],
+                                self.manifest.validation.min_quality,
+                            ),
+                        )
+                        for rejected_job_id, reason in validation_result.rejected_jobs.items()
+                        if not isinstance(reason, TooFewGtError)
                     ]
                 ),
             )
+        else:
+            raise TypeError(f"Unexpected validation result {type(validation_result)=}")
 
 
 def validate_results(
