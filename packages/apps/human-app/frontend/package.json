@@ -59,7 +59,7 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@vercel/style-guide": "^5.2.0",
+    "@vercel/style-guide": "^6.0.0",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/ui": "^2.1.1",
     "eslint": "^8.55.0",
