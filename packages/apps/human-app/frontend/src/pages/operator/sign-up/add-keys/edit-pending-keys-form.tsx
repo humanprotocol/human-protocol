@@ -61,7 +61,7 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
       label={t('operator.addKeysPage.existingKeys.jobType')}
       name={EthKVStoreKeys.JobTypes}
       options={JOB_TYPES.map((jobType) => ({
-        label: t(`jobTypeLabels.${jobType}`),
+        label: jobType,
         value: jobType,
       }))}
     />
