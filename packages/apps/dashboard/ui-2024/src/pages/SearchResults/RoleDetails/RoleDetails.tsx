@@ -3,7 +3,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { colorPalette } from '@assets/styles/color-palette';
 import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
 import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
@@ -18,6 +17,7 @@ import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDe
 import { Reputation } from '@services/api/use-leaderboard-details';
 import { env } from '@helpers/env';
 import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
+import CustomTooltip from '@components/CustomTooltip';
 
 interface RoleInfoProps {
 	title: string;
@@ -268,7 +268,7 @@ const RoleDetails = ({
 							direction="row"
 							alignItems="center"
 						>
-							<Tooltip title="Reputation of the role as per their activities">
+							<CustomTooltip title="Reputation of the role as per their activities">
 								<IconButton
 									sx={{
 										padding: 0,
@@ -278,7 +278,7 @@ const RoleDetails = ({
 								>
 									<HelpOutlineIcon fontSize="small" />
 								</IconButton>
-							</Tooltip>
+							</CustomTooltip>
 							<Typography variant="subtitle2">Reputation Score</Typography>
 						</Stack>
 						{renderReputationTitle(reputation)}
