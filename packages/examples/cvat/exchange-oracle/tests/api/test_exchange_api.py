@@ -6,6 +6,8 @@ from itertools import combinations, product
 from unittest.mock import patch
 
 import jwt
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
 from fastapi.responses import Response
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -31,6 +33,25 @@ user_address = "0x86e83d346041E8806e352681f3F14549C0d2BC60"
 cvat_email = "test@hmt.ai"
 
 
+def generate_ecdsa_keys() -> tuple[str, str]:
+    private_key = ec.generate_private_key(ec.SECP256R1())
+    pem_private = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    pem_public = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    return pem_private.decode(), pem_public.decode()
+
+
+PRIVATE_KEY, PUBLIC_KEY = generate_ecdsa_keys()
+
+# Exchange Oracle doesn't have access to the private key
+Config.human_app_config.jwt_public_key = PUBLIC_KEY
+
+
 def generate_jwt_token(
     *,
     wallet_address: str | None = user_address,
@@ -41,7 +62,8 @@ def generate_jwt_token(
             **({"wallet_address": wallet_address} if wallet_address else {"role": "HUMAN_APP"}),
             "email": email,
         },
-        Config.human_app_config.jwt_key,
+        PRIVATE_KEY,
+        algorithm="ES256",
     )
 
 
