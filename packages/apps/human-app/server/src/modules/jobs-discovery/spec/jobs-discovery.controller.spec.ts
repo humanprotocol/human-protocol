@@ -88,7 +88,7 @@ describe('JobsDiscoveryController', () => {
     it('should throw an error if jobsDiscoveryFlag is disabled', async () => {
       const dto = dtoFixture;
       (configServiceMock as any).jobsDiscoveryFlag = false;
-      expect(
+      await expect(
         controller.getJobs(
           dto,
           { qualifications: [] } as any,
