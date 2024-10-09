@@ -15,7 +15,6 @@ import { HttpService } from '@nestjs/axios';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
-import { JwtUserData } from 'src/common/utils/jwt-token.model';
 
 describe('JobsDiscoveryController', () => {
   let controller: JobsDiscoveryController;
