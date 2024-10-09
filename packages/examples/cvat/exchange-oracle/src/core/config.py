@@ -244,6 +244,8 @@ class CoreConfig:
 
 
 class HumanAppConfig:
+    # jwt_public_key is obtained from the Human App.
+    # To generate a key pair for testing purposes:
     # openssl ecparam -name prime256v1 -genkey -noout -out ec_private.pem
     # openssl ec -in ec_private.pem -pubout -out ec_public.pem
     # HUMAN_APP_JWT_KEY=$(cat ec_public.pem)
