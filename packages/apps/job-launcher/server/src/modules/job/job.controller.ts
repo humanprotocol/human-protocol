@@ -79,7 +79,6 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
   ): Promise<number> {
-    console.log(data);
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
       MUTEX_TIMEOUT,

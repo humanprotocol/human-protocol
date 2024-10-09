@@ -1551,8 +1551,8 @@ export class JobService {
       specificManifestDetails = {
         requestType: manifest.annotation?.type,
         submissionsRequired: manifest.annotation?.job_size,
-        ...(manifest.annotation.qualifications &&
-          manifest.annotation.qualifications?.length > 0 && {
+        ...(manifest?.annotation?.qualifications &&
+          manifest?.annotation?.qualifications?.length > 0 && {
             qualifications: manifest.annotation.qualifications,
           }),
       };

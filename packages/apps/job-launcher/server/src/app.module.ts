@@ -24,6 +24,7 @@ import { ExceptionFilter } from './common/exceptions/exception.filter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { StatisticModule } from './modules/statistic/statistic.module';
 import { QualificationModule } from './modules/qualification/qualification.module';
+import { EnumTransformInterceptor } from './common/interceptors/enum-insensitive';
 
 @Module({
   providers: [
@@ -38,6 +39,10 @@ import { QualificationModule } from './modules/qualification/qualification.modul
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: EnumTransformInterceptor,
     },
     {
       provide: APP_FILTER,

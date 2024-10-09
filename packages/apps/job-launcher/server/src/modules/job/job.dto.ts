@@ -37,7 +37,6 @@ import {
 import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
-import { IsEnumInsensitive } from '../../common/decorators/enum-insensitive';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -81,8 +80,7 @@ export class JobQuickLaunchDto extends JobDto {
     name: 'request_type',
     enum: JobRequestType,
   })
-  @Transform(({ value }) => value.toUpperCase())
-  @IsEnumInsensitive(JobRequestType)
+  @IsEnum(JobRequestType)
   public requestType: JobRequestType;
 
   @ApiProperty({ name: 'manifest_url' })
@@ -121,20 +119,17 @@ export class JobFortuneDto extends JobDto {
   public fundAmount: number;
 
   @ApiProperty({ enum: JobCurrency })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsEnumInsensitive(JobCurrency)
+  @IsEnum(JobCurrency)
   public currency: JobCurrency;
 }
 
 export class StorageDataDto {
   @ApiProperty({ enum: StorageProviders })
-  @Transform(({ value }) => value.toUpperCase())
-  @IsEnumInsensitive(StorageProviders)
+  @IsEnum(StorageProviders)
   public provider: StorageProviders;
 
   @ApiProperty({ enum: AWSRegions })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsEnumInsensitive(AWSRegions)
+  @IsEnum(AWSRegions)
   public region: AWSRegions | null;
 
   @ApiProperty({ name: 'bucket_name' })
@@ -207,8 +202,7 @@ export class JobCvatDto extends JobDto {
   public userGuide: string;
 
   @ApiProperty({ enum: JobRequestType })
-  @Transform(({ value }) => value.toUpperCase())
-  @IsEnumInsensitive(JobRequestType)
+  @IsEnum(JobRequestType)
   public type: JobRequestType;
 
   @ApiProperty({ name: 'fund_amount' })
@@ -217,8 +211,7 @@ export class JobCvatDto extends JobDto {
   public fundAmount: number;
 
   @ApiProperty({ enum: JobCurrency })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsEnumInsensitive(JobCurrency)
+  @IsEnum(JobCurrency)
   public currency: JobCurrency;
 }
 
@@ -521,8 +514,7 @@ export class GetJobsDto extends PageOptionsDto {
     default: JobSortField.CREATED_AT,
   })
   @IsOptional()
-  @Transform(({ value }) => value.toLowerCase())
-  @IsEnumInsensitive(JobSortField)
+  @IsEnum(JobSortField)
   sortField?: JobSortField = JobSortField.CREATED_AT;
 
   @ApiPropertyOptional({

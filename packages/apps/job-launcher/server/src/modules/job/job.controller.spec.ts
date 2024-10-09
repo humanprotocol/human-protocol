@@ -20,7 +20,6 @@ import {
   MOCK_REQUESTER_TITLE,
 } from '../../../test/constants';
 import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
-import { Currency } from 'src/common/enums/payment';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -79,7 +78,7 @@ describe('JobController', () => {
   describe('quickLaunch', () => {
     it('should create a job and return job ID', async () => {
       const jobDto: JobQuickLaunchDto = {
-        requestType: 'TYPE_A' as JobRequestType,
+        requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         fundAmount: 500,
@@ -112,7 +111,7 @@ describe('JobController', () => {
 
     it('should throw a conflict error if mutex manager fails', async () => {
       const jobDto: JobQuickLaunchDto = {
-        requestType: 'TYPE_A' as JobRequestType,
+        requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         fundAmount: 500,
@@ -148,7 +147,7 @@ describe('JobController', () => {
 
     it('should return unauthorized error if user is not authenticated', async () => {
       const jobDto: JobQuickLaunchDto = {
-        requestType: 'TYPE_A' as JobRequestType,
+        requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         fundAmount: 500,

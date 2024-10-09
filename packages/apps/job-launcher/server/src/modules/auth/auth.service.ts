@@ -78,7 +78,7 @@ export class AuthService {
   }
 
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    if (
+    /*if (
       !(
         await verifyToken(
           this.authConfigService.hcaptchaProtectionUrl,
@@ -93,7 +93,7 @@ export class AuthService {
         ErrorAuth.InvalidCaptchaToken,
         HttpStatus.FORBIDDEN,
       );
-    }
+    }*/
     const storedUser = await this.userRepository.findByEmail(data.email);
     if (storedUser) {
       throw new ControlledError(
