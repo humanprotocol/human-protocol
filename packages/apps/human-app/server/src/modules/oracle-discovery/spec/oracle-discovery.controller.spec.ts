@@ -15,7 +15,6 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { any } from 'joi';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
