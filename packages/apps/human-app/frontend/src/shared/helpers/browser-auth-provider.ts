@@ -21,11 +21,11 @@ const browserAuthProvider: BrowserAuthProvider = {
     }
   },
   signOut(args) {
-    // browserAuthProvider.isAuthenticated = false;
-    // localStorage.removeItem(accessTokenKey);
-    // localStorage.removeItem(refreshTokenKey);
-    // localStorage.removeItem(authTypeKey);
-    // localStorage.removeItem(userDataKey);
+    browserAuthProvider.isAuthenticated = false;
+    localStorage.removeItem(accessTokenKey);
+    localStorage.removeItem(refreshTokenKey);
+    localStorage.removeItem(authTypeKey);
+    localStorage.removeItem(userDataKey);
 
     if (args?.callback) {
       args.callback();

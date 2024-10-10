@@ -1,22 +1,31 @@
 import type React from 'react';
 import { useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
-import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
-import { useAuth } from '@/auth/use-auth';
+import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
-export function JWTExpirationCheckForAppFirstRun({
+export function JWTExpirationCheckForFirstAppRun({
   children,
 }: {
   children: React.ReactElement[];
 }) {
-  const web3Auth = useWeb3Auth();
-  const web2Auth = useAuth();
   const { mutate: getAccessTokenMutation } = useGetAccessTokenMutation();
 
   useEffect(() => {
+    const accessToken = browserAuthProvider.getAccessToken();
+    const authType = browserAuthProvider.getAuthType();
+
+    if (!accessToken) {
+      browserAuthProvider.signOut({ triggerSignOutSubscriptions: false });
+      return;
+    }
+
+    const userData = jwtDecode(accessToken);
+
     const web3TokenExpired = Boolean(
-      web3Auth.user?.exp && web3Auth.user.exp < Date.now() / 1000
+      authType === 'web3' && userData.exp && userData.exp < Date.now() / 1000
     );
+
     if (web3TokenExpired) {
       getAccessTokenMutation({
         authType: 'web3',
@@ -25,8 +34,9 @@ export function JWTExpirationCheckForAppFirstRun({
     }
 
     const web2TokenExpired = Boolean(
-      web2Auth.user?.exp && web2Auth.user.exp < Date.now() / 1000
+      authType === 'web3' && userData.exp && userData.exp < Date.now() / 1000
     );
+
     if (web2TokenExpired) {
       getAccessTokenMutation({
         authType: 'web3',
