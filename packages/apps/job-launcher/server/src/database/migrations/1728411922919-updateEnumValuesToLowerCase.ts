@@ -6,7 +6,7 @@ export class UpdateEnumValuesToLowerCase1728411922919
   name = 'UpdateEnumValuesToLowerCase1728411922919';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Jobs Status Enum
+    // Jobs status Enum
     await queryRunner.query(`
         ALTER TYPE "hmt"."jobs_status_enum"
         RENAME TO "jobs_status_enum_old"
@@ -96,7 +96,7 @@ export class UpdateEnumValuesToLowerCase1728411922919
         DROP TYPE "hmt"."payments_source_enum_old";
       `);
 
-    // Payments Status Enum
+    // Payments status Enum
     await queryRunner.query(`
         ALTER TYPE "hmt"."payments_status_enum"
         RENAME TO "payments_status_enum_old";
@@ -134,7 +134,7 @@ export class UpdateEnumValuesToLowerCase1728411922919
         DROP TYPE "hmt"."users_type_enum_old";
       `);
 
-    // Users Status Enum
+    // Users status Enum
     await queryRunner.query(`
         ALTER TYPE "hmt"."users_status_enum"
         RENAME TO "users_status_enum_old";
@@ -153,7 +153,7 @@ export class UpdateEnumValuesToLowerCase1728411922919
         DROP TYPE "hmt"."users_status_enum_old";
       `);
 
-    // Jobs Request type enum
+    // Jobs request type enum
     await queryRunner.query(`
         ALTER TYPE "hmt"."jobs_request_type_enum"
         RENAME TO "jobs_request_type_enum_old";
@@ -179,160 +179,160 @@ export class UpdateEnumValuesToLowerCase1728411922919
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Jobs Status Enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."jobs_status_enum"
-    RENAME TO "jobs_status_enum_new"
-  `);
+        ALTER TYPE "hmt"."jobs_status_enum"
+        RENAME TO "jobs_status_enum_new"
+    `);
 
     await queryRunner.query(`
-    CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
-      'PENDING', 'PAID', 'CREATED', 'SET_UP', 'LAUNCHED', 
-      'PARTIAL', 'COMPLETED', 'FAILED', 'TO_CANCEL', 'CANCELED'
-    )
-  `);
+        CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
+        'PENDING', 'PAID', 'CREATED', 'SET_UP', 'LAUNCHED', 
+        'PARTIAL', 'COMPLETED', 'FAILED', 'TO_CANCEL', 'CANCELED'
+        )
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."jobs"
-    ALTER COLUMN "status" TYPE "hmt"."jobs_status_enum" USING "status"::"text"::"hmt"."jobs_status_enum";
-  `);
+        ALTER TABLE "hmt"."jobs"
+        ALTER COLUMN "status" TYPE "hmt"."jobs_status_enum" USING "status"::"text"::"hmt"."jobs_status_enum";
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."jobs_status_enum_new";
-  `);
+        DROP TYPE "hmt"."jobs_status_enum_new";
+    `);
 
     // Webhook Status Enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."webhook_status_enum"
-    RENAME TO "webhook_status_enum_new"
-  `);
+        ALTER TYPE "hmt"."webhook_status_enum"
+        RENAME TO "webhook_status_enum_new"
+    `);
 
     await queryRunner.query(`
-    CREATE TYPE "hmt"."webhook_status_enum" AS ENUM('PENDING', 'COMPLETED', 'FAILED')
-  `);
+        CREATE TYPE "hmt"."webhook_status_enum" AS ENUM('PENDING', 'COMPLETED', 'FAILED')
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."webhook"
-    ALTER COLUMN "status" TYPE "hmt"."webhook_status_enum" USING "status"::"text"::"hmt"."webhook_status_enum";
-  `);
+        ALTER TABLE "hmt"."webhook"
+        ALTER COLUMN "status" TYPE "hmt"."webhook_status_enum" USING "status"::"text"::"hmt"."webhook_status_enum";
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."webhook_status_enum_new";
-  `);
+        DROP TYPE "hmt"."webhook_status_enum_new";
+    `);
 
     // Payments type enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."payments_type_enum"
-    RENAME TO "payments_type_enum_new";
-  `);
+        ALTER TYPE "hmt"."payments_type_enum"
+        RENAME TO "payments_type_enum_new";
+    `);
 
     await queryRunner.query(`
-    CREATE TYPE "hmt"."payments_type_enum" AS ENUM('DEPOSIT', 'REFUND', 'WITHDRAWAL');
-  `);
+        CREATE TYPE "hmt"."payments_type_enum" AS ENUM('DEPOSIT', 'REFUND', 'WITHDRAWAL');
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."payments"
-    ALTER COLUMN "type" TYPE "hmt"."payments_type_enum" USING "type"::"text"::"hmt"."payments_type_enum";
-  `);
+        ALTER TABLE "hmt"."payments"
+        ALTER COLUMN "type" TYPE "hmt"."payments_type_enum" USING "type"::"text"::"hmt"."payments_type_enum";
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."payments_type_enum_new";
-  `);
+        DROP TYPE "hmt"."payments_type_enum_new";
+    `);
 
     // Payments Source Enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."payments_source_enum"
-    RENAME TO "payments_source_enum_new";
-  `);
+        ALTER TYPE "hmt"."payments_source_enum"
+        RENAME TO "payments_source_enum_new";
+    `);
 
     await queryRunner.query(`
-    CREATE TYPE "hmt"."payments_source_enum" AS ENUM('FIAT', 'CRYPTO', 'BALANCE');
-  `);
+        CREATE TYPE "hmt"."payments_source_enum" AS ENUM('FIAT', 'CRYPTO', 'BALANCE');
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."payments"
-    ALTER COLUMN "source" TYPE "hmt"."payments_source_enum" USING "source"::"text"::"hmt"."payments_source_enum";
-  `);
+        ALTER TABLE "hmt"."payments"
+        ALTER COLUMN "source" TYPE "hmt"."payments_source_enum" USING "source"::"text"::"hmt"."payments_source_enum";
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."payments_source_enum_new";
-  `);
+        DROP TYPE "hmt"."payments_source_enum_new";
+    `);
 
-    // Payments Status Enum
+    // Payments status Enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."payments_status_enum"
-    RENAME TO "payments_status_enum_new";
-  `);
-
-    await queryRunner.query(`
-    CREATE TYPE "hmt"."payments_status_enum" AS ENUM('PENDING', 'FAILED', 'SUCCEEDED');
-  `);
+        ALTER TYPE "hmt"."payments_status_enum"
+        RENAME TO "payments_status_enum_new";
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."payments"
-    ALTER COLUMN "status" TYPE "hmt"."payments_status_enum" USING "status"::"text"::"hmt"."payments_status_enum";
-  `);
+        CREATE TYPE "hmt"."payments_status_enum" AS ENUM('PENDING', 'FAILED', 'SUCCEEDED');
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."payments_status_enum_new";
-  `);
+        ALTER TABLE "hmt"."payments"
+        ALTER COLUMN "status" TYPE "hmt"."payments_status_enum" USING "status"::"text"::"hmt"."payments_status_enum";
+    `);
+
+    await queryRunner.query(`
+        DROP TYPE "hmt"."payments_status_enum_new";
+    `);
 
     // Users type enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."users_type_enum"
-    RENAME TO "users_type_enum_new";
-  `);
+        ALTER TYPE "hmt"."users_type_enum"
+        RENAME TO "users_type_enum_new";
+    `);
 
     await queryRunner.query(`
-    CREATE TYPE "hmt"."users_type_enum" AS ENUM('OPERATOR', 'REQUESTER');
-  `);
+        CREATE TYPE "hmt"."users_type_enum" AS ENUM('OPERATOR', 'REQUESTER');
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."users"
-    ALTER COLUMN "type" TYPE "hmt"."users_type_enum" USING "type"::"text"::"hmt"."users_type_enum";
-  `);
+        ALTER TABLE "hmt"."users"
+        ALTER COLUMN "type" TYPE "hmt"."users_type_enum" USING "type"::"text"::"hmt"."users_type_enum";
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."users_type_enum_new";
-  `);
+        DROP TYPE "hmt"."users_type_enum_new";
+    `);
 
     // Users Status Enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."users_status_enum"
-    RENAME TO "users_status_enum_new";
-  `);
+        ALTER TYPE "hmt"."users_status_enum"
+        RENAME TO "users_status_enum_new";
+    `);
 
     await queryRunner.query(`
-    CREATE TYPE "hmt"."users_status_enum" AS ENUM('ACTIVE', 'INACTIVE', 'PENDING');
-  `);
+        CREATE TYPE "hmt"."users_status_enum" AS ENUM('ACTIVE', 'INACTIVE', 'PENDING');
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."users"
-    ALTER COLUMN "status" TYPE "hmt"."users_status_enum" USING "status"::"text"::"hmt"."users_status_enum";
-  `);
+        ALTER TABLE "hmt"."users"
+        ALTER COLUMN "status" TYPE "hmt"."users_status_enum" USING "status"::"text"::"hmt"."users_status_enum";
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."users_status_enum_new";
-  `);
+        DROP TYPE "hmt"."users_status_enum_new";
+    `);
 
-    // Jobs Request type enum
+    // Jobs request type enum
     await queryRunner.query(`
-    ALTER TYPE "hmt"."jobs_request_type_enum"
-    RENAME TO "jobs_request_type_enum_new";
-  `);
-
-    await queryRunner.query(`
-    CREATE TYPE "hmt"."jobs_request_type_enum" AS ENUM(
-      'IMAGE_POINTS', 'IMAGE_BOXES', 'IMAGE_BOXES_FROM_POINTS',
-      'IMAGE_SKELETONS_FROM_BOXES', 'HCAPTCHA', 'FORTUNE'
-    );
-  `);
+        ALTER TYPE "hmt"."jobs_request_type_enum"
+        RENAME TO "jobs_request_type_enum_new";
+    `);
 
     await queryRunner.query(`
-    ALTER TABLE "hmt"."jobs"
-    ALTER COLUMN "request_type" TYPE "hmt"."jobs_request_type_enum" USING "request_type"::"text"::"hmt"."jobs_request_type_enum";
-  `);
+        CREATE TYPE "hmt"."jobs_request_type_enum" AS ENUM(
+        'IMAGE_POINTS', 'IMAGE_BOXES', 'IMAGE_BOXES_FROM_POINTS',
+        'IMAGE_SKELETONS_FROM_BOXES', 'HCAPTCHA', 'FORTUNE'
+        );
+    `);
 
     await queryRunner.query(`
-    DROP TYPE "hmt"."jobs_request_type_enum_new";
-  `);
+        ALTER TABLE "hmt"."jobs"
+        ALTER COLUMN "request_type" TYPE "hmt"."jobs_request_type_enum" USING "request_type"::"text"::"hmt"."jobs_request_type_enum";
+    `);
+
+    await queryRunner.query(`
+        DROP TYPE "hmt"."jobs_request_type_enum_new";
+    `);
   }
 }
