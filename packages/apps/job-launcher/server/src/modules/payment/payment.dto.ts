@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
+import { IsNumber, IsString, Min } from 'class-validator';
 import { Currency } from '../../common/enums/payment';
 import { ChainId } from '@human-protocol/sdk';
+import { IsEnumWithMetadata } from '../../common/utils/enums';
 
 export class PaymentFiatConfirmDto {
   @ApiProperty({ name: 'payment_id' })
@@ -18,7 +19,7 @@ export class PaymentFiatCreateDto {
   @ApiProperty({
     enum: Currency,
   })
-  @IsEnum(Currency)
+  @IsEnumWithMetadata(Currency)
   public currency: Currency;
 }
 
@@ -27,7 +28,7 @@ export class PaymentCryptoCreateDto {
     enum: ChainId,
     name: 'chain_id',
   })
-  @IsEnum(ChainId)
+  @IsEnumWithMetadata(ChainId)
   public chainId: ChainId;
 
   @ApiProperty({ name: 'transaction_hash' })

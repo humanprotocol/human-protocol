@@ -5,25 +5,23 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { of } from 'rxjs';
-import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
+import { IsNumber, IsString, Min } from 'class-validator';
 import { JobStatus } from '../../common/enums/job';
 import { UserType } from '../../common/enums/user';
 import { ApiProperty } from '@nestjs/swagger';
-import { EnumMetadata } from '../utils/enums';
+import { IsEnumWithMetadata } from '../utils/enums';
 
 export class MockDto {
   @ApiProperty({
     enum: JobStatus,
   })
-  @IsEnum(JobStatus)
-  @EnumMetadata(JobStatus)
+  @IsEnumWithMetadata(JobStatus)
   public status: JobStatus;
 
   @ApiProperty({
     enum: UserType,
   })
-  @IsEnum(UserType)
-  @EnumMetadata(UserType)
+  @IsEnumWithMetadata(UserType)
   public userType: UserType;
 
   @ApiProperty()

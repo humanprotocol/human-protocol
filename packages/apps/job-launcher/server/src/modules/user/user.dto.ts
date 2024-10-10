@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Currency } from '../../common/enums/payment';
+import { IsEnumWithMetadata } from '../../common/utils/enums';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -31,7 +32,7 @@ export class UserUpdateDto {
   @ApiPropertyOptional({
     enum: UserStatus,
   })
-  @IsEnum(UserStatus)
+  @IsEnumWithMetadata(UserStatus)
   public status?: UserStatus;
 }
 

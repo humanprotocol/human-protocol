@@ -1,7 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsObject,
   IsString,
   IsBoolean,
@@ -9,7 +8,7 @@ import {
   IsEthereumAddress,
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
-
+import { IsEnumWithMetadata } from '../../common/utils/enums';
 export class FailedEventData {
   @ApiProperty()
   @IsString()
@@ -21,11 +20,11 @@ export type EventData = FailedEventData;
 
 export class WebhookDto {
   @ApiProperty()
-  @IsEnum(ChainId)
+  @IsEnumWithMetadata(ChainId)
   public chainId: ChainId;
 
   @ApiProperty()
-  @IsEnum(EventType)
+  @IsEnumWithMetadata(EventType)
   public eventType: EventType;
 
   @ApiProperty()
@@ -33,7 +32,7 @@ export class WebhookDto {
   public escrowAddress: string;
 
   @ApiProperty()
-  @IsEnum(OracleType)
+  @IsEnumWithMetadata(OracleType)
   public oracleType: OracleType;
 
   @ApiProperty()
@@ -43,7 +42,7 @@ export class WebhookDto {
 
 export class WebhookDataDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsEnum(ChainId)
+  @IsEnumWithMetadata(ChainId)
   public chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
@@ -52,7 +51,7 @@ export class WebhookDataDto {
   public escrowAddress: string;
 
   @ApiProperty({ enum: EventType, name: 'event_type' })
-  @IsEnum(EventType)
+  @IsEnumWithMetadata(EventType)
   public eventType: EventType;
 
   @ApiPropertyOptional({ name: 'event_data' })
