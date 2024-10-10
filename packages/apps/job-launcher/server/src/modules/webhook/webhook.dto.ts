@@ -8,7 +8,7 @@ import {
   IsEthereumAddress,
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
-import { IsEnumWithMetadata } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/utils/enums';
 export class FailedEventData {
   @ApiProperty()
   @IsString()
@@ -20,11 +20,11 @@ export type EventData = FailedEventData;
 
 export class WebhookDto {
   @ApiProperty()
-  @IsEnumWithMetadata(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   public chainId: ChainId;
 
   @ApiProperty()
-  @IsEnumWithMetadata(EventType)
+  @IsEnumCaseInsensitive(EventType)
   public eventType: EventType;
 
   @ApiProperty()
@@ -32,7 +32,7 @@ export class WebhookDto {
   public escrowAddress: string;
 
   @ApiProperty()
-  @IsEnumWithMetadata(OracleType)
+  @IsEnumCaseInsensitive(OracleType)
   public oracleType: OracleType;
 
   @ApiProperty()
@@ -42,7 +42,7 @@ export class WebhookDto {
 
 export class WebhookDataDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsEnumWithMetadata(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   public chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
@@ -51,7 +51,7 @@ export class WebhookDataDto {
   public escrowAddress: string;
 
   @ApiProperty({ enum: EventType, name: 'event_type' })
-  @IsEnumWithMetadata(EventType)
+  @IsEnumCaseInsensitive(EventType)
   public eventType: EventType;
 
   @ApiPropertyOptional({ name: 'event_data' })

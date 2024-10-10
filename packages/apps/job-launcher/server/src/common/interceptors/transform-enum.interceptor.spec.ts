@@ -9,19 +9,19 @@ import { IsNumber, IsString, Min } from 'class-validator';
 import { JobStatus } from '../../common/enums/job';
 import { UserType } from '../../common/enums/user';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnumWithMetadata } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../utils/enums';
 
 export class MockDto {
   @ApiProperty({
     enum: JobStatus,
   })
-  @IsEnumWithMetadata(JobStatus)
+  @IsEnumCaseInsensitive(JobStatus)
   public status: JobStatus;
 
   @ApiProperty({
     enum: UserType,
   })
-  @IsEnumWithMetadata(UserType)
+  @IsEnumCaseInsensitive(UserType)
   public userType: UserType;
 
   @ApiProperty()

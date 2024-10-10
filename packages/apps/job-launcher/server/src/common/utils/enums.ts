@@ -5,7 +5,7 @@ import {
 } from 'class-validator';
 import 'reflect-metadata';
 
-export function IsEnumWithMetadata(
+export function IsEnumCaseInsensitive(
   enumType: any,
   validationOptions?: ValidationOptions,
 ) {

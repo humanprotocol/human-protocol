@@ -4,7 +4,7 @@ import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Currency } from '../../common/enums/payment';
-import { IsEnumWithMetadata } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/utils/enums';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -32,7 +32,7 @@ export class UserUpdateDto {
   @ApiPropertyOptional({
     enum: UserStatus,
   })
-  @IsEnumWithMetadata(UserStatus)
+  @IsEnumCaseInsensitive(UserStatus)
   public status?: UserStatus;
 }
 

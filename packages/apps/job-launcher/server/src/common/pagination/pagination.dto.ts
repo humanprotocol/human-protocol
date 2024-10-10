@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional, Max, Min, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SortDirection } from '../enums/collection';
-import { IsEnumWithMetadata } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../utils/enums';
 
 export class PageDto<T> {
   @ApiProperty()
@@ -61,7 +61,7 @@ export abstract class PageOptionsDto {
   pageSize?: number = 5;
 
   @ApiPropertyOptional({ enum: SortDirection, default: SortDirection.ASC })
-  @IsEnumWithMetadata(SortDirection)
+  @IsEnumCaseInsensitive(SortDirection)
   @IsOptional()
   sort?: SortDirection = SortDirection.ASC;
 
