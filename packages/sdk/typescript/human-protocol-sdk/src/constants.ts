@@ -85,7 +85,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmfCCRC1cGKWuoRtaj2ZJKyaw97Ry15TbGiC4u3veTq8iX',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmfV43CMjRuzr4moz4t5f7eUuNaYb8Ycmpdt37vWRodetE',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
