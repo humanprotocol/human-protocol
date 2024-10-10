@@ -27,7 +27,7 @@ export function useKycStartMutation() {
         });
         return result;
       } catch (error) {
-        await getAccessTokenMutation('web2');
+        await getAccessTokenMutation({ authType: 'web2' });
         throw error;
       }
     },

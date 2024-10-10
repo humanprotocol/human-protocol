@@ -20,7 +20,7 @@ export function useDisableWeb3Operator() {
         },
       });
 
-      await mutateAsync('web3');
+      await mutateAsync({ authType: 'web3' });
       updateUserData({ status: 'INACTIVE' });
       return result;
     },

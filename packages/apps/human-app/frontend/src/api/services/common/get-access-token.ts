@@ -13,7 +13,13 @@ export function useGetAccessTokenMutation() {
   const { signIn: signInWeb3 } = useWeb3Auth();
 
   return useMutation({
-    mutationFn: async (authType: AuthType) => {
+    mutationFn: async ({
+      authType,
+      throwExpirationModalOnSignOut = true,
+    }: {
+      authType: AuthType;
+      throwExpirationModalOnSignOut?: boolean;
+    }) => {
       try {
         const refetchAccessTokenSuccess = await apiClient(
           apiPaths.worker.obtainAccessToken.path,
@@ -35,7 +41,9 @@ export function useGetAccessTokenMutation() {
           signInWeb3(refetchAccessTokenSuccess);
         }
       } catch (error) {
-        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+        browserAuthProvider.signOut({
+          triggerSignOutSubscriptions: throwExpirationModalOnSignOut,
+        });
       }
     },
     onSuccess: async () => {

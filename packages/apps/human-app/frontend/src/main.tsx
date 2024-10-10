@@ -19,6 +19,7 @@ import { WalletConnectProvider } from '@/contexts/wallet-connect';
 import { Web3AuthProvider } from '@/auth-web3/web3-auth-context';
 import { JWTExpirationCheck } from '@/contexts/jwt-expiration-check';
 import { HomePageStateProvider } from '@/contexts/homepage-state';
+import { JWTExpirationCheckForAppFirstRun } from '@/contexts/jwt-expiration-check-for-app-first-run';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -42,10 +43,12 @@ createRoot(root).render(
             <HomePageStateProvider>
               <Web3AuthProvider>
                 <AuthProvider>
-                  <DisplayModal />
-                  <JWTExpirationCheck>
-                    <Router />
-                  </JWTExpirationCheck>
+                  <JWTExpirationCheckForAppFirstRun>
+                    <DisplayModal />
+                    <JWTExpirationCheck>
+                      <Router />
+                    </JWTExpirationCheck>
+                  </JWTExpirationCheckForAppFirstRun>
                 </AuthProvider>
               </Web3AuthProvider>
             </HomePageStateProvider>
