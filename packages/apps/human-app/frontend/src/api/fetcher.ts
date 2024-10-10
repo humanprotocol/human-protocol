@@ -97,13 +97,7 @@ export function createFetcher(defaultFetcherConfig?: {
           fetcherOptions.options
         )
       : fetcherOptions.options;
-
     if (fetcherOptions.authenticated) {
-      if (url === '/assignment/resign-job') {
-        fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
-          Authorization: `Bearer ${browserAuthProvider.getAccessToken()}3`,
-        });
-      }
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
         Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
       });
