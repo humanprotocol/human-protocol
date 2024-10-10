@@ -33,7 +33,8 @@ export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
   const [allPages, setAllPages] = useState<MyJob[]>([]);
-  const { filterParams, setPageParams } = useMyJobsFilterStore();
+  const { filterParams, setPageParams, resetFilterParams } =
+    useMyJobsFilterStore();
 
   const { t } = useTranslation();
   const {
@@ -58,6 +59,12 @@ export function MyJobsTableMobile({
       setAllPages((state) => [...state, ...pagesFromRes]);
     }
   }, [tableData, filterParams.page]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   return (
     <>

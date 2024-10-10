@@ -46,7 +46,8 @@ export function AvailableJobsTableMobile({
     fetchNextPage,
     hasNextPage,
   } = useInfiniteGetAvailableJobsData();
-  const { filterParams, setPageParams } = useJobsFilterStore();
+  const { filterParams, setPageParams, resetFilterParams } =
+    useJobsFilterStore();
   const { t } = useTranslation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
 
@@ -59,6 +60,12 @@ export function AvailableJobsTableMobile({
       setAllPages((state) => [...state, ...pagesFromRes]);
     }
   }, [tableData, filterParams.page]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   return (
     <>

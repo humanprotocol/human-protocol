@@ -149,8 +149,12 @@ const getColumns = (callbacks: {
 };
 
 export function AvailableJobsTable() {
-  const { setSearchEscrowAddress, setPageParams, filterParams } =
-    useJobsFilterStore();
+  const {
+    setSearchEscrowAddress,
+    setPageParams,
+    filterParams,
+    resetFilterParams,
+  } = useJobsFilterStore();
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
@@ -182,6 +186,12 @@ export function AvailableJobsTable() {
       pageSize: filterParams.page_size,
     });
   }, [filterParams.page, filterParams.page_size]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
     columns: getColumns({
