@@ -13,12 +13,14 @@ import {
   JobsFetchResponseItem,
   ResignJobCommand,
 } from './model/job-assignment.model';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { paginateAndSortResults } from '../../common/utils/pagination.utils';
 import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class JobAssignmentService {
   constructor(
+    private readonly configService: EnvironmentConfigService,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
     private readonly escrowUtilsGateway: EscrowUtilsGateway,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -27,6 +29,19 @@ export class JobAssignmentService {
   private getEvmAddressFromToken(token: string): string {
     const decoded: any = decode(token.substring(7));
     return decoded.wallet_address;
+  }
+
+  private makeJobAssignmentCacheKey(
+    userWalledAddress: string,
+    oracleAddress: string,
+  ): string {
+    return `${JOB_ASSIGNMENT_CACHE_KEY}:${userWalledAddress}:${oracleAddress}`;
+  }
+
+  private getCacheRetentionDate(): string {
+    const ttlMs = this.configService.cacheTtlJobAssignments * 1000;
+
+    return new Date(Date.now() - ttlMs).toISOString();
   }
 
   async processJobAssignment(
@@ -64,7 +79,10 @@ export class JobAssignmentService {
     command: JobsFetchParamsCommand,
   ): Promise<JobsFetchResponse> {
     const evmAddress = this.getEvmAddressFromToken(command.token);
-    const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
+    const cacheKey = this.makeJobAssignmentCacheKey(
+      evmAddress,
+      command.oracleAddress,
+    );
 
     const cachedData =
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
@@ -78,6 +96,7 @@ export class JobAssignmentService {
       );
     }
 
+    command.data.updatedAfter = this.getCacheRetentionDate();
     const allJobsData = await this.fetchAllAssignedJobs(command);
     await this.cacheManager.set(cacheKey, allJobsData);
     return paginateAndSortResults(
@@ -93,26 +112,36 @@ export class JobAssignmentService {
     command: JobsFetchParamsCommand,
   ): Promise<void> {
     const evmAddress = this.getEvmAddressFromToken(command.token);
-    const cacheKey = `${JOB_ASSIGNMENT_CACHE_KEY}:${evmAddress}`;
-
-    const cachedData =
-      await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
-    const latestUpdatedAt = cachedData?.reduce(
-      (latest, assignment) => {
-        if (!latest || new Date(assignment.updated_at) > new Date(latest)) {
-          return assignment.updated_at;
-        }
-        return latest;
-      },
-      null as string | null | undefined,
+    const cacheRetentionDate = this.getCacheRetentionDate();
+    const cacheKey = this.makeJobAssignmentCacheKey(
+      evmAddress,
+      command.oracleAddress,
     );
 
+    const cachedAssignments =
+      (await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey)) || [];
+
+    const cachedAssignmentsToRetain = [];
+    let latestUpdatedAt = cacheRetentionDate;
+    for (const jobAssignment of cachedAssignments) {
+      if (jobAssignment.updated_at > cacheRetentionDate) {
+        cachedAssignmentsToRetain.push(jobAssignment);
+      }
+
+      if (jobAssignment.updated_at > latestUpdatedAt) {
+        latestUpdatedAt = jobAssignment.updated_at;
+      }
+    }
+
     if (!command.data) command.data = new JobsFetchParams();
-    command.data.updatedAfter = latestUpdatedAt ?? undefined;
+    command.data.updatedAfter = latestUpdatedAt;
 
-    const assignmentsData = await this.fetchAllAssignedJobs(command);
+    const fetchedAssignments = await this.fetchAllAssignedJobs(command);
 
-    const mergedData = this.mergeAssignments(cachedData || [], assignmentsData);
+    const mergedData = this.mergeAssignments(
+      cachedAssignmentsToRetain,
+      fetchedAssignments,
+    );
     await this.cacheManager.set(cacheKey, mergedData);
   }
 
@@ -152,7 +181,7 @@ export class JobAssignmentService {
 
   private mergeAssignments(
     cachedAssignments: JobsFetchResponseItem[],
-    newAssignments: JobsFetchResponseItem[],
+    fetchedAssignments: JobsFetchResponseItem[],
   ): JobsFetchResponseItem[] {
     const assignmentsMap = new Map<string, JobsFetchResponseItem>();
 
@@ -160,7 +189,7 @@ export class JobAssignmentService {
       assignmentsMap.set(assignment.assignment_id, assignment);
     }
 
-    for (const assignment of newAssignments) {
+    for (const assignment of fetchedAssignments) {
       assignmentsMap.set(assignment.assignment_id, assignment);
     }
 

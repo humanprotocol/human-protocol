@@ -48,6 +48,30 @@ export class JobDto {
   @IsArray()
   @IsOptional()
   public qualifications?: string[];
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Address of the reputation oracle',
+  })
+  @IsEthereumAddress()
+  @IsOptional()
+  public reputationOracle?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Address of the exchange oracle',
+  })
+  @IsEthereumAddress()
+  @IsOptional()
+  public exchangeOracle?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Address of the recording oracle',
+  })
+  @IsEthereumAddress()
+  @IsOptional()
+  public recordingOracle?: string;
 }
 
 export class JobQuickLaunchDto extends JobDto {

@@ -25,21 +25,25 @@ class JobLauncherEvent_EscrowCanceled(OracleEvent):
     pass  # escrow is enough
 
 
-class RecordingOracleEvent_TaskCompleted(OracleEvent):
+class RecordingOracleEvent_JobCompleted(OracleEvent):
     pass  # escrow is enough for now
 
 
-class RecordingOracleEvent_TaskRejected(OracleEvent):
+class RecordingOracleEvent_SubmissionRejected(OracleEvent):
+    class RejectedAssignmentInfo(BaseModel):
+        assignment_id: str
+        reason: str
+
     # no task_id, escrow is enough for now
-    rejected_job_ids: list[int]
+    assignments: list[RejectedAssignmentInfo]
 
 
-class ExchangeOracleEvent_TaskCreationFailed(OracleEvent):
+class ExchangeOracleEvent_JobCreationFailed(OracleEvent):
     # no task_id, escrow is enough for now
     reason: str
 
 
-class ExchangeOracleEvent_TaskFinished(OracleEvent):
+class ExchangeOracleEvent_JobFinished(OracleEvent):
     pass  # escrow is enough for now
 
 
@@ -54,10 +58,10 @@ class ReputationOracleEvent_EscrowCompleted(OracleEvent):
 _event_type_map = {
     JobLauncherEventTypes.escrow_created: JobLauncherEvent_EscrowCreated,
     JobLauncherEventTypes.escrow_canceled: JobLauncherEvent_EscrowCanceled,
-    RecordingOracleEventTypes.task_completed: RecordingOracleEvent_TaskCompleted,
-    RecordingOracleEventTypes.task_rejected: RecordingOracleEvent_TaskRejected,
-    ExchangeOracleEventTypes.task_creation_failed: ExchangeOracleEvent_TaskCreationFailed,
-    ExchangeOracleEventTypes.task_finished: ExchangeOracleEvent_TaskFinished,
+    RecordingOracleEventTypes.job_completed: RecordingOracleEvent_JobCompleted,
+    RecordingOracleEventTypes.submission_rejected: RecordingOracleEvent_SubmissionRejected,
+    ExchangeOracleEventTypes.job_creation_failed: ExchangeOracleEvent_JobCreationFailed,
+    ExchangeOracleEventTypes.job_finished: ExchangeOracleEvent_JobFinished,
     ExchangeOracleEventTypes.escrow_cleaned: ExchangeOracleEvent_EscrowCleaned,
     ReputationOracleEventTypes.escrow_completed: ReputationOracleEvent_EscrowCompleted,
 }
@@ -103,7 +107,7 @@ def parse_event(
         raise AssertionError(f"Unknown event sender type '{sender}'")
 
     event_class = get_class_for_event_type(event_type)
-    return event_class.parse_obj(event_data or {})
+    return event_class.model_validate(event_data or {})
 
 
 def validate_event(sender: OracleWebhookTypes, event_type: str, event_data: dict):
