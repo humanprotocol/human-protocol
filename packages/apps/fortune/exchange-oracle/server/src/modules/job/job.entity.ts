@@ -14,6 +14,9 @@ export class JobEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   public escrowAddress: string;
 
+  @Column({ type: 'varchar' })
+  public manifestUrl: string;
+
   @Column({
     type: 'enum',
     enum: JobStatus,
