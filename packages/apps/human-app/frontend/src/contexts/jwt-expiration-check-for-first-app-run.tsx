@@ -22,24 +22,15 @@ export function JWTExpirationCheckForFirstAppRun({
 
     const userData = jwtDecode(accessToken);
 
-    const web3TokenExpired = Boolean(
-      authType === 'web3' && userData.exp && userData.exp < Date.now() / 1000
+    const tokenExpired = Boolean(
+      userData.exp && userData.exp < Date.now() / 1000
     );
 
-    if (web3TokenExpired) {
-      getAccessTokenMutation({
-        authType: 'web3',
-        throwExpirationModalOnSignOut: false,
-      });
-    }
+    if (tokenExpired) {
+      const authTypeConfig = authType === 'web3' ? 'web3' : 'web2';
 
-    const web2TokenExpired = Boolean(
-      authType === 'web3' && userData.exp && userData.exp < Date.now() / 1000
-    );
-
-    if (web2TokenExpired) {
       getAccessTokenMutation({
-        authType: 'web3',
+        authType: authTypeConfig,
         throwExpirationModalOnSignOut: false,
       });
     }
