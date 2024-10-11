@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
@@ -6,9 +7,11 @@ import { useAuth } from '@/auth/use-auth';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import type { AuthType } from '@/shared/types/browser-auth-provider';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
+import { routerPaths } from '@/router/router-paths';
 
 export function useGetAccessTokenMutation() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const {
     signIn: signInWeb2,
     signOut: web2SignOut,
@@ -57,6 +60,13 @@ export function useGetAccessTokenMutation() {
         }
         browserAuthProvider.signOut({
           triggerSignOutSubscriptions: throwExpirationModalOnSignOut,
+          callback: () => {
+            if (authType === 'web2') {
+              navigate(routerPaths.worker.signIn);
+            } else {
+              navigate(routerPaths.homePage);
+            }
+          },
         });
       }
     },
