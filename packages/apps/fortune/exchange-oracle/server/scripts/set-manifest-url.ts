@@ -1,7 +1,13 @@
-import { EscrowClient } from "@human-protocol/sdk";
+//This script reads manifest urls from the blockchain and set them in the database in the new column manifest_url
 
+import { EscrowClient } from '@human-protocol/sdk';
+import * as dotenv from 'dotenv';
 import { Client } from 'pg';
 import { ethers } from 'ethers';
+
+dotenv.config({
+  path: '.env',
+});
 
 const dbConfig = {
   user: process.env.POSTGRES_USER,
@@ -9,12 +15,12 @@ const dbConfig = {
   database: process.env.POSTGRES_DATABASE,
   password: process.env.POSTGRES_PASSWORD,
   port: +process.env.POSTGRES_PORT!,
+  ssl: process.env.POSTGRES_SSL == 'true',
 };
 
-async function createSigner() {
+async function createProvider() {
   const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-  const wallet = new ethers.Wallet(process.env.WEB3_PRIVATE_KEY!);
-  return wallet.connect(provider);
+  return provider;
 }
 
 async function updateJobsWithManifestUrls() {
@@ -23,12 +29,14 @@ async function updateJobsWithManifestUrls() {
   try {
     await client.connect();
 
-    const signer = await createSigner();
-    const escrowClient = await EscrowClient.build(signer);
-    
+    const provider = await createProvider();
+    const escrowClient = await EscrowClient.build(provider);
+
     console.log('Connected to the database.');
 
-    const res = await client.query('SELECT * FROM "hmt"."jobs" WHERE manifest_url IS NULL');
+    const res = await client.query(
+      'SELECT * FROM "hmt"."jobs" WHERE manifest_url IS NULL',
+    );
     const jobsWithoutManifest = res.rows;
 
     for (const job of jobsWithoutManifest) {
@@ -38,7 +46,10 @@ async function updateJobsWithManifestUrls() {
         const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
 
         if (manifestUrl) {
-          await client.query('UPDATE "hmt"."jobs" SET manifest_url = $1 WHERE id = $2', [manifestUrl, id]);
+          await client.query(
+            'UPDATE "hmt"."jobs" SET manifest_url = $1 WHERE id = $2',
+            [manifestUrl, id],
+          );
           console.log(`Updated job ${id} with manifestUrl: ${manifestUrl}`);
         }
       } catch (error) {
