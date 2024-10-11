@@ -74,7 +74,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/sepolia/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmfV43CMjRuzr4moz4t5f7eUuNaYb8Ycmpdt37vWRodetE"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmSuw35Jk6kaGaByaQ9fWvyxoFtKrjTbAxSH9M2KR8APJC"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
