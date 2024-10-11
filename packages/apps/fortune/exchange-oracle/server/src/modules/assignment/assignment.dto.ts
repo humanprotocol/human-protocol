@@ -1,12 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsDate,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsDate } from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,

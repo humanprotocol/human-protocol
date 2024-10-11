@@ -1,11 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsString,
-  IsObject,
-  IsOptional,
-} from 'class-validator';
+import { IsArray, IsString, IsObject, IsOptional } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
 import { EventType } from '../../common/enums/webhook';
 import { IsEnumCaseInsensitive } from '../../common/utils/enums';
