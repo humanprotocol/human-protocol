@@ -158,7 +158,7 @@ describe('JobAssignmentService', () => {
         exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
       ).mockResolvedValue({ results: newAssignments });
 
-      await service['updateAssignmentsCache'](command, USER_ADDRESS);
+      await service['updateAssignmentsCache'](command);
 
       expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe('JobAssignmentService', () => {
 
       const command = jobsFetchParamsCommandFixture;
 
-      await service['updateAssignmentsCache'](command, USER_ADDRESS);
+      await service['updateAssignmentsCache'](command);
 
       expect(cacheManagerMock.get).toHaveBeenCalledWith(cacheKey);
       expect(exchangeOracleGatewayMock.fetchAssignedJobs).toHaveBeenCalledWith(

@@ -6,4 +6,5 @@ import {
 export const jobAssignmentServiceMock = {
   processJobAssignment: jest.fn().mockReturnValue(jobAssignmentResponseFixture),
   processGetAssignedJobs: jest.fn().mockReturnValue(jobsFetchResponseFixture),
+  updateAssignmentsCache: jest.fn().mockResolvedValue(undefined),
 };

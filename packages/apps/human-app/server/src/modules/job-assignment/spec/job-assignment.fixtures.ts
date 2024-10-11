@@ -10,6 +10,7 @@ import {
   JobsFetchParamsDto,
   JobsFetchResponse,
   JobsFetchResponseItem,
+  RefreshJobDto,
   ResignJobCommand,
 } from '../model/job-assignment.model';
 import {
@@ -35,7 +36,7 @@ const UPDATED_AT = 'test_date_2';
 const EXPIRES_AT = 'test_date_3';
 const JOB_ASSIGNMENT_ID = '1';
 const URL = 'test_url';
-const TOKEN = 'test_user_token';
+export const TOKEN = 'test_user_token';
 export const USER_ADDRESS = 'test_address';
 export const jobAssignmentToken = TOKEN;
 export const jobAssignmentOracleUrl = EXCHANGE_ORACLE_URL;
@@ -140,4 +141,8 @@ export const jobsFetchResponseFixture: JobsFetchResponse = {
   total_pages: 1,
   total_results: 1,
   results: [jobsFetchResponseItemFixture],
+};
+
+export const refreshJobDtoFixture: RefreshJobDto = {
+  oracle_address: EXCHANGE_ORACLE_ADDRESS,
 };

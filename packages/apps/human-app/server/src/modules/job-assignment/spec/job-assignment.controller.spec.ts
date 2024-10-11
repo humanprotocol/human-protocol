@@ -7,6 +7,7 @@ import {
   JobAssignmentDto,
   JobsFetchParamsCommand,
   JobsFetchParamsDto,
+  RefreshJobDto,
 } from '../model/job-assignment.model';
 import {
   jobAssignmentDtoFixture,
@@ -16,6 +17,9 @@ import {
   jobsFetchParamsCommandFixture,
   jobsFetchResponseFixture,
   jobAssignmentToken,
+  refreshJobDtoFixture,
+  EXCHANGE_ORACLE_ADDRESS,
+  TOKEN,
 } from './job-assignment.fixtures';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
@@ -92,6 +96,15 @@ describe('JobAssignmentController', () => {
       expect(jobAssignmentService.processGetAssignedJobs).toHaveBeenCalledWith(
         command,
       );
+    });
+
+    it('should call service refreshAssigments method with proper fields set', async () => {
+      const dto: RefreshJobDto = refreshJobDtoFixture;
+      await controller.refreshAssigments(dto, jobAssignmentToken);
+      expect(jobAssignmentService.updateAssignmentsCache).toHaveBeenCalledWith({
+        oracleAddress: EXCHANGE_ORACLE_ADDRESS,
+        token: TOKEN,
+      });
     });
   });
 });
