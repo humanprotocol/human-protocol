@@ -1,20 +1,18 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddManifestUrl1728528813649 implements MigrationInterface {
-    name = 'AddManifestUrl1728528813649'
+export class AddManifestUrl1728552691568 implements MigrationInterface {
+    name = 'AddManifestUrl1728552691568'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
             ALTER TABLE "hmt"."jobs"
-            ALTER COLUMN "manifest_url"
-            SET NOT NULL
+            ADD "manifest_url" character varying
         `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
-            ALTER TABLE "hmt"."jobs"
-            ALTER COLUMN "manifest_url" DROP NOT NULL
+            ALTER TABLE "hmt"."jobs" DROP COLUMN "manifest_url"
         `);
     }
 
