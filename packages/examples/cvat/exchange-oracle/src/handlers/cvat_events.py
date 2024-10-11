@@ -66,6 +66,7 @@ def handle_update_job_event(payload: dict) -> None:
                             "Assignment is expired, rejecting the update"
                         )
                         cvat_service.expire_assignment(session, matching_assignment.id)
+                        cvat_service.touch(session, models.Job, [matching_assignment.job.id])
 
                         if matching_assignment.id == latest_assignment.id:
                             cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
@@ -88,6 +89,7 @@ def handle_update_job_event(payload: dict) -> None:
                         session, matching_assignment.id, completed_at=webhook_time
                     )
                     cvat_service.update_job_status(session, job.id, new_status)
+                    cvat_service.touch(session, models.Job, [job.id])
 
                     cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
 
@@ -115,13 +117,14 @@ def handle_create_job_event(payload: dict) -> None:
         jobs = cvat_service.get_jobs_by_cvat_id(session, [payload.job["id"]])
 
         if not jobs:
-            cvat_service.create_job(
+            job_id = cvat_service.create_job(
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
                 payload.job["project_id"],
                 status=JobStatuses[payload.job["state"]],
             )
+            cvat_service.touch(session, models.Job, [job_id])
 
         escrow_creation = None
         with db.suppress(db_errors.LockNotAvailable):

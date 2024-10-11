@@ -142,6 +142,7 @@ describe('JobService', () => {
     beforeAll(async () => {
       jest.spyOn(jobRepository, 'createUnique');
       (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
         getReputationOracleAddress: jest
           .fn()
           .mockResolvedValue(reputationNetwork),
@@ -163,6 +164,7 @@ describe('JobService', () => {
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: chainId,
         escrowAddress: escrowAddress,
+        manifestUrl: MOCK_MANIFEST_URL,
         reputationNetwork: reputationNetwork,
         status: JobStatus.ACTIVE,
       });
@@ -337,6 +339,7 @@ describe('JobService', () => {
         jobId: 1,
         chainId: 1,
         escrowAddress,
+        manifestUrl: MOCK_MANIFEST_URL,
         status: JobStatus.ACTIVE,
         createdAt: new Date(),
       },
@@ -384,6 +387,7 @@ describe('JobService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
+        MOCK_MANIFEST_URL
       );
     });
 

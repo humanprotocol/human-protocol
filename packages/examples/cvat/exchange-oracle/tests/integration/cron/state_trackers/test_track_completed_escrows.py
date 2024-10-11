@@ -157,7 +157,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
         db_project = self.session.query(Project).filter_by(id=project_id).first()
 
         assert db_project.status == ProjectStatuses.validation
@@ -490,7 +490,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
 
         self.session.refresh(project1)
         self.session.refresh(project2)
@@ -638,7 +638,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .first()
         )
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.task_finished
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
 
         self.session.refresh(project1)
         self.session.refresh(project2)
