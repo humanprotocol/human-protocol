@@ -9,8 +9,16 @@ import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 
 export function useGetAccessTokenMutation() {
   const queryClient = useQueryClient();
-  const { signIn: signInWeb2 } = useAuth();
-  const { signIn: signInWeb3 } = useWeb3Auth();
+  const {
+    signIn: signInWeb2,
+    signOut: web2SignOut,
+    user: web2User,
+  } = useAuth();
+  const {
+    signIn: signInWeb3,
+    signOut: web3SignOut,
+    user: web3User,
+  } = useWeb3Auth();
 
   return useMutation({
     mutationFn: async ({
@@ -41,6 +49,12 @@ export function useGetAccessTokenMutation() {
           signInWeb3(refetchAccessTokenSuccess);
         }
       } catch (error) {
+        if (authType === 'web2' && web2User) {
+          web2SignOut(false);
+        }
+        if (authType === 'web3' && web3User) {
+          web3SignOut(false);
+        }
         browserAuthProvider.signOut({
           triggerSignOutSubscriptions: throwExpirationModalOnSignOut,
         });

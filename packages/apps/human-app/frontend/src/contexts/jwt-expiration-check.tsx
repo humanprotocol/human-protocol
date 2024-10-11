@@ -10,16 +10,18 @@ export function JWTExpirationCheck({
 }: {
   children: React.ReactElement;
 }) {
-  const checks = useRef(0);
+  const checksOnProfile = useRef(0);
   const web3Auth = useWeb3Auth();
   const web2Auth = useAuth();
   const location = useLocation();
-  const { mutate: getAccessTokenMutation, isPending } =
-    useGetAccessTokenMutation();
+  const { mutate: getAccessTokenMutation } = useGetAccessTokenMutation();
 
   useEffect(() => {
-    if (isPending) {
-      return;
+    if (
+      location.pathname.includes('profile') &&
+      (web2Auth.user || web3Auth.user)
+    ) {
+      checksOnProfile.current = checksOnProfile.current + 1;
     }
     const web3TokenExpired = Boolean(
       web3Auth.user?.exp && web3Auth.user.exp < Date.now() / 1000
@@ -27,7 +29,7 @@ export function JWTExpirationCheck({
     if (web3TokenExpired) {
       getAccessTokenMutation({
         authType: 'web3',
-        throwExpirationModalOnSignOut: checks.current > 0,
+        throwExpirationModalOnSignOut: checksOnProfile.current < 1,
       });
     }
 
@@ -37,17 +39,16 @@ export function JWTExpirationCheck({
     if (web2TokenExpired) {
       getAccessTokenMutation({
         authType: 'web2',
-        throwExpirationModalOnSignOut: checks.current > 0,
+        throwExpirationModalOnSignOut: checksOnProfile.current < 1,
       });
     }
-
-    checks.current = checks.current + 1;
   }, [
     location,
     web3Auth.user?.exp,
     web2Auth.user?.exp,
     getAccessTokenMutation,
-    isPending,
+    web2Auth.user,
+    web3Auth.user,
   ]);
 
   return children;
