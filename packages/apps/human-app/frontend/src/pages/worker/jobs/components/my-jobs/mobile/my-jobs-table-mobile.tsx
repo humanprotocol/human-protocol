@@ -22,7 +22,8 @@ import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { ListItem } from '@/components/ui/list-item';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
-import { Chips } from '@/components/ui/chips';
+import { Chip } from '@/components/ui/chip';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -32,7 +33,8 @@ export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
   const [allPages, setAllPages] = useState<MyJob[]>([]);
-  const { filterParams, setPageParams } = useMyJobsFilterStore();
+  const { filterParams, setPageParams, resetFilterParams } =
+    useMyJobsFilterStore();
 
   const { t } = useTranslation();
   const {
@@ -57,6 +59,12 @@ export function MyJobsTableMobile({
       setAllPages((state) => [...state, ...pagesFromRes]);
     }
   }, [tableData, filterParams.page]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   return (
     <>
@@ -136,10 +144,12 @@ export function MyJobsTableMobile({
                       </Typography>
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>
-                      <Chips data={[d.status]} />
+                      <Chip label={d.status} />
                     </ListItem>
                     <ListItem label={t('worker.jobs.jobType')}>
-                      <Chips data={[d.job_type]} />
+                      <Chip
+                        label={t(`jobTypeLabels.${d.job_type as JobType}`)}
+                      />
                     </ListItem>
                   </Grid>
                   <Grid

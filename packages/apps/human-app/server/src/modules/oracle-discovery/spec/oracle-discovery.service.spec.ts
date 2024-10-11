@@ -119,7 +119,7 @@ describe('OracleDiscoveryService', () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValue(mockData);
+      .mockResolvedValueOnce(mockData);
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
@@ -140,14 +140,14 @@ describe('OracleDiscoveryService', () => {
     });
   });
 
-  it('should filter responses if selectedJobTypes not empty, or url not set', async () => {
+  it('should filter oracles if selectedJobTypes not empty, or url not set', async () => {
     const mockData: OracleDiscoveryResponse[] =
       generateOracleDiscoveryResponseBody();
 
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValue(mockData);
+      .mockResolvedValueOnce(mockData);
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
@@ -155,9 +155,24 @@ describe('OracleDiscoveryService', () => {
     expect(result).toEqual([mockData[1], mockData[2]]);
   });
 
+  it('should not filter responses if selectedJobTypes is empty', async () => {
+    const mockData: OracleDiscoveryResponse[] =
+      generateOracleDiscoveryResponseBody();
+
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);    jest
+      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+      .mockResolvedValueOnce(mockData);
+
+    const result = await oracleDiscoveryService.processOracleDiscovery({
+      selectedJobTypes: [],
+    });
+
+    expect(result).toEqual([mockData[0], mockData[1], mockData[2]]);
+  });
+
   it('should handle errors and return an empty array', async () => {
     const error = new Error('Test error');
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockRejectedValueOnce(error);
@@ -178,10 +193,10 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should return an empty array if no oracles are found', async () => {
-    jest.spyOn(cacheManager, 'get').mockResolvedValue(undefined);
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValue([]);
+      .mockResolvedValueOnce([]);
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);

@@ -25,38 +25,41 @@ export function Navbar({
 }: NavbarProps) {
   const isMobile = useIsMobile();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
-  const getIcon = () => {
-    switch (true) {
-      case open:
-        return (
-          <CloseIcon
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
-        );
-      case !open && !userStatsDrawerOpen:
-        return (
-          <MenuIcon
-            onClick={() => {
-              setOpen(true);
-            }}
-          />
-        );
-      case userStatsDrawerOpen:
-        return (
-          <CloseIcon
-            onClick={() => {
-              if (toggleUserStatsDrawer) {
-                toggleUserStatsDrawer();
-              }
-            }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+
+  let iconButton = null;
+  if (open) {
+    iconButton = (
+      <IconButton
+        onClick={() => {
+          setOpen(false);
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    );
+  } else if (userStatsDrawerOpen) {
+    iconButton = (
+      <IconButton
+        onClick={() => {
+          if (toggleUserStatsDrawer) {
+            toggleUserStatsDrawer();
+          }
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    );
+  } else {
+    iconButton = (
+      <IconButton
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        <MenuIcon />
+      </IconButton>
+    );
+  }
 
   return (
     <Stack
@@ -93,7 +96,7 @@ export function Navbar({
             {t('translation:worker.hcaptchaLabelingStats.statistics')}
           </Button>
         ) : null}
-        <IconButton>{getIcon()}</IconButton>
+        {iconButton}
       </Grid>
     </Stack>
   );

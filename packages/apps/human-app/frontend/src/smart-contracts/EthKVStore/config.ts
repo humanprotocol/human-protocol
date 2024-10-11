@@ -5,12 +5,12 @@ export enum Role {
   RecordingOracle = 'Recording Oracle',
 }
 
-export enum JobTypes {
-  Fortune = 'Fortune',
-  Points = 'Points',
-  BoundingBoxes = 'Bounding Boxes',
-  BoundingBoxesFromPoints = 'Bounding Boxes from Points',
-  SkeletonsFromBoundingBoxes = 'Skeletons from Bounding Boxes',
+export enum JobType {
+  Fortune = 'FORTUNE',
+  Points = 'IMAGE_POINTS',
+  BoundingBoxes = 'IMAGE_BOXES',
+  BoundingBoxesFromPoints = 'IMAGE_BOXES_FROM_POINTS',
+  SkeletonsFromBoundingBoxes = 'IMAGE_SKELETONS_FROM_BOXES',
 }
 
 export const EthKVStoreKeys = {
