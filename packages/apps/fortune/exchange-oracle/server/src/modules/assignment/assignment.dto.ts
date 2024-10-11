@@ -2,7 +2,6 @@ import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
@@ -14,6 +13,7 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
+import { IsEnumCaseInsensitive } from '../../common/utils/enums';
 
 export class CreateAssignmentDto {
   @ApiProperty({
@@ -21,7 +21,7 @@ export class CreateAssignmentDto {
     name: 'chain_id',
     required: false,
   })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
@@ -36,7 +36,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
     default: AssignmentSortField.CREATED_AT,
   })
   @IsOptional()
-  @IsEnum(AssignmentSortField)
+  @IsEnumCaseInsensitive(AssignmentSortField)
   sortField?: AssignmentSortField = AssignmentSortField.CREATED_AT;
 
   @ApiPropertyOptional({ name: 'chain_id' })
@@ -46,7 +46,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
   chainId?: number;
 
   @ApiPropertyOptional({ name: 'job_type', enum: JobType })
-  @IsEnum(JobType)
+  @IsEnumCaseInsensitive(JobType)
   @IsOptional()
   jobType?: JobType;
 
@@ -56,7 +56,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
   escrowAddress?: string;
 
   @ApiPropertyOptional({ enum: AssignmentStatus })
-  @IsEnum(AssignmentStatus)
+  @IsEnumCaseInsensitive(AssignmentStatus)
   @IsOptional()
   status?: AssignmentStatus;
 
