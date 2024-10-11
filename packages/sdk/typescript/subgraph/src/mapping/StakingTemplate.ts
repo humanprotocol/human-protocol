@@ -127,7 +127,7 @@ export function handleStakeLocked(event: StakeLocked): void {
 export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   createTransaction(
     event,
-    'withdraw',
+    'stakeWithdrawn',
     event.transaction.to,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)

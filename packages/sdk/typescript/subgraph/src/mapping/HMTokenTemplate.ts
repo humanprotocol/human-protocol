@@ -9,7 +9,6 @@ import {
 import {
   DailyWorker,
   Escrow,
-  FundEvent,
   HMTApprovalEvent,
   HMTBulkApprovalEvent,
   HMTBulkTransferEvent,
@@ -22,7 +21,7 @@ import {
 } from '../../generated/schema';
 import { toEventDayId, toEventId } from './utils/event';
 import { ONE_BI, ONE_DAY, ZERO_BI } from './utils/number';
-import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
+import { createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
@@ -152,33 +151,8 @@ export function handleTransfer(event: Transfer): void {
   const eventDayData = getEventDayData(event);
   const escrow = Escrow.load(event.params._to);
   if (escrow) {
-    // Create FundEvent entity
-    const fundEventEntity = new FundEvent(toEventId(event));
-    fundEventEntity.block = event.block.number;
-    fundEventEntity.timestamp = event.block.timestamp;
-    fundEventEntity.txHash = event.transaction.hash;
-    fundEventEntity.escrowAddress = escrow.address;
-    fundEventEntity.sender = event.params._from;
-    fundEventEntity.amount = event.params._value;
-    fundEventEntity.save();
-
-    // Update escrow statistics
-    const statsEntity = createOrLoadEscrowStatistics();
-    statsEntity.fundEventCount = statsEntity.fundEventCount.plus(ONE_BI);
-    statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-    statsEntity.save();
-
-    // Update event day data
-    eventDayData.dailyFundEventCount =
-      eventDayData.dailyFundEventCount.plus(ONE_BI);
-    eventDayData.dailyTotalEventCount =
-      eventDayData.dailyTotalEventCount.plus(ONE_BI);
-
-    // Update escrow balance, and totalFundedAmount
+    // Update escrow balance
     escrow.balance = escrow.balance.plus(event.params._value);
-    escrow.totalFundedAmount = escrow.totalFundedAmount.plus(
-      event.params._value
-    );
     escrow.save();
 
     createTransaction(

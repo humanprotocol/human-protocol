@@ -21,7 +21,7 @@ import {
   Worker,
   Payout,
   DailyWorker,
-  Transfer,
+  InternalTransaction,
   WithdrawEvent,
 } from '../../generated/schema';
 import {
@@ -30,7 +30,6 @@ import {
   Bytes,
   dataSource,
   ethereum,
-  log,
 } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventDayId, toEventId } from './utils/event';
@@ -39,6 +38,7 @@ import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 import { createOrLoadLeader } from './Staking';
 
+export const HMT_ADDRESS = toBytes('{{ HMToken.address }}');
 export const STATISTICS_ENTITY_ID = toBytes('escrow-statistics-id');
 
 function constructStatsEntity(): EscrowStatistics {
@@ -438,7 +438,7 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity !== null) {
     // If the escrow is non-HMT, track the balance data
-    if (escrowEntity.isNonHMT) {
+    if (escrowEntity.token != HMT_ADDRESS) {
       for (let i = 0; i < event.params._recipients.length; i++) {
         const recipient = event.params._recipients[i];
         const amount = event.params._amounts[i];
@@ -496,16 +496,16 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
         for (let i = 0; i < event.params._recipients.length; i++) {
           const recipient = event.params._recipients[i];
           const amount = event.params._amounts[i];
-          const transfer = new Transfer(
+          const internalTransaction = new InternalTransaction(
             event.transaction.hash
               .concatI32(i)
               .concatI32(event.block.timestamp.toI32())
           );
-          transfer.from = escrowEntity.address;
-          transfer.to = recipient;
-          transfer.value = amount;
-          transfer.transaction = transaction.id;
-          transfer.save();
+          internalTransaction.from = escrowEntity.address;
+          internalTransaction.to = recipient;
+          internalTransaction.value = amount;
+          internalTransaction.transaction = transaction.id;
+          internalTransaction.save();
         }
 
         eventDayData.save();
@@ -559,7 +559,7 @@ export function handleCancelled(event: Cancelled): void {
   const escrowEntity = Escrow.load(dataSource.address());
 
   if (escrowEntity) {
-    if (escrowEntity.isNonHMT) {
+    if (escrowEntity.token != HMT_ADDRESS) {
       const transaction = createTransaction(
         event,
         'cancel',
@@ -568,12 +568,12 @@ export function handleCancelled(event: Cancelled): void {
         Address.fromBytes(escrowEntity.token)
       );
       // If escrow is funded with HMT, balance is already tracked by HMT transfer
-      const transfer = new Transfer(toEventId(event));
-      transfer.from = escrowEntity.address;
-      transfer.to = escrowEntity.canceler;
-      transfer.value = escrowEntity.balance;
-      transfer.transaction = transaction.id;
-      transfer.save();
+      const internalTransaction = new InternalTransaction(toEventId(event));
+      internalTransaction.from = escrowEntity.address;
+      internalTransaction.to = escrowEntity.canceler;
+      internalTransaction.value = escrowEntity.balance;
+      internalTransaction.transaction = transaction.id;
+      internalTransaction.save();
       escrowEntity.balance = ZERO_BI;
     }
     escrowEntity.status = 'Cancelled';
@@ -627,19 +627,6 @@ export function handleFund(event: Fund): void {
     return;
   }
 
-  // If escrow is funded with HMT, balance is already tracked by HMT transfer
-  if (escrowEntity.balance.gt(ZERO_BI)) {
-    return;
-  }
-
-  createTransaction(
-    event,
-    'fund',
-    event.address,
-    event.params._amount,
-    Address.fromBytes(escrowEntity.token)
-  );
-
   // Create FundEvent entity
   const fundEventEntity = new FundEvent(toEventId(event));
   fundEventEntity.block = event.block.number;
@@ -665,8 +652,6 @@ export function handleFund(event: Fund): void {
   eventDayData.save();
 
   // Update escrow entity
-  escrowEntity.isNonHMT = true;
-  escrowEntity.balance = escrowEntity.balance.plus(event.params._amount);
   escrowEntity.totalFundedAmount = escrowEntity.totalFundedAmount.plus(
     event.params._amount
   );
