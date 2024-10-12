@@ -12,6 +12,7 @@ import {
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
 import { Role } from '../../common/enums/user';
+import { IsEnumCaseInsensitive } from '../../common/utils/enums';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -115,7 +116,7 @@ export class Web3SignUpDto {
   @ApiProperty({
     enum: Role,
   })
-  @IsEnum(Role)
+  @IsEnumCaseInsensitive(Role)
   public type: Role;
 
   @ApiProperty()

@@ -1,15 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 import { EventType } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
+import { IsEnumCaseInsensitive } from '../../common/utils/enums';
 
 export class WebhookDto {
   @ApiProperty({ name: 'chain_id' })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   public chainId: ChainId;
 
   @ApiProperty({ name: 'event_type' })
-  @IsEnum(EventType)
+  @IsEnumCaseInsensitive(EventType)
   public eventType: EventType;
 
   @ApiProperty({ name: 'escrow_address' })
