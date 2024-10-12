@@ -1,5 +1,5 @@
 export enum JobRequestType {
-  FORTUNE = 'FORTUNE',
+  FORTUNE = 'fortune',
 }
 
 export enum SolutionError {
