@@ -33,7 +33,7 @@
     "@nestjs/platform-express": "^10.3.9",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
-    "@nestjs/swagger": "^7.1.13",
+    "@nestjs/swagger": "^7.4.2",
     "cache-manager": "^5.4.0",
     "cache-manager-redis-store": "^3.0.1",
     "ioredis": "^5.3.2",
