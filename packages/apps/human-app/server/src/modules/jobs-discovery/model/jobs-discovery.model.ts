@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   JobDiscoveryFieldName,
@@ -13,6 +13,7 @@ import {
   PageableParams,
   PageableResponse,
 } from '../../../common/utils/pageable.model';
+import { IsEnumCaseInsensitive } from '../../../common/utils/enums';
 
 export class JobsDiscoveryParamsDto extends PageableDto {
   @AutoMap()
@@ -32,7 +33,7 @@ export class JobsDiscoveryParamsDto extends PageableDto {
   chain_id?: number;
   @AutoMap()
   @IsOptional()
-  @IsEnum(JobDiscoverySortField)
+  @IsEnumCaseInsensitive(JobDiscoverySortField)
   @ApiPropertyOptional({ enum: JobDiscoverySortField })
   sort_field?: JobDiscoverySortField;
   @AutoMap()
@@ -42,12 +43,12 @@ export class JobsDiscoveryParamsDto extends PageableDto {
   job_type?: string;
   @AutoMap()
   @IsOptional()
-  @IsEnum(JobDiscoveryFieldName, { each: true })
+  @IsEnumCaseInsensitive(JobDiscoveryFieldName, { each: true })
   @ApiPropertyOptional({ enum: JobDiscoveryFieldName, isArray: true })
   fields: JobDiscoveryFieldName[];
   @AutoMap()
   @ApiPropertyOptional({ enum: JobStatus })
-  @IsEnum(JobStatus)
+  @IsEnumCaseInsensitive(JobStatus)
   @IsOptional()
   status: JobStatus;
 }

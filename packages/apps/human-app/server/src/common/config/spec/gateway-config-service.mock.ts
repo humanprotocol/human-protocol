@@ -2,78 +2,78 @@ export const gatewayConfigServiceMock = {
   getConfig: jest.fn().mockReturnValue({
     url: 'https://example.com',
     endpoints: {
-      WORKER_SIGNUP: {
+      worker_signup: {
         endpoint: '/auth/signup',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      OPERATOR_SIGNUP: {
+      operator_signup: {
         endpoint: '/auth/web3/signup',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      WORKER_SIGNIN: {
+      worker_signin: {
         endpoint: '/auth/signin',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      WORKER_REGISTRATION: {
+      worker_registration: {
         endpoint: '/user/registration',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      EMAIL_VERIFICATION: {
+      email_verification: {
         endpoint: '/auth/email-verification',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      RESEND_EMAIL_VERIFICATION: {
+      resend_email_verification: {
         endpoint: '/auth/resend-email-verification',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      FORGOT_PASSWORD: {
+      forgot_password: {
         endpoint: '/auth/forgot-password',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      RESTORE_PASSWORD: {
+      restore_password: {
         endpoint: '/auth/restore-password',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      PREPARE_SIGNATURE: {
+      prepare_signature: {
         endpoint: '/user/prepare-signature',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      DISABLE_OPERATOR: {
+      disable_operator: {
         endpoint: '/user/disable-operator',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      KYC_PROCEDURE_START: {
+      kyc_procedure_start: {
         endpoint: '/kyc/start',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      ENABLE_LABELING: {
+      enable_labeling: {
         endpoint: '/labeler/register',
         method: 'POST',
         params: { api_key: 'mock-api-key' },
       },
-      OPERATOR_SIGNIN: {
+      operator_signin: {
         endpoint: '/auth/web3/signin',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         params: {},
       },
-      REGISTER_ADDRESS: {
+      register_address: {
         endpoint: '/user/register-address',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      TOKEN_REFRESH: {
+      token_refresh: {
         endpoint: '/auth/refresh',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

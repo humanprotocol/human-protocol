@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { AxiosRequestInterceptor } from './axios-request.interceptor';
 import { EnvironmentConfigService } from '../config/environment-config.service';
+import { TransformEnumInterceptor } from './transform-enum.interceptor';
 
 @Global()
 @Module({
@@ -15,7 +16,13 @@ import { EnvironmentConfigService } from '../config/environment-config.service';
       },
       inject: [EnvironmentConfigService],
     },
+    {
+      provide: TransformEnumInterceptor, // Add the new interceptor
+      useFactory: () => {
+        return new TransformEnumInterceptor();
+      },
+    },
   ],
-  exports: [AxiosRequestInterceptor],
+  exports: [AxiosRequestInterceptor, TransformEnumInterceptor],
 })
 export class InterceptorModule {}

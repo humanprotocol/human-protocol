@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   PageableData,
   PageableDto,
@@ -12,6 +12,7 @@ import {
   AssignmentStatus,
 } from '../../../common/enums/global-common';
 import { Type } from 'class-transformer';
+import { IsEnumCaseInsensitive } from '../../../common/utils/enums';
 
 export class JobAssignmentDto {
   @AutoMap()
@@ -86,12 +87,12 @@ export class JobsFetchParamsDto extends PageableDto {
   job_type: string;
   @AutoMap()
   @IsOptional()
-  @IsEnum(AssignmentStatus)
+  @IsEnumCaseInsensitive(AssignmentStatus)
   @ApiPropertyOptional({ enum: AssignmentStatus })
   status: AssignmentStatus;
   @AutoMap()
   @IsOptional()
-  @IsEnum(AssignmentSortField)
+  @IsEnumCaseInsensitive(AssignmentSortField)
   @ApiPropertyOptional({ enum: AssignmentSortField })
   sort_field: AssignmentSortField;
 }
