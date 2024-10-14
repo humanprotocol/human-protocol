@@ -61,7 +61,7 @@ export function useGetAccessTokenMutation() {
         browserAuthProvider.signOut({
           triggerSignOutSubscriptions: throwExpirationModalOnSignOut,
           callback: () => {
-            navigate(routerPaths.worker.signIn);
+            navigate(routerPaths.homePage);
           },
         });
       }
