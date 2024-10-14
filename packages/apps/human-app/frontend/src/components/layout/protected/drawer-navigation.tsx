@@ -186,6 +186,7 @@ export function DrawerNavigation({
 
               const { label, link, icon, href, onClick } = item;
               const isActive = location.pathname === link;
+
               return (
                 <ListItem alignItems="center" disablePadding key={label}>
                   <ListItemButton
