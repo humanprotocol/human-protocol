@@ -30,7 +30,7 @@ export function useEnableHCaptchaLabelingMutation() {
           options: { method: 'POST' },
         }
       );
-      await getAccessTokenMutation('web2');
+      await getAccessTokenMutation({ authType: 'web2' });
       return result;
     },
     onSuccess: async () => {

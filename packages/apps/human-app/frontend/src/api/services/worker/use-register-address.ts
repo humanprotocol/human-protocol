@@ -54,7 +54,7 @@ export function useRegisterAddressMutation(callbacks?: {
       }
 
       await registerAddress(address, signature);
-      await getAccessTokenMutation('web2');
+      await getAccessTokenMutation({ authType: 'web2' });
     },
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
