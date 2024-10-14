@@ -21,6 +21,7 @@ export function useKycStartMutation() {
         const result = await apiClient(apiPaths.worker.kycStart.path, {
           successSchema: kycStartSchema,
           authenticated: true,
+          withAuthRetry: apiPaths.worker.kycStart.withAuthRetry,
           options: {
             method: 'POST',
           },

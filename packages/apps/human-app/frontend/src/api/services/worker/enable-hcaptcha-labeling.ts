@@ -22,11 +22,14 @@ export function useEnableHCaptchaLabelingMutation() {
 
   return useMutation({
     mutationFn: async () => {
-      const result = await apiClient(apiPaths.worker.enableHCaptchaLabeling, {
-        successSchema: enableHCaptchaLabelingSuccessSchema,
-        authenticated: true,
-        options: { method: 'POST' },
-      });
+      const result = await apiClient(
+        apiPaths.worker.enableHCaptchaLabeling.path,
+        {
+          successSchema: enableHCaptchaLabelingSuccessSchema,
+          authenticated: true,
+          options: { method: 'POST' },
+        }
+      );
       await getAccessTokenMutation('web2');
       return result;
     },
