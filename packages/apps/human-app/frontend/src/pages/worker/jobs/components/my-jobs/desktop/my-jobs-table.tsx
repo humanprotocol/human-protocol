@@ -28,7 +28,7 @@ import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/desk
 import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
-import { JOB_TYPES } from '@/shared/consts';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
 
 const getColumnsDefinition = (
@@ -93,8 +93,9 @@ const getColumnsDefinition = (
     header: t('worker.jobs.jobType'),
     size: 100,
     enableSorting: true,
-    Cell: (props) => {
-      return <Chip label={props.row.original.job_type} />;
+    Cell: ({ row }) => {
+      const label = t(`jobTypeLabels.${row.original.job_type as JobType}`);
+      return <Chip label={label} />;
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {
@@ -103,7 +104,7 @@ const getColumnsDefinition = (
             {...props}
             headerText={t('worker.jobs.jobType')}
             iconType="filter"
-            popoverContent={<MyJobsJobTypeFilter jobTypes={JOB_TYPES} />}
+            popoverContent={<MyJobsJobTypeFilter />}
           />
         );
       },
@@ -191,8 +192,13 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
-  const { setSearchEscrowAddress, setPageParams, filterParams } =
-    useMyJobsFilterStore();
+  const {
+    setSearchEscrowAddress,
+    setPageParams,
+    filterParams,
+    resetFilterParams,
+  } = useMyJobsFilterStore();
+
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
     () => tableData?.results || [],
@@ -224,6 +230,12 @@ export function MyJobsTable() {
       pageSize: filterParams.page_size,
     });
   }, [filterParams.page, filterParams.page_size]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
     columns: getColumnsDefinition(rejectTask(oracle_address || '')),

@@ -12,7 +12,7 @@ import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import {
   EthKVStoreKeys,
-  JobTypes,
+  JobType,
   Role,
 } from '@/smart-contracts/EthKVStore/config';
 import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
@@ -25,7 +25,7 @@ const fieldsValidations = {
   [EthKVStoreKeys.Url]: z.string(),
   [EthKVStoreKeys.WebhookUrl]: z.string().url(),
   [EthKVStoreKeys.Role]: z.nativeEnum(Role),
-  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobTypes)).min(1),
+  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
 };
 

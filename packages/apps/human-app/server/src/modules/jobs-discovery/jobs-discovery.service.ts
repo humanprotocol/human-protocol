@@ -34,7 +34,7 @@ export class JobsDiscoveryService {
     filters: JobsDiscoveryParamsCommand['data'],
   ): JobsDiscoveryResponseItem[] {
     const difference = Object.values(JobDiscoveryFieldName).filter(
-      (value) => !filters.fields.includes(value),
+      (value) => !filters.fields?.includes(value),
     );
     return jobs
       .filter((job) => {

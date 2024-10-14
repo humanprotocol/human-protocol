@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { ControllerRenderProps, FieldValues } from 'react-hook-form';
 import FormControl from '@mui/material/FormControl';
@@ -20,7 +21,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { colorPalette } from '@/styles/color-palette';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
-  options: string[];
+  options: { label: string; value: string }[];
   name: string;
   label: string;
 }
@@ -38,6 +39,13 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const { t } = useTranslation();
   const context = useFormContext();
+  const valuesToLabels = useMemo(() => {
+    const mapping: Record<string, string> = {};
+    for (const option of options) {
+      mapping[option.value] = option.label;
+    }
+    return mapping;
+  }, [options]);
 
   const isFieldChecked = (field: FieldType, option: string) => {
     if (Array.isArray(field.value)) {
@@ -70,7 +78,7 @@ export function MultiSelect({
             />
           }
           key={value}
-          label={value}
+          label={valuesToLabels[value]}
           onDelete={() => {
             onDelete(value);
           }}
@@ -127,9 +135,9 @@ export function MultiSelect({
               }}
             >
               {options.map((option) => (
-                <MenuItem key={option} value={option}>
-                  <Checkbox checked={isFieldChecked(field, option)} />
-                  <ListItemText>{option}</ListItemText>
+                <MenuItem key={option.value} value={option.value}>
+                  <Checkbox checked={isFieldChecked(field, option.value)} />
+                  <ListItemText>{option.label}</ListItemText>
                 </MenuItem>
               ))}
               <Divider component="li" variant="fullWidth" />

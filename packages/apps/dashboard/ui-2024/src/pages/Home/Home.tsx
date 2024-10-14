@@ -2,7 +2,6 @@ import PageWrapper from '@components/PageWrapper';
 import Search from '@components/Search';
 import ShadowIcon from '@components/ShadowIcon';
 import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Divider from '@mui/material/Divider';
@@ -16,6 +15,7 @@ import { TotalTransactions } from '@pages/Home/TotalTransactions';
 import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { colorPalette } from '@assets/styles/color-palette';
+import CustomTooltip from '@components/CustomTooltip';
 
 const Home: React.FC = () => {
 	const {
@@ -37,13 +37,13 @@ const Home: React.FC = () => {
 					<div className="box-title">Token</div>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Token Current Price" arrow>
+							<CustomTooltip title="Token Current Price" arrow>
 								<HelpOutlineIcon
 									style={{
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 						</div>
 						<HMTPrice />
 					</div>
@@ -54,13 +54,13 @@ const Home: React.FC = () => {
 					/>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Number of users holding HMT" arrow>
+							<CustomTooltip title="Number of users holding HMT" arrow>
 								<HelpOutlineIcon
 									style={{
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 						</div>
 						<Holders />
 					</div>
@@ -80,13 +80,17 @@ const Home: React.FC = () => {
 					</div>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Total number of transactions" arrow>
+							<CustomTooltip
+								enterTouchDelay={0}
+								title="Total number of transactions"
+								arrow
+							>
 								<HelpOutlineIcon
 									style={{
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 						</div>
 						<TotalTransactions />
 					</div>
@@ -97,13 +101,16 @@ const Home: React.FC = () => {
 					/>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Number of tasks that have been launched" arrow>
+							<CustomTooltip
+								title="Number of tasks that have been launched"
+								arrow
+							>
 								<HelpOutlineIcon
 									style={{
 										color: colorPalette.sky.main,
 									}}
 								/>
-							</Tooltip>
+							</CustomTooltip>
 						</div>
 						<TotalNumberOfTasks />
 					</div>

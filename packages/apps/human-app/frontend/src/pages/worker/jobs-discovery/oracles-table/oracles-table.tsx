@@ -16,6 +16,7 @@ import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 const getColumns = (
   selectOracle: (oracleAddress: string) => void
@@ -39,12 +40,17 @@ const getColumns = (
       header: t('worker.oraclesTable.jobTypes'),
       size: 100,
       enableSorting: false,
-      Cell: (props) => {
-        return <Chips data={props.row.original.jobTypes} />;
+      Cell: ({ row }) => {
+        const jobTypes: string[] = [];
+        for (const jobType of row.original.jobTypes) {
+          jobTypes.push(t(`jobTypeLabels.${jobType as JobType}`));
+        }
+        return <Chips data={jobTypes} />;
       },
     },
     {
       accessorKey: 'url',
+      id: 'seeJobsAction',
       header: '',
       size: 100,
       enableSorting: false,
