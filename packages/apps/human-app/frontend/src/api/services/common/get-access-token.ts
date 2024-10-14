@@ -61,11 +61,7 @@ export function useGetAccessTokenMutation() {
         browserAuthProvider.signOut({
           triggerSignOutSubscriptions: throwExpirationModalOnSignOut,
           callback: () => {
-            if (authType === 'web2') {
-              navigate(routerPaths.worker.signIn);
-            } else {
-              navigate(routerPaths.homePage);
-            }
+            navigate(routerPaths.worker.signIn);
           },
         });
       }
