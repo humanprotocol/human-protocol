@@ -2,7 +2,6 @@ import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsEnum,
   IsObject,
   IsOptional,
   IsString,
