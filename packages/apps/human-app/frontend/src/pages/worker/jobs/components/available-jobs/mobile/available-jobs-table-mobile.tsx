@@ -20,6 +20,7 @@ import { Chip } from '@/components/ui/chip';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { ListItem } from '@/components/ui/list-item';
 import { useColorMode } from '@/hooks/use-color-mode';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -46,7 +47,8 @@ export function AvailableJobsTableMobile({
     fetchNextPage,
     hasNextPage,
   } = useInfiniteGetAvailableJobsData();
-  const { filterParams, setPageParams } = useJobsFilterStore();
+  const { filterParams, setPageParams, resetFilterParams } =
+    useJobsFilterStore();
   const { t } = useTranslation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
 
@@ -59,6 +61,12 @@ export function AvailableJobsTableMobile({
       setAllPages((state) => [...state, ...pagesFromRes]);
     }
   }, [tableData, filterParams.page]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   return (
     <>
@@ -150,7 +158,7 @@ export function AvailableJobsTableMobile({
                     </Typography>
                   </ListItem>
                   <ListItem label={t('worker.jobs.jobType')}>
-                    <Chip label={d.job_type} />
+                    <Chip label={t(`jobTypeLabels.${d.job_type as JobType}`)} />
                   </ListItem>
                 </Grid>
                 <Grid item xs={12}>

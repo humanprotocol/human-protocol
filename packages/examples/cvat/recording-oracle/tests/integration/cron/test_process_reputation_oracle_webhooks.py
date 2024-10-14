@@ -47,7 +47,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.reputation_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed,
+            event_type=RecordingOracleEventTypes.job_completed,
             event_data=event_data,
         )
 
@@ -91,7 +91,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 json={
                     "escrow_address": escrow_address,
                     "chain_id": chain_id,
-                    "event_type": RecordingOracleEventTypes.task_completed.value,
+                    "event_type": RecordingOracleEventTypes.job_completed.value,
                 },
             )
             assert updated_webhook.status == OracleWebhookStatuses.completed.value

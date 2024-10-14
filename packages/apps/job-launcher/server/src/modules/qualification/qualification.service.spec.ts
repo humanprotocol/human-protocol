@@ -14,6 +14,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { ErrorQualification, ErrorWeb3 } from '../../common/constants/errors';
 import { HttpStatus } from '@nestjs/common';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -42,6 +43,7 @@ describe.only('QualificationService', () => {
         },
         QualificationService,
         Web3ConfigService,
+        Web3Service,
         NetworkConfigService,
         {
           provide: HttpService,
@@ -88,7 +90,9 @@ describe.only('QualificationService', () => {
           }) as any,
       );
 
-      const result = await qualificationService.getQualifications();
+      const result = await qualificationService.getQualifications(
+        ChainId.LOCALHOST,
+      );
 
       expect(result).toEqual(qualifications);
     });
@@ -96,7 +100,9 @@ describe.only('QualificationService', () => {
     it('should throw a ControlledError when KVStoreUtils.get fails', async () => {
       (KVStoreUtils.get as any).mockRejectedValue(new Error('KV store error'));
 
-      await expect(qualificationService.getQualifications()).rejects.toThrow(
+      await expect(
+        qualificationService.getQualifications(ChainId.LOCALHOST),
+      ).rejects.toThrow(
         new ControlledError(
           ErrorWeb3.ReputationOracleUrlNotSet,
           HttpStatus.BAD_REQUEST,
@@ -111,11 +117,27 @@ describe.only('QualificationService', () => {
         .spyOn(httpService, 'get')
         .mockImplementation(() => throwError(new Error('HTTP error')) as any);
 
-      await expect(qualificationService.getQualifications()).rejects.toThrow(
+      await expect(
+        qualificationService.getQualifications(ChainId.LOCALHOST),
+      ).rejects.toThrow(
         new ControlledError(
           ErrorQualification.FailedToFetchQualifications,
           HttpStatus.BAD_REQUEST,
         ),
+      );
+    });
+
+    it('should throw a ControlledError when invalid chainId', async () => {
+      (KVStoreUtils.get as any).mockResolvedValue(MOCK_REPUTATION_ORACLE_URL);
+
+      jest
+        .spyOn(httpService, 'get')
+        .mockImplementation(() => throwError(new Error('HTTP error')) as any);
+
+      await expect(
+        qualificationService.getQualifications(ChainId.MAINNET),
+      ).rejects.toThrow(
+        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
       );
     });
   });

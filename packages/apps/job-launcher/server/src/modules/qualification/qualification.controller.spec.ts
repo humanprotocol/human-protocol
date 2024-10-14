@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { QualificationController } from './qualification.controller';
 import { QualificationService } from './qualification.service';
 import { QualificationDto } from './qualification.dto';
+import { ChainId } from '@human-protocol/sdk';
 
 describe('QualificationController', () => {
   let qualificationController: QualificationController;
@@ -42,7 +43,9 @@ describe('QualificationController', () => {
         .spyOn(qualificationService, 'getQualifications')
         .mockResolvedValue(result);
 
-      expect(await qualificationController.getQualifications()).toBe(result);
+      expect(
+        await qualificationController.getQualifications(ChainId.LOCALHOST),
+      ).toBe(result);
       expect(qualificationService.getQualifications).toHaveBeenCalled();
     });
   });

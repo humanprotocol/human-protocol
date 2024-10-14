@@ -1,10 +1,13 @@
 import { Grid, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import { Button } from '@/components/ui/button';
 import { breakpoints } from '@/styles/breakpoints';
 
 export function UpdateVersionModal() {
   const { closeModal } = useModalStore();
+  const { t } = useTranslation();
 
   return (
     <Grid
@@ -30,50 +33,43 @@ export function UpdateVersionModal() {
         }}
       >
         <Typography textAlign="center" variant="h4">
-          We&#39;ve just released a new version of HUMAN App with enhanced
-          features.
+          {t('updateVersionModal.newVersion')}
         </Typography>
         <Typography variant="body1">
-          To continue using the app, please:
+          {t('updateVersionModal.please')}
           <ol>
             <li>
-              <a
-                href="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/sign-up"
-                rel="noopener noreferrer"
-                target="_blank"
+              <Link
+                style={{ textDecoration: 'none', fontWeight: 600 }}
+                to="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/sign-up"
               >
-                Reregister your account
-              </a>
+                {t('updateVersionModal.reregister')}
+              </Link>
             </li>
             <li>
-              <a
-                href="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/kyc-verification"
-                rel="noopener noreferrer"
-                target="_blank"
+              <Link
+                style={{ textDecoration: 'none', fontWeight: 600 }}
+                to="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/kyc-verification"
               >
-                Verify your identity
-              </a>
+                {t('updateVersionModal.verify')}
+              </Link>
             </li>
             <li>
-              <a
-                href="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/wallet-address-registration"
-                rel="noopener noreferrer"
-                target="_blank"
+              <Link
+                style={{ textDecoration: 'none', fontWeight: 600 }}
+                to="https://docs.humanprotocol.org/hub/human-tech-docs/tutorials/workers/wallet-address-registration"
               >
-                Connect your wallet
-              </a>
+                {t('updateVersionModal.connect')}
+              </Link>
             </li>
           </ol>
-          These steps help us ensure the safety of your account and provide you
-          with a better experience. Thank you for your understanding! For
-          assistance, reach out on&nbsp;
-          <a
-            href="https://discord.com/invite/5sHfvE8y8p"
-            rel="noopener noreferrer"
-            target="_blank"
+          {t('updateVersionModal.assistance')}
+          <Link
+            style={{ textDecoration: 'none', fontWeight: 600 }}
+            to="https://discord.com/invite/5sHfvE8y8p"
           >
-            Discord
-          </a>
+            {t('updateVersionModal.discord')}
+          </Link>
         </Typography>
         <Button
           fullWidth
@@ -83,7 +79,7 @@ export function UpdateVersionModal() {
           }}
           variant="contained"
         >
-          Got it!
+          {t('updateVersionModal.gotIt')}
         </Button>
       </Grid>
     </Grid>

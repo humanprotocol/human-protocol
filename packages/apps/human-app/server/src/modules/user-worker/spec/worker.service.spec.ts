@@ -9,7 +9,6 @@ import { exchangeOracleGatewayMock } from '../../../integrations/exchange-oracle
 describe('WorkerService', () => {
   let service: WorkerService;
   let reputationOracleGateway: ReputationOracleGateway;
-  let exchangeOracleGateway: ExchangeOracleGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,9 +27,6 @@ describe('WorkerService', () => {
     service = module.get<WorkerService>(WorkerService);
     reputationOracleGateway = module.get<ReputationOracleGateway>(
       ReputationOracleGateway,
-    );
-    exchangeOracleGateway = module.get<ExchangeOracleGateway>(
-      ExchangeOracleGateway,
     );
   });
 

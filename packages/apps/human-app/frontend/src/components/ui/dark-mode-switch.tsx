@@ -14,14 +14,14 @@ export function DarkModeSwitch() {
         alignItems: 'center',
       }}
     >
-      <MoonIcon />
+      <SunIcon />
       <Switch
         checked={isDarkMode}
         onChange={() => {
           switchMode();
         }}
       />
-      <SunIcon />
+      <MoonIcon />
     </Grid>
   );
 }

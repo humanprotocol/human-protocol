@@ -18,6 +18,7 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 const getColumns = (
   selectOracle: (oracleAddress: string) => void
@@ -41,12 +42,17 @@ const getColumns = (
       header: t('worker.oraclesTable.jobTypes'),
       size: 100,
       enableSorting: false,
-      Cell: (props) => {
-        return <Chips data={props.row.original.jobTypes} />;
+      Cell: ({ row }) => {
+        const jobTypes: string[] = [];
+        for (const jobType of row.original.jobTypes) {
+          jobTypes.push(t(`jobTypeLabels.${jobType as JobType}`));
+        }
+        return <Chips data={jobTypes} />;
       },
     },
     {
       accessorKey: 'url',
+      id: 'seeJobsAction',
       header: '',
       size: 100,
       enableSorting: false,

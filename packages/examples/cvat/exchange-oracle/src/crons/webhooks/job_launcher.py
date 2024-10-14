@@ -11,7 +11,7 @@ from src.chain.kvstore import get_job_launcher_url
 from src.core.config import Config, CronConfig
 from src.core.oracle_events import (
     ExchangeOracleEvent_EscrowCleaned,
-    ExchangeOracleEvent_TaskCreationFailed,
+    ExchangeOracleEvent_JobCreationFailed,
 )
 from src.core.types import JobLauncherEventTypes, Networks, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
@@ -36,7 +36,7 @@ def handle_failure(session: Session, webhook: Webhook, exc: Exception) -> None:
             escrow_address=webhook.escrow_address,
             chain_id=webhook.chain_id,
             type=OracleWebhookTypes.job_launcher,
-            event=ExchangeOracleEvent_TaskCreationFailed(reason=str(exc)),
+            event=ExchangeOracleEvent_JobCreationFailed(reason=str(exc)),
         )
 
 

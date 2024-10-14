@@ -18,7 +18,7 @@ import {
   SortOrder,
 } from '../../../common/enums/global-common';
 const EXCHANGE_ORACLE_URL = 'https://www.example.com/api';
-const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
+export const EXCHANGE_ORACLE_ADDRESS = '0x34df642';
 const ESCROW_ADDRESS = 'test_address';
 const CHAIN_ID = 1;
 const JOB_TYPE = 'FORTUNE';

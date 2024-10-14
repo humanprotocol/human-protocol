@@ -12,7 +12,6 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
-import { JOB_TYPES } from '@/shared/consts';
 import { useColorMode } from '@/hooks/use-color-mode';
 
 interface DrawerMobileProps {
@@ -180,7 +179,7 @@ export function AvailableJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsJobTypeFilterMobile jobTypes={JOB_TYPES} />
+          <AvailableJobsJobTypeFilterMobile />
         </Stack>
         <Divider
           sx={{
