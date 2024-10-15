@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsString, IsObject, IsOptional } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
 import { EventType } from '../../common/enums/webhook';
-import { IsEnumCaseInsensitive } from '../../common/decorators/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class AssignmentRejection {
   @ApiProperty({ name: 'assignee_id' })
