@@ -28,6 +28,8 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 
 @ApiTags('Assignment')
 @Controller('assignment')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class AssignmentController {
   constructor(private readonly assignmentService: AssignmentService) {}
 
