@@ -9,7 +9,7 @@ import { IsNumber, IsString, Min } from 'class-validator';
 import { JobStatus } from '../../common/enums/job';
 import { UserType } from '../../common/enums/user';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnumCaseInsensitive } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export class MockDto {
   @ApiProperty({

@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsOptional, Max, Min, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SortDirection } from '../enums/collection';
-import { IsEnumCaseInsensitive } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export class PageDto<T> {
   @ApiProperty()
