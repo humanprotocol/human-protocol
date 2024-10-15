@@ -12,7 +12,7 @@ import {
   AssignmentStatus,
 } from '../../../common/enums/global-common';
 import { Type } from 'class-transformer';
-import { IsEnumCaseInsensitive } from '../../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../../common/decorators';
 
 export class JobAssignmentDto {
   @AutoMap()

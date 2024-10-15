@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { SortOrder } from '../enums/global-common';
 import { AutoMap } from '@automapper/classes';
-import { IsEnumCaseInsensitive } from './enums';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export abstract class PageableDto {
   @AutoMap()

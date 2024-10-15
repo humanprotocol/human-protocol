@@ -8,16 +8,9 @@ import { of } from 'rxjs';
 import { IsNumber, IsString, Min } from 'class-validator';
 import { UserType } from '../../common/enums/user';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnumCaseInsensitive } from '../utils/enums';
-import { JobStatus } from '../enums/global-common';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export class MockDto {
-  @ApiProperty({
-    enum: JobStatus,
-  })
-  @IsEnumCaseInsensitive(JobStatus)
-  public status: JobStatus;
-
   @ApiProperty({
     enum: UserType,
   })
@@ -47,10 +40,12 @@ describe('TransformEnumInterceptor', () => {
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue({
           body: {
-            status: 'ACTIVE',
             userType: 'OPERATOR',
             amount: 5,
             address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
+          },
+          query: {
+            userType: 'OPERATOR',
           },
         }),
       }),
@@ -74,14 +69,47 @@ describe('TransformEnumInterceptor', () => {
       }
 
       // Mock custom:enum to return the corresponding enum for each property
-      if (metadataKey === 'custom:enum' && propertyKey === 'status') {
-        return JobStatus;
-      }
       if (metadataKey === 'custom:enum' && propertyKey === 'userType') {
         return UserType;
       }
       return undefined; // For non-enum properties, return undefined
     }) as any;
+  });
+
+  it('should transform enum values in query params to lowercase', async () => {
+    // Run the interceptor
+    await interceptor.intercept(executionContext, callHandler).toPromise();
+
+    // Access the modified request query
+    const request = executionContext.switchToHttp().getRequest();
+    console.log(123213, request.query);
+    // Expectations
+    expect(request.query.userType).toBe('operator');
+    expect(request.query).toEqual({
+      userType: 'operator',
+    });
+    expect(callHandler.handle).toBeCalled(); // Ensure the handler is called
+  });
+
+  it('should throw an error if the query value is not a valid enum', async () => {
+    // Modify the request query to have an invalid enum value for userType
+    executionContext.switchToHttp = jest.fn().mockReturnValue({
+      getRequest: jest.fn().mockReturnValue({
+        query: {
+          userType: 'invalidEnum', // Invalid enum value for userType
+        },
+      }),
+    });
+
+    try {
+      // Run the interceptor
+      await interceptor.intercept(executionContext, callHandler).toPromise();
+    } catch (err) {
+      // Expect an error to be thrown
+      expect(err).toBeInstanceOf(BadRequestException);
+      expect(err.response.statusCode).toBe(400);
+      expect(err.response.message).toContain('Validation failed');
+    }
   });
 
   it('should transform enum values to lowercase', async () => {
@@ -93,9 +121,7 @@ describe('TransformEnumInterceptor', () => {
 
     // Expectations
     expect(request.body.userType).toBe('operator'); // Should be transformed to lowercase
-    expect(request.body.status).toBe('active'); // Should be transformed to lowercase
     expect(request.body).toEqual({
-      status: 'active',
       userType: 'operator',
       amount: 5,
       address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
@@ -108,7 +134,6 @@ describe('TransformEnumInterceptor', () => {
     executionContext.switchToHttp = jest.fn().mockReturnValue({
       getRequest: jest.fn().mockReturnValue({
         body: {
-          status: 'active',
           userType: 'invalidEnum', // Invalid enum value for userType
           amount: 5,
           address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
@@ -148,7 +173,6 @@ describe('TransformEnumInterceptor', () => {
       getRequest: jest.fn().mockReturnValue({
         body: {
           transaction: {
-            status: 'ACTIVE',
             userType: 'OPERATOR',
             address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
           },
@@ -165,11 +189,9 @@ describe('TransformEnumInterceptor', () => {
     const request = executionContext.switchToHttp().getRequest();
 
     // Expectations
-    expect(request.body.transaction.status).toBe('active'); // Nested enum should be transformed
     expect(request.body.transaction.userType).toBe('operator');
     expect(request.body).toEqual({
       transaction: {
-        status: 'active',
         userType: 'operator',
         address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
       },

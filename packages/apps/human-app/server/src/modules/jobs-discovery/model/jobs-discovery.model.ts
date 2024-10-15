@@ -13,7 +13,7 @@ import {
   PageableParams,
   PageableResponse,
 } from '../../../common/utils/pageable.model';
-import { IsEnumCaseInsensitive } from '../../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../../common/decorators';
 
 export class JobsDiscoveryParamsDto extends PageableDto {
   @AutoMap()
