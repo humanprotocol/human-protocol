@@ -16,7 +16,7 @@ import {
   StakeSlashedEvent,
   StakeWithdrawnEvent,
 } from '../../generated/schema';
-import { Address } from '@graphprotocol/graph-ts';
+import { Address, dataSource } from '@graphprotocol/graph-ts';
 import { ONE_BI, ZERO_BI } from './utils/number';
 import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
@@ -67,7 +67,10 @@ export function handleStakeDeposited(event: StakeDeposited): void {
   createTransaction(
     event,
     'stake',
-    event.transaction.to,
+    event.params.staker,
+    dataSource.address(),
+    null,
+    null,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)
   );
@@ -103,7 +106,10 @@ export function handleStakeLocked(event: StakeLocked): void {
   createTransaction(
     event,
     'unstake',
-    event.transaction.to,
+    event.params.staker,
+    dataSource.address(),
+    null,
+    null,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)
   );
@@ -128,7 +134,10 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   createTransaction(
     event,
     'stakeWithdrawn',
-    event.transaction.to,
+    event.params.staker,
+    dataSource.address(),
+    null,
+    null,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)
   );
@@ -156,6 +165,9 @@ export function handleStakeAllocated(event: StakeAllocated): void {
   createTransaction(
     event,
     'allocate',
+    event.params.staker,
+    dataSource.address(),
+    null,
     event.params.escrowAddress,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)
@@ -180,6 +192,9 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   createTransaction(
     event,
     'closeAllocation',
+    event.params.staker,
+    dataSource.address(),
+    null,
     event.params.escrowAddress,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)
@@ -204,7 +219,10 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   createTransaction(
     event,
     'slash',
-    event.params.slasher,
+    event.params.staker,
+    dataSource.address(),
+    null,
+    event.params.escrowAddress,
     event.params.tokens,
     Address.fromString(TOKEN_ADDRESS)
   );

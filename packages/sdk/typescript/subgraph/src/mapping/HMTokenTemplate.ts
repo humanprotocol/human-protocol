@@ -158,6 +158,9 @@ export function handleTransfer(event: Transfer): void {
     createTransaction(
       event,
       'fund',
+      event.params._from,
+      dataSource.address(),
+      event.params._to,
       event.params._to,
       event.params._value,
       dataSource.address()
@@ -166,7 +169,10 @@ export function handleTransfer(event: Transfer): void {
     createTransaction(
       event,
       'transfer',
+      event.params._from,
+      dataSource.address(),
       event.params._to,
+      null,
       event.params._value,
       dataSource.address()
     );
@@ -272,7 +278,16 @@ export function handleTransfer(event: Transfer): void {
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  createTransaction(event, 'transferBulk', null, null, dataSource.address());
+  createTransaction(
+    event,
+    'transferBulk',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    null,
+    null,
+    dataSource.address()
+  );
   // Create HMTBulkTransferEvent entity
   const eventEntity = new HMTBulkTransferEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -293,7 +308,10 @@ export function handleApproval(event: Approval): void {
   createTransaction(
     event,
     'approve',
+    event.params._owner,
+    dataSource.address(),
     event.params._spender,
+    null,
     event.params._value,
     dataSource.address()
   );
@@ -318,6 +336,9 @@ export function handleBulkApproval(event: BulkApproval): void {
   createTransaction(
     event,
     'increaseApprovalBulk',
+    event.transaction.from,
+    dataSource.address(),
+    null,
     null,
     null,
     dataSource.address()

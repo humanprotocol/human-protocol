@@ -382,7 +382,9 @@ type Transaction @entity {
   timestamp: BigInt!
   txHash: Bytes!
   from: Bytes!
-  to: Bytes
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
   value: BigInt!
   method: String!
   token: Bytes
@@ -393,8 +395,11 @@ type Transaction @entity {
 type InternalTransaction @entity {
   id: Bytes!
   from: Bytes!
-  to: Bytes
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
   value: BigInt!
   token: Bytes
+  method: String!
   transaction: Transaction!
 }

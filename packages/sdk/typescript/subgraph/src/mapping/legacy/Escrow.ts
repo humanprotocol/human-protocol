@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts';
+import { Address, dataSource } from '@graphprotocol/graph-ts';
 
 import {
   BulkTransfer,
@@ -28,13 +28,12 @@ enum EscrowStatuses {
 }
 
 export function handlePending(event: Pending): void {
-  createTransaction(event, 'setup');
   // Create PendingEvent entity
   const pendingEventEntity = new PendingEvent(toEventId(event));
   pendingEventEntity.block = event.block.number;
   pendingEventEntity.timestamp = event.block.timestamp;
   pendingEventEntity.txHash = event.transaction.hash;
-  pendingEventEntity.escrowAddress = event.address;
+  pendingEventEntity.escrowAddress = dataSource.address();
   pendingEventEntity.sender = event.transaction.from;
   pendingEventEntity.save();
 
@@ -76,11 +75,19 @@ export function handlePending(event: Pending): void {
     }
 
     escrowEntity.save();
+
+    createTransaction(
+      event,
+      'setup',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
-  createTransaction(event, 'storeResults');
   // Create StoreResultsEvent entity
   const eventEntity = new StoreResultsEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -111,11 +118,19 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   if (escrowEntity) {
     escrowEntity.intermediateResultsUrl = event.params._url;
     escrowEntity.save();
+
+    createTransaction(
+      event,
+      'storeResults',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  createTransaction(event, 'bulkTransfer');
   // Create BulkPayoutEvent entity
   const eventEntity = new BulkPayoutEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -181,6 +196,15 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       escrowEntity.finalResultsUrl = finalResultsUrl.value;
     }
     escrowEntity.save();
+
+    createTransaction(
+      event,
+      'bulkTransfer',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 
   // Save statistics, and event day data

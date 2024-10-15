@@ -9,7 +9,7 @@ import { DataSaved } from '../../generated/KVStore/KVStore';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { isValidEthAddress } from './utils/ethAdrress';
-import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
@@ -58,7 +58,7 @@ export function createOrUpdateKVStore(event: DataSaved): void {
 }
 
 export function handleDataSaved(event: DataSaved): void {
-  createTransaction(event, 'set');
+  createTransaction(event, 'set', event.transaction.from, dataSource.address());
   // Create KVStoreSetEvent entity
   const eventEntity = new KVStoreSetEvent(toEventId(event));
   eventEntity.block = event.block.number;

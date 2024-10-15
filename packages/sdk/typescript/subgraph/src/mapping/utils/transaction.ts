@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { Transaction, InternalTransaction } from '../../../generated/schema';
 import { toEventId } from './event';
@@ -5,7 +6,10 @@ import { toEventId } from './event';
 export function createTransaction(
   event: ethereum.Event,
   method: string,
-  to: Address | null = null,
+  from: Address,
+  to: Address,
+  receiver: Address | null = null,
+  escrow: Address | null = null,
   value: BigInt | null = null,
   token: Address | null = null
 ): Transaction {
@@ -15,72 +19,84 @@ export function createTransaction(
     transaction.txHash = event.transaction.hash;
     transaction.block = event.block.number;
     transaction.timestamp = event.block.timestamp;
-    transaction.method = method;
-    transaction.from = event.transaction.from;
-    transaction.to = event.transaction.to;
-    transaction.token = token;
-    transaction.value =
-      value !== null ? BigInt.fromI32(0) : event.transaction.value;
-  } else if (getPriorityMethod(transaction.method, method) == method) {
-    transaction.method = method;
-    transaction.from = event.transaction.from;
-    transaction.to = event.transaction.to;
-    transaction.token = token;
-    transaction.value =
-      value !== null ? BigInt.fromI32(0) : event.transaction.value;
-  }
+    transaction.from = from;
+    transaction.to = event.transaction.to!;
 
-  if (transaction.method != method) {
+    if (
+      Address.fromBytes(transaction.to) != to &&
+      (escrow === null || Address.fromBytes(transaction.to) != escrow) &&
+      (token === null || Address.fromBytes(transaction.to) != token)
+    ) {
+      transaction.method = 'multimethod';
+      transaction.value = BigInt.fromI32(0);
+      transaction.token = null;
+      transaction.escrow = null;
+
+      const internalTransaction = new InternalTransaction(toEventId(event));
+      internalTransaction.method = method;
+      internalTransaction.from = from;
+      internalTransaction.to = to;
+      internalTransaction.value = value !== null ? value : BigInt.fromI32(0);
+      internalTransaction.transaction = transaction.id;
+      internalTransaction.token = token;
+      internalTransaction.escrow = escrow;
+      internalTransaction.receiver = receiver;
+      internalTransaction.save();
+    } else {
+      transaction.to = to;
+      transaction.method = method;
+      transaction.value = value !== null ? value : BigInt.fromI32(0);
+      transaction.token = token;
+      transaction.escrow = escrow;
+      transaction.receiver = receiver;
+    }
+    transaction.save();
+  } else if (
+    mainMethods.includes(method) &&
+    escrow !== null &&
+    Address.fromBytes(transaction.to) == escrow
+  ) {
+    transaction.method = method;
+    transaction.value = value !== null ? value : BigInt.fromI32(0);
+    transaction.token = token;
+    transaction.escrow = escrow;
+    transaction.receiver = receiver;
+    transaction.save();
+  } else {
     const internalTransaction = new InternalTransaction(toEventId(event));
-    internalTransaction.from = event.transaction.from;
-    internalTransaction.to = to !== null ? to : event.transaction.to;
+    internalTransaction.method = method;
+    internalTransaction.from = from;
+    internalTransaction.to = to;
     internalTransaction.value =
-      value !== null ? BigInt.fromI32(0) : event.transaction.value;
+      value !== null ? value : event.transaction.value;
     internalTransaction.transaction = transaction.id;
     internalTransaction.token = token;
+    internalTransaction.escrow = escrow;
+    internalTransaction.receiver = receiver;
     internalTransaction.save();
   }
-
-  transaction.save();
 
   return transaction;
 }
 
-const priorityMethods: string[] = [
+const mainMethods: string[] = [
   'createEscrow',
   'setup',
   'fund',
   'bulkTransfer',
   'complete',
-  'sotoreResults',
+  'storeResults',
   'withdraw',
   'cancel',
   'stake',
-  'unstake',
-  'slash',
-  'allocate',
-  'closeAllocation',
-  'addReward',
-  'stakeWithdrawn',
-  'set',
-  'approve',
-  'increaseApprovalBulk',
-  'transfer',
+  // 'stake',
+  // 'unstake',
+  // 'slash',
+  // 'allocate',
+  // 'closeAllocation',
+  // 'addReward',
+  // 'stakeWithdrawn',
+  // 'set',
+  // 'approve',
+  // 'increaseApprovalBulk',
 ];
-
-function getPriorityMethod(existingMethod: string, newMethod: string): string {
-  if (!existingMethod) return newMethod;
-
-  const existingIndex = getMethodIndex(existingMethod);
-  const newIndex = getMethodIndex(newMethod);
-
-  if (newIndex < 0) {
-    return existingMethod;
-  }
-
-  return newIndex < existingIndex ? newMethod : existingMethod;
-}
-
-function getMethodIndex(eventName: string): number {
-  return priorityMethods.indexOf(eventName);
-}
