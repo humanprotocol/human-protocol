@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString, Min } from 'class-validator';
 import { Currency } from '../../common/enums/payment';
 import { ChainId } from '@human-protocol/sdk';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class PaymentFiatConfirmDto {
   @ApiProperty({ name: 'payment_id' })
