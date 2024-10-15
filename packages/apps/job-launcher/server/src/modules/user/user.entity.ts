@@ -8,6 +8,7 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { ApiKeyEntity } from '../auth/apikey.entity';
+import { WhitelistEntity } from '../whitelist/whitelist.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -37,4 +38,9 @@ export class UserEntity extends BaseEntity implements IUser {
     nullable: true,
   })
   public apiKey: ApiKeyEntity;
+
+  @OneToOne(() => WhitelistEntity, (whitelist) => whitelist.user, {
+    nullable: true,
+  })
+  public whitelist: WhitelistEntity;
 }

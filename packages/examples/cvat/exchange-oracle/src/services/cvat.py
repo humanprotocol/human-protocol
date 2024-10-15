@@ -1,16 +1,48 @@
+"""
+Functions in this module are grouped by various categories, look for separators like  `# Job`, etc.
+"""
+
 import itertools
 import uuid
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import datetime
+from itertools import islice
+from typing import Any
 
-from sqlalchemy import delete, insert, update
+from sqlalchemy import case, delete, func, literal, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
+from src.core.types import (
+    AssignmentStatuses,
+    EscrowValidationStatuses,
+    JobStatuses,
+    ProjectStatuses,
+    TaskStatuses,
+    TaskTypes,
+)
+from src.db import Base, ChildOf
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
-from src.models.cvat import Assignment, DataUpload, EscrowCreation, Image, Job, Project, Task, User
+from src.models.cvat import (
+    Assignment,
+    DataUpload,
+    EscrowCreation,
+    EscrowValidation,
+    Image,
+    Job,
+    Project,
+    Task,
+    User,
+)
 from src.utils.time import utcnow
+
+
+def batched(iterable: Iterable, *, batch_size: int) -> Iterable[Any]:
+    assert batch_size > 0
+    iterator = iter(iterable)
+    while batch := tuple(islice(iterator, batch_size)):
+        yield batch
 
 
 # Project
@@ -81,11 +113,16 @@ def get_projects_by_cvat_ids(
 
 
 def get_project_by_escrow_address(
-    session: Session, escrow_address: str, *, for_update: bool | ForUpdateParams = False
+    session: Session,
+    escrow_address: str,
+    *,
+    for_update: bool | ForUpdateParams = False,
+    status_in: list[ProjectStatuses] | None = None,
 ) -> Project | None:
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
-        .where(Project.escrow_address == escrow_address)
+        .where(Project.escrow_address == escrow_address, *status_filter_arg)
         .first()
     )
 
@@ -138,23 +175,61 @@ def get_projects_by_status(
     return projects.limit(limit).all()
 
 
-def get_escrows_by_project_status(
-    session: Session,
-    project_status: ProjectStatuses,
-    *,
-    included_types: Sequence[TaskTypes] | None = None,
-    limit: int = 5,
-) -> list[tuple[str, int]]:
-    escrows = (
-        session.query(Project.escrow_address, Project.chain_id)
-        .group_by(Project.escrow_address, Project.chain_id)
-        .where(Project.status == project_status.value)
+def complete_projects_with_completed_tasks(session: Session) -> list[int]:
+    incomplete_tasks_exist = (
+        select(1)
+        .where(
+            Task.cvat_project_id == Project.cvat_id,
+            Task.status != TaskStatuses.completed,
+        )
+        .limit(1)
+        .correlate(Project)
+    ).exists()
+
+    stmt = (
+        update(Project)
+        .where(Project.status == ProjectStatuses.annotation, ~incomplete_tasks_exist)
+        .values(status=ProjectStatuses.completed)
+        .returning(Project.cvat_id)
     )
 
-    if included_types:
-        escrows = escrows.where(Project.job_type.in_([t.value for t in included_types]))
+    result = session.execute(stmt)
+    return [row.cvat_id for row in result.all()]
 
-    return escrows.limit(limit).all()
+
+def create_escrow_validations(session: Session):
+    # if escrow have projects with `validation` AND `completed` statuses
+    # it means, some jobs were rejected and re-annotated
+    allowed_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
+    # excluding escrows where all projects are still have `validation` status
+    at_least_one_is_completed = (
+        func.count(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
+    )
+    select_stmt = (
+        select(
+            Project.escrow_address,
+            Project.chain_id,
+            literal(EscrowValidationStatuses.awaiting).label("status"),
+        )
+        .where(Project.status.in_(allowed_statuses))
+        .group_by(Project.escrow_address, Project.chain_id)
+        .having(at_least_one_is_completed)
+    )
+
+    insert_stmt = (
+        insert(EscrowValidation)
+        .from_select(("escrow_address", "chain_id", "status"), select_stmt)
+        .on_conflict_do_update(
+            index_elements=("escrow_address", "chain_id"),
+            set_={
+                "status": EscrowValidationStatuses.awaiting,
+            },
+            where=EscrowValidation.status != EscrowValidationStatuses.awaiting,
+        )
+        .returning(EscrowValidation.id)
+    )
+
+    return session.execute(insert_stmt).all()
 
 
 def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:
@@ -217,7 +292,7 @@ def update_project_statuses_by_escrow_address(
         .values(status=status.value)
         .returning(Project.cvat_id)
     )
-    session.execute(statement)
+    session.execute(statement).all()
 
 
 def delete_project(session: Session, project_id: str) -> None:
@@ -240,7 +315,7 @@ def is_project_completed(session: Session, project_id: str) -> bool:
     return bool(len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs))
 
 
-# EscrowCreation
+# Escrow
 def create_escrow_creation(
     session: Session,
     escrow_address: str,
@@ -326,6 +401,77 @@ def finish_escrow_creations_by_escrow_address(
     session.execute(statement)
 
 
+# EscrowValidation
+
+
+def prepare_escrows_for_validation(
+    session: Session, *, limit: int = 5
+) -> Sequence[tuple[str, str, int]]:
+    subquery = (
+        select(EscrowValidation.id)
+        .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
+        .limit(limit)
+        .order_by(EscrowValidation.attempts.asc())
+        .subquery()
+    )
+    update_stmt = (
+        update(EscrowValidation)
+        .where(EscrowValidation.id.in_(subquery))
+        .values(attempts=EscrowValidation.attempts + 1)
+        .returning(EscrowValidation.escrow_address, EscrowValidation.chain_id)
+    )
+    return session.execute(update_stmt).all()
+
+
+def lock_escrow_for_validation(
+    session: Session,
+    *,
+    escrow_address: str,
+    chain_id: int,
+) -> Sequence[tuple[str, str, int]]:
+    stmt = (
+        select(EscrowValidation.escrow_address, EscrowValidation.chain_id)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .with_for_update(nowait=True)
+    )
+    return session.execute(stmt)
+
+
+def update_escrow_validation(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    *,
+    status: EscrowValidationStatuses | None = None,
+    increase_attempts: bool = False,
+) -> None:
+    values = {}
+    if increase_attempts:
+        values["attempts"] = EscrowValidation.attempts + 1
+    if status is not None:
+        values["status"] = status
+
+    stmt = (
+        update(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .values(**values)
+    )
+    session.execute(stmt)
+
+
+def update_escrow_validation_statuses_by_ids(
+    session: Session,
+    ids: Iterable[str],
+    status: EscrowValidationStatuses,
+) -> None:
+    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
+    session.execute(stmt)
+
+
 # Task
 def create_task(session: Session, cvat_id: int, cvat_project_id: int, status: TaskStatuses) -> str:
     """
@@ -387,7 +533,7 @@ def get_tasks_by_status(
     return query.all()
 
 
-def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:
+def update_task_status(session: Session, task_id: str, status: TaskStatuses) -> None:
     upd = update(Task).where(Task.id == task_id).values(status=status.value)
     session.execute(upd)
 
@@ -438,6 +584,29 @@ def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
     session.execute(statement)
 
 
+def complete_tasks_with_completed_jobs(session: Session) -> list[tuple[str, int]]:
+    incomplete_jobs_exist = (
+        select(1)
+        .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
+        .limit(1)
+        .correlate(Task)
+    ).exists()
+
+    stmt = (
+        update(Task)
+        .where(
+            Task.status == TaskStatuses.annotation,
+            ~incomplete_jobs_exist,
+            Task.project.has(Project.status == ProjectStatuses.annotation),
+        )
+        .values(status=TaskStatuses.completed)
+        .returning(Task.id, Task.cvat_id)
+    )
+
+    result = session.execute(stmt)
+    return [row.cvat_id for row in result.all()]
+
+
 # Job
 
 
@@ -481,7 +650,7 @@ def get_jobs_by_cvat_id(
     )
 
 
-def update_job_status(session: Session, job_id: int, status: JobStatuses) -> None:
+def update_job_status(session: Session, job_id: str, status: JobStatuses) -> None:
     upd = update(Job).where(Job.id == job_id).values(status=status.value)
     session.execute(upd)
 
@@ -502,6 +671,24 @@ def get_jobs_by_cvat_project_id(
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(Job.cvat_project_id == cvat_project_id)
+        .all()
+    )
+
+
+def get_jobs_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    *,
+    for_update: bool | ForUpdateParams = False,
+) -> list[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(
+            Job.project.has(
+                (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+            )
+        )
         .all()
     )
 
@@ -683,6 +870,10 @@ def expire_assignment(session: Session, assignment_id: str):
     update_assignment(session, assignment_id, status=AssignmentStatuses.expired)
 
 
+def reject_assignment(session: Session, assignment_id: str):
+    update_assignment(session, assignment_id, status=AssignmentStatuses.rejected)
+
+
 def complete_assignment(session: Session, assignment_id: str, completed_at: datetime):
     update_assignment(
         session,
@@ -750,3 +941,35 @@ def get_project_images(
         .where(Image.cvat_project_id == cvat_project_id)
         .all()
     )
+
+
+def touch(
+    session: Session,
+    cls: type["Base"],
+    ids: list[str],
+    *,
+    touch_parents: bool = True,
+    time: datetime | None = None,
+) -> None:
+    if time is None:
+        time = utcnow()
+
+    session.execute(update(cls).where(cls.id.in_(ids)).values({cls.updated_at: time}))
+    while touch_parents and issubclass(cls, ChildOf):
+        parent_cls = cls.parent_cls
+        foreign_key_column = next(iter(cls.parent.property.local_columns))
+        parent_id_column = next(iter(foreign_key_column.foreign_keys)).column
+        parent_update_stmt = (
+            update(parent_cls)
+            .where(
+                parent_id_column.in_(
+                    select(foreign_key_column)
+                    .where(cls.id.in_(ids))
+                    .where(foreign_key_column.is_not(None))
+                )
+            )
+            .values({parent_cls.updated_at: time})
+            .returning(parent_cls.id)
+        )
+        ids = session.execute(parent_update_stmt).scalars().all()
+        cls = parent_cls

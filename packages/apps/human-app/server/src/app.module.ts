@@ -42,6 +42,8 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
 
+const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -71,7 +73,24 @@ import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check
             return value;
           })
           .required(),
+        HUMAN_APP_EMAIL: Joi.string().email().required(),
+        HUMAN_APP_PASSWORD: Joi.string().required(),
+        IS_AXIOS_REQUEST_LOGGING_ENABLED: JOI_BOOLEAN_STRING_SCHEMA,
         ALLOWED_HOST: Joi.string().required(),
+        CORS_ENABLED: JOI_BOOLEAN_STRING_SCHEMA,
+        CORS_ALLOWED_ORIGIN: Joi.string(),
+        CORS_ALLOWED_HEADERS: Joi.string(),
+        IS_CACHE_TO_RESTART: JOI_BOOLEAN_STRING_SCHEMA,
+        CACHE_TTL_ORACLE_STATS: Joi.number(),
+        CACHE_TTL_USER_STATS: Joi.number(),
+        CACHE_TTL_DAILY_HMT_SPENT: Joi.number(),
+        CACHE_TTL_HCAPTCHA_USER_STATS: Joi.number(),
+        CACHE_TTL_ORACLE_DISCOVERY: Joi.number(),
+        CACHE_TTL_JOB_ASSIGNMENTS: Joi.number(),
+        CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
+        CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
+        MAX_REQUEST_RETRIES: Joi.number(),
+        FEATURE_FLAG_JOBS_DISCOVERY: JOI_BOOLEAN_STRING_SCHEMA,
       }),
     }),
     AutomapperModule.forRoot({

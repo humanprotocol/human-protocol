@@ -34,7 +34,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session):
     assert webhook.type == OracleWebhookTypes.exchange_oracle
 
     match webhook.event_type:
-        case ExchangeOracleEventTypes.task_finished:
+        case ExchangeOracleEventTypes.job_finished:
             validate_results(
                 escrow_address=webhook.escrow_address,
                 chain_id=webhook.chain_id,
