@@ -36,7 +36,7 @@ import {
 import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })

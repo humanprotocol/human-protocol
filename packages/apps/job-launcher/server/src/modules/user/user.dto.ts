@@ -4,7 +4,7 @@ import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Currency } from '../../common/enums/payment';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()

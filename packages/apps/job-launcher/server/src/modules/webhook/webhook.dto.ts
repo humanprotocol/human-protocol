@@ -8,7 +8,7 @@ import {
   IsEthereumAddress,
 } from 'class-validator';
 import { EventType, OracleType } from '../../common/enums/webhook';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 export class FailedEventData {
   @ApiProperty()
   @IsString()
