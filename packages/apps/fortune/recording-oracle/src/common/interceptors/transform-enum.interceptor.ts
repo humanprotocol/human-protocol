@@ -16,12 +16,21 @@ export class TransformEnumInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const body = request.body;
+    const query = request.query;
 
     // Retrieve the class of the controller's DTO (if applicable)
     const targetClass = this.getTargetClass(context);
 
-    if (targetClass && body) {
-      request.body = this.transformEnums(body, targetClass);
+    if (targetClass) {
+      // Transform and validate enums in the body (for POST requests)
+      if (body) {
+        request.body = this.transformEnums(body, targetClass);
+      }
+
+      // Transform and validate enums in the query (for GET requests)
+      if (query) {
+        request.query = this.transformEnums(query, targetClass);
+      }
     }
 
     return next.handle().pipe(map((data) => data));
@@ -46,33 +55,36 @@ export class TransformEnumInterceptor implements NestInterceptor {
       : null;
   }
 
-  private transformEnums(body: any, targetClass: ClassConstructor<any>): any {
-    // Convert the body to an instance of the target class
-    let transformedInstance = plainToInstance(targetClass, body);
+  private transformEnums(
+    bodyOrQuery: any,
+    targetClass: ClassConstructor<any>,
+  ): any {
+    // Convert the body or query to an instance of the target class
+    let transformedInstance = plainToInstance(targetClass, bodyOrQuery);
 
     // Transform the enums before validation
     transformedInstance = this.lowercaseEnumProperties(
-      body,
+      bodyOrQuery,
       transformedInstance,
       targetClass,
     );
 
-    // Validate the transformed body
+    // Validate the transformed data
     const validationErrors = validateSync(transformedInstance);
     if (validationErrors.length > 0) {
       throw new BadRequestException('Validation failed');
     }
 
-    return body;
+    return bodyOrQuery;
   }
 
   private lowercaseEnumProperties(
-    body: any,
+    bodyOrQuery: any,
     instance: any,
     targetClass: ClassConstructor<any>,
   ): any {
-    for (const property in body) {
-      if (Object.prototype.hasOwnProperty.call(body, property)) {
+    for (const property in bodyOrQuery) {
+      if (bodyOrQuery.hasOwnProperty(property)) {
         const instanceValue = instance[property];
 
         // Retrieve enum metadata if available
@@ -85,21 +97,21 @@ export class TransformEnumInterceptor implements NestInterceptor {
         if (enumType && typeof instanceValue === 'string') {
           // Check if it's an enum and convert to lowercase
           if (Object.values(enumType).includes(instanceValue.toLowerCase())) {
-            body[property] = instanceValue.toLowerCase();
+            bodyOrQuery[property] = instanceValue.toLowerCase();
           }
         } else if (
-          typeof body[property] === 'object' &&
-          !Array.isArray(body[property])
+          typeof bodyOrQuery[property] === 'object' &&
+          !Array.isArray(bodyOrQuery[property])
         ) {
           // Recursively handle nested objects
           this.lowercaseEnumProperties(
-            body[property],
+            bodyOrQuery[property],
             instance[property],
             targetClass,
           );
         }
       }
     }
-    return body;
+    return bodyOrQuery;
   }
 }
