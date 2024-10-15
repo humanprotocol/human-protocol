@@ -11,7 +11,7 @@ async function main() {
   const Staking = await ethers.getContractFactory('Staking');
   const stakingContract = await upgrades.deployProxy(
     Staking,
-    [hmtAddress, 1, 1],
+    [hmtAddress, 1, 1, 1],
     { initializer: 'initialize', kind: 'uups' }
   );
   await stakingContract.waitForDeployment();

@@ -1,14 +1,6 @@
 import { EscrowStatus } from './types';
 import { ChainId, OrderDirection } from './enums';
 
-export interface IAllocation {
-  escrowAddress: string;
-  staker: string;
-  tokens: bigint;
-  createdAt: bigint;
-  closedAt: bigint;
-}
-
 export interface IReward {
   escrowAddress: string;
   amount: bigint;

@@ -81,7 +81,7 @@ services:
       postgres_pass: qwerty
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'localhost:http://host.docker.internal:8545'
+      ethereum: 'sepolia:https://sepolia.infura.io/v3/a9728d7d00a14a3d822c923a8978c5a5'
       GRAPH_LOG: info
   ipfs:
     hostname: ipfs

@@ -9,7 +9,6 @@ import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
 import './interfaces/HMTokenInterface.sol';
 import './interfaces/IEscrow.sol';
-import './interfaces/IRewardPool.sol';
 import './interfaces/IStaking.sol';
 import './libs/Stakes.sol';
 import './utils/Math.sol';
@@ -25,9 +24,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     // Token address
     address public token;
 
-    // Reward pool address
-    address public override rewardPool;
-
     // Minimum amount of tokens an staker needs to stake
     uint256 public minimumStake;
 
@@ -40,8 +36,13 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     // List of stakers
     address[] public stakers;
 
-    // Allocations : escrowAddress => Allocation
-    mapping(address => IStaking.Allocation) public allocations;
+    // Fee percentage
+    uint8 public feePercentage;
+
+    // Accumulated fee balance in the contract
+    uint256 public feeBalance;
+
+    mapping(address => bool) public slashers;
 
     /**
      * @dev Emitted when `staker` stake `tokens` amount.
@@ -69,26 +70,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     );
 
     /**
-     * @dev Emitted when `staker` allocated `tokens` amount to `escrowAddress`.
-     */
-    event StakeAllocated(
-        address indexed staker,
-        uint256 tokens,
-        address indexed escrowAddress,
-        uint256 createdAt
-    );
-
-    /**
-     * @dev Emitted when `staker` close an allocation `escrowAddress`.
-     */
-    event AllocationClosed(
-        address indexed staker,
-        uint256 tokens,
-        address indexed escrowAddress,
-        uint256 closedAt
-    );
-
-    /**
      * @dev Emitted when `owner` set new value for `minimumStake`.
      */
     event SetMinumumStake(uint256 indexed minimumStake);
@@ -99,9 +80,24 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     event SetLockPeriod(uint32 indexed lockPeriod);
 
     /**
-     * @dev Emitted when `owner` set new value for `rewardPool`.
+     * @dev Emitted when `owner` set new value for `feePercentage`.
      */
-    event SetRewardPool(address indexed rewardPool);
+    event SetFeePercentage(uint8 indexed feePercentage);
+
+    /**
+     * @dev Emitted when `owner` withdraw the total `amount` of fees.
+     */
+    event FeeWithdrawn(uint256 amount);
+
+    /**
+     * @dev Emitted when `owner` add a new `slasher`.
+     */
+    event SlasherAdded(address indexed slasher);
+
+    /**
+     * @dev Emitted when `owner` remove an existing `slasher`.
+     */
+    event SlasherRemoved(address indexed slasher);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -111,21 +107,30 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function initialize(
         address _token,
         uint256 _minimumStake,
-        uint32 _lockPeriod
+        uint32 _lockPeriod,
+        uint8 _feePercentage
     ) external payable virtual initializer {
         __Ownable_init_unchained();
 
-        __Staking_init_unchained(_token, _minimumStake, _lockPeriod);
+        __Staking_init_unchained(
+            _token,
+            _minimumStake,
+            _lockPeriod,
+            _feePercentage
+        );
     }
 
     function __Staking_init_unchained(
         address _token,
         uint256 _minimumStake,
-        uint32 _lockPeriod
+        uint32 _lockPeriod,
+        uint8 _feePercentage
     ) internal onlyInitializing {
         token = _token;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
+        _setFeePercentage(_feePercentage);
+        slashers[owner()] = true;
     }
 
     /**
@@ -167,32 +172,21 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Set the destionations of the rewards.
-     * @param _rewardPool Reward pool address
+     * @dev Set the fee percentage for slash.
+     * @param _feePercentage Fee percentage for slash
      */
-    function setRewardPool(address _rewardPool) external override onlyOwner {
-        _setRewardPool(_rewardPool);
+    function setFeePercentage(uint8 _feePercentage) external onlyOwner {
+        _setFeePercentage(_feePercentage);
     }
 
     /**
-     * @dev Set the destionations of the rewards.
-     * @param _rewardPool Reward pool address
+     * @dev Set the fee percentage.
+     * @param _feePercentage Fee percentage
      */
-    function _setRewardPool(address _rewardPool) private {
-        require(_rewardPool != address(0), 'Must be a valid address');
-        rewardPool = _rewardPool;
-        emit SetRewardPool(_rewardPool);
-    }
-
-    /**
-     * @dev Return if escrowAddress is use for allocation.
-     * @param _escrowAddress Address used as signer by the staker for an allocation
-     * @return True if _escrowAddress already used
-     */
-    function isAllocation(
-        address _escrowAddress
-    ) external view override returns (bool) {
-        return _getAllocationState(_escrowAddress) != AllocationState.Null;
+    function _setFeePercentage(uint8 _feePercentage) private {
+        require(_feePercentage <= 100, 'Fee cannot exceed 100%');
+        feePercentage = _feePercentage;
+        emit SetFeePercentage(_feePercentage);
     }
 
     /**
@@ -213,82 +207,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         address _staker
     ) external view override returns (bool) {
         return stakes[_staker].tokensAvailable() > 0;
-    }
-
-    /**
-     * @dev Return the allocation by escrow address.
-     * @param _escrowAddress Address used as allocation identifier
-     * @return Allocation data
-     */
-    function getAllocation(
-        address _escrowAddress
-    ) external view override returns (Allocation memory) {
-        return _getAllocation(_escrowAddress);
-    }
-
-    /**
-     * @dev Return the allocation by job ID.
-     * @param _escrowAddress Address used as allocation identifier
-     * @return Allocation data
-     */
-    function _getAllocation(
-        address _escrowAddress
-    ) private view returns (Allocation memory) {
-        return allocations[_escrowAddress];
-    }
-
-    /**
-     * @dev Return the current state of an allocation.
-     * @param _escrowAddress Address used as the allocation identifier
-     * @return AllocationState
-     */
-    function getAllocationState(
-        address _escrowAddress
-    ) external view override returns (AllocationState) {
-        return _getAllocationState(_escrowAddress);
-    }
-
-    /**
-     * @dev Return the current state of an allocation, partially depends on job status
-     * @param _escrowAddress Job identifier (Escrow address)
-     * @return AllocationState
-     */
-    function _getAllocationState(
-        address _escrowAddress
-    ) private view returns (AllocationState) {
-        Allocation storage allocation = allocations[_escrowAddress];
-
-        if (allocation.staker == address(0)) {
-            return AllocationState.Null;
-        }
-
-        IEscrow escrow = IEscrow(_escrowAddress);
-        IEscrow.EscrowStatuses escrowStatus = escrow.status();
-
-        if (
-            allocation.createdAt != 0 &&
-            allocation.tokens > 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Pending
-        ) {
-            return AllocationState.Pending;
-        }
-
-        if (
-            allocation.closedAt == 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Launched
-        ) {
-            return AllocationState.Active;
-        }
-
-        if (
-            allocation.closedAt == 0 &&
-            (escrowStatus == IEscrow.EscrowStatuses.Complete ||
-                escrowStatus == IEscrow.EscrowStatuses.Cancelled)
-        ) {
-            return AllocationState.Completed;
-        }
-
-        return AllocationState.Closed;
     }
 
     /**
@@ -348,12 +266,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         Stakes.Staker memory staker = stakes[msg.sender];
         require(
-            staker.tokensSecureStake().add(_tokens) >= minimumStake,
+            staker.tokensAvailable().add(_tokens) >= minimumStake,
             'Total stake is below the minimum threshold'
         );
 
         if (staker.tokensStaked == 0) {
-            staker = Stakes.Staker(0, 0, 0, 0);
+            staker = Stakes.Staker(0, 0, 0);
             stakes[msg.sender] = staker;
             stakers.push(msg.sender);
         }
@@ -373,12 +291,11 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         Stakes.Staker storage staker = stakes[msg.sender];
 
         require(_tokens > 0, 'Must be a positive number');
-        require(
-            staker.tokensAvailable() >= _tokens,
-            'Insufficient amount to unstake'
-        );
 
-        uint256 newStake = staker.tokensSecureStake().sub(_tokens);
+        uint256 stakeAvailabe = staker.tokensAvailable();
+        require(stakeAvailabe >= _tokens, 'Insufficient amount to unstake');
+
+        uint256 newStake = stakeAvailabe.sub(_tokens);
         require(
             newStake == 0 || newStake >= minimumStake,
             'Total stake is below the minimum threshold'
@@ -432,136 +349,60 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         address _staker,
         address _escrowAddress,
         uint256 _tokens
-    ) external override onlyOwner {
+    ) external override onlySlasher {
         require(_escrowAddress != address(0), 'Must be a valid address');
 
         Stakes.Staker storage staker = stakes[_staker];
 
-        Allocation storage allocation = allocations[_escrowAddress];
-
         require(_tokens > 0, 'Must be a positive number');
 
         require(
-            _tokens <= allocation.tokens,
-            'Slash tokens exceed allocated ones'
+            _tokens <= staker.tokensStaked,
+            'Slash tokens exceed staked ones'
         );
 
-        staker.unallocate(_tokens);
-        allocation.tokens = allocation.tokens.sub(_tokens);
+        uint256 feeAmount = _tokens.mul(feePercentage).div(100);
+        uint256 tokensToSlash = _tokens.sub(feeAmount);
 
-        staker.release(_tokens);
+        staker.release(tokensToSlash);
 
-        _safeTransfer(rewardPool, _tokens);
+        feeBalance = feeBalance.add(feeAmount);
 
-        // Keep record on Reward Pool
-        IRewardPool(rewardPool).addReward(
-            _escrowAddress,
-            _staker,
-            _slasher,
-            _tokens
-        );
+        _safeTransfer(_slasher, tokensToSlash);
 
-        emit StakeSlashed(_staker, _tokens, _escrowAddress, _slasher);
+        emit StakeSlashed(_staker, tokensToSlash, _escrowAddress, _slasher);
     }
 
     /**
-     * @dev Allocate available tokens to an escrow.
-     * @param _escrowAddress The allocationID will work to identify collected funds related to this allocation
-     * @param _tokens Amount of tokens to allocate
+     * @dev Withdraw fee tokens.
      */
-    function allocate(
-        address _escrowAddress,
-        uint256 _tokens
-    ) external override {
-        _allocate(msg.sender, _escrowAddress, _tokens);
+    function withdrawFees() external onlyOwner {
+        require(feeBalance > 0, 'No fees to withdraw');
+        uint256 amount = feeBalance;
+        feeBalance = 0;
+        _safeTransfer(owner(), amount);
+        emit FeeWithdrawn(amount);
     }
 
     /**
-     * @dev Allocate available tokens to an escrow.
-     * @param _staker Staker address to allocate funds from.
-     * @param _escrowAddress The escrow address which collected funds related to this allocation
-     * @param _tokens Amount of tokens to allocate
+     * @dev Add a new slasher address.
      */
-    function _allocate(
-        address _staker,
-        address _escrowAddress,
-        uint256 _tokens
-    ) private {
-        require(_escrowAddress != address(0), 'Must be a valid address');
-        require(
-            stakes[msg.sender].tokensAvailable() >= _tokens,
-            'Insufficient amount of tokens in the stake'
-        );
-        require(_tokens > 0, 'Must be a positive number');
-        require(
-            _getAllocationState(_escrowAddress) == AllocationState.Null,
-            'Allocation already exists'
-        );
+    function addSlasher(address _slasher) external onlyOwner {
+        require(_slasher != address(0), 'Invalid slasher address');
+        require(!slashers[_slasher], 'Address is already a slasher');
 
-        Allocation memory allocation = Allocation(
-            _escrowAddress, // Escrow address
-            _staker, // Staker address
-            _tokens, // Tokens allocated
-            block.number, // createdAt
-            0 // closedAt
-        );
-
-        allocations[_escrowAddress] = allocation;
-        stakes[_staker].allocate(allocation.tokens);
-
-        emit StakeAllocated(
-            _staker,
-            allocation.tokens,
-            _escrowAddress,
-            allocation.createdAt
-        );
+        slashers[_slasher] = true;
+        emit SlasherAdded(_slasher);
     }
 
     /**
-     * @dev Close an allocation and free the staked tokens.
-     * @param _escrowAddress The allocation identifier
+     * @dev Remove an existing slasher address.
      */
-    function closeAllocation(address _escrowAddress) external override {
-        require(_escrowAddress != address(0), 'Must be a valid address');
+    function removeSlasher(address _slasher) external onlyOwner {
+        require(slashers[_slasher], 'Address is not a slasher');
 
-        _closeAllocation(_escrowAddress);
-    }
-
-    /**
-     * @dev Close an allocation and free the staked tokens.
-     * @param _escrowAddress The allocation identifier
-     */
-    function _closeAllocation(address _escrowAddress) private {
-        Allocation storage allocation = allocations[_escrowAddress];
-        require(
-            allocation.staker == msg.sender,
-            'Only the allocator can close the allocation'
-        );
-
-        AllocationState allocationState = _getAllocationState(_escrowAddress);
-        require(
-            allocationState == AllocationState.Completed,
-            'Allocation has no completed state'
-        );
-
-        allocation.closedAt = block.number;
-        uint256 diffInBlocks = Math.diffOrZero(
-            allocation.closedAt,
-            allocation.createdAt
-        );
-        require(diffInBlocks > 0, 'Allocation cannot be closed so early');
-
-        uint256 _tokens = allocation.tokens;
-
-        stakes[allocation.staker].unallocate(_tokens);
-        allocation.tokens = 0;
-
-        emit AllocationClosed(
-            allocation.staker,
-            _tokens,
-            _escrowAddress,
-            allocation.closedAt
-        );
+        slashers[_slasher] = false;
+        emit SlasherRemoved(_slasher);
     }
 
     function _safeTransfer(address to, uint256 value) internal {
@@ -579,6 +420,11 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             to,
             value
         );
+    }
+
+    modifier onlySlasher() {
+        require(slashers[msg.sender], 'Caller is not a slasher');
+        _;
     }
 
     // solhint-disable-next-line no-empty-blocks
