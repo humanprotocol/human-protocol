@@ -8,7 +8,7 @@ import { of } from 'rxjs';
 import { IsNumber, IsString, Min } from 'class-validator';
 import { JobType } from '../../common/enums/job';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnumCaseInsensitive } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../decorators/enums';
 
 export class MockDto {
   @ApiProperty({

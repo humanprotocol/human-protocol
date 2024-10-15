@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SortDirection } from '../enums/collection';
-import { IsEnumCaseInsensitive } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../decorators/enums';
 
 export class PageDto<T> {
   @ApiProperty()

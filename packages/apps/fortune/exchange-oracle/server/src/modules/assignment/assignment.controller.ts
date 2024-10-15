@@ -55,8 +55,8 @@ export class AssignmentController {
   })
   @Post()
   async createAssignment(
-    @Request() req: RequestWithUser,
     @Body() body: CreateAssignmentDto,
+    @Request() req: RequestWithUser,
   ): Promise<AssignJobResponseDto> {
     const assignment = await this.assignmentService.createAssignment(
       body,
@@ -91,9 +91,10 @@ export class AssignmentController {
   })
   @Get()
   getAssignments(
-    @Request() req: RequestWithUser,
     @Query() query: GetAssignmentsDto,
+    @Request() req: RequestWithUser,
   ): any {
+    console.log(query)
     return this.assignmentService.getAssignmentList(
       query,
       req.user.address,
@@ -124,8 +125,8 @@ export class AssignmentController {
   })
   @Post('resign')
   resign(
-    @Request() req: RequestWithUser,
     @Body() body: ResignDto,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     return this.assignmentService.resign(
       Number(body.assignmentId),

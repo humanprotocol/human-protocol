@@ -8,7 +8,7 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators/enums';
 
 export class CreateAssignmentDto {
   @ApiProperty({
