@@ -8,7 +8,7 @@ import { of } from 'rxjs';
 import { IsNumber, IsString, Min } from 'class-validator';
 import { JobRequestType } from '../../common/enums/job';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnumCaseInsensitive } from '../utils/enums';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export class MockDto {
   @ApiProperty({
@@ -44,6 +44,9 @@ describe('TransformEnumInterceptor', () => {
             amount: 5,
             address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
           },
+          query: {
+            jobType: 'FORTUNE',
+          },
         }),
       }),
       getHandler: jest.fn().mockReturnValue({
@@ -71,6 +74,42 @@ describe('TransformEnumInterceptor', () => {
       }
       return undefined; // For non-enum properties, return undefined
     }) as any;
+  });
+
+  it('should transform enum values in query params to lowercase', async () => {
+    // Run the interceptor
+    await interceptor.intercept(executionContext, callHandler).toPromise();
+
+    // Access the modified request query
+    const request = executionContext.switchToHttp().getRequest();
+
+    // Expectations
+    expect(request.query.jobType).toBe('fortune');
+    expect(request.query).toEqual({
+      jobType: 'fortune',
+    });
+    expect(callHandler.handle).toBeCalled(); // Ensure the handler is called
+  });
+
+  it('should throw an error if the query value is not a valid enum', async () => {
+    // Modify the request query to have an invalid enum value for jobType
+    executionContext.switchToHttp = jest.fn().mockReturnValue({
+      getRequest: jest.fn().mockReturnValue({
+        query: {
+          jobType: 'invalidEnum', // Invalid enum value for jobType
+        },
+      }),
+    });
+
+    try {
+      // Run the interceptor
+      await interceptor.intercept(executionContext, callHandler).toPromise();
+    } catch (err) {
+      // Expect an error to be thrown
+      expect(err).toBeInstanceOf(BadRequestException);
+      expect(err.response.statusCode).toBe(400);
+      expect(err.response.message).toContain('Validation failed');
+    }
   });
 
   it('should transform enum values to lowercase', async () => {

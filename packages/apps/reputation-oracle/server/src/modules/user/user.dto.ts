@@ -9,7 +9,7 @@ import { Transform } from 'class-transformer';
 import { UserStatus, Role } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { SignatureType } from '../../common/enums/web3';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from 'src/common/decorators';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()

@@ -8,7 +8,7 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { Transform } from 'class-transformer';
-import { IsEnumCaseInsensitive } from '../../common/utils/enums';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class ReputationCreateDto {
   @ApiProperty({ name: 'chain_id' })
