@@ -92,7 +92,7 @@ describe('JobController', () => {
 
       mockJobService.createJob.mockResolvedValueOnce(1);
 
-      const result = await jobController.quickLaunch(mockRequest, jobDto);
+      const result = await jobController.quickLaunch(jobDto, mockRequest);
 
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user.id,
@@ -122,7 +122,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.quickLaunch(mockRequest, jobDto),
+        jobController.quickLaunch(jobDto, mockRequest),
       ).rejects.toThrow('Conflict');
       expect(mockJobService.createJob).not.toHaveBeenCalled();
     });
@@ -140,7 +140,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.quickLaunch(mockRequest, invalidJobDto),
+        jobController.quickLaunch(invalidJobDto, mockRequest),
       ).rejects.toThrow('Bad Request');
       expect(mockJobService.createJob).not.toHaveBeenCalled();
     });
@@ -158,7 +158,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.quickLaunch(mockRequest, jobDto),
+        jobController.quickLaunch(jobDto, mockRequest),
       ).rejects.toThrow('Unauthorized');
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -185,8 +185,8 @@ describe('JobController', () => {
       );
 
       const result = await jobController.createFortuneJob(
-        mockRequest,
         jobFortuneDto,
+        mockRequest,
       );
 
       expect(result).toBe(1);
@@ -208,7 +208,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createFortuneJob(mockRequest, jobFortuneDto),
+        jobController.createFortuneJob(jobFortuneDto, mockRequest),
       ).rejects.toThrow(UnauthorizedException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -225,7 +225,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createFortuneJob(mockRequest, jobFortuneDto),
+        jobController.createFortuneJob(jobFortuneDto, mockRequest),
       ).rejects.toThrow(ConflictException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -242,7 +242,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createFortuneJob(mockRequest, jobFortuneDto),
+        jobController.createFortuneJob(jobFortuneDto, mockRequest),
       ).rejects.toThrow(BadRequestException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -290,7 +290,7 @@ describe('JobController', () => {
         async (_lock, _timeout, fn) => await fn(),
       );
 
-      const result = await jobController.createCvatJob(mockRequest, jobCvatDto);
+      const result = await jobController.createCvatJob(jobCvatDto, mockRequest);
 
       expect(result).toBe(1);
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -311,7 +311,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createCvatJob(mockRequest, jobCvatDto),
+        jobController.createCvatJob(jobCvatDto, mockRequest),
       ).rejects.toThrow(UnauthorizedException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -328,7 +328,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createCvatJob(mockRequest, jobCvatDto),
+        jobController.createCvatJob(jobCvatDto, mockRequest),
       ).rejects.toThrow(ConflictException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
@@ -345,7 +345,7 @@ describe('JobController', () => {
       );
 
       await expect(
-        jobController.createCvatJob(mockRequest, jobCvatDto),
+        jobController.createCvatJob(jobCvatDto, mockRequest),
       ).rejects.toThrow(BadRequestException);
 
       expect(mockMutexManagerService.runExclusive).toHaveBeenCalledWith(
