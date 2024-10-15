@@ -9,6 +9,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { ListItem } from '@/components/ui/list-item';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 export function OraclesTableMobile({
   selectOracle,
@@ -66,7 +67,11 @@ export function OraclesTableMobile({
               <Typography variant="body2">{d.url || ''}</Typography>
             </ListItem>
             <ListItem label={t('worker.oraclesTable.jobTypes')}>
-              <Chips data={d.jobTypes} />
+              <Chips
+                data={d.jobTypes.map((jobType) =>
+                  t(`jobTypeLabels.${jobType as JobType}`)
+                )}
+              />
             </ListItem>
           </Grid>
           <TableButton

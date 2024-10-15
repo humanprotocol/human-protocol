@@ -10,6 +10,7 @@ import { PaymentRepository } from './payment.repository';
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
 import { RateService } from './rate.service';
+import { WhitelistModule } from '../whitelist/whitelist.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RateService } from './rate.service';
     TypeOrmModule.forFeature([PaymentEntity]),
     ConfigModule,
     Web3Module,
+    WhitelistModule,
     MinioModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

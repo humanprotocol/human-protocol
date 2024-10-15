@@ -5,6 +5,7 @@ const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_JOB_ASSIGNMENTS = 45 * 24 * 60 * 60;
 const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
@@ -137,6 +138,17 @@ export class EnvironmentConfigService {
     return this.configService.get<number>(
       'CACHE_TTL_ORACLE_DISCOVERY',
       DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
+    );
+  }
+
+  /**
+   * The cache time-to-live (TTL) for user job assignments.
+   * Default: 45 days
+   */
+  get cacheTtlJobAssignments(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_JOB_ASSIGNMENTS',
+      DEFAULT_CACHE_TTL_JOB_ASSIGNMENTS,
     );
   }
 

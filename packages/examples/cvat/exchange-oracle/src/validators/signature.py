@@ -5,9 +5,7 @@ from http import HTTPStatus
 
 from fastapi import HTTPException, Request
 
-from src.chain.escrow import (
-    get_available_webhook_types,
-)
+from src.chain.escrow import get_available_webhook_types
 from src.chain.web3 import recover_signer
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
@@ -41,9 +39,4 @@ async def validate_cvat_signature(request: Request, x_signature_256: str):
     )
 
     if not hmac.compare_digest(x_signature_256, signature):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
-
-
-async def validate_human_app_signature(signature: str):
-    if not signature == Config.human_app_config.signature:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)

@@ -8,9 +8,10 @@ import type {
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
+import type { UserData } from '@/auth/auth-context';
 
 export const workerDrawerTopMenuItems = (
-  addressRegistered: boolean
+  user: UserData | null
 ): TopMenuItem[] => {
   return [
     <Grid
@@ -28,16 +29,16 @@ export const workerDrawerTopMenuItems = (
       </Typography>
     </Grid>,
     {
-      label: t('components.DrawerNavigation.captchaLabelling'),
+      label: t('components.DrawerNavigation.captchaLabeling'),
       link: routerPaths.worker.enableLabeler,
-      disabled: !addressRegistered,
+      disabled: !user?.wallet_address || user.kyc_status !== 'approved',
     },
     ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
       ? [
           {
             label: t('components.DrawerNavigation.jobsDiscovery'),
             link: routerPaths.worker.jobsDiscovery,
-            disabled: !addressRegistered,
+            disabled: !user?.wallet_address || user.kyc_status !== 'approved',
           },
         ]
       : []),

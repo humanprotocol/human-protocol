@@ -152,7 +152,7 @@ export function DrawerNavigation({
           </List>
           <List>
             {bottomMenuItems?.map(({ label, link, icon, href, onClick }) => (
-              <ListItem alignItems="center" disablePadding key={link}>
+              <ListItem alignItems="center" disablePadding key={label}>
                 <ListItemButton
                   alignItems="center"
                   onClick={() => {

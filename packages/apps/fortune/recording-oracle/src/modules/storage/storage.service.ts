@@ -49,7 +49,7 @@ export class StorageService {
       ) {
         try {
           const encryption = await Encryption.build(
-            this.pgpConfigService.privateKey,
+            this.pgpConfigService.privateKey!,
             this.pgpConfigService.passphrase,
           );
 

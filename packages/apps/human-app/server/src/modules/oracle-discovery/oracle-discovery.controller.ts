@@ -29,7 +29,7 @@ export class OracleDiscoveryController {
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @UsePipes(new ValidationPipe())
-  public getOracles(
+  public async getOracles(
     @Query() dto: OracleDiscoveryDto,
   ): Promise<OracleDiscoveryResponse[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
