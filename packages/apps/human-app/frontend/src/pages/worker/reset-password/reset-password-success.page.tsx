@@ -7,10 +7,11 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/components/ui/page-card';
-import { colorPalette } from '@/styles/color-palette';
 import { useAuth } from '@/auth/use-auth';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function ResetPasswordWorkerSuccessPage() {
+  const { colorPalette } = useColorMode();
   const { signOut } = useAuth();
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function ResetPasswordWorkerSuccessPage() {
         </Grid>
       }
     >
-      <Grid container gap="2rem">
+      <Grid container gap="1.5rem">
         <Typography variant="body1">
           {t('worker.resetPasswordSuccess.description')}
         </Typography>

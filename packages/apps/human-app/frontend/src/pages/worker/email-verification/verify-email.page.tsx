@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { colorPalette } from '@/styles/color-palette';
 import { PageCard, PageCardLoader } from '@/components/ui/page-card';
 import { useLocationState } from '@/hooks/use-location-state';
 import { env } from '@/shared/env';
@@ -23,8 +22,11 @@ import { useAuth } from '@/auth/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { MailTo } from '@/components/ui/mail-to';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function VerifyEmailWorkerPage() {
+  const { colorPalette, isDarkMode } = useColorMode();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const isAuthenticated = Boolean(user);
@@ -95,7 +97,14 @@ export function VerifyEmailWorkerPage() {
                 values={{ email: routerState?.email }}
               />
             </Typography>
-            <Typography color={colorPalette.primary.light} variant="body1">
+            <Typography
+              color={
+                isDarkMode
+                  ? onlyDarkModeColor.additionalTextColor
+                  : colorPalette.primary.light
+              }
+              variant="body1"
+            >
               {t('worker.verifyEmail.paragraph2')}
             </Typography>
             <Typography variant="body1">

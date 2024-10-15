@@ -4,7 +4,6 @@ import { t } from 'i18next';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import type { EthKVStoreKeyValues } from '@/smart-contracts/EthKVStore/config';
 import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 import { OptionalText } from '@/components/ui/optional-text';
@@ -16,6 +15,7 @@ import {
   order,
   sortFormKeys,
 } from '@/pages/operator/sign-up/add-keys/sort-form';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const existingKeysConfig: Record<
   EthKVStoreKeyValues,
@@ -86,6 +86,7 @@ export function ExistingKeys({
   openEditMode: () => void;
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
 }) {
+  const { colorPalette } = useColorMode();
   const { getValues } = useFormContext<GetEthKVStoreValuesSuccessResponse>();
   const formValues = getValues();
 

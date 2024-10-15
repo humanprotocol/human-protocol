@@ -23,6 +23,7 @@ import { routerPaths } from './router-paths';
 
 export function Router() {
   const { user } = useAuth();
+
   return (
     <Routes>
       <Route element={<LayoutUnprotected />}>

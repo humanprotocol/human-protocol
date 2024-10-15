@@ -4,7 +4,6 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OraclesTable } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table';
 import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-job-types-select';
-import { colorPalette } from '@/styles/color-palette';
 import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
 
@@ -19,12 +18,9 @@ export function JobsDiscoveryPage() {
       <Grid item xs={12}>
         <Paper
           sx={{
-            backgroundColor: isMobile
-              ? colorPalette.paper.main
-              : colorPalette.white,
             height: '100%',
             boxShadow: 'none',
-            padding: isMobile ? '20px' : '40px',
+            padding: isMobile ? '20px' : '64px 144px',
             minHeight: '800px',
             borderRadius: '20px',
           }}

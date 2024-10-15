@@ -5,9 +5,13 @@ import { Button } from '@/components/ui/button';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import { routerPaths } from '@/router/router-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
+import { useAuth } from '@/auth/use-auth';
+import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 
 export function ExpirationModal() {
+  const { signOut } = useAuth();
+  const { signOut: web3SignOut } = useWeb3Auth();
   const { closeModal } = useModalStore();
   const navigate = useNavigate();
 
@@ -50,9 +54,11 @@ export function ExpirationModal() {
             fullWidth
             onClick={() => {
               if (browserAuthProvider.authType === 'web2') {
-                navigate(routerPaths.worker.signIn);
+                signOut();
+                navigate(routerPaths.worker.signIn, { replace: true });
               } else {
-                navigate(routerPaths.homePage);
+                web3SignOut();
+                navigate(routerPaths.homePage, { replace: true });
               }
               closeModal();
             }}

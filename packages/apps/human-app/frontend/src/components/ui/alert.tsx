@@ -4,30 +4,63 @@ import ErrorIcon from '@mui/icons-material/Error';
 import MuiAlert from '@mui/material/Alert';
 import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import { Typography } from '@mui/material';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { darkColorPalette } from '@/styles/dark-color-palette';
 
-const getIcon = (severity: MuiAlertProps['severity']) => {
+const getIcon = (severity: MuiAlertProps['severity'], isDarkMode: boolean) => {
   switch (severity) {
     case 'success':
-      return <CheckCircleIcon />;
+      return (
+        <CheckCircleIcon sx={isDarkMode ? { fill: 'white' } : undefined} />
+      );
 
     case 'error':
-      return <ErrorIcon />;
+      return <ErrorIcon sx={isDarkMode ? { fill: 'white' } : undefined} />;
 
     case 'warning':
-      return <WarningIcon />;
+      return <WarningIcon sx={isDarkMode ? { fill: 'white' } : undefined} />;
 
     default:
       return undefined;
   }
 };
 
-export function Alert({ severity, color, children, ...rest }: MuiAlertProps) {
-  const icon = getIcon(severity);
-  const fontColor = color === 'error' ? colorPalette.error.main : 'inherit';
+export function Alert({
+  severity,
+  color,
+  children,
+  ...rest
+}: Omit<MuiAlertProps, 'color'> & { color: 'success' | 'error' }) {
+  const { colorPalette, isDarkMode } = useColorMode();
+  const icon = getIcon(severity, isDarkMode);
+  const fontColor = (() => {
+    if (isDarkMode) {
+      return 'white';
+    }
+    return color === 'error' ? colorPalette.error.main : 'inherit';
+  })();
+
+  const sxForDarkMode = {
+    backgroundColor: (() => {
+      switch (color) {
+        case 'error':
+          return darkColorPalette.error.main;
+
+        case 'success':
+          return darkColorPalette.success.main;
+      }
+    })(),
+  };
+
   return (
-    <MuiAlert color={color} icon={icon} {...rest} variant="standard">
-      <Typography color={fontColor} variant="subtitle2">
+    <MuiAlert
+      color={color}
+      icon={icon}
+      {...rest}
+      sx={isDarkMode ? sxForDarkMode : undefined}
+      variant="standard"
+    >
+      <Typography sx={{ color: `${fontColor} !important` }} variant="subtitle2">
         {children}
       </Typography>
     </MuiAlert>

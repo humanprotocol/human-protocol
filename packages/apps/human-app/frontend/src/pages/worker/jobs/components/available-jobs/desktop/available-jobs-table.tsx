@@ -20,12 +20,13 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
-import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-network-filter';
 import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-reward-amount-sort';
 import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-job-type-filter';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 export type AvailableJobsTableData = AvailableJob & {
@@ -137,7 +138,10 @@ const getColumns = (callbacks: {
                 callbacks.assignJob({ escrow_address, chain_id });
               }}
             >
-              <Typography color={colorPalette.white} variant="buttonSmall">
+              <Typography
+                sx={{ color: 'white !important' }}
+                variant="buttonSmall"
+              >
                 {t('worker.jobs.selectJob')}
               </Typography>
             </TableButton>
@@ -149,6 +153,7 @@ const getColumns = (callbacks: {
 };
 
 export function AvailableJobsTable() {
+  const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,
     setPageParams,
@@ -163,11 +168,10 @@ export function AvailableJobsTable() {
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation, isPending: isAssignJobMutationPending } =
-    useAssignJobMutation({
-      onSuccess: onJobAssignmentSuccess,
-      onError: onJobAssignmentError,
-    });
+  const { mutate: assignJobMutation } = useAssignJobMutation({
+    onSuccess: onJobAssignmentSuccess,
+    onError: onJobAssignmentError,
+  });
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -203,13 +207,22 @@ export function AvailableJobsTable() {
     state: {
       isLoading: tableStatus === 'pending',
       showAlertBanner: tableStatus === 'error',
-      showProgressBars: tableStatus === 'pending' || isAssignJobMutationPending,
       pagination: paginationState,
     },
     enablePagination: Boolean(tableData?.total_pages),
     manualPagination: true,
     onPaginationChange: setPaginationState,
     muiPaginationProps: {
+      SelectProps: {
+        sx: {
+          '.MuiSelect-icon': {
+            ':hover': {
+              backgroundColor: 'blue',
+            },
+            fill: colorPalette.text.primary,
+          },
+        },
+      },
       rowsPerPageOptions: [5, 10],
     },
     pageCount: tableData?.total_pages || -1,
@@ -229,6 +242,22 @@ export function AvailableJobsTable() {
         }}
       />
     ),
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

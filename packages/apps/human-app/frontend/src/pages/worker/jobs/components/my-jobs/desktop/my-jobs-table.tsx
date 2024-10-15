@@ -8,6 +8,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
+import { Box } from '@mui/material';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
@@ -28,8 +29,10 @@ import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/desk
 import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
-import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
 
 const getColumnsDefinition = (
   resignJob: (assignment_id: string) => void
@@ -139,10 +142,19 @@ const getColumnsDefinition = (
     Cell: (props) => {
       const status = props.row.original.status;
       return (
-        <Chip
-          backgroundColor={parseJobStatusChipColor(status)}
-          label={status}
-        />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '3px 4px',
+            color: lightModeColorPalette.white,
+            backgroundColor: '#5D0CE9',
+            borderRadius: '16px',
+          }}
+        >
+          {status}
+        </Box>
       );
     },
     muiTableHeadCellProps: () => ({
@@ -192,6 +204,7 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
+  const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,
     setPageParams,
@@ -243,7 +256,6 @@ export function MyJobsTable() {
     state: {
       isLoading: tableStatus === 'pending',
       showAlertBanner: tableStatus === 'error',
-      showProgressBars: tableStatus === 'pending',
       pagination: paginationState,
     },
     enablePagination: Boolean(tableData?.total_pages),
@@ -252,6 +264,16 @@ export function MyJobsTable() {
       setPaginationState(updater);
     },
     muiPaginationProps: {
+      SelectProps: {
+        sx: {
+          '.MuiSelect-icon': {
+            ':hover': {
+              backgroundColor: 'blue',
+            },
+            fill: colorPalette.text.primary,
+          },
+        },
+      },
       rowsPerPageOptions: [5, 10],
     },
     pageCount: tableData?.total_pages || -1,
@@ -270,6 +292,22 @@ export function MyJobsTable() {
         }}
       />
     ),
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

@@ -6,10 +6,10 @@ import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
+import { useColorMode } from '@/hooks/use-color-mode';
 import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
 import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
 import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
@@ -20,6 +20,7 @@ interface DrawerMobileProps {
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 

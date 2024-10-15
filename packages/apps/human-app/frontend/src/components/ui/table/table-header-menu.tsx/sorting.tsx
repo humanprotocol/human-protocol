@@ -2,7 +2,7 @@ import { Divider, Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItemText from '@mui/material/ListItemText';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface SortingMenuProps {
   sortingOptions: { label: string; sortCallback: () => void }[];
@@ -10,6 +10,8 @@ interface SortingMenuProps {
 }
 
 export function Sorting({ sortingOptions, clear }: SortingMenuProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <List sx={{ padding: 0 }}>
       <Typography

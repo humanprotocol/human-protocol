@@ -1,5 +1,5 @@
 import Grid from '@mui/material/Grid/Grid';
-import { FilersIcon } from '@/components/ui/icons';
+import { FiltersIcon } from '@/components/ui/icons';
 
 export type IconType = 'filter';
 
@@ -13,7 +13,7 @@ export function TextHeaderWithIcon({
   const getIcon = () => {
     switch (iconType) {
       case 'filter':
-        return <FilersIcon />;
+        return <FiltersIcon />;
     }
   };
 
