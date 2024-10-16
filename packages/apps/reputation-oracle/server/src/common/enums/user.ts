@@ -1,14 +1,14 @@
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  PENDING = 'PENDING',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
 }
 
 export enum Role {
-  OPERATOR = 'OPERATOR',
-  WORKER = 'WORKER',
-  HUMAN_APP = 'HUMAN_APP',
-  ADMIN = 'ADMIN',
+  OPERATOR = 'operator',
+  WORKER = 'worker',
+  HUMAN_APP = 'human_app',
+  ADMIN = 'admin',
 }
 
 export enum KycStatus {
@@ -23,6 +23,6 @@ export enum KycStatus {
 }
 
 export enum OperatorStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
 }
