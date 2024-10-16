@@ -68,6 +68,9 @@ export class DatabaseConfigService {
    * Default: 'log,info,warn,error'
    */
   get logging(): string {
-    return this.configService.get<string>('POSTGRES_LOGGING', 'log,info,warn,error');
+    return this.configService.get<string>(
+      'POSTGRES_LOGGING',
+      'log,info,warn,error',
+    );
   }
 }

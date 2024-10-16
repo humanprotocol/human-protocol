@@ -49,25 +49,25 @@ export enum TokenId {
 }
 
 export enum PaymentSource {
-  FIAT = 'FIAT',
-  CRYPTO = 'CRYPTO',
-  BALANCE = 'BALANCE',
+  FIAT = 'fiat',
+  CRYPTO = 'crypto',
+  BALANCE = 'balance',
 }
 
 export enum PaymentFiatMethodType {
-  CARD = 'CARD',
+  CARD = 'card',
 }
 
 export enum PaymentType {
-  DEPOSIT = 'DEPOSIT',
-  REFUND = 'REFUND',
-  WITHDRAWAL = 'WITHDRAWAL',
+  DEPOSIT = 'deposit',
+  REFUND = 'refund',
+  WITHDRAWAL = 'withdrawal',
 }
 
 export enum PaymentStatus {
-  PENDING = 'PENDING',
-  FAILED = 'FAILED',
-  SUCCEEDED = 'SUCCEEDED',
+  PENDING = 'pending',
+  FAILED = 'failed',
+  SUCCEEDED = 'succeeded',
 }
 
 export enum StripePaymentStatus {

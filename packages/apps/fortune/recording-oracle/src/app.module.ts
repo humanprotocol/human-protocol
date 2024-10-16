@@ -20,6 +20,10 @@ import { EnvConfigModule } from './common/config/config.module';
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
     },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformEnumInterceptor,
+    },
   ],
   imports: [
     ConfigModule.forRoot({

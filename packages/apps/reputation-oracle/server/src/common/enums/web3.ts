@@ -5,10 +5,10 @@ export enum Web3Env {
 }
 
 export enum SignatureType {
-  SIGNUP = 'SIGNUP',
-  SIGNIN = 'SIGNIN',
-  ENABLE_OPERATOR = 'ENABLE_OPERATOR',
-  DISABLE_OPERATOR = 'DISABLE_OPERATOR',
-  CERTIFICATE_AUTHENTICATION = 'CERTIFICATE_AUTHENTICATION',
-  REGISTER_ADDRESS = 'REGISTER_ADDRESS',
+  SIGNUP = 'signup',
+  SIGNIN = 'signin',
+  ENABLE_OPERATOR = 'enable_operator',
+  DISABLE_OPERATOR = 'disable_operator',
+  CERTIFICATE_AUTHENTICATION = 'certificate_authentication',
+  REGISTER_ADDRESS = 'register_address',
 }

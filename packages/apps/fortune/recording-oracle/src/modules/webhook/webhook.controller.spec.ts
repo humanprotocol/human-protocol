@@ -100,7 +100,7 @@ describe('webhookController', () => {
 
       (verifySignature as jest.Mock).mockReturnValue(true);
 
-      await webhookController.processWebhook(MOCK_SIGNATURE, webhook);
+      await webhookController.processWebhook(webhook, MOCK_SIGNATURE);
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
@@ -121,7 +121,7 @@ describe('webhookController', () => {
 
       jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();
 
-      await webhookController.processWebhook(MOCK_SIGNATURE, webhook);
+      await webhookController.processWebhook(webhook, MOCK_SIGNATURE);
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
@@ -137,7 +137,7 @@ describe('webhookController', () => {
       (verifySignature as jest.Mock).mockReturnValue(true);
 
       await expect(
-        webhookController.processWebhook(MOCK_SIGNATURE, webhook),
+        webhookController.processWebhook(webhook, MOCK_SIGNATURE),
       ).rejects.toThrow('Invalid webhook event type: job_completed');
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);

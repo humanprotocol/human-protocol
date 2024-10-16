@@ -67,8 +67,8 @@ export class PaymentController {
   })
   @Post('/fiat')
   public async createFiatPayment(
-    @Request() req: RequestWithUser,
     @Body() data: PaymentFiatCreateDto,
+    @Request() req: RequestWithUser,
   ): Promise<string> {
     return this.paymentService.createFiatPayment(req.user.id, data);
   }
@@ -97,8 +97,8 @@ export class PaymentController {
   })
   @Post('/fiat/confirm-payment')
   public async confirmFiatPayment(
-    @Request() req: RequestWithUser,
     @Body() data: PaymentFiatConfirmDto,
+    @Request() req: RequestWithUser,
   ): Promise<boolean> {
     return this.paymentService.confirmFiatPayment(req.user.id, data);
   }
@@ -134,8 +134,8 @@ export class PaymentController {
   @Post('/crypto')
   public async createCryptoPayment(
     @Headers(HEADER_SIGNATURE_KEY) signature: string,
-    @Request() req: RequestWithUser,
     @Body() data: PaymentCryptoCreateDto,
+    @Request() req: RequestWithUser,
   ): Promise<boolean> {
     return this.paymentService.createCryptoPayment(
       req.user.id,

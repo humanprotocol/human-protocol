@@ -166,7 +166,7 @@ export class JobService {
           const manifest = await this.getManifest(
             entity.chainId,
             entity.escrowAddress,
-            entity.manifestUrl
+            entity.manifestUrl,
           );
           if (data.fields?.includes(JobFieldName.JobDescription)) {
             job.jobDescription = manifest.requesterDescription;
@@ -299,7 +299,11 @@ export class JobService {
       throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
     }
 
-    const manifest = await this.getManifest(chainId, escrowAddress, manifestUrl);
+    const manifest = await this.getManifest(
+      chainId,
+      escrowAddress,
+      manifestUrl,
+    );
     if (
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired

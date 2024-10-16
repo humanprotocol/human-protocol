@@ -1,7 +1,10 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { CredentialStatus } from '../../common/enums/credential';
+import {
+  CredentialStatus,
+  CredentialValidationStatus,
+} from '../../common/enums/credential';
 import { UserEntity } from '../user/user.entity';
 
 @Entity({ schema: NS, name: 'credentials' })
@@ -36,8 +39,8 @@ export class CredentialValidationEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, { eager: true })
   user: UserEntity;
 
-  @Column({ type: 'enum', enum: ['VALIDATED', 'ON_CHAIN'] })
-  status: string;
+  @Column({ type: 'enum', enum: CredentialValidationStatus })
+  status: CredentialValidationStatus;
 
   @Column({ nullable: true })
   certificate: string;
