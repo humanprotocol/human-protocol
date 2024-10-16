@@ -1,0 +1,31 @@
+---
+source: src/graphql/escrows_query.rs
+expression: query.query
+---
+query GetEscrowsQuery($launcher: String, $exchangeOracle: String, $recordingOracle: String, $reputationOracle: String, $jobRequesterId: String, $status: [String!], $from: String, $to: String) {
+  escrows(where: {launcher_contains: $launcher, exchangeOracle: $exchangeOracle, recordingOracle_contains: $recordingOracle, reputationOracle_contains: $reputationOracle, jobRequesterId: $jobRequesterId, status_in: $status, createdAt_gte: $from, createdAt_lte: $to, }) {
+    id
+    address
+    amountPaid
+    balance
+    count
+    factoryAddress
+    launcher
+    status
+    token
+    totalFundedAmount
+    createdAt
+    finalResultsUrl
+    intermediateResultsUrl
+    manifestHash
+    manifestUrl
+    recordingOracle
+    recordingOracleFee
+    reputationOracle
+    reputationOracleFee
+    exchangeOracle
+    exchangeOracleFee
+  }
+}
+
+
