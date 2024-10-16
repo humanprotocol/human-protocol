@@ -94,7 +94,6 @@ export class AssignmentController {
     @Query() query: GetAssignmentsDto,
     @Request() req: RequestWithUser,
   ): any {
-    console.log(query)
     return this.assignmentService.getAssignmentList(
       query,
       req.user.address,
