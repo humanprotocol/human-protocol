@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
   options: { label: string; value: string }[];
@@ -37,6 +37,7 @@ export function MultiSelect({
   label,
   ...props
 }: MultiSelectProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const context = useFormContext();
   const valuesToLabels = useMemo(() => {
@@ -129,6 +130,9 @@ export function MultiSelect({
               labelId={`${name}-${label}`}
               multiple
               renderValue={renderValue}
+              sx={{
+                '& .MuiSvgIcon-root': { color: colorPalette.primary.main },
+              }}
               {...props}
               onChange={(event) => {
                 handleChange(event, field);

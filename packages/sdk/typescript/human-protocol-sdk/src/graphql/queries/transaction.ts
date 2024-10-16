@@ -30,7 +30,11 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
 
   const WHERE_CLAUSE = `
       where: {
-        ${fromAddress === toAddress ? `or: [ ${addressCondition} ],` : addressCondition}
+        ${
+          fromAddress === toAddress
+            ? `or: [ ${addressCondition} ],`
+            : addressCondition
+        }
         ${startDate ? `timestamp_gte: $startDate,` : ''}
         ${endDate ? `timestamp_lte: $endDate,` : ''}
         ${startBlock ? `block_gte: $startBlock,` : ''}

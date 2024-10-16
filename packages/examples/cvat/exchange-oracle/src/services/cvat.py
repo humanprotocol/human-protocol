@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Iterable, Sequence
 from datetime import datetime
 from itertools import islice
-from typing import Any
+from typing import Any, NamedTuple
 
 from sqlalchemy import case, delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -584,7 +584,12 @@ def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
     session.execute(statement)
 
 
-def complete_tasks_with_completed_jobs(session: Session) -> list[tuple[str, int]]:
+class TaskResult(NamedTuple):
+    id: str
+    cvat_id: int
+
+
+def complete_tasks_with_completed_jobs(session: Session) -> list[TaskResult]:
     incomplete_jobs_exist = (
         select(1)
         .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
@@ -604,7 +609,7 @@ def complete_tasks_with_completed_jobs(session: Session) -> list[tuple[str, int]
     )
 
     result = session.execute(stmt)
-    return [row.cvat_id for row in result.all()]
+    return [TaskResult(row.id, row.cvat_id) for row in result.all()]
 
 
 # Job

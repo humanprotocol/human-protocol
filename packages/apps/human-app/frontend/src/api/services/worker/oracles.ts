@@ -5,6 +5,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useJobsTypesOraclesFilter } from '@/hooks/use-job-types-oracles-table';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
+import { env } from '@/shared/env';
 
 const OracleSuccessSchema = z.object({
   address: z.string(),
@@ -18,6 +19,13 @@ const OraclesSuccessSchema = z.array(OracleSuccessSchema);
 export type OracleSuccessResponse = z.infer<typeof OracleSuccessSchema>;
 export type OraclesSuccessResponse = OracleSuccessResponse[];
 
+const H_CAPTCHA_ORACLE: OracleSuccessResponse = {
+  address: env.VITE_H_CAPTCHA_ORACLE_ADDRESS,
+  jobTypes: env.VITE_H_CAPTCHA_ORACLE_TASK_TYPES,
+  role: env.VITE_H_CAPTCHA_ORACLE_ROLE,
+  url: env.VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL,
+};
+
 export async function getOracles({
   selected_job_types,
 }: {
@@ -27,10 +35,17 @@ export async function getOracles({
     ? `?${stringifyUrlQueryObject({ selected_job_types })}`
     : '';
 
-  return apiClient(`${apiPaths.worker.oracles.path}${queryParams}`, {
-    successSchema: OraclesSuccessSchema,
-    options: { method: 'GET' },
-  });
+  const result = await apiClient(
+    `${apiPaths.worker.oracles.path}${queryParams}`,
+    {
+      successSchema: OraclesSuccessSchema,
+      options: { method: 'GET' },
+    }
+  );
+
+  result.unshift(H_CAPTCHA_ORACLE);
+
+  return result;
 }
 
 export function useGetOracles() {

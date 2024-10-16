@@ -2,9 +2,9 @@ import { Controller } from 'react-hook-form';
 import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
-import { colorPalette } from '@/styles/color-palette';
 import type { InputMask } from '@/components/data-entry/input-masks/input-masks';
 import { InputMasks } from '@/components/data-entry/input-masks/input-masks';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
@@ -23,6 +23,8 @@ export function Input({
   mask,
   ...rest
 }: InputProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <Controller
       name={name}

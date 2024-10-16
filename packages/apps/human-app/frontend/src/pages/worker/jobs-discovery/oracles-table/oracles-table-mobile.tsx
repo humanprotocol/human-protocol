@@ -1,6 +1,5 @@
 import { Grid, Paper, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
 import { Loader } from '@/components/ui/loader';
@@ -9,6 +8,7 @@ import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { ListItem } from '@/components/ui/list-item';
+import { useColorMode } from '@/hooks/use-color-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 export function OraclesTableMobile({
@@ -23,6 +23,8 @@ export function OraclesTableMobile({
   selectOracle: (oracleAddress: string, jobTypes: string[]) => void;
   oraclesQueryDataResult: OraclesDataQueryResult;
 }) {
+  const { colorPalette } = useColorMode();
+
   if (isOraclesDataPending) {
     return (
       <Grid

@@ -32,14 +32,15 @@ def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
     updated_tasks = cvat_service.complete_tasks_with_completed_jobs(session)
 
     if updated_tasks:
-        session.commit()
         cvat_service.touch(
             session,
             cvat_models.Task,
-            [t[0] for t in updated_tasks],
+            [t.id for t in updated_tasks],
         )
-
-        logger.info(f"Found new completed projects: {format_sequence(updated_tasks)}")
+        session.commit()
+        logger.info(
+            f"Found new completed tasks: {format_sequence([t.cvat_id for t in updated_tasks])}"
+        )
 
 
 @cron_job

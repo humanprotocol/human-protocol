@@ -75,11 +75,12 @@ export const getEditEthKVStoreValuesMutationSchema = (
       const newFiledData = newData[key];
       const initialFiledData = initialData[key];
 
-      if (
-        isArray(newFiledData) &&
-        isArray(initialFiledData) &&
-        newFiledData.sort().toString() !== initialFiledData.sort().toString()
-      ) {
+      if (isArray(newFiledData) && isArray(initialFiledData)) {
+        if (
+          newFiledData.sort().toString() === initialFiledData.sort().toString()
+        ) {
+          return;
+        }
         Object.assign(fieldsThatHasChanges, { [key]: newFiledData.toString() });
         return;
       }
@@ -105,7 +106,6 @@ export const getEditEthKVStoreValuesMutationSchema = (
         path: ['form'],
       });
     }
-
     return fieldsThatHasChanges;
   });
 };

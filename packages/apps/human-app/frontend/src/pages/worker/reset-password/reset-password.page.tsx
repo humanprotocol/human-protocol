@@ -69,7 +69,7 @@ export function ResetPasswordWorkerPage() {
             void methods.handleSubmit(handleWorkerResetPassword)(event);
           }}
         >
-          <Grid container gap="2rem">
+          <Grid container gap="1.5rem">
             <Typography variant="body1">
               {t('worker.resetPassword.description')}
             </Typography>

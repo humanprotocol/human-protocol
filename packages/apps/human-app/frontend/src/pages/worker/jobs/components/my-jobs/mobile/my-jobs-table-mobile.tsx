@@ -3,7 +3,6 @@ import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
@@ -22,6 +21,7 @@ import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { ListItem } from '@/components/ui/list-item';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
+import { useColorMode } from '@/hooks/use-color-mode';
 import { Chip } from '@/components/ui/chip';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
@@ -32,6 +32,7 @@ interface MyJobsTableMobileProps {
 export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: MyJobsTableMobileProps) {
+  const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<MyJob[]>([]);
   const { filterParams, setPageParams, resetFilterParams } =
     useMyJobsFilterStore();
