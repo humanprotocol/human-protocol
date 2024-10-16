@@ -108,7 +108,6 @@ export function AvailableJobsTableMobile({
             sx={{
               px: '16px',
               py: '32px',
-              backgroundColor: colorPalette.white,
               marginBottom: '20px',
               borderRadius: '20px',
               boxShadow: 'unset',

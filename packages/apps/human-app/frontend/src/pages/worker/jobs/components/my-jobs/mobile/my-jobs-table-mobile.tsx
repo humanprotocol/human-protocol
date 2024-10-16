@@ -24,6 +24,7 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { Chip } from '@/components/ui/chip';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -109,7 +110,6 @@ export function MyJobsTableMobile({
               sx={{
                 px: '16px',
                 py: '32px',
-                backgroundColor: colorPalette.white,
                 marginBottom: '20px',
                 boxShadow: 'none',
                 borderRadius: '20px',
@@ -146,7 +146,14 @@ export function MyJobsTableMobile({
                     <ListItem label={t('worker.jobs.status')}>
                       <Chip
                         backgroundColor={colorPalette.secondary.main}
-                        label={d.status}
+                        label={
+                          <Typography
+                            color={lightModeColorPalette.white}
+                            variant="chip"
+                          >
+                            {d.status}
+                          </Typography>
+                        }
                       />
                     </ListItem>
                     <ListItem label={t('worker.jobs.jobType')}>
