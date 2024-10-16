@@ -283,6 +283,7 @@ class EncryptionConfig(_BaseConfig):
 
 
 class Config:
+    debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
