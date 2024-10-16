@@ -144,7 +144,10 @@ export function MyJobsTableMobile({
                       </Typography>
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>
-                      <Chip label={d.status} />
+                      <Chip
+                        backgroundColor={colorPalette.secondary.main}
+                        label={d.status}
+                      />
                     </ListItem>
                     <ListItem label={t('worker.jobs.jobType')}>
                       <Chip
@@ -161,15 +164,27 @@ export function MyJobsTableMobile({
                     }}
                   >
                     {d.url ? (
-                      <TableButton
-                        component={Link}
-                        disabled={buttonDisabled}
-                        fullWidth
-                        target="_blank"
-                        to={d.url}
-                      >
-                        {t('worker.jobs.solve')}
-                      </TableButton>
+                      <>
+                        <TableButton
+                          component={Link}
+                          disabled={buttonDisabled}
+                          fullWidth
+                          target="_blank"
+                          to={d.url}
+                        >
+                          {t('worker.jobs.solve')}
+                        </TableButton>
+                        <RejectButton
+                          disabled={buttonDisabled}
+                          onClick={() => {
+                            if (buttonDisabled) return;
+                            rejectTaskMutation({
+                              oracle_address: oracle_address ?? '',
+                              assignment_id: d.assignment_id,
+                            });
+                          }}
+                        />
+                      </>
                     ) : null}
                     <RejectButton
                       disabled={buttonDisabled}

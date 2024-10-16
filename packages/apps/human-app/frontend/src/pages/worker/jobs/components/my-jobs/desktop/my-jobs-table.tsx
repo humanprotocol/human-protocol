@@ -8,7 +8,8 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
@@ -144,16 +145,16 @@ const getColumnsDefinition = (
       return (
         <Box
           sx={{
-            display: 'flex',
+            display: 'inline-flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '3px 4px',
+            padding: '6px 9px',
             color: lightModeColorPalette.white,
             backgroundColor: '#5D0CE9',
             borderRadius: '16px',
           }}
         >
-          {status}
+          <Typography variant="chip">{status}</Typography>
         </Box>
       );
     },
@@ -181,22 +182,24 @@ const getColumnsDefinition = (
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           {url ? (
-            <TableButton
-              component={Link}
-              disabled={buttonDisabled}
-              target="_blank"
-              to={url}
-            >
-              {t('worker.jobs.solve')}
-            </TableButton>
+            <>
+              <TableButton
+                component={Link}
+                disabled={buttonDisabled}
+                target="_blank"
+                to={url}
+              >
+                {t('worker.jobs.solve')}
+              </TableButton>
+              <RejectButton
+                disabled={buttonDisabled}
+                onClick={() => {
+                  if (buttonDisabled) return;
+                  resignJob(assignment_id);
+                }}
+              />
+            </>
           ) : null}
-          <RejectButton
-            disabled={buttonDisabled}
-            onClick={() => {
-              if (buttonDisabled) return;
-              resignJob(assignment_id);
-            }}
-          />
         </Grid>
       );
     },

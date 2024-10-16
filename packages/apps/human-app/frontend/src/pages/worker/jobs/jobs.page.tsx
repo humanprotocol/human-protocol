@@ -88,6 +88,7 @@ export function JobsPage() {
               padding: isMobile ? '20px' : '64px 144px',
               minHeight: '800px',
               borderRadius: '20px',
+              backgroundColor: isMobile ? 'transparent' : undefined,
             }}
           >
             <div>
