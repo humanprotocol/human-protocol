@@ -153,7 +153,9 @@ const getColumnsDefinition = (
             borderRadius: '16px',
           }}
         >
-          <Typography variant="chip">{status}</Typography>
+          <Typography color={lightModeColorPalette.white} variant="chip">
+            {status}
+          </Typography>
         </Box>
       );
     },
