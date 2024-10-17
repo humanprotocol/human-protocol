@@ -19,14 +19,18 @@ export function Chip({ label, backgroundColor }: ChipProps) {
           : colorPalette.chip.main,
         width: 'fit-content',
         px: '10px',
-        py: '2px',
+        py: '6px',
         borderRadius: '16px',
         display: 'flex',
+        whiteSpace: 'wrap',
       }}
     >
       <Typography
         color={backgroundColor ? colorPalette.white : colorPalette.text.primary}
         variant="chip"
+        sx={{
+          wordBreak: 'break-all',
+        }}
       >
         {label}
       </Typography>
