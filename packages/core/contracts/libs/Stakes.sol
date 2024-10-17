@@ -14,7 +14,6 @@ library Stakes {
 
     struct Staker {
         uint256 tokensStaked; // Tokens staked by the Staker
-        uint256 tokensAllocated; // Tokens allocated for jobs
         uint256 tokensLocked; // Tokens locked for withdrawal
         uint256 tokensLockedUntil; // Tokens locked until time
     }
@@ -35,24 +34,6 @@ library Stakes {
      */
     function release(Stakes.Staker storage stake, uint256 _tokens) internal {
         stake.tokensStaked = stake.tokensStaked.sub(_tokens);
-    }
-
-    /**
-     * @dev Add tokens from the main stack to tokensAllocated.
-     * @param stake Staker struct
-     * @param _tokens Amount of tokens to allocate
-     */
-    function allocate(Stakes.Staker storage stake, uint256 _tokens) internal {
-        stake.tokensAllocated = stake.tokensAllocated.add(_tokens);
-    }
-
-    /**
-     * @dev Unallocate tokens from a escrowAddress back to the main stack.
-     * @param stake Staker struct
-     * @param _tokens Amount of tokens to unallocate
-     */
-    function unallocate(Stakes.Staker storage stake, uint256 _tokens) internal {
-        stake.tokensAllocated = stake.tokensAllocated.sub(_tokens);
     }
 
     /**
@@ -120,28 +101,6 @@ library Stakes {
      * @return Token amount
      */
     function tokensAvailable(
-        Stakes.Staker memory stake
-    ) internal pure returns (uint256) {
-        return stake.tokensStaked.sub(stake.tokensUsed());
-    }
-
-    /**
-     * @dev Return all tokens used in allocations and locked for withdrawal.
-     * @param stake Staker struct
-     * @return Token amount
-     */
-    function tokensUsed(
-        Stakes.Staker memory stake
-    ) internal pure returns (uint256) {
-        return stake.tokensAllocated.add(stake.tokensLocked);
-    }
-
-    /**
-     * @dev Return the amount of tokens staked which are not locked.
-     * @param stake Staker struct
-     * @return Token amount
-     */
-    function tokensSecureStake(
         Stakes.Staker memory stake
     ) internal pure returns (uint256) {
         return stake.tokensStaked.sub(stake.tokensLocked);

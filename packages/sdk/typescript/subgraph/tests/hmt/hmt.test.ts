@@ -11,7 +11,6 @@ import {
 } from 'matchstick-as/assembly';
 
 import { Escrow } from '../../generated/schema';
-import { STATISTICS_ENTITY_ID } from '../../src/mapping/Escrow';
 import {
   HMT_STATISTICS_ENTITY_ID,
   handleTransfer,
