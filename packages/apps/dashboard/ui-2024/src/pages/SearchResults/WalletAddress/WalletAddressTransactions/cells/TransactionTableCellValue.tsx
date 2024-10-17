@@ -6,11 +6,11 @@ export const TransactionTableCellValue = ({ value }: { value: string }) => {
 	const { isError, isPending } = useHMTPrice();
 
 	if (isError) {
-		return 'N/A';
+		return <span>N/A</span>;
 	}
 
 	if (isPending) {
-		return '...';
+		return <span>...</span>;
 	}
 
 	return (
