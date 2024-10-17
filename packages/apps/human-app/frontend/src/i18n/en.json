@@ -209,6 +209,11 @@
       "seeJobs": "See tasks",
       "allJobs": "All tasks"
     },
+    "registration": {
+      "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
+      "completeMessage": "Click on Complete once you have finished the registration process:",
+      "completeButton": "Complete"
+    },
     "jobs": {
       "successFullyAssignedJob": "Successfully assigned a task!",
       "errorFetchingData": "There was an error while fetching data, please try again",

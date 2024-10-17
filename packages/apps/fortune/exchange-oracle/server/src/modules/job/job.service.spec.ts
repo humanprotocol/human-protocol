@@ -387,7 +387,7 @@ describe('JobService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
-        MOCK_MANIFEST_URL
+        MOCK_MANIFEST_URL,
       );
     });
 

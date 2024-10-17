@@ -65,6 +65,9 @@ export const apiPaths = {
     dailyHmtSpend: {
       path: '/labeling/h-captcha/daily-hmt-spent',
     },
+    userRegistration: {
+      path: '/register',
+    },
   },
   operator: {
     web3Auth: {

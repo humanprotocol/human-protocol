@@ -1,27 +1,32 @@
+import React, { useState, useEffect } from 'react';
+
 import { t } from 'i18next';
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import Grid from '@mui/material/Grid';
+import { Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { type OracleSuccessResponse } from '@/api/services/worker/oracles';
+import { OracleSuccessResponse } from '@/api/services/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
 import { routerPaths } from '@/router/router-paths';
-import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
+import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table-mobile';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
-import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { JobType } from '@/smart-contracts/EthKVStore/config';
+import { useGetRegisteredOracles } from '@/api/services/worker/registered-oracles';
+import { useRegisteredOracles } from '@/contexts/registered-oracles';
+import { RegistrationStep } from '@/pages/worker/jobs-discovery/components/registration/registration-step';
 
 const getColumns = (
-  selectOracle: (oracleAddress: string) => void
+  selectOracle: (oracle: OracleSuccessResponse) => void
 ): MRT_ColumnDef<OracleSuccessResponse>[] => {
   return [
     {
@@ -61,7 +66,7 @@ const getColumns = (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <TableButton
               onClick={() => {
-                selectOracle(props.row.original.address);
+                selectOracle(props.row.original);
               }}
             >
               {t('worker.oraclesTable.seeJobs')}
@@ -87,18 +92,50 @@ export function OraclesTable({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
-  const selectOracle = (oracleAddress: string) => {
-    if (oracleAddress === env.VITE_H_CAPTCHA_ORACLE_ADDRESS) {
+  const { setRegisteredOracles } = useRegisteredOracles();
+  const { data: registeredOraclesResults, isFetched } =
+    useGetRegisteredOracles();
+
+  const [selectedOracle, setSelectedOracle] =
+    useState<OracleSuccessResponse | null>(null);
+  const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
+
+  const selectOracle = (oracle: OracleSuccessResponse) => {
+    if (oracle.registrationNeeded) {
+      setSelectedOracle(oracle);
+      return;
+    }
+
+    if (oracle.address === env.VITE_H_CAPTCHA_ORACLE_ADDRESS) {
       if (!user.site_key) {
         navigate(routerPaths.worker.enableLabeler);
         return;
       }
-
       navigate(routerPaths.worker.HcaptchaLabeling);
       return;
     }
-    navigate(`${routerPaths.worker.jobs}/${oracleAddress}`);
+    navigate(`${routerPaths.worker.jobs}/${oracle.address}`, {
+      state: {
+        oracle,
+      },
+    });
   };
+
+  useEffect(() => {
+    if (isFetched && registeredOraclesResults?.oracle_addresses) {
+      setRegisteredOracles(registeredOraclesResults.oracle_addresses);
+    }
+  }, [isFetched, registeredOraclesResults, setRegisteredOracles]);
+
+  useEffect(() => {
+    if (isRegistrationComplete && selectedOracle) {
+      navigate(`${routerPaths.worker.jobs}/${selectedOracle.address}`, {
+        state: {
+          oracle: selectedOracle,
+        },
+      });
+    }
+  }, [isRegistrationComplete, selectedOracle, navigate]);
 
   const table = useMaterialReactTable({
     state: {
@@ -129,6 +166,19 @@ export function OraclesTable({
     },
     ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
+
+  if (
+    selectedOracle &&
+    selectedOracle.registrationNeeded &&
+    !isRegistrationComplete
+  ) {
+    return (
+      <RegistrationStep
+        oracleData={selectedOracle}
+        onRegistrationComplete={() => setIsRegistrationComplete(true)}
+      />
+    );
+  }
 
   return (
     <>

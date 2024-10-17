@@ -2,8 +2,8 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { OraclesTable } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table';
-import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-job-types-select';
+import { OraclesTable } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table';
+import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table-job-types-select';
 import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
 
