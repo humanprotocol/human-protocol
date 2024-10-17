@@ -69,16 +69,18 @@ export const CvatJobRequestForm = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        setQualificationsOptions(await getQualifications());
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching data:', error);
+      if (jobRequest.chainId !== undefined) {
+        try {
+          setQualificationsOptions(await getQualifications(jobRequest.chainId));
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error fetching data:', error);
+        }
       }
     };
 
     fetchData();
-  }, []);
+  }, [jobRequest.chainId]);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {

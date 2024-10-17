@@ -1,7 +1,9 @@
 """Config for the application logger"""
 
 import logging
+from collections.abc import Sequence
 from logging.config import dictConfig
+from typing import Any
 
 from src.core.config import Config
 
@@ -48,3 +50,9 @@ def setup_logging():
 
 def get_root_logger() -> logging.Logger:
     return logging.getLogger(ROOT_LOGGER_NAME)
+
+
+def format_sequence(items: Sequence[Any], *, max_items: int = 5, separator: str = ", ") -> str:
+    remainder_count = len(items) - max_items
+    tail = f" (and {remainder_count} more)" if remainder_count > 0 else ""
+    return f"{separator.join(map(str, items[:max_items]))}{tail}"

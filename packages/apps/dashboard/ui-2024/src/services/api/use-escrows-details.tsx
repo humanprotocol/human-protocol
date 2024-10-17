@@ -42,7 +42,11 @@ export function useEscrowDetails({
 	role: AddressDetailsLeader['role'];
 }) {
 	const { filterParams } = useWalletSearch();
-	const { params } = useEscrowDetailsDto();
+	const {
+		setLastPageIndex,
+		pagination: { page, lastPageIndex },
+		params,
+	} = useEscrowDetailsDto();
 
 	const dto: PaginatedEscrowsDetailsDto = {
 		chainId: filterParams.chainId,
@@ -64,6 +68,28 @@ export function useEscrowDetails({
 				data,
 				paginatedEscrowsDetailsSuccessResponseSchema
 			);
+
+			// check if last page
+			if (lastPageIndex === undefined) {
+				const { data: lastPageCheckData } = await httpService.get(
+					`${apiPaths.escrowDetails.path}/${filterParams.address}`,
+					{
+						params: {
+							...dto,
+							skip: dto.skip + validResponse.results.length,
+							first: 1,
+						},
+					}
+				);
+				const validLastPageCheckData = validateResponse(
+					lastPageCheckData,
+					paginatedEscrowsDetailsSuccessResponseSchema
+				);
+
+				if (validLastPageCheckData.results.length === 0) {
+					setLastPageIndex(page + 1);
+				}
+			}
 
 			return validResponse;
 		},

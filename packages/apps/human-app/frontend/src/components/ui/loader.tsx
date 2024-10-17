@@ -1,12 +1,18 @@
-import { styled } from '@mui/material';
-import type { CircularProgressProps } from '@mui/material';
+import type { CircularProgressProps } from '@mui/material/CircularProgress';
 import CircularProgress from '@mui/material/CircularProgress';
-import { colorPalette } from '@/styles/color-palette';
-
-const LoaderStyled = styled(CircularProgress)({
-  '.MuiCircularProgress-circle': { color: colorPalette.primary.main },
-});
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function Loader({ ...props }: CircularProgressProps) {
-  return <LoaderStyled {...props} />;
+  const { colorPalette } = useColorMode();
+
+  return (
+    <CircularProgress
+      {...props}
+      sx={{
+        '.MuiCircularProgress-circle': {
+          color: colorPalette.primary.main,
+        },
+      }}
+    />
+  );
 }

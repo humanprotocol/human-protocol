@@ -229,7 +229,7 @@ class _TaskValidator:
                     item = item.wrap(id=item.id[len(self._prefix) :])
                 return item
 
-        prefix = self.manifest.data.data_url.path.lstrip("/\\") + "/"
+        prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.lstrip("/\\") + "/"
         if all(sample.id.startswith(prefix) for sample in merged_dataset):
             merged_dataset.transform(RemoveCommonPrefix, prefix=prefix)
 
@@ -1055,7 +1055,7 @@ def process_intermediate_results(  # noqa: PLR0912
             should_complete = True
 
     if not should_complete:
-        return ValidationFailure(rejected_jobs)
+        return ValidationFailure(job_results=job_results, rejected_jobs=rejected_jobs)
 
     task_validation_results = db_service.get_task_validation_results(session, task.id)
 
@@ -1083,6 +1083,7 @@ def process_intermediate_results(  # noqa: PLR0912
     )
 
     return ValidationSuccess(
+        job_results=job_results,
         validation_meta=validation_meta,
         resulting_annotations=updated_merged_dataset_archive.getvalue(),
         average_quality=np.mean(
@@ -1093,8 +1094,8 @@ def process_intermediate_results(  # noqa: PLR0912
 
 
 def parse_annotation_metafile(metafile: io.RawIOBase) -> AnnotationMeta:
-    return AnnotationMeta.parse_raw(metafile.read())
+    return AnnotationMeta.model_validate_json(metafile.read())
 
 
 def serialize_validation_meta(validation_meta: ValidationMeta) -> bytes:
-    return validation_meta.json().encode()
+    return validation_meta.model_dump_json().encode()

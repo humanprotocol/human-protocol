@@ -1,6 +1,4 @@
-import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
-import Grid from '@mui/material/Grid';
 import type {
   BottomMenuItem,
   TopMenuItem,
@@ -8,36 +6,20 @@ import type {
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { env } from '@/shared/env';
+import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
+import type { UserData } from '@/auth/auth-context';
 
 export const workerDrawerTopMenuItems = (
-  addressRegistered: boolean
+  user: UserData | null
 ): TopMenuItem[] => {
   return [
-    <Grid
-      key={crypto.randomUUID()}
-      sx={{
-        display: 'inline-flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '0.8rem',
-      }}
-    >
-      <WorkIcon />
-      <Typography variant="body6">
-        {t('components.DrawerNavigation.jobs')}
-      </Typography>
-    </Grid>,
-    {
-      label: t('components.DrawerNavigation.captchaLabelling'),
-      link: routerPaths.worker.enableLabeler,
-      disabled: !addressRegistered,
-    },
     ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
       ? [
           {
-            label: t('components.DrawerNavigation.jobsDiscovery'),
+            label: t('components.DrawerNavigation.jobs'),
+            icon: <WorkIcon />,
             link: routerPaths.worker.jobsDiscovery,
-            disabled: !addressRegistered,
+            disabled: !user?.wallet_address || user.kyc_status !== 'approved',
           },
         ]
       : []),
@@ -63,4 +45,5 @@ export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
       }
     },
   },
+  <DarkModeSwitch key={crypto.randomUUID()} />,
 ];

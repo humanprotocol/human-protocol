@@ -4,10 +4,9 @@ import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { Counter } from '@/components/ui/counter';
 import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
@@ -17,11 +16,17 @@ import { getTomorrowDate } from '@/shared/helpers/counter-helpers';
 import { useSolveHCaptchaMutation } from '@/api/services/worker/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function HcaptchaLabelingPage() {
+  const { colorPalette, isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
   const { user } = useAuthenticatedUser();
   const { onSuccess, onError } = useHCaptchaLabelingNotifications();
+  const statsColor = isDarkMode
+    ? onlyDarkModeColor.additionalTextColor
+    : colorPalette.primary.light;
 
   const resetCaptcha = () => {
     if (captchaRef.current) {
@@ -93,9 +98,6 @@ export function HcaptchaLabelingPage() {
     >
       <Paper
         sx={{
-          backgroundColor: isMobile
-            ? colorPalette.paper.main
-            : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
           padding: isMobile ? '20px' : '40px',
@@ -137,6 +139,7 @@ export function HcaptchaLabelingPage() {
                   ref={captchaRef}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
                   sitekey={user.site_key || ''}
+                  theme={isDarkMode ? 'dark' : 'light'}
                 />
               </Grid>
             ) : (
@@ -144,7 +147,7 @@ export function HcaptchaLabelingPage() {
                 <Typography variant="subtitle2">
                   {t('worker.hcaptchaLabeling.noJobs')}
                 </Typography>
-                <Typography color={colorPalette.primary.light} variant="h4">
+                <Typography color={statsColor} variant="h4">
                   <Counter
                     date={getTomorrowDate().toISOString()}
                     onFinish={() => {

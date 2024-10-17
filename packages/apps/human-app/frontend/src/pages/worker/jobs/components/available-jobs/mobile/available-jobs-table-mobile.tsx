@@ -2,7 +2,6 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
@@ -20,6 +19,8 @@ import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chip } from '@/components/ui/chip';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { ListItem } from '@/components/ui/list-item';
+import { useColorMode } from '@/hooks/use-color-mode';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -28,6 +29,7 @@ interface AvailableJobsTableMobileProps {
 export function AvailableJobsTableMobile({
   setIsMobileFilterDrawerOpen,
 }: AvailableJobsTableMobileProps) {
+  const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<AvailableJob[]>([]);
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
@@ -45,7 +47,8 @@ export function AvailableJobsTableMobile({
     fetchNextPage,
     hasNextPage,
   } = useInfiniteGetAvailableJobsData();
-  const { filterParams, setPageParams } = useJobsFilterStore();
+  const { filterParams, setPageParams, resetFilterParams } =
+    useJobsFilterStore();
   const { t } = useTranslation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
 
@@ -58,6 +61,12 @@ export function AvailableJobsTableMobile({
       setAllPages((state) => [...state, ...pagesFromRes]);
     }
   }, [tableData, filterParams.page]);
+
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
 
   return (
     <>
@@ -149,7 +158,7 @@ export function AvailableJobsTableMobile({
                     </Typography>
                   </ListItem>
                   <ListItem label={t('worker.jobs.jobType')}>
-                    <Chip label={d.job_type} />
+                    <Chip label={t(`jobTypeLabels.${d.job_type as JobType}`)} />
                   </ListItem>
                 </Grid>
                 <Grid item xs={12}>

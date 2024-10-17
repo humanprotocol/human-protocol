@@ -89,7 +89,7 @@ export class KycService {
   }
 
   public async updateKycStatus(data: KycStatusDto): Promise<void> {
-    const { status, id: sessionId } = data.verification;
+    const { status, reason, id: sessionId } = data.verification;
     const { country } = data.verification.document;
 
     const kycEntity = await this.kycRepository.findOneBySessionId(sessionId);
@@ -101,13 +101,9 @@ export class KycService {
       throw new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST);
     }
 
-    if (status === KycStatus.APPROVED) {
-      kycEntity.status = status;
-      kycEntity.country = country;
-    } else {
-      kycEntity.status = data.verification.status;
-      kycEntity.message = data.verification.reason;
-    }
+    kycEntity.status = status;
+    kycEntity.country = country;
+    kycEntity.message = reason;
 
     await this.kycRepository.updateOne(kycEntity);
   }
