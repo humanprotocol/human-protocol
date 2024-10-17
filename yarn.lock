@@ -18696,10 +18696,10 @@ solidity-ast@^0.4.51:
   dependencies:
     array.prototype.findlast "^1.2.2"
 
-solidity-coverage@^0.8.13:
-  version "0.8.13"
-  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.8.13.tgz#8eeada2e82ae19d25568368aa782a2baad0e0ce7"
-  integrity sha512-RiBoI+kF94V3Rv0+iwOj3HQVSqNzA9qm/qDP1ZDXK5IX0Cvho1qiz8hAXTsAo6KOIUeP73jfscq0KlLqVxzGWA==
+solidity-coverage@^0.8.2:
+  version "0.8.12"
+  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.8.12.tgz#c4fa2f64eff8ada7a1387b235d6b5b0e6c6985ed"
+  integrity sha512-8cOB1PtjnjFRqOgwFiD8DaUsYJtVJ6+YdXQtSZDrLGf8cdhhh8xzTtGzVTGeBf15kTv0v7lYPJlV/az7zLEPJw==
   dependencies:
     "@ethersproject/abi" "^5.0.9"
     "@solidity-parser/parser" "^0.18.0"
