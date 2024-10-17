@@ -669,17 +669,6 @@ export function handleFund(event: Fund): void {
     return;
   }
 
-  // createTransaction(
-  //   event,
-  //   'fund',
-  //   event.transaction.from,
-  //   Address.fromBytes(escrowEntity.address),
-  //   Address.fromBytes(escrowEntity.address),
-  //   Address.fromBytes(escrowEntity.address),
-  //   event.params._amount,
-  //   Address.fromBytes(escrowEntity.token)
-  // );
-
   // Create FundEvent entity
   const fundEventEntity = new FundEvent(toEventId(event));
   fundEventEntity.block = event.block.number;
@@ -705,9 +694,11 @@ export function handleFund(event: Fund): void {
   eventDayData.save();
 
   // Update escrow entity
-  escrowEntity.totalFundedAmount = escrowEntity.totalFundedAmount.plus(
-    event.params._amount
-  );
+  escrowEntity.totalFundedAmount = event.params._amount;
+
+  if (escrowEntity.token != HMT_ADDRESS) {
+    escrowEntity.balance = event.params._amount;
+  }
 
   escrowEntity.save();
 }

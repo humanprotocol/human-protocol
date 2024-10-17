@@ -1,5 +1,5 @@
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { Address, ethereum, BigInt } from '@graphprotocol/graph-ts';
+import { Address, ethereum, BigInt, dataSource } from '@graphprotocol/graph-ts';
 
 import {
   Transfer,
@@ -23,6 +23,10 @@ export function createTransferEvent(
   );
 
   transferEvent.parameters = [];
+  transferEvent.transaction.from = Address.fromString(from);
+  transferEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   transferEvent.block.timestamp = timestamp;
   const fromParam = new ethereum.EventParam(
     '_from',
@@ -57,6 +61,10 @@ export function createApprovalEvent(
     approvalEvent.transaction.nonce
   );
 
+  approvalEvent.transaction.from = Address.fromString(spender);
+  approvalEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   approvalEvent.parameters = [];
   approvalEvent.block.timestamp = timestamp;
   const ownerParam = new ethereum.EventParam(
@@ -90,6 +98,9 @@ export function createBulkTransferEvent(
     timestamp,
     bulkTransferEvent.transaction.nonce
   );
+  bulkTransferEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
 
   bulkTransferEvent.parameters = [];
   bulkTransferEvent.block.timestamp = timestamp;
@@ -118,6 +129,10 @@ export function createBulkApprovalEvent(
     bulkCount.toString(),
     timestamp,
     bulkApprovalEvent.transaction.nonce
+  );
+
+  bulkApprovalEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
   );
 
   bulkApprovalEvent.parameters = [];

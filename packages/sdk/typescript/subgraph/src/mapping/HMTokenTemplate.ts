@@ -153,6 +153,9 @@ export function handleTransfer(event: Transfer): void {
   if (escrow) {
     // Update escrow balance
     escrow.balance = escrow.balance.plus(event.params._value);
+    escrow.totalFundedAmount = escrow.totalFundedAmount.plus(
+      event.params._value
+    );
     escrow.save();
 
     createTransaction(

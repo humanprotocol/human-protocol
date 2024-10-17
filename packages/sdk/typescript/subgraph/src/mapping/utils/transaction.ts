@@ -1,7 +1,29 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { Transaction, InternalTransaction } from '../../../generated/schema';
-import { toEventId } from './event';
+import { toEventId, toPreviousEventId } from './event';
+
+const mainMethods: string[] = [
+  'createEscrow',
+  'setup',
+  'fund',
+  'bulkTransfer',
+  'complete',
+  'storeResults',
+  'withdraw',
+  'cancel',
+  'stake',
+  // 'stake',
+  // 'unstake',
+  // 'slash',
+  // 'allocate',
+  // 'closeAllocation',
+  // 'addReward',
+  // 'stakeWithdrawn',
+  // 'set',
+  // 'approve',
+  // 'increaseApprovalBulk',
+];
 
 export function createTransaction(
   event: ethereum.Event,
@@ -37,7 +59,7 @@ export function createTransaction(
       internalTransaction.from = from;
       internalTransaction.to = to;
       internalTransaction.value = value !== null ? value : BigInt.fromI32(0);
-      internalTransaction.transaction = transaction.id;
+      internalTransaction.transaction = transaction.txHash;
       internalTransaction.token = token;
       internalTransaction.escrow = escrow;
       internalTransaction.receiver = receiver;
@@ -63,13 +85,32 @@ export function createTransaction(
     transaction.receiver = receiver;
     transaction.save();
   } else {
+    if (
+      transaction.method == 'set' &&
+      method == 'set' &&
+      transaction.to == to
+    ) {
+      const internalTransaction = new InternalTransaction(
+        toPreviousEventId(event)
+      );
+      internalTransaction.method = transaction.method;
+      internalTransaction.from = transaction.from;
+      internalTransaction.to = transaction.to;
+      internalTransaction.value = transaction.value;
+      internalTransaction.transaction = transaction.txHash;
+      internalTransaction.save();
+
+      transaction.method = 'setBulk';
+      transaction.save();
+    }
+
     const internalTransaction = new InternalTransaction(toEventId(event));
     internalTransaction.method = method;
     internalTransaction.from = from;
     internalTransaction.to = to;
     internalTransaction.value =
       value !== null ? value : event.transaction.value;
-    internalTransaction.transaction = transaction.id;
+    internalTransaction.transaction = transaction.txHash;
     internalTransaction.token = token;
     internalTransaction.escrow = escrow;
     internalTransaction.receiver = receiver;
@@ -78,25 +119,3 @@ export function createTransaction(
 
   return transaction;
 }
-
-const mainMethods: string[] = [
-  'createEscrow',
-  'setup',
-  'fund',
-  'bulkTransfer',
-  'complete',
-  'storeResults',
-  'withdraw',
-  'cancel',
-  'stake',
-  // 'stake',
-  // 'unstake',
-  // 'slash',
-  // 'allocate',
-  // 'closeAllocation',
-  // 'addReward',
-  // 'stakeWithdrawn',
-  // 'set',
-  // 'approve',
-  // 'increaseApprovalBulk',
-];

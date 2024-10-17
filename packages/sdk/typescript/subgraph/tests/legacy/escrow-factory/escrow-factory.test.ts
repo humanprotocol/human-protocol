@@ -1,10 +1,12 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
   assert,
   clearStore,
   afterAll,
+  beforeAll,
+  dataSourceMock,
 } from 'matchstick-as/assembly';
 
 import { createLaunchedEvent } from './fixtures';
@@ -23,6 +25,14 @@ const escrow2AddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc7';
 const escrow2Address = Address.fromString(escrow2AddressString);
 
 describe('EscrowFactory', () => {
+  beforeAll(() => {
+    dataSourceMock.setReturnValues(
+      factoryAddressString,
+      'rinkeby',
+      new DataSourceContext()
+    );
+  });
+
   afterAll(() => {
     clearStore();
   });

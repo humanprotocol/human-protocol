@@ -13,13 +13,14 @@ import { ONE_BI, ZERO_BI } from './utils/number';
 import { dataSource } from '@graphprotocol/graph-ts';
 
 export function handleLaunched(event: Launched): void {
-  // createTransaction(
-  //   event,
-  //   'createEscrow',
-  //   event.transaction.from,
-  //   dataSource.address(),
-  //   event.params.escrow
-  // );
+  createTransaction(
+    event,
+    'createEscrow',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    event.params.escrow
+  );
   // Create LaunchedStatusEvent entity
   const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;
