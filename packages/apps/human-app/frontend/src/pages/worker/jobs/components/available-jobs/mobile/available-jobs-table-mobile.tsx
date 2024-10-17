@@ -119,14 +119,7 @@ export function AvailableJobsTableMobile({
               <Grid columnSpacing="2rem" container>
                 <Grid item xs={12}>
                   <ListItem label={t('worker.jobs.jobDescription')}>
-                    <Typography
-                      sx={{
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                      }}
-                      variant="subtitle1"
-                    >
+                    <Typography variant="subtitle1">
                       {d.job_description}
                     </Typography>
                   </ListItem>
