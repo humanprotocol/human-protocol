@@ -6,9 +6,17 @@ import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
 import { createOrLoadLeader } from '../Staking';
 import { createTransaction } from '../utils/transaction';
+import { dataSource } from '@graphprotocol/graph-ts';
 
 export function handleLaunched(event: Launched): void {
-  createTransaction(event, 'createEscrow');
+  createTransaction(
+    event,
+    'createEscrow',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    event.params.escrow
+  );
 
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow);

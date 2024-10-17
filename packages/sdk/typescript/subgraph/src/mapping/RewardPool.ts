@@ -3,9 +3,15 @@ import { RewardAdded } from '../../generated/RewardPool/RewardPool';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
+import { dataSource } from '@graphprotocol/graph-ts';
 
 export function handleRewardAdded(event: RewardAdded): void {
-  createTransaction(event, 'addReward');
+  createTransaction(
+    event,
+    'addReward',
+    event.transaction.from,
+    dataSource.address()
+  );
   // Create RewardAddedEvent entity
   const eventEntity = new RewardAddedEvent(toEventId(event));
   eventEntity.block = event.block.number;

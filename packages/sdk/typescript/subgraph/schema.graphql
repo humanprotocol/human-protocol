@@ -86,7 +86,6 @@ type Escrow @entity {
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
   jobRequesterId: String # string
-  isNonHMT: Boolean
   createdAt: BigInt!
 }
 
@@ -383,17 +382,24 @@ type Transaction @entity {
   timestamp: BigInt!
   txHash: Bytes!
   from: Bytes!
-  to: Bytes
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
   value: BigInt!
   method: String!
   token: Bytes
-  transfers: [Transfer!] @derivedFrom(field: "transaction")
+  internalTransactions: [InternalTransaction!]
+    @derivedFrom(field: "transaction")
 }
 
-type Transfer @entity {
+type InternalTransaction @entity {
   id: Bytes!
   from: Bytes!
-  to: Bytes
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
   value: BigInt!
+  token: Bytes
+  method: String!
   transaction: Transaction!
 }

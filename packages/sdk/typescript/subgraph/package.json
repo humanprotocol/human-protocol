@@ -6,7 +6,8 @@
     "generated"
   ],
   "scripts": {
-    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-hmt && yarn generate-staking && graph codegen",
+    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-escrow && yarn generate-hmt && yarn generate-staking && graph codegen",
+    "generate-escrow": "mustache ./config/$NETWORK.json src/mapping/EscrowTemplate.ts > src/mapping/Escrow.ts",
     "generate-hmt": "mustache ./config/$NETWORK.json src/mapping/HMTokenTemplate.ts > src/mapping/HMToken.ts",
     "generate-staking": "mustache ./config/$NETWORK.json src/mapping/StakingTemplate.ts > src/mapping/Staking.ts",
     "codegen": "graph codegen",

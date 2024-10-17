@@ -1,10 +1,12 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
   assert,
   clearStore,
   afterAll,
+  dataSourceMock,
+  beforeAll,
 } from 'matchstick-as/assembly';
 
 import { STATISTICS_ENTITY_ID } from '../../src/mapping/Escrow';
@@ -18,12 +20,19 @@ const launcherAddressString = '0x92a2eef7ff696bcef98957a0189872680600a959';
 const launcherAddress = Address.fromString(launcherAddressString);
 const tokenAddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc4';
 const tokenAddress = Address.fromString(tokenAddressString);
-const escrow1AddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc6';
+const escrow1AddressString = '0xd979105297fb0eee83f7475fc09279cb5b94ffc6';
 const escrow1Address = Address.fromString(escrow1AddressString);
 const escrow2AddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc7';
 const escrow2Address = Address.fromString(escrow2AddressString);
 
 describe('EscrowFactory', () => {
+  beforeAll(() => {
+    dataSourceMock.setReturnValues(
+      factoryAddressString,
+      'rinkeby',
+      new DataSourceContext()
+    );
+  });
   afterAll(() => {
     clearStore();
   });
@@ -225,6 +234,12 @@ describe('EscrowFactory', () => {
       data2.transaction.hash.toHex(),
       'from',
       data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'to',
+      factoryAddressString
     );
   });
 });

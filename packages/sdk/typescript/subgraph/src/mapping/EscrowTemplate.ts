@@ -21,7 +21,7 @@ import {
   Worker,
   Payout,
   DailyWorker,
-  Transfer,
+  InternalTransaction,
   WithdrawEvent,
 } from '../../generated/schema';
 import {
@@ -30,7 +30,6 @@ import {
   Bytes,
   dataSource,
   ethereum,
-  log,
 } from '@graphprotocol/graph-ts';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventDayId, toEventId } from './utils/event';
@@ -39,6 +38,7 @@ import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 import { createOrLoadLeader } from './Staking';
 
+export const HMT_ADDRESS = Address.fromString('{{ HMToken.address }}');
 export const STATISTICS_ENTITY_ID = toBytes('escrow-statistics-id');
 
 function constructStatsEntity(): EscrowStatistics {
@@ -191,8 +191,6 @@ function updateEscrowEntityForPending(
 }
 
 export function handlePending(event: Pending): void {
-  createTransaction(event, 'setup');
-
   // Create common entities for setup and status
   const escrowStatusEvent = createCommonEntitiesForPending(event, 'Pending');
 
@@ -221,12 +219,19 @@ export function handlePending(event: Pending): void {
       !recordingOracle.reverted ? recordingOracle.value : null,
       !exchangeOracle.reverted ? exchangeOracle.value : null
     );
+
+    createTransaction(
+      event,
+      'setup',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
 export function handlePendingV2(event: PendingV2): void {
-  createTransaction(event, 'setup');
-
   // Create common entities for setup and status
   const escrowStatusEvent = createCommonEntitiesForPending(event, 'Pending');
 
@@ -248,11 +253,19 @@ export function handlePendingV2(event: PendingV2): void {
       event.params.recordingOracle,
       event.params.exchangeOracle
     );
+
+    createTransaction(
+      event,
+      'setup',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
-  createTransaction(event, 'storeResults');
   // Create StoreResultsEvent entity
   const eventEntity = new StoreResultsEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -283,6 +296,14 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   if (escrowEntity) {
     escrowEntity.intermediateResultsUrl = event.params._url;
     escrowEntity.save();
+    createTransaction(
+      event,
+      'storeResults',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
@@ -383,8 +404,6 @@ function updateEscrowEntityForBulkTransfer(
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  createTransaction(event, 'bulkTransfer');
-
   // Create BulkPayoutEvent entity
   createBulkPayoutEvent(
     event,
@@ -417,6 +436,15 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       escrowEntity.status,
       escrowEntity
     );
+
+    createTransaction(
+      event,
+      'bulkTransfer',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
@@ -438,7 +466,7 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
   const escrowEntity = Escrow.load(dataSource.address());
   if (escrowEntity !== null) {
     // If the escrow is non-HMT, track the balance data
-    if (escrowEntity.isNonHMT) {
+    if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
       for (let i = 0; i < event.params._recipients.length; i++) {
         const recipient = event.params._recipients[i];
         const amount = event.params._amounts[i];
@@ -487,7 +515,10 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
         const transaction = createTransaction(
           event,
           'bulkTransfer',
+          event.transaction.from,
+          Address.fromBytes(escrowEntity.address),
           null,
+          Address.fromBytes(escrowEntity.address),
           null,
           Address.fromBytes(escrowEntity.token)
         );
@@ -496,16 +527,18 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
         for (let i = 0; i < event.params._recipients.length; i++) {
           const recipient = event.params._recipients[i];
           const amount = event.params._amounts[i];
-          const transfer = new Transfer(
+          const internalTransaction = new InternalTransaction(
             event.transaction.hash
               .concatI32(i)
               .concatI32(event.block.timestamp.toI32())
           );
-          transfer.from = escrowEntity.address;
-          transfer.to = recipient;
-          transfer.value = amount;
-          transfer.transaction = transaction.id;
-          transfer.save();
+          internalTransaction.from = Address.fromBytes(escrowEntity.address);
+          internalTransaction.to = recipient;
+          internalTransaction.value = amount;
+          internalTransaction.transaction = transaction.id;
+          internalTransaction.method = 'transfer';
+          internalTransaction.escrow = Address.fromBytes(escrowEntity.address);
+          internalTransaction.save();
         }
 
         eventDayData.save();
@@ -525,8 +558,6 @@ export function handleBulkTransferV2(event: BulkTransferV2): void {
       escrowEntity.status,
       escrowEntity
     );
-  } else {
-    createTransaction(event, 'bulkTransfer');
   }
 }
 
@@ -559,33 +590,35 @@ export function handleCancelled(event: Cancelled): void {
   const escrowEntity = Escrow.load(dataSource.address());
 
   if (escrowEntity) {
-    if (escrowEntity.isNonHMT) {
-      const transaction = createTransaction(
-        event,
-        'cancel',
-        null,
-        null,
-        Address.fromBytes(escrowEntity.token)
-      );
+    const transaction = createTransaction(
+      event,
+      'cancel',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
+    if (Address.fromBytes(escrowEntity.token) != HMT_ADDRESS) {
       // If escrow is funded with HMT, balance is already tracked by HMT transfer
-      const transfer = new Transfer(toEventId(event));
-      transfer.from = escrowEntity.address;
-      transfer.to = escrowEntity.canceler;
-      transfer.value = escrowEntity.balance;
-      transfer.transaction = transaction.id;
-      transfer.save();
+      const internalTransaction = new InternalTransaction(toEventId(event));
+      internalTransaction.from = escrowEntity.address;
+      internalTransaction.to = Address.fromBytes(escrowEntity.token);
+      internalTransaction.receiver = escrowEntity.canceler;
+      internalTransaction.value = escrowEntity.balance;
+      internalTransaction.transaction = transaction.id;
+      internalTransaction.method = 'transfer';
+      internalTransaction.token = Address.fromBytes(escrowEntity.token);
+      internalTransaction.save();
       escrowEntity.balance = ZERO_BI;
     }
     escrowEntity.status = 'Cancelled';
     escrowEntity.save();
     eventEntity.launcher = escrowEntity.launcher;
   }
-  createTransaction(event, 'cancel');
   eventEntity.save();
 }
 
 export function handleCompleted(event: Completed): void {
-  createTransaction(event, 'complete');
   // Create EscrowStatusEvent entity
   const eventEntity = new EscrowStatusEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -616,6 +649,15 @@ export function handleCompleted(event: Completed): void {
     escrowEntity.status = 'Complete';
     escrowEntity.save();
     eventEntity.launcher = escrowEntity.launcher;
+
+    createTransaction(
+      event,
+      'complete',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
   eventEntity.save();
 }
@@ -626,19 +668,6 @@ export function handleFund(event: Fund): void {
   if (!escrowEntity) {
     return;
   }
-
-  // If escrow is funded with HMT, balance is already tracked by HMT transfer
-  if (escrowEntity.balance.gt(ZERO_BI)) {
-    return;
-  }
-
-  createTransaction(
-    event,
-    'fund',
-    event.address,
-    event.params._amount,
-    Address.fromBytes(escrowEntity.token)
-  );
 
   // Create FundEvent entity
   const fundEventEntity = new FundEvent(toEventId(event));
@@ -665,11 +694,11 @@ export function handleFund(event: Fund): void {
   eventDayData.save();
 
   // Update escrow entity
-  escrowEntity.isNonHMT = true;
-  escrowEntity.balance = escrowEntity.balance.plus(event.params._amount);
-  escrowEntity.totalFundedAmount = escrowEntity.totalFundedAmount.plus(
-    event.params._amount
-  );
+  escrowEntity.totalFundedAmount = event.params._amount;
+
+  if (escrowEntity.token != HMT_ADDRESS) {
+    escrowEntity.balance = event.params._amount;
+  }
 
   escrowEntity.save();
 }
@@ -684,7 +713,10 @@ export function handleWithdraw(event: Withdraw): void {
   createTransaction(
     event,
     'withdraw',
-    Address.fromBytes(escrowEntity.canceler),
+    event.transaction.from,
+    Address.fromBytes(escrowEntity.address),
+    event.transaction.from,
+    Address.fromBytes(escrowEntity.address),
     event.params._amount,
     event.params._token
   );

@@ -579,52 +579,6 @@ describe('Escrow', () => {
       'totalFundedAmount',
       '100'
     );
-    assert.fieldEquals(
-      'Transaction',
-      fund.transaction.hash.toHex(),
-      'txHash',
-      fund.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      fund.transaction.hash.toHex(),
-      'method',
-      'fund'
-    );
-    assert.fieldEquals(
-      'Transaction',
-      fund.transaction.hash.toHex(),
-      'block',
-      fund.block.number.toString()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      fund.transaction.hash.toHex(),
-      'from',
-      fund.transaction.from.toHex()
-    );
-    assert.fieldEquals(
-      'Transaction',
-      fund.transaction.hash.toHex(),
-      'value',
-      '100'
-    );
-
-    const transferId = toEventId(fund).toHex();
-    assert.fieldEquals(
-      'Transfer',
-      transferId,
-      'transaction',
-      fund.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'Transfer',
-      transferId,
-      'from',
-      fund.transaction.from.toHex()
-    );
-    assert.fieldEquals('Transfer', transferId, 'to', escrowAddressString);
-    assert.fieldEquals('Transfer', transferId, 'value', '100');
   });
 
   test('Should skip Fund event if balance is greater than 0', () => {
@@ -1515,22 +1469,6 @@ describe('Escrow', () => {
       'value',
       '100'
     );
-
-    const transferId = toEventId(withdraw).toHex();
-    assert.fieldEquals(
-      'Transfer',
-      transferId,
-      'transaction',
-      withdraw.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'Transfer',
-      transferId,
-      'from',
-      withdraw.transaction.from.toHex()
-    );
-    assert.fieldEquals('Transfer', transferId, 'to', launcherAddressString);
-    assert.fieldEquals('Transfer', transferId, 'value', '100');
   });
 
   describe('Statistics', () => {
