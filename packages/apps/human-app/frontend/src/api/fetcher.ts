@@ -99,7 +99,7 @@ export function createFetcher(defaultFetcherConfig?: {
       : fetcherOptions.options;
     if (fetcherOptions.authenticated) {
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
-        Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
+        Authorization: `Bearer ${browserAuthProvider.getAccessToken() ?? ''}`,
       });
     }
 
