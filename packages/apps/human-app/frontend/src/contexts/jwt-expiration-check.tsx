@@ -19,7 +19,7 @@ export function JWTExpirationCheck({
   useEffect(() => {
     if (
       location.pathname.includes('profile') &&
-      (web2Auth.user || web3Auth.user)
+      (web2Auth.user ?? web3Auth.user)
     ) {
       checksOnProfile.current = checksOnProfile.current + 1;
     }

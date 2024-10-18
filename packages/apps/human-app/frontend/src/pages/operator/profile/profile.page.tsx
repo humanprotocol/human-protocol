@@ -54,7 +54,7 @@ export function OperatorProfilePage() {
   if (isKeysError || isStatsError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(keysError || statsError)}
+        errorMessage={defaultErrorMessage(keysError ?? statsError)}
       />
     );
   }
@@ -84,7 +84,7 @@ export function OperatorProfilePage() {
               <ProfileListItem
                 header={t('operator.profile.about.role')}
                 paragraph={
-                  keysData.role ||
+                  keysData.role ??
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
@@ -139,27 +139,27 @@ export function OperatorProfilePage() {
               <ProfileListItem
                 header={t('operator.profile.about.fee')}
                 paragraph={
-                  `${keysData.fee}${t('inputMasks.percentSuffix')}` ||
+                  `${keysData.fee ?? ''}${t('inputMasks.percentSuffix')}` ||
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.publicKey')}
                 paragraph={
-                  keysData.public_key ||
+                  keysData.public_key ??
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.url')}
                 paragraph={
-                  keysData.url || t('operator.addKeysPage.existingKeys.url')
+                  keysData.url ?? t('operator.addKeysPage.existingKeys.url')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.webhookUrl')}
                 paragraph={
-                  keysData.webhook_url ||
+                  keysData.webhook_url ??
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />

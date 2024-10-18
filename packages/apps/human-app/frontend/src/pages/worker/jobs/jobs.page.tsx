@@ -21,8 +21,8 @@ import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
 
 function generateTabA11yProps(index: number) {
   return {
-    id: `tab-${index}`,
-    'aria-controls': `jobs-tabpanel-${index}`,
+    id: `tab-${index.toString()}`,
+    'aria-controls': `jobs-tabpanel-${index.toString()}`,
   };
 }
 

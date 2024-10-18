@@ -37,7 +37,7 @@ export function EditExistingKeysSuccessPage() {
 
   const createSignature = async (data: SignatureData) => {
     const signature = await signMessage(JSON.stringify(data));
-    web3SignUpMutation({ signature: signature || '' });
+    web3SignUpMutation({ signature: signature ?? '' });
   };
 
   if (isSignatureDataError) {

@@ -52,7 +52,7 @@ export function useRegisterAddressOnChainMutation() {
       await registerAddressInKVStore({
         ...data,
         signer: web3ProviderMutation.data?.signer,
-        chainId: chainId || -1,
+        chainId: chainId ?? -1,
       });
     },
     onSuccess: async () => {

@@ -85,7 +85,7 @@ export function EditPendingKeysForm({
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
         {sortedKeys.map((key) => {
-          const formInputsConfigKey = key as EthKVStoreKeyValues;
+          const formInputsConfigKey = key;
           return (
             <>
               {!existingKeysInitialState[formInputsConfigKey]

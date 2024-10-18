@@ -20,7 +20,7 @@ export function parseDate(delta: number): ParsedDate {
 }
 
 export function padZero(num: number): string {
-  return num < 10 ? `0${num}` : `${num}`;
+  return num < 10 ? `0${num.toString()}` : num.toString();
 }
 
 // implementation used like in prev version of human app

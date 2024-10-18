@@ -47,7 +47,7 @@ const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
 export function useGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address || '' };
+  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
 
   return useQuery({
     queryKey: ['availableJobs', dto],
@@ -58,7 +58,7 @@ export function useGetAvailableJobsData() {
 export function useInfiniteGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address || '' };
+  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
 
   return useInfiniteQuery({
     initialPageParam: 0,

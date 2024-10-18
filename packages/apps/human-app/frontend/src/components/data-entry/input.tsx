@@ -40,7 +40,7 @@ export function Input({
                 }
               : undefined
           }
-          autoComplete={autoComplete || name}
+          autoComplete={autoComplete ?? name}
           error={Boolean(fieldState.error)}
           fullWidth
           helperText={
