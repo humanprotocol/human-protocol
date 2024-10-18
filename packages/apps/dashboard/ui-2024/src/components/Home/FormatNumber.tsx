@@ -20,7 +20,7 @@ export const FormatNumberWithDecimals = ({
 	value: number | string | undefined | null;
 }) => {
 	if (value && Number(value) < 1) {
-		return value;
+		return <span>{value}</span>;
 	}
 	return (
 		<NumericFormat

@@ -32,7 +32,7 @@ export const SelectNetwork = () => {
 		<FormControl
 			fullWidth
 			size="small"
-			sx={{ width: isMobile ? '100%' : '210px' }}
+			sx={{ width: isMobile ? '100%' : '210px', textTransform: 'none' }}
 		>
 			<InputLabel id="network-select-label">By Network</InputLabel>
 			<Select<number>
