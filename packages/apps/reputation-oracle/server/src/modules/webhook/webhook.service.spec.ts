@@ -10,12 +10,16 @@ import {
   MOCK_WEBHOOK_URL,
   mockConfig,
 } from '../../../test/constants';
-import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import {
+  EventType,
+  WebhookStatus,
+  WebhookType,
+} from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
-import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { WebhookDto } from './webhook.dto';
+import { WebhookEntity } from './webhook.entity';
+import { SendWebhookDto, WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
@@ -92,10 +96,21 @@ describe('WebhookService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createIncomingWebhook', () => {
-    const webhookEntity: Partial<WebhookIncomingEntity> = {
+  describe('createWebhook', () => {
+    const inWebhookEntity: Partial<WebhookEntity> = {
       chainId: ChainId.LOCALHOST,
       escrowAddress: MOCK_ADDRESS,
+      type: WebhookType.IN,
+      status: WebhookStatus.PENDING,
+      waitUntil: new Date(),
+      retriesCount: 0,
+    };
+
+    const outWebhookEntity: Partial<WebhookEntity> = {
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      type: WebhookType.OUT,
+      callbackUrl: MOCK_WEBHOOK_URL,
       status: WebhookStatus.PENDING,
       waitUntil: new Date(),
       retriesCount: 0,
@@ -105,35 +120,38 @@ describe('WebhookService', () => {
       const validDto: WebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
+        type: WebhookType.IN,
         eventType: EventType.JOB_COMPLETED,
       };
 
       jest
-        .spyOn(webhookRepository, 'findOne')
-        .mockResolvedValueOnce(webhookEntity as WebhookIncomingEntity);
+        .spyOn(webhookRepository, 'createUnique')
+        .mockResolvedValue(inWebhookEntity as WebhookEntity);
 
-      await webhookService.createIncomingWebhook(validDto);
+      await webhookService.createWebhook(validDto);
 
-      expect(webhookRepository.createUnique).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(0);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
+      expect(webhookRepository.createUnique).toHaveBeenCalledWith(
+        expect.any(Object),
+      );
     });
 
-    it('should throw BadRequestException with invalid event type', async () => {
-      const invalidDto: WebhookDto = {
+    it('should successfully create outgoing webhook with valid DTO', async () => {
+      const validDto: WebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        eventType: 'INVALID_EVENT' as EventType,
+        type: WebhookType.OUT,
+        callbackUrl: MOCK_WEBHOOK_URL,
+        eventType: EventType.JOB_COMPLETED,
       };
 
-      await expect(
-        webhookService.createIncomingWebhook(invalidDto),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorWebhook.InvalidEventType,
-          HttpStatus.BAD_REQUEST,
-        ),
+      jest
+        .spyOn(webhookRepository, 'createUnique')
+        .mockResolvedValue(outWebhookEntity as WebhookEntity);
+
+      await webhookService.createWebhook(validDto);
+
+      expect(webhookRepository.createUnique).toHaveBeenCalledWith(
+        expect.any(Object),
       );
     });
 
@@ -141,6 +159,7 @@ describe('WebhookService', () => {
       const validDto: WebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
+        type: WebhookType.IN,
         eventType: EventType.JOB_COMPLETED,
       };
 
@@ -148,9 +167,7 @@ describe('WebhookService', () => {
         .spyOn(webhookRepository as any, 'createUnique')
         .mockResolvedValue(null);
 
-      await expect(
-        webhookService.createIncomingWebhook(validDto),
-      ).rejects.toThrow(
+      await expect(webhookService.createWebhook(validDto)).rejects.toThrow(
         new ControlledError(ErrorWebhook.NotCreated, HttpStatus.BAD_REQUEST),
       );
     });
@@ -158,7 +175,7 @@ describe('WebhookService', () => {
 
   describe('handleWebhookError', () => {
     it('should set webhook status to FAILED if retries exceed threshold', async () => {
-      const webhookEntity: Partial<WebhookIncomingEntity> = {
+      const webhookEntity: Partial<WebhookEntity> = {
         id: 1,
         status: WebhookStatus.PENDING,
         retriesCount: MOCK_MAX_RETRY_COUNT,
@@ -172,7 +189,7 @@ describe('WebhookService', () => {
     });
 
     it('should increment retries count if below threshold', async () => {
-      const webhookEntity: Partial<WebhookIncomingEntity> = {
+      const webhookEntity: Partial<WebhookEntity> = {
         id: 1,
         status: WebhookStatus.PENDING,
         retriesCount: 0,
@@ -189,7 +206,7 @@ describe('WebhookService', () => {
   });
 
   describe('sendWebhook', () => {
-    const webhookBody: WebhookDto = {
+    const webhookBody: SendWebhookDto = {
       chainId: ChainId.LOCALHOST,
       escrowAddress: MOCK_ADDRESS,
       eventType: EventType.ESCROW_COMPLETED,

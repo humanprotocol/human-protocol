@@ -9,3 +9,8 @@ export enum WebhookStatus {
   FAILED = 'FAILED',
   PAID = 'PAID',
 }
+
+export enum WebhookType {
+  IN = 'in',
+  OUT = 'out',
+}

@@ -4,14 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
-import { WebhookIncomingEntity } from './webhook-incoming.entity';
+import { WebhookEntity } from './webhook.entity';
 import { WebhookController } from './webhook.controller';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WebhookIncomingEntity]),
+    TypeOrmModule.forFeature([WebhookEntity]),
     ConfigModule,
     Web3Module,
     HttpModule,
