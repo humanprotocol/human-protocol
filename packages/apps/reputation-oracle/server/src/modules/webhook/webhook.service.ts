@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { WebhookDto } from './webhook.dto';
+import { SendWebhookDto, WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
 import { EventType, WebhookStatus } from '../../common/enums';
@@ -13,6 +12,7 @@ import { CaseConverter } from '../../common/utils/case-converter';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { WebhookEntity } from './webhook.entity';
 
 @Injectable()
 export class WebhookService {
@@ -24,22 +24,18 @@ export class WebhookService {
   ) {}
 
   /**
-   * Create a incoming webhook using the DTO data.
-   * @param dto - Data to create an incoming webhook.
-   * @returns {Promise<void>} - Return the boolean result of the method.
-   * @throws {Error} - An error object if an error occurred.
+   * Creates a new webhook using the provided data transfer object (DTO).
+   *
+   * @param {WebhookDto} dto - The data transfer object containing necessary information such as chain ID, escrow address, and webhook type.
+   * @returns {Promise<void>} - Resolves to void if the webhook is successfully created.
+   * @throws {ControlledError} - Throws an error if the webhook cannot be created.
    */
-  public async createIncomingWebhook(dto: WebhookDto): Promise<void> {
-    if (dto.eventType !== EventType.JOB_COMPLETED) {
-      throw new ControlledError(
-        ErrorWebhook.InvalidEventType,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    let webhookEntity = new WebhookIncomingEntity();
+  public async createWebhook(dto: WebhookDto): Promise<void> {
+    let webhookEntity = new WebhookEntity();
     webhookEntity.chainId = dto.chainId;
     webhookEntity.escrowAddress = dto.escrowAddress;
+    webhookEntity.type = dto.type;
+    webhookEntity.callbackUrl = dto.callbackUrl || null;
     webhookEntity.status = WebhookStatus.PENDING;
     webhookEntity.waitUntil = new Date();
     webhookEntity.retriesCount = 0;
@@ -59,28 +55,30 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   public async handleWebhookError(
-    webhookEntity: WebhookIncomingEntity,
+    webhookEntity: WebhookEntity,
+    failedReason: string,
   ): Promise<void> {
-    if (webhookEntity.retriesCount >= this.serverConfigService.maxRetryCount) {
-      webhookEntity.status = WebhookStatus.FAILED;
-    } else {
+    if (webhookEntity.retriesCount < this.serverConfigService.maxRetryCount) {
       webhookEntity.waitUntil = new Date();
-      webhookEntity.retriesCount = webhookEntity.retriesCount + 1;
+      webhookEntity.retriesCount += 1;
+    } else {
+      webhookEntity.failedReason = failedReason;
+      webhookEntity.status = WebhookStatus.FAILED;
     }
     this.webhookRepository.updateOne(webhookEntity);
   }
 
   public async sendWebhook(
-    webhookUrl: string,
-    webhookBody: WebhookDto,
+    callbackUrl: string,
+    body: SendWebhookDto,
   ): Promise<void> {
-    const snake_case_body = CaseConverter.transformToSnakeCase(webhookBody);
+    const snake_case_body = CaseConverter.transformToSnakeCase(body);
     const signedBody = await signMessage(
       snake_case_body,
       this.web3ConfigService.privateKey,
     );
     const { status } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, snake_case_body, {
+      await this.httpService.post(callbackUrl, snake_case_body, {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
       }),
     );

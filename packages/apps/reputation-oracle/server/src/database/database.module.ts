@@ -6,7 +6,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NS } from '../common/constants';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
-import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
+import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
@@ -45,7 +45,7 @@ import { UserQualificationEntity } from '../modules/qualification/user-qualifica
           name: 'default',
           type: 'postgres',
           entities: [
-            WebhookIncomingEntity,
+            WebhookEntity,
             ReputationEntity,
             CredentialEntity,
             CredentialValidationEntity,
