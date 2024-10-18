@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import { t } from 'i18next';
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
@@ -8,7 +7,7 @@ import {
 } from 'material-react-table';
 import { Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { OracleSuccessResponse } from '@/api/services/worker/oracles';
+import { type OracleSuccessResponse } from '@/api/services/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
@@ -20,7 +19,7 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
-import { JobType } from '@/smart-contracts/EthKVStore/config';
+import { type JobType } from '@/smart-contracts/EthKVStore/config';
 import { useGetRegisteredOracles } from '@/api/services/worker/registered-oracles';
 import { useRegisteredOracles } from '@/contexts/registered-oracles';
 import { RegistrationStep } from '@/pages/worker/jobs-discovery/components/registration/registration-step';
@@ -143,7 +142,7 @@ export function OraclesTable({
       showAlertBanner: isOraclesDataError,
     },
     columns: getColumns(selectOracle),
-    data: oraclesData || [],
+    data: oraclesData ?? [],
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
@@ -167,15 +166,13 @@ export function OraclesTable({
     ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
-  if (
-    selectedOracle &&
-    selectedOracle.registrationNeeded &&
-    !isRegistrationComplete
-  ) {
+  if (selectedOracle?.registrationNeeded && !isRegistrationComplete) {
     return (
       <RegistrationStep
         oracleData={selectedOracle}
-        onRegistrationComplete={() => setIsRegistrationComplete(true)}
+        onRegistrationComplete={() => {
+          setIsRegistrationComplete(true);
+        }}
       />
     );
   }

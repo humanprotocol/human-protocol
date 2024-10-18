@@ -244,16 +244,22 @@ describe('Kyc Service', () => {
     } as any;
 
     it('Should update the Kyc status of the user', async () => {
-      jest.spyOn(kycRepository, 'updateOne').mockResolvedValue({} as any);
+      const mockKycEntity: Partial<KycEntity> = {
+        status: KycStatus.NONE,
+      };
       jest
         .spyOn(kycRepository, 'findOneBySessionId')
-        .mockResolvedValue({} as any);
+        .mockResolvedValueOnce(mockKycEntity as any);
+      jest
+        .spyOn(kycRepository, 'updateOne')
+        .mockResolvedValueOnce(mockKycUpdate);
 
       await kycService.updateKycStatus(mockKycUpdate);
 
       expect(kycRepository.updateOne).toHaveBeenCalledWith({
         status: KycStatus.APPROVED,
         country: 'GB',
+        message: null,
       });
     });
   });

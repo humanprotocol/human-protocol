@@ -27,7 +27,9 @@ const existingKeysConfig: Record<
         {t('operator.addKeysPage.existingKeys.fee')}
       </Typography>
       <Typography variant="body1">
-        <OptionalText text={fee?.toString() + t('inputMasks.percentSuffix')} />
+        <OptionalText
+          text={`${fee?.toString() ?? ''}${t('inputMasks.percentSuffix')}`}
+        />
       </Typography>
     </Grid>
   ),
@@ -101,7 +103,7 @@ export function ExistingKeys({
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
       {sortedKeys.map((key) => {
-        const existingKeysConfigKey = key as EthKVStoreKeyValues;
+        const existingKeysConfigKey = key;
         return existingKeysInitialState[existingKeysConfigKey]
           ? existingKeysConfig[existingKeysConfigKey](formValues)
           : null;

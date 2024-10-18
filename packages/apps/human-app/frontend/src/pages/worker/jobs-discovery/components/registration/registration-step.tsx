@@ -37,9 +37,11 @@ export function RegistrationStep({
   const handleRegistrationComplete = () => {
     userRegistrationMutate(oracleData.address, {
       onSuccess(data) {
-        setRegisteredOracles(registeredOracles?.concat([
+        setRegisteredOracles(
+          registeredOracles?.concat([
             (data as { oracle_address: string }).oracle_address,
-          ]));
+          ])
+        );
         onRegistrationComplete(); // Call the completion callback
       },
     });
@@ -64,7 +66,7 @@ export function RegistrationStep({
           <Stack maxWidth="350px" spacing={2}>
             <Box>{t('worker.registration.requiredMessage')}</Box>
             <Link
-              href={oracleData.registrationInstructions}
+              href={oracleData.registrationInstructions ?? ''}
               onClick={handleLinkClick}
               target="_blank"
               rel="noopener"
@@ -74,7 +76,11 @@ export function RegistrationStep({
             </Link>
             <Box>{t('worker.registration.completeMessage')}</Box>
             <FormProvider {...methods}>
-              <form onSubmit={methods.handleSubmit(handleRegistrationComplete)}>
+              <form
+                onSubmit={(event) =>
+                  void methods.handleSubmit(handleRegistrationComplete)(event)
+                }
+              >
                 <Stack spacing={2} alignItems="center">
                   <FormCaptcha
                     name="h_captcha_token"

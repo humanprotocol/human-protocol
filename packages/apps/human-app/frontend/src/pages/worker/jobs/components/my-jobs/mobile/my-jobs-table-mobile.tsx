@@ -177,7 +177,7 @@ export function MyJobsTableMobile({
                       onClick={() => {
                         if (buttonDisabled) return;
                         rejectTaskMutation({
-                          oracle_address: oracle_address || '',
+                          oracle_address: oracle_address ?? '',
                           assignment_id: d.assignment_id,
                         });
                       }}

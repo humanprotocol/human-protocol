@@ -82,7 +82,7 @@ export function HcaptchaLabelingPage() {
       <PageCardError
         cardMaxWidth="100%"
         errorMessage={defaultErrorMessage(
-          hcaptchaUserStatsError || dailyHmtSpentError
+          hcaptchaUserStatsError ?? dailyHmtSpentError
         )}
       />
     );
@@ -138,7 +138,7 @@ export function HcaptchaLabelingPage() {
                   onVerify={hcaptchaOnSuccess}
                   ref={captchaRef}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
-                  sitekey={user.site_key || ''}
+                  sitekey={user.site_key ?? ''}
                   theme={isDarkMode ? 'dark' : 'light'}
                 />
               </Grid>
