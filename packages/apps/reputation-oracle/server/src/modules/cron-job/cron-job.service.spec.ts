@@ -18,11 +18,7 @@ import { WebhookService } from '../webhook/webhook.service';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigService } from '@nestjs/config';
 import { WebhookEntity } from '../webhook/webhook.entity';
-import {
-  EventType,
-  WebhookStatus,
-  WebhookType,
-} from '../../common/enums/webhook';
+import { WebhookStatus, WebhookType } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';

@@ -3,7 +3,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { SendWebhookDto, WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
-import { EventType, WebhookStatus } from '../../common/enums';
+import { WebhookStatus } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
