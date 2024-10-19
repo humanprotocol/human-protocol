@@ -19,14 +19,20 @@ import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { isArray } from '@/shared/helpers/is-array';
+import { publicKeySchema } from '@/shared/helpers/public-key-validation';
 
 const fieldsValidations = {
-  [EthKVStoreKeys.PublicKey]: z.string().min(1),
-  [EthKVStoreKeys.Url]: z.string(),
+  [EthKVStoreKeys.PublicKey]: publicKeySchema,
+  [EthKVStoreKeys.Url]: z.string().url(),
   [EthKVStoreKeys.WebhookUrl]: z.string().url(),
   [EthKVStoreKeys.Role]: z.nativeEnum(Role),
   [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
-  [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
+  [EthKVStoreKeys.Fee]: z.coerce
+    // eslint-disable-next-line camelcase
+    .number({ invalid_type_error: t('validation.required') })
+    .min(1)
+    .max(100)
+    .step(1),
 };
 
 export const editEthKVStoreValuesMutationSchema = z.object({
