@@ -159,7 +159,9 @@ export function Layout({
                   zIndex: 200,
                   top: '0',
                   left: '0',
-                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  width: notificationWith
+                    ? `${notificationWith.toString()}px`
+                    : 'unset',
                 },
               }}
             >
@@ -168,7 +170,9 @@ export function Layout({
                 sx={{
                   minHeight: '3.2rem',
                   position: 'fixed',
-                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  width: notificationWith
+                    ? `${notificationWith.toString()}px`
+                    : 'unset',
                   zIndex: '10',
                   [breakpoints.mobile]: {
                     minHeight: 'unset',
@@ -201,6 +205,7 @@ export function Layout({
             </Grid>
             <Grid
               component="div"
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error -- ...
               ref={layoutElementRef}
               sx={{ height: '100%' }}

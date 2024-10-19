@@ -46,7 +46,7 @@ export function ResetPasswordWorkerPage() {
 
   const handleWorkerResetPassword = (data: ResetPasswordDto) => {
     resetPasswordWorkerMutate(
-      omit({ ...data, token: token?.toString() || '' }, ['confirmPassword'])
+      omit({ ...data, token: token?.toString() ?? '' }, ['confirmPassword'])
     );
   };
 

@@ -159,7 +159,8 @@ describe('OracleDiscoveryService', () => {
     const mockData: OracleDiscoveryResponse[] =
       generateOracleDiscoveryResponseBody();
 
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);    jest
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
+    jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockResolvedValueOnce(mockData);
 

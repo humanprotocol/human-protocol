@@ -1,7 +1,11 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { MOCK_ADDRESS, MOCK_MANIFEST_URL, MOCK_PRIVATE_KEY } from '../../../test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_MANIFEST_URL,
+  MOCK_PRIVATE_KEY,
+} from '../../../test/constants';
 import { TOKEN } from '../../common/constant';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { AssignmentRepository } from '../assignment/assignment.repository';
@@ -133,7 +137,11 @@ describe('AssignmentService', () => {
 
       expect(result).toEqual(undefined);
       expect(assignmentRepository.createUnique).toHaveBeenCalledWith({
-        job: { id: 1, manifestUrl: MOCK_MANIFEST_URL, reputationNetwork: reputationNetwork },
+        job: {
+          id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
+          reputationNetwork: reputationNetwork,
+        },
         workerAddress: workerAddress,
         status: AssignmentStatus.ACTIVE,
         expiresAt: expect.any(Date),
@@ -142,7 +150,7 @@ describe('AssignmentService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
-        MOCK_MANIFEST_URL
+        MOCK_MANIFEST_URL,
       );
     });
 
@@ -174,7 +182,7 @@ describe('AssignmentService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
-        MOCK_MANIFEST_URL
+        MOCK_MANIFEST_URL,
       );
     });
 
@@ -312,7 +320,7 @@ describe('AssignmentService', () => {
         job: {
           chainId: 1,
           escrowAddress,
-          manifestUrl: MOCK_MANIFEST_URL
+          manifestUrl: MOCK_MANIFEST_URL,
         },
         status: AssignmentStatus.ACTIVE,
         createdAt: new Date(),
@@ -372,7 +380,7 @@ describe('AssignmentService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
-        MOCK_MANIFEST_URL
+        MOCK_MANIFEST_URL,
       );
       expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
         page: 0,

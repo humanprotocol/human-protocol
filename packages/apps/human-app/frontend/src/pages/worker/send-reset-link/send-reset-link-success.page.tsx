@@ -32,7 +32,7 @@ export function SendResetLinkWorkerSuccessPage() {
     useSendResetLinkMutation();
 
   const handleWorkerSendResetLink = (dto: SendResetLinkHcaptcha) => {
-    mutate({ ...dto, email: email || '' });
+    mutate({ ...dto, email: email ?? '' });
   };
 
   const methods = useForm<SendResetLinkHcaptcha>({

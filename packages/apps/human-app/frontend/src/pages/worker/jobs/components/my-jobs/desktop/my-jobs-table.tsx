@@ -214,7 +214,7 @@ export function MyJobsTable() {
 
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
-    () => tableData?.results || [],
+    () => tableData?.results ?? [],
     [tableData?.results]
   );
 
@@ -251,7 +251,7 @@ export function MyJobsTable() {
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(rejectTask(oracle_address || '')),
+    columns: getColumnsDefinition(rejectTask(oracle_address ?? '')),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
@@ -276,7 +276,7 @@ export function MyJobsTable() {
       },
       rowsPerPageOptions: [5, 10],
     },
-    pageCount: tableData?.total_pages || -1,
+    pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,

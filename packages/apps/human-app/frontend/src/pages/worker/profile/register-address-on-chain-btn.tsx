@@ -47,8 +47,8 @@ export function RegisterAddressOnChainButton() {
     isRegisterAddressOnChainError;
 
   const error =
-    onChainRegisteredAddressError ||
-    signedAddressError ||
+    onChainRegisteredAddressError ??
+    signedAddressError ??
     registerAddressOnChainError;
 
   const isAddressSetInKVStore =

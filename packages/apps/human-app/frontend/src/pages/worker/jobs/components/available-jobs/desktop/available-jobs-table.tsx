@@ -164,7 +164,7 @@ export function AvailableJobsTable() {
     useJobsNotifications();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
   const memoizedTableDataResults = useMemo(
-    () => tableData?.results || [],
+    () => tableData?.results ?? [],
     [tableData?.results]
   );
 
@@ -225,7 +225,7 @@ export function AvailableJobsTable() {
       },
       rowsPerPageOptions: [5, 10],
     },
-    pageCount: tableData?.total_pages || -1,
+    pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
