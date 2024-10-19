@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { z } from 'zod';
 
 export const urlDomainSchema = z
@@ -13,5 +14,16 @@ export const urlDomainSchema = z
         return false;
       }
     },
-    { message: 'Invalid domain in the URL' }
+    { message: t('validation.urlDomainValidationError') }
+  )
+  .refine(
+    (url) => {
+      try {
+        const parsedUrl = new URL(url);
+        return parsedUrl.protocol === 'https:'; // Check if the URL starts with https
+      } catch (e) {
+        return false;
+      }
+    },
+    { message: t('validation.invalidProtocol') }
   );
