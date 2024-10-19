@@ -168,7 +168,7 @@ export function Layout({
               <Grid
                 item
                 sx={{
-                  minHeight: '3.2rem',
+                  minHeight: notification ? '3.2rem' : 'unset',
                   position: 'fixed',
                   width: notificationWith
                     ? `${notificationWith.toString()}px`
@@ -205,7 +205,7 @@ export function Layout({
             </Grid>
             <Grid
               component="div"
-              // @ts-expect-error -- ...
+              // @ts-expect-error -- mui Grid accepts ref prop even if it's not typed
               ref={layoutElementRef}
               sx={{ height: '100%' }}
             >
