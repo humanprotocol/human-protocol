@@ -20,11 +20,12 @@ import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { isArray } from '@/shared/helpers/is-array';
 import { publicKeySchema } from '@/shared/helpers/public-key-validation';
+import { urlDomainSchema } from '@/shared/helpers/url-domain-validation';
 
 const fieldsValidations = {
   [EthKVStoreKeys.PublicKey]: publicKeySchema,
-  [EthKVStoreKeys.Url]: z.string().url(),
-  [EthKVStoreKeys.WebhookUrl]: z.string().url(),
+  [EthKVStoreKeys.Url]: urlDomainSchema,
+  [EthKVStoreKeys.WebhookUrl]: urlDomainSchema,
   [EthKVStoreKeys.Role]: z.nativeEnum(Role),
   [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce
