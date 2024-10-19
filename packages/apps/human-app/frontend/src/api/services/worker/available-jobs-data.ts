@@ -2,6 +2,8 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useParams } from 'react-router-dom';
+import { useDebounce } from 'use-debounce';
+import { useMemo } from 'react';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
@@ -31,7 +33,10 @@ type GetJobTableDataDto = JobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
 };
 
-const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
+const getAvailableJobsTableData = async (
+  dto: GetJobTableDataDto,
+  abortSignal: AbortSignal
+) => {
   return apiClient(
     `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
@@ -40,30 +45,59 @@ const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
       options: {
         method: 'GET',
       },
-    }
+    },
+    abortSignal
   );
 };
 
+const DEBOUNCE_TIME_MS = 500;
+
 export function useGetAvailableJobsData() {
-  const { filterParams } = useJobsFilterStore();
+  const {
+    filterParams: { escrow_address, ...filterParams },
+  } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
+  const [debouncedEscrowAddress] = useDebounce(
+    escrow_address,
+    DEBOUNCE_TIME_MS
+  );
+  const dto = useMemo(
+    () => ({
+      ...filterParams,
+      oracle_address: oracle_address ?? '',
+      escrow_address: debouncedEscrowAddress,
+    }),
+    [filterParams, oracle_address, debouncedEscrowAddress]
+  );
 
   return useQuery({
     queryKey: ['availableJobs', dto],
-    queryFn: () => getAvailableJobsTableData(dto),
+    queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
   });
 }
 
 export function useInfiniteGetAvailableJobsData() {
-  const { filterParams } = useJobsFilterStore();
+  const {
+    filterParams: { escrow_address, ...filterParams },
+  } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
+  const [debouncedEscrowAddress] = useDebounce(
+    escrow_address,
+    DEBOUNCE_TIME_MS
+  );
+  const dto = useMemo(
+    () => ({
+      ...filterParams,
+      oracle_address: oracle_address ?? '',
+      escrow_address: debouncedEscrowAddress,
+    }),
+    [filterParams, oracle_address, debouncedEscrowAddress]
+  );
 
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['availableJobsInfinite', dto],
-    queryFn: () => getAvailableJobsTableData(dto),
+    queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
     getNextPageParam: (pageParams) => {
       return pageParams.total_pages - 1 <= pageParams.page
         ? undefined

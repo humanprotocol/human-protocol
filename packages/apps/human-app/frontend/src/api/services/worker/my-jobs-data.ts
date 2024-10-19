@@ -2,6 +2,8 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useDebounce } from 'use-debounce';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
@@ -48,10 +50,26 @@ const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
   );
 };
 
+const DEBOUNCE_TIME_MS = 500;
+
 export function useGetMyJobsData() {
-  const { filterParams } = useMyJobsFilterStore();
-  const { address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: address ?? '' };
+  const {
+    filterParams: { escrow_address, ...filterParams },
+  } = useMyJobsFilterStore();
+  const { address: oracle_address } = useParams<{ address: string }>();
+  const [debouncedEscrowAddress] = useDebounce(
+    escrow_address,
+    DEBOUNCE_TIME_MS
+  );
+  const dto = useMemo(
+    () => ({
+      ...filterParams,
+      oracle_address: oracle_address ?? '',
+      escrow_address: debouncedEscrowAddress,
+    }),
+    [filterParams, oracle_address, debouncedEscrowAddress]
+  );
+
   return useQuery({
     queryKey: ['myJobs', dto],
     queryFn: () => getMyJobsTableData(dto),
@@ -59,9 +77,22 @@ export function useGetMyJobsData() {
 }
 
 export function useInfiniteGetMyJobsData() {
-  const { filterParams } = useMyJobsFilterStore();
-  const { address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: address ?? '' };
+  const {
+    filterParams: { escrow_address, ...filterParams },
+  } = useMyJobsFilterStore();
+  const { address: oracle_address } = useParams<{ address: string }>();
+  const [debouncedEscrowAddress] = useDebounce(
+    escrow_address,
+    DEBOUNCE_TIME_MS
+  );
+  const dto = useMemo(
+    () => ({
+      ...filterParams,
+      oracle_address: oracle_address ?? '',
+      escrow_address: debouncedEscrowAddress,
+    }),
+    [filterParams, oracle_address, debouncedEscrowAddress]
+  );
 
   return useInfiniteQuery({
     initialPageParam: 0,
