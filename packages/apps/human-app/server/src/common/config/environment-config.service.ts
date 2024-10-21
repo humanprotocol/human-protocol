@@ -34,6 +34,10 @@ export class EnvironmentConfigService {
     return this.configService.getOrThrow<number>('PORT');
   }
 
+  get gitHash(): string {
+    return this.configService.get<string>('GIT_HASH', '');
+  }
+
   /**
    * The URL of the reputation oracle service.
    * Required
@@ -282,6 +286,10 @@ export class EnvironmentConfigService {
       DEFAULT_MAX_REQUEST_RETRIES,
     );
   }
+
+  /**
+   * Feature flag for job discovery
+   */
   get jobsDiscoveryFlag(): boolean {
     const flag = this.configService.get<string>(
       'FEATURE_FLAG_JOBS_DISCOVERY',
