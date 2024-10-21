@@ -50,7 +50,6 @@ export function EscrowAddressSearchForm({
   return (
     <FormProvider {...methods}>
       <Input
-        hideErrorTextField
         InputProps={{
           sx: { color: colorPalette.text.secondary },
           startAdornment: (
