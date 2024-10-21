@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { Input } from '@/components/data-entry/input';
 import { addressSchemaOrEmptyString } from '@/shared/helpers/validate-address-schema';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 interface SearchFormProps {
   label: string;
@@ -22,6 +23,7 @@ export function EscrowAddressSearchForm({
   updater,
   fullWidth = false,
 }: SearchFormProps) {
+  const isMobile = useIsMobile();
   const { colorPalette } = useColorMode();
   const methods = useForm<{ searchValue: string }>({
     defaultValues: {
@@ -51,7 +53,10 @@ export function EscrowAddressSearchForm({
     <FormProvider {...methods}>
       <Input
         InputProps={{
-          sx: { color: colorPalette.text.secondary },
+          sx: {
+            color: colorPalette.text.secondary,
+            width: isMobile ? 'unset' : '362px',
+          },
           startAdornment: (
             <InputAdornment position="start">
               <Search sx={{ fill: colorPalette.text.primary }} />
