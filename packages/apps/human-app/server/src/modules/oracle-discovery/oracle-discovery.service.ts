@@ -89,6 +89,8 @@ export class OracleDiscoveryService {
               operator.role,
               operator.url,
               operator.jobTypes,
+              operator.registrationNeeded,
+              operator.registrationInstructions,
             ),
           );
         }

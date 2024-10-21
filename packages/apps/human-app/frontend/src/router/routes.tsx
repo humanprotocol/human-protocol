@@ -27,6 +27,7 @@ import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-
 import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
 import { SetUpOperatorPage } from '@/pages/operator/sign-up/set-up-operator';
 import { env } from '@/shared/env';
+import { RegistrationPage } from '@/pages/worker/registration/registration.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -101,18 +102,28 @@ export const protectedRoutes: {
             headerText: t('protectedPagesHeaders.jobsDiscovery'),
           },
         },
+        {
+          routerProps: {
+            path: `${routerPaths.worker.jobs}/:address`,
+            element: <JobsPage />,
+          },
+          pageHeaderProps: {
+            headerIcon: <HomepageWorkIcon />,
+            headerText: t('protectedPagesHeaders.jobs'),
+          },
+        },
+        {
+          routerProps: {
+            path: `${routerPaths.worker.registration}/:address`,
+            element: <RegistrationPage />,
+          },
+          pageHeaderProps: {
+            headerIcon: <HomepageWorkIcon />,
+            headerText: t('protectedPagesHeaders.registration'),
+          },
+        },
       ]
     : []),
-  {
-    routerProps: {
-      path: `${routerPaths.worker.jobs}/:address`,
-      element: <JobsPage />,
-    },
-    pageHeaderProps: {
-      headerIcon: <HomepageWorkIcon />,
-      headerText: t('protectedPagesHeaders.jobs'),
-    },
-  },
   {
     routerProps: {
       path: routerPaths.worker.profile,
