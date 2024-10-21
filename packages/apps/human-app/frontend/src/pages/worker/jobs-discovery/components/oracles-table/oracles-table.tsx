@@ -1,4 +1,3 @@
-import React from 'react';
 import { t } from 'i18next';
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
