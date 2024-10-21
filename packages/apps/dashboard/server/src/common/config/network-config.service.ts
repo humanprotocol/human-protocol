@@ -27,7 +27,7 @@ export class NetworkConfigService {
   constructor(private configService: ConfigService) {
     this.networkMap = {
       ...(this.configService.get<string>('RPC_URL_ETHEREUM') && {
-        sepolia: {
+        ethereum: {
           chainId: ChainId.MAINNET,
           rpcUrl: this.configService.get<string>('RPC_URL_ETHEREUM'),
         },
