@@ -2,21 +2,20 @@ import React, { useState } from 'react';
 import { Box, Grid, Link, Paper, Stack } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FormCaptcha } from '@/components/h-captcha';
 import { Button } from '@/components/ui/button';
 import { useUserRegistrationMutation } from '@/api/services/worker/user-register';
 import { useRegisteredOracles } from '@/contexts/registered-oracles';
-import type { OracleSuccessResponse } from '@/api/services/worker/oracles';
+import { useGetOracles } from '@/api/services/worker/oracles';
+import { routerPaths } from '@/router/router-paths';
 
-interface RegistrationStepProps {
-  oracleData: OracleSuccessResponse;
-  onRegistrationComplete: () => void;
-}
-
-export function RegistrationStep({
-  oracleData,
-  onRegistrationComplete,
-}: RegistrationStepProps) {
+export function RegistrationPage() {
+  const navigate = useNavigate();
+  const { address: oracleAddress } = useParams<{ address: string }>();
+  const oracleData = useGetOracles().data?.find(
+    (oracle) => oracle.address === oracleAddress
+  );
   const { t } = useTranslation();
   const [hasClickedRegistrationLink, setHasClickedRegistrationLink] =
     useState(false);
@@ -35,17 +34,26 @@ export function RegistrationStep({
   };
 
   const handleRegistrationComplete = () => {
-    userRegistrationMutate(oracleData.address, {
+    userRegistrationMutate(oracleAddress ?? '', {
       onSuccess(data) {
         setRegisteredOracles(
           registeredOracles?.concat([
             (data as { oracle_address: string }).oracle_address,
           ])
         );
-        onRegistrationComplete(); // Call the completion callback
+        navigate(`${routerPaths.worker.jobs}/${oracleAddress ?? ''}`, {
+          state: {
+            oracleAddress,
+          },
+        });
       },
     });
   };
+
+  if (oracleData === undefined) {
+    navigate(routerPaths.worker.jobsDiscovery);
+    return;
+  }
 
   return (
     <Grid alignItems="center" container justifyContent="center">

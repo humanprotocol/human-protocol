@@ -10,7 +10,8 @@
     "profile": "Profile",
     "jobsDiscovery": "Tasks",
     "hcaptchaLabeling": "Labeling",
-    "jobs": "Tasks"
+    "jobs": "Tasks",
+    "registration": "Registration"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"

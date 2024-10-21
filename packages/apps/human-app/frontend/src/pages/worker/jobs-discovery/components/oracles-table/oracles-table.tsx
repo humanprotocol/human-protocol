@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { t } from 'i18next';
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
@@ -21,8 +21,6 @@ import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { type JobType } from '@/smart-contracts/EthKVStore/config';
 import { useGetRegisteredOracles } from '@/api/services/worker/registered-oracles';
-import { useRegisteredOracles } from '@/contexts/registered-oracles';
-import { RegistrationStep } from '@/pages/worker/jobs-discovery/components/registration/registration-step';
 
 const getColumns = (
   selectOracle: (oracle: OracleSuccessResponse) => void
@@ -91,17 +89,16 @@ export function OraclesTable({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
-  const { setRegisteredOracles } = useRegisteredOracles();
-  const { data: registeredOraclesResults, isFetched } =
-    useGetRegisteredOracles();
-
-  const [selectedOracle, setSelectedOracle] =
-    useState<OracleSuccessResponse | null>(null);
-  const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
+  const { data: registeredOraclesResults } = useGetRegisteredOracles();
 
   const selectOracle = (oracle: OracleSuccessResponse) => {
-    if (oracle.registrationNeeded) {
-      setSelectedOracle(oracle);
+    if (
+      oracle.registrationNeeded &&
+      !registeredOraclesResults?.oracle_addresses.find(
+        (address) => address === oracle.address
+      )
+    ) {
+      navigate(`${routerPaths.worker.registration}/${oracle.address}`);
       return;
     }
 
@@ -119,22 +116,6 @@ export function OraclesTable({
       },
     });
   };
-
-  useEffect(() => {
-    if (isFetched && registeredOraclesResults?.oracle_addresses) {
-      setRegisteredOracles(registeredOraclesResults.oracle_addresses);
-    }
-  }, [isFetched, registeredOraclesResults, setRegisteredOracles]);
-
-  useEffect(() => {
-    if (isRegistrationComplete && selectedOracle) {
-      navigate(`${routerPaths.worker.jobs}/${selectedOracle.address}`, {
-        state: {
-          oracle: selectedOracle,
-        },
-      });
-    }
-  }, [isRegistrationComplete, selectedOracle, navigate]);
 
   const table = useMaterialReactTable({
     state: {
@@ -165,17 +146,6 @@ export function OraclesTable({
     },
     ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
-
-  if (selectedOracle?.registrationNeeded && !isRegistrationComplete) {
-    return (
-      <RegistrationStep
-        oracleData={selectedOracle}
-        onRegistrationComplete={() => {
-          setIsRegistrationComplete(true);
-        }}
-      />
-    );
-  }
 
   return (
     <>
