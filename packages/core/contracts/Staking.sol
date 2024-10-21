@@ -70,34 +70,9 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     );
 
     /**
-     * @dev Emitted when `owner` set new value for `minimumStake`.
-     */
-    event SetMinumumStake(uint256 indexed minimumStake);
-
-    /**
-     * @dev Emitted when `owner` set new value for `lockPeriod`.
-     */
-    event SetLockPeriod(uint32 indexed lockPeriod);
-
-    /**
-     * @dev Emitted when `owner` set new value for `feePercentage`.
-     */
-    event SetFeePercentage(uint8 indexed feePercentage);
-
-    /**
      * @dev Emitted when `owner` withdraw the total `amount` of fees.
      */
     event FeeWithdrawn(uint256 amount);
-
-    /**
-     * @dev Emitted when `owner` add a new `slasher`.
-     */
-    event SlasherAdded(address indexed slasher);
-
-    /**
-     * @dev Emitted when `owner` remove an existing `slasher`.
-     */
-    event SlasherRemoved(address indexed slasher);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -150,7 +125,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function _setMinimumStake(uint256 _minimumStake) private {
         require(_minimumStake > 0, 'Must be a positive number');
         minimumStake = _minimumStake;
-        emit SetMinumumStake(minimumStake);
     }
 
     /**
@@ -168,7 +142,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function _setLockPeriod(uint32 _lockPeriod) private {
         require(_lockPeriod > 0, 'Must be a positive number');
         lockPeriod = _lockPeriod;
-        emit SetLockPeriod(lockPeriod);
     }
 
     /**
@@ -186,7 +159,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function _setFeePercentage(uint8 _feePercentage) private {
         require(_feePercentage <= 100, 'Fee cannot exceed 100%');
         feePercentage = _feePercentage;
-        emit SetFeePercentage(_feePercentage);
     }
 
     /**
@@ -392,7 +364,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         require(!slashers[_slasher], 'Address is already a slasher');
 
         slashers[_slasher] = true;
-        emit SlasherAdded(_slasher);
     }
 
     /**
@@ -402,7 +373,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         require(slashers[_slasher], 'Address is not a slasher');
 
         slashers[_slasher] = false;
-        emit SlasherRemoved(_slasher);
     }
 
     function _safeTransfer(address to, uint256 value) internal {

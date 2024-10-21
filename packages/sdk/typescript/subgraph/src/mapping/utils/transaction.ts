@@ -13,16 +13,11 @@ const mainMethods: string[] = [
   'withdraw',
   'cancel',
   'stake',
-  // 'stake',
-  // 'unstake',
-  // 'slash',
-  // 'allocate',
-  // 'closeAllocation',
-  // 'addReward',
-  // 'stakeWithdrawn',
-  // 'set',
-  // 'approve',
-  // 'increaseApprovalBulk',
+  'unstake',
+  'slash',
+  'stakeWithdrawn',
+  'withdrawFees',
+  'approve',
 ];
 
 export function createTransaction(

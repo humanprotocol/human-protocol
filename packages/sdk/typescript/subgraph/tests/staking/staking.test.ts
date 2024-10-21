@@ -15,12 +15,14 @@ import {
   handleStakeLocked,
   handleStakeSlashed,
   handleStakeWithdrawn,
+  handleFeeWithdrawn,
   STATISTICS_ENTITY_ID,
   TOKEN_ADDRESS,
 } from '../../src/mapping/Staking';
 import { toEventId } from '../../src/mapping/utils/event';
 import { ZERO_BI } from '../../src/mapping/utils/number';
 import {
+  createFeeWithdrawnEvent,
   createStakeDepositedEvent,
   createStakeLockedEvent,
   createStakeSlashedEvent,
@@ -751,6 +753,50 @@ describe('Staking', () => {
       data2.transaction.hash.toHex(),
       'escrow',
       escrow2Address.toHexString()
+    );
+  });
+
+  test('Should properly create transactions for FeeWithdrawn events', () => {
+    const data = createFeeWithdrawnEvent(10, BigInt.fromI32(60));
+
+    handleFeeWithdrawn(data);
+
+    // Transaction
+    assert.fieldEquals(
+      'Transaction',
+      data.transaction.hash.toHex(),
+      'txHash',
+      data.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data.transaction.hash.toHex(),
+      'method',
+      'withdrawFees'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data.transaction.hash.toHex(),
+      'block',
+      data.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data.transaction.hash.toHex(),
+      'to',
+      stakingAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data.transaction.hash.toHex(),
+      'value',
+      '10'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data.transaction.hash.toHex(),
+      'token',
+      TOKEN_ADDRESS.toHexString()
     );
   });
 });

@@ -1,6 +1,7 @@
 import { Address, BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
+  FeeWithdrawn,
   StakeDeposited,
   StakeLocked,
   StakeSlashed,
@@ -150,4 +151,28 @@ export function createStakeSlashedEvent(
   );
 
   return newStakeSlashedEvent;
+}
+
+export function createFeeWithdrawnEvent(
+  amount: i32,
+  timestamp: BigInt
+): FeeWithdrawn {
+  const newFeeWithdrawnEvent = changetype<FeeWithdrawn>(newMockEvent());
+  newFeeWithdrawnEvent.transaction.hash = generateUniqueHash(
+    amount.toString(),
+    timestamp,
+    newFeeWithdrawnEvent.transaction.nonce
+  );
+
+  newFeeWithdrawnEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
+  newFeeWithdrawnEvent.block.timestamp = timestamp;
+
+  newFeeWithdrawnEvent.parameters = [];
+  newFeeWithdrawnEvent.parameters.push(
+    new ethereum.EventParam('amount', ethereum.Value.fromI32(amount))
+  );
+
+  return newFeeWithdrawnEvent;
 }

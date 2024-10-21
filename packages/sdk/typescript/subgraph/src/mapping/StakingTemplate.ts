@@ -1,4 +1,5 @@
 import {
+  FeeWithdrawn,
   StakeDeposited,
   StakeLocked,
   StakeSlashed,
@@ -183,4 +184,17 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   leader.amountSlashed = leader.amountSlashed.plus(eventEntity.amount);
   leader.amountStaked = leader.amountStaked.minus(eventEntity.amount);
   leader.save();
+}
+
+export function handleFeeWithdrawn(event: FeeWithdrawn): void {
+  createTransaction(
+    event,
+    'withdrawFees',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    null,
+    event.params.amount,
+    TOKEN_ADDRESS
+  );
 }

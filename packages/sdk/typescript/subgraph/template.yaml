@@ -102,6 +102,8 @@ dataSources:
           handler: handleStakeWithdrawn
         - event: StakeSlashed(indexed address,uint256,indexed address,address)
           handler: handleStakeSlashed
+        - event: FeeWithdrawn(uint256)
+          handler: handleFeeWithdrawn
       file: ./src/mapping/Staking.ts
 {{ #LegacyEscrowFactory }}
   - kind: ethereum
