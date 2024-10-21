@@ -115,10 +115,14 @@ export interface IKVStore {
   value: string;
 }
 
-export interface Transfer {
+export interface InternalTransaction {
   from: string;
   to: string;
   value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
 }
 
 export interface ITransaction {
@@ -129,7 +133,10 @@ export interface ITransaction {
   timestamp: bigint;
   value: string;
   method: string;
-  transfers: Transfer[];
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransaction[];
 }
 
 export interface ITransactionsFilter extends IPagination {

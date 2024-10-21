@@ -30,4 +30,4 @@ StorageClient is deprecated. Use Minio.Client directly.
 
 ## Defined in
 
-[types.ts:38](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L38)
+[types.ts:38](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L38)

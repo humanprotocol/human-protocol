@@ -10,11 +10,18 @@ const TRANSACTION_FRAGMENT = gql`
     timestamp
     value
     method
-    transfers {
+    receiver
+    escrow
+    token
+    internalTransactions {
       from
       id
       to
       value
+      receiver
+      escrow
+      token
+      method
     }
   }
 `;
@@ -27,11 +34,11 @@ export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
     fromAddress === toAddress
       ? `
         ${fromAddress ? `{ from: $fromAddress }` : ''}
-        ${toAddress ? `{ or: [{to: $toAddress}, {transfers_: {to: $toAddress}}]}` : ''}
+        ${toAddress ? `{ or: [{ or: [{ to: $toAddress }, { receiver: $toAddress }] }, {internalTransactions_: { or: [{ to: $toAddress }, { receiver: $toAddress }] } ]}` : ''}
       `
       : `
         ${fromAddress ? `from: $fromAddress` : ''}
-        ${toAddress ? `or: [{to: $toAddress}, {transfers_: {to: $toAddress}}]` : ''}
+        ${toAddress ? `or: [{ or: [{ to: $toAddress }, { receiver: $toAddress }] }, { internalTransactions_: { or: [{ to: $toAddress }, { receiver: $toAddress }] } }]` : ''}
       `;
 
   const WHERE_CLAUSE = `

@@ -48,21 +48,6 @@ staking_client = StakingClient(w3)
 
 ## Module
 
-### *class* human_protocol_sdk.staking.staking_client.AllocationData(escrow_address, staker, tokens, created_at, closed_at)
-
-Bases: `object`
-
-#### \_\_init_\_(escrow_address, staker, tokens, created_at, closed_at)
-
-Initializes an AllocationData instance.
-
-* **Parameters:**
-  * **escrow_address** (`str`) – Escrow address
-  * **staker** (`str`) – Staker address
-  * **tokens** (`str`) – Amount allocated
-  * **created_at** (`str`) – Creation date
-  * **closed_at** (`str`) – Closing date
-
 ### *class* human_protocol_sdk.staking.staking_client.StakingClient(w3)
 
 Bases: `object`
@@ -75,48 +60,6 @@ Initializes a Staking instance
 
 * **Parameters:**
   **w3** (`Web3`) – Web3 instance
-
-#### allocate(escrow_address, amount, tx_options=None)
-
-Allocates HMT token to the escrow.
-
-* **Parameters:**
-  * **escrow_address** (`str`) – Address of the escrow
-  * **amount** (`Decimal`) – Amount to allocate
-  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
-* **Return type:**
-  `None`
-* **Returns:**
-  None
-* **Validate:**
-  - Amount must be greater than 0
-  - Escrow address must be valid
-  - Amount must be less than or equal to the staked amount (on-chain)
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.staking import StakingClient
-
-  def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-      gas_payer = w3.eth.account.from_key(priv_key)
-      w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
-      )
-      return (w3, gas_payer)
-
-  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-  staking_client = StakingClient(w3)
-
-  amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-  staking_client.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount)
-  ```
 
 #### approve_stake(amount, tx_options=None)
 
@@ -155,109 +98,6 @@ Approves HMT token for Staking.
 
   amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
   staking_client.approve_stake(amount)
-  ```
-
-#### close_allocation(escrow_address, tx_options=None)
-
-Closes allocated HMT token from the escrow.
-
-* **Parameters:**
-  * **escrow_address** (`str`) – Address of the escrow
-  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
-* **Return type:**
-  `None`
-* **Returns:**
-  None
-* **Validate:**
-  - Escrow address must be valid
-  - Escrow should be cancelled / completed (on-chain)
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.staking import StakingClient
-
-  def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-      gas_payer = w3.eth.account.from_key(priv_key)
-      w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
-      )
-      return (w3, gas_payer)
-
-  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-  staking_client = StakingClient(w3)
-
-  staking_client.close_allocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f')
-  ```
-
-#### distribute_reward(escrow_address, tx_options=None)
-
-Pays out rewards to the slashers for the specified escrow address.
-
-* **Parameters:**
-  * **escrow_address** (`str`) – Address of the escrow
-  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
-* **Return type:**
-  `None`
-* **Returns:**
-  None
-* **Validate:**
-  - Escrow address must be valid
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.staking import StakingClient
-
-  def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-      gas_payer = w3.eth.account.from_key(priv_key)
-      w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
-      )
-      return (w3, gas_payer)
-
-  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-  staking_client = StakingClient(w3)
-
-  staking_client.distribute_reward('0x62dD51230A30401C455c8398d06F85e4EaB6309f')
-  ```
-
-#### get_allocation(escrow_address)
-
-Gets the allocation info for the specified escrow.
-
-* **Parameters:**
-  **escrow_address** (`str`) – Address of the escrow
-* **Return type:**
-  `Optional`[[`AllocationData`](#human_protocol_sdk.staking.staking_client.AllocationData)]
-* **Returns:**
-  Allocation info if escrow exists, otherwise None
-* **Example:**
-  ```python
-  from eth_typing import URI
-  from web3 import Web3
-  from web3.providers.auto import load_provider_from_uri
-
-  from human_protocol_sdk.staking import StakingClient
-
-  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-  staking_client = StakingClient(w3)
-
-  allocation = staking_client.get_allocation(
-      '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-  )
   ```
 
 #### slash(slasher, staker, escrow_address, amount, tx_options=None)
