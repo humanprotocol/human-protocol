@@ -4,6 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect } from 'react';
+import Grid from '@mui/material/Grid';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { Input } from '@/components/data-entry/input';
 import { addressSchemaOrEmptyString } from '@/shared/helpers/validate-address-schema';
@@ -50,30 +51,34 @@ export function EscrowAddressSearchForm({
   }, [methods, updater]);
 
   return (
-    <FormProvider {...methods}>
-      <Input
-        InputProps={{
-          sx: {
-            color: colorPalette.text.secondary,
-            width: isMobile ? 'unset' : '362px',
-          },
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search sx={{ fill: colorPalette.text.primary }} />
-            </InputAdornment>
-          ),
-        }}
-        label={label}
-        name="searchValue"
-        onChange={(e) => {
-          methods.setValue('searchValue', e.target.value);
-        }}
-        placeholder={placeholder}
-        sx={{
-          width: fullWidth ? '100%' : '15rem',
-          margin: fullWidth ? '0' : '1rem',
-        }}
-      />
-    </FormProvider>
+    <Grid
+      sx={{
+        color: colorPalette.text.secondary,
+        width: isMobile ? 'unset' : '362px',
+      }}
+    >
+      <FormProvider {...methods}>
+        <Input
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ fill: colorPalette.text.primary }} />
+              </InputAdornment>
+            ),
+          }}
+          fullWidth
+          label={label}
+          name="searchValue"
+          onChange={(e) => {
+            methods.setValue('searchValue', e.target.value);
+          }}
+          placeholder={placeholder}
+          sx={{
+            width: fullWidth ? '100%' : '362px',
+            margin: fullWidth ? '0' : '1rem',
+          }}
+        />
+      </FormProvider>
+    </Grid>
   );
 }

@@ -35,7 +35,7 @@
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
     "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
-    "invalidAddress": "Invalid address format. The address must be 42 characters long and in hexadecimal format."
+    "invalidAddress": "Please enter a valid escrow address."
   },
   "components": {
     "multiSelect": {
