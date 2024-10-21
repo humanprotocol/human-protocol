@@ -70,8 +70,7 @@ export function createTransaction(
     transaction.save();
   } else if (
     mainMethods.includes(method) &&
-    escrow !== null &&
-    Address.fromBytes(transaction.to) == escrow
+    Address.fromBytes(transaction.to) == to
   ) {
     transaction.method = method;
     transaction.value = value !== null ? value : BigInt.fromI32(0);
