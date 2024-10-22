@@ -117,6 +117,10 @@ export class RegisterOracleDto {
   })
   @IsEthereumAddress()
   public oracleAddress: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
 }
 
 export class RegisteredOraclesDto {

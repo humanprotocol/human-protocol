@@ -12,7 +12,7 @@ const OracleSuccessSchema = z.object({
   role: z.string(),
   url: z.string().optional().nullable(),
   jobTypes: z.array(z.string()),
-  registrationNeeded: z.boolean().optional().default(false),
+  registrationNeeded: z.boolean().optional().nullable(),
   registrationInstructions: z.string().optional().nullable(),
 });
 
@@ -34,6 +34,7 @@ export async function getOracles({
 }: {
   selected_job_types: string[];
 }) {
+  let oracles = [H_CAPTCHA_ORACLE];
   const queryParams = selected_job_types.length
     ? `?${stringifyUrlQueryObject({ selected_job_types })}`
     : '';
@@ -46,9 +47,9 @@ export async function getOracles({
     }
   );
 
-  result.unshift(H_CAPTCHA_ORACLE);
+  oracles = oracles.concat(result);
 
-  return result;
+  return oracles;
 }
 
 export function useGetOracles() {

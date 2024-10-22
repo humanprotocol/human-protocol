@@ -47,6 +47,10 @@ export class RegisterWorkerDto {
   @ApiProperty({ example: 'string' })
   @IsEthereumAddress()
   oracle_address: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  h_captcha_token: string;
 }
 
 export class RegisterWorkerCommand {

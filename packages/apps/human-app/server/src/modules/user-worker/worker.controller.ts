@@ -59,7 +59,7 @@ export class WorkerController {
   }
 
   @ApiBearerAuth()
-  @Post('/register')
+  @Post('/registration')
   @ApiOperation({ summary: 'Worker registration completed' })
   @UsePipes(new ValidationPipe())
   public registerWorker(
@@ -77,7 +77,7 @@ export class WorkerController {
   }
 
   @ApiBearerAuth()
-  @Get('/register')
+  @Get('/registration')
   @ApiOperation({ summary: 'Get registered oracles' })
   @UsePipes(new ValidationPipe())
   public getRegisteredOracles(
