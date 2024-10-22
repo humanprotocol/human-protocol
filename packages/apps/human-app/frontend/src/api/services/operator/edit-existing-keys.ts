@@ -30,9 +30,9 @@ const fieldsValidations = {
   [EthKVStoreKeys.Fee]: z.coerce
     // eslint-disable-next-line camelcase
     .number({ invalid_type_error: t('validation.required') })
-    .min(1)
-    .max(100)
-    .step(1),
+    .min(0, t('validation.feeValidationError'))
+    .max(100, t('validation.feeValidationError'))
+    .step(1, t('validation.feeValidationError')),
 };
 
 export const editEthKVStoreValuesMutationSchema = z.object({
