@@ -5,7 +5,11 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { ErrorOperator, ErrorUser } from '../../common/constants/errors';
+import {
+  ErrorAuth,
+  ErrorOperator,
+  ErrorUser,
+} from '../../common/constants/errors';
 import {
   KycStatus,
   OperatorStatus,
@@ -15,6 +19,7 @@ import {
 import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import {
+  OracleRegistrationDto,
   RegisterAddressRequestDto,
   SignatureBodyDto,
   UserCreateDto,
@@ -47,6 +52,7 @@ export class UserService {
     private readonly web3ConfigService: Web3ConfigService,
     private readonly hcaptchaConfigService: HCaptchaConfigService,
     private readonly networkConfigService: NetworkConfigService,
+    private readonly hCaptchaService: HCaptchaService,
   ) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
@@ -369,17 +375,27 @@ export class UserService {
 
   public async registerOracle(
     user: UserEntity,
-    oracleAddress: string,
+    data: OracleRegistrationDto,
   ): Promise<SiteKeyEntity> {
+    if (
+      !data.hCaptchaToken ||
+      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+        .success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
       user,
-      oracleAddress,
+      data.oracleAddress,
       SiteKeyType.REGISTRATION,
     );
     if (siteKey) return siteKey;
 
     const newSiteKey = new SiteKeyEntity();
-    newSiteKey.siteKey = oracleAddress;
+    newSiteKey.siteKey = data.oracleAddress;
     newSiteKey.type = SiteKeyType.REGISTRATION;
     newSiteKey.user = user;
 

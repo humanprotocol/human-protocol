@@ -110,7 +110,7 @@ export class PrepareSignatureDto {
   public type: SignatureType;
 }
 
-export class RegisterOracleDto {
+export class OracleRegistrationDto {
   @ApiProperty({
     name: 'oracle_address',
     description: 'Ethereum address of the oracle',

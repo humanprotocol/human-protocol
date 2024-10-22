@@ -42,7 +42,7 @@ export class SignupWorkerData {
   h_captcha_token: string;
 }
 
-export class RegisterWorkerDto {
+export class WorkerRegistrationDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
   @IsEthereumAddress()
@@ -53,27 +53,34 @@ export class RegisterWorkerDto {
   h_captcha_token: string;
 }
 
-export class RegisterWorkerCommand {
+export class WorkerRegistrationCommand {
   @AutoMap()
   oracleAddress: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  hCaptchaToken: string;
 
   token: string;
 
-  constructor(oracleAddress: string) {
+  constructor(oracleAddress: string, hCaptchaToken: string) {
     this.oracleAddress = oracleAddress;
+    this.hCaptchaToken = hCaptchaToken;
   }
 }
 
-export class RegisterWorkerData {
+export class WorkerRegistrationData {
   @AutoMap()
   oracle_address: string;
+  @AutoMap()
+  h_captcha_token: string;
 }
 
-export class RegisterWorkerResponse {
+export class WorkerRegistrationResponse {
   email: string;
   wallet_address: string;
 }
 
-export class RegisteredOraclesResponse {
+export class OraclesRegistrationResponse {
   oracle_addresses: string[];
 }

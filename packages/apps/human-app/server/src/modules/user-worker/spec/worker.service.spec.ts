@@ -66,9 +66,10 @@ describe('WorkerService', () => {
     it('should call reputation oracle gateway without doing anything else', async () => {
       const command = {
         oracleAddress: '0x34df642',
+        hCaptchaToken: 'hcaptcha-token',
         token: 'test-token',
       };
-      await service.registerWorker(command);
+      await service.workerRegistration(command);
       expect(
         reputationOracleGateway.sendWorkerRegistration,
       ).toHaveBeenCalledWith(command);

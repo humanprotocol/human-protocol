@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import {
-  RegisterWorkerCommand,
+  WorkerRegistrationCommand,
   SignupWorkerCommand,
 } from './model/worker-registration.model';
 import { SigninWorkerCommand } from './model/worker-signin.model';
@@ -20,11 +20,15 @@ export class WorkerService {
   async signinWorker(signinWorkerCommand: SigninWorkerCommand) {
     return this.reputationOracleGateway.sendWorkerSignin(signinWorkerCommand);
   }
-  async registerWorker(registerWorkerCommand: RegisterWorkerCommand) {
-    await this.exchangeOracleGateway.registerWorker(registerWorkerCommand);
+  async workerRegistration(
+    workerRegistrationCommand: WorkerRegistrationCommand,
+  ) {
+    await this.exchangeOracleGateway.workerRegistration(
+      workerRegistrationCommand,
+    );
 
     return await this.reputationOracleGateway.sendWorkerRegistration(
-      registerWorkerCommand,
+      workerRegistrationCommand,
     );
   }
   async getRegisteredOracles(token: string) {
