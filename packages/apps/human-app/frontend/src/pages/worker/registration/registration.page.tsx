@@ -76,9 +76,9 @@ export function RegistrationPage() {
             <Link
               href={oracleData.registrationInstructions ?? ''}
               onClick={handleLinkClick}
-              target="_blank"
               rel="noopener"
               sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}
+              target="_blank"
             >
               {oracleData.registrationInstructions}
             </Link>
@@ -89,10 +89,10 @@ export function RegistrationPage() {
                   void methods.handleSubmit(handleRegistrationComplete)(event)
                 }
               >
-                <Stack spacing={2} alignItems="center">
+                <Stack alignItems="center" spacing={2}>
                   <FormCaptcha
-                    name="h_captcha_token"
                     error={userRegistrationError}
+                    name="h_captcha_token"
                   />
                   <Button
                     disabled={!hasClickedRegistrationLink}
