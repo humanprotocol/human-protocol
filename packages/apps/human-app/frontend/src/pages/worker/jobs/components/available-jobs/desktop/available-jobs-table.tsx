@@ -36,9 +36,12 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const getColumns = (callbacks: {
-  assignJob: (data: AssignJobBody) => undefined;
-}): MRT_ColumnDef<AvailableJob>[] => {
+const getColumns = (
+  callbacks: {
+    assignJob: (data: AssignJobBody) => undefined;
+  },
+  disableButtons: boolean
+): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
       accessorKey: 'job_description',
@@ -134,6 +137,7 @@ const getColumns = (callbacks: {
         return (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <TableButton
+              disabled={disableButtons}
               onClick={() => {
                 callbacks.assignJob({ escrow_address, chain_id });
               }}
@@ -168,7 +172,7 @@ export function AvailableJobsTable() {
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation } = useAssignJobMutation({
+  const { mutate: assignJobMutation, status } = useAssignJobMutation({
     onSuccess: onJobAssignmentSuccess,
     onError: onJobAssignmentError,
   });
@@ -198,11 +202,14 @@ export function AvailableJobsTable() {
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getColumns({
-      assignJob: (data) => {
-        assignJobMutation(data);
+    columns: getColumns(
+      {
+        assignJob: (data) => {
+          assignJobMutation(data);
+        },
       },
-    }),
+      status === 'pending'
+    ),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',

@@ -34,7 +34,7 @@ export function AvailableJobsTableMobile({
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
 
-  const { mutate: assignJobMutation } = useAssignJobMutation({
+  const { mutate: assignJobMutation, status } = useAssignJobMutation({
     onSuccess: onJobAssignmentSuccess,
     onError: onJobAssignmentError,
   });
@@ -165,6 +165,7 @@ export function AvailableJobsTableMobile({
                   <TableButton
                     color="secondary"
                     fullWidth
+                    disabled={status === 'pending'}
                     onClick={() => {
                       assignJobMutation({
                         escrow_address: d.escrow_address,
