@@ -73,7 +73,7 @@ export class AuthService {
         HttpStatus.NOT_FOUND,
       );
     }
-    /*
+
     if (
       userEntity.role !== UserRole.HUMAN_APP &&
       (!data.hCaptchaToken ||
@@ -84,13 +84,13 @@ export class AuthService {
         ErrorAuth.InvalidToken,
         HttpStatus.UNAUTHORIZED,
       );
-    }*/
+    }
 
     return this.auth(userEntity);
   }
 
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    /*if (
+    if (
       !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
         .success
     ) {
@@ -98,7 +98,7 @@ export class AuthService {
         ErrorAuth.InvalidToken,
         HttpStatus.UNAUTHORIZED,
       );
-    }*/
+    }
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new ControlledError(
