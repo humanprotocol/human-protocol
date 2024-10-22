@@ -31,7 +31,7 @@ hardhat-node:
 
 subgraph:
 	docker compose -f ./fortune/docker-compose.yml up -d graph-node
-	NETWORK=sepolia yarn workspace @human-protocol/subgraph generate
+	NETWORK=localhost yarn workspace @human-protocol/subgraph generate
 	@while [ $$(docker inspect --format='{{.State.Health.Status}}' graph-node) != "healthy" ]; do \
 		sleep 2; \
 	done; \
