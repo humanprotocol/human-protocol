@@ -19,11 +19,10 @@ import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { isArray } from '@/shared/helpers/is-array';
-import { publicKeySchema } from '@/shared/helpers/public-key-validation';
 import { urlDomainSchema } from '@/shared/helpers/url-domain-validation';
 
 const fieldsValidations = {
-  [EthKVStoreKeys.PublicKey]: publicKeySchema,
+  [EthKVStoreKeys.PublicKey]: urlDomainSchema,
   [EthKVStoreKeys.Url]: urlDomainSchema,
   [EthKVStoreKeys.WebhookUrl]: urlDomainSchema,
   [EthKVStoreKeys.Role]: z.nativeEnum(Role),
