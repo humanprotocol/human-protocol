@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import { z } from 'zod';
+import { parse } from 'tldts';
 
 export const urlDomainSchema = z
   .string()
@@ -19,11 +20,11 @@ export const urlDomainSchema = z
   .refine(
     (url) => {
       try {
-        const parsedUrl = new URL(url);
-        return parsedUrl.protocol === 'https:'; // Check if the URL starts with https
+        const result = parse(url);
+        return result.isIcann;
       } catch (e) {
         return false;
       }
     },
-    { message: t('validation.invalidProtocol') }
+    { message: t('validation.urlDomainValidationError') }
   );

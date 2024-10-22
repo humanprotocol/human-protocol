@@ -29,7 +29,7 @@
     "publicKeyLengthError": "Public key must be exactly 128 characters long",
     "publicKeyHexadecimalStringError": "Public key must be a valid hexadecimal string",
     "urlDomainValidationError": "Invalid domain in the URL",
-    "invalidProtocol": "URL must start with https://"
+    "feeValidationError": "Fee value must be an integer between 0 and 100"
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
