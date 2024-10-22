@@ -820,7 +820,22 @@ describe('UserService', () => {
 
       const oracleAddress = '0xOracleAddress';
 
-      await userService.registerOracle(userEntity as UserEntity, oracleAddress);
+      const siteKeyMock: DeepPartial<SiteKeyEntity> = {
+        siteKey: oracleAddress,
+        type: SiteKeyType.REGISTRATION,
+        user: userEntity,
+      };
+      jest
+        .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(siteKeyRepository, 'createUnique')
+        .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);
+
+      const result = await userService.registerOracle(
+        userEntity as UserEntity,
+        oracleAddress,
+      );
 
       expect(siteKeyRepository.createUnique).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -829,6 +844,35 @@ describe('UserService', () => {
           user: userEntity,
         }),
       );
+
+      expect(result).toEqual(siteKeyMock);
+    });
+
+    it('should not register a new oracle for the user and return the existing one', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const oracleAddress = '0xOracleAddress';
+
+      const siteKeyMock: DeepPartial<SiteKeyEntity> = {
+        siteKey: oracleAddress,
+        type: SiteKeyType.REGISTRATION,
+        user: userEntity,
+      };
+      jest
+        .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
+        .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);
+
+      const result = await userService.registerOracle(
+        userEntity as UserEntity,
+        oracleAddress,
+      );
+
+      expect(siteKeyRepository.createUnique).not.toHaveBeenCalled();
+
+      expect(result).toEqual(siteKeyMock);
     });
   });
 

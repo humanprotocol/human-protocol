@@ -12,6 +12,8 @@ const OracleSuccessSchema = z.object({
   role: z.string(),
   url: z.string().optional().nullable(),
   jobTypes: z.array(z.string()),
+  registrationNeeded: z.boolean().optional().default(false),
+  registrationInstructions: z.string().optional().nullable(),
 });
 
 const OraclesSuccessSchema = z.array(OracleSuccessSchema);
@@ -24,6 +26,7 @@ const H_CAPTCHA_ORACLE: OracleSuccessResponse = {
   jobTypes: env.VITE_H_CAPTCHA_ORACLE_TASK_TYPES,
   role: env.VITE_H_CAPTCHA_ORACLE_ROLE,
   url: env.VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL,
+  registrationNeeded: false,
 };
 
 export async function getOracles({
