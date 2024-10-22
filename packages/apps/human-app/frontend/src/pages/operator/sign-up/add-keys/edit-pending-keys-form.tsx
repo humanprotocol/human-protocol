@@ -60,7 +60,10 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
     <MultiSelect
       label={t('operator.addKeysPage.existingKeys.jobType')}
       name={EthKVStoreKeys.JobTypes}
-      options={JOB_TYPES}
+      options={JOB_TYPES.map((jobType) => ({
+        label: jobType,
+        value: jobType,
+      }))}
     />
   ),
 };
@@ -82,7 +85,7 @@ export function EditPendingKeysForm({
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
         {sortedKeys.map((key) => {
-          const formInputsConfigKey = key as EthKVStoreKeyValues;
+          const formInputsConfigKey = key;
           return (
             <>
               {!existingKeysInitialState[formInputsConfigKey]

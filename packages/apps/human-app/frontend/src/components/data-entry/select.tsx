@@ -6,6 +6,7 @@ import { Controller } from 'react-hook-form';
 import InputLabel from '@mui/material/InputLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import { Chip } from '@/components/ui/chip';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export interface OptionsProps {
   id: number;
@@ -29,6 +30,7 @@ export function Select({
   isChipRenderValue,
   ...props
 }: SelectComponentProps) {
+  const { colorPalette } = useColorMode();
   return (
     <Controller
       name={name}
@@ -40,6 +42,7 @@ export function Select({
             aria-labelledby={ariaLabelledby}
             error={Boolean(fieldState.error)}
             labelId={`${name}-label`}
+            sx={{ '& .MuiSvgIcon-root': { color: colorPalette.primary.main } }}
             {...props}
             label={label}
             renderValue={

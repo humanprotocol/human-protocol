@@ -1,4 +1,7 @@
+import os
 from collections.abc import Generator
+
+os.environ["DEBUG"] = "1"
 
 import pytest
 from fastapi.testclient import TestClient

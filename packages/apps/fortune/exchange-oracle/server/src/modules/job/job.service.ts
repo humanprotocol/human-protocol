@@ -53,9 +53,10 @@ export class JobService {
   ) {}
 
   public async createJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
+      chainId,
+      escrowAddress,
     );
 
     if (jobEntity) {
@@ -63,14 +64,15 @@ export class JobService {
       throw new BadRequestException(ErrorJob.AlreadyExists);
     }
 
-    const signer = this.web3Service.getSigner(webhook.chainId);
+    const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const reputationOracleAddress =
-      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+      await escrowClient.getReputationOracleAddress(escrowAddress);
 
     const newJobEntity = new JobEntity();
-    newJobEntity.escrowAddress = webhook.escrowAddress;
-    newJobEntity.chainId = webhook.chainId;
+    newJobEntity.escrowAddress = escrowAddress;
+    newJobEntity.manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    newJobEntity.chainId = chainId;
     newJobEntity.status = JobStatus.ACTIVE;
     newJobEntity.reputationNetwork = reputationOracleAddress;
     await this.jobRepository.createUnique(newJobEntity);
@@ -164,6 +166,7 @@ export class JobService {
           const manifest = await this.getManifest(
             entity.chainId,
             entity.escrowAddress,
+            entity.manifestUrl,
           );
           if (data.fields?.includes(JobFieldName.JobDescription)) {
             job.jobDescription = manifest.requesterDescription;
@@ -217,6 +220,7 @@ export class JobService {
     await this.addSolution(
       assignment.job.chainId,
       assignment.job.escrowAddress,
+      assignment.job.manifestUrl,
       assignment.workerAddress,
       solution,
     );
@@ -278,6 +282,7 @@ export class JobService {
   private async addSolution(
     chainId: ChainId,
     escrowAddress: string,
+    manifestUrl: string,
     workerAddress: string,
     solution: string,
   ): Promise<string> {
@@ -294,7 +299,11 @@ export class JobService {
       throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
     }
 
-    const manifest = await this.getManifest(chainId, escrowAddress);
+    const manifest = await this.getManifest(
+      chainId,
+      escrowAddress,
+      manifestUrl,
+    );
     if (
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
@@ -322,10 +331,8 @@ export class JobService {
   public async getManifest(
     chainId: number,
     escrowAddress: string,
+    manifestUrl: string,
   ): Promise<ManifestDto> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     const manifestEncrypted =
       await StorageClient.downloadFileFromUrl(manifestUrl);
 

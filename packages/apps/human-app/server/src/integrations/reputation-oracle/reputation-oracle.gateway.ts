@@ -4,6 +4,7 @@ import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
+  RegisteredOraclesResponse,
   RegisterWorkerCommand,
   RegisterWorkerData,
   RegisterWorkerResponse,
@@ -333,5 +334,18 @@ export class ReputationOracleGateway {
       token,
     );
     return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async getRegisteredOracles(
+    token: string,
+  ): Promise<RegisteredOraclesResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.GET_REGISTERED_ORACLES,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<RegisteredOraclesResponse>(
+      options,
+    );
   }
 }

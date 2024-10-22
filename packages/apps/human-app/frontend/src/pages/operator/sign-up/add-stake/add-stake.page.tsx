@@ -8,7 +8,6 @@ import {
   PageCardLoader,
 } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { colorPalette } from '@/styles/color-palette';
 import { Buttons } from '@/pages/operator/sign-up/add-stake/buttons';
 import { StakeForm } from '@/pages/operator/sign-up/add-stake/stake-form';
 import { Alert } from '@/components/ui/alert';
@@ -18,8 +17,11 @@ import {
 } from '@/api/services/operator/get-stacked-amount';
 import { useAddStakeMutationState } from '@/api/services/operator/add-stake';
 import { useHMTokenDecimals } from '@/api/services/operator/human-token-decimals';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function AddStakeOperatorPage() {
+  const { colorPalette, isDarkMode } = useColorMode();
   const [displayForm, setDisplayForm] = useState(false);
   const {
     data: stakedAmount,
@@ -78,7 +80,7 @@ export function AddStakeOperatorPage() {
     <PageCard alert={getAlert()} title={t('operator.addStake.title')}>
       <Grid
         container
-        sx={{ flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}
+        sx={{ flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}
       >
         <Typography variant="body4">
           {t('operator.addStake.formHeader')}
@@ -86,7 +88,14 @@ export function AddStakeOperatorPage() {
         <Typography variant="subtitle2">
           {t('operator.addStake.label')}
         </Typography>
-        <Typography color={colorPalette.primary.light} variant="body5">
+        <Typography
+          color={
+            isDarkMode
+              ? onlyDarkModeColor.additionalTextColor
+              : colorPalette.primary.light
+          }
+          variant="body5"
+        >
           {stakedAmountFormatter(stakedAmount)}
         </Typography>
         {displayForm ? (

@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { PageHeader } from '@/components/layout/protected/page-header';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { TopNotification } from '@/components/ui/top-notification';
 import type { TopNotificationPayload } from '@/components/layout/protected/layout-notification-context';
 import { ProtectedLayoutContext } from '@/components/layout/protected/layout-notification-context';
@@ -159,7 +159,9 @@ export function Layout({
                   zIndex: 200,
                   top: '0',
                   left: '0',
-                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  width: notificationWith
+                    ? `${notificationWith.toString()}px`
+                    : 'unset',
                 },
               }}
             >
@@ -168,7 +170,9 @@ export function Layout({
                 sx={{
                   minHeight: '3.2rem',
                   position: 'fixed',
-                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  width: notificationWith
+                    ? `${notificationWith.toString()}px`
+                    : 'unset',
                   zIndex: '10',
                   [breakpoints.mobile]: {
                     minHeight: 'unset',

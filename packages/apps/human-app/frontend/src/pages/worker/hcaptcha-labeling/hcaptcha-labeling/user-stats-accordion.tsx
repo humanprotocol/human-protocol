@@ -5,14 +5,17 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Grid from '@mui/material/Grid';
 import { useEffect } from 'react';
+import { t } from 'i18next';
 import { UserStatsDetails } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-details';
 import { useHCaptchaUserStats } from '@/api/services/worker/hcaptcha-user-stats';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const accordionWidth = { width: '284px' };
 
 export function UserStatsAccordion() {
+  const { colorPalette } = useColorMode();
   const {
     data: hcaptchaUserStats,
     isPending: isHcaptchaUserStatsPending,
@@ -38,11 +41,19 @@ export function UserStatsAccordion() {
         <AccordionSummary
           aria-controls="panel1-content"
           disabled={isHcaptchaUserStatsPending || isHcaptchaUserStatsError}
-          expandIcon={<ExpandMoreIcon />}
+          expandIcon={
+            <ExpandMoreIcon
+              sx={{
+                fill: colorPalette.text.primary,
+              }}
+            />
+          }
           id="panel1-header"
           sx={{ ...accordionWidth, height: '76px' }}
         >
-          <Typography variant="subtitle2">hCapcha Statistics</Typography>
+          <Typography variant="subtitle2">
+            {t('worker.hcaptchaLabelingStats.statistics')}
+          </Typography>
         </AccordionSummary>
         {hcaptchaUserStats ? (
           <AccordionDetails sx={{ ...accordionWidth }}>

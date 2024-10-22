@@ -8,8 +8,10 @@ import { TransactionsTableHead } from '@pages/SearchResults/WalletAddress/Wallet
 import { TransactionsTableBody } from '@pages/SearchResults/WalletAddress/WalletAddressTransactions/tableComponents/TransactionsTableBody';
 import { useTransactionDetailsDto } from '@utils/hooks/use-transactions-details-dto';
 import { TableFooter } from '@mui/material';
+import { useTransactionDetails } from '@services/api/use-transaction-details';
 
 export const WalletAddressTransactionsTable = () => {
+	const { data } = useTransactionDetails();
 	const {
 		pagination: { page, pageSize, lastPageIndex },
 		setPageSize,
@@ -57,7 +59,10 @@ export const WalletAddressTransactionsTable = () => {
 									}}
 									rowsPerPageOptions={[5, 10]}
 									labelDisplayedRows={({ from, to }) => {
-										return `${from}–${to}`;
+										const effectiveTo = data?.results
+											? from + data.results.length - 1
+											: to;
+										return `${from}–${effectiveTo}`;
 									}}
 									slotProps={{
 										actions: {

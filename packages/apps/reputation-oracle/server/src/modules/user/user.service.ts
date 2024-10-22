@@ -370,13 +370,20 @@ export class UserService {
   public async registerOracle(
     user: UserEntity,
     oracleAddress: string,
-  ): Promise<void> {
+  ): Promise<SiteKeyEntity> {
+    const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
+      user,
+      oracleAddress,
+      SiteKeyType.REGISTRATION,
+    );
+    if (siteKey) return siteKey;
+
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = oracleAddress;
     newSiteKey.type = SiteKeyType.REGISTRATION;
     newSiteKey.user = user;
 
-    await this.siteKeyRepository.createUnique(newSiteKey);
+    return await this.siteKeyRepository.createUnique(newSiteKey);
   }
 
   public async getRegisteredOracles(user: UserEntity): Promise<string[]> {
