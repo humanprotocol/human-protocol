@@ -1,7 +1,7 @@
 export enum JobStatus {
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
-  CANCELED = 'CANCELED',
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
+  CANCELED = 'canceled',
 }
 
 export enum JobSortField {
@@ -22,12 +22,12 @@ export enum JobFieldName {
 }
 
 export enum AssignmentStatus {
-  ACTIVE = 'ACTIVE',
-  VALIDATION = 'VALIDATION',
-  COMPLETED = 'COMPLETED',
-  EXPIRED = 'EXPIRED',
-  CANCELED = 'CANCELED',
-  REJECTED = 'REJECTED',
+  ACTIVE = 'active',
+  VALIDATION = 'validation',
+  COMPLETED = 'completed',
+  EXPIRED = 'expired',
+  CANCELED = 'canceled',
+  REJECTED = 'rejected',
 }
 
 export enum AssignmentSortField {
@@ -40,5 +40,5 @@ export enum AssignmentSortField {
 }
 
 export enum JobType {
-  FORTUNE = 'FORTUNE',
+  FORTUNE = 'fortune',
 }

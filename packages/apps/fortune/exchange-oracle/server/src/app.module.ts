@@ -16,12 +16,17 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { HealthModule } from './modules/health/health.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TransformEnumInterceptor } from './common/interceptors/transform-enum.interceptor';
 
 @Module({
   providers: [
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformEnumInterceptor,
     },
     JwtHttpStrategy,
   ],

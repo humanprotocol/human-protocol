@@ -1,10 +1,10 @@
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  PENDING = 'PENDING',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
 }
 
 export enum UserType {
-  OPERATOR = 'OPERATOR',
-  REQUESTER = 'REQUESTER',
+  OPERATOR = 'operator',
+  REQUESTER = 'requester',
 }

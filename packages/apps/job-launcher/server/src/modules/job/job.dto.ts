@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
-  IsEnum,
   IsNumber,
   IsPositive,
   IsString,
@@ -37,10 +36,11 @@ import {
 import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   @IsOptional()
   public chainId?: ChainId;
 
@@ -80,7 +80,7 @@ export class JobQuickLaunchDto extends JobDto {
     name: 'request_type',
     enum: JobRequestType,
   })
-  @IsEnum(JobRequestType)
+  @IsEnumCaseInsensitive(JobRequestType)
   public requestType: JobRequestType;
 
   @ApiProperty({ name: 'manifest_url' })
@@ -119,17 +119,17 @@ export class JobFortuneDto extends JobDto {
   public fundAmount: number;
 
   @ApiProperty({ enum: JobCurrency })
-  @IsEnum(JobCurrency)
+  @IsEnumCaseInsensitive(JobCurrency)
   public currency: JobCurrency;
 }
 
 export class StorageDataDto {
   @ApiProperty({ enum: StorageProviders })
-  @IsEnum(StorageProviders)
+  @IsEnumCaseInsensitive(StorageProviders)
   public provider: StorageProviders;
 
   @ApiProperty({ enum: AWSRegions })
-  @IsEnum(AWSRegions)
+  @IsEnumCaseInsensitive(AWSRegions)
   public region: AWSRegions | null;
 
   @ApiProperty({ name: 'bucket_name' })
@@ -202,7 +202,7 @@ export class JobCvatDto extends JobDto {
   public userGuide: string;
 
   @ApiProperty({ enum: JobRequestType })
-  @IsEnum(JobRequestType)
+  @IsEnumCaseInsensitive(JobRequestType)
   public type: JobRequestType;
 
   @ApiProperty({ name: 'fund_amount' })
@@ -211,7 +211,7 @@ export class JobCvatDto extends JobDto {
   public fundAmount: number;
 
   @ApiProperty({ enum: JobCurrency })
-  @IsEnum(JobCurrency)
+  @IsEnumCaseInsensitive(JobCurrency)
   public currency: JobCurrency;
 }
 
@@ -285,7 +285,7 @@ export class ManifestDetails {
   public requesterAddress: string;
 
   @ApiProperty({ description: 'Request type', name: 'request_type' })
-  @IsEnum(JobRequestType)
+  @IsEnumCaseInsensitive(JobRequestType)
   public requestType: JobRequestType;
 
   @ApiProperty({
@@ -359,7 +359,7 @@ export class CommonDetails {
   public amountOfTasks?: number;
 
   @ApiProperty({ description: 'Status of the job' })
-  @IsEnum(JobStatus)
+  @IsEnumCaseInsensitive(JobStatus)
   public status: JobStatus;
 
   @ApiProperty({
@@ -404,7 +404,7 @@ export class FortuneManifestDto {
   public fundAmount: number;
 
   @ApiProperty({ enum: JobRequestType, name: 'request_type' })
-  @IsEnum(JobRequestType)
+  @IsEnumCaseInsensitive(JobRequestType)
   public requestType: JobRequestType;
 
   @IsArray()
@@ -435,7 +435,7 @@ export class Annotation {
   @IsString()
   public user_guide: string;
 
-  @IsEnum(JobRequestType)
+  @IsEnumCaseInsensitive(JobRequestType)
   public type: JobRequestType;
 
   @IsNumber()
@@ -514,7 +514,7 @@ export class GetJobsDto extends PageOptionsDto {
     default: JobSortField.CREATED_AT,
   })
   @IsOptional()
-  @IsEnum(JobSortField)
+  @IsEnumCaseInsensitive(JobSortField)
   sortField?: JobSortField = JobSortField.CREATED_AT;
 
   @ApiPropertyOptional({
@@ -537,7 +537,7 @@ export class GetJobsDto extends PageOptionsDto {
   chainId?: ChainId[];
 
   @ApiPropertyOptional({ enum: JobStatusFilter })
-  @IsEnum(JobStatusFilter)
+  @IsEnumCaseInsensitive(JobStatusFilter)
   @IsOptional()
   status?: JobStatusFilter;
 }
@@ -555,7 +555,7 @@ export class JobCaptchaAdvancedDto {
     enum: WorkerLanguage,
     name: 'worker_language',
   })
-  @IsEnum(WorkerLanguage)
+  @IsEnumCaseInsensitive(WorkerLanguage)
   @IsOptional()
   workerLanguage?: WorkerLanguage;
 
@@ -563,7 +563,7 @@ export class JobCaptchaAdvancedDto {
     enum: WorkerLocation,
     name: 'workerocation',
   })
-  @IsEnum(WorkerLocation)
+  @IsEnumCaseInsensitive(WorkerLocation)
   @IsOptional()
   workerLocation?: WorkerLocation;
 
@@ -571,7 +571,7 @@ export class JobCaptchaAdvancedDto {
     enum: WorkerBrowser,
     name: 'target_browser',
   })
-  @IsEnum(WorkerBrowser)
+  @IsEnumCaseInsensitive(WorkerBrowser)
   @IsOptional()
   targetBrowser?: WorkerBrowser;
 }
@@ -581,7 +581,7 @@ export class JobCaptchaAnnotationsDto {
     enum: JobCaptchaShapeType,
     name: 'type_of_job',
   })
-  @IsEnum(JobCaptchaShapeType)
+  @IsEnumCaseInsensitive(JobCaptchaShapeType)
   typeOfJob: JobCaptchaShapeType;
 
   @ApiProperty({ name: 'task_bid_price' })
@@ -675,7 +675,7 @@ class RequesterRestrictedAnswer {
 }
 
 class RequestConfig {
-  @IsEnum(JobCaptchaShapeType)
+  @IsEnumCaseInsensitive(JobCaptchaShapeType)
   shape_type?: JobCaptchaShapeType;
 
   @IsNumber()
@@ -724,7 +724,7 @@ export class HCaptchaManifestDto {
   @IsString()
   job_mode: string;
 
-  @IsEnum(JobCaptchaRequestType)
+  @IsEnumCaseInsensitive(JobCaptchaRequestType)
   request_type: JobCaptchaRequestType;
 
   @IsObject()

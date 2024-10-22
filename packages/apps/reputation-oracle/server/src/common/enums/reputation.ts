@@ -1,14 +1,14 @@
 export enum ReputationEntityType {
-  WORKER = 'WORKER',
-  JOB_LAUNCHER = 'JOB_LAUNCHER',
-  EXCHANGE_ORACLE = 'EXCHANGE_ORACLE',
-  RECORDING_ORACLE = 'RECORDING_ORACLE',
-  REPUTATION_ORACLE = 'REPUTATION_ORACLE',
-  CREDENTIAL_VALIDATOR = 'CREDENTIAL_VALIDATOR',
+  WORKER = 'worker',
+  JOB_LAUNCHER = 'job_launcher',
+  EXCHANGE_ORACLE = 'exchange_oracle',
+  RECORDING_ORACLE = 'recording_oracle',
+  REPUTATION_ORACLE = 'reputation_oracle',
+  CREDENTIAL_VALIDATOR = 'credential_validator',
 }
 
 export enum ReputationLevel {
-  LOW = 'Low',
-  MEDIUM = 'Medium',
-  HIGH = 'High',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
 }

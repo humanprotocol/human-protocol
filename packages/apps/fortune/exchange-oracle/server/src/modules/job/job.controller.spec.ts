@@ -59,7 +59,7 @@ describe('JobController', () => {
 
       jest.spyOn(jobService, 'getJobList').mockResolvedValue(pageDto);
 
-      await jobController.getJobs(req, getJobsDto);
+      await jobController.getJobs(getJobsDto, req);
 
       expect(jobService.getJobList).toHaveBeenCalledWith(
         getJobsDto,
@@ -75,7 +75,7 @@ describe('JobController', () => {
         solution: 'job-solution',
       };
 
-      await jobController.solveJob('signature', solveJobDto);
+      await jobController.solveJob(solveJobDto, 'signature');
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
         Number(solveJobDto.assignmentId),

@@ -1,13 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUrl,
-  IsUUID,
-} from 'class-validator';
+import { IsObject, IsOptional, IsString, IsUrl, IsUUID } from 'class-validator';
 import { KycStatus } from '../../common/enums/user';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class KycSessionDto {
   @ApiProperty({ name: 'url' })
@@ -31,7 +25,7 @@ export class KycVerificationDto {
   public vendorData: string;
 
   @ApiProperty()
-  @IsEnum(KycStatus)
+  @IsEnumCaseInsensitive(KycStatus)
   public status: KycStatus;
 
   @ApiProperty({ nullable: true })

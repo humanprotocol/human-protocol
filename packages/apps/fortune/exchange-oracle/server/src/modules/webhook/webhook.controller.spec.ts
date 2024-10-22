@@ -41,7 +41,7 @@ describe('webhookController', () => {
       };
       jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();
 
-      await webhookController.processWebhook(MOCK_SIGNATURE, webhook);
+      await webhookController.processWebhook(webhook, MOCK_SIGNATURE);
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });

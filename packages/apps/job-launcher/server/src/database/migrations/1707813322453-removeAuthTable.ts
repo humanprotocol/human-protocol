@@ -94,5 +94,21 @@ export class RemoveAuthTable1707813322453 implements MigrationInterface {
             ALTER TABLE "hmt"."tokens"
             ADD CONSTRAINT "FK_8769073e38c365f315426554ca5" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
+    await queryRunner.query(`
+        CREATE TABLE "hmt"."auths" (
+            "id" SERIAL NOT NULL,
+            "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+            "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+            "access_token" character varying NOT NULL,
+            "refresh_token" character varying NOT NULL,
+            "user_id" integer NOT NULL,
+            CONSTRAINT "REL_593ea7ee438b323776029d3185" UNIQUE ("user_id"),
+            CONSTRAINT "PK_22fc0631a651972ddc9c5a31090" PRIMARY KEY ("id")
+        )
+    `);
+    await queryRunner.query(`
+        ALTER TABLE "hmt"."auths"
+        ADD CONSTRAINT "FK_593ea7ee438b323776029d3185f" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+    `);
   }
 }
