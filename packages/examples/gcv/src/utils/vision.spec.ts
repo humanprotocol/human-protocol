@@ -6,17 +6,15 @@ import { VisionModeration } from './vision';
 import { ErrorCommon } from '../constants/errors';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 
-// Mock dependencies
 jest.mock('fs');
 jest.mock('@google-cloud/vision');
 jest.mock('./storage');
 
-describe('VisionModeration', () => {
+describe('Vision Utils', () => {
   let visionModeration: VisionModeration;
   let mockSafeSearchDetection: jest.Mock;
 
   beforeEach(() => {
-    // Set up mock for ImageAnnotatorClient
     mockSafeSearchDetection = jest.fn();
     (ImageAnnotatorClient as unknown as jest.Mock).mockImplementation(() => ({
       safeSearchDetection: mockSafeSearchDetection,
@@ -91,18 +89,14 @@ describe('VisionModeration', () => {
       ];
       const jsonFilePath = './results.json';
 
-      // Mock fs.existsSync to return true (file exists)
       (fs.existsSync as jest.Mock).mockReturnValue(true);
 
-      // Mock fs.readFileSync to return existing data
       (fs.readFileSync as jest.Mock).mockReturnValue(
         JSON.stringify([{ existing: 'data' }])
       );
 
-      // Call the method
       visionModeration.saveResultsToJson(results, jsonFilePath);
 
-      // Verify fs.writeFileSync was called with updated data
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         jsonFilePath,
         JSON.stringify([{ existing: 'data' }, ...results], null, 2)
@@ -115,13 +109,10 @@ describe('VisionModeration', () => {
       ];
       const jsonFilePath = './results.json';
 
-      // Mock fs.existsSync to return false (file does not exist)
       (fs.existsSync as jest.Mock).mockReturnValue(false);
 
-      // Call the method
       visionModeration.saveResultsToJson(results, jsonFilePath);
 
-      // Verify fs.writeFileSync was called with new data
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         jsonFilePath,
         JSON.stringify(results, null, 2)
@@ -141,21 +132,17 @@ describe('VisionModeration', () => {
         { imageUrl: 'http://test.com/image1.jpg', moderationResult: {} },
       ];
 
-      // Mock storage methods
       (generateBucketUrl as jest.Mock).mockReturnValue(mockBucketUrl);
       (listObjectsInBucket as jest.Mock).mockResolvedValue(mockObjectKeys);
 
-      // Mock analyzeRemoteImageForModeration to return mock results
       jest
         .spyOn(visionModeration, 'analyzeRemoteImageForModeration')
         .mockResolvedValue(mockModerationResults[0] as any);
 
-      // Mock saveResultsToJson
       jest
         .spyOn(visionModeration, 'saveResultsToJson')
         .mockImplementation(jest.fn());
 
-      // Create a StorageDataDto instance
       const storageData: StorageDataDto = {
         provider: StorageProviders.AWS,
         region: AWSRegions.AF_SOUTH_1,
@@ -165,11 +152,9 @@ describe('VisionModeration', () => {
 
       await visionModeration.processDataset(storageData);
 
-      // Verify generateBucketUrl and listObjectsInBucket were called
       expect(generateBucketUrl).toHaveBeenCalledWith(storageData);
       expect(listObjectsInBucket).toHaveBeenCalledWith(mockBucketUrl);
 
-      // Verify saveResultsToJson was called with the moderation results
       expect(visionModeration.saveResultsToJson).toHaveBeenCalledWith(
         mockModerationResults,
         './results.json'
@@ -177,12 +162,10 @@ describe('VisionModeration', () => {
     });
 
     it('should throw an error if processing fails', async () => {
-      // Mock listObjectsInBucket to throw an error
       (listObjectsInBucket as jest.Mock).mockRejectedValue(
         new Error('Error listing objects')
       );
 
-      // Create a StorageDataDto instance
       const storageData: StorageDataDto = {
         provider: StorageProviders.AWS,
         region: AWSRegions.AF_SOUTH_1,

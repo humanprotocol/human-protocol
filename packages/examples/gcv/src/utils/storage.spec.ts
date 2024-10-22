@@ -9,7 +9,7 @@ import { ErrorBucket } from '../constants/errors';
 jest.mock('axios');
 jest.mock('xml2js');
 
-describe('Storage Functions', () => {
+describe('Storage Utils', () => {
     describe('generateBucketUrl', () => {
         it('should generate AWS bucket URL with path', () => {
             const storageData: StorageDataDto = {
