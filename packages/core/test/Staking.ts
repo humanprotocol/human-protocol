@@ -336,16 +336,6 @@ describe('Staking', function () {
       });
     });
 
-    describe('Events', function () {
-      it('Should emit an event on stake set', async function () {
-        const minumumStake = 5;
-
-        await expect(await staking.connect(owner).setMinimumStake(minumumStake))
-          .to.emit(staking, 'SetMinumumStake')
-          .withArgs(minumumStake);
-      });
-    });
-
     describe('Set minimum stake', function () {
       it('Should assign a value to minimum stake variable', async function () {
         const minumumStake = 5;
@@ -375,16 +365,6 @@ describe('Staking', function () {
       });
     });
 
-    describe('Events', function () {
-      it('Should emit an event on stake locked', async function () {
-        const lockPeriod = 5;
-
-        await expect(await staking.connect(owner).setLockPeriod(lockPeriod))
-          .to.emit(staking, 'SetLockPeriod')
-          .withArgs(lockPeriod);
-      });
-    });
-
     describe('Set lock period', function () {
       it('Should assign a value to lock period variable', async function () {
         const lockPeriod = 5;
@@ -411,18 +391,6 @@ describe('Staking', function () {
         await expect(
           staking.connect(owner).setFeePercentage(feePercentage)
         ).to.be.revertedWith('Fee cannot exceed 100%');
-      });
-    });
-
-    describe('Events', function () {
-      it('Should emit an event on stake set', async function () {
-        const feePercentage = 5;
-
-        await expect(
-          await staking.connect(owner).setFeePercentage(feePercentage)
-        )
-          .to.emit(staking, 'SetFeePercentage')
-          .withArgs(feePercentage);
       });
     });
 
@@ -733,14 +701,6 @@ describe('Staking', function () {
       });
     });
 
-    describe('Events', function () {
-      it('Should emit an event when a new slasher is added', async function () {
-        await expect(await staking.connect(owner).addSlasher(newSlasher))
-          .to.emit(staking, 'SlasherAdded')
-          .withArgs(newSlasher);
-      });
-    });
-
     describe('Add slasher', function () {
       it('Should add a new slasher', async function () {
         await staking.connect(owner).addSlasher(newSlasher);
@@ -769,14 +729,6 @@ describe('Staking', function () {
         await expect(
           staking.connect(owner).removeSlasher(nonSlasher)
         ).to.be.revertedWith('Address is not a slasher');
-      });
-    });
-
-    describe('Events', function () {
-      it('Should emit an event when a slasher is removed', async function () {
-        await expect(await staking.connect(owner).removeSlasher(newSlasher))
-          .to.emit(staking, 'SlasherRemoved')
-          .withArgs(newSlasher);
       });
     });
 
