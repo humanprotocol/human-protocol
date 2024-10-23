@@ -191,7 +191,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVfssyiU81KwrTVL1QRjj4LPpTkA1ZmexHTRVg51J5YxP',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmbwio5UnvDn5GQRJ5kLJfK27fqHK9nkEh4YXXYKWCc9rH',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -350,6 +350,7 @@ export const KVStoreKeys = {
   url: 'url',
   jobTypes: 'job_types',
   registrationNeeded: 'registration_needed',
+  registrationInstructions: 'registration_instructions',
 };
 
 export const Role = {

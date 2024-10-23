@@ -35,8 +35,8 @@ import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 import { KvStoreGateway } from '../kv-store/kv-store.gateway';
 import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
 import {
-  RegisterWorkerCommand,
-  RegisterWorkerData,
+  WorkerRegistrationCommand,
+  WorkerRegistrationData,
 } from '../../modules/user-worker/model/worker-registration.model';
 
 @Injectable()
@@ -176,18 +176,18 @@ export class ExchangeOracleGateway {
     return this.callExternalHttpUtilRequest<JobsDiscoveryResponse>(options);
   }
 
-  async registerWorker(command: RegisterWorkerCommand) {
+  async workerRegistration(command: WorkerRegistrationCommand) {
     const data = this.mapper.map(
       command,
-      RegisterWorkerCommand,
-      RegisterWorkerData,
+      WorkerRegistrationCommand,
+      WorkerRegistrationData,
     );
 
     const options: AxiosRequestConfig = {
       method: HttpMethod.POST,
       url: `${await this.kvStoreGateway.getExchangeOracleUrlByAddress(
         command.oracleAddress,
-      )}/register`,
+      )}/registration`,
       data: data,
       headers: {
         Authorization: command.token,

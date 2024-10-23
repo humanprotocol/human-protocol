@@ -108,6 +108,10 @@ export function handleDataSaved(event: DataSaved): void {
       operator.reputationNetwork = null;
     }
     operator.save();
+  } else if (key == 'registration_needed') {
+    leader.registrationNeeded = event.params.value.toLowerCase() == 'true';
+  } else if (key == 'registration_instructions') {
+    leader.registrationInstructions = event.params.value;
   }
 
   if (key.indexOf('url') > -1) {
