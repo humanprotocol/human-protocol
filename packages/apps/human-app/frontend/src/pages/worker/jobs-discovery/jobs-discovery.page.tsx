@@ -1,24 +1,17 @@
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OraclesTable } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table';
 import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table-job-types-select';
 import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
 export type OraclesDataQueryResult = UseQueryResult<OraclesSuccessResponse>;
 
 export function JobsDiscoveryPage() {
   const oraclesQueryResult = useGetOracles();
   const isMobile = useIsMobile();
-  const { setGrayBackground } = useBackgroundColorStore();
-
-  useEffect(() => {
-    setGrayBackground();
-  }, [setGrayBackground]);
 
   return (
     <Grid alignItems="center" container justifyContent="center">
