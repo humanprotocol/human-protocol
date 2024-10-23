@@ -14,7 +14,8 @@ export function JWTExpirationCheck({
   const web3Auth = useWeb3Auth();
   const web2Auth = useAuth();
   const location = useLocation();
-  const { mutate: getAccessTokenMutation } = useGetAccessTokenMutation();
+  const { mutateIfNotLoading: getAccessTokenMutation } =
+    useGetAccessTokenMutation();
 
   useEffect(() => {
     if (

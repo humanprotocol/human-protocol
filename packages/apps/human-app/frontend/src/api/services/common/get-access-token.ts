@@ -23,7 +23,7 @@ export function useGetAccessTokenMutation() {
     user: web3User,
   } = useWeb3Auth();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async ({
       authType,
       throwExpirationModalOnSignOut = true,
@@ -73,4 +73,26 @@ export function useGetAccessTokenMutation() {
       await queryClient.invalidateQueries();
     },
   });
+
+  // Block new mutations if one is already loading
+  const mutateIfNotLoading = (args: Parameters<typeof mutation.mutate>[0]) => {
+    if (!mutation.isPending) {
+      mutation.mutate(args);
+    }
+  };
+
+  // Block new async mutations if one is already loading
+  const mutateAsyncIfNotLoading = async (
+    args: Parameters<typeof mutation.mutateAsync>[0]
+  ) => {
+    if (!mutation.isPending) {
+      return mutation.mutateAsync(args);
+    }
+  };
+
+  return {
+    ...mutation,
+    mutateIfNotLoading,
+    mutateAsyncIfNotLoading,
+  };
 }
