@@ -205,6 +205,7 @@ export function Layout({
             </Grid>
             <Grid
               component="div"
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error -- ...
               ref={layoutElementRef}
               sx={{ height: '100%' }}

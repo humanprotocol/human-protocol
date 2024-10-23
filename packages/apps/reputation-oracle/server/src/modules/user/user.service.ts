@@ -19,7 +19,7 @@ import {
 import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import {
-  OracleRegistrationDto,
+  RegistrationInExchangeOracleDto,
   RegisterAddressRequestDto,
   SignatureBodyDto,
   UserCreateDto,
@@ -373,9 +373,9 @@ export class UserService {
     };
   }
 
-  public async registerOracle(
+  public async registrationInExchangeOracle(
     user: UserEntity,
-    data: OracleRegistrationDto,
+    data: RegistrationInExchangeOracleDto,
   ): Promise<SiteKeyEntity> {
     if (
       !data.hCaptchaToken ||
@@ -402,7 +402,9 @@ export class UserService {
     return await this.siteKeyRepository.createUnique(newSiteKey);
   }
 
-  public async getRegisteredOracles(user: UserEntity): Promise<string[]> {
+  public async getRegistrationInExchangeOracles(
+    user: UserEntity,
+  ): Promise<string[]> {
     const siteKeys = await this.siteKeyRepository.findByUserAndType(
       user,
       SiteKeyType.REGISTRATION,

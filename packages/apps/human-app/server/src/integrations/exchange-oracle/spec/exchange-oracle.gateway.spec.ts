@@ -33,7 +33,7 @@ import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
 import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
 import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { AxiosResponse } from 'axios';
-import { WorkerRegistrationData } from '../../../modules/user-worker/model/worker-registration.model';
+import { RegistrationInExchangeOracleData } from '../../../modules/user-worker/model/worker-registration.model';
 import {
   registerWorkerCommandFixture,
   registerWorkerDataFixture,
@@ -252,8 +252,8 @@ describe('ExchangeOracleApiGateway', () => {
     });
   });
 
-  describe('registerWorker', () => {
-    it('should successfully call register worker', async () => {
+  describe('register', () => {
+    it('should successfully call register in exchange oracle', async () => {
       jest.spyOn(httpService, 'request').mockReturnValue(
         of({
           data: responseWorkerFixture,
@@ -264,15 +264,15 @@ describe('ExchangeOracleApiGateway', () => {
         } as AxiosResponse),
       );
       const command = registerWorkerCommandFixture;
-      const expectedMappedData: WorkerRegistrationData =
+      const expectedMappedData: RegistrationInExchangeOracleData =
         registerWorkerDataFixture;
       nock(workerRegisterUrl)
-        .post(`/registration`)
+        .post(`/register`)
         .reply(200, responseWorkerFixture);
-      await gateway.workerRegistration(command);
+      await gateway.sendRegistrationInExchangeOracle(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_URL + '/registration',
+          url: EXCHANGE_ORACLE_URL + '/register',
           method: HttpMethod.POST,
           data: expectedMappedData,
           headers: {

@@ -4,12 +4,12 @@ import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
-  OraclesRegistrationResponse,
-  WorkerRegistrationCommand,
-  WorkerRegistrationData,
-  WorkerRegistrationResponse,
+  RegistrationInExchangeOraclesResponse,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleData,
   SignupWorkerCommand,
   SignupWorkerData,
+  RegistrationInExchangeOracleResponse,
 } from '../../modules/user-worker/model/worker-registration.model';
 import {
   SignupOperatorCommand,
@@ -174,18 +174,20 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
   }
 
-  async sendWorkerRegistration(command: WorkerRegistrationCommand) {
+  async sendRegistrationInExchangeOracle(
+    command: RegistrationInExchangeOracleCommand,
+  ) {
     const data = this.mapper.map(
       command,
-      WorkerRegistrationCommand,
-      WorkerRegistrationData,
+      RegistrationInExchangeOracleCommand,
+      RegistrationInExchangeOracleData,
     );
     const options = this.getEndpointOptions(
-      ReputationOracleEndpoints.WORKER_REGISTRATION,
+      ReputationOracleEndpoints.REGISTRATION_IN_EXCHANGE_ORACLE,
       data,
       command.token,
     );
-    return this.handleRequestToReputationOracle<WorkerRegistrationResponse>(
+    return this.handleRequestToReputationOracle<RegistrationInExchangeOracleResponse>(
       options,
     );
   }
@@ -336,15 +338,15 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<void>(options);
   }
 
-  async getRegisteredOracles(
+  async getRegistrationInExchangeOracles(
     token: string,
-  ): Promise<OraclesRegistrationResponse> {
+  ): Promise<RegistrationInExchangeOraclesResponse> {
     const options = this.getEndpointOptions(
-      ReputationOracleEndpoints.GET_REGISTERED_ORACLES,
+      ReputationOracleEndpoints.GET_REGISTRATION_IN_EXCHANGE_ORACLES,
       undefined,
       token,
     );
-    return this.handleRequestToReputationOracle<OraclesRegistrationResponse>(
+    return this.handleRequestToReputationOracle<RegistrationInExchangeOraclesResponse>(
       options,
     );
   }
