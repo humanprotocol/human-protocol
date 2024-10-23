@@ -123,7 +123,7 @@ export function AvailableJobsTableMobile({
                       sx={{
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
-                        whiteSpace: 'nowrap',
+                        whiteSpace: 'wrap',
                       }}
                       variant="subtitle1"
                     >
@@ -157,6 +157,8 @@ export function AvailableJobsTableMobile({
                       {getNetworkName()}
                     </Typography>
                   </ListItem>
+                </Grid>
+                <Grid item xs={6}>
                   <ListItem label={t('worker.jobs.jobType')}>
                     <Chip label={t(`jobTypeLabels.${d.job_type as JobType}`)} />
                   </ListItem>
