@@ -39,7 +39,7 @@ export function RegistrationPage() {
 
   const {
     mutate: userRegistrationMutate,
-    isPending: isRegistrationPending,
+    isPending: isRegistrationInExchangeOraclePending,
     error: registrationInExchangeOracleError,
   } = useExchangeOracleRegistrationMutation();
 
@@ -130,7 +130,7 @@ export function RegistrationPage() {
                   <Button
                     disabled={!hasClickedRegistrationLink}
                     fullWidth
-                    loading={isRegistrationPending}
+                    loading={isRegistrationInExchangeOraclePending}
                     type="submit"
                     variant="contained"
                   >
