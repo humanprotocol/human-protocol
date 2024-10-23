@@ -1511,6 +1511,7 @@ export class JobService {
       manifest = manifestData as CvatManifestDto;
     }
 
+    console.log(manifest);
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
@@ -1551,9 +1552,10 @@ export class JobService {
       specificManifestDetails = {
         requestType: manifest.annotation?.type,
         submissionsRequired: manifest.annotation?.job_size,
-        ...(manifest.annotation.qualifications &&
-          manifest.annotation.qualifications?.length > 0 && {
-            qualifications: manifest.annotation.qualifications,
+        description: manifest.annotation?.description,
+        ...(manifest.annotation?.qualifications &&
+          manifest.annotation?.qualifications?.length > 0 && {
+            qualifications: manifest.annotation?.qualifications,
           }),
       };
     }
