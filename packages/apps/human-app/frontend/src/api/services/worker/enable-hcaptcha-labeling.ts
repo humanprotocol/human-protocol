@@ -18,7 +18,8 @@ export type EnableHCaptchaLabelingSuccessResponse = z.infer<
 export function useEnableHCaptchaLabelingMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { mutateAsync: getAccessTokenMutation } = useGetAccessTokenMutation();
+  const { mutateAsyncIfNotLoading: getAccessTokenMutation } =
+    useGetAccessTokenMutation();
 
   return useMutation({
     mutationFn: async () => {

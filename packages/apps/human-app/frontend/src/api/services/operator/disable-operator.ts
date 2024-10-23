@@ -7,7 +7,7 @@ import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-use
 
 export function useDisableWeb3Operator() {
   const { address, chainId } = useConnectedWallet();
-  const { mutateAsync } = useGetAccessTokenMutation();
+  const { mutateAsyncIfNotLoading } = useGetAccessTokenMutation();
   const { updateUserData } = useWeb3AuthenticatedUser();
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) => {
@@ -21,8 +21,9 @@ export function useDisableWeb3Operator() {
         },
       });
 
-      await mutateAsync({ authType: 'web3' });
+      await mutateAsyncIfNotLoading({ authType: 'web3' });
       updateUserData({ status: 'inactive' });
+
       return result;
     },
     mutationKey: ['disableOperator', address, chainId],

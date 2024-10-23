@@ -34,7 +34,8 @@ export function useRegisterAddressMutation(callbacks?: {
 }) {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedUser();
-  const { mutateAsync: getAccessTokenMutation } = useGetAccessTokenMutation();
+  const { mutateAsyncIfNotLoading: getAccessTokenMutation } =
+    useGetAccessTokenMutation();
 
   const { address, signMessage } = useWalletConnect();
   return useMutation({

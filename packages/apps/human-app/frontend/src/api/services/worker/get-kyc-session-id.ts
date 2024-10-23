@@ -14,7 +14,8 @@ export type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
 export function useKycStartMutation() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedUser();
-  const { mutateAsync: getAccessTokenMutation } = useGetAccessTokenMutation();
+  const { mutateAsyncIfNotLoading: getAccessTokenMutation } =
+    useGetAccessTokenMutation();
   return useMutation({
     mutationFn: async () => {
       try {
