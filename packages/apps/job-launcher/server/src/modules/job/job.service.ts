@@ -1511,7 +1511,6 @@ export class JobService {
       manifest = manifestData as CvatManifestDto;
     }
 
-    console.log(manifest);
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
