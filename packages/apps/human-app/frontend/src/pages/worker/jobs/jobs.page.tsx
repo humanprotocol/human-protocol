@@ -27,6 +27,7 @@ function generateTabA11yProps(index: number) {
 }
 
 export function JobsPage() {
+  // draft
   const { isDarkMode } = useColorMode();
   const { data, isError, isPending, error } = useGetOracles();
   const { address: oracle_address } = useParams<{ address: string }>();
