@@ -158,7 +158,7 @@ export function AvailableJobsTableMobile({
                     </Typography>
                   </ListItem>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <ListItem label={t('worker.jobs.jobType')}>
                     <Chip label={t(`jobTypeLabels.${d.job_type as JobType}`)} />
                   </ListItem>

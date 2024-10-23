@@ -22,6 +22,7 @@ export function Chip({ label, backgroundColor }: ChipProps) {
         py: '2px',
         borderRadius: '16px',
         display: 'flex',
+        wordBreak: 'break-word',
       }}
     >
       <Typography
