@@ -1,17 +1,27 @@
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import type { UseQueryResult } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OraclesTable } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table';
 import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-job-types-select';
 import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
+import { useGetOraclesNotifications } from '@/hooks/use-get-oracles-notifications';
 
 export type OraclesDataQueryResult = UseQueryResult<OraclesSuccessResponse>;
 
 export function JobsDiscoveryPage() {
+  const { onError } = useGetOraclesNotifications();
+  const onErrorRef = useRef(onError);
   const oraclesQueryResult = useGetOracles();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (oraclesQueryResult.error) {
+      void onErrorRef.current(oraclesQueryResult.error);
+    }
+  }, [oraclesQueryResult.error]);
 
   return (
     <Grid alignItems="center" container justifyContent="center">
