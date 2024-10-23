@@ -8,9 +8,10 @@ import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/components/ui/icons';
 import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
-import { useColorMode } from '@/hooks/use-color-mode';
 import { AvailableJobsRewardAmountSortMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-reward-amount-sort-mobile';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -18,6 +19,7 @@ interface DrawerMobileProps {
 export function AvailableJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
@@ -55,7 +57,15 @@ export function AvailableJobsDrawerMobile({
             zIndex: '999999',
           }}
         >
-          <HumanLogoIcon />
+          <Stack
+            sx={{ cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+              // setIsMobileFilterDrawerOpen(false);
+            }}
+          >
+            <HumanLogoIcon />
+          </Stack>
 
           <IconButton
             onClick={() => {

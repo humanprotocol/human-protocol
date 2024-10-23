@@ -84,6 +84,9 @@ export function Navbar({
       <Grid
         sx={{ cursor: 'pointer', paddingLeft: '8px' }}
         onClick={() => {
+          if (isMobile) {
+            setOpen(false);
+          }
           handleMainNavIconClick();
         }}
         role="button"
