@@ -128,6 +128,7 @@ export function OraclesTable({
     enableSorting: false,
     enablePagination: false,
     enableTopToolbar: false,
+    enableBottomToolbar: false,
     muiTableHeadCellProps: {
       sx: {
         borderColor: colorPalette.paper.text,
