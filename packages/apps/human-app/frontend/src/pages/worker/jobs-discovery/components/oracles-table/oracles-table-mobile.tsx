@@ -3,8 +3,6 @@ import { t } from 'i18next';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
 import { Loader } from '@/components/ui/loader';
-import { Alert } from '@/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { ListItem } from '@/components/ui/list-item';
@@ -17,7 +15,6 @@ export function OraclesTableMobile({
   oraclesQueryDataResult: {
     data: oraclesData,
     isError: isOraclesDataError,
-    error: oraclesDataError,
     isPending: isOraclesDataPending,
   },
 }: {
@@ -39,9 +36,15 @@ export function OraclesTableMobile({
 
   if (isOraclesDataError) {
     return (
-      <Alert color="error" severity="error">
-        {defaultErrorMessage(oraclesDataError)}
-      </Alert>
+      <Paper
+        sx={{
+          padding: '20px',
+          textAlign: 'center',
+          color: colorPalette.text.disabled,
+        }}
+      >
+        <span>No records to display</span>
+      </Paper>
     );
   }
 
