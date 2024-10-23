@@ -7,11 +7,11 @@ export const HMTBalance = ({ HMTBalance }: { HMTBalance: number }) => {
 	const { data, isError, isPending } = useHMTPrice();
 
 	if (isError) {
-		return 'N/A';
+		return <span>N/A</span>;
 	}
 
 	if (isPending) {
-		return '...';
+		return <span>...</span>;
 	}
 	const HMTBalanceInDollars = HMTBalance * data.hmtPrice;
 
