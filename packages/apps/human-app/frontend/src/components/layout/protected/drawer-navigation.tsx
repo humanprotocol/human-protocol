@@ -77,7 +77,13 @@ export function DrawerNavigation({
           <Stack
             alignItems="flex-start"
             sx={{ paddingLeft: '60px', cursor: 'pointer' }}
-            onClick={handleMainNavIconClick}
+            onClick={() => {
+              handleMainNavIconClick();
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              if (isMobile) {
+                setDrawerOpen(false);
+              }
+            }}
           >
             <HumanLogoNavbarIcon />
           </Stack>
