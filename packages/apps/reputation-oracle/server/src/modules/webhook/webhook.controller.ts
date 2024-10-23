@@ -12,7 +12,6 @@ import { Public } from '../../common/decorators';
 import { CreateWebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
 import { AuthSignatureRole } from '../../common/enums/role';
-import { EventType, WebhookType } from 'src/common/enums';
 
 @Public()
 @ApiTags('Webhook')

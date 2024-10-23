@@ -106,16 +106,6 @@ describe('WebhookService', () => {
       retriesCount: 0,
     };
 
-    const outWebhookEntity: Partial<WebhookEntity> = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      type: WebhookType.OUT,
-      callbackUrl: MOCK_WEBHOOK_URL,
-      status: WebhookStatus.PENDING,
-      waitUntil: new Date(),
-      retriesCount: 0,
-    };
-
     it('should successfully create incoming webhook with valid DTO', async () => {
       const validDto: CreateWebhookDto = {
         chainId: ChainId.LOCALHOST,
