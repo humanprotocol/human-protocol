@@ -40,7 +40,7 @@ export function RegistrationPage() {
   const {
     mutate: userRegistrationMutate,
     isPending: isRegistrationPending,
-    error: registrationError,
+    error: registrationInExchangeOracleError,
   } = useExchangeOracleRegistrationMutation();
 
   const handleLinkClick = () => {
@@ -124,7 +124,7 @@ export function RegistrationPage() {
               >
                 <Stack alignItems="center" spacing={2}>
                   <FormCaptcha
-                    error={registrationError}
+                    error={registrationInExchangeOracleError}
                     name="h_captcha_token"
                   />
                   <Button
