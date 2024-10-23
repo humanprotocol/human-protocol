@@ -11,7 +11,7 @@
     "jobsDiscovery": "Tasks",
     "hcaptchaLabeling": "Labeling",
     "jobs": "Tasks",
-    "registration": "Registration"
+    "registrationInExchangeOracle": "Registration in Exchange Oracle"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
@@ -211,7 +211,7 @@
       "seeJobs": "See tasks",
       "allJobs": "All tasks"
     },
-    "registration": {
+    "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
       "completeMessage": "Click on Complete once you have finished the registration process:",
       "completeButton": "Complete"

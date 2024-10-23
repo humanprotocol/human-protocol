@@ -11,10 +11,10 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Authorization } from '../../common/config/params-decorators';
 import {
-  OraclesRegistrationResponse,
-  WorkerRegistrationCommand,
-  WorkerRegistrationDto,
-  WorkerRegistrationResponse,
+  RegistrationInExchangeOracleResponse,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleDto,
+  RegistrationInExchangeOraclesResponse,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from './model/worker-registration.model';
@@ -59,30 +59,32 @@ export class WorkerController {
   }
 
   @ApiBearerAuth()
-  @Post('/registration')
-  @ApiOperation({ summary: 'Register a worker in Exchange Oracle' })
+  @Post('/exchange-oracle-registration')
+  @ApiOperation({ summary: 'Registers a worker in Exchange Oracle' })
   @UsePipes(new ValidationPipe())
-  public workerRegistration(
-    @Body() workerRegistrationDto: WorkerRegistrationDto,
+  public createRegistrationInExchangeOracle(
+    @Body() registrationInExchangeOracleDto: RegistrationInExchangeOracleDto,
     @Authorization() token: string,
-  ): Promise<WorkerRegistrationResponse> {
-    const workerRegistrationCommand = this.mapper.map(
-      workerRegistrationDto,
-      WorkerRegistrationDto,
-      WorkerRegistrationCommand,
+  ): Promise<RegistrationInExchangeOracleResponse> {
+    const registrationInExchangeOracle = this.mapper.map(
+      registrationInExchangeOracleDto,
+      RegistrationInExchangeOracleDto,
+      RegistrationInExchangeOracleCommand,
     );
-    workerRegistrationCommand.token = token;
+    registrationInExchangeOracle.token = token;
 
-    return this.service.workerRegistration(workerRegistrationCommand);
+    return this.service.registrationInExchangeOracle(
+      registrationInExchangeOracle,
+    );
   }
 
   @ApiBearerAuth()
-  @Get('/registration')
-  @ApiOperation({ summary: 'Retrieve oracles registered by the worker' })
+  @Get('/exchange-oracle-registration')
+  @ApiOperation({ summary: 'Retrieves oracles registered by the worker' })
   @UsePipes(new ValidationPipe())
-  public getRegisteredOracles(
+  public getRegistrationInExchangeOracles(
     @Authorization() token: string,
-  ): Promise<OraclesRegistrationResponse> {
-    return this.service.getRegisteredOracles(token);
+  ): Promise<RegistrationInExchangeOraclesResponse> {
+    return this.service.getRegistrationInExchangeOracles(token);
   }
 }

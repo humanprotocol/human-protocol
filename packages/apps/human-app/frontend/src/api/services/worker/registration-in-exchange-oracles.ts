@@ -6,7 +6,7 @@ import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
-export const registrationDtoSchema = z.object({
+export const registrationInExchangeOracleDtoSchema = z.object({
   oracle_address: z
     .string()
     .refine(
@@ -16,23 +16,27 @@ export const registrationDtoSchema = z.object({
   h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
 });
 
-export type RegistrationDto = z.infer<typeof registrationDtoSchema>;
+export type RegistrationInExchangeOracleDto = z.infer<
+  typeof registrationInExchangeOracleDtoSchema
+>;
 
-const UserRegistrationSuccessResponseSchema = z.unknown();
+const RegistrationInExchangeOracleSuccessResponseSchema = z.unknown();
 
-function userRegistrationMutationFn(data: RegistrationDto) {
-  return apiClient(apiPaths.worker.userRegistration.path, {
+function registrationInExchangeOracleMutationFn(
+  data: RegistrationInExchangeOracleDto
+) {
+  return apiClient(apiPaths.worker.registrationInExchangeOracle.path, {
     authenticated: true,
-    successSchema: UserRegistrationSuccessResponseSchema,
+    successSchema: RegistrationInExchangeOracleSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });
 }
 
-export function useUserRegistrationMutation() {
+export function useExchangeOracleRegistrationMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: userRegistrationMutationFn,
+    mutationFn: registrationInExchangeOracleMutationFn,
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },
