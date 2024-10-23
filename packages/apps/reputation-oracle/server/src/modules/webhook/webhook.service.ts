@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { SendWebhookDto, WebhookDto } from './webhook.dto';
+import { CreateWebhookDto, SendWebhookDto, WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
-import { WebhookStatus } from '../../common/enums';
+import { EventType, WebhookStatus, WebhookType } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
@@ -22,6 +22,27 @@ export class WebhookService {
     public readonly serverConfigService: ServerConfigService,
     public readonly web3ConfigService: Web3ConfigService,
   ) {}
+
+  /**
+   * Creates an incoming webhook based on the provided DTO (data transfer object).
+   *
+   * @param {CreateWebhookDto} dto - The data transfer object containing event type and other webhook details.
+   * @returns {Promise<void>} - Resolves to void if the webhook creation is successful.
+   * @throws {ControlledError} - Throws an error if the event type is not 'JOB_COMPLETED'.
+   */
+  public async createIncomingWebhook(dto: CreateWebhookDto): Promise<void> {
+    if (dto.eventType !== EventType.JOB_COMPLETED) {
+      throw new ControlledError(
+        ErrorWebhook.InvalidEventType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.createWebhook({
+      ...dto,
+      type: WebhookType.IN,
+    });
+  }
 
   /**
    * Creates a new webhook using the provided data transfer object (DTO).

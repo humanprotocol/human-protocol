@@ -12,6 +12,10 @@ export class CreateWebhookDto {
   @IsString()
   public escrowAddress: string;
 
+  @ApiProperty({ name: 'event_type' })
+  @IsEnum(EventType)
+  public eventType: EventType;
+
   @ApiPropertyOptional({ name: 'event_data' })
   @IsOptional()
   @IsObject()
@@ -19,9 +23,6 @@ export class CreateWebhookDto {
 }
 
 export class WebhookDto extends CreateWebhookDto {
-  @IsEnum(EventType)
-  public eventType: EventType;
-
   @IsEnum(WebhookType)
   public type: WebhookType;
 

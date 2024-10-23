@@ -19,7 +19,7 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
 import { WebhookEntity } from './webhook.entity';
-import { SendWebhookDto, WebhookDto } from './webhook.dto';
+import { CreateWebhookDto, SendWebhookDto, WebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
@@ -94,6 +94,80 @@ describe('WebhookService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('createIncomingWebhook', () => {
+    const inWebhookEntity: Partial<WebhookEntity> = {
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      type: WebhookType.IN,
+      status: WebhookStatus.PENDING,
+      waitUntil: new Date(),
+      retriesCount: 0,
+    };
+
+    const outWebhookEntity: Partial<WebhookEntity> = {
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      type: WebhookType.OUT,
+      callbackUrl: MOCK_WEBHOOK_URL,
+      status: WebhookStatus.PENDING,
+      waitUntil: new Date(),
+      retriesCount: 0,
+    };
+
+    it('should successfully create incoming webhook with valid DTO', async () => {
+      const validDto: CreateWebhookDto = {
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        eventType: EventType.JOB_COMPLETED,
+      };
+
+      jest
+        .spyOn(webhookRepository, 'createUnique')
+        .mockResolvedValue(inWebhookEntity as WebhookEntity);
+
+      await webhookService.createIncomingWebhook(validDto);
+
+      expect(webhookRepository.createUnique).toHaveBeenCalledWith(
+        expect.any(Object),
+      );
+    });
+
+    it('should throw NotFoundException if webhook entity not created', async () => {
+      const validDto: CreateWebhookDto = {
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        eventType: EventType.JOB_COMPLETED,
+      };
+
+      jest
+        .spyOn(webhookRepository as any, 'createUnique')
+        .mockResolvedValue(null);
+
+      await expect(
+        webhookService.createIncomingWebhook(validDto),
+      ).rejects.toThrow(
+        new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw BadRequestException with invalid event type', async () => {
+      const invalidDto: CreateWebhookDto = {
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        eventType: 'JOB_FAILED' as EventType,
+      };
+
+      await expect(
+        webhookService.createIncomingWebhook(invalidDto),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorWebhook.InvalidEventType,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
   });
 
   describe('createWebhook', () => {

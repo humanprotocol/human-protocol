@@ -52,11 +52,7 @@ export class WebhookController {
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: CreateWebhookDto,
   ): Promise<void> {
-    await this.webhookService.createWebhook({
-      ...data,
-      eventType: EventType.JOB_COMPLETED,
-      type: WebhookType.IN,
-    });
+    await this.webhookService.createIncomingWebhook(data);
     return;
   }
 }
