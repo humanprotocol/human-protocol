@@ -1,7 +1,7 @@
 import { WorkerController } from '../worker.controller';
 import { WorkerService } from '../worker.service';
 import {
-  RegisterWorkerDto,
+  WorkerRegistrationDto,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from '../model/worker-registration.model';
@@ -75,15 +75,17 @@ describe('WorkerController', () => {
 
   describe('register', () => {
     it('should service a user register method with proper fields set', async () => {
-      const dto: RegisterWorkerDto = {
+      const dto: WorkerRegistrationDto = {
         oracle_address: '0x34df642',
+        h_captcha_token: 'h_captcha_token',
       };
-      await controller.registerWorker(dto, workerToken);
+      await controller.workerRegistration(dto, workerToken);
       const expectedCommand = {
         oracleAddress: dto.oracle_address,
+        hCaptchaToken: dto.h_captcha_token,
         token: workerToken,
       };
-      expect(workerService.registerWorker).toHaveBeenCalledWith(
+      expect(workerService.workerRegistration).toHaveBeenCalledWith(
         expectedCommand,
       );
     });

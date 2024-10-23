@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { UserCreateDto } from './user.dto';
+import { OracleRegistrationDto, UserCreateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import {
   KycStatus,
@@ -30,6 +30,7 @@ import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.servi
 import { HttpService } from '@nestjs/axios';
 import { ControlledError } from '../../common/errors/controlled';
 import {
+  ErrorAuth,
   ErrorOperator,
   ErrorSignature,
   ErrorUser,
@@ -818,16 +819,97 @@ describe('UserService', () => {
         email: 'test@example.com',
       };
 
-      const oracleAddress = '0xOracleAddress';
+      const oracleRegistration: OracleRegistrationDto = {
+        oracleAddress: '0xOracleAddress',
+        hCaptchaToken: 'hcaptcha-token',
+      };
 
-      await userService.registerOracle(userEntity as UserEntity, oracleAddress);
+      const siteKeyMock: DeepPartial<SiteKeyEntity> = {
+        siteKey: oracleRegistration.oracleAddress,
+        type: SiteKeyType.REGISTRATION,
+        user: userEntity,
+      };
+      jest
+        .spyOn(hcaptchaService, 'verifyToken')
+        .mockResolvedValueOnce({ success: true });
+      jest
+        .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(siteKeyRepository, 'createUnique')
+        .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);
+
+      const result = await userService.registerOracle(
+        userEntity as UserEntity,
+        oracleRegistration,
+      );
 
       expect(siteKeyRepository.createUnique).toHaveBeenCalledWith(
         expect.objectContaining({
-          siteKey: oracleAddress,
+          siteKey: oracleRegistration.oracleAddress,
           type: SiteKeyType.REGISTRATION,
           user: userEntity,
         }),
+      );
+
+      expect(result).toEqual(siteKeyMock);
+    });
+
+    it('should not register a new oracle for the user and return the existing one', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const oracleRegistration: OracleRegistrationDto = {
+        oracleAddress: '0xOracleAddress',
+        hCaptchaToken: 'hcaptcha-token',
+      };
+
+      const siteKeyMock: DeepPartial<SiteKeyEntity> = {
+        siteKey: oracleRegistration.oracleAddress,
+        type: SiteKeyType.REGISTRATION,
+        user: userEntity,
+      };
+      jest
+        .spyOn(hcaptchaService, 'verifyToken')
+        .mockResolvedValueOnce({ success: true });
+      jest
+        .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
+        .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);
+
+      const result = await userService.registerOracle(
+        userEntity as UserEntity,
+        oracleRegistration,
+      );
+
+      expect(siteKeyRepository.createUnique).not.toHaveBeenCalled();
+
+      expect(result).toEqual(siteKeyMock);
+    });
+
+    it('should fail if token is invalid', async () => {
+      const userEntity: DeepPartial<UserEntity> = {
+        id: 1,
+        email: 'test@example.com',
+      };
+
+      const oracleRegistration: OracleRegistrationDto = {
+        oracleAddress: '0xOracleAddress',
+        hCaptchaToken: 'hcaptcha-token',
+      };
+
+      jest
+        .spyOn(hcaptchaService, 'verifyToken')
+        .mockResolvedValueOnce({ success: false });
+
+      await expect(
+        userService.registerOracle(
+          userEntity as UserEntity,
+          oracleRegistration,
+        ),
+      ).rejects.toThrow(
+        new ControlledError(ErrorAuth.InvalidToken, HttpStatus.UNAUTHORIZED),
       );
     });
   });

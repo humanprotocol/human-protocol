@@ -4,9 +4,10 @@ import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
-  RegisterWorkerCommand,
-  RegisterWorkerData,
-  RegisterWorkerResponse,
+  OraclesRegistrationResponse,
+  WorkerRegistrationCommand,
+  WorkerRegistrationData,
+  WorkerRegistrationResponse,
   SignupWorkerCommand,
   SignupWorkerData,
 } from '../../modules/user-worker/model/worker-registration.model';
@@ -173,18 +174,18 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
   }
 
-  async sendWorkerRegistration(command: RegisterWorkerCommand) {
+  async sendWorkerRegistration(command: WorkerRegistrationCommand) {
     const data = this.mapper.map(
       command,
-      RegisterWorkerCommand,
-      RegisterWorkerData,
+      WorkerRegistrationCommand,
+      WorkerRegistrationData,
     );
     const options = this.getEndpointOptions(
       ReputationOracleEndpoints.WORKER_REGISTRATION,
       data,
       command.token,
     );
-    return this.handleRequestToReputationOracle<RegisterWorkerResponse>(
+    return this.handleRequestToReputationOracle<WorkerRegistrationResponse>(
       options,
     );
   }
@@ -333,5 +334,18 @@ export class ReputationOracleGateway {
       token,
     );
     return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async getRegisteredOracles(
+    token: string,
+  ): Promise<OraclesRegistrationResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.GET_REGISTERED_ORACLES,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<OraclesRegistrationResponse>(
+      options,
+    );
   }
 }

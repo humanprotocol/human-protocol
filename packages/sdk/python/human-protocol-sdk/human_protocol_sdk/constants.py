@@ -163,7 +163,7 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmVfssyiU81KwrTVL1QRjj4LPpTkA1ZmexHTRVg51J5YxP"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmbwio5UnvDn5GQRJ5kLJfK27fqHK9nkEh4YXXYKWCc9rH"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
@@ -368,3 +368,4 @@ class KVStoreKeys(Enum):
     url = "url"
     job_types = "job_types"
     registration_needed = "registration_needed"
+    registration_instructions = "registration_instructions"

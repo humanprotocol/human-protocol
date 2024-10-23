@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { t } from 'i18next';
 import type {
   BottomMenuItem,

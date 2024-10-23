@@ -12,7 +12,7 @@ import { classes } from '@automapper/classes';
 import { ReputationOracleProfile } from '../reputation-oracle.mapper.profile';
 import { gatewayConfigServiceMock } from '../../../common/config/spec/gateway-config-service.mock';
 import {
-  RegisterWorkerCommand,
+  WorkerRegistrationCommand,
   SignupWorkerCommand,
 } from '../../../modules/user-worker/model/worker-registration.model';
 import { SignupOperatorCommand } from '../../../modules/user-operator/model/operator-registration.model';
@@ -178,7 +178,7 @@ describe('ReputationOracleGateway', () => {
   });
 
   describe('sendWorkerRegistration', () => {
-    const command = new RegisterWorkerCommand('0x34df642');
+    const command = new WorkerRegistrationCommand('0x34df642', 'hcaptchaToken');
     const expectedData = {
       oracle_address: '0x34df642',
     };
@@ -209,7 +209,7 @@ describe('ReputationOracleGateway', () => {
           ),
         );
 
-      const command = new RegisterWorkerCommand('');
+      const command = new WorkerRegistrationCommand('', 'hcaptchaToken');
       await expect(service.sendWorkerRegistration(command)).rejects.toThrow(
         new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
       );
