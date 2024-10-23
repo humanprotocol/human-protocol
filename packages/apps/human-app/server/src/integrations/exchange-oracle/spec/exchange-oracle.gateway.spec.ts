@@ -33,7 +33,7 @@ import { EscrowUtilsGateway } from '../../escrow/escrow-utils-gateway.service';
 import { ResignJobData } from '../../../modules/job-assignment/model/job-assignment.model';
 import { JobsDiscoveryParamsData } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { AxiosResponse } from 'axios';
-import { RegisterWorkerData } from '../../../modules/user-worker/model/worker-registration.model';
+import { WorkerRegistrationData } from '../../../modules/user-worker/model/worker-registration.model';
 import {
   registerWorkerCommandFixture,
   registerWorkerDataFixture,
@@ -264,14 +264,15 @@ describe('ExchangeOracleApiGateway', () => {
         } as AxiosResponse),
       );
       const command = registerWorkerCommandFixture;
-      const expectedMappedData: RegisterWorkerData = registerWorkerDataFixture;
+      const expectedMappedData: WorkerRegistrationData =
+        registerWorkerDataFixture;
       nock(workerRegisterUrl)
-        .post(`/register`)
+        .post(`/registration`)
         .reply(200, responseWorkerFixture);
-      await gateway.registerWorker(command);
+      await gateway.workerRegistration(command);
       expect(httpService.request).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: EXCHANGE_ORACLE_URL + '/register',
+          url: EXCHANGE_ORACLE_URL + '/registration',
           method: HttpMethod.POST,
           data: expectedMappedData,
           headers: {

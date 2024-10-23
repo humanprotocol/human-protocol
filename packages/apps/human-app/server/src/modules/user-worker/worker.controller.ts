@@ -11,10 +11,10 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Authorization } from '../../common/config/params-decorators';
 import {
-  RegisteredOraclesResponse,
-  RegisterWorkerCommand,
-  RegisterWorkerDto,
-  RegisterWorkerResponse,
+  OraclesRegistrationResponse,
+  WorkerRegistrationCommand,
+  WorkerRegistrationDto,
+  WorkerRegistrationResponse,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from './model/worker-registration.model';
@@ -59,30 +59,30 @@ export class WorkerController {
   }
 
   @ApiBearerAuth()
-  @Post('/register')
-  @ApiOperation({ summary: 'Worker registration completed' })
+  @Post('/registration')
+  @ApiOperation({ summary: 'Register a worker in Exchange Oracle' })
   @UsePipes(new ValidationPipe())
-  public registerWorker(
-    @Body() registerWorkerDto: RegisterWorkerDto,
+  public workerRegistration(
+    @Body() workerRegistrationDto: WorkerRegistrationDto,
     @Authorization() token: string,
-  ): Promise<RegisterWorkerResponse> {
-    const registerWorkerCommand = this.mapper.map(
-      registerWorkerDto,
-      RegisterWorkerDto,
-      RegisterWorkerCommand,
+  ): Promise<WorkerRegistrationResponse> {
+    const workerRegistrationCommand = this.mapper.map(
+      workerRegistrationDto,
+      WorkerRegistrationDto,
+      WorkerRegistrationCommand,
     );
-    registerWorkerCommand.token = token;
+    workerRegistrationCommand.token = token;
 
-    return this.service.registerWorker(registerWorkerCommand);
+    return this.service.workerRegistration(workerRegistrationCommand);
   }
 
   @ApiBearerAuth()
-  @Get('/register')
-  @ApiOperation({ summary: 'Get registered oracles' })
+  @Get('/registration')
+  @ApiOperation({ summary: 'Retrieve oracles registered by the worker' })
   @UsePipes(new ValidationPipe())
   public getRegisteredOracles(
     @Authorization() token: string,
-  ): Promise<RegisteredOraclesResponse> {
+  ): Promise<OraclesRegistrationResponse> {
     return this.service.getRegisteredOracles(token);
   }
 }

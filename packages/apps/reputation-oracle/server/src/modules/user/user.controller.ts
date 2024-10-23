@@ -22,7 +22,7 @@ import {
   SignatureBodyDto,
   RegisterLabelerResponseDto,
   EnableOperatorDto,
-  RegisterOracleDto,
+  OracleRegistrationDto,
   RegisteredOraclesDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
@@ -171,13 +171,14 @@ export class UserController {
   @HttpCode(200)
   @ApiOperation({
     summary: 'Register Oracle',
-    description: 'Endpoint to save a registration process completed.',
+    description:
+      'Initiates the registration process for an oracle with the provided details.',
   })
-  @ApiBody({ type: RegisterOracleDto })
+  @ApiBody({ type: OracleRegistrationDto })
   @ApiResponse({
     status: 200,
     description: 'Oracle registered successfully',
-    type: RegisterOracleDto,
+    type: OracleRegistrationDto,
   })
   @ApiResponse({
     status: 400,
@@ -189,18 +190,18 @@ export class UserController {
   })
   public async registerOracle(
     @Req() request: RequestWithUser,
-    @Body() data: RegisterOracleDto,
-  ): Promise<RegisterOracleDto> {
-    await this.userService.registerOracle(request.user, data.oracleAddress);
+    @Body() data: OracleRegistrationDto,
+  ): Promise<OracleRegistrationDto> {
+    await this.userService.registerOracle(request.user, data);
     return data;
   }
 
   @Get('/registration')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get Registered Oracles',
+    summary: 'Retrieve oracles registered by the user',
     description:
-      'Fetch the list of exchange oracles where the user completed a registration process.',
+      'Fetches the list of oracles where the user has completed the registration process.',
   })
   @ApiResponse({
     status: 200,

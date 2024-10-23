@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt.auth';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UserController {
-  @Post('register')
+  @Post('registration')
   @ApiOperation({
     summary: 'Register a user in Exchange Oracle',
     description: 'Endpoint to register a user in Exchange Oracle.',
@@ -25,7 +25,7 @@ export class UserController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  async registerUser(): Promise<void> {
+  async userRegistration(): Promise<void> {
     return;
   }
 }
