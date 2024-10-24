@@ -67,7 +67,9 @@ export function OraclesTableMobile({
               <EvmAddress address={d.address} />
             </ListItem>
             <ListItem label={t('worker.oraclesTable.annotationTool')}>
-              <Typography variant="body2">{d.url ?? ''}</Typography>
+              <Typography color={colorPalette.primary.dark} variant="body2">
+                {d.url ?? ''}
+              </Typography>
             </ListItem>
             <ListItem label={t('worker.oraclesTable.jobTypes')}>
               <Chips
