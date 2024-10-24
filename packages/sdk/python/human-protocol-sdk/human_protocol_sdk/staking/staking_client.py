@@ -82,7 +82,7 @@ class StakingClientError(Exception):
 
 class StakingClient:
     """
-    A class used to manage staking, and allocation on the HUMAN network.
+    A class used to manage staking on the HUMAN network.
     """
 
     def __init__(self, w3: Web3):

@@ -350,7 +350,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * @param {string} slasher Wallet address from who requested the slash
    * @param {string} staker Wallet address from who is going to be slashed
-   * @param {string} escrowAddress Address of the escrow which allocation will be slashed
+   * @param {string} escrowAddress Address of the escrow that the slash is made
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @param {bigint} amount Amount in WEI of tokens to unstake.
    * @returns Returns void if successful. Throws error if any.

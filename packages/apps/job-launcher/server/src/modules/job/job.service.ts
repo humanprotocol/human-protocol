@@ -5,7 +5,6 @@ import {
   EscrowStatus,
   EscrowUtils,
   NETWORKS,
-  StakingClient,
   StorageParams,
   Encryption,
   KVStoreKeys,
@@ -1476,13 +1475,10 @@ export class JobService {
     const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
-    let escrow, allocation;
+    let escrow;
 
     if (escrowAddress) {
-      const stakingClient = await StakingClient.build(signer);
-
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
-      allocation = await stakingClient.getAllocation(escrowAddress);
     }
 
     let manifestData = await this.storageService.download(manifestUrl);
@@ -1575,11 +1571,6 @@ export class JobService {
           failedReason: jobEntity.failedReason,
         },
         manifest: manifestDetails,
-        staking: {
-          staker: ethers.ZeroAddress,
-          allocated: 0,
-          slashed: 0,
-        },
       };
     }
 
@@ -1594,11 +1585,6 @@ export class JobService {
         failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
-      staking: {
-        staker: allocation?.staker as string,
-        allocated: Number(ethers.formatEther(allocation?.tokens || 0)),
-        slashed: 0, // TODO: Retrieve slash tokens
-      },
     };
   }
 

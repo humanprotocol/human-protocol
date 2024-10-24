@@ -259,7 +259,7 @@ describe('Staking', function () {
       expect(event?.escrow).to.not.be.null;
     });
 
-    describe('Withdrawal without allocation', function () {
+    describe('Withdrawal without tokens available', function () {
       describe('Validations', function () {
         it('Should revert with the right error if has no available tokens for withdrawal', async function () {
           await expect(staking.connect(operator).withdraw()).to.be.revertedWith(
