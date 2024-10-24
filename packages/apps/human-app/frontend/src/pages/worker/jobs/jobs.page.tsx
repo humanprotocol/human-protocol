@@ -102,7 +102,7 @@ export function JobsPage() {
                   padding: '8px 42px',
                   backgroundColor: isDarkMode ? '#CDC7FF14' : '#1406B20A',
                   display: 'inline-block',
-                  borderRadius: '20px',
+                  borderRadius: '4px',
                 }}
               >
                 <Typography variant="h6">{oracleName}</Typography>
