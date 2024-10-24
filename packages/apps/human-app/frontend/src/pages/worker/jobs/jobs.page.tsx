@@ -15,7 +15,6 @@ import { PageCardLoader } from '@/components/ui/page-card';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { useGetOraclesNotifications } from '@/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/components/ui/no-records';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { AvailableJobsTableMobile } from './components/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
 import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
@@ -31,7 +30,6 @@ export function JobsPage() {
   const { isDarkMode } = useColorMode();
   const { data, isError, isPending, error } = useGetOracles();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
@@ -52,10 +50,6 @@ export function JobsPage() {
       setSelectedTab('myJobs');
     }
   };
-
-  useEffect(() => {
-    setGrayBackground();
-  }, [setGrayBackground]);
 
   useEffect(() => {
     if (error) {
