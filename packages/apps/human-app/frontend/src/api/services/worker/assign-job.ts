@@ -28,11 +28,11 @@ export function useAssignJobMutation(callbacks?: {
     mutationFn: assignJob,
     onSuccess: async () => {
       await queryClient.invalidateQueries();
-      await callbacks?.onSuccess();
+      void callbacks?.onSuccess();
     },
     onError: async (error) => {
       await queryClient.invalidateQueries();
-      await callbacks?.onError(error);
+      void callbacks?.onError(error);
     },
   });
 }
