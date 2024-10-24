@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useGetKeys } from '@/api/services/operator/get-keys';
 import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
@@ -16,7 +15,6 @@ import { useColorMode } from '@/hooks/use-color-mode';
 
 export function OperatorProfilePage() {
   const { colorPalette } = useColorMode();
-  const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
   const { user } = useWeb3AuthenticatedUser();
@@ -36,10 +34,6 @@ export function OperatorProfilePage() {
   } = useGetOperatorStats();
 
   const isOperatorActive = user.status === 'ACTIVE';
-
-  useEffect(() => {
-    setGrayBackground();
-  }, [setGrayBackground]);
 
   useEffect(() => {
     if (keysData?.url) {

@@ -22,8 +22,9 @@ import {
   SignatureBodyDto,
   RegisterLabelerResponseDto,
   EnableOperatorDto,
-  OracleRegistrationDto,
-  RegisteredOraclesDto,
+  RegistrationInExchangeOracleDto,
+  RegistrationInExchangeOraclesDto,
+  RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
@@ -167,18 +168,18 @@ export class UserController {
     return await this.userService.prepareSignatureBody(data.type, data.address);
   }
 
-  @Post('/registration')
+  @Post('/exchange-oracle-registration')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Register Oracle',
+    summary: 'Notifies registration in Exchange Oracle completed',
     description:
-      'Initiates the registration process for an oracle with the provided details.',
+      'Notifies that the registration process in a Exchange Oracle has been completed by the user.',
   })
-  @ApiBody({ type: OracleRegistrationDto })
+  @ApiBody({ type: RegistrationInExchangeOracleDto })
   @ApiResponse({
     status: 200,
     description: 'Oracle registered successfully',
-    type: OracleRegistrationDto,
+    type: RegistrationInExchangeOracleDto,
   })
   @ApiResponse({
     status: 400,
@@ -188,36 +189,36 @@ export class UserController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async registerOracle(
+  public async registrationInExchangeOracle(
     @Req() request: RequestWithUser,
-    @Body() data: OracleRegistrationDto,
-  ): Promise<OracleRegistrationDto> {
-    await this.userService.registerOracle(request.user, data);
-    return data;
+    @Body() data: RegistrationInExchangeOracleDto,
+  ): Promise<RegistrationInExchangeOracleResponseDto> {
+    await this.userService.registrationInExchangeOracle(request.user, data);
+
+    return { oracleAddress: data.oracleAddress };
   }
 
-  @Get('/registration')
+  @Get('/exchange-oracle-registration')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Retrieve oracles registered by the user',
+    summary: 'Retrieves Exchange Oracles the user is registered in',
     description:
-      'Fetches the list of oracles where the user has completed the registration process.',
+      'Fetches the list of Exchange Oracles where the user has completed the registration process.',
   })
   @ApiResponse({
     status: 200,
     description: 'List of registered oracles retrieved successfully',
-    type: RegisteredOraclesDto,
+    type: RegistrationInExchangeOraclesDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async getRegisteredOracles(
+  public async getRegistrationInExchangeOracles(
     @Req() request: RequestWithUser,
-  ): Promise<RegisteredOraclesDto> {
-    const oracleAddresses = await this.userService.getRegisteredOracles(
-      request.user,
-    );
+  ): Promise<RegistrationInExchangeOraclesDto> {
+    const oracleAddresses =
+      await this.userService.getRegistrationInExchangeOracles(request.user);
     return { oracleAddresses };
   }
 }

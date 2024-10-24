@@ -22,8 +22,8 @@ import {
   JobsDiscoveryParamsData,
 } from '../../modules/jobs-discovery/model/jobs-discovery.model';
 import {
-  WorkerRegistrationCommand,
-  WorkerRegistrationData,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleData,
 } from '../../modules/user-worker/model/worker-registration.model';
 
 @Injectable()
@@ -94,8 +94,8 @@ export class ExchangeOracleProfile extends AutomapperProfile {
       );
       createMap(
         mapper,
-        WorkerRegistrationCommand,
-        WorkerRegistrationData,
+        RegistrationInExchangeOracleCommand,
+        RegistrationInExchangeOracleData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { OracleRegistrationDto, UserCreateDto } from './user.dto';
+import { RegistrationInExchangeOracleDto, UserCreateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import {
   KycStatus,
@@ -812,14 +812,14 @@ describe('UserService', () => {
     });
   });
 
-  describe('registerOracle', () => {
-    it('should register a new oracle for the user', async () => {
+  describe('registrationInExchangeOracle', () => {
+    it('should register a new registration in a Exchange Oracle for the user', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: 'test@example.com',
       };
 
-      const oracleRegistration: OracleRegistrationDto = {
+      const oracleRegistration: RegistrationInExchangeOracleDto = {
         oracleAddress: '0xOracleAddress',
         hCaptchaToken: 'hcaptcha-token',
       };
@@ -839,7 +839,7 @@ describe('UserService', () => {
         .spyOn(siteKeyRepository, 'createUnique')
         .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);
 
-      const result = await userService.registerOracle(
+      const result = await userService.registrationInExchangeOracle(
         userEntity as UserEntity,
         oracleRegistration,
       );
@@ -861,7 +861,7 @@ describe('UserService', () => {
         email: 'test@example.com',
       };
 
-      const oracleRegistration: OracleRegistrationDto = {
+      const oracleRegistration: RegistrationInExchangeOracleDto = {
         oracleAddress: '0xOracleAddress',
         hCaptchaToken: 'hcaptcha-token',
       };
@@ -878,7 +878,7 @@ describe('UserService', () => {
         .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
         .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);
 
-      const result = await userService.registerOracle(
+      const result = await userService.registrationInExchangeOracle(
         userEntity as UserEntity,
         oracleRegistration,
       );
@@ -894,7 +894,7 @@ describe('UserService', () => {
         email: 'test@example.com',
       };
 
-      const oracleRegistration: OracleRegistrationDto = {
+      const oracleRegistration: RegistrationInExchangeOracleDto = {
         oracleAddress: '0xOracleAddress',
         hCaptchaToken: 'hcaptcha-token',
       };
@@ -904,7 +904,7 @@ describe('UserService', () => {
         .mockResolvedValueOnce({ success: false });
 
       await expect(
-        userService.registerOracle(
+        userService.registrationInExchangeOracle(
           userEntity as UserEntity,
           oracleRegistration,
         ),
@@ -930,7 +930,7 @@ describe('UserService', () => {
         .spyOn(siteKeyRepository, 'findByUserAndType')
         .mockResolvedValue(siteKeys);
 
-      const result = await userService.getRegisteredOracles(
+      const result = await userService.getRegistrationInExchangeOracles(
         userEntity as UserEntity,
       );
 

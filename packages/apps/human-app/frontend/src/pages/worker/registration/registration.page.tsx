@@ -7,10 +7,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormCaptcha } from '@/components/h-captcha';
 import { Button } from '@/components/ui/button';
 import {
-  type RegistrationDto,
-  registrationDtoSchema,
-  useUserRegistrationMutation,
-} from '@/api/services/worker/user-registration';
+  type RegistrationInExchangeOracleDto,
+  registrationInExchangeOracleDtoSchema,
+  useExchangeOracleRegistrationMutation,
+} from '@/api/services/worker/registration-in-exchange-oracles';
 import { useRegisteredOracles } from '@/contexts/registered-oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
 import { routerPaths } from '@/router/router-paths';
@@ -27,27 +27,29 @@ export function RegistrationPage() {
 
   const { registeredOracles, setRegisteredOracles } = useRegisteredOracles();
 
-  const methods = useForm<RegistrationDto>({
+  const methods = useForm<RegistrationInExchangeOracleDto>({
     defaultValues: {
       // eslint-disable-next-line camelcase
       oracle_address: oracleAddress,
       // eslint-disable-next-line camelcase
       h_captcha_token: '',
     },
-    resolver: zodResolver(registrationDtoSchema),
+    resolver: zodResolver(registrationInExchangeOracleDtoSchema),
   });
 
   const {
     mutate: userRegistrationMutate,
-    isPending: isUserRegistrationPending,
-    error: userRegistrationError,
-  } = useUserRegistrationMutation();
+    isPending: isRegistrationInExchangeOraclePending,
+    error: registrationInExchangeOracleError,
+  } = useExchangeOracleRegistrationMutation();
 
   const handleLinkClick = () => {
     setHasClickedRegistrationLink(true);
   };
 
-  const handleRegistrationComplete = (data: RegistrationDto) => {
+  const handleRegistrationComplete = (
+    data: RegistrationInExchangeOracleDto
+  ) => {
     userRegistrationMutate(data, {
       onSuccess(_data) {
         if (oracleAddress !== undefined) {
@@ -99,7 +101,9 @@ export function RegistrationPage() {
           }}
         >
           <Stack maxWidth="350px" spacing={2}>
-            <Box>{t('worker.registration.requiredMessage')}</Box>
+            <Box>
+              {t('worker.registrationInExchangeOracle.requiredMessage')}
+            </Box>
             <Link
               href={oracleData?.registrationInstructions ?? ''}
               onClick={handleLinkClick}
@@ -109,7 +113,9 @@ export function RegistrationPage() {
             >
               {oracleData?.registrationInstructions}
             </Link>
-            <Box>{t('worker.registration.completeMessage')}</Box>
+            <Box>
+              {t('worker.registrationInExchangeOracle.completeMessage')}
+            </Box>
             <FormProvider {...methods}>
               <form
                 onSubmit={(event) =>
@@ -118,17 +124,17 @@ export function RegistrationPage() {
               >
                 <Stack alignItems="center" spacing={2}>
                   <FormCaptcha
-                    error={userRegistrationError}
+                    error={registrationInExchangeOracleError}
                     name="h_captcha_token"
                   />
                   <Button
                     disabled={!hasClickedRegistrationLink}
                     fullWidth
-                    loading={isUserRegistrationPending}
+                    loading={isRegistrationInExchangeOraclePending}
                     type="submit"
                     variant="contained"
                   >
-                    {t('worker.registration.completeButton')}
+                    {t('worker.registrationInExchangeOracle.completeButton')}
                   </Button>
                 </Stack>
               </form>
