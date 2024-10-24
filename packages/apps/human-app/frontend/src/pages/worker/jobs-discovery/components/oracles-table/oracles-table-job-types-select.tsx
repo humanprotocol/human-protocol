@@ -27,7 +27,7 @@ export function OraclesTableJobTypesSelect() {
       <FormProvider {...methods}>
         <form>
           <MultiSelect
-            label="Job types"
+            label="Task Types"
             name="jobType"
             options={JOB_TYPES.map((jobType) => ({
               label: t(`jobTypeLabels.${jobType}`),
