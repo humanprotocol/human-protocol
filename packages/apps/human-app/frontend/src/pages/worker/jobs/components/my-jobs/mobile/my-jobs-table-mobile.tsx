@@ -24,6 +24,7 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { Chip } from '@/components/ui/chip';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -110,7 +111,6 @@ export function MyJobsTableMobile({
               sx={{
                 px: '16px',
                 py: '32px',
-                backgroundColor: colorPalette.white,
                 marginBottom: '20px',
                 boxShadow: 'none',
                 borderRadius: '20px',
@@ -145,7 +145,17 @@ export function MyJobsTableMobile({
                       </Typography>
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>
-                      <Chip label={d.status} />
+                      <Chip
+                        backgroundColor={colorPalette.secondary.main}
+                        label={
+                          <Typography
+                            color={lightModeColorPalette.white}
+                            variant="chip"
+                          >
+                            {d.status}
+                          </Typography>
+                        }
+                      />
                     </ListItem>
                     <ListItem label={t('worker.jobs.jobType')}>
                       <Chip
@@ -162,15 +172,27 @@ export function MyJobsTableMobile({
                     }}
                   >
                     {d.url ? (
-                      <TableButton
-                        component={Link}
-                        disabled={buttonDisabled}
-                        fullWidth
-                        target="_blank"
-                        to={d.url}
-                      >
-                        {t('worker.jobs.solve')}
-                      </TableButton>
+                      <>
+                        <TableButton
+                          component={Link}
+                          disabled={buttonDisabled}
+                          fullWidth
+                          target="_blank"
+                          to={d.url}
+                        >
+                          {t('worker.jobs.solve')}
+                        </TableButton>
+                        <RejectButton
+                          disabled={buttonDisabled}
+                          onClick={() => {
+                            if (buttonDisabled) return;
+                            rejectTaskMutation({
+                              oracle_address: oracle_address ?? '',
+                              assignment_id: d.assignment_id,
+                            });
+                          }}
+                        />
+                      </>
                     ) : null}
                     <RejectButton
                       disabled={buttonDisabled}
