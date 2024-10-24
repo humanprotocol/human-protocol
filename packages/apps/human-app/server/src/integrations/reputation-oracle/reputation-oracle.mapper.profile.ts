@@ -12,8 +12,8 @@ import {
   SignupOperatorData,
 } from '../../modules/user-operator/model/operator-registration.model';
 import {
-  WorkerRegistrationCommand,
-  WorkerRegistrationData,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleData,
   SignupWorkerCommand,
   SignupWorkerData,
 } from '../../modules/user-worker/model/worker-registration.model';
@@ -68,8 +68,8 @@ export class ReputationOracleProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(
         mapper,
-        WorkerRegistrationCommand,
-        WorkerRegistrationData,
+        RegistrationInExchangeOracleCommand,
+        RegistrationInExchangeOracleData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

@@ -114,12 +114,12 @@ export const protectedRoutes: {
         },
         {
           routerProps: {
-            path: `${routerPaths.worker.registration}/:address`,
+            path: `${routerPaths.worker.registrationInExchangeOracle}/:address`,
             element: <RegistrationPage />,
           },
           pageHeaderProps: {
             headerIcon: <HomepageWorkIcon />,
-            headerText: t('protectedPagesHeaders.registration'),
+            headerText: t('protectedPagesHeaders.registrationInExchangeOracle'),
           },
         },
       ]
