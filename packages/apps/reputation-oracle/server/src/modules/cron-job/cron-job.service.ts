@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 
 import { CronJobType } from '../../common/enums/cron-job';
 import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
@@ -6,13 +7,17 @@ import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { WebhookService } from '../webhook/webhook.service';
-import { EventType, WebhookStatus } from '../../common/enums/webhook';
+import {
+  EventType,
+  WebhookStatus,
+  WebhookType,
+} from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
-import { WebhookDto } from '../webhook/webhook.dto';
+import { EscrowClient, EscrowStatus, OperatorUtils } from '@human-protocol/sdk';
+import { SendWebhookDto, WebhookDto } from '../webhook/webhook.dto';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
 
@@ -101,8 +106,9 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
-      const webhookEntities = await this.webhookRepository.findByStatus(
+      const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PENDING,
+        WebhookType.IN,
       );
 
       for (const webhookEntity of webhookEntities) {
@@ -114,8 +120,15 @@ export class CronJobService {
             escrowAddress,
           );
         } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.webhookService.handleWebhookError(webhookEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error processing pending webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.webhookService.handleWebhookError(
+            webhookEntity,
+            failedReason,
+          );
           continue;
         }
         webhookEntity.status = WebhookStatus.PAID;
@@ -149,27 +162,33 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.ProcessPaidWebhook);
 
     try {
-      const webhookEntities = await this.webhookRepository.findByStatus(
+      const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PAID,
+        WebhookType.IN,
       );
 
       for (const webhookEntity of webhookEntities) {
         try {
           const { chainId, escrowAddress } = webhookEntity;
 
+          const signer = this.web3Service.getSigner(chainId);
+          const escrowClient = await EscrowClient.build(signer);
+
+          const escrowStatus = await escrowClient.getStatus(escrowAddress);
+          if (escrowStatus === EscrowStatus.Complete) {
+            continue;
+          }
+
           await this.reputationService.assessReputationScores(
             chainId,
             escrowAddress,
           );
 
-          const signer = this.web3Service.getSigner(chainId);
-          const escrowClient = await EscrowClient.build(signer);
-
           await escrowClient.complete(escrowAddress, {
             gasPrice: await this.web3Service.calculateGasPrice(chainId),
           });
 
-          const webhookUrls = [
+          const callbackUrls = [
             (
               await OperatorUtils.getLeader(
                 chainId,
@@ -190,24 +209,35 @@ export class CronJobService {
             //   )
             // ).webhookUrl,
           ];
-          const webhookBody: WebhookDto = {
-            chainId,
-            escrowAddress,
-            eventType: EventType.ESCROW_COMPLETED,
-          };
-          for (const webhookUrl of webhookUrls) {
-            if (!webhookUrl) {
+
+          for (const callbackUrl of callbackUrls) {
+            if (!callbackUrl) {
               throw new ControlledError(
-                ErrorWebhook.UrlNotFound,
+                ErrorWebhook.CallbackUrlNotFound,
                 HttpStatus.NOT_FOUND,
               );
             }
 
-            await this.webhookService.sendWebhook(webhookUrl, webhookBody);
+            const dto: WebhookDto = {
+              chainId,
+              escrowAddress,
+              eventType: EventType.ESCROW_COMPLETED,
+              type: WebhookType.OUT,
+              callbackUrl,
+            };
+
+            this.webhookService.createWebhook(dto);
           }
         } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.webhookService.handleWebhookError(webhookEntity);
+          const errorId = uuidv4();
+          const failedReason = `${ErrorWebhook.PaidProcessingFailed} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error processing paid webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.webhookService.handleWebhookError(
+            webhookEntity,
+            failedReason,
+          );
           continue;
         }
         webhookEntity.status = WebhookStatus.COMPLETED;
@@ -219,6 +249,72 @@ export class CronJobService {
     }
 
     this.logger.log('Paid webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/2 * * * *')
+  /**
+   * Process a pending webhook job with out type.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  public async processOutgoingWebhooks(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessOutgoingWebhook,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Pending webhooks with out type START');
+    const cronJob = await this.startCronJob(CronJobType.ProcessOutgoingWebhook);
+
+    try {
+      const webhookEntities = await this.webhookRepository.findByStatusAndType(
+        WebhookStatus.PENDING,
+        WebhookType.OUT,
+      );
+
+      for (const webhookEntity of webhookEntities) {
+        let resultsUrl;
+        try {
+          const { callbackUrl, chainId, escrowAddress } = webhookEntity;
+
+          const body: SendWebhookDto = {
+            chainId,
+            escrowAddress,
+            eventType: EventType.ESCROW_COMPLETED,
+          };
+
+          if (!callbackUrl) {
+            throw new ControlledError(
+              ErrorWebhook.CallbackUrlNotFound,
+              HttpStatus.NOT_FOUND,
+            );
+          }
+
+          await this.webhookService.sendWebhook(callbackUrl, body);
+        } catch (err) {
+          const errorId = uuidv4();
+          const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error processing pending webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.webhookService.handleWebhookError(
+            webhookEntity,
+            failedReason,
+          );
+          continue;
+        }
+        webhookEntity.status = WebhookStatus.PAID;
+        webhookEntity.retriesCount = 0;
+        await this.webhookRepository.updateOne(webhookEntity);
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Pending webhooks with out type STOP');
     await this.completeCronJob(cronJob);
   }
 }

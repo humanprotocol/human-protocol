@@ -9,7 +9,7 @@ import {
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
-import { WebhookDto } from './webhook.dto';
+import { CreateWebhookDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
 import { AuthSignatureRole } from '../../common/enums/role';
 
@@ -30,7 +30,7 @@ export class WebhookController {
     description: 'Signature for webhook authentication.',
     required: true,
   })
-  @ApiBody({ type: WebhookDto })
+  @ApiBody({ type: CreateWebhookDto })
   @ApiResponse({
     status: 200,
     description: 'Incoming webhook created successfully',
@@ -49,7 +49,7 @@ export class WebhookController {
   })
   public async createIncomingWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: WebhookDto,
+    @Body() data: CreateWebhookDto,
   ): Promise<void> {
     await this.webhookService.createIncomingWebhook(data);
     return;
