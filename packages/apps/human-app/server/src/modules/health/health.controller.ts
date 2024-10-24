@@ -40,7 +40,7 @@ export class HealthController {
     description: 'Service is not reachable/running',
   })
   @Get('/ping')
-  ping(): PingResponseDto {
+  async ping(): Promise<PingResponseDto> {
     return {
       appName: packageJson.name,
       gitHash: this.environmentConfigService.gitHash,
