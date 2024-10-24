@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
 import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
@@ -24,6 +23,7 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { Chip } from '@/components/ui/chip';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -69,11 +69,10 @@ export function MyJobsTableMobile({
 
   return (
     <>
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         fullWidth
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={setSearchEscrowAddress}
       />

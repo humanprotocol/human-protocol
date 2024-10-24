@@ -38,6 +38,9 @@ export interface MyJobsFilterStoreProps {
 const initialFiltersState = {
   page: 0,
   page_size: 5,
+  filterParams: {
+    escrow_address: '',
+  },
 } as const;
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
