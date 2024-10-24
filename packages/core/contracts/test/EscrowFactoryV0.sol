@@ -38,11 +38,11 @@ contract EscrowFactoryV0 is OwnableUpgradeable, UUPSUpgradeable {
         address[] memory trustedHandlers,
         string memory jobRequesterId
     ) public returns (address) {
-        bool hasAvailableStake = IStaking(staking).hasAvailableStake(
+        uint256 hasAvailableStake = IStaking(staking).getAvailableStake(
             msg.sender
         );
         require(
-            hasAvailableStake == true,
+            hasAvailableStake > 0,
             'Needs to stake HMT tokens to create an escrow.'
         );
 

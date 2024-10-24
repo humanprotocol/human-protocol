@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2;
+pragma solidity ^0.8.0;
 
 import '../libs/Stakes.sol';
 
@@ -9,15 +9,9 @@ interface IStaking {
 
     function setLockPeriod(uint32 _lockPeriod) external;
 
-    function hasStake(address _indexer) external view returns (bool);
-
-    function hasAvailableStake(address _indexer) external view returns (bool);
+    function getAvailableStake(address _staker) external view returns (uint256);
 
     function getStakedTokens(address _staker) external view returns (uint256);
-
-    function getStaker(
-        address _staker
-    ) external view returns (Stakes.Staker memory);
 
     function stake(uint256 _tokens) external;
 
@@ -32,8 +26,14 @@ interface IStaking {
         uint256 _tokens
     ) external;
 
-    function getListOfStakers()
-        external
-        view
-        returns (address[] memory, Stakes.Staker[] memory);
+    function getListOfStakers(
+        uint256 _startIndex,
+        uint256 _limit
+    ) external view returns (address[] memory, Stakes.Staker[] memory);
+
+    function withdrawFees() external;
+
+    function addSlasher(address _slasher) external;
+
+    function removeSlasher(address _slasher) external;
 }

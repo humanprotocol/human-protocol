@@ -176,7 +176,7 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   eventEntity.staker = event.params.staker;
   eventEntity.amount = event.params.tokens;
   eventEntity.escrowAddress = event.params.escrowAddress;
-  eventEntity.slasher = event.params.slasher;
+  eventEntity.slashRequester = event.params.slashRequester;
   eventEntity.save();
 
   // Update leader

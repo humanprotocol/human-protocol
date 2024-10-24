@@ -281,7 +281,7 @@ type StakeSlashedEvent @entity(immutable: true) {
 
   escrowAddress: Bytes! # address
   staker: Bytes! # address
-  slasher: Bytes! # address
+  slashRequester: Bytes! # address
   amount: BigInt!
 }
 

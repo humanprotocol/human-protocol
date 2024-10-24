@@ -167,8 +167,10 @@ describe('Staking', function () {
       it('Should stake token and increase staker stake', async function () {
         await staking.connect(operator).stake(2);
         await expect(
-          await staking.connect(operator).hasStake(await operator.getAddress())
-        ).to.equal(true);
+          await staking
+            .connect(operator)
+            .getStakedTokens(await operator.getAddress())
+        ).to.above(0);
       });
     });
   });
@@ -222,7 +224,7 @@ describe('Staking', function () {
         await staking.connect(operator).unstake(amount);
         const staker = await staking
           .connect(operator)
-          .getStaker(await operator.getAddress());
+          .stakes(await operator.getAddress());
         await expect(staker.tokensLocked).to.equal(amount.toString());
         await expect(staker.tokensLockedUntil).to.not.equal('0');
       });
@@ -289,7 +291,7 @@ describe('Staking', function () {
 
           const staker = await staking
             .connect(operator)
-            .getStaker(await operator.getAddress());
+            .stakes(await operator.getAddress());
 
           let latestBlockNumber = await ethers.provider.getBlockNumber();
           expect(latestBlockNumber).to.be.lessThan(staker.tokensLockedUntil);
@@ -305,7 +307,7 @@ describe('Staking', function () {
           await staking.connect(operator).withdraw();
           const stakerAfterWithdrawn = await staking
             .connect(operator)
-            .getStaker(await operator.getAddress());
+            .stakes(await operator.getAddress());
 
           await expect(stakerAfterWithdrawn.tokensStaked).to.equal(
             restTokensStaked.toString()
@@ -400,25 +402,6 @@ describe('Staking', function () {
 
         await staking.connect(owner).setFeePercentage(feePercentage);
         await expect(await staking.feePercentage()).to.equal(feePercentage);
-      });
-    });
-  });
-
-  describe('hasStake', function () {
-    describe('Is stakes has stake', function () {
-      it('Should return an escrow address has not allocation', async function () {
-        expect(
-          await staking.connect(owner).hasStake(await operator.getAddress())
-        ).to.equal(false);
-      });
-
-      it('Should return an escrow address has allocation', async function () {
-        const stakedTokens = 10;
-        await staking.connect(operator).stake(stakedTokens);
-
-        expect(
-          await staking.connect(owner).hasStake(await operator.getAddress())
-        ).to.equal(true);
       });
     });
   });
@@ -545,7 +528,7 @@ describe('Staking', function () {
 
     it('Should transfer the slashed amount to the slasher', async function () {
       const initialBalance = await token.connect(owner).balanceOf(validator);
-      const initialStake = (await staking.connect(owner).getStaker(operator))
+      const initialStake = (await staking.connect(owner).stakes(operator))
         .tokensStaked;
       await staking
         .connect(owner)
@@ -557,7 +540,7 @@ describe('Staking', function () {
         );
       const feeAmount = (slashedTokens * feePercentage) / 100;
       const finalBalance = await token.connect(owner).balanceOf(validator);
-      const finalStake = (await staking.connect(owner).getStaker(operator))
+      const finalStake = (await staking.connect(owner).stakes(operator))
         .tokensStaked;
       expect(finalBalance - initialBalance).to.equal(slashedTokens - feeAmount);
       expect(initialStake - finalStake).to.equal(slashedTokens - feeAmount);
@@ -587,7 +570,7 @@ describe('Staking', function () {
     });
 
     it('Should return list of stakers', async () => {
-      const [stakers, stakes] = await staking.getListOfStakers();
+      const [stakers, stakes] = await staking.getListOfStakers(0, 10);
 
       expect(stakers.length).to.equal(6);
       expect(stakes.length).to.equal(6);

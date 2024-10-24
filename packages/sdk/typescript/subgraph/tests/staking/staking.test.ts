@@ -597,8 +597,8 @@ describe('Staking', () => {
     assert.fieldEquals(
       'StakeSlashedEvent',
       id1,
-      'slasher',
-      data1.params.slasher.toHex()
+      'slashRequester',
+      data1.params.slashRequester.toHex()
     );
 
     // Data 2
@@ -636,8 +636,8 @@ describe('Staking', () => {
     assert.fieldEquals(
       'StakeSlashedEvent',
       id2,
-      'slasher',
-      data2.params.slasher.toHex()
+      'slashRequester',
+      data2.params.slashRequester.toHex()
     );
 
     // Leader statistics
