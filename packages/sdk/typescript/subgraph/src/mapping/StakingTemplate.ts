@@ -1,16 +1,13 @@
 import {
-  AllocationClosed,
-  StakeAllocated,
+  FeeWithdrawn,
   StakeDeposited,
   StakeLocked,
   StakeSlashed,
   StakeWithdrawn,
 } from '../../generated/Staking/Staking';
 import {
-  AllocationClosedEvent,
   Leader,
   LeaderStatistics,
-  StakeAllocatedEvent,
   StakeDepositedEvent,
   StakeLockedEvent,
   StakeSlashedEvent,
@@ -51,7 +48,6 @@ export function createOrLoadLeader(address: Address): Leader {
 
     leader.address = address;
     leader.amountStaked = ZERO_BI;
-    leader.amountAllocated = ZERO_BI;
     leader.amountLocked = ZERO_BI;
     leader.lockedUntilTimestamp = ZERO_BI;
     leader.amountSlashed = ZERO_BI;
@@ -161,60 +157,6 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   leader.save();
 }
 
-export function handleStakeAllocated(event: StakeAllocated): void {
-  createTransaction(
-    event,
-    'allocate',
-    event.params.staker,
-    dataSource.address(),
-    null,
-    event.params.escrowAddress,
-    event.params.tokens,
-    TOKEN_ADDRESS
-  );
-  // Create StakeAllocatedEvent entity
-  const eventEntity = new StakeAllocatedEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.staker = event.params.staker;
-  eventEntity.amount = event.params.tokens;
-  eventEntity.escrowAddress = event.params.escrowAddress;
-  eventEntity.save();
-
-  // Update leader
-  const leader = createOrLoadLeader(event.params.staker);
-  leader.amountAllocated = leader.amountAllocated.plus(eventEntity.amount);
-  leader.save();
-}
-
-export function handleAllocationClosed(event: AllocationClosed): void {
-  createTransaction(
-    event,
-    'closeAllocation',
-    event.params.staker,
-    dataSource.address(),
-    null,
-    event.params.escrowAddress,
-    event.params.tokens,
-    TOKEN_ADDRESS
-  );
-  // Create AllocationClosedEvent entity
-  const eventEntity = new AllocationClosedEvent(toEventId(event));
-  eventEntity.block = event.block.number;
-  eventEntity.timestamp = event.block.timestamp;
-  eventEntity.txHash = event.transaction.hash;
-  eventEntity.staker = event.params.staker;
-  eventEntity.amount = event.params.tokens;
-  eventEntity.escrowAddress = event.params.escrowAddress;
-  eventEntity.save();
-
-  // Update leader
-  const leader = createOrLoadLeader(event.params.staker);
-  leader.amountAllocated = leader.amountAllocated.minus(eventEntity.amount);
-  leader.save();
-}
-
 export function handleStakeSlashed(event: StakeSlashed): void {
   createTransaction(
     event,
@@ -234,13 +176,25 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   eventEntity.staker = event.params.staker;
   eventEntity.amount = event.params.tokens;
   eventEntity.escrowAddress = event.params.escrowAddress;
-  eventEntity.slasher = event.params.slasher;
+  eventEntity.slashRequester = event.params.slashRequester;
   eventEntity.save();
 
   // Update leader
   const leader = createOrLoadLeader(event.params.staker);
   leader.amountSlashed = leader.amountSlashed.plus(eventEntity.amount);
-  leader.amountAllocated = leader.amountAllocated.minus(eventEntity.amount);
   leader.amountStaked = leader.amountStaked.minus(eventEntity.amount);
   leader.save();
+}
+
+export function handleFeeWithdrawn(event: FeeWithdrawn): void {
+  createTransaction(
+    event,
+    'withdrawFees',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    null,
+    event.params.amount,
+    TOKEN_ADDRESS
+  );
 }

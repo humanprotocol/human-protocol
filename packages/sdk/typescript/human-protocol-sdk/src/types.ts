@@ -116,10 +116,6 @@ export type NetworkData = {
    */
   stakingAddress: string;
   /**
-   * RewardPool contract address
-   */
-  rewardPoolAddress: string;
-  /**
    * KVStore contract address
    */
   kvstoreAddress: string;

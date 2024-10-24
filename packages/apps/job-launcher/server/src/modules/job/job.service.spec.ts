@@ -4,8 +4,6 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  StakingClient,
-  IAllocation,
   EscrowUtils,
   Encryption,
   KVStoreUtils,
@@ -318,7 +316,6 @@ describe('JobService', () => {
 
     it('should use all oracles provided by the user and skip oracle selection', async () => {
       const fundAmount = 10;
-      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
 
       const userId = 1;
@@ -365,7 +362,6 @@ describe('JobService', () => {
 
     it('should select missing oracles when only partial oracles are provided by the user', async () => {
       const fundAmount = 10;
-      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
 
       const providedReputationOracle = '0xProvidedReputationOracle';
@@ -3380,13 +3376,6 @@ describe('JobService', () => {
   describe('getDetails', () => {
     it('should return job details with escrow address successfully', async () => {
       const balance = '1';
-      const allocationMock: IAllocation = {
-        escrowAddress: ethers.ZeroAddress,
-        staker: ethers.ZeroAddress,
-        tokens: 1n,
-        createdAt: 1n,
-        closedAt: 1n,
-      };
 
       const manifestMock: FortuneManifestDto = {
         submissionsRequired: 10,
@@ -3432,11 +3421,6 @@ describe('JobService', () => {
           recordingOracleAddress: expect.any(String),
           reputationOracleAddress: expect.any(String),
         },
-        staking: {
-          staker: expect.any(String),
-          allocated: expect.any(Number),
-          slashed: 0,
-        },
       };
 
       const getEscrowData = {
@@ -3453,9 +3437,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
-      (StakingClient.build as any).mockImplementation(() => ({
-        getAllocation: jest.fn().mockResolvedValue(allocationMock),
-      }));
       storageService.download = jest.fn().mockResolvedValue(manifestMock);
       jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 
@@ -3507,11 +3488,6 @@ describe('JobService', () => {
           exchangeOracleAddress: ethers.ZeroAddress,
           recordingOracleAddress: ethers.ZeroAddress,
           reputationOracleAddress: ethers.ZeroAddress,
-        },
-        staking: {
-          staker: expect.any(String),
-          allocated: 0,
-          slashed: 0,
         },
       };
 

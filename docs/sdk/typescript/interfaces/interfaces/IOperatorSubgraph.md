@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[interfaces.ts:63](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L63)
+[interfaces.ts:55](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L55)
 
 ***
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[interfaces.ts:72](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L72)
+[interfaces.ts:64](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L64)
 
 ***
 
@@ -46,7 +46,7 @@
 
 #### Defined in
 
-[interfaces.ts:68](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L68)
+[interfaces.ts:60](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L60)
 
 ***
 
@@ -60,7 +60,7 @@
 
 #### Defined in
 
-[interfaces.ts:67](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L67)
+[interfaces.ts:59](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L59)
 
 ***
 
@@ -74,7 +74,7 @@
 
 #### Defined in
 
-[interfaces.ts:64](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L64)
+[interfaces.ts:56](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L56)
 
 ***
 
@@ -88,4 +88,4 @@
 
 #### Defined in
 
-[interfaces.ts:65](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L65)
+[interfaces.ts:57](https://github.com/humanprotocol/human-protocol/blob/c89cf662f1f49999499468fbc2c62e830c1f474a/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L57)

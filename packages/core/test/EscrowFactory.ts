@@ -16,6 +16,7 @@ describe('EscrowFactory', function () {
   const jobRequesterId = 'job-requester-id';
   const minimumStake = 2;
   const lockPeriod = 2;
+  const feePercentage = 2;
 
   const stakeAmount = 10;
 
@@ -69,7 +70,7 @@ describe('EscrowFactory', function () {
     const Staking = await ethers.getContractFactory('Staking');
     staking = (await upgrades.deployProxy(
       Staking,
-      [await token.getAddress(), minimumStake, lockPeriod],
+      [await token.getAddress(), minimumStake, lockPeriod, feePercentage],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as Staking;
 
@@ -139,13 +140,10 @@ describe('EscrowFactory', function () {
     expect(result).to.equal(true);
   });
 
-  it('Operator should be able to create another escrow after allocating some of the stakes', async () => {
-    const result = await stakeAndCreateEscrow(staking);
-    const escrowAddress = result?.escrow;
+  it('Operator should be able to create another escrow after unstaking some of the stakes', async () => {
+    await stakeAndCreateEscrow(staking);
 
-    staking
-      .connect(operator)
-      .allocate(escrowAddress.toString(), stakeAmount / 2);
+    staking.connect(operator).unstake(stakeAmount / 2);
 
     const event = await createEscrow();
 
@@ -156,11 +154,10 @@ describe('EscrowFactory', function () {
     expect(event?.escrow).to.not.be.null;
   });
 
-  it('Operator should not be able to create an escrow after allocating all of the stakes', async () => {
-    const result = await stakeAndCreateEscrow(staking);
-    const escrowAddress = result?.escrow;
+  it('Operator should not be able to create an escrow after unstaking all of the stakes', async () => {
+    await stakeAndCreateEscrow(staking);
 
-    staking.connect(operator).allocate(escrowAddress.toString(), stakeAmount);
+    staking.connect(operator).unstake(stakeAmount);
 
     await expect(
       escrowFactory
@@ -174,10 +171,9 @@ describe('EscrowFactory', function () {
   });
 
   it('Operator should be able to create an escrow after staking more tokens', async () => {
-    const result = await stakeAndCreateEscrow(staking);
-    const escrowAddress = result?.escrow;
+    await stakeAndCreateEscrow(staking);
 
-    staking.connect(operator).allocate(escrowAddress.toString(), stakeAmount);
+    staking.connect(operator).unstake(stakeAmount);
 
     const event = await stakeAndCreateEscrow(staking);
 

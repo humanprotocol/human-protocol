@@ -32,3 +32,5 @@ export const LOCAL_STORAGE_KEYS = {
   accessToken: 'HUMAN_JOB_LAUNCHER_ACCESS_TOKEN',
   refreshToken: 'HUMAN_JOB_LAUNCHER_REFRESH_TOKEN',
 };
+
+export const DASHBOARD_URL = 'https://dashboard.humanprotocol.org/';

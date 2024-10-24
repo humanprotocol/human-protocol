@@ -227,22 +227,6 @@ export class JobIdDto {
   public id: number;
 }
 
-export class StakingDetails {
-  @ApiProperty({ description: 'Ethereum address of the staker' })
-  @IsEthereumAddress()
-  public staker: string;
-
-  @ApiProperty({ description: 'Amount allocated' })
-  @IsNumber()
-  @Min(0)
-  public allocated: number;
-
-  @ApiProperty({ description: 'Amount slashed' })
-  @IsNumber()
-  @Min(0)
-  public slashed: number;
-}
-
 export class ManifestDetails {
   @ApiProperty({ description: 'Chain ID', name: 'chain_id' })
   @IsNumber()
@@ -378,10 +362,6 @@ export class JobDetailsDto {
   @ApiProperty({ description: 'Manifest details' })
   @IsNotEmpty()
   public manifest: ManifestDetails;
-
-  @ApiProperty({ description: 'Staking details' })
-  @IsNotEmpty()
-  public staking: StakingDetails;
 }
 
 export class FortuneManifestDto {

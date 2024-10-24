@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2;
+pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
@@ -28,12 +28,6 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize(address _staking) external payable virtual initializer {
         __Ownable_init_unchained();
-        __EscrowFactory_init_unchained(_staking);
-    }
-
-    function __EscrowFactory_init_unchained(
-        address _staking
-    ) internal onlyInitializing {
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
         staking = _staking;
     }
@@ -42,12 +36,12 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         address token,
         address[] memory trustedHandlers,
         string memory jobRequesterId
-    ) public returns (address) {
-        bool hasAvailableStake = IStaking(staking).hasAvailableStake(
+    ) external returns (address) {
+        uint256 availableStake = IStaking(staking).getAvailableStake(
             msg.sender
         );
         require(
-            hasAvailableStake == true,
+            availableStake > 0,
             'Needs to stake HMT tokens to create an escrow.'
         );
 
@@ -65,7 +59,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         return lastEscrow;
     }
 
-    function hasEscrow(address _address) public view returns (bool) {
+    function hasEscrow(address _address) external view returns (bool) {
         return escrowCounters[_address] != 0;
     }
 

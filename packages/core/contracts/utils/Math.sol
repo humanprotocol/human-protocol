@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2;
-
-import './SafeMath.sol';
+pragma solidity ^0.8.0;
 
 /**
  * @title Math Library
  * @notice A collection of functions to perform math operations
  */
 library Math {
-    using SafeMath for uint256;
-
     enum Rounding {
         Down, // Toward negative infinity
         Up, // Toward infinity
@@ -55,17 +51,14 @@ library Math {
         uint256 valueB,
         uint256 weightB
     ) internal pure returns (uint256) {
-        return
-            valueA.mul(weightA).add(valueB.mul(weightB)).div(
-                weightA.add(weightB)
-            );
+        return (valueA * weightA + valueB * weightB) / (weightA + weightB);
     }
 
     /**
      * @dev Returns the difference between two numbers or zero if negative.
      */
     function diffOrZero(uint256 x, uint256 y) internal pure returns (uint256) {
-        return (x > y) ? x.sub(y) : 0;
+        return (x > y) ? x - y : 0;
     }
 
     /**
@@ -166,7 +159,7 @@ library Math {
     }
 
     /**
-     * @dev Return the log in base 10, following the selected rounding direction, of a positive value.
+     * @dev Return the log in base 256, following the selected rounding direction, of a positive value.
      * Returns 0 if given 0.
      */
     function log256(

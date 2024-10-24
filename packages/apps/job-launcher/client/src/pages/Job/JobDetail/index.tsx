@@ -11,6 +11,7 @@ import { useJobDetails } from '../../../hooks/useJobDetails';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import * as jobService from '../../../services/job';
 import { JobStatus } from '../../../types';
+import { generateDashboardURL } from '../../../utils';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -91,7 +92,7 @@ export default function JobDetail() {
           </LoadingButton>
         )}
         <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <CardContainer>
               <Typography
                 variant="body2"
@@ -102,47 +103,31 @@ export default function JobDetail() {
                 Job details
               </Typography>
               <Stack spacing={2}>
-                <CardTextRow
-                  label="Manifest URL"
-                  value={data.details.manifestUrl}
-                />
-                <CardTextRow
-                  label="Manifest Hash"
-                  value={data.details.manifestHash}
-                />
-                <CardTextRow
-                  label="Balance of"
-                  value={`${data.details.balance} HMT`}
-                />
-                <CardTextRow
-                  label="Paid Out HMT"
-                  value={`${data.details.paidOut.toString()} HMT`}
-                />
-                <CardTextRow label="Amount of Jobs" value="" />
-                <CardTextRow label="Workers assigned" value="" />
-              </Stack>
-            </CardContainer>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <CardContainer>
-              <Typography
-                variant="body2"
-                color="primary"
-                fontWeight={600}
-                sx={{ mb: 2 }}
-              >
-                Stake details
-              </Typography>
-              <Stack spacing={2}>
-                <CardTextRow label="Staker" value={data.staking.staker} />
-                <CardTextRow
-                  label="Staked HMT"
-                  value={`${data.staking.allocated.toString()} HMT`}
-                />
-                <CardTextRow
-                  label="Slashed HMT"
-                  value={`${data.staking.slashed.toString()} HMT`}
-                />
+                <Grid container spacing={4}>
+                  <Grid item xs={12} md={6}>
+                    <CardTextRow
+                      label="Manifest URL"
+                      value={data.details.manifestUrl}
+                      url={data.details.manifestUrl}
+                    />
+                    <CardTextRow
+                      label="Manifest Hash"
+                      value={data.details.manifestHash}
+                    />
+                    <CardTextRow
+                      label="Balance of"
+                      value={`${data.details.balance} HMT`}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <CardTextRow
+                      label="Paid Out HMT"
+                      value={`${data.details.paidOut.toString()} HMT`}
+                    />
+                    <CardTextRow label="Amount of Jobs" value="" />
+                    <CardTextRow label="Workers assigned" value="" />
+                  </Grid>
+                </Grid>
               </Stack>
             </CardContainer>
           </Grid>
@@ -175,6 +160,10 @@ export default function JobDetail() {
                     <CardTextRow
                       label="Token"
                       value={data.manifest.tokenAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.tokenAddress,
+                      )}
                     />
                     <CardTextRow
                       label="Fund Amount"
@@ -183,6 +172,10 @@ export default function JobDetail() {
                     <CardTextRow
                       label="Job Requester"
                       value={data.manifest.requesterAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.requesterAddress,
+                      )}
                     />
                   </Stack>
                 </Grid>
@@ -191,14 +184,26 @@ export default function JobDetail() {
                     <CardTextRow
                       label="Recording Oracle"
                       value={data.manifest.recordingOracleAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.recordingOracleAddress,
+                      )}
                     />
                     <CardTextRow
                       label="Reputation Oracle"
                       value={data.manifest.reputationOracleAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.recordingOracleAddress,
+                      )}
                     />
                     <CardTextRow
                       label="Exchange Oracle"
                       value={data.manifest.exchangeOracleAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.exchangeOracleAddress,
+                      )}
                     />
                     <CardTextRow label="Recording URL" value="" />
                     <CardTextRow label="Reputation URL" value="" />

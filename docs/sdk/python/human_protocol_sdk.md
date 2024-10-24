@@ -75,7 +75,6 @@
     * [human_protocol_sdk.staking.staking_client module](human_protocol_sdk.staking.staking_client.md)
       * [Code Example](human_protocol_sdk.staking.staking_client.md#code-example)
       * [Module](human_protocol_sdk.staking.staking_client.md#module)
-      * [`AllocationData`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.AllocationData)
       * [`StakingClient`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient)
       * [`StakingClientError`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClientError)
 * [human_protocol_sdk.statistics package](human_protocol_sdk.statistics.md)
@@ -111,10 +110,10 @@
     * [human_protocol_sdk.transaction.transaction_utils module](human_protocol_sdk.transaction.transaction_utils.md)
       * [Code Example](human_protocol_sdk.transaction.transaction_utils.md#code-example)
       * [Module](human_protocol_sdk.transaction.transaction_utils.md#module)
+      * [`InternalTransaction`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.InternalTransaction)
       * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
       * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
       * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
-      * [`Transfer`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.Transfer)
 
 ## Submodules
 
@@ -195,7 +194,6 @@
   * [`get_factory_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_factory_interface)
   * [`get_hmt_balance()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_hmt_balance)
   * [`get_kvstore_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_kvstore_interface)
-  * [`get_reward_pool_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_reward_pool_interface)
   * [`get_staking_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_staking_interface)
   * [`handle_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.handle_transaction)
   * [`parse_transfer_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.parse_transfer_transaction)

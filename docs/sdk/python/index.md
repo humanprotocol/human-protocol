@@ -67,7 +67,6 @@ pip install human-protocol-sdk[agreement]
       * [`get_factory_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_factory_interface)
       * [`get_hmt_balance()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_hmt_balance)
       * [`get_kvstore_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_kvstore_interface)
-      * [`get_reward_pool_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_reward_pool_interface)
       * [`get_staking_interface()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.get_staking_interface)
       * [`handle_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.handle_transaction)
       * [`parse_transfer_transaction()`](human_protocol_sdk.utils.md#human_protocol_sdk.utils.parse_transfer_transaction)
