@@ -226,7 +226,7 @@
       "escrowAddress": "Escrow address",
       "network": "Network",
       "rewardAmount": "Reward amount",
-      "jobType": "Job type",
+      "jobType": "Task type",
       "expiresAt": "Expires at",
       "status": "Status",
       "selectJob": "Select Task",
