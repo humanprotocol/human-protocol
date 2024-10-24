@@ -13,6 +13,7 @@ import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -20,6 +21,7 @@ interface DrawerMobileProps {
 export function AvailableJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
@@ -58,7 +60,15 @@ export function AvailableJobsDrawerMobile({
             zIndex: '999999',
           }}
         >
-          <HumanLogoIcon />
+          <Stack
+            sx={{ cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+              // setIsMobileFilterDrawerOpen(false);
+            }}
+          >
+            <HumanLogoIcon />
+          </Stack>
 
           <IconButton
             onClick={() => {

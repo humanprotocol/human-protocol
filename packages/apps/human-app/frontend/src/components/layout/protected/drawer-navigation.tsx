@@ -16,6 +16,7 @@ import { NAVBAR_PADDING } from '@/components/layout/protected/navbar';
 import { colorPalette } from '@/styles/color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { onlyDarkModeColor } from '@/styles/dark-color-palette';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 
 const drawerWidth = 240;
 
@@ -49,6 +50,7 @@ export function DrawerNavigation({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
+  const handleMainNavIconClick = useHandleMainNavIconClick();
 
   return (
     <Box
@@ -72,7 +74,17 @@ export function DrawerNavigation({
         variant="persistent"
       >
         {!isMobile && (
-          <Stack alignItems="flex-start" sx={{ paddingLeft: '60px' }}>
+          <Stack
+            alignItems="flex-start"
+            sx={{ paddingLeft: '60px', cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              if (isMobile) {
+                setDrawerOpen(false);
+              }
+            }}
+          >
             <HumanLogoNavbarIcon />
           </Stack>
         )}

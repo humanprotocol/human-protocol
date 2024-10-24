@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
 import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
 import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
@@ -20,6 +21,7 @@ interface DrawerMobileProps {
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
@@ -58,7 +60,15 @@ export function MyJobsDrawerMobile({
             zIndex: '999999',
           }}
         >
-          <HumanLogoIcon />
+          <Stack
+            sx={{ cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+              // setIsMobileFilterDrawerOpen(false);
+            }}
+          >
+            <HumanLogoIcon />
+          </Stack>
 
           <IconButton
             onClick={() => {
