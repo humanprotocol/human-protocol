@@ -1,0 +1,14 @@
+{
+  "name": "gcv",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "test": "jest",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
+  },
+  "dependencies": {
+    "@google-cloud/vision": "^4.3.2"
+  }
+}
