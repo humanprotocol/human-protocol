@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -12,9 +12,10 @@ import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-job
 import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-drawer-mobile';
 import { useGetOracles } from '@/api/services/worker/oracles';
-import { PageCardError, PageCardLoader } from '@/components/ui/page-card';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { PageCardLoader } from '@/components/ui/page-card';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useGetOraclesNotifications } from '@/hooks/use-get-oracles-notifications';
+import { NoRecords } from '@/components/ui/no-records';
 import { AvailableJobsTableMobile } from './components/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from './components/jobs-tab-panel';
 import { MyJobsTable } from './components/my-jobs/desktop/my-jobs-table';
@@ -39,6 +40,8 @@ export function JobsPage() {
   );
   const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
     useState(false);
+  const { onError } = useGetOraclesNotifications();
+  const onErrorRef = useRef(onError);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -54,13 +57,15 @@ export function JobsPage() {
     setGrayBackground();
   }, [setGrayBackground]);
 
+  useEffect(() => {
+    if (error) {
+      void onErrorRef.current(error);
+    }
+  }, [error]);
+
   const oracleName = data?.find(
     ({ address }) => address === oracle_address
   )?.role;
-
-  if (isError) {
-    return <PageCardError errorMessage={defaultErrorMessage(error)} />;
-  }
 
   if (isPending) {
     return <PageCardLoader />;
@@ -131,28 +136,34 @@ export function JobsPage() {
                       />
                     </Tabs>
                   </Box>
-                  <TabPanel activeTab={activeTab} index={0}>
-                    {isMobile ? (
-                      <AvailableJobsTableMobile
-                        setIsMobileFilterDrawerOpen={
-                          setIsMobileFilterDrawerOpen
-                        }
-                      />
-                    ) : null}
-                    {!isMobile ? <AvailableJobsTable /> : null}
-                  </TabPanel>
-                  <TabPanel activeTab={activeTab} index={1}>
+                  {isError ? (
+                    <NoRecords />
+                  ) : (
                     <>
-                      {isMobile ? (
-                        <MyJobsTableMobile
-                          setIsMobileFilterDrawerOpen={
-                            setIsMobileFilterDrawerOpen
-                          }
-                        />
-                      ) : null}
-                      {!isMobile ? <MyJobsTable /> : null}
+                      <TabPanel activeTab={activeTab} index={0}>
+                        {isMobile ? (
+                          <AvailableJobsTableMobile
+                            setIsMobileFilterDrawerOpen={
+                              setIsMobileFilterDrawerOpen
+                            }
+                          />
+                        ) : null}
+                        {!isMobile ? <AvailableJobsTable /> : null}
+                      </TabPanel>
+                      <TabPanel activeTab={activeTab} index={1}>
+                        <>
+                          {isMobile ? (
+                            <MyJobsTableMobile
+                              setIsMobileFilterDrawerOpen={
+                                setIsMobileFilterDrawerOpen
+                              }
+                            />
+                          ) : null}
+                          {!isMobile ? <MyJobsTable /> : null}
+                        </>
+                      </TabPanel>
                     </>
-                  </TabPanel>
+                  )}
                 </Box>
               </TableQueryContextProvider>
             </Stack>

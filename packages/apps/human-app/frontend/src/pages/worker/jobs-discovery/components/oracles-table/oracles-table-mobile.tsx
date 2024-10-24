@@ -9,6 +9,7 @@ import { ListItem } from '@/components/ui/list-item';
 import { useColorMode } from '@/hooks/use-color-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import type { OracleSuccessResponse } from '@/api/services/worker/oracles';
+import { NoRecords } from '@/components/ui/no-records';
 
 export function OraclesTableMobile({
   selectOracle,
@@ -35,17 +36,7 @@ export function OraclesTableMobile({
   }
 
   if (isOraclesDataError) {
-    return (
-      <Paper
-        sx={{
-          padding: '20px',
-          textAlign: 'center',
-          color: colorPalette.text.disabled,
-        }}
-      >
-        <span>No records to display</span>
-      </Paper>
-    );
+    return <NoRecords />;
   }
 
   return (
