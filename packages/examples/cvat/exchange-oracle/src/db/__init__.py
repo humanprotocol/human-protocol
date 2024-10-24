@@ -1,14 +1,17 @@
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
+from uuid import uuid4
 
 import sqlalchemy
 from psycopg2.errors import Error
-from sqlalchemy import DDL, event
+from sqlalchemy import DDL, UUID, event, func
 from sqlalchemy.exc import SQLAlchemyError, StatementError
 from sqlalchemy.orm import (
     DeclarativeBase,
     InstrumentedAttribute,
+    Mapped,
     Relationship,
+    mapped_column,
     sessionmaker,
 )
 
@@ -29,10 +32,25 @@ class Base(DeclarativeBase):
     __tablename__: ClassVar[str]
 
 
+class BaseUUID(Base):
+    __abstract__ = True
+    id: Mapped[str] = mapped_column(
+        # Using `str` instead of python `uuid.UUID` for now
+        # to reduce amount of code needed to be rewritten.
+        # At some point it would make sense to use UUID(as_uuid=True).
+        UUID(as_uuid=False),
+        primary_key=True,
+        default=lambda: str(uuid4()),
+        server_default=func.uuid_generate_v4(),
+        sort_order=-1,  # Make sure it's the first column.
+        index=True,
+    )
+
+
 ParentT = TypeVar("ParentT", bound=type[Base])
 
 
-class ChildOf(Base, Generic[ParentT]):
+class ChildOf(BaseUUID, Generic[ParentT]):
     __abstract__ = True
 
     if TYPE_CHECKING:
