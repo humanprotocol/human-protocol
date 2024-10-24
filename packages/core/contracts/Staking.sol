@@ -295,7 +295,12 @@ contract Staking is
 
         _safeTransfer(token, _slashRequester, tokensToSlash);
 
-        emit StakeSlashed(_staker, _tokens, _escrowAddress, _slashRequester);
+        emit StakeSlashed(
+            _staker,
+            tokensToSlash,
+            _escrowAddress,
+            _slashRequester
+        );
     }
 
     /**

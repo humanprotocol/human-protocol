@@ -464,7 +464,7 @@ describe('Staking', function () {
               ethers.ZeroAddress,
               slashedTokens
             )
-        ).to.be.revertedWith('Must be a valid address');
+        ).to.be.revertedWith('Must be a valid escrow address');
       });
 
       it('Should revert if slash amount exceeds staking', async function () {
@@ -486,7 +486,7 @@ describe('Staking', function () {
               escrowAddress,
               stakedTokens
             )
-        ).to.be.revertedWith('Slash tokens exceed staked ones');
+        ).to.be.revertedWith('Slash amount exceeds staked amount');
       });
 
       it('Should revert if slash amount is 0', async function () {
