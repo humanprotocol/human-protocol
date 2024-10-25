@@ -38,6 +38,7 @@ export function generateOracleDiscoveryResponseBody() {
   return [response1, response2, response3, response4];
 }
 
+export const reputationOracleSupportedJobTypes = 'job-type-1, job-type-4';
 export const filledCommandFixture = {
   selectedJobTypes: ['job-type-1', 'job-type-2'],
 } as OracleDiscoveryCommand;

@@ -11,6 +11,7 @@ const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
   'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
+const DEFAULT_CACHE_TTL_JOB_TYPES = 24 * 60 * 60;
 const DEFAULT_MAX_REQUEST_RETRIES = 5;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
 
@@ -197,6 +198,17 @@ export class EnvironmentConfigService {
     return this.configService.get<number>(
       'CACHE_TTL_EXCHANGE_ORACLE_URL',
       DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL,
+    );
+  }
+
+  /**
+   * The cache time-to-live (TTL) for job types URLs.
+   * Default: 24 hours
+   */
+  get cacheTtlJobTypes(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_JOB_TYPES',
+      DEFAULT_CACHE_TTL_JOB_TYPES,
     );
   }
 

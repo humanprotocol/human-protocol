@@ -260,7 +260,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.forgotPasswordExpiresIn * 1000,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
