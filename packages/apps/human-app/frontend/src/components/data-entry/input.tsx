@@ -13,7 +13,6 @@ export interface InputProps
   autoComplete?: string;
   customError?: React.ReactNode;
   mask?: InputMask;
-  hideErrorTextField?: boolean;
 }
 
 export function Input({
@@ -22,7 +21,6 @@ export function Input({
   label,
   customError,
   mask,
-  hideErrorTextField = false,
   ...rest
 }: InputProps) {
   const { colorPalette } = useColorMode();
@@ -46,15 +44,13 @@ export function Input({
           error={Boolean(fieldState.error)}
           fullWidth
           helperText={
-            hideErrorTextField ? undefined : (
-              <Typography
-                color={customError ? undefined : colorPalette.error.main}
-                component="div"
-                variant="helperText"
-              >
-                {customError ? customError : fieldState.error?.message}
-              </Typography>
-            )
+            <Typography
+              color={customError ? undefined : colorPalette.error.main}
+              component="div"
+              variant="helperText"
+            >
+              {customError ? customError : fieldState.error?.message}
+            </Typography>
           }
           label={label}
           name={name}

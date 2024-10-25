@@ -73,20 +73,17 @@ export function createFetcher(defaultFetcherConfig?: {
 }) {
   async function fetcher<SuccessInput, SuccessOutput>(
     url: string | URL,
-    fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>,
-    abortSignal?: AbortSignal
+    fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>
   ): Promise<SuccessOutput>;
 
   async function fetcher(
     url: FetcherUrl,
-    fetcherOptions: FetcherOptionsWithoutValidation,
-    abortSignal?: AbortSignal
+    fetcherOptions: FetcherOptionsWithoutValidation
   ): Promise<unknown>;
 
   async function fetcher<SuccessInput, SuccessOutput>(
     url: FetcherUrl,
-    fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>,
-    abortSignal?: AbortSignal
+    fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- required unknown for correct type intellisense
   ): Promise<SuccessOutput | unknown> {
     let fetcherOptionsWithDefaults = defaultFetcherConfig?.options
@@ -104,13 +101,6 @@ export function createFetcher(defaultFetcherConfig?: {
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
         Authorization: `Bearer ${browserAuthProvider.getAccessToken() ?? ''}`,
       });
-    }
-
-    if (abortSignal) {
-      fetcherOptionsWithDefaults = {
-        ...fetcherOptionsWithDefaults,
-        signal: abortSignal,
-      };
     }
 
     const baseUrl = (() => {
