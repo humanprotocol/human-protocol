@@ -133,17 +133,14 @@ export function Welcome() {
           }}
         >
           <Button
+            color="secondary"
             fullWidth
             onClick={() => {
               setPageView('chooseSignUpAccountType');
             }}
             size="large"
             sx={{
-              backgroundColor: isDarkMode
-                ? '#5D0CE9'
-                : colorPalette.primary.light,
               mb: '1.5625rem',
-              color: isDarkMode ? '#CDC7FF' : undefined,
             }}
             variant="contained"
           >
