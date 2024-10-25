@@ -3,8 +3,8 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { useFormContext } from 'react-hook-form';
 import { Typography } from '@mui/material';
 import { env } from '@/shared/env';
-import { colorPalette } from '@/styles/color-palette';
 import { FetchError } from '@/api/fetcher';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface CaptchaProps {
   setCaptchaToken: (token: string) => void;
@@ -12,6 +12,7 @@ interface CaptchaProps {
 }
 
 export function Captcha({ setCaptchaToken, error }: CaptchaProps) {
+  const { isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export function Captcha({ setCaptchaToken, error }: CaptchaProps) {
       onVerify={setCaptchaToken}
       ref={captchaRef}
       sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
+      theme={isDarkMode ? 'dark' : 'light'}
     />
   );
 }
@@ -35,6 +37,7 @@ interface FormCaptchaProps {
 }
 
 export function FormCaptcha({ name, error }: FormCaptchaProps) {
+  const { colorPalette } = useColorMode();
   const { setValue, formState } = useFormContext<Record<string, unknown>>();
 
   function setCaptchaToken(token: string) {

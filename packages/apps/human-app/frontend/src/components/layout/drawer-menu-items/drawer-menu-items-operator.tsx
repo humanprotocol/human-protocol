@@ -2,6 +2,7 @@ import { t } from 'i18next';
 import type { BottomMenuItem } from '@/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
+import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
 
 export const operatorDrawerBottomMenuItems: BottomMenuItem[] = [
   {
@@ -13,13 +14,16 @@ export const operatorDrawerBottomMenuItems: BottomMenuItem[] = [
     label: t('components.DrawerNavigation.help'),
     icon: <HelpIcon />,
     onClick: () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error -- ...
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ...
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if ($zoho?.salesiq?.chat?.start) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error -- ...
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- ...
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         $zoho.salesiq.chat.start();
       }
     },
   },
+  <DarkModeSwitch key={crypto.randomUUID()} />,
 ];

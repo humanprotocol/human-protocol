@@ -20,10 +20,10 @@ export function Chat({
         chatElement.style.position = 'absolute';
         if (displayChatIcon) {
           chatElement.style.opacity = '1';
-          chatElement.style.top = `${refRect.top - rootRect.top}px`;
-          chatElement.style.left = `${refRect.left - rootRect.left}px`;
-          chatElement.style.width = `${refRect.width}px`;
-          chatElement.style.height = `${refRect.height}px`;
+          chatElement.style.top = `${(refRect.top - rootRect.top).toString()}px`;
+          chatElement.style.left = `${(refRect.left - rootRect.left).toString()}px`;
+          chatElement.style.width = `${refRect.width.toString()}px`;
+          chatElement.style.height = `${refRect.height.toString()}px`;
         } else {
           chatElement.style.opacity = '0';
         }

@@ -17,8 +17,8 @@ export const gatewayConfigServiceMock = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },
-      worker_registration: {
-        endpoint: '/user/registration',
+      registration_in_exchange_oracle: {
+        endpoint: '/user/exchange-oracle-registration',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       },

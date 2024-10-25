@@ -179,3 +179,10 @@ export class ResignJobData {
   @AutoMap()
   assignment_id: string;
 }
+
+export class RefreshJobDto {
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  oracle_address: string;
+}

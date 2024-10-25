@@ -110,12 +110,23 @@ export class PrepareSignatureDto {
   public type: SignatureType;
 }
 
-export class RegisterOracleDto {
-  @ApiProperty({ description: 'Ethereum address of the oracle' })
+export class RegistrationInExchangeOracleDto {
+  @ApiProperty({
+    name: 'oracle_address',
+    description: 'Ethereum address of the oracle',
+  })
   @IsEthereumAddress()
+  public oracleAddress: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
+}
+
+export class RegistrationInExchangeOracleResponseDto {
   public oracleAddress: string;
 }
 
-export class RegisteredOraclesDto {
+export class RegistrationInExchangeOraclesDto {
   public oracleAddresses: string[];
 }

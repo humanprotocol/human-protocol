@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface ChipProps {
   label: string;
@@ -7,6 +7,8 @@ interface ChipProps {
   backgroundColor?: string;
 }
 export function Chip({ label, backgroundColor }: ChipProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <Box
       component="span"
@@ -20,6 +22,7 @@ export function Chip({ label, backgroundColor }: ChipProps) {
         py: '2px',
         borderRadius: '16px',
         display: 'flex',
+        wordBreak: 'break-word',
       }}
     >
       <Typography

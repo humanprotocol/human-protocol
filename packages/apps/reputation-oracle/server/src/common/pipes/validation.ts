@@ -25,7 +25,6 @@ export class HttpValidationPipe extends ValidationPipe {
       },
       transform: true,
       whitelist: true,
-      forbidNonWhitelisted: true,
       forbidUnknownValues: true,
       ...options,
     });

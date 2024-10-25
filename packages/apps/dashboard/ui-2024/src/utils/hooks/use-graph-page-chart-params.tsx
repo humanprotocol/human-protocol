@@ -50,13 +50,16 @@ export interface GraphPageChartParams {
 	setFromDate: (fromDate: Dayjs | null) => void;
 	setToDate: (toDate: Dayjs | null) => void;
 	setEffectiveFromAllTimeDate: (date: Dayjs) => void;
+	revertToInitialParams: () => void;
 }
 
+const INITIAL_RANGE_PARAMS = {
+	from: oneWeekAgo,
+	to: dayjs(),
+};
+
 export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
-	dateRangeParams: {
-		from: oneWeekAgo,
-		to: dayjs(),
-	},
+	dateRangeParams: INITIAL_RANGE_PARAMS,
 	selectedTimePeriod: '1W',
 	setFromDate: (fromDate: Dayjs | null) => {
 		if (!fromDate) {
@@ -103,6 +106,12 @@ export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
 		set((state) => ({
 			...state,
 			effectiveFromAllTimeDate: date,
+		}));
+	},
+	revertToInitialParams: () => {
+		set((state) => ({
+			...state,
+			dateRangeParams: INITIAL_RANGE_PARAMS,
 		}));
 	},
 }));

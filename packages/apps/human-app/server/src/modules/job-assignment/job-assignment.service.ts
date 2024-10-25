@@ -49,8 +49,6 @@ export class JobAssignmentService {
   ): Promise<JobAssignmentResponse> {
     const response =
       await this.exchangeOracleGateway.postNewJobAssignment(command);
-
-    const evmAddress = this.getEvmAddressFromToken(command.token);
     const assignmentsParamsCommand = new JobsFetchParamsCommand();
     assignmentsParamsCommand.oracleAddress =
       await this.escrowUtilsGateway.getExchangeOracleAddressByEscrowAddress(
@@ -59,7 +57,7 @@ export class JobAssignmentService {
       );
     assignmentsParamsCommand.token = command.token;
 
-    this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+    this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -68,12 +66,11 @@ export class JobAssignmentService {
     const response =
       await this.exchangeOracleGateway.resignAssignedJob(command);
 
-    const evmAddress = this.getEvmAddressFromToken(command.token);
     const assignmentsParamsCommand = new JobsFetchParamsCommand();
     assignmentsParamsCommand.oracleAddress = command.oracleAddress;
     assignmentsParamsCommand.token = command.token;
 
-    await this.updateAssignmentsCache(assignmentsParamsCommand, evmAddress);
+    await this.updateAssignmentsCache(assignmentsParamsCommand);
 
     return response;
   }
@@ -91,7 +88,7 @@ export class JobAssignmentService {
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
     if (cachedData && cachedData.length > 0) {
       return paginateAndSortResults(
-        cachedData,
+        this.applyFilters(cachedData, command.data),
         command.data.page,
         command.data.pageSize,
         command.data.sortField as keyof JobsFetchResponseItem,
@@ -103,7 +100,7 @@ export class JobAssignmentService {
     const allJobsData = await this.fetchAllAssignedJobs(command);
     await this.cacheManager.set(cacheKey, allJobsData);
     return paginateAndSortResults(
-      allJobsData,
+      this.applyFilters(allJobsData, command.data),
       command.data.page,
       command.data.pageSize,
       command.data.sortField as keyof JobsFetchResponseItem,
@@ -111,10 +108,35 @@ export class JobAssignmentService {
     );
   }
 
-  private async updateAssignmentsCache(
+  private applyFilters(
+    assignments: JobsFetchResponseItem[],
+    { chainId, jobType, status, escrowAddress }: JobsFetchParamsCommand['data'],
+  ): JobsFetchResponseItem[] {
+    return assignments.filter((assignment) => {
+      if (chainId && assignment.chain_id !== chainId) {
+        return false;
+      }
+
+      if (status && assignment.status !== status) {
+        return false;
+      }
+
+      if (escrowAddress && assignment.escrow_address !== escrowAddress) {
+        return false;
+      }
+
+      if (jobType && assignment.job_type !== jobType) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  public async updateAssignmentsCache(
     command: JobsFetchParamsCommand,
-    evmAddress: string,
   ): Promise<void> {
+    const evmAddress = this.getEvmAddressFromToken(command.token);
     const cacheRetentionDate = this.getCacheRetentionDate();
     const cacheKey = this.makeJobAssignmentCacheKey(
       evmAddress,

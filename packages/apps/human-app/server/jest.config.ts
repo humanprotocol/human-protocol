@@ -1,3 +1,5 @@
+process.env['GIT_HASH'] = 'test_value_hardcoded_in_jest_config';
+
 module.exports = {
   coverageDirectory: '../coverage',
   collectCoverageFrom: ['**/*.(t|j)s'],

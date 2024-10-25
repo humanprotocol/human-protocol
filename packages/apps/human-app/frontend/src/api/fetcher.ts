@@ -49,6 +49,7 @@ export type FetcherOptionsWithValidation<SuccessInput, SuccessOutput> =
     successSchema: ZodType<SuccessOutput, ZodTypeDef, SuccessInput>;
     skipValidation?: false | undefined;
     authenticated?: boolean;
+    withAuthRetry?: boolean;
     baseUrl?: string;
   }>;
 
@@ -56,6 +57,7 @@ export type FetcherOptionsWithoutValidation = Readonly<{
   options?: RequestInit;
   skipValidation: true;
   authenticated?: boolean;
+  withAuthRetry?: boolean;
   baseUrl?: string;
 }>;
 
@@ -95,10 +97,9 @@ export function createFetcher(defaultFetcherConfig?: {
           fetcherOptions.options
         )
       : fetcherOptions.options;
-
     if (fetcherOptions.authenticated) {
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
-        Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
+        Authorization: `Bearer ${browserAuthProvider.getAccessToken() ?? ''}`,
       });
     }
 
@@ -139,7 +140,8 @@ export function createFetcher(defaultFetcherConfig?: {
     if (
       !response.ok &&
       response.status === 401 &&
-      fetcherOptions.authenticated
+      fetcherOptions.authenticated &&
+      fetcherOptions.withAuthRetry
     ) {
       let refetchAccessTokenSuccess: SignInSuccessResponse | undefined;
       try {

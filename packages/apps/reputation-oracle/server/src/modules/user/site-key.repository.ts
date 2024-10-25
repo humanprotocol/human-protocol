@@ -11,12 +11,14 @@ export class SiteKeyRepository extends BaseRepository<SiteKeyEntity> {
     super(SiteKeyEntity, dataSource);
   }
 
-  async findById(id: number): Promise<SiteKeyEntity | null> {
-    return this.findOne({ where: { id }, relations: { user: true } });
-  }
-
-  async findBySiteKey(siteKey: string): Promise<SiteKeyEntity | null> {
-    return this.findOne({ where: { siteKey }, relations: { user: true } });
+  async findByUserSiteKeyAndType(
+    user: UserEntity,
+    siteKey: string,
+    type: SiteKeyType,
+  ): Promise<SiteKeyEntity | null> {
+    return this.findOne({
+      where: { user, siteKey, type },
+    });
   }
 
   async findByUserAndType(
