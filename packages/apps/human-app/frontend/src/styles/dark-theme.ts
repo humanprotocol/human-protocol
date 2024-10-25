@@ -60,6 +60,9 @@ export const darkTheme: ThemeOptions = {
         colorSecondary: {
           fill: darkColorPalette.text.disabled,
         },
+        root: {
+          color: darkColorPalette.primary.main,
+        },
       },
     },
     MuiTableHead: {
