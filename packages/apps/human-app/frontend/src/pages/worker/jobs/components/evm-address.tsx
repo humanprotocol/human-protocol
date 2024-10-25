@@ -18,7 +18,7 @@ export function EvmAddress({ address }: { address: string }) {
       <Typography
         sx={{
           [breakpoints.mobile]: {
-            color: colorPalette.secondary.light,
+            color: colorPalette.text.primary,
           },
         }}
         variant="body2"
