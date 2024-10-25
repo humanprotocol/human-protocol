@@ -137,19 +137,21 @@ const getColumns = ({
         const { escrow_address, chain_id } = props.row.original;
         return (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <TableButton
-              loading={loadingButtons}
-              onClick={() => {
-                assignJob({ escrow_address, chain_id });
-              }}
-            >
-              <Typography
-                sx={{ color: 'white !important' }}
-                variant="buttonSmall"
+            <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
+              <TableButton
+                loading={loadingButtons}
+                onClick={() => {
+                  assignJob({ escrow_address, chain_id });
+                }}
               >
-                {t('worker.jobs.selectJob')}
-              </Typography>
-            </TableButton>
+                <Typography
+                  sx={{ color: 'white !important' }}
+                  variant="buttonSmall"
+                >
+                  {t('worker.jobs.selectJob')}
+                </Typography>
+              </TableButton>
+            </Grid>
           </Grid>
         );
       },
