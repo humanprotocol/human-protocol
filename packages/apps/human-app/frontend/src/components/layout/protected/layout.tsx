@@ -172,7 +172,7 @@ export function Layout({
               <Grid
                 item
                 sx={{
-                  minHeight: '3.2rem',
+                  minHeight: notification ? '3.2rem' : 'unset',
                   position: 'fixed',
                   width: notificationWith
                     ? `${notificationWith.toString()}px`
