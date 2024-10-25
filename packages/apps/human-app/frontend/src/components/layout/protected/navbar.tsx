@@ -79,7 +79,9 @@ export function Navbar({
         top: open ? '0' : 'unset',
       }}
     >
-      <HumanLogoIcon />
+      <Stack sx={{ paddingLeft: '8px' }}>
+        <HumanLogoIcon />
+      </Stack>
       <Grid
         sx={{
           display: 'flex',

@@ -208,7 +208,7 @@
       "annotationTool": "Annotation tool",
       "oracleAddress": "Oracle address",
       "jobTypes": "Task types",
-      "seeJobs": "See tasks",
+      "seeJobs": "See Tasks",
       "allJobs": "All tasks"
     },
     "registrationInExchangeOracle": {
@@ -226,7 +226,7 @@
       "escrowAddress": "Escrow address",
       "network": "Network",
       "rewardAmount": "Reward amount",
-      "jobType": "Job type",
+      "jobType": "Task type",
       "expiresAt": "Expires at",
       "status": "Status",
       "selectJob": "Select Task",
