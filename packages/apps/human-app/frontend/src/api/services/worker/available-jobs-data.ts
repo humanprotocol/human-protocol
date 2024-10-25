@@ -2,8 +2,6 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useParams } from 'react-router-dom';
-import { useDebounce } from 'use-debounce';
-import { useMemo } from 'react';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
@@ -50,25 +48,10 @@ const getAvailableJobsTableData = async (
   );
 };
 
-const DEBOUNCE_TIME_MS = 500;
-
 export function useGetAvailableJobsData() {
-  const {
-    filterParams: { escrow_address, ...filterParams },
-  } = useJobsFilterStore();
+  const { filterParams } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const [debouncedEscrowAddress] = useDebounce(
-    escrow_address,
-    DEBOUNCE_TIME_MS
-  );
-  const dto = useMemo(
-    () => ({
-      ...filterParams,
-      oracle_address: oracle_address ?? '',
-      escrow_address: debouncedEscrowAddress,
-    }),
-    [filterParams, oracle_address, debouncedEscrowAddress]
-  );
+  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
 
   return useQuery({
     queryKey: ['availableJobs', dto],
@@ -77,22 +60,9 @@ export function useGetAvailableJobsData() {
 }
 
 export function useInfiniteGetAvailableJobsData() {
-  const {
-    filterParams: { escrow_address, ...filterParams },
-  } = useJobsFilterStore();
+  const { filterParams } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const [debouncedEscrowAddress] = useDebounce(
-    escrow_address,
-    DEBOUNCE_TIME_MS
-  );
-  const dto = useMemo(
-    () => ({
-      ...filterParams,
-      oracle_address: oracle_address ?? '',
-      escrow_address: debouncedEscrowAddress,
-    }),
-    [filterParams, oracle_address, debouncedEscrowAddress]
-  );
+  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
 
   return useInfiniteQuery({
     initialPageParam: 0,

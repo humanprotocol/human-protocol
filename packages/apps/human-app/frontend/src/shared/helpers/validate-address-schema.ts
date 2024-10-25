@@ -9,6 +9,6 @@ export const addressSchemaOrEmptyString = z.string().refine(
     return /^0x[0-9a-fA-F]{40}$/.test(value);
   },
   {
-    message: t('errors.invalidAddress'),
+    message: t('errors.invalidEscrowAddress'),
   }
 );

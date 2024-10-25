@@ -35,7 +35,7 @@
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
     "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
-    "invalidAddress": "Please enter a valid escrow address."
+    "invalidEscrowAddress": "Please enter a valid escrow address."
   },
   "components": {
     "multiSelect": {

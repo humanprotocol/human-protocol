@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect } from 'react';
 import Grid from '@mui/material/Grid';
+import debounce from 'lodash/debounce';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { Input } from '@/components/data-entry/input';
 import { addressSchemaOrEmptyString } from '@/shared/helpers/validate-address-schema';
@@ -35,12 +36,16 @@ export function EscrowAddressSearchForm({
     ),
   });
 
+  const debouncedUpdater = debounce((value: string) => {
+    if (updater) updater(value);
+  }, 500);
+
   useEffect(() => {
     const subscription = methods.watch(() => {
       void methods.trigger('searchValue').then((isSearchValueValid) => {
         const inputValue = methods.getValues('searchValue');
-        if (updater && isSearchValueValid) {
-          updater(inputValue);
+        if (isSearchValueValid) {
+          debouncedUpdater(inputValue);
         }
       });
     });
@@ -48,7 +53,7 @@ export function EscrowAddressSearchForm({
     return () => {
       subscription.unsubscribe();
     };
-  }, [methods, updater]);
+  }, [debouncedUpdater, methods, updater]);
 
   return (
     <Grid
