@@ -5,6 +5,7 @@ import {
   HomepageLogoIcon,
   HomepageUserIcon,
   HomepageWorkIcon,
+  HomepageWorkIconDark2,
   MobileHomeIcons,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,7 @@ function DarkModeIcons() {
         justifyContent: 'space-between',
       }}
     >
-      <HomepageWorkIcon />
+      <HomepageWorkIconDark2 />
       <HomepageUserIcon />
       <HomepageLogoIcon />
     </Stack>
