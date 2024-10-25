@@ -165,7 +165,7 @@ export function AvailableJobsTableMobile({
                   <TableButton
                     color="secondary"
                     fullWidth
-                    disabled={status === 'pending'}
+                    loading={status === 'pending'}
                     onClick={() => {
                       assignJobMutation({
                         escrow_address: d.escrow_address,
