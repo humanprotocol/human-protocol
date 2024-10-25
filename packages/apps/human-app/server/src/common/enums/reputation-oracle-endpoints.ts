@@ -1,7 +1,6 @@
 export enum ReputationOracleEndpoints {
   WORKER_SIGNUP = 'worker_signup',
   WORKER_SIGNIN = 'worker_signin',
-  WORKER_REGISTRATION = 'worker_registration',
   OPERATOR_SIGNUP = 'operator_signup',
   OPERATOR_SIGNIN = 'operator_signin',
   EMAIL_VERIFICATION = 'email_verification',
