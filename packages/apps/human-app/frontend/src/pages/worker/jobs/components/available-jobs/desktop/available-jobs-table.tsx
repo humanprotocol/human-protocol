@@ -36,8 +36,12 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const getColumns = (callbacks: {
+const getColumns = ({
+  assignJob,
+  loadingButtons,
+}: {
   assignJob: (data: AssignJobBody) => undefined;
+  loadingButtons: boolean;
 }): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
@@ -133,18 +137,21 @@ const getColumns = (callbacks: {
         const { escrow_address, chain_id } = props.row.original;
         return (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <TableButton
-              onClick={() => {
-                callbacks.assignJob({ escrow_address, chain_id });
-              }}
-            >
-              <Typography
-                sx={{ color: 'white !important' }}
-                variant="buttonSmall"
+            <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
+              <TableButton
+                loading={loadingButtons}
+                onClick={() => {
+                  assignJob({ escrow_address, chain_id });
+                }}
               >
-                {t('worker.jobs.selectJob')}
-              </Typography>
-            </TableButton>
+                <Typography
+                  sx={{ color: 'white !important' }}
+                  variant="buttonSmall"
+                >
+                  {t('worker.jobs.selectJob')}
+                </Typography>
+              </TableButton>
+            </Grid>
           </Grid>
         );
       },
@@ -168,7 +175,7 @@ export function AvailableJobsTable() {
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation } = useAssignJobMutation({
+  const { mutate: assignJobMutation, status } = useAssignJobMutation({
     onSuccess: onJobAssignmentSuccess,
     onError: onJobAssignmentError,
   });
@@ -202,6 +209,7 @@ export function AvailableJobsTable() {
       assignJob: (data) => {
         assignJobMutation(data);
       },
+      loadingButtons: status === 'pending',
     }),
     data: memoizedTableDataResults,
     state: {
