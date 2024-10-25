@@ -121,7 +121,7 @@ export function PageCard({
       container
       sx={{
         ...(isDarkMode ? commonStylesDark : commonStyles),
-        padding: isMobile ? '0 1rem 7.25rem 1rem' : '2rem 2rem 7.7rem 2rem',
+        padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
       {!hiddenCancelButton && (
