@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ImageAnnotatorClient } from '@google-cloud/vision';
+import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
 import { generateBucketUrl, listObjectsInBucket } from './storage';
 import { StorageDataDto } from '../dto/storage';
 import { VisionModeration } from './vision';
@@ -10,14 +10,14 @@ jest.mock('fs');
 jest.mock('@google-cloud/vision');
 jest.mock('./storage');
 
-describe('Vision Utils', () => {
+describe('VisionModeration', () => {
   let visionModeration: VisionModeration;
-  let mockSafeSearchDetection: jest.Mock;
+  let mockBatchAnnotateImages: jest.Mock;
 
   beforeEach(() => {
-    mockSafeSearchDetection = jest.fn();
+    mockBatchAnnotateImages = jest.fn();
     (ImageAnnotatorClient as unknown as jest.Mock).mockImplementation(() => ({
-      safeSearchDetection: mockSafeSearchDetection,
+      batchAnnotateImages: mockBatchAnnotateImages,
     }));
 
     visionModeration = new VisionModeration(
@@ -31,85 +31,91 @@ describe('Vision Utils', () => {
     jest.clearAllMocks();
   });
 
-  describe('analyzeRemoteImageForModeration', () => {
-    it('should return moderation results for a valid image URL', async () => {
-      const mockResult = {
-        safeSearchAnnotation: {
-          adult: 'LIKELY',
-          violence: 'VERY_UNLIKELY',
-          racy: 'UNLIKELY',
-          spoof: 'POSSIBLE',
-          medical: 'VERY_UNLIKELY',
-        },
+  describe('analyzeImagesForModeration', () => {
+    it('should return moderation results for a batch of valid image URLs', async () => {
+      const mockResponses = {
+        responses: [
+          {
+            safeSearchAnnotation: {
+              adult: 'LIKELY',
+              violence: 'VERY_UNLIKELY',
+              racy: 'UNLIKELY',
+              spoof: 'POSSIBLE',
+              medical: 'VERY_UNLIKELY',
+            },
+          },
+          {
+            safeSearchAnnotation: {
+              adult: 'VERY_LIKELY',
+              violence: 'LIKELY',
+              racy: 'VERY_UNLIKELY',
+              spoof: 'UNLIKELY',
+              medical: 'VERY_UNLIKELY',
+            },
+          },
+        ],
       };
-      mockSafeSearchDetection.mockResolvedValue([mockResult]);
+      mockBatchAnnotateImages.mockResolvedValue([mockResponses]);
 
-      const result = await visionModeration.analyzeRemoteImageForModeration(
-        'http://test.com/image.jpg'
-      );
+      const result = await visionModeration.analyzeImagesForModeration([
+        'http://test.com/image1.jpg',
+        'http://test.com/image2.jpg',
+      ]);
 
-      expect(result).toEqual({
-        imageUrl: 'http://test.com/image.jpg',
-        moderationResult: {
-          adult: 'LIKELY',
-          violence: 'VERY_UNLIKELY',
-          racy: 'UNLIKELY',
-          spoof: 'POSSIBLE',
-          medical: 'VERY_UNLIKELY',
+      expect(result).toEqual([
+        {
+          imageUrl: 'http://test.com/image1.jpg',
+          moderationResult: {
+            adult: 'LIKELY',
+            violence: 'VERY_UNLIKELY',
+            racy: 'UNLIKELY',
+            spoof: 'POSSIBLE',
+            medical: 'VERY_UNLIKELY',
+          },
         },
-      });
+        {
+          imageUrl: 'http://test.com/image2.jpg',
+          moderationResult: {
+            adult: 'VERY_LIKELY',
+            violence: 'LIKELY',
+            racy: 'VERY_UNLIKELY',
+            spoof: 'UNLIKELY',
+            medical: 'VERY_UNLIKELY',
+          },
+        },
+      ]);
     });
 
-    it('should return null if safeSearchAnnotation is not found', async () => {
-      mockSafeSearchDetection.mockResolvedValue([{}]);
+    it('should return an empty array if no moderation results are found', async () => {
+      mockBatchAnnotateImages.mockResolvedValue([{
+        responses: [{}], // No safeSearchAnnotation
+      }]);
 
-      const result = await visionModeration.analyzeRemoteImageForModeration(
-        'http://test.com/image.jpg'
-      );
+      const result = await visionModeration.analyzeImagesForModeration([
+        'http://test.com/image.jpg',
+      ]);
 
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
 
-    it('should return null if an error occurs', async () => {
-      mockSafeSearchDetection.mockRejectedValue(new Error('API Error'));
+    it('should return an empty array if an error occurs', async () => {
+      mockBatchAnnotateImages.mockRejectedValue(new Error('API Error'));
 
-      const result = await visionModeration.analyzeRemoteImageForModeration(
-        'http://test.com/image.jpg'
-      );
+      const result = await visionModeration.analyzeImagesForModeration([
+        'http://test.com/image.jpg',
+      ]);
 
-      expect(result).toBeNull();
-      expect(mockSafeSearchDetection).toHaveBeenCalled();
+      expect(result).toEqual([]);
+      expect(mockBatchAnnotateImages).toHaveBeenCalled();
     });
   });
 
   describe('saveResultsToJson', () => {
-    it('should append results to the JSON file', () => {
+    it('should overwrite results in the JSON file', () => {
       const results = [
-        { imageUrl: 'http://test.com/image.jpg', moderationResult: {} },
+        { imageUrl: 'http://test.com/image1.jpg', moderationResult: {} },
       ];
       const jsonFilePath = './results.json';
-
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-
-      (fs.readFileSync as jest.Mock).mockReturnValue(
-        JSON.stringify([{ existing: 'data' }])
-      );
-
-      visionModeration.saveResultsToJson(results, jsonFilePath);
-
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        jsonFilePath,
-        JSON.stringify([{ existing: 'data' }, ...results], null, 2)
-      );
-    });
-
-    it('should create a new JSON file if it does not exist', () => {
-      const results = [
-        { imageUrl: 'http://test.com/image.jpg', moderationResult: {} },
-      ];
-      const jsonFilePath = './results.json';
-
-      (fs.existsSync as jest.Mock).mockReturnValue(false);
 
       visionModeration.saveResultsToJson(results, jsonFilePath);
 
@@ -127,21 +133,21 @@ describe('Vision Utils', () => {
         host: 'test-bucket.s3.amazonaws.com',
         pathname: '/images',
       };
-      const mockObjectKeys = ['image1.jpg'];
+      const mockObjectKeys = ['image1.jpg', 'image2.jpg'];
       const mockModerationResults = [
-        { imageUrl: 'http://test.com/image1.jpg', moderationResult: {} },
+        { imageUrl: 'http://test.com/image1.jpg', moderationResult: { adult: 'LIKELY' } },
+        { imageUrl: 'http://test.com/image2.jpg', moderationResult: { adult: 'VERY_LIKELY' } },
       ];
 
       (generateBucketUrl as jest.Mock).mockReturnValue(mockBucketUrl);
       (listObjectsInBucket as jest.Mock).mockResolvedValue(mockObjectKeys);
 
       jest
-        .spyOn(visionModeration, 'analyzeRemoteImageForModeration')
-        .mockResolvedValue(mockModerationResults[0] as any);
+        .spyOn(visionModeration, 'analyzeImagesForModeration')
+        .mockResolvedValue(mockModerationResults);
 
       jest
-        .spyOn(visionModeration, 'saveResultsToJson')
-        .mockImplementation(jest.fn());
+        .spyOn(visionModeration, 'saveResultsToJson');
 
       const storageData: StorageDataDto = {
         provider: StorageProviders.AWS,
@@ -150,15 +156,47 @@ describe('Vision Utils', () => {
         path: 'images',
       };
 
-      await visionModeration.processDataset(storageData);
+      const result = await visionModeration.processDataset(storageData);
 
       expect(generateBucketUrl).toHaveBeenCalledWith(storageData);
       expect(listObjectsInBucket).toHaveBeenCalledWith(mockBucketUrl);
-
       expect(visionModeration.saveResultsToJson).toHaveBeenCalledWith(
         mockModerationResults,
         './results.json'
       );
+      expect(result).toEqual({
+        containsAbuse: 'true',
+        abuseResultsFile: './results.json',
+      });
+    });
+
+    it('should return false for containsAbuse if no abusive content is detected', async () => {
+      const mockBucketUrl = {
+        protocol: 'http:',
+        host: 'test-bucket.s3.amazonaws.com',
+        pathname: '/images',
+      };
+      const mockObjectKeys = ['image1.jpg'];
+      const mockModerationResults = [
+        { imageUrl: 'http://test.com/image1.jpg', moderationResult: { adult: 'LIKELY' } },
+      ];
+
+      (generateBucketUrl as jest.Mock).mockReturnValue(mockBucketUrl);
+      (listObjectsInBucket as jest.Mock).mockResolvedValue(mockObjectKeys);
+      jest
+        .spyOn(visionModeration, 'analyzeImagesForModeration')
+        .mockResolvedValue(mockModerationResults);
+
+      const storageData: StorageDataDto = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.AF_SOUTH_1,
+        bucketName: 'test-bucket',
+        path: 'images',
+      };
+
+      const result = await visionModeration.processDataset(storageData);
+
+      expect(result.containsAbuse).toBe('false');
     });
 
     it('should throw an error if processing fails', async () => {

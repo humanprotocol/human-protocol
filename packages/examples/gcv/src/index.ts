@@ -19,5 +19,5 @@ const visionModeration = new VisionModeration(
     path: '',
   };
 
-  await visionModeration.processDataset(storageData);
+  console.log(await visionModeration.processDataset(storageData));
 })();
