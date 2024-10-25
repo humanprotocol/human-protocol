@@ -77,7 +77,9 @@ export function DrawerNavigation({
           <Stack
             alignItems="flex-start"
             sx={{ paddingLeft: '60px', cursor: 'pointer' }}
-            onClick={handleMainNavIconClick}
+            onClick={() => {
+              handleMainNavIconClick();
+            }}
           >
             <HumanLogoNavbarIcon />
           </Stack>

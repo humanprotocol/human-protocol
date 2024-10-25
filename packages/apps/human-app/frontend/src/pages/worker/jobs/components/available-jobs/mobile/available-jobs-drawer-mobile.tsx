@@ -61,7 +61,6 @@ export function AvailableJobsDrawerMobile({
             sx={{ cursor: 'pointer' }}
             onClick={() => {
               handleMainNavIconClick();
-              // setIsMobileFilterDrawerOpen(false);
             }}
           >
             <HumanLogoIcon />
