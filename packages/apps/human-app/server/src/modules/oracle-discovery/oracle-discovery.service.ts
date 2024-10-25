@@ -90,7 +90,7 @@ export class OracleDiscoveryService {
           Role.ExchangeOracle,
         );
 
-      const filteredOracles = this.filterOracles(operators, jobTypes);
+      const filteredOracles = this.filterOraclesByJobType(operators, jobTypes);
 
       const oraclesWithRetryData: OracleDiscoveryResponse[] = [];
       for (const operator of filteredOracles) {
@@ -124,9 +124,9 @@ export class OracleDiscoveryService {
     }
   }
 
-  private filterOracles(foundOracles: IOperator[], jobTypes: string[]) {
-    if (foundOracles && foundOracles.length > 0) {
-      const filteredOracles = foundOracles.filter((oracle) => {
+  private filterOraclesByJobType(oracles: IOperator[], jobTypes: string[]) {
+    if (oracles && oracles.length > 0) {
+      const filteredOracles = oracles.filter((oracle) => {
         if (!oracle.url || oracle.url === null) {
           return false;
         }
@@ -138,7 +138,7 @@ export class OracleDiscoveryService {
 
         return filteredOracles.filter((oracle) =>
           oracle.jobTypes && oracle.jobTypes.length > 0
-            ? this.matchesJobTypes(oracle.jobTypes, jobTypeSet)
+            ? this.containsJobTypes(oracle.jobTypes, jobTypeSet)
             : false,
         );
       }
@@ -147,7 +147,7 @@ export class OracleDiscoveryService {
     return [];
   }
 
-  private matchesJobTypes(oracleJobTypes: string[], jobTypeSet: Set<string>) {
+  private containsJobTypes(oracleJobTypes: string[], jobTypeSet: Set<string>) {
     return oracleJobTypes.some((job) => jobTypeSet.has(job.toLowerCase()));
   }
 }
