@@ -54,6 +54,16 @@ export function Input({
           }
           label={label}
           name={name}
+          sx={{
+            input: {
+              '&:-webkit-autofill': {
+                '-webkit-box-shadow': `0 0 0 30px transparent inset !important`,
+                '-webkit-text-fill-color': `${colorPalette.text.primary} !important`,
+                transition:
+                  'background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s',
+              },
+            },
+          }}
           variant="outlined"
           {...rest}
         />
