@@ -6,7 +6,7 @@ export const darkColorPalette = {
   backgroundColor: 'rgba(16, 7, 53, 1)',
   text: {
     primary: '#D4CFFF',
-    secondary: 'rgba(212, 207, 255, 0.7)',
+    secondary: '#6C6978',
     disabled: 'rgba(212, 207, 255, 0.5)',
     disabledSecondary: 'rgba(147, 135, 255, 1)',
   },
