@@ -134,6 +134,11 @@ export function MultiSelect({
               onChange={(event) => {
                 handleChange(event as SelectChangeEvent<string[]>, field);
               }}
+              sx={{
+                '.MuiSvgIcon-root': {
+                  color: colorPalette.text.primary,
+                },
+              }}
             >
               {options.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
