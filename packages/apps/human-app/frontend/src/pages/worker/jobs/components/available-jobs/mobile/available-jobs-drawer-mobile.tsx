@@ -1,4 +1,3 @@
-/* eslint-disable camelcase --- response from api */
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -6,13 +5,12 @@ import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
-import { Button } from '@/components/ui/button';
-import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
-import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
+import { HumanLogoIcon } from '@/components/ui/icons';
 import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { AvailableJobsRewardAmountSortMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-reward-amount-sort-mobile';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -22,7 +20,6 @@ export function AvailableJobsDrawerMobile({
 }: DrawerMobileProps) {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
-  const { setFilterParams, filterParams } = useJobsFilterStore();
 
   return (
     <Box sx={{ display: 'flex', position: 'relative' }}>
@@ -85,66 +82,7 @@ export function AvailableJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.mobileFilterDrawer.sortBy')}
         </Typography>
-        <Typography color={colorPalette.text.secondary} variant="body2">
-          {t('worker.jobs.rewardAmount')}
-        </Typography>
-        <Button
-          size="small"
-          sx={{
-            marginLeft: '16px',
-            maxWidth: 'fit-content',
-          }}
-          variant="text"
-        >
-          <SortArrow />
-          <Typography
-            onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                sort: 'desc',
-                sort_field: 'reward_amount',
-              });
-            }}
-            sx={{
-              marginLeft: '10px',
-            }}
-            variant="subtitle1"
-          >
-            {t('worker.jobs.sortDirection.fromHighest')}
-          </Typography>
-        </Button>
-        <Button
-          size="small"
-          sx={{
-            marginLeft: '16px',
-            maxWidth: 'fit-content',
-            marginBottom: '16px',
-          }}
-          variant="text"
-        >
-          <Box
-            sx={{
-              transform: 'rotate(180deg)',
-            }}
-          >
-            <SortArrow />
-          </Box>
-          <Typography
-            onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                sort: 'asc',
-                sort_field: 'reward_amount',
-              });
-            }}
-            sx={{
-              marginLeft: '10px',
-            }}
-            variant="subtitle1"
-          >
-            From lowest
-          </Typography>
-        </Button>
+        <AvailableJobsRewardAmountSortMobile />
         <Typography variant="mobileHeaderLarge">
           {t('worker.jobs.mobileFilterDrawer.filters')}
         </Typography>
