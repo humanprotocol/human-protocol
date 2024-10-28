@@ -38,10 +38,12 @@ export type AvailableJobsTableData = AvailableJob & {
 
 const getColumns = ({
   assignJob,
-  loadingButtons,
+  assignmentPending,
+  pendingAssignmentEscrowAddress,
 }: {
   assignJob: (data: AssignJobBody) => undefined;
-  loadingButtons: boolean;
+  assignmentPending: boolean;
+  pendingAssignmentEscrowAddress?: string;
 }): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
@@ -139,7 +141,11 @@ const getColumns = ({
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
               <TableButton
-                loading={loadingButtons}
+                loading={
+                  pendingAssignmentEscrowAddress === escrow_address &&
+                  assignmentPending
+                }
+                disabled={assignmentPending}
                 onClick={() => {
                   assignJob({ escrow_address, chain_id });
                 }}
@@ -170,7 +176,11 @@ export function AvailableJobsTable() {
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation, status } = useAssignJobMutation({
+  const {
+    mutate: assignJobMutation,
+    status,
+    variables,
+  } = useAssignJobMutation({
     onSuccess: onJobAssignmentSuccess,
     onError: onJobAssignmentError,
   });
@@ -204,7 +214,8 @@ export function AvailableJobsTable() {
       assignJob: (data) => {
         assignJobMutation(data);
       },
-      loadingButtons: status === 'pending',
+      assignmentPending: status === 'pending',
+      pendingAssignmentEscrowAddress: variables?.escrow_address,
     }),
     data: memoizedTableDataResults,
     state: {
