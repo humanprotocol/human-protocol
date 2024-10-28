@@ -102,7 +102,7 @@ export function MyJobsTableMobile({
           </Stack>
         ) : null}
         {allPages.map((d) => {
-          const buttonDisabled = d.status !== 'ACTIVE';
+          const buttonDisabled = d.status !== 'active';
           return (
             <Paper
               key={crypto.randomUUID()}

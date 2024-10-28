@@ -36,7 +36,7 @@ export function ProfileActions() {
   }, [address, isWalletConnected, registerAddressMutation]);
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
-  const emailVerified = user.status === 'ACTIVE';
+  const emailVerified = user.status === 'active';
   const kycApproved = user.kyc_status === 'approved';
 
   const getConnectWalletBtn = () => {
