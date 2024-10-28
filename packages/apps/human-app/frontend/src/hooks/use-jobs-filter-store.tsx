@@ -4,7 +4,7 @@ import type { PageSize } from '@/shared/types/entity.type';
 
 export interface JobsFilterStoreProps {
   filterParams: {
-    sort?: 'ASC' | 'DESC';
+    sort?: 'asc' | 'desc';
     sort_field?:
       | 'chain_id'
       | 'job_type'
