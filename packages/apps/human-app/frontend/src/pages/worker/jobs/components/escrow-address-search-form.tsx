@@ -16,7 +16,7 @@ interface SearchFormProps {
   placeholder: string;
   columnId: string;
   fullWidth?: boolean;
-  updater?: (fieldValue: string) => void;
+  updater: (fieldValue: string) => void;
 }
 
 export function EscrowAddressSearchForm({
@@ -37,7 +37,7 @@ export function EscrowAddressSearchForm({
   });
 
   const debouncedUpdater = debounce((value: string) => {
-    if (updater) updater(value);
+    updater(value);
   }, 500);
 
   useEffect(() => {
