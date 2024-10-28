@@ -41,9 +41,10 @@ const initialFiltersState = {
   page_size: 5,
   fields: ['reward_amount', 'job_description', 'reward_token'],
   status: 'ACTIVE',
+  escrow_address: '',
 } satisfies Pick<
   JobsFilterStoreProps['filterParams'],
-  'page_size' | 'page' | 'fields' | 'status'
+  'page_size' | 'page' | 'fields' | 'status' | 'escrow_address'
 >;
 
 export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({

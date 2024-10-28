@@ -7,7 +7,6 @@ import {
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { Grid, Typography } from '@mui/material';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   useGetAvailableJobsData,
@@ -28,6 +27,7 @@ import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/avail
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -240,10 +240,9 @@ export function AvailableJobsTable() {
     enableSorting: true,
     manualSorting: true,
     renderTopToolbar: () => (
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={(address) => {
           setSearchEscrowAddress(address);
