@@ -1,15 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  IsArray,
-} from 'class-validator';
+import { IsNumber, IsOptional, Max, Min, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SortDirection } from '../enums/collection';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export class PageDto<T> {
   @ApiProperty()
@@ -67,7 +61,7 @@ export abstract class PageOptionsDto {
   pageSize?: number = 5;
 
   @ApiPropertyOptional({ enum: SortDirection, default: SortDirection.ASC })
-  @IsEnum(SortDirection)
+  @IsEnumCaseInsensitive(SortDirection)
   @IsOptional()
   sort?: SortDirection = SortDirection.ASC;
 

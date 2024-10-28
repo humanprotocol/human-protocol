@@ -1,8 +1,8 @@
 export enum JobRequestType {
-  FORTUNE = 'FORTUNE',
+  FORTUNE = 'fortune',
 }
 
 export enum SolutionError {
-  Duplicated = 'Duplicated',
-  CurseWord = 'CurseWord',
+  Duplicated = 'duplicated',
+  CurseWord = 'curse_word',
 }

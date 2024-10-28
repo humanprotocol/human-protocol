@@ -36,9 +36,13 @@ export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
     label: t('components.DrawerNavigation.help'),
     icon: <HelpIcon />,
     onClick: () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error -- ...
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if ($zoho?.salesiq?.chat?.start) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error -- ...
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         $zoho.salesiq.chat.start();
       }
     },
