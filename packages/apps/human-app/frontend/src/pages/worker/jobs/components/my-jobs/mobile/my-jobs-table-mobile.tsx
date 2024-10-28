@@ -193,16 +193,6 @@ export function MyJobsTableMobile({
                         />
                       </>
                     ) : null}
-                    <RejectButton
-                      disabled={buttonDisabled}
-                      onClick={() => {
-                        if (buttonDisabled) return;
-                        rejectTaskMutation({
-                          oracle_address: oracle_address ?? '',
-                          assignment_id: d.assignment_id,
-                        });
-                      }}
-                    />
                   </Grid>
                 </Grid>
               </List>
