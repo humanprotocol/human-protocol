@@ -9,7 +9,6 @@ import {
   type MRT_ColumnDef,
 } from 'material-react-table';
 import { Box, Typography } from '@mui/material';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
