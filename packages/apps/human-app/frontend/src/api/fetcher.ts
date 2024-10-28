@@ -102,7 +102,6 @@ export function createFetcher(defaultFetcherConfig?: {
       : fetcherOptions.options;
     if (fetcherOptions.authenticated) {
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
       });
     }
