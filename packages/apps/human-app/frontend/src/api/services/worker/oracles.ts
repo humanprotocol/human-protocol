@@ -31,8 +31,10 @@ const H_CAPTCHA_ORACLE: OracleSuccessResponse = {
 
 export async function getOracles({
   selected_job_types,
+  signal,
 }: {
   selected_job_types: string[];
+  signal: AbortSignal;
 }) {
   let oracles = [H_CAPTCHA_ORACLE];
   const queryParams = selected_job_types.length
@@ -44,7 +46,8 @@ export async function getOracles({
     {
       successSchema: OraclesSuccessSchema,
       options: { method: 'GET' },
-    }
+    },
+    signal
   );
 
   oracles = oracles.concat(result);
@@ -55,7 +58,7 @@ export async function getOracles({
 export function useGetOracles() {
   const { selected_job_types } = useJobsTypesOraclesFilter();
   return useQuery({
-    queryFn: () => getOracles({ selected_job_types }),
+    queryFn: ({ signal }) => getOracles({ selected_job_types, signal }),
     queryKey: ['oracles', selected_job_types],
   });
 }
