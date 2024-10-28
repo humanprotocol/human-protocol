@@ -6,11 +6,11 @@ export enum Role {
 }
 
 export enum JobType {
-  Fortune = 'FORTUNE',
-  Points = 'IMAGE_POINTS',
-  BoundingBoxes = 'IMAGE_BOXES',
-  BoundingBoxesFromPoints = 'IMAGE_BOXES_FROM_POINTS',
-  SkeletonsFromBoundingBoxes = 'IMAGE_SKELETONS_FROM_BOXES',
+  Fortune = 'fortune',
+  Points = 'image_points',
+  BoundingBoxes = 'image_boxes',
+  BoundingBoxesFromPoints = 'image_boxes_from_points',
+  SkeletonsFromBoundingBoxes = 'image_skeletons_from_boxes',
 }
 
 export const EthKVStoreKeys = {

@@ -404,10 +404,10 @@
     "gotIt": "Got it!"
   },
   "jobTypeLabels": {
-    "FORTUNE": "Fortune",
-    "IMAGE_POINTS": "Points",
-    "IMAGE_BOXES": "Bounding Boxes",
-    "IMAGE_BOXES_FROM_POINTS": "Bounding Boxes from Points",
-    "IMAGE_SKELETONS_FROM_BOXES": "Skeletons from Bounding Boxes"
+    "fortune": "Fortune",
+    "image_points": "Points",
+    "image_boxes": "Bounding Boxes",
+    "image_boxes_from_points": "Bounding Boxes from Points",
+    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes"
   }
 }

@@ -177,7 +177,7 @@ const getColumnsDefinition = (
     enableSorting: true,
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
-      const buttonDisabled = status !== 'ACTIVE';
+      const buttonDisabled = status !== 'active';
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           {url ? (
