@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { useColorMode } from '@/hooks/use-color-mode';
 
 interface ChipProps {
-  label: string;
+  label: string | React.ReactElement;
   key?: string;
   backgroundColor?: string;
 }
