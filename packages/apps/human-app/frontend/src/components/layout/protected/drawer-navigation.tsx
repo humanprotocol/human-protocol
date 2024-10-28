@@ -76,7 +76,7 @@ export function DrawerNavigation({
         {!isMobile && (
           <Stack
             alignItems="flex-start"
-            sx={{ paddingLeft: '60px', cursor: 'pointer' }}
+            sx={{ paddingLeft: '26px', cursor: 'pointer' }}
             onClick={() => {
               handleMainNavIconClick();
             }}
