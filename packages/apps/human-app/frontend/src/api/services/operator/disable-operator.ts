@@ -22,7 +22,7 @@ export function useDisableWeb3Operator() {
       });
 
       await mutateAsync({ authType: 'web3' });
-      updateUserData({ status: 'INACTIVE' });
+      updateUserData({ status: 'inactive' });
       return result;
     },
     mutationKey: ['disableOperator', address, chainId],

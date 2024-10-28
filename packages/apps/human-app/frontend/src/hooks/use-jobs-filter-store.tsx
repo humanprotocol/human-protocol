@@ -4,7 +4,7 @@ import type { PageSize } from '@/shared/types/entity.type';
 
 export interface JobsFilterStoreProps {
   filterParams: {
-    sort?: 'ASC' | 'DESC';
+    sort?: 'asc' | 'desc';
     sort_field?:
       | 'chain_id'
       | 'job_type'
@@ -15,12 +15,12 @@ export interface JobsFilterStoreProps {
     // TODO add allowed job types
     job_type?: string;
     status?:
-      | 'ACTIVE'
-      | 'COMPLETED'
-      | 'CANCELED'
-      | 'VALIDATION'
-      | 'EXPIRED'
-      | 'REJECTED';
+      | 'active'
+      | 'completed'
+      | 'canceled'
+      | 'validation'
+      | 'expired'
+      | 'rejected';
     escrow_address?: string;
     page: number;
     page_size: PageSize;
@@ -40,7 +40,7 @@ const initialFiltersState = {
   page: 0,
   page_size: 5,
   fields: ['reward_amount', 'job_description', 'reward_token'],
-  status: 'ACTIVE',
+  status: 'active',
   escrow_address: '',
 } satisfies Pick<
   JobsFilterStoreProps['filterParams'],

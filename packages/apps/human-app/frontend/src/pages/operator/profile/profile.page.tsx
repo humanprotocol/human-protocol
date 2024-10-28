@@ -33,7 +33,7 @@ export function OperatorProfilePage() {
     refetch: refetchStats,
   } = useGetOperatorStats();
 
-  const isOperatorActive = user.status === 'ACTIVE';
+  const isOperatorActive = user.status === 'active';
 
   useEffect(() => {
     if (keysData?.url) {
