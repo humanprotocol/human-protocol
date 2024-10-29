@@ -37,5 +37,8 @@ lerna-debug.log*
 .env.development
 .env.production
 
-#Postgres Data
+# Postgres Data
 db
+
+# Results Data
+results.json
