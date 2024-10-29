@@ -1,0 +1,25 @@
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { type MyJob } from '@/api/services/worker/my-jobs-data';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
+import { getChipStatusColor } from '@/shared/helpers/get-chip-status-color';
+
+export function StatusChip({ status }: { status: MyJob['status'] }) {
+  return (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '6px 9px',
+        color: lightModeColorPalette.white,
+        backgroundColor: getChipStatusColor(status),
+        borderRadius: '16px',
+      }}
+    >
+      <Typography color={lightModeColorPalette.white} variant="chip">
+        {status}
+      </Typography>
+    </Box>
+  );
+}

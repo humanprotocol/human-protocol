@@ -15,7 +15,7 @@ export function MyJobsTableActions({ job }: MyJobsTableRejectActionProps) {
   const { mutate: rejectTaskMutation, isPending: isRejectPending } =
     useRejectTaskMutation();
   const { address: oracleAddress } = useParams<{ address: string }>();
-  const buttonDisabled = job.status !== 'active' || isRejectPending;
+  const buttonDisabled = job.status !== 'ACTIVE' || isRejectPending;
 
   if (!job.url) {
     return null;

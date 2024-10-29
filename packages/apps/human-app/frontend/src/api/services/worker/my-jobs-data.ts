@@ -14,7 +14,19 @@ const myJobSchema = z.object({
   escrow_address: z.string(),
   chain_id: z.number(),
   job_type: z.string(),
-  status: z.string(),
+  status: z.string().transform((value) => {
+    try {
+      return z
+        .union([
+          z.literal('ACTIVE'),
+          z.literal('CANCELED'),
+          z.literal('COMPLETED'),
+        ])
+        .parse(value);
+    } catch (error) {
+      return 'UNKNOWN';
+    }
+  }),
   reward_amount: z.string(),
   reward_token: z.string(),
   created_at: z.string(),
