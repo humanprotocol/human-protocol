@@ -157,7 +157,10 @@ export function DrawerNavigation({
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography component="span" variant="body1">
+                          <Typography
+                            component="span"
+                            variant={isMobile ? 'h5' : 'body1'}
+                          >
                             {label}
                           </Typography>
                         }
@@ -243,7 +246,10 @@ export function DrawerNavigation({
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography component="span" variant="body1">
+                          <Typography
+                            component="span"
+                            variant={isMobile ? 'h5' : 'body1'}
+                          >
                             {label}
                           </Typography>
                         }
