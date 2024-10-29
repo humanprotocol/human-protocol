@@ -18,6 +18,7 @@ SkeletonBboxMapping = dict[int, int]
 @frozen(kw_only=True)
 class RoiInfo:
     original_image_key: int
+    original_image_id: str
     bbox_id: int
     bbox_x: int
     bbox_y: int

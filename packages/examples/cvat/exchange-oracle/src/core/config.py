@@ -167,14 +167,24 @@ class CronConfig:
 
 
 class CvatConfig:
+    # TODO: it looks odd to use cvat_ prefix in class attributes inside CvatConfig
     cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
     cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
     cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
     cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "")
 
     cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
-    cvat_job_segment_size = int(os.environ.get("CVAT_JOB_SEGMENT_SIZE", 150))
+    cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
     cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
+    cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 10 * 1000))
+
+    # quality control settings
+    cvat_val_frames_per_job_count = int(os.environ.get("CVAT_VAL_FRAMES_PER_JOB_COUNT", 2))
+    cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
+    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.5))
+    cvat_low_overlap_threshold = float(os.environ.get("CVAT_LOW_OVERLAP_THRESHOLD", 0.8))
+    cvat_target_metric_threshold = cvat_low_overlap_threshold
+    cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
 
     cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
@@ -222,6 +232,9 @@ class FeaturesConfig:
 
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
+
+    default_import_timeout = int(os.environ.get("DEFAULT_IMPORT_TIMEOUT", 60))
+    "Timeout, in seconds, for waiting on GT annotations import"
 
     request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
     "Allow to log request details for each request"
