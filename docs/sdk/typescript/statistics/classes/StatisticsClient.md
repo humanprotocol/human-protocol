@@ -62,7 +62,11 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:72](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L72)
+=======
+[statistics.ts:72](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L72)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ## Properties
 
@@ -72,7 +76,11 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
+=======
+[statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -82,7 +90,11 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
+=======
+[statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ## Methods
 
@@ -148,7 +160,11 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:128](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L128)
+=======
+[statistics.ts:128](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L128)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -213,7 +229,11 @@ console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:495](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L495)
+=======
+[statistics.ts:495](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L495)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -256,7 +276,11 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:421](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L421)
+=======
+[statistics.ts:421](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L421)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -296,7 +320,11 @@ console.log('HMT statistics:', {
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:378](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L378)
+=======
+[statistics.ts:378](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L378)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -380,7 +408,11 @@ console.log(
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:312](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L312)
+=======
+[statistics.ts:312](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L312)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -441,4 +473,8 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
+<<<<<<< HEAD
 [statistics.ts:213](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L213)
+=======
+[statistics.ts:213](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L213)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))

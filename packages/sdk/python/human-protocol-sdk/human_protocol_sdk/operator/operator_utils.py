@@ -79,9 +79,6 @@ class LeaderData:
         webhook_url: Optional[str] = None,
         url: Optional[str] = None,
         job_types: Optional[List[str]] = None,
-        registration_needed: Optional[bool] = None,
-        registration_instructions: Optional[str] = None,
-        reputation_networks: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -103,9 +100,6 @@ class LeaderData:
         :param webhook_url: Webhook url
         :param url: Url
         :param job_types: Job types
-        :param reputation_networks: List of reputation networks
-        :param registration_needed: True,
-        :param registration_instructions: Instructions url,
         """
 
         self.chain_id = chain_id
@@ -125,9 +119,6 @@ class LeaderData:
         self.webhook_url = webhook_url
         self.url = url
         self.job_types = job_types
-        self.registration_needed = registration_needed
-        self.registration_instructions = registration_instructions
-        self.reputation_networks = reputation_networks
 
 
 class RewardData:
@@ -149,29 +140,19 @@ class RewardData:
 
 class Operator:
     def __init__(
-        self,
-        address: str,
-        role: str,
-        url: str = "",
-        job_types: List[str] = [],
-        registration_needed: Optional[bool] = None,
-        registration_instructions: Optional[str] = None,
+        self, address: str, role: str, url: str = "", job_types: List[str] = []
     ):
         """
         Initializes an Operator instance.
 
         :param address: Operator address
         :param role: Role of the operator
-        :param registration_needed: True,
-        :param registration_instructions: Instructions url,
         """
 
         self.address = address
         self.role = role
         self.url = url
         self.job_types = job_types
-        self.registration_needed = registration_needed
-        self.registration_instructions = registration_instructions
 
 
 class OperatorUtils:
@@ -257,12 +238,15 @@ class OperatorUtils:
                     public_key=leader.get("publicKey", None),
                     webhook_url=leader.get("webhookUrl", None),
                     url=leader.get("url", None),
-                    job_types=job_types,
-                    registration_needed=leader.get("registrationNeeded", None),
-                    registration_instructions=leader.get(
-                        "registrationInstructions", None
+                    job_types=(
+                        leader.get("jobTypes").split(",")
+                        if isinstance(leader.get("jobTypes"), str)
+                        else (
+                            leader.get("jobTypes", [])
+                            if isinstance(leader.get("jobTypes"), list)
+                            else []
+                        )
                     ),
-                    reputation_networks=reputation_networks,
                 )
             )
 
@@ -350,10 +334,15 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
-            job_types=job_types,
-            registration_needed=leader.get("registrationNeeded", None),
-            registration_instructions=leader.get("registrationInstructions", None),
-            reputation_networks=reputation_networks,
+            job_types=(
+                leader.get("jobTypes").split(",")
+                if isinstance(leader.get("jobTypes"), str)
+                else (
+                    leader.get("jobTypes", [])
+                    if isinstance(leader.get("jobTypes"), list)
+                    else []
+                )
+            ),
         )
 
     @staticmethod
@@ -367,6 +356,7 @@ class OperatorUtils:
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
+        :parem job_types: (Optional) Job types of the operator
 
         :return: Returns an array of operator details
 
@@ -422,8 +412,6 @@ class OperatorUtils:
                         else []
                     )
                 ),
-                registration_needed=operator.get("registrationNeeded", ""),
-                registration_instructions=operator.get("registrationInstructions", ""),
             )
             for operator in operators
         ]

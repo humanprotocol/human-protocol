@@ -65,7 +65,11 @@ The private key.
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:52](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L52)
+=======
+[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ## Methods
 
@@ -117,7 +121,11 @@ const resultMessage = await encription.decrypt('message');
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:179](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L179)
+=======
+[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -153,7 +161,11 @@ const resultMessage = await encription.sign('message');
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:216](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L216)
+=======
+[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -218,7 +230,11 @@ const resultMessage = await encription.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:128](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L128)
+=======
+[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -246,4 +262,8 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:63](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L63)
+=======
+[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))

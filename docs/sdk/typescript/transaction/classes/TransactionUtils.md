@@ -50,7 +50,11 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 #### Defined in
 
+<<<<<<< HEAD
 [transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+=======
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -121,4 +125,8 @@ const transactions = await TransactionUtils.getTransactions(filter);
 
 #### Defined in
 
+<<<<<<< HEAD
 [transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+=======
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))

@@ -102,7 +102,11 @@ console.log(value);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
+=======
+[kvstore.ts:388](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L388)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -146,7 +150,11 @@ console.log(url);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
+=======
+[kvstore.ts:435](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L435)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -191,7 +199,11 @@ console.log(kvStoreData);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
+=======
+[kvstore.ts:336](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L336)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
 
 ***
 
@@ -231,4 +243,8 @@ console.log(publicKey);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
+=======
+[kvstore.ts:492](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L492)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
