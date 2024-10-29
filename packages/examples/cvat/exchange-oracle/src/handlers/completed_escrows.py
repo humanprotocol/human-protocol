@@ -282,3 +282,4 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
                 chain_id=chain_id,
                 status=EscrowValidationStatuses.in_progress,
             )
+            session.commit()

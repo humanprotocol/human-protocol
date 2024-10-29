@@ -6,3 +6,5 @@ __pycache__/
 .env
 .python-version
 
+human_app_public_key.pem
+human_app_private_key.pem
