@@ -145,9 +145,11 @@ const getColumns = ({
                   pendingAssignmentEscrowAddress === escrow_address &&
                   assignmentPending
                 }
-                disabled={assignmentPending}
                 onClick={() => {
                   assignJob({ escrow_address, chain_id });
+                }}
+                sx={{
+                  width: '94px',
                 }}
               >
                 <span>{t('worker.jobs.selectJob')}</span>
