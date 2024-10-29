@@ -54,11 +54,24 @@
       * [Module](human_protocol_sdk.kvstore.kvstore_client.md#module)
       * [`KVStoreClient`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClient)
       * [`KVStoreClientError`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClientError)
+<<<<<<< HEAD
     * [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
       * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
       * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
       * [`KVStoreData`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData)
       * [`KVStoreUtils`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils)
+=======
+* [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
+  * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
+  * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
+  * [`KVStoreData`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData)
+    * [`KVStoreData.__init__()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData.__init__)
+  * [`KVStoreUtils`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils)
+    * [`KVStoreUtils.get()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get)
+    * [`KVStoreUtils.get_file_url_and_verify_hash()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_file_url_and_verify_hash)
+    * [`KVStoreUtils.get_kvstore_data()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_kvstore_data)
+    * [`KVStoreUtils.get_public_key()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_public_key)
+>>>>>>> develop
 * [human_protocol_sdk.operator package](human_protocol_sdk.operator.md)
   * [Submodules](human_protocol_sdk.operator.md#submodules)
     * [human_protocol_sdk.operator.operator_utils module](human_protocol_sdk.operator.operator_utils.md)
@@ -114,7 +127,10 @@
       * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
       * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
       * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
+<<<<<<< HEAD
       * [`Transfer`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.Transfer)
+=======
+>>>>>>> develop
 
 ## Submodules
 
@@ -142,6 +158,7 @@
     * [`KVStoreKeys.fee`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.fee)
     * [`KVStoreKeys.job_types`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.job_types)
     * [`KVStoreKeys.public_key`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.public_key)
+    * [`KVStoreKeys.registration_instructions`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.registration_instructions)
     * [`KVStoreKeys.registration_needed`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.registration_needed)
     * [`KVStoreKeys.role`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.role)
     * [`KVStoreKeys.url`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.url)

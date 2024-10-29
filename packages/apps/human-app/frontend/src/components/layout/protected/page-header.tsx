@@ -1,7 +1,7 @@
 import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 
 export interface PageHeaderProps {
   headerIcon: React.ReactNode;

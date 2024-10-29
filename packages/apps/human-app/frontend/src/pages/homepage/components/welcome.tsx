@@ -1,5 +1,6 @@
 import { Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -7,21 +8,66 @@ import {
   MobileHomeIcons,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import type { HomePageStageType } from '@/pages/homepage/components/home-container';
 import { OperatorSignIn } from '@/pages/homepage/components/operator-signin';
 import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { useHomePageState } from '@/contexts/homepage-state';
+import { useBackgroundColorStore } from '@/hooks/use-background-store';
 
-interface WelcomeProps {
-  setStage: (step: HomePageStageType) => void;
+function LightModeIcons() {
+  return (
+    <Stack
+      direction="row"
+      maxHeight="80px"
+      mb="1.5rem"
+      sx={{ transform: 'translateX(-4.5%)' }}
+    >
+      <Grid sx={{ mx: '-8px' }}>
+        <HomepageWorkIcon />
+      </Grid>
+      <Grid sx={{ mx: '-8px' }}>
+        <HomepageUserIcon />
+      </Grid>
+      <Grid sx={{ mx: '-8px' }}>
+        <HomepageLogoIcon />
+      </Grid>
+    </Stack>
+  );
 }
 
-export function Welcome({ setStage }: WelcomeProps) {
+function DarkModeIcons() {
+  return (
+    <Stack
+      sx={{
+        width: '288px',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      }}
+    >
+      <HomepageWorkIcon />
+      <HomepageUserIcon />
+      <HomepageLogoIcon />
+    </Stack>
+  );
+}
+
+export function Welcome() {
+  const { colorPalette, isDarkMode } = useColorMode();
+  const { setWhiteBackground } = useBackgroundColorStore();
+  const { setPageView } = useHomePageState();
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
   const logoTextSplit: string[] = logoText.split(' ');
   const isMobile = useIsMobile('lg');
+
+  useEffect(() => {
+    if (!isDarkMode) {
+      setWhiteBackground();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Grid
@@ -31,8 +77,8 @@ export function Welcome({ setStage }: WelcomeProps) {
         paddingBottom: isMobile ? '44px' : 0,
       }}
     >
-      <Grid item justifyContent="flex-end" xs={isMobile ? 12 : 6}>
-        <Grid container direction="column">
+      <Grid container item justifyContent="center" xs={isMobile ? 12 : 6}>
+        <Grid container direction="column" justifyContent="center">
           {isMobile ? (
             <Stack
               alignItems="center"
@@ -43,11 +89,7 @@ export function Welcome({ setStage }: WelcomeProps) {
               <MobileHomeIcons />
             </Stack>
           ) : (
-            <Stack direction="row" sx={{ transform: 'translateX(-6%)' }}>
-              <HomepageWorkIcon />
-              <HomepageUserIcon />
-              <HomepageLogoIcon />
-            </Stack>
+            <>{isDarkMode ? <DarkModeIcons /> : <LightModeIcons />}</>
           )}
           <Stack
             direction="row"
@@ -93,12 +135,15 @@ export function Welcome({ setStage }: WelcomeProps) {
           <Button
             fullWidth
             onClick={() => {
-              setStage('chooseSignUpAccountType');
+              setPageView('chooseSignUpAccountType');
             }}
             size="large"
             sx={{
-              backgroundColor: colorPalette.primary.light,
+              backgroundColor: isDarkMode
+                ? '#5D0CE9'
+                : colorPalette.primary.light,
               mb: '1.5625rem',
+              color: isDarkMode ? '#CDC7FF' : undefined,
             }}
             variant="contained"
           >

@@ -28,7 +28,7 @@ export function Slider({
             {...field}
             max={max}
             min={min}
-            step={step || 10}
+            step={step ?? 10}
             valueLabelDisplay="auto"
             {...rest}
           />

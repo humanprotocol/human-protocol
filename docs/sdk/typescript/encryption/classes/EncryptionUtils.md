@@ -100,10 +100,14 @@ const result = await EncriptionUtils.encrypt('message', publicKeys);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [encryption.ts:421](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L421)
 =======
 [encryption.ts:422](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L422)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[encryption.ts:421](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L421)
+>>>>>>> develop
 
 ***
 
@@ -159,10 +163,14 @@ const result = await EncriptionUtils.generateKeyPair(name, email, passphrase);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [encryption.ts:359](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L359)
 =======
 [encryption.ts:360](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L360)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[encryption.ts:359](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L359)
+>>>>>>> develop
 
 ***
 
@@ -195,10 +203,14 @@ const signedData = await EncriptionUtils.getSignedData('message');
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [encryption.ts:316](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L316)
 =======
 [encryption.ts:317](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L317)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[encryption.ts:316](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L316)
+>>>>>>> develop
 
 ***
 
@@ -247,10 +259,14 @@ if (isEncrypted) {
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [encryption.ts:470](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L470)
 =======
 [encryption.ts:471](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L471)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[encryption.ts:470](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L470)
+>>>>>>> develop
 
 ***
 
@@ -299,7 +315,11 @@ const result = await EncriptionUtils.verify('message', publicKey);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [encryption.ts:283](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L283)
 =======
 [encryption.ts:284](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L284)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[encryption.ts:283](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L283)
+>>>>>>> develop

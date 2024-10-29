@@ -49,6 +49,8 @@ type Leader @entity {
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
   reputationNetwork: ReputationNetwork
+  registrationNeeded: Boolean
+  registrationInstructions: String
 }
 
 type LeaderURL @entity {

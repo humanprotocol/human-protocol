@@ -6,14 +6,13 @@ import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
-import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
-import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
-import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
-import { JOB_TYPES } from '@/shared/consts';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
+import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
+import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -21,6 +20,7 @@ interface DrawerMobileProps {
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
@@ -101,7 +101,7 @@ export function MyJobsDrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'DESC',
+                sort: 'desc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -133,7 +133,7 @@ export function MyJobsDrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'ASC',
+                sort: 'asc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -161,7 +161,7 @@ export function MyJobsDrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'DESC',
+                sort: 'desc',
                 sort_field: 'expires_at',
               });
             }}
@@ -193,7 +193,7 @@ export function MyJobsDrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'ASC',
+                sort: 'asc',
                 sort_field: 'expires_at',
               });
             }}
@@ -222,7 +222,7 @@ export function MyJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsNetworkFilterMobile />
+          <MyJobsNetworkFilterMobile />
         </Stack>
 
         <Divider
@@ -239,7 +239,7 @@ export function MyJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsJobTypeFilterMobile jobTypes={JOB_TYPES} />
+          <MyJobsJobTypeFilterMobile />
         </Stack>
         <Divider
           sx={{
@@ -250,7 +250,7 @@ export function MyJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.status')}
         </Typography>
-        <AvailableJobsStatusFilterMobile />
+        <MyJobsStatusFilterMobile />
       </Drawer>
     </Box>
   );

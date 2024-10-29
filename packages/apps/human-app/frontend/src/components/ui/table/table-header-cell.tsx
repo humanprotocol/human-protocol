@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { forwardRef, useState } from 'react';
 import Popover from '@mui/material/Popover';
 import type { TableCellBaseProps } from '@mui/material/TableCell/TableCell';
@@ -45,9 +43,11 @@ export const TableHeaderCell = forwardRef<
 
   const getHeader = () => {
     if (!iconType) {
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
       return <td onClick={handleClick} {...rest} />;
     }
     return (
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
       <td onClick={handleClick} {...rest}>
         <TextHeaderWithIcon iconType={iconType} text={headerText} />
       </td>

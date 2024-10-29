@@ -1,6 +1,11 @@
 export enum CredentialStatus {
-  ACTIVE = 'ACTIVE',
-  EXPIRED = 'EXPIRED',
-  VALIDATED = 'VALIDATED',
-  ON_CHAIN = 'ON_CHAIN',
+  ACTIVE = 'active',
+  EXPIRED = 'expired',
+  VALIDATED = 'validated',
+  ON_CHAIN = 'on_chain',
+}
+
+export enum CredentialValidationStatus {
+  VALIDATED = 'validated',
+  ON_CHAIN = 'on_chain',
 }

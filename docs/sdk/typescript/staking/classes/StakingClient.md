@@ -107,10 +107,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
 =======
 [staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:111](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L111)
+>>>>>>> develop
 
 ## Properties
 
@@ -121,10 +125,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
 =======
 [staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:102](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L102)
+>>>>>>> develop
 
 ***
 
@@ -139,10 +147,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 =======
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+>>>>>>> develop
 
 ***
 
@@ -153,10 +165,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
 =======
 [staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:103](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L103)
+>>>>>>> develop
 
 ***
 
@@ -171,10 +187,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 =======
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+>>>>>>> develop
 
 ***
 
@@ -185,10 +205,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
 =======
 [staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:101](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L101)
+>>>>>>> develop
 
 ***
 
@@ -199,10 +223,14 @@ The network information required to connect to the Staking contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
 =======
 [staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
+>>>>>>> develop
 
 ## Methods
 
@@ -254,10 +282,14 @@ await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amoun
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:457](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L457)
 =======
 [staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:458](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L458)
+>>>>>>> develop
 
 ***
 
@@ -303,10 +335,14 @@ await stakingClient.approveStake(amount);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:202](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L202)
 =======
 [staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:203](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L203)
+>>>>>>> develop
 
 ***
 
@@ -354,10 +390,14 @@ await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:510](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L510)
 =======
 [staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:511](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L511)
+>>>>>>> develop
 
 ***
 
@@ -404,10 +444,14 @@ await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:553](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L553)
 =======
 [staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:554](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L554)
+>>>>>>> develop
 
 ***
 
@@ -446,10 +490,14 @@ const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:590](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L590)
 =======
 [staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:591](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L591)
+>>>>>>> develop
 
 ***
 
@@ -507,10 +555,14 @@ await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:386](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L386)
 =======
 [staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:387](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L387)
+>>>>>>> develop
 
 ***
 
@@ -559,10 +611,14 @@ await stakingClient.approveStake(amount);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:257](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L257)
 =======
 [staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:258](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L258)
+>>>>>>> develop
 
 ***
 
@@ -610,10 +666,14 @@ await stakingClient.unstake(amount);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:302](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L302)
 =======
 [staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:303](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L303)
+>>>>>>> develop
 
 ***
 
@@ -656,10 +716,14 @@ await stakingClient.withdraw();
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:348](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L348)
 =======
 [staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:349](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L349)
+>>>>>>> develop
 
 ***
 
@@ -692,7 +756,11 @@ The Runner object to interact with the Ethereum network
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [staking.ts:144](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L144)
 =======
 [staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[staking.ts:145](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L145)
+>>>>>>> develop

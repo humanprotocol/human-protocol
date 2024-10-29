@@ -107,10 +107,14 @@ The network information required to connect to the Escrow contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:136](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L136)
 =======
 [escrow.ts:129](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L129)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:129](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L129)
+>>>>>>> develop
 
 ## Properties
 
@@ -125,10 +129,14 @@ The network information required to connect to the Escrow contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 =======
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+>>>>>>> develop
 
 ***
 
@@ -143,12 +151,16 @@ The network information required to connect to the Escrow contract
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
 =======
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+=======
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+>>>>>>> develop
 
 ## Methods
 
@@ -194,7 +206,11 @@ await escrowClient.abort('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 
 #### Defined in
 
+<<<<<<< HEAD
 [escrow.ts:837](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L837)
+=======
+[escrow.ts:837](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L837)
+>>>>>>> develop
 
 ***
 
@@ -247,10 +263,14 @@ await escrowClient.addTrustedHandlers('0x62dD51230A30401C455c8398d06F85e4EaB6309
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:783](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L783)
 =======
 [escrow.ts:885](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L885)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:885](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L885)
+>>>>>>> develop
 
 ***
 
@@ -318,10 +338,14 @@ await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', reci
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:594](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L594)
 =======
 [escrow.ts:650](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L650)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:650](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L650)
+>>>>>>> develop
 
 ***
 
@@ -368,10 +392,14 @@ await escrowClient.cancel('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:697](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L697)
 =======
 [escrow.ts:753](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L753)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:753](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L753)
+>>>>>>> develop
 
 ***
 
@@ -418,9 +446,13 @@ await escrowClient.complete('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:536](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L536)
 =======
 [escrow.ts:592](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L592)
+=======
+[escrow.ts:592](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L592)
+>>>>>>> develop
 
 ***
 
@@ -487,8 +519,12 @@ const escrowAddress = await escrowClient.createAndSetupEscrow(tokenAddress, trus
 
 #### Defined in
 
+<<<<<<< HEAD
 [escrow.ts:415](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L415)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:415](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L415)
+>>>>>>> develop
 
 ***
 
@@ -546,10 +582,14 @@ const escrowAddress = await escrowClient.createEscrow(tokenAddress, trustedHandl
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:216](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L216)
 =======
 [escrow.ts:209](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L209)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:209](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L209)
+>>>>>>> develop
 
 ***
 
@@ -599,10 +639,14 @@ await escrowClient.fund('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:407](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L407)
 =======
 [escrow.ts:463](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L463)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:463](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L463)
+>>>>>>> develop
 
 ***
 
@@ -641,10 +685,14 @@ const balance = await escrowClient.getBalance('0x62dD51230A30401C455c8398d06F85e
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:931](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L931)
 =======
 [escrow.ts:940](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L940)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:940](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L940)
+>>>>>>> develop
 
 ***
 
@@ -683,10 +731,14 @@ const oracleAddress = await escrowClient.getExchangeOracleAddress('0x62dD51230A3
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1317](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1317)
 =======
 [escrow.ts:1320](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1320)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1320](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1320)
+>>>>>>> develop
 
 ***
 
@@ -725,10 +777,14 @@ const factoryAddress = await escrowClient.getFactoryAddress('0x62dD51230A30401C4
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1355](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1355)
 =======
 [escrow.ts:1358](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1358)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1358](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1358)
+>>>>>>> develop
 
 ***
 
@@ -767,10 +823,14 @@ const intemediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1089](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1089)
 =======
 [escrow.ts:1092](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1092)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1092](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1092)
+>>>>>>> develop
 
 ***
 
@@ -809,10 +869,14 @@ const jobLauncherAddress = await escrowClient.getJobLauncherAddress('0x62dD51230
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1241](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1241)
 =======
 [escrow.ts:1244](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1244)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1244](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1244)
+>>>>>>> develop
 
 ***
 
@@ -851,10 +915,14 @@ const manifestHash = await escrowClient.getManifestHash('0x62dD51230A30401C455c8
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:975](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L975)
 =======
 [escrow.ts:978](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L978)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:978](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L978)
+>>>>>>> develop
 
 ***
 
@@ -893,10 +961,14 @@ const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c839
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1013](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1013)
 =======
 [escrow.ts:1016](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1016)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1016](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1016)
+>>>>>>> develop
 
 ***
 
@@ -935,10 +1007,14 @@ const oracleAddress = await escrowClient.getRecordingOracleAddress('0x62dD51230A
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1203](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1203)
 =======
 [escrow.ts:1206](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1206)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1206](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1206)
+>>>>>>> develop
 
 ***
 
@@ -977,10 +1053,14 @@ const oracleAddress = await escrowClient.getReputationOracleAddress('0x62dD51230
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1279](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1279)
 =======
 [escrow.ts:1282](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1282)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1282](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1282)
+>>>>>>> develop
 
 ***
 
@@ -1019,10 +1099,14 @@ const resultsUrl = await escrowClient.getResultsUrl('0x62dD51230A30401C455c8398d
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1051](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1051)
 =======
 [escrow.ts:1054](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1054)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1054](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1054)
+>>>>>>> develop
 
 ***
 
@@ -1061,10 +1145,14 @@ const status = await escrowClient.getStatus('0x62dD51230A30401C455c8398d06F85e4E
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1165](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1165)
 =======
 [escrow.ts:1168](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1168)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1168](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1168)
+>>>>>>> develop
 
 ***
 
@@ -1103,10 +1191,14 @@ const tokenAddress = await escrowClient.getTokenAddress('0x62dD51230A30401C455c8
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:1127](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1127)
 =======
 [escrow.ts:1130](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1130)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:1130](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1130)
+>>>>>>> develop
 
 ***
 
@@ -1168,10 +1260,14 @@ await escrowClient.setup(escrowAddress, escrowConfig);
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:297](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L297)
 =======
 [escrow.ts:290](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L290)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:290](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L290)
+>>>>>>> develop
 
 ***
 
@@ -1225,6 +1321,7 @@ await storeResults.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'h
 
 #### Defined in
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 [escrow.ts:472](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L472)
 
@@ -1283,6 +1380,9 @@ await escrowClient.withdraw(
 =======
 [escrow.ts:528](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L528)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:528](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L528)
+>>>>>>> develop
 
 ***
 
@@ -1315,7 +1415,11 @@ Thrown if the network's chainId is not supported
 #### Defined in
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 [escrow.ts:154](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L154)
 =======
 [escrow.ts:147](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L147)
 >>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+[escrow.ts:147](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L147)
+>>>>>>> develop

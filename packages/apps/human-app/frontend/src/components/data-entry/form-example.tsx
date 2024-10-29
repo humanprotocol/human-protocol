@@ -130,7 +130,14 @@ export function FormExample() {
               />
             </Grid>
             <Grid item xs={6}>
-              <MultiSelect label="ID Merchanta" name="names" options={names} />
+              <MultiSelect
+                label="ID Merchanta"
+                name="names"
+                options={names.map((name) => ({
+                  label: name,
+                  value: name,
+                }))}
+              />
             </Grid>
           </Grid>
 

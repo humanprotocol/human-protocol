@@ -31,7 +31,10 @@ type GetJobTableDataDto = JobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
 };
 
-const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
+const getAvailableJobsTableData = async (
+  dto: GetJobTableDataDto,
+  abortSignal: AbortSignal
+) => {
   return apiClient(
     `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
@@ -40,30 +43,31 @@ const getAvailableJobsTableData = async (dto: GetJobTableDataDto) => {
       options: {
         method: 'GET',
       },
-    }
+    },
+    abortSignal
   );
 };
 
 export function useGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address || '' };
+  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
 
   return useQuery({
     queryKey: ['availableJobs', dto],
-    queryFn: () => getAvailableJobsTableData(dto),
+    queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
   });
 }
 
 export function useInfiniteGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address || '' };
+  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
 
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['availableJobsInfinite', dto],
-    queryFn: () => getAvailableJobsTableData(dto),
+    queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
     getNextPageParam: (pageParams) => {
       return pageParams.total_pages - 1 <= pageParams.page
         ? undefined

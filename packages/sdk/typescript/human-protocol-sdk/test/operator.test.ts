@@ -47,6 +47,8 @@ describe('OperatorUtils', () => {
       reward: ethers.parseEther('25'),
       amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
     };
 
     const mockLeader: ILeader = {
@@ -183,6 +185,8 @@ describe('OperatorUtils', () => {
       reward: ethers.parseEther('25'),
       amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
     };
 
     const mockLeader: ILeader = {
@@ -289,6 +293,8 @@ describe('OperatorUtils', () => {
       role: Role.JobLauncher,
       url: 'www.google.com',
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
     };
     const mockOperator: IOperator = {
       ...mockOperatorSubgraph,

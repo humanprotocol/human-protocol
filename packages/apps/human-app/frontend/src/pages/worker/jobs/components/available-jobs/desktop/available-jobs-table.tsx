@@ -7,7 +7,6 @@ import {
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { Grid, Typography } from '@mui/material';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   useGetAvailableJobsData,
@@ -20,13 +19,15 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { Chip } from '@/components/ui/chip';
 import { useJobsNotifications } from '@/hooks/use-jobs-notifications';
-import { colorPalette } from '@/styles/color-palette';
 import { TableButton } from '@/components/ui/table-button';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
-import { JOB_TYPES } from '@/shared/consts';
 import { AvailableJobsNetworkFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-network-filter';
 import { AvailableJobsRewardAmountSort } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-reward-amount-sort';
 import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/available-jobs/desktop/available-jobs-job-type-filter';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -35,8 +36,12 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const getColumns = (callbacks: {
+const getColumns = ({
+  assignJob,
+  loadingButtons,
+}: {
   assignJob: (data: AssignJobBody) => undefined;
+  loadingButtons: boolean;
 }): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
@@ -105,8 +110,9 @@ const getColumns = (callbacks: {
       header: t('worker.jobs.jobType'),
       size: 200,
       enableSorting: false,
-      Cell: (props) => {
-        return <Chip label={props.row.original.job_type} />;
+      Cell: ({ row }) => {
+        const label = t(`jobTypeLabels.${row.original.job_type as JobType}`);
+        return <Chip label={label} />;
       },
       muiTableHeadCellProps: () => ({
         component: (props) => {
@@ -115,9 +121,7 @@ const getColumns = (callbacks: {
               {...props}
               headerText={t('worker.jobs.jobType')}
               iconType="filter"
-              popoverContent={
-                <AvailableJobsJobTypeFilter jobTypes={JOB_TYPES} />
-              }
+              popoverContent={<AvailableJobsJobTypeFilter />}
             />
           );
         },
@@ -125,6 +129,7 @@ const getColumns = (callbacks: {
     },
     {
       accessorKey: 'escrow_address',
+      id: 'selectJobAction',
       header: '',
       size: 100,
       enableSorting: false,
@@ -132,15 +137,21 @@ const getColumns = (callbacks: {
         const { escrow_address, chain_id } = props.row.original;
         return (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <TableButton
-              onClick={() => {
-                callbacks.assignJob({ escrow_address, chain_id });
-              }}
-            >
-              <Typography color={colorPalette.white} variant="buttonSmall">
-                {t('worker.jobs.selectJob')}
-              </Typography>
-            </TableButton>
+            <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
+              <TableButton
+                loading={loadingButtons}
+                onClick={() => {
+                  assignJob({ escrow_address, chain_id });
+                }}
+              >
+                <Typography
+                  sx={{ color: 'white !important' }}
+                  variant="buttonSmall"
+                >
+                  {t('worker.jobs.selectJob')}
+                </Typography>
+              </TableButton>
+            </Grid>
           </Grid>
         );
       },
@@ -149,21 +160,25 @@ const getColumns = (callbacks: {
 };
 
 export function AvailableJobsTable() {
-  const { setSearchEscrowAddress, setPageParams, filterParams } =
-    useJobsFilterStore();
+  const { colorPalette, isDarkMode } = useColorMode();
+  const {
+    setSearchEscrowAddress,
+    setPageParams,
+    filterParams,
+    resetFilterParams,
+  } = useJobsFilterStore();
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
   const memoizedTableDataResults = useMemo(
-    () => tableData?.results || [],
+    () => tableData?.results ?? [],
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation, isPending: isAssignJobMutationPending } =
-    useAssignJobMutation({
-      onSuccess: onJobAssignmentSuccess,
-      onError: onJobAssignmentError,
-    });
+  const { mutate: assignJobMutation, status } = useAssignJobMutation({
+    onSuccess: onJobAssignmentSuccess,
+    onError: onJobAssignmentError,
+  });
 
   const [paginationState, setPaginationState] = useState({
     pageIndex: 0,
@@ -183,42 +198,73 @@ export function AvailableJobsTable() {
     });
   }, [filterParams.page, filterParams.page_size]);
 
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
+
   const table = useMaterialReactTable({
     columns: getColumns({
       assignJob: (data) => {
         assignJobMutation(data);
       },
+      loadingButtons: status === 'pending',
     }),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
       showAlertBanner: tableStatus === 'error',
-      showProgressBars: tableStatus === 'pending' || isAssignJobMutationPending,
       pagination: paginationState,
     },
     enablePagination: Boolean(tableData?.total_pages),
     manualPagination: true,
     onPaginationChange: setPaginationState,
     muiPaginationProps: {
+      SelectProps: {
+        sx: {
+          '.MuiSelect-icon': {
+            ':hover': {
+              backgroundColor: 'blue',
+            },
+            fill: colorPalette.text.primary,
+          },
+        },
+      },
       rowsPerPageOptions: [5, 10],
     },
-    pageCount: tableData?.total_pages || -1,
+    pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: true,
     manualSorting: true,
     renderTopToolbar: () => (
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={(address) => {
           setSearchEscrowAddress(address);
         }}
       />
     ),
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

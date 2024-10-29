@@ -4,11 +4,12 @@ import { lastValueFrom } from 'rxjs';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import {
-  RegisterWorkerCommand,
-  RegisterWorkerData,
-  RegisterWorkerResponse,
+  RegistrationInExchangeOraclesResponse,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleData,
   SignupWorkerCommand,
   SignupWorkerData,
+  RegistrationInExchangeOracleResponse,
 } from '../../modules/user-worker/model/worker-registration.model';
 import {
   SignupOperatorCommand,
@@ -173,18 +174,20 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<SigninWorkerResponse>(options);
   }
 
-  async sendWorkerRegistration(command: RegisterWorkerCommand) {
+  async sendRegistrationInExchangeOracle(
+    command: RegistrationInExchangeOracleCommand,
+  ) {
     const data = this.mapper.map(
       command,
-      RegisterWorkerCommand,
-      RegisterWorkerData,
+      RegistrationInExchangeOracleCommand,
+      RegistrationInExchangeOracleData,
     );
     const options = this.getEndpointOptions(
-      ReputationOracleEndpoints.WORKER_REGISTRATION,
+      ReputationOracleEndpoints.REGISTRATION_IN_EXCHANGE_ORACLE,
       data,
       command.token,
     );
-    return this.handleRequestToReputationOracle<RegisterWorkerResponse>(
+    return this.handleRequestToReputationOracle<RegistrationInExchangeOracleResponse>(
       options,
     );
   }
@@ -333,5 +336,18 @@ export class ReputationOracleGateway {
       token,
     );
     return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async getRegistrationInExchangeOracles(
+    token: string,
+  ): Promise<RegistrationInExchangeOraclesResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.GET_REGISTRATION_IN_EXCHANGE_ORACLES,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<RegistrationInExchangeOraclesResponse>(
+      options,
+    );
   }
 }

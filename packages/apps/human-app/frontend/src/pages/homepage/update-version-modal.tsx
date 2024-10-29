@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import { Button } from '@/components/ui/button';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 
 export function UpdateVersionModal() {
   const { closeModal } = useModalStore();

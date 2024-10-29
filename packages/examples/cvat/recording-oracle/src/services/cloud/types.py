@@ -6,6 +6,8 @@ from enum import Enum, auto
 from inspect import isclass
 from urllib.parse import urlparse
 
+import pydantic
+
 from src.core import manifest
 from src.core.config import Config, IStorageConfig
 from src.services.cloud.gcs import DEFAULT_GCS_HOST
@@ -167,14 +169,18 @@ class BucketAccessInfo:
 
     @classmethod
     def from_bucket_url(cls, bucket_url: manifest.BucketUrl) -> BucketAccessInfo:
-        return cls._from_dict(bucket_url.dict())
+        return cls._from_dict(bucket_url.model_dump())
 
     @classmethod
-    def parse_obj(cls, data: str | type[IStorageConfig] | manifest.BucketUrl) -> BucketAccessInfo:
+    def parse_obj(
+        cls, data: str | type[IStorageConfig] | manifest.BucketUrl | pydantic.AnyUrl
+    ) -> BucketAccessInfo:
         if isinstance(data, manifest.BucketUrlBase):
             return cls.from_bucket_url(data)
         if isinstance(data, str):
             return cls.from_url(data)
+        if isinstance(data, pydantic.AnyUrl):
+            return cls.from_url(str(data))
         if isclass(data) and issubclass(data, IStorageConfig):
             return cls.from_storage_config(data)
 

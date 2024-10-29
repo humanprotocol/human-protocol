@@ -4,7 +4,7 @@ import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface FilteringOption<T> {
   name: string;
@@ -26,6 +26,8 @@ export function Filtering<T>({
   clear,
   isMobile = true,
 }: FilteringProps<T>) {
+  const { colorPalette } = useColorMode();
+
   return (
     <List sx={{ padding: 0 }}>
       {isMobile ? (

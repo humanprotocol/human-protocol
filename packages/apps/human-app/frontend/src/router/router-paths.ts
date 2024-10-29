@@ -15,6 +15,7 @@ export const routerPaths = {
     jobs: '/worker/jobs',
     HcaptchaLabeling: '/worker/hcaptcha-labeling',
     enableLabeler: '/worker/enable-labeler',
+    registrationInExchangeOracle: '/worker/registration-in-exchange-oracle',
   },
   operator: {
     signIn: '/operator/sign-in',
