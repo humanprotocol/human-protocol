@@ -1,6 +1,6 @@
-# VisionModeration
+# Images Content Moderation
 
-VisionModeration is a module that uses the Google Cloud Vision API to analyze images for moderation purposes. It can assess images for adult, violent, racy, spoof, and medical content, saving the results in a JSON file. The module is designed to help detect potentially inappropriate content in image datasets stored in a remote bucket.
+Images Content Moderation is a module that uses the Google Cloud Vision API to analyze images for moderation purposes. It can assess images for adult, violent, racy, spoof, and medical content, saving the results in a JSON file. The module is designed to help detect potentially inappropriate content in image datasets stored in a remote bucket.
 
 ## Table of Contents
 
