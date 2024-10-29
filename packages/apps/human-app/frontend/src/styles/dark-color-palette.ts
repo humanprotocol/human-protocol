@@ -6,7 +6,7 @@ export const darkColorPalette = {
   backgroundColor: 'rgba(16, 7, 53, 1)',
   text: {
     primary: '#D4CFFF',
-    secondary: 'rgba(212, 207, 255, 0.7)',
+    secondary: '#6C6978',
     disabled: 'rgba(212, 207, 255, 0.5)',
     disabledSecondary: 'rgba(147, 135, 255, 1)',
   },
@@ -45,7 +45,7 @@ export const darkColorPalette = {
     main: 'rgba(203, 207, 232, 0.28)',
   },
   button: {
-    disabled: 'rgba(218, 222, 240, 0.8)',
+    disabled: '#FFFFFF1F',
   },
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
