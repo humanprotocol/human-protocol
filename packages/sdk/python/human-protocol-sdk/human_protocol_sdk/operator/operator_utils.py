@@ -81,6 +81,7 @@ class LeaderData:
         job_types: Optional[List[str]] = None,
         registration_needed: Optional[bool] = None,
         registration_instructions: Optional[str] = None,
+        reputation_networks: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -102,8 +103,9 @@ class LeaderData:
         :param webhook_url: Webhook url
         :param url: Url
         :param job_types: Job types
-        :param registration_needed: True,
-        :param registration_instructions: Instructions url,
+        :param registration_needed: True
+        :param registration_instructions: Instructions url
+        :param reputation_networks: List of reputation networks
         """
 
         self.chain_id = chain_id
@@ -125,6 +127,7 @@ class LeaderData:
         self.job_types = job_types
         self.registration_needed = registration_needed
         self.registration_instructions = registration_instructions
+        self.reputation_networks = reputation_networks
 
 
 class RewardData:
@@ -267,6 +270,7 @@ class OperatorUtils:
                     registration_instructions=leader.get(
                         "registrationInstructions", None
                     ),
+                    reputation_networks=reputation_networks,
                 )
             )
 
@@ -365,6 +369,7 @@ class OperatorUtils:
             ),
             registration_needed=leader.get("registrationNeeded", None),
             registration_instructions=leader.get("registrationInstructions", None),
+            reputation_networks=reputation_networks,
         )
 
     @staticmethod

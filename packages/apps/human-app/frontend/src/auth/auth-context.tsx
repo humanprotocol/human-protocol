@@ -43,6 +43,7 @@ interface UnauthenticatedUserContextType {
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<
   AuthenticatedUserContextType | UnauthenticatedUserContextType | null
 >(null);

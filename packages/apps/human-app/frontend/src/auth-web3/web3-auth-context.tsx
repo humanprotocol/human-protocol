@@ -33,6 +33,7 @@ interface Web3UnauthenticatedUserContextType {
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Web3AuthContext = createContext<
   Web3AuthenticatedUserContextType | Web3UnauthenticatedUserContextType | null
 >(null);

@@ -43,11 +43,9 @@ export const TableHeaderCell = forwardRef<
 
   const getHeader = () => {
     if (!iconType) {
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
       return <td onClick={handleClick} {...rest} />;
     }
     return (
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
       <td onClick={handleClick} {...rest}>
         <TextHeaderWithIcon iconType={iconType} text={headerText} />
       </td>

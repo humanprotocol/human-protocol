@@ -22,6 +22,9 @@ fragment LeaderFields on Leader {
     jobTypes
     registrationNeeded
     registrationInstructions
+    reputationNetworks {
+      address
+    }
 }
 """
 

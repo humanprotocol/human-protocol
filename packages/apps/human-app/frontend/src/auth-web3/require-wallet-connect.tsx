@@ -5,6 +5,7 @@ import type { WalletConnectContextConnectedAccount } from '@/contexts/wallet-con
 import { routerPaths } from '@/router/router-paths';
 import { PageCardLoader } from '@/components/ui/page-card';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthWeb3Context =
   createContext<WalletConnectContextConnectedAccount | null>(null);
 

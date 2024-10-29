@@ -49,6 +49,11 @@ describe('OperatorUtils', () => {
       jobTypes: 'type1,type2',
       registrationNeeded: true,
       registrationInstructions: 'www.google.com',
+      reputationNetworks: [
+        {
+          address: '0x01',
+        },
+      ],
     };
 
     const mockLeader: ILeader = {
@@ -187,6 +192,11 @@ describe('OperatorUtils', () => {
       jobTypes: 'type1,type2',
       registrationNeeded: true,
       registrationInstructions: 'www.google.com',
+      reputationNetworks: [
+        {
+          address: '0x01',
+        },
+      ],
     };
 
     const mockLeader: ILeader = {
