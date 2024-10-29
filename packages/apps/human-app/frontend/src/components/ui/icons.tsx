@@ -4,7 +4,6 @@ import HomepageUserIconLight from '@/assets/icons/icons-homepage/user.svg';
 import HomepageUserIconDark from '@/assets/icons-dark-mode/icons-homepage/user.svg';
 import HomepageWorkIconLight from '@/assets/icons/icons-homepage/work.svg';
 import HomepageWorkIconDark from '@/assets/icons-dark-mode/icons-homepage/work.svg';
-import HomepageWorkIconDark2 from '@/assets/icons-dark-mode/icons-homepage/work2.svg';
 import HumanLogoIconLight from '@/assets/icons/icons-human-logo/human-logo.svg';
 import HumanLogoIconDark from '@/assets/icons-dark-mode/icons-human-logo/human-logo.svg';
 import ChatIcon from '@/assets/icons/chat.svg';
@@ -142,5 +141,4 @@ export {
   FiltersIcon,
   SunIcon,
   MoonIcon,
-  HomepageWorkIconDark2,
 };

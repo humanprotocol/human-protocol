@@ -5,7 +5,6 @@ import {
   HomepageLogoIcon,
   HomepageUserIcon,
   HomepageWorkIcon,
-  HomepageWorkIconDark2,
   MobileHomeIcons,
 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
@@ -15,44 +14,6 @@ import { WorkerSignIn } from '@/pages/homepage/components/worker-signin';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { useHomePageState } from '@/contexts/homepage-state';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
-
-function LightModeIcons() {
-  return (
-    <Stack
-      direction="row"
-      maxHeight="80px"
-      mb="1.5rem"
-      sx={{ transform: 'translateX(-4.5%)' }}
-    >
-      <Grid sx={{ mx: '-8px' }}>
-        <HomepageWorkIcon />
-      </Grid>
-      <Grid sx={{ mx: '-8px' }}>
-        <HomepageUserIcon />
-      </Grid>
-      <Grid sx={{ mx: '-8px' }}>
-        <HomepageLogoIcon />
-      </Grid>
-    </Stack>
-  );
-}
-
-function DarkModeIcons() {
-  return (
-    <Stack
-      sx={{
-        width: '288px',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-      }}
-    >
-      <HomepageWorkIconDark2 />
-      <HomepageUserIcon />
-      <HomepageLogoIcon />
-    </Stack>
-  );
-}
 
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();
@@ -90,7 +51,22 @@ export function Welcome() {
               <MobileHomeIcons />
             </Stack>
           ) : (
-            <>{isDarkMode ? <DarkModeIcons /> : <LightModeIcons />}</>
+            <Stack
+              direction="row"
+              maxHeight="80px"
+              mb="1.5rem"
+              sx={{ transform: 'translateX(-4.5%)' }}
+            >
+              <Grid sx={{ mx: '-8px' }}>
+                <HomepageWorkIcon />
+              </Grid>
+              <Grid sx={{ mx: '-8px' }}>
+                <HomepageUserIcon />
+              </Grid>
+              <Grid sx={{ mx: '-8px' }}>
+                <HomepageLogoIcon />
+              </Grid>
+            </Stack>
           )}
           <Stack
             direction="row"
