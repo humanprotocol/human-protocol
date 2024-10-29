@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  type MutationKey,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
@@ -18,10 +22,13 @@ function assignJob(data: AssignJobBody) {
   });
 }
 
-export function useAssignJobMutation(callbacks?: {
-  onSuccess: () => Promise<void>;
-  onError: (error: unknown) => Promise<void>;
-}) {
+export function useAssignJobMutation(
+  callbacks?: {
+    onSuccess: () => Promise<void>;
+    onError: (error: unknown) => Promise<void>;
+  },
+  mutationKey?: MutationKey
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -34,5 +41,6 @@ export function useAssignJobMutation(callbacks?: {
       await queryClient.invalidateQueries();
       void callbacks?.onError(error);
     },
+    mutationKey,
   });
 }
