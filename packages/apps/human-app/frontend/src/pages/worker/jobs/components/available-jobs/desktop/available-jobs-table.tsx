@@ -6,7 +6,7 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
-import { Grid, Typography } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   useGetAvailableJobsData,
@@ -144,12 +144,7 @@ const getColumns = ({
                   assignJob({ escrow_address, chain_id });
                 }}
               >
-                <Typography
-                  sx={{ color: 'white !important' }}
-                  variant="buttonSmall"
-                >
-                  {t('worker.jobs.selectJob')}
-                </Typography>
+                <span>{t('worker.jobs.selectJob')}</span>
               </TableButton>
             </Grid>
           </Grid>
