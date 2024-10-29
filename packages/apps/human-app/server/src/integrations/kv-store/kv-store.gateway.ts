@@ -76,10 +76,7 @@ export class KvStoreGateway {
     }
 
     if (!jobTypes || jobTypes === '') {
-      throw new HttpException(
-        `Unable to retrieve job types from address: ${address}`,
-        400,
-      );
+      return;
     } else {
       await this.cacheManager.set(key, jobTypes, {
         ttl: this.configService.cacheTtlJobTypes,

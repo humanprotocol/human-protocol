@@ -5,7 +5,7 @@ import {
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { ChainId, IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
+import { OperatorUtils, Role } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
 
@@ -24,7 +24,6 @@ export class OracleDiscoveryService {
   ): Promise<OracleDiscoveryResponse[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
-    const jobTypesByChainId = new Map<ChainId, string[]>();
 
     const oraclesForChainIds = await Promise.all(
       chainIds.map(async (chainId) => {
@@ -33,8 +32,6 @@ export class OracleDiscoveryService {
         )
           .split(',')
           .map((job) => job.trim().toLowerCase());
-
-        jobTypesByChainId.set(+chainId, jobTypes);
 
         return this.findOraclesByChainId(chainId, address, jobTypes);
       }),
@@ -76,28 +73,25 @@ export class OracleDiscoveryService {
     jobTypes: string[],
   ): Promise<OracleDiscoveryResponse[]> {
     try {
-      const cachedOracles: OracleDiscoveryResponse[] | undefined =
-        await this.cacheManager.get(chainId);
+      const cachedOracles =
+        await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
+      if (cachedOracles) return cachedOracles;
 
-      if (cachedOracles) {
-        return cachedOracles;
-      }
+      const operators = await OperatorUtils.getReputationNetworkOperators(
+        Number(chainId),
+        address,
+        Role.ExchangeOracle,
+      );
 
-      const operators: IOperator[] =
-        await OperatorUtils.getReputationNetworkOperators(
-          Number(chainId),
-          address,
-          Role.ExchangeOracle,
-        );
+      const jobTypeSet = new Set(jobTypes.map((j) => j.toLowerCase()));
 
-      const filteredOracles = this.filterOraclesByJobType(operators, jobTypes);
-
-      const oraclesWithRetryData: OracleDiscoveryResponse[] = [];
-      for (const operator of filteredOracles) {
-        const isOperatorValid = !!operator.url;
-
-        if (isOperatorValid) {
-          oraclesWithRetryData.push(
+      const oraclesWithRetryData: OracleDiscoveryResponse[] = operators
+        .filter(
+          (operator) =>
+            operator.url && this.hasJobTypes(operator.jobTypes, jobTypeSet),
+        )
+        .map(
+          (operator) =>
             new OracleDiscoveryResponse(
               operator.address,
               chainId,
@@ -107,9 +101,7 @@ export class OracleDiscoveryService {
               operator.registrationNeeded,
               operator.registrationInstructions,
             ),
-          );
-        }
-      }
+        );
 
       await this.cacheManager.set(
         chainId,
@@ -124,30 +116,12 @@ export class OracleDiscoveryService {
     }
   }
 
-  private filterOraclesByJobType(oracles: IOperator[], jobTypes: string[]) {
-    if (oracles && oracles.length > 0) {
-      const filteredOracles = oracles.filter((oracle) => {
-        if (!oracle.url || oracle.url === null) {
-          return false;
-        }
-        return true;
-      });
-
-      if (jobTypes && jobTypes.length > 0) {
-        const jobTypeSet = new Set(jobTypes || []);
-
-        return filteredOracles.filter((oracle) =>
-          oracle.jobTypes && oracle.jobTypes.length > 0
-            ? this.containsJobTypes(oracle.jobTypes, jobTypeSet)
-            : false,
-        );
-      }
-      return filteredOracles;
-    }
-    return [];
-  }
-
-  private containsJobTypes(oracleJobTypes: string[], jobTypeSet: Set<string>) {
-    return oracleJobTypes.some((job) => jobTypeSet.has(job.toLowerCase()));
+  private hasJobTypes(
+    oracleJobTypes: string[] | undefined,
+    jobTypeSet: Set<string>,
+  ) {
+    return oracleJobTypes
+      ? oracleJobTypes.some((job) => jobTypeSet.has(job.toLowerCase()))
+      : false;
   }
 }
