@@ -5,24 +5,23 @@ import zipfile
 from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
+from pathlib import Path
 from time import sleep
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from cvat_sdk import Client, make_client
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
 from cvat_sdk.core.helpers import get_paginated_collection
+from cvat_sdk.core.uploading import AnnotationUploader
 
 from src.core.config import Config
 from src.utils.enums import BetterEnumMeta
 from src.utils.time import utcnow
-
-if TYPE_CHECKING:
-    from cvat_sdk.core.proxies.jobs import Job
 
 _NOTSET = object()
 
@@ -609,9 +608,9 @@ def clear_job_annotations(job_id: int) -> None:
             raise
 
 
-def setup_gt_job(task_id: int, filename: str, format_name: str) -> None:
+def setup_gt_job(task_id: int, dataset_path: Path, format_name: str) -> None:
     gt_job = get_gt_job(task_id)
-    upload_gt_annotations(gt_job.id, filename, format_name)
+    upload_gt_annotations(gt_job.id, dataset_path, format_name=format_name)
     finish_gt_job(gt_job.id)
     settings = get_quality_control_settings(task_id)
     update_quality_control_settings(settings.id)
@@ -634,12 +633,68 @@ def get_gt_job(task_id: int) -> models.JobRead:
 
 def upload_gt_annotations(
     job_id: int,
-    filename: str,
+    dataset_path: Path,
+    *,
     format_name: str,
+    sleep_interval: int = 5,
+    timeout: int | None = Config.features.default_import_timeout,
 ) -> None:
+    # FUTURE-TODO: use job.import_annotations when CVAT will support waiting timeout
+    start_time = datetime.now(timezone.utc)
+    logger = logging.getLogger("app")
+
     with get_sdk_client() as client:
-        job: Job = client.jobs.retrieve(job_id)
-        job.import_annotations(format_name=format_name, filename=filename)
+        uploader = AnnotationUploader(client)
+        url = client.api_map.make_endpoint_url(
+            client.api_client.jobs_api.create_annotations_endpoint.path, kwsub={"id": job_id}
+        )
+
+        try:
+            response = uploader.upload_file(
+                url,
+                dataset_path,
+                query_params={"format": format_name, "filename": dataset_path.name},
+                meta={"filename": dataset_path.name},
+            )
+        except Exception as ex:
+            logger.exception(f"Exception occurred while importing GT annotations: {ex}\n")
+            raise
+
+        request_id = json.loads(response.data).get("rq_id")
+        assert request_id, "CVAT server have not returned rq_id in the response."
+
+        while True:
+            try:
+                (request_details, _) = client.api_client.requests_api.retrieve(request_id)
+            except exceptions.ApiException as ex:
+                logger.exception(f"Exception occurred while importing GT annotations: {ex}\n")
+                raise
+
+            if (
+                request_details.status.value
+                == models.RequestStatus.allowed_values[("value",)]["FINISHED"]
+            ):
+                break
+
+            if (
+                request_details.status.value
+                == models.RequestStatus.allowed_values[("value",)]["FAILED"]
+            ):
+                raise Exception(
+                    "Annotations upload failed. "
+                    f"Previous status was: {request_details.status.value}."
+                )
+
+            if timeout is not None and timedelta(seconds=timeout) < (utcnow() - start_time):
+                raise Exception(
+                    "Failed to upload the GT annotations to CVAT within the timeout interval. "
+                    f"Previous status was: {request_details.status.value}. "
+                    f"Timeout: {timeout} seconds."
+                )
+
+            sleep(sleep_interval)
+
+    logger.info(f"GT annotations for the job {job_id} have been uploaded to CVAT.")
 
 
 def get_quality_control_settings(task_id: int) -> models.QualitySettings:
@@ -662,7 +717,7 @@ def get_quality_control_settings(task_id: int) -> models.QualitySettings:
 def update_quality_control_settings(
     settings_id: int,
     *,
-    max_validations_per_job: int,
+    max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     target_metric: str = "accuracy",
     target_metric_threshold: float = Config.cvat_config.cvat_target_metric_threshold,
     low_overlap_threshold: float = Config.cvat_config.cvat_low_overlap_threshold,
