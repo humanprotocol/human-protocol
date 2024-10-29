@@ -9,7 +9,6 @@ import { DatabaseModule } from './database/database.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
-import { UserModule } from './modules/user/user.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
@@ -34,7 +33,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     Web3Module,
     StatsModule,
     CronJobModule,
-    UserModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`

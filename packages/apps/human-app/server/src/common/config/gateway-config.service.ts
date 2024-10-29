@@ -103,12 +103,6 @@ export class GatewayConfigService {
             [ReputationOracleEndpoints.KYC_ON_CHAIN]: {
               endpoint: '/kyc/on-chain',
               method: HttpMethod.GET,
-              headers: this.JSON_HEADER,
-            },
-            [ReputationOracleEndpoints.GET_REGISTERED_ORACLES]: {
-              endpoint: '/user/registration',
-              method: HttpMethod.GET,
-              headers: this.JSON_HEADER,
             },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },

@@ -27,7 +27,4 @@ export class WorkerService {
       registerWorkerCommand,
     );
   }
-  async getRegisteredOracles(token: string) {
-    return this.reputationOracleGateway.getRegisteredOracles(token);
-  }
 }

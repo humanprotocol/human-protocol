@@ -15,7 +15,6 @@ export enum ReputationOracleEndpoints {
   REGISTER_ADDRESS = 'REGISTER_ADDRESS',
   TOKEN_REFRESH = 'TOKEN_REFRESH',
   KYC_ON_CHAIN = 'KYC_ON_CHAIN',
-  GET_REGISTERED_ORACLES = 'GET_REGISTERED_ORACLES',
 }
 export enum HCaptchaLabelingStatsEndpoints {
   USER_STATS = 'USER_STATS',

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {

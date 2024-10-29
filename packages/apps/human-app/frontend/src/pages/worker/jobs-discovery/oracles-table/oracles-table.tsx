@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { t } from 'i18next';
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
@@ -15,11 +14,9 @@ import { TableButton } from '@/components/ui/table-button';
 import { routerPaths } from '@/router/router-paths';
 import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
-import { useGetRegisteredOracles } from '@/api/services/worker/registered-oracles';
-import { useRegisteredOracles } from '@/contexts/registered-oracles';
 
 const getColumns = (
-  selectOracle: (oracle: OracleSuccessResponse) => void
+  selectOracle: (oracleAddress: string) => void
 ): MRT_ColumnDef<OracleSuccessResponse>[] => {
   return [
     {
@@ -54,7 +51,7 @@ const getColumns = (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <TableButton
               onClick={() => {
-                selectOracle(props.row.original);
+                selectOracle(props.row.original.address);
               }}
             >
               {t('worker.oraclesTable.seeJobs')}
@@ -79,23 +76,9 @@ export function OraclesTable({
   } = oraclesQueryDataResult;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const selectOracle = (oracle: OracleSuccessResponse) => {
-    navigate(`${routerPaths.worker.jobs}/${oracle.address}`, {
-      state: {
-        oracle,
-      },
-    });
+  const selectOracle = (oracleAddress: string) => {
+    navigate(`${routerPaths.worker.jobs}/${oracleAddress}`);
   };
-
-  const { setRegisteredOracles } = useRegisteredOracles();
-  const { data: registeredOraclesResults, isFetched } =
-    useGetRegisteredOracles();
-
-  useEffect(() => {
-    if (isFetched && registeredOraclesResults?.oracle_addresses) {
-      setRegisteredOracles(registeredOraclesResults.oracle_addresses);
-    }
-  }, [isFetched, registeredOraclesResults, setRegisteredOracles]);
 
   const table = useMaterialReactTable({
     state: {
