@@ -412,7 +412,6 @@ def prepare_escrows_for_validation(
         .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
         .limit(limit)
         .order_by(EscrowValidation.attempts.asc())
-        .subquery()
     )
     update_stmt = (
         update(EscrowValidation)
