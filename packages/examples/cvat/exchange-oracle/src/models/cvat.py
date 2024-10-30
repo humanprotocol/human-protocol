@@ -61,6 +61,7 @@ class Project(Base):
             ")"
         ),
         foreign_keys=[escrow_address, chain_id],
+        overlaps="escrow_validation",
     )
     escrow_validation: Mapped[EscrowValidation] = relationship(
         back_populates="projects",
@@ -73,6 +74,7 @@ class Project(Base):
             ")"
         ),
         foreign_keys=[escrow_address, chain_id],
+        overlaps="escrow_creation",
     )
 
     def __repr__(self) -> str:
@@ -129,6 +131,7 @@ class EscrowCreation(Base):
             ")"
         ),
         foreign_keys=[Project.escrow_address, Project.chain_id],
+        overlaps="projects, escrow_validation",
     )
 
     def __repr__(self) -> str:
@@ -157,6 +160,7 @@ class EscrowValidation(Base):
             ")"
         ),
         foreign_keys=[Project.escrow_address, Project.chain_id],
+        overlaps="projects, escrow_creation",
     )
 
 
