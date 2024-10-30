@@ -25,7 +25,7 @@ export function AvailableJobsDrawerMobile({
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
   return (
-    <Box sx={{ display: 'flex', position: 'relative' }}>
+    <Box>
       <CssBaseline />
       <Drawer
         open
