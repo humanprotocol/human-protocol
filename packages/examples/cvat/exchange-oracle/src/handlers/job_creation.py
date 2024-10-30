@@ -138,41 +138,6 @@ class _ExcludedAnnotationsInfo:
         )
 
 
-def setup_gt_job_for_cvat_task(
-    task_id: int,
-    gt_dataset: dm.Dataset,
-    *,
-    dm_export_format: str = "coco",
-) -> None:
-    dm_format_to_cvat_format = {
-        "coco": "COCO 1.0",
-        "cvat": "CVAT 1.1",
-    }
-
-    dm_format_to_annotations_path = {
-        "coco": "annotations/instances_default.json",
-        "cvat": "default.xml",
-    }
-
-    task_status: cvat_api.UploadStatus | None = None
-
-    while task_status != cvat_api.UploadStatus.FINISHED:
-        task_status, _ = cvat_api.get_task_upload_status(task_id)
-        if not task_status or task_status == cvat_api.UploadStatus.FAILED:
-            return  # will be handled in state_trackers.py::track_task_creation
-
-    if task_status == cvat_api.UploadStatus.FINISHED:
-        with TemporaryDirectory() as tmp_dir:
-            gt_dataset.export(
-                save_dir=tmp_dir, save_images=False, format=dm_export_format
-            )  # reindex=True ?
-            cvat_api.setup_gt_job(
-                task_id,
-                Path(tmp_dir) / dm_format_to_annotations_path[dm_export_format],
-                format_name=dm_format_to_cvat_format[dm_export_format],
-            )
-
-
 class _TaskBuilderBase(metaclass=ABCMeta):
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
@@ -201,6 +166,41 @@ class _TaskBuilderBase(metaclass=ABCMeta):
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
+
+    def _setup_gt_job_for_cvat_task(
+        self,
+        task_id: int,
+        gt_dataset: dm.Dataset,
+        *,
+        dm_export_format: str = "coco",
+    ) -> None:
+        dm_format_to_cvat_format = {
+            "coco": "COCO 1.0",
+            "cvat": "CVAT 1.1",
+        }
+
+        dm_format_to_annotations_path = {
+            "coco": "annotations/instances_default.json",
+            "cvat": "default.xml",
+        }
+
+        task_status: cvat_api.UploadStatus | None = None
+
+        while task_status != cvat_api.UploadStatus.FINISHED:
+            task_status, _ = cvat_api.get_task_upload_status(task_id)
+            if not task_status or task_status == cvat_api.UploadStatus.FAILED:
+                return  # will be handled in state_trackers.py::track_task_creation
+
+        if task_status == cvat_api.UploadStatus.FINISHED:
+            with TemporaryDirectory() as tmp_dir:
+                gt_dataset.export(
+                    save_dir=tmp_dir, save_images=False, format=dm_export_format
+                )  # reindex=True ?
+                cvat_api.setup_gt_job(
+                    task_id,
+                    Path(tmp_dir) / dm_format_to_annotations_path[dm_export_format],
+                    format_name=dm_format_to_cvat_format[dm_export_format],
+                )
 
     @abstractmethod
     def build(self) -> None: ...
@@ -386,7 +386,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                     },
                 )
 
-                setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset, dm_export_format="coco")
+                self._setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset, dm_export_format="coco")
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
@@ -1437,7 +1437,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
-                setup_gt_job_for_cvat_task(
+                self._setup_gt_job_for_cvat_task(
                     cvat_task.id, self._gt_roi_dataset, dm_export_format="coco"
                 )
 
@@ -2561,7 +2561,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                                 "gt_frames_per_job_count": self.manifest.validation.val_size,
                             },
                         )
-                        setup_gt_job_for_cvat_task(
+                        self._setup_gt_job_for_cvat_task(
                             cvat_task.id, gt_points_dataset, dm_export_format="cvat"
                         )
                         db_service.create_data_upload(session, cvat_task.id)
