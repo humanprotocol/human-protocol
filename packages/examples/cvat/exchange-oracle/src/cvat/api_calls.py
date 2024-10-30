@@ -608,14 +608,6 @@ def clear_job_annotations(job_id: int) -> None:
             raise
 
 
-def setup_gt_job(task_id: int, dataset_path: Path, format_name: str) -> None:
-    gt_job = get_gt_job(task_id)
-    upload_gt_annotations(gt_job.id, dataset_path, format_name=format_name)
-    finish_gt_job(gt_job.id)
-    settings = get_quality_control_settings(task_id)
-    update_quality_control_settings(settings.id)
-
-
 def get_gt_job(task_id: int) -> models.JobRead:
     logger = logging.getLogger("app")
 

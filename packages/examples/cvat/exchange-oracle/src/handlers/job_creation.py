@@ -196,11 +196,21 @@ class _TaskBuilderBase(metaclass=ABCMeta):
                 gt_dataset.export(
                     save_dir=tmp_dir, save_images=False, format=dm_export_format
                 )  # reindex=True ?
-                cvat_api.setup_gt_job(
+
+                self._setup_gt_job(
                     task_id,
                     Path(tmp_dir) / dm_format_to_annotations_path[dm_export_format],
                     format_name=dm_format_to_cvat_format[dm_export_format],
                 )
+
+    def _setup_gt_job(self, task_id: int, dataset_path: Path, format_name: str) -> None:
+        gt_job = cvat_api.get_gt_job(task_id)
+        cvat_api.upload_gt_annotations(gt_job.id, dataset_path, format_name=format_name)
+        cvat_api.finish_gt_job(gt_job.id)
+
+    def _setup_quality_settings(self, task_id: int) -> None:
+        settings = cvat_api.get_quality_control_settings(task_id)
+        cvat_api.update_quality_control_settings(settings.id)
 
     @abstractmethod
     def build(self) -> None: ...
@@ -208,7 +218,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
 class SimpleTaskBuilder(_TaskBuilderBase):
     """
-    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
+    Handles task creation for the IMAGE_BOXES task type
     """
 
     def _upload_task_meta(self, gt_dataset: dm.Dataset):
@@ -390,6 +400,58 @@ class SimpleTaskBuilder(_TaskBuilderBase):
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
+
+
+class PointsTaskBuilder(SimpleTaskBuilder):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
+
+        self._mean_gt_bbox_radius_estimation: _MaybeUnset[float] = _unset
+
+    def _parse_gt_dataset(self, gt_file_data, *, add_prefix=None):
+        gt_dataset = super()._parse_gt_dataset(gt_file_data, add_prefix=add_prefix)
+
+        # Replace boxes with their center points
+        # Collect radius statistics
+
+        updated_gt_dataset = dm.Dataset(categories=gt_dataset.categories(), media_type=dm.Image)
+
+        radiuses = []
+
+        for gt_sample in gt_dataset:
+            updated_anns = []
+
+            image_size = gt_sample.media_as(dm.Image).size
+            image_half_diag = ((image_size[0] ** 2 + image_size[1] ** 2) ** 0.5) / 2
+
+            for gt_bbox in gt_sample:
+                if not isinstance(gt_bbox, dm.Bbox):
+                    continue
+
+                x, y, w, h = gt_bbox.get_bbox()
+                bbox_center = dm.Points([x + w / 2, y + h / 2], label=gt_bbox.label, id=gt_bbox.id)
+
+                rel_bbox_radius = ((w**2 + h**2) ** 0.5) / 2 / image_half_diag
+                radiuses.append(rel_bbox_radius)
+
+                updated_anns.append(bbox_center)
+
+            updated_gt_dataset.put(gt_sample.wrap(annotations=updated_anns))
+
+        self._mean_gt_bbox_radius_estimation = min(0.5, np.mean(radiuses))
+
+        return updated_gt_dataset
+
+    def _setup_quality_settings(self, task_id):
+        assert self._mean_gt_bbox_radius_estimation is not _unset
+
+        # TODO: refactor
+        super()._setup_quality_settings(task_id)
+
+        settings = cvat_api.get_quality_control_settings(task_id)
+        cvat_api.update_quality_control_settings(
+            settings.id, oks_sigma=self._mean_gt_bbox_radius_estimation
+        )
 
 
 class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
@@ -2638,10 +2700,11 @@ def create_task(escrow_address: str, chain_id: int) -> None:
 
     if manifest.annotation.type in [
         TaskTypes.image_boxes,
-        TaskTypes.image_points,
         TaskTypes.image_label_binary,
     ]:
         builder_type = SimpleTaskBuilder
+    elif manifest.annotation.type in [TaskTypes.image_points]:
+        builder_type = TaskTypes.image_points
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
         builder_type = BoxesFromPointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
