@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useGetKeys } from '@/api/services/operator/get-keys';
 import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
@@ -16,7 +15,6 @@ import { useColorMode } from '@/hooks/use-color-mode';
 
 export function OperatorProfilePage() {
   const { colorPalette } = useColorMode();
-  const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const isMobile = useIsMobile('lg');
   const { user } = useWeb3AuthenticatedUser();
@@ -35,11 +33,7 @@ export function OperatorProfilePage() {
     refetch: refetchStats,
   } = useGetOperatorStats();
 
-  const isOperatorActive = user.status === 'ACTIVE';
-
-  useEffect(() => {
-    setGrayBackground();
-  }, [setGrayBackground]);
+  const isOperatorActive = user.status === 'active';
 
   useEffect(() => {
     if (keysData?.url) {
@@ -54,7 +48,7 @@ export function OperatorProfilePage() {
   if (isKeysError || isStatsError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(keysError || statsError)}
+        errorMessage={defaultErrorMessage(keysError ?? statsError)}
       />
     );
   }
@@ -84,7 +78,7 @@ export function OperatorProfilePage() {
               <ProfileListItem
                 header={t('operator.profile.about.role')}
                 paragraph={
-                  keysData.role ||
+                  keysData.role ??
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
@@ -139,27 +133,27 @@ export function OperatorProfilePage() {
               <ProfileListItem
                 header={t('operator.profile.about.fee')}
                 paragraph={
-                  `${keysData.fee}${t('inputMasks.percentSuffix')}` ||
+                  `${keysData.fee ?? ''}${t('inputMasks.percentSuffix')}` ||
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.publicKey')}
                 paragraph={
-                  keysData.public_key ||
+                  keysData.public_key ??
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.url')}
                 paragraph={
-                  keysData.url || t('operator.addKeysPage.existingKeys.url')
+                  keysData.url ?? t('operator.addKeysPage.existingKeys.url')
                 }
               />
               <ProfileListItem
                 header={t('operator.profile.about.webhookUrl')}
                 paragraph={
-                  keysData.webhook_url ||
+                  keysData.webhook_url ??
                   t('operator.addKeysPage.existingKeys.noValue')
                 }
               />

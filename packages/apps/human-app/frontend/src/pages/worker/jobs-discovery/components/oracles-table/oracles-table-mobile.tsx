@@ -10,6 +10,7 @@ import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { ListItem } from '@/components/ui/list-item';
 import { useColorMode } from '@/hooks/use-color-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import type { OracleSuccessResponse } from '@/api/services/worker/oracles';
 
 export function OraclesTableMobile({
   selectOracle,
@@ -20,7 +21,7 @@ export function OraclesTableMobile({
     isPending: isOraclesDataPending,
   },
 }: {
-  selectOracle: (oracleAddress: string, jobTypes: string[]) => void;
+  selectOracle: (oracle: OracleSuccessResponse, jobTypes: string[]) => void;
   oraclesQueryDataResult: OraclesDataQueryResult;
 }) {
   const { colorPalette } = useColorMode();
@@ -66,7 +67,7 @@ export function OraclesTableMobile({
               <EvmAddress address={d.address} />
             </ListItem>
             <ListItem label={t('worker.oraclesTable.annotationTool')}>
-              <Typography variant="body2">{d.url || ''}</Typography>
+              <Typography variant="body2">{d.url ?? ''}</Typography>
             </ListItem>
             <ListItem label={t('worker.oraclesTable.jobTypes')}>
               <Chips
@@ -79,7 +80,7 @@ export function OraclesTableMobile({
           <TableButton
             fullWidth
             onClick={() => {
-              selectOracle(d.address, d.jobTypes);
+              selectOracle(d, d.jobTypes);
             }}
           >
             {t('worker.oraclesTable.seeJobs')}

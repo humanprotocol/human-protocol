@@ -6,8 +6,7 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
-import { Grid, Typography } from '@mui/material';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
+import { Grid } from '@mui/material';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   useGetAvailableJobsData,
@@ -28,6 +27,7 @@ import { AvailableJobsJobTypeFilter } from '@/pages/worker/jobs/components/avail
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -36,8 +36,12 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const getColumns = (callbacks: {
+const getColumns = ({
+  assignJob,
+  loadingButtons,
+}: {
   assignJob: (data: AssignJobBody) => undefined;
+  loadingButtons: boolean;
 }): MRT_ColumnDef<AvailableJob>[] => {
   return [
     {
@@ -133,18 +137,16 @@ const getColumns = (callbacks: {
         const { escrow_address, chain_id } = props.row.original;
         return (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <TableButton
-              onClick={() => {
-                callbacks.assignJob({ escrow_address, chain_id });
-              }}
-            >
-              <Typography
-                sx={{ color: 'white !important' }}
-                variant="buttonSmall"
+            <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
+              <TableButton
+                loading={loadingButtons}
+                onClick={() => {
+                  assignJob({ escrow_address, chain_id });
+                }}
               >
-                {t('worker.jobs.selectJob')}
-              </Typography>
-            </TableButton>
+                <span>{t('worker.jobs.selectJob')}</span>
+              </TableButton>
+            </Grid>
           </Grid>
         );
       },
@@ -164,11 +166,11 @@ export function AvailableJobsTable() {
     useJobsNotifications();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
   const memoizedTableDataResults = useMemo(
-    () => tableData?.results || [],
+    () => tableData?.results ?? [],
     [tableData?.results]
   );
 
-  const { mutate: assignJobMutation } = useAssignJobMutation({
+  const { mutate: assignJobMutation, status } = useAssignJobMutation({
     onSuccess: onJobAssignmentSuccess,
     onError: onJobAssignmentError,
   });
@@ -202,6 +204,7 @@ export function AvailableJobsTable() {
       assignJob: (data) => {
         assignJobMutation(data);
       },
+      loadingButtons: status === 'pending',
     }),
     data: memoizedTableDataResults,
     state: {
@@ -225,17 +228,16 @@ export function AvailableJobsTable() {
       },
       rowsPerPageOptions: [5, 10],
     },
-    pageCount: tableData?.total_pages || -1,
+    pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: true,
     manualSorting: true,
     renderTopToolbar: () => (
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={(address) => {
           setSearchEscrowAddress(address);

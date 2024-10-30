@@ -12,6 +12,8 @@ const OracleSuccessSchema = z.object({
   role: z.string(),
   url: z.string().optional().nullable(),
   jobTypes: z.array(z.string()),
+  registrationNeeded: z.boolean().optional().nullable(),
+  registrationInstructions: z.string().optional().nullable(),
 });
 
 const OraclesSuccessSchema = z.array(OracleSuccessSchema);
@@ -24,13 +26,17 @@ const H_CAPTCHA_ORACLE: OracleSuccessResponse = {
   jobTypes: env.VITE_H_CAPTCHA_ORACLE_TASK_TYPES,
   role: env.VITE_H_CAPTCHA_ORACLE_ROLE,
   url: env.VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL,
+  registrationNeeded: false,
 };
 
 export async function getOracles({
   selected_job_types,
+  signal,
 }: {
   selected_job_types: string[];
+  signal: AbortSignal;
 }) {
+  let oracles = [H_CAPTCHA_ORACLE];
   const queryParams = selected_job_types.length
     ? `?${stringifyUrlQueryObject({ selected_job_types })}`
     : '';
@@ -40,18 +46,19 @@ export async function getOracles({
     {
       successSchema: OraclesSuccessSchema,
       options: { method: 'GET' },
-    }
+    },
+    signal
   );
 
-  result.unshift(H_CAPTCHA_ORACLE);
+  oracles = oracles.concat(result);
 
-  return result;
+  return oracles;
 }
 
 export function useGetOracles() {
   const { selected_job_types } = useJobsTypesOraclesFilter();
   return useQuery({
-    queryFn: () => getOracles({ selected_job_types }),
+    queryFn: ({ signal }) => getOracles({ selected_job_types, signal }),
     queryKey: ['oracles', selected_job_types],
   });
 }

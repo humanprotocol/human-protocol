@@ -57,7 +57,7 @@ export function VerifyEmailWorkerPage() {
     data: Pick<ResendEmailVerificationDto, 'h_captcha_token'>
   ) => {
     resendEmailVerificationMutation({
-      email: routerState?.email || '',
+      email: routerState?.email ?? '',
       h_captcha_token: data.h_captcha_token,
     });
   };

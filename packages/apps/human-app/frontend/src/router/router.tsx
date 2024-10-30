@@ -45,14 +45,6 @@ export function Router() {
         ))}
       </Route>
       {protectedRoutes.map(({ routerProps, pageHeaderProps }) => {
-        if (
-          (routerProps.path === routerPaths.worker.HcaptchaLabeling ||
-            routerProps.path === routerPaths.worker.jobsDiscovery) &&
-          user?.kyc_status !== 'approved'
-        ) {
-          return null;
-        }
-
         return (
           <Route
             element={

@@ -18,6 +18,7 @@ import { Web3AuthProvider } from '@/auth-web3/web3-auth-context';
 import { JWTExpirationCheck } from '@/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/contexts/color-mode-context';
 import { HomePageStateProvider } from '@/contexts/homepage-state';
+import { RegisteredOraclesProvider } from '@/contexts/registered-oracles';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -41,7 +42,9 @@ createRoot(root).render(
                 <AuthProvider>
                   <DisplayModal />
                   <JWTExpirationCheck>
-                    <Router />
+                    <RegisteredOraclesProvider>
+                      <Router />
+                    </RegisteredOraclesProvider>
                   </JWTExpirationCheck>
                 </AuthProvider>
               </Web3AuthProvider>

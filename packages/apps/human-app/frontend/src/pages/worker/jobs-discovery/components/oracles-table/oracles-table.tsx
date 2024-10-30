@@ -4,7 +4,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import Grid from '@mui/material/Grid';
+import { Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { type OracleSuccessResponse } from '@/api/services/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
@@ -12,16 +12,17 @@ import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
 import { routerPaths } from '@/router/router-paths';
-import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/oracles-table/oracles-table-mobile';
+import { OraclesTableMobile } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table-mobile';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
-import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { type JobType } from '@/smart-contracts/EthKVStore/config';
+import { useGetRegistrationInExchangeOracles } from '@/api/services/worker/get-registration-in-exchange-oracles';
 
 const getColumns = (
-  selectOracle: (oracleAddress: string) => void
+  selectOracle: (oracle: OracleSuccessResponse) => void
 ): MRT_ColumnDef<OracleSuccessResponse>[] => {
   return [
     {
@@ -61,7 +62,7 @@ const getColumns = (
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <TableButton
               onClick={() => {
-                selectOracle(props.row.original.address);
+                selectOracle(props.row.original);
               }}
             >
               {t('worker.oraclesTable.seeJobs')}
@@ -87,17 +88,35 @@ export function OraclesTable({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
-  const selectOracle = (oracleAddress: string) => {
-    if (oracleAddress === env.VITE_H_CAPTCHA_ORACLE_ADDRESS) {
+  const { data: registrationInExchangeOraclesResult } =
+    useGetRegistrationInExchangeOracles();
+
+  const selectOracle = (oracle: OracleSuccessResponse) => {
+    if (
+      oracle.registrationNeeded &&
+      !registrationInExchangeOraclesResult?.oracle_addresses.find(
+        (address) => address === oracle.address
+      )
+    ) {
+      navigate(
+        `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
+      );
+      return;
+    }
+
+    if (oracle.address === env.VITE_H_CAPTCHA_ORACLE_ADDRESS) {
       if (!user.site_key) {
         navigate(routerPaths.worker.enableLabeler);
         return;
       }
-
       navigate(routerPaths.worker.HcaptchaLabeling);
       return;
     }
-    navigate(`${routerPaths.worker.jobs}/${oracleAddress}`);
+    navigate(`${routerPaths.worker.jobs}/${oracle.address}`, {
+      state: {
+        oracle,
+      },
+    });
   };
 
   const table = useMaterialReactTable({
@@ -106,12 +125,13 @@ export function OraclesTable({
       showAlertBanner: isOraclesDataError,
     },
     columns: getColumns(selectOracle),
-    data: oraclesData || [],
+    data: oraclesData ?? [],
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
     enablePagination: false,
     enableTopToolbar: false,
+    enableBottomToolbar: false,
     muiTableHeadCellProps: {
       sx: {
         borderColor: colorPalette.paper.text,

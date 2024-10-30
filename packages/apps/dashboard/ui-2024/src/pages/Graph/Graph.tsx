@@ -2,11 +2,12 @@ import { AreaChart } from '@components/Charts';
 import Tabs from '@mui/material/Tabs';
 import TabPanel from '@mui/lab/TabPanel';
 import Tab from '@mui/material/Tab';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TabContext from '@mui/lab/TabContext';
 import Typography from '@mui/material/Typography';
 import PageWrapper from '@components/PageWrapper';
 import Breadcrumbs from '@components/Breadcrumbs';
+import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-params';
 
 type graphType = 'bucketed';
 
@@ -15,6 +16,12 @@ const Graph = () => {
 	const handleGraphTypeChange = (_: unknown, newValue: graphType) => {
 		setGraphType(newValue);
 	};
+	const { revertToInitialParams } = useGraphPageChartParams();
+
+	useEffect(() => {
+		revertToInitialParams();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<PageWrapper displaySearchBar className="standard-background">

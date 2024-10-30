@@ -9,9 +9,9 @@ interface TabPanelProps {
 export function TabPanel({ children, index, activeTab }: TabPanelProps) {
   return (
     <div
-      aria-labelledby={`tabpanel-${index}`}
+      aria-labelledby={`tabpanel-${index.toString()}`}
       hidden={activeTab !== index}
-      id={`jobs-tabpanel-${index}`}
+      id={`jobs-tabpanel-${index.toString()}`}
       role="tabpanel"
     >
       {activeTab === index && <Box sx={{ py: 3 }}>{children}</Box>}

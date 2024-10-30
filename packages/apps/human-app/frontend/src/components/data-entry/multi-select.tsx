@@ -124,18 +124,15 @@ export function MultiSelect({
             <Select
               input={<OutlinedInput id={name} label={label} />}
               {...field}
-              defaultValue={[]}
+              defaultValue={[] as string[]}
               error={Boolean(fieldState.error)}
               id={name}
               labelId={`${name}-${label}`}
               multiple
-              renderValue={renderValue}
-              sx={{
-                '& .MuiSvgIcon-root': { color: colorPalette.primary.main },
-              }}
+              renderValue={(selected) => renderValue(selected as string[])}
               {...props}
               onChange={(event) => {
-                handleChange(event, field);
+                handleChange(event as SelectChangeEvent<string[]>, field);
               }}
             >
               {options.map((option) => (

@@ -4,5 +4,5 @@ export const exchangeOracleGatewayMock = {
   fetchAssignedJobs: jest.fn(),
   postNewJobAssignment: jest.fn(),
   fetchDiscoveredJobs: jest.fn(),
-  registerWorker: jest.fn(),
+  sendRegistrationInExchangeOracle: jest.fn(),
 };

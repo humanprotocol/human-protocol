@@ -4,10 +4,10 @@ export enum EventType {
 }
 
 export enum WebhookStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  PAID = 'PAID',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  PAID = 'paid',
 }
 
 export enum WebhookType {

@@ -33,6 +33,8 @@ export interface ILeader {
   webhookUrl?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
 }
 
 export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
@@ -60,6 +62,8 @@ export interface IOperator {
   role?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
 }
 
 export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {

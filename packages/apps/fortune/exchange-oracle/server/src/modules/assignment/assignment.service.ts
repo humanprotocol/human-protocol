@@ -70,7 +70,7 @@ export class AssignmentService {
     const manifest = await this.jobService.getManifest(
       data.chainId,
       data.escrowAddress,
-      jobEntity.manifestUrl
+      jobEntity.manifestUrl,
     );
 
     // Check if all required qualifications are present

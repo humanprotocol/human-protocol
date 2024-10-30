@@ -8,8 +8,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { Box } from '@mui/material';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
+import { Box, Typography } from '@mui/material';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
@@ -33,6 +32,7 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 const getColumnsDefinition = (
   resignJob: (assignment_id: string) => void
@@ -144,16 +144,18 @@ const getColumnsDefinition = (
       return (
         <Box
           sx={{
-            display: 'flex',
+            display: 'inline-flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '3px 4px',
+            padding: '6px 9px',
             color: lightModeColorPalette.white,
             backgroundColor: '#5D0CE9',
             borderRadius: '16px',
           }}
         >
-          {status}
+          <Typography color={lightModeColorPalette.white} variant="chip">
+            {status}
+          </Typography>
         </Box>
       );
     },
@@ -177,26 +179,28 @@ const getColumnsDefinition = (
     enableSorting: true,
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
-      const buttonDisabled = status !== 'ACTIVE';
+      const buttonDisabled = status !== 'active';
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           {url ? (
-            <TableButton
-              component={Link}
-              disabled={buttonDisabled}
-              target="_blank"
-              to={url}
-            >
-              {t('worker.jobs.solve')}
-            </TableButton>
+            <>
+              <TableButton
+                component={Link}
+                disabled={buttonDisabled}
+                target="_blank"
+                to={url}
+              >
+                {t('worker.jobs.solve')}
+              </TableButton>
+              <RejectButton
+                disabled={buttonDisabled}
+                onClick={() => {
+                  if (buttonDisabled) return;
+                  resignJob(assignment_id);
+                }}
+              />
+            </>
           ) : null}
-          <RejectButton
-            disabled={buttonDisabled}
-            onClick={() => {
-              if (buttonDisabled) return;
-              resignJob(assignment_id);
-            }}
-          />
         </Grid>
       );
     },
@@ -214,7 +218,7 @@ export function MyJobsTable() {
 
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
-    () => tableData?.results || [],
+    () => tableData?.results ?? [],
     [tableData?.results]
   );
 
@@ -251,7 +255,7 @@ export function MyJobsTable() {
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(rejectTask(oracle_address || '')),
+    columns: getColumnsDefinition(rejectTask(oracle_address ?? '')),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
@@ -276,16 +280,15 @@ export function MyJobsTable() {
       },
       rowsPerPageOptions: [5, 10],
     },
-    pageCount: tableData?.total_pages || -1,
+    pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
     renderTopToolbar: () => (
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={(address) => {
           setSearchEscrowAddress(address);

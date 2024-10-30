@@ -2,7 +2,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import Grid from '@mui/material/Grid';
 import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
@@ -18,6 +18,7 @@ import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { onlyDarkModeColor } from '@/styles/dark-color-palette';
+import { routerPaths } from '@/router/router-paths';
 
 export function HcaptchaLabelingPage() {
   const { colorPalette, isDarkMode } = useColorMode();
@@ -73,6 +74,10 @@ export function HcaptchaLabelingPage() {
     solveHCaptchaMutation({ token });
   };
 
+  if (user.kyc_status !== 'approved') {
+    return <Navigate to={routerPaths.worker.profile} replace />;
+  }
+
   if (isHcaptchaUserStatsPending || isDailyHmtSpentPending) {
     return <PageCardLoader />;
   }
@@ -82,7 +87,7 @@ export function HcaptchaLabelingPage() {
       <PageCardError
         cardMaxWidth="100%"
         errorMessage={defaultErrorMessage(
-          hcaptchaUserStatsError || dailyHmtSpentError
+          hcaptchaUserStatsError ?? dailyHmtSpentError
         )}
       />
     );
@@ -138,7 +143,7 @@ export function HcaptchaLabelingPage() {
                   onVerify={hcaptchaOnSuccess}
                   ref={captchaRef}
                   reportapi={env.VITE_H_CAPTCHA_LABELING_BASE_URL}
-                  sitekey={user.site_key || ''}
+                  sitekey={user.site_key ?? ''}
                   theme={isDarkMode ? 'dark' : 'light'}
                 />
               </Grid>

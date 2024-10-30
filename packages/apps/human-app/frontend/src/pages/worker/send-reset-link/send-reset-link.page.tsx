@@ -24,7 +24,7 @@ export function SendResetLinkWorkerPage() {
 
   const methods = useForm<SendResetLinkDto>({
     defaultValues: {
-      email: user?.email || '',
+      email: user?.email ?? '',
       h_captcha_token: '',
     },
     resolver: zodResolver(sendResetLinkDtoSchema),
