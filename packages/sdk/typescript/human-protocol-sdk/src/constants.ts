@@ -323,6 +323,7 @@ export const KVStoreKeys = {
   fee: 'fee',
   publicKey: 'public_key',
   webhookUrl: 'webhook_url',
+  website: 'website',
   url: 'url',
   jobTypes: 'job_types',
   registrationNeeded: 'registration_needed',

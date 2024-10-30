@@ -17,6 +17,7 @@ const LEADER_FRAGMENT = gql`
     fee
     publicKey
     webhookUrl
+    website
     url
     jobTypes
     registrationNeeded

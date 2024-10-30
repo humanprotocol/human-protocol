@@ -30,6 +30,7 @@ export interface ILeader {
   fee?: bigint;
   publicKey?: string;
   webhookUrl?: string;
+  website?: string;
   url?: string;
   jobTypes?: string[];
   registrationNeeded?: boolean;

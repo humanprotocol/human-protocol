@@ -19,6 +19,7 @@ import { getNetwork } from '@utils/config/networks';
 import { NetworkIcon } from '@components/NetworkIcon';
 import { colorPalette } from '@assets/styles/color-palette';
 import { TableRow, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
 import Stack from '@mui/material/Stack';
 import { handleErrorMessage } from '@services/handle-error-message';
 import Loader from '@components/Loader';
@@ -184,31 +185,67 @@ export const Table = ({
 										},
 									}}
 								>
-									<Grid
-										container
-										wrap="nowrap"
-										alignItems="center"
-										gap="8px"
-										justifyContent="flex-start"
-									>
-										{mobile.isMobile ? (
-											<>
-												<Typography
-													variant="subtitle2"
-													sx={{ wordBreak: 'unset' }}
-												>
-													{row.role}
-												</Typography>
-											</>
-										) : (
-											<>
-												<EntityIcon role={row.role} />
-												<Typography variant="h6" sx={{ wordBreak: 'unset' }}>
-													{row.role}
-												</Typography>
-											</>
-										)}
-									</Grid>
+									{row.website ? (
+										<Link
+											to={row.website}
+											style={{ textDecoration: 'none', color: 'inherit' }}
+										>
+											<Grid
+												container
+												wrap="nowrap"
+												alignItems="center"
+												gap="8px"
+												justifyContent="flex-start"
+											>
+												{mobile.isMobile ? (
+													<>
+														<Typography
+															variant="subtitle2"
+															sx={{ wordBreak: 'unset' }}
+														>
+															{row.role}
+														</Typography>
+													</>
+												) : (
+													<>
+														<EntityIcon role={row.role} />
+														<Typography
+															variant="h6"
+															sx={{ wordBreak: 'unset' }}
+														>
+															{row.role}
+														</Typography>
+													</>
+												)}
+											</Grid>
+										</Link>
+									) : (
+										<Grid
+											container
+											wrap="nowrap"
+											alignItems="center"
+											gap="8px"
+											justifyContent="flex-start"
+										>
+											{mobile.isMobile ? (
+												<>
+													<Typography
+														variant="subtitle2"
+														sx={{ wordBreak: 'unset' }}
+													>
+														{row.role}
+													</Typography>
+												</>
+											) : (
+												<>
+													<EntityIcon role={row.role} />
+													<Typography variant="h6" sx={{ wordBreak: 'unset' }}>
+														{row.role}
+													</Typography>
+												</>
+											)}
+										</Grid>
+									)}
 								</TableCell>
 								<TableCell
 									sx={{
