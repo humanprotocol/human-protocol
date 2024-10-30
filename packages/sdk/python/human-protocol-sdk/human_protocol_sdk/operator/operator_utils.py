@@ -77,6 +77,7 @@ class LeaderData:
         fee: Optional[int] = None,
         public_key: Optional[str] = None,
         webhook_url: Optional[str] = None,
+        website: Optional[str] = None,
         url: Optional[str] = None,
         job_types: Optional[List[str]] = None,
         registration_needed: Optional[bool] = None,
@@ -101,6 +102,7 @@ class LeaderData:
         :param fee: Fee
         :param public_key: Public key
         :param webhook_url: Webhook url
+        :param website: Website url
         :param url: Url
         :param job_types: Job types
         :param registration_needed: True
@@ -123,6 +125,7 @@ class LeaderData:
         self.fee = fee
         self.public_key = public_key
         self.webhook_url = webhook_url
+        self.website = website
         self.url = url
         self.job_types = job_types
         self.registration_needed = registration_needed
@@ -256,6 +259,7 @@ class OperatorUtils:
                     fee=int(leader.get("fee")) if leader.get("fee", None) else None,
                     public_key=leader.get("publicKey", None),
                     webhook_url=leader.get("webhookUrl", None),
+                    website=leader.get("website", None),
                     url=leader.get("url", None),
                     job_types=(
                         leader.get("jobTypes").split(",")
@@ -357,6 +361,7 @@ class OperatorUtils:
             fee=int(leader.get("fee")) if leader.get("fee", None) else None,
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
+            website=leader.get("website", None),
             url=leader.get("url", None),
             job_types=(
                 leader.get("jobTypes").split(",")

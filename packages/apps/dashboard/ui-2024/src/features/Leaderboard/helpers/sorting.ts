@@ -3,7 +3,7 @@ import { LeaderBoardData } from '@services/api/use-leaderboard-details';
 export type Order = 'asc' | 'desc';
 export type SortableFieldsInLeaderBoardData = Exclude<
 	keyof LeaderBoardData[number],
-	'jobTypes' | 'url'
+	'jobTypes' | 'url' | 'website'
 >;
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {

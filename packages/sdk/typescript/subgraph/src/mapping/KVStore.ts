@@ -84,6 +84,8 @@ export function handleDataSaved(event: DataSaved): void {
     leader.publicKey = event.params.value;
   } else if (key == 'webhookurl' || key == 'webhook_url') {
     leader.webhookUrl = event.params.value;
+  } else if (key == 'website') {
+    leader.website = event.params.value;
   } else if (key == 'url') {
     leader.url = event.params.value;
   } else if (key == 'jobtypes' || key == 'job_types') {

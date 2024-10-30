@@ -38,6 +38,7 @@ const leaderBoardEntity = z.object({
 	fee: z.number(),
 	jobTypes: z.array(z.string()),
 	url: z.string(),
+	website: z.string().optional(),
 	chainId: z.number(),
 });
 

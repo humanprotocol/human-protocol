@@ -185,10 +185,41 @@ export const Table = ({
 										},
 									}}
 								>
-									<Link
-										to={row.url}
-										style={{ textDecoration: 'none', color: 'inherit' }}
-									>
+									{row.website ? (
+										<Link
+											to={row.website}
+											style={{ textDecoration: 'none', color: 'inherit' }}
+										>
+											<Grid
+												container
+												wrap="nowrap"
+												alignItems="center"
+												gap="8px"
+												justifyContent="flex-start"
+											>
+												{mobile.isMobile ? (
+													<>
+														<Typography
+															variant="subtitle2"
+															sx={{ wordBreak: 'unset' }}
+														>
+															{row.role}
+														</Typography>
+													</>
+												) : (
+													<>
+														<EntityIcon role={row.role} />
+														<Typography
+															variant="h6"
+															sx={{ wordBreak: 'unset' }}
+														>
+															{row.role}
+														</Typography>
+													</>
+												)}
+											</Grid>
+										</Link>
+									) : (
 										<Grid
 											container
 											wrap="nowrap"
@@ -214,7 +245,7 @@ export const Table = ({
 												</>
 											)}
 										</Grid>
-									</Link>
+									)}
 								</TableCell>
 								<TableCell
 									sx={{

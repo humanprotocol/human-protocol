@@ -49,6 +49,7 @@ describe('OperatorUtils', () => {
       jobTypes: 'type1,type2',
       registrationNeeded: true,
       registrationInstructions: 'www.google.com',
+      website: 'www.google.com',
       reputationNetworks: [
         {
           address: '0x01',
@@ -192,6 +193,7 @@ describe('OperatorUtils', () => {
       jobTypes: 'type1,type2',
       registrationNeeded: true,
       registrationInstructions: 'www.google.com',
+      website: 'www.google.com',
       reputationNetworks: [
         {
           address: '0x01',
