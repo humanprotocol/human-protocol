@@ -66,7 +66,6 @@ class LeaderData:
         id: str,
         address: str,
         amount_staked: int,
-        amount_allocated: int,
         amount_locked: int,
         locked_until_timestamp: int,
         amount_withdrawn: int,
@@ -90,7 +89,6 @@ class LeaderData:
         :param id: Identifier
         :param address: Address
         :param amount_staked: Amount staked
-        :param amount_allocated: Amount allocated
         :param amount_locked: Amount locked
         :param locked_until_timestamp: Locked until timestamp
         :param amount_withdrawn: Amount withdrawn
@@ -112,7 +110,6 @@ class LeaderData:
         self.id = id
         self.address = address
         self.amount_staked = amount_staked
-        self.amount_allocated = amount_allocated
         self.amount_locked = amount_locked
         self.locked_until_timestamp = locked_until_timestamp
         self.amount_withdrawn = amount_withdrawn
