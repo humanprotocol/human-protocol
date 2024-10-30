@@ -52,7 +52,7 @@ staking_client = StakingClient(w3)
 
 Bases: `object`
 
-A class used to manage staking, and allocation on the HUMAN network.
+A class used to manage staking on the HUMAN network.
 
 #### \_\_init_\_(w3)
 

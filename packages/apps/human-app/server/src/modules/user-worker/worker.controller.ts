@@ -11,10 +11,10 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Authorization } from '../../common/config/params-decorators';
 import {
-  RegisteredOraclesResponse,
-  RegisterWorkerCommand,
-  RegisterWorkerDto,
-  RegisterWorkerResponse,
+  RegistrationInExchangeOracleResponse,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleDto,
+  RegistrationInExchangeOraclesResponse,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from './model/worker-registration.model';
@@ -59,30 +59,32 @@ export class WorkerController {
   }
 
   @ApiBearerAuth()
-  @Post('/register')
-  @ApiOperation({ summary: 'Worker registration completed' })
+  @Post('/exchange-oracle-registration')
+  @ApiOperation({ summary: 'Registers a worker in Exchange Oracle' })
   @UsePipes(new ValidationPipe())
-  public registerWorker(
-    @Body() registerWorkerDto: RegisterWorkerDto,
+  public createRegistrationInExchangeOracle(
+    @Body() registrationInExchangeOracleDto: RegistrationInExchangeOracleDto,
     @Authorization() token: string,
-  ): Promise<RegisterWorkerResponse> {
-    const registerWorkerCommand = this.mapper.map(
-      registerWorkerDto,
-      RegisterWorkerDto,
-      RegisterWorkerCommand,
+  ): Promise<RegistrationInExchangeOracleResponse> {
+    const registrationInExchangeOracle = this.mapper.map(
+      registrationInExchangeOracleDto,
+      RegistrationInExchangeOracleDto,
+      RegistrationInExchangeOracleCommand,
     );
-    registerWorkerCommand.token = token;
+    registrationInExchangeOracle.token = token;
 
-    return this.service.registerWorker(registerWorkerCommand);
+    return this.service.registrationInExchangeOracle(
+      registrationInExchangeOracle,
+    );
   }
 
   @ApiBearerAuth()
-  @Get('/register')
-  @ApiOperation({ summary: 'Get registered oracles' })
+  @Get('/exchange-oracle-registration')
+  @ApiOperation({ summary: 'Retrieves oracles registered by the worker' })
   @UsePipes(new ValidationPipe())
-  public getRegisteredOracles(
+  public getRegistrationInExchangeOracles(
     @Authorization() token: string,
-  ): Promise<RegisteredOraclesResponse> {
-    return this.service.getRegisteredOracles(token);
+  ): Promise<RegistrationInExchangeOraclesResponse> {
+    return this.service.getRegistrationInExchangeOracles(token);
   }
 }

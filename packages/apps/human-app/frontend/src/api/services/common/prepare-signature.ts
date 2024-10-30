@@ -4,10 +4,10 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
 export enum PrepareSignatureType {
-  SignUp = 'SIGNUP',
-  SignIn = 'SIGNIN',
-  DisableOperator = 'DISABLE_OPERATOR',
-  RegisterAddress = 'REGISTER_ADDRESS',
+  SignUp = 'signup',
+  SignIn = 'signin',
+  DisableOperator = 'disable_operator',
+  RegisterAddress = 'register_address',
 }
 
 export const prepareSignatureSuccessSchema = z.object({

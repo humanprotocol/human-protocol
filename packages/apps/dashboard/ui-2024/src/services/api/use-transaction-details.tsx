@@ -39,7 +39,11 @@ export interface PaginatedTransactionDetailsDto {
 
 export function useTransactionDetails() {
 	const { filterParams } = useWalletSearch();
-	const { params } = useTransactionDetailsDto();
+	const {
+		params,
+		pagination: { lastPageIndex, page },
+		setLastPageIndex,
+	} = useTransactionDetailsDto();
 
 	const dto: PaginatedTransactionDetailsDto = {
 		chainId: filterParams.chainId,
@@ -60,6 +64,28 @@ export function useTransactionDetails() {
 				data,
 				paginatedTransactionDetailsSuccessResponseSchema
 			);
+
+			// check if last page
+			if (lastPageIndex === undefined) {
+				const { data: lastPageCheckData } = await httpService.get(
+					`${apiPaths.transactionDetails.path}/${filterParams.address}`,
+					{
+						params: {
+							...dto,
+							skip: dto.skip + validResponse.results.length,
+							first: 1,
+						},
+					}
+				);
+				const validLastPageCheckData = validateResponse(
+					lastPageCheckData,
+					paginatedTransactionDetailsSuccessResponseSchema
+				);
+
+				if (validLastPageCheckData.results.length === 0) {
+					setLastPageIndex(page + 1);
+				}
+			}
 
 			return validResponse;
 		},

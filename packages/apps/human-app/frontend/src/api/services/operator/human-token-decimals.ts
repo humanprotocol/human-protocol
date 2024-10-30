@@ -20,6 +20,6 @@ export function useHMTokenDecimals() {
         signer: data?.signer,
       });
     },
-    queryKey: ['decimals', chainId, data?.signer || 'signer'],
+    queryKey: ['decimals', chainId, data?.signer ?? 'signer'],
   });
 }

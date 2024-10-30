@@ -1,5 +1,5 @@
 import { FormProvider, useForm } from 'react-hook-form';
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { t as i18NextT } from 'i18next';
@@ -79,7 +79,7 @@ export function SignInWorkerPage() {
             void methods.handleSubmit(handleWorkerSignIn)(event)
           }
         >
-          <Grid container gap="2rem" sx={{ paddingTop: '1rem' }}>
+          <Grid container gap="1.5rem">
             <Input
               fullWidth
               label={t('worker.signInForm.fields.email')}
@@ -90,15 +90,21 @@ export function SignInWorkerPage() {
               label={t('worker.signInForm.fields.password')}
               name="password"
             />
+            <Box width="100%">
+              <Typography variant="body1">
+                <Link
+                  style={{
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    color: 'inherit',
+                  }}
+                  to={routerPaths.worker.sendResetLink}
+                >
+                  {t('worker.signInForm.forgotPassword')}
+                </Link>
+              </Typography>
+            </Box>
             <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
-            <Typography variant="body1">
-              <Link
-                style={{ textDecoration: 'none', fontWeight: 600 }}
-                to={routerPaths.worker.sendResetLink}
-              >
-                {t('worker.signInForm.forgotPassword')}
-              </Link>
-            </Typography>
             <Button
               fullWidth
               loading={isSignInWorkerPending}

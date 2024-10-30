@@ -119,7 +119,7 @@ Adds an array of addresses to the trusted handlers list.
   )
   ```
 
-#### bulk_payout(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, tx_options=None)
+#### bulk_payout(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, force_complete=False, tx_options=None)
 
 Pays out the amounts specified to the workers and sets the URL of the final results file.
 
@@ -130,6 +130,7 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
   * **final_results_url** (`str`) – Final results file url
   * **final_results_hash** (`str`) – Final results file hash
   * **txId** (`Decimal`) – Serial number of the bulks
+  * **force_complete** (`Optional`[`bool`]) – (Optional) Indicates if remaining balance should be transferred to the escrow creator
   * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`

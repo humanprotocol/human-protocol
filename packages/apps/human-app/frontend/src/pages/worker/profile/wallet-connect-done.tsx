@@ -7,6 +7,11 @@ import { CheckmarkIcon } from '@/components/ui/icons';
 import { colorPalette } from '@/styles/color-palette';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
+import { useColorMode } from '@/hooks/use-color-mode';
+import {
+  darkColorPalette,
+  onlyDarkModeColor,
+} from '@/styles/dark-color-palette';
 
 const CustomTextField = styled(TextField)(() => ({
   '& .Mui-disabled': {
@@ -14,10 +19,28 @@ const CustomTextField = styled(TextField)(() => ({
     '-webkit-text-fill-color': colorPalette.text.disabledSecondary,
   },
 }));
+const CustomTextFieldDark = styled(TextField)(() => ({
+  '& .Mui-disabled': {
+    color: darkColorPalette.text.disabledSecondary,
+    '-webkit-text-fill-color': darkColorPalette.text.disabledSecondary,
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: `${onlyDarkModeColor.mainColorWithOpacity} !important`,
+    },
+  },
+}));
 
 export function WalletConnectDone() {
+  const { isDarkMode } = useColorMode();
   const { address } = useWalletConnect();
   const { user } = useAuthenticatedUser();
+
+  const textFiled = isDarkMode ? (
+    <CustomTextFieldDark disabled fullWidth value={user.wallet_address} />
+  ) : (
+    <CustomTextField disabled fullWidth value={user.wallet_address} />
+  );
 
   return (
     <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">
@@ -25,9 +48,7 @@ export function WalletConnectDone() {
         {t('worker.profile.walletConnected')}
       </Typography>
       <CheckmarkIcon />
-      {address && !user.wallet_address ? null : (
-        <CustomTextField disabled fullWidth value={user.wallet_address} />
-      )}
+      {address && !user.wallet_address ? null : textFiled}
     </Grid>
   );
 }

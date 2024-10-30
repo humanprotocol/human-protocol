@@ -41,10 +41,6 @@ import { RateService } from './rate.service';
 
 jest.mock('@human-protocol/sdk');
 
-jest.mock('../../common/utils', () => ({
-  getRate: jest.fn().mockImplementation(() => 1.5),
-}));
-
 jest.mock('../../common/utils/signature', () => ({
   verifySignature: jest.fn().mockReturnValue(true),
 }));
@@ -88,6 +84,7 @@ describe('PaymentService', () => {
           },
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        { provide: RateService, useValue: createMock<RateService>() },
         {
           provide: RateService,
           useValue: {

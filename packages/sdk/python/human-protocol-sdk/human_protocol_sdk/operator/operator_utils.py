@@ -103,9 +103,9 @@ class LeaderData:
         :param webhook_url: Webhook url
         :param url: Url
         :param job_types: Job types
+        :param registration_needed: True
+        :param registration_instructions: Instructions url
         :param reputation_networks: List of reputation networks
-        :param registration_needed: True,
-        :param registration_instructions: Instructions url,
         """
 
         self.chain_id = chain_id
@@ -256,7 +256,15 @@ class OperatorUtils:
                     public_key=leader.get("publicKey", None),
                     webhook_url=leader.get("webhookUrl", None),
                     url=leader.get("url", None),
-                    job_types=job_types,
+                    job_types=(
+                        leader.get("jobTypes").split(",")
+                        if isinstance(leader.get("jobTypes"), str)
+                        else (
+                            leader.get("jobTypes", [])
+                            if isinstance(leader.get("jobTypes"), list)
+                            else []
+                        )
+                    ),
                     registration_needed=leader.get("registrationNeeded", None),
                     registration_instructions=leader.get(
                         "registrationInstructions", None
@@ -348,7 +356,15 @@ class OperatorUtils:
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
             url=leader.get("url", None),
-            job_types=job_types,
+            job_types=(
+                leader.get("jobTypes").split(",")
+                if isinstance(leader.get("jobTypes"), str)
+                else (
+                    leader.get("jobTypes", [])
+                    if isinstance(leader.get("jobTypes"), list)
+                    else []
+                )
+            ),
             registration_needed=leader.get("registrationNeeded", None),
             registration_instructions=leader.get("registrationInstructions", None),
             reputation_networks=reputation_networks,

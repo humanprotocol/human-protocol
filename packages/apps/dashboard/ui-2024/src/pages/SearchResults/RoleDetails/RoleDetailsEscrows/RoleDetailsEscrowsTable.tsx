@@ -7,6 +7,7 @@ import Table from '@mui/material/Table';
 import { EscrowsTableBody } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBody';
 import TablePagination from '@mui/material/TablePagination';
 import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
+import { useEscrowDetails } from '@services/api/use-escrows-details';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Stack } from '@mui/material';
@@ -16,6 +17,7 @@ export const RoleDetailsEscrowsTable = ({
 }: {
 	role: AddressDetailsLeader['role'];
 }) => {
+	const { data } = useEscrowDetails({ role });
 	const {
 		pagination: { page, pageSize, lastPageIndex },
 		setPageSize,
@@ -76,7 +78,10 @@ export const RoleDetailsEscrowsTable = ({
 						}}
 						rowsPerPageOptions={[5, 10]}
 						labelDisplayedRows={({ from, to }) => {
-							return `${from}–${to}`;
+							const effectiveTo = data?.results
+								? from + data.results.length - 1
+								: to;
+							return `${from}–${effectiveTo}`;
 						}}
 						component="div"
 						slotProps={{

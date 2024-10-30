@@ -13,7 +13,7 @@ export type CustomButtonProps = ButtonProps &
 export const Button = forwardRef<HTMLButtonElement, CustomButtonProps>(
   ({ children, loading, disabled, ...props }, ref) => {
     return (
-      <MuiButton ref={ref} {...props} disabled={disabled || loading}>
+      <MuiButton ref={ref} {...props} disabled={disabled ?? loading}>
         <>{loading ? <CircularProgress size={24} /> : children}</>
       </MuiButton>
     );

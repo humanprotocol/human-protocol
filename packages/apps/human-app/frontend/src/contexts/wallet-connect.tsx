@@ -64,6 +64,7 @@ export type WalletConnectContextConnectedAccount = CommonWalletConnectContext &
 type WalletConnectContextDisconnectedAccount = CommonWalletConnectContext &
   DisconnectedAccount;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const WalletConnectContext = createContext<
   | WalletConnectContextConnectedAccount
   | WalletConnectContextDisconnectedAccount

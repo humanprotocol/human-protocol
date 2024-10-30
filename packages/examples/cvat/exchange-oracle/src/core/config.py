@@ -41,6 +41,27 @@ class PostgresConfig:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
+class RedisConfig:
+    port = os.environ.get("REDIS_PORT", "6379")
+    host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
+    database = os.environ.get("REDIS_DB", "")
+    user = os.environ.get("REDIS_USER", "")
+    password = os.environ.get("REDIS_PASSWORD", "")
+    use_ssl = to_bool(os.environ.get("REDIS_USE_SSL", "false"))
+
+    @classmethod
+    def connection_url(cls) -> str:
+        scheme = "redis"
+        if cls.use_ssl:
+            scheme += "s"
+
+        auth_params = ""
+        if cls.user or cls.password:
+            auth_params = f"{cls.user}:{cls.password}@"
+
+        return f"{scheme}://{auth_params}{cls.host}:{cls.port}/{cls.database}"
+
+
 class _NetworkConfig:
     chain_id: ClassVar[int]
     rpc_api: ClassVar[str | None]
@@ -223,7 +244,20 @@ class CoreConfig:
 
 
 class HumanAppConfig:
-    signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
+    # jwt_public_key is obtained from the Human App.
+    # To generate a key pair for testing purposes:
+    # openssl ecparam -name prime256v1 -genkey -noout -out ec_private.pem
+    # openssl ec -in ec_private.pem -pubout -out ec_public.pem
+    # HUMAN_APP_JWT_KEY=$(cat ec_public.pem)
+    jwt_public_key = os.environ.get("HUMAN_APP_JWT_KEY")
+
+
+class ApiConfig:
+    default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
+    min_page_size = int(os.environ.get("MIN_API_PAGE_SIZE", 1))
+    max_page_size = int(os.environ.get("MAX_API_PAGE_SIZE", 10))
+
+    stats_rps_limit = int(os.environ.get("STATS_RPS_LIMIT", 4))
 
 
 class EncryptionConfig(_BaseConfig):
@@ -249,6 +283,7 @@ class EncryptionConfig(_BaseConfig):
 
 
 class Config:
+    debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
@@ -261,6 +296,8 @@ class Config:
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig
+    redis_config = RedisConfig
+    api_config = ApiConfig
     human_app_config = HumanAppConfig
 
     cron_config = CronConfig

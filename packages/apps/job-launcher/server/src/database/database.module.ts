@@ -15,6 +15,7 @@ import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { LoggerOptions } from 'typeorm';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
+import { WhitelistEntity } from 'src/modules/whitelist/whitelist.entity';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
             PaymentEntity,
             WebhookEntity,
             CronJobEntity,
+            WhitelistEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,

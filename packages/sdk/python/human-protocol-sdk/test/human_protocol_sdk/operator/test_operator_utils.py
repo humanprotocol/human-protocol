@@ -136,7 +136,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(leaders[0].registration_needed, None)
             self.assertEqual(leaders[0].registration_instructions, None)
-            # Should rerutn empty array
             self.assertEqual(leaders[0].job_types, [])
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 

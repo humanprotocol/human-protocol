@@ -21,13 +21,14 @@ export function useKycStartMutation() {
         const result = await apiClient(apiPaths.worker.kycStart.path, {
           successSchema: kycStartSchema,
           authenticated: true,
+          withAuthRetry: apiPaths.worker.kycStart.withAuthRetry,
           options: {
             method: 'POST',
           },
         });
         return result;
       } catch (error) {
-        await getAccessTokenMutation('web2');
+        await getAccessTokenMutation({ authType: 'web2' });
         throw error;
       }
     },

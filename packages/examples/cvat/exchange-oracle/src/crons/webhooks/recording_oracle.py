@@ -7,7 +7,7 @@ import src.services.cvat as cvat_db_service
 import src.services.webhook as oracle_db_service
 from src.chain.kvstore import get_recording_oracle_url
 from src.core.config import CronConfig
-from src.core.oracle_events import RecordingOracleEvent_TaskRejected
+from src.core.oracle_events import RecordingOracleEvent_SubmissionRejected
 from src.core.types import (
     EscrowValidationStatuses,
     JobStatuses,
@@ -39,11 +39,11 @@ def process_incoming_recording_oracle_webhooks(logger: logging.Logger, session: 
             handle_recording_oracle_event(webhook, db_session=session, logger=logger)
 
 
-def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logger: logging.Logger):
+def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logger: logging.Logger):  # noqa: PLR0912
     assert webhook.type == OracleWebhookTypes.recording_oracle
 
     match webhook.event_type:
-        case RecordingOracleEventTypes.task_completed:
+        case RecordingOracleEventTypes.job_completed:
             chunk_size = CronConfig.accepted_projects_chunk_size
             project_ids = cvat_db_service.get_project_cvat_ids_by_escrow_address(
                 db_session, webhook.escrow_address
@@ -79,6 +79,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                             new_status, webhook.escrow_address, project.cvat_id
                         )
                     )
+
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
             cvat_db_service.update_escrow_validation(
@@ -88,10 +89,15 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 status=EscrowValidationStatuses.completed,
             )
 
-        case RecordingOracleEventTypes.task_rejected:
-            event = RecordingOracleEvent_TaskRejected.parse_obj(webhook.event_data)
+        case RecordingOracleEventTypes.submission_rejected:
+            event = RecordingOracleEvent_SubmissionRejected.model_validate(webhook.event_data)
 
-            rejected_jobs = cvat_db_service.get_jobs_by_cvat_id(db_session, event.rejected_job_ids)
+            rejected_assignments = cvat_db_service.get_assignments_by_id(
+                db_session, [t.assignment_id for t in event.assignments]
+            )
+            rejected_jobs = cvat_db_service.get_jobs_by_cvat_id(
+                db_session, [a.cvat_job_id for a in rejected_assignments]
+            )
             rejected_project_cvat_ids = set(j.cvat_project_id for j in rejected_jobs)
 
             chunk_size = CronConfig.rejected_projects_chunk_size
@@ -116,6 +122,12 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                     rejected_jobs_in_project = [
                         j for j in rejected_jobs if j.cvat_project_id == project.cvat_id
                     ]
+
+                    rejected_job_ids_in_project = set(j.cvat_id for j in rejected_jobs_in_project)
+                    for assignment in rejected_assignments:
+                        if assignment.cvat_job_id in rejected_job_ids_in_project:
+                            cvat_db_service.reject_assignment(db_session, assignment.id)
+
                     tasks_to_update = set()
                     for job in rejected_jobs_in_project:
                         tasks_to_update.add(job.task.id)

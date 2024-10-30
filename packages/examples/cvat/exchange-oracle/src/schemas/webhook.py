@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from src.chain.web3 import validate_address
 from src.core.types import JobLauncherEventTypes, Networks
@@ -13,13 +13,13 @@ class OracleWebhook(BaseModel):
     event_data: dict | None = None
     timestamp: datetime | None = None  # TODO: remove optional
 
-    @validator("escrow_address", allow_reuse=True)
-    def validate_escrow_(cls, value):
+    @field_validator("escrow_address")
+    @classmethod
+    def validate_escrow_(cls, value: str) -> str:
         return validate_address(value)
 
-    # pylint: disable=too-few-public-methods
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
                 "chain_id": 80002,
@@ -27,6 +27,7 @@ class OracleWebhook(BaseModel):
                 "event_data": {},
             }
         }
+    )
 
 
 class OracleWebhookResponse(BaseModel):

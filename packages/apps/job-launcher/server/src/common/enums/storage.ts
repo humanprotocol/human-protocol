@@ -1,7 +1,7 @@
 export enum StorageProviders {
-  AWS = 'AWS',
-  GCS = 'GCS',
-  LOCAL = 'LOCAL',
+  AWS = 'aws',
+  GCS = 'gcs',
+  LOCAL = 'local',
 }
 
 export enum AWSRegions {

@@ -2,7 +2,7 @@ import Search from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Input } from '@/components/data-entry/input';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface SearchFormProps {
   label: string;
@@ -20,6 +20,7 @@ export function SearchForm({
   updater,
   fullWidth = false,
 }: SearchFormProps) {
+  const { colorPalette } = useColorMode();
   const methods = useForm<{ searchValue: string }>({
     defaultValues: {
       searchValue: '',
@@ -33,7 +34,7 @@ export function SearchForm({
           sx: { color: colorPalette.text.secondary },
           startAdornment: (
             <InputAdornment position="start">
-              <Search />
+              <Search sx={{ fill: colorPalette.text.primary }} />
             </InputAdornment>
           ),
         }}

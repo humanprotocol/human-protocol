@@ -57,13 +57,10 @@ describe('assignmentController', () => {
         .spyOn(assignmentService, 'getAssignmentList')
         .mockResolvedValue(expectedResult);
 
-      const result = await assignmentController.getAssignments(
-        {
-          user: { address: userAddress, reputationNetwork: reputationNetwork },
-          headers: { referer: MOCK_EXCHANGE_ORACLE },
-        } as any,
-        query,
-      );
+      const result = await assignmentController.getAssignments(query, {
+        user: { address: userAddress, reputationNetwork: reputationNetwork },
+        headers: { referer: MOCK_EXCHANGE_ORACLE },
+      } as any);
       expect(result).toBe(expectedResult);
       expect(assignmentService.getAssignmentList).toHaveBeenCalledWith(
         query,
@@ -82,12 +79,9 @@ describe('assignmentController', () => {
       jest
         .spyOn(assignmentService, 'createAssignment')
         .mockResolvedValue({ id: 1 } as any);
-      await assignmentController.createAssignment(
-        {
-          user: { address: userAddress },
-        } as RequestWithUser,
-        body,
-      );
+      await assignmentController.createAssignment(body, {
+        user: { address: userAddress },
+      } as RequestWithUser);
       expect(assignmentService.createAssignment).toHaveBeenCalledWith(body, {
         address: userAddress,
       });
@@ -103,10 +97,9 @@ describe('assignmentController', () => {
 
       jest.spyOn(assignmentService, 'resign').mockResolvedValue();
 
-      await assignmentController.resign(
-        { user: { address: userAddress } } as RequestWithUser,
-        resignJobDto,
-      );
+      await assignmentController.resign(resignJobDto, {
+        user: { address: userAddress },
+      } as RequestWithUser);
 
       expect(assignmentService.resign).toHaveBeenCalledWith(
         assignmentId,

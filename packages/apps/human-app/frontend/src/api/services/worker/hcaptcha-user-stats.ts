@@ -26,7 +26,7 @@ const hcaptchaUserStatsSchema = z.object({
 export type HCaptchaUserStatsSuccess = z.infer<typeof hcaptchaUserStatsSchema>;
 
 export async function getHCaptchaUsersStats() {
-  return apiClient(apiPaths.worker.hCaptchaUserStats, {
+  return apiClient(apiPaths.worker.hCaptchaUserStats.path, {
     authenticated: true,
     successSchema: hcaptchaUserStatsSchema,
     options: { method: 'GET' },

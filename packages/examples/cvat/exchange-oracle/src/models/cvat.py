@@ -14,7 +14,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.db import Base
+from src.db import Base, ChildOf
 from src.utils.time import utcnow
 
 
@@ -79,7 +79,7 @@ class Project(Base):
         return f"Project. id={self.id}"
 
 
-class Task(Base):
+class Task(ChildOf[Project]):
     __tablename__ = "tasks"
     id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
@@ -177,7 +177,7 @@ class DataUpload(Base):
         return f"DataUpload. id={self.id} task={self.task_id}"
 
 
-class Job(Base):
+class Job(ChildOf[Task]):
     __tablename__ = "jobs"
     id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
@@ -226,7 +226,10 @@ class User(Base):
 class Assignment(Base):
     __tablename__ = "assignments"
     id = Column(String, primary_key=True, index=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
     expires_at = Column(DateTime(timezone=True), nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True, server_default=None)
     user_wallet_address = Column(

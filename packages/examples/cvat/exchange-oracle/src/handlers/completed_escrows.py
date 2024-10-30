@@ -15,7 +15,7 @@ from src import db
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
-from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
+from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.storage import compose_results_bucket_filename
 from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, ProjectStatuses, TaskTypes
 from src.db import SessionLocal
@@ -133,7 +133,7 @@ def _export_escrow_annotations(
         escrow_address=escrow_address,
         chain_id=chain_id,
         type=OracleWebhookTypes.recording_oracle,
-        event=ExchangeOracleEvent_TaskFinished(),
+        event=ExchangeOracleEvent_JobFinished(),
     )
 
     cvat_service.update_project_statuses_by_escrow_address(

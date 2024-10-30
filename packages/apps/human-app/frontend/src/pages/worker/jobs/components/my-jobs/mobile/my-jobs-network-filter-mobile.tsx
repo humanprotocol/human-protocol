@@ -8,7 +8,7 @@ const allNetworks = chains.map(({ chainId, name }) => ({
   name,
 }));
 
-export function MyJobsNetworkFilter() {
+export function MyJobsNetworkFilterMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
   return (

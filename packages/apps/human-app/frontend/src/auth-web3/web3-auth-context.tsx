@@ -21,7 +21,7 @@ type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 export interface Web3AuthenticatedUserContextType {
   user: Web3UserData;
   status: AuthStatus;
-  signOut: () => void;
+  signOut: (throwExpirationModal?: boolean) => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
   updateUserData: (updateUserDataPayload: Partial<Web3UserData>) => void;
 }
@@ -29,10 +29,11 @@ export interface Web3AuthenticatedUserContextType {
 interface Web3UnauthenticatedUserContextType {
   user: null;
   status: AuthStatus;
-  signOut: () => void;
+  signOut: (throwExpirationModal?: boolean) => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const Web3AuthContext = createContext<
   Web3AuthenticatedUserContextType | Web3UnauthenticatedUserContextType | null
 >(null);
@@ -99,7 +100,10 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
     handleSignIn();
   };
 
-  const signOut = () => {
+  const signOut = (throwExpirationModal = true) => {
+    browserAuthProvider.signOut({
+      triggerSignOutSubscriptions: throwExpirationModal,
+    });
     setWeb3AuthState({ user: null, status: 'idle' });
   };
 

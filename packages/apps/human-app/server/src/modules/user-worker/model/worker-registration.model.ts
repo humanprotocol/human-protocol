@@ -42,34 +42,44 @@ export class SignupWorkerData {
   h_captcha_token: string;
 }
 
-export class RegisterWorkerDto {
+export class RegistrationInExchangeOracleDto {
   @AutoMap()
   @ApiProperty({ example: 'string' })
   @IsEthereumAddress()
   oracle_address: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  h_captcha_token: string;
 }
 
-export class RegisterWorkerCommand {
+export class RegistrationInExchangeOracleCommand {
   @AutoMap()
   oracleAddress: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  hCaptchaToken: string;
 
   token: string;
 
-  constructor(oracleAddress: string) {
+  constructor(oracleAddress: string, hCaptchaToken: string) {
     this.oracleAddress = oracleAddress;
+    this.hCaptchaToken = hCaptchaToken;
   }
 }
 
-export class RegisterWorkerData {
+export class RegistrationInExchangeOracleData {
   @AutoMap()
+  oracle_address: string;
+  @AutoMap()
+  h_captcha_token: string;
+}
+
+export class RegistrationInExchangeOracleResponse {
   oracle_address: string;
 }
 
-export class RegisterWorkerResponse {
-  email: string;
-  wallet_address: string;
-}
-
-export class RegisteredOraclesResponse {
+export class RegistrationInExchangeOraclesResponse {
   oracle_addresses: string[];
 }

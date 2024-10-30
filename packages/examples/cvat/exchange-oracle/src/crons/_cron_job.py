@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 from sqlalchemy.orm import Session
 
+from src import Config
 from src.db import SessionLocal
 from src.log import get_logger_name
 
@@ -65,6 +66,8 @@ def cron_job(fn: Callable[..., None]) -> Callable[[], None]:
                 return fn(logger, session)
         except Exception:
             logger.exception(f"Exception while running {cron_spec.repr} cron")
+            if Config.debug:
+                raise
         finally:
             logger.debug(f"Cron {cron_spec.repr} finished")
 

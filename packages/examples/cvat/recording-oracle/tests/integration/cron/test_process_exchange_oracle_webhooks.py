@@ -41,7 +41,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    def make_webhook(self, escrow_address, event_type=ExchangeOracleEventTypes.task_finished):
+    def make_webhook(self, escrow_address, event_type=ExchangeOracleEventTypes.job_finished):
         return Webhook(
             id=str(uuid.uuid4()),
             direction=OracleWebhookDirectionTags.incoming.value,

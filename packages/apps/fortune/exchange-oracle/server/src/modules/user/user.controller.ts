@@ -25,7 +25,7 @@ export class UserController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  async registerUser(): Promise<void> {
+  async userRegistration(): Promise<void> {
     return;
   }
 }

@@ -31,7 +31,7 @@ type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 export interface AuthenticatedUserContextType {
   user: UserData;
   status: AuthStatus;
-  signOut: () => void;
+  signOut: (throwExpirationModal?: boolean) => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
   updateUserData: (updateUserDataPayload: UpdateUserDataPayload) => void;
 }
@@ -39,10 +39,11 @@ export interface AuthenticatedUserContextType {
 interface UnauthenticatedUserContextType {
   user: null;
   status: AuthStatus;
-  signOut: () => void;
+  signOut: (throwExpirationModal?: boolean) => void;
   signIn: (singIsSuccess: SignInSuccessResponse) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<
   AuthenticatedUserContextType | UnauthenticatedUserContextType | null
 >(null);
@@ -114,8 +115,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     handleSignIn();
   };
 
-  const signOut = () => {
-    browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+  const signOut = (throwExpirationModal = true) => {
+    browserAuthProvider.signOut({
+      triggerSignOutSubscriptions: throwExpirationModal,
+    });
     setAuthState({ user: null, status: 'idle' });
   };
 

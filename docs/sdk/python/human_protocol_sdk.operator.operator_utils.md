@@ -43,9 +43,9 @@ Initializes an LeaderData instance.
   * **webhook_url** (`Optional`[`str`]) – Webhook url
   * **url** (`Optional`[`str`]) – Url
   * **job_types** (`Optional`[`List`[`str`]]) – Job types
+  * **registration_needed** (`Optional`[`bool`]) – True
+  * **registration_instructions** (`Optional`[`str`]) – Instructions url
   * **reputation_networks** (`Optional`[`List`[`str`]]) – List of reputation networks
-  * **registration_needed** (`Optional`[`bool`]) – True,
-  * **registration_instructions** (`Optional`[`str`]) – Instructions url,
 
 ### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None)
 

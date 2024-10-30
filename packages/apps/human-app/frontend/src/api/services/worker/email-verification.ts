@@ -14,6 +14,7 @@ const VerifyEmailSuccessResponseSchema = z.unknown();
 async function verifyEmailQueryFn(data: VerifyDto) {
   return apiClient(apiPaths.worker.verifyEmail.path, {
     authenticated: true,
+    withAuthRetry: apiPaths.worker.verifyEmail.withAuthRetry,
     successSchema: VerifyEmailSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });
