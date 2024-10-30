@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-import '../utils/Math.sol';
-
 /**
  * @title Structures, methods and data are available to manage the staker state.
  */
@@ -43,19 +41,8 @@ library Stakes {
         uint256 _tokens,
         uint256 _period
     ) internal {
-        uint256 lockingPeriod = _period;
-
-        if (stake.tokensLocked > 0) {
-            lockingPeriod = Math.weightedAverage(
-                Math.diffOrZero(stake.tokensLockedUntil, block.number), // Remaining lock period
-                stake.tokensLocked,
-                _period,
-                _tokens
-            );
-        }
-
         stake.tokensLocked += _tokens;
-        stake.tokensLockedUntil = block.number + lockingPeriod;
+        stake.tokensLockedUntil = block.number + _period;
     }
 
     /**

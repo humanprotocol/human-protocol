@@ -220,8 +220,12 @@ contract Staking is
      * @param _tokens Amount of tokens to unstake
      */
     function unstake(uint256 _tokens) external override {
-        Stakes.Staker storage staker = stakes[msg.sender];
         require(_tokens > 0, 'Must be a positive number');
+        Stakes.Staker storage staker = stakes[msg.sender];
+        require(
+            staker.tokensLocked == 0,
+            'Unstake in progress, complete it first'
+        );
         uint256 stakeAvailable = staker.tokensAvailable();
         require(stakeAvailable >= _tokens, 'Insufficient amount to unstake');
 

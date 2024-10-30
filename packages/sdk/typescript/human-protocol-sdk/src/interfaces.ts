@@ -11,7 +11,6 @@ export interface ILeader {
   chainId: ChainId;
   address: string;
   amountStaked: bigint;
-  amountAllocated: bigint;
   amountLocked: bigint;
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;

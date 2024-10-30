@@ -8,7 +8,6 @@ const mainMethods: string[] = [
   'setup',
   'fund',
   'bulkTransfer',
-  'complete',
   'storeResults',
   'withdraw',
   'cancel',

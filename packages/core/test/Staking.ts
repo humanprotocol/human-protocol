@@ -205,6 +205,15 @@ describe('Staking', function () {
           staking.connect(operator).unstake(amount)
         ).to.be.revertedWith('Total stake is below the minimum threshold');
       });
+
+      it('Should revert with the right error if there is a pending unstake', async function () {
+        const amount = 1;
+        await staking.connect(operator).unstake(amount);
+
+        await expect(
+          staking.connect(operator).unstake(amount)
+        ).to.be.revertedWith('Unstake in progress, complete it first');
+      });
     });
 
     describe('Events', function () {

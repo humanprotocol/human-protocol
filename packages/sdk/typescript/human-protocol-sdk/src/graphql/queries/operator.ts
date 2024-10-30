@@ -6,7 +6,6 @@ const LEADER_FRAGMENT = gql`
     id
     address
     amountStaked
-    amountAllocated
     amountLocked
     lockedUntilTimestamp
     amountWithdrawn

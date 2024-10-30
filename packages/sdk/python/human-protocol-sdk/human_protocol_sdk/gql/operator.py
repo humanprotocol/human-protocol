@@ -7,7 +7,6 @@ fragment LeaderFields on Leader {
     id
     address
     amountStaked
-    amountAllocated
     amountLocked
     lockedUntilTimestamp
     amountWithdrawn

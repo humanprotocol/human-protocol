@@ -540,6 +540,7 @@ class EscrowClient:
         final_results_url: str,
         final_results_hash: str,
         txId: Decimal,
+        force_complete: Optional[bool] = False,
         tx_options: Optional[TxParams] = None,
     ) -> None:
         """Pays out the amounts specified to the workers and sets the URL of the final results file.
@@ -550,6 +551,7 @@ class EscrowClient:
         :param final_results_url: Final results file url
         :param final_results_hash: Final results file hash
         :param txId: Serial number of the bulks
+        :param force_complete: (Optional) Indicates if remaining balance should be transferred to the escrow creator
         :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
@@ -624,15 +626,31 @@ class EscrowClient:
         if not final_results_hash:
             raise EscrowClientError("Invalid empty final results hash")
 
-        handle_transaction(
-            self.w3,
-            "Bulk Payout",
-            self._get_escrow_contract(escrow_address).functions.bulkPayOut(
-                recipients, amounts, final_results_url, final_results_hash, txId
-            ),
-            EscrowClientError,
-            tx_options,
-        )
+        if force_complete:
+            handle_transaction(
+                self.w3,
+                "Bulk Payout",
+                self._get_escrow_contract(escrow_address).functions.bulkPayOut(
+                    recipients,
+                    amounts,
+                    final_results_url,
+                    final_results_hash,
+                    txId,
+                    force_complete,
+                ),
+                EscrowClientError,
+                tx_options,
+            )
+        else:
+            handle_transaction(
+                self.w3,
+                "Bulk Payout",
+                self._get_escrow_contract(escrow_address).functions.bulkPayOut(
+                    recipients, amounts, final_results_url, final_results_hash, txId
+                ),
+                EscrowClientError,
+                tx_options,
+            )
 
     def cancel(
         self, escrow_address: str, tx_options: Optional[TxParams] = None

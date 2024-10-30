@@ -171,7 +171,6 @@ const RoleDetails = ({
 		reputation,
 		amountJobsProcessed,
 		amountStaked,
-		amountAllocated,
 		amountLocked,
 	},
 }: {
@@ -337,36 +336,6 @@ const RoleDetails = ({
 							<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
 								<Typography variant="body2">
 									<FormatNumberWithDecimals value={amountStaked} />
-								</Typography>
-								<Typography
-									sx={{
-										marginLeft: 0.5,
-									}}
-									variant="body2"
-									color={colorPalette.fog.main}
-									component="span"
-								>
-									HMT
-								</Typography>
-							</Stack>
-						</Stack>
-					) : null}
-					{amountAllocated !== undefined && amountAllocated !== null ? (
-						<Stack
-							gap={{ xs: 1, md: 0 }}
-							direction={{ sm: 'column', md: 'row' }}
-						>
-							<Typography
-								sx={{
-									width: 300,
-								}}
-								variant="subtitle2"
-							>
-								Tokens Allocated
-							</Typography>
-							<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
-								<Typography variant="body2">
-									<FormatNumberWithDecimals value={amountAllocated} />
 								</Typography>
 								<Typography
 									sx={{

@@ -3,8 +3,7 @@ import { ethers, upgrades } from 'hardhat';
 async function main() {
   const escrowFactoryAddress = process.env.ESCROW_FACTORY_ADDRESS;
   const stakingAddress = process.env.STAKING_ADDRESS;
-  const rewardPoolAddress = process.env.REWARD_POOL_ADDRESS;
-  if (!(escrowFactoryAddress && stakingAddress && rewardPoolAddress)) {
+  if (!(escrowFactoryAddress && stakingAddress)) {
     console.error('Env variable missing');
     return;
   }
@@ -18,9 +17,6 @@ async function main() {
 
   const Staking = await ethers.getContractFactory('Staking');
   await upgrades.forceImport(stakingAddress, Staking, { kind: 'uups' });
-
-  const RewardPool = await ethers.getContractFactory('RewardPool');
-  await upgrades.forceImport(rewardPoolAddress, RewardPool, { kind: 'uups' });
 }
 
 main().catch((error) => {
