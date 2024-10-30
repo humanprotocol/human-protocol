@@ -4,6 +4,7 @@ import math
 import os
 import random
 import uuid
+from abc import ABCMeta, abstractmethod
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
@@ -172,12 +173,7 @@ def setup_gt_job_for_cvat_task(
             )
 
 
-# TODO: refactor builders and extract common interface
-class SimpleTaskBuilder:
-    """
-    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
-    """
-
+class _TaskBuilderBase(metaclass=ABCMeta):
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
@@ -205,6 +201,15 @@ class SimpleTaskBuilder:
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
+
+    @abstractmethod
+    def build(self) -> None: ...
+
+
+class SimpleTaskBuilder(_TaskBuilderBase):
+    """
+    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
+    """
 
     def _upload_task_meta(self, gt_dataset: dm.Dataset):
         layout = simple_task.TaskMetaLayout()
@@ -387,14 +392,9 @@ class SimpleTaskBuilder:
             db_service.touch(session, Project, [project_id])
 
 
-class BoxesFromPointsTaskBuilder:
+class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
-        self.exit_stack = ExitStack()
-        self.manifest = manifest
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
-
-        self.logger: Logger = NullLogger()
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
         self._input_gt_data: _MaybeUnset[bytes] = _unset
         self._input_points_data: _MaybeUnset[bytes] = _unset
@@ -470,20 +470,6 @@ class BoxesFromPointsTaskBuilder:
         """
 
         # TODO: probably, need to also add an absolute number of minimum GT RoIs
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.close()
-
-    def close(self):
-        self.exit_stack.close()
-
-    def set_logger(self, logger: Logger):
-        # TODO: add escrow info into messages
-        self.logger = logger
-        return self
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -1457,10 +1443,6 @@ class BoxesFromPointsTaskBuilder:
 
             db_service.touch(session, Project, [project_id])
 
-    @classmethod
-    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
-
     def build(self):
         self._download_input_data()
         self._parse_gt()
@@ -1484,7 +1466,7 @@ class BoxesFromPointsTaskBuilder:
         self._create_on_cvat()
 
 
-class SkeletonsFromBoxesTaskBuilder:
+class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
     @dataclass
     class _TaskParams:
         label_id: int
@@ -1492,12 +1474,7 @@ class SkeletonsFromBoxesTaskBuilder:
         roi_gt_ids: list[int]
 
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
-        self.exit_stack = ExitStack()
-        self.manifest = manifest
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
-
-        self.logger: Logger = NullLogger()
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
         self._input_gt_data: _MaybeUnset[bytes] = _unset
         self._input_boxes_data: _MaybeUnset[bytes] = _unset
@@ -1554,20 +1531,6 @@ class SkeletonsFromBoxesTaskBuilder:
         """
 
         # TODO: probably, need to also add an absolute number of minimum GT RoIs per class
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.close()
-
-    def close(self):
-        self.exit_stack.close()
-
-    def set_logger(self, logger: Logger):
-        # TODO: add escrow info into messages
-        self.logger = logger
-        return self
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -2604,10 +2567,6 @@ class SkeletonsFromBoxesTaskBuilder:
                         db_service.create_data_upload(session, cvat_task.id)
 
             db_service.touch(session, Project, created_projects)
-
-    @classmethod
-    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
 
     def build(self):
         self._download_input_data()
