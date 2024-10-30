@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { Button } from '@/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 
 export const NAVBAR_PADDING = '16px';
 
@@ -23,6 +24,7 @@ export function Navbar({
   userStatsDrawerOpen,
   toggleUserStatsDrawer,
 }: NavbarProps) {
+  const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
@@ -79,9 +81,20 @@ export function Navbar({
         top: open ? '0' : 'unset',
       }}
     >
-      <Stack sx={{ paddingLeft: '8px' }}>
+      <Grid
+        sx={{ cursor: 'pointer', paddingLeft: '8px' }}
+        onClick={() => {
+          if (isMobile) {
+            setOpen(false);
+          }
+          handleMainNavIconClick();
+        }}
+        role="button"
+        tabIndex={0}
+        aria-hidden="true"
+      >
         <HumanLogoIcon />
-      </Stack>
+      </Grid>
       <Grid
         sx={{
           display: 'flex',
