@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
 import { FiltersButtonIcon } from '@/components/ui/icons';
 import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
@@ -24,6 +23,8 @@ import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { Chip } from '@/components/ui/chip';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -69,11 +70,10 @@ export function MyJobsTableMobile({
 
   return (
     <>
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         fullWidth
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={setSearchEscrowAddress}
       />
@@ -103,14 +103,13 @@ export function MyJobsTableMobile({
           </Stack>
         ) : null}
         {allPages.map((d) => {
-          const buttonDisabled = d.status !== 'ACTIVE';
+          const buttonDisabled = d.status !== 'active';
           return (
             <Paper
               key={crypto.randomUUID()}
               sx={{
                 px: '16px',
                 py: '32px',
-                backgroundColor: colorPalette.white,
                 marginBottom: '20px',
                 boxShadow: 'none',
                 borderRadius: '20px',
@@ -145,7 +144,17 @@ export function MyJobsTableMobile({
                       </Typography>
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>
-                      <Chip label={d.status} />
+                      <Chip
+                        backgroundColor={colorPalette.secondary.main}
+                        label={
+                          <Typography
+                            color={lightModeColorPalette.white}
+                            variant="chip"
+                          >
+                            {d.status}
+                          </Typography>
+                        }
+                      />
                     </ListItem>
                     <ListItem label={t('worker.jobs.jobType')}>
                       <Chip
@@ -162,26 +171,28 @@ export function MyJobsTableMobile({
                     }}
                   >
                     {d.url ? (
-                      <TableButton
-                        component={Link}
-                        disabled={buttonDisabled}
-                        fullWidth
-                        target="_blank"
-                        to={d.url}
-                      >
-                        {t('worker.jobs.solve')}
-                      </TableButton>
+                      <>
+                        <TableButton
+                          component={Link}
+                          disabled={buttonDisabled}
+                          fullWidth
+                          target="_blank"
+                          to={d.url}
+                        >
+                          {t('worker.jobs.solve')}
+                        </TableButton>
+                        <RejectButton
+                          disabled={buttonDisabled}
+                          onClick={() => {
+                            if (buttonDisabled) return;
+                            rejectTaskMutation({
+                              oracle_address: oracle_address ?? '',
+                              assignment_id: d.assignment_id,
+                            });
+                          }}
+                        />
+                      </>
                     ) : null}
-                    <RejectButton
-                      disabled={buttonDisabled}
-                      onClick={() => {
-                        if (buttonDisabled) return;
-                        rejectTaskMutation({
-                          oracle_address: oracle_address ?? '',
-                          assignment_id: d.assignment_id,
-                        });
-                      }}
-                    />
                   </Grid>
                 </Grid>
               </List>

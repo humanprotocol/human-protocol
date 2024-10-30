@@ -127,7 +127,7 @@ export function DrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'DESC',
+                sort: 'desc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -159,7 +159,7 @@ export function DrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'ASC',
+                sort: 'asc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -226,9 +226,9 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'VALIDATION'}
+                  checked={filterParams.status === 'validation'}
                   onClick={() => {
-                    handleCheckboxClick('status', 'VALIDATION');
+                    handleCheckboxClick('status', 'validation');
                   }}
                 />
                 <Typography>
@@ -241,9 +241,9 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'EXPIRED'}
+                  checked={filterParams.status === 'expired'}
                   onClick={() => {
-                    handleCheckboxClick('status', 'EXPIRED');
+                    handleCheckboxClick('status', 'expired');
                   }}
                 />
                 <Typography>
@@ -256,9 +256,9 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'REJECTED'}
+                  checked={filterParams.status === 'rejected'}
                   onClick={() => {
-                    handleCheckboxClick('status', 'REJECTED');
+                    handleCheckboxClick('status', 'rejected');
                   }}
                 />
                 <Typography>

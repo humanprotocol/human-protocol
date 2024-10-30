@@ -35,7 +35,10 @@ type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
 };
 
-const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
+const getMyJobsTableData = async (
+  dto: GetMyJobTableDataDto,
+  abortSignal: AbortSignal
+) => {
   return apiClient(
     `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
@@ -44,7 +47,8 @@ const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
       options: {
         method: 'GET',
       },
-    }
+    },
+    abortSignal
   );
 };
 
@@ -54,7 +58,7 @@ export function useGetMyJobsData() {
   const dto = { ...filterParams, oracle_address: address ?? '' };
   return useQuery({
     queryKey: ['myJobs', dto],
-    queryFn: () => getMyJobsTableData(dto),
+    queryFn: ({ signal }) => getMyJobsTableData(dto, signal),
   });
 }
 
@@ -66,7 +70,7 @@ export function useInfiniteGetMyJobsData() {
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['myJobsInfinite', dto],
-    queryFn: () => getMyJobsTableData(dto),
+    queryFn: ({ signal }) => getMyJobsTableData(dto, signal),
     getNextPageParam: (pageParams) => {
       return pageParams.total_pages - 1 <= pageParams.page
         ? undefined

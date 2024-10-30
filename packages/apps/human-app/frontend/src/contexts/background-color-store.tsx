@@ -8,6 +8,7 @@ export interface BackgroundContextProps {
   setGrayBackground: () => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const BackgroundContext = createContext<
   BackgroundContextProps | undefined
 >(undefined);

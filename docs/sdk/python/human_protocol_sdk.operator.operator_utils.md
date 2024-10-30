@@ -17,11 +17,27 @@ print(
 
 ## Module
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+
+Bases: `object`
+
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+=======
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None)
+
+Bases: `object`
+
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None)
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
 ### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None)
 
 Bases: `object`
 
 #### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None)
+>>>>>>> develop
 
 Initializes an LeaderData instance.
 
@@ -35,7 +51,6 @@ Initializes an LeaderData instance.
   * **locked_until_timestamp** (`int`) – Locked until timestamp
   * **amount_withdrawn** (`int`) – Amount withdrawn
   * **amount_slashed** (`int`) – Amount slashed
-  * **reputation** (`int`) – Reputation
   * **reward** (`int`) – Reward
   * **amount_jobs_processed** (`int`) – Amount of jobs launched
   * **role** (`Optional`[`str`]) – Role
@@ -44,8 +59,17 @@ Initializes an LeaderData instance.
   * **webhook_url** (`Optional`[`str`]) – Webhook url
   * **url** (`Optional`[`str`]) – Url
   * **job_types** (`Optional`[`List`[`str`]]) – Job types
+<<<<<<< HEAD
+<<<<<<< HEAD
+  * **reputation_networks** (`Optional`[`List`[`str`]]) – List of reputation networks
   * **registration_needed** (`Optional`[`bool`]) – True,
   * **registration_instructions** (`Optional`[`str`]) – Instructions url,
+=======
+>>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
+=======
+  * **registration_needed** (`Optional`[`bool`]) – True,
+  * **registration_instructions** (`Optional`[`str`]) – Instructions url,
+>>>>>>> develop
 
 ### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None)
 

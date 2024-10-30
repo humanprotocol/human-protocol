@@ -19,7 +19,7 @@ import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { env } from '@/shared/env';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { type JobType } from '@/smart-contracts/EthKVStore/config';
-import { useGetRegisteredOracles } from '@/api/services/worker/registered-oracles';
+import { useGetRegistrationInExchangeOracles } from '@/api/services/worker/get-registration-in-exchange-oracles';
 
 const getColumns = (
   selectOracle: (oracle: OracleSuccessResponse) => void
@@ -88,16 +88,19 @@ export function OraclesTable({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
-  const { data: registeredOraclesResults } = useGetRegisteredOracles();
+  const { data: registrationInExchangeOraclesResult } =
+    useGetRegistrationInExchangeOracles();
 
   const selectOracle = (oracle: OracleSuccessResponse) => {
     if (
       oracle.registrationNeeded &&
-      !registeredOraclesResults?.oracle_addresses.find(
+      !registrationInExchangeOraclesResult?.oracle_addresses.find(
         (address) => address === oracle.address
       )
     ) {
-      navigate(`${routerPaths.worker.registration}/${oracle.address}`);
+      navigate(
+        `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
+      );
       return;
     }
 
@@ -128,6 +131,7 @@ export function OraclesTable({
     enableSorting: false,
     enablePagination: false,
     enableTopToolbar: false,
+    enableBottomToolbar: false,
     muiTableHeadCellProps: {
       sx: {
         borderColor: colorPalette.paper.text,

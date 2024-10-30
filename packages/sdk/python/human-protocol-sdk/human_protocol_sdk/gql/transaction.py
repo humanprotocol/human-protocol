@@ -9,6 +9,12 @@ fragment TransactionFields on Transaction {
     timestamp
     value
     method
+    transfers {
+      from
+      id
+      to
+      value
+    }
 }
 """
 
@@ -20,17 +26,17 @@ def get_transactions_query(filter: TransactionFilter) -> str:
     if from_address == to_address:
         address_condition = f"""
         {f'{{ from: $fromAddress }}' if from_address else ''}
-        {f'{{ to: $toAddress }}' if to_address else ''}
+        {f'{{ or: [{{ to: $toAddress }}, {{ transfers_: {{ to: $toAddress }} }}] }}' if to_address else ''}
         """
     else:
         address_condition = f"""
         {f'from: $fromAddress' if from_address else ''}
-        {f'to: $toAddress' if to_address else ''}
+        {f'or: [{{ to: $toAddress }}, {{ transfers_: {{ to: $toAddress }} }}]' if to_address else ''}
         """
 
     where_clause = f"""
     where: {{
-        {"or: [" + address_condition + "]," if from_address == to_address else address_condition}
+        {"or: [" + address_condition + "]," if from_address and from_address == to_address else address_condition}
         {f'timestamp_gte: $startDate,' if filter.start_date else ''}
         {f'timestamp_lte: $endDate,' if filter.end_date else ''}
         {f'block_gte: $startBlock,' if filter.start_block else ''}

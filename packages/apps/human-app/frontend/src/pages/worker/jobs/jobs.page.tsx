@@ -1,10 +1,9 @@
 /* eslint-disable camelcase */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TableQueryContextProvider } from '@/components/ui/table/table-query-context';
-import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import { Modal } from '@/components/ui/modal/modal';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { MyJobsTableMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-table-mobile';
@@ -30,7 +29,6 @@ export function JobsPage() {
   const { isDarkMode } = useColorMode();
   const { data, isError, isPending, error } = useGetOracles();
   const { address: oracle_address } = useParams<{ address: string }>();
-  const { setGrayBackground } = useBackgroundColorStore();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const isMobile = useIsMobile();
@@ -49,10 +47,6 @@ export function JobsPage() {
       setSelectedTab('myJobs');
     }
   };
-
-  useEffect(() => {
-    setGrayBackground();
-  }, [setGrayBackground]);
 
   const oracleName = data?.find(
     ({ address }) => address === oracle_address
@@ -94,6 +88,7 @@ export function JobsPage() {
               padding: isMobile ? '20px' : '64px 144px',
               minHeight: '800px',
               borderRadius: '20px',
+              backgroundColor: isMobile ? 'transparent' : undefined,
             }}
           >
             <div>
@@ -102,6 +97,7 @@ export function JobsPage() {
                   padding: '8px 42px',
                   backgroundColor: isDarkMode ? '#CDC7FF14' : '#1406B20A',
                   display: 'inline-block',
+                  borderRadius: '4px',
                 }}
               >
                 <Typography variant="h6">{oracleName}</Typography>

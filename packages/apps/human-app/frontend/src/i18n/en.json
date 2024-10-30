@@ -11,7 +11,7 @@
     "jobsDiscovery": "Tasks",
     "hcaptchaLabeling": "Labeling",
     "jobs": "Tasks",
-    "registration": "Registration"
+    "registrationInExchangeOracle": "Registration in Exchange Oracle"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
@@ -24,7 +24,8 @@
     "passwordMismatch": "Passwords are not the same",
     "captcha": "Please complete the captcha",
     "passwordMissing": "Please enter your password.",
-    "invalidEmail": "Please enter a valid email address."
+    "invalidEmail": "Please enter a valid email address.",
+    "invalidOracleAddress": "Invalid oracle address."
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
@@ -33,7 +34,8 @@
     "unknownNetwork": "Unknown network",
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
-    "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported."
+    "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
+    "invalidEscrowAddress": "Please enter a valid escrow address."
   },
   "components": {
     "multiSelect": {
@@ -207,10 +209,10 @@
       "annotationTool": "Annotation tool",
       "oracleAddress": "Oracle address",
       "jobTypes": "Task types",
-      "seeJobs": "See tasks",
+      "seeJobs": "See Tasks",
       "allJobs": "All tasks"
     },
-    "registration": {
+    "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
       "completeMessage": "Click on Complete once you have finished the registration process:",
       "completeButton": "Complete"
@@ -225,7 +227,7 @@
       "escrowAddress": "Escrow address",
       "network": "Network",
       "rewardAmount": "Reward amount",
-      "jobType": "Job type",
+      "jobType": "Task type",
       "expiresAt": "Expires at",
       "status": "Status",
       "selectJob": "Select Task",
@@ -402,10 +404,10 @@
     "gotIt": "Got it!"
   },
   "jobTypeLabels": {
-    "FORTUNE": "Fortune",
-    "IMAGE_POINTS": "Points",
-    "IMAGE_BOXES": "Bounding Boxes",
-    "IMAGE_BOXES_FROM_POINTS": "Bounding Boxes from Points",
-    "IMAGE_SKELETONS_FROM_BOXES": "Skeletons from Bounding Boxes"
+    "fortune": "Fortune",
+    "image_points": "Points",
+    "image_boxes": "Bounding Boxes",
+    "image_boxes_from_points": "Bounding Boxes from Points",
+    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes"
   }
 }

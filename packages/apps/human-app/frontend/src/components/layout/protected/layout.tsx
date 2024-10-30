@@ -58,7 +58,7 @@ export function Layout({
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
-  const { backgroundColor } = useBackgroundColorStore();
+  const { backgroundColor, setGrayBackground } = useBackgroundColorStore();
   const toggleUserStatsDrawer = isHCaptchaLabelingPage
     ? () => {
         setHcaptchaDrawerOpen((state) => !state);
@@ -93,6 +93,10 @@ export function Layout({
   useEffect(() => {
     setNotificationWidth();
   }, [notification]);
+
+  useEffect(() => {
+    setGrayBackground();
+  }, [setGrayBackground]);
 
   return (
     <ProtectedLayoutContext.Provider
@@ -168,7 +172,7 @@ export function Layout({
               <Grid
                 item
                 sx={{
-                  minHeight: '3.2rem',
+                  minHeight: notification ? '3.2rem' : 'unset',
                   position: 'fixed',
                   width: notificationWith
                     ? `${notificationWith.toString()}px`
@@ -205,7 +209,7 @@ export function Layout({
             </Grid>
             <Grid
               component="div"
-              // @ts-expect-error -- ...
+              // @ts-expect-error -- MUI accepts this prop even if it's not typed
               ref={layoutElementRef}
               sx={{ height: '100%' }}
             >

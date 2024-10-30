@@ -7,6 +7,12 @@ export function toEventId(event: ethereum.Event): Bytes {
     .concatI32(event.block.timestamp.toI32());
 }
 
+export function toPreviousEventId(event: ethereum.Event): Bytes {
+  return event.transaction.hash
+    .concatI32(event.logIndex.toI32() - 1)
+    .concatI32(event.block.timestamp.toI32());
+}
+
 export function toEventDayId(event: ethereum.Event): BigInt {
   const timestamp = event.block.timestamp.toI32();
   const dayID = timestamp / ONE_DAY;

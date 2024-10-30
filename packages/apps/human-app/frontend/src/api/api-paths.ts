@@ -65,8 +65,8 @@ export const apiPaths = {
     dailyHmtSpend: {
       path: '/labeling/h-captcha/daily-hmt-spent',
     },
-    userRegistration: {
-      path: '/register',
+    registrationInExchangeOracle: {
+      path: '/exchange-oracle-registration',
     },
   },
   operator: {

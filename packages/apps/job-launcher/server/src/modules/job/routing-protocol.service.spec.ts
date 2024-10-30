@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { ChainId, Role } from '@human-protocol/sdk';
 import {
-  MOCK_ADDRESS,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
@@ -27,9 +26,7 @@ jest.mock('../../common/utils', () => ({
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-    })),
+    build: jest.fn().mockImplementation(() => ({})),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
     uploadFiles: jest

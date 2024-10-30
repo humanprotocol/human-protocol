@@ -101,7 +101,7 @@ export function AvailableJobsDrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'DESC',
+                sort: 'desc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -133,7 +133,7 @@ export function AvailableJobsDrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'ASC',
+                sort: 'asc',
                 sort_field: 'reward_amount',
               });
             }}

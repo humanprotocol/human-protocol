@@ -54,7 +54,7 @@ export function StartKycButton() {
 
   return (
     <Button
-      disabled={user.status !== 'ACTIVE'}
+      disabled={user.status !== 'active'}
       fullWidth
       loading={kycStartIsPending}
       onClick={startKYC}

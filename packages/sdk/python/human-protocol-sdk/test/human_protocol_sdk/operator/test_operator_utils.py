@@ -33,7 +33,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
@@ -44,6 +43,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "jobTypes": "type1,type2",
                                 "registrationNeeded": True,
                                 "registrationInstructions": "www.google.com",
+                                "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
                     }
@@ -67,7 +67,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
@@ -78,6 +77,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].job_types, ["type1", "type2"])
             self.assertEqual(leaders[0].registration_needed, True)
             self.assertEqual(leaders[0].registration_instructions, "www.google.com")
+            self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_none(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -99,7 +99,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
@@ -108,6 +107,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "webhookUrl": None,
                                 "url": None,
                                 "jobTypes": None,
+                                "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
                     }
@@ -131,7 +131,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
@@ -141,8 +140,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(leaders[0].registration_needed, None)
             self.assertEqual(leaders[0].registration_instructions, None)
-            # Should rerutn empty array
             self.assertEqual(leaders[0].job_types, [])
+            self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_array(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -164,7 +163,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
@@ -173,6 +171,7 @@ class TestOperatorUtils(unittest.TestCase):
                                 "webhookUrl": None,
                                 "url": None,
                                 "jobTypes": ["type1", "type2", "type3"],
+                                "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
                     }
@@ -196,7 +195,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
@@ -207,6 +205,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(
                 leaders[0].job_types, ["type1", "type2", "type3"]
             )  # Should the same array
+            self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_empty_data(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -253,7 +252,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
@@ -264,6 +262,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "jobTypes": "type1,type2",
                             "registrationNeeded": True,
                             "registrationInstructions": "www.google.com",
+                            "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
                 }
@@ -286,7 +285,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
@@ -297,6 +295,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.job_types, ["type1", "type2"])
             self.assertEqual(leader.registration_needed, True)
             self.assertEqual(leader.registration_instructions, "www.google.com")
+            self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_when_job_types_is_none(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -318,7 +317,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
@@ -327,6 +325,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "webhookUrl": None,
                             "url": None,
                             "jobTypes": None,
+                            "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
                 }
@@ -349,7 +348,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
@@ -360,6 +358,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.job_types, [])
             self.assertEqual(leader.registration_needed, None)
             self.assertEqual(leader.registration_instructions, None)
+            self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_when_job_types_is_array(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -381,7 +380,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
@@ -390,6 +388,7 @@ class TestOperatorUtils(unittest.TestCase):
                             "webhookUrl": None,
                             "url": None,
                             "jobTypes": ["type1", "type2", "type3"],
+                            "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
                 }
@@ -412,7 +411,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
@@ -421,6 +419,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.webhook_url, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2", "type3"])
+            self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_empty_data(self):
         staker_address = "0x1234567890123456789012345678901234567891"

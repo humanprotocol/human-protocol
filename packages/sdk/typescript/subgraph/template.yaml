@@ -129,7 +129,6 @@ dataSources:
         - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
           handler: handleRewardAdded
       file: ./src/mapping/RewardPool.ts
-{{ #LegacyEscrowFactory }}
   - kind: ethereum
     name: LegacyEscrowFactory
     network: '{{ network }}'
@@ -150,7 +149,6 @@ dataSources:
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
-{{ /LegacyEscrowFactory }}
 templates:
   - name: Escrow
     kind: ethereum/contract
@@ -175,12 +173,20 @@ templates:
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending
+        - event: PendingV2(string,string,address,address,address)
+          handler: handlePendingV2
         - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
+          handler: handleBulkTransfer
+        - event: BulkTransferV2(indexed uint256,address[],uint256[],bool,string)
           handler: handleBulkTransfer
         - event: Cancelled()
           handler: handleCancelled
         - event: Completed()
           handler: handleCompleted
+        - event: Fund(uint256)
+          handler: handleFund
+        - event: Withdraw(address,uint256)
+          handler: handleWithdraw
   - name: LegacyEscrow
     kind: ethereum/contract
     network: '{{ network }}'

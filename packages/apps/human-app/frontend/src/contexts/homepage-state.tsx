@@ -10,6 +10,7 @@ interface HomePageStageContextProps {
   isMainPage: boolean;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const HomePageStateContext =
   createContext<HomePageStageContextProps | null>(null);
 

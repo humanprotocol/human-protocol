@@ -23,11 +23,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
+### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method, transfers)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
+#### \_\_init_\_(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method, transfers)
 
 ### *class* human_protocol_sdk.transaction.transaction_utils.TransactionUtils
 
@@ -92,3 +92,9 @@ Get an array of transactions based on the specified filter parameters.
 Bases: `Exception`
 
 Raises when some error happens when getting data from subgraph.
+
+### *class* human_protocol_sdk.transaction.transaction_utils.Transfer(from_address, to_address, value)
+
+Bases: `object`
+
+#### \_\_init_\_(from_address, to_address, value)

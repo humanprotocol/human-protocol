@@ -21,7 +21,7 @@ import {
   SECONDS_PER_BLOCK,
 } from './GovernanceUtils';
 
-describe.only('MetaHumanGovernor', function () {
+describe('MetaHumanGovernor', function () {
   let owner: Signer;
   let user1: Signer;
   let wormholeMockForGovernor: WormholeMock;

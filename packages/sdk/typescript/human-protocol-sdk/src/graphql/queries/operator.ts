@@ -11,7 +11,6 @@ const LEADER_FRAGMENT = gql`
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
-    reputation
     reward
     amountJobsProcessed
     role
@@ -22,6 +21,7 @@ const LEADER_FRAGMENT = gql`
     jobTypes
     registrationNeeded
     registrationInstructions
+    reputationNetworks
   }
 `;
 

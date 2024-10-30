@@ -1,10 +1,12 @@
-import { BigInt } from '@graphprotocol/graph-ts';
+import { BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
   assert,
   clearStore,
   afterEach,
+  dataSourceMock,
+  beforeAll,
 } from 'matchstick-as/assembly';
 
 import { handleDataSaved } from '../../src/mapping/KVStore';
@@ -12,7 +14,16 @@ import { toEventId } from '../../src/mapping/utils/event';
 import { toBytes } from '../../src/mapping/utils/string';
 import { createDataSavedEvent } from './fixtures';
 
+const kvStoreAddressString = '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65';
+
 describe('KVStore', () => {
+  beforeAll(() => {
+    dataSourceMock.setReturnValues(
+      kvStoreAddressString,
+      'rinkeby',
+      new DataSourceContext()
+    );
+  });
   afterEach(() => {
     clearStore();
   });
@@ -94,7 +105,7 @@ describe('KVStore', () => {
     assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Validator');
   });
 
-  test('Should properly create a transaction', () => {
+  test('Should properly create a transaction with set method', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
@@ -158,6 +169,99 @@ describe('KVStore', () => {
       data2.transaction.hash.toHex(),
       'from',
       data2.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'to',
+      kvStoreAddressString
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data2.transaction.hash.toHex(),
+      'to',
+      kvStoreAddressString
+    );
+  });
+
+  test('Should properly create a transaction with setBulk method', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Operator',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'webhook_url',
+      'https://operator.example.com',
+      BigInt.fromI32(10)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'method',
+      'setBulk'
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'from',
+      data1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'Transaction',
+      data1.transaction.hash.toHex(),
+      'to',
+      kvStoreAddressString
+    );
+
+    const internalTransactionId = toEventId(data1).toHex();
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTransactionId,
+      'transaction',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTransactionId,
+      'from',
+      data1.transaction.from.toHex()
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTransactionId,
+      'to',
+      kvStoreAddressString
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTransactionId,
+      'value',
+      '0'
+    );
+    assert.fieldEquals(
+      'InternalTransaction',
+      internalTransactionId,
+      'method',
+      'set'
     );
   });
 
@@ -411,11 +515,12 @@ describe('KVStore', () => {
       'role',
       'Job Launcher'
     );
+
     assert.fieldEquals(
       'Leader',
       data2.params.sender.toHex(),
-      'reputationNetwork',
-      data1.params.sender.toHex()
+      'reputationNetworks',
+      `[${data1.params.sender.toHex()}]`
     );
   });
 

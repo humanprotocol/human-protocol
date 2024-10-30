@@ -40,6 +40,7 @@
       * [`EscrowClient`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient)
       * [`EscrowClientError`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError)
       * [`EscrowConfig`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig)
+      * [`EscrowWithdraw`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowWithdraw)
     * [human_protocol_sdk.escrow.escrow_utils module](human_protocol_sdk.escrow.escrow_utils.md)
       * [Code Example](human_protocol_sdk.escrow.escrow_utils.md#code-example)
       * [Module](human_protocol_sdk.escrow.escrow_utils.md#module)
@@ -53,6 +54,13 @@
       * [Module](human_protocol_sdk.kvstore.kvstore_client.md#module)
       * [`KVStoreClient`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClient)
       * [`KVStoreClientError`](human_protocol_sdk.kvstore.kvstore_client.md#human_protocol_sdk.kvstore.kvstore_client.KVStoreClientError)
+<<<<<<< HEAD
+    * [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
+      * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
+      * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
+      * [`KVStoreData`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreData)
+      * [`KVStoreUtils`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils)
+=======
 * [human_protocol_sdk.kvstore.kvstore_utils module](human_protocol_sdk.kvstore.kvstore_utils.md)
   * [Code Example](human_protocol_sdk.kvstore.kvstore_utils.md#code-example)
   * [Module](human_protocol_sdk.kvstore.kvstore_utils.md#module)
@@ -63,6 +71,7 @@
     * [`KVStoreUtils.get_file_url_and_verify_hash()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_file_url_and_verify_hash)
     * [`KVStoreUtils.get_kvstore_data()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_kvstore_data)
     * [`KVStoreUtils.get_public_key()`](human_protocol_sdk.kvstore.kvstore_utils.md#human_protocol_sdk.kvstore.kvstore_utils.KVStoreUtils.get_public_key)
+>>>>>>> develop
 * [human_protocol_sdk.operator package](human_protocol_sdk.operator.md)
   * [Submodules](human_protocol_sdk.operator.md#submodules)
     * [human_protocol_sdk.operator.operator_utils module](human_protocol_sdk.operator.operator_utils.md)
@@ -118,6 +127,10 @@
       * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
       * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)
       * [`TransactionUtilsError`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtilsError)
+<<<<<<< HEAD
+      * [`Transfer`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.Transfer)
+=======
+>>>>>>> develop
 
 ## Submodules
 

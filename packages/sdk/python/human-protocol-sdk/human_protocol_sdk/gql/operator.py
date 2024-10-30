@@ -12,7 +12,6 @@ fragment LeaderFields on Leader {
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
-    reputation
     reward
     amountJobsProcessed
     role
@@ -23,6 +22,9 @@ fragment LeaderFields on Leader {
     jobTypes
     registrationNeeded
     registrationInstructions
+    reputationNetworks {
+      address
+    }
 }
 """
 

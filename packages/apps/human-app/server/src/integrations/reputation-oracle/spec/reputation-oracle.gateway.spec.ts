@@ -12,7 +12,7 @@ import { classes } from '@automapper/classes';
 import { ReputationOracleProfile } from '../reputation-oracle.mapper.profile';
 import { gatewayConfigServiceMock } from '../../../common/config/spec/gateway-config-service.mock';
 import {
-  RegisterWorkerCommand,
+  RegistrationInExchangeOracleCommand,
   SignupWorkerCommand,
 } from '../../../modules/user-worker/model/worker-registration.model';
 import { SignupOperatorCommand } from '../../../modules/user-operator/model/operator-registration.model';
@@ -177,21 +177,24 @@ describe('ReputationOracleGateway', () => {
     });
   });
 
-  describe('sendWorkerRegistration', () => {
-    const command = new RegisterWorkerCommand('0x34df642');
+  describe('sendRegistrationInExchangeOracle', () => {
+    const command = new RegistrationInExchangeOracleCommand(
+      '0x34df642',
+      'hcaptchaToken',
+    );
     const expectedData = {
       oracle_address: '0x34df642',
     };
 
-    it('should successfully call the reputation oracle worker registration endpoint', async () => {
+    it('should successfully call the reputation oracle exchange oracle registration endpoint', async () => {
       nock('https://example.com')
-        .post('/user/registration', expectedData)
+        .post('/user/exchange-oracle-registration', expectedData)
         .reply(201, '');
 
       httpServiceMock.request.mockReturnValue(of({}));
 
       await expect(
-        service.sendWorkerRegistration(command),
+        service.sendRegistrationInExchangeOracle(command),
       ).resolves.not.toThrow();
       expect(httpService.request).toHaveBeenCalled();
     });
@@ -209,8 +212,13 @@ describe('ReputationOracleGateway', () => {
           ),
         );
 
-      const command = new RegisterWorkerCommand('');
-      await expect(service.sendWorkerRegistration(command)).rejects.toThrow(
+      const command = new RegistrationInExchangeOracleCommand(
+        '',
+        'hcaptchaToken',
+      );
+      await expect(
+        service.sendRegistrationInExchangeOracle(command),
+      ).rejects.toThrow(
         new HttpException({ message: 'Bad request' }, HttpStatus.BAD_REQUEST),
       );
     });
@@ -220,7 +228,9 @@ describe('ReputationOracleGateway', () => {
         .spyOn(httpService, 'request')
         .mockReturnValue(throwError(() => new Error('Internal Server Error')));
 
-      await expect(service.sendWorkerRegistration(command)).rejects.toThrow(
+      await expect(
+        service.sendRegistrationInExchangeOracle(command),
+      ).rejects.toThrow(
         new HttpException(
           'Internal Server Error',
           HttpStatus.INTERNAL_SERVER_ERROR,
