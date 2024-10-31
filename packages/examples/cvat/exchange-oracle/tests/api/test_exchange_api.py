@@ -608,7 +608,9 @@ def test_cannot_register_400_with_duplicated_address(client: TestClient, session
 
     response = client.post(
         "/register",
-        headers=get_auth_header(generate_jwt_token(email=new_cvat_email)),
+        headers=get_auth_header(
+            generate_jwt_token(wallet_address=user_address, email=new_cvat_email)
+        ),
     )
     assert response.status_code == 400
     assert response.json() == {"message": "User already exists"}
