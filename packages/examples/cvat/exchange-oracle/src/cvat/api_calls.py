@@ -26,6 +26,10 @@ from src.utils.time import utcnow
 _NOTSET = object()
 
 
+class CVATException(Exception):
+    """Indicates that CVAT API returned unexpected response"""
+
+
 def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> bool:
     """
     Requests annotations export.
@@ -314,7 +318,7 @@ def create_task(
     project_id: int,
     name: str,
     *,
-    segment_size: int = Config.cvat_config.cvat_task_segment_size,
+    segment_size: int,
 ) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -325,7 +329,7 @@ def create_task(
             segment_size=segment_size,
         )
         try:
-            (task_info, response) = api_client.tasks_api.create(task_write_request)
+            (task_info, _) = api_client.tasks_api.create(task_write_request)
             return task_info
 
         except exceptions.ApiException as e:
@@ -351,6 +355,7 @@ def put_task_data(
     task_id: int,
     cloudstorage_id: int,
     *,
+    chunk_size: int,
     filenames: list[str] | None = None,
     sort_images: bool = True,
     validation_params: dict[str, str | float | list[str]] | None = None,
@@ -384,14 +389,11 @@ def put_task_data(
                 mode=models.ValidationMode("gt_pool"),
                 frames=gt_filenames,
                 frame_selection_method=models.FrameSelectionMethod("manual"),
-                frames_per_job_count=validation_params.get(
-                    "gt_frames_per_job_count",
-                    Config.cvat_config.cvat_val_frames_per_job_count,
-                ),
+                frames_per_job_count=validation_params["gt_frames_per_job_count"],
             )
 
         data_request = models.DataRequest(
-            chunk_size=Config.cvat_config.cvat_task_segment_size,
+            chunk_size=chunk_size,
             cloud_storage_id=cloudstorage_id,
             image_quality=Config.cvat_config.cvat_default_image_quality,
             use_cache=True,
@@ -614,9 +616,11 @@ def get_gt_job(task_id: int) -> models.JobRead:
     with get_api_client() as api_client:
         try:
             (paginated_jobs, _) = api_client.jobs_api.list(task_id=task_id, type="ground_truth")
-            assert (
-                len(paginated_jobs["results"]) == 1
-            ), f'CVAT returned {len(paginated_jobs["results"])} GT jobs'
+            if (gt_jobs_count := len(paginated_jobs["results"])) != 1:
+                raise CVATException(
+                    f"CVAT returned {gt_jobs_count} GT jobs for the task({task_id})"
+                )
+
             return paginated_jobs["results"][0]
         except (exceptions.ApiException, AssertionError) as ex:
             logger.exception(f"Exception when calling JobsApi.list(): {ex}\n")
@@ -631,7 +635,7 @@ def upload_gt_annotations(
     sleep_interval: int = 5,
     timeout: int | None = Config.features.default_import_timeout,
 ) -> None:
-    # FUTURE-TODO: use job.import_annotations when CVAT will support waiting timeout
+    # FUTURE-TODO: use job.import_annotations when CVAT supports a waiting timeout
     start_time = datetime.now(timezone.utc)
     logger = logging.getLogger("app")
 
@@ -653,7 +657,11 @@ def upload_gt_annotations(
             raise
 
         request_id = json.loads(response.data).get("rq_id")
-        assert request_id, "CVAT server have not returned rq_id in the response."
+        if not request_id:
+            raise CVATException(
+                "CVAT server has not returned rq_id in the response when "
+                f"uploading GT annotations to the {job_id} job"
+            )
 
         while True:
             try:
@@ -695,14 +703,15 @@ def get_quality_control_settings(task_id: int) -> models.QualitySettings:
     with get_api_client() as api_client:
         try:
             paginated_data, _ = api_client.quality_api.list_settings(task_id=task_id)
-            assert len(paginated_data["results"]) == 1, (
-                f'CVAT returned {len(paginated_data["results"])}'
-                "quality control settings associated with the task"
-            )
+            if (settings_count := paginated_data["results"]) != 1:
+                raise CVATException(
+                    f"CVAT returned {settings_count}"
+                    f"quality control settings associated with the task({task_id})"
+                )
             return paginated_data["results"][0]
 
-        except (exceptions.ApiException, AssertionError) as e:
-            logger.exception(f"Exception when calling QualityApi.list_settings(): {e}\n")
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling QualityApi.list_settings(): {ex}\n")
             raise
 
 
@@ -710,8 +719,8 @@ def update_quality_control_settings(
     settings_id: int,
     *,
     target_metric_threshold: float,
-    max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     target_metric: str = "accuracy",
+    max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
     oks_sigma: float = Config.cvat_config.cvat_oks_sigma,
 ) -> None:

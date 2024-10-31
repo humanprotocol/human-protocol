@@ -180,8 +180,9 @@ class CvatConfig:
     cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
     # quality control settings
-    cvat_val_frames_per_job_count = int(os.environ.get("CVAT_VAL_FRAMES_PER_JOB_COUNT", 2))
     cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
+    "Maximum number of attempts to run a validation check on a job after completing annotation"
+
     cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
     cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
 
@@ -232,7 +233,7 @@ class FeaturesConfig:
     default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
-    default_import_timeout = int(os.environ.get("DEFAULT_IMPORT_TIMEOUT", 60))
+    default_import_timeout = int(os.environ.get("DEFAULT_IMPORT_TIMEOUT", 60 * 60))
     "Timeout, in seconds, for waiting on GT annotations import"
 
     request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
