@@ -22,7 +22,7 @@ const myJobSchema = z.object({
           z.literal('CANCELED'),
           z.literal('COMPLETED'),
         ])
-        .parse(value);
+        .parse(value.toUpperCase());
     } catch (error) {
       return 'UNKNOWN';
     }
