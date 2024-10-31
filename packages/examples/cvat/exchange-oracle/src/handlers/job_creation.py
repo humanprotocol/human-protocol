@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import os
 import random
+from time import sleep
 import uuid
 from abc import ABCMeta, abstractmethod
 from contextlib import ExitStack
@@ -38,6 +39,7 @@ from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
+from src.utils.zip_archive import write_dir_to_zip_archive
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Sequence
@@ -167,41 +169,42 @@ class _TaskBuilderBase(metaclass=ABCMeta):
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
 
+    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+        # TODO: add a timeout or
+        # save gt datasets in the oracle bucket and upload in track_task_creation()
+        while True:
+            task_status, _ = cvat_api.get_task_upload_status(task_id)
+            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+                return task_status
+
+            sleep(Config.cvat_config.cvat_task_creation_check_interval)
+
     def _setup_gt_job_for_cvat_task(
-        self,
-        task_id: int,
-        gt_dataset: dm.Dataset,
-        *,
-        dm_export_format: str = "coco",
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
     ) -> None:
+        task_status = self._wait_task_creation(task_id)
+        if task_status != cvat_api.UploadStatus.FINISHED:
+            return  # will be handled in state_trackers.py::track_task_creation
+
         dm_format_to_cvat_format = {
             "coco": "COCO 1.0",
             "cvat": "CVAT 1.1",
+            "datumaro": "Datumaro 1.0",
         }
 
-        dm_format_to_annotations_path = {
-            "coco": "annotations/instances_default.json",
-            "cvat": "default.xml",
-        }
+        with TemporaryDirectory() as tmp_dir:
+            export_dir = Path(tmp_dir) / "export"
+            gt_dataset.export(save_dir=str(export_dir), save_images=False, format=dm_export_format)
 
-        task_status: cvat_api.UploadStatus | None = None
+            annotations_archive_path = Path(tmp_dir) / "annotations.zip"
+            with annotations_archive_path.open("wb") as annotations_archive:
+                write_dir_to_zip_archive(export_dir, annotations_archive)
 
-        while task_status != cvat_api.UploadStatus.FINISHED:
-            task_status, _ = cvat_api.get_task_upload_status(task_id)
-            if not task_status or task_status == cvat_api.UploadStatus.FAILED:
-                return  # will be handled in state_trackers.py::track_task_creation
-
-        if task_status == cvat_api.UploadStatus.FINISHED:
-            with TemporaryDirectory() as tmp_dir:
-                gt_dataset.export(
-                    save_dir=tmp_dir, save_images=False, format=dm_export_format
-                )  # reindex=True ?
-
-                self._setup_gt_job(
-                    task_id,
-                    Path(tmp_dir) / dm_format_to_annotations_path[dm_export_format],
-                    format_name=dm_format_to_cvat_format[dm_export_format],
-                )
+            self._setup_gt_job(
+                task_id,
+                annotations_archive_path,
+                format_name=dm_format_to_cvat_format[dm_export_format],
+            )
 
     def _setup_gt_job(self, task_id: int, dataset_path: Path, format_name: str) -> None:
         gt_job = cvat_api.get_gt_job(task_id)
@@ -396,7 +399,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                     },
                 )
 
-                self._setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset, dm_export_format="coco")
+                self._setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset)
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
@@ -411,20 +414,18 @@ class PointsTaskBuilder(SimpleTaskBuilder):
     def _parse_gt_dataset(self, gt_file_data, *, add_prefix=None):
         gt_dataset = super()._parse_gt_dataset(gt_file_data, add_prefix=add_prefix)
 
-        # Replace boxes with their center points
-        # Collect radius statistics
-
         updated_gt_dataset = dm.Dataset(categories=gt_dataset.categories(), media_type=dm.Image)
 
+        # Replace boxes with their center points
+        # Collect radius statistics
         radiuses = []
-
         for gt_sample in gt_dataset:
             updated_anns = []
 
             image_size = gt_sample.media_as(dm.Image).size
             image_half_diag = ((image_size[0] ** 2 + image_size[1] ** 2) ** 0.5) / 2
 
-            for gt_bbox in gt_sample:
+            for gt_bbox in gt_sample.annotations:
                 if not isinstance(gt_bbox, dm.Bbox):
                     continue
 
@@ -442,10 +443,17 @@ class PointsTaskBuilder(SimpleTaskBuilder):
 
         return updated_gt_dataset
 
+    def _setup_gt_job_for_cvat_task(
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
+    ) -> None:
+        super()._setup_gt_job_for_cvat_task(
+            task_id=task_id, gt_dataset=gt_dataset, dm_export_format="datumaro"
+        )
+
     def _setup_quality_settings(self, task_id):
         assert self._mean_gt_bbox_radius_estimation is not _unset
 
-        # TODO: refactor
+        # TODO: refactor, remove repeated requests
         super()._setup_quality_settings(task_id)
 
         settings = cvat_api.get_quality_control_settings(task_id)
@@ -2704,7 +2712,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
     ]:
         builder_type = SimpleTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_points]:
-        builder_type = TaskTypes.image_points
+        builder_type = PointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
         builder_type = BoxesFromPointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
