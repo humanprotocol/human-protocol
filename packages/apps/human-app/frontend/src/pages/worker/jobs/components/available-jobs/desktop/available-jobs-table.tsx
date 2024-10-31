@@ -6,7 +6,7 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
-import { Grid, Typography } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   useGetAvailableJobsData,
@@ -129,7 +129,7 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
       const { escrow_address, chain_id } = props.row.original;
       const { onJobAssignmentError, onJobAssignmentSuccess } =
         useJobsNotifications();
-      const { mutate: assignJobMutation, status } = useAssignJobMutation(
+      const { mutate: assignJobMutation, isPending } = useAssignJobMutation(
         {
           onSuccess: onJobAssignmentSuccess,
           onError: onJobAssignmentError,
@@ -141,7 +141,7 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
             <TableButton
-              loading={status === 'pending'}
+              loading={isPending}
               onClick={() => {
                 assignJobMutation({ escrow_address, chain_id });
               }}
@@ -149,12 +149,7 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
                 width: '94px',
               }}
             >
-              <Typography
-                sx={{ color: 'white !important' }}
-                variant="buttonSmall"
-              >
-                {t('worker.jobs.selectJob')}
-              </Typography>
+              {t('worker.jobs.selectJob')}
             </TableButton>
           </Grid>
         </Grid>
