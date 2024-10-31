@@ -2,7 +2,6 @@ import datetime
 
 import uvicorn
 
-from src import app
 from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
 
@@ -16,7 +15,8 @@ def apply_local_development_patches():
       using mock data if the address corresponds to a local manifest.
     - Updates local manifest files from cloud storage.
     - Overrides `validate_address` to disable address validation.
-    - Replaces `validate_oracle_webhook_signature` with a lenient version for oracle signature validation in development.
+    - Replaces `validate_oracle_webhook_signature` with a lenient version for oracle signature
+      validation in development.
     """
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.escrow import EscrowData, EscrowUtils
@@ -34,9 +34,9 @@ def apply_local_development_patches():
                 factory_address="",
                 launcher="",
                 status="Pending",
-                token="HMT",
+                token="HMT",  # noqa: S106
                 total_funded_amount=10,
-                created_at=datetime.datetime(2023, 1, 1),
+                created_at=datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
                 manifest_url=f"http://127.0.0.1:9010/manifests/{possible_manifest_name}",
             )
         return original_get_escrow(ChainId(chain_id), escrow_address)
@@ -66,6 +66,7 @@ def apply_local_development_patches():
             return await validate_oracle_webhook_signature(request, signature, webhook)
 
     import src.endpoints.webhook
+
     src.endpoints.webhook.validate_oracle_webhook_signature = (
         lenient_validate_oracle_webhook_signature
     )
