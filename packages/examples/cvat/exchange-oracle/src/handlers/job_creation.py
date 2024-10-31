@@ -400,6 +400,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                 )
 
                 self._setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset)
+                self._setup_quality_settings(cvat_task.id)
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
@@ -439,7 +440,7 @@ class PointsTaskBuilder(SimpleTaskBuilder):
 
             updated_gt_dataset.put(gt_sample.wrap(annotations=updated_anns))
 
-        self._mean_gt_bbox_radius_estimation = min(0.5, np.mean(radiuses))
+        self._mean_gt_bbox_radius_estimation = min(0.5, np.mean(radiuses).item())
 
         return updated_gt_dataset
 
@@ -453,12 +454,10 @@ class PointsTaskBuilder(SimpleTaskBuilder):
     def _setup_quality_settings(self, task_id):
         assert self._mean_gt_bbox_radius_estimation is not _unset
 
-        # TODO: refactor, remove repeated requests
-        super()._setup_quality_settings(task_id)
-
         settings = cvat_api.get_quality_control_settings(task_id)
         cvat_api.update_quality_control_settings(
-            settings.id, oks_sigma=self._mean_gt_bbox_radius_estimation
+            settings.id,
+            oks_sigma=self._mean_gt_bbox_radius_estimation
         )
 
 
@@ -1506,10 +1505,12 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     },
                 )
 
-                db_service.create_data_upload(session, cvat_task.id)
                 self._setup_gt_job_for_cvat_task(
                     cvat_task.id, self._gt_roi_dataset, dm_export_format="coco"
                 )
+                self._setup_quality_settings(cvat_task.id)
+
+                db_service.create_data_upload(session, cvat_task.id)
 
             db_service.touch(session, Project, [project_id])
 
@@ -2631,9 +2632,12 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                                 "gt_frames_per_job_count": self.manifest.validation.val_size,
                             },
                         )
+
                         self._setup_gt_job_for_cvat_task(
                             cvat_task.id, gt_points_dataset, dm_export_format="cvat"
                         )
+                        self._setup_quality_settings(cvat_task.id)
+
                         db_service.create_data_upload(session, cvat_task.id)
 
             db_service.touch(session, Project, created_projects)
