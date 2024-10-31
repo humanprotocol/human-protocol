@@ -23,7 +23,7 @@ export function Chat({
         if (displayChatIcon) {
           chatElement.style.opacity = '1';
           chatElement.style.top = `${(refRect.top - rootRect.top).toString()}px`;
-          chatElement.style.left = `${(isMobile ? refRect.left - rootRect.left : refRect.right).toString()}px`;
+          chatElement.style.right = isMobile ? '16px' : '80px';
           chatElement.style.width = `${refRect.width.toString()}px`;
           chatElement.style.height = `${refRect.height.toString()}px`;
         } else {
@@ -71,7 +71,7 @@ export function Chat({
         resizeObserverElement.parentNode.removeChild(resizeObserverElement);
       }
     };
-  }, [ref, displayChatIcon]);
+  }, [ref, displayChatIcon, isMobile]);
 
   return (
     <div
