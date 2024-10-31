@@ -1,14 +1,17 @@
-import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
+import { type ColorPalette } from '@/styles/color-palette';
 import { type MyJob } from '@/api/services/worker/my-jobs-data';
 
-export function getChipStatusColor(status: MyJob['status']) {
+export function getChipStatusColor(
+  status: MyJob['status'],
+  colorPalette: ColorPalette
+) {
   switch (status) {
     case 'ACTIVE':
-      return lightModeColorPalette.primary.light;
+      return colorPalette.secondary.main;
     case 'COMPLETED':
-      return lightModeColorPalette.success.main;
+      return colorPalette.success.main;
     case 'CANCELED':
     case 'UNKNOWN':
-      return lightModeColorPalette.error.main;
+      return colorPalette.error.main;
   }
 }

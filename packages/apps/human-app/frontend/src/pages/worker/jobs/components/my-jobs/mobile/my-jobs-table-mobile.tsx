@@ -171,7 +171,10 @@ export function MyJobsTableMobile({
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>
                       <Chip
-                        backgroundColor={getChipStatusColor(d.status)}
+                        backgroundColor={getChipStatusColor(
+                          d.status,
+                          colorPalette
+                        )}
                         label={
                           <Typography
                             color={lightModeColorPalette.white}
