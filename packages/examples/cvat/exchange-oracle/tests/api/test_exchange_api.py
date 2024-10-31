@@ -59,7 +59,7 @@ def generate_jwt_token(
 ) -> str:
     return jwt.encode(
         {
-            **({"wallet_address": wallet_address} if wallet_address else {"role": "HUMAN_APP"}),
+            **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
             "email": email,
         },
         PRIVATE_KEY,

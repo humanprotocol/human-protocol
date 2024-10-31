@@ -29,7 +29,7 @@ class HTTPBearer(BaseHTTPBearer):
 AuthorizationDependency = HTTPBearer(scheme_name="jwt_bearer")
 AuthorizationToken = HTTPAuthorizationCredentials
 
-HUMAN_APP_ROLE = "HUMAN_APP"
+HUMAN_APP_ROLE = "human_app"
 
 
 class AuthorizationData(BaseModel):
