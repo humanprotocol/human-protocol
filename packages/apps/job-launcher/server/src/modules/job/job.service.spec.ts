@@ -2650,9 +2650,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2675,9 +2677,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2699,9 +2703,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2768,9 +2774,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2793,9 +2801,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2816,9 +2826,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
