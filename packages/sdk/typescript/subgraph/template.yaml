@@ -90,8 +90,6 @@ dataSources:
         - StakeLocked
         - StakeWithdrawn
         - StakeSlashed
-        - StakeAllocated
-        - AllocationClosed
       abis:
         - name: Staking
           file: '{{{ Staking.abi }}}'
@@ -104,31 +102,10 @@ dataSources:
           handler: handleStakeWithdrawn
         - event: StakeSlashed(indexed address,uint256,indexed address,address)
           handler: handleStakeSlashed
-        - event: StakeAllocated(indexed address,uint256,indexed address,uint256)
-          handler: handleStakeAllocated
-        - event: AllocationClosed(indexed address,uint256,indexed address,uint256)
-          handler: handleAllocationClosed
+        - event: FeeWithdrawn(uint256)
+          handler: handleFeeWithdrawn
       file: ./src/mapping/Staking.ts
-  - kind: ethereum
-    name: RewardPool
-    network: '{{ network }}'
-    source:
-      abi: RewardPool
-      address: '{{ RewardPool.address }}'
-      startBlock: {{ RewardPool.startBlock }}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - RewardAdded
-      abis:
-        - name: RewardPool
-          file: '{{{ RewardPool.abi }}}'
-      eventHandlers:
-        - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
-          handler: handleRewardAdded
-      file: ./src/mapping/RewardPool.ts
+{{ #LegacyEscrowFactory }}
   - kind: ethereum
     name: LegacyEscrowFactory
     network: '{{ network }}'
@@ -149,6 +126,7 @@ dataSources:
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
+{{ /LegacyEscrowFactory }}
 templates:
   - name: Escrow
     kind: ethereum/contract

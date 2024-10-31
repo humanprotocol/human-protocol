@@ -77,10 +77,6 @@ const leaderSchema = z.object({
 	balance: z.string().transform(transformOptionalTokenAmount),
 	role: z.nativeEnum(Roles).nullable(),
 	amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
-	amountAllocated: z
-		.string()
-		.optional()
-		.transform(transformOptionalTokenAmount),
 	amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
 	lockedUntilTimestamp: z.string().optional(),
 	reputation: reputationSchema,

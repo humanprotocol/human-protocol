@@ -33,11 +33,24 @@ from human_protocol_sdk.filter import TransactionFilter
 from human_protocol_sdk.utils import get_data_from_subgraph
 
 
-class Transfer:
-    def __init__(self, from_address: str, to_address: str, value: str):
+class InternalTransaction:
+    def __init__(
+        self,
+        from_address: str,
+        to_address: str,
+        value: str,
+        method: str,
+        receiver: str,
+        escrow: str,
+        token: str,
+    ):
         self.from_address = from_address
         self.to_address = to_address
         self.value = value
+        self.method = method
+        self.receiver = receiver
+        self.escrow = escrow
+        self.token = token
 
 
 class TransactionData:
@@ -51,7 +64,10 @@ class TransactionData:
         timestamp: int,
         value: str,
         method: str,
-        transfers: list[Transfer],  # Aquí añadimos la lista de transfers
+        receiver: str,
+        escrow: str,
+        token: str,
+        internal_transactions: list[InternalTransaction],
     ):
         self.chain_id = chain_id
         self.block = block
@@ -61,7 +77,10 @@ class TransactionData:
         self.timestamp = timestamp
         self.value = value
         self.method = method
-        self.transfers = transfers
+        self.receiver = receiver
+        self.escrow = escrow
+        self.token = token
+        self.internal_transactions = internal_transactions
 
 
 class TransactionUtilsError(Exception):
@@ -129,7 +148,10 @@ class TransactionUtils:
             timestamp=transaction.get("timestamp", 0),
             value=transaction.get("value", ""),
             method=transaction.get("method", ""),
-            transfers=transaction.get("transfers", []),
+            receiver=transaction.get("receiver", ""),
+            escrow=transaction.get("escrow", ""),
+            token=transaction.get("token", ""),
+            internal_transactions=transaction.get("internalTransactions", []),
         )
 
     @staticmethod
@@ -207,7 +229,10 @@ class TransactionUtils:
                     timestamp=transaction.get("timestamp", 0),
                     value=transaction.get("value", ""),
                     method=transaction.get("method", ""),
-                    transfers=transaction.get("transfers", []),
+                    receiver=transaction.get("receiver", ""),
+                    escrow=transaction.get("escrow", ""),
+                    token=transaction.get("token", ""),
+                    internal_transactions=transaction.get("internalTransactions", []),
                 )
                 for transaction in transactions_raw
             ]

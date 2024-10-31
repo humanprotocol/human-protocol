@@ -28,7 +28,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
                                 "amountStaked": "100",
-                                "amountAllocated": "50",
                                 "amountLocked": "25",
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
@@ -63,7 +62,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].amount_staked, 100)
-            self.assertEqual(leaders[0].amount_allocated, 50)
             self.assertEqual(leaders[0].amount_locked, 25)
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
@@ -96,7 +94,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
                                 "amountStaked": "100",
-                                "amountAllocated": "50",
                                 "amountLocked": "25",
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
@@ -129,7 +126,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].amount_staked, 100)
-            self.assertEqual(leaders[0].amount_allocated, 50)
             self.assertEqual(leaders[0].amount_locked, 25)
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
@@ -162,7 +158,6 @@ class TestOperatorUtils(unittest.TestCase):
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
                                 "amountStaked": "100",
-                                "amountAllocated": "50",
                                 "amountLocked": "25",
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
@@ -195,7 +190,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].amount_staked, 100)
-            self.assertEqual(leaders[0].amount_allocated, 50)
             self.assertEqual(leaders[0].amount_locked, 25)
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
@@ -253,7 +247,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "id": staker_address,
                             "address": staker_address,
                             "amountStaked": "100",
-                            "amountAllocated": "50",
                             "amountLocked": "25",
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
@@ -287,7 +280,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.id, staker_address)
             self.assertEqual(leader.address, staker_address)
             self.assertEqual(leader.amount_staked, 100)
-            self.assertEqual(leader.amount_allocated, 50)
             self.assertEqual(leader.amount_locked, 25)
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
@@ -320,7 +312,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "id": staker_address,
                             "address": staker_address,
                             "amountStaked": "100",
-                            "amountAllocated": "50",
                             "amountLocked": "25",
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
@@ -352,7 +343,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.id, staker_address)
             self.assertEqual(leader.address, staker_address)
             self.assertEqual(leader.amount_staked, 100)
-            self.assertEqual(leader.amount_allocated, 50)
             self.assertEqual(leader.amount_locked, 25)
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
@@ -385,7 +375,6 @@ class TestOperatorUtils(unittest.TestCase):
                             "id": staker_address,
                             "address": staker_address,
                             "amountStaked": "100",
-                            "amountAllocated": "50",
                             "amountLocked": "25",
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
@@ -417,7 +406,6 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.id, staker_address)
             self.assertEqual(leader.address, staker_address)
             self.assertEqual(leader.amount_staked, 100)
-            self.assertEqual(leader.amount_allocated, 50)
             self.assertEqual(leader.amount_locked, 25)
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)

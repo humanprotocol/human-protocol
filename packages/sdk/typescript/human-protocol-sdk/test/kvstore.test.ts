@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Overrides, ethers } from 'ethers';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 import {

@@ -106,15 +106,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
-=======
-[kvstore.ts:107](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L107)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
->>>>>>> develop
+[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
 
 ## Properties
 
@@ -128,15 +120,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> develop
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -150,15 +134,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> develop
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -208,15 +184,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
-=======
-[kvstore.ts:170](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L170)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
->>>>>>> develop
+[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
 
 ***
 
@@ -268,15 +236,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
-=======
-[kvstore.ts:213](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L213)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
->>>>>>> develop
+[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
 
 ***
 
@@ -325,15 +285,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
-=======
-[kvstore.ts:256](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L256)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
->>>>>>> develop
+[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
 
 ***
 
@@ -365,12 +317,4 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
-=======
-[kvstore.ts:125](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L125)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
->>>>>>> develop
+[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)

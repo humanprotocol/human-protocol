@@ -33,7 +33,6 @@ type Leader @entity {
   id: Bytes!
   address: Bytes!
   amountStaked: BigInt!
-  amountAllocated: BigInt!
   amountLocked: BigInt!
   lockedUntilTimestamp: BigInt!
   amountWithdrawn: BigInt!
@@ -283,42 +282,7 @@ type StakeSlashedEvent @entity(immutable: true) {
 
   escrowAddress: Bytes! # address
   staker: Bytes! # address
-  slasher: Bytes! # address
-  amount: BigInt!
-}
-
-type StakeAllocatedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-type AllocationClosedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-# RewardPool
-type RewardAddedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  slasher: Bytes # address
+  slashRequester: Bytes! # address
   amount: BigInt!
 }
 

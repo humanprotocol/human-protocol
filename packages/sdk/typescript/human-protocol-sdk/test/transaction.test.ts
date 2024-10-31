@@ -31,11 +31,12 @@ describe('TransactionUtils', () => {
       timestamp: 1625247600n,
       value: '1000000000000000000',
       method: 'transfer',
-      transfers: [
+      internalTransactions: [
         {
           from: '0x1234567890123456789012345678901234567890',
           to: '0x1234567890123456789012345678901234567891',
           value: '1000000000000000000',
+          method: 'transfer',
         },
       ],
     };
@@ -87,11 +88,12 @@ describe('TransactionUtils', () => {
       timestamp: 1625247600n,
       value: '1000000000000000000',
       method: 'transfer',
-      transfers: [
+      internalTransactions: [
         {
           from: '0x1234567890123456789012345678901234567890',
           to: '0x1234567890123456789012345678901234567891',
           value: '1000000000000000000',
+          method: 'transfer',
         },
       ],
     };

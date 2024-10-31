@@ -563,6 +563,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {bigint[]} amounts Array of amounts the recipients will receive.
    * @param {string} finalResultsUrl Final results file url.
    * @param {string} finalResultsHash Final results file hash.
+   * @param {string} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
@@ -597,6 +598,7 @@ export class EscrowClient extends BaseEthersClient {
     amounts: bigint[],
     finalResultsUrl: string,
     finalResultsHash: string,
+    forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<void> {
     if (!ethers.isAddress(escrowAddress)) {
@@ -650,17 +652,34 @@ export class EscrowClient extends BaseEthersClient {
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
-
-      await (
-        await escrowContract.bulkPayOut(
-          recipients,
-          amounts,
-          finalResultsUrl,
-          finalResultsHash,
-          DEFAULT_TX_ID,
-          txOptions
-        )
-      ).wait();
+      if (forceComplete) {
+        await (
+          await escrowContract[
+            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+          ](
+            recipients,
+            amounts,
+            finalResultsUrl,
+            finalResultsHash,
+            DEFAULT_TX_ID,
+            forceComplete,
+            txOptions
+          )
+        ).wait();
+      } else {
+        await (
+          await escrowContract[
+            'bulkPayOut(address[],uint256[],string,string,uint256)'
+          ](
+            recipients,
+            amounts,
+            finalResultsUrl,
+            finalResultsHash,
+            DEFAULT_TX_ID,
+            txOptions
+          )
+        ).wait();
+      }
       return;
     } catch (e) {
       return throwError(e);

@@ -10,7 +10,6 @@
 
 ### Interfaces
 
-- [IAllocation](interfaces/IAllocation.md)
 - [IEscrowConfig](interfaces/IEscrowConfig.md)
 - [IEscrowsFilter](interfaces/IEscrowsFilter.md)
 - [IHMTHoldersParams](interfaces/IHMTHoldersParams.md)
@@ -19,6 +18,7 @@
 - [ILeader](interfaces/ILeader.md)
 - [ILeadersFilter](interfaces/ILeadersFilter.md)
 - [ILeaderSubgraph](interfaces/ILeaderSubgraph.md)
+- [InternalTransaction](interfaces/InternalTransaction.md)
 - [IOperator](interfaces/IOperator.md)
 - [IOperatorSubgraph](interfaces/IOperatorSubgraph.md)
 - [IPagination](interfaces/IPagination.md)
@@ -29,4 +29,3 @@
 - [IStatisticsFilter](interfaces/IStatisticsFilter.md)
 - [ITransaction](interfaces/ITransaction.md)
 - [ITransactionsFilter](interfaces/ITransactionsFilter.md)
-- [Transfer](interfaces/Transfer.md)

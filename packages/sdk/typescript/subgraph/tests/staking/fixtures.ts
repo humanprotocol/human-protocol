@@ -1,8 +1,7 @@
-import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { Address, BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import {
-  AllocationClosed,
-  StakeAllocated,
+  FeeWithdrawn,
   StakeDeposited,
   StakeLocked,
   StakeSlashed,
@@ -22,6 +21,10 @@ export function createStakeDepositedEvent(
     newStakeDepositedEvent.transaction.nonce
   );
   newStakeDepositedEvent.block.timestamp = timestamp;
+  newStakeDepositedEvent.transaction.from = Address.fromString(staker);
+  newStakeDepositedEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
 
   newStakeDepositedEvent.parameters = [];
   newStakeDepositedEvent.parameters.push(
@@ -49,7 +52,10 @@ export function createStakeLockedEvent(
     timestamp,
     newStakeLockedEvent.transaction.nonce
   );
-
+  newStakeLockedEvent.transaction.from = Address.fromString(staker);
+  newStakeLockedEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   newStakeLockedEvent.block.timestamp = timestamp;
 
   newStakeLockedEvent.parameters = [];
@@ -81,6 +87,10 @@ export function createStakeWithdrawnEvent(
     newStakeWithdrawnEvent.transaction.nonce
   );
 
+  newStakeWithdrawnEvent.transaction.from = Address.fromString(staker);
+  newStakeWithdrawnEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   newStakeWithdrawnEvent.block.timestamp = timestamp;
 
   newStakeWithdrawnEvent.parameters = [];
@@ -101,7 +111,7 @@ export function createStakeSlashedEvent(
   staker: string,
   tokens: i32,
   escrowAddress: string,
-  slasher: string,
+  slashRequester: string,
   timestamp: BigInt
 ): StakeSlashed {
   const newStakeSlashedEvent = changetype<StakeSlashed>(newMockEvent());
@@ -111,6 +121,10 @@ export function createStakeSlashedEvent(
     newStakeSlashedEvent.transaction.nonce
   );
 
+  newStakeSlashedEvent.transaction.from = Address.fromString(staker);
+  newStakeSlashedEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   newStakeSlashedEvent.block.timestamp = timestamp;
 
   newStakeSlashedEvent.parameters = [];
@@ -131,88 +145,34 @@ export function createStakeSlashedEvent(
   );
   newStakeSlashedEvent.parameters.push(
     new ethereum.EventParam(
-      'slasher',
-      ethereum.Value.fromAddress(Address.fromString(slasher))
+      'slashRequester',
+      ethereum.Value.fromAddress(Address.fromString(slashRequester))
     )
   );
 
   return newStakeSlashedEvent;
 }
 
-export function createStakeAllocatedEvent(
-  staker: string,
-  tokens: i32,
-  escrowAddress: string,
-  createdAt: i32,
+export function createFeeWithdrawnEvent(
+  amount: i32,
   timestamp: BigInt
-): StakeAllocated {
-  const newStakeAllocatedEvent = changetype<StakeAllocated>(newMockEvent());
-  newStakeAllocatedEvent.transaction.hash = generateUniqueHash(
-    staker,
+): FeeWithdrawn {
+  const newFeeWithdrawnEvent = changetype<FeeWithdrawn>(newMockEvent());
+  newFeeWithdrawnEvent.transaction.hash = generateUniqueHash(
+    amount.toString(),
     timestamp,
-    newStakeAllocatedEvent.transaction.nonce
+    newFeeWithdrawnEvent.transaction.nonce
   );
 
-  newStakeAllocatedEvent.block.timestamp = timestamp;
+  newFeeWithdrawnEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
+  newFeeWithdrawnEvent.block.timestamp = timestamp;
 
-  newStakeAllocatedEvent.parameters = [];
-  newStakeAllocatedEvent.parameters.push(
-    new ethereum.EventParam(
-      'staker',
-      ethereum.Value.fromAddress(Address.fromString(staker))
-    )
-  );
-  newStakeAllocatedEvent.parameters.push(
-    new ethereum.EventParam('tokens', ethereum.Value.fromI32(tokens))
-  );
-  newStakeAllocatedEvent.parameters.push(
-    new ethereum.EventParam(
-      'escrowAddress',
-      ethereum.Value.fromAddress(Address.fromString(escrowAddress))
-    )
-  );
-  newStakeAllocatedEvent.parameters.push(
-    new ethereum.EventParam('createdAt', ethereum.Value.fromI32(createdAt))
+  newFeeWithdrawnEvent.parameters = [];
+  newFeeWithdrawnEvent.parameters.push(
+    new ethereum.EventParam('amount', ethereum.Value.fromI32(amount))
   );
 
-  return newStakeAllocatedEvent;
-}
-
-export function createAllocationClosedEvent(
-  staker: string,
-  tokens: i32,
-  escrowAddress: string,
-  closedAt: i32,
-  timestamp: BigInt
-): AllocationClosed {
-  const newAllocationClosedEvent = changetype<AllocationClosed>(newMockEvent());
-  newAllocationClosedEvent.transaction.hash = generateUniqueHash(
-    staker,
-    timestamp,
-    newAllocationClosedEvent.transaction.nonce
-  );
-
-  newAllocationClosedEvent.block.timestamp = timestamp;
-
-  newAllocationClosedEvent.parameters = [];
-  newAllocationClosedEvent.parameters.push(
-    new ethereum.EventParam(
-      'staker',
-      ethereum.Value.fromAddress(Address.fromString(staker))
-    )
-  );
-  newAllocationClosedEvent.parameters.push(
-    new ethereum.EventParam('tokens', ethereum.Value.fromI32(tokens))
-  );
-  newAllocationClosedEvent.parameters.push(
-    new ethereum.EventParam(
-      'escrowAddress',
-      ethereum.Value.fromAddress(Address.fromString(escrowAddress))
-    )
-  );
-  newAllocationClosedEvent.parameters.push(
-    new ethereum.EventParam('closedAt', ethereum.Value.fromI32(closedAt))
-  );
-
-  return newAllocationClosedEvent;
+  return newFeeWithdrawnEvent;
 }

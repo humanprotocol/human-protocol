@@ -40,15 +40,7 @@ The network information required to connect to the contracts
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
-=======
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
->>>>>>> develop
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
@@ -58,15 +50,7 @@ The network information required to connect to the contracts
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> develop
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -76,12 +60,4 @@ The network information required to connect to the contracts
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> develop
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)

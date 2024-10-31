@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2;
+pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
@@ -86,7 +86,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         token = _token;
         status = EscrowStatuses.Launched;
-        duration = _duration + block.timestamp; // Solidity 0.8+ has built-in overflow checks
+        duration = _duration + block.timestamp;
         launcher = _launcher;
         canceler = _canceler;
         escrowFactory = msg.sender;
@@ -189,7 +189,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         trusted
         notBroke
         notComplete
-        notPaid
         nonReentrant
         returns (bool)
     {
@@ -218,6 +217,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
+    // For backward compatibility: this function can only be called on existing escrows,
+    // as the "Paid" status is not set anywhere for new escrows.
     function complete() external override notExpired trustedOrReputationOracle {
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
@@ -243,7 +244,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     /**
      * @dev Performs bulk payout to multiple workers
-     * Escrow needs to be complted / cancelled, so that it can be paid out.
+     * Escrow needs to be completed / cancelled, so that it can be paid out.
      * Every recipient is paid with the amount after reputation and recording oracle fees taken out.
      * If the amount is less than the fee, the recipient is not paid.
      * If the fee is zero, reputation, and recording oracle are not paid.
@@ -257,20 +258,21 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * @param _url URL storing results as transaction details
      * @param _hash Hash of the results
      * @param _txId Transaction ID
+     * @param forceComplete Boolean parameter indicating if remaining balance should be transferred to the escrow creator
      */
     function bulkPayOut(
         address[] memory _recipients,
         uint256[] memory _amounts,
         string memory _url,
         string memory _hash,
-        uint256 _txId
+        uint256 _txId,
+        bool forceComplete
     )
-        external
+        public
         override
         trustedOrReputationOracle
         notBroke
         notLaunched
-        notPaid
         notExpired
         nonReentrant
     {
@@ -343,8 +345,14 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         remainingFunds = cachedRemainingFunds;
 
+        // Check the forceComplete flag and transfer remaining funds if true
+        if (forceComplete && cachedRemainingFunds > 0) {
+            _safeTransfer(token, launcher, cachedRemainingFunds);
+            cachedRemainingFunds = 0;
+        }
+
         if (cachedRemainingFunds == 0) {
-            status = EscrowStatuses.Paid;
+            status = EscrowStatuses.Complete;
             emit BulkTransferV2(
                 _txId,
                 _recipients,
@@ -352,6 +360,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 false,
                 finalResultsUrl
             );
+            emit Completed();
         } else {
             status = EscrowStatuses.Partial;
             emit BulkTransferV2(
@@ -362,6 +371,26 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 finalResultsUrl
             );
         }
+    }
+
+    /**
+     * @dev Overloaded function to perform bulk payout with default forceComplete set to false.
+     * Calls the main bulkPayout function with forceComplete as false.
+     *
+     * @param _recipients Array of recipients
+     * @param _amounts Array of amounts to be paid to each recipient.
+     * @param _url URL storing results as transaction details
+     * @param _hash Hash of the results
+     * @param _txId Transaction ID
+     */
+    function bulkPayOut(
+        address[] memory _recipients,
+        uint256[] memory _amounts,
+        string memory _url,
+        string memory _hash,
+        uint256 _txId
+    ) external {
+        bulkPayOut(_recipients, _amounts, _url, _hash, _txId, false);
     }
 
     function _safeTransfer(address _token, address to, uint256 value) internal {

@@ -5,7 +5,6 @@ export type LeaderData = {
   address: string;
   role?: string;
   amountStaked: number;
-  amountAllocated: number;
   amountLocked: number;
   amountSlashed: number;
   amountWithdrawn: number;
@@ -17,7 +16,6 @@ export type LeaderData = {
 
 export type LeaderEscrowData = {
   address: string;
-  amountAllocated: number;
   amountPayout: number;
   status: string;
 };

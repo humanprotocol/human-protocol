@@ -32,4 +32,4 @@ The hash of the transaction associated with the escrow withdrawal.
 
 ## Defined in
 
-[types.ts:161](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L161)
+[types.ts:157](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L157)

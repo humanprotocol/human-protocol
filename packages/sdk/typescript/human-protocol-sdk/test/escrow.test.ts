@@ -75,7 +75,8 @@ describe('EscrowClient', () => {
       fund: vi.fn(),
       storeResults: vi.fn(),
       complete: vi.fn(),
-      bulkPayOut: vi.fn(),
+      'bulkPayOut(address[],uint256[],string,string,uint256)': vi.fn(),
+      'bulkPayOut(address[],uint256[],string,string,uint256,bool)': vi.fn(),
       cancel: vi.fn(),
       withdraw: vi.fn(),
       addTrustedHandlers: vi.fn(),
@@ -1084,7 +1085,10 @@ describe('EscrowClient', () => {
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       const bulkPayOutSpy = vi
-        .spyOn(escrowClient.escrowContract, 'bulkPayOut')
+        .spyOn(
+          escrowClient.escrowContract,
+          'bulkPayOut(address[],uint256[],string,string,uint256)'
+        )
         .mockImplementation(() => ({
           wait: vi.fn().mockResolvedValue(true),
         }));
@@ -1107,6 +1111,44 @@ describe('EscrowClient', () => {
       );
     });
 
+    test('should successfully bulkPayOut escrow with forceComplete option', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [10n, 10n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      const bulkPayOutSpy = vi
+        .spyOn(
+          escrowClient.escrowContract,
+          'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+        )
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      await escrowClient.bulkPayOut(
+        escrowAddress,
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        true
+      );
+
+      expect(bulkPayOutSpy).toHaveBeenCalledWith(
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        true,
+        {}
+      );
+    });
+
     test('should successfully bulkPayOut escrow with transaction options', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
@@ -1118,7 +1160,10 @@ describe('EscrowClient', () => {
       escrowClient.getBalance = vi.fn().mockReturnValue(100n);
 
       const bulkPayOutSpy = vi
-        .spyOn(escrowClient.escrowContract, 'bulkPayOut')
+        .spyOn(
+          escrowClient.escrowContract,
+          'bulkPayOut(address[],uint256[],string,string,uint256)'
+        )
         .mockImplementation(() => ({
           wait: vi.fn().mockResolvedValue(true),
         }));
@@ -1130,6 +1175,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
+        false,
         txOptions
       );
 

@@ -129,15 +129,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[escrow.ts:1637](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1637)
-=======
-[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
->>>>>>> develop
+[escrow.ts:1656](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1656)
 
 ***
 
@@ -258,15 +250,7 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[escrow.ts:1511](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1511)
-=======
-[escrow.ts:1514](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1514)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[escrow.ts:1514](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1514)
->>>>>>> develop
+[escrow.ts:1530](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1530)
 
 ***
 
@@ -379,12 +363,4 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 
 #### Defined in
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-[escrow.ts:1735](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1735)
-=======
-[escrow.ts:1738](https://github.com/humanprotocol/human-protocol/blob/c09869ece39906cbc45f3dc508e1338970deeec5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1738)
->>>>>>> parent of cc79357b2 ([Subgraph][SDK] Add registration data to leaders entity (#2451))
-=======
-[escrow.ts:1738](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1738)
->>>>>>> develop
+[escrow.ts:1754](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1754)

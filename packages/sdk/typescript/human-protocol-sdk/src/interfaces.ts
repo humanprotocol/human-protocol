@@ -1,14 +1,6 @@
 import { EscrowStatus } from './types';
 import { ChainId, OrderDirection } from './enums';
 
-export interface IAllocation {
-  escrowAddress: string;
-  staker: string;
-  tokens: bigint;
-  createdAt: bigint;
-  closedAt: bigint;
-}
-
 export interface IReward {
   escrowAddress: string;
   amount: bigint;
@@ -19,7 +11,6 @@ export interface ILeader {
   chainId: ChainId;
   address: string;
   amountStaked: bigint;
-  amountAllocated: bigint;
   amountLocked: bigint;
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
@@ -124,10 +115,14 @@ export interface IKVStore {
   value: string;
 }
 
-export interface Transfer {
+export interface InternalTransaction {
   from: string;
   to: string;
   value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
 }
 
 export interface ITransaction {
@@ -138,7 +133,10 @@ export interface ITransaction {
   timestamp: bigint;
   value: string;
   method: string;
-  transfers: Transfer[];
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransaction[];
 }
 
 export interface ITransactionsFilter extends IPagination {

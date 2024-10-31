@@ -866,6 +866,43 @@ class TestEscrowClient(unittest.TestCase):
                 None,
             )
 
+    def test_bulk_payout_with_force_complete(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.bulkPayOut = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.get_balance = MagicMock(return_value=100)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.bulk_payout(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+                True,
+            )
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.bulkPayOut.assert_called_once_with(
+                recipients, amounts, final_results_url, final_results_hash, txId, True
+            )
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Bulk Payout",
+                mock_contract.functions.bulkPayOut.return_value,
+                EscrowClientError,
+                None,
+            )
+
     def test_bulk_payout_invalid_address(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -1223,6 +1260,7 @@ class TestEscrowClient(unittest.TestCase):
                 final_results_url,
                 final_results_hash,
                 txId,
+                False,
                 tx_options,
             )
 

@@ -69,6 +69,7 @@ export class PayoutService {
       results.amounts,
       results.url,
       results.hash,
+      true,
       {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
       },

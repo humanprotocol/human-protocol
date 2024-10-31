@@ -48,12 +48,6 @@ Old Escrow Factory contract address
 
 Old subgraph URL
 
-### rewardPoolAddress
-
-> **rewardPoolAddress**: `string`
-
-RewardPool contract address
-
 ### scanUrl
 
 > **scanUrl**: `string`
@@ -86,4 +80,4 @@ Network title
 
 ## Defined in
 
-[types.ts:93](https://github.com/humanprotocol/human-protocol/blob/9ddd51f9c9a3ec97c56d6ffbca5fe9048b9ea0f8/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L93)
+[types.ts:93](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L93)
