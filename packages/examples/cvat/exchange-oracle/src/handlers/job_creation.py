@@ -172,6 +172,20 @@ def setup_gt_job_for_cvat_task(
             )
 
 
+def setup_quality_control_for_cvat_task(
+    task_id: int,
+    *,
+    target_metric_threshold: float,
+    **other_settings,
+) -> None:
+    settings = cvat_api.get_quality_control_settings(task_id)
+    cvat_api.update_quality_control_settings(
+        settings.id,
+        target_metric_threshold=target_metric_threshold,
+        **other_settings,
+    )
+
+
 # TODO: refactor builders and extract common interface
 class SimpleTaskBuilder:
     """
@@ -272,7 +286,7 @@ class SimpleTaskBuilder:
 
         return list(matched_gt_filenames)
 
-    def split_dataset_per_task(
+    def _split_dataset_per_task(
         self,
         data_filenames: list[str],
         *,
@@ -304,7 +318,6 @@ class SimpleTaskBuilder:
         # Create task configuration
         gt_filenames = self._get_gt_filenames(gt_dataset, data_filenames, manifest=manifest)
         data_to_be_annotated = [f for f in data_filenames if f not in set(gt_filenames)]
-        segment_size = manifest.annotation.job_size or Config.cvat_config.cvat_task_segment_size
         label_configuration = make_label_configuration(manifest)
 
         self._upload_task_meta(gt_dataset)
@@ -326,7 +339,7 @@ class SimpleTaskBuilder:
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
-            segment_size = manifest.annotation.job_size or Config.cvat_config.cvat_task_segment_size
+            segment_size = manifest.annotation.job_size
             total_jobs = math.ceil(len(data_to_be_annotated) / segment_size)
 
             self.logger.info(
@@ -356,7 +369,7 @@ class SimpleTaskBuilder:
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(session, cvat_project.id, data_filenames)
 
-            for data_subset in self.split_dataset_per_task(
+            for data_subset in self._split_dataset_per_task(
                 data_to_be_annotated,
                 subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
             ):
@@ -368,13 +381,14 @@ class SimpleTaskBuilder:
                 )
                 db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
                 # The task is fully created once 'update:task' or 'update:job' webhook is received.
                 cvat_api.put_task_data(
                     cvat_task.id,
                     cloud_storage.id,
                     filenames=data_subset,
                     sort_images=False,
+                    # use the same value for the chunk size as for the job size
+                    chunk_size=segment_size,
                     validation_params={
                         "gt_filenames": gt_filenames,  # include whole GT dataset into each task
                         "gt_frames_per_job_count": manifest.validation.val_size,
@@ -382,6 +396,9 @@ class SimpleTaskBuilder:
                 )
 
                 setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset, dm_export_format="coco")
+                setup_quality_control_for_cvat_task(
+                    cvat_task.id, target_metric_threshold=manifest.validation.min_quality
+                )
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
@@ -404,7 +421,7 @@ class BoxesFromPointsTaskBuilder:
         self._input_gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._gt_roi_dataset: _MaybeUnset[dm.Dataset] = _unset
-        self._gt_filenames: _MaybeUnset[dm.Dataset] = _unset
+        self._gt_filenames: _MaybeUnset[Sequence[str]] = _unset
         self._points_dataset: _MaybeUnset[dm.Dataset] = _unset
 
         self._bbox_point_mapping: _MaybeUnset[boxes_from_points_task.BboxPointMapping] = _unset
@@ -1314,7 +1331,7 @@ class BoxesFromPointsTaskBuilder:
                     roi_bytes,
                 )
 
-    def split_dataset_per_task(
+    def _split_dataset_per_task(
         self,
         data_filenames: list[str],
         *,
@@ -1377,9 +1394,7 @@ class BoxesFromPointsTaskBuilder:
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
-            segment_size = (
-                self.manifest.annotation.job_size or Config.cvat_config.cvat_task_segment_size
-            )
+            segment_size = self.manifest.annotation.job_size
             total_jobs = math.ceil(len(self._data_filenames_to_be_annotated) / segment_size)
             self.logger.info(
                 "Task creation for escrow '%s': will create %s assignments",
@@ -1417,7 +1432,7 @@ class BoxesFromPointsTaskBuilder:
                 ],
             )
 
-            for data_subset in self.split_dataset_per_task(
+            for data_subset in self._split_dataset_per_task(
                 self._data_filenames_to_be_annotated,
                 subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
             ):
@@ -1437,13 +1452,13 @@ class BoxesFromPointsTaskBuilder:
                     for fn in self._gt_filenames
                 ]
 
-                # FUTURE-FIXME:
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
                 cvat_api.put_task_data(
                     cvat_task.id,
                     cvat_cloud_storage.id,
                     filenames=filenames,
                     sort_images=False,
+                    # use the same value for the chunk size as for the job size
+                    chunk_size=segment_size,
                     validation_params={
                         "gt_filenames": gt_filenames,
                         "gt_frames_per_job_count": self.manifest.validation.val_size,
@@ -1453,6 +1468,9 @@ class BoxesFromPointsTaskBuilder:
                 db_service.create_data_upload(session, cvat_task.id)
                 setup_gt_job_for_cvat_task(
                     cvat_task.id, self._gt_roi_dataset, dm_export_format="coco"
+                )
+                setup_quality_control_for_cvat_task(
+                    cvat_task.id, target_metric_threshold=self.manifest.validation.min_quality
                 )
 
             db_service.touch(session, Project, [project_id])
@@ -1516,6 +1534,10 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self._excluded_gt_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
         self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
+
+        # Configuration / constants
+        self.job_size_mult = skeletons_from_boxes_task.DEFAULT_ASSIGNMENT_SIZE_MULTIPLIER
+        "Job size multiplier"
 
         # TODO: consider WebP if produced files are too big
         self.roi_file_ext = ".png"  # supposed to be lossless and reasonably compressing
@@ -2181,6 +2203,13 @@ class SkeletonsFromBoxesTaskBuilder:
             roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self._roi_infos
         }
 
+    @property
+    def _task_segment_size(self):
+        # Unlike other task types, here we use a grid of RoIs,
+        # so the absolute job size numbers from manifest are multiplied by the job size multiplier.
+        # Then, we add a percent of job tiles for validation, keeping the requested ratio.
+        return self.manifest.annotation.job_size * self.job_size_mult
+
     def _prepare_task_params(self):
         assert self._roi_infos is not _unset
         assert self._skeleton_bbox_mapping is not _unset
@@ -2196,9 +2225,8 @@ class SkeletonsFromBoxesTaskBuilder:
 
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
         self._roi_info_by_id = roi_info_by_id
-        segment_size = (
-            self.manifest.annotation.job_size or Config.cvat_config.cvat_task_segment_size
-        )
+
+        segment_size = self._task_segment_size
 
         for label_id, _ in enumerate(self.manifest.annotation.labels):
             label_gt_roi_ids = set(
@@ -2421,6 +2449,7 @@ class SkeletonsFromBoxesTaskBuilder:
         label_specs_by_skeleton = {
             skeleton_label_id: [
                 {
+                    # why not just use skeleton node?
                     "name": self.point_labels[(skeleton_label.name, skeleton_point)],
                     "type": "points",
                 }
@@ -2437,9 +2466,7 @@ class SkeletonsFromBoxesTaskBuilder:
         _params["bucket_host"] = "http://minio:9010"
         cvat_cloud_storage = cvat_api.create_cloudstorage(**_params)
 
-        segment_size = (
-            self.manifest.annotation.job_size or Config.cvat_config.cvat_task_segment_size
-        )
+        segment_size = self._task_segment_size
 
         total_jobs = sum(
             len(self.manifest.annotation.labels[tp.label_id].nodes)
@@ -2583,9 +2610,6 @@ class SkeletonsFromBoxesTaskBuilder:
                         )
                         db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                        # FUTURE-FIXME: now we must wait for the task to be created to set up GT
-                        # Actual task creation in CVAT takes some time,
-                        # so it's done in an async process.
                         # The task is fully created once 'update:task' or 'update:job'
                         # webhook is received.
                         cvat_api.put_task_data(
@@ -2593,13 +2617,20 @@ class SkeletonsFromBoxesTaskBuilder:
                             cvat_cloud_storage.id,
                             filenames=point_label_filenames + gt_point_label_filenames,
                             sort_images=False,
+                            # use the same value for the chunk size as for the job size
+                            chunk_size=segment_size,
                             validation_params={
                                 "gt_filenames": gt_point_label_filenames,
-                                "gt_frames_per_job_count": self.manifest.validation.val_size,
+                                "gt_frames_per_job_count": self.manifest.validation.val_size
+                                * self.job_size_mult,
                             },
                         )
                         setup_gt_job_for_cvat_task(
                             cvat_task.id, gt_points_dataset, dm_export_format="cvat"
+                        )
+                        setup_quality_control_for_cvat_task(
+                            cvat_task.id,
+                            target_metric_threshold=self.manifest.validation.min_quality,
                         )
                         db_service.create_data_upload(session, cvat_task.id)
 
