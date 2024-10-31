@@ -63,15 +63,11 @@ def generate_jwt_token(
         "email": email,
     }
 
-    return jwt.encode(
-        data,
-        private_key,
-        algorithm="ES256",
-    )
+    return jwt.encode(data, private_key, algorithm="ES256")
 
 
-def get_auth_header(token: str | None = None) -> dict:
-    return {"Authorization": f"Bearer {token or generate_jwt_token()}"}
+def get_auth_header(token: str = generate_jwt_token(wallet_address=user_address)) -> dict:
+    return {"Authorization": f"Bearer {token}"}
 
 
 empty_result = {
