@@ -3,7 +3,6 @@ from __future__ import annotations
 import math
 import os
 import random
-from time import sleep
 import uuid
 from abc import ABCMeta, abstractmethod
 from contextlib import ExitStack
@@ -12,6 +11,7 @@ from itertools import chain, groupby
 from math import ceil
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import sleep
 from typing import TYPE_CHECKING, TypeVar, cast
 
 import cv2
@@ -447,16 +447,16 @@ class PointsTaskBuilder(SimpleTaskBuilder):
         return updated_gt_dataset
 
     def _setup_gt_job_for_cvat_task(
-        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "datumaro"
     ) -> None:
         super()._setup_gt_job_for_cvat_task(
-            task_id=task_id, gt_dataset=gt_dataset, dm_export_format="datumaro"
+            task_id=task_id, gt_dataset=gt_dataset, dm_export_format=dm_export_format
         )
 
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         assert self._mean_gt_bbox_radius_estimation is not _unset
 
-        values = { "oks_sigma": self._mean_gt_bbox_radius_estimation }
+        values = {"oks_sigma": self._mean_gt_bbox_radius_estimation}
         values.update(overrides)
         super()._setup_quality_settings(task_id, **values)
 
