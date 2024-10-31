@@ -501,7 +501,7 @@ def test_can_list_jobs_200_check_values(client: TestClient, session: Session) ->
             "status": APIJobStatuses.active,
             "job_description": manifest["annotation"]["description"],
             "reward_amount": manifest["job_bounty"],
-            "reward_token": "HMT",
+            "reward_token": "hmt",
             "created_at": cvat_project.created_at.isoformat().replace("+00:00", "Z"),
             "updated_at": cvat_first_job.task.project.updated_at.isoformat().replace("+00:00", "Z"),
             "qualifications": manifest.get("qualifications", []),
