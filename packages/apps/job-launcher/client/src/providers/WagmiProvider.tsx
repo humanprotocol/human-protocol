@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren } from 'react';
-import { createConfig, WagmiProvider as WWagmiProvider } from 'wagmi';
+import { createConfig, http, WagmiProvider as WWagmiProvider } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 
@@ -32,6 +32,21 @@ export const wagmiConfig = createConfig({
       appName: 'human-job-launcher',
     }),
   ],
+  transports: {
+    [wagmiChains.mainnet.id]: http(),
+    [wagmiChains.sepolia.id]: http(),
+    [wagmiChains.bsc.id]: http(),
+    [wagmiChains.bscTestnet.id]: http(),
+    [wagmiChains.polygon.id]: http(),
+    [wagmiChains.polygonAmoy.id]: http(),
+    [wagmiChains.moonbeam.id]: http(),
+    [wagmiChains.moonbaseAlpha.id]: http(),
+    [wagmiChains.avalanche.id]: http(),
+    [wagmiChains.avalancheFuji.id]: http(),
+    [wagmiChains.xLayer.id]: http(),
+    [wagmiChains.xLayerTestnet.id]: http(),
+    [LOCALHOST.id]: http(LOCALHOST.rpcUrls.default.http[0]),
+  },
 });
 
 export const WagmiProvider: FC<PropsWithChildren> = ({ children }) => {
