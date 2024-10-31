@@ -435,8 +435,8 @@ class PointsTaskBuilder(SimpleTaskBuilder):
                 x, y, w, h = gt_bbox.get_bbox()
                 bbox_center = dm.Points([x + w / 2, y + h / 2], label=gt_bbox.label, id=gt_bbox.id)
 
-                rel_bbox_radius = ((w**2 + h**2) ** 0.5) / 2 / image_half_diag
-                radiuses.append(rel_bbox_radius)
+                rel_int_bbox_radius = min(w, h) / 2 / image_half_diag
+                radiuses.append(rel_int_bbox_radius)
 
                 updated_anns.append(bbox_center)
 
