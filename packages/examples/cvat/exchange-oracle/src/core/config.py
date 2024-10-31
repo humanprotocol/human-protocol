@@ -234,13 +234,13 @@ class CoreConfig:
     default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
 
     skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
-    "Assignment size multiplier for IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Assignment size multiplier for image_skeletons_from_boxes tasks"
 
     min_roi_size_w = int(os.environ.get("MIN_ROI_SIZE_W", 350))
-    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
     min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
-    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
 
 class HumanAppConfig:
