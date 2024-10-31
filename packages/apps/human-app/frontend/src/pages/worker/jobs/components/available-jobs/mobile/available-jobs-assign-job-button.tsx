@@ -14,7 +14,7 @@ export function AvailableJobsAssignJobButton({
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
 
-  const { mutate: assignJobMutation, status } = useAssignJobMutation(
+  const { mutate: assignJobMutation, isPending } = useAssignJobMutation(
     {
       onSuccess: onJobAssignmentSuccess,
       onError: onJobAssignmentError,
@@ -26,7 +26,7 @@ export function AvailableJobsAssignJobButton({
     <TableButton
       color="secondary"
       fullWidth
-      loading={status === 'pending'}
+      loading={isPending}
       onClick={() => {
         assignJobMutation(assignJobPayload);
       }}
