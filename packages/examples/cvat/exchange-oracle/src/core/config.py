@@ -182,9 +182,7 @@ class CvatConfig:
     # quality control settings
     cvat_val_frames_per_job_count = int(os.environ.get("CVAT_VAL_FRAMES_PER_JOB_COUNT", 2))
     cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
-    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.5))
-    cvat_low_overlap_threshold = float(os.environ.get("CVAT_LOW_OVERLAP_THRESHOLD", 0.8))
-    cvat_target_metric_threshold = cvat_low_overlap_threshold
+    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
     cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
 
     cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")

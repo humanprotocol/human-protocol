@@ -709,10 +709,9 @@ def get_quality_control_settings(task_id: int) -> models.QualitySettings:
 def update_quality_control_settings(
     settings_id: int,
     *,
+    target_metric_threshold: float,
     max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     target_metric: str = "accuracy",
-    target_metric_threshold: float = Config.cvat_config.cvat_target_metric_threshold,
-    low_overlap_threshold: float = Config.cvat_config.cvat_low_overlap_threshold,
     iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
     oks_sigma: float = Config.cvat_config.cvat_oks_sigma,
 ) -> None:
@@ -727,7 +726,7 @@ def update_quality_control_settings(
                     target_metric=target_metric,
                     target_metric_threshold=target_metric_threshold,
                     iou_threshold=iou_threshold,
-                    low_overlap_threshold=low_overlap_threshold,
+                    low_overlap_threshold=iou_threshold,  # used only for warnings
                     oks_sigma=oks_sigma,
                 ),
             )

@@ -211,9 +211,11 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         cvat_api.upload_gt_annotations(gt_job.id, dataset_path, format_name=format_name)
         cvat_api.finish_gt_job(gt_job.id)
 
-    def _setup_quality_settings(self, task_id: int) -> None:
+    def _setup_quality_settings(self, task_id: int, *, quality_threshold: float) -> None:
         settings = cvat_api.get_quality_control_settings(task_id)
-        cvat_api.update_quality_control_settings(settings.id)
+        cvat_api.update_quality_control_settings(
+            settings.id, target_metric_threshold=quality_threshold
+        )
 
     @abstractmethod
     def build(self) -> None: ...
@@ -451,13 +453,14 @@ class PointsTaskBuilder(SimpleTaskBuilder):
             task_id=task_id, gt_dataset=gt_dataset, dm_export_format="datumaro"
         )
 
-    def _setup_quality_settings(self, task_id):
+    def _setup_quality_settings(self, task_id) -> None:
         assert self._mean_gt_bbox_radius_estimation is not _unset
 
         settings = cvat_api.get_quality_control_settings(task_id)
         cvat_api.update_quality_control_settings(
             settings.id,
-            oks_sigma=self._mean_gt_bbox_radius_estimation
+            target_metric_threshold=self.manifest.validation.min_quality,
+            oks_sigma=self._mean_gt_bbox_radius_estimation,
         )
 
 
