@@ -162,6 +162,13 @@ export const darkTheme: ThemeOptions = {
         },
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: darkColorPalette.text.secondary,
+        },
+      },
+    },
   },
   breakpoints: {
     values: {
