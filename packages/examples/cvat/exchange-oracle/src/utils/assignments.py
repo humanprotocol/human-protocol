@@ -16,6 +16,7 @@ def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> st
     if project.job_type in [
         TaskTypes.image_skeletons_from_boxes,
         TaskTypes.image_boxes_from_points,
+        TaskTypes.image_points,
     ]:
         query_params = "?defaultWorkspace=single_shape"
 
