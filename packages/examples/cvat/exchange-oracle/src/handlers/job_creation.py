@@ -213,9 +213,19 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         settings = cvat_api.get_quality_control_settings(task_id)
-        cvat_api.update_quality_control_settings(
-            settings.id, target_metric_threshold=self.manifest.validation.min_quality, **overrides
-        )
+
+        values = {"target_metric_threshold": self.manifest.validation.min_quality}
+        values.update(**overrides)
+        cvat_api.update_quality_control_settings(settings.id, **values)
+
+    def _split_dataset_per_task(
+        self,
+        data_filenames: list[str],
+        *,
+        subset_size: int,
+    ) -> Generator[str]:
+        random.shuffle(data_filenames)
+        yield from take_by(data_filenames, subset_size)
 
     @abstractmethod
     def build(self) -> None: ...
@@ -291,15 +301,6 @@ class SimpleTaskBuilder(_TaskBuilderBase):
             )
 
         return list(matched_gt_filenames)
-
-    def _split_dataset_per_task(
-        self,
-        data_filenames: list[str],
-        *,
-        subset_size: int,
-    ) -> Generator[str]:
-        random.shuffle(data_filenames)
-        yield from take_by(data_filenames, subset_size)
 
     def build(self):
         manifest = self.manifest
@@ -417,17 +418,19 @@ class PointsTaskBuilder(SimpleTaskBuilder):
     def _parse_gt_dataset(self, gt_file_data, *, add_prefix=None):
         gt_dataset = super()._parse_gt_dataset(gt_file_data, add_prefix=add_prefix)
 
+        assert len(gt_dataset.categories()[dm.AnnotationType.label]) == 1
+        label_id = 0
+
         updated_gt_dataset = dm.Dataset(categories=gt_dataset.categories(), media_type=dm.Image)
 
         # Replace boxes with their center points
         # Collect radius statistics
         radiuses = []
         for gt_sample in gt_dataset:
-            updated_anns = []
-
             image_size = gt_sample.media_as(dm.Image).size
             image_half_diag = ((image_size[0] ** 2 + image_size[1] ** 2) ** 0.5) / 2
 
+            sample_points = []
             for gt_bbox in gt_sample.annotations:
                 if not isinstance(gt_bbox, dm.Bbox):
                     continue
@@ -438,7 +441,10 @@ class PointsTaskBuilder(SimpleTaskBuilder):
                 rel_int_bbox_radius = min(w, h) / 2 / image_half_diag
                 radiuses.append(rel_int_bbox_radius)
 
-                updated_anns.append(bbox_center)
+                sample_points.extend(bbox_center.points)
+
+            # Join points into a single annotation for compatibility with CVAT capabilities
+            updated_anns = [dm.Points(sample_points, label=label_id)]
 
             updated_gt_dataset.put(gt_sample.wrap(annotations=updated_anns))
 
@@ -456,9 +462,26 @@ class PointsTaskBuilder(SimpleTaskBuilder):
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         assert self._mean_gt_bbox_radius_estimation is not _unset
 
-        values = {"oks_sigma": self._mean_gt_bbox_radius_estimation}
+        values = {
+            # We have at most 1 annotation per frame, so accuracy is either 0 or 1.
+            # Point set accuracy is controlled by iou_threshold,
+            # so configure it with the requested value.
+            "target_metric_threshold": 0.9,
+            "iou_threshold": self.manifest.validation.min_quality,
+            "oks_sigma": self._mean_gt_bbox_radius_estimation,
+            "use_image_space_for_point_comparison": True,
+        }
         values.update(overrides)
         super()._setup_quality_settings(task_id, **values)
+
+    def build(self):
+        if len(self.manifest.annotation.labels) != 1:
+            # TODO: implement support for multiple labels
+            # Probably, need to split the whole task into projects per label
+            # for efficient annotation
+            raise NotImplementedError("Point annotation tasks can have only 1 label")
+
+        return super().build()
 
 
 class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
@@ -1368,15 +1391,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, roi_filename),
                     roi_bytes,
                 )
-
-    def _split_dataset_per_task(
-        self,
-        data_filenames: list[str],
-        *,
-        subset_size: int,
-    ) -> Generator[str]:
-        random.shuffle(data_filenames)
-        yield from take_by(data_filenames, subset_size)
 
     def _prepare_gt_roi_dataset(self):
         self._gt_roi_dataset = dm.Dataset(
@@ -2643,7 +2657,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         self._setup_gt_job_for_cvat_task(
                             cvat_task.id, gt_points_dataset, dm_export_format="cvat"
                         )
-                        self._setup_quality_settings(cvat_task.id)
+                        self._setup_quality_settings(
+                            cvat_task.id, oks_sigma=Config.cvat_config.cvat_oks_sigma
+                        )
 
                         db_service.create_data_upload(session, cvat_task.id)
 

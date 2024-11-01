@@ -11,7 +11,7 @@ from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
 from time import sleep
-from typing import Any
+from typing import Any, Optional
 
 from cvat_sdk import Client, make_client
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
@@ -376,7 +376,7 @@ def put_task_data(
 
         if validation_params:
             logger.info(
-                f"The {sorting_method} is ignored."
+                f"The {sorting_method} is ignored. "
                 'Only "random" sorting can be used when validation parameters passed.'
             )
             sorting_method = models.SortingMethod("random")
@@ -703,7 +703,7 @@ def get_quality_control_settings(task_id: int) -> models.QualitySettings:
     with get_api_client() as api_client:
         try:
             paginated_data, _ = api_client.quality_api.list_settings(task_id=task_id)
-            if (settings_count := paginated_data["results"]) != 1:
+            if (settings_count := len(paginated_data["results"])) != 1:
                 raise CVATException(
                     f"CVAT returned {settings_count}"
                     f"quality control settings associated with the task({task_id})"
@@ -722,22 +722,30 @@ def update_quality_control_settings(
     target_metric: str = "accuracy",
     max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
-    oks_sigma: float = Config.cvat_config.cvat_oks_sigma,
+    oks_sigma: Optional[float] = None,
+    use_image_space_for_point_comparison: Optional[bool] = None,
 ) -> None:
     logger = logging.getLogger("app")
+
+    params = {
+        "max_validations_per_job": max_validations_per_job,
+        "target_metric": target_metric,
+        "target_metric_threshold": target_metric_threshold,
+        "iou_threshold": iou_threshold,
+        "low_overlap_threshold": iou_threshold,  # used only for warnings
+    }
+
+    if oks_sigma is not None:
+        params["oks_sigma"] = oks_sigma
+
+    if use_image_space_for_point_comparison is not None:
+        params["use_image_space_for_point_comparison"] = use_image_space_for_point_comparison
 
     with get_api_client() as api_client:
         try:
             api_client.quality_api.partial_update_settings(
                 settings_id,
-                patched_quality_settings_request=models.PatchedQualitySettingsRequest(
-                    max_validations_per_job=max_validations_per_job,
-                    target_metric=target_metric,
-                    target_metric_threshold=target_metric_threshold,
-                    iou_threshold=iou_threshold,
-                    low_overlap_threshold=iou_threshold,  # used only for warnings
-                    oks_sigma=oks_sigma,
-                ),
+                patched_quality_settings_request=models.PatchedQualitySettingsRequest(**params),
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling QualityApi.partial_update_settings(): {e}\n")
