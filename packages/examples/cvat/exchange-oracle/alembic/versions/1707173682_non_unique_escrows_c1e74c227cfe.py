@@ -36,10 +36,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     offline_mode = op.get_context().environment_context.is_offline_mode()
-    assert offline_mode or "TESTING" in os.environ or "test" in op.get_bind().engine.url, (
-        "This downgrade deletes data and should only run in a test environment."
-        "If you are sure you want to run it, set the TESTING environment variable."
-    )
+    if not (offline_mode or "TESTING" in os.environ or "test" in op.get_bind().engine.url):
+        raise RuntimeError(
+            "This downgrade deletes data and should only run in a test environment."
+            "If you are sure you want to run it, set the TESTING environment variable."
+        )
 
     op.execute(
         delete(Project).where(
