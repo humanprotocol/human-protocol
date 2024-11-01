@@ -11,7 +11,7 @@ from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
 from time import sleep
-from typing import Any, Optional
+from typing import Any
 
 from cvat_sdk import Client, make_client
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
@@ -722,8 +722,8 @@ def update_quality_control_settings(
     target_metric: str = "accuracy",
     max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
-    oks_sigma: Optional[float] = None,
-    use_bbox_size_for_points: Optional[bool] = None,
+    oks_sigma: float | None = None,
+    use_bbox_size_for_points: bool | None = None,
 ) -> None:
     logger = logging.getLogger("app")
 
