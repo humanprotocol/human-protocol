@@ -723,7 +723,7 @@ def update_quality_control_settings(
     max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
     iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
     oks_sigma: Optional[float] = None,
-    use_image_space_for_point_comparison: Optional[bool] = None,
+    use_bbox_size_for_points: Optional[bool] = None,
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -738,8 +738,8 @@ def update_quality_control_settings(
     if oks_sigma is not None:
         params["oks_sigma"] = oks_sigma
 
-    if use_image_space_for_point_comparison is not None:
-        params["use_image_space_for_point_comparison"] = use_image_space_for_point_comparison
+    if use_bbox_size_for_points is not None:
+        params["use_bbox_size_for_points"] = use_bbox_size_for_points
 
     with get_api_client() as api_client:
         try:
