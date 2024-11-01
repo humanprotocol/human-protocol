@@ -177,12 +177,13 @@ class CvatConfig:
     cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
     cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
     cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 10 * 1000))
+    cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
     # quality control settings
     cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
     "Maximum number of attempts to run a validation check on a job after completing annotation"
 
-    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.5))
+    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
     cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
 
     cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")

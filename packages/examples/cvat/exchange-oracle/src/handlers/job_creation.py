@@ -4,12 +4,14 @@ import math
 import os
 import random
 import uuid
+from abc import ABCMeta, abstractmethod
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
 from math import ceil
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import sleep
 from typing import TYPE_CHECKING, TypeVar, cast
 
 import cv2
@@ -37,6 +39,7 @@ from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
+from src.utils.zip_archive import write_dir_to_zip_archive
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Sequence
@@ -137,61 +140,7 @@ class _ExcludedAnnotationsInfo:
         )
 
 
-def setup_gt_job_for_cvat_task(
-    task_id: int,
-    gt_dataset: dm.Dataset,
-    *,
-    dm_export_format: str = "coco",
-) -> None:
-    dm_format_to_cvat_format = {
-        "coco": "COCO 1.0",
-        "cvat": "CVAT 1.1",
-    }
-
-    dm_format_to_annotations_path = {
-        "coco": "annotations/instances_default.json",
-        "cvat": "default.xml",
-    }
-
-    task_status: cvat_api.UploadStatus | None = None
-
-    while task_status != cvat_api.UploadStatus.FINISHED:
-        task_status, _ = cvat_api.get_task_upload_status(task_id)
-        if not task_status or task_status == cvat_api.UploadStatus.FAILED:
-            return  # will be handled in state_trackers.py::track_task_creation
-
-    if task_status == cvat_api.UploadStatus.FINISHED:
-        with TemporaryDirectory() as tmp_dir:
-            gt_dataset.export(
-                save_dir=tmp_dir, save_images=False, format=dm_export_format
-            )  # reindex=True ?
-            cvat_api.setup_gt_job(
-                task_id,
-                Path(tmp_dir) / dm_format_to_annotations_path[dm_export_format],
-                format_name=dm_format_to_cvat_format[dm_export_format],
-            )
-
-
-def setup_quality_control_for_cvat_task(
-    task_id: int,
-    *,
-    target_metric_threshold: float,
-    **other_settings,
-) -> None:
-    settings = cvat_api.get_quality_control_settings(task_id)
-    cvat_api.update_quality_control_settings(
-        settings.id,
-        target_metric_threshold=target_metric_threshold,
-        **other_settings,
-    )
-
-
-# TODO: refactor builders and extract common interface
-class SimpleTaskBuilder:
-    """
-    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
-    """
-
+class _TaskBuilderBase(metaclass=ABCMeta):
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
@@ -219,6 +168,63 @@ class SimpleTaskBuilder:
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
+
+    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+        # TODO: add a timeout or
+        # save gt datasets in the oracle bucket and upload in track_task_creation()
+        while True:
+            task_status, _ = cvat_api.get_task_upload_status(task_id)
+            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+                return task_status
+
+            sleep(Config.cvat_config.cvat_task_creation_check_interval)
+
+    def _setup_gt_job_for_cvat_task(
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
+    ) -> None:
+        task_status = self._wait_task_creation(task_id)
+        if task_status != cvat_api.UploadStatus.FINISHED:
+            return  # will be handled in state_trackers.py::track_task_creation
+
+        dm_format_to_cvat_format = {
+            "coco": "COCO 1.0",
+            "cvat": "CVAT 1.1",
+            "datumaro": "Datumaro 1.0",
+        }
+
+        with TemporaryDirectory() as tmp_dir:
+            export_dir = Path(tmp_dir) / "export"
+            gt_dataset.export(save_dir=str(export_dir), save_images=False, format=dm_export_format)
+
+            annotations_archive_path = Path(tmp_dir) / "annotations.zip"
+            with annotations_archive_path.open("wb") as annotations_archive:
+                write_dir_to_zip_archive(export_dir, annotations_archive)
+
+            self._setup_gt_job(
+                task_id,
+                annotations_archive_path,
+                format_name=dm_format_to_cvat_format[dm_export_format],
+            )
+
+    def _setup_gt_job(self, task_id: int, dataset_path: Path, format_name: str) -> None:
+        gt_job = cvat_api.get_gt_job(task_id)
+        cvat_api.upload_gt_annotations(gt_job.id, dataset_path, format_name=format_name)
+        cvat_api.finish_gt_job(gt_job.id)
+
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        settings = cvat_api.get_quality_control_settings(task_id)
+        cvat_api.update_quality_control_settings(
+            settings.id, target_metric_threshold=self.manifest.validation.min_quality, **overrides
+        )
+
+    @abstractmethod
+    def build(self) -> None: ...
+
+
+class SimpleTaskBuilder(_TaskBuilderBase):
+    """
+    Handles task creation for the IMAGE_BOXES task type
+    """
 
     def _upload_task_meta(self, gt_dataset: dm.Dataset):
         layout = simple_task.TaskMetaLayout()
@@ -395,23 +401,69 @@ class SimpleTaskBuilder:
                     },
                 )
 
-                setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset, dm_export_format="coco")
-                setup_quality_control_for_cvat_task(
-                    cvat_task.id, target_metric_threshold=manifest.validation.min_quality
-                )
+                self._setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset)
+                self._setup_quality_settings(cvat_task.id)
 
                 db_service.create_data_upload(session, cvat_task.id)
             db_service.touch(session, Project, [project_id])
 
 
-class BoxesFromPointsTaskBuilder:
+class PointsTaskBuilder(SimpleTaskBuilder):
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
-        self.exit_stack = ExitStack()
-        self.manifest = manifest
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
-        self.logger: Logger = NullLogger()
+        self._mean_gt_bbox_radius_estimation: _MaybeUnset[float] = _unset
+
+    def _parse_gt_dataset(self, gt_file_data, *, add_prefix=None):
+        gt_dataset = super()._parse_gt_dataset(gt_file_data, add_prefix=add_prefix)
+
+        updated_gt_dataset = dm.Dataset(categories=gt_dataset.categories(), media_type=dm.Image)
+
+        # Replace boxes with their center points
+        # Collect radius statistics
+        radiuses = []
+        for gt_sample in gt_dataset:
+            updated_anns = []
+
+            image_size = gt_sample.media_as(dm.Image).size
+            image_half_diag = ((image_size[0] ** 2 + image_size[1] ** 2) ** 0.5) / 2
+
+            for gt_bbox in gt_sample.annotations:
+                if not isinstance(gt_bbox, dm.Bbox):
+                    continue
+
+                x, y, w, h = gt_bbox.get_bbox()
+                bbox_center = dm.Points([x + w / 2, y + h / 2], label=gt_bbox.label, id=gt_bbox.id)
+
+                rel_int_bbox_radius = min(w, h) / 2 / image_half_diag
+                radiuses.append(rel_int_bbox_radius)
+
+                updated_anns.append(bbox_center)
+
+            updated_gt_dataset.put(gt_sample.wrap(annotations=updated_anns))
+
+        self._mean_gt_bbox_radius_estimation = min(0.5, np.mean(radiuses).item())
+
+        return updated_gt_dataset
+
+    def _setup_gt_job_for_cvat_task(
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "datumaro"
+    ) -> None:
+        super()._setup_gt_job_for_cvat_task(
+            task_id=task_id, gt_dataset=gt_dataset, dm_export_format=dm_export_format
+        )
+
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        assert self._mean_gt_bbox_radius_estimation is not _unset
+
+        values = {"oks_sigma": self._mean_gt_bbox_radius_estimation}
+        values.update(overrides)
+        super()._setup_quality_settings(task_id, **values)
+
+
+class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
         self._input_gt_data: _MaybeUnset[bytes] = _unset
         self._input_points_data: _MaybeUnset[bytes] = _unset
@@ -487,20 +539,6 @@ class BoxesFromPointsTaskBuilder:
         """
 
         # TODO: probably, need to also add an absolute number of minimum GT RoIs
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.close()
-
-    def close(self):
-        self.exit_stack.close()
-
-    def set_logger(self, logger: Logger):
-        # TODO: add escrow info into messages
-        self.logger = logger
-        return self
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -1465,19 +1503,14 @@ class BoxesFromPointsTaskBuilder:
                     },
                 )
 
-                db_service.create_data_upload(session, cvat_task.id)
-                setup_gt_job_for_cvat_task(
+                self._setup_gt_job_for_cvat_task(
                     cvat_task.id, self._gt_roi_dataset, dm_export_format="coco"
                 )
-                setup_quality_control_for_cvat_task(
-                    cvat_task.id, target_metric_threshold=self.manifest.validation.min_quality
-                )
+                self._setup_quality_settings(cvat_task.id)
+
+                db_service.create_data_upload(session, cvat_task.id)
 
             db_service.touch(session, Project, [project_id])
-
-    @classmethod
-    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
 
     def build(self):
         self._download_input_data()
@@ -1502,7 +1535,7 @@ class BoxesFromPointsTaskBuilder:
         self._create_on_cvat()
 
 
-class SkeletonsFromBoxesTaskBuilder:
+class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
     @dataclass
     class _TaskParams:
         label_id: int
@@ -1510,12 +1543,7 @@ class SkeletonsFromBoxesTaskBuilder:
         roi_gt_ids: list[int]
 
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
-        self.exit_stack = ExitStack()
-        self.manifest = manifest
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
-
-        self.logger: Logger = NullLogger()
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
         self._input_gt_data: _MaybeUnset[bytes] = _unset
         self._input_boxes_data: _MaybeUnset[bytes] = _unset
@@ -1576,20 +1604,6 @@ class SkeletonsFromBoxesTaskBuilder:
         """
 
         # TODO: probably, need to also add an absolute number of minimum GT RoIs per class
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.close()
-
-    def close(self):
-        self.exit_stack.close()
-
-    def set_logger(self, logger: Logger):
-        # TODO: add escrow info into messages
-        self.logger = logger
-        return self
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -2625,20 +2639,15 @@ class SkeletonsFromBoxesTaskBuilder:
                                 * self.job_size_mult,
                             },
                         )
-                        setup_gt_job_for_cvat_task(
+
+                        self._setup_gt_job_for_cvat_task(
                             cvat_task.id, gt_points_dataset, dm_export_format="cvat"
                         )
-                        setup_quality_control_for_cvat_task(
-                            cvat_task.id,
-                            target_metric_threshold=self.manifest.validation.min_quality,
-                        )
+                        self._setup_quality_settings(cvat_task.id)
+
                         db_service.create_data_upload(session, cvat_task.id)
 
             db_service.touch(session, Project, created_projects)
-
-    @classmethod
-    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
 
     def build(self):
         self._download_input_data()
@@ -2710,10 +2719,11 @@ def create_task(escrow_address: str, chain_id: int) -> None:
 
     if manifest.annotation.type in [
         TaskTypes.image_boxes,
-        TaskTypes.image_points,
         TaskTypes.image_label_binary,
     ]:
         builder_type = SimpleTaskBuilder
+    elif manifest.annotation.type in [TaskTypes.image_points]:
+        builder_type = PointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
         builder_type = BoxesFromPointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
