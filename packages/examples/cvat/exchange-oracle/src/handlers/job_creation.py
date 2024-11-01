@@ -213,9 +213,11 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         settings = cvat_api.get_quality_control_settings(task_id)
-        cvat_api.update_quality_control_settings(
-            settings.id, target_metric_threshold=self.manifest.validation.min_quality, **overrides
-        )
+
+        values = {"target_metric_threshold": self.manifest.validation.min_quality}
+        values.update(**overrides)
+        cvat_api.update_quality_control_settings(settings.id, **values)
+
 
     @abstractmethod
     def build(self) -> None: ...
