@@ -1,4 +1,4 @@
-"""Use UUID type for primar keys
+"""Use UUID type for primary keys
 
 Revision ID: 284adb30d75e
 Revises: fde2b09b6b39
