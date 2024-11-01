@@ -376,7 +376,7 @@ def put_task_data(
 
         if validation_params:
             logger.info(
-                f"The {sorting_method} is ignored."
+                f"The {sorting_method} is ignored. "
                 'Only "random" sorting can be used when validation parameters passed.'
             )
             sorting_method = models.SortingMethod("random")
