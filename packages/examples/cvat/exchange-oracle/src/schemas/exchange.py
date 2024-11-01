@@ -7,7 +7,7 @@ from strenum import StrEnum  # added in python 3.11
 from src.core.types import Networks, TaskTypes
 from src.utils.enums import BetterEnumMeta
 
-DEFAULT_TOKEN = "hmt"  # noqa: S105 (it's  not a credential)
+DEFAULT_TOKEN = "HMT"  # noqa: S105 (it's  not a credential)
 
 
 class JobStatuses(StrEnum, metaclass=BetterEnumMeta):
