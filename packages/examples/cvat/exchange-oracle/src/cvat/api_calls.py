@@ -703,7 +703,7 @@ def get_quality_control_settings(task_id: int) -> models.QualitySettings:
     with get_api_client() as api_client:
         try:
             paginated_data, _ = api_client.quality_api.list_settings(task_id=task_id)
-            if (settings_count := paginated_data["results"]) != 1:
+            if (settings_count := len(paginated_data["results"])) != 1:
                 raise CVATException(
                     f"CVAT returned {settings_count}"
                     f"quality control settings associated with the task({task_id})"
