@@ -3,12 +3,12 @@ import logging
 from datetime import timedelta
 from http import HTTPStatus
 from time import sleep
-from typing import Any
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.core.helpers import get_paginated_collection
 
 from src.core.config import Config
+from src.cvat.interface import QualityReportData
 from src.utils.time import utcnow
 
 
@@ -94,16 +94,14 @@ def get_task_quality_report(
     )
 
 
-def get_quality_report_data(report_id: int) -> dict[str, Any]:
+def get_quality_report_data(report_id: int) -> QualityReportData:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
             _, response = api_client.quality_api.retrieve_report_data(
                 report_id, _parse_response=False
             )
-            report_data = json.loads(response.data)
-            assert report_data
-            return report_data
+            return QualityReportData(**response.json())
 
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling QualityApi.retrieve_report_data: {e}\n")
@@ -138,6 +136,7 @@ def get_jobs_quality_reports(parent_id: int) -> dict[int, models.QualityReport]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
+            # TODO: optimize
             reports: list[models.QualityReport] = get_paginated_collection(
                 api_client.quality_api.list_reports_endpoint, parent_id=parent_id, target="job"
             )
@@ -148,55 +147,17 @@ def get_jobs_quality_reports(parent_id: int) -> dict[int, models.QualityReport]:
             raise
 
 
-def get_quality_report_data(report_id: int) -> dict[str, Any]:
-    with get_api_client() as api_client:
-        _, response = api_client.quality_api.retrieve_report_data(report_id, _parse_response=False)
-        assert response.status == HTTPStatus.OK
-        return response.json()
-
-
-def shuffle_honeypots_in_jobs(job_ids: list[int] | int) -> None:
-    logger = logging.getLogger("app")
-
-    if isinstance(job_ids, int):
-        job_ids = [job_ids]
-
-    with get_api_client() as api_client:
-        for job_id in job_ids:
-            updated_validation_layout, _ = api_client.jobs_api.partial_update_validation_layout(
-                job_id,
-                patched_job_validation_layout_write_request=models.PatchedJobValidationLayoutWriteRequest(
-                    frame_selection_method="random_uniform",
-                ),
-            )
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    f"Updated validation layout for the job {job_id}: {updated_validation_layout!s}"
-                )
-
-
-def disable_validation_frames(task_id: int, *, frames_to_disable: list[int]) -> None:
+def update_task_validation_layout(
+    task_id: int, *, disabled_frames: list[int], honeypot_real_frames: list[int]
+) -> None:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
-        task_validation_layout, _ = api_client.tasks_api.retrieve_validation_layout(task_id)
-        disabled_frames = task_validation_layout.disabled_frames
-
-        # nothing to update
-        if not (set(frames_to_disable) - set(disabled_frames)):
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    f"Validation frames {frames_to_disable!r} are already "
-                    f"disabled for the CVAT task {task_id}"
-                )
-            return
-
         api_client.tasks_api.partial_update_validation_layout(
             task_id,
             patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
-                disabled_frames=sorted(set(disabled_frames + frames_to_disable))
+                frame_selection_method="manual",
+                disabled_frames=disabled_frames,
+                honeypot_real_frames=honeypot_real_frames,
             ),
         )
-        logger.info(
-            f"Validation frames {frames_to_disable!r} have been disabled "
-            f"for the CVAT task {task_id}"
-        )
+        logger.info(f"Validation layout for the task {task_id} has been updated.")
