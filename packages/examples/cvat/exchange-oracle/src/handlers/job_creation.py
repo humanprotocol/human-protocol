@@ -218,6 +218,14 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         values.update(**overrides)
         cvat_api.update_quality_control_settings(settings.id, **values)
 
+    def _split_dataset_per_task(
+        self,
+        data_filenames: list[str],
+        *,
+        subset_size: int,
+    ) -> Generator[str]:
+        random.shuffle(data_filenames)
+        yield from take_by(data_filenames, subset_size)
 
     @abstractmethod
     def build(self) -> None: ...
@@ -293,15 +301,6 @@ class SimpleTaskBuilder(_TaskBuilderBase):
             )
 
         return list(matched_gt_filenames)
-
-    def _split_dataset_per_task(
-        self,
-        data_filenames: list[str],
-        *,
-        subset_size: int,
-    ) -> Generator[str]:
-        random.shuffle(data_filenames)
-        yield from take_by(data_filenames, subset_size)
 
     def build(self):
         manifest = self.manifest
@@ -1370,15 +1369,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, roi_filename),
                     roi_bytes,
                 )
-
-    def _split_dataset_per_task(
-        self,
-        data_filenames: list[str],
-        *,
-        subset_size: int,
-    ) -> Generator[str]:
-        random.shuffle(data_filenames)
-        yield from take_by(data_filenames, subset_size)
 
     def _prepare_gt_roi_dataset(self):
         self._gt_roi_dataset = dm.Dataset(
