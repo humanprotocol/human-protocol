@@ -24,7 +24,7 @@ export function SendResetLinkWorkerPage() {
 
   const methods = useForm<SendResetLinkDto>({
     defaultValues: {
-      email: user?.email || '',
+      email: user?.email ?? '',
       h_captcha_token: '',
     },
     resolver: zodResolver(sendResetLinkDtoSchema),
@@ -62,7 +62,7 @@ export function SendResetLinkWorkerPage() {
             void methods.handleSubmit(handleWorkerSendResetLink)(event);
           }}
         >
-          <Grid container gap="2rem">
+          <Grid container gap="1.5rem">
             <Typography variant="body1">
               {t('worker.sendResetLinkForm.description')}
             </Typography>

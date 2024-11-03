@@ -29,7 +29,7 @@ class HTTPBearer(BaseHTTPBearer):
 AuthorizationDependency = HTTPBearer(scheme_name="jwt_bearer")
 AuthorizationToken = HTTPAuthorizationCredentials
 
-HUMAN_APP_ROLE = "HUMAN_APP"
+HUMAN_APP_ROLE = "human_app"
 
 
 class AuthorizationData(BaseModel):
@@ -68,7 +68,7 @@ class TokenAuthenticator:
 
         try:
             payload = jwt.decode(
-                token.credentials, Config.human_app_config.jwt_key, algorithms=["HS256"]
+                token.credentials, Config.human_app_config.jwt_public_key, algorithms=["ES256"]
             )
             return self._auth_data_class.model_validate(payload)
         except (jwt.PyJWTError, pydantic.ValidationError) as e:

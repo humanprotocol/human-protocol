@@ -1,14 +1,11 @@
 /* eslint-disable camelcase --- ... */
-import capitalize from 'lodash/capitalize';
+import { useTranslation } from 'react-i18next';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { stringToUpperSnakeCase } from '@/shared/helpers/string-to-upper-snake-case';
+import { JOB_TYPES } from '@/shared/consts';
 
-export function AvailableJobsJobTypeFilter({
-  jobTypes,
-}: {
-  jobTypes: string[];
-}) {
+export function AvailableJobsJobTypeFilter() {
+  const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
   return (
@@ -19,17 +16,15 @@ export function AvailableJobsJobTypeFilter({
           job_type: undefined,
         });
       }}
-      filteringOptions={jobTypes.map((jobType) => ({
-        name: capitalize(jobType),
+      filteringOptions={JOB_TYPES.map((jobType) => ({
+        name: t(`jobTypeLabels.${jobType}`),
         option: jobType,
       }))}
-      isChecked={(option) =>
-        stringToUpperSnakeCase(option) === filterParams.job_type
-      }
+      isChecked={(option) => option === filterParams.job_type}
       setFiltering={(jobType) => {
         setFilterParams({
           ...filterParams,
-          job_type: stringToUpperSnakeCase(jobType),
+          job_type: jobType,
         });
       }}
     />

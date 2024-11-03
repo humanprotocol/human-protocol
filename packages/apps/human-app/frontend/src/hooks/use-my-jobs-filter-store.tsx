@@ -3,19 +3,19 @@ import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
 
 export const jobStatuses = [
-  'ACTIVE',
-  'COMPLETED',
-  'CANCELED',
-  'VALIDATION',
-  'EXPIRED',
-  'REJECTED',
+  'active',
+  'completed',
+  'canceled',
+  'validation',
+  'expired',
+  'rejected',
 ] as const;
 
 type JobStatus = (typeof jobStatuses)[number];
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
-    sort?: 'ASC' | 'DESC';
+    sort?: 'asc' | 'desc';
     sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'expires_at';
     job_type?: string;
     status?: JobStatus;
@@ -38,6 +38,9 @@ export interface MyJobsFilterStoreProps {
 const initialFiltersState = {
   page: 0,
   page_size: 5,
+  filterParams: {
+    escrow_address: '',
+  },
 } as const;
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({

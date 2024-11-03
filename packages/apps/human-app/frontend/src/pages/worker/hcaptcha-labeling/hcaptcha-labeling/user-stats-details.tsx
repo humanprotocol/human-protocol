@@ -1,8 +1,9 @@
 import { Divider, Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { colorPalette } from '@/styles/color-palette';
 import { RefreshIcon } from '@/components/ui/icons';
 import type { HCaptchaUserStatsSuccess } from '@/api/services/worker/hcaptcha-user-stats';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { onlyDarkModeColor } from '@/styles/dark-color-palette';
 
 export function UserStatsDetails({
   stats,
@@ -11,6 +12,10 @@ export function UserStatsDetails({
   stats: HCaptchaUserStatsSuccess;
   refetch: () => void;
 }) {
+  const { colorPalette, isDarkMode } = useColorMode();
+  const statsColor = isDarkMode
+    ? onlyDarkModeColor.additionalTextColor
+    : colorPalette.primary.light;
   return (
     <Grid>
       <Divider sx={{ borderBottomWidth: '2px' }} />
@@ -33,7 +38,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsServed')}
               </Typography>
-              <Typography color={colorPalette.primary.light} variant="h6">
+              <Typography color={statsColor} variant="h6">
                 {stats.served}
               </Typography>
             </Grid>
@@ -43,7 +48,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.jobsComplete')}
               </Typography>
-              <Typography color={colorPalette.primary.light} variant="h6">
+              <Typography color={statsColor} variant="h6">
                 {stats.solved}
               </Typography>
             </Grid>
@@ -53,7 +58,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.hmtEarned')}
               </Typography>
-              <Typography color={colorPalette.primary.light} variant="h6">
+              <Typography color={statsColor} variant="h6">
                 {stats.balance.total}
                 <span style={{ color: colorPalette.text.primary }}>
                   {t('inputMasks.humanCurrencySuffix')}
@@ -74,7 +79,7 @@ export function UserStatsDetails({
               <Typography variant="caption">
                 {t('worker.hcaptchaLabelingStats.earnedLastHour')}
               </Typography>
-              <Typography color={colorPalette.primary.light} variant="h6">
+              <Typography color={statsColor} variant="h6">
                 {stats.balance.recent}
                 <span style={{ color: colorPalette.text.primary }}>
                   {t('inputMasks.humanCurrencySuffix')}

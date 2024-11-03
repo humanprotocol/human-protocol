@@ -1,7 +1,5 @@
-import Typography from '@mui/material/Typography';
 import type { CustomButtonProps } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 
 export function TableButton(props: CustomButtonProps) {
   return (
@@ -9,20 +7,18 @@ export function TableButton(props: CustomButtonProps) {
       {...props}
       size="small"
       sx={{
-        backgroundColor: colorPalette.secondary.main,
-        color: colorPalette.white,
         paddingTop: '0.4rem',
         paddingBottom: '0.4rem',
         whiteSpace: 'nowrap',
         textWrap: 'nowrap',
+        fontSize: '13px',
         ...props.sx,
       }}
       type="button"
       variant="contained"
+      color="secondary"
     >
-      <Typography color={colorPalette.white} variant="buttonSmall">
-        {props.children}
-      </Typography>
+      <div>{props.children}</div>
     </Button>
   );
 }

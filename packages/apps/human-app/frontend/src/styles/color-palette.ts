@@ -1,9 +1,10 @@
 export const colorPalette = {
   white: '#FFFFFF',
   black: '#000000',
+  backgroundColor: '#FFFFFF',
   text: {
     primary: '#320A8D',
-    secondary: '#858EC6',
+    secondary: '#B2AFC1',
     disabled: '#CBCFE6',
     disabledSecondary: '#8494C3',
   },
@@ -12,6 +13,7 @@ export const colorPalette = {
     light: '#6309FF',
     dark: '#100735',
     contrastText: '#F9FAFF',
+    shades: '#DADEF0CC',
   },
   secondary: {
     main: '#6309FF',
@@ -41,8 +43,10 @@ export const colorPalette = {
     main: 'rgba(203, 207, 232, 0.28)',
   },
   button: {
-    disabled: 'rgba(218, 222, 240, 0.8)',
+    disabled: '#E6E7EF',
   },
   // for 'warning', 'info' native colors from MUI were pointed as expected
   // 'info' native colors from MUI were pointed as expected
-} as const;
+};
+
+export type ColorPalette = typeof colorPalette;

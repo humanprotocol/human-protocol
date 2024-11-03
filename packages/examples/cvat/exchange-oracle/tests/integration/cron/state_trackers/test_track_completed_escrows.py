@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 import datumaro as dm
+import pytest
 from sqlalchemy import select
 
 from src.core.types import (
@@ -30,6 +31,9 @@ from src.models.webhook import Webhook
 from src.services.cvat import create_escrow_validations
 
 from tests.utils.db_helper import create_project_task_and_job
+
+
+class TestException(RuntimeError): ...
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -237,7 +241,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch(
-                "src.handlers.completed_escrows.cvat_api.get_job_annotations"
+                "src.handlers.completed_escrows.cvat_api.request_job_annotations"
             ) as mock_annotations,
             patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
@@ -249,9 +253,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.create_file = mock_create_file
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            mock_annotations.side_effect = Exception("Connection error")
-
-            track_escrow_validations()
+            mock_annotations.side_effect = TestException()
+            with pytest.raises(TestException):
+                track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)
@@ -321,6 +325,15 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_job_id=cvat_job.cvat_id,
             expires_at=datetime.now() + timedelta(days=1),
         )
+        project_images = ["sample1.jpg", "sample2.png"]
+
+        for image_filename in project_images:
+            self.session.add(
+                Image(
+                    id=str(uuid.uuid4()), cvat_project_id=cvat_project_id, filename=image_filename
+                )
+            )
+
         self.session.add(assignment)
         self.session.commit()
 
@@ -339,12 +352,34 @@ class ServiceIntegrationTest(unittest.TestCase):
             open("tests/utils/manifest.json") as data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api"),
+            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.services.cloud.make_client"),
         ):
             manifest = json.load(data)
             mock_get_manifest.return_value = manifest
+            dummy_zip_file = io.BytesIO()
+            with zipfile.ZipFile(dummy_zip_file, "w") as archive, TemporaryDirectory() as tempdir:
+                mock_dataset = dm.Dataset(
+                    media_type=dm.Image,
+                    categories={
+                        dm.AnnotationType.label: dm.LabelCategories.from_iterable(["cat", "dog"])
+                    },
+                )
+                for image_filename in project_images:
+                    mock_dataset.put(dm.DatasetItem(id=os.path.splitext(image_filename)[0]))
+                mock_dataset.export(tempdir, format="coco_instances")
 
-            track_escrow_validations()
+                for filename in list(glob(os.path.join(tempdir, "**/*"), recursive=True)):
+                    archive.write(filename, os.path.relpath(filename, tempdir))
+            dummy_zip_file.seek(0)
+
+            mock_cvat_api.get_job_annotations.return_value = dummy_zip_file
+            mock_cvat_api.get_project_annotations.return_value = dummy_zip_file
+            mock_cloud_service.make_client.return_value.create_file.side_effect = TestException()
+
+            with pytest.raises(TestException):
+                track_escrow_validations()
 
         webhook = (
             self.session.query(Webhook)

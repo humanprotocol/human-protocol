@@ -8,7 +8,7 @@ packages = [{include = "exchange_oracle"}]
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
-fastapi = "^0.111.1"
+fastapi = {version = "^0.115.4", extras = ["standard"]}
 uvicorn = "^0.30.0"
 python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
@@ -32,6 +32,7 @@ fastapi-filter = "^1.1.0"
 fastapi-limiter = "^0.1.6"
 strenum = "^0.4.15"
 pyjwt = "^2.9.0"
+starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 
 
 [tool.poetry.group.dev.dependencies]

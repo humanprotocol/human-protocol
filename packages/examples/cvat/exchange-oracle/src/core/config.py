@@ -247,17 +247,22 @@ class CoreConfig:
     default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
 
     skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
-    "Assignment size multiplier for IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Assignment size multiplier for image_skeletons_from_boxes tasks"
 
     min_roi_size_w = int(os.environ.get("MIN_ROI_SIZE_W", 350))
-    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
     min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
-    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
 
 class HumanAppConfig:
-    jwt_key = os.environ.get("HUMAN_APP_JWT_KEY", "sample")
+    # jwt_public_key is obtained from the Human App.
+    # To generate a key pair for testing purposes:
+    # openssl ecparam -name prime256v1 -genkey -noout -out ec_private.pem
+    # openssl ec -in ec_private.pem -pubout -out ec_public.pem
+    # HUMAN_APP_JWT_KEY=$(cat ec_public.pem)
+    jwt_public_key = os.environ.get("HUMAN_APP_JWT_KEY")
 
 
 class ApiConfig:
@@ -293,6 +298,7 @@ class EncryptionConfig(_BaseConfig):
 class Config:
     _DEVELOPMENT_MODE = "development"
 
+    debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", _DEVELOPMENT_MODE)
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))

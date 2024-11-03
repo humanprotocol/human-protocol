@@ -28,6 +28,7 @@ from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import (
     ASSIGNMENT_PROJECT_VALIDATION_STATUSES,
     PROJECT_ACTIVE_STATUSES,
+    PROJECT_COMPLETED_STATUSES,
     serialize_assignment,
     serialize_job,
 )
@@ -146,9 +147,7 @@ async def list_jobs(
                     cvat_service.Project.status == cvat_service.ProjectStatuses.canceled
                 )
             case JobStatuses.completed:
-                query = query.filter(
-                    cvat_service.Project.status == cvat_service.ProjectStatuses.recorded
-                )
+                query = query.filter(cvat_service.Project.status.in_(PROJECT_COMPLETED_STATUSES))
             case _:
                 raise NotImplementedError(f"Unsupported status {status}")
 

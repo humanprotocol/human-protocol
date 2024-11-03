@@ -39,11 +39,11 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
 
 
 class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
-    image_label_binary = "IMAGE_LABEL_BINARY"
-    image_points = "IMAGE_POINTS"
-    image_boxes = "IMAGE_BOXES"
-    image_boxes_from_points = "IMAGE_BOXES_FROM_POINTS"
-    image_skeletons_from_boxes = "IMAGE_SKELETONS_FROM_BOXES"
+    image_label_binary = "image_label_binary"
+    image_points = "image_points"
+    image_boxes = "image_boxes"
+    image_boxes_from_points = "image_boxes_from_points"
+    image_skeletons_from_boxes = "image_skeletons_from_boxes"
 
 
 class CvatLabelTypes(str, Enum, metaclass=BetterEnumMeta):

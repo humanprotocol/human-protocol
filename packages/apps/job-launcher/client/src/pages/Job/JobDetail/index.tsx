@@ -163,13 +163,19 @@ export default function JobDetail() {
                       label="Chain Id"
                       value={data.manifest.chainId}
                     />
-                    <CardTextRow label="Title" value={data.manifest.title} />
+                    {data.manifest.title && (
+                      <CardTextRow label="Title" value={data.manifest.title} />
+                    )}
                     <CardTextRow
                       label="Description"
                       value={data.manifest.description}
                     />
                     <CardTextRow
-                      label="Fortune's request"
+                      label={
+                        data.manifest.requestType === 'FORTUNE'
+                          ? "Fortune's request"
+                          : 'Task size'
+                      }
                       value={data.manifest.submissionsRequired}
                     />
                     <CardTextRow
@@ -216,7 +222,7 @@ export default function JobDetail() {
             Job solutions
           </Typography>
           <Box sx={{ mt: 7 }}>
-            {data.manifest.requestType === 'FORTUNE' && (
+            {data.manifest.requestType === 'fortune' && (
               <Table
                 columns={[
                   {
@@ -246,7 +252,7 @@ export default function JobDetail() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             )}
-            {data.manifest.requestType !== 'FORTUNE' && (
+            {data.manifest.requestType !== 'fortune' && (
               <Box
                 sx={{
                   borderRadius: '16px',

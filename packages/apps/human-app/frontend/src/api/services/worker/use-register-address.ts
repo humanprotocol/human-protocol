@@ -17,6 +17,7 @@ const RegisterAddressSuccessSchema = z.unknown();
 export const registerAddress = (address: string, signature: string) => {
   return apiClient(apiPaths.worker.registerAddress.path, {
     authenticated: true,
+    withAuthRetry: apiPaths.worker.registerAddress.withAuthRetry,
     successSchema: RegisterAddressSuccessSchema,
     options: {
       method: 'POST',
@@ -53,7 +54,7 @@ export function useRegisterAddressMutation(callbacks?: {
       }
 
       await registerAddress(address, signature);
-      await getAccessTokenMutation('web2');
+      await getAccessTokenMutation({ authType: 'web2' });
     },
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
