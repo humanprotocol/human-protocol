@@ -169,6 +169,16 @@ class _TaskBuilderBase(metaclass=ABCMeta):
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
 
+    def _save_cvat_gt_dataset_to_oracle_bucket(  # noqa: B027
+        self,
+        gt_dataset_path: Path,
+        *,
+        file_suffix: str = "",
+    ) -> None:
+        # method saves gt annotations that will be uploaded to CVAT
+        # into oracle bucket
+        pass
+
     def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
         # TODO: add a timeout or
         # save gt datasets in the oracle bucket and upload in track_task_creation()
@@ -199,6 +209,11 @@ class _TaskBuilderBase(metaclass=ABCMeta):
             annotations_archive_path = Path(tmp_dir) / "annotations.zip"
             with annotations_archive_path.open("wb") as annotations_archive:
                 write_dir_to_zip_archive(export_dir, annotations_archive)
+
+            if Config.is_development():
+                self._save_cvat_gt_dataset_to_oracle_bucket(
+                    gt_dataset_path=annotations_archive_path, file_suffix=f"for_task_{task_id}"
+                )
 
             self._setup_gt_job(
                 task_id,
@@ -1571,7 +1586,13 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             _unset
         )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
+        self._image_id_to_roi_info: _MaybeUnset[dict[str, skeletons_from_boxes_task.RoiInfos]] = (
+            _unset
+        )
+
         self._roi_filenames: _MaybeUnset[dict[int, str]] = _unset
+        self._input_filename_to_nameless: _MaybeUnset[dict[str, str]] = _unset
+
         self._task_params: _MaybeUnset[list[self._TaskParams]] = _unset
 
         self._excluded_gt_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
@@ -2218,6 +2239,10 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
         self._roi_infos = rois
 
+        self._image_id_to_roi_info = {
+            roi_info.original_image_id: roi_info for roi_info in self._roi_infos
+        }
+
     def _mangle_filenames(self):
         """
         Mangle filenames in the dataset to make them less recognizable by annotators
@@ -2229,6 +2254,11 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         # different jobs to make them even less recognizable
         self._roi_filenames = {
             roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self._roi_infos
+        }
+
+        self._input_filename_to_nameless = {
+            roi_info.original_image_id: self._roi_filenames[roi_info.bbox_id]
+            for roi_info in self._roi_infos
         }
 
     @property
@@ -2293,6 +2323,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 self.point_labels[(skeleton_label.name, point_name)] = point_name  # ??
 
     def _prepare_points_mapping(self):
+        assert self._image_id_to_roi_info is not _unset
+        assert self._input_filename_to_nameless is not _unset
+
         # (skeleton_label, point_label) to (dataset_item.id, point)
         self.points = {}
 
@@ -2303,18 +2336,21 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                     continue
 
                 for point in skeleton.elements:
+                    if point.visibility[0] in [
+                        dm.Points.Visibility.absent,
+                        dm.Points.Visibility.hidden,
+                    ]:
+                        continue
+
                     point_label_name = (
                         self._gt_dataset.categories()[dm.AnnotationType.label]
                         .items[point.label]
                         .name
                     )
 
-                    # TODO: exclude such images
-                    if dm.Points.Visibility.absent in point.visibility:
-                        continue
-
-                    self.points.setdefault((skeleton.label, point_label_name), [])
-                    self.points[(skeleton.label, point_label_name)].append((dataset_item.id, point))
+                    self.points.setdefault((skeleton.label, point_label_name), []).append(
+                        (dataset_item.id, point)
+                    )
 
     def _upload_task_meta(self):
         layout = skeletons_from_boxes_task.TaskMetaLayout()
@@ -2460,6 +2496,57 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                     data=roi_bytes,
                 )
 
+    def _prepare_gt_dataset_per_skeleton_point(
+        self,
+        *,
+        point_label_name: str,
+        skeleton_label_id: int,
+    ) -> dm.Dataset:
+        gt_points_dataset = dm.Dataset(
+            categories={
+                dm.AnnotationType.label: dm.LabelCategories.from_iterable([point_label_name]),
+            },
+            media_type=dm.Image,
+        )
+
+        for input_gt_filename, gt_points in self.points[(skeleton_label_id, point_label_name)]:
+            dataset_item_id = compose_data_bucket_filename(
+                self.escrow_address,
+                self.chain_id,
+                self._input_filename_to_nameless[input_gt_filename].split(".", maxsplit=1)[0],
+            )
+            roi_info = self._image_id_to_roi_info[input_gt_filename]
+            # update points coordinates in accordance with roi coordinates
+            updated_points = [
+                gt_points.points[0] - roi_info.roi_x,
+                gt_points.points[1] - roi_info.roi_y,
+            ]
+            gt_points_dataset.put(
+                dm.DatasetItem(
+                    id=dataset_item_id,
+                    annotations=[dm.Points(points=updated_points, label=0)],
+                )
+            )
+
+        return gt_points_dataset
+
+    def _save_cvat_gt_dataset_to_oracle_bucket(
+        self,
+        gt_dataset_path: Path,
+        *,
+        file_suffix: str = "",
+    ) -> None:
+        layout = skeletons_from_boxes_task.TaskMetaLayout()
+
+        base_gt_filename = layout.GT_FILENAME.split(".", maxsplit=1)[0]
+        final_gt_filename = f"{base_gt_filename}_{file_suffix}" + ".zip"
+        gt_dataset_key = compose_data_bucket_filename(
+            self.escrow_address, self.chain_id, final_gt_filename
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        storage_client.create_file(gt_dataset_key, gt_dataset_path.read_bytes())
+
     def _create_on_cvat(self):
         assert self._task_params is not _unset
         assert self.point_labels is not _unset
@@ -2516,15 +2603,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             )
             created_projects = []
 
-            image_id_to_roi_info = {
-                roi_info.original_image_id: roi_info for roi_info in self._roi_infos
-            }
-
-            input_filename_to_nameless = {
-                roi_info.original_image_id: self._roi_filenames[roi_info.bbox_id]
-                for roi_info in self._roi_infos
-            }
-
             for skeleton_label_id, skeleton_label_tasks in tasks_by_skeleton_label.items():
                 skeleton_label_filenames: list[list[str]] = []
                 gt_skeleton_label_filenames: list[list[str]] = []
@@ -2550,37 +2628,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
                 for point_label_spec in label_specs_by_skeleton[skeleton_label_id]:
                     point_label_name = point_label_spec["name"]
-
-                    # prepare GT dataset
-                    gt_points_dataset = dm.Dataset(
-                        categories={
-                            dm.AnnotationType.label: dm.LabelCategories.from_iterable(
-                                [point_label_name]
-                            ),
-                        },
-                        media_type=dm.Image,
-                    )
-
-                    for input_gt_filename, gt_points in self.points[
-                        (skeleton_label_id, point_label_name)
-                    ]:
-                        dataset_item_id = compose_data_bucket_filename(
-                            self.escrow_address,
-                            self.chain_id,
-                            input_filename_to_nameless[input_gt_filename].split(".", maxsplit=1)[0],
-                        )
-                        roi_info = image_id_to_roi_info[input_gt_filename]
-                        # update points coordinates in accordance with roi coordinates
-                        updated_points = [
-                            gt_points.points[0] - roi_info.roi_x,
-                            gt_points.points[1] - roi_info.roi_y,
-                        ]
-                        gt_points_dataset.put(
-                            dm.DatasetItem(
-                                id=dataset_item_id,
-                                annotations=[dm.Points(points=updated_points, label=0)],
-                            )
-                        )
 
                     # Create a project for each point label.
                     # CVAT doesn't support tasks with different labels in a project.
@@ -2652,6 +2699,12 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                                 "gt_frames_per_job_count": self.manifest.validation.val_size
                                 * self.job_size_mult,
                             },
+                        )
+
+                        # prepare GT dataset
+                        gt_points_dataset = self._prepare_gt_dataset_per_skeleton_point(
+                            point_label_name=point_label_name,
+                            skeleton_label_id=skeleton_label_id,
                         )
 
                         self._setup_gt_job_for_cvat_task(
