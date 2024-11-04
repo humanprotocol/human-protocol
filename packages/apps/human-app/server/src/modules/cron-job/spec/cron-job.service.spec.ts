@@ -342,12 +342,12 @@ describe('CronJobService', () => {
   });
 
   describe('handleJobListError', () => {
-    it('should increment retries count and deactivate oracle after 5 failures', async () => {
+    it('should increment retries count and executions to skip but not exceed the limit', async () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        retriesCount: 4,
+        retriesCount: 6,
         executionsToSkip: 0,
       };
 
@@ -357,12 +357,12 @@ describe('CronJobService', () => {
 
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
-        [{ ...oracleData, retriesCount: 5, executionsToSkip: 16 }],
+        [{ ...oracleData, retriesCount: 7, executionsToSkip: 32 }],
         configServiceMock.cacheTtlOracleDiscovery,
       );
     });
 
-    it('should increment retries count but keep oracle active if less than 5 failures', async () => {
+    it('should increment retries count and executions to skip', async () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',

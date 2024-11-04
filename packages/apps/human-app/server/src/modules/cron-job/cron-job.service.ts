@@ -162,10 +162,6 @@ export class CronJobService {
       (oracleData.executionsToSkip || 0) + Math.pow(2, retriesCount),
       this.configService.maxExecutionToSkip,
     );
-    console.log(oracleData.executionsToSkip);
-    console.log(Math.pow(2, retriesCount));
-    console.log(this.configService.maxExecutionToSkip);
-    console.log(newExecutionsToSkip);
 
     await this.updateOracleInCache(oracleData, {
       retriesCount: retriesCount + 1,
