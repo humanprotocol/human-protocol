@@ -8583,13 +8583,6 @@ cacache@^18.0.0:
     tar "^6.1.11"
     unique-filename "^3.0.0"
 
-cache-manager-redis-store@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/cache-manager-redis-store/-/cache-manager-redis-store-3.0.1.tgz#8eeb211212763d04cef4058666182d624f714299"
-  integrity sha512-o560kw+dFqusC9lQJhcm6L2F2fMKobJ5af+FoR2PdnMVdpQ3f3Bz6qzvObTGyvoazQJxjQNWgMQeChP4vRTuXQ==
-  dependencies:
-    redis "^4.3.1"
-
 cache-manager-redis-yet@^5.1.5:
   version "5.1.5"
   resolved "https://registry.yarnpkg.com/cache-manager-redis-yet/-/cache-manager-redis-yet-5.1.5.tgz#9175287ca0f7efa9a2d3b76d51b7825a98629f80"
@@ -17955,7 +17948,7 @@ redeyed@~2.1.0:
   dependencies:
     esprima "~4.0.0"
 
-redis@^4.3.1, redis@^4.7.0:
+redis@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/redis/-/redis-4.7.0.tgz#b401787514d25dd0cfc22406d767937ba3be55d6"
   integrity sha512-zvmkHEAdGMn+hMRXuMBtu4Vo5P6rHQjLoHftu+lBqq8ZTA3RCVC/WzD790bkKKiNFp7d5/9PcSD19fJyyRvOdQ==
