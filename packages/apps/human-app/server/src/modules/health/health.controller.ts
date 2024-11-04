@@ -1,8 +1,7 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Cache } from 'cache-manager';
-import type { RedisStore } from 'cache-manager-redis-yet';
+import type { Cache } from 'cache-manager';
 
 import {
   HealthCheck,
@@ -13,7 +12,7 @@ import {
 import packageJson from '../../../package.json';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { PingResponseDto } from './dto/ping-response.dto';
-import { RedisHealthIndicator } from './indicators/redis.health';
+import { CacheManagerHealthIndicator } from './indicators/cache-manager.health';
 
 @ApiTags('Health')
 @Controller('health')
@@ -22,7 +21,7 @@ export class HealthController {
     private readonly environmentConfigService: EnvironmentConfigService,
     private readonly healthCheckService: HealthCheckService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-    private readonly redisHealthIndicator: RedisHealthIndicator,
+    private readonly cacheManagerHealthIndicator: CacheManagerHealthIndicator,
   ) {}
 
   @ApiOperation({
@@ -56,9 +55,9 @@ export class HealthController {
   async check(): Promise<HealthCheckResult> {
     return this.healthCheckService.check([
       () =>
-        this.redisHealthIndicator.isHealthy(
-          'cache-manager-redis',
-          (this.cacheManager.store as RedisStore).client,
+        this.cacheManagerHealthIndicator.isHealthy(
+          'cache-manager',
+          this.cacheManager,
         ),
     ]);
   }

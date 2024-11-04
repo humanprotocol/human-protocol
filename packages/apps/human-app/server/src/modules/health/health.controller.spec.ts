@@ -2,19 +2,13 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Test } from '@nestjs/testing';
 import { HealthController } from './health.controller';
 import { TerminusModule } from '@nestjs/terminus';
-import { RedisHealthIndicator } from './indicators/redis.health';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { ConfigModule } from '@nestjs/config';
 import { ServiceUnavailableException } from '@nestjs/common';
-
-const redisClientMock = {
-  ping: jest.fn(),
-};
+import { CacheManagerHealthIndicator } from './indicators/cache-manager.health';
 
 const cacheManagerMock = {
-  store: {
-    client: redisClientMock,
-  },
+  get: jest.fn(),
 };
 
 describe('HealthController', () => {
@@ -31,7 +25,7 @@ describe('HealthController', () => {
       ],
       controllers: [HealthController],
       providers: [
-        RedisHealthIndicator,
+        CacheManagerHealthIndicator,
         EnvironmentConfigService,
         { provide: CACHE_MANAGER, useValue: cacheManagerMock },
       ],
@@ -49,7 +43,7 @@ describe('HealthController', () => {
 
   describe('/check', () => {
     afterEach(() => {
-      redisClientMock.ping.mockReset();
+      cacheManagerMock.get.mockReset();
     });
 
     it(`returns 'up' status when cache-manager redis is up`, async () => {
@@ -57,7 +51,7 @@ describe('HealthController', () => {
         expect.objectContaining({
           status: 'ok',
           info: {
-            'cache-manager-redis': {
+            'cache-manager': {
               status: 'up',
             },
           },
@@ -66,7 +60,7 @@ describe('HealthController', () => {
     });
 
     it(`returns 'down' status when cache-manager redis is down`, async () => {
-      redisClientMock.ping.mockRejectedValueOnce(new Error());
+      cacheManagerMock.get.mockRejectedValueOnce(new Error());
 
       let thrownError;
       try {
@@ -81,7 +75,7 @@ describe('HealthController', () => {
           status: 'error',
           info: {},
           error: {
-            'cache-manager-redis': {
+            'cache-manager': {
               status: 'down',
             },
           },
