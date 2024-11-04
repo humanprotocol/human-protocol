@@ -132,7 +132,7 @@ def get_task_gt_stats(
     )
 
 
-def update_gt_stats(session: Session, task_id: int, values: dict[tuple[int, int], int]):
+def update_gt_stats(session: Session, task_id: str, values: dict[tuple[int, int], int]):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
 

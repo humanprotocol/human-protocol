@@ -94,7 +94,6 @@ class _TaskValidator:
         chain_id: int,
         manifest: TaskManifest,
         *,
-        job_annotations: dict[int, io.IOBase],
         merged_annotations: io.IOBase,
         meta: AnnotationMeta,
         gt_stats: _GtStats | None = None,
@@ -104,7 +103,6 @@ class _TaskValidator:
         self.manifest = manifest
 
         self._initial_gt_stats: _GtStats = gt_stats or {}
-        self._job_annotations: dict[int, io.IOBase] = job_annotations
         self._merged_annotations: io.IOBase = merged_annotations
 
         self._updated_merged_dataset_archive: io.IOBase | None = None
@@ -147,16 +145,16 @@ class _TaskValidator:
         )
 
     def _validate_jobs(self):
-        tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
-        job_annotations = self._require_field(self._job_annotations)
+        meta = self._require_field(self._meta)
 
         job_results: _JobResults = {}
         rejected_jobs: _RejectedJobs = {}
         self._updated_gt_stats = {}
 
-        cvat_task_ids = {job_meta.task_id for job_meta in self._meta.jobs}
-        job_id_to_task_id = {job_meta.job_id: job_meta.task_id for job_meta in self._meta.jobs}
+        cvat_task_ids = {job_meta.task_id for job_meta in meta.jobs}
+        cvat_job_ids = {job_meta.job_id for job_meta in meta.jobs}
+        job_id_to_task_id = {job_meta.job_id: job_meta.task_id for job_meta in meta.jobs}
 
         task_id_to_quality_report: dict[int, dict] = {}
         task_id_to_quality_report_data: dict[int, dict] = {}
@@ -192,11 +190,8 @@ class _TaskValidator:
 
         job_id_to_quality_report = cvat_api.get_jobs_quality_reports(task_quality_report.id)
 
-        for cvat_job_id, job_annotations_file in job_annotations.items():
+        for cvat_job_id in cvat_job_ids:
             cvat_task_id = job_id_to_task_id[cvat_job_id]
-
-            job_dataset_path = tempdir / str(cvat_job_id)
-            extract_zip_archive(job_annotations_file, job_dataset_path)
 
             job_quality_report = job_id_to_quality_report[cvat_job_id]
 
@@ -340,7 +335,6 @@ def process_intermediate_results(  # noqa: PLR0912
     escrow_address: str,
     chain_id: int,
     meta: AnnotationMeta,
-    job_annotations: dict[int, io.RawIOBase],
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
@@ -353,6 +347,7 @@ def process_intermediate_results(  # noqa: PLR0912
         ),  # should not happen, but waiting should not block processing
     )
     if not task:
+        # Recording Oracle task represents all CVAT tasks related with the escrow
         task_id = db_service.create_task(session, escrow_address=escrow_address, chain_id=chain_id)
         task = db_service.get_task_by_id(session, task_id, for_update=True)
 
@@ -369,7 +364,6 @@ def process_intermediate_results(  # noqa: PLR0912
         escrow_address=escrow_address,
         chain_id=chain_id,
         manifest=manifest,
-        job_annotations=job_annotations,
         merged_annotations=merged_annotations,
         meta=meta,
         gt_stats=initial_gt_stats,
@@ -398,26 +392,21 @@ def process_intermediate_results(  # noqa: PLR0912
         for cvat_task_id, val_frame_ids in cvat_task_id_to_failed_val_frames.items():
             task_validation_layout = validation_result.task_id_to_val_layout[cvat_task_id]
             intersection = set(val_frame_ids) & set(task_validation_layout.disabled_frames)
+
             if intersection:
                 logger.error(f"Unexpected case: frames {intersection} were disabled earlier")
 
-            updated_disable_frames = task_validation_layout.disabled_frames + val_frame_ids
-            not_disabled_frames = list(
-                set(task_validation_layout.validation_frames) - set(updated_disable_frames)
-            )
+            upd_disabled_frames = task_validation_layout.disabled_frames + val_frame_ids
 
-            rng = np.random.default_rng()
-            upd_honeypot_real_frames = [
-                frame
-                if frame not in updated_disable_frames
-                else int(rng.choice(not_disabled_frames))
-                for frame in task_validation_layout.honeypot_real_frames
-            ]
+            shuffle_honeypots = True
+            if set(upd_disabled_frames) == set(task_validation_layout.validation_frames):
+                logger.error("All validation frames were banned. Honeypots will not be shuffled")
+                shuffle_honeypots = False
 
             cvat_api.update_task_validation_layout(
                 cvat_task_id,
-                disabled_frames=updated_disable_frames,
-                honeypot_real_frames=upd_honeypot_real_frames,
+                disabled_frames=upd_disabled_frames,
+                shuffle_honeypots=shuffle_honeypots,
             )
 
         if logger.isEnabledFor(logging.DEBUG):

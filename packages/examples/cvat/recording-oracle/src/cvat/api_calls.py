@@ -40,7 +40,7 @@ def get_last_task_quality_report(task_id: int) -> models.QualityReport | None:
 def compute_task_quality_report(
     task_id: int,
     *,
-    max_waiting_time: int = 10 * 60,
+    max_waiting_time: int = 60 * 60,
     sleep_interval: float = 0.5,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
@@ -86,7 +86,10 @@ def get_task_quality_report(
     report = get_last_task_quality_report(task_id)
     if report and report.created_date > report.target_last_updated:
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug(f"The latest task({task_id}) quality report({report.id}) is actual")
+            logger.debug(
+                f"The latest task({task_id}) quality report({report.id}) is actual. "
+                "Do not recreate it."
+            )
         return report
 
     return compute_task_quality_report(
@@ -103,20 +106,8 @@ def get_quality_report_data(report_id: int) -> QualityReportData:
             )
             return QualityReportData(**response.json())
 
-        except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling QualityApi.retrieve_report_data: {e}\n")
-            raise
-
-
-def get_job_validation_layout(job_id: int) -> models.JobValidationLayoutRead:
-    logger = logging.getLogger("app")
-    with get_api_client() as api_client:
-        try:
-            layout, _ = api_client.jobs_api.retrieve_validation_layout(job_id)
-            return layout
-
-        except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling JobApi.retrieve_validation_layout: {e}\n")
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling QualityApi.retrieve_report_data: {ex}\n")
             raise
 
 
@@ -125,10 +116,14 @@ def get_task_validation_layout(task_id: int) -> models.TaskValidationLayoutRead:
     with get_api_client() as api_client:
         try:
             layout, _ = api_client.tasks_api.retrieve_validation_layout(task_id)
+
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(f"Retrieved validation layout: {layout}")
+
             return layout
 
-        except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling TaskApi.retrieve_validation_layout: {e}\n")
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling TaskApi.retrieve_validation_layout: {ex}\n")
             raise
 
 
@@ -136,7 +131,6 @@ def get_jobs_quality_reports(parent_id: int) -> dict[int, models.QualityReport]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            # TODO: optimize
             reports: list[models.QualityReport] = get_paginated_collection(
                 api_client.quality_api.list_reports_endpoint, parent_id=parent_id, target="job"
             )
@@ -148,16 +142,33 @@ def get_jobs_quality_reports(parent_id: int) -> dict[int, models.QualityReport]:
 
 
 def update_task_validation_layout(
-    task_id: int, *, disabled_frames: list[int], honeypot_real_frames: list[int]
+    task_id: int,
+    *,
+    disabled_frames: list[int],
+    shuffle_honeypots: bool = True,
 ) -> None:
     logger = logging.getLogger("app")
+    params = {
+        "disabled_frames": disabled_frames,
+    }
+    if shuffle_honeypots:
+        params["frame_selection_method"] = models.FrameSelectionMethod("random_uniform")
+
     with get_api_client() as api_client:
-        api_client.tasks_api.partial_update_validation_layout(
-            task_id,
-            patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
-                frame_selection_method="manual",
-                disabled_frames=disabled_frames,
-                honeypot_real_frames=honeypot_real_frames,
-            ),
-        )
+        try:
+            validation_layout, _ = api_client.tasks_api.partial_update_validation_layout(
+                task_id,
+                patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
+                    **params
+                ),
+            )
+        except exceptions.ApiException as ex:
+            logger.exception(
+                f"Exception when calling TasksApi.partial_update_validation_layout: {ex}\n"
+            )
+            raise
+
         logger.info(f"Validation layout for the task {task_id} has been updated.")
+
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"Validation layout: {validation_layout}")
