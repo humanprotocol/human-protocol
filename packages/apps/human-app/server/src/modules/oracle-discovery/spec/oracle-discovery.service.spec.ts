@@ -82,12 +82,14 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
@@ -107,12 +109,14 @@ describe('OracleDiscoveryService', () => {
         url: 'url1',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
     ];
 
@@ -215,12 +219,14 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         chainId: '4200',
         retriesCount: 5,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
@@ -239,12 +245,14 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         chainId: '4200',
         retriesCount: 5,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
         retriesCount: 5,
+        executionsToSkip: 0,
       },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);

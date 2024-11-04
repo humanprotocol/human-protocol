@@ -13,6 +13,7 @@ export class OracleDiscoveryResponse implements IOperator {
   registrationNeeded?: boolean;
   registrationInstructions?: string;
   retriesCount = 0;
+  executionsToSkip = 0;
   constructor(
     address: string,
     chainId: string,

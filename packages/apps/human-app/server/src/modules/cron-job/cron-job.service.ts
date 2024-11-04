@@ -61,6 +61,17 @@ export class CronJobService {
       });
 
       for (const oracle of oracles) {
+        if (oracle.executionsToSkip > 0) {
+          this.logger.log(
+            `Skipping execution for oracle: ${oracle.address}. Remaining skips: ${oracle.executionsToSkip}`,
+          );
+
+          await this.updateOracleInCache(oracle, {
+            executionsToSkip: oracle.executionsToSkip - 1,
+          });
+          continue;
+        }
+
         await this.updateJobsListCache(
           oracle,
           'Bearer ' + response.access_token,
@@ -109,9 +120,11 @@ export class CronJobService {
         allResults = this.mergeJobs(allResults, response.results);
       }
 
-      await this.resetRetriesCount(oracle);
+      await this.updateOracleInCache(oracle, {
+        retriesCount: 0,
+        executionsToSkip: 0,
+      });
 
-      // Cache the job results (original behavior)
       await this.cacheManager.set(
         `${JOB_DISCOVERY_CACHE_KEY}:${oracle.address}`,
         allResults,
@@ -122,16 +135,18 @@ export class CronJobService {
     }
   }
 
-  private async resetRetriesCount(oracleData: OracleDiscoveryResponse) {
-    oracleData.retriesCount = 0;
-
+  private async updateOracleInCache(
+    oracleData: OracleDiscoveryResponse,
+    updates: Partial<OracleDiscoveryResponse>,
+  ) {
+    const updatedOracle = { ...oracleData, ...updates };
     const chainId = oracleData.chainId;
     const cachedOracles =
       await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
 
     if (cachedOracles) {
       const updatedOracles = cachedOracles.map((oracle) =>
-        oracle.address === oracleData.address ? oracleData : oracle,
+        oracle.address === oracleData.address ? updatedOracle : oracle,
       );
       await this.cacheManager.set(
         chainId,
@@ -142,29 +157,20 @@ export class CronJobService {
   }
 
   private async handleJobListError(oracleData: OracleDiscoveryResponse) {
-    const chainId = oracleData.chainId;
-    const cachedOracles =
-      await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
+    const retriesCount = oracleData.retriesCount || 0;
+    const newExecutionsToSkip = Math.min(
+      (oracleData.executionsToSkip || 0) + Math.pow(2, retriesCount),
+      this.configService.maxExecutionToSkip,
+    );
+    console.log(oracleData.executionsToSkip);
+    console.log(Math.pow(2, retriesCount));
+    console.log(this.configService.maxExecutionToSkip);
+    console.log(newExecutionsToSkip);
 
-    if (cachedOracles) {
-      const cachedOracle = cachedOracles.find(
-        (oracle) => oracle.address === oracleData.address,
-      );
-
-      if (cachedOracle) {
-        cachedOracle.retriesCount = (cachedOracle.retriesCount || 0) + 1;
-
-        const updatedOracles = cachedOracles.map((oracle) =>
-          oracle.address === cachedOracle.address ? cachedOracle : oracle,
-        );
-
-        await this.cacheManager.set(
-          chainId,
-          updatedOracles,
-          this.configService.cacheTtlOracleDiscovery,
-        );
-      }
-    }
+    await this.updateOracleInCache(oracleData, {
+      retriesCount: retriesCount + 1,
+      executionsToSkip: newExecutionsToSkip,
+    });
   }
 
   private mergeJobs(
