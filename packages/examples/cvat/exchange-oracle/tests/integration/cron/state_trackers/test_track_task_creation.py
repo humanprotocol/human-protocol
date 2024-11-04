@@ -60,7 +60,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             ) as mock_get_task_upload_status,
             patch("src.crons.cvat.state_trackers.cvat_api.fetch_task_jobs") as mock_fetch_task_jobs,
         ):
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
+            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, "Finished")
             mock_cvat_job_1 = Mock()
             mock_cvat_job_1.id = cvat_job.cvat_id
 
@@ -100,7 +100,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 side_effect=cvat_api.exceptions.ApiException("Error"),
             ),
         ):
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
+            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, "Finished")
 
             track_task_creation()
 

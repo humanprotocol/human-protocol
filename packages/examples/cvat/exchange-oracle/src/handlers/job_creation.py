@@ -345,9 +345,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
         self._upload_task_meta(gt_dataset)
 
         # Register cloud storage on CVAT to pass user dataset
-        _params = _make_cvat_cloud_storage_params(data_bucket)
-        _params["bucket_host"] = "http://minio:9010"
-        cloud_storage = cvat_api.create_cloudstorage(**_params)
+        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
 
         # Create a project
         cvat_project = cvat_api.create_project(
@@ -1446,9 +1444,9 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
-        _params = _make_cvat_cloud_storage_params(oracle_bucket)
-        _params["bucket_host"] = "http://minio:9010"
-        cvat_cloud_storage = cvat_api.create_cloudstorage(**_params)
+        cvat_cloud_storage = cvat_api.create_cloudstorage(
+            **_make_cvat_cloud_storage_params(oracle_bucket)
+        )
 
         # Create a project
         cvat_project = cvat_api.create_project(
@@ -2577,9 +2575,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
-        _params = _make_cvat_cloud_storage_params(oracle_bucket)
-        _params["bucket_host"] = "http://minio:9010"
-        cvat_cloud_storage = cvat_api.create_cloudstorage(**_params)
+        cvat_cloud_storage = cvat_api.create_cloudstorage(
+            **_make_cvat_cloud_storage_params(oracle_bucket)
+        )
 
         segment_size = self._task_segment_size
 
