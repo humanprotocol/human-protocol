@@ -229,6 +229,7 @@
       "rewardAmount": "Reward amount",
       "jobType": "Task type",
       "expiresAt": "Expires at",
+      "refresh": "Refresh",
       "status": "Status",
       "selectJob": "Select Task",
       "searchEscrowAddress": "Search escrow address",
