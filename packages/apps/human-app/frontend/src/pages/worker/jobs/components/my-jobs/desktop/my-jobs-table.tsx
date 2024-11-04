@@ -223,11 +223,11 @@ const getColumnsDefinition = (
                 sx={{
                   paddingTop: '0.4rem',
                   paddingBottom: '0.4rem',
+                  paddingInline: '1rem',
                   fontSize: '13px',
                 }}
                 type="button"
-                color="secondary"
-                variant="contained"
+                variant="outlined"
                 onClick={refreshData}
               >
                 {t('worker.jobs.refresh')}
