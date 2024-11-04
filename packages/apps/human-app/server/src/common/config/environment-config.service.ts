@@ -5,7 +5,7 @@ const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
-const DEFAULT_CACHE_TTL_JOB_ASSIGNMENTS = 45 * 24 * 60 * 60;
+const DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS = 45;
 const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
@@ -156,15 +156,13 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * The cache time-to-live (TTL) for user job assignments.
+   * Number of days without updates assignments data is retained.
    * Default: 45 days
    */
-  get cacheTtlJobAssignments(): number {
-    return (
-      this.configService.get<number>(
-        'CACHE_TTL_JOB_ASSIGNMENTS',
-        DEFAULT_CACHE_TTL_JOB_ASSIGNMENTS,
-      ) * 1000
+  get jobAssignmentsRetentionDays(): number {
+    return this.configService.get<number>(
+      'JOB_ASSIGNMENTS_DATA_RETENTION_DAYS',
+      DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS,
     );
   }
 

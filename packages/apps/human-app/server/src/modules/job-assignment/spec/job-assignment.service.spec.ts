@@ -48,7 +48,7 @@ describe('JobAssignmentService', () => {
         {
           provide: EnvironmentConfigService,
           useValue: {
-            cacheTtlJobAssignments: TEST_RETENTION_TTL,
+            jobAssignmentsRetentionDays: 1,
           },
         },
       ],
