@@ -4,7 +4,8 @@
 import inspect
 import os
 from collections.abc import Iterable
-from typing import ClassVar
+from enum import Enum
+from typing import ClassVar, Optional
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
@@ -295,12 +296,25 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
-class Config:
-    _DEVELOPMENT_MODE = "development"
+class Environment(str, Enum):
+    PRODUCTION = "production"
+    DEVELOPMENT = "development"
+    TEST = "test"
 
+    @classmethod
+    def _missing_(cls, value: str) -> Optional["Environment"]:
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+
+        return None
+
+
+class Config:
     debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
-    environment = os.environ.get("ENVIRONMENT", _DEVELOPMENT_MODE)
+    environment = Environment(os.environ.get("ENVIRONMENT", Environment.DEVELOPMENT.value))
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
     webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES", 5))
     webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED", 60))
@@ -323,8 +337,19 @@ class Config:
     encryption_config = EncryptionConfig
 
     @classmethod
-    def is_development(cls) -> bool:
-        return cls.environment.lower() == cls._DEVELOPMENT_MODE
+    def is_development_mode(cls) -> bool:
+        """Returns whether the oracle is running in development mode or not"""
+        return cls.environment == Environment.DEVELOPMENT
+
+    @classmethod
+    def is_test_mode(cls) -> bool:
+        """Returns whether the oracle is running in testing mode or not"""
+        return cls.environment == Environment.TEST
+
+    @classmethod
+    def is_production_mode(cls) -> bool:
+        """Returns whether the oracle is running in production mode or not"""
+        return cls.environment == Environment.PRODUCTION
 
     @classmethod
     def validate(cls) -> None:

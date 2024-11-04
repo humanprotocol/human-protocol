@@ -210,7 +210,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
             with annotations_archive_path.open("wb") as annotations_archive:
                 write_dir_to_zip_archive(export_dir, annotations_archive)
 
-            if Config.is_development():
+            if Config.is_development_mode():
                 self._save_cvat_gt_dataset_to_oracle_bucket(
                     gt_dataset_path=annotations_archive_path, file_suffix=f"for_task_{task_id}"
                 )

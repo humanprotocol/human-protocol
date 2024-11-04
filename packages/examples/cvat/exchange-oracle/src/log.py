@@ -16,7 +16,7 @@ def get_logger_name(module_name: str) -> str:
 
 def setup_logging():
     log_level_name = logging.getLevelName(
-        Config.loglevel or (logging.DEBUG if Config.environment == "development" else logging.INFO)
+        Config.loglevel or (logging.DEBUG if Config.is_development_mode() else logging.INFO)
     )
 
     log_config = {
