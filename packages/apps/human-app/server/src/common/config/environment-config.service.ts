@@ -159,16 +159,10 @@ export class EnvironmentConfigService {
    * Number of days without updates assignments data is retained.
    * Default: 45 days
    */
-  get cacheTtlJobAssignments(): number {
-    return (
-      this.configService.get<number>(
-        'JOB_ASSIGNMENTS_DATA_RETENTION_DAYS',
-        DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS,
-      ) *
-      24 *
-      60 *
-      60 *
-      1000
+  get jobAssignmentsRetentionDays(): number {
+    return this.configService.get<number>(
+      'JOB_ASSIGNMENTS_DATA_RETENTION_DAYS',
+      DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS,
     );
   }
 

@@ -40,7 +40,8 @@ export class JobAssignmentService {
 
   private getCacheRetentionDate(): string {
     return new Date(
-      Date.now() - this.configService.cacheTtlJobAssignments,
+      Date.now() -
+        this.configService.jobAssignmentsRetentionDays * 24 * 60 * 60 * 1000,
     ).toISOString();
   }
 
