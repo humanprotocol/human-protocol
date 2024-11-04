@@ -13,7 +13,7 @@ const redisClientMock = {
 
 const cacheManagerMock = {
   store: {
-    getClient: () => redisClientMock,
+    client: redisClientMock,
   },
 };
 

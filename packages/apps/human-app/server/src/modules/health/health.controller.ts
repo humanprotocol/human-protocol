@@ -2,7 +2,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Cache } from 'cache-manager';
-import type { RedisStore } from 'cache-manager-redis-store';
+import type { RedisStore } from 'cache-manager-redis-yet';
 
 import {
   HealthCheck,
@@ -58,7 +58,7 @@ export class HealthController {
       () =>
         this.redisHealthIndicator.isHealthy(
           'cache-manager-redis',
-          (this.cacheManager.store as unknown as RedisStore).getClient(),
+          (this.cacheManager.store as RedisStore).client,
         ),
     ]);
   }
