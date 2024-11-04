@@ -1,6 +1,5 @@
 import { t } from 'i18next';
 import { z } from 'zod';
-import { parse } from 'tldts';
 
 export const urlDomainSchema = z
   .string()
@@ -8,23 +7,11 @@ export const urlDomainSchema = z
   .refine(
     (url) => {
       try {
-        const parsedUrl = new URL(url);
-        const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return domainPattern.test(parsedUrl.hostname);
+        const newUrl = new URL(url);
+        return newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
       } catch (e) {
         return false;
       }
     },
-    { message: t('validation.urlDomainValidationError') }
-  )
-  .refine(
-    (url) => {
-      try {
-        const result = parse(url);
-        return result.isIcann;
-      } catch (e) {
-        return false;
-      }
-    },
-    { message: t('validation.urlDomainValidationError') }
+    { message: t('validation.urlValidationError') }
   );
