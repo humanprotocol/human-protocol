@@ -31,6 +31,7 @@ from src.validation.dataset_comparison import (
     BboxDatasetComparator,
     DatasetComparator,
     PointsDatasetComparator,
+    PolygonsDatasetComparator,
     SkeletonDatasetComparator,
     TooFewGtError,
 )
@@ -62,7 +63,7 @@ DM_GT_DATASET_FORMAT_MAPPING = {
 DATASET_COMPARATOR_TYPE_MAP: dict[TaskTypes, type[DatasetComparator]] = {
     # TaskType.image_label_binary: TagDatasetComparator, # TODO: implement if support is needed
     TaskTypes.image_boxes: BboxDatasetComparator,
-    TaskTypes.image_polygons: BboxDatasetComparator,
+    TaskTypes.image_polygons: PolygonsDatasetComparator,
     TaskTypes.image_points: PointsDatasetComparator,
     TaskTypes.image_boxes_from_points: BboxDatasetComparator,
     TaskTypes.image_skeletons_from_boxes: SkeletonDatasetComparator,
