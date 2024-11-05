@@ -190,14 +190,10 @@ class PolygonsDatasetComparator(DatasetComparator):
         similarity_fn = CachedSimilarityFunction(bbox_iou)
 
         ds_boxes = [
-            Bbox(*a.get_bbox(), a.label)
-            for a in ds_sample.annotations
-            if isinstance(a, dm.Polygon)
+            Bbox(*a.get_bbox(), a.label) for a in ds_sample.annotations if isinstance(a, dm.Polygon)
         ]
         gt_boxes = [
-            Bbox(*a.get_bbox(), a.label)
-            for a in gt_sample.annotations
-            if isinstance(a, dm.Polygon)
+            Bbox(*a.get_bbox(), a.label) for a in gt_sample.annotations if isinstance(a, dm.Polygon)
         ]
 
         matching_result = match_annotations(
@@ -208,6 +204,7 @@ class PolygonsDatasetComparator(DatasetComparator):
         )
 
         return matching_result, similarity_fn
+
 
 _SkeletonInfo = list[str]
 
