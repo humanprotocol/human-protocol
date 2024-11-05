@@ -9,7 +9,7 @@ import type { AuthType } from '@/shared/types/browser-auth-provider';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
 
-export function useGetAccessTokenMutation() {
+export function useAccessTokenRefresh() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
@@ -75,23 +75,23 @@ export function useGetAccessTokenMutation() {
   });
 
   // Block new mutations if one is already loading
-  const mutateIfNotLoading = (args: Parameters<typeof mutation.mutate>[0]) => {
+  const refreshAccessToken = (args: Parameters<typeof mutation.mutate>[0]) => {
     if (!mutation.isPending) {
       mutation.mutate(args);
     }
   };
 
   // Block new async mutations if one is already loading
-  const mutateAsyncIfNotLoading = async (
+  const refreshAccessTokenAsync = async (
     args: Parameters<typeof mutation.mutateAsync>[0]
   ) => {
     if (!mutation.isPending) {
-      return mutation.mutateAsync(args);
+      await mutation.mutateAsync(args);
     }
   };
 
   return {
-    mutateIfNotLoading,
-    mutateAsyncIfNotLoading,
+    refreshAccessToken,
+    refreshAccessTokenAsync,
   };
 }

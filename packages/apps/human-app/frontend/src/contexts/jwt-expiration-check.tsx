@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
+import { useAccessTokenRefresh } from '@/api/services/common/use-access-token-refresh';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { useAuth } from '@/auth/use-auth';
 
@@ -14,8 +14,8 @@ export function JWTExpirationCheck({
   const web3Auth = useWeb3Auth();
   const web2Auth = useAuth();
   const location = useLocation();
-  const { mutateIfNotLoading: getAccessTokenMutation } =
-    useGetAccessTokenMutation();
+  const { refreshAccessToken: getAccessTokenMutation } =
+    useAccessTokenRefresh();
 
   useEffect(() => {
     if (

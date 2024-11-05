@@ -9,7 +9,7 @@ import {
   prepareSignature,
 } from '@/api/services/common/prepare-signature';
 import type { ResponseError } from '@/shared/types/global.type';
-import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
+import { useAccessTokenRefresh } from '@/api/services/common/use-access-token-refresh';
 import { useWalletConnect } from '@/hooks/use-wallet-connect';
 
 const RegisterAddressSuccessSchema = z.unknown();
@@ -34,8 +34,8 @@ export function useRegisterAddressMutation(callbacks?: {
 }) {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedUser();
-  const { mutateAsyncIfNotLoading: getAccessTokenMutation } =
-    useGetAccessTokenMutation();
+  const { refreshAccessTokenAsync: getAccessTokenMutation } =
+    useAccessTokenRefresh();
 
   const { address, signMessage } = useWalletConnect();
   return useMutation({
