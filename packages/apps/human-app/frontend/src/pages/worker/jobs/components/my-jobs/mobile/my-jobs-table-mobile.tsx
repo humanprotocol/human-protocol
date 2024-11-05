@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FiltersButtonIcon } from '@/components/ui/icons';
+import { FiltersButtonIcon, RefreshIcon } from '@/components/ui/icons';
 import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
@@ -25,6 +25,7 @@ import { Chip } from '@/components/ui/chip';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
+import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -49,6 +50,7 @@ export function MyJobsTableMobile({
   } = useInfiniteGetMyJobsData();
 
   const { mutate: rejectTaskMutation } = useRejectTaskMutation();
+  const { mutate: refreshTasksMutation } = useRefreshTasksMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
@@ -77,20 +79,45 @@ export function MyJobsTableMobile({
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={setSearchEscrowAddress}
       />
-      <Button
-        fullWidth
-        onClick={() => {
-          setIsMobileFilterDrawerOpen(true);
-        }}
-        sx={{
-          marginBottom: '32px',
-          marginTop: '21px',
-        }}
-        variant="outlined"
-      >
-        {t('worker.jobs.mobileFilterDrawer.filters')}
-        <FiltersButtonIcon />
-      </Button>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Button
+            fullWidth
+            onClick={() => {
+              setIsMobileFilterDrawerOpen(true);
+            }}
+            sx={{
+              marginBottom: '32px',
+              marginTop: '21px',
+            }}
+            variant="outlined"
+          >
+            {t('worker.jobs.mobileFilterDrawer.filters')}
+            <FiltersButtonIcon />
+          </Button>
+        </Grid>
+        <Grid item xs={6}>
+          <Button
+            fullWidth
+            size="small"
+            sx={{
+              marginBottom: '32px',
+              marginTop: '21px',
+            }}
+            type="button"
+            variant="outlined"
+            onClick={() => {
+              refreshTasksMutation({
+                oracle_address: oracle_address ?? '',
+              });
+            }}
+          >
+            {t('worker.jobs.refresh')}
+            <RefreshIcon />
+          </Button>
+        </Grid>
+      </Grid>
+
       <Stack flexDirection="column">
         {isTableError ? (
           <Alert color="error" severity="error">

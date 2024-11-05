@@ -37,21 +37,22 @@ export async function getOracles({
   signal: AbortSignal;
 }) {
   let oracles = [H_CAPTCHA_ORACLE];
-  const queryParams = selected_job_types.length
-    ? `?${stringifyUrlQueryObject({ selected_job_types })}`
-    : '';
+  if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
+    const queryParams = selected_job_types.length
+      ? `?${stringifyUrlQueryObject({ selected_job_types })}`
+      : '';
 
-  const result = await apiClient(
-    `${apiPaths.worker.oracles.path}${queryParams}`,
-    {
-      successSchema: OraclesSuccessSchema,
-      options: { method: 'GET' },
-    },
-    signal
-  );
+    const result = await apiClient(
+      `${apiPaths.worker.oracles.path}${queryParams}`,
+      {
+        successSchema: OraclesSuccessSchema,
+        options: { method: 'GET' },
+      },
+      signal
+    );
 
-  oracles = oracles.concat(result);
-
+    oracles = oracles.concat(result);
+  }
   return oracles;
 }
 

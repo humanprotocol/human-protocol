@@ -33,7 +33,6 @@ export function HomePageStateProvider({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useHomePageState = () => {
   const context = useContext(HomePageStateContext);
   if (!context) {

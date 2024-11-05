@@ -16,6 +16,7 @@ import { NAVBAR_PADDING } from '@/components/layout/protected/navbar';
 import { colorPalette } from '@/styles/color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { onlyDarkModeColor } from '@/styles/dark-color-palette';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 
 const drawerWidth = 240;
 
@@ -49,6 +50,7 @@ export function DrawerNavigation({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
+  const handleMainNavIconClick = useHandleMainNavIconClick();
 
   return (
     <Box
@@ -72,7 +74,13 @@ export function DrawerNavigation({
         variant="persistent"
       >
         {!isMobile && (
-          <Stack alignItems="flex-start" sx={{ paddingLeft: '26px' }}>
+          <Stack
+            alignItems="flex-start"
+            sx={{ paddingLeft: '26px', cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+            }}
+          >
             <HumanLogoNavbarIcon />
           </Stack>
         )}
@@ -157,7 +165,10 @@ export function DrawerNavigation({
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography component="span" variant="body1">
+                          <Typography
+                            component="span"
+                            variant={isMobile ? 'h5' : 'body1'}
+                          >
                             {label}
                           </Typography>
                         }
@@ -243,7 +254,10 @@ export function DrawerNavigation({
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography component="span" variant="body1">
+                          <Typography
+                            component="span"
+                            variant={isMobile ? 'h5' : 'body1'}
+                          >
                             {label}
                           </Typography>
                         }

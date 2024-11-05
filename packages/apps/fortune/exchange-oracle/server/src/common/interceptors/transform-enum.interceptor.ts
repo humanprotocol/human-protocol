@@ -55,7 +55,10 @@ export class TransformEnumInterceptor implements NestInterceptor {
       : null;
   }
 
-  private transformEnums(bodyOrQuery: any, targetClass: ClassConstructor<any>): any {
+  private transformEnums(
+    bodyOrQuery: any,
+    targetClass: ClassConstructor<any>,
+  ): any {
     // Convert the body or query to an instance of the target class
     let transformedInstance = plainToInstance(targetClass, bodyOrQuery);
 
