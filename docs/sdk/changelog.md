@@ -1,34 +1,38 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+* Add registrationNeeded and registrationInstructions to leader.
 
-### Removed
+#### Changed
 
-### Fixed
+#### Deprecated
 
-### Security
+#### Removed
 
-# How to upgrade
+#### Fixed
 
-## Typescript
+#### Security
 
-### yarn
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk
