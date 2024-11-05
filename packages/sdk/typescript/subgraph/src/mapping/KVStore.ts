@@ -102,9 +102,9 @@ export function handleDataSaved(event: DataSaved): void {
 
     const operator = createOrLoadLeader(ethAddress);
 
-    if (event.params.value == 'ACTIVE') {
+    if (event.params.value.toLowerCase() == 'active') {
       operator.reputationNetwork = reputationNetwork.id;
-    } else if (event.params.value == 'INACTIVE') {
+    } else if (event.params.value.toLowerCase() == 'inactive') {
       operator.reputationNetwork = null;
     }
     operator.save();
