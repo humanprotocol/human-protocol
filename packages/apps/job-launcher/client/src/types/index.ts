@@ -76,10 +76,10 @@ export enum JobType {
 }
 
 export enum CvatJobType {
-  IMAGE_POINTS = 'IMAGE_POINTS',
-  IMAGE_BOXES = 'IMAGE_BOXES',
-  IMAGE_BOXES_FROM_POINTS = 'IMAGE_BOXES_FROM_POINTS',
-  IMAGE_SKELETONS_FROM_BOXES = 'IMAGE_SKELETONS_FROM_BOXES',
+  IMAGE_POINTS = 'image_points',
+  IMAGE_BOXES = 'image_boxes',
+  IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
+  IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
 }
 
 export enum HCaptchaJobType {
@@ -98,8 +98,8 @@ export type FortuneRequest = {
 };
 
 export enum StorageProviders {
-  AWS = 'AWS',
-  GCS = 'GCS',
+  AWS = 'aws',
+  GCS = 'gcs',
 }
 
 export enum AWSRegions {
@@ -240,16 +240,16 @@ export type JobRequest = {
 };
 
 export enum JobStatus {
-  LAUNCHED = 'LAUNCHED',
-  PENDING = 'PENDING',
-  PARTIAL = 'PARTIAL',
-  CANCELED = 'CANCELED',
-  FAILED = 'FAILED',
-  COMPLETED = 'COMPLETED',
-  TO_CANCEL = 'TO_CANCEL',
-  PAID = 'PAID',
-  SET_UP = 'SET_UP',
-  CREATED = 'CREATED',
+  LAUNCHED = 'launched',
+  PENDING = 'pending',
+  PARTIAL = 'partial',
+  CANCELED = 'canceled',
+  FAILED = 'failed',
+  COMPLETED = 'completed',
+  TO_CANCEL = 'to_cancel',
+  PAID = 'paid',
+  SET_UP = 'set_up',
+  CREATED = 'created',
 }
 
 export type JobDetailsResponse = {

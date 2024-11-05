@@ -24,7 +24,7 @@ class ResponseError(BaseModel):
 
 class SupportedNetwork(BaseModel):
     chain_id: int
-    addr: str | None
+    addr: str | None = None
 
 
 class MetaResponse(BaseModel):

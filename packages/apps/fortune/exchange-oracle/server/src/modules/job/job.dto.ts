@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsEnum,
-  IsString,
-  IsNumber,
-  IsDate,
-} from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   JobFieldName,
@@ -14,6 +8,7 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class ManifestDto {
   requesterTitle: string;
@@ -40,7 +35,7 @@ export class GetJobsDto extends PageOptionsDto {
     default: JobSortField.CREATED_AT,
   })
   @IsOptional()
-  @IsEnum(JobSortField)
+  @IsEnumCaseInsensitive(JobSortField)
   sortField?: JobSortField = JobSortField.CREATED_AT;
 
   @ApiPropertyOptional({ name: 'chain_id' })
@@ -50,13 +45,13 @@ export class GetJobsDto extends PageOptionsDto {
   chainId: number;
 
   @ApiPropertyOptional({ name: 'job_type', enum: JobType })
-  @IsEnum(JobType)
+  @IsEnumCaseInsensitive(JobType)
   @IsOptional()
   jobType: JobType;
 
   @ApiPropertyOptional({ enum: JobFieldName, isArray: true })
   @IsOptional()
-  @IsEnum(JobFieldName, { each: true })
+  @IsEnumCaseInsensitive(JobFieldName, { each: true })
   fields: JobFieldName[];
 
   @ApiPropertyOptional({ name: 'escrow_address' })
@@ -65,7 +60,7 @@ export class GetJobsDto extends PageOptionsDto {
   escrowAddress: string;
 
   @ApiPropertyOptional({ enum: JobStatus })
-  @IsEnum(JobStatus)
+  @IsEnumCaseInsensitive(JobStatus)
   @IsOptional()
   status: JobStatus;
 

@@ -1,4 +1,4 @@
 export enum UserType {
-  OPERATOR = 'OPERATOR',
-  WORKER = 'WORKER',
+  OPERATOR = 'operator',
+  WORKER = 'worker',
 }

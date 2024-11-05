@@ -25,7 +25,7 @@ export function generateOracleDiscoveryResponseBody() {
     chainId: '4200',
     role: 'role3',
     url: 'common-url',
-    jobTypes: ['Job-Type-2'],
+    jobTypes: ['job-type-2'],
     retriesCount: 0,
   };
   const response4: OracleDiscoveryResponse = {

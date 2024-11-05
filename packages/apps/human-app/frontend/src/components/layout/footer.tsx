@@ -1,16 +1,17 @@
 import { Grid, Link, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { colorPalette } from '@/styles/color-palette';
 import { env } from '@/shared/env';
 import { Chat } from '@/pages/homepage/components/chat';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface FooterProps {
   displayChatIcon?: boolean;
   isProtected?: boolean;
 }
 export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile('md');
 
@@ -21,7 +22,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
     if (isProtected) {
       return '200px';
     }
-    return '44px';
+    return '0';
   };
 
   return (
@@ -29,10 +30,9 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
       component="footer"
       container
       sx={{
-        pr: isMobile ? 0 : '44px',
+        pr: 0,
         pl: parseLeftPadding(),
-        pb: isMobile ? 0 : '44px',
-        pt: '32px',
+        pb: isMobile ? 0 : '32px',
         [breakpoints.mobile]: {
           pr: 0,
           pl: 0,
@@ -47,13 +47,13 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
         alignItems="flex-start"
         display="flex"
         flexDirection="column"
-        gap="24px"
         item
         justifyContent="center"
         xs={isMobile ? 12 : 11}
       >
         <Stack
           direction={isMobile ? 'column' : 'row'}
+          lineHeight="166%"
           sx={{
             gap: '24px',
             [breakpoints.mobile]: {

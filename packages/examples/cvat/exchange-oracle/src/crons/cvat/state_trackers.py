@@ -8,7 +8,7 @@ import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
 from src import db
 from src.core.config import CronConfig
-from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
+from src.core.oracle_events import ExchangeOracleEvent_JobCreationFailed
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
 from src.db import SessionLocal
@@ -29,11 +29,18 @@ def track_completed_projects(logger: logging.Logger, session: Session) -> None:
 
 @cron_job
 def track_completed_tasks(logger: logging.Logger, session: Session) -> None:
-    updated_task_cvat_ids = cvat_service.complete_tasks_with_completed_jobs(session)
+    updated_tasks = cvat_service.complete_tasks_with_completed_jobs(session)
 
-    if updated_task_cvat_ids:
+    if updated_tasks:
+        cvat_service.touch(
+            session,
+            cvat_models.Task,
+            [t.id for t in updated_tasks],
+        )
         session.commit()
-        logger.info(f"Found new completed projects: {format_sequence(updated_task_cvat_ids)}")
+        logger.info(
+            f"Found new completed tasks: {format_sequence([t.cvat_id for t in updated_tasks])}"
+        )
 
 
 @cron_job
@@ -72,6 +79,8 @@ def track_assignments(logger: logging.Logger) -> None:
 
             cvat_service.expire_assignment(session, assignment.id)
 
+        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
+
     with SessionLocal.begin() as session:
         assignments = cvat_service.get_active_assignments(
             session,
@@ -101,6 +110,8 @@ def track_assignments(logger: logging.Logger) -> None:
                     )  # note that calling it in a loop can take too much time
 
                 cvat_service.cancel_assignment(session, assignment.id)
+
+        cvat_service.touch(session, cvat_models.Job, [a.job.id for a in assignments])
 
 
 @cron_job
@@ -156,7 +167,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                 escrow_address=project.escrow_address,
                 chain_id=project.chain_id,
                 type=OracleWebhookTypes.job_launcher,
-                event=ExchangeOracleEvent_TaskCreationFailed(reason=reason),
+                event=ExchangeOracleEvent_JobCreationFailed(reason=reason),
             )
         elif status == cvat_api.UploadStatus.FINISHED:
             try:
@@ -186,8 +197,11 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                     escrow_address=project.escrow_address,
                     chain_id=project.chain_id,
                     type=OracleWebhookTypes.job_launcher,
-                    event=ExchangeOracleEvent_TaskCreationFailed(reason=str(e)),
+                    event=ExchangeOracleEvent_JobCreationFailed(reason=str(e)),
                 )
+
+    if completed:
+        cvat_service.touch(session, cvat_models.Task, [upload.task.id for upload in completed])
 
     if completed or failed:
         cvat_service.finish_data_uploads(session, failed + completed)

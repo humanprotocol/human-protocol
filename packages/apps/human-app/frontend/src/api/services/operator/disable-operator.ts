@@ -14,14 +14,15 @@ export function useDisableWeb3Operator() {
       const result = apiClient(apiPaths.operator.disableOperator.path, {
         skipValidation: true,
         authenticated: true,
+        withAuthRetry: apiPaths.operator.disableOperator.withAuthRetry,
         options: {
           method: 'POST',
           body: JSON.stringify({ signature }),
         },
       });
 
-      await mutateAsync('web3');
-      updateUserData({ status: 'INACTIVE' });
+      await mutateAsync({ authType: 'web3' });
+      updateUserData({ status: 'inactive' });
       return result;
     },
     mutationKey: ['disableOperator', address, chainId],

@@ -49,6 +49,7 @@ export type FetcherOptionsWithValidation<SuccessInput, SuccessOutput> =
     successSchema: ZodType<SuccessOutput, ZodTypeDef, SuccessInput>;
     skipValidation?: false | undefined;
     authenticated?: boolean;
+    withAuthRetry?: boolean;
     baseUrl?: string;
   }>;
 
@@ -56,6 +57,7 @@ export type FetcherOptionsWithoutValidation = Readonly<{
   options?: RequestInit;
   skipValidation: true;
   authenticated?: boolean;
+  withAuthRetry?: boolean;
   baseUrl?: string;
 }>;
 
@@ -71,17 +73,20 @@ export function createFetcher(defaultFetcherConfig?: {
 }) {
   async function fetcher<SuccessInput, SuccessOutput>(
     url: string | URL,
-    fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>
+    fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>,
+    abortSignal?: AbortSignal
   ): Promise<SuccessOutput>;
 
   async function fetcher(
     url: FetcherUrl,
-    fetcherOptions: FetcherOptionsWithoutValidation
+    fetcherOptions: FetcherOptionsWithoutValidation,
+    abortSignal?: AbortSignal
   ): Promise<unknown>;
 
   async function fetcher<SuccessInput, SuccessOutput>(
     url: FetcherUrl,
-    fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>
+    fetcherOptions: FetcherOptions<SuccessInput, SuccessOutput>,
+    abortSignal?: AbortSignal
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- required unknown for correct type intellisense
   ): Promise<SuccessOutput | unknown> {
     let fetcherOptionsWithDefaults = defaultFetcherConfig?.options
@@ -95,11 +100,17 @@ export function createFetcher(defaultFetcherConfig?: {
           fetcherOptions.options
         )
       : fetcherOptions.options;
-
     if (fetcherOptions.authenticated) {
       fetcherOptionsWithDefaults = appendHeader(fetcherOptionsWithDefaults, {
         Authorization: `Bearer ${browserAuthProvider.getAccessToken()}`,
       });
+    }
+
+    if (abortSignal) {
+      fetcherOptionsWithDefaults = {
+        ...fetcherOptionsWithDefaults,
+        signal: abortSignal,
+      };
     }
 
     const baseUrl = (() => {
@@ -139,7 +150,8 @@ export function createFetcher(defaultFetcherConfig?: {
     if (
       !response.ok &&
       response.status === 401 &&
-      fetcherOptions.authenticated
+      fetcherOptions.authenticated &&
+      fetcherOptions.withAuthRetry
     ) {
       let refetchAccessTokenSuccess: SignInSuccessResponse | undefined;
       try {

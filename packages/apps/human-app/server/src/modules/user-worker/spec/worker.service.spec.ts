@@ -9,7 +9,6 @@ import { exchangeOracleGatewayMock } from '../../../integrations/exchange-oracle
 describe('WorkerService', () => {
   let service: WorkerService;
   let reputationOracleGateway: ReputationOracleGateway;
-  let exchangeOracleGateway: ExchangeOracleGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,9 +27,6 @@ describe('WorkerService', () => {
     service = module.get<WorkerService>(WorkerService);
     reputationOracleGateway = module.get<ReputationOracleGateway>(
       ReputationOracleGateway,
-    );
-    exchangeOracleGateway = module.get<ExchangeOracleGateway>(
-      ExchangeOracleGateway,
     );
   });
 
@@ -66,15 +62,19 @@ describe('WorkerService', () => {
     });
   });
 
-  describe('registerWorker', () => {
-    it('should call reputation oracle gateway without doing anything else', async () => {
+  describe('registrationInExchangeOracle', () => {
+    it('should call exchange and reputation oracle gateway', async () => {
       const command = {
         oracleAddress: '0x34df642',
+        hCaptchaToken: 'hcaptcha-token',
         token: 'test-token',
       };
-      await service.registerWorker(command);
+      await service.registrationInExchangeOracle(command);
       expect(
-        reputationOracleGateway.sendWorkerRegistration,
+        exchangeOracleGatewayMock.sendRegistrationInExchangeOracle,
+      ).toHaveBeenCalledWith(command);
+      expect(
+        reputationOracleGateway.sendRegistrationInExchangeOracle,
       ).toHaveBeenCalledWith(command);
     });
   });

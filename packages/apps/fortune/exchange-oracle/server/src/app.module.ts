@@ -9,18 +9,24 @@ import { DatabaseModule } from './database/database.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { JwtHttpStrategy } from './common/guards/strategy';
 import { Web3Module } from './modules/web3/web3.module';
+import { UserModule } from './modules/user/user.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { AssignmentModule } from './modules/assignment/assignment.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { HealthModule } from './modules/health/health.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TransformEnumInterceptor } from './common/interceptors/transform-enum.interceptor';
 
 @Module({
   providers: [
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformEnumInterceptor,
     },
     JwtHttpStrategy,
   ],
@@ -33,6 +39,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     Web3Module,
     StatsModule,
     CronJobModule,
+    UserModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`

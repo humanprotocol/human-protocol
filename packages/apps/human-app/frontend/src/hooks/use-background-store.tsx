@@ -1,18 +1,13 @@
-import { create } from 'zustand';
-import { colorPalette } from '@/styles/color-palette';
+import { useContext } from 'react';
+import type { BackgroundContextProps } from '@/contexts/background-color-store';
+import { BackgroundContext } from '@/contexts/background-color-store';
 
-interface BackgroundStore {
-  backgroundColor: string;
-  setWhiteBackground: () => void;
-  setGrayBackground: () => void;
-}
-
-export const useBackgroundColorStore = create<BackgroundStore>((set) => ({
-  backgroundColor: colorPalette.white,
-  setWhiteBackground: () => {
-    set((state) => ({ ...state, backgroundColor: colorPalette.white }));
-  },
-  setGrayBackground: () => {
-    set((state) => ({ ...state, backgroundColor: colorPalette.paper.main }));
-  },
-}));
+export const useBackgroundColorStore = (): BackgroundContextProps => {
+  const context = useContext(BackgroundContext);
+  if (!context) {
+    throw new Error(
+      'useBackgroundColor must be used within a BackgroundProvider'
+    );
+  }
+  return context;
+};

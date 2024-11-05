@@ -3,10 +3,10 @@
     "data_url": "https://test.storage.googleapis.com/"
   },
   "annotation": {
-    "labels": [{ "name": "dummy_label" , "nodes":  ["example node"]}],
+    "labels": [{ "name": "dummy_label" , "nodes":  ["example node"], "joints":  []}],
     "description": "Dummy description",
     "user_guide": "https://test.storage.googleapis.com",
-    "type": "IMAGE_BOXES",
+    "type": "image_boxes",
     "job_size": 10,
     "max_time": 300
   },

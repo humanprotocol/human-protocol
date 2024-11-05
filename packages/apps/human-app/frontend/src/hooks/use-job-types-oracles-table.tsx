@@ -12,7 +12,7 @@ export const useJobsTypesOraclesFilter = create<JobsTypesOraclesFilterStore>(
     selectJobType: (jobTypes: string[]) => {
       set((state) => ({
         ...state,
-        selected_job_types: jobTypes.map((jobType) => jobType.toLowerCase()),
+        selected_job_types: jobTypes,
       }));
     },
   })

@@ -21,7 +21,7 @@ export function OperatorSignIn() {
   const modalWasOpened = useRef(false);
 
   useEffect(() => {
-    signOut();
+    signOut(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
   }, []);
 

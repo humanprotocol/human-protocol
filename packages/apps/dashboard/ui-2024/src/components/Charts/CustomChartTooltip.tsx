@@ -7,6 +7,7 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { colorPalette } from '@assets/styles/color-palette';
 import { formatDate } from '@helpers/formatDate';
 import { GraphPageChartDataConfigObject } from '@components/Charts/AreaChart';
+import { NumericFormat } from 'react-number-format';
 
 const renderTitle = (title: string) => {
 	const currentTitle: GraphPageChartDataConfigObject<string> = {
@@ -72,7 +73,11 @@ const CustomChartTooltip = ({
 									textAlign="start"
 									variant="subtitle2"
 								>
-									{elem.value}{' '}
+									<NumericFormat
+										displayType="text"
+										value={elem.value}
+										decimalScale={2}
+									/>{' '}
 									{elem.name === 'totalTransactionAmount' ? 'HMT' : ''}
 								</Typography>
 							</Grid>

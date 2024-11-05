@@ -41,8 +41,8 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
-            [ReputationOracleEndpoints.WORKER_REGISTRATION]: {
-              endpoint: '/user/registration',
+            [ReputationOracleEndpoints.REGISTRATION_IN_EXCHANGE_ORACLE]: {
+              endpoint: '/user/exchange-oracle-registration',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
@@ -103,6 +103,12 @@ export class GatewayConfigService {
             [ReputationOracleEndpoints.KYC_ON_CHAIN]: {
               endpoint: '/kyc/on-chain',
               method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.GET_REGISTRATION_IN_EXCHANGE_ORACLES]: {
+              endpoint: '/user/exchange-oracle-registration',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
             },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },

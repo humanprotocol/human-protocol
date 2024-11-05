@@ -9,6 +9,7 @@ import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { envValidator } from './common/config/env-schema';
 import { EnvConfigModule } from './common/config/config.module';
+import { TransformEnumInterceptor } from './common/interceptors/transform-enum.interceptor';
 
 @Module({
   providers: [
@@ -19,6 +20,10 @@ import { EnvConfigModule } from './common/config/config.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformEnumInterceptor,
     },
   ],
   imports: [

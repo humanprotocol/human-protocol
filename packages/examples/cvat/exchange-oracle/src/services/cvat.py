@@ -6,6 +6,8 @@ import itertools
 import uuid
 from collections.abc import Iterable, Sequence
 from datetime import datetime
+from itertools import islice
+from typing import Any, NamedTuple
 
 from sqlalchemy import case, delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -19,6 +21,7 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
+from src.db import Base, ChildOf
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import (
@@ -33,6 +36,13 @@ from src.models.cvat import (
     User,
 )
 from src.utils.time import utcnow
+
+
+def batched(iterable: Iterable, *, batch_size: int) -> Iterable[Any]:
+    assert batch_size > 0
+    iterator = iter(iterable)
+    while batch := tuple(islice(iterator, batch_size)):
+        yield batch
 
 
 # Project
@@ -103,11 +113,16 @@ def get_projects_by_cvat_ids(
 
 
 def get_project_by_escrow_address(
-    session: Session, escrow_address: str, *, for_update: bool | ForUpdateParams = False
+    session: Session,
+    escrow_address: str,
+    *,
+    for_update: bool | ForUpdateParams = False,
+    status_in: list[ProjectStatuses] | None = None,
 ) -> Project | None:
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
-        .where(Project.escrow_address == escrow_address)
+        .where(Project.escrow_address == escrow_address, *status_filter_arg)
         .first()
     )
 
@@ -397,7 +412,6 @@ def prepare_escrows_for_validation(
         .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
         .limit(limit)
         .order_by(EscrowValidation.attempts.asc())
-        .subquery()
     )
     update_stmt = (
         update(EscrowValidation)
@@ -518,7 +532,7 @@ def get_tasks_by_status(
     return query.all()
 
 
-def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:
+def update_task_status(session: Session, task_id: str, status: TaskStatuses) -> None:
     upd = update(Task).where(Task.id == task_id).values(status=status.value)
     session.execute(upd)
 
@@ -569,7 +583,12 @@ def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
     session.execute(statement)
 
 
-def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
+class TaskResult(NamedTuple):
+    id: str
+    cvat_id: int
+
+
+def complete_tasks_with_completed_jobs(session: Session) -> list[TaskResult]:
     incomplete_jobs_exist = (
         select(1)
         .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
@@ -585,11 +604,11 @@ def complete_tasks_with_completed_jobs(session: Session) -> list[int]:
             Task.project.has(Project.status == ProjectStatuses.annotation),
         )
         .values(status=TaskStatuses.completed)
-        .returning(Task.cvat_id)
+        .returning(Task.id, Task.cvat_id)
     )
 
     result = session.execute(stmt)
-    return [row.cvat_id for row in result.all()]
+    return [TaskResult(row.id, row.cvat_id) for row in result.all()]
 
 
 # Job
@@ -635,7 +654,7 @@ def get_jobs_by_cvat_id(
     )
 
 
-def update_job_status(session: Session, job_id: int, status: JobStatuses) -> None:
+def update_job_status(session: Session, job_id: str, status: JobStatuses) -> None:
     upd = update(Job).where(Job.id == job_id).values(status=status.value)
     session.execute(upd)
 
@@ -855,6 +874,10 @@ def expire_assignment(session: Session, assignment_id: str):
     update_assignment(session, assignment_id, status=AssignmentStatuses.expired)
 
 
+def reject_assignment(session: Session, assignment_id: str):
+    update_assignment(session, assignment_id, status=AssignmentStatuses.rejected)
+
+
 def complete_assignment(session: Session, assignment_id: str, completed_at: datetime):
     update_assignment(
         session,
@@ -922,3 +945,35 @@ def get_project_images(
         .where(Image.cvat_project_id == cvat_project_id)
         .all()
     )
+
+
+def touch(
+    session: Session,
+    cls: type["Base"],
+    ids: list[str],
+    *,
+    touch_parents: bool = True,
+    time: datetime | None = None,
+) -> None:
+    if time is None:
+        time = utcnow()
+
+    session.execute(update(cls).where(cls.id.in_(ids)).values({cls.updated_at: time}))
+    while touch_parents and issubclass(cls, ChildOf):
+        parent_cls = cls.parent_cls
+        foreign_key_column = next(iter(cls.parent.property.local_columns))
+        parent_id_column = next(iter(foreign_key_column.foreign_keys)).column
+        parent_update_stmt = (
+            update(parent_cls)
+            .where(
+                parent_id_column.in_(
+                    select(foreign_key_column)
+                    .where(cls.id.in_(ids))
+                    .where(foreign_key_column.is_not(None))
+                )
+            )
+            .values({parent_cls.updated_at: time})
+            .returning(parent_cls.id)
+        )
+        ids = session.execute(parent_update_stmt).scalars().all()
+        cls = parent_cls

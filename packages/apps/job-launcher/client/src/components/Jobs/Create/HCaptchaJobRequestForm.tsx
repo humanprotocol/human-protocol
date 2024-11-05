@@ -134,17 +134,18 @@ export const HCaptchaJobRequestForm = () => {
       setFieldValue('type', type);
     }
     const fetchData = async () => {
-      try {
-        setQualificationsOptions(await getQualifications());
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching data:', error);
+      if (jobRequest.chainId !== undefined) {
+        try {
+          setQualificationsOptions(await getQualifications(jobRequest.chainId));
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error fetching data:', error);
+        }
       }
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [jobRequest.chainId]);
 
   return (
     <Box mt="42px">

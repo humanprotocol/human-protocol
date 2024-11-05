@@ -8,10 +8,10 @@ interface MyJobsButtonProps {
 export function MyJobsButton({ status }: MyJobsButtonProps) {
   // TODO add correct implementation depending on job status
   const { t } = useTranslation();
-  if (status === 'RESIGN') {
+  if (status === 'resign') {
     return <TableButton>{t('worker.jobs.resign')}</TableButton>;
   }
-  if (status === 'ACTIVE') {
+  if (status === 'active') {
     return <TableButton>{t('worker.jobs.solve')}</TableButton>;
   }
 

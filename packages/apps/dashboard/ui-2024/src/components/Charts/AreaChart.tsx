@@ -16,14 +16,17 @@ import { colorPalette } from '@assets/styles/color-palette';
 import CustomXAxisTick from '@components/Charts/CustomXAxisTick';
 import DatePicker from '@components/DataEntry/DatePicker';
 import ToggleButtons from '@components/DataEntry/ToggleButtons';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import ToggleCharts from '@components/Charts/ToggleCharts';
 import { formatNumber } from '@helpers/formatNumber';
 import {
 	GraphPageChartData,
 	useGraphPageChartData,
 } from '@services/api/use-graph-page-chart-data';
-import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-params';
+import {
+	initialAllTime,
+	useGraphPageChartParams,
+} from '@utils/hooks/use-graph-page-chart-params';
 
 export type GraphPageChartDataConfigObject<T> = Partial<
 	Record<keyof GraphPageChartData[number], T>
@@ -83,7 +86,6 @@ export const AreaChart = ({
 		setToDate,
 		clearTimePeriod,
 		dateRangeParams: { from, to },
-		effectiveFromAllTimeDate,
 	} = useGraphPageChartParams();
 	const sum = sumNumericProperties(chartData);
 	const [checkedCharts, setCheckedCharts] = useState(
@@ -135,7 +137,7 @@ export const AreaChart = ({
 					}
 					setFromDate(from.add(1, 'day'));
 				} else if (event.deltaY > 0) {
-					if (effectiveFromAllTimeDate?.isSame(from)) {
+					if (from?.isSame(from)) {
 						return;
 					}
 					setFromDate(from.subtract(1, 'day'));
@@ -148,20 +150,15 @@ export const AreaChart = ({
 				currentRef.removeEventListener('wheel', handleScrollChangeDate);
 			};
 		}
-	}, [
-		changeDateOnScroll,
-		clearTimePeriod,
-		effectiveFromAllTimeDate,
-		from,
-		setFromDate,
-		to,
-	]);
+	}, [changeDateOnScroll, clearTimePeriod, from, setFromDate, to]);
 
 	return (
 		<Card
 			sx={{
 				paddingY: { xs: 4, md: 4 },
 				paddingX: { xs: 2, md: 8 },
+				boxShadow: 'none',
+				borderRadius: '16px',
 			}}
 		>
 			<Stack
@@ -176,8 +173,8 @@ export const AreaChart = ({
 						value={from}
 						customProps={{
 							disableFuture: true,
-							maxDate: to,
-							minDate: effectiveFromAllTimeDate,
+							maxDate: to.isBefore(dayjs()) ? to : dayjs(),
+							minDate: initialAllTime,
 						}}
 					/>
 					<Typography>-</Typography>
@@ -186,7 +183,8 @@ export const AreaChart = ({
 						value={to}
 						customProps={{
 							disableFuture: true,
-							minDate: from,
+							minDate: from.isAfter(initialAllTime) ? from : initialAllTime,
+							maxDate: dayjs(),
 						}}
 					/>
 				</Stack>
@@ -366,6 +364,8 @@ export const AreaChart = ({
 					marginTop: 3,
 					marginLeft: { xs: 0, xl: 6 },
 					backgroundColor: colorPalette.overlay.light,
+					boxShadow: 'none',
+					borderRadius: '16px',
 				}}
 			>
 				<ToggleCharts
