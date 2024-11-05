@@ -1,11 +1,14 @@
 import datetime
 
 import uvicorn
+from fastapi import Request
 
 from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
-
-LOCAL_MANIFEST_FILES = set()
+from src.schemas.webhook import OracleWebhook
+from src.services import cloud
+from src.services.cloud import BucketAccessInfo
+from src.utils.logging import get_function_logger
 
 
 def apply_local_development_patches():
@@ -17,13 +20,22 @@ def apply_local_development_patches():
     - Overrides `validate_address` to disable address validation.
     - Replaces `validate_oracle_webhook_signature` with a lenient version for oracle signature
       validation in development.
+    - Replaces `src.chain.escrow.store_results` to avoid attempting to store results on chain.
+    - Replaces `src.validators.signature.validate_oracle_webhook_signature` to always return
+      `OracleWebhookTypes.exchange_oracle`.
     """
+    logger = get_function_logger(apply_local_development_patches.__name__)
+
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 
+    minio_client = cloud.make_client(BucketAccessInfo.parse_obj(Config.storage_config))
+
     def get_local_escrow(chain_id: int, escrow_address: str) -> EscrowData:
         possible_manifest_name = escrow_address.split(":")[0]
-        if possible_manifest_name in LOCAL_MANIFEST_FILES:
+        local_manifests = minio_client.list_files(bucket="manifests")
+        logger.info(f"Local manifests: {local_manifests}")
+        if possible_manifest_name in local_manifests:
             return EscrowData(
                 chain_id=ChainId(chain_id),
                 id="test",
@@ -44,14 +56,6 @@ def apply_local_development_patches():
     original_get_escrow = EscrowUtils.get_escrow
     EscrowUtils.get_escrow = get_local_escrow
 
-    from src.services import cloud
-    from src.services.cloud import BucketAccessInfo
-
-    manifests = cloud.make_client(BucketAccessInfo.parse_obj(Config.storage_config)).list_files(
-        bucket="manifests"
-    )
-    LOCAL_MANIFEST_FILES.update(manifests)
-
     import src.schemas.webhook
     from src.core.types import OracleWebhookTypes
 
@@ -70,9 +74,24 @@ def apply_local_development_patches():
     src.endpoints.webhook.validate_oracle_webhook_signature = (
         lenient_validate_oracle_webhook_signature
     )
-    import logging
 
-    logging.warning("Local development patches applied.")
+    import src.chain.escrow
+
+    def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:  # noqa: ARG001 (not relevant here)
+        logger.info(f"Would store results for escrow {escrow_address} on chain: {url}, {hash}")
+
+    src.chain.escrow.store_results = store_results
+    import src.validators.signature
+
+    def validate_oracle_webhook_signature(
+        request: Request, signature: str, webhook: OracleWebhook
+    ) -> OracleWebhookTypes:
+        # Technically, we also might want to test receiving webhook from reputation oracle,
+        # if this will be the case, this function can be updated accordingly
+        return OracleWebhookTypes.exchange_oracle
+
+    src.validators.signature.validate_oracle_webhook_signature = validate_oracle_webhook_signature
+    logger.warning("Local development patches applied.")
 
 
 if __name__ == "__main__":
