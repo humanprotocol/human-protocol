@@ -5,8 +5,9 @@ import uvicorn
 
 from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
-
-LOCAL_MANIFEST_FILES = set()
+from src.services import cloud
+from src.services.cloud import BucketAccessInfo
+from src.utils.logging import get_function_logger
 
 
 def apply_local_development_patches():
@@ -24,9 +25,15 @@ def apply_local_development_patches():
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 
+    logger = get_function_logger(apply_local_development_patches.__name__)
+
+    minio_client = cloud.make_client(BucketAccessInfo.parse_obj(Config.storage_config))
+
     def get_local_escrow(chain_id: int, escrow_address: str) -> EscrowData:
         possible_manifest_name = escrow_address.split(":")[0]
-        if possible_manifest_name in LOCAL_MANIFEST_FILES:
+        local_manifests = minio_client.list_files(bucket="manifests")
+        logger.info(f"Local manifests: {local_manifests}")
+        if possible_manifest_name in local_manifests:
             return EscrowData(
                 chain_id=ChainId(chain_id),
                 id="test",
@@ -46,14 +53,6 @@ def apply_local_development_patches():
 
     original_get_escrow = EscrowUtils.get_escrow
     EscrowUtils.get_escrow = get_local_escrow
-
-    from src.services import cloud
-    from src.services.cloud import BucketAccessInfo
-
-    manifests = cloud.make_client(BucketAccessInfo.parse_obj(Config.storage_config)).list_files(
-        bucket="manifests"
-    )
-    LOCAL_MANIFEST_FILES.update(manifests)
 
     import src.schemas.webhook
     from src.core.types import OracleWebhookTypes
