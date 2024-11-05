@@ -2,11 +2,13 @@
 import { describe, test, expect, beforeAll } from 'vitest';
 import { Encryption, EncryptionUtils } from '../src/encryption';
 import {
+  BINARY_MESSAGE_CONTENT,
   ENCRYPTEDMESSAGE,
   KEYPAIR1,
   KEYPAIR2,
   KEYPAIR3,
   MESSAGE,
+  SIGNEDENCRYPTEDBINARYMESSAGE,
   SIGNEDENCRYPTEDLOCKEDMESSAGE,
   SIGNEDENCRYPTEDMESSAGE,
   SIGNEDMESSAGE,
@@ -249,6 +251,20 @@ describe('Encryption', async () => {
       expect(encryptedMessage.includes(expectedMessageFooter)).toBeTruthy();
     });
 
+    test('should sign and ecnrypt a binary message', async () => {
+      const encryption = await Encryption.build(KEYPAIR1.privateKey);
+      const encryptedMessage = await encryption.signAndEncrypt(
+        Buffer.from(JSON.stringify(BINARY_MESSAGE_CONTENT)),
+        [KEYPAIR2.publicKey, KEYPAIR3.publicKey]
+      );
+      console.log('en', encryptedMessage);
+      const expectedMessageHeader = '-----BEGIN PGP MESSAGE-----\n';
+      const expectedMessageFooter = '-----END PGP MESSAGE-----\n';
+
+      expect(encryptedMessage.includes(expectedMessageHeader)).toBeTruthy();
+      expect(encryptedMessage.includes(expectedMessageFooter)).toBeTruthy();
+    });
+
     test('should throw an error when an invalid public key is provided', async () => {
       const encryption = await Encryption.build(
         KEYPAIR1.privateKey,
@@ -285,8 +301,7 @@ describe('Encryption', async () => {
         SIGNEDENCRYPTEDMESSAGE,
         KEYPAIR1.publicKey
       );
-
-      expect(decryptedMessage).toBe(MESSAGE);
+      expect(Buffer.from(decryptedMessage).toString()).toBe(MESSAGE);
 
       const encryption3 = await Encryption.build(
         KEYPAIR3.privateKey,
@@ -296,7 +311,18 @@ describe('Encryption', async () => {
         SIGNEDENCRYPTEDMESSAGE,
         KEYPAIR1.publicKey
       );
-      expect(decryptedMessage2).toBe(MESSAGE);
+      expect(Buffer.from(decryptedMessage2).toString()).toBe(MESSAGE);
+    });
+
+    test('should decrypt and verify binary message', async () => {
+      const encryption2 = await Encryption.build(KEYPAIR2.privateKey);
+      const decryptedMessage = await encryption2.decrypt(
+        SIGNEDENCRYPTEDBINARYMESSAGE,
+        KEYPAIR1.publicKey
+      );
+      expect(JSON.parse(Buffer.from(decryptedMessage).toString())).toEqual(
+        BINARY_MESSAGE_CONTENT
+      );
     });
 
     test('should decrypt and verify a message encrypted with a locked private key', async () => {
@@ -306,7 +332,7 @@ describe('Encryption', async () => {
         KEYPAIR3.publicKey
       );
 
-      expect(decryptedMessage).toBe(MESSAGE);
+      expect(Buffer.from(decryptedMessage).toString()).toBe(MESSAGE);
     });
 
     test('should throw an error when no encrypted message is provided', async () => {
@@ -332,7 +358,7 @@ describe('Encryption', async () => {
       );
       const decryptedMessage = await encryption2.decrypt(ENCRYPTEDMESSAGE);
 
-      expect(decryptedMessage).toBe(MESSAGE);
+      expect(Buffer.from(decryptedMessage).toString()).toBe(MESSAGE);
     });
 
     test('should fail when decrypting and verifying an unsigned message', async () => {
@@ -343,7 +369,7 @@ describe('Encryption', async () => {
 
       await expect(
         encryption2.decrypt(ENCRYPTEDMESSAGE, KEYPAIR1.publicKey)
-      ).rejects.toThrowError('Error decrypting message: Message is not signed');
+      ).rejects.toThrowError('Signature could not be verified');
     });
   });
 
