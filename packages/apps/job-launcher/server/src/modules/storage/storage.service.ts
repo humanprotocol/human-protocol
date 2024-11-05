@@ -36,7 +36,7 @@ export class StorageService {
     try {
       const url = new URL(maybeUrl);
       return ['http:', 'https:'].includes(url.protocol);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -77,7 +77,7 @@ export class StorageService {
       }
 
       return fileContent;
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -97,7 +97,7 @@ export class StorageService {
       } catch (_noop) {}
 
       return jsonLikeData;
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -140,7 +140,7 @@ export class StorageService {
         url: this.formatUrl(fileKey),
         hash,
       };
-    } catch (error) {
+    } catch (_error) {
       throw new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST);
     }
   }

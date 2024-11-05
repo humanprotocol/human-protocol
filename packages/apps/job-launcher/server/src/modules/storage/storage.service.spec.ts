@@ -1,6 +1,23 @@
+jest.mock('minio', () => {
+  class Client {
+    putObject = jest.fn();
+    bucketExists = jest.fn();
+    constructor() {
+      (this as any).protocol = 'http:';
+      (this as any).host = 'localhost';
+      (this as any).port = 9000;
+    }
+  }
+
+  return { Client };
+});
+
+jest.mock('axios');
+
 import { Encryption, EncryptionUtils, HttpStatus } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import axios from 'axios';
 import {
   MOCK_FILE_URL,
   MOCK_MANIFEST,
@@ -21,27 +38,13 @@ import { hashString } from '../../common/utils';
 import { ContentType } from '../../common/enums/storage';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
-
-jest.mock('minio', () => {
-  class Client {
-    putObject = jest.fn();
-    bucketExists = jest.fn();
-    constructor() {
-      (this as any).protocol = 'http:';
-      (this as any).host = 'localhost';
-      (this as any).port = 9000;
-    }
-  }
-
-  return { Client };
-});
+import {
+  FileDownloadError,
+  FileNotFoundError,
+  InvalidFileUrl,
+} from './storage.errors';
 
 describe('StorageService', () => {
-  const spyDownloadFileFromUrl = jest.spyOn(
-    StorageService,
-    'downloadFileFromUrl',
-  );
-
   let storageService: StorageService;
 
   beforeAll(async () => {
@@ -81,6 +84,91 @@ describe('StorageService', () => {
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
+  });
+
+  describe('downloadFileFromUrl', () => {
+    it.each(['no-protocol.com', 'ftp://invalid-protocol.com'])(
+      'throws if invalid URL [%#]',
+      async (url) => {
+        let thrownError;
+
+        try {
+          await StorageService.downloadFileFromUrl(url);
+        } catch (error) {
+          thrownError = error;
+        }
+
+        expect(thrownError).toBeInstanceOf(InvalidFileUrl);
+      },
+    );
+
+    it('throws if file not found', async () => {
+      const testUrl = 'https://file-not.found';
+      (axios.get as jest.Mock).mockImplementationOnce((url) => {
+        if (url === testUrl) {
+          return Promise.reject({
+            response: {
+              status: 404,
+            },
+          });
+        }
+        return Promise.resolve({});
+      });
+
+      let thrownError;
+      try {
+        await StorageService.downloadFileFromUrl(testUrl);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toBeInstanceOf(FileNotFoundError);
+      expect(thrownError.location).toBe(testUrl);
+    });
+
+    it('throws if netrowk error', async () => {
+      const testUrl = 'https://network-error.io';
+      const testError = new Error('ECONNRESET :443');
+      (axios.get as jest.Mock).mockImplementationOnce((url) => {
+        if (url === testUrl) {
+          return Promise.reject({
+            cause: testError,
+          });
+        }
+        return Promise.resolve({ data: null });
+      });
+
+      let thrownError;
+      try {
+        await StorageService.downloadFileFromUrl(testUrl);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toBeInstanceOf(FileDownloadError);
+      expect(thrownError.location).toBe(testUrl);
+      expect(thrownError.cause).toBe(testError);
+    });
+
+    it('returns response as buffer', async () => {
+      const testData = new Date().toISOString();
+      const testDataBuffer = Buffer.from(testData);
+      (axios.get as jest.Mock).mockImplementationOnce((_url, options) => {
+        if (options.responseType === 'arraybuffer') {
+          return Promise.resolve({
+            data: testDataBuffer.buffer.slice(
+              testDataBuffer.byteOffset,
+              testDataBuffer.byteOffset + testDataBuffer.byteLength,
+            ),
+          });
+        }
+
+        return Promise.resolve({ data: {} });
+      });
+
+      const result = await StorageService.downloadFileFromUrl('http://test.io');
+      expect(result.toString()).toBe(testData);
+    });
   });
 
   describe('uploadJsonLikeData', () => {
@@ -136,6 +224,11 @@ describe('StorageService', () => {
   });
 
   describe('downloadJsonLikeData', () => {
+    const spyDownloadFileFromUrl = jest.spyOn(
+      StorageService,
+      'downloadFileFromUrl',
+    );
+
     it('should download the file correctly', async () => {
       const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
