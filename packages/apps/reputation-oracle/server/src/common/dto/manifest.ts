@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { JobRequestType } from '../enums';
+import { ChainId } from '@human-protocol/sdk';
 
 export class CvatData {
   @IsString()
@@ -81,4 +82,15 @@ export class FortuneManifestDto {
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
+}
+
+export class CalculateResultsDto {
+  @IsEnum(ChainId)
+  chainId: ChainId;
+
+  @IsString()
+  escrowAddress: string;
+
+  @IsString()
+  finalResultsUrl: string;
 }

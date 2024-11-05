@@ -6,10 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CronJobEntity } from './cron-job.entity';
 import { Web3Module } from '../web3/web3.module';
 import { WebhookModule } from '../webhook/webhook.module';
-import { WebhookRepository } from '../webhook/webhook.repository';
 import { ConfigModule } from '@nestjs/config';
 import { PayoutModule } from '../payout/payout.module';
 import { ReputationModule } from '../reputation/reputation.module';
+import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repository';
+import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
+import { EscrowCompletionTrackingRepository } from '../webhook/escrow-completion-tracking.repository';
 
 @Global()
 @Module({
@@ -21,7 +23,13 @@ import { ReputationModule } from '../reputation/reputation.module';
     PayoutModule,
     ReputationModule,
   ],
-  providers: [CronJobService, CronJobRepository, WebhookRepository],
+  providers: [
+    CronJobService,
+    CronJobRepository,
+    WebhookIncomingRepository,
+    WebhookOutgoingRepository,
+    EscrowCompletionTrackingRepository,
+  ],
   exports: [CronJobService],
 })
 export class CronJobModule {}

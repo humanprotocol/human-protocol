@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
-import { EventType, WebhookType } from '../../common/enums';
+import { IsObject, IsOptional, IsString } from 'class-validator';
+import { EventType } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 
-export class CreateWebhookDto {
+export class CreateWebhookIncomingDto {
   @ApiProperty({ name: 'chain_id' })
   @IsEnumCaseInsensitive(ChainId)
   public chainId: ChainId;
@@ -21,24 +21,4 @@ export class CreateWebhookDto {
   @IsOptional()
   @IsObject()
   public eventData?: any;
-}
-
-export class WebhookDto extends CreateWebhookDto {
-  @IsEnum(WebhookType)
-  public type: WebhookType;
-
-  @IsOptional()
-  @IsString()
-  public callbackUrl?: string;
-}
-
-export class SendWebhookDto {
-  @IsEnum(ChainId)
-  public chainId: ChainId;
-
-  @IsEnum(EventType)
-  public eventType: EventType;
-
-  @IsString()
-  public escrowAddress: string;
 }

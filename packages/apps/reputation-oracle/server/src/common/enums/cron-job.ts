@@ -1,5 +1,6 @@
 export enum CronJobType {
-  ProcessPendingWebhook = 'process-pending-webhook',
-  ProcessPaidWebhook = 'process-paid-webhook',
-  ProcessOutgoingWebhook = 'process-outgoing-webhook',
+  ProcessPendingIncomingWebhook = 'process-pending-incoming-webhook',
+  ProcessPendingOutgoingWebhook = 'process-pending-outgoing-webhook',
+  ProcessPendingEscrowCompletionTracking = 'process-pending-escrow-completion-tracking',
+  ProcessPaidEscrowCompletionTracking = 'process-paid-escrow-completion-tracking',
 }

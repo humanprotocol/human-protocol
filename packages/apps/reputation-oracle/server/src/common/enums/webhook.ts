@@ -3,14 +3,21 @@ export enum EventType {
   ESCROW_COMPLETED = 'escrow_completed',
 }
 
-export enum WebhookStatus {
+export enum WebhookIncomingStatus {
   PENDING = 'pending',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  PAID = 'paid',
 }
 
-export enum WebhookType {
-  IN = 'in',
-  OUT = 'out',
+export enum WebhookOutgoingStatus {
+  PENDING = 'pending',
+  SENT = 'sent',
+  FAILED = 'failed',
+}
+
+export enum EscrowCompletionTrackingStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }

@@ -122,6 +122,22 @@ export class StorageService {
 
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `${hash}.json`;
+
+      // Check if the file already exists in the bucket
+      try {
+        await this.minioClient.statObject(this.s3ConfigService.bucket, key);
+        Logger.log(`File with key ${key} already exists. Skipping upload.`);
+        return { url: this.getUrl(key), hash };
+      } catch (err) {
+        if (err.code !== 'NotFound') {
+          Logger.error('Error checking if file exists:', err);
+          throw new ControlledError(
+            'Error accessing storage',
+            HttpStatus.BAD_GATEWAY,
+          );
+        }
+      }
+
       await this.minioClient.putObject(
         this.s3ConfigService.bucket,
         key,
@@ -164,6 +180,21 @@ export class StorageService {
       // Upload the encrypted file to the bucket
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
+
+      // Check if the file already exists in the bucket
+      try {
+        await this.minioClient.statObject(this.s3ConfigService.bucket, key);
+        Logger.log(`File with key ${key} already exists. Skipping upload.`);
+        return { url: this.getUrl(key), hash };
+      } catch (err) {
+        if (err.code !== 'NotFound') {
+          Logger.error('Error checking if file exists:', err);
+          throw new ControlledError(
+            'Error accessing storage',
+            HttpStatus.BAD_GATEWAY,
+          );
+        }
+      }
 
       await this.minioClient.putObject(
         this.s3ConfigService.bucket,

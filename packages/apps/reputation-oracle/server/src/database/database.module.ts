@@ -6,7 +6,6 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NS } from '../common/constants';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
-import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
@@ -20,6 +19,9 @@ import { CredentialValidationEntity } from '../modules/credentials/credential.en
 import { CredentialEntity } from '../modules/credentials/credential.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
+import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
+import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
+import { EscrowCompletionTrackingEntity } from '../modules/webhook/escrow-completion-tracking.entity';
 
 @Module({
   imports: [
@@ -45,7 +47,9 @@ import { UserQualificationEntity } from '../modules/qualification/user-qualifica
           name: 'default',
           type: 'postgres',
           entities: [
-            WebhookEntity,
+            WebhookIncomingEntity,
+            WebhookOutgoingEntity,
+            EscrowCompletionTrackingEntity,
             ReputationEntity,
             CredentialEntity,
             CredentialValidationEntity,

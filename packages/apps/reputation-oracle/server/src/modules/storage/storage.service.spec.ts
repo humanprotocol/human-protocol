@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   MOCK_ENCRYPTION_PUBLIC_KEY,
+  MOCK_FILE_HASH,
   MOCK_FILE_URL,
   mockConfig,
 } from '../../../test/constants';
@@ -45,6 +46,7 @@ jest.mock('minio', () => {
   class Client {
     putObject = jest.fn();
     bucketExists = jest.fn();
+    statObject = jest.fn();
     constructor() {
       (this as any).protocol = 'http:';
       (this as any).host = 'localhost';
@@ -118,6 +120,9 @@ describe('StorageService', () => {
       storageService.minioClient.bucketExists = jest
         .fn()
         .mockResolvedValueOnce(true);
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockRejectedValueOnce({ code: 'NotFound' });
 
       EncryptionUtils.encrypt = jest.fn().mockResolvedValueOnce('encrypted');
 
@@ -170,6 +175,10 @@ describe('StorageService', () => {
           .fn()
           .mockResolvedValueOnce(true);
 
+        storageService.minioClient.statObject = jest
+          .fn()
+          .mockRejectedValueOnce({ code: 'NotFound' });
+
         EncryptionUtils.encrypt = jest.fn().mockResolvedValueOnce('encrypted');
 
         const jobSolution = {
@@ -200,6 +209,41 @@ describe('StorageService', () => {
       });
     });
 
+    it('should return the URL of the file and a hash if it already exists', async () => {
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
+      const chainId = ChainId.LOCALHOST;
+      const solution = 'test';
+
+      const hash = crypto.createHash('sha1').update('encrypted').digest('hex');
+      const results = {
+        url: `http://${s3ConfigService.endpoint}:${s3ConfigService.port}/${s3ConfigService.bucket}/${hash}.json`,
+        hash,
+      };
+
+      storageService.minioClient.bucketExists = jest
+        .fn()
+        .mockResolvedValueOnce(true);
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockResolvedValueOnce({ url: MOCK_FILE_URL, hash: MOCK_FILE_HASH });
+
+      EncryptionUtils.encrypt = jest.fn().mockResolvedValueOnce('encrypted');
+
+      const jobSolution = {
+        workerAddress,
+        solution,
+      };
+
+      const result = await storageService.uploadJobSolutions(
+        escrowAddress,
+        chainId,
+        [jobSolution],
+      );
+
+      expect(result).toEqual(results);
+    });
+
     it('should fail if the bucket does not exist', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -209,6 +253,10 @@ describe('StorageService', () => {
       storageService.minioClient.bucketExists = jest
         .fn()
         .mockResolvedValueOnce(false);
+
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockRejectedValueOnce({ code: 'NotFound' });
 
       const jobSolution = {
         workerAddress,
@@ -232,6 +280,9 @@ describe('StorageService', () => {
       storageService.minioClient.bucketExists = jest
         .fn()
         .mockResolvedValueOnce(true);
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockRejectedValueOnce({ code: 'NotFound' });
       storageService.minioClient.putObject = jest
         .fn()
         .mockRejectedValueOnce('Network error');
@@ -325,6 +376,9 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValueOnce('encrypted-file-content');
 
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockRejectedValueOnce({ code: 'NotFound' });
       storageService.minioClient.putObject = jest
         .fn()
         .mockResolvedValueOnce(true);
@@ -365,6 +419,10 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValueOnce('encrypted-file-content');
 
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockRejectedValueOnce({ code: 'NotFound' });
+
       const uploadedFile = await storageService.copyFileFromURLToBucket(
         escrowAddress,
         chainId,
@@ -386,6 +444,37 @@ describe('StorageService', () => {
         'encrypted-file-content',
         { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
       );
+    });
+
+    it('should return the URL of the file and a hash if it already exists', async () => {
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce('some-file-content');
+      Encryption.build = jest.fn().mockResolvedValue({
+        decrypt: jest.fn().mockResolvedValue('decrypted-file-content'),
+      });
+
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+      EncryptionUtils.encrypt = jest
+        .fn()
+        .mockResolvedValueOnce('encrypted-file-content');
+
+      storageService.minioClient.statObject = jest
+        .fn()
+        .mockResolvedValueOnce({ url: MOCK_FILE_URL, hash: MOCK_FILE_HASH });
+
+      const uploadedFile = await storageService.copyFileFromURLToBucket(
+        escrowAddress,
+        chainId,
+        MOCK_FILE_URL,
+      );
+
+      expect(
+        uploadedFile.url.includes(
+          `http://${s3ConfigService.endpoint}:${s3ConfigService.port}/${s3ConfigService.bucket}/`,
+        ),
+      ).toBeTruthy();
+      expect(uploadedFile.hash).toBeDefined();
     });
 
     describe('without encryption', () => {
@@ -411,6 +500,9 @@ describe('StorageService', () => {
           .fn()
           .mockResolvedValueOnce('encrypted-file-content');
 
+        storageService.minioClient.statObject = jest
+          .fn()
+          .mockRejectedValueOnce({ code: 'NotFound' });
         storageService.minioClient.putObject = jest
           .fn()
           .mockResolvedValueOnce(true);
@@ -450,6 +542,10 @@ describe('StorageService', () => {
         EncryptionUtils.encrypt = jest
           .fn()
           .mockResolvedValueOnce('encrypted-file-content');
+
+        storageService.minioClient.statObject = jest
+          .fn()
+          .mockRejectedValueOnce({ code: 'NotFound' });
 
         const uploadedFile = await storageService.copyFileFromURLToBucket(
           escrowAddress,

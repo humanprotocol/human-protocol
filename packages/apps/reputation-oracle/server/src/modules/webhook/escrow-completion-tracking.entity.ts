@@ -2,12 +2,12 @@ import { Column, Entity, Index } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { WebhookStatus, WebhookType } from '../../common/enums';
+import { EscrowCompletionTrackingStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
-@Entity({ schema: NS, name: 'webhook' })
-@Index(['chainId', 'escrowAddress', 'type', 'callbackUrl'], { unique: true })
-export class WebhookEntity extends BaseEntity {
+@Entity({ schema: NS, name: 'escrow_completion_tracking' })
+@Index(['chainId', 'escrowAddress'], { unique: true })
+export class EscrowCompletionTrackingEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;
 
@@ -15,13 +15,10 @@ export class WebhookEntity extends BaseEntity {
   public escrowAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public resultsUrl: string;
+  public finalResultsUrl: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public callbackUrl: string | null;
-
-  @Column({ type: 'enum', enum: WebhookType })
-  public type: WebhookType;
+  public finalResultsHash: string;
 
   @Column({ type: 'varchar', nullable: true })
   public failedReason: string;
@@ -34,7 +31,7 @@ export class WebhookEntity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: WebhookStatus,
+    enum: EscrowCompletionTrackingStatus,
   })
-  public status: WebhookStatus;
+  public status: EscrowCompletionTrackingStatus;
 }
