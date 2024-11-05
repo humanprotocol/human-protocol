@@ -31,7 +31,6 @@ import { JobRepository } from '../../src/modules/job/job.repository';
 import { AWSRegions, StorageProviders } from '../../src/common/enums/storage';
 import { ChainId } from '@human-protocol/sdk';
 import { StorageService } from '../../src/modules/storage/storage.service';
-import stringify from 'json-stable-stringify';
 import { delay } from './utils';
 import { PaymentService } from '../../src/modules/payment/payment.service';
 import { NetworkConfigService } from '../../src/common/config/network-config.service';
@@ -171,7 +170,9 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(manifest).toBeDefined();
 
@@ -198,15 +199,8 @@ describe.skip('hCaptcha E2E workflow', () => {
       'image_name_2.jpg': [['Cat']],
     };
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const hCaptchaDto = {
       chain_id: ChainId.LOCALHOST,
@@ -248,7 +242,9 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(jobEntity!.manifestUrl).toBeDefined();
     expect(manifest.requester_restricted_answer_set).toMatchObject({
@@ -315,7 +311,9 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(jobEntity!.manifestUrl).toBeDefined();
     expect(manifest.requester_restricted_answer_set).toMatchObject({
@@ -381,7 +379,9 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(jobEntity!.manifestUrl).toBeDefined();
     expect(manifest.requester_restricted_answer_set).toMatchObject({
@@ -447,7 +447,9 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(jobEntity!.manifestUrl).toBeDefined();
     expect(manifest.requester_restricted_answer_set).toMatchObject({
@@ -513,7 +515,9 @@ describe.skip('hCaptcha E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(jobEntity!.manifestUrl).toBeDefined();
     expect(manifest.requester_restricted_answer_set).toMatchObject({

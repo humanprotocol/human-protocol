@@ -31,13 +31,6 @@ jest.mock('@human-protocol/sdk', () => ({
       createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     })),
   },
-  StorageClient: jest.fn().mockImplementation(() => ({
-    uploadFiles: jest
-      .fn()
-      .mockResolvedValue([
-        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-      ]),
-  })),
 }));
 
 describe('RoutingProtocolService', () => {

@@ -584,7 +584,7 @@ describe('CronJobService', () => {
         },
       };
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(cvatManifestMock);
 
       jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
@@ -714,7 +714,9 @@ describe('CronJobService', () => {
       const manifestMock = {
         requestType: JobRequestType.FORTUNE,
       };
-      storageService.download = jest.fn().mockResolvedValue(manifestMock);
+      storageService.downloadJsonLikeData = jest
+        .fn()
+        .mockResolvedValue(manifestMock);
 
       jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
       jest
