@@ -17,11 +17,7 @@ const myJobSchema = z.object({
   status: z.string().transform((value) => {
     try {
       return z
-        .union([
-          z.literal('ACTIVE'),
-          z.literal('CANCELED'),
-          z.literal('COMPLETED'),
-        ])
+        .enum(['ACTIVE', 'CANCELED', 'COMPLETED'])
         .parse(value.toUpperCase());
     } catch (error) {
       return 'UNKNOWN';
