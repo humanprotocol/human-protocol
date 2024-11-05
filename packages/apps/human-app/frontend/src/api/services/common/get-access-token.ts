@@ -91,7 +91,6 @@ export function useGetAccessTokenMutation() {
   };
 
   return {
-    ...mutation,
     mutateIfNotLoading,
     mutateAsyncIfNotLoading,
   };
