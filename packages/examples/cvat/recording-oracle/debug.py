@@ -1,11 +1,9 @@
 import datetime
 
 import uvicorn
-from fastapi import Request
 
 from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
-from src.schemas.webhook import OracleWebhook
 from src.services import cloud
 from src.services.cloud import BucketAccessInfo
 from src.utils.logging import get_function_logger
@@ -61,13 +59,11 @@ def apply_local_development_patches():
 
     src.schemas.webhook.validate_address = lambda x: x
 
-    async def lenient_validate_oracle_webhook_signature(request, signature, webhook):
-        from src.validators.signature import validate_oracle_webhook_signature
-
+    async def lenient_validate_oracle_webhook_signature(request, signature, webhook):  # noqa: ARG001 (not relevant here)
         try:
             return OracleWebhookTypes(signature.split(":")[0])
         except (ValueError, TypeError):
-            return await validate_oracle_webhook_signature(request, signature, webhook)
+            return OracleWebhookTypes.exchange_oracle
 
     import src.endpoints.webhook
 
@@ -81,16 +77,7 @@ def apply_local_development_patches():
         logger.info(f"Would store results for escrow {escrow_address} on chain: {url}, {hash}")
 
     src.chain.escrow.store_results = store_results
-    import src.validators.signature
 
-    def validate_oracle_webhook_signature(
-        request: Request, signature: str, webhook: OracleWebhook
-    ) -> OracleWebhookTypes:
-        # Technically, we also might want to test receiving webhook from reputation oracle,
-        # if this will be the case, this function can be updated accordingly
-        return OracleWebhookTypes.exchange_oracle
-
-    src.validators.signature.validate_oracle_webhook_signature = validate_oracle_webhook_signature
     logger.warning("Local development patches applied.")
 
 
