@@ -126,6 +126,13 @@ export const theme: ThemeOptions = {
         },
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: colorPalette.text.secondary,
+        },
+      },
+    },
   },
   breakpoints: {
     values: {

@@ -140,7 +140,7 @@ class _ExcludedAnnotationsInfo:
 
 class SimpleTaskBuilder:
     """
-    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
+    Handles task creation for image_points and image_boxes task types
     """
 
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:

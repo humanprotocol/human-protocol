@@ -59,7 +59,7 @@ def generate_jwt_token(
     private_key: str = PRIVATE_KEY,
 ) -> str:
     data = {
-        **({"wallet_address": wallet_address} if wallet_address else {"role": "HUMAN_APP"}),
+        **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
         "email": email,
     }
 
@@ -829,7 +829,7 @@ def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
             "chain_id": ((cvat_projects[0].chain_id, len(assignments)),),
             "assignment_id": (
                 (assignments[0].id, 1),
-                ("unknown", 0),
+                (uuid.uuid4(), 0),
             ),
             "job_type": (
                 (cvat_projects[0].job_type, len(assignments)),

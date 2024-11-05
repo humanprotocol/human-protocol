@@ -49,6 +49,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        output_buffer=config.output_buffer,
     )
 
     with context.begin_transaction():

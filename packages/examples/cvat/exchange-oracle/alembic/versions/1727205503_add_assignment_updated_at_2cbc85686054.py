@@ -9,8 +9,8 @@ Create Date: 2024-09-24 19:18:23.248579
 import enum
 
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime, Enum, String
-from sqlalchemy.orm import Session, declarative_base
+from sqlalchemy import Column, DateTime, Enum, String, update
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 
 from alembic import op
@@ -51,25 +51,36 @@ class Assignment(Base):
 
 
 def define_initial_updated_at():
-    bind = op.get_bind()
-    session = Session(bind=bind)
+    # First update: expired, rejected, and canceled assignments
+    # using op.execute instead of session.execute to support offline migrations
+    op.execute(
+        update(Assignment)
+        .where(
+            Assignment.updated_at == None,
+            Assignment.status.in_(
+                [
+                    AssignmentStatuses.expired,
+                    AssignmentStatuses.rejected,
+                    AssignmentStatuses.canceled,
+                ]
+            ),
+        )
+        .values(updated_at=Assignment.expires_at)
+    )
 
-    session.query(Assignment).filter(
-        Assignment.updated_at == None,
-        Assignment.status.in_(
-            [AssignmentStatuses.expired, AssignmentStatuses.rejected, AssignmentStatuses.canceled]
-        ),
-    ).update({Assignment.updated_at: Assignment.expires_at})
+    # Second update: completed assignments
+    op.execute(
+        update(Assignment)
+        .where(Assignment.updated_at == None, Assignment.status == AssignmentStatuses.completed)
+        .values(updated_at=Assignment.completed_at)
+    )
 
-    session.query(Assignment).filter(
-        Assignment.updated_at == None,
-        Assignment.status == AssignmentStatuses.completed,
-    ).update({Assignment.updated_at: Assignment.completed_at})
-
-    session.query(Assignment).filter(
-        Assignment.updated_at == None,
-        # fallback for invalid entries above + handling of status == "created"
-    ).update({Assignment.updated_at: Assignment.created_at})
+    # Third update: fallback for invalid entries and handling status == "created"
+    op.execute(
+        update(Assignment)
+        .where(Assignment.updated_at == None)
+        .values(updated_at=Assignment.created_at)
+    )
 
 
 def upgrade() -> None:

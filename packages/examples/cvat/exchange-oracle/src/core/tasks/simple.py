@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 import datumaro as dm
 
-# These details are relevant for IMAGE_POINTS and IMAGE_BOXES tasks
+# These details are relevant for image_points and image_boxes tasks
 
 
 class TaskMetaLayout:
