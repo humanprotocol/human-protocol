@@ -47,12 +47,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import {
-  isPGPMessage,
-  isValidJSON,
-  mapJobType,
-  parseUrl,
-} from '../../common/utils';
+import { mapJobType, parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';

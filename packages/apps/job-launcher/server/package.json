@@ -20,7 +20,7 @@
     "docker:db:up": "docker compose up -d postgres && yarn migration:run",
     "docker:db:down": "docker compose down",
     "setup:local": "ts-node ./test/setup.ts",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

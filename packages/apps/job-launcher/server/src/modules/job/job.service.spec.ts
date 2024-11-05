@@ -318,7 +318,6 @@ describe('JobService', () => {
 
     it('should use all oracles provided by the user and skip oracle selection', async () => {
       const fundAmount = 10;
-      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
 
       const userId = 1;
@@ -365,7 +364,6 @@ describe('JobService', () => {
 
     it('should select missing oracles when only partial oracles are provided by the user', async () => {
       const fundAmount = 10;
-      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
 
       const providedReputationOracle = '0xProvidedReputationOracle';

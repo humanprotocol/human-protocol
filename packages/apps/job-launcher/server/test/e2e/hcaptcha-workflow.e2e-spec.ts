@@ -3,7 +3,6 @@ import * as crypto from 'crypto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
-import { UserRepository } from '../../src/modules/user/user.repository';
 import { UserStatus } from '../../src/common/enums/user';
 import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
@@ -38,7 +37,6 @@ import { Web3ConfigService } from '../../src/common/config/web3-config.service';
 
 describe.skip('hCaptcha E2E workflow', () => {
   let app: INestApplication;
-  let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
@@ -77,7 +75,6 @@ describe.skip('hCaptcha E2E workflow', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    userRepository = moduleFixture.get<UserRepository>(UserRepository);
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);

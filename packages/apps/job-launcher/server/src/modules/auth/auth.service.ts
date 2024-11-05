@@ -45,7 +45,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
+  public async signin(data: SignInDto, _ip?: string): Promise<AuthDto> {
     // if (
     //   !(
     //     await verifyToken(
