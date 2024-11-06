@@ -12,6 +12,7 @@
     "react-dom": "^18.2.0",
     "react-loading-skeleton": "^3.3.1",
     "react-router-dom": "^6.4.3",
+    "serve": "^14.2.4",
     "viem": "2.x"
   },
   "devDependencies": {
