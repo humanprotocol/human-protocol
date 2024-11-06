@@ -1,17 +1,21 @@
 import { type ColorPalette } from '@/styles/color-palette';
-import { type MyJob } from '@/api/services/worker/my-jobs-data';
+import { MyJobStatusWithUnknown } from '@/api/services/worker/my-jobs-data';
 
 export function getChipStatusColor(
-  status: MyJob['status'],
+  status: MyJobStatusWithUnknown,
   colorPalette: ColorPalette
 ) {
   switch (status) {
-    case 'ACTIVE':
+    case MyJobStatusWithUnknown.ACTIVE:
       return colorPalette.secondary.main;
-    case 'COMPLETED':
+    case MyJobStatusWithUnknown.COMPLETED:
       return colorPalette.success.main;
-    case 'CANCELED':
-    case 'UNKNOWN':
+    case MyJobStatusWithUnknown.VALIDATION:
+      return colorPalette.error.light;
+    case MyJobStatusWithUnknown.CANCELED:
+    case MyJobStatusWithUnknown.UNKNOWN:
+    case MyJobStatusWithUnknown.EXPIRED:
+    case MyJobStatusWithUnknown.REJECTED:
       return colorPalette.error.main;
   }
 }

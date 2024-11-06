@@ -9,6 +9,26 @@ import { createPaginationSchema } from '@/shared/helpers/create-pagination-schem
 import type { MyJobsFilterStoreProps } from '@/hooks/use-my-jobs-filter-store';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 
+export enum MyJobStatus {
+  ACTIVE = 'ACTIVE',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED',
+  VALIDATION = 'VALIDATION',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
+}
+
+// Repeated because of linting rule
+export enum MyJobStatusWithUnknown {
+  ACTIVE = 'ACTIVE',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED',
+  VALIDATION = 'VALIDATION',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
+  UNKNOWN = 'UNKNOWN',
+}
+
 const myJobSchema = z.object({
   assignment_id: z.string(),
   escrow_address: z.string(),
@@ -17,10 +37,14 @@ const myJobSchema = z.object({
   status: z.string().transform((value) => {
     try {
       return z
-        .enum(['ACTIVE', 'CANCELED', 'COMPLETED'])
+        .enum([
+          MyJobStatusWithUnknown.ACTIVE,
+          MyJobStatusWithUnknown.CANCELED,
+          MyJobStatusWithUnknown.COMPLETED,
+        ])
         .parse(value.toUpperCase());
     } catch (error) {
-      return 'UNKNOWN';
+      return MyJobStatusWithUnknown.UNKNOWN;
     }
   }),
   reward_amount: z.string(),
