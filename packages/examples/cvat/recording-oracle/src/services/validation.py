@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
+from src.core.gt_stats import ValidationFrameStats
 from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
@@ -132,11 +133,13 @@ def get_task_gt_stats(
     )
 
 
-def update_gt_stats(session: Session, task_id: str, values: dict[tuple[int, int], int]):
+def update_gt_stats(
+    session: Session, task_id: str, updated_gt_stats: dict[tuple[int, int], ValidationFrameStats]
+):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
 
-    if not values:
+    if not updated_gt_stats:
         return
 
     if db_engine.driver != "psycopg2":
@@ -151,9 +154,11 @@ def update_gt_stats(session: Session, task_id: str, values: dict[tuple[int, int]
                 "task_id": task_id,
                 "cvat_task_id": cvat_task_id,
                 "gt_frame_id": gt_frame_id,
-                "failed_attempts": failed_attempts,
+                "failed_attempts": val_frame_stats.failed_attempts,
+                "accepted_attempts": val_frame_stats.accepted_attempts,
+                "accumulated_quality": val_frame_stats.accumulated_quality,
             }
-            for (cvat_task_id, gt_frame_id), failed_attempts in values.items()
+            for (cvat_task_id, gt_frame_id), val_frame_stats in updated_gt_stats.items()
         ],
     )
     statement = statement.on_conflict_do_update(

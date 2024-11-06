@@ -127,14 +127,13 @@ def get_task_validation_layout(task_id: int) -> models.TaskValidationLayoutRead:
             raise
 
 
-def get_jobs_quality_reports(parent_id: int) -> dict[int, models.QualityReport]:
+def get_jobs_quality_reports(parent_id: int) -> list[models.QualityReport]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            reports: list[models.QualityReport] = get_paginated_collection(
+            return get_paginated_collection(
                 api_client.quality_api.list_reports_endpoint, parent_id=parent_id, target="job"
             )
-            return {report.job_id: report for report in reports}
 
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling QualityApi.list_reports: {e}\n")
@@ -145,21 +144,18 @@ def update_task_validation_layout(
     task_id: int,
     *,
     disabled_frames: list[int],
-    shuffle_honeypots: bool = True,
+    honeypot_real_frames: list[int],
 ) -> None:
     logger = logging.getLogger("app")
-    params = {
-        "disabled_frames": disabled_frames,
-    }
-    if shuffle_honeypots:
-        params["frame_selection_method"] = models.FrameSelectionMethod("random_uniform")
 
     with get_api_client() as api_client:
         try:
             validation_layout, _ = api_client.tasks_api.partial_update_validation_layout(
                 task_id,
                 patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
-                    **params
+                    disabled_frames=disabled_frames,
+                    honeypot_real_frames=honeypot_real_frames,
+                    frame_selection_method=models.FrameSelectionMethod("manual"),
                 ),
             )
         except exceptions.ApiException as ex:

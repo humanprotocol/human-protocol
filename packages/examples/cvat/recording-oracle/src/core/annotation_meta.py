@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -12,7 +13,19 @@ class JobMeta(BaseModel):
     annotation_filename: Path
     annotator_wallet_address: str
     assignment_id: str
+    start_frame: int
+    stop_frame: int
+
+    @property
+    def job_frame_range(self) -> Iterator[int]:
+        return range(self.start_frame, self.stop_frame + 1)
 
 
 class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
+
+    def skip_jobs(self, job_ids: list[int]):
+        # self.jobs = [
+        #     job for job in self.jobs if job.job_id not in job_ids
+        # ]
+        return AnnotationMeta(jobs=[job for job in self.jobs if job.job_id not in job_ids])
