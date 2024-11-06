@@ -8,6 +8,7 @@ pragma solidity ^0.8.0;
 library Stakes {
     struct Staker {
         uint256 tokensStaked; // Tokens staked by the Staker
+        uint256 tokensAllocated; // Obsolete: `tokensAllocated` is no longer used in the contract logic but remains here to preserve storage layout compatibility
         uint256 tokensLocked; // Tokens locked for withdrawal
         uint256 tokensLockedUntil; // Tokens locked until time
     }

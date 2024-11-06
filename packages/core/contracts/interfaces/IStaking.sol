@@ -5,6 +5,15 @@ pragma solidity ^0.8.0;
 import '../libs/Stakes.sol';
 
 interface IStaking {
+    // Obsolete: `Allocation` is no longer used in the contract logic but remains here to preserve storage layout compatibility
+    struct Allocation {
+        address escrowAddress;
+        address staker;
+        uint256 tokens;
+        uint256 createdAt;
+        uint256 closedAt;
+    }
+
     function setMinimumStake(uint256 _minimumStake) external;
 
     function setLockPeriod(uint32 _lockPeriod) external;

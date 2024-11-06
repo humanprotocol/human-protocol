@@ -6,7 +6,6 @@ import '@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 
 import './interfaces/HMTokenInterface.sol';
 import './interfaces/IEscrow.sol';
@@ -17,16 +16,14 @@ import './libs/Stakes.sol';
  * @title Staking contract
  * @dev The Staking contract allows to stake.
  */
-contract Staking is
-    IStaking,
-    OwnableUpgradeable,
-    UUPSUpgradeable,
-    ReentrancyGuardUpgradeable
-{
+contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     using Stakes for Stakes.Staker;
 
     // Token address
     address public token;
+
+    // Obsolete: `rewardPool` is no longer used in the contract logic but remains here to preserve storage layout compatibility
+    address private rewardPool;
 
     // Minimum amount of tokens a staker needs to stake
     uint256 public minimumStake;
@@ -39,6 +36,9 @@ contract Staking is
 
     // List of stakers
     address[] public stakers;
+
+    // Obsolete: `allocations` is no longer used in the contract logic but remains here to preserve storage layout compatibility
+    mapping(address => IStaking.Allocation) private allocations;
 
     // Fee percentage
     uint8 public feePercentage;
@@ -90,7 +90,6 @@ contract Staking is
         uint8 _feePercentage
     ) external initializer {
         __Ownable_init_unchained();
-        __ReentrancyGuard_init_unchained();
         token = _token;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
@@ -252,7 +251,7 @@ contract Staking is
     /**
      * @dev Withdraw staker tokens once the lock period has passed.
      */
-    function withdraw() external override nonReentrant {
+    function withdraw() external override {
         _withdraw(msg.sender);
     }
 
@@ -278,7 +277,7 @@ contract Staking is
         address _staker,
         address _escrowAddress,
         uint256 _tokens
-    ) external override onlySlasher nonReentrant {
+    ) external override onlySlasher {
         require(
             _slashRequester != address(0),
             'Must be a valid slash requester address'
@@ -310,7 +309,7 @@ contract Staking is
     /**
      * @dev Withdraw fee tokens.
      */
-    function withdrawFees() external override onlyOwner nonReentrant {
+    function withdrawFees() external override onlyOwner {
         require(feeBalance > 0, 'No fees to withdraw');
         uint256 amount = feeBalance;
         feeBalance = 0;
@@ -366,5 +365,5 @@ contract Staking is
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[43] private __gap;
+    uint256[40] private __gap;
 }
