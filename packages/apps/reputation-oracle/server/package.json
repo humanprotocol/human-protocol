@@ -39,7 +39,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/schedule": "^4.0.1",
-    "@nestjs/swagger": "^7.4.2",
+    "@nestjs/swagger": "^8.0.2",
     "@nestjs/terminus": "^10.2.1",
     "@nestjs/typeorm": "^10.0.1",
     "@types/passport-jwt": "^4.0.1",
