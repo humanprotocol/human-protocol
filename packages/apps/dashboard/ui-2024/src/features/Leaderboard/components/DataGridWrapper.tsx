@@ -3,12 +3,12 @@ import { Box, Typography } from '@mui/material';
 import { handleErrorMessage } from '@services/handle-error-message';
 import Loader from '@components/Loader';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
-import { DataGrid as MuiDataGrid, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
 import { useState } from 'react';
 
 import { useDataGrid } from '../hooks/useDataGrid';
 
-export const DataGrid = ({
+export const DataGridWrapper = ({
 	data = [],
 	status,
 	error,
@@ -30,7 +30,7 @@ export const DataGrid = ({
 
 	return (
 		<Box width="100%" height={tableMinHeight} sx={{ overflow: 'hidden' }}>
-			<MuiDataGrid
+			<DataGrid
 				disableColumnResize
 				hideFooterPagination
 				disableColumnMenu
@@ -83,7 +83,7 @@ export const DataGrid = ({
 					marginBottom: '16px',
 					'& .MuiDataGrid-cell': {
 						borderTop: 'none',
-						padding: '0 16px',
+						padding: '0 8px',
 						overflow: 'visible !important',
 					},
 					'& .MuiDataGrid-row': {

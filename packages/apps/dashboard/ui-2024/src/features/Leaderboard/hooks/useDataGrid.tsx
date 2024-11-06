@@ -13,6 +13,7 @@ import { AddressCell } from '../components/AddressCell';
 import { ChainCell } from '../components/ChainCell';
 import { SelectNetwork } from '../components/SelectNetwork';
 import { ReputationLabel } from '../components/ReputationLabel';
+import { TextCell } from '../components/TextCell';
 
 export const useDataGrid = (data: LeaderBoardData) => {
 	const {
@@ -39,160 +40,169 @@ export const useDataGrid = (data: LeaderBoardData) => {
 		return formattedData;
 	}, [formattedData, chainId]);
 
-	const columns: GridColDef<(typeof visibleRows)[number]>[] = [
-		...(isMobile
-			? []
-			: [
-					{
-						field: 'id',
-						headerName: '',
-						flex: 0.5,
-						headerClassName: 'home-page-table-header',
-						sortable: false,
-						renderCell: (params: GridRenderCellParams) => (
-							<Typography
-								variant="body1"
-								height="100%"
-								display="flex"
-								alignItems="center"
-							>
-								{params.api.state.sorting.sortedRows.indexOf(params.id) + 1}
-							</Typography>
-						),
-					},
-				]),
-		{
-			field: 'role',
-			flex: isMobile ? 0.8 : 1.5,
-			minWidth: isMobile ? 100 : 250,
-			headerClassName: isMobile
-				? 'home-page-table-header pinned-column--header'
-				: 'home-page-table-header',
-			cellClassName: isMobile ? 'pinned-column--cell' : '',
-			renderHeader: () => (
-				<Typography component="span" variant="body3">
-					Role
-				</Typography>
-			),
-			renderCell: (params: GridRenderCellParams) => (
-				<RoleCell role={params.value} />
-			),
-		},
-		{
-			field: 'address',
-			flex: 1,
-			minWidth: 150,
-			headerClassName: 'home-page-table-header',
-			renderHeader: () => (
-				<Box display="flex" gap="8px" alignItems="center">
-					<CustomTooltip title="Address of the role" arrow>
-						<HelpOutlineIcon
-							style={{
-								color: colorPalette.sky.main,
-							}}
-						/>
-					</CustomTooltip>
+	const columns: GridColDef<(typeof visibleRows)[number]>[] = useMemo(
+		() => [
+			...(isMobile
+				? []
+				: [
+						{
+							field: 'id',
+							headerName: '',
+							width: 30,
+							headerClassName: 'home-page-table-header',
+							sortable: false,
+							renderCell: (params: GridRenderCellParams) => (
+								<Typography
+									variant="body1"
+									height="100%"
+									display="flex"
+									alignItems="center"
+								>
+									{params.api.state.sorting.sortedRows.indexOf(params.id) + 1}
+								</Typography>
+							),
+						},
+					]),
+			{
+				field: 'role',
+				flex: isMobile ? 0.8 : 1.5,
+				minWidth: isMobile ? 100 : 240,
+				headerClassName: isMobile
+					? 'home-page-table-header pinned-column--header'
+					: 'home-page-table-header',
+				cellClassName: isMobile ? 'pinned-column--cell' : '',
+				renderHeader: () => (
 					<Typography component="span" variant="body3">
-						Address
+						Role
 					</Typography>
-				</Box>
-			),
-			renderCell: (params: GridRenderCellParams) => (
-				<AddressCell chainId={params.row.chainId} address={params.value} />
-			),
-		},
-		{
-			field: 'amountStaked',
-			flex: 1,
-			minWidth: 110,
-			headerClassName: 'home-page-table-header',
-			renderHeader: () => (
-				<Box display="flex" gap="8px" alignItems="center">
-					<CustomTooltip title="Amount of HMT staked" arrow>
-						<HelpOutlineIcon
-							style={{
-								color: colorPalette.sky.main,
-							}}
-						/>
-					</CustomTooltip>
-					<Typography component="span" variant="body3">
-						Stake
-					</Typography>
-				</Box>
-			),
-			valueFormatter: (value: string) => {
-				return `${value} HMT`;
+				),
+				renderCell: (params: GridRenderCellParams) => (
+					<RoleCell role={params.value} />
+				),
 			},
-		},
-		{
-			field: 'chainId',
-			headerName: 'Network',
-			flex: isMobile ? 1 : 1.5,
-			minWidth: isMobile ? 150 : 250,
-			headerClassName: 'home-page-table-header',
-			renderHeader: () => {
-				return (
-					<>
-						{isMobile ? (
-							<Typography component="span" variant="body3">
-								Network
-							</Typography>
-						) : (
-							<SelectNetwork />
-						)}
-					</>
-				);
+			{
+				field: 'address',
+				flex: 1,
+				minWidth: 150,
+				headerClassName: 'home-page-table-header',
+				renderHeader: () => (
+					<Box display="flex" gap="8px" alignItems="center">
+						<CustomTooltip title="Address of the role" arrow>
+							<HelpOutlineIcon
+								style={{
+									color: colorPalette.sky.main,
+								}}
+							/>
+						</CustomTooltip>
+						<Typography component="span" variant="body3">
+							Address
+						</Typography>
+					</Box>
+				),
+				renderCell: (params: GridRenderCellParams) => (
+					<AddressCell chainId={params.row.chainId} address={params.value} />
+				),
 			},
-			renderCell: (params: GridRenderCellParams) => (
-				<ChainCell chainId={params.value} />
-			),
-		},
-		{
-			field: 'reputation',
-			headerName: 'Reputation Score',
-			flex: 1,
-			minWidth: 190,
-			headerClassName: 'home-page-table-header',
-			renderHeader: () => (
-				<Box display="flex" gap="8px" alignItems="center">
-					<CustomTooltip
-						title="Reputation of the role as per their activities "
-						arrow
-					>
-						<HelpOutlineIcon
-							style={{
-								color: colorPalette.sky.main,
-							}}
-						/>
-					</CustomTooltip>
-					<Typography component="span" variant="body3">
-						Reputation Score
+			{
+				field: 'amountStaked',
+				flex: 1,
+				minWidth: 130,
+				headerClassName: 'home-page-table-header',
+				renderHeader: () => (
+					<Box display="flex" gap="8px" alignItems="center">
+						<CustomTooltip title="Amount of HMT staked" arrow>
+							<HelpOutlineIcon
+								style={{
+									color: colorPalette.sky.main,
+								}}
+							/>
+						</CustomTooltip>
+						<Typography component="span" variant="body3">
+							Stake
+						</Typography>
+					</Box>
+				),
+				valueFormatter: (value: string) => {
+					return `${value} HMT`;
+				},
+				renderCell: (params: GridRenderCellParams) => (
+					<TextCell value={params.formattedValue} />
+				),
+			},
+			{
+				field: 'chainId',
+				headerName: 'Network',
+				flex: isMobile ? 1 : 1.5,
+				minWidth: isMobile ? 150 : 245,
+				headerClassName: 'home-page-table-header',
+				renderHeader: () => {
+					return (
+						<>
+							{isMobile ? (
+								<Typography component="span" variant="body3">
+									Network
+								</Typography>
+							) : (
+								<SelectNetwork />
+							)}
+						</>
+					);
+				},
+				renderCell: (params: GridRenderCellParams) => (
+					<ChainCell chainId={params.value} />
+				),
+			},
+			{
+				field: 'reputation',
+				headerName: 'Reputation Score',
+				flex: 1,
+				minWidth: 210,
+				headerClassName: 'home-page-table-header',
+				renderHeader: () => (
+					<Box display="flex" gap="8px" alignItems="center">
+						<CustomTooltip
+							title="Reputation of the role as per their activities "
+							arrow
+						>
+							<HelpOutlineIcon
+								style={{
+									color: colorPalette.sky.main,
+								}}
+							/>
+						</CustomTooltip>
+						<Typography component="span" variant="body3">
+							Reputation Score
+						</Typography>
+					</Box>
+				),
+				renderCell: (params: GridRenderCellParams) => (
+					<ReputationLabel reputation={params.value} />
+				),
+			},
+			{
+				field: 'fee',
+				minWidth: 150,
+				headerName: 'Operator Fee',
+				headerClassName: 'home-page-table-header',
+				renderHeader: () => (
+					<Typography variant="body3" component="div">
+						Operator Fee
 					</Typography>
-				</Box>
-			),
-			renderCell: (params: GridRenderCellParams) => (
-				<ReputationLabel reputation={params.value} />
-			),
-		},
-		{
-			field: 'fee',
-			minWidth: 160,
-			headerName: 'Operator Fee',
-			headerClassName: 'home-page-table-header',
-			renderHeader: () => (
-				<Typography variant="body3" component="div">
-					Operator Fee
-				</Typography>
-			),
-			valueFormatter: (value: string | null) => {
-				if (value == null) {
-					return '';
-				}
+				),
+				valueFormatter: (value: string | null) => {
+					if (value == null) {
+						return '';
+					}
 
-				return `${value}%`;
+					return `${value}%`;
+				},
+				renderCell: (params: GridRenderCellParams) => (
+					<TextCell value={params.formattedValue} />
+				),
 			},
-		},
-	];
+		],
+		[isMobile]
+	);
 
 	return {
 		columns,
