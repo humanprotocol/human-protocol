@@ -4,11 +4,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import { t } from 'i18next';
 import { HumanLogoIcon } from '@/components/ui/icons';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/hooks/use-is-hcaptcha-labeling-page';
+import { useColorMode } from '@/hooks/use-color-mode';
 
-export const NAVBAR_PADDING = '44px';
+export const NAVBAR_PADDING = '16px';
 
 interface NavbarProps {
   open: boolean;
@@ -23,40 +23,44 @@ export function Navbar({
   userStatsDrawerOpen,
   toggleUserStatsDrawer,
 }: NavbarProps) {
+  const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
-  const getIcon = () => {
-    switch (true) {
-      case open:
-        return (
-          <CloseIcon
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
-        );
-      case !open && !userStatsDrawerOpen:
-        return (
-          <MenuIcon
-            onClick={() => {
-              setOpen(true);
-            }}
-          />
-        );
-      case userStatsDrawerOpen:
-        return (
-          <CloseIcon
-            onClick={() => {
-              if (toggleUserStatsDrawer) {
-                toggleUserStatsDrawer();
-              }
-            }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+
+  let iconButton = null;
+  if (open) {
+    iconButton = (
+      <IconButton
+        onClick={() => {
+          setOpen(false);
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    );
+  } else if (userStatsDrawerOpen) {
+    iconButton = (
+      <IconButton
+        onClick={() => {
+          if (toggleUserStatsDrawer) {
+            toggleUserStatsDrawer();
+          }
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    );
+  } else {
+    iconButton = (
+      <IconButton
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        <MenuIcon />
+      </IconButton>
+    );
+  }
 
   return (
     <Stack
@@ -75,7 +79,9 @@ export function Navbar({
         top: open ? '0' : 'unset',
       }}
     >
-      <HumanLogoIcon />
+      <Stack sx={{ paddingLeft: '8px' }}>
+        <HumanLogoIcon />
+      </Stack>
       <Grid
         sx={{
           display: 'flex',
@@ -93,7 +99,7 @@ export function Navbar({
             {t('translation:worker.hcaptchaLabelingStats.statistics')}
           </Button>
         ) : null}
-        <IconButton>{getIcon()}</IconButton>
+        {iconButton}
       </Grid>
     </Stack>
   );

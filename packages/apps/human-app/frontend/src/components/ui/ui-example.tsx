@@ -3,28 +3,19 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/ui/button';
 import { Loader } from '@/components/ui/loader';
-import { colorPalette } from '@/styles/color-palette';
 import { useModalStore } from '@/components/ui/modal/modal.store';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
   HomepageWorkIcon,
   HumanLogoIcon,
-  HumanLogoCircleIcon,
-  BackArrowIcon,
   ChatIcon,
   HandIcon,
-  InfoIcon,
   RefreshIcon,
-  UserFilledIcon,
   UserOutlinedIcon,
-  UserSecondaryIcon,
   WorkIcon,
-  WorkSecondaryIcon,
   HumanLogoNavbarIcon,
-  DiscordIcon,
   HelpIcon,
-  MobileHeaderIcon,
   ProfileIcon,
   CheckmarkIcon,
   LockerIcon,
@@ -34,8 +25,10 @@ import {
 import { TableExample } from '@/pages/playground/table-example/table-example';
 import { Alert } from '@/components/ui/alert';
 import { ConnectWalletBtn } from '@/components/ui/connect-wallet-btn';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export function UiExample() {
+  const { colorPalette } = useColorMode();
   const { openModal } = useModalStore();
   return (
     <div>
@@ -197,52 +190,28 @@ export function UiExample() {
           <HumanLogoIcon />
         </Grid>
         <Grid>
-          <HumanLogoCircleIcon />
-        </Grid>
-        <Grid>
           <HandIcon />
         </Grid>
         <Grid>
           <RefreshIcon />
         </Grid>
         <Grid>
-          <UserFilledIcon />
-        </Grid>
-        <Grid>
           <UserOutlinedIcon />
-        </Grid>
-        <Grid>
-          <UserSecondaryIcon />
         </Grid>
         <Grid>
           <WorkIcon />
         </Grid>
         <Grid>
-          <WorkSecondaryIcon />
-        </Grid>
-        <Grid>
-          <BackArrowIcon />
-        </Grid>
-        <Grid>
           <ChatIcon />
         </Grid>
         <Grid>
-          <InfoIcon />
-        </Grid>
-        <Grid>
           <HumanLogoNavbarIcon />
-        </Grid>
-        <Grid>
-          <DiscordIcon />
         </Grid>
         <Grid>
           <HelpIcon />
         </Grid>
       </Stack>
       <Stack alignItems="center" direction="row" spacing={4}>
-        <Grid>
-          <MobileHeaderIcon />
-        </Grid>
         <Grid>
           <ProfileIcon />
         </Grid>
@@ -280,10 +249,6 @@ export function UiExample() {
         </Alert>
         <Alert color="success" severity="success">
           Your password has been successfully updated!
-        </Alert>
-        <Alert color="warning" severity="warning">
-          We have switched to the Polygon network. You’ll need to replace your
-          Ethereum wallet address with one connected to Polygon.
         </Alert>
       </Stack>
     </div>

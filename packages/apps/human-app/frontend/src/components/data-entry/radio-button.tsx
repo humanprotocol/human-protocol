@@ -27,11 +27,11 @@ export function RadioButton({
       render={({ field, fieldState }) => (
         <FormControl error={Boolean(fieldState.error)}>
           {groupLabel ? (
-            <FormLabel id={ariaLabelledby || name}>{groupLabel}</FormLabel>
+            <FormLabel id={ariaLabelledby ?? name}>{groupLabel}</FormLabel>
           ) : null}
           <RadioGroup
             {...field}
-            aria-labelledby={ariaLabelledby || name}
+            aria-labelledby={ariaLabelledby ?? name}
             name={name}
             {...rest}
           >

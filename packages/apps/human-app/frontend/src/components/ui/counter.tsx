@@ -23,5 +23,5 @@ export function Counter({
     return `${padZero(time.hours)}:${padZero(time.minutes)}:${padZero(time.seconds)}`;
   }
 
-  return `${time.days}:${padZero(time.hours)}:${padZero(time.minutes)}:${padZero(time.seconds)}`;
+  return `${time.days.toString()}:${padZero(time.hours)}:${padZero(time.minutes)}:${padZero(time.seconds)}`;
 }

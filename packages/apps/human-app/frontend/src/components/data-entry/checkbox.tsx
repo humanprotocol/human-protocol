@@ -4,7 +4,7 @@ import CheckboxMui from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface InputProps extends Omit<CheckboxProps, 'name' | 'error'> {
   name: string;
@@ -12,6 +12,8 @@ interface InputProps extends Omit<CheckboxProps, 'name' | 'error'> {
 }
 
 export function Checkbox({ name, label = '', ...rest }: InputProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <Controller
       name={name}

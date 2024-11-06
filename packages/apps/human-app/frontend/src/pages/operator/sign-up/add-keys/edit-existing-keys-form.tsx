@@ -3,7 +3,6 @@ import { t } from 'i18next';
 import { useFormState } from 'react-hook-form';
 import type { CustomButtonProps } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import { Input } from '@/components/data-entry/input';
 import type { EthKVStoreKeyValues } from '@/smart-contracts/EthKVStore/config';
 import { EthKVStoreKeys, Role } from '@/smart-contracts/EthKVStore/config';
@@ -15,6 +14,7 @@ import {
   order,
   sortFormKeys,
 } from '@/pages/operator/sign-up/add-keys/sort-form';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
@@ -64,7 +64,10 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
     <MultiSelect
       label={t('operator.addKeysPage.existingKeys.jobType')}
       name={EthKVStoreKeys.JobTypes}
-      options={JOB_TYPES}
+      options={JOB_TYPES.map((jobType) => ({
+        label: jobType,
+        value: jobType,
+      }))}
     />
   ),
 };
@@ -75,6 +78,7 @@ export function EditExistingKeysForm({
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
   formButtonProps: CustomButtonProps;
 }) {
+  const { colorPalette } = useColorMode();
   const { errors } = useFormState();
   const noChangesError = errors.form?.message as string;
 
@@ -90,7 +94,7 @@ export function EditExistingKeysForm({
       </Typography>
       <Grid container sx={{ flexDirection: 'column', gap: '2rem' }}>
         {sortedKeys.map((key) => {
-          const formInputsConfigKey = key as EthKVStoreKeyValues;
+          const formInputsConfigKey = key;
           return (
             <>
               {existingKeysInitialState[formInputsConfigKey] ? (

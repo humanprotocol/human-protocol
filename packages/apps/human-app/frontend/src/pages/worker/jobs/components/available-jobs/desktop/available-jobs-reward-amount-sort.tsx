@@ -10,7 +10,7 @@ export function AvailableJobsRewardAmountSort() {
     setFilterParams({
       ...filterParams,
       sort_field: 'reward_amount',
-      sort: 'ASC',
+      sort: 'asc',
     });
   };
 
@@ -18,7 +18,7 @@ export function AvailableJobsRewardAmountSort() {
     setFilterParams({
       ...filterParams,
       sort_field: 'reward_amount',
-      sort: 'DESC',
+      sort: 'desc',
     });
   };
 

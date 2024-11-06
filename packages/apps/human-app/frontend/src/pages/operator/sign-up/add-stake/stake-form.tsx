@@ -10,7 +10,7 @@ import {
   useAddStakeMutation,
   type AddStakeCallArguments,
 } from '@/api/services/operator/add-stake';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { Input } from '@/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/components/ui/button';

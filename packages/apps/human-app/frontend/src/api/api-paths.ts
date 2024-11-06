@@ -20,12 +20,15 @@ export const apiPaths = {
     },
     verifyEmail: {
       path: '/email-confirmation/email-verification',
+      withAuthRetry: true,
     },
     resendEmailVerification: {
       path: '/email-confirmation/resend-email-verification',
+      withAuthRetry: true,
     },
     kycStart: {
       path: '/kyc/start',
+      withAuthRetry: true,
     },
     oracles: {
       path: '/oracles',
@@ -44,14 +47,27 @@ export const apiPaths = {
     },
     registerAddress: {
       path: '/user/register-address',
+      withAuthRetry: true,
     },
     signedAddress: {
       path: '/kyc/on-chain',
+      withAuthRetry: true,
     },
-    enableHCaptchaLabeling: '/labeling/h-captcha/enable',
-    verifyHCaptchaLabeling: '/labeling/h-captcha/verify',
-    hCaptchaUserStats: '/labeling/h-captcha/user-stats',
-    dailyHmtSpend: '/labeling/h-captcha/daily-hmt-spent',
+    enableHCaptchaLabeling: {
+      path: '/labeling/h-captcha/enable',
+    },
+    verifyHCaptchaLabeling: {
+      path: '/labeling/h-captcha/verify',
+    },
+    hCaptchaUserStats: {
+      path: '/labeling/h-captcha/user-stats',
+    },
+    dailyHmtSpend: {
+      path: '/labeling/h-captcha/daily-hmt-spent',
+    },
+    registrationInExchangeOracle: {
+      path: '/exchange-oracle-registration',
+    },
   },
   operator: {
     web3Auth: {
@@ -70,6 +86,7 @@ export const apiPaths = {
     },
     disableOperator: {
       path: '/disable-operator',
+      withAuthRetry: true,
     },
   },
 } as const;

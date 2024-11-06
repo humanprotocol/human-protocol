@@ -51,8 +51,8 @@ export class WebhookController {
   )
   @Post()
   processWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,
+    @Headers(HEADER_SIGNATURE_KEY) _: string,
   ): Promise<any> {
     return this.webhookService.handleWebhook(body);
   }

@@ -8,7 +8,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
+import { Box, Typography } from '@mui/material';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
@@ -28,8 +28,11 @@ import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/desk
 import { TableButton } from '@/components/ui/table-button';
 import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
-import { JOB_TYPES } from '@/shared/consts';
-import { parseJobStatusChipColor } from '../parse-job-status-chip-color';
+import { useColorMode } from '@/hooks/use-color-mode';
+import { createTableDarkMode } from '@/styles/create-table-dark-mode';
+import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
+import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 const getColumnsDefinition = (
   resignJob: (assignment_id: string) => void
@@ -93,8 +96,9 @@ const getColumnsDefinition = (
     header: t('worker.jobs.jobType'),
     size: 100,
     enableSorting: true,
-    Cell: (props) => {
-      return <Chip label={props.row.original.job_type} />;
+    Cell: ({ row }) => {
+      const label = t(`jobTypeLabels.${row.original.job_type as JobType}`);
+      return <Chip label={label} />;
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {
@@ -103,7 +107,7 @@ const getColumnsDefinition = (
             {...props}
             headerText={t('worker.jobs.jobType')}
             iconType="filter"
-            popoverContent={<MyJobsJobTypeFilter jobTypes={JOB_TYPES} />}
+            popoverContent={<MyJobsJobTypeFilter />}
           />
         );
       },
@@ -138,10 +142,21 @@ const getColumnsDefinition = (
     Cell: (props) => {
       const status = props.row.original.status;
       return (
-        <Chip
-          backgroundColor={parseJobStatusChipColor(status)}
-          label={status}
-        />
+        <Box
+          sx={{
+            display: 'inline-flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '6px 9px',
+            color: lightModeColorPalette.white,
+            backgroundColor: '#5D0CE9',
+            borderRadius: '16px',
+          }}
+        >
+          <Typography color={lightModeColorPalette.white} variant="chip">
+            {status}
+          </Typography>
+        </Box>
       );
     },
     muiTableHeadCellProps: () => ({
@@ -164,26 +179,28 @@ const getColumnsDefinition = (
     enableSorting: true,
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
-      const buttonDisabled = status !== 'ACTIVE';
+      const buttonDisabled = status !== 'active';
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           {url ? (
-            <TableButton
-              component={Link}
-              disabled={buttonDisabled}
-              target="_blank"
-              to={url}
-            >
-              {t('worker.jobs.solve')}
-            </TableButton>
+            <>
+              <TableButton
+                component={Link}
+                disabled={buttonDisabled}
+                target="_blank"
+                to={url}
+              >
+                {t('worker.jobs.solve')}
+              </TableButton>
+              <RejectButton
+                disabled={buttonDisabled}
+                onClick={() => {
+                  if (buttonDisabled) return;
+                  resignJob(assignment_id);
+                }}
+              />
+            </>
           ) : null}
-          <RejectButton
-            disabled={buttonDisabled}
-            onClick={() => {
-              if (buttonDisabled) return;
-              resignJob(assignment_id);
-            }}
-          />
         </Grid>
       );
     },
@@ -191,11 +208,17 @@ const getColumnsDefinition = (
 ];
 
 export function MyJobsTable() {
-  const { setSearchEscrowAddress, setPageParams, filterParams } =
-    useMyJobsFilterStore();
+  const { colorPalette, isDarkMode } = useColorMode();
+  const {
+    setSearchEscrowAddress,
+    setPageParams,
+    filterParams,
+    resetFilterParams,
+  } = useMyJobsFilterStore();
+
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
-    () => tableData?.results || [],
+    () => tableData?.results ?? [],
     [tableData?.results]
   );
 
@@ -225,13 +248,18 @@ export function MyJobsTable() {
     });
   }, [filterParams.page, filterParams.page_size]);
 
+  useEffect(() => {
+    return () => {
+      resetFilterParams();
+    };
+  }, [resetFilterParams]);
+
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(rejectTask(oracle_address || '')),
+    columns: getColumnsDefinition(rejectTask(oracle_address ?? '')),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
       showAlertBanner: tableStatus === 'error',
-      showProgressBars: tableStatus === 'pending',
       pagination: paginationState,
     },
     enablePagination: Boolean(tableData?.total_pages),
@@ -240,24 +268,49 @@ export function MyJobsTable() {
       setPaginationState(updater);
     },
     muiPaginationProps: {
+      SelectProps: {
+        sx: {
+          '.MuiSelect-icon': {
+            ':hover': {
+              backgroundColor: 'blue',
+            },
+            fill: colorPalette.text.primary,
+          },
+        },
+      },
       rowsPerPageOptions: [5, 10],
     },
-    pageCount: tableData?.total_pages || -1,
+    pageCount: tableData?.total_pages ?? -1,
     rowCount: tableData?.total_results,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
     renderTopToolbar: () => (
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={(address) => {
           setSearchEscrowAddress(address);
         }}
       />
     ),
+    muiTableHeadCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTableBodyCellProps: {
+      sx: {
+        borderColor: colorPalette.paper.text,
+      },
+    },
+    muiTablePaperProps: {
+      sx: {
+        boxShadow: '0px 2px 2px 0px #E9EBFA80',
+      },
+    },
+    ...(isDarkMode ? createTableDarkMode(colorPalette) : {}),
   });
 
   return <MaterialReactTable table={table} />;

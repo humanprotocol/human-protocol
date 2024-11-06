@@ -12,7 +12,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { Button } from '@/components/ui/button';
 import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
 import type { JobsFilterStoreProps } from '@/hooks/use-jobs-filter-store';
@@ -20,7 +19,7 @@ import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
-import { JOB_TYPES } from '@/shared/consts';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 interface DrawerMobileProps {
   selectedTab: string;
@@ -30,6 +29,7 @@ export function DrawerMobile({
   selectedTab,
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
@@ -127,7 +127,7 @@ export function DrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'DESC',
+                sort: 'desc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -159,7 +159,7 @@ export function DrawerMobile({
             onClick={() => {
               setFilterParams({
                 ...filterParams,
-                sort: 'ASC',
+                sort: 'asc',
                 sort_field: 'reward_amount',
               });
             }}
@@ -205,7 +205,7 @@ export function DrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsJobTypeFilterMobile jobTypes={JOB_TYPES} />
+          <AvailableJobsJobTypeFilterMobile />
         </Stack>
         <Divider
           sx={{
@@ -226,9 +226,9 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'VALIDATION'}
+                  checked={filterParams.status === 'validation'}
                   onClick={() => {
-                    handleCheckboxClick('status', 'VALIDATION');
+                    handleCheckboxClick('status', 'validation');
                   }}
                 />
                 <Typography>
@@ -241,9 +241,9 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'EXPIRED'}
+                  checked={filterParams.status === 'expired'}
                   onClick={() => {
-                    handleCheckboxClick('status', 'EXPIRED');
+                    handleCheckboxClick('status', 'expired');
                   }}
                 />
                 <Typography>
@@ -256,9 +256,9 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'REJECTED'}
+                  checked={filterParams.status === 'rejected'}
                   onClick={() => {
-                    handleCheckboxClick('status', 'REJECTED');
+                    handleCheckboxClick('status', 'rejected');
                   }}
                 />
                 <Typography>

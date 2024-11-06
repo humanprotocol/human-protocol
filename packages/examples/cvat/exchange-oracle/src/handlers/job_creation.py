@@ -28,7 +28,8 @@ from src.core.config import Config
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
-from src.log import ROOT_LOGGER_NAME
+from src.log import ROOT_LOGGER_NAME, format_sequence
+from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
@@ -149,9 +150,6 @@ class SimpleTaskBuilder:
 
         self._oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
 
-        self.list_display_threshold = 5
-        "The maximum number of rendered list items in a message"
-
     def __enter__(self):
         return self
 
@@ -165,18 +163,6 @@ class SimpleTaskBuilder:
         # TODO: add escrow info into messages
         self.logger = logger
         return self
-
-    def _format_list(
-        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
-    ) -> str:
-        if max_items is None:
-            max_items = self.list_display_threshold
-
-        remainder_count = len(items) - max_items
-        return "{}{}".format(
-            separator.join(items[:max_items]),
-            f" (and {remainder_count} more)" if remainder_count > 0 else "",
-        )
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
@@ -236,7 +222,7 @@ class SimpleTaskBuilder:
             missing_gt = gt_filenames - matched_gt_filenames
             raise DatasetValidationError(
                 "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(list(missing_gt))
+                    format_sequence(list(missing_gt))
                 )
             )
 
@@ -358,6 +344,7 @@ class SimpleTaskBuilder:
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
+            db_service.touch(session, Project, [project_id])
 
 
 class BoxesFromPointsTaskBuilder:
@@ -506,7 +493,7 @@ class BoxesFromPointsTaskBuilder:
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
-                    self._format_list(list(gt_labels - manifest_labels)),
+                    format_sequence(list(gt_labels - manifest_labels)),
                 )
             )
 
@@ -526,7 +513,7 @@ class BoxesFromPointsTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(extra_gt)
+                    format_sequence(extra_gt)
                 )
             )
 
@@ -589,9 +576,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_gt_info.excluded_count:
             self.logger.warning(
                 "Some GT boxes were excluded due to the errors found: \n{}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -600,7 +585,7 @@ class BoxesFromPointsTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many GT boxes discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_gt_info.messages]
                     )
                 )
@@ -615,18 +600,6 @@ class BoxesFromPointsTaskBuilder:
         self._validate_gt_filenames()
         self._validate_gt_labels()
         self._validate_gt_annotations()
-
-    def _format_list(
-        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
-    ) -> str:
-        if max_items is None:
-            max_items = self.list_display_threshold
-
-        remainder_count = len(items) - max_items
-        return "{}{}".format(
-            separator.join(items[:max_items]),
-            f" (and {remainder_count} more)" if remainder_count > 0 else "",
-        )
 
     def _validate_points_categories(self):
         invalid_point_categories_messages = []
@@ -649,7 +622,7 @@ class BoxesFromPointsTaskBuilder:
         if invalid_point_categories_messages:
             raise InvalidCategories(
                 "Invalid categories in the input point annotations: {}".format(
-                    self._format_list(invalid_point_categories_messages, separator="; ")
+                    format_sequence(invalid_point_categories_messages, separator="; ")
                 )
             )
 
@@ -676,7 +649,7 @@ class BoxesFromPointsTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several samples in the dataset files: {}".format(
-                    self._format_list(extra_point_samples),
+                    format_sequence(extra_point_samples),
                 )
             )
 
@@ -747,7 +720,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_points_info.excluded_count:
             self.logger.warning(
                 "Some points were excluded due to the errors found: \n{}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_points_info.messages], separator="\n"
                     )
                 )
@@ -758,7 +731,7 @@ class BoxesFromPointsTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many points discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_points_info.messages]
                     )
                 )
@@ -811,7 +784,7 @@ class BoxesFromPointsTaskBuilder:
                             points_sample.id,
                             input_skeleton.id,
                             points_label_cat[input_skeleton.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_boxes]),
+                            format_sequence([f"#{a.id}" for a in matched_boxes]),
                         ),
                         sample_id=points_sample.id,
                         sample_subset=points_sample.subset,
@@ -834,7 +807,7 @@ class BoxesFromPointsTaskBuilder:
                             gt_sample.id,
                             gt_bbox.id,
                             gt_label_cat[gt_bbox.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_skeletons]),
+                            format_sequence([f"#{a.id}" for a in matched_skeletons]),
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
@@ -939,7 +912,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_points_info.messages:
             self.logger.warning(
                 "Some points were excluded from GT due to the problems found: \n{}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_points_info.messages], separator="\n"
                     )
                 )
@@ -948,9 +921,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_gt_info.messages:
             self.logger.warning(
                 "Some GT annotations were excluded due to the problems found: \n{}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -967,7 +938,7 @@ class BoxesFromPointsTaskBuilder:
 
         self.logger.info(
             "GT counts per class to be used for validation: {}".format(
-                self._format_list(
+                format_sequence(
                     [
                         f"{gt_label_cat[label_id].name}: {count}"
                         for label_id, count in gt_count_per_class.items()
@@ -984,7 +955,7 @@ class BoxesFromPointsTaskBuilder:
         if gt_labels_without_anns:
             raise DatasetValidationError(
                 "No matching GT boxes/points annotations found for some classes: {}".format(
-                    self._format_list(gt_labels_without_anns)
+                    format_sequence(gt_labels_without_anns)
                 )
             )
 
@@ -1044,7 +1015,7 @@ class BoxesFromPointsTaskBuilder:
                     "; ".join(
                         "{}: {}".format(
                             g_reason,
-                            self._format_list([label_cat[label_id].name for label_id in g_labels]),
+                            format_sequence([label_cat[label_id].name for label_id in g_labels]),
                         )
                         for g_reason, g_labels in labels_by_reason.items()
                     )
@@ -1363,7 +1334,6 @@ class BoxesFromPointsTaskBuilder:
                 ),
                 cvat_webhook_id=cvat_webhook.id,
             )
-
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(
                 session,
@@ -1394,6 +1364,7 @@ class BoxesFromPointsTaskBuilder:
                 )
 
                 db_service.create_data_upload(session, cvat_task.id)
+            db_service.touch(session, Project, [project_id])
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
@@ -1565,7 +1536,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [
                             label_name if not parent_name else f"{parent_name}.{label_name}"
                             for label_name, parent_name in gt_labels - manifest_labels
@@ -1591,7 +1562,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(extra_gt)
+                    format_sequence(extra_gt)
                 )
             )
 
@@ -1667,9 +1638,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_gt_info.excluded_count:
             self.logger.warning(
                 "Some GT skeletons were excluded due to the errors found: {}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -1678,7 +1647,7 @@ class SkeletonsFromBoxesTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many GT skeletons discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_gt_info.messages]
                     )
                 )
@@ -1724,7 +1693,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several samples in the dataset files: {}".format(
-                    self._format_list(extra_bbox_samples),
+                    format_sequence(extra_bbox_samples),
                 )
             )
 
@@ -1782,7 +1751,7 @@ class SkeletonsFromBoxesTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many boxes discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_boxes_info.messages]
                     )
                 )
@@ -1795,7 +1764,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_samples:
             self.logger.warning(
                 "Some boxes were excluded due to the errors found: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_boxes_info.messages], separator="\n"
                     )
                 )
@@ -1810,18 +1779,6 @@ class SkeletonsFromBoxesTaskBuilder:
         self._validate_boxes_categories()
         self._validate_boxes_filenames()
         self._validate_boxes_annotations()
-
-    def _format_list(
-        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
-    ) -> str:
-        if max_items is None:
-            max_items = self.list_display_threshold
-
-        remainder_count = len(items) - max_items
-        return "{}{}".format(
-            separator.join(items[:max_items]),
-            f" (and {remainder_count} more)" if remainder_count > 0 else "",
-        )
 
     def _match_boxes(self, a: BboxCoords, b: BboxCoords) -> bool:
         return bbox_iou(a, b) > 0
@@ -1889,7 +1846,7 @@ class SkeletonsFromBoxesTaskBuilder:
                             boxes_sample.id,
                             input_bbox.id,
                             boxes_label_cat[input_bbox.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_skeletons]),
+                            format_sequence([f"#{a.id}" for a in matched_skeletons]),
                         ),
                         sample_id=boxes_sample.id,
                         sample_subset=boxes_sample.subset,
@@ -1912,7 +1869,7 @@ class SkeletonsFromBoxesTaskBuilder:
                             gt_sample.id,
                             gt_skeleton.id,
                             gt_label_cat[gt_skeleton.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_boxes]),
+                            format_sequence([f"#{a.id}" for a in matched_boxes]),
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
@@ -2029,7 +1986,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_boxes_info.messages:
             self.logger.warning(
                 "Some boxes were excluded from GT due to the problems found: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_boxes_info.messages], separator="\n"
                     )
                 )
@@ -2038,9 +1995,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_gt_info.messages:
             self.logger.warning(
                 "Some GT annotations were excluded due to the errors found: {}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -2058,7 +2013,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self.logger.info(
             "GT counts per class to be used for validation: {}".format(
-                self._format_list(
+                format_sequence(
                     [
                         f"{gt_label_cat[label_id].name}: {count}"
                         for label_id, count in gt_count_per_class.items()
@@ -2075,7 +2030,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if labels_with_few_gt:
             raise DatasetValidationError(
                 "Too few matching GT boxes/points annotations found for some classes: {}".format(
-                    self._format_list(labels_with_few_gt)
+                    format_sequence(labels_with_few_gt)
                 )
             )
 
@@ -2391,7 +2346,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 chain_id=self.chain_id,
                 total_jobs=total_jobs,
             )
-
+            created_projects = []
             for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
                 # Each skeleton point uses the same file layout in jobs
                 skeleton_label_filenames = []
@@ -2436,6 +2391,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         ),
                         cvat_webhook_id=cvat_webhook.id,
                     )
+                    created_projects.append(project_id)
 
                     db_service.get_project_by_id(
                         session, project_id, for_update=True
@@ -2466,6 +2422,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         )
 
                         db_service.create_data_upload(session, cvat_task.id)
+            db_service.touch(session, Project, created_projects)
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:

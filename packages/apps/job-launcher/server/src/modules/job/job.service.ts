@@ -47,7 +47,12 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { isPGPMessage, isValidJSON, parseUrl } from '../../common/utils';
+import {
+  isPGPMessage,
+  isValidJSON,
+  mapJobType,
+  parseUrl,
+} from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -733,17 +738,37 @@ export class JobService {
     requestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
-    let { chainId } = dto;
+    let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
+    const mappedJobType = mapJobType(requestType);
 
-    if (chainId) {
-      this.web3Service.validateChainId(chainId);
+    // Select network
+    chainId = chainId || this.routingProtocolService.selectNetwork();
+    this.web3Service.validateChainId(chainId);
+
+    // Select oracles
+    if (!reputationOracle || !exchangeOracle || !recordingOracle) {
+      const selectedOracles = await this.routingProtocolService.selectOracles(
+        chainId,
+        mappedJobType,
+      );
+
+      exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
+      recordingOracle = recordingOracle || selectedOracles.recordingOracle;
+      reputationOracle = reputationOracle || selectedOracles.reputationOracle;
     } else {
-      chainId = this.routingProtocolService.selectNetwork();
+      // Validate if all oracles are provided
+      await this.routingProtocolService.validateOracles(
+        chainId,
+        mappedJobType,
+        reputationOracle,
+        exchangeOracle,
+        recordingOracle,
+      );
     }
 
     if (dto.qualifications) {
       const validQualifications =
-        await this.qualificationService.getQualifications();
+        await this.qualificationService.getQualifications(chainId);
 
       const validQualificationReferences = validQualifications.map(
         (q) => q.reference,
@@ -768,10 +793,7 @@ export class JobService {
       div(1, rate),
     );
     const feePercentage = Number(
-      await this.getOracleFee(
-        await this.web3Service.getOperatorAddress(),
-        chainId,
-      ),
+      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
 
     let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
@@ -851,6 +873,9 @@ export class JobService {
     }
 
     jobEntity.chainId = chainId;
+    jobEntity.reputationOracle = reputationOracle;
+    jobEntity.exchangeOracle = exchangeOracle;
+    jobEntity.recordingOracle = recordingOracle;
     jobEntity.userId = userId;
     jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;
@@ -1526,9 +1551,10 @@ export class JobService {
       specificManifestDetails = {
         requestType: manifest.annotation?.type,
         submissionsRequired: manifest.annotation?.job_size,
-        ...(manifest.annotation.qualifications &&
-          manifest.annotation.qualifications?.length > 0 && {
-            qualifications: manifest.annotation.qualifications,
+        description: manifest.annotation?.description,
+        ...(manifest.annotation?.qualifications &&
+          manifest.annotation?.qualifications?.length > 0 && {
+            qualifications: manifest.annotation?.qualifications,
           }),
       };
     }

@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout as LayoutProtected } from '@/components/layout/protected/layout';
 import { Layout as LayoutUnprotected } from '@/components/layout/unprotected/layout';
 import {
@@ -19,9 +19,11 @@ import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-i
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import { UserStatsDrawer } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-drawer';
 import { useAuth } from '@/auth/use-auth';
+import { routerPaths } from './router-paths';
 
 export function Router() {
   const { user } = useAuth();
+
   return (
     <Routes>
       <Route element={<LayoutUnprotected />}>
@@ -42,45 +44,54 @@ export function Router() {
           />
         ))}
       </Route>
-      {protectedRoutes.map(({ routerProps, pageHeaderProps }) => (
-        <Route
-          element={
-            <LayoutProtected
-              pageHeaderProps={pageHeaderProps}
-              renderDrawer={(open, setDrawerOpen) => (
-                <DrawerNavigation
-                  bottomMenuItems={workerDrawerBottomMenuItems}
-                  open={open}
-                  setDrawerOpen={setDrawerOpen}
-                  signOut={() => {
-                    browserAuthProvider.signOut({
-                      callback: () => {
-                        window.location.reload();
-                      },
-                    });
-                  }}
-                  topMenuItems={workerDrawerTopMenuItems(
-                    Boolean(user?.wallet_address)
-                  )}
-                />
-              )}
-              renderHCaptchaStatisticsDrawer={(isOpen) => (
-                <UserStatsDrawer isOpen={isOpen} />
-              )}
-            />
-          }
-          key={routerProps.path}
-        >
+      {protectedRoutes.map(({ routerProps, pageHeaderProps }) => {
+        if (
+          (routerProps.path === routerPaths.worker.HcaptchaLabeling ||
+            routerProps.path === routerPaths.worker.jobsDiscovery) &&
+          user?.kyc_status !== 'approved'
+        ) {
+          return null;
+        }
+
+        return (
           <Route
             element={
-              <RequireAuth>
-                <>{routerProps.element}</>
-              </RequireAuth>
+              <LayoutProtected
+                pageHeaderProps={pageHeaderProps}
+                renderDrawer={(open, setDrawerOpen) => (
+                  <DrawerNavigation
+                    bottomMenuItems={workerDrawerBottomMenuItems}
+                    open={open}
+                    setDrawerOpen={setDrawerOpen}
+                    signOut={() => {
+                      browserAuthProvider.signOut({
+                        callback: () => {
+                          window.location.reload();
+                        },
+                      });
+                    }}
+                    topMenuItems={workerDrawerTopMenuItems(user)}
+                  />
+                )}
+                renderHCaptchaStatisticsDrawer={(isOpen) => (
+                  <UserStatsDrawer isOpen={isOpen} />
+                )}
+              />
             }
+            key={routerProps.path}
             path={routerProps.path}
-          />
-        </Route>
-      ))}
+          >
+            <Route
+              element={
+                <RequireAuth>
+                  <>{routerProps.element}</>
+                </RequireAuth>
+              }
+              path={routerProps.path}
+            />
+          </Route>
+        );
+      })}
       {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
         <Route
           element={
@@ -116,6 +127,8 @@ export function Router() {
           />
         </Route>
       ))}
+
+      <Route element={<Navigate to={routerPaths.homePage} />} path="*" />
     </Routes>
   );
 }

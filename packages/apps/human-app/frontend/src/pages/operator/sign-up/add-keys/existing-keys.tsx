@@ -4,7 +4,6 @@ import { t } from 'i18next';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { colorPalette } from '@/styles/color-palette';
 import type { EthKVStoreKeyValues } from '@/smart-contracts/EthKVStore/config';
 import { EthKVStoreKeys } from '@/smart-contracts/EthKVStore/config';
 import { OptionalText } from '@/components/ui/optional-text';
@@ -16,6 +15,7 @@ import {
   order,
   sortFormKeys,
 } from '@/pages/operator/sign-up/add-keys/sort-form';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 const existingKeysConfig: Record<
   EthKVStoreKeyValues,
@@ -27,7 +27,9 @@ const existingKeysConfig: Record<
         {t('operator.addKeysPage.existingKeys.fee')}
       </Typography>
       <Typography variant="body1">
-        <OptionalText text={fee?.toString() + t('inputMasks.percentSuffix')} />
+        <OptionalText
+          text={`${fee?.toString() ?? ''}${t('inputMasks.percentSuffix')}`}
+        />
       </Typography>
     </Grid>
   ),
@@ -86,6 +88,7 @@ export function ExistingKeys({
   openEditMode: () => void;
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
 }) {
+  const { colorPalette } = useColorMode();
   const { getValues } = useFormContext<GetEthKVStoreValuesSuccessResponse>();
   const formValues = getValues();
 
@@ -100,7 +103,7 @@ export function ExistingKeys({
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
       {sortedKeys.map((key) => {
-        const existingKeysConfigKey = key as EthKVStoreKeyValues;
+        const existingKeysConfigKey = key;
         return existingKeysInitialState[existingKeysConfigKey]
           ? existingKeysConfig[existingKeysConfigKey](formValues)
           : null;

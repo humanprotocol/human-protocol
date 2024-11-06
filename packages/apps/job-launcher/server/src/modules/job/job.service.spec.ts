@@ -121,6 +121,7 @@ import { QualificationService } from '../qualification/qualification.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 
 const rate = 1.5;
+const mappedJobType = 'mappedType';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -155,6 +156,7 @@ jest.mock('../../common/utils', () => ({
       bucket: MOCK_BUCKET_NAME,
     };
   }),
+  mapJobType: jest.fn().mockImplementation(() => 'mappedType'),
 }));
 
 jest.mock('../../common/utils/storage', () => ({
@@ -180,6 +182,12 @@ describe('JobService', () => {
   const signerMock = {
     address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+  };
+
+  const selectedOraclesMock = {
+    reputationOracle: '0xReputationOracle',
+    exchangeOracle: '0xExchangeOracle',
+    recordingOracle: '0xRecordingOracle',
   };
 
   beforeEach(async () => {
@@ -247,7 +255,11 @@ describe('JobService', () => {
         { provide: WebhookService, useValue: createMock<WebhookService>() },
         {
           provide: RoutingProtocolService,
-          useValue: createMock<RoutingProtocolService>(),
+          useValue: {
+            selectNetwork: jest.fn().mockReturnValue(ChainId.POLYGON_AMOY),
+            selectOracles: jest.fn().mockReturnValue(selectedOraclesMock),
+            validateOracles: jest.fn(),
+          },
         },
         {
           provide: CronJobService,
@@ -304,6 +316,98 @@ describe('JobService', () => {
       jest.restoreAllMocks();
     });
 
+    it('should use all oracles provided by the user and skip oracle selection', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+      const userBalance = 25;
+
+      const userId = 1;
+      const providedReputationOracle = '0xProvidedReputationOracle';
+      const providedExchangeOracle = '0xProvidedExchangeOracle';
+      const providedRecordingOracle = '0xProvidedRecordingOracle';
+
+      const fortuneJobDto: JobFortuneDto = {
+        chainId: MOCK_CHAIN_ID,
+        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: fundAmount,
+        currency: JobCurrency.HMT,
+        reputationOracle: providedReputationOracle,
+        exchangeOracle: providedExchangeOracle,
+        recordingOracle: providedRecordingOracle,
+      };
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+
+      expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
+        MOCK_CHAIN_ID,
+        mappedJobType,
+        providedReputationOracle,
+        providedExchangeOracle,
+        providedRecordingOracle,
+      );
+
+      expect(jobRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reputationOracle: providedReputationOracle,
+          exchangeOracle: providedExchangeOracle,
+          recordingOracle: providedRecordingOracle,
+        }),
+      );
+    });
+
+    it('should select missing oracles when only partial oracles are provided by the user', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+      const userBalance = 25;
+
+      const providedReputationOracle = '0xProvidedReputationOracle';
+      const providedExchangeOracle = '0xProvidedExchangeOracle';
+
+      const userId = 1;
+      const fortuneJobDto: JobFortuneDto = {
+        chainId: MOCK_CHAIN_ID,
+        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: fundAmount,
+        currency: JobCurrency.HMT,
+        reputationOracle: providedReputationOracle,
+        exchangeOracle: providedExchangeOracle,
+      };
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      jest.spyOn(routingProtocolService, 'selectOracles').mockResolvedValue({
+        reputationOracle: selectedOraclesMock.reputationOracle,
+        exchangeOracle: selectedOraclesMock.exchangeOracle,
+        recordingOracle: selectedOraclesMock.recordingOracle,
+      });
+
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+
+      expect(routingProtocolService.selectOracles).toHaveBeenCalledTimes(1);
+
+      expect(jobRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reputationOracle: providedReputationOracle,
+          exchangeOracle: providedExchangeOracle,
+          recordingOracle: selectedOraclesMock.recordingOracle,
+        }),
+      );
+    });
+
     it('should create a job successfully', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
@@ -358,6 +462,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -434,6 +539,7 @@ describe('JobService', () => {
         fundAmount: tokenFundAmount,
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -472,6 +578,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1239,6 +1346,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1492,6 +1600,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1632,6 +1741,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1668,6 +1778,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 

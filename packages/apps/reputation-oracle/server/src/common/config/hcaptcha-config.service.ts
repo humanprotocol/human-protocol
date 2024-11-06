@@ -7,26 +7,26 @@ export class HCaptchaConfigService {
 
   /**
    * The site key for the hCaptcha service, used for client-side verification.
-   * Default: an empty string
+   * Required
    */
   get siteKey(): string {
-    return this.configService.get<string>('HCAPTCHA_SITE_KEY', '');
+    return this.configService.getOrThrow<string>('HCAPTCHA_SITE_KEY');
   }
 
   /**
    * The API key for the hCaptcha service, used for server-side verification and operations.
-   * Default: an empty string
+   * Required
    */
   get apiKey(): string {
-    return this.configService.get<string>('HCAPTCHA_API_KEY', '');
+    return this.configService.getOrThrow<string>('HCAPTCHA_API_KEY');
   }
 
   /**
    * The secret key for the hCaptcha service, used for server-side authentication.
-   * Default: an empty string
+   * Required
    */
   get secret(): string {
-    return this.configService.get<string>('HCAPTCHA_SECRET', '');
+    return this.configService.getOrThrow<string>('HCAPTCHA_SECRET');
   }
 
   /**

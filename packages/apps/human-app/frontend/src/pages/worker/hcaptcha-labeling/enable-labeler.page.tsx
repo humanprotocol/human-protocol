@@ -4,13 +4,12 @@ import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
 import { Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { colorPalette } from '@/styles/color-palette';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useEnableHCaptchaLabelingMutation } from '@/api/services/worker/enable-hcaptcha-labeling';
 import { Button } from '@/components/ui/button';
 import { PageCardError } from '@/components/ui/page-card';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 import { useProtectedLayoutNotification } from '@/hooks/use-protected-layout-notifications';
@@ -32,9 +31,9 @@ export function EnableLabeler() {
     return <Navigate replace to={routerPaths.worker.profile} />;
   }
 
-  if (user.site_key) {
-    return <Navigate replace to={routerPaths.worker.HcaptchaLabeling} />;
-  }
+  // if (user.site_key) {
+  //   return <Navigate replace to={routerPaths.worker.HcaptchaLabeling} />;
+  // }
 
   if (isError) {
     return <PageCardError errorMessage={defaultErrorMessage(error)} />;
@@ -50,9 +49,6 @@ export function EnableLabeler() {
     >
       <Paper
         sx={{
-          backgroundColor: isMobile
-            ? colorPalette.paper.main
-            : colorPalette.white,
           height: '100%',
           boxShadow: 'none',
           padding: isMobile ? '20px' : '40px',

@@ -3,6 +3,6 @@ from pydantic import BaseModel
 
 class CvatWebhook(BaseModel):
     event: str
-    job: dict | None
-    task: dict | None
-    before_update: dict | None
+    job: dict | None = None
+    task: dict | None = None
+    before_update: dict | None = None

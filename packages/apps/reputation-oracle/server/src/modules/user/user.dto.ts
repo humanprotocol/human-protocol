@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
   IsEthereumAddress,
   IsOptional,
   IsString,
@@ -10,6 +9,7 @@ import { Transform } from 'class-transformer';
 import { UserStatus, Role } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { SignatureType } from '../../common/enums/web3';
+import { IsEnumCaseInsensitive } from 'src/common/decorators';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -45,7 +45,7 @@ export class UserUpdateDto {
     enum: UserStatus,
   })
   @IsOptional()
-  @IsEnum(UserStatus)
+  @IsEnumCaseInsensitive(UserStatus)
   public status?: UserStatus;
 }
 
@@ -106,16 +106,27 @@ export class PrepareSignatureDto {
   @ApiProperty({
     enum: SignatureType,
   })
-  @IsEnum(SignatureType)
+  @IsEnumCaseInsensitive(SignatureType)
   public type: SignatureType;
 }
 
-export class RegisterOracleDto {
-  @ApiProperty({ description: 'Ethereum address of the oracle' })
+export class RegistrationInExchangeOracleDto {
+  @ApiProperty({
+    name: 'oracle_address',
+    description: 'Ethereum address of the oracle',
+  })
   @IsEthereumAddress()
+  public oracleAddress: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
+}
+
+export class RegistrationInExchangeOracleResponseDto {
   public oracleAddress: string;
 }
 
-export class RegisteredOraclesDto {
+export class RegistrationInExchangeOraclesDto {
   public oracleAddresses: string[];
 }
