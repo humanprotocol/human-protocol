@@ -619,6 +619,8 @@ def create_job(
     cvat_id: int,
     cvat_task_id: int,
     cvat_project_id: int,
+    start_frame: int,
+    stop_frame: int,
     status: JobStatuses = JobStatuses.new,
 ) -> str:
     """
@@ -630,6 +632,8 @@ def create_job(
         cvat_id=cvat_id,
         cvat_task_id=cvat_task_id,
         cvat_project_id=cvat_project_id,
+        start_frame=start_frame,
+        stop_frame=stop_frame,
         status=status.value,
     )
 
