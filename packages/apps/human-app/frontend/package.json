@@ -40,7 +40,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.53.1",
-    "react-i18next": "^14.0.2",
+    "react-i18next": "^15.1.0",
     "react-imask": "^7.4.0",
     "react-number-format": "^5.3.4",
     "react-router-dom": "^6.22.0",
