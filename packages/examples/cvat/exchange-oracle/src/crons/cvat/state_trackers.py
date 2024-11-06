@@ -186,6 +186,8 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                         upload.task_id,
                         upload.task.cvat_project_id,
                         status=JobStatuses(cvat_job.state),
+                        start_frame=cvat_job.start_frame,
+                        stop_frame=cvat_job.stop_frame,
                     )
 
                 completed.append(upload)

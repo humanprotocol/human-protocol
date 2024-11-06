@@ -75,6 +75,8 @@ def _export_escrow_annotations(
     jobs = cvat_service.get_jobs_by_escrow_address(session, escrow_address, chain_id)
 
     annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
+    # FUTURE-TODO: probably can be removed in the future since
+    # these annotations are no longer used in Recording Oracle
     job_annotations = _download_job_annotations(logger, annotation_format, jobs)
 
     if manifest.annotation.type == TaskTypes.image_skeletons_from_boxes.value:

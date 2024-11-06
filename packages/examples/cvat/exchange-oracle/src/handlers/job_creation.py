@@ -354,7 +354,6 @@ class SimpleTaskBuilder(_TaskBuilderBase):
             user_guide=manifest.annotation.user_guide,
         )
 
-        # TODO: setup webhook after task is created and GT job is configured
         # Setup webhooks for a project (update:task, update:job)
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
@@ -401,7 +400,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                 )
                 db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                # The task is fully created once 'update:task' webhook is received.
                 cvat_api.put_task_data(
                     cvat_task.id,
                     cloud_storage.id,
@@ -2640,7 +2639,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         # TODO: improve guide handling - split for different points
                     )
 
-                    # FIXME: setup webhook after GT job is created
                     # Setup webhooks for a project (update:task, update:job)
                     cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
@@ -2683,8 +2681,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         )
                         db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                        # The task is fully created once 'update:task' or 'update:job'
-                        # webhook is received.
+                        # The task is fully created once 'update:task' webhook is received.
                         cvat_api.put_task_data(
                             cvat_task.id,
                             cvat_cloud_storage.id,
