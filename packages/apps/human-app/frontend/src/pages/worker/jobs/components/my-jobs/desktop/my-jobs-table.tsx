@@ -8,7 +8,8 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
@@ -33,9 +34,11 @@ import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
+import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
 
 const getColumnsDefinition = (
-  resignJob: (assignment_id: string) => void
+  resignJob: (assignment_id: string) => void,
+  refreshData: () => void
 ): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -174,7 +177,7 @@ const getColumnsDefinition = (
   },
   {
     accessorKey: 'assignment_id',
-    header: '',
+    header: t('worker.jobs.refresh'),
     size: 100,
     enableSorting: true,
     Cell: (props) => {
@@ -204,6 +207,37 @@ const getColumnsDefinition = (
         </Grid>
       );
     },
+    muiTableHeadCellProps: () => ({
+      component: (props) => {
+        return (
+          <td {...props}>
+            <Grid
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                width: '100%',
+              }}
+            >
+              <Button
+                size="small"
+                sx={{
+                  paddingTop: '0.4rem',
+                  paddingBottom: '0.4rem',
+                  paddingInline: '1rem',
+                  fontSize: '13px',
+                }}
+                type="button"
+                variant="outlined"
+                onClick={refreshData}
+              >
+                {t('worker.jobs.refresh')}
+                <RefreshIcon sx={{ marginLeft: '0.5rem' }} />
+              </Button>
+            </Grid>
+          </td>
+        );
+      },
+    }),
   },
 ];
 
@@ -215,7 +249,6 @@ export function MyJobsTable() {
     filterParams,
     resetFilterParams,
   } = useMyJobsFilterStore();
-
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
     () => tableData?.results ?? [],
@@ -223,6 +256,7 @@ export function MyJobsTable() {
   );
 
   const { mutate: rejectTaskMutation } = useRejectTaskMutation();
+  const { mutate: refreshTasksMutation } = useRefreshTasksMutation();
   const { address: oracle_address } = useParams<{ address: string }>();
 
   const [paginationState, setPaginationState] = useState({
@@ -233,6 +267,11 @@ export function MyJobsTable() {
   const rejectTask = (address: string) => {
     return (assignment_id: string) => {
       rejectTaskMutation({ oracle_address: address, assignment_id });
+    };
+  };
+  const refreshTasks = (address: string) => {
+    return () => {
+      refreshTasksMutation({ oracle_address: address });
     };
   };
   useEffect(() => {
@@ -255,7 +294,10 @@ export function MyJobsTable() {
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(rejectTask(oracle_address ?? '')),
+    columns: getColumnsDefinition(
+      rejectTask(oracle_address ?? ''),
+      refreshTasks(oracle_address ?? '')
+    ),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',

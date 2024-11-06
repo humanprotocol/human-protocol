@@ -22,7 +22,6 @@ export interface TableQueryContext {
   };
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const TableQueryContext = createContext<TableQueryContext>({
   actions: {
     setSorting: () => undefined,

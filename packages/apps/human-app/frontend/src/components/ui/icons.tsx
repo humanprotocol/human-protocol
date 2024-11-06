@@ -74,6 +74,10 @@ function RefreshIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <RefreshIconDark /> : <RefreshIconLight />;
 }
+function InverseRefreshIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <RefreshIconLight /> : <RefreshIconDark />;
+}
 function UserOutlinedIcon() {
   const { isDarkMode } = useColorMode();
   return isDarkMode ? <UserOutlinedIconDark /> : <UserOutlinedIconLight />;
@@ -125,6 +129,7 @@ export {
   ChatIcon,
   HandIcon,
   RefreshIcon,
+  InverseRefreshIcon,
   UserOutlinedIcon,
   WorkIcon,
   HelpIcon,

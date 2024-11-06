@@ -5,7 +5,6 @@ import { routerPaths } from '@/router/router-paths';
 import type { AuthenticatedUserContextType } from '@/auth/auth-context';
 import { PageCardLoader } from '@/components/ui/page-card';
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType | null>(null);
 

@@ -10,7 +10,6 @@ interface HomePageStageContextProps {
   isMainPage: boolean;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const HomePageStateContext =
   createContext<HomePageStageContextProps | null>(null);
 
@@ -34,7 +33,6 @@ export function HomePageStateProvider({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useHomePageState = () => {
   const context = useContext(HomePageStateContext);
   if (!context) {

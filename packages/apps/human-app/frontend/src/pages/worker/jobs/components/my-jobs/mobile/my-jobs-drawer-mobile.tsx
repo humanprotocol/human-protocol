@@ -1,4 +1,3 @@
-/* eslint-disable camelcase --- response from api */
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -6,10 +5,11 @@ import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
-import { Button } from '@/components/ui/button';
-import { HumanLogoIcon, SortArrow } from '@/components/ui/icons';
-import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
+import { HumanLogoIcon } from '@/components/ui/icons';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { MyJobsRewardAmountSortMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-reward-amount-sort-mobile';
+import { MyJobsExpiresAtSortMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-expires-at-sort-mobile';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
 import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
 import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
@@ -20,9 +20,9 @@ interface DrawerMobileProps {
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
 }: DrawerMobileProps) {
+  const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
-  const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
   return (
     <Box sx={{ display: 'flex', position: 'relative' }}>
@@ -58,7 +58,14 @@ export function MyJobsDrawerMobile({
             zIndex: '999999',
           }}
         >
-          <HumanLogoIcon />
+          <Stack
+            sx={{ cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+            }}
+          >
+            <HumanLogoIcon />
+          </Stack>
 
           <IconButton
             onClick={() => {
@@ -85,126 +92,8 @@ export function MyJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.mobileFilterDrawer.sortBy')}
         </Typography>
-        <Typography color={colorPalette.text.secondary} variant="body2">
-          {t('worker.jobs.rewardAmount')}
-        </Typography>
-        <Button
-          size="small"
-          sx={{
-            marginLeft: '16px',
-            maxWidth: 'fit-content',
-          }}
-          variant="text"
-        >
-          <SortArrow />
-          <Typography
-            onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                sort: 'desc',
-                sort_field: 'reward_amount',
-              });
-            }}
-            sx={{
-              marginLeft: '10px',
-            }}
-            variant="subtitle1"
-          >
-            {t('worker.jobs.sortDirection.fromHighest')}
-          </Typography>
-        </Button>
-        <Button
-          size="small"
-          sx={{
-            marginLeft: '16px',
-            maxWidth: 'fit-content',
-            marginBottom: '16px',
-          }}
-          variant="text"
-        >
-          <Box
-            sx={{
-              transform: 'rotate(180deg)',
-            }}
-          >
-            <SortArrow />
-          </Box>
-          <Typography
-            onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                sort: 'asc',
-                sort_field: 'reward_amount',
-              });
-            }}
-            sx={{
-              marginLeft: '10px',
-            }}
-            variant="subtitle1"
-          >
-            From lowest
-          </Typography>
-        </Button>
-        <Typography color={colorPalette.text.secondary} variant="body2">
-          {t('worker.jobs.expiresAt')}
-        </Typography>
-        <Button
-          size="small"
-          sx={{
-            marginLeft: '16px',
-            maxWidth: 'fit-content',
-          }}
-          variant="text"
-        >
-          <SortArrow />
-          <Typography
-            onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                sort: 'desc',
-                sort_field: 'expires_at',
-              });
-            }}
-            sx={{
-              marginLeft: '10px',
-            }}
-            variant="subtitle1"
-          >
-            {t('worker.jobs.sortDirection.fromHighest')}
-          </Typography>
-        </Button>
-        <Button
-          size="small"
-          sx={{
-            marginLeft: '16px',
-            maxWidth: 'fit-content',
-            marginBottom: '16px',
-          }}
-          variant="text"
-        >
-          <Box
-            sx={{
-              transform: 'rotate(180deg)',
-            }}
-          >
-            <SortArrow />
-          </Box>
-          <Typography
-            onClick={() => {
-              setFilterParams({
-                ...filterParams,
-                sort: 'asc',
-                sort_field: 'expires_at',
-              });
-            }}
-            sx={{
-              marginLeft: '10px',
-            }}
-            variant="subtitle1"
-          >
-            From lowest
-          </Typography>
-        </Button>
+        <MyJobsRewardAmountSortMobile />
+        <MyJobsExpiresAtSortMobile />
         <Typography variant="mobileHeaderLarge">
           {t('worker.jobs.mobileFilterDrawer.filters')}
         </Typography>

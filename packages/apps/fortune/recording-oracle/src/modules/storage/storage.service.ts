@@ -53,7 +53,8 @@ export class StorageService {
             this.pgpConfigService.passphrase,
           );
 
-          return JSON.parse(await encryption.decrypt(fileContent));
+          const decryptedData = await encryption.decrypt(fileContent);
+          return JSON.parse(Buffer.from(decryptedData).toString());
         } catch {
           throw new Error('Unable to decrypt manifest');
         }

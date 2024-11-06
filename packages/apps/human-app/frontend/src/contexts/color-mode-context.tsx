@@ -31,7 +31,6 @@ const isModeSetILocalStorage = () => {
   return Boolean(localStorage.getItem(MODE_LOCAL_STORAGE_KEY));
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const ColorModeContext = createContext<
   ColorModeContextProps | undefined
 >(undefined);

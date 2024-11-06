@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common';
-import { CacheModuleAsyncOptions } from '@nestjs/common/cache';
+import { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import _ from 'lodash';
-import { redisStore } from 'cache-manager-redis-store';
+import { redisStore } from 'cache-manager-redis-yet';
 
 import { EnvironmentConfigService } from './environment-config.service';
 
@@ -24,8 +24,7 @@ export const CacheFactoryConfig: CacheModuleAsyncOptions = {
       disableOfflineQueue: true,
     });
 
-    const redisClient = store.getClient();
-    redisClient.on('error', throttledRedisErrorLog);
+    store.client.on('error', throttledRedisErrorLog);
 
     return {
       store: () => store,

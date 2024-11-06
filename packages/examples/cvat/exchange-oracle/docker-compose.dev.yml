@@ -41,15 +41,13 @@ services:
       MINIO_ROOT_USER: dev
       MINIO_ROOT_PASSWORD: devdevdev
     volumes:
-      - ./tests/utils/datasets:/tmp/datasets
+      - minio:/data
     entrypoint: 'sh'
     ports:
       - 9010:9010
       - 9011:9011
     command:
-      -c "
-      cp -r /tmp/datasets /data &&
-      minio server /data --console-address ':9011' --address ':9010'"
+      -c "minio server /data --console-address ':9011' --address ':9010'"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9010/minio/health/live"]
       interval: 5s
@@ -84,6 +82,7 @@ services:
 volumes:
   postgres:
   redis:
+  minio:
 
 networks:
   test-network:

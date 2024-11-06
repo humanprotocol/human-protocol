@@ -69,7 +69,7 @@ export class PayoutService {
       results.amounts,
       results.url,
       results.hash,
-      true,  // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
+      true, // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
       {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
       },

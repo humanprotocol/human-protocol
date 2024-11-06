@@ -3,21 +3,19 @@ import { t } from 'i18next';
 import { Chips } from '@/components/ui/chips';
 import { TableButton } from '@/components/ui/table-button';
 import { Loader } from '@/components/ui/loader';
-import { Alert } from '@/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { OraclesDataQueryResult } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { ListItem } from '@/components/ui/list-item';
 import { useColorMode } from '@/hooks/use-color-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import type { OracleSuccessResponse } from '@/api/services/worker/oracles';
+import { NoRecords } from '@/components/ui/no-records';
 
 export function OraclesTableMobile({
   selectOracle,
   oraclesQueryDataResult: {
     data: oraclesData,
     isError: isOraclesDataError,
-    error: oraclesDataError,
     isPending: isOraclesDataPending,
   },
 }: {
@@ -38,11 +36,7 @@ export function OraclesTableMobile({
   }
 
   if (isOraclesDataError) {
-    return (
-      <Alert color="error" severity="error">
-        {defaultErrorMessage(oraclesDataError)}
-      </Alert>
-    );
+    return <NoRecords />;
   }
 
   return (

@@ -227,7 +227,7 @@ export default function JobDetail() {
             Job solutions
           </Typography>
           <Box sx={{ mt: 7 }}>
-            {data.manifest.requestType === 'FORTUNE' && (
+            {data.manifest.requestType === 'fortune' && (
               <Table
                 columns={[
                   {
@@ -257,7 +257,7 @@ export default function JobDetail() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             )}
-            {data.manifest.requestType !== 'FORTUNE' && (
+            {data.manifest.requestType !== 'fortune' && (
               <Box
                 sx={{
                   borderRadius: '16px',

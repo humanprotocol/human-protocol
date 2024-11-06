@@ -5,7 +5,6 @@ import type { Web3AuthenticatedUserContextType } from '@/auth-web3/web3-auth-con
 import { PageCardLoader } from '@/components/ui/page-card';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const Web3AuthenticatedUserContext =
   createContext<Web3AuthenticatedUserContextType | null>(null);
 

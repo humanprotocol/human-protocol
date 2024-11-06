@@ -140,6 +140,12 @@ WXs/I9nhKcx2pAAA5VwA/R6fW20uAR7ItubxVhQa+PLEVSiUKgYOU9jp75av
 };
 
 export const MESSAGE = 'Human Protocol';
+export const BINARY_MESSAGE_CONTENT = {
+  number: 1,
+  boolean: true,
+  null: null,
+  string: MESSAGE,
+} as const;
 
 export const SIGNEDMESSAGE = `-----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA512
@@ -165,6 +171,21 @@ j/DPeNxUq3zrvUJXXbwb6cMf23f66U/mB27Q0tgAFFMyB+iJxEeo1HEt9IYb
 cii1NVsBkAg4xxsZHrjXKqXzHnnhseNGEW5eNYUZWZJZTZLSMGWV031Kwjm1
 1X6Iew8+EcczRCFcgaCZgxRmEeShDbKMEGjKckvEC1A=
 =pawu
+-----END PGP MESSAGE-----`;
+
+export const SIGNEDENCRYPTEDBINARYMESSAGE = `-----BEGIN PGP MESSAGE-----
+
+wV4D62ta7QqCH7ASAQdA1Fu+j1ROzZfOhWFonXU5nqN8SS7lZ9PcOH5R0EsJ
+WwMwVqgc90AQPe6QqHXADnmWRcmlMa60UqZXp6RM117IA61U3eMWZMvZpm8w
+WchAe+/YwV4DM57hZqoRiU8SAQdAjBxr7VwdHExxR16YJRfl6jmS/+jVf7Ed
+a1M134lkWFQwzGk4dbVx/PVlH3QbwzSuwh4EvdTku/5eA6TTAG8SsPnjeYwe
++bOn6blgHitbCyRg0sA4ARd/h3Cv3SPLv8TLLY1+oZKCxj8JixvRJ7pdQFtX
+uQj4/3ebFN3Wz4Bc22og61V0bRwbItkvAkdPytAAohMSdvtmB/afqN5KleH7
+Q+hftw7iUpLxGEhykh4lHy9dt/ylzPFYP1MVAm9aTdNMo0YEeCji8EPbbxl4
+hdPtck+uT1OpewbrhZNxg5Mtzc+t5tf/TfNYllAO6u/XTTWsOBKGcLhsituV
+j7PegOO0npgohXmOxKFMmjJZhJOEbDOwCxTb72lZHwOXP5f95xMuSWoUGFpO
+lk9n7jB3p5HYtUDSriV2YSI+G3NWmqGHG4/XTdodK2DQb8/Hp88=
+=qQI9
 -----END PGP MESSAGE-----`;
 
 export const SIGNEDENCRYPTEDLOCKEDMESSAGE = `-----BEGIN PGP MESSAGE-----

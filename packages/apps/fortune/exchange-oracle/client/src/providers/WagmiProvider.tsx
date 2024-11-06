@@ -1,11 +1,9 @@
-import { ChainId } from '@human-protocol/sdk';
-
 import { FC, PropsWithChildren } from 'react';
-import { http, createConfig, WagmiProvider as WWagmiProvider } from 'wagmi';
+import { createConfig, http, WagmiProvider as WWagmiProvider } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
 import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 
-import { RPC_URLS, LOCALHOST } from '../constants/chains';
+import { LOCALHOST } from '../constants/chains';
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
 
@@ -35,19 +33,19 @@ export const wagmiConfig = createConfig({
     }),
   ],
   transports: {
-    [wagmiChains.mainnet.id]: http(RPC_URLS[ChainId.MAINNET]),
-    [wagmiChains.sepolia.id]: http(RPC_URLS[ChainId.SEPOLIA]),
-    [wagmiChains.bsc.id]: http(RPC_URLS[ChainId.BSC_MAINNET]),
-    [wagmiChains.bscTestnet.id]: http(RPC_URLS[ChainId.BSC_TESTNET]),
-    [wagmiChains.polygon.id]: http(RPC_URLS[ChainId.POLYGON]),
-    [wagmiChains.polygonAmoy.id]: http(RPC_URLS[ChainId.POLYGON_AMOY]),
-    [wagmiChains.moonbeam.id]: http(RPC_URLS[ChainId.MOONBEAM]),
-    [wagmiChains.moonbaseAlpha.id]: http(RPC_URLS[ChainId.MOONBASE_ALPHA]),
-    [wagmiChains.avalanche.id]: http(RPC_URLS[ChainId.AVALANCHE]),
-    [wagmiChains.avalancheFuji.id]: http(RPC_URLS[ChainId.AVALANCHE_TESTNET]),
-    [wagmiChains.xLayer.id]: http(RPC_URLS[ChainId.XLAYER]),
-    [wagmiChains.xLayerTestnet.id]: http(RPC_URLS[ChainId.XLAYER_TESTNET]),
-    [LOCALHOST.id]: http(RPC_URLS[ChainId.LOCALHOST]),
+    [wagmiChains.mainnet.id]: http(),
+    [wagmiChains.sepolia.id]: http(),
+    [wagmiChains.bsc.id]: http(),
+    [wagmiChains.bscTestnet.id]: http(),
+    [wagmiChains.polygon.id]: http(),
+    [wagmiChains.polygonAmoy.id]: http(),
+    [wagmiChains.moonbeam.id]: http(),
+    [wagmiChains.moonbaseAlpha.id]: http(),
+    [wagmiChains.avalanche.id]: http(),
+    [wagmiChains.avalancheFuji.id]: http(),
+    [wagmiChains.xLayer.id]: http(),
+    [wagmiChains.xLayerTestnet.id]: http(),
+    [LOCALHOST.id]: http(LOCALHOST.rpcUrls.default.http[0]),
   },
 });
 

@@ -83,10 +83,12 @@ export class StorageService {
         this.pgpConfigService.privateKey!,
         this.pgpConfigService.passphrase,
       );
+      const decryptedData = await encryption.decrypt(fileContent);
+      const content = Buffer.from(decryptedData).toString();
       try {
-        return JSON.parse(await encryption.decrypt(fileContent));
+        return JSON.parse(content);
       } catch {
-        return await encryption.decrypt(fileContent);
+        return content;
       }
     } else {
       return fileContent;

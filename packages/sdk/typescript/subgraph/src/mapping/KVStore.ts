@@ -109,9 +109,9 @@ export function handleDataSaved(event: DataSaved): void {
       reputationNetworks = [];
     }
 
-    if (event.params.value == 'ACTIVE') {
+    if (event.params.value.toLowerCase() == 'active') {
       reputationNetworks.push(reputationNetwork.id);
-    } else if (event.params.value == 'INACTIVE') {
+    } else if (event.params.value.toLowerCase() == 'inactive') {
       const filteredNetworks: Bytes[] = [];
       for (let i = 0; i < reputationNetworks.length; i++) {
         if (reputationNetworks[i] != reputationNetwork.id) {

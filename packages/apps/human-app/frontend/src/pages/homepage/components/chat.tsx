@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 export function Chat({
   displayChatIcon = true,
@@ -6,6 +7,7 @@ export function Chat({
   displayChatIcon?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let chatElement: HTMLElement | undefined;
@@ -21,7 +23,7 @@ export function Chat({
         if (displayChatIcon) {
           chatElement.style.opacity = '1';
           chatElement.style.top = `${(refRect.top - rootRect.top).toString()}px`;
-          chatElement.style.left = `${(refRect.left - rootRect.left).toString()}px`;
+          chatElement.style.right = isMobile ? '16px' : '80px';
           chatElement.style.width = `${refRect.width.toString()}px`;
           chatElement.style.height = `${refRect.height.toString()}px`;
         } else {
@@ -69,7 +71,7 @@ export function Chat({
         resizeObserverElement.parentNode.removeChild(resizeObserverElement);
       }
     };
-  }, [ref, displayChatIcon]);
+  }, [ref, displayChatIcon, isMobile]);
 
   return (
     <div

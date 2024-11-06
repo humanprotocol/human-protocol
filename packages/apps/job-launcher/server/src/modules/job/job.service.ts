@@ -1012,7 +1012,9 @@ export class JobService {
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      manifest = await this.encryption.decrypt(manifest as any);
+      manifest = Buffer.from(
+        await this.encryption.decrypt(manifest),
+      ).toString();
     }
 
     if (isValidJSON(manifest)) {
@@ -1492,7 +1494,9 @@ export class JobService {
 
     let manifest;
     if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
-      manifestData = await this.encryption.decrypt(manifestData as any);
+      manifestData = Buffer.from(
+        await this.encryption.decrypt(manifestData),
+      ).toString();
     }
 
     if (isValidJSON(manifestData)) {
