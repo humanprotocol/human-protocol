@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class JobStatusFunded1727189483187 implements MigrationInterface {
-  name = 'JobStatusFunded1727189483187';
+export class JobStatusFunded1730895674938 implements MigrationInterface {
+  name = 'JobStatusFunded1730895674938';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -10,16 +10,16 @@ export class JobStatusFunded1727189483187 implements MigrationInterface {
         `);
     await queryRunner.query(`
             CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
-                'PENDING',
-                'PAID',
-                'CREATED',
-                'FUNDED',
-                'LAUNCHED',
-                'PARTIAL',
-                'COMPLETED',
-                'FAILED',
-                'TO_CANCEL',
-                'CANCELED'
+                'pending',
+                'paid',
+                'created',
+                'funded',
+                'launched',
+                'partial',
+                'completed',
+                'failed',
+                'to_cancel',
+                'canceled'
             )
         `);
     await queryRunner.query(`
@@ -34,16 +34,16 @@ export class JobStatusFunded1727189483187 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             CREATE TYPE "hmt"."jobs_status_enum_old" AS ENUM(
-                'PENDING',
-                'PAID',
-                'CREATED',
-                'SET_UP',
-                'LAUNCHED',
-                'PARTIAL',
-                'COMPLETED',
-                'FAILED',
-                'TO_CANCEL',
-                'CANCELED'
+                'pending',
+                'paid',
+                'created',
+                'set_up',
+                'launched',
+                'partial',
+                'completed',
+                'failed',
+                'to_cancel',
+                'canceled'
             )
         `);
     await queryRunner.query(`
