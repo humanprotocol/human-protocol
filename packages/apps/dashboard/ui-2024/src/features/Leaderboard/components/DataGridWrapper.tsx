@@ -57,7 +57,7 @@ export const DataGridWrapper = ({
 				slots={{
 					noRowsOverlay() {
 						if (status === 'error') {
-							return handleErrorMessage(error);
+							return <div>{handleErrorMessage(error)}</div>;
 						}
 
 						return (
