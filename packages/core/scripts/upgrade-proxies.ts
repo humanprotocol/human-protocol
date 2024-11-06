@@ -21,10 +21,11 @@ async function main() {
       escrowFactoryAddress,
       EscrowFactory
     );
-    const contract = await escrowFactoryContract.deployed();
-    await ethers.provider.getTransactionReceipt(
-      contract.deployTransaction.hash
-    );
+    const contract = await escrowFactoryContract.waitForDeployment();
+    const hash = contract.deploymentTransaction()?.hash;
+    if (hash) {
+      await ethers.provider.getTransactionReceipt(hash);
+    }
 
     console.log(
       'Escrow Factory Proxy Address: ',
@@ -45,10 +46,11 @@ async function main() {
       stakingAddress,
       Staking
     );
-    const contract = await stakingContract.deployed();
-    await ethers.provider.getTransactionReceipt(
-      contract.deployTransaction.hash
-    );
+    const contract = await stakingContract.waitForDeployment();
+    const hash = contract.deploymentTransaction()?.hash;
+    if (hash) {
+      await ethers.provider.getTransactionReceipt(hash);
+    }
 
     console.log('Staking Proxy Address: ', await stakingContract.getAddress());
     console.log(
