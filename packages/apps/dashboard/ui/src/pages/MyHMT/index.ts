@@ -1,1 +1,0 @@
-export { MyHMT } from './MyHMT';
