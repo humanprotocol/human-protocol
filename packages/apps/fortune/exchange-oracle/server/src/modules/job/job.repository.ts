@@ -6,6 +6,7 @@ import { BaseRepository } from '../../database/base.repository';
 import { JobEntity } from './job.entity';
 import { JobSortField, JobStatus } from '../../common/enums/job';
 import { JobFilterData, ListResult } from './job.interface';
+import { convertToDatabaseSortDirection } from '../../database/database.utils';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {
@@ -57,7 +58,10 @@ export class JobRepository extends BaseRepository<JobEntity> {
       data.sortField == JobSortField.CREATED_AT ||
       data.sortField == JobSortField.UPDATED_AT
     )
-      queryBuilder.orderBy(data.sortField!, data.sort);
+      queryBuilder.orderBy(
+        data.sortField!,
+        convertToDatabaseSortDirection(data.sort),
+      );
 
     if (data.chainId !== undefined) {
       queryBuilder.andWhere('job.chainId = :chainId', {
