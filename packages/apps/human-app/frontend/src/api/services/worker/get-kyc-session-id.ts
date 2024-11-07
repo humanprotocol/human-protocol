@@ -14,8 +14,7 @@ export type KycStartSuccessSchema = z.infer<typeof kycStartSchema>;
 export function useKycStartMutation() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedUser();
-  const { refreshAccessTokenAsync: getAccessTokenMutation } =
-    useAccessTokenRefresh();
+  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   return useMutation({
     mutationFn: async () => {
       try {
@@ -29,7 +28,7 @@ export function useKycStartMutation() {
         });
         return result;
       } catch (error) {
-        await getAccessTokenMutation({ authType: 'web2' });
+        await refreshAccessTokenAsync({ authType: 'web2' });
         throw error;
       }
     },

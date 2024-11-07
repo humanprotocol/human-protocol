@@ -72,26 +72,13 @@ export function useAccessTokenRefresh() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
+    scope: {
+      id: 'refresh-access-token',
+    },
   });
 
-  // Block new mutations if one is already loading
-  const refreshAccessToken = (args: Parameters<typeof mutation.mutate>[0]) => {
-    if (!mutation.isPending) {
-      mutation.mutate(args);
-    }
-  };
-
-  // Block new async mutations if one is already loading
-  const refreshAccessTokenAsync = async (
-    args: Parameters<typeof mutation.mutateAsync>[0]
-  ) => {
-    if (!mutation.isPending) {
-      await mutation.mutateAsync(args);
-    }
-  };
-
   return {
-    refreshAccessToken,
-    refreshAccessTokenAsync,
+    refreshAccessToken: mutation.mutate,
+    refreshAccessTokenAsync: mutation.mutateAsync,
   };
 }

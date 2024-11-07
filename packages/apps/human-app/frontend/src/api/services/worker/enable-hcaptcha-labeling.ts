@@ -18,8 +18,7 @@ export type EnableHCaptchaLabelingSuccessResponse = z.infer<
 export function useEnableHCaptchaLabelingMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { refreshAccessTokenAsync: getAccessTokenMutation } =
-    useAccessTokenRefresh();
+  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
 
   return useMutation({
     mutationFn: async () => {
@@ -31,7 +30,7 @@ export function useEnableHCaptchaLabelingMutation() {
           options: { method: 'POST' },
         }
       );
-      await getAccessTokenMutation({ authType: 'web2' });
+      await refreshAccessTokenAsync({ authType: 'web2' });
       return result;
     },
     onSuccess: async () => {
