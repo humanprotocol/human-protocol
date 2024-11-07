@@ -93,7 +93,7 @@ describe('Staking', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [await staking.getAddress()],
+      [await staking.getAddress(), minimumStake],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
 

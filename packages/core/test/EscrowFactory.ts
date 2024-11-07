@@ -14,7 +14,7 @@ describe('EscrowFactory', function () {
   let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
 
   const jobRequesterId = 'job-requester-id';
-  const minimumStake = 2;
+  const minimumStake = 5;
   const lockPeriod = 2;
   const feePercentage = 2;
 
@@ -66,7 +66,7 @@ describe('EscrowFactory', function () {
   });
 
   this.beforeEach(async () => {
-    // Deploy Staking Conract
+    // Deploy Staking Contract
     const Staking = await ethers.getContractFactory('Staking');
     staking = (await upgrades.deployProxy(
       Staking,
@@ -84,7 +84,7 @@ describe('EscrowFactory', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [await staking.getAddress()],
+      [await staking.getAddress(), minimumStake],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
   });
@@ -96,7 +96,7 @@ describe('EscrowFactory', function () {
     });
   });
 
-  it('Operator should not be able to create an escrow without staking', async () => {
+  it('Operator should not be able to create an escrow without meeting minimum stake', async () => {
     await expect(
       escrowFactory
         .connect(operator)
@@ -105,10 +105,10 @@ describe('EscrowFactory', function () {
           [await reputationOracle.getAddress()],
           jobRequesterId
         )
-    ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
+    ).to.be.revertedWith('Insufficient stake to create an escrow.');
   });
 
-  it('Operator should be able to create an escrow after staking', async () => {
+  it('Operator should be able to create an escrow after meeting minimum stake', async () => {
     const event = await stakeAndCreateEscrow(staking);
 
     expect(event?.token).to.equal(
@@ -130,6 +130,40 @@ describe('EscrowFactory', function () {
       .withArgs(await token.getAddress(), anyValue, jobRequesterId);
   });
 
+  it('Owner should be able to update minimumStake', async () => {
+    await escrowFactory.connect(owner).updateMinimumStake(15);
+    const updatedMinimumStake = await escrowFactory.minimumStake();
+    expect(updatedMinimumStake).to.equal(15, 'Minimum stake updated correctly');
+  });
+
+  it('Operator should not create escrow if new minimumStake is not met', async () => {
+    await escrowFactory.connect(owner).updateMinimumStake(15);
+    await staking.connect(operator).stake(stakeAmount);
+
+    await expect(
+      escrowFactory
+        .connect(operator)
+        .createEscrow(
+          await token.getAddress(),
+          [await reputationOracle.getAddress()],
+          jobRequesterId
+        )
+    ).to.be.revertedWith('Insufficient stake to create an escrow.');
+  });
+
+  it('Operator should be able to create escrow after staking more to meet new minimum', async () => {
+    await escrowFactory.connect(owner).updateMinimumStake(15);
+    await staking.connect(operator).stake(20);
+
+    const event = await createEscrow();
+
+    expect(event?.token).to.equal(
+      await token.getAddress(),
+      'token address is correct'
+    );
+    expect(event?.escrow).to.not.be.null;
+  });
+
   it('Should find the newly created escrow from deployed escrow', async () => {
     await stakeAndCreateEscrow(staking);
     const escrowAddress = await escrowFactory.lastEscrow();
@@ -143,7 +177,7 @@ describe('EscrowFactory', function () {
   it('Operator should be able to create another escrow after unstaking some of the stakes', async () => {
     await stakeAndCreateEscrow(staking);
 
-    staking.connect(operator).unstake(stakeAmount / 2);
+    staking.connect(operator).unstake(2);
 
     const event = await createEscrow();
 
@@ -167,21 +201,17 @@ describe('EscrowFactory', function () {
           [await reputationOracle.getAddress()],
           jobRequesterId
         )
-    ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
+    ).to.be.revertedWith('Insufficient stake to create an escrow.');
   });
 
-  it('Operator should be able to create an escrow after staking more tokens', async () => {
+  it('Should find the newly created escrow from deployed escrow', async () => {
     await stakeAndCreateEscrow(staking);
+    const escrowAddress = await escrowFactory.lastEscrow();
 
-    staking.connect(operator).unstake(stakeAmount);
-
-    const event = await stakeAndCreateEscrow(staking);
-
-    expect(event?.token).to.equal(
-      await token.getAddress(),
-      'token address is correct'
-    );
-    expect(event?.escrow).to.not.be.null;
+    const result = await escrowFactory
+      .connect(operator)
+      .hasEscrow(escrowAddress);
+    expect(result).to.equal(true);
   });
 
   describe('proxy implementation', function () {

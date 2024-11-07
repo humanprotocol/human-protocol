@@ -17,19 +17,26 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     mapping(address => uint256) public escrowCounters;
     address public lastEscrow;
     address public staking;
+    uint256 public minimumStake;
 
     event Launched(address token, address escrow);
     event LaunchedV2(address token, address escrow, string jobRequesterId);
+    event StakingAddressUpdated(address newStakingAddress);
+    event MinimumStakeUpdated(uint256 newMinimumStake);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address _staking) external payable virtual initializer {
+    function initialize(
+        address _staking,
+        uint256 _minimumStake
+    ) external payable virtual initializer {
         __Ownable_init_unchained();
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
         staking = _staking;
+        minimumStake = _minimumStake;
     }
 
     function createEscrow(
@@ -41,8 +48,8 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
             msg.sender
         );
         require(
-            availableStake > 0,
-            'Needs to stake HMT tokens to create an escrow.'
+            availableStake >= minimumStake,
+            'Insufficient stake to create an escrow.'
         );
 
         Escrow escrow = new Escrow(
@@ -63,7 +70,17 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         return escrowCounters[_address] != 0;
     }
 
-    // solhint-disable-next-line no-empty-blocks
+    function updateStakingAddress(address _newStaking) external onlyOwner {
+        require(_newStaking != address(0), ERROR_ZERO_ADDRESS);
+        staking = _newStaking;
+        emit StakingAddressUpdated(_newStaking);
+    }
+
+    function updateMinimumStake(uint256 _newMinimumStake) external onlyOwner {
+        minimumStake = _newMinimumStake;
+        emit MinimumStakeUpdated(_newMinimumStake);
+    }
+
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
@@ -71,5 +88,5 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[46] private __gap;
+    uint256[44] private __gap;
 }
