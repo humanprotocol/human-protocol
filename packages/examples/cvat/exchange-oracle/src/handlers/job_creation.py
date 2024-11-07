@@ -481,7 +481,7 @@ class PointsTaskBuilder(SimpleTaskBuilder):
             "target_metric_threshold": 0.9,
             "iou_threshold": self.manifest.validation.min_quality,
             "oks_sigma": self._mean_gt_bbox_radius_estimation,
-            "use_bbox_size_for_points": False,
+            "point_size_base": "image_size",
         }
         values.update(overrides)
         super()._setup_quality_settings(task_id, **values)
