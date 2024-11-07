@@ -17,6 +17,7 @@ import {
   FundAmountStatisticsDto,
   JobCountDto,
 } from '../statistic/statistic.dto';
+import { convertToDatabaseSortDirection } from '../../database/database.utils';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {
@@ -106,10 +107,11 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     const queryBuilder = this.createQueryBuilder('job');
 
+    const dbSortDirection = convertToDatabaseSortDirection(data.sort);
     if (data.sortField == JobSortField.CHAIN_ID)
-      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+      queryBuilder.orderBy(`job.${data.sortField}`, dbSortDirection);
     else if (data.sortField == JobSortField.CREATED_AT)
-      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+      queryBuilder.orderBy(`job.${data.sortField}`, dbSortDirection);
 
     queryBuilder.where('job.userId = :userId', { userId });
     if (data.status !== undefined) {
