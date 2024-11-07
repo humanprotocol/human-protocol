@@ -157,6 +157,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             cvat_task_id=cvat_task.cvat_id,
             status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.add(cvat_job)
 
