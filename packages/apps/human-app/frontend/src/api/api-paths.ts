@@ -45,6 +45,9 @@ export const apiPaths = {
     resignJob: {
       path: '/assignment/resign-job',
     },
+    refreshJob: {
+      path: '/assignment/refresh',
+    },
     registerAddress: {
       path: '/user/register-address',
       withAuthRetry: true,

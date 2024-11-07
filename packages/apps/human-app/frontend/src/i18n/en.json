@@ -25,7 +25,11 @@
     "captcha": "Please complete the captcha",
     "passwordMissing": "Please enter your password.",
     "invalidEmail": "Please enter a valid email address.",
-    "invalidOracleAddress": "Invalid oracle address."
+    "invalidOracleAddress": "Invalid oracle address.",
+    "publicKeyLengthError": "Public key must be exactly 128 characters long",
+    "publicKeyHexadecimalStringError": "Public key must be a valid hexadecimal string",
+    "urlValidationError": "Invalid URL",
+    "feeValidationError": "Fee value must be an integer between 0 and 100"
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
@@ -229,6 +233,7 @@
       "rewardAmount": "Reward amount",
       "jobType": "Task type",
       "expiresAt": "Expires at",
+      "refresh": "Refresh",
       "status": "Status",
       "selectJob": "Select Task",
       "searchEscrowAddress": "Search escrow address",
@@ -392,16 +397,6 @@
     "header": "Session Expired",
     "description": "Please log in again to continue using the app.",
     "logIn": "Log In"
-  },
-  "updateVersionModal": {
-    "newVersion": "We've just released a new version of HUMAN App with enhanced features.",
-    "please": "To continue using the app, please:",
-    "reregister": "Reregister your account",
-    "verify": "Verify your identity",
-    "connect": "Connect your wallet",
-    "assistance": "These steps help us ensure the safety of your account and provide you with a better experience. Thank you for your understanding! For assistance, reach out on ",
-    "discord": "Discord",
-    "gotIt": "Got it!"
   },
   "jobTypeLabels": {
     "fortune": "Fortune",

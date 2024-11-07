@@ -97,9 +97,11 @@ describe('KvStoreGateway', () => {
         KVStoreKeys.url,
       );
 
-      expect(cacheManager.set).toHaveBeenCalledWith(cacheKey, expectedData, {
-        ttl: configService.cacheTtlExchangeOracleUrl,
-      });
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        cacheKey,
+        expectedData,
+        configService.cacheTtlExchangeOracleUrl,
+      );
       expect(cacheManager.get).toHaveBeenCalledWith(cacheKey);
       expect(result).toBe(expectedData);
     });

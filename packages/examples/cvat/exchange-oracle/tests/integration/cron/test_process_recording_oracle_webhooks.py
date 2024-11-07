@@ -252,9 +252,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             status=OracleWebhookStatuses.pending.value,
             event_type=RecordingOracleEventTypes.submission_rejected.value,
             event_data={
-                "assignments": [
-                    {"assignment_id": "sample assignment id", "reason": "sample reason"}
-                ]
+                "assignments": [{"assignment_id": str(uuid.uuid4()), "reason": "sample reason"}]
             },
             direction=OracleWebhookDirectionTags.incoming,
         )

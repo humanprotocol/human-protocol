@@ -14,13 +14,12 @@ from src.core.types import (
     TaskStatuses,
     TaskTypes,
 )
-from src.db import Base, ChildOf
+from src.db import Base, BaseUUID, ChildOf
 from src.utils.time import utcnow
 
 
-class Project(Base):
+class Project(BaseUUID):
     __tablename__ = "projects"
-    id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     cvat_cloudstorage_id = Column(Integer, index=True, nullable=False)
     status = Column(String, Enum(ProjectStatuses), nullable=False)
@@ -83,7 +82,6 @@ class Project(Base):
 
 class Task(ChildOf[Project]):
     __tablename__ = "tasks"
-    id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     cvat_project_id = Column(
         Integer,
@@ -108,9 +106,8 @@ class Task(ChildOf[Project]):
         return f"Task. id={self.id}"
 
 
-class EscrowCreation(Base):
+class EscrowCreation(BaseUUID):
     __tablename__ = "escrow_creations"
-    id = Column(String, primary_key=True, index=True)
 
     escrow_address = Column(String(42), index=True, nullable=False)
     chain_id = Column(Integer, Enum(Networks), nullable=False)
@@ -138,11 +135,9 @@ class EscrowCreation(Base):
         return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"
 
 
-class EscrowValidation(Base):
+class EscrowValidation(BaseUUID):
     __tablename__ = "escrow_validations"
     __table_args__ = (UniqueConstraint("escrow_address", "chain_id", name="uix_escrow_chain"),)
-
-    id = Column(String, primary_key=True, index=True, server_default=func.uuid_generate_v4())
 
     escrow_address = Column(String(42), index=True, nullable=False)
     chain_id = Column(Integer, Enum(Networks), nullable=False)
@@ -164,9 +159,8 @@ class EscrowValidation(Base):
     )
 
 
-class DataUpload(Base):
+class DataUpload(BaseUUID):
     __tablename__ = "data_uploads"
-    id = Column(String, primary_key=True, index=True)
     task_id = Column(
         Integer,
         ForeignKey("tasks.cvat_id", ondelete="CASCADE"),
@@ -183,7 +177,6 @@ class DataUpload(Base):
 
 class Job(ChildOf[Task]):
     __tablename__ = "jobs"
-    id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     cvat_task_id = Column(Integer, ForeignKey("tasks.cvat_id", ondelete="CASCADE"), nullable=False)
     cvat_project_id = Column(
@@ -215,7 +208,7 @@ class Job(ChildOf[Task]):
         return f"Job. id={self.id}"
 
 
-class User(Base):
+class User(Base):  # user does not have a UUID primary key
     __tablename__ = "users"
     wallet_address = Column(String, primary_key=True, index=True, nullable=False)
     cvat_email = Column(String, unique=True, index=True, nullable=True)
@@ -229,9 +222,8 @@ class User(Base):
         return f"User. wallet_address={self.wallet_address} cvat_id={self.cvat_id}"
 
 
-class Assignment(Base):
+class Assignment(BaseUUID):
     __tablename__ = "assignments"
-    id = Column(String, primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
@@ -266,9 +258,8 @@ class Assignment(Base):
         return f"Assignment. id={self.id} user={self.user.cvat_id} job={self.job.cvat_id}"
 
 
-class Image(Base):
+class Image(BaseUUID):
     __tablename__ = "images"
-    id = Column(String, primary_key=True, index=True)
     cvat_project_id = Column(
         Integer,
         ForeignKey("projects.cvat_id", ondelete="CASCADE"),

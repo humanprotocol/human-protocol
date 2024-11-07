@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  IsArray,
-} from 'class-validator';
+import { IsNumber, IsOptional, Max, Min, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SortDirection } from '../enums/collection';
 import { IsEnumCaseInsensitive } from '../decorators/enums';
