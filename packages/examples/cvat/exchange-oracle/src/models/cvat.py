@@ -194,8 +194,8 @@ class Job(ChildOf[Task]):
     status = Column(String, Enum(JobStatuses), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    start_frame = Column(Integer)  # TODO: nullable=False
-    stop_frame = Column(Integer)  # TODO: nullable=False
+    start_frame = Column(Integer, nullable=False)
+    stop_frame = Column(Integer, nullable=False)
 
     task: Mapped[Task] = relationship(back_populates="jobs")
     project: Mapped[Project] = relationship(back_populates="jobs")
