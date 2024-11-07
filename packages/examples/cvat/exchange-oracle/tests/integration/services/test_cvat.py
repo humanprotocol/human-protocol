@@ -918,7 +918,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=0,
             stop_frame=1,
         )
@@ -948,7 +948,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=0,
             stop_frame=1,
         )
@@ -980,7 +980,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=0,
             stop_frame=1,
         )
@@ -1061,7 +1061,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=0,
             stop_frame=1,
         )
@@ -1074,7 +1074,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=2,
             stop_frame=3,
         )
@@ -1087,7 +1087,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=4,
             stop_frame=5,
         )
@@ -1110,7 +1110,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=0,
             stop_frame=1,
         )
@@ -1123,7 +1123,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=2,
             stop_frame=3,
         )
@@ -1136,7 +1136,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
             start_frame=4,
             stop_frame=5,
         )
