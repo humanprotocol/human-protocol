@@ -134,7 +134,7 @@ def get_task_gt_stats(
 
 
 def update_gt_stats(
-    session: Session, task_id: str, updated_gt_stats: dict[tuple[int, int], ValidationFrameStats]
+    session: Session, task_id: str, updated_gt_stats: dict[str, ValidationFrameStats]
 ):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
@@ -152,13 +152,12 @@ def update_gt_stats(
         [
             {
                 "task_id": task_id,
-                "cvat_task_id": cvat_task_id,
-                "gt_frame_id": gt_frame_id,
+                "gt_frame_name": gt_frame_name,
                 "failed_attempts": val_frame_stats.failed_attempts,
                 "accepted_attempts": val_frame_stats.accepted_attempts,
                 "accumulated_quality": val_frame_stats.accumulated_quality,
             }
-            for (cvat_task_id, gt_frame_id), val_frame_stats in updated_gt_stats.items()
+            for gt_frame_name, val_frame_stats in updated_gt_stats.items()
         ],
     )
     statement = statement.on_conflict_do_update(

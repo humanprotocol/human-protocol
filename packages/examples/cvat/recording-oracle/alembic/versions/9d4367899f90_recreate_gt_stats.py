@@ -25,13 +25,12 @@ def upgrade() -> None:
     op.create_table(
         "gt_stats",
         sa.Column("task_id", sa.String(), nullable=False),
-        sa.Column("cvat_task_id", sa.Integer(), nullable=False),
-        sa.Column("gt_frame_id", sa.Integer(), nullable=False),
+        sa.Column("gt_frame_name", sa.String(), nullable=False),
         sa.Column("failed_attempts", sa.Integer(), nullable=False),
         sa.Column("accepted_attempts", sa.Integer(), nullable=False),
         sa.Column("accumulated_quality", sa.Float(), nullable=False),
         sa.ForeignKeyConstraint(["task_id"], ["tasks.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("task_id", "gt_frame_id"),
+        sa.PrimaryKeyConstraint("task_id", "gt_frame_name"),
     )
     # ### end Alembic commands ###
 

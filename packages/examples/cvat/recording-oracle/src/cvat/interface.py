@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 
 
-class AnnotationInfo(BaseModel):
+class _AnnotationInfo(BaseModel):
     accuracy: float | int
 
 
-class FrameResult(BaseModel):
+class _FrameResult(BaseModel):
     conflicts: list[dict]
-    annotations: AnnotationInfo
+    annotations: _AnnotationInfo
 
 
 class QualityReportData(BaseModel):
-    frame_results: dict[str, FrameResult]
+    frame_results: dict[str, _FrameResult]

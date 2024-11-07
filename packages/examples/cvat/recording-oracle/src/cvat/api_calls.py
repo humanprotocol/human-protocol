@@ -111,6 +111,19 @@ def get_quality_report_data(report_id: int) -> QualityReportData:
             raise
 
 
+def get_jobs_quality_reports(parent_id: int) -> list[models.QualityReport]:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            return get_paginated_collection(
+                api_client.quality_api.list_reports_endpoint, parent_id=parent_id, target="job"
+            )
+
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling QualityApi.list_reports: {e}\n")
+            raise
+
+
 def get_task_validation_layout(task_id: int) -> models.TaskValidationLayoutRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -124,19 +137,6 @@ def get_task_validation_layout(task_id: int) -> models.TaskValidationLayoutRead:
 
         except exceptions.ApiException as ex:
             logger.exception(f"Exception when calling TaskApi.retrieve_validation_layout: {ex}\n")
-            raise
-
-
-def get_jobs_quality_reports(parent_id: int) -> list[models.QualityReport]:
-    logger = logging.getLogger("app")
-    with get_api_client() as api_client:
-        try:
-            return get_paginated_collection(
-                api_client.quality_api.list_reports_endpoint, parent_id=parent_id, target="job"
-            )
-
-        except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling QualityApi.list_reports: {e}\n")
             raise
 
 
@@ -168,3 +168,15 @@ def update_task_validation_layout(
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"Validation layout: {validation_layout}")
+
+
+def get_task_data_meta(task_id: int) -> models.DataMetaRead:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            data_meta, _ = api_client.tasks_api.retrieve_data_meta(task_id)
+            return data_meta
+
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling TaskApi.retrieve_data_meta: {ex}\n")
+            raise

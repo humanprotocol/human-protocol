@@ -57,8 +57,7 @@ class GtStats(Base):
     task_id = Column(
         String, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True, nullable=False
     )
-    cvat_task_id = Column(Integer, nullable=False)
-    gt_frame_id = Column(Integer, primary_key=True, nullable=False)
+    gt_frame_name = Column(String, primary_key=True, nullable=False)
 
     failed_attempts = Column(Integer, default=0, nullable=False)
     accepted_attempts = Column(Integer, default=0, nullable=False)

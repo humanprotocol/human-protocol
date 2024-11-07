@@ -58,6 +58,7 @@ _RejectedJobs = dict[int, DatasetValidationError]
 
 _TaskIdToValidationLayout = dict[int, dict]
 _TaskIdToHoneypotsMapping = dict[int, dict]
+_TaskIdToSequenceOfFrameNames = dict[int, list[str]]
 
 _HoneypotFrameId = int
 _ValidationFrameId = int
@@ -72,6 +73,7 @@ class _ValidationResult:
     gt_stats: GtStats
     task_id_to_val_layout: _TaskIdToValidationLayout
     task_id_to_honeypots_mapping: _TaskIdToHoneypotsMapping
+    task_id_to_sequence_of_frame_names: _TaskIdToSequenceOfFrameNames
 
 
 T = TypeVar("T")
@@ -141,15 +143,21 @@ class _TaskValidator:
         task_id_to_val_layout: dict[int, cvat_api.models.TaskValidationLayoutRead] = {}
         task_id_to_honeypots_mapping: dict[int, _HoneypotFrameToValFrame] = {}
 
+        # store sequence of frame names for each task
+        # task honeypot with frame index matches the sequence[index]
+        task_id_to_sequence_of_frame_names: dict[int, list[str]] = {}
+
         min_quality = manifest.validation.min_quality
 
         job_id_to_quality_report: dict[int, cvat_api.models.QualityReport] = {}
 
         for cvat_task_id in cvat_task_ids:
+            # obtain quality report details
             task_quality_report = cvat_api.get_task_quality_report(cvat_task_id)
             task_quality_report_data = cvat_api.get_quality_report_data(task_quality_report.id)
             task_id_to_quality_report_data[cvat_task_id] = task_quality_report_data
 
+            # obtain task validation layout and define honeypots mapping
             task_val_layout = cvat_api.get_task_validation_layout(cvat_task_id)
             honeypot_frame_to_real = {
                 f: task_val_layout.honeypot_real_frames[idx]
@@ -157,7 +165,11 @@ class _TaskValidator:
             }
             task_id_to_val_layout[cvat_task_id] = task_val_layout
             task_id_to_honeypots_mapping[cvat_task_id] = honeypot_frame_to_real
+            task_id_to_sequence_of_frame_names[cvat_task_id] = [
+                frame.name for frame in cvat_api.get_task_data_meta(cvat_task_id).frames
+            ]
 
+            # obtain quality reports for each job from the task
             job_id_to_quality_report.update(
                 {
                     quality_report.job_id: quality_report
@@ -172,28 +184,28 @@ class _TaskValidator:
 
             # assess quality of the job's honeypots
             task_quality_report_data = task_id_to_quality_report_data[cvat_task_id]
+            sorted_task_frame_names = task_id_to_sequence_of_frame_names[cvat_task_id]
             task_honeypots = {int(frame) for frame in task_quality_report_data.frame_results}
             honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
 
             for honeypot in task_honeypots & set(job_meta.job_frame_range):
                 val_frame = honeypots_mapping[honeypot]
+                val_frame_name = sorted_task_frame_names[val_frame]
 
                 result = task_quality_report_data.frame_results[str(honeypot)]
-                self._gt_stats.setdefault((cvat_task_id, val_frame), ValidationFrameStats())
-                self._gt_stats[
-                    (cvat_task_id, val_frame)
-                ].accumulated_quality += result.annotations.accuracy
+                self._gt_stats.setdefault(val_frame_name, ValidationFrameStats())
+                self._gt_stats[val_frame_name].accumulated_quality += result.annotations.accuracy
 
                 if result.annotations.accuracy < min_quality:
-                    self._gt_stats[(cvat_task_id, val_frame)].failed_attempts += 1
+                    self._gt_stats[val_frame_name].failed_attempts += 1
                 else:
-                    self._gt_stats[(cvat_task_id, val_frame)].accepted_attempts += 1
+                    self._gt_stats[val_frame_name].accepted_attempts += 1
 
             # assess job quality
             job_quality_report = job_id_to_quality_report[cvat_job_id]
 
             accuracy = job_quality_report.summary.accuracy
-            if isinstance(accuracy, int):
+            if not job_quality_report.summary.gt_count:
                 assert accuracy == 0
                 job_results[cvat_job_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[cvat_job_id] = TooFewGtError
@@ -208,6 +220,7 @@ class _TaskValidator:
         self._rejected_jobs = rejected_jobs
         self._task_id_to_val_layout = task_id_to_val_layout
         self._task_id_to_honeypots_mapping = task_id_to_honeypots_mapping
+        self._task_id_to_sequence_of_frame_names = task_id_to_sequence_of_frame_names
 
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
@@ -320,6 +333,9 @@ class _TaskValidator:
             gt_stats=self._require_field(self._gt_stats),
             task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
             task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
+            task_id_to_sequence_of_frame_names=self._require_field(
+                self._task_id_to_sequence_of_frame_names
+            ),
         )
 
 
@@ -359,7 +375,7 @@ def process_intermediate_results(  # noqa: PLR0912
         logger.debug("Task id %s, %s", getattr(task, "id", None), getattr(task, "__dict__", None))
 
     gt_stats = {
-        (gt_image_stat.cvat_task_id, gt_image_stat.gt_frame_id): ValidationFrameStats(
+        gt_image_stat.gt_frame_name: ValidationFrameStats(
             failed_attempts=gt_image_stat.failed_attempts,
             accepted_attempts=gt_image_stat.accepted_attempts,
             accumulated_quality=gt_image_stat.accumulated_quality,
@@ -391,9 +407,8 @@ def process_intermediate_results(  # noqa: PLR0912
 
     gt_stats = validation_result.gt_stats
     if gt_stats:
-        cvat_task_id_to_failed_val_frames: dict[
-            int, set[int]
-        ] = {}  # cvat_task_id: {val_frame_id, ...}
+        # cvat_task_id: {val_frame_id, ...}
+        cvat_task_id_to_failed_val_frames: dict[int, set[int]] = {}
         rejected_job_ids = rejected_jobs.keys()
 
         if rejected_job_ids:
@@ -411,9 +426,13 @@ def process_intermediate_results(  # noqa: PLR0912
                     for honeypot, val_frame in honeypots_mapping.items()
                     if honeypot in job_honeypots
                 ]
+                sorted_task_frame_names = validation_result.task_id_to_sequence_of_frame_names[
+                    cvat_task_id
+                ]
 
                 for val_frame in validation_frames:
-                    val_frame_stats = gt_stats[(cvat_task_id, val_frame)]
+                    val_frame_name = sorted_task_frame_names[val_frame]
+                    val_frame_stats = gt_stats[val_frame_name]
                     if (
                         val_frame_stats.failed_attempts >= Config.validation.gt_ban_threshold
                         and not val_frame_stats.accepted_attempts
@@ -439,9 +458,11 @@ def process_intermediate_results(  # noqa: PLR0912
             )
 
             updated_task_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
-            task_honeypot_real_frames_index = {
-                f: idx for idx, f in enumerate(updated_task_honeypot_real_frames)
-            }
+
+            # validation frames may be repeated
+            task_honeypot_real_frames_index: dict[int, list[int]] = {}
+            for idx, f in enumerate(updated_task_honeypot_real_frames):
+                task_honeypot_real_frames_index.setdefault(f, []).append(idx)
 
             rejected_jobs_for_task = [
                 j
@@ -478,7 +499,7 @@ def process_intermediate_results(  # noqa: PLR0912
                     for prev_val_frame, new_val_frame in zip(
                         validation_frames_to_replace, new_validation_frames, strict=True
                     ):
-                        idx = task_honeypot_real_frames_index[prev_val_frame]
+                        idx = task_honeypot_real_frames_index[prev_val_frame].pop(0)
                         updated_task_honeypot_real_frames[idx] = new_val_frame
                 except ValueError as ex:
                     logger.exception(
