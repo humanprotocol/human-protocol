@@ -2260,8 +2260,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
     @property
     def _task_segment_size(self):
-        # Unlike other task types, here we use a grid of RoIs,
-        # so the absolute job size numbers from manifest are multiplied by the job size multiplier.
+        # Here we use a job size multiplier, because each image
+        # is supposed to be simple and the assignment is expected
+        # to take little time with the default job size.
         # Then, we add a percent of job tiles for validation, keeping the requested ratio.
         return self.manifest.annotation.job_size * self.job_size_mult
 
