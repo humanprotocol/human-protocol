@@ -1,14 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  IsArray,
-  IsEnum,
-} from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { IsNumber, IsOptional, Max, Min, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
 import { SortDirection } from '../enums/collection';
+import { IsEnumCaseInsensitive } from '../decorators/enums';
 
 export class PageDto<T> {
   @ApiProperty()
@@ -66,8 +60,7 @@ export abstract class PageOptionsDto {
   pageSize?: number = 5;
 
   @ApiPropertyOptional({ enum: SortDirection, default: SortDirection.ASC })
-  @Transform(({ value }) => value?.toUpperCase())
-  @IsEnum(SortDirection)
+  @IsEnumCaseInsensitive(SortDirection)
   @IsOptional()
   sort?: SortDirection = SortDirection.ASC;
 
