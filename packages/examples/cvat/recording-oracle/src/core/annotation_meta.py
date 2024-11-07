@@ -25,7 +25,4 @@ class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
 
     def skip_jobs(self, job_ids: list[int]):
-        # self.jobs = [
-        #     job for job in self.jobs if job.job_id not in job_ids
-        # ]
         return AnnotationMeta(jobs=[job for job in self.jobs if job.job_id not in job_ids])

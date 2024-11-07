@@ -72,7 +72,6 @@ class _ValidationResult:
     gt_stats: GtStats
     task_id_to_val_layout: _TaskIdToValidationLayout
     task_id_to_honeypots_mapping: _TaskIdToHoneypotsMapping
-    job_id_to_task_id: dict[int, int]
 
 
 T = TypeVar("T")
@@ -137,9 +136,7 @@ class _TaskValidator:
         rejected_jobs: _RejectedJobs = {}
 
         cvat_task_ids = {job_meta.task_id for job_meta in meta.jobs}
-        job_id_to_task_id = {job_meta.job_id: job_meta.task_id for job_meta in meta.jobs}
 
-        task_id_to_quality_report: dict[int, cvat_api.models.QualityReport] = {}
         task_id_to_quality_report_data: dict[int, QualityReportData] = {}
         task_id_to_val_layout: dict[int, cvat_api.models.TaskValidationLayoutRead] = {}
         task_id_to_honeypots_mapping: dict[int, _HoneypotFrameToValFrame] = {}
@@ -150,8 +147,6 @@ class _TaskValidator:
 
         for cvat_task_id in cvat_task_ids:
             task_quality_report = cvat_api.get_task_quality_report(cvat_task_id)
-            task_id_to_quality_report[cvat_task_id] = task_quality_report
-
             task_quality_report_data = cvat_api.get_quality_report_data(task_quality_report.id)
             task_id_to_quality_report_data[cvat_task_id] = task_quality_report_data
 
@@ -170,28 +165,29 @@ class _TaskValidator:
                 }
             )
 
-        # accepted jobs from the previous epoch are not included
+        # accepted jobs from the previous epochs are not included
         for job_meta in meta.jobs:
             cvat_job_id = job_meta.job_id
-            cvat_task_id = job_id_to_task_id[cvat_job_id]
+            cvat_task_id = job_meta.task_id
 
-            # assess quality of the job honeypots
+            # assess quality of the job's honeypots
             task_quality_report_data = task_id_to_quality_report_data[cvat_task_id]
             task_honeypots = {int(frame) for frame in task_quality_report_data.frame_results}
             honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
+
             for honeypot in task_honeypots & set(job_meta.job_frame_range):
-                val_frame_id = honeypots_mapping[honeypot]
+                val_frame = honeypots_mapping[honeypot]
 
                 result = task_quality_report_data.frame_results[str(honeypot)]
-                self._gt_stats.setdefault((cvat_task_id, val_frame_id), ValidationFrameStats())
+                self._gt_stats.setdefault((cvat_task_id, val_frame), ValidationFrameStats())
                 self._gt_stats[
-                    (cvat_task_id, val_frame_id)
+                    (cvat_task_id, val_frame)
                 ].accumulated_quality += result.annotations.accuracy
 
                 if result.annotations.accuracy < min_quality:
-                    self._gt_stats[(cvat_task_id, val_frame_id)].failed_attempts += 1
+                    self._gt_stats[(cvat_task_id, val_frame)].failed_attempts += 1
                 else:
-                    self._gt_stats[(cvat_task_id, val_frame_id)].accepted_attempts += 1
+                    self._gt_stats[(cvat_task_id, val_frame)].accepted_attempts += 1
 
             # assess job quality
             job_quality_report = job_id_to_quality_report[cvat_job_id]
@@ -205,8 +201,6 @@ class _TaskValidator:
 
             job_results[cvat_job_id] = accuracy
 
-            min_quality = manifest.validation.min_quality
-
             if accuracy < min_quality:
                 rejected_jobs[cvat_job_id] = LowAccuracyError()
 
@@ -214,7 +208,6 @@ class _TaskValidator:
         self._rejected_jobs = rejected_jobs
         self._task_id_to_val_layout = task_id_to_val_layout
         self._task_id_to_honeypots_mapping = task_id_to_honeypots_mapping
-        self._job_id_to_task_id = job_id_to_task_id
 
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
@@ -327,7 +320,6 @@ class _TaskValidator:
             gt_stats=self._require_field(self._gt_stats),
             task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
             task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
-            job_id_to_task_id=self._require_field(self._job_id_to_task_id),
         )
 
 
@@ -355,13 +347,12 @@ def process_intermediate_results(  # noqa: PLR0912
             for validation_result in db_service.get_task_validation_results(session, task.id)
             if validation_result.annotation_quality >= manifest.validation.min_quality
         ]
-        full_meta = meta
-        meta = meta.skip_jobs(accepted_cvat_job_ids)
-        # meta.skip_jobs(accepted_cvat_job_ids)
+        unchecked_jobs_meta = meta.skip_jobs(accepted_cvat_job_ids)
     else:
         # Recording Oracle task represents all CVAT tasks related with the escrow
         task_id = db_service.create_task(session, escrow_address=escrow_address, chain_id=chain_id)
         task = db_service.get_task_by_id(session, task_id, for_update=True)
+        unchecked_jobs_meta = meta
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("process_intermediate_results for escrow %s", escrow_address)
@@ -381,7 +372,7 @@ def process_intermediate_results(  # noqa: PLR0912
         chain_id=chain_id,
         manifest=manifest,
         merged_annotations=merged_annotations,
-        meta=meta,
+        meta=unchecked_jobs_meta,
         gt_stats=gt_stats,
     )
 
@@ -400,18 +391,19 @@ def process_intermediate_results(  # noqa: PLR0912
 
     gt_stats = validation_result.gt_stats
     if gt_stats:
-        cvat_task_id_to_failed_val_frames = {}  # cvat_task_id: [val_frame_id, ...]
+        cvat_task_id_to_failed_val_frames: dict[
+            int, set[int]
+        ] = {}  # cvat_task_id: {val_frame_id, ...}
         rejected_job_ids = rejected_jobs.keys()
 
         if rejected_job_ids:
-            job_id_to_frame_range = {
-                job_meta.job_id: job_meta.job_frame_range for job_meta in meta.jobs
-            }
+            job_id_to_task_id = {j.job_id: j.task_id for j in unchecked_jobs_meta.jobs}
+            job_id_to_frame_range = {j.job_id: j.job_frame_range for j in unchecked_jobs_meta.jobs}
 
-            # define which validation frames should be disabled
+            # find validation frames to be disabled
             for rejected_job_id in rejected_job_ids:
                 job_frame_range = job_id_to_frame_range[rejected_job_id]
-                cvat_task_id = validation_result.job_id_to_task_id[rejected_job_id]
+                cvat_task_id = job_id_to_task_id[rejected_job_id]
                 honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
                 job_honeypots = set(honeypots_mapping.keys()) & set(job_frame_range)
                 validation_frames = [
@@ -426,69 +418,84 @@ def process_intermediate_results(  # noqa: PLR0912
                         val_frame_stats.failed_attempts >= Config.validation.gt_ban_threshold
                         and not val_frame_stats.accepted_attempts
                     ):
-                        cvat_task_id_to_failed_val_frames.setdefault(cvat_task_id, []).append(
+                        cvat_task_id_to_failed_val_frames.setdefault(cvat_task_id, set()).add(
                             val_frame
                         )
 
         for cvat_task_id, val_frame_ids in cvat_task_id_to_failed_val_frames.items():
             task_validation_layout = validation_result.task_id_to_val_layout[cvat_task_id]
-            intersection = set(val_frame_ids) & set(task_validation_layout.disabled_frames)
+            intersection = val_frame_ids & set(task_validation_layout.disabled_frames)
 
             if intersection:
-                logger.error(f"Unexpected case: frames {intersection} were disabled earlier")
+                logger.error(
+                    "Logical error occurred while disabling validation frames "
+                    f"for the task({task_id}). Frames {intersection} "
+                    "are already disabled."
+                )
 
-            updated_disable_frames = task_validation_layout.disabled_frames + val_frame_ids
-            not_disabled_frames = list(
+            updated_disable_frames = task_validation_layout.disabled_frames + list(val_frame_ids)
+            non_disabled_frames = list(
                 set(task_validation_layout.validation_frames) - set(updated_disable_frames)
             )
+
             updated_task_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
             task_honeypot_real_frames_index = {
                 f: idx for idx, f in enumerate(updated_task_honeypot_real_frames)
             }
 
-            jobs_ = [
-                job_meta
-                for job_meta in meta.jobs
-                if job_meta.job_id in rejected_job_ids and job_meta.task_id == cvat_task_id
+            rejected_jobs_for_task = [
+                j
+                for j in unchecked_jobs_meta.jobs
+                if j.job_id in rejected_job_ids and j.task_id == cvat_task_id
             ]
 
-            for job in jobs_:
+            for job in rejected_jobs_for_task:
                 job_frame_range = job.job_frame_range
                 honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
                 job_honeypots = set(honeypots_mapping.keys()) & set(job_frame_range)
-                job_validation_frames = [
-                    val_frame
-                    for honeypot, val_frame in honeypots_mapping.items()
-                    if honeypot in job_honeypots
-                ]
+
                 validation_frames_to_replace = [
-                    f for f in job_validation_frames if f in val_frame_ids
+                    honeypots_mapping[honeypot]
+                    for honeypot in job_honeypots
+                    if honeypots_mapping[honeypot] in val_frame_ids
                 ]
 
                 # choose new unique validation frames for the job
+                available_validation_frames = list(
+                    set(non_disabled_frames) - set(validation_frames_to_replace)
+                )
                 rng = np.random.default_rng()
-                new_validation_frames = [
-                    int(f)
-                    for f in rng.choice(
-                        list(set(not_disabled_frames) - set(job_validation_frames)),
-                        replace=False,
-                        size=len(validation_frames_to_replace),
+                try:
+                    new_validation_frames = [
+                        int(f)
+                        for f in rng.choice(
+                            available_validation_frames,
+                            replace=False,
+                            size=len(validation_frames_to_replace),
+                        )
+                    ]
+
+                    for prev_val_frame, new_val_frame in zip(
+                        validation_frames_to_replace, new_validation_frames, strict=True
+                    ):
+                        idx = task_honeypot_real_frames_index[prev_val_frame]
+                        updated_task_honeypot_real_frames[idx] = new_val_frame
+                except ValueError as ex:
+                    logger.exception(
+                        "Exception occurred while generating new validation frames for "
+                        f"the job {job.job_id}. Tried to replace validation frames "
+                        f"{validation_frames_to_replace!r} by new "
+                        f"{len(validation_frames_to_replace)} frames. \nDetails: {ex!s}"
                     )
-                ]
-                for prev_val_frame, new_val_frame in zip(
-                    validation_frames_to_replace, new_validation_frames, strict=False
-                ):
-                    idx = task_honeypot_real_frames_index[prev_val_frame]
-                    updated_task_honeypot_real_frames[idx] = new_val_frame
 
-            if set(updated_disable_frames) == set(task_validation_layout.validation_frames):
+            if set(updated_disable_frames) != set(task_validation_layout.validation_frames):
+                cvat_api.update_task_validation_layout(
+                    cvat_task_id,
+                    disabled_frames=updated_disable_frames,
+                    honeypot_real_frames=updated_task_honeypot_real_frames,
+                )
+            else:
                 logger.error("All validation frames were banned. Honeypots will not be shuffled")
-
-            cvat_api.update_task_validation_layout(
-                cvat_task_id,
-                disabled_frames=updated_disable_frames,
-                honeypot_real_frames=updated_task_honeypot_real_frames,
-            )
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Updating GT stats: %s", gt_stats)
@@ -497,8 +504,7 @@ def process_intermediate_results(  # noqa: PLR0912
 
     job_final_result_ids: dict[int, str] = {}
 
-    # # # meta.jobs does not include jobs that have already been accepted on the previous epochs
-    for job_meta in full_meta.jobs:
+    for job_meta in meta.jobs:
         job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
         if not job:
             job_id = db_service.create_job(session, task_id=task.id, job_cvat_id=job_meta.job_id)
