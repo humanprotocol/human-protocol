@@ -5,6 +5,3 @@ __pycache__/
 # Env file
 .env
 .python-version
-
-human_app_public_key.pem
-human_app_private_key.pem
