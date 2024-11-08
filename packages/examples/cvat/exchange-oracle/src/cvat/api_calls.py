@@ -724,6 +724,7 @@ def update_quality_control_settings(
     iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
     oks_sigma: float | None = None,
     point_size_base: str | None = None,
+    match_empty_frames: bool | None = None,
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -740,6 +741,9 @@ def update_quality_control_settings(
 
     if point_size_base is not None:
         params["point_size_base"] = point_size_base
+
+    if match_empty_frames:
+        params["match_empty_frames"] = match_empty_frames
 
     with get_api_client() as api_client:
         try:
