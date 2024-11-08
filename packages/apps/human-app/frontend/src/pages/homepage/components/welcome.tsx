@@ -57,13 +57,13 @@ export function Welcome() {
               mb="1.5rem"
               sx={{ transform: 'translateX(-4.5%)' }}
             >
-              <Grid sx={{ mx: '-8px' }}>
+              <Grid sx={{ mx: '24px' }}>
                 <HomepageWorkIcon />
               </Grid>
-              <Grid sx={{ mx: '-8px' }}>
+              <Grid sx={{ mx: '24px' }}>
                 <HomepageUserIcon />
               </Grid>
-              <Grid sx={{ mx: '-8px' }}>
+              <Grid sx={{ mx: '24px' }}>
                 <HomepageLogoIcon />
               </Grid>
             </Stack>
