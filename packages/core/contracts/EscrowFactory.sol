@@ -19,10 +19,14 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     address public staking;
     uint256 public minimumStake;
 
-    event Launched(address token, address escrow);
-    event LaunchedV2(address token, address escrow, string jobRequesterId);
-    event StakingAddressUpdated(address newStakingAddress);
-    event MinimumStakeUpdated(uint256 newMinimumStake);
+    event Launched(address indexed token, address indexed escrow);
+    event LaunchedV2(
+        address indexed token,
+        address indexed escrow,
+        string jobRequesterId
+    );
+    event SetStakingAddress(address indexed stakingAddress);
+    event SetMinumumStake(uint256 indexed minimumStake);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -33,12 +37,21 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         address _staking,
         uint256 _minimumStake
     ) external payable virtual initializer {
-        __Ownable_init_unchained();
+        __Ownable_init_unchained(msg.sender);
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
         staking = _staking;
         minimumStake = _minimumStake;
     }
 
+    /**
+     * @dev Creates a new Escrow contract.
+     *
+     * @param token Token address to be associated with the Escrow contract.
+     * @param trustedHandlers Array of addresses that will serve as the trusted handlers for the Escrow.
+     * @param jobRequesterId String identifier for the job requester, used for tracking purposes.
+     *
+     * @return The address of the newly created Escrow contract.
+     */
     function createEscrow(
         address token,
         address[] memory trustedHandlers,
@@ -70,15 +83,32 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         return escrowCounters[_address] != 0;
     }
 
-    function updateStakingAddress(address _newStaking) external onlyOwner {
-        require(_newStaking != address(0), ERROR_ZERO_ADDRESS);
-        staking = _newStaking;
-        emit StakingAddressUpdated(_newStaking);
+    /**
+     * @dev Set the Staking address.
+     * @param _stakingAddress Staking address
+     */
+    function setStakingAddress(address _stakingAddress) external onlyOwner {
+        _setStakingAddress(_stakingAddress);
     }
 
-    function updateMinimumStake(uint256 _newMinimumStake) external onlyOwner {
-        minimumStake = _newMinimumStake;
-        emit MinimumStakeUpdated(_newMinimumStake);
+    function _setStakingAddress(address _stakingAddress) private {
+        require(_stakingAddress != address(0), ERROR_ZERO_ADDRESS);
+        staking = _stakingAddress;
+        emit SetStakingAddress(_stakingAddress);
+    }
+
+    /**
+     * @dev Set the minimum stake amount.
+     * @param _minimumStake Minimum stake
+     */
+    function setMinimumStake(uint256 _minimumStake) external onlyOwner {
+        _setMinimumStake(_minimumStake);
+    }
+
+    function _setMinimumStake(uint256 _minimumStake) private {
+        require(_minimumStake > 0, 'Must be a positive number');
+        minimumStake = _minimumStake;
+        emit SetMinumumStake(minimumStake);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
@@ -88,5 +118,5 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[44] private __gap;
+    uint256[45] private __gap;
 }

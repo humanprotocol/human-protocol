@@ -80,11 +80,12 @@ describe('Staking', function () {
   this.beforeEach(async () => {
     // Deploy Staking Contract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = (await upgrades.deployProxy(
-      Staking,
-      [await token.getAddress(), minimumStake, lockPeriod, feePercentage],
-      { kind: 'uups', initializer: 'initialize' }
-    )) as unknown as Staking;
+    staking = await Staking.deploy(
+      await token.getAddress(),
+      minimumStake,
+      lockPeriod,
+      feePercentage
+    );
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory(
@@ -196,14 +197,6 @@ describe('Staking', function () {
         await expect(
           staking.connect(operator).unstake(amount)
         ).to.be.revertedWith('Insufficient amount to unstake');
-      });
-
-      it('Should revert with the right error if total stake is below the minimum threshold', async function () {
-        const amount = 9;
-
-        await expect(
-          staking.connect(operator).unstake(amount)
-        ).to.be.revertedWith('Total stake is below the minimum threshold');
       });
 
       it('Should revert with the right error if there is a pending unstake', async function () {
@@ -333,9 +326,9 @@ describe('Staking', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         const minumumStake = 0;
 
-        await expect(
-          staking.connect(operator).setMinimumStake(minumumStake)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).setMinimumStake(minumumStake))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -362,9 +355,9 @@ describe('Staking', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         const lockPeriod = 0;
 
-        await expect(
-          staking.connect(operator).setLockPeriod(lockPeriod)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).setLockPeriod(lockPeriod))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -391,9 +384,9 @@ describe('Staking', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         const feePercentage = 0;
 
-        await expect(
-          staking.connect(operator).setFeePercentage(feePercentage)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).setFeePercentage(feePercentage))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if exceed the maximum value', async function () {
@@ -628,9 +621,9 @@ describe('Staking', function () {
 
     describe('Valitions', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
-        await expect(
-          staking.connect(operator).withdrawFees()
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).withdrawFees())
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if there are no fees to withdraw', async function () {
@@ -680,9 +673,9 @@ describe('Staking', function () {
 
     describe('Validaciones', function () {
       it('Should revert with the right error if caller is not the owner', async function () {
-        await expect(
-          staking.connect(operator).addSlasher(newSlasher)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).addSlasher(newSlasher))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if the address is already a slasher', async function () {
@@ -711,9 +704,9 @@ describe('Staking', function () {
 
     describe('Validaciones', function () {
       it('Should revert with the right error if caller is not the owner', async function () {
-        await expect(
-          staking.connect(operator).removeSlasher(newSlasher)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).removeSlasher(newSlasher))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if the address is not a slasher', async function () {

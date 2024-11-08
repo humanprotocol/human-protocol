@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
 import './interfaces/HMTokenInterface.sol';
 import './interfaces/IEscrow.sol';
@@ -16,14 +16,11 @@ import './libs/Stakes.sol';
  * @title Staking contract
  * @dev The Staking contract allows to stake.
  */
-contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
+contract Staking is IStaking, Ownable, ReentrancyGuard {
     using Stakes for Stakes.Staker;
 
     // Token address
     address public token;
-
-    // Obsolete: `rewardPool` is no longer used in the contract logic but remains here to preserve storage layout compatibility
-    address private rewardPool;
 
     // Minimum amount of tokens a staker needs to stake
     uint256 public minimumStake;
@@ -36,9 +33,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
     // List of stakers
     address[] public stakers;
-
-    // Obsolete: `allocations` is no longer used in the contract logic but remains here to preserve storage layout compatibility
-    mapping(address => IStaking.Allocation) private allocations;
 
     // Fee percentage
     uint8 public feePercentage;
@@ -78,18 +72,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     event FeeWithdrawn(uint256 amount);
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(
+    constructor(
         address _token,
         uint256 _minimumStake,
         uint32 _lockPeriod,
         uint8 _feePercentage
-    ) external initializer {
-        __Ownable_init_unchained();
+    ) Ownable(msg.sender) {
         token = _token;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
@@ -163,7 +151,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Get list of stakers
      * @param _startIndex Index of the first staker to return.
-     * @param _limit :aximum number of stakers to return.
+     * @param _limit Maximum number of stakers to return.
      * @return List of staker's addresses, and stake data
      */
     function getListOfStakers(
@@ -218,21 +206,15 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Unstake tokens from the staker stake, lock them until lock period expires.
      * @param _tokens Amount of tokens to unstake
      */
-    function unstake(uint256 _tokens) external override {
+    function unstake(uint256 _tokens) external override nonReentrant {
         require(_tokens > 0, 'Must be a positive number');
         Stakes.Staker storage staker = stakes[msg.sender];
         require(
-            staker.tokensLocked == 0,
+            staker.tokensLocked == 0 || staker.tokensLockedUntil < block.number,
             'Unstake in progress, complete it first'
         );
         uint256 stakeAvailable = staker.tokensAvailable();
         require(stakeAvailable >= _tokens, 'Insufficient amount to unstake');
-
-        uint256 newStake = stakeAvailable - _tokens;
-        require(
-            newStake == 0 || newStake >= minimumStake,
-            'Total stake is below the minimum threshold'
-        );
 
         uint256 tokensToWithdraw = staker.tokensWithdrawable();
         if (tokensToWithdraw > 0) {
@@ -251,7 +233,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Withdraw staker tokens once the lock period has passed.
      */
-    function withdraw() external override {
+    function withdraw() external override nonReentrant {
         _withdraw(msg.sender);
     }
 
@@ -277,7 +259,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         address _staker,
         address _escrowAddress,
         uint256 _tokens
-    ) external override onlySlasher {
+    ) external override onlySlasher nonReentrant {
         require(
             _slashRequester != address(0),
             'Must be a valid slash requester address'
@@ -307,13 +289,15 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Withdraw fee tokens.
+     * @dev Withdraw the total amount of fees accumulated.
      */
-    function withdrawFees() external override onlyOwner {
+    function withdrawFees() external override onlyOwner nonReentrant {
         require(feeBalance > 0, 'No fees to withdraw');
         uint256 amount = feeBalance;
         feeBalance = 0;
-        _safeTransfer(token, owner(), amount);
+
+        _safeTransfer(token, msg.sender, amount);
+
         emit FeeWithdrawn(amount);
     }
 
@@ -331,7 +315,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     function removeSlasher(address _slasher) external override onlyOwner {
         require(slashers[_slasher], 'Address is not a slasher');
-        slashers[_slasher] = false;
+        delete slashers[_slasher];
     }
 
     modifier onlySlasher() {
@@ -339,31 +323,26 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         _;
     }
 
-    function _safeTransfer(address _token, address to, uint256 value) private {
-        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(_token), to, value);
-    }
-
-    function _safeTransferFrom(
+    /**
+     * @dev Safe transfer helper
+     */
+    function _safeTransfer(
         address _token,
-        address from,
-        address to,
-        uint256 value
+        address _to,
+        uint256 _value
     ) private {
-        SafeERC20Upgradeable.safeTransferFrom(
-            IERC20Upgradeable(_token),
-            from,
-            to,
-            value
-        );
+        SafeERC20.safeTransfer(IERC20(_token), _to, _value);
     }
-
-    // solhint-disable-next-line no-empty-blocks
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     * @dev Safe transferFrom helper
      */
-    uint256[40] private __gap;
+    function _safeTransferFrom(
+        address _token,
+        address _from,
+        address _to,
+        uint256 _value
+    ) private {
+        SafeERC20.safeTransferFrom(IERC20(_token), _from, _to, _value);
+    }
 }
