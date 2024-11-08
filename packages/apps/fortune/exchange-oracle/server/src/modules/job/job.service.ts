@@ -347,7 +347,8 @@ export class JobService {
           this.pgpConfigService.passphrase,
         );
 
-        manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
+        const decryptedData = await encryption.decrypt(manifestEncrypted);
+        manifest = JSON.parse(Buffer.from(decryptedData).toString());
       } catch {
         throw new Error(ErrorJob.ManifestDecryptionFailed);
       }

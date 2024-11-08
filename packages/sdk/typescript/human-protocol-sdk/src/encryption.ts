@@ -1,6 +1,16 @@
 import * as openpgp from 'openpgp';
 import { IKeyPair } from './interfaces';
 
+type MessageDataType = string | Uint8Array;
+
+function makeMessageDataBinary(message: MessageDataType): Uint8Array {
+  if (typeof message === 'string') {
+    return Buffer.from(message);
+  }
+
+  return message;
+}
+
 /**
  * ## Introduction
  *
@@ -126,20 +136,21 @@ export class Encryption {
    * ```
    */
   public async signAndEncrypt(
-    message: string,
+    message: MessageDataType,
     publicKeys: string[]
   ): Promise<string> {
-    const plaintext = message;
-
     const pgpPublicKeys = await Promise.all(
       publicKeys.map((armoredKey) => openpgp.readKey({ armoredKey }))
     );
 
-    const pgpMessage = await openpgp.createMessage({ text: plaintext });
+    const pgpMessage = await openpgp.createMessage({
+      binary: makeMessageDataBinary(message),
+    });
     const encrypted = await openpgp.encrypt({
       message: pgpMessage,
       encryptionKeys: pgpPublicKeys,
       signingKeys: this.privateKey,
+      format: 'armored',
     });
 
     return encrypted as string;
@@ -176,23 +187,43 @@ export class Encryption {
    * const resultMessage = await encription.decrypt('message');
    * ```
    */
-  public async decrypt(message: string, publicKey?: string): Promise<string> {
-    const pgpMessage = await openpgp.readMessage({ armoredMessage: message });
+  public async decrypt(
+    message: string,
+    publicKey?: string
+  ): Promise<Uint8Array> {
+    const pgpMessage = await openpgp.readMessage({
+      armoredMessage: message,
+    });
 
     const decryptionOptions: openpgp.DecryptOptions = {
       message: pgpMessage,
       decryptionKeys: this.privateKey,
-      expectSigned: !!publicKey,
+      format: 'binary',
     };
 
-    if (publicKey) {
+    const shouldVerifySignature = !!publicKey;
+    if (shouldVerifySignature) {
       const pgpPublicKey = await openpgp.readKey({ armoredKey: publicKey });
       decryptionOptions.verificationKeys = pgpPublicKey;
     }
 
-    const { data: decrypted } = await openpgp.decrypt(decryptionOptions);
+    const { data: decrypted, signatures } =
+      await openpgp.decrypt(decryptionOptions);
 
-    return decrypted as string;
+    /**
+     * There is an option to automatically verify signatures - `expectSigned`,
+     * but atm it has a bug - https://github.com/openpgpjs/openpgpjs/issues/1803,
+     * so we have to verify it manually till it's fixed.
+     */
+    try {
+      if (shouldVerifySignature) {
+        await signatures[0].verified;
+      }
+    } catch {
+      throw new Error('Signature could not be verified');
+    }
+
+    return decrypted as Uint8Array;
   }
 
   /**
@@ -419,19 +450,20 @@ export class EncryptionUtils {
    * ```
    */
   public static async encrypt(
-    message: string,
+    message: MessageDataType,
     publicKeys: string[]
   ): Promise<string> {
-    const plaintext = message;
-
     const pgpPublicKeys = await Promise.all(
       publicKeys.map((armoredKey) => openpgp.readKey({ armoredKey }))
     );
 
-    const pgpMessage = await openpgp.createMessage({ text: plaintext });
+    const pgpMessage = await openpgp.createMessage({
+      binary: makeMessageDataBinary(message),
+    });
     const encrypted = await openpgp.encrypt({
       message: pgpMessage,
       encryptionKeys: pgpPublicKeys,
+      format: 'armored',
     });
 
     return encrypted as string;
