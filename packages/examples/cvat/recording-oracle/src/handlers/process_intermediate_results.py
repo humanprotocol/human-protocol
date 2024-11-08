@@ -485,16 +485,13 @@ def process_intermediate_results(  # noqa: PLR0912
                 available_validation_frames = list(
                     set(non_disabled_frames) - set(validation_frames_to_replace)
                 )
-                rng = np.random.default_rng()
+                rng = np.random.Generator(np.random.MT19937())
                 try:
-                    new_validation_frames = [
-                        int(f)
-                        for f in rng.choice(
-                            available_validation_frames,
-                            replace=False,
-                            size=len(validation_frames_to_replace),
-                        )
-                    ]
+                    new_validation_frames = rng.choice(
+                        available_validation_frames,
+                        replace=False,
+                        size=len(validation_frames_to_replace),
+                    ).tolist()
 
                     for prev_val_frame, new_val_frame in zip(
                         validation_frames_to_replace, new_validation_frames, strict=True
