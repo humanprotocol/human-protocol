@@ -54,19 +54,20 @@ Config.human_app_config.jwt_public_key = PUBLIC_KEY
 
 def generate_jwt_token(
     *,
-    wallet_address: str | None = None,
+    wallet_address: str | None = user_address,
     email: str = cvat_email,
-    private_key: str = PRIVATE_KEY,
 ) -> str:
-    data = {
-        **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
-        "email": email,
-    }
+    return jwt.encode(
+        {
+            **({"wallet_address": wallet_address} if wallet_address else {"role": "human_app"}),
+            "email": email,
+        },
+        PRIVATE_KEY,
+        algorithm="ES256",
+    )
 
-    return jwt.encode(data, private_key, algorithm="ES256")
 
-
-def get_auth_header(token: str = generate_jwt_token(wallet_address=user_address)) -> dict:
+def get_auth_header(token: str = generate_jwt_token()) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -608,9 +609,7 @@ def test_cannot_register_400_with_duplicated_address(client: TestClient, session
 
     response = client.post(
         "/register",
-        headers=get_auth_header(
-            generate_jwt_token(wallet_address=user_address, email=new_cvat_email)
-        ),
+        headers=get_auth_header(generate_jwt_token(email=new_cvat_email)),
     )
     assert response.status_code == 400
     assert response.json() == {"message": "User already exists"}
