@@ -25,7 +25,13 @@ class StorageClient(metaclass=ABCMeta):
     def download_file(self, key: str, *, bucket: str | None = None) -> bytes: ...
 
     @abstractmethod
-    def list_files(self, *, bucket: str | None = None, prefix: str | None = None) -> list[str]: ...
+    def list_files(
+        self,
+        *,
+        bucket: str | None = None,
+        prefix: str | None = None,
+        trim_prefix: bool = False,
+    ) -> list[str]: ...
 
     @staticmethod
     def normalize_prefix(prefix: str | None) -> str | None:

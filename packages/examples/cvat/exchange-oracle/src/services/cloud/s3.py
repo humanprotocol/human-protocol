@@ -67,8 +67,20 @@ class S3Client(StorageClient):
             self.client.download_fileobj(Bucket=bucket, Key=unquote(key), Fileobj=data)
             return data.getvalue()
 
-    def list_files(self, *, bucket: str | None = None, prefix: str | None = None) -> list[str]:
+    def list_files(
+        self, *, bucket: str | None = None, prefix: str | None = None, trim_prefix: bool = False
+    ) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         objects = self.resource.Bucket(bucket).objects
-        objects = objects.filter(Prefix=self.normalize_prefix(prefix)) if prefix else objects.all()
-        return [file_info.key for file_info in objects]
+
+        if trim_prefix:
+            assert prefix, "The trim_prefix option cannot be used without a prefix"
+
+        if prefix:
+            prefix = self.normalize_prefix(prefix)
+            objects = objects.filter(Prefix=self.normalize_prefix(prefix))
+
+            if trim_prefix:
+                return [file_info.key[len(prefix) :].strip("/") for file_info in objects]
+
+        return [file_info.key for file_info in objects.all()]
