@@ -78,7 +78,7 @@ class S3Client(StorageClient):
 
         if prefix:
             prefix = self.normalize_prefix(prefix)
-            objects = objects.filter(Prefix=self.normalize_prefix(prefix))
+            objects = objects.filter(Prefix=prefix)
 
             if trim_prefix:
                 return [file_info.key[len(prefix) :].strip("/") for file_info in objects]
