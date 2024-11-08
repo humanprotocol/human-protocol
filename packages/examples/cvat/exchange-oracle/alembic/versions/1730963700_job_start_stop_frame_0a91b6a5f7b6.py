@@ -1,7 +1,7 @@
 """job_start_stop_frame
 
 Revision ID: 0a91b6a5f7b6
-Revises: fde2b09b6b39
+Revises: 4fc740e8c6ff
 Create Date: 2024-11-07 08:15:00.780982
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "0a91b6a5f7b6"
-down_revision = "fde2b09b6b39"
+down_revision = "4fc740e8c6ff"
 branch_labels = None
 depends_on = None
 
