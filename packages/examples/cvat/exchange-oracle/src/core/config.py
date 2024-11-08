@@ -105,6 +105,8 @@ class LocalhostConfig(_NetworkConfig):
 
     recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
+
+    reputation_oracle_address = os.environ.get("LOCALHOST_REPUTATION_ORACLE_ADDRESS")
     reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
