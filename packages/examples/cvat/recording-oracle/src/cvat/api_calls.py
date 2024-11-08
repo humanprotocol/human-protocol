@@ -76,6 +76,18 @@ def compute_task_quality_report(
         raise Exception(f"Task({task_id}) quality report has not been created in time")
 
 
+def get_task(task_id: int) -> models.TaskRead:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            task, _ = api_client.tasks_api.retrieve(task_id)
+            return task
+
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling TaskApi.retrieve: {ex}\n")
+            raise
+
+
 def get_task_quality_report(
     task_id: int,
     *,
@@ -83,12 +95,19 @@ def get_task_quality_report(
     sleep_interval: float = 0.5,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
+
     report = get_last_task_quality_report(task_id)
-    if report and report.created_date > report.target_last_updated:
+
+    if (
+        report
+        # retrieving the task details to check if the latest quality report is actual
+        # or not should be more effective than recreating quality report each time
+        and get_task(task_id).updated_date <= report.target_last_updated
+    ):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(
                 f"The latest task({task_id}) quality report({report.id}) is actual. "
-                "Do not recreate it."
+                "Do not re-create it."
             )
         return report
 
@@ -144,7 +163,7 @@ def update_task_validation_layout(
     task_id: int,
     *,
     disabled_frames: list[int],
-    honeypot_real_frames: list[int],
+    honeypot_real_frames: list[int] | None,
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -154,8 +173,14 @@ def update_task_validation_layout(
                 task_id,
                 patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
                     disabled_frames=disabled_frames,
-                    honeypot_real_frames=honeypot_real_frames,
-                    frame_selection_method=models.FrameSelectionMethod("manual"),
+                    **(
+                        {
+                            "honeypot_real_frames": honeypot_real_frames,
+                            "frame_selection_method": models.FrameSelectionMethod("manual"),
+                        }
+                        if honeypot_real_frames
+                        else {}
+                    ),
                 ),
             )
         except exceptions.ApiException as ex:
