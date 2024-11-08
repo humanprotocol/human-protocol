@@ -151,6 +151,18 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
         self._oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
 
+    @property
+    def _task_segment_size(self) -> int:
+        return self.manifest.annotation.job_size
+
+    @property
+    def _job_val_frames_count(self) -> int:
+        return self.manifest.validation.val_size
+
+    @property
+    def _task_chunk_size(self) -> int:
+        return self._task_segment_size + self._job_val_frames_count
+
     def __enter__(self):
         return self
 
@@ -361,7 +373,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
-            segment_size = manifest.annotation.job_size
+            segment_size = self._task_segment_size
             total_jobs = math.ceil(len(data_to_be_annotated) / segment_size)
 
             self.logger.info(
@@ -409,11 +421,10 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                     cloud_storage.id,
                     filenames=data_subset,
                     sort_images=False,
-                    # use the same value for the chunk size as for the job size
-                    chunk_size=segment_size,
+                    chunk_size=self._task_chunk_size,
                     validation_params={
                         "gt_filenames": gt_filenames,  # include whole GT dataset into each task
-                        "gt_frames_per_job_count": manifest.validation.val_size,
+                        "gt_frames_per_job_count": self._job_val_frames_count,
                     },
                 )
 
@@ -654,10 +665,10 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 )
             )
 
-        if len(gt_filenames) < self.manifest.validation.val_size:
+        if len(gt_filenames) < self._job_val_frames_count:
             raise TooFewSamples(
                 f"Too few validation samples provided ({len(gt_filenames)}), "
-                f"at least {self.manifest.validation.val_size} required."
+                f"at least {self._job_val_frames_count} required."
             )
 
     def _validate_gt_annotations(self):
@@ -1461,7 +1472,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
-            segment_size = self.manifest.annotation.job_size
+            segment_size = self._task_segment_size
             total_jobs = math.ceil(len(self._data_filenames_to_be_annotated) / segment_size)
             self.logger.info(
                 "Task creation for escrow '%s': will create %s assignments",
@@ -1524,11 +1535,10 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     cvat_cloud_storage.id,
                     filenames=filenames,
                     sort_images=False,
-                    # use the same value for the chunk size as for the job size
-                    chunk_size=segment_size,
+                    chunk_size=self._task_chunk_size,
                     validation_params={
                         "gt_filenames": gt_filenames,
-                        "gt_frames_per_job_count": self.manifest.validation.val_size,
+                        "gt_frames_per_job_count": self._job_val_frames_count,
                     },
                 )
 
@@ -1726,10 +1736,10 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 )
             )
 
-        if len(gt_filenames) < self.manifest.validation.val_size:
+        if len(gt_filenames) < self._job_val_frames_count:
             raise TooFewSamples(
                 f"Too few validation samples provided ({len(gt_filenames)}), "
-                f"at least {self.manifest.validation.val_size} required."
+                f"at least {self._job_val_frames_count} required."
             )
 
     def _validate_gt_annotations(self):
@@ -2262,12 +2272,16 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         }
 
     @property
-    def _task_segment_size(self):
+    def _task_segment_size(self) -> int:
         # Here we use a job size multiplier, because each image
         # is supposed to be simple and the assignment is expected
         # to take little time with the default job size.
         # Then, we add a percent of job tiles for validation, keeping the requested ratio.
-        return self.manifest.annotation.job_size * self.job_size_mult
+        return super()._task_segment_size * self.job_size_mult
+
+    @property
+    def _job_val_frames_count(self) -> int:
+        return super()._job_val_frames_count * self.job_size_mult
 
     def _prepare_task_params(self):
         assert self._roi_infos is not _unset
@@ -2691,12 +2705,10 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                             cvat_cloud_storage.id,
                             filenames=point_label_filenames + gt_point_label_filenames,
                             sort_images=False,
-                            # use the same value for the chunk size as for the job size
-                            chunk_size=segment_size,
+                            chunk_size=self._task_chunk_size,
                             validation_params={
                                 "gt_filenames": gt_point_label_filenames,
-                                "gt_frames_per_job_count": self.manifest.validation.val_size
-                                * self.job_size_mult,
+                                "gt_frames_per_job_count": self._job_val_frames_count,
                             },
                         )
 
