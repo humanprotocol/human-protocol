@@ -1552,11 +1552,11 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         self._mangle_filenames()
         self._prepare_label_configuration()
         self._prepare_job_layout()
+        self._prepare_gt_roi_dataset()
 
         # Data preparation
         self._extract_and_upload_rois()
         self._upload_task_meta()
-        self._prepare_gt_roi_dataset()
 
         self._create_on_cvat()
 
