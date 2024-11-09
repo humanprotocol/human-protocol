@@ -50,7 +50,7 @@ export class KvStoreGateway {
     }
   }
 
-  async getJobTypesByAddress(address: string): Promise<string | void> {
+  async getJobTypesByAddress(chainId: ChainId, address: string): Promise<string | void> {
     const key = `jobTypes:${address}`;
     const cachedData: string | undefined = await this.cacheManager.get(key);
     if (cachedData) {
@@ -59,10 +59,6 @@ export class KvStoreGateway {
 
     let jobTypes: string;
     try {
-      const runner = new ethers.JsonRpcProvider(this.configService.rpcUrl);
-      const network = await runner.provider?.getNetwork();
-      const chainId: ChainId = Number(network?.chainId);
-
       jobTypes = await KVStoreUtils.get(chainId, address, KVStoreKeys.jobTypes);
     } catch (e) {
       if (e.toString().includes('Error: Invalid address')) {

@@ -1,4 +1,4 @@
-import { OperatorUtils } from '@human-protocol/sdk';
+import { ChainId, OperatorUtils } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -28,7 +28,7 @@ jest.mock('@human-protocol/sdk', () => {
 
 describe('OracleDiscoveryService', () => {
   const EXCHANGE_ORACLE = 'Exchange Oracle';
-  const EXPECTED_CHAIN_IDS = ['4200'];
+  const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY];
   const REPUTATION_ORACLE_ADDRESS = 'the_oracle';
   const TTL = '300';
   const JOB_TYPES = 'job-type-1, job-type-2, job-type-3';
@@ -91,13 +91,13 @@ describe('OracleDiscoveryService', () => {
       {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
       },
     ];
@@ -116,14 +116,14 @@ describe('OracleDiscoveryService', () => {
         address: 'mockAddress1',
         role: 'validator',
         url: 'url1',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
         jobTypes: ['job-type-1'],
       },
       {
         address: 'mockAddress2',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
         jobTypes: ['job-type-2'],
       },
@@ -139,9 +139,9 @@ describe('OracleDiscoveryService', () => {
 
     expect(result).toEqual([mockData[0]]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
-      expect(cacheManager.get).toHaveBeenCalledWith(chainId);
+      expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
       expect(cacheManager.set).toHaveBeenCalledWith(
-        chainId,
+        chainId.toString(),
         [mockData[0]],
         TTL,
       );
@@ -217,7 +217,7 @@ describe('OracleDiscoveryService', () => {
 
     expect(result).toEqual([]);
     expect(loggerErrorSpy).toHaveBeenCalledWith(
-      `Error processing chainId 4200:`,
+      `Error processing chainId ${ChainId.POLYGON_AMOY}:`,
       error,
     );
   });
@@ -233,7 +233,7 @@ describe('OracleDiscoveryService', () => {
 
     expect(result).toEqual([]);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
-      expect(cacheManager.get).toHaveBeenCalledWith(chainId);
+      expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
     });
   });
 
@@ -242,13 +242,13 @@ describe('OracleDiscoveryService', () => {
       {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 5,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
       },
     ];
@@ -266,13 +266,13 @@ describe('OracleDiscoveryService', () => {
       {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 5,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
-        chainId: '4200',
+        chainId: ChainId.POLYGON_AMOY,
         retriesCount: 5,
       },
     ];

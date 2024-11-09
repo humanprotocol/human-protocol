@@ -13,6 +13,7 @@ import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
 import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('cron', () => {
   return {
@@ -52,7 +53,7 @@ describe('CronJobService', () => {
       email: 'human-app@hmt.ai',
       password: 'Test1234*',
       cacheTtlOracleDiscovery: 600,
-      chainIdsEnabled: ['137', '1'],
+      chainIdsEnabled: [ChainId.POLYGON, ChainId.MAINNET],
       jobsDiscoveryFlag: false,
     };
 
@@ -166,7 +167,7 @@ describe('CronJobService', () => {
       const oracle: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '137',
+        chainId: ChainId.POLYGON,
         retriesCount: 0,
       };
       const token = 'Bearer token';
@@ -193,7 +194,7 @@ describe('CronJobService', () => {
       const oracle: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '137',
+        chainId: ChainId.POLYGON,
         retriesCount: 0,
       };
       const token = 'Bearer token';
@@ -218,7 +219,7 @@ describe('CronJobService', () => {
       const oracle: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '137',
+        chainId: ChainId.POLYGON,
         retriesCount: 3,
       };
       const token = 'Bearer token';
@@ -314,7 +315,7 @@ describe('CronJobService', () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '137',
+        chainId: ChainId.POLYGON,
         retriesCount: 5,
       };
 
@@ -324,7 +325,7 @@ describe('CronJobService', () => {
 
       expect(oracleData.retriesCount).toBe(0);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
-        oracleData.chainId,
+        oracleData.chainId.toString(),
         [oracleData],
         configServiceMock.cacheTtlOracleDiscovery,
       );
@@ -336,7 +337,7 @@ describe('CronJobService', () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '137',
+        chainId: ChainId.POLYGON,
         retriesCount: 4,
       };
 
@@ -346,7 +347,7 @@ describe('CronJobService', () => {
 
       expect(oracleData.retriesCount).toBe(5);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
-        oracleData.chainId,
+        oracleData.chainId.toString(),
         [oracleData],
         configServiceMock.cacheTtlOracleDiscovery,
       );
@@ -356,7 +357,7 @@ describe('CronJobService', () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        chainId: '137',
+        chainId: ChainId.POLYGON,
         retriesCount: 2,
       };
 
@@ -366,7 +367,7 @@ describe('CronJobService', () => {
 
       expect(oracleData.retriesCount).toBe(3);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
-        oracleData.chainId,
+        oracleData.chainId.toString(),
         [oracleData],
         configServiceMock.cacheTtlOracleDiscovery,
       );
