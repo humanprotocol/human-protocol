@@ -1514,7 +1514,9 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 self._data_filenames_to_be_annotated,
                 subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
             ):
-                cvat_task = cvat_api.create_task(cvat_project.id, self.escrow_address)
+                cvat_task = cvat_api.create_task(
+                    cvat_project.id, self.escrow_address, segment_size=segment_size
+                )
 
                 task_id = db_service.create_task(
                     session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
