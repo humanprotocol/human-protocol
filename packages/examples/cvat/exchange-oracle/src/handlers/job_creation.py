@@ -2557,6 +2557,14 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
         storage_client.create_file(gt_dataset_key, gt_dataset_path.read_bytes())
 
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        values = {
+            "oks_sigma": Config.cvat_config.cvat_oks_sigma,
+            "point_size_base": "image_size",  # we don't expect any boxes or groups, so ignore them
+        }
+        values.update(overrides)
+        super()._setup_quality_settings(task_id, **values)
+
     def _create_on_cvat(self):
         assert self._task_params is not _unset
         assert self.point_labels is not _unset
