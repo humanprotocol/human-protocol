@@ -357,15 +357,10 @@ def put_task_data(
     *,
     chunk_size: int,
     filenames: list[str] | None = None,
-    sort_images: bool = True,
+    sort_images: bool | None = None,
     validation_params: dict[str, str | float | list[str]] | None = None,
 ) -> None:
     logger = logging.getLogger("app")
-    sorting_method = (
-        models.SortingMethod("lexicographical")
-        if sort_images
-        else models.SortingMethod("predefined")
-    )
 
     with get_api_client() as api_client:
         kwargs = {}
@@ -374,11 +369,14 @@ def put_task_data(
         else:
             kwargs["filename_pattern"] = "*"
 
+        sorting_method = None
+
         if validation_params:
-            logger.info(
-                f"The {sorting_method} is ignored. "
-                'Only "random" sorting can be used when validation parameters passed.'
-            )
+            if sort_images:
+                raise AssertionError(
+                    f"sort_images={sort_images} cannot be used. "
+                    'Only random sorting can be used when task validation mode is "gt_pool"'
+                )
             sorting_method = models.SortingMethod("random")
 
             gt_filenames = validation_params["gt_filenames"]
@@ -390,6 +388,16 @@ def put_task_data(
                 frames=gt_filenames,
                 frame_selection_method=models.FrameSelectionMethod("manual"),
                 frames_per_job_count=validation_params["gt_frames_per_job_count"],
+            )
+
+        if sorting_method is None:
+            if sort_images is None:
+                sort_images = True
+
+            sorting_method = (
+                models.SortingMethod("lexicographical")
+                if sort_images
+                else models.SortingMethod("predefined")
             )
 
         data_request = models.DataRequest(

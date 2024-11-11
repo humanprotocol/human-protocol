@@ -420,7 +420,6 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                     cvat_task.id,
                     cloud_storage.id,
                     filenames=data_subset,
-                    sort_images=False,
                     chunk_size=self._task_chunk_size,
                     validation_params={
                         "gt_filenames": gt_filenames,  # include whole GT dataset into each task
@@ -1533,7 +1532,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     cvat_task.id,
                     cvat_cloud_storage.id,
                     filenames=filenames,
-                    sort_images=False,
                     chunk_size=self._task_chunk_size,
                     validation_params={
                         "gt_filenames": gt_filenames,
@@ -2703,7 +2701,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                             cvat_task.id,
                             cvat_cloud_storage.id,
                             filenames=point_label_filenames + gt_point_label_filenames,
-                            sort_images=False,
                             chunk_size=self._task_chunk_size,
                             validation_params={
                                 "gt_filenames": gt_point_label_filenames,
