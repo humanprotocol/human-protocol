@@ -87,7 +87,6 @@ describe('WebhookService', () => {
           provide: JobRepository,
           useValue: createMock<JobRepository>(),
         },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
