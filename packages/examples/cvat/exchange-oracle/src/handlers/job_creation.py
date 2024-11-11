@@ -1591,6 +1591,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             _unset
         )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
+        self._roi_info_by_id: _MaybeUnset[dict[int, skeletons_from_boxes_task.RoiInfo]] = _unset
 
         self._gt_points_per_label: _MaybeUnset[
             dict[tuple[int, str], Sequence[tuple[int, dm.Points]]]
@@ -2244,6 +2245,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 )
 
         self._roi_infos = rois
+        self._roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
 
     def _mangle_filenames(self):
         """
@@ -2282,17 +2284,12 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         }
 
         task_params: list[self._TaskParams] = []
-
-        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
-        self._roi_info_by_id = roi_info_by_id
-
         segment_size = self._task_segment_size
-
         for label_id, _ in enumerate(self.manifest.annotation.labels):
             label_gt_roi_ids = set(
                 roi_id
                 for roi_id in self._skeleton_bbox_mapping.values()
-                if roi_info_by_id[roi_id].bbox_label == label_id
+                if self._roi_info_by_id[roi_id].bbox_label == label_id
             )
 
             label_data_roi_ids = [
@@ -2504,8 +2501,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
     ) -> dm.Dataset:
         assert self._gt_points_per_label is not _unset
 
-        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
-
         # Change annotations to Points for validation in CVAT,
         # as annotators will use this annotation type
         point_dataset = dm.Dataset(
@@ -2519,7 +2514,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             (skeleton_label_id, point_label_name)
         ]:
             roi_key = self._skeleton_bbox_mapping[gt_skeleton_id]
-            roi_info = roi_info_by_id[roi_key]
+            roi_info = self._roi_info_by_id[roi_key]
 
             mangled_cvat_sample_id = compose_data_bucket_filename(
                 self.escrow_address,
