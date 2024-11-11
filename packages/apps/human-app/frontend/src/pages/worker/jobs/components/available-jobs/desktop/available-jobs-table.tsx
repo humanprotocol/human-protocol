@@ -139,19 +139,17 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
 
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Grid sx={{ width: '5rem', height: '2.5rem', padding: '0.2rem 0' }}>
-            <TableButton
-              loading={isPending}
-              onClick={() => {
-                assignJobMutation({ escrow_address, chain_id });
-              }}
-              sx={{
-                width: '94px',
-              }}
-            >
-              {t('worker.jobs.selectJob')}
-            </TableButton>
-          </Grid>
+          <TableButton
+            loading={isPending}
+            onClick={() => {
+              assignJobMutation({ escrow_address, chain_id });
+            }}
+            sx={{
+              width: '94px',
+            }}
+          >
+            {t('worker.jobs.selectJob')}
+          </TableButton>
         </Grid>
       );
     },
