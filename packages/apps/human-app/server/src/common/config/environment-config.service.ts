@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+import { ChainId } from '@human-protocol/sdk';
 
 const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
@@ -255,9 +256,12 @@ export class EnvironmentConfigService {
    * The list of enabled chain IDs.
    * Required
    */
-  get chainIdsEnabled(): string[] {
+  get chainIdsEnabled(): ChainId[] {
     const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');
-    return chainIds.split(',').map((id) => id.trim());
+    return chainIds
+      .split(',')
+      .map((id) => parseInt(id.trim(), 10))
+      .filter((id): id is ChainId => !isNaN(id) && Object.values(ChainId).includes(id));
   }
 
   /**

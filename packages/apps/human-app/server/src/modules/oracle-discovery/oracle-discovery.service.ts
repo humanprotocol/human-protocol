@@ -5,7 +5,7 @@ import {
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { OperatorUtils, Role } from '@human-protocol/sdk';
+import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
 
@@ -28,7 +28,7 @@ export class OracleDiscoveryService {
     const oraclesForChainIds = await Promise.all(
       chainIds.map(async (chainId) => {
         const jobTypes = (
-          (await this.kvStoreGateway.getJobTypesByAddress(address)) ?? ''
+          (await this.kvStoreGateway.getJobTypesByAddress(chainId, address)) ?? ''
         )
           .split(',')
           .map((job) => job.trim().toLowerCase());
@@ -68,13 +68,13 @@ export class OracleDiscoveryService {
   }
 
   private async findOraclesByChainId(
-    chainId: string,
+    chainId: ChainId,
     address: string,
     jobTypes: string[],
   ): Promise<OracleDiscoveryResponse[]> {
     try {
       const cachedOracles =
-        await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
+        await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId.toString());
       if (cachedOracles) return cachedOracles;
 
       const operators = await OperatorUtils.getReputationNetworkOperators(
@@ -104,7 +104,7 @@ export class OracleDiscoveryService {
         );
 
       await this.cacheManager.set(
-        chainId,
+        chainId.toString(),
         oraclesWithRetryData,
         this.configService.cacheTtlOracleDiscovery,
       );

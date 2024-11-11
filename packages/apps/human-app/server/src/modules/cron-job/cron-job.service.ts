@@ -125,7 +125,7 @@ export class CronJobService {
   private async resetRetriesCount(oracleData: OracleDiscoveryResponse) {
     oracleData.retriesCount = 0;
 
-    const chainId = oracleData.chainId;
+    const chainId = oracleData.chainId.toString();
     const cachedOracles =
       await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
 
@@ -142,7 +142,7 @@ export class CronJobService {
   }
 
   private async handleJobListError(oracleData: OracleDiscoveryResponse) {
-    const chainId = oracleData.chainId;
+    const chainId = oracleData.chainId?.toString();
     const cachedOracles =
       await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
 
