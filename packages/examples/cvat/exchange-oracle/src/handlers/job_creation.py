@@ -1426,22 +1426,19 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         for dm_item in self._gt_dataset:
             for gt_bbox in dm_item.annotations:
                 assert isinstance(gt_bbox, dm.Bbox)
+
                 point_id = self._bbox_point_mapping[gt_bbox.id]
                 gt_roi_filename = compose_data_bucket_filename(
                     self.escrow_address, self.chain_id, self._roi_filenames[point_id]
-                ).rsplit(".", maxsplit=1)[0]
+                )
 
+                image_data = lambda: dm_item.media_as(dm.Image).data
+                image = dm.Image(path=gt_roi_filename, data=image_data, size=dm_item.media.size)
                 self._gt_roi_dataset.put(
                     dm_item.wrap(
-                        id=gt_roi_filename,
+                        id=os.path.splitext(gt_roi_filename)[0],
                         annotations=[gt_bbox],
-                        media=dm.Image(
-                            path=gt_roi_filename, data=dm_item.media.data, size=dm_item.media.size
-                        ),
-                        image=dm.Image(
-                            path=gt_roi_filename, data=dm_item.image.data, size=dm_item.image.size
-                        ),
-                        attributes={},
+                        media=image,
                     )
                 )
 
