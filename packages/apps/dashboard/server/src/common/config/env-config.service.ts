@@ -14,6 +14,8 @@ const DEFAULT_HCAPTCHA_STATS_FILE = 'hcaptchaStats.json';
 export const HCAPTCHA_STATS_START_DATE = '2022-07-01';
 export const HCAPTCHA_STATS_API_START_DATE = '2024-09-14';
 export const HMT_STATS_START_DATE = '2021-04-06';
+export const DEFAULT_NETWORK_USAGE_FILTER_MONTHS = 60;
+export const DEFAULT_NETWORKS_AVAILABLE_CACHE_TTL = 2 * 60;
 
 @Injectable()
 export class EnvironmentConfigService {
@@ -80,5 +82,19 @@ export class EnvironmentConfigService {
   }
   get reputationSource(): string {
     return this.configService.getOrThrow<string>('REPUTATION_SOURCE_URL');
+  }
+
+  get networkUsageFilterMonths(): number {
+    return this.configService.get<number>(
+      'NETWORK_USAGE_FILTER_MONTHS',
+      DEFAULT_NETWORK_USAGE_FILTER_MONTHS,
+    );
+  }
+
+  get networkAvailableCacheTtl(): number {
+    return this.configService.getOrThrow<number>(
+      'NETWORKS_AVAILABLE_CACHE_TTL',
+      DEFAULT_NETWORKS_AVAILABLE_CACHE_TTL,
+    );
   }
 }
