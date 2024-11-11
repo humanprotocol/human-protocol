@@ -203,7 +203,7 @@ def create_escrow_validations(session: Session):
     allowed_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
     # excluding escrows where all projects are still have `validation` status
     at_least_one_is_completed = (
-        func.count(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
+        func.sum(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
     )
     select_stmt = (
         select(

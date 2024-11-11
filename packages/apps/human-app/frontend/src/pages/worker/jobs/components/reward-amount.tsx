@@ -25,5 +25,9 @@ export function RewardAmount({
       </Tooltip>
     );
   }
-  return `${reward_amount} ${reward_token}`;
+  return (
+    <Typography color={color} variant="body2">
+      {`${reward_amount} ${reward_token}`}
+    </Typography>
+  );
 }
