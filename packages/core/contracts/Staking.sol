@@ -210,7 +210,8 @@ contract Staking is IStaking, Ownable, ReentrancyGuard {
         require(_tokens > 0, 'Must be a positive number');
         Stakes.Staker storage staker = stakes[msg.sender];
         require(
-            staker.tokensLocked == 0 || staker.tokensLockedUntil < block.number,
+            staker.tokensLocked == 0 ||
+                staker.tokensLockedUntil <= block.number,
             'Unstake in progress, complete it first'
         );
         uint256 stakeAvailable = staker.tokensAvailable();

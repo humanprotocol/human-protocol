@@ -39,8 +39,8 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     ) external payable virtual initializer {
         __Ownable_init_unchained(msg.sender);
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
-        staking = _staking;
-        minimumStake = _minimumStake;
+        _setStakingAddress(_staking);
+        _setMinimumStake(_minimumStake);
     }
 
     /**
