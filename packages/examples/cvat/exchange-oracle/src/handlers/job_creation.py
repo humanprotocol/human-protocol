@@ -2082,7 +2082,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             gt_skeletons: list[dm.Skeleton],
             *,
             gt_annotations: list[dm.Annotation],
-        ) -> list[dm.Bbox]:
+        ) -> list[dm.Skeleton]:
             matches = _find_unambiguous_matches(
                 input_boxes, gt_skeletons, gt_annotations=gt_annotations
             )
