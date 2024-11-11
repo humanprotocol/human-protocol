@@ -1591,12 +1591,13 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             _unset
         )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
-        self._image_id_to_roi_info: _MaybeUnset[dict[str, skeletons_from_boxes_task.RoiInfos]] = (
-            _unset
-        )
+
+        self._gt_points_per_label: _MaybeUnset[
+            dict[tuple[int, str], Sequence[tuple[int, dm.Points]]]
+        ] = _unset
+        "(skeleton_label_id, point_label_name) to [(skeleton_id, point), ...]"
 
         self._roi_filenames: _MaybeUnset[dict[int, str]] = _unset
-        self._input_filename_to_nameless: _MaybeUnset[dict[str, str]] = _unset
 
         self._task_params: _MaybeUnset[list[self._TaskParams]] = _unset
 
@@ -2244,10 +2245,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
         self._roi_infos = rois
 
-        self._image_id_to_roi_info = {
-            roi_info.original_image_id: roi_info for roi_info in self._roi_infos
-        }
-
     def _mangle_filenames(self):
         """
         Mangle filenames in the dataset to make them less recognizable by annotators
@@ -2259,11 +2256,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         # different jobs to make them even less recognizable
         self._roi_filenames = {
             roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self._roi_infos
-        }
-
-        self._input_filename_to_nameless = {
-            roi_info.original_image_id: self._roi_filenames[roi_info.bbox_id]
-            for roi_info in self._roi_infos
         }
 
     @property
@@ -2326,26 +2318,24 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         self._task_params = task_params
 
     def _prepare_job_labels(self):
-        self.point_labels = {}
+        self._point_labels = {}
 
         for skeleton_label in self.manifest.annotation.labels:
             for point_name in skeleton_label.nodes:
-                self.point_labels[(skeleton_label.name, point_name)] = point_name  # ??
+                self._point_labels[(skeleton_label.name, point_name)] = point_name
 
-    def _prepare_points_mapping(self):
-        assert self._image_id_to_roi_info is not _unset
-        assert self._input_filename_to_nameless is not _unset
+    def _prepare_gt_points_mapping(self):
+        assert self._gt_dataset is not _unset
 
-        # (skeleton_label, point_label) to (dataset_item.id, point)
-        self.points = {}
+        self._gt_points_per_label = {}
 
         # GT should contain all GT images with only one point per skeleton node
-        for dataset_item in self._gt_dataset:
-            for skeleton in dataset_item.annotations:
-                if not isinstance(skeleton, dm.Skeleton):
+        for gt_sample in self._gt_dataset:
+            for gt_skeleton in gt_sample.annotations:
+                if not isinstance(gt_skeleton, dm.Skeleton):
                     continue
 
-                for point in skeleton.elements:
+                for point in gt_skeleton.elements:
                     if point.visibility[0] in [
                         dm.Points.Visibility.absent,
                         dm.Points.Visibility.hidden,
@@ -2358,9 +2348,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         .name
                     )
 
-                    self.points.setdefault((skeleton.label, point_label_name), []).append(
-                        (dataset_item.id, point)
-                    )
+                    self._gt_points_per_label.setdefault(
+                        (gt_skeleton.label, point_label_name), []
+                    ).append((gt_skeleton.id, point))
 
     def _upload_task_meta(self):
         layout = skeletons_from_boxes_task.TaskMetaLayout()
@@ -2387,7 +2377,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             (serializer.serialize_roi_filenames(self._roi_filenames), layout.ROI_FILENAMES_FILENAME)
         )
         file_list.append(
-            (serializer.serialize_point_labels(self.point_labels), layout.POINT_LABELS_FILENAME)
+            (serializer.serialize_point_labels(self._point_labels), layout.POINT_LABELS_FILENAME)
         )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
@@ -2506,39 +2496,51 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                     data=roi_bytes,
                 )
 
-    def _prepare_gt_dataset_per_skeleton_point(
+    def _prepare_gt_dataset_for_skeleton_point(
         self,
         *,
         point_label_name: str,
         skeleton_label_id: int,
     ) -> dm.Dataset:
-        gt_points_dataset = dm.Dataset(
+        assert self._gt_points_per_label is not _unset
+
+        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
+
+        # Change annotations to Points for validation in CVAT,
+        # as annotators will use this annotation type
+        point_dataset = dm.Dataset(
             categories={
                 dm.AnnotationType.label: dm.LabelCategories.from_iterable([point_label_name]),
             },
             media_type=dm.Image,
         )
 
-        for input_gt_filename, gt_points in self.points[(skeleton_label_id, point_label_name)]:
-            dataset_item_id = compose_data_bucket_filename(
+        for gt_skeleton_id, gt_point in self._gt_points_per_label[
+            (skeleton_label_id, point_label_name)
+        ]:
+            roi_key = self._skeleton_bbox_mapping[gt_skeleton_id]
+            roi_info = roi_info_by_id[roi_key]
+
+            mangled_cvat_sample_id = compose_data_bucket_filename(
                 self.escrow_address,
                 self.chain_id,
-                self._input_filename_to_nameless[input_gt_filename].split(".", maxsplit=1)[0],
+                os.path.splitext(self._roi_filenames[roi_key])[0],
             )
-            roi_info = self._image_id_to_roi_info[input_gt_filename]
+
             # update points coordinates in accordance with roi coordinates
             updated_points = [
-                gt_points.points[0] - roi_info.roi_x,
-                gt_points.points[1] - roi_info.roi_y,
+                gt_point.points[0] - roi_info.roi_x,
+                gt_point.points[1] - roi_info.roi_y,
             ]
-            gt_points_dataset.put(
+
+            point_dataset.put(
                 dm.DatasetItem(
-                    id=dataset_item_id,
-                    annotations=[dm.Points(points=updated_points, label=0)],
+                    id=mangled_cvat_sample_id,
+                    annotations=[dm.Points(id=gt_skeleton_id, points=updated_points, label=0)],
                 )
             )
 
-        return gt_points_dataset
+        return point_dataset
 
     def _save_cvat_gt_dataset_to_oracle_bucket(
         self,
@@ -2567,7 +2569,8 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
     def _create_on_cvat(self):
         assert self._task_params is not _unset
-        assert self.point_labels is not _unset
+        assert self._point_labels is not _unset
+        assert self._gt_points_per_label is not _unset
 
         def _task_params_label_key(ts):
             return ts.label_id
@@ -2582,8 +2585,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         label_specs_by_skeleton = {
             skeleton_label_id: [
                 {
-                    # why not just use skeleton node?
-                    "name": self.point_labels[(skeleton_label.name, skeleton_point)],
+                    "name": self._point_labels[(skeleton_label.name, skeleton_point)],
                     "type": "points",
                 }
                 for skeleton_point in skeleton_label.nodes
@@ -2714,14 +2716,13 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                             },
                         )
 
-                        # prepare GT dataset
-                        gt_points_dataset = self._prepare_gt_dataset_per_skeleton_point(
+                        gt_point_dataset = self._prepare_gt_dataset_for_skeleton_point(
                             point_label_name=point_label_name,
                             skeleton_label_id=skeleton_label_id,
                         )
 
                         self._setup_gt_job_for_cvat_task(
-                            cvat_task.id, gt_points_dataset, dm_export_format="cvat"
+                            cvat_task.id, gt_point_dataset, dm_export_format="cvat"
                         )
                         self._setup_quality_settings(
                             cvat_task.id, oks_sigma=Config.cvat_config.cvat_oks_sigma
@@ -2748,7 +2749,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         # Data preparation
         self._extract_and_upload_rois()
         self._upload_task_meta()
-        self._prepare_points_mapping()
+        self._prepare_gt_points_mapping()
 
         self._create_on_cvat()
 
