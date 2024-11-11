@@ -202,7 +202,7 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * The cache time-to-live (TTL) for job types URLs.
+   * The cache time-to-live (TTL) for job types.
    * Default: 24 hours
    */
   get cacheTtlJobTypes(): number {
