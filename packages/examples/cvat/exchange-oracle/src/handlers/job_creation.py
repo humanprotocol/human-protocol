@@ -1431,13 +1431,11 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     self.escrow_address, self.chain_id, self._roi_filenames[point_id]
                 )
 
-                image_data = lambda: dm_item.media_as(dm.Image).data
-                image = dm.Image(path=gt_roi_filename, data=image_data, size=dm_item.media.size)
                 self._gt_roi_dataset.put(
                     dm_item.wrap(
                         id=os.path.splitext(gt_roi_filename)[0],
                         annotations=[gt_bbox],
-                        media=image,
+                        media=dm.Image(path=gt_roi_filename, size=dm_item.media_as(dm.Image).size),
                     )
                 )
 
