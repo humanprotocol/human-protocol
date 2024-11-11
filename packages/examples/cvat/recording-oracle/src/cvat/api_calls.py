@@ -100,8 +100,8 @@ def get_task_quality_report(
 
     if (
         report
-        # retrieving the task details to check if the latest quality report is actual
-        # or not should be more effective than recreating quality report each time
+        # retrieving the task details to check if the latest quality report is up-to-date
+        # or not should be more effective than recreating the quality report each time
         and get_task(task_id).updated_date <= report.target_last_updated
     ):
         if logger.isEnabledFor(logging.DEBUG):

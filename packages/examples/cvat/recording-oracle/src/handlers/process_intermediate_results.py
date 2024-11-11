@@ -188,7 +188,14 @@ class _TaskValidator:
             task_honeypots = {int(frame) for frame in task_quality_report_data.frame_results}
             honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
 
-            for honeypot in task_honeypots & set(job_meta.job_frame_range):
+            job_honeypots = task_honeypots & set(job_meta.job_frame_range)
+
+            if not job_honeypots:
+                job_results[cvat_job_id] = self.UNKNOWN_QUALITY
+                rejected_jobs[cvat_job_id] = TooFewGtError
+                continue
+
+            for honeypot in job_honeypots:
                 val_frame = honeypots_mapping[honeypot]
                 val_frame_name = sorted_task_frame_names[val_frame]
 
@@ -205,11 +212,6 @@ class _TaskValidator:
             job_quality_report = job_id_to_quality_report[cvat_job_id]
 
             accuracy = job_quality_report.summary.accuracy
-            if not job_quality_report.summary.gt_count:
-                assert accuracy == 0
-                job_results[cvat_job_id] = self.UNKNOWN_QUALITY
-                rejected_jobs[cvat_job_id] = TooFewGtError
-                continue
 
             job_results[cvat_job_id] = accuracy
 
@@ -349,6 +351,8 @@ def process_intermediate_results(  # noqa: PLR0912
     manifest: TaskManifest,
     logger: logging.Logger,
 ) -> ValidationSuccess | ValidationFailure:
+    should_complete = False
+
     task = db_service.get_task_by_escrow_address(
         session,
         escrow_address,
@@ -457,6 +461,17 @@ def process_intermediate_results(  # noqa: PLR0912
                 set(task_validation_layout.validation_frames) - set(updated_disable_frames)
             )
 
+            if len(non_disabled_frames) < task_validation_layout.frames_per_job_count:
+                should_complete = True
+                logger.info(
+                    f"Validation for escrow_address={escrow_address}: "
+                    "Too few validation frames left "
+                    f"(required: {task_validation_layout.frames_per_job_count}, "
+                    f"left: {len(non_disabled_frames)}) for the task({cvat_task_id}), "
+                    "stopping annotation"
+                )
+                break
+
             updated_task_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
 
             # validation frames may be repeated
@@ -480,40 +495,35 @@ def process_intermediate_results(  # noqa: PLR0912
                     for honeypot in job_honeypots
                     if honeypots_mapping[honeypot] in val_frame_ids
                 ]
+                valid_used_validation_frames = [
+                    honeypots_mapping[honeypot]
+                    for honeypot in job_honeypots
+                    if honeypots_mapping[honeypot] not in validation_frames_to_replace
+                ]
 
                 # choose new unique validation frames for the job
+                assert not (set(validation_frames_to_replace) & set(non_disabled_frames))
                 available_validation_frames = list(
-                    set(non_disabled_frames) - set(validation_frames_to_replace)
+                    set(non_disabled_frames) - set(valid_used_validation_frames)
                 )
                 rng = np.random.Generator(np.random.MT19937())
-                try:
-                    new_validation_frames = rng.choice(
-                        available_validation_frames,
-                        replace=False,
-                        size=len(validation_frames_to_replace),
-                    ).tolist()
+                new_validation_frames = rng.choice(
+                    available_validation_frames,
+                    replace=False,
+                    size=len(validation_frames_to_replace),
+                ).tolist()
 
-                    for prev_val_frame, new_val_frame in zip(
-                        validation_frames_to_replace, new_validation_frames, strict=True
-                    ):
-                        idx = task_honeypot_real_frames_index[prev_val_frame].pop(0)
-                        updated_task_honeypot_real_frames[idx] = new_val_frame
-                except ValueError as ex:
-                    logger.exception(
-                        "Exception occurred while generating new validation frames for "
-                        f"the job {job.job_id}. Tried to replace validation frames "
-                        f"{validation_frames_to_replace!r} by new "
-                        f"{len(validation_frames_to_replace)} frames. \nDetails: {ex!s}"
-                    )
+                for prev_val_frame, new_val_frame in zip(
+                    validation_frames_to_replace, new_validation_frames, strict=True
+                ):
+                    idx = task_honeypot_real_frames_index[prev_val_frame].pop(0)
+                    updated_task_honeypot_real_frames[idx] = new_val_frame
 
-            if set(updated_disable_frames) != set(task_validation_layout.validation_frames):
-                cvat_api.update_task_validation_layout(
-                    cvat_task_id,
-                    disabled_frames=updated_disable_frames,
-                    honeypot_real_frames=updated_task_honeypot_real_frames,
-                )
-            else:
-                logger.error("All validation frames were banned. Honeypots will not be shuffled")
+            cvat_api.update_task_validation_layout(
+                cvat_task_id,
+                disabled_frames=updated_disable_frames,
+                honeypot_real_frames=updated_task_honeypot_real_frames,
+            )
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Updating GT stats: %s", gt_stats)
@@ -545,8 +555,6 @@ def process_intermediate_results(  # noqa: PLR0912
         job_final_result_ids[job.id] = assignment_validation_result_id
 
     task_jobs = task.jobs
-
-    should_complete = False
 
     if Config.validation.max_escrow_iterations > 0:
         escrow_iteration = task.iteration
