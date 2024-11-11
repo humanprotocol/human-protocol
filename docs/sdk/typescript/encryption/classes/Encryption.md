@@ -8,12 +8,11 @@
 
 ## Introduction
 
-Class for sign and decrypt messages.
+Class for signing and decrypting messages.
 
-The algorithm includes the implementation of the [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs) multi-public key encryption on typescript.
-Using the vanilla [ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) implementation Schnorr signatures for signature and [curve25519](https://en.wikipedia.org/wiki/Curve25519) for encryption. [Learn more](https://wiki.polkadot.network/docs/learn-cryptography).
+The algorithm includes the implementation of the [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs) multi-public key encryption on typescript, and uses the vanilla [ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) implementation Schnorr signature for signatures and [curve25519](https://en.wikipedia.org/wiki/Curve25519) for encryption. [Learn more](https://wiki.polkadot.network/docs/learn-cryptography).
 
-To get an instance of this class, is recommended to initialize it using the static `build` method.
+To get an instance of this class, initialization is recommended using the static `build` method.
 
 ```ts
 static async build(privateKeyArmored: string, passphrase?: string): Promise<Encryption>
@@ -66,7 +65,7 @@ The private key.
 
 #### Defined in
 
-[encryption.ts:53](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L53)
+[encryption.ts:52](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L52)
 
 ## Methods
 
@@ -74,7 +73,7 @@ The private key.
 
 > **decrypt**(`message`, `publicKey`?): `Promise`\<`string`\>
 
-This function decrypt message message using the private key. In addition, the public key can be added for signature verification.
+This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
 
 #### Parameters
 
@@ -84,7 +83,7 @@ Message to decrypt.
 
 • **publicKey?**: `string`
 
-Public key used to verify signature if needed. Optional.
+Public key used to verify signature if needed. This is optional.
 
 #### Returns
 
@@ -118,7 +117,7 @@ const resultMessage = await encription.decrypt('message');
 
 #### Defined in
 
-[encryption.ts:180](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L180)
+[encryption.ts:179](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L179)
 
 ***
 
@@ -154,7 +153,7 @@ const resultMessage = await encription.sign('message');
 
 #### Defined in
 
-[encryption.ts:217](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L217)
+[encryption.ts:216](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L216)
 
 ***
 
@@ -219,7 +218,7 @@ const resultMessage = await encription.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
-[encryption.ts:129](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L129)
+[encryption.ts:128](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L128)
 
 ***
 
@@ -247,4 +246,4 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
-[encryption.ts:64](https://github.com/humanprotocol/human-protocol/blob/0b3839952b697011b6b5a2ed2d456d3d85ce02c7/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L64)
+[encryption.ts:63](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L63)

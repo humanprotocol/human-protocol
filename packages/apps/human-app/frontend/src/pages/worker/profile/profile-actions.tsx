@@ -36,7 +36,7 @@ export function ProfileActions() {
   }, [address, isWalletConnected, registerAddressMutation]);
   const { user } = useAuthenticatedUser();
   const { t } = useTranslation();
-  const emailVerified = user.status === 'ACTIVE';
+  const emailVerified = user.status === 'active';
   const kycApproved = user.kyc_status === 'approved';
 
   const getConnectWalletBtn = () => {
@@ -98,6 +98,9 @@ export function ProfileActions() {
         <Grid>
           <RegisterAddressBtn />
         </Grid>
+      ) : null}
+      {kycApproved && !user.wallet_address ? (
+        <Grid>{t('worker.profile.walletAddressMessage')}</Grid>
       ) : null}
       {/* <Grid>
         {kycApproved && user.wallet_address ? (

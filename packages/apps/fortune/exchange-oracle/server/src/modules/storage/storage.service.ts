@@ -53,11 +53,12 @@ export class StorageService {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
       if (EncryptionUtils.isEncrypted(fileContent)) {
         const encryption = await Encryption.build(
-          this.pgpConfigService.privateKey,
+          this.pgpConfigService.privateKey!,
           this.pgpConfigService.passphrase,
         );
 
-        return JSON.parse(await encryption.decrypt(fileContent)) as ISolution[];
+        const decryptedData = await encryption.decrypt(fileContent);
+        return JSON.parse(Buffer.from(decryptedData).toString()) as ISolution[];
       }
 
       return typeof fileContent == 'string'

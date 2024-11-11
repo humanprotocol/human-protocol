@@ -138,6 +138,15 @@ export enum ErrorWeb3 {
 }
 
 /**
+ * Represents error messages related to routing protocol.
+ */
+export enum ErrorRoutingProtocol {
+  ReputationOracleNotFound = 'The specified Reputation Oracle address is not found in the set of available oracles. Ensure the address is correct and check available oracles for this network.',
+  ExchangeOracleNotFound = 'The specified Exchange Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
+  RecordingOracleNotFound = 'The specified Recording Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
+}
+
+/**
  * Represents error messages related to send grid.
  */
 export enum ErrorSendGrid {
@@ -173,4 +182,12 @@ export enum ErrorCronJob {
  */
 export enum ErrorQualification {
   FailedToFetchQualifications = 'Failed to fetch qualifications',
+  InvalidQualification = `Invalid qualification`,
+}
+
+/**
+ * Represents error messages associated with encryption.
+ */
+export enum ErrorEncryption {
+  MissingPrivateKey = 'Encryption private key cannot be empty, when it is enabled',
 }

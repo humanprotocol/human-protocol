@@ -1,6 +1,8 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { create } from 'zustand';
 
+const MINIMAL_DATE_FOR_DATE_PICKER = '2021-04-06';
+
 export type GraphPageChartPeriodName = '1W' | '1M' | '6M' | '1Y' | 'ALL';
 
 export type TimePeriod = {
@@ -12,7 +14,7 @@ const oneWeekAgo = dayjs().subtract(1, 'week');
 const oneMonthAgo = dayjs().subtract(1, 'month');
 const sixMonthsAgo = dayjs().subtract(6, 'months');
 const oneYearAgo = dayjs().subtract(1, 'year');
-export const initialAllTime = dayjs().subtract(10, 'years');
+export const initialAllTime = dayjs(MINIMAL_DATE_FOR_DATE_PICKER);
 
 export const TIME_PERIOD_OPTIONS: TimePeriod[] = [
 	{
@@ -42,21 +44,22 @@ export interface GraphPageChartParams {
 		from: Dayjs;
 		to: Dayjs;
 	};
-	effectiveFromAllTimeDate?: Dayjs;
 	selectedTimePeriod: GraphPageChartPeriodName | null;
 	setTimePeriod: (timePeriod: TimePeriod) => void;
 	clearTimePeriod: () => void;
 	setFromDate: (fromDate: Dayjs | null) => void;
 	setToDate: (toDate: Dayjs | null) => void;
 	setEffectiveFromAllTimeDate: (date: Dayjs) => void;
+	revertToInitialParams: () => void;
 }
 
+const INITIAL_RANGE_PARAMS = {
+	from: oneWeekAgo,
+	to: dayjs(),
+};
+
 export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
-	dateRangeParams: {
-		from: oneWeekAgo,
-		to: dayjs(),
-	},
-	effectiveFromAllTimeDate: undefined,
+	dateRangeParams: INITIAL_RANGE_PARAMS,
 	selectedTimePeriod: '1W',
 	setFromDate: (fromDate: Dayjs | null) => {
 		if (!fromDate) {
@@ -86,17 +89,12 @@ export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
 	},
 	setTimePeriod: (timePeriod: TimePeriod) => {
 		set((state) => {
-			const newFromDate =
-				state.effectiveFromAllTimeDate && timePeriod.name === 'ALL'
-					? state.effectiveFromAllTimeDate
-					: timePeriod.value;
-
 			return {
 				...state,
 				selectedTimePeriod: timePeriod.name,
 				dateRangeParams: {
 					...state.dateRangeParams,
-					from: newFromDate,
+					from: timePeriod.value,
 				},
 			};
 		});
@@ -108,6 +106,12 @@ export const useGraphPageChartParams = create<GraphPageChartParams>((set) => ({
 		set((state) => ({
 			...state,
 			effectiveFromAllTimeDate: date,
+		}));
+	},
+	revertToInitialParams: () => {
+		set((state) => ({
+			...state,
+			dateRangeParams: INITIAL_RANGE_PARAMS,
 		}));
 	},
 }));

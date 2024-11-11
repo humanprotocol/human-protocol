@@ -2,25 +2,32 @@ import PageWrapper from '@components/PageWrapper';
 import Search from '@components/Search';
 import ShadowIcon from '@components/ShadowIcon';
 import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Divider from '@mui/material/Divider';
 import { Link } from 'react-router-dom';
-import cup from '@assets/cup.png';
 import { Leaderboard } from './Leaderboard';
 import GraphSwiper from '@components/Home/GraphSwiper';
 import { HMTPrice } from '@pages/Home/HMTPrice';
 import { TotalNumberOfTasks } from '@pages/Home/TotalNumberOfTasks';
 import { Holders } from '@pages/Home/Holders';
 import { TotalTransactions } from '@pages/Home/TotalTransactions';
-import { Links } from '@pages/Home/Links';
+import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { colorPalette } from '@assets/styles/color-palette';
+import CustomTooltip from '@components/CustomTooltip';
 
 const Home: React.FC = () => {
+	const {
+		mobile: { isMobile },
+	} = useBreakPoints();
 	return (
 		<PageWrapper violetHeader>
 			<div className="home-page-header">
-				<Typography variant="h3" fontWeight={600}>
+				<Typography
+					fontWeight={isMobile ? undefined : 600}
+					variant={isMobile ? 'H6-Mobile' : 'h3'}
+				>
 					All HUMAN activity. In one place.
 				</Typography>
 				<Search className="home-page-search" />
@@ -30,9 +37,13 @@ const Home: React.FC = () => {
 					<div className="box-title">Token</div>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Token Current Price" arrow>
-								<HelpOutlineIcon color="sky" />
-							</Tooltip>
+							<CustomTooltip title="Token Current Price" arrow>
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
+							</CustomTooltip>
 						</div>
 						<HMTPrice />
 					</div>
@@ -43,9 +54,13 @@ const Home: React.FC = () => {
 					/>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Number of users holding HMT" arrow>
-								<HelpOutlineIcon color="sky" />
-							</Tooltip>
+							<CustomTooltip title="Number of users holding HMT" arrow>
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
+							</CustomTooltip>
 						</div>
 						<Holders />
 					</div>
@@ -65,9 +80,17 @@ const Home: React.FC = () => {
 					</div>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Total number of transactions" arrow>
-								<HelpOutlineIcon color="sky" />
-							</Tooltip>
+							<CustomTooltip
+								enterTouchDelay={0}
+								title="Total number of transactions"
+								arrow
+							>
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
+							</CustomTooltip>
 						</div>
 						<TotalTransactions />
 					</div>
@@ -78,9 +101,16 @@ const Home: React.FC = () => {
 					/>
 					<div className="box-content">
 						<div className="box-icon">
-							<Tooltip title="Number of tasks that have been launched" arrow>
-								<HelpOutlineIcon color="sky" />
-							</Tooltip>
+							<CustomTooltip
+								title="Number of tasks that have been launched"
+								arrow
+							>
+								<HelpOutlineIcon
+									style={{
+										color: colorPalette.sky.main,
+									}}
+								/>
+							</CustomTooltip>
 						</div>
 						<TotalNumberOfTasks />
 					</div>
@@ -89,13 +119,11 @@ const Home: React.FC = () => {
 					<GraphSwiper />
 				</div>
 			</div>
-			<Links />
 			<ShadowIcon
 				className="home-page-leaderboard"
 				title="Leaderboard"
-				img={cup}
+				img={<LeaderboardIcon />}
 			/>
-
 			<Leaderboard />
 		</PageWrapper>
 	);

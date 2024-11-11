@@ -25,7 +25,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "export POSTGRES_DATABASE=job-launcher POSTGRES_PASSWORD=qwerty POSTGRES_USER=default POSTGRES_HOST=0.0.0.0 NODE_ENV=test-e2e && docker compose up -d postgres && yarn migration:run && jest --config ./test/jest-e2e.json; testStatus=$?; docker rm -f postgres; exit $testStatus"
+    "test:e2e": "export POSTGRES_DATABASE=job-launcher POSTGRES_PASSWORD=qwerty POSTGRES_USER=default POSTGRES_HOST=0.0.0.0 NODE_ENV=test-e2e && docker compose up -d postgres && yarn migration:run && jest --config ./test/jest-e2e.json; testStatus=$?; docker rm -f postgres; exit $testStatus",
+    "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",
@@ -37,7 +38,7 @@
     "@nestjs/passport": "^10.0.0",
     "@nestjs/schedule": "^4.0.1",
     "@nestjs/serve-static": "^4.0.1",
-    "@nestjs/swagger": "^7.1.13",
+    "@nestjs/swagger": "^7.4.2",
     "@nestjs/terminus": "^10.2.1",
     "@nestjs/typeorm": "^10.0.1",
     "@sendgrid/mail": "^8.1.3",
@@ -54,7 +55,7 @@
     "pg": "8.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.2.0",
-    "stripe": "^14.24.0",
+    "stripe": "^17.2.1",
     "typeorm": "^0.3.17",
     "typeorm-naming-strategies": "^4.1.0",
     "zxcvbn": "^4.4.2"
@@ -63,15 +64,15 @@
     "@golevelup/ts-jest": "^0.5.0",
     "@nestjs/cli": "^10.3.2",
     "@nestjs/schematics": "^10.1.3",
-    "@nestjs/testing": "^10.3.1",
+    "@nestjs/testing": "^10.4.6",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.13",
     "@types/jest": "29.5.12",
     "@types/json-stable-stringify": "^1.0.36",
-    "@types/node": "20.12.12",
+    "@types/node": "22.5.4",
     "@types/supertest": "^6.0.2",
     "@types/xml2js": "0.4.13",
-    "@types/zxcvbn": "4.4.4",
+    "@types/zxcvbn": "4.4.5",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vercel/node": "^3.0.26",
@@ -86,7 +87,7 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "4.2.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.6.3"
   },
   "lint-staged": {
     "*.ts": [

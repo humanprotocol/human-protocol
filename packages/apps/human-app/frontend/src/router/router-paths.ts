@@ -11,10 +11,11 @@ export const routerPaths = {
     emailVerification: '/verify',
     verifyEmail: '/worker/verify-email',
     profile: '/worker/profile',
-    // jobsDiscovery: '/worker/jobs-discovery',
+    jobsDiscovery: '/worker/jobs-discovery',
     jobs: '/worker/jobs',
     HcaptchaLabeling: '/worker/hcaptcha-labeling',
     enableLabeler: '/worker/enable-labeler',
+    registrationInExchangeOracle: '/worker/registration-in-exchange-oracle',
   },
   operator: {
     signIn: '/operator/sign-in',

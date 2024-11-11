@@ -13,18 +13,20 @@ const hcaptchaUserStatsSchema = z.object({
   served: z.number(),
   solved: z.number(),
   verified: z.number(),
-  // TODO verify response
-  currentDateStats: z.unknown(),
-  // TODO verify response
-  currentEarningsStats: z.object({
-    hmtEarned: z.unknown(),
+  currentDateStats: z.object({
+    // eslint-disable-next-line camelcase
+    billing_units: z.number(),
+    bypass: z.number(),
+    served: z.number(),
+    solved: z.number(),
   }),
+  currentEarningsStats: z.number(),
 });
 
 export type HCaptchaUserStatsSuccess = z.infer<typeof hcaptchaUserStatsSchema>;
 
 export async function getHCaptchaUsersStats() {
-  return apiClient(apiPaths.worker.hCaptchaUserStats, {
+  return apiClient(apiPaths.worker.hCaptchaUserStats.path, {
     authenticated: true,
     successSchema: hcaptchaUserStatsSchema,
     options: { method: 'GET' },

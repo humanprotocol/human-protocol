@@ -1,6 +1,7 @@
 import io
 import os
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
 
@@ -60,7 +61,9 @@ def prepare_annotation_metafile(
         ]
     )
 
-    return FileDescriptor(ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.json().encode()))
+    return FileDescriptor(
+        ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.model_dump_json().encode())
+    )
 
 
 class _TaskProcessor:
@@ -68,7 +71,7 @@ class _TaskProcessor:
         self,
         escrow_address: str,
         chain_id: int,
-        annotations: list[FileDescriptor],
+        annotations: Sequence[FileDescriptor],
         merged_annotation: FileDescriptor,
         *,
         manifest: TaskManifest,
@@ -571,7 +574,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
 def postprocess_annotations(
     escrow_address: str,
     chain_id: int,
-    annotations: list[FileDescriptor],
+    annotations: Sequence[FileDescriptor],
     merged_annotation: FileDescriptor,
     *,
     manifest: TaskManifest,

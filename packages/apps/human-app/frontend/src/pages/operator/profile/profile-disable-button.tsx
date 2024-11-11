@@ -28,7 +28,7 @@ export function ProfileDisableButton() {
 
   const disableOperator = async (signaturePayload: SignatureData) => {
     const signature = await signMessage(JSON.stringify(signaturePayload));
-    disableOperatorMutation({ signature: signature || '' });
+    disableOperatorMutation({ signature: signature ?? '' });
   };
 
   if (isSignatureDataError || isDisableOperatorError) {

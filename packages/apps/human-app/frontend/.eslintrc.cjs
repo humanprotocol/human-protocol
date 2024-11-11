@@ -20,10 +20,7 @@ module.exports = {
   },
   plugins: ['react-refresh'],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
+    'react-refresh/only-export-components': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -37,6 +34,13 @@ module.exports = {
     // allow imports from material react table library
     camelcase: ['error', { allow: ['MRT_'] }],
     'react/jsx-pascal-case': ['error', { ignore: ['MRT_'] }],
+    '@typescript-eslint/restrict-template-expressions': [
+      'error',
+      {
+        allowNumber: true,
+        allowNullish: true,
+      },
+    ],
   },
   settings: {
     'import/resolver': {

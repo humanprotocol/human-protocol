@@ -8,12 +8,19 @@ import {
 	useLeaderboardSearch,
 } from '@utils/hooks/use-leaderboard-search';
 import { NetworkIcon } from '@components/NetworkIcon';
+import { Box } from '@mui/material';
+import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
 export const SelectNetwork = () => {
 	const {
 		setChainId,
 		filterParams: { chainId },
 	} = useLeaderboardSearch();
+
+	const {
+		mobile: { isMobile },
+	} = useBreakPoints();
+
 	const handleChange = (event: SelectChangeEvent<number>) => {
 		const value = event.target.value;
 		if (typeof value === 'number') {
@@ -22,7 +29,11 @@ export const SelectNetwork = () => {
 	};
 
 	return (
-		<FormControl fullWidth size="small">
+		<FormControl
+			fullWidth
+			size="small"
+			sx={{ width: isMobile ? '100%' : '210px' }}
+		>
 			<InputLabel id="network-select-label">By Network</InputLabel>
 			<Select<number>
 				labelId="network-select-label"
@@ -51,7 +62,10 @@ export const SelectNetwork = () => {
 							className="select-item"
 							value={selectItem.id}
 						>
-							<NetworkIcon chainId={selectItem.id} />
+							<Box sx={{ svg: { width: '24px', height: '24px' } }}>
+								<NetworkIcon chainId={selectItem.id} />
+							</Box>
+
 							{selectItem.name}
 						</MenuItem>
 					);

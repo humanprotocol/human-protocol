@@ -99,13 +99,7 @@ const mergeResponses = (
 const DEBOUNCE_MS = 300;
 
 export function useGraphPageChartData() {
-	const {
-		dateRangeParams,
-		selectedTimePeriod,
-		effectiveFromAllTimeDate,
-		setEffectiveFromAllTimeDate,
-		setFromDate,
-	} = useGraphPageChartParams();
+	const { dateRangeParams } = useGraphPageChartParams();
 	const queryParams = useMemo(
 		() => ({
 			from: dateRangeParams.from.format('YYYY-MM-DD'),
@@ -141,31 +135,10 @@ export function useGraphPageChartData() {
 				hcaptchaDailyStatsResponseSchema
 			);
 
-			const mergedResponses = mergeResponses(
+			return mergeResponses(
 				validHcaptchaGeneralStats.results,
 				validHmtDailyStats.results
 			);
-			const latestDate = mergedResponses[0]?.date
-				? dayjs(new Date(mergedResponses[0]?.date))
-				: null;
-
-			const fromDateInLatestDateFormat = dayjs(
-				new Date(dateRangeParams.from.format('YYYY-MM-DD'))
-			);
-
-			if (
-				(selectedTimePeriod === 'ALL' &&
-					!effectiveFromAllTimeDate &&
-					latestDate) ||
-				(!effectiveFromAllTimeDate &&
-					latestDate?.isAfter(fromDateInLatestDateFormat))
-			) {
-				console.log({ fromDateInLatestDateFormat, latestDate });
-				setEffectiveFromAllTimeDate(latestDate);
-				setFromDate(latestDate);
-			}
-
-			return mergedResponses;
 		},
 		staleTime: DEBOUNCE_MS,
 		queryKey: ['useGraphPageChartData', debouncedQueryParams],

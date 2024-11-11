@@ -23,6 +23,7 @@ class ProjectStatuses(str, Enum, metaclass=BetterEnumMeta):
     validation = "validation"
     canceled = "canceled"
     recorded = "recorded"
+    deleted = "deleted"
 
 
 class TaskStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -38,11 +39,11 @@ class JobStatuses(str, Enum, metaclass=BetterEnumMeta):
 
 
 class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
-    image_label_binary = "IMAGE_LABEL_BINARY"
-    image_points = "IMAGE_POINTS"
-    image_boxes = "IMAGE_BOXES"
-    image_boxes_from_points = "IMAGE_BOXES_FROM_POINTS"
-    image_skeletons_from_boxes = "IMAGE_SKELETONS_FROM_BOXES"
+    image_label_binary = "image_label_binary"
+    image_points = "image_points"
+    image_boxes = "image_boxes"
+    image_boxes_from_points = "image_boxes_from_points"
+    image_skeletons_from_boxes = "image_skeletons_from_boxes"
 
 
 class CvatLabelTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -55,11 +56,13 @@ class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):
     exchange_oracle = "exchange_oracle"
     job_launcher = "job_launcher"
     recording_oracle = "recording_oracle"
+    reputation_oracle = "reputation_oracle"
 
 
 class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    task_creation_failed = "task_creation_failed"
-    task_finished = "task_finished"
+    job_creation_failed = "job_creation_failed"
+    job_finished = "job_finished"
+    escrow_cleaned = "escrow_cleaned"
 
 
 class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -68,8 +71,13 @@ class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):
 
 
 class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    task_completed = "task_completed"
-    task_rejected = "task_rejected"
+    job_completed = "job_completed"
+    submission_rejected = "submission_rejected"
+
+
+class ReputationOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
+    # TODO: rename to ReputationOracleEventType
+    escrow_completed = "escrow_completed"
 
 
 class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
@@ -78,12 +86,22 @@ class OracleWebhookStatuses(str, Enum, metaclass=BetterEnumMeta):
     failed = "failed"
 
 
-class PlatformTypes(str, Enum, metaclass=BetterEnumMeta):
-    CVAT = "cvat"
-
-
 class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
+    """
+    State changes:
+
+    - created: -> expired / completed / canceled
+    - completed: -> rejected
+    """
+
     created = "created"
     completed = "completed"
     expired = "expired"
+    rejected = "rejected"
     canceled = "canceled"
+
+
+class EscrowValidationStatuses(str, Enum, metaclass=BetterEnumMeta):
+    awaiting = "awaiting"
+    in_progress = "in_progress"
+    completed = "completed"

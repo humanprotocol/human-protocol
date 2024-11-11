@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import update
+from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
 from src.db import engine as db_engine
@@ -51,6 +51,16 @@ def update_escrow_iteration(session: Session, escrow_address: str, chain_id: int
         update(Task)
         .where(Task.escrow_address == escrow_address, Task.chain_id == chain_id)
         .values(iteration=iteration)
+    )
+
+    session.execute(expression)
+
+
+def mark_escrow_as_cleaned(session: Session, escrow_address: str, chain_id: int):
+    expression = (
+        update(Task)
+        .where(Task.escrow_address == escrow_address, Task.chain_id == chain_id)
+        .values(cleaned_at=func.now())
     )
 
     session.execute(expression)

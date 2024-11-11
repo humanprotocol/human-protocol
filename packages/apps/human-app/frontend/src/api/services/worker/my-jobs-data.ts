@@ -15,22 +15,11 @@ const myJobSchema = z.object({
   chain_id: z.number(),
   job_type: z.string(),
   status: z.string(),
-  reward_amount: z.string().transform((value, ctx) => {
-    const parsedNumber = Number(value);
-    if (Number.isNaN(parsedNumber)) {
-      ctx.addIssue({
-        path: ['results', 'reward_amount'],
-        message: 'Not a numeric string',
-        code: 'custom',
-      });
-    }
-
-    return parsedNumber;
-  }),
+  reward_amount: z.string(),
   reward_token: z.string(),
   created_at: z.string(),
   expires_at: z.string(),
-  url: z.string().optional(),
+  url: z.string().optional().nullable(),
 });
 
 const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
@@ -46,7 +35,10 @@ type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
 };
 
-const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
+const getMyJobsTableData = async (
+  dto: GetMyJobTableDataDto,
+  abortSignal: AbortSignal
+) => {
   return apiClient(
     `${apiPaths.worker.myJobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
@@ -55,30 +47,30 @@ const getMyJobsTableData = async (dto: GetMyJobTableDataDto) => {
       options: {
         method: 'GET',
       },
-    }
+    },
+    abortSignal
   );
 };
 
 export function useGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
   const { address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: address || '' };
-
+  const dto = { ...filterParams, oracle_address: address ?? '' };
   return useQuery({
     queryKey: ['myJobs', dto],
-    queryFn: () => getMyJobsTableData(dto),
+    queryFn: ({ signal }) => getMyJobsTableData(dto, signal),
   });
 }
 
 export function useInfiniteGetMyJobsData() {
   const { filterParams } = useMyJobsFilterStore();
   const { address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: address || '' };
+  const dto = { ...filterParams, oracle_address: address ?? '' };
 
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['myJobsInfinite', dto],
-    queryFn: () => getMyJobsTableData(dto),
+    queryFn: ({ signal }) => getMyJobsTableData(dto, signal),
     getNextPageParam: (pageParams) => {
       return pageParams.total_pages - 1 <= pageParams.page
         ? undefined

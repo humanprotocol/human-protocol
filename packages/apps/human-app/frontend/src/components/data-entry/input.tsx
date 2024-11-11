@@ -2,9 +2,9 @@ import { Controller } from 'react-hook-form';
 import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
-import { colorPalette } from '@/styles/color-palette';
 import type { InputMask } from '@/components/data-entry/input-masks/input-masks';
 import { InputMasks } from '@/components/data-entry/input-masks/input-masks';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {
@@ -23,6 +23,8 @@ export function Input({
   mask,
   ...rest
 }: InputProps) {
+  const { colorPalette } = useColorMode();
+
   return (
     <Controller
       name={name}
@@ -38,7 +40,7 @@ export function Input({
                 }
               : undefined
           }
-          autoComplete={autoComplete || name}
+          autoComplete={autoComplete ?? name}
           error={Boolean(fieldState.error)}
           fullWidth
           helperText={
@@ -52,6 +54,16 @@ export function Input({
           }
           label={label}
           name={name}
+          sx={{
+            input: {
+              '&:-webkit-autofill': {
+                '-webkit-box-shadow': `0 0 0 30px transparent inset !important`,
+                '-webkit-text-fill-color': `${colorPalette.text.primary} !important`,
+                transition:
+                  'background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s',
+              },
+            },
+          }}
           variant="outlined"
           {...rest}
         />

@@ -46,6 +46,7 @@ footer{
 
   .footer-link, .footer-icon{
     display: flex;
+    flex-wrap: wrap;
     span {
       cursor: pointer;
       font-size: 12px;
@@ -62,5 +63,10 @@ footer{
         flex-direction: column;
       }
     }
+  }
+
+  .footer-link, .footer-icon{
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 }

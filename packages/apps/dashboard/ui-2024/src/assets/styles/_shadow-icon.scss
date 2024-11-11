@@ -8,7 +8,7 @@
     justify-content: center;
     align-items: center;
   }
-  img {
+  img, svg {
     transform: translateY(17%);
     width: 130px;
     height: 130px;
@@ -16,13 +16,14 @@
   span{
     padding-top: 20px;
     font-size: 28px;
-    font-weight: bold;
+    font-weight: 600;
   }
 
     @media (max-width: 400px) {
       span {
         padding-top: 30px;
         font-size: 20px;
+        font-weight: 500;
       }
     }
 }

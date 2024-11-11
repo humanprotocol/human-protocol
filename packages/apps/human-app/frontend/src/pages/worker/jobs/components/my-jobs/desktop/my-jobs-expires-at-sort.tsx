@@ -10,7 +10,7 @@ export function MyJobsExpiresAtSort() {
     setFilterParams({
       ...filterParams,
       sort_field: 'expires_at',
-      sort: 'ASC',
+      sort: 'asc',
     });
   };
 
@@ -18,7 +18,7 @@ export function MyJobsExpiresAtSort() {
     setFilterParams({
       ...filterParams,
       sort_field: 'expires_at',
-      sort: 'DESC',
+      sort: 'desc',
     });
   };
 

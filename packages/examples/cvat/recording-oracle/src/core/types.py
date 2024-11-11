@@ -11,11 +11,11 @@ class Networks(int, Enum):
 
 
 class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
-    image_label_binary = "IMAGE_LABEL_BINARY"
-    image_points = "IMAGE_POINTS"
-    image_boxes = "IMAGE_BOXES"
-    image_boxes_from_points = "IMAGE_BOXES_FROM_POINTS"
-    image_skeletons_from_boxes = "IMAGE_SKELETONS_FROM_BOXES"
+    image_label_binary = "image_label_binary"
+    image_points = "image_points"
+    image_boxes = "image_boxes"
+    image_boxes_from_points = "image_boxes_from_points"
+    image_skeletons_from_boxes = "image_skeletons_from_boxes"
 
 
 class OracleWebhookTypes(str, Enum):
@@ -31,10 +31,11 @@ class OracleWebhookStatuses(str, Enum):
 
 
 class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    task_creation_failed = "task_creation_failed"
-    task_finished = "task_finished"
+    job_creation_failed = "job_creation_failed"
+    job_finished = "job_finished"
+    escrow_cleaned = "escrow_cleaned"
 
 
 class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    task_completed = "task_completed"
-    task_rejected = "task_rejected"
+    job_completed = "job_completed"
+    submission_rejected = "submission_rejected"

@@ -19,6 +19,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.XLAYER_TESTNET,
 ];
 export const MAINNET_CHAIN_IDS = [
+  ChainId.MAINNET,
   ChainId.BSC_MAINNET,
   ChainId.POLYGON,
   ChainId.MOONBEAM,

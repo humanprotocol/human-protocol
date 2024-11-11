@@ -1,10 +1,8 @@
 import { Test } from '@nestjs/testing';
 
-import { KycStatus } from '../../common/enums/user';
 import { KycController } from './kyc.controller';
 import { KycSessionDto } from './kyc.dto';
 import { KycService } from './kyc.service';
-import { KycConfigService } from '../../common/config/kyc-config.service';
 import { EnvConfigModule } from '../../common/config/config.module';
 
 describe('KycController', () => {

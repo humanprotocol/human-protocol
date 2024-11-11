@@ -7,6 +7,7 @@ import { AssignmentStatus } from '../../common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 import { AssignmentFilterData, ListResult } from './assignment.interface';
 import { AssignmentSortField } from '../../common/enums/job';
+import { convertToDatabaseSortDirection } from '../../database/database.utils';
 
 @Injectable()
 export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
@@ -34,6 +35,19 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
     return this.findOne({
       where: {
         jobId,
+        workerAddress,
+      },
+    });
+  }
+
+  public async findOneByEscrowAndWorker(
+    escrowAddress: string,
+    chainId: ChainId,
+    workerAddress: string,
+  ): Promise<AssignmentEntity | null> {
+    return this.findOne({
+      where: {
+        job: { escrowAddress, chainId },
         workerAddress,
       },
     });
@@ -117,24 +131,25 @@ export class AssignmentRepository extends BaseRepository<AssignmentEntity> {
       'assignment',
     ).leftJoinAndSelect('assignment.job', 'job');
 
+    const dbSortDirection = convertToDatabaseSortDirection(data.sort);
     switch (data.sortField) {
       case AssignmentSortField.CHAIN_ID:
-        queryBuilder.orderBy('job.chainId', data.sort);
+        queryBuilder.orderBy('job.chainId', dbSortDirection);
         break;
       case AssignmentSortField.STATUS:
-        queryBuilder.orderBy('assignment.status', data.sort);
+        queryBuilder.orderBy('assignment.status', dbSortDirection);
         break;
       case AssignmentSortField.CREATED_AT:
-        queryBuilder.orderBy('assignment.createdAt', data.sort);
+        queryBuilder.orderBy('assignment.createdAt', dbSortDirection);
         break;
       case AssignmentSortField.EXPIRES_AT:
-        queryBuilder.orderBy('assignment.expiresAt', data.sort);
+        queryBuilder.orderBy('assignment.expiresAt', dbSortDirection);
         break;
       case AssignmentSortField.REWARD_AMOUNT:
-        queryBuilder.orderBy('assignment.rewardAmount', data.sort);
+        queryBuilder.orderBy('assignment.rewardAmount', dbSortDirection);
         break;
       default:
-        queryBuilder.orderBy('assignment.createdAt', data.sort);
+        queryBuilder.orderBy('assignment.createdAt', dbSortDirection);
     }
 
     if (data.chainId !== undefined) {

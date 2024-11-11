@@ -102,12 +102,16 @@ export function handleDataSaved(event: DataSaved): void {
 
     const operator = createOrLoadLeader(ethAddress);
 
-    if (event.params.value == 'ACTIVE') {
+    if (event.params.value.toLowerCase() == 'active') {
       operator.reputationNetwork = reputationNetwork.id;
-    } else if (event.params.value == 'INACTIVE') {
+    } else if (event.params.value.toLowerCase() == 'inactive') {
       operator.reputationNetwork = null;
     }
     operator.save();
+  } else if (key == 'registration_needed') {
+    leader.registrationNeeded = event.params.value.toLowerCase() == 'true';
+  } else if (key == 'registration_instructions') {
+    leader.registrationInstructions = event.params.value;
   }
 
   if (key.indexOf('url') > -1) {

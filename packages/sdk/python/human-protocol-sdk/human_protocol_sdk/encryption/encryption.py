@@ -40,7 +40,7 @@ Module
 ------
 """
 
-from typing import Optional, List
+from typing import Optional, List, Union
 from pgpy import PGPKey, PGPMessage
 from pgpy.constants import SymmetricKeyAlgorithm
 from pgpy.errors import PGPError
@@ -74,7 +74,9 @@ class Encryption:
             else:
                 raise ValueError("Private key locked. Passphrase needed")
 
-    def sign_and_encrypt(self, message: str, public_keys: List[str]) -> str:
+    def sign_and_encrypt(
+        self, message: Union[str, bytes], public_keys: List[str]
+    ) -> str:
         """
         Signs and encrypts a message using the private key and recipient's public keys.
 
@@ -139,7 +141,9 @@ class Encryption:
                     "your message", [public_key2, public_key3]
                 )
         """
+
         pgp_message = PGPMessage.new(message)
+
         if not self.private_key.is_unlocked:
             try:
                 with self.private_key.unlock(self.passphrase):
@@ -159,7 +163,7 @@ class Encryption:
         del sessionkey
         return pgp_message.__str__()
 
-    def decrypt(self, message: str, public_key: Optional[str] = None) -> str:
+    def decrypt(self, message: str, public_key: Optional[str] = None) -> bytes:
         """
         Decrypts a message using the private key.
 
@@ -209,7 +213,10 @@ class Encryption:
                 public_key, _ = PGPKey.from_blob(public_key)
                 public_key.verify(decrypted_message)
 
-            return decrypted_message.message.__str__()
+            if isinstance(decrypted_message.message, str):
+                return bytes(decrypted_message.message, encoding="utf-8")
+            else:
+                return bytes(decrypted_message.message)
         except PGPError as e:
             if (
                 decrypted_message
@@ -221,7 +228,7 @@ class Encryption:
                 )
             raise ValueError("Failed to decrypt message: {}".format(str(e)))
 
-    def sign(self, message: str) -> str:
+    def sign(self, message: Union[str, bytes]) -> str:
         """
         Signs a message using the private key.
 

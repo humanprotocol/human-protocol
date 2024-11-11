@@ -25,6 +25,7 @@ import {
   MOCK_PAYMENT_ID,
   MOCK_SIGNATURE,
   MOCK_TRANSACTION_HASH,
+  mockConfig,
 } from '../../../test/constants';
 import { PaymentInfoRepository } from './payment-info.repository';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -42,10 +43,6 @@ import { RateService } from './rate.service';
 
 jest.mock('@human-protocol/sdk');
 
-jest.mock('../../common/utils', () => ({
-  getRate: jest.fn().mockImplementation(() => 1.5),
-}));
-
 jest.mock('../../common/utils/signature', () => ({
   verifySignature: jest.fn().mockReturnValue(true),
 }));
@@ -62,29 +59,20 @@ describe('PaymentService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'STRIPE_SECRET_KEY':
-            return 'test-secret';
-          case 'STRIPE_API_VERSION':
-            return '2022-11-15';
-          case 'NAME':
-            return 'Fortune';
-          case 'VERSION':
-            return '0.0.1';
-          case 'STRIPE_APP_INFO_URL':
-            return 'https://test-app-url.com';
-          case 'RPC_URL_POLYGON_AMOY':
-            return 'http://0.0.0.0:8545';
-          default:
-            return defaultValue;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         PaymentService,
         StripeConfigService,
         {
@@ -102,9 +90,14 @@ describe('PaymentService', () => {
             validateChainId: jest.fn(),
           },
         },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: RateService, useValue: createMock<RateService>() },
+        {
+          provide: RateService,
+          useValue: {
+            getRate: jest.fn().mockResolvedValue(1.5),
+          },
+        },
         NetworkConfigService,
         ServerConfigService,
       ],

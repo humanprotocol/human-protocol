@@ -42,7 +42,6 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { SiteKeyType } from '../../common/enums';
 
 @Injectable()
@@ -55,7 +54,6 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
-    private readonly hCaptchaConfigService: HCaptchaConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
@@ -262,7 +260,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -441,8 +439,8 @@ export class AuthService {
 
     if (
       !role ||
-      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        role,
+      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].some(
+        (r) => r.toLowerCase() === role.toLowerCase(),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);

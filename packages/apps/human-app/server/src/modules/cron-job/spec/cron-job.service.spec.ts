@@ -12,6 +12,15 @@ import {
 import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
 import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
+import { SchedulerRegistry } from '@nestjs/schedule';
+
+jest.mock('cron', () => {
+  return {
+    CronJob: jest.fn().mockImplementation(() => ({
+      start: jest.fn(),
+    })),
+  };
+});
 
 describe('CronJobService', () => {
   let service: CronJobService;
@@ -44,6 +53,7 @@ describe('CronJobService', () => {
       password: 'Test1234*',
       cacheTtlOracleDiscovery: 600,
       chainIdsEnabled: ['137', '1'],
+      jobsDiscoveryFlag: false,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +67,7 @@ describe('CronJobService', () => {
         { provide: WorkerService, useValue: workerServiceMock },
         { provide: CACHE_MANAGER, useValue: cacheManagerMock },
         { provide: EnvironmentConfigService, useValue: configServiceMock },
+        SchedulerRegistry,
       ],
     }).compile();
 
@@ -65,6 +76,46 @@ describe('CronJobService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('CronJobService - Cron Job Initialization', () => {
+    const schedulerRegistryMock: any = {
+      addCronJob: jest.fn(),
+    };
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should initialize the cron job if jobsDiscoveryFlag is true', () => {
+      (configServiceMock as any).jobsDiscoveryFlag = true;
+
+      service = new CronJobService(
+        exchangeOracleGatewayMock as ExchangeOracleGateway,
+        cacheManagerMock,
+        configServiceMock as any,
+        oracleDiscoveryServiceMock as OracleDiscoveryService,
+        workerServiceMock as WorkerService,
+        schedulerRegistryMock,
+      );
+
+      expect(schedulerRegistryMock.addCronJob).toHaveBeenCalled();
+    });
+
+    it('should not initialize the cron job if jobsDiscoveryFlag is false', () => {
+      (configServiceMock as any).jobsDiscoveryFlag = false;
+
+      service = new CronJobService(
+        exchangeOracleGatewayMock as ExchangeOracleGateway,
+        cacheManagerMock,
+        configServiceMock as any,
+        oracleDiscoveryServiceMock as OracleDiscoveryService,
+        workerServiceMock as WorkerService,
+        schedulerRegistryMock,
+      );
+
+      expect(schedulerRegistryMock.addCronJob).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateJobsListCron', () => {

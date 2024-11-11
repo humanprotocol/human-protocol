@@ -3,7 +3,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { colorPalette } from '@assets/styles/color-palette';
 import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
 import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
@@ -17,6 +16,8 @@ import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
 import { Reputation } from '@services/api/use-leaderboard-details';
 import { env } from '@helpers/env';
+import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
+import CustomTooltip from '@components/CustomTooltip';
 
 interface RoleInfoProps {
 	title: string;
@@ -26,7 +27,7 @@ interface RoleInfoProps {
 const RoleInformation = ({ title, points }: RoleInfoProps) => {
 	return (
 		<Box>
-			<Typography>{title}</Typography>
+			<Typography variant="body2">{title}</Typography>
 			<ul
 				style={{
 					margin: 0,
@@ -35,7 +36,9 @@ const RoleInformation = ({ title, points }: RoleInfoProps) => {
 				}}
 			>
 				{points.map((elem, idx) => (
-					<li key={idx}>{elem}</li>
+					<li key={idx}>
+						<Typography variant="body2">{elem}</Typography>
+					</li>
 				))}
 			</ul>
 		</Box>
@@ -47,6 +50,10 @@ const RenderRoleDetailsInfo = ({
 }: {
 	role: AddressDetailsLeader['role'];
 }) => {
+	if (!role) {
+		return null;
+	}
+
 	const roleDetailsInfo: Partial<
 		Record<Roles, { title: string; points: string[] }>
 	> = {
@@ -76,7 +83,7 @@ const RenderRoleDetailsInfo = ({
 		[Roles.jobLauncher]: {
 			title: 'Job Launcher',
 			points: [
-				'The Job Launcher is a tool that allows anybody to create and launch jobs, to be distributed as tasks through the HUMAN App',
+				'The Job Launcher is a tool that allows anybody to create and launch jobs, to be distributed as tasks through the HUMAN App.',
 			],
 		},
 	};
@@ -145,6 +152,7 @@ const renderReputationTitle = (reputation: Reputation) => {
 };
 
 const renderRoleIcon = (role: AddressDetailsLeader['role']) => {
+	if (!role) return null;
 	const roleIcons = {
 		[Roles.reputationOracle]: <ReputationOracleIcon />,
 		[Roles.exchangeOracle]: <ExchangeOracleIcon />,
@@ -178,6 +186,8 @@ const RoleDetails = ({
 					paddingX: { xs: 2, md: 8 },
 					paddingY: { xs: 4, md: 6 },
 					marginBottom: 4,
+					borderRadius: '16px',
+					boxShadow: 'none',
 				}}
 			>
 				<Box
@@ -226,7 +236,7 @@ const RoleDetails = ({
 							direction="row"
 							alignItems="center"
 						>
-							<Typography fontWeight={600}>Role</Typography>
+							<Typography variant="subtitle2">Role</Typography>
 						</Stack>
 						<Stack gap={2} direction="column">
 							{renderRoleIcon(role)}
@@ -238,11 +248,13 @@ const RoleDetails = ({
 							sx={{
 								width: 300,
 							}}
-							fontWeight={600}
+							variant="subtitle2"
 						>
 							Network
 						</Typography>
-						<Typography>{getNetwork(chainId)?.name || ''}</Typography>
+						<Typography variant="body2">
+							{getNetwork(chainId)?.name || ''}
+						</Typography>
 					</Stack>
 					<Stack
 						alignItems={{ xs: 'start', md: 'center' }}
@@ -256,7 +268,7 @@ const RoleDetails = ({
 							direction="row"
 							alignItems="center"
 						>
-							<Tooltip title="Reputation of the role as per their activities">
+							<CustomTooltip title="Reputation of the role as per their activities">
 								<IconButton
 									sx={{
 										padding: 0,
@@ -266,8 +278,8 @@ const RoleDetails = ({
 								>
 									<HelpOutlineIcon fontSize="small" />
 								</IconButton>
-							</Tooltip>
-							<Typography fontWeight={600}>Reputation Score</Typography>
+							</CustomTooltip>
+							<Typography variant="subtitle2">Reputation Score</Typography>
 						</Stack>
 						{renderReputationTitle(reputation)}
 					</Stack>
@@ -276,7 +288,7 @@ const RoleDetails = ({
 							sx={{
 								width: 300,
 							}}
-							fontWeight={600}
+							variant="subtitle2"
 						>
 							Jobs Launched
 						</Typography>
@@ -290,6 +302,8 @@ const RoleDetails = ({
 					paddingX: { xs: 2, md: 8 },
 					paddingY: { xs: 4, md: 6 },
 					marginBottom: 4,
+					borderRadius: '16px',
+					boxShadow: 'none',
 				}}
 			>
 				<Box
@@ -307,29 +321,7 @@ const RoleDetails = ({
 					</Typography>
 				</Box>
 				<Stack gap={4}>
-					<Stack gap={{ xs: 1, md: 0 }} direction={{ sm: 'column', md: 'row' }}>
-						<Typography
-							sx={{
-								width: 300,
-							}}
-							fontWeight={600}
-						>
-							Tokens Staked
-						</Typography>
-						<Typography>
-							{amountStaked}
-							<Typography
-								sx={{
-									marginLeft: 0.5,
-								}}
-								color={colorPalette.fog.main}
-								component="span"
-							>
-								HMT
-							</Typography>
-						</Typography>
-					</Stack>
-					{amountAllocated !== undefined ? (
+					{amountStaked !== undefined && amountStaked !== null ? (
 						<Stack
 							gap={{ xs: 1, md: 0 }}
 							direction={{ sm: 'column', md: 'row' }}
@@ -338,25 +330,58 @@ const RoleDetails = ({
 								sx={{
 									width: 300,
 								}}
-								fontWeight={600}
+								variant="subtitle2"
+							>
+								Tokens Staked
+							</Typography>
+							<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+								<Typography variant="body2">
+									<FormatNumberWithDecimals value={amountStaked} />
+								</Typography>
+								<Typography
+									sx={{
+										marginLeft: 0.5,
+									}}
+									variant="body2"
+									color={colorPalette.fog.main}
+									component="span"
+								>
+									HMT
+								</Typography>
+							</Stack>
+						</Stack>
+					) : null}
+					{amountAllocated !== undefined && amountAllocated !== null ? (
+						<Stack
+							gap={{ xs: 1, md: 0 }}
+							direction={{ sm: 'column', md: 'row' }}
+						>
+							<Typography
+								sx={{
+									width: 300,
+								}}
+								variant="subtitle2"
 							>
 								Tokens Allocated
 							</Typography>
-							<Typography>
-								{amountAllocated}
+							<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+								<Typography variant="body2">
+									<FormatNumberWithDecimals value={amountAllocated} />
+								</Typography>
 								<Typography
 									sx={{
 										marginLeft: 0.5,
 									}}
+									variant="body2"
 									color={colorPalette.fog.main}
 									component="span"
 								>
 									HMT
 								</Typography>
-							</Typography>
+							</Stack>
 						</Stack>
 					) : null}
-					{amountLocked !== undefined ? (
+					{amountLocked !== undefined && amountLocked !== null ? (
 						<Stack
 							gap={{ xs: 1, md: 0 }}
 							direction={{ sm: 'column', md: 'row' }}
@@ -365,22 +390,25 @@ const RoleDetails = ({
 								sx={{
 									width: 300,
 								}}
-								fontWeight={600}
+								variant="subtitle2"
 							>
 								Tokens Locked
 							</Typography>
-							<Typography>
-								{amountLocked}
+							<Stack sx={{ whiteSpace: 'nowrap', flexDirection: 'row' }}>
+								<Typography variant="body2">
+									<FormatNumberWithDecimals value={amountLocked} />
+								</Typography>
 								<Typography
 									sx={{
 										marginLeft: 0.5,
 									}}
+									variant="body2"
 									color={colorPalette.fog.main}
 									component="span"
 								>
 									HMT
 								</Typography>
-							</Typography>
+							</Stack>
 						</Stack>
 					) : null}
 				</Stack>

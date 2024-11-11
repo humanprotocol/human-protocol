@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
 
 export function Buttons({

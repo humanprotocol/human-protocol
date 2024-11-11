@@ -12,6 +12,7 @@ import { Web3Module } from '../web3/web3.module';
 import { RateService } from './rate.service';
 import { PaymentInfoEntity } from './payment-info.entity';
 import { PaymentInfoRepository } from './payment-info.repository';
+import { WhitelistModule } from '../whitelist/whitelist.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PaymentInfoRepository } from './payment-info.repository';
     TypeOrmModule.forFeature([PaymentEntity, PaymentInfoEntity]),
     ConfigModule,
     Web3Module,
+    WhitelistModule,
     MinioModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -20,12 +20,14 @@ import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { HandIcon, HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
-// import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
+import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.page';
 import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/hcaptcha-labeling.page';
 import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
 import { SetUpOperatorPage } from '@/pages/operator/sign-up/set-up-operator';
+import { env } from '@/shared/env';
+import { RegistrationPage } from '@/pages/worker/registration/registration.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -88,26 +90,40 @@ export const protectedRoutes: {
       headerText: t('protectedPagesHeaders.profile'),
     },
   },
-  // {
-  //   routerProps: {
-  //     path: routerPaths.worker.jobsDiscovery,
-  //     element: <JobsDiscoveryPage />,
-  //   },
-  //   pageHeaderProps: {
-  //     headerIcon: <HomepageWorkIcon />,
-  //     headerText: t('protectedPagesHeaders.jobsDiscovery'),
-  //   },
-  // },
   {
     routerProps: {
-      path: `${routerPaths.worker.jobs}/:address`,
-      element: <JobsPage />,
+      path: routerPaths.worker.jobsDiscovery,
+      element: <JobsDiscoveryPage />,
     },
     pageHeaderProps: {
       headerIcon: <HomepageWorkIcon />,
-      headerText: t('protectedPagesHeaders.jobs'),
+      headerText: t('protectedPagesHeaders.jobsDiscovery'),
     },
   },
+  ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
+    ? [
+        {
+          routerProps: {
+            path: `${routerPaths.worker.jobs}/:address`,
+            element: <JobsPage />,
+          },
+          pageHeaderProps: {
+            headerIcon: <HomepageWorkIcon />,
+            headerText: t('protectedPagesHeaders.jobs'),
+          },
+        },
+        {
+          routerProps: {
+            path: `${routerPaths.worker.registrationInExchangeOracle}/:address`,
+            element: <RegistrationPage />,
+          },
+          pageHeaderProps: {
+            headerIcon: <HomepageWorkIcon />,
+            headerText: t('protectedPagesHeaders.registrationInExchangeOracle'),
+          },
+        },
+      ]
+    : []),
   {
     routerProps: {
       path: routerPaths.worker.profile,

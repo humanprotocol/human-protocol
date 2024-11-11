@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useBackgroundColorStore } from '@/hooks/use-background-store';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
 import { PageHeader } from '@/components/layout/protected/page-header';
-import { breakpoints } from '@/styles/theme';
+import { breakpoints } from '@/styles/breakpoints';
 import { TopNotification } from '@/components/ui/top-notification';
 import type { TopNotificationPayload } from '@/components/layout/protected/layout-notification-context';
 import { ProtectedLayoutContext } from '@/components/layout/protected/layout-notification-context';
@@ -58,7 +58,7 @@ export function Layout({
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
-  const { backgroundColor } = useBackgroundColorStore();
+  const { backgroundColor, setGrayBackground } = useBackgroundColorStore();
   const toggleUserStatsDrawer = isHCaptchaLabelingPage
     ? () => {
         setHcaptchaDrawerOpen((state) => !state);
@@ -93,6 +93,10 @@ export function Layout({
   useEffect(() => {
     setNotificationWidth();
   }, [notification]);
+
+  useEffect(() => {
+    setGrayBackground();
+  }, [setGrayBackground]);
 
   return (
     <ProtectedLayoutContext.Provider
@@ -159,16 +163,20 @@ export function Layout({
                   zIndex: 200,
                   top: '0',
                   left: '0',
-                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  width: notificationWith
+                    ? `${notificationWith.toString()}px`
+                    : 'unset',
                 },
               }}
             >
               <Grid
                 item
                 sx={{
-                  minHeight: '3.2rem',
+                  minHeight: notification ? '3.2rem' : 'unset',
                   position: 'fixed',
-                  width: notificationWith ? `${notificationWith}px` : 'unset',
+                  width: notificationWith
+                    ? `${notificationWith.toString()}px`
+                    : 'unset',
                   zIndex: '10',
                   [breakpoints.mobile]: {
                     minHeight: 'unset',
@@ -201,7 +209,7 @@ export function Layout({
             </Grid>
             <Grid
               component="div"
-              // @ts-expect-error -- ...
+              // @ts-expect-error -- MUI accepts this prop even if it's not typed
               ref={layoutElementRef}
               sx={{ height: '100%' }}
             >

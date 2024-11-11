@@ -7,19 +7,19 @@ from sqlalchemy.sql import func
 
 from src.core.types import (
     AssignmentStatuses,
+    EscrowValidationStatuses,
     JobStatuses,
     Networks,
     ProjectStatuses,
     TaskStatuses,
     TaskTypes,
 )
-from src.db import Base
+from src.db import Base, BaseUUID, ChildOf
 from src.utils.time import utcnow
 
 
-class Project(Base):
+class Project(BaseUUID):
     __tablename__ = "projects"
-    id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     cvat_cloudstorage_id = Column(Integer, index=True, nullable=False)
     status = Column(String, Enum(ProjectStatuses), nullable=False)
@@ -60,15 +60,28 @@ class Project(Base):
             ")"
         ),
         foreign_keys=[escrow_address, chain_id],
+        overlaps="escrow_validation",
+    )
+    escrow_validation: Mapped[EscrowValidation] = relationship(
+        back_populates="projects",
+        passive_deletes=True,
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowValidation.escrow_address, "
+            "Project.chain_id == EscrowValidation.chain_id"
+            ")"
+        ),
+        foreign_keys=[escrow_address, chain_id],
+        overlaps="escrow_creation",
     )
 
     def __repr__(self) -> str:
         return f"Project. id={self.id}"
 
 
-class Task(Base):
+class Task(ChildOf[Project]):
     __tablename__ = "tasks"
-    id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     cvat_project_id = Column(
         Integer,
@@ -93,9 +106,8 @@ class Task(Base):
         return f"Task. id={self.id}"
 
 
-class EscrowCreation(Base):
+class EscrowCreation(BaseUUID):
     __tablename__ = "escrow_creations"
-    id = Column(String, primary_key=True, index=True)
 
     escrow_address = Column(String(42), index=True, nullable=False)
     chain_id = Column(Integer, Enum(Networks), nullable=False)
@@ -116,15 +128,39 @@ class EscrowCreation(Base):
             ")"
         ),
         foreign_keys=[Project.escrow_address, Project.chain_id],
+        overlaps="projects, escrow_validation",
     )
 
     def __repr__(self) -> str:
         return f"EscrowCreation. id={self.id} escrow={self.escrow_address}"
 
 
-class DataUpload(Base):
+class EscrowValidation(BaseUUID):
+    __tablename__ = "escrow_validations"
+    __table_args__ = (UniqueConstraint("escrow_address", "chain_id", name="uix_escrow_chain"),)
+
+    escrow_address = Column(String(42), index=True, nullable=False)
+    chain_id = Column(Integer, Enum(Networks), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    attempts = Column(Integer, default=0, server_default="0")
+    status = Column(String, Enum(EscrowValidationStatuses), nullable=False)
+    projects: Mapped[list[Project]] = relationship(
+        back_populates="escrow_validation",
+        # A custom join is used because the foreign keys do not actually reference any objects
+        primaryjoin=(
+            "and_("
+            "Project.escrow_address == EscrowValidation.escrow_address, "
+            "Project.chain_id == EscrowValidation.chain_id"
+            ")"
+        ),
+        foreign_keys=[Project.escrow_address, Project.chain_id],
+        overlaps="projects, escrow_creation",
+    )
+
+
+class DataUpload(BaseUUID):
     __tablename__ = "data_uploads"
-    id = Column(String, primary_key=True, index=True)
     task_id = Column(
         Integer,
         ForeignKey("tasks.cvat_id", ondelete="CASCADE"),
@@ -139,9 +175,8 @@ class DataUpload(Base):
         return f"DataUpload. id={self.id} task={self.task_id}"
 
 
-class Job(Base):
+class Job(ChildOf[Task]):
     __tablename__ = "jobs"
-    id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
     cvat_task_id = Column(Integer, ForeignKey("tasks.cvat_id", ondelete="CASCADE"), nullable=False)
     cvat_project_id = Column(
@@ -171,7 +206,7 @@ class Job(Base):
         return f"Job. id={self.id}"
 
 
-class User(Base):
+class User(Base):  # user does not have a UUID primary key
     __tablename__ = "users"
     wallet_address = Column(String, primary_key=True, index=True, nullable=False)
     cvat_email = Column(String, unique=True, index=True, nullable=True)
@@ -185,10 +220,12 @@ class User(Base):
         return f"User. wallet_address={self.wallet_address} cvat_id={self.cvat_id}"
 
 
-class Assignment(Base):
+class Assignment(BaseUUID):
     __tablename__ = "assignments"
-    id = Column(String, primary_key=True, index=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
     expires_at = Column(DateTime(timezone=True), nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True, server_default=None)
     user_wallet_address = Column(
@@ -219,9 +256,8 @@ class Assignment(Base):
         return f"Assignment. id={self.id} user={self.user.cvat_id} job={self.job.cvat_id}"
 
 
-class Image(Base):
+class Image(BaseUUID):
     __tablename__ = "images"
-    id = Column(String, primary_key=True, index=True)
     cvat_project_id = Column(
         Integer,
         ForeignKey("projects.cvat_id", ondelete="CASCADE"),

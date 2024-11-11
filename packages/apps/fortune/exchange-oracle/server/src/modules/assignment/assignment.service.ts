@@ -55,7 +55,10 @@ export class AssignmentService {
         jwtUser.address,
       );
 
-    if (assignmentEntity) {
+    if (
+      assignmentEntity &&
+      assignmentEntity.status !== AssignmentStatus.CANCELED
+    ) {
       this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.AlreadyExists);
     }
@@ -67,7 +70,19 @@ export class AssignmentService {
     const manifest = await this.jobService.getManifest(
       data.chainId,
       data.escrowAddress,
+      jobEntity.manifestUrl,
     );
+
+    // Check if all required qualifications are present
+    const userQualificationsSet = new Set(jwtUser.qualifications);
+    const missingQualifications = manifest.qualifications?.filter(
+      (qualification) => !userQualificationsSet.has(qualification),
+    );
+    if (missingQualifications && missingQualifications.length > 0) {
+      throw new BadRequestException(
+        ErrorAssignment.InvalidAssignmentQualification,
+      );
+    }
 
     if (currentAssignments >= manifest.submissionsRequired) {
       this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
@@ -80,6 +95,12 @@ export class AssignmentService {
     if (expirationDate < new Date()) {
       this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.ExpiredEscrow);
+    }
+
+    // Allow reassignation when status is Canceled
+    if (assignmentEntity) {
+      assignmentEntity.status = AssignmentStatus.ACTIVE;
+      return this.assignmentRepository.updateOne(assignmentEntity);
     }
 
     const newAssignmentEntity = new AssignmentEntity();

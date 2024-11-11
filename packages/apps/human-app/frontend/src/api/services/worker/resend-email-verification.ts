@@ -43,6 +43,7 @@ async function resendEmailVerificationMutationFn(
 
   return apiClient(apiPaths.worker.resendEmailVerification.path, {
     authenticated: true,
+    withAuthRetry: apiPaths.worker.resendEmailVerification.withAuthRetry,
     successSchema: ResendEmailVerificationSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });

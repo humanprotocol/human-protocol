@@ -76,8 +76,8 @@ export class JobController {
   })
   @Post('/quick-launch')
   public async quickLaunch(
-    @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
@@ -116,8 +116,8 @@ export class JobController {
   })
   @Post('/fortune')
   public async createFortuneJob(
-    @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
@@ -156,8 +156,8 @@ export class JobController {
   })
   @Post('/cvat')
   public async createCvatJob(
-    @Request() req: RequestWithUser,
     @Body() data: JobCvatDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
@@ -192,8 +192,8 @@ export class JobController {
   })
   @Post('/hCaptcha')
   public async createCaptchaJob(
-    @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
     throw new ControlledError(
       'Hcaptcha jobs disabled temporally',
@@ -232,8 +232,8 @@ export class JobController {
   })
   @Get('/list')
   public async getJobList(
-    @Request() req: RequestWithUser,
     @Query() data: GetJobsDto,
+    @Request() req: RequestWithUser,
   ): Promise<PageDto<JobListDto>> {
     return this.jobService.getJobsByStatus(data, req.user.id);
   }
@@ -257,8 +257,8 @@ export class JobController {
   })
   @Get('/result/:id')
   public async getResult(
-    @Request() req: RequestWithUser,
     @Param() params: JobIdDto,
+    @Request() req: RequestWithUser,
   ): Promise<FortuneFinalResultDto[] | string> {
     return this.jobService.getResult(req.user.id, params.id);
   }
@@ -286,9 +286,9 @@ export class JobController {
   })
   @Patch('/cancel/:chain_id/:escrow_address')
   public async cancelJobByChainIdAndEscrowAddress(
-    @Request() req: RequestWithUser,
     @Param('chain_id') chainId: ChainId,
     @Param('escrow_address') escrowAddress: string,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
@@ -326,8 +326,8 @@ export class JobController {
   })
   @Patch('/cancel/:id')
   public async cancelJobById(
-    @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
     await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
@@ -361,8 +361,8 @@ export class JobController {
   })
   @Get('/details/:id')
   public async getDetails(
-    @Request() req: RequestWithUser,
     @Param() params: JobIdDto,
+    @Request() req: RequestWithUser,
   ): Promise<JobDetailsDto> {
     return this.jobService.getDetails(req.user.id, params.id);
   }

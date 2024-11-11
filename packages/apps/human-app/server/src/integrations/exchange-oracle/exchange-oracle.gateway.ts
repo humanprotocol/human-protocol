@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
@@ -35,8 +35,8 @@ import { toCleanObjParams } from '../../common/utils/gateway-common.utils';
 import { KvStoreGateway } from '../kv-store/kv-store.gateway';
 import { EscrowUtilsGateway } from '../escrow/escrow-utils-gateway.service';
 import {
-  RegisterWorkerCommand,
-  RegisterWorkerData,
+  RegistrationInExchangeOracleCommand,
+  RegistrationInExchangeOracleData,
 } from '../../modules/user-worker/model/worker-registration.model';
 
 @Injectable()
@@ -55,7 +55,7 @@ export class ExchangeOracleGateway {
       return response.data as T;
     } catch (e) {
       console.error(
-        `Error, while executing exchange oracle API call, error details: ${e}`,
+        `Error, while executing exchange oracle API call to ${options.url}, error details: ${e}`,
       );
       throw e;
     }
@@ -176,11 +176,13 @@ export class ExchangeOracleGateway {
     return this.callExternalHttpUtilRequest<JobsDiscoveryResponse>(options);
   }
 
-  async registerWorker(command: RegisterWorkerCommand) {
+  async sendRegistrationInExchangeOracle(
+    command: RegistrationInExchangeOracleCommand,
+  ) {
     const data = this.mapper.map(
       command,
-      RegisterWorkerCommand,
-      RegisterWorkerData,
+      RegistrationInExchangeOracleCommand,
+      RegistrationInExchangeOracleData,
     );
 
     const options: AxiosRequestConfig = {

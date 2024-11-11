@@ -22,4 +22,3 @@ export class OracleStatisticsDto {
   @AutoMap()
   oracle_address: string;
 }
-

@@ -58,8 +58,8 @@ export class JobController {
   @ApiBearerAuth()
   @Get()
   getJobs(
-    @Request() req: RequestWithUser,
     @Query() query: GetJobsDto,
+    @Request() req: RequestWithUser,
   ): Promise<PageDto<JobDto>> {
     return this.jobService.getJobList(query, req.user.reputationNetwork);
   }
@@ -94,8 +94,8 @@ export class JobController {
   @UseGuards(SignatureAuthGuard)
   @AllowedRoles([AuthSignatureRole.Worker])
   async solveJob(
-    @Headers(HEADER_SIGNATURE_KEY) signature: string,
     @Body() solveJobDto: SolveJobDto,
+    @Headers(HEADER_SIGNATURE_KEY) signature: string,
   ): Promise<SolveJobResponseDto> {
     const { assignmentId, solution } = solveJobDto;
 

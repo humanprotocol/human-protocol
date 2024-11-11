@@ -41,6 +41,27 @@ class PostgresConfig:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
+class RedisConfig:
+    port = os.environ.get("REDIS_PORT", "6379")
+    host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
+    database = os.environ.get("REDIS_DB", "")
+    user = os.environ.get("REDIS_USER", "")
+    password = os.environ.get("REDIS_PASSWORD", "")
+    use_ssl = to_bool(os.environ.get("REDIS_USE_SSL", "false"))
+
+    @classmethod
+    def connection_url(cls) -> str:
+        scheme = "redis"
+        if cls.use_ssl:
+            scheme += "s"
+
+        auth_params = ""
+        if cls.user or cls.password:
+            auth_params = f"{cls.user}:{cls.password}@"
+
+        return f"{scheme}://{auth_params}{cls.host}:{cls.port}/{cls.database}"
+
+
 class _NetworkConfig:
     chain_id: ClassVar[int]
     rpc_api: ClassVar[str | None]
@@ -83,18 +104,25 @@ class LocalhostConfig(_NetworkConfig):
 
     recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
+    reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
 class CronConfig:
     process_job_launcher_webhooks_int = int(os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
-    process_job_launcher_webhooks_chunk_size = os.environ.get(
-        "PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5
+    process_job_launcher_webhooks_chunk_size = int(
+        os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_recording_oracle_webhooks_int = int(
         os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30)
     )
-    process_recording_oracle_webhooks_chunk_size = os.environ.get(
-        "PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
+    process_recording_oracle_webhooks_chunk_size = int(
+        os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
+    )
+    process_reputation_oracle_webhooks_chunk_size = int(
+        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
+    )
+    process_reputation_oracle_webhooks_int = int(
+        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
     track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
     track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
@@ -107,6 +135,11 @@ class CronConfig:
 
     track_completed_escrows_int = int(
         # backward compatibility
+        os.environ.get(
+            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
+        )
+    )
+    track_escrow_validations_int = int(
         os.environ.get(
             "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
         )
@@ -201,17 +234,30 @@ class CoreConfig:
     default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
 
     skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
-    "Assignment size multiplier for IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Assignment size multiplier for image_skeletons_from_boxes tasks"
 
     min_roi_size_w = int(os.environ.get("MIN_ROI_SIZE_W", 350))
-    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
     min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
-    "Minimum absolute ROI size for IMAGE_BOXES_FROM_POINTS and IMAGE_SKELETONS_FROM_BOXES tasks"
+    "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
 
 class HumanAppConfig:
-    signature = os.environ.get("HUMAN_APP_SIGNATURE", "sample")
+    # jwt_public_key is obtained from the Human App.
+    # To generate a key pair for testing purposes:
+    # openssl ecparam -name prime256v1 -genkey -noout -out ec_private.pem
+    # openssl ec -in ec_private.pem -pubout -out ec_public.pem
+    # HUMAN_APP_JWT_KEY=$(cat ec_public.pem)
+    jwt_public_key = os.environ.get("HUMAN_APP_JWT_KEY")
+
+
+class ApiConfig:
+    default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
+    min_page_size = int(os.environ.get("MIN_API_PAGE_SIZE", 1))
+    max_page_size = int(os.environ.get("MAX_API_PAGE_SIZE", 10))
+
+    stats_rps_limit = int(os.environ.get("STATS_RPS_LIMIT", 4))
 
 
 class EncryptionConfig(_BaseConfig):
@@ -237,6 +283,7 @@ class EncryptionConfig(_BaseConfig):
 
 
 class Config:
+    debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
@@ -249,6 +296,8 @@ class Config:
     localhost = LocalhostConfig
 
     postgres_config = PostgresConfig
+    redis_config = RedisConfig
+    api_config = ApiConfig
     human_app_config = HumanAppConfig
 
     cron_config = CronConfig

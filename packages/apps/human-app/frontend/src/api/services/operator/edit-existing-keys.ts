@@ -12,21 +12,27 @@ import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
 import {
   EthKVStoreKeys,
-  JobTypes,
+  JobType,
   Role,
 } from '@/smart-contracts/EthKVStore/config';
 import { ethKvStoreSetBulk } from '@/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/api/services/operator/get-keys';
 import { isArray } from '@/shared/helpers/is-array';
+import { urlDomainSchema } from '@/shared/helpers/url-domain-validation';
 
 const fieldsValidations = {
-  [EthKVStoreKeys.PublicKey]: z.string().min(1),
-  [EthKVStoreKeys.Url]: z.string(),
-  [EthKVStoreKeys.WebhookUrl]: z.string().url(),
+  [EthKVStoreKeys.PublicKey]: urlDomainSchema,
+  [EthKVStoreKeys.Url]: urlDomainSchema,
+  [EthKVStoreKeys.WebhookUrl]: urlDomainSchema,
   [EthKVStoreKeys.Role]: z.nativeEnum(Role),
-  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobTypes)).min(1),
-  [EthKVStoreKeys.Fee]: z.coerce.number().min(1).max(100).step(1),
+  [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
+  [EthKVStoreKeys.Fee]: z.coerce
+    // eslint-disable-next-line camelcase
+    .number({ invalid_type_error: t('validation.required') })
+    .min(0, t('validation.feeValidationError'))
+    .max(100, t('validation.feeValidationError'))
+    .step(1, t('validation.feeValidationError')),
 };
 
 export const editEthKVStoreValuesMutationSchema = z.object({
@@ -75,11 +81,12 @@ export const getEditEthKVStoreValuesMutationSchema = (
       const newFiledData = newData[key];
       const initialFiledData = initialData[key];
 
-      if (
-        isArray(newFiledData) &&
-        isArray(initialFiledData) &&
-        newFiledData.sort().toString() !== initialFiledData.sort().toString()
-      ) {
+      if (isArray(newFiledData) && isArray(initialFiledData)) {
+        if (
+          newFiledData.sort().toString() === initialFiledData.sort().toString()
+        ) {
+          return;
+        }
         Object.assign(fieldsThatHasChanges, { [key]: newFiledData.toString() });
         return;
       }
@@ -105,7 +112,6 @@ export const getEditEthKVStoreValuesMutationSchema = (
         path: ['form'],
       });
     }
-
     return fieldsThatHasChanges;
   });
 };

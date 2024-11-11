@@ -8,9 +8,10 @@
   "dashboard": {},
   "protectedPagesHeaders": {
     "profile": "Profile",
-    "jobsDiscovery": "Jobs Discovery",
-    "hcaptchaLabeling": "hCaptcha Labeling",
-    "jobs": "Jobs"
+    "jobsDiscovery": "Tasks",
+    "hcaptchaLabeling": "Labeling",
+    "jobs": "Tasks",
+    "registrationInExchangeOracle": "Registration in Exchange Oracle"
   },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
@@ -23,7 +24,12 @@
     "passwordMismatch": "Passwords are not the same",
     "captcha": "Please complete the captcha",
     "passwordMissing": "Please enter your password.",
-    "invalidEmail": "Please enter a valid email address."
+    "invalidEmail": "Please enter a valid email address.",
+    "invalidOracleAddress": "Invalid oracle address.",
+    "publicKeyLengthError": "Public key must be exactly 128 characters long",
+    "publicKeyHexadecimalStringError": "Public key must be a valid hexadecimal string",
+    "urlValidationError": "Invalid URL",
+    "feeValidationError": "Fee value must be an integer between 0 and 100"
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
@@ -32,7 +38,8 @@
     "unknownNetwork": "Unknown network",
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
-    "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported."
+    "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
+    "invalidEscrowAddress": "Please enter a valid escrow address."
   },
   "components": {
     "multiSelect": {
@@ -48,8 +55,8 @@
       "howItWorks": "How It Works"
     },
     "DrawerNavigation": {
-      "jobs": "Jobs",
-      "captchaLabelling": "hCaptcha labelling",
+      "jobs": "Tasks",
+      "captchaLabeling": "hCaptcha labeling",
       "jobsDiscovery": "Jobs discovery",
       "profile": "Profile",
       "help": "Help",
@@ -79,7 +86,7 @@
     },
     "pageCardError": {
       "reload": "Reload",
-      "goHome": "Home page"
+      "goHome": "Home Page"
     }
   },
   "homepage": {
@@ -93,14 +100,14 @@
     "welcome": "Welcome",
     "howWillUse": "How will you use HUMAN App?",
     "selectOption": "Please select an option below.",
-    "iWantToEarn": "I want to earn HMT",
-    "completeTask": "Complete simple tasks and get paid.",
+    "iWantToEarn": "I want to complete tasks, and earn HMT",
+    "completeTask": "Complete multiple task types, and get paid.",
     "workAnywhere": "Work anywhere, any time.",
-    "signUpToComplete": "Sign Up to Complete Tasks",
-    "joinAsOperator": "I want to join as an Operator",
-    "runAsOracle": "Run an Oracle, or other essential service, and earn fees.",
-    "becomePartner": "Become a HUMAN App partner.",
-    "signAsOperator": "Sign Up as an Operator",
+    "signUpToComplete": "Worker Sign Up",
+    "joinAsOperator": "I want to join as an operator",
+    "runAsOracle": "Run an oracle, or other essential service, and earn fees.",
+    "becomePartner": "Become a HUMAN App operator.",
+    "signAsOperator": "Operator Sign Up",
     "termsAndConditions": "Terms & conditions",
     "cancel": "Cancel"
   },
@@ -162,7 +169,7 @@
       "paragraph1": "We've sent an email to <1>{{email}}</1> Please check your inbox and verify your email.",
       "paragraph2": "The verification link is valid for 24 hours.",
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
-      "btn": "Resend Reset Password Email",
+      "btn": "Resend Email",
       "btnAfterSend": "Resend Email",
       "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
     },
@@ -189,6 +196,7 @@
       "KYCInProgress": "KYC in progress",
       "confirmEmail": "Confirm email",
       "kycCompleted": "KYC Completed",
+      "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
       "addKYCInfoOnChain": "Add KYC Info On-chain",
@@ -198,32 +206,36 @@
       "emailNotifications": "Email Notifications",
       "notificationsConsent": "I would like to be notified about News and Offers",
       "topNotifications": {
-        "noKYC": "Please complete your profile! You still need to complete KYC, connect your wallet and add KYC info on-chain.",
-        "noWalletConnected": "Please complete your profile! You still need to connect your wallet and add KYC info on-chain.",
-        "registerAddress": "Register Address"
+        "completeSteps": "Please set up your profile by completing the steps below."
       }
     },
     "oraclesTable": {
       "annotationTool": "Annotation tool",
       "oracleAddress": "Oracle address",
-      "jobTypes": "Job types",
-      "seeJobs": "See Jobs",
-      "allJobs": "All jobs"
+      "jobTypes": "Task types",
+      "seeJobs": "See Tasks",
+      "allJobs": "All tasks"
+    },
+    "registrationInExchangeOracle": {
+      "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
+      "completeMessage": "Click on Complete once you have finished the registration process:",
+      "completeButton": "Complete"
     },
     "jobs": {
-      "successFullyAssignedJob": "Successfully assigned a job!",
+      "successFullyAssignedJob": "Successfully assigned a task!",
       "errorFetchingData": "There was an error while fetching data, please try again",
-      "availableJobs": "Available Jobs",
-      "myJobs": "My Jobs",
+      "availableJobs": "Available Tasks",
+      "myJobs": "My Tasks",
       "jobsDiscovery": "Jobs Discovery",
       "jobDescription": "Job description",
       "escrowAddress": "Escrow address",
       "network": "Network",
       "rewardAmount": "Reward amount",
-      "jobType": "Job type",
+      "jobType": "Task type",
       "expiresAt": "Expires at",
+      "refresh": "Refresh",
       "status": "Status",
-      "selectJob": "Select Job",
+      "selectJob": "Select Task",
       "searchEscrowAddress": "Search escrow address",
       "resign": "Resign",
       "solve": "Solve",
@@ -259,22 +271,22 @@
       "next": "Next"
     },
     "hcaptchaLabeling": {
-      "description": "To earn HMT, you must complete data-labeling tasks. Rewards will be automatically sent to your wallet according to a predefined schedule.",
+      "description": "HMT payouts are automatically computed by an oracle based on correctness and volume of tasks completed. Payout timing depends on total job size, and can take as little as an hour or as long as a week or so, depending on overall job status.",
       "noJobs": "No jobs available at the moment. Please come back in:"
     },
     "enableHCaptchaLabeling": {
-      "description": "To earn HMT, you must enable data-labeling. Rewards will be automatically sent to your wallet according to a predefined schedule.",
-      "enableButton": "Enable Labeling"
+      "description": "CAPTCHA tasks involve the correct labeling of images in a group of images. Read the instructional prompt, and select the images that best correspond to that prompt.",
+      "enableButton": "Begin Labeling"
     },
     "hcaptchaLabelingStats": {
-      "hCapchaStatistics": "hCapcha Statistics",
+      "hCapchaStatistics": "Statistics",
       "statistics": "Statistics",
       "allTime": "All Time",
       "jobsServed": "Jobs served",
       "jobsComplete": "Jobs complete",
       "hmtEarned": "HMT earned",
       "lastHour": "Last hour",
-      "earnedLastHour": "HMT earned in last hour",
+      "earnedLastHour": "HMT earned in the last hour",
       "statisticsNotLive": "Statistics are not live. Please refresh to view live statistics.",
       "solvedSuccess": "HCaptcha solved!"
     }
@@ -385,5 +397,12 @@
     "header": "Session Expired",
     "description": "Please log in again to continue using the app.",
     "logIn": "Log In"
+  },
+  "jobTypeLabels": {
+    "fortune": "Fortune",
+    "image_points": "Points",
+    "image_boxes": "Bounding Boxes",
+    "image_boxes_from_points": "Bounding Boxes from Points",
+    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes"
   }
 }

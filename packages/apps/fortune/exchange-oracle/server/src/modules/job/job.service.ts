@@ -53,9 +53,10 @@ export class JobService {
   ) {}
 
   public async createJob(webhook: WebhookDto): Promise<void> {
+    const { chainId, escrowAddress } = webhook;
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
+      chainId,
+      escrowAddress,
     );
 
     if (jobEntity) {
@@ -63,14 +64,15 @@ export class JobService {
       throw new BadRequestException(ErrorJob.AlreadyExists);
     }
 
-    const signer = this.web3Service.getSigner(webhook.chainId);
+    const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const reputationOracleAddress =
-      await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+      await escrowClient.getReputationOracleAddress(escrowAddress);
 
     const newJobEntity = new JobEntity();
-    newJobEntity.escrowAddress = webhook.escrowAddress;
-    newJobEntity.chainId = webhook.chainId;
+    newJobEntity.escrowAddress = escrowAddress;
+    newJobEntity.manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    newJobEntity.chainId = chainId;
     newJobEntity.status = JobStatus.ACTIVE;
     newJobEntity.reputationNetwork = reputationOracleAddress;
     await this.jobRepository.createUnique(newJobEntity);
@@ -158,11 +160,13 @@ export class JobService {
           data.fields?.includes(JobFieldName.JobDescription) ||
           data.fields?.includes(JobFieldName.RewardAmount) ||
           data.fields?.includes(JobFieldName.RewardToken) ||
+          data.fields?.includes(JobFieldName.Qualifications) ||
           data.sortField === JobSortField.REWARD_AMOUNT
         ) {
           const manifest = await this.getManifest(
             entity.chainId,
             entity.escrowAddress,
+            entity.manifestUrl,
           );
           if (data.fields?.includes(JobFieldName.JobDescription)) {
             job.jobDescription = manifest.requesterDescription;
@@ -171,11 +175,15 @@ export class JobService {
             data.fields?.includes(JobFieldName.RewardAmount) ||
             data.sortField === JobSortField.REWARD_AMOUNT
           ) {
-            job.rewardAmount =
-              manifest.fundAmount / manifest.submissionsRequired;
+            job.rewardAmount = (
+              manifest.fundAmount / manifest.submissionsRequired
+            ).toString();
           }
           if (data.fields?.includes(JobFieldName.RewardToken)) {
             job.rewardToken = TOKEN;
+          }
+          if (data.fields?.includes(JobFieldName.Qualifications)) {
+            job.qualifications = manifest.qualifications;
           }
         }
 
@@ -185,8 +193,8 @@ export class JobService {
 
     if (data.sortField === JobSortField.REWARD_AMOUNT) {
       jobs.sort((a, b) => {
-        const rewardA = a.rewardAmount ?? 0;
-        const rewardB = b.rewardAmount ?? 0;
+        const rewardA = Number(a.rewardAmount ?? 0);
+        const rewardB = Number(b.rewardAmount ?? 0);
         if (data.sort === SortDirection.DESC) {
           return rewardB - rewardA;
         } else {
@@ -212,6 +220,7 @@ export class JobService {
     await this.addSolution(
       assignment.job.chainId,
       assignment.job.escrowAddress,
+      assignment.job.manifestUrl,
       assignment.workerAddress,
       solution,
     );
@@ -245,6 +254,16 @@ export class JobService {
 
         if (foundSolution) {
           foundSolution.error = true;
+          const assignment =
+            await this.assignmentRepository.findOneByEscrowAndWorker(
+              invalidJobSolution.escrowAddress,
+              invalidJobSolution.chainId,
+              foundSolution.workerAddress,
+            );
+          if (assignment) {
+            assignment.status = AssignmentStatus.REJECTED;
+            this.assignmentRepository.updateOne(assignment);
+          }
         } else {
           throw new BadRequestException(
             `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
@@ -263,6 +282,7 @@ export class JobService {
   private async addSolution(
     chainId: ChainId,
     escrowAddress: string,
+    manifestUrl: string,
     workerAddress: string,
     solution: string,
   ): Promise<string> {
@@ -279,7 +299,11 @@ export class JobService {
       throw new BadRequestException(ErrorJob.SolutionAlreadySubmitted);
     }
 
-    const manifest = await this.getManifest(chainId, escrowAddress);
+    const manifest = await this.getManifest(
+      chainId,
+      escrowAddress,
+      manifestUrl,
+    );
     if (
       existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
@@ -307,10 +331,8 @@ export class JobService {
   public async getManifest(
     chainId: number,
     escrowAddress: string,
+    manifestUrl: string,
   ): Promise<ManifestDto> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     const manifestEncrypted =
       await StorageClient.downloadFileFromUrl(manifestUrl);
 
@@ -321,11 +343,12 @@ export class JobService {
     ) {
       try {
         const encryption = await Encryption.build(
-          this.pgpConfigService.privateKey,
+          this.pgpConfigService.privateKey!,
           this.pgpConfigService.passphrase,
         );
 
-        manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
+        const decryptedData = await encryption.decrypt(manifestEncrypted);
+        manifest = JSON.parse(Buffer.from(decryptedData).toString());
       } catch {
         throw new Error(ErrorJob.ManifestDecryptionFailed);
       }

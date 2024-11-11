@@ -1,7 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { Cron } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import {
   JobsDiscoveryParams,
@@ -17,6 +17,7 @@ import {
 } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class CronJobService {
@@ -27,11 +28,24 @@ export class CronJobService {
     private configService: EnvironmentConfigService,
     private oracleDiscoveryService: OracleDiscoveryService,
     private workerService: WorkerService,
-  ) {}
+    private schedulerRegistry: SchedulerRegistry,
+  ) {
+    if (this.configService.jobsDiscoveryFlag) {
+      this.initializeCronJob();
+    }
+  }
 
-  @Cron('*/3 * * * *')
+  initializeCronJob() {
+    const job = new CronJob('*/3 * * * *', () => {
+      this.updateJobsListCron();
+    });
+
+    this.schedulerRegistry.addCronJob('updateJobsList', job);
+    job.start();
+  }
+
   async updateJobsListCron() {
-    console.log('CRON START');
+    this.logger.log('CRON START');
 
     const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
     const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
@@ -40,16 +54,23 @@ export class CronJobService {
 
     if (!oracles || oracles.length < 1) return;
 
-    const response = await this.workerService.signinWorker({
-      email: this.configService.email,
-      password: this.configService.password,
-    });
+    try {
+      const response = await this.workerService.signinWorker({
+        email: this.configService.email,
+        password: this.configService.password,
+      });
 
-    for (const oracle of oracles) {
-      await this.updateJobsListCache(oracle, 'Bearer ' + response.access_token);
+      for (const oracle of oracles) {
+        await this.updateJobsListCache(
+          oracle,
+          'Bearer ' + response.access_token,
+        );
+      }
+    } catch (e) {
+      this.logger.error(e);
     }
 
-    console.log('CRON END');
+    this.logger.log('CRON END');
   }
 
   async updateJobsListCache(oracle: OracleDiscoveryResponse, token: string) {
@@ -68,6 +89,7 @@ export class CronJobService {
         JobDiscoveryFieldName.JobDescription,
         JobDiscoveryFieldName.RewardAmount,
         JobDiscoveryFieldName.RewardToken,
+        JobDiscoveryFieldName.Qualifications,
       ];
       const initialResponse =
         await this.exchangeOracleGateway.fetchJobs(command);

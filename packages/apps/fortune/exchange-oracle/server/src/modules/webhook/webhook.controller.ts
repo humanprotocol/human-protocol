@@ -57,8 +57,8 @@ export class WebhookController {
     description: 'Not Found. Could not find the requested content.',
   })
   public async processWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() body: WebhookDto,
+    @Headers(HEADER_SIGNATURE_KEY) _: string,
   ): Promise<void> {
     return this.webhookService.handleWebhook(body);
   }

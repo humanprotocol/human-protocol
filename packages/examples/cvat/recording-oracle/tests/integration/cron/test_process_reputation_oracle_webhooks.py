@@ -47,20 +47,18 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.reputation_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed,
+            event_type=RecordingOracleEventTypes.job_completed,
             event_data=event_data,
         )
 
     def test_process_reputation_oracle_webhooks(self):
         expected_url = "expected_url"
         with (
-            patch("src.crons.process_reputation_oracle_webhooks.httpx.Client.post") as mock_httpx,
+            patch("src.crons._utils.httpx.Client.post") as mock_httpx,
+            patch("src.crons._utils.prepare_signed_message") as mock_signature,
             patch(
                 "src.crons.process_reputation_oracle_webhooks.get_reputation_oracle_url"
             ) as mock_get_repo_url,
-            patch(
-                "src.crons.process_reputation_oracle_webhooks.prepare_signed_message"
-            ) as mock_signature,
         ):
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
@@ -93,7 +91,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 json={
                     "escrow_address": escrow_address,
                     "chain_id": chain_id,
-                    "event_type": RecordingOracleEventTypes.task_completed.value,
+                    "event_type": RecordingOracleEventTypes.job_completed.value,
                 },
             )
             assert updated_webhook.status == OracleWebhookStatuses.completed.value

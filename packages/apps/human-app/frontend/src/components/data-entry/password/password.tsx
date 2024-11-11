@@ -4,11 +4,12 @@ import React, { useState } from 'react';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { Input, type InputProps } from '@/components/data-entry/input';
-import { colorPalette } from '@/styles/color-palette';
+import { useColorMode } from '@/hooks/use-color-mode';
 
 type PasswordProps = InputProps & { type?: never };
 
 export function Password(props: PasswordProps) {
+  const { colorPalette } = useColorMode();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {

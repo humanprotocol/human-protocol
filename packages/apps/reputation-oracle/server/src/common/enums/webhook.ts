@@ -1,11 +1,11 @@
 export enum EventType {
-  TASK_COMPLETED = 'task_completed',
+  JOB_COMPLETED = 'job_completed',
   ESCROW_COMPLETED = 'escrow_completed',
 }
 
 export enum WebhookStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  PAID = 'PAID',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  PAID = 'paid',
 }

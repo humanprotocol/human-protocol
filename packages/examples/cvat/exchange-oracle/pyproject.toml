@@ -8,7 +8,7 @@ packages = [{include = "exchange_oracle"}]
 
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
-fastapi = "^0.97.0"
+fastapi = {version = "^0.115.4", extras = ["standard"]}
 uvicorn = "^0.30.0"
 python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
@@ -26,11 +26,19 @@ google-cloud-storage = "^2.14.0"
 pyinstrument = "^4.6.2"
 human-protocol-sdk = "^3.0.4"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
+pydantic = ">=2.6.1,<2.7.0"
+fastapi-pagination = "^0.12.17"
+fastapi-filter = "^1.1.0"
+fastapi-limiter = "^0.1.6"
+strenum = "^0.4.15"
+pyjwt = "^2.9.0"
+starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.0.4"
 ruff = "^0.6.0"
+pytest-mock = "^3.14.0"
 
 [tool.ruff]
 line-length = 100
@@ -99,7 +107,6 @@ ignore = [
     "ERA001",  # Found commented-out code
     "N801",    # Class name should use CapWords convention
     "PLR0915", # Too many statements
-    "F401",    # Imported but unused
     "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
     "ANN002",  # Missing type annotation for `*args`
     "TRY300",  # Consider moving this statement to an `else` block
@@ -130,10 +137,12 @@ ignore = [
 ]
 # alembic is not a package in a traditional sense, so putting __init__.py there doesn't make sense
 "alembic/*" = ["INP001"]
+"__init__.py" = ["F401"]
 
 [tool.ruff.lint.pep8-naming]
 classmethod-decorators = [
     "pydantic.validator",
+    "pydantic.field_validator"
 ]
 
 [tool.ruff.lint.pylint]

@@ -1,41 +1,25 @@
-import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
-import Grid from '@mui/material/Grid';
 import type {
   BottomMenuItem,
   TopMenuItem,
 } from '@/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon, WorkIcon } from '@/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
+import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
+import type { UserData } from '@/auth/auth-context';
 
 export const workerDrawerTopMenuItems = (
-  addressRegistered: boolean
+  user: UserData | null
 ): TopMenuItem[] => {
   return [
-    <Grid
-      key={crypto.randomUUID()}
-      sx={{
-        display: 'inline-flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '0.8rem',
-      }}
-    >
-      <WorkIcon />
-      <Typography variant="body6">
-        {t('components.DrawerNavigation.jobs')}
-      </Typography>
-    </Grid>,
-    {
-      label: t('components.DrawerNavigation.captchaLabelling'),
-      link: routerPaths.worker.enableLabeler,
-      disabled: !addressRegistered,
-    },
-    // {
-    //   label: t('components.DrawerNavigation.jobsDiscovery'),
-    //   link: routerPaths.worker.jobsDiscovery,
-    //   disabled: !addressRegistered,
-    // },
+    ...[
+      {
+        label: t('components.DrawerNavigation.jobs'),
+        icon: <WorkIcon />,
+        link: routerPaths.worker.jobsDiscovery,
+        disabled: !user?.wallet_address || user.kyc_status !== 'approved',
+      },
+    ],
   ];
 };
 
@@ -49,13 +33,16 @@ export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
     label: t('components.DrawerNavigation.help'),
     icon: <HelpIcon />,
     onClick: () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error -- ...
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- ...
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if ($zoho?.salesiq?.chat?.start) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error -- ...
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- ...
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         $zoho.salesiq.chat.start();
       }
     },
   },
+  <DarkModeSwitch key={crypto.randomUUID()} />,
 ];

@@ -47,14 +47,10 @@ import {
   MOCK_ORACLE_FEE,
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
-  MOCK_HCAPTCHA_ORACLE_ADDRESS,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
   MOCK_PGP_PUBLIC_KEY,
-  MOCK_PRIVATE_KEY,
-  MOCK_RECORDING_ORACLE_ADDRESS,
-  MOCK_REPUTATION_ORACLE_ADDRESS,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
   MOCK_SUBMISSION_REQUIRED,
@@ -63,21 +59,18 @@ import {
   MOCK_STORAGE_DATA,
   MOCK_CVAT_DATA_DATASET,
   MOCK_CVAT_LABELS,
-  MOCK_CVAT_JOB_SIZE,
-  MOCK_CVAT_VAL_SIZE,
-  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_HCAPTCHA_IMAGE_LABEL,
   MOCK_HCAPTCHA_IMAGE_URL,
-  MOCK_HCAPTCHA_REPO_URI,
-  MOCK_HCAPTCHA_RO_URI,
+  MOCK_RECORDING_ORACLE_URL,
   MOCK_BUCKET_FILE,
-  MOCK_MAX_RETRY_COUNT,
   MOCK_CVAT_LABELS_WITH_NODES,
   MOCK_CVAT_DATA_POINTS,
   MOCK_CVAT_DATA_BOXES,
   MOCK_CVAT_DATA,
   MOCK_CVAT_GT,
+  MOCK_REPUTATION_ORACLE_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -124,8 +117,11 @@ import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { CronJobType } from '../../common/enums/cron-job';
+import { QualificationService } from '../qualification/qualification.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 const rate = 1.5;
+const mappedJobType = 'mappedType';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -160,6 +156,7 @@ jest.mock('../../common/utils', () => ({
       bucket: MOCK_BUCKET_NAME,
     };
   }),
+  mapJobType: jest.fn().mockImplementation(() => 'mappedType'),
 }));
 
 jest.mock('../../common/utils/storage', () => ({
@@ -187,58 +184,31 @@ describe('JobService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
-  beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
-            return MOCK_EXCHANGE_ORACLE_ADDRESS;
-          case 'FORTUNE_RECORDING_ORACLE_ADDRESS':
-            return MOCK_RECORDING_ORACLE_ADDRESS;
-          case 'CVAT_EXCHANGE_ORACLE_ADDRESS':
-            return MOCK_EXCHANGE_ORACLE_ADDRESS;
-          case 'CVAT_RECORDING_ORACLE_ADDRESS':
-            return MOCK_RECORDING_ORACLE_ADDRESS;
-          case 'REPUTATION_ORACLE_ADDRESS':
-            return MOCK_REPUTATION_ORACLE_ADDRESS;
-          case 'HOST':
-            return '127.0.0.1';
-          case 'PORT':
-            return 5000;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'S3_BUCKET':
-            return MOCK_BUCKET_NAME;
-          case 'CVAT_JOB_SIZE':
-            return 1;
-          case 'PGP_PRIVATE_KEY':
-            return MOCK_PGP_PRIVATE_KEY;
-          case 'PGP_ENCRYPT':
-            return encrypt;
-          case 'HCAPTCHA_ORACLE_ADDRESS':
-            return MOCK_HCAPTCHA_ORACLE_ADDRESS;
-          case 'HCAPTCHA_SITE_KEY':
-            return MOCK_HCAPTCHA_SITE_KEY;
-          case 'CVAT_JOB_SIZE':
-            return MOCK_CVAT_JOB_SIZE;
-          case 'CVAT_VAL_SIZE':
-            return MOCK_CVAT_VAL_SIZE;
-          case 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER':
-            return MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER;
-          case 'HCAPTCHA_REPUTATION_ORACLE_URI':
-            return MOCK_HCAPTCHA_REPO_URI;
-          case 'HCAPTCHA_RECORDING_ORACLE_URI':
-            return MOCK_HCAPTCHA_RO_URI;
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
+  const selectedOraclesMock = {
+    reputationOracle: '0xReputationOracle',
+    exchangeOracle: '0xExchangeOracle',
+    recordingOracle: '0xRecordingOracle',
+  };
 
+  beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'PGP_ENCRYPT') return encrypt;
+              return mockConfig[key];
+            }),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              if (key === 'PGP_ENCRYPT') return encrypt;
+              return mockConfig[key];
+            }),
+          },
+        },
         JobService,
         Encryption,
         ServerConfigService,
@@ -247,6 +217,8 @@ describe('JobService', () => {
         CvatConfigService,
         PGPConfigService,
         S3ConfigService,
+        QualificationService,
+        NetworkConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -278,13 +250,16 @@ describe('JobService', () => {
           },
         },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: StorageService, useValue: createMock<StorageService>() },
         { provide: WebhookService, useValue: createMock<WebhookService>() },
         {
           provide: RoutingProtocolService,
-          useValue: createMock<RoutingProtocolService>(),
+          useValue: {
+            selectNetwork: jest.fn().mockReturnValue(ChainId.POLYGON_AMOY),
+            selectOracles: jest.fn().mockReturnValue(selectedOraclesMock),
+            validateOracles: jest.fn(),
+          },
         },
         {
           provide: CronJobService,
@@ -341,6 +316,98 @@ describe('JobService', () => {
       jest.restoreAllMocks();
     });
 
+    it('should use all oracles provided by the user and skip oracle selection', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+      const userBalance = 25;
+
+      const userId = 1;
+      const providedReputationOracle = '0xProvidedReputationOracle';
+      const providedExchangeOracle = '0xProvidedExchangeOracle';
+      const providedRecordingOracle = '0xProvidedRecordingOracle';
+
+      const fortuneJobDto: JobFortuneDto = {
+        chainId: MOCK_CHAIN_ID,
+        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: fundAmount,
+        currency: JobCurrency.HMT,
+        reputationOracle: providedReputationOracle,
+        exchangeOracle: providedExchangeOracle,
+        recordingOracle: providedRecordingOracle,
+      };
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+
+      expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
+        MOCK_CHAIN_ID,
+        mappedJobType,
+        providedReputationOracle,
+        providedExchangeOracle,
+        providedRecordingOracle,
+      );
+
+      expect(jobRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reputationOracle: providedReputationOracle,
+          exchangeOracle: providedExchangeOracle,
+          recordingOracle: providedRecordingOracle,
+        }),
+      );
+    });
+
+    it('should select missing oracles when only partial oracles are provided by the user', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+      const userBalance = 25;
+
+      const providedReputationOracle = '0xProvidedReputationOracle';
+      const providedExchangeOracle = '0xProvidedExchangeOracle';
+
+      const userId = 1;
+      const fortuneJobDto: JobFortuneDto = {
+        chainId: MOCK_CHAIN_ID,
+        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: fundAmount,
+        currency: JobCurrency.HMT,
+        reputationOracle: providedReputationOracle,
+        exchangeOracle: providedExchangeOracle,
+      };
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      jest.spyOn(routingProtocolService, 'selectOracles').mockResolvedValue({
+        reputationOracle: selectedOraclesMock.reputationOracle,
+        exchangeOracle: selectedOraclesMock.exchangeOracle,
+        recordingOracle: selectedOraclesMock.recordingOracle,
+      });
+
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+
+      expect(routingProtocolService.selectOracles).toHaveBeenCalledTimes(1);
+
+      expect(jobRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reputationOracle: providedReputationOracle,
+          exchangeOracle: providedExchangeOracle,
+          recordingOracle: selectedOraclesMock.recordingOracle,
+        }),
+      );
+    });
+
     it('should create a job successfully', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
@@ -395,6 +462,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -471,6 +539,7 @@ describe('JobService', () => {
         fundAmount: tokenFundAmount,
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -509,6 +578,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -561,7 +631,7 @@ describe('JobService', () => {
 
   describe('createCvatManifest', () => {
     it('should create a valid CVAT manifest for image boxes job type', async () => {
-      const jobBounty = '50';
+      const jobBounty = '100';
       jest
         .spyOn(jobService, 'calculateJobBounty')
         .mockResolvedValueOnce(jobBounty);
@@ -809,8 +879,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {},
@@ -864,8 +934,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -946,8 +1016,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -1018,8 +1088,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -1090,8 +1160,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -1276,6 +1346,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1529,6 +1600,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1669,6 +1741,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1705,6 +1778,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -2576,9 +2650,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2601,9 +2677,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2625,9 +2703,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2644,7 +2724,7 @@ describe('JobService', () => {
         description: MOCK_REQUESTER_DESCRIPTION,
         user_guide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
-        job_size: 10,
+        job_size: 1,
       },
       validation: {
         min_quality: 1,
@@ -2692,12 +2772,13 @@ describe('JobService', () => {
       ]);
 
       expect(storageService.uploadFile).toHaveBeenCalled();
-
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2720,9 +2801,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2743,9 +2826,11 @@ describe('JobService', () => {
       expect(storageService.uploadFile).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadFile as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });

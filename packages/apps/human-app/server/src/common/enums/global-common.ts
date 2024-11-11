@@ -3,30 +3,36 @@ export enum JobDiscoveryFieldName {
   RewardAmount = 'reward_amount',
   RewardToken = 'reward_token',
   CreatedAt = 'created_at',
+  Qualifications = 'qualifications',
 }
+
 export enum JobStatus {
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
-  CANCELED = 'CANCELED',
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
+  CANCELED = 'canceled',
 }
+
 export enum AssignmentStatus {
-  ACTIVE = 'ACTIVE',
-  VALIDATION = 'VALIDATION',
-  COMPLETED = 'COMPLETED',
-  EXPIRED = 'EXPIRED',
-  CANCELED = 'CANCELED',
-  REJECTED = 'REJECTED',
+  ACTIVE = 'active',
+  VALIDATION = 'validation',
+  COMPLETED = 'completed',
+  EXPIRED = 'expired',
+  CANCELED = 'canceled',
+  REJECTED = 'rejected',
 }
+
 export enum JobDiscoverySortField {
   CHAIN_ID = 'chain_id',
   JOB_TYPE = 'job_type',
   REWARD_AMOUNT = 'reward_amount',
   CREATED_AT = 'created_at',
 }
+
 export enum SortOrder {
-  ASC = 'ASC',
-  DESC = 'DESC',
+  ASC = 'asc',
+  DESC = 'desc',
 }
+
 export enum AssignmentSortField {
   CHAIN_ID = 'chain_id',
   JOB_TYPE = 'job_type',
@@ -35,10 +41,11 @@ export enum AssignmentSortField {
   CREATED_AT = 'created_at',
   EXPIRES_AT = 'expires_at',
 }
+
 export enum SignatureType {
-  SIGNUP = 'SIGNUP',
-  SIGNIN = 'SIGNIN',
-  DISABLE_OPERATOR = 'DISABLE_OPERATOR',
-  CERTIFICATE_AUTHENTICATION = 'CERTIFICATE_AUTHENTICATION',
-  REGISTER_ADDRESS = 'REGISTER_ADDRESS',
+  SIGNUP = 'signup',
+  SIGNIN = 'signin',
+  DISABLE_OPERATOR = 'disable_operator',
+  CERTIFICATE_AUTHENTICATION = 'certificate_authentication',
+  REGISTER_ADDRESS = 'register_address',
 }
