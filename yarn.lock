@@ -3132,10 +3132,10 @@
     "@babel/runtime" "^7.25.7"
     "@mui/utils" "^5.16.6 || ^6.0.0"
 
-"@nestjs/axios@^3.0.2":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-3.1.1.tgz#565160180c81b580e4b192792fe506f5db9e1bcc"
-  integrity sha512-ySoxrzqX80P1q6LKLKGcgyBd2utg4gbC+4FsJNpXYvILorMlxss/ECNogD9EXLCE4JS5exVFD5ez0nK5hXcNTQ==
+"@nestjs/axios@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-3.1.2.tgz#e55c39cfd2e0ed24304b9aa31d1854ecbfe760c7"
+  integrity sha512-pFlfi4ZQsZtTNNhvgssbxjCHUd1nMpV3sXy/xOOB2uEJhw3M8j8SFR08gjFNil2we2Har7VCsXLfCkwbMHECFQ==
 
 "@nestjs/cache-manager@^2.2.1", "@nestjs/cache-manager@^2.2.2":
   version "2.3.0"
