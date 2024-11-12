@@ -23,7 +23,7 @@ class TaskMetaSerializer:
     def parse_gt_annotations(self, gt_dataset_data: bytes) -> dm.Dataset:
         with TemporaryDirectory() as temp_dir:
             annotations_dir = os.path.join(temp_dir, "annotations")
-            os.makedirs(annotations_dir)
+            Path(annotations_dir).mkdir()
 
             annotations_filename = os.path.join(annotations_dir, "default.json")
             with open(annotations_filename, "wb") as f:
