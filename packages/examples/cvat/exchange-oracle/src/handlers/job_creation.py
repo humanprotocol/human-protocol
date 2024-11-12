@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 import cv2
 import datumaro as dm
 import numpy as np
-from datumaro.util import take_by
+from datumaro.util import filter_dict, take_by
 from datumaro.util.annotation_util import BboxCoords, bbox_iou
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
@@ -1442,8 +1442,8 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             categories=self._gt_dataset.categories(), media_type=dm.Image
         )
 
-        for dm_item in self._gt_dataset:
-            for gt_bbox in dm_item.annotations:
+        for sample in self._gt_dataset:
+            for gt_bbox in sample.annotations:
                 assert isinstance(gt_bbox, dm.Bbox)
 
                 point_id = self._bbox_point_mapping[gt_bbox.id]
@@ -1452,10 +1452,11 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 )
 
                 self._gt_roi_dataset.put(
-                    dm_item.wrap(
+                    sample.wrap(
                         id=os.path.splitext(gt_roi_filename)[0],
                         annotations=[gt_bbox],
-                        media=dm.Image(path=gt_roi_filename, size=dm_item.media_as(dm.Image).size),
+                        media=dm.Image(path=gt_roi_filename, size=sample.media_as(dm.Image).size),
+                        attributes=filter_dict(sample.attributes, exclude_keys=["id"]),
                     )
                 )
 
