@@ -11,7 +11,10 @@ from typing import TYPE_CHECKING, TypeVar
 import datumaro as dm
 import numpy as np
 
+import src.core.tasks.boxes_from_points as boxes_from_points_task
+import src.core.tasks.points as points_task
 import src.core.tasks.simple as simple_task
+import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.cvat.api_calls as cvat_api
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
@@ -25,7 +28,7 @@ from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.db.utils import ForUpdateParams
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.annotations import ProjectLabels
+from src.utils.annotations import ProjectLabels, flatten_points
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
 
 if TYPE_CHECKING:
@@ -115,12 +118,36 @@ class _TaskValidator:
     def _gt_key_to_sample_id(self, gt_key: str) -> str:
         return gt_key
 
-    def _parse_gt(self):
-        layout = simple_task.TaskMetaLayout()
-        serializer = simple_task.TaskMetaSerializer()
+    def _get_meta_layout_and_serializer(self):
+        if self.manifest.annotation.type == TaskTypes.image_boxes:
+            return (
+                simple_task.TaskMetaLayout(),
+                simple_task.TaskMetaSerializer(),
+            )
+        if self.manifest.annotation.type == TaskTypes.image_points:
+            return (
+                points_task.TaskMetaLayout(),
+                points_task.TaskMetaSerializer(),
+            )
+        if self.manifest.annotation.type == TaskTypes.image_boxes_from_points:
+            return (
+                boxes_from_points_task.TaskMetaLayout(),
+                boxes_from_points_task.TaskMetaSerializer(),
+            )
+        if self.manifest.annotation.type == TaskTypes.image_skeletons_from_boxes:
+            return (
+                skeletons_from_boxes_task.TaskMetaLayout(),
+                skeletons_from_boxes_task.TaskMetaSerializer(),
+            )
+        raise AssertionError(f"Unknown task type {self.manifest.annotation.type}")
 
-        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
-        storage_client = make_cloud_client(oracle_data_bucket)
+    def _parse_gt(self):
+        layout, serializer = self._get_meta_layout_and_serializer()
+
+        exchange_oracle_data_bucket = BucketAccessInfo.parse_obj(
+            Config.exchange_oracle_storage_config
+        )
+        storage_client = make_cloud_client(exchange_oracle_data_bucket)
 
         self._gt_dataset = serializer.parse_gt_annotations(
             storage_client.download_file(
@@ -292,18 +319,17 @@ class _TaskValidator:
                     annotations = [
                         dm.Skeleton(
                             elements=[
-                                # Put a point in the center of each GT bbox
-                                # Not ideal, but it's the target for now
                                 dm.Points(
-                                    [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
+                                    point.points,
                                     label=point_label_id,
-                                    attributes=bbox.attributes,
+                                    attributes=point.attributes,
                                 )
                             ],
                             label=skeleton_label_id,
                         )
-                        for bbox in sample.annotations
-                        if isinstance(bbox, dm.Bbox)
+                        for point in flatten_points(
+                            [p for p in sample.annotations if isinstance(p, dm.Points)]
+                        )
                     ]
                     merged_dataset.put(sample.wrap(annotations=annotations))
             case TaskTypes.image_label_binary.value:
