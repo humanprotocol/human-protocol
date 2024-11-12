@@ -537,11 +537,9 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         self._input_points_data: _MaybeUnset[bytes] = _unset
 
         self._data_filenames: _MaybeUnset[Sequence[str]] = _unset
-        self._data_filenames_to_be_annotated: _MaybeUnset[Sequence[str]] = _unset
         self._input_gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._gt_roi_dataset: _MaybeUnset[dm.Dataset] = _unset
-        self._gt_filenames: _MaybeUnset[Sequence[str]] = _unset
         self._points_dataset: _MaybeUnset[dm.Dataset] = _unset
 
         self._bbox_point_mapping: _MaybeUnset[boxes_from_points_task.BboxPointMapping] = _unset
@@ -552,6 +550,8 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
 
         self._rois: _MaybeUnset[boxes_from_points_task.RoiInfos] = _unset
         self._roi_filenames: _MaybeUnset[boxes_from_points_task.RoiFilenames] = _unset
+        self._roi_filenames_to_be_annotated: _MaybeUnset[Sequence[str]] = _unset
+        self._gt_roi_filenames: _MaybeUnset[Sequence[str]] = _unset
 
         self._job_layout: _MaybeUnset[Sequence[Sequence[str]]] = _unset
         "File lists per CVAT job"
@@ -1267,8 +1267,8 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         point_id_to_original_image_id = {roi.point_id: roi.original_image_key for roi in self._rois}
 
         gt_point_ids = set(self._bbox_point_mapping.values())
-        self._gt_filenames = [self._roi_filenames[point_id] for point_id in gt_point_ids]
-        self._data_filenames_to_be_annotated = [
+        self._gt_roi_filenames = [self._roi_filenames[point_id] for point_id in gt_point_ids]
+        self._roi_filenames_to_be_annotated = [
             fn
             for point_id, fn in self._roi_filenames.items()
             if point_id not in gt_point_ids
@@ -1460,11 +1460,11 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     )
                 )
 
-        assert len(self._gt_roi_dataset) == len(self._gt_filenames)
+        assert len(self._gt_roi_dataset) == len(self._gt_roi_filenames)
 
     def _create_on_cvat(self):
-        assert self._data_filenames_to_be_annotated is not _unset
-        assert self._gt_filenames is not _unset
+        assert self._roi_filenames_to_be_annotated is not _unset
+        assert self._gt_roi_filenames is not _unset
         assert self._label_configuration is not _unset
         assert self._gt_roi_dataset is not _unset
 
@@ -1488,7 +1488,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
 
         with SessionLocal.begin() as session:
             segment_size = self._task_segment_size
-            total_jobs = math.ceil(len(self._data_filenames_to_be_annotated) / segment_size)
+            total_jobs = math.ceil(len(self._roi_filenames_to_be_annotated) / segment_size)
             self.logger.info(
                 "Task creation for escrow '%s': will create %s assignments",
                 self.escrow_address,
@@ -1526,7 +1526,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             )
 
             for data_subset in self._split_dataset_per_task(
-                self._data_filenames_to_be_annotated,
+                self._roi_filenames_to_be_annotated,
                 subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
             ):
                 cvat_task = cvat_api.create_task(
@@ -1544,7 +1544,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 ]
                 gt_filenames = [
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
-                    for fn in self._gt_filenames
+                    for fn in self._gt_roi_filenames
                 ]
 
                 cvat_api.put_task_data(
