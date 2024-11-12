@@ -41,7 +41,8 @@ export class StorageService {
         typeof fileContent === 'string' &&
         EncryptionUtils.isEncrypted(fileContent)
       ) {
-        return await this.encryption.decrypt(fileContent);
+        const decryptedData = await this.encryption.decrypt(fileContent);
+        return Buffer.from(decryptedData).toString();
       } else {
         return fileContent;
       }

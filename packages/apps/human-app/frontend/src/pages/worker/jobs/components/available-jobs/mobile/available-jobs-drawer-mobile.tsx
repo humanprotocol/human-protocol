@@ -24,7 +24,7 @@ export function AvailableJobsDrawerMobile({
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ display: 'flex', position: 'relative' }}>
+    <Box>
       <CssBaseline />
       <Drawer
         open
