@@ -22,6 +22,7 @@ from datumaro.util.annotation_util import BboxCoords, bbox_iou
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
+import src.core.tasks.points as points_task
 import src.core.tasks.simple as simple_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.cvat.api_calls as cvat_api
@@ -476,6 +477,25 @@ class PointsTaskBuilder(SimpleTaskBuilder):
         self._mean_gt_bbox_radius_estimation = min(0.5, np.mean(radiuses).item())
 
         return updated_gt_dataset
+
+    def _upload_task_meta(self, gt_dataset: dm.Dataset):
+        layout = points_task.TaskMetaLayout()
+        serializer = points_task.TaskMetaSerializer()
+
+        file_list = []
+        file_list.append(
+            (
+                serializer.serialize_gt_annotations(gt_dataset),
+                layout.GT_FILENAME,
+            )
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        for file_data, filename in file_list:
+            storage_client.create_file(
+                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
+                file_data,
+            )
 
     def _setup_gt_job_for_cvat_task(
         self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "datumaro"
