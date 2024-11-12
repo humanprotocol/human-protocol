@@ -10,6 +10,7 @@ import {
 import { HmtDailyStatsResponseDto } from './dto/hmt.dto';
 import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
+import { ChainId } from '@human-protocol/sdk';
 
 @ApiTags('Stats')
 @Controller('/stats')
@@ -126,5 +127,20 @@ export class StatsController {
   ): Promise<HmtDailyStatsResponseDto> {
     const results = await this.statsService.hmtDailyStats(from, to);
     return { from, to, results };
+  }
+
+  @Get('/available-networks')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get available networks with recent usage',
+    description: 'Endpoint to return networks filtered by recent activity.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Networks retrieved successfully',
+    type: Array<ChainId>,
+  })
+  public async getAvailableNetworks(): Promise<ChainId[]> {
+    return this.statsService.getAvailableNetworks();
   }
 }

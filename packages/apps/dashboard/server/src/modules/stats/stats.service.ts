@@ -4,11 +4,12 @@ import { lastValueFrom } from 'rxjs';
 import * as dayjs from 'dayjs';
 import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import {
   EnvironmentConfigService,
   HCAPTCHA_STATS_API_START_DATE,
   HMT_STATS_START_DATE,
+  MINIMUM_HMT_TRANSFERS,
 } from '../../common/config/env-config.service';
 import {
   HCAPTCHA_PREFIX,
@@ -418,5 +419,74 @@ export class StatsService implements OnModuleInit {
     );
 
     return stats.filter((stat): stat is HmtDailyStatsData => stat !== null);
+  }
+
+  public async getAvailableNetworks(): Promise<ChainId[]> {
+    const cachedNetworks = await this.cacheManager.get<ChainId[]>(
+      this.redisConfigService.availableNetworksCacheKey,
+    );
+
+    if (cachedNetworks) {
+      return cachedNetworks;
+    }
+
+    const currentMonth = new Date();
+    const oneMonthAgo = new Date(currentMonth);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const filterDate = new Date(currentMonth);
+    filterDate.setMonth(
+      filterDate.getMonth() - this.envConfigService.networkUsageFilterMonths,
+    );
+
+    const availableNetworks = [];
+
+    for (const networkKey of Object.values(MainnetsId)) {
+      const chainId = MainnetsId[networkKey as keyof typeof MainnetsId];
+
+      const networkConfig = NETWORKS[chainId];
+
+      if (!networkConfig) {
+        continue;
+      }
+
+      const statisticsClient = new StatisticsClient(networkConfig);
+
+      try {
+        const hmtData = await statisticsClient.getHMTDailyData({
+          from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
+        });
+        const escrowStats = await statisticsClient.getEscrowStatistics({
+          from: new Date(Math.floor(oneMonthAgo.getTime() / 1000) * 1000),
+        });
+
+        // Calculate total HMT transaction count across the period
+        const totalTransactionCount = hmtData.reduce(
+          (sum, day) => sum + day.totalTransactionCount,
+          0,
+        );
+
+        // At least 1 escrow created in the last month
+        const recentEscrowsCreated = escrowStats.totalEscrows > 0;
+        // Total HMT transactions > MINIMUM_HMT_TRANSFERS in the last X months
+        const sufficientHMTTransfers =
+          totalTransactionCount > MINIMUM_HMT_TRANSFERS;
+
+        if (recentEscrowsCreated && sufficientHMTTransfers) {
+          availableNetworks.push(chainId);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Error processing network ${networkKey} (Chain ID: ${chainId}): ${error.message}`,
+        );
+      }
+    }
+
+    await this.cacheManager.set(
+      this.redisConfigService.availableNetworksCacheKey,
+      availableNetworks,
+      this.envConfigService.networkAvailableCacheTtl,
+    );
+    return availableNetworks;
   }
 }

@@ -7,6 +7,7 @@ const DEFAULT_CACHE_HMT_PRICE_TTL = 60;
 const DEFAULT_CACHE_HMT_GENERAL_STATS_TTL = 2 * 60;
 const DEFAULT_HMT_PRICE_CACHE_KEY = 'hmt-price';
 const DEFAULT_HMT_GENERAL_STATS_CACHE_KEY = 'hmt-general';
+const DEFAULT_AVAILABLE_NETWORKS_CACHE_KEY = 'available-networks';
 export const HCAPTCHA_PREFIX = 'hcaptcha-';
 export const HMT_PREFIX = 'hmt-';
 
@@ -41,6 +42,12 @@ export class RedisConfigService {
     return this.configService.get<string>(
       'HMT_GENERAL_STATS_CACHE_KEY',
       DEFAULT_HMT_GENERAL_STATS_CACHE_KEY,
+    );
+  }
+  get availableNetworksCacheKey(): string {
+    return this.configService.get<string>(
+      'AVAILABLE_NETWORKS_CACHE_KEY',
+      DEFAULT_AVAILABLE_NETWORKS_CACHE_KEY,
     );
   }
 }
