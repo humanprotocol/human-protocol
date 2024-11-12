@@ -2232,7 +2232,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                 rois.append(
                     skeletons_from_boxes_task.RoiInfo(
                         original_image_key=sample.attributes["id"],
-                        original_image_id=sample.id,
                         bbox_id=bbox.id,
                         bbox_label=bbox.label,
                         bbox_x=new_bbox_x,
