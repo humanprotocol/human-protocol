@@ -11,7 +11,8 @@ import { PayoutModule } from '../payout/payout.module';
 import { ReputationModule } from '../reputation/reputation.module';
 import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repository';
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
-import { EscrowCompletionTrackingRepository } from '../webhook/escrow-completion-tracking.repository';
+import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
+import { EscrowCompletionTrackingModule } from '../escrow-completion-tracking/escrow-completion-tracking.module';
 
 @Global()
 @Module({
@@ -20,6 +21,7 @@ import { EscrowCompletionTrackingRepository } from '../webhook/escrow-completion
     ConfigModule,
     Web3Module,
     WebhookModule,
+    EscrowCompletionTrackingModule,
     PayoutModule,
     ReputationModule,
   ],

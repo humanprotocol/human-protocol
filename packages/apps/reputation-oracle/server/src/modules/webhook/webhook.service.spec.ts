@@ -21,11 +21,9 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
 import { WebhookService } from './webhook.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
-import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
 import { CreateWebhookIncomingDto } from './webhook.dto';
 import {
   ErrorEscrowCompletionTracking,
@@ -53,7 +51,6 @@ describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookIncomingRepository: WebhookIncomingRepository,
     webhookOutgoingRepository: WebhookOutgoingRepository,
-    escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository,
     httpService: HttpService,
     web3ConfigService: Web3ConfigService;
 
@@ -92,10 +89,6 @@ describe('WebhookService', () => {
           provide: WebhookOutgoingRepository,
           useValue: createMock<WebhookOutgoingRepository>(),
         },
-        {
-          provide: EscrowCompletionTrackingRepository,
-          useValue: createMock<EscrowCompletionTrackingRepository>(),
-        },
         Web3ConfigService,
         ServerConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
@@ -105,9 +98,6 @@ describe('WebhookService', () => {
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookIncomingRepository = moduleRef.get(WebhookIncomingRepository);
     webhookOutgoingRepository = moduleRef.get(WebhookOutgoingRepository);
-    escrowCompletionTrackingRepository = moduleRef.get(
-      EscrowCompletionTrackingRepository,
-    );
     httpService = moduleRef.get(HttpService);
     web3ConfigService = moduleRef.get(Web3ConfigService);
 
@@ -227,52 +217,6 @@ describe('WebhookService', () => {
     });
   });
 
-  describe('createEscrowCompletionTracking', () => {
-    const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
-      {
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        status: EscrowCompletionTrackingStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      };
-
-    it('should successfully create escrow completion tracking with valid DTO', async () => {
-      jest
-        .spyOn(escrowCompletionTrackingRepository, 'createUnique')
-        .mockResolvedValue(
-          escrowCompletionTrackingEntity as EscrowCompletionTrackingEntity,
-        );
-
-      await webhookService.createEscrowCompletionTracking(
-        ChainId.LOCALHOST,
-        MOCK_ADDRESS,
-      );
-
-      expect(
-        escrowCompletionTrackingRepository.createUnique,
-      ).toHaveBeenCalledWith(expect.any(Object));
-    });
-
-    it('should throw NotFoundException if escrow completion tracking not created', async () => {
-      jest
-        .spyOn(escrowCompletionTrackingRepository as any, 'createUnique')
-        .mockResolvedValue(null);
-
-      await expect(
-        webhookService.createEscrowCompletionTracking(
-          ChainId.LOCALHOST,
-          MOCK_ADDRESS,
-        ),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorEscrowCompletionTracking.NotCreated,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
-    });
-  });
-
   describe('handleWebhookIncomingError', () => {
     it('should set incoming webhook status to FAILED if retries exceed threshold', async () => {
       const webhookEntity: Partial<WebhookIncomingEntity> = {
@@ -332,38 +276,6 @@ describe('WebhookService', () => {
       );
       expect(webhookOutgoingRepository.updateOne).toHaveBeenCalled();
       expect(webhookEntity.status).toBe(WebhookOutgoingStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
-    });
-  });
-
-  describe('handleEscrowCompletionTrackingError', () => {
-    it('should set escrow completion tracking status to FAILED if retries exceed threshold', async () => {
-      const webhookEntity: Partial<EscrowCompletionTrackingEntity> = {
-        id: 1,
-        status: EscrowCompletionTrackingStatus.PENDING,
-        retriesCount: MOCK_MAX_RETRY_COUNT,
-      };
-      await (webhookService as any).handleEscrowCompletionTrackingError(
-        webhookEntity,
-        new Error('Sample error'),
-      );
-      expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(EscrowCompletionTrackingStatus.FAILED);
-    });
-
-    it('should increment retries count if below threshold', async () => {
-      const webhookEntity: Partial<EscrowCompletionTrackingEntity> = {
-        id: 1,
-        status: EscrowCompletionTrackingStatus.PENDING,
-        retriesCount: 0,
-      };
-      await (webhookService as any).handleEscrowCompletionTrackingError(
-        webhookEntity,
-        new Error('Sample error'),
-      );
-      expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(EscrowCompletionTrackingStatus.PENDING);
       expect(webhookEntity.retriesCount).toBe(1);
       expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
     });

@@ -23,7 +23,8 @@ import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
 import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repository';
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
-import { EscrowCompletionTrackingRepository } from '../webhook/escrow-completion-tracking.repository';
+import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
+import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
 
 @Injectable()
 export class CronJobService {
@@ -32,6 +33,7 @@ export class CronJobService {
   constructor(
     private readonly cronJobRepository: CronJobRepository,
     private readonly webhookService: WebhookService,
+    private readonly escrowCompletionTrackingService: EscrowCompletionTrackingService,
     private readonly reputationService: ReputationService,
     private readonly webhookIncomingRepository: WebhookIncomingRepository,
     private readonly webhookOutgoingRepository: WebhookOutgoingRepository,
@@ -123,7 +125,7 @@ export class CronJobService {
         try {
           const { chainId, escrowAddress } = webhookEntity;
 
-          await this.webhookService.createEscrowCompletionTracking(
+          await this.escrowCompletionTrackingService.createEscrowCompletionTracking(
             chainId,
             escrowAddress,
           );
@@ -220,7 +222,7 @@ export class CronJobService {
           this.logger.error(
             `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
           );
-          await this.webhookService.handleEscrowCompletionTrackingError(
+          await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
             escrowCompletionTrackingEntity,
             failedReason,
           );
@@ -336,7 +338,7 @@ export class CronJobService {
           this.logger.error(
             `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
           );
-          await this.webhookService.handleEscrowCompletionTrackingError(
+          await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
             escrowCompletionTrackingEntity,
             failedReason,
           );

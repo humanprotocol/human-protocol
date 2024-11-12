@@ -10,16 +10,10 @@ import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
-import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      WebhookIncomingEntity,
-      WebhookOutgoingEntity,
-      EscrowCompletionTrackingEntity,
-    ]),
+    TypeOrmModule.forFeature([WebhookIncomingEntity, WebhookOutgoingEntity]),
     ConfigModule,
     Web3Module,
     HttpModule,
@@ -30,7 +24,6 @@ import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking
     WebhookService,
     WebhookIncomingRepository,
     WebhookOutgoingRepository,
-    EscrowCompletionTrackingRepository,
   ],
   exports: [WebhookService],
 })

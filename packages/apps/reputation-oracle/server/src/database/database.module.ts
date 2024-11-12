@@ -21,7 +21,7 @@ import { QualificationEntity } from '../modules/qualification/qualification.enti
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
-import { EscrowCompletionTrackingEntity } from '../modules/webhook/escrow-completion-tracking.entity';
+import { EscrowCompletionTrackingEntity } from 'src/modules/escrow-completion-tracking/escrow-completion-tracking.entity';
 
 @Module({
   imports: [
