@@ -20,7 +20,6 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('StatsService', () => {
   let statsService: StatsService;
   let cacheManager: Cache;
-  let envConfigService: EnvironmentConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,9 +56,6 @@ describe('StatsService', () => {
 
     statsService = module.get<StatsService>(StatsService);
     cacheManager = module.get<Cache>(CACHE_MANAGER);
-    envConfigService = module.get<EnvironmentConfigService>(
-      EnvironmentConfigService,
-    );
   });
 
   it('should regenerate network list when cache TTL expires', async () => {
