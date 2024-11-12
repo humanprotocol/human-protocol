@@ -46,7 +46,7 @@ export function recoverSigner(
 
   try {
     return ethers.verifyMessage(message, signature);
-  } catch (e) {
+  } catch (_error) {
     throw new ControlledError(
       ErrorSignature.InvalidSignature,
       HttpStatus.CONFLICT,
