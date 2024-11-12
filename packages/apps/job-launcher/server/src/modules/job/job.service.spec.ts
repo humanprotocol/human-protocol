@@ -3043,7 +3043,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(jobEntityMock);
 
-      downloadJsonLIkeDataMock.mockResolvedValueOnce(null);
+      downloadJsonLIkeDataMock.mockResolvedValueOnce([]);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
