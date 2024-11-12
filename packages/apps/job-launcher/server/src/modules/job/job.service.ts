@@ -1303,9 +1303,9 @@ export class JobService {
     if (jobEntity.requestType === JobRequestType.FORTUNE) {
       const data = (await this.storageService.downloadJsonLikeData(
         finalResultUrl,
-      )) as any;
+      )) as Array<FortuneFinalResultDto>;
 
-      if (!data) {
+      if (!data.length) {
         throw new ControlledError(
           ErrorJob.ResultNotFound,
           HttpStatus.NOT_FOUND,
