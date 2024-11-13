@@ -4,6 +4,7 @@
 import inspect
 import os
 from collections.abc import Iterable
+from os import getenv
 from typing import ClassVar
 
 from attrs.converters import to_bool
@@ -15,7 +16,7 @@ from web3.providers.rpc import HTTPProvider
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
-dotenv_path = os.getenv("DOTENV_PATH", None)
+dotenv_path = getenv("DOTENV_PATH", None)
 if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 
@@ -29,12 +30,12 @@ class _BaseConfig:
 
 
 class Postgres:
-    port = os.environ.get("PG_PORT", "5434")
-    host = os.environ.get("PG_HOST", "0.0.0.0")  # noqa: S104
-    user = os.environ.get("PG_USER", "admin")
-    password = os.environ.get("PG_PASSWORD", "admin")
-    database = os.environ.get("PG_DB", "recording_oracle")
-    lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
+    port = getenv("PG_PORT", "5434")
+    host = getenv("PG_HOST", "0.0.0.0")  # noqa: S104
+    user = getenv("PG_USER", "admin")
+    password = getenv("PG_PASSWORD", "admin")
+    database = getenv("PG_DB", "recording_oracle")
+    lock_timeout = int(getenv("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
     def connection_url(cls) -> str:
@@ -58,42 +59,40 @@ class _NetworkConfig:
 
 class PolygonMainnetConfig(_NetworkConfig):
     chain_id = 137
-    rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_MAINNET_ADDR")
+    rpc_api = getenv("POLYGON_MAINNET_RPC_API_URL")
+    private_key = getenv("POLYGON_MAINNET_PRIVATE_KEY")
+    addr = getenv("POLYGON_MAINNET_ADDR")
 
 
 class PolygonAmoyConfig(_NetworkConfig):
     chain_id = 80002
-    rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_AMOY_ADDR")
+    rpc_api = getenv("POLYGON_AMOY_RPC_API_URL")
+    private_key = getenv("POLYGON_AMOY_PRIVATE_KEY")
+    addr = getenv("POLYGON_AMOY_ADDR")
 
 
 class LocalhostConfig(_NetworkConfig):
     chain_id = 1338
-    rpc_api = os.environ.get("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
-    private_key = os.environ.get(
+    rpc_api = getenv("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
+    private_key = getenv(
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = getenv("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
-    exchange_oracle_url = os.environ.get("LOCALHOST_EXCHANGE_ORACLE_URL")
-    reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
+    exchange_oracle_url = getenv("LOCALHOST_EXCHANGE_ORACLE_URL")
+    reputation_oracle_url = getenv("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
 class CronConfig:
-    process_exchange_oracle_webhooks_int = int(
-        os.environ.get("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000)
-    )
-    process_exchange_oracle_webhooks_chunk_size = os.environ.get(
+    process_exchange_oracle_webhooks_int = int(getenv("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000))
+    process_exchange_oracle_webhooks_chunk_size = getenv(
         "PROCESS_EXCHANGE_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
     )
     process_reputation_oracle_webhooks_int = int(
-        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 3000)
+        getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 3000)
     )
-    process_reputation_oracle_webhooks_chunk_size = os.environ.get(
+    process_reputation_oracle_webhooks_chunk_size = getenv(
         "PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
     )
 
@@ -128,14 +127,14 @@ class StorageConfig(IStorageConfig):
     provider = os.environ["STORAGE_PROVIDER"].lower()
     endpoint_url = os.environ["STORAGE_ENDPOINT_URL"]  # TODO: probably should be optional
     data_bucket_name = os.environ["STORAGE_RESULTS_BUCKET_NAME"]
-    secure = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    secure = to_bool(getenv("STORAGE_USE_SSL", "true"))
 
     # AWS S3 specific attributes
-    access_key = os.environ.get("STORAGE_ACCESS_KEY")
-    secret_key = os.environ.get("STORAGE_SECRET_KEY")
+    access_key = getenv("STORAGE_ACCESS_KEY")
+    secret_key = getenv("STORAGE_SECRET_KEY")
 
     # GCS specific attributes
-    key_file_path = os.environ.get("STORAGE_KEY_FILE_PATH")
+    key_file_path = getenv("STORAGE_KEY_FILE_PATH")
 
 
 class ExchangeOracleStorageConfig(IStorageConfig):
@@ -145,29 +144,27 @@ class ExchangeOracleStorageConfig(IStorageConfig):
         "EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
     data_bucket_name = os.environ["EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME"]
-    results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
-    secure = to_bool(os.environ.get("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
+    results_dir_suffix = getenv("STORAGE_RESULTS_DIR_SUFFIX", "-results")
+    secure = to_bool(getenv("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
     # AWS S3 specific attributes
-    access_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY")
-    secret_key = os.environ.get("EXCHANGE_ORACLE_STORAGE_SECRET_KEY")
+    access_key = getenv("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY")
+    secret_key = getenv("EXCHANGE_ORACLE_STORAGE_SECRET_KEY")
     # GCS specific attributes
-    key_file_path = os.environ.get("EXCHANGE_ORACLE_STORAGE_KEY_FILE_PATH")
+    key_file_path = getenv("EXCHANGE_ORACLE_STORAGE_KEY_FILE_PATH")
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(getenv("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
 
 class ValidationConfig:
-    gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
+    gt_ban_threshold = int(getenv("GT_BAN_THRESHOLD", 3))
     """
     The maximum allowed number of failures per GT sample before it's excluded from validation
     """
 
-    unverifiable_assignments_threshold = float(
-        os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1)
-    )
+    unverifiable_assignments_threshold = float(getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1))
     """
     Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
 
@@ -175,7 +172,7 @@ class ValidationConfig:
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
-    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", "0"))
+    max_escrow_iterations = int(getenv("MAX_ESCROW_ITERATIONS", "0"))
     """
     Maximum escrow annotation-validation iterations.
     After this, the escrow is finished automatically.
@@ -184,9 +181,9 @@ class ValidationConfig:
 
 
 class EncryptionConfig(_BaseConfig):
-    pgp_passphrase = os.environ.get("PGP_PASSPHRASE", "")
-    pgp_private_key = os.environ.get("PGP_PRIVATE_KEY", "")
-    pgp_public_key_url = os.environ.get("PGP_PUBLIC_KEY_URL", "")
+    pgp_passphrase = getenv("PGP_PASSPHRASE", "")
+    pgp_private_key = getenv("PGP_PRIVATE_KEY", "")
+    pgp_public_key_url = getenv("PGP_PUBLIC_KEY_URL", "")
 
     @classmethod
     def validate(cls) -> None:
@@ -206,22 +203,22 @@ class EncryptionConfig(_BaseConfig):
 
 
 class CvatConfig:
-    host_url = os.environ.get("CVAT_URL", "http://localhost:8080")
-    admin_login = os.environ.get("CVAT_ADMIN", "admin")
-    admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
-    org_slug = os.environ.get("CVAT_ORG_SLUG", "org1")
+    host_url = getenv("CVAT_URL", "http://localhost:8080")
+    admin_login = getenv("CVAT_ADMIN", "admin")
+    admin_pass = getenv("CVAT_ADMIN_PASS", "admin")
+    org_slug = getenv("CVAT_ORG_SLUG", "org1")
 
-    quality_retrieval_timeout = int(os.environ.get("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
-    quality_check_interval = int(os.environ.get("CVAT_QUALITY_CHECK_INTERVAL", 5))
+    quality_retrieval_timeout = int(getenv("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
+    quality_check_interval = int(getenv("CVAT_QUALITY_CHECK_INTERVAL", 5))
 
 
 class Config:
-    port = int(os.environ.get("PORT", 8000))
-    environment = os.environ.get("ENVIRONMENT", "development")
-    workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
-    webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES", 5))
-    webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED", 60))
-    loglevel = parse_log_level(os.environ.get("LOGLEVEL", "info"))
+    port = int(getenv("PORT", 8000))
+    environment = getenv("ENVIRONMENT", "development")
+    workers_amount = int(getenv("WORKERS_AMOUNT", 1))
+    webhook_max_retries = int(getenv("WEBHOOK_MAX_RETRIES", 5))
+    webhook_delay_if_failed = int(getenv("WEBHOOK_DELAY_IF_FAILED", 60))
+    loglevel = parse_log_level(getenv("LOGLEVEL", "info"))
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_amoy = PolygonAmoyConfig

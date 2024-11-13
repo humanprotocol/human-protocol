@@ -111,6 +111,7 @@ ignore = [
     "ANN002",  # Missing type annotation for `*args`
     "TRY300",  # Consider moving this statement to an `else` block
     "C901",    # Function is too complex
+    "PLW1508", # invalid-envvar-default. Alerts only for os.getenv(), but not for os.environ.get()
     "PLW2901", # Variable overwritten by assignment target
     "PTH118",  # Prefer pathlib instead of os.path
     "PTH119",  # `os.path.basename()` should be replaced by `Path.name`
