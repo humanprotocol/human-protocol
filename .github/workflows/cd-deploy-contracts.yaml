@@ -51,7 +51,7 @@ jobs:
         run: |
           case ${{ github.event.inputs.network }} in
             "sepolia")
-              echo "escrow_factory=0xD6D347ba6987519B4e42EcED43dF98eFf5465a23" >> $GITHUB_OUTPUT
+              echo "escrow_factory=0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf" >> $GITHUB_OUTPUT
               echo "staking=0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203" >> $GITHUB_OUTPUT
               echo "reward_pool=0xAFf5a986A530ff839d49325A5dF69F96627E8D29" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT

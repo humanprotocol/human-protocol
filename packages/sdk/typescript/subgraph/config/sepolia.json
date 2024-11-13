@@ -2,8 +2,8 @@
   "network": "sepolia",
   "description": "HUMAN subgraph on Sepolia Ethereum Testnet",
   "EscrowFactory": {
-    "address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
-    "startBlock": 5716237,
+    "address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
+    "startBlock": 7067993,
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {

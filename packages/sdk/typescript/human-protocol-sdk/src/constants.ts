@@ -74,7 +74,7 @@ export const NETWORKS: {
     chainId: ChainId.SEPOLIA,
     title: 'Ethereum Sepolia',
     scanUrl: 'https://sepolia.etherscan.io/',
-    factoryAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
+    factoryAddress: '0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf',
     hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
     stakingAddress: '0x2163e3A40032Af1C359ac731deaB48258b317890',
     kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',

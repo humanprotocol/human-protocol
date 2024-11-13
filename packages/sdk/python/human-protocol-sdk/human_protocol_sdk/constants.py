@@ -75,7 +75,7 @@ NETWORKS = {
             "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmPoEHTaUnAufFWWz7CnKcHqokHyrKc4CETU43ySW9NNec"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
-        "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
+        "factory_address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
         "staking_address": "0x2163e3A40032Af1C359ac731deaB48258b317890",
         "kvstore_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
         "old_subgraph_url": (""),
