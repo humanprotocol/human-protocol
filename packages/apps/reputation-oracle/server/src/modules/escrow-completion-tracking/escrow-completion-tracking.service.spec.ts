@@ -13,11 +13,8 @@ import { EscrowCompletionTrackingStatus } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
 import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
-import { ErrorEscrowCompletionTracking } from '../../common/constants/errors';
-import { HttpStatus } from '@nestjs/common';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { EscrowCompletionTrackingService } from './escrow-completion-tracking.service';
 
 jest.mock('@human-protocol/sdk', () => ({
