@@ -17,20 +17,15 @@ async function main() {
   console.log('HMToken Address: ', await HMTokenContract.getAddress());
 
   const Staking = await ethers.getContractFactory('Staking');
-  const stakingContract = await upgrades.deployProxy(
-    Staking,
-    [await HMTokenContract.getAddress(), 1, 10, 1],
-    { initializer: 'initialize', kind: 'uups' }
+  const stakingContract = await Staking.deploy(
+    '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
+    1,
+    1000,
+    1
   );
 
   await stakingContract.waitForDeployment();
-  console.log('Staking Proxy Address: ', await stakingContract.getAddress());
-  console.log(
-    'Staking Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(
-      await stakingContract.getAddress()
-    )
-  );
+  console.log('Staking Address: ', await stakingContract.getAddress());
 
   const EscrowFactory = await ethers.getContractFactory(
     'contracts/EscrowFactory.sol:EscrowFactory'

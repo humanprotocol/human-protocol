@@ -127,7 +127,7 @@ contract Staking is IStaking, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Getter that returns if an staker has any available stake.
+     * @dev Getter that returns whether a staker has any available stake.
      * @param _staker Address of the staker
      * @return True if staker has available tokens staked
      */
@@ -203,7 +203,7 @@ contract Staking is IStaking, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Unstake tokens from the staker stake, lock them until lock period expires.
+     * @dev Unstake tokens from the staker's stake, locking them until lock period expires.
      * @param _tokens Amount of tokens to unstake
      */
     function unstake(uint256 _tokens) external override nonReentrant {

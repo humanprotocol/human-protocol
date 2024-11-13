@@ -76,7 +76,7 @@ export const NETWORKS: {
     scanUrl: 'https://sepolia.etherscan.io/',
     factoryAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
     hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
-    stakingAddress: '0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203',
+    stakingAddress: '0x2163e3A40032Af1C359ac731deaB48258b317890',
     kvstoreAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',

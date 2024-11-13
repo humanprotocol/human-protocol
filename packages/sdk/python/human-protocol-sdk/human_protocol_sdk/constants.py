@@ -76,7 +76,7 @@ NETWORKS = {
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
-        "staking_address": "0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203",
+        "staking_address": "0x2163e3A40032Af1C359ac731deaB48258b317890",
         "kvstore_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
         "old_subgraph_url": (""),
         "old_factory_address": "0x98108c28B7767a52BE38B4860832dd4e11A7ecad",
