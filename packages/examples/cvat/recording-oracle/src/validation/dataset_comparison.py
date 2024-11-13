@@ -183,6 +183,29 @@ class PointsDatasetComparator(DatasetComparator):
         return matching_result, similarity_fn
 
 
+class PolygonsDatasetComparator(DatasetComparator):
+    def compare_sample_annotations(
+        self, gt_sample: dm.DatasetItem, ds_sample: dm.DatasetItem, *, similarity_threshold: float
+    ) -> tuple[MatchResult, SimilarityFunction]:
+        similarity_fn = CachedSimilarityFunction(bbox_iou)
+
+        ds_boxes = [
+            Bbox(*a.get_bbox(), a.label) for a in ds_sample.annotations if isinstance(a, dm.Polygon)
+        ]
+        gt_boxes = [
+            Bbox(*a.get_bbox(), a.label) for a in gt_sample.annotations if isinstance(a, dm.Polygon)
+        ]
+
+        matching_result = match_annotations(
+            gt_boxes,
+            ds_boxes,
+            similarity=similarity_fn,
+            min_similarity=similarity_threshold,
+        )
+
+        return matching_result, similarity_fn
+
+
 _SkeletonInfo = list[str]
 
 

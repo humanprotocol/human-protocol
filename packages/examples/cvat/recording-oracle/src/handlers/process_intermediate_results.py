@@ -31,6 +31,7 @@ from src.validation.dataset_comparison import (
     BboxDatasetComparator,
     DatasetComparator,
     PointsDatasetComparator,
+    PolygonsDatasetComparator,
     SkeletonDatasetComparator,
     TooFewGtError,
 )
@@ -42,6 +43,7 @@ if TYPE_CHECKING:
 
 DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_points: "coco_person_keypoints",
     TaskTypes.image_boxes: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
@@ -51,6 +53,7 @@ DM_DATASET_FORMAT_MAPPING = {
 DM_GT_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_instances",  # we compare points against boxes
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
@@ -60,6 +63,7 @@ DM_GT_DATASET_FORMAT_MAPPING = {
 DATASET_COMPARATOR_TYPE_MAP: dict[TaskTypes, type[DatasetComparator]] = {
     # TaskType.image_label_binary: TagDatasetComparator, # TODO: implement if support is needed
     TaskTypes.image_boxes: BboxDatasetComparator,
+    TaskTypes.image_polygons: PolygonsDatasetComparator,
     TaskTypes.image_points: PointsDatasetComparator,
     TaskTypes.image_boxes_from_points: BboxDatasetComparator,
     TaskTypes.image_skeletons_from_boxes: SkeletonDatasetComparator,
@@ -199,7 +203,7 @@ class _TaskValidator:
             try:
                 job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
             except TooFewGtError as e:
-                job_results[job_cvat_id] = self.self.UNKNOWN_QUALITY
+                job_results[job_cvat_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
 
@@ -271,7 +275,7 @@ class _TaskValidator:
         """
 
         match manifest.annotation.type:
-            case TaskTypes.image_boxes.value:
+            case TaskTypes.image_boxes.value | TaskTypes.image_polygons.value:
                 merged_dataset.update(gt_dataset)
             case TaskTypes.image_points.value:
                 merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
@@ -929,7 +933,12 @@ def process_intermediate_results(  # noqa: PLR0912
     # actually validate jobs
 
     task_type = manifest.annotation.type
-    if task_type in [TaskTypes.image_label_binary, TaskTypes.image_boxes, TaskTypes.image_points]:
+    if task_type in [
+        TaskTypes.image_label_binary,
+        TaskTypes.image_boxes,
+        TaskTypes.image_polygons,
+        TaskTypes.image_points,
+    ]:
         validator_type = _TaskValidator
     elif task_type == TaskTypes.image_boxes_from_points:
         validator_type = _BoxesFromPointsValidator
