@@ -127,26 +127,15 @@ class CronConfig:
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
     track_completed_projects_int = int(getenv("TRACK_COMPLETED_PROJECTS_INT", 30))
-    track_completed_projects_chunk_size = getenv("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
     track_completed_tasks_int = int(getenv("TRACK_COMPLETED_TASKS_INT", 30))
-    track_completed_tasks_chunk_size = getenv("TRACK_COMPLETED_TASKS_CHUNK_SIZE", 20)
     track_creating_tasks_int = int(getenv("TRACK_CREATING_TASKS_INT", 300))
     track_creating_tasks_chunk_size = getenv("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
     track_assignments_int = int(getenv("TRACK_ASSIGNMENTS_INT", 5))
     track_assignments_chunk_size = getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
 
-    track_completed_escrows_int = int(
-        # backward compatibility
-        getenv("TRACK_COMPLETED_ESCROWS_INT", getenv("RETRIEVE_ANNOTATIONS_INT", 60))
-    )
-    track_escrow_validations_int = int(
-        getenv("TRACK_COMPLETED_ESCROWS_INT", getenv("RETRIEVE_ANNOTATIONS_INT", 60))
-    )
-    track_completed_escrows_chunk_size = getenv(
-        # backward compatibility
-        "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
-        getenv("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
-    )
+    track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
+    track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 5))
+    track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
     track_completed_escrows_max_downloading_retries = int(
         getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
@@ -157,8 +146,8 @@ class CronConfig:
     )
     "Maximum number of parallel downloading requests during results downloading"
 
-    rejected_projects_chunk_size = getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20)
-    accepted_projects_chunk_size = getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
+    process_rejected_projects_chunk_size = getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20)
+    process_accepted_projects_chunk_size = getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
 
     track_escrow_creation_chunk_size = getenv("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20)
     track_escrow_creation_int = int(getenv("TRACK_ESCROW_CREATION_INT", 300))

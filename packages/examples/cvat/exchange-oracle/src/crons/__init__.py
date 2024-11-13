@@ -69,7 +69,7 @@ def setup_cron_jobs(app: FastAPI) -> None:
         scheduler.add_job(
             track_escrow_validations,
             "interval",
-            seconds=Config.cron_config.track_completed_escrows_int,
+            seconds=Config.cron_config.track_escrow_validations_int,
         )
         scheduler.add_job(
             track_task_creation,
