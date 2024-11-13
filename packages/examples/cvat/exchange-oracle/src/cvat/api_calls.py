@@ -77,7 +77,7 @@ def _get_annotations(
     time_begin = utcnow()
 
     if timeout is _NOTSET:
-        timeout = Config.features.default_export_timeout
+        timeout = Config.cvat_config.cvat_export_timeout
 
     while True:
         (_, response) = endpoint.call_with_http_info(
@@ -641,7 +641,7 @@ def upload_gt_annotations(
     *,
     format_name: str,
     sleep_interval: int = 5,
-    timeout: int | None = Config.features.default_import_timeout,
+    timeout: int | None = Config.cvat_config.cvat_import_timeout,
 ) -> None:
     # FUTURE-TODO: use job.import_annotations when CVAT supports a waiting timeout
     start_time = datetime.now(timezone.utc)

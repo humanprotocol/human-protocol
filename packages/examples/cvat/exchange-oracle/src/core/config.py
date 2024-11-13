@@ -170,7 +170,7 @@ class CronConfig:
 
 
 class CvatConfig:
-    # TODO: it looks odd to use cvat_ prefix in class attributes inside CvatConfig
+    # TODO: remove cvat_ prefix
     cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
     cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
     cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
@@ -181,6 +181,12 @@ class CvatConfig:
     cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
     cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 10 * 1000))
     cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
+
+    cvat_export_timeout = int(os.environ.get("CVAT_EXPORT_TIMEOUT", 5 * 60))
+    "Timeout, in seconds, for annotations or dataset export waiting"
+
+    cvat_import_timeout = int(os.environ.get("CVAT_IMPORT_TIMEOUT", 60 * 60))
+    "Timeout, in seconds, for waiting on GT annotations import"
 
     # quality control settings
     cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
@@ -232,12 +238,6 @@ class StorageConfig:
 class FeaturesConfig:
     enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
-
-    default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
-    "Timeout, in seconds, for annotations or dataset export waiting"
-
-    default_import_timeout = int(os.environ.get("DEFAULT_IMPORT_TIMEOUT", 60 * 60))
-    "Timeout, in seconds, for waiting on GT annotations import"
 
     request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
     "Allow to log request details for each request"
