@@ -103,7 +103,6 @@ class IStorageConfig:
     data_bucket_name: ClassVar[str]
     secure: ClassVar[bool]
     endpoint_url: ClassVar[str]  # TODO: probably should be optional
-    region: ClassVar[str | None]
     # AWS S3 specific attributes
     access_key: ClassVar[str | None]
     secret_key: ClassVar[str | None]
@@ -128,7 +127,6 @@ class IStorageConfig:
 class StorageConfig(IStorageConfig):
     provider = os.environ["STORAGE_PROVIDER"].lower()
     endpoint_url = os.environ["STORAGE_ENDPOINT_URL"]  # TODO: probably should be optional
-    region = os.environ.get("STORAGE_REGION")
     data_bucket_name = os.environ["STORAGE_RESULTS_BUCKET_NAME"]
     secure = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
 
@@ -146,7 +144,6 @@ class ExchangeOracleStorageConfig(IStorageConfig):
     endpoint_url = os.environ[
         "EXCHANGE_ORACLE_STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
-    region = os.environ.get("EXCHANGE_ORACLE_STORAGE_REGION")
     data_bucket_name = os.environ["EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME"]
     results_dir_suffix = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure = to_bool(os.environ.get("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))

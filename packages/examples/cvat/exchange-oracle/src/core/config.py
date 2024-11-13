@@ -208,7 +208,6 @@ class StorageConfig:
     endpoint_url: ClassVar[str] = os.environ[
         "STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
-    region: ClassVar[str | None] = os.environ.get("STORAGE_REGION")
     results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
 
