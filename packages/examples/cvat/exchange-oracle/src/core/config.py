@@ -179,7 +179,7 @@ class CvatConfig:
     cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
     cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
     cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
-    cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 10 * 1000))
+    cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 1000))
     cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
     cvat_export_timeout = int(os.environ.get("CVAT_EXPORT_TIMEOUT", 5 * 60))
