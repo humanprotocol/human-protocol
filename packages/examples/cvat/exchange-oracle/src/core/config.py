@@ -170,11 +170,10 @@ class CronConfig:
 
 
 class CvatConfig:
-    # TODO: remove cvat_ prefix
-    cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
-    cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
-    cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
-    cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "")
+    host_url = os.environ.get("CVAT_URL", "http://localhost:8080")
+    admin_login = os.environ.get("CVAT_ADMIN", "admin")
+    admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
+    org_slug = os.environ.get("CVAT_ORG_SLUG", "")
 
     cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
     cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
@@ -182,21 +181,21 @@ class CvatConfig:
     cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 1000))
     cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
-    cvat_export_timeout = int(os.environ.get("CVAT_EXPORT_TIMEOUT", 5 * 60))
+    export_timeout = int(os.environ.get("CVAT_EXPORT_TIMEOUT", 5 * 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
-    cvat_import_timeout = int(os.environ.get("CVAT_IMPORT_TIMEOUT", 60 * 60))
+    import_timeout = int(os.environ.get("CVAT_IMPORT_TIMEOUT", 60 * 60))
     "Timeout, in seconds, for waiting on GT annotations import"
 
     # quality control settings
-    cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
+    max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
     "Maximum number of attempts to run a validation check on a job after completing annotation"
 
-    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
-    cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
+    iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
+    oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
 
-    cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
-    cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
+    incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
+    webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
 
 
 class StorageConfig:
