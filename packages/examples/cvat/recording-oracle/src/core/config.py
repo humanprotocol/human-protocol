@@ -163,23 +163,6 @@ class FeaturesConfig:
 
 
 class ValidationConfig:
-    default_point_validity_relative_radius = float(
-        os.environ.get("DEFAULT_POINT_VALIDITY_RELATIVE_RADIUS", 0.9)
-    )
-
-    default_oks_sigma = float(
-        os.environ.get("DEFAULT_OKS_SIGMA", 0.1)  # average value for COCO points
-    )
-    "Default OKS sigma for GT skeleton points validation. Valid range is (0; 1]"
-
-    gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.9))
-    """
-    The maximum allowed fraction of failed assignments per GT sample,
-    before it's considered failed for the current validation iteration.
-    v = 0 -> any GT failure leads to image failure
-    v = 1 -> any GT failures do not lead to image failure
-    """
-
     gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
     """
     The maximum allowed number of failures per GT sample before it's excluded from validation
@@ -189,6 +172,8 @@ class ValidationConfig:
         os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1)
     )
     """
+    Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
+
     The maximum allowed fraction of jobs with insufficient GT available for validation.
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
