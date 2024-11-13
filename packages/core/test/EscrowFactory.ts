@@ -246,9 +246,7 @@ describe('EscrowFactory', function () {
 
       await expect(
         upgrades.upgradeProxy(await escrowFactory.getAddress(), EscrowFactoryV0)
-      )
-        .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
-        .withArgs(await operator.getAddress());
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
     it('Owner should upgrade correctly', async () => {
