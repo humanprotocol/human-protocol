@@ -16,7 +16,6 @@ import {
   EventType,
   WebhookIncomingStatus,
   WebhookOutgoingStatus,
-  EscrowCompletionTrackingStatus,
 } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
@@ -24,11 +23,8 @@ import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { WebhookService } from './webhook.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
-import { CreateWebhookIncomingDto } from './webhook.dto';
-import {
-  ErrorEscrowCompletionTracking,
-  ErrorWebhook,
-} from '../../common/constants/errors';
+import { IncomingWebhookDto } from './webhook.dto';
+import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
@@ -120,7 +116,7 @@ describe('WebhookService', () => {
     };
 
     it('should successfully create incoming webhook with valid DTO', async () => {
-      const validDto: CreateWebhookIncomingDto = {
+      const validDto: IncomingWebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
         eventType: EventType.JOB_COMPLETED,
@@ -138,7 +134,7 @@ describe('WebhookService', () => {
     });
 
     it('should throw NotFoundException if webhook entity not created', async () => {
-      const validDto: CreateWebhookIncomingDto = {
+      const validDto: IncomingWebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
         eventType: EventType.JOB_COMPLETED,
@@ -156,7 +152,7 @@ describe('WebhookService', () => {
     });
 
     it('should throw BadRequestException with invalid event type', async () => {
-      const invalidDto: CreateWebhookIncomingDto = {
+      const invalidDto: IncomingWebhookDto = {
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
         eventType: 'JOB_FAILED' as EventType,
@@ -201,18 +197,6 @@ describe('WebhookService', () => {
 
       expect(webhookOutgoingRepository.createUnique).toHaveBeenCalledWith(
         expect.any(Object),
-      );
-    });
-
-    it('should throw NotFoundException if webhook entity not created', async () => {
-      jest
-        .spyOn(webhookOutgoingRepository as any, 'createUnique')
-        .mockResolvedValue(null);
-
-      await expect(
-        webhookService.createOutgoingWebhook(payload, url, hash),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND),
       );
     });
   });

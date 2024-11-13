@@ -80,23 +80,23 @@ describe('PayoutService', () => {
     payoutService = moduleRef.get<PayoutService>(PayoutService);
     payoutService.createPayoutSpecificActions = {
       [JobRequestType.FORTUNE]: {
-        calculateResults: jest.fn(),
+        calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
       [JobRequestType.IMAGE_BOXES]: {
-        calculateResults: jest.fn(),
+        calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
       [JobRequestType.IMAGE_POINTS]: {
-        calculateResults: jest.fn(),
+        calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
       [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-        calculateResults: jest.fn(),
+        calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
       [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-        calculateResults: jest.fn(),
+        calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
     };
@@ -235,7 +235,7 @@ describe('PayoutService', () => {
       };
 
       payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
-        'calculateResults'
+        'calculatePayouts'
       ] = jest.fn().mockResolvedValue(results);
 
       const escrowAddress = MOCK_ADDRESS;
@@ -275,7 +275,7 @@ describe('PayoutService', () => {
       };
 
       payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
-        'calculateResults'
+        'calculatePayouts'
       ] = jest.fn().mockResolvedValue(results);
 
       const escrowAddress = MOCK_ADDRESS;
@@ -299,7 +299,7 @@ describe('PayoutService', () => {
       };
 
       payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
-        'calculateResults'
+        'calculatePayouts'
       ] = jest.fn().mockResolvedValue(results);
 
       EscrowClient.build = jest.fn().mockResolvedValue({
@@ -422,7 +422,7 @@ describe('PayoutService', () => {
     });
   });
 
-  describe('calculateResultsFortune', () => {
+  describe('calculatePayoutsFortune', () => {
     it('should successfully calculate results and return correct result values', async () => {
       const manifest = {
         submissionsRequired: 1,
@@ -443,7 +443,7 @@ describe('PayoutService', () => {
         .spyOn(storageService, 'download')
         .mockResolvedValue(intermediateResults);
 
-      const result = await payoutService.calculateResultsFortune(
+      const result = await payoutService.calculatePayoutsFortune(
         manifest,
         MOCK_FILE_URL,
       );
@@ -501,7 +501,7 @@ describe('PayoutService', () => {
     });
   });
 
-  describe('calculateResultsCvat', () => {
+  describe('calculatePayoutsCvat', () => {
     const manifest = {
       data: {
         data_url: MOCK_FILE_URL,
@@ -550,7 +550,7 @@ describe('PayoutService', () => {
 
       jest.spyOn(storageService, 'download').mockResolvedValue(results);
 
-      const result = await payoutService.calculateResultsCvat(
+      const result = await payoutService.calculatePayoutsCvat(
         manifest as any,
         chainId,
         escrowAddress,
@@ -575,7 +575,7 @@ describe('PayoutService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValue(results);
 
       await expect(
-        payoutService.calculateResultsCvat(
+        payoutService.calculatePayoutsCvat(
           manifest as any,
           chainId,
           escrowAddress,

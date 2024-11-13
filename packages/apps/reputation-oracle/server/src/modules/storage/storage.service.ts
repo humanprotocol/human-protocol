@@ -16,6 +16,7 @@ import { FortuneFinalResult } from '../../common/dto/result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { isNotFoundError } from '../../common/utils/minio';
 
 @Injectable()
 export class StorageService {
@@ -131,11 +132,11 @@ export class StorageService {
         Logger.log(`File with key ${key} already exists. Skipping upload.`);
         return { url: this.getUrl(key), hash };
       } catch (err) {
-        if (err.code !== 'NotFound') {
+        if (!isNotFoundError(err)) {
           Logger.error('Error checking if file exists:', err);
           throw new ControlledError(
             'Error accessing storage',
-            HttpStatus.BAD_GATEWAY,
+            HttpStatus.INTERNAL_SERVER_ERROR,
           );
         }
       }
@@ -189,7 +190,7 @@ export class StorageService {
         Logger.log(`File with key ${key} already exists. Skipping upload.`);
         return { url: this.getUrl(key), hash };
       } catch (err) {
-        if (err.code !== 'NotFound') {
+        if (!isNotFoundError(err)) {
           Logger.error('Error checking if file exists:', err);
           throw new ControlledError(
             'Error accessing storage',

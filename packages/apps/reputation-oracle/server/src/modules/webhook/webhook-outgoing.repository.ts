@@ -26,7 +26,7 @@ export class WebhookOutgoingRepository extends BaseRepository<WebhookOutgoingEnt
       },
 
       order: {
-        createdAt: 'DESC',
+        createdAt: 'ASC',
       },
     });
   }

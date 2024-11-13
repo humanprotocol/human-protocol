@@ -25,6 +25,8 @@ import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repositor
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
 import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
 import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
+import { PostgresErrorCodes } from '../../common/enums/database';
+import { DatabaseError } from '../../common/errors/database';
 
 @Injectable()
 export class CronJobService {
@@ -129,21 +131,46 @@ export class CronJobService {
             chainId,
             escrowAddress,
           );
+
+          webhookEntity.status = WebhookIncomingStatus.COMPLETED;
+          await this.webhookIncomingRepository.updateOne(webhookEntity);
         } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error processing pending incoming webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
-          await this.webhookService.handleWebhookIncomingError(
-            webhookEntity,
-            failedReason,
-          );
-          continue;
+          if (err instanceof DatabaseError) {
+            if (
+              (err as DatabaseError).message.includes(
+                PostgresErrorCodes.Duplicated,
+              )
+            ) {
+              this.logger.warn(
+                `Duplicate tracking entity for escrowAddress: ${webhookEntity.escrowAddress}. Marking webhook as completed.`,
+              );
+              webhookEntity.status = WebhookIncomingStatus.COMPLETED;
+              await this.webhookIncomingRepository.updateOne(webhookEntity);
+            } else {
+              const errorId = uuidv4();
+              const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+              this.logger.error(
+                `Database error for webhook processing. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+              );
+              await this.webhookService.handleWebhookIncomingError(
+                webhookEntity,
+                failedReason,
+              );
+              continue;
+            }
+          } else {
+            const errorId = uuidv4();
+            const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+            this.logger.error(
+              `Unexpected error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+            );
+            await this.webhookService.handleWebhookIncomingError(
+              webhookEntity,
+              failedReason,
+            );
+            continue;
+          }
         }
-        webhookEntity.status = WebhookIncomingStatus.COMPLETED;
-        webhookEntity.retriesCount = 0;
-        await this.webhookIncomingRepository.updateOne(webhookEntity);
       }
     } catch (e) {
       this.logger.error(e);
@@ -160,7 +187,7 @@ export class CronJobService {
    * Handles errors and logs detailed messages.
    * @returns {Promise<void>} A promise that resolves when the operation is complete.
    */
-  public async processPendingEscrowCompletionTrackingWebhooks(): Promise<void> {
+  public async processPendingEscrowCompletion(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingEscrowCompletionTracking,
     );
@@ -243,7 +270,7 @@ export class CronJobService {
    * Notifies oracles via callbacks, logs errors, and updates tracking status.
    * @returns {Promise<void>} A promise that resolves when the paid escrow tracking has been processed.
    */
-  public async processPaidEscrowCompletionTrackingWebhooks(): Promise<void> {
+  public async processPaidEscrowCompletion(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPaidEscrowCompletionTracking,
     );
@@ -277,6 +304,9 @@ export class CronJobService {
               gasPrice: await this.web3Service.calculateGasPrice(chainId),
             });
 
+            // TODO: Technically it's possible that the escrow completion could occur before the reputation scores are assessed,
+            // and the app might go down during this window. Currently, there isn’t a clear approach to handle this situation.
+            // Consider revisiting this section to explore potential solutions to improve resilience in such scenarios.
             await this.reputationService.assessReputationScores(
               chainId,
               escrowAddress,
@@ -305,6 +335,8 @@ export class CronJobService {
             // ).webhookUrl,
           ];
 
+          let allWebhooksCreated = true;
+
           for (const url of callbackUrls) {
             if (!url) {
               throw new ControlledError(
@@ -324,14 +356,45 @@ export class CronJobService {
               .update(stringify({ payload, url }))
               .digest('hex');
 
-            this.webhookService.createOutgoingWebhook(payload, hash, url);
+            try {
+              await this.webhookService.createOutgoingWebhook(
+                payload,
+                hash,
+                url,
+              );
+            } catch (err) {
+              if (
+                err instanceof DatabaseError &&
+                err.message.includes(PostgresErrorCodes.Duplicated)
+              ) {
+                this.logger.warn(
+                  `Duplicate outgoing webhook for escrowAddress: ${escrowAddress}. Webhook creation skipped, but will not complete escrow until all URLs are successful.`,
+                );
+                continue;
+              } else {
+                const errorId = uuidv4();
+                const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+                this.logger.error(
+                  `Error creating outgoing webhook. Error ID: ${errorId}, Escrow Address: ${escrowAddress}, Reason: ${failedReason}, Message: ${err.message}`,
+                );
+                await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
+                  escrowCompletionTrackingEntity,
+                  failedReason,
+                );
+                allWebhooksCreated = false;
+                break;
+              }
+            }
           }
 
-          escrowCompletionTrackingEntity.status =
-            EscrowCompletionTrackingStatus.COMPLETED;
-          await this.escrowCompletionTrackingRepository.updateOne(
-            escrowCompletionTrackingEntity,
-          );
+          // Only set the status to COMPLETED if all webhooks were created successfully
+          if (allWebhooksCreated) {
+            escrowCompletionTrackingEntity.status =
+              EscrowCompletionTrackingStatus.COMPLETED;
+            await this.escrowCompletionTrackingRepository.updateOne(
+              escrowCompletionTrackingEntity,
+            );
+          }
         } catch (err) {
           const errorId = uuidv4();
           const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
@@ -342,7 +405,6 @@ export class CronJobService {
             escrowCompletionTrackingEntity,
             failedReason,
           );
-          continue;
         }
       }
     } catch (e) {
@@ -396,7 +458,6 @@ export class CronJobService {
           continue;
         }
         webhookEntity.status = WebhookOutgoingStatus.SENT;
-        webhookEntity.retriesCount = 0;
         await this.webhookOutgoingRepository.updateOne(webhookEntity);
       }
     } catch (e) {

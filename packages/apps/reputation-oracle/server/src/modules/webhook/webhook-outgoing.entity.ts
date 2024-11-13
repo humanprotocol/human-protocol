@@ -8,7 +8,7 @@ import { WebhookOutgoingStatus } from '../../common/enums';
 @Index(['hash'], { unique: true })
 export class WebhookOutgoingEntity extends BaseEntity {
   @Column({ type: 'jsonb' })
-  public payload: object;
+  public payload: Record<string, unknown>;
 
   @Column({ type: 'varchar' })
   public hash: string;

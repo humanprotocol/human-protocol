@@ -35,11 +35,14 @@ import { ReputationConfigService } from '../../common/config/reputation-config.s
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorCronJob } from '../../common/constants/errors';
 import { HttpStatus } from '@nestjs/common';
-import { EscrowCompletionTrackingRepository } from '../webhook/escrow-completion-tracking.repository';
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
 import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repository';
 import { WebhookIncomingEntity } from '../webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../webhook/webhook-outgoing.entity';
+import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
+import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
+import { PostgresErrorCodes } from '../../common/enums/database';
+import { DatabaseError } from '../../common/errors/database';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -73,6 +76,7 @@ describe('CronJobService', () => {
     webhookOutgoingRepository: WebhookOutgoingRepository,
     escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository,
     webhookService: WebhookService,
+    escrowCompletionTrackingService: EscrowCompletionTrackingService,
     reputationService: ReputationService,
     payoutService: PayoutService;
 
@@ -110,6 +114,7 @@ describe('CronJobService', () => {
           },
         },
         WebhookService,
+        EscrowCompletionTrackingService,
         PayoutService,
         ReputationService,
         ServerConfigService,
@@ -148,6 +153,10 @@ describe('CronJobService', () => {
     );
 
     webhookService = module.get<WebhookService>(WebhookService);
+    escrowCompletionTrackingService =
+      module.get<EscrowCompletionTrackingService>(
+        EscrowCompletionTrackingService,
+      );
   });
 
   describe('startCronJob', () => {
@@ -297,7 +306,13 @@ describe('CronJobService', () => {
     let webhookEntity1: Partial<WebhookIncomingEntity>,
       webhookEntity2: Partial<WebhookIncomingEntity>;
 
+    let completeCronJobMock: jest.SpyInstance;
+
     beforeEach(() => {
+      completeCronJobMock = jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue({} as CronJobEntity);
+
       cronJobEntityMock = {
         cronJobType: CronJobType.ProcessPendingIncomingWebhook,
         startedAt: new Date(),
@@ -326,7 +341,7 @@ describe('CronJobService', () => {
         .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
       createEscrowCompletionTrackingMock = jest.spyOn(
-        webhookService as any,
+        escrowCompletionTrackingService as any,
         'createEscrowCompletionTracking',
       );
       createEscrowCompletionTrackingMock.mockResolvedValue(undefined);
@@ -415,9 +430,42 @@ describe('CronJobService', () => {
         cronJobEntityMock as any,
       );
     });
+
+    it('should retry if createEscrowCompletionTracking throws a DatabaseError with Duplicated error code', async () => {
+      const mockEntity = { id: 1, status: EscrowCompletionTrackingStatus.PAID };
+
+      jest
+        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .mockResolvedValue([mockEntity as any]);
+
+      const updateOneMock = jest
+        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .mockResolvedValue(mockEntity as any);
+
+      const createEscrowCompletionTrackingMock = jest
+        .spyOn(
+          escrowCompletionTrackingService,
+          'createEscrowCompletionTracking',
+        )
+        .mockImplementation(() => {
+          throw new DatabaseError(
+            'Duplicate entry error',
+            PostgresErrorCodes.Duplicated,
+          );
+        });
+
+      await service.processPendingIncomingWebhooks();
+
+      expect(createEscrowCompletionTrackingMock).toHaveBeenCalled();
+      expect(updateOneMock).not.toHaveBeenCalledWith({
+        id: mockEntity.id,
+        status: EscrowCompletionTrackingStatus.COMPLETED,
+      });
+      expect(completeCronJobMock).toHaveBeenCalled();
+    });
   });
 
-  describe('processPendingEscrowCompletionTrackingWebhooks', () => {
+  describe('processPendingEscrowCompletion', () => {
     let startCronJobMock: jest.SpyInstance;
     let completeCronJobMock: jest.SpyInstance;
 
@@ -435,7 +483,7 @@ describe('CronJobService', () => {
     it('should skip processing if a cron job is already running', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
 
-      await service.processPendingEscrowCompletionTrackingWebhooks();
+      await service.processPendingEscrowCompletion();
 
       expect(startCronJobMock).not.toHaveBeenCalled();
     });
@@ -453,7 +501,7 @@ describe('CronJobService', () => {
         .spyOn(escrowCompletionTrackingRepository, 'updateOne')
         .mockResolvedValue(mockEntity as any);
 
-      await service.processPendingEscrowCompletionTrackingWebhooks();
+      await service.processPendingEscrowCompletion();
 
       expect(startCronJobMock).toHaveBeenCalledWith(
         CronJobType.ProcessPendingEscrowCompletionTracking,
@@ -483,13 +531,13 @@ describe('CronJobService', () => {
         })
         .mockResolvedValue(mockEntity2 as any);
 
-      await service.processPendingEscrowCompletionTrackingWebhooks();
+      await service.processPendingEscrowCompletion();
 
       expect(completeCronJobMock).toHaveBeenCalled();
     });
   });
 
-  describe('processPaidEscrowCompletionTrackingWebhooks', () => {
+  describe('processPaidEscrowCompletion', () => {
     let startCronJobMock: jest.SpyInstance;
     let completeCronJobMock: jest.SpyInstance;
     let assessReputationScoresMock: jest.SpyInstance;
@@ -518,7 +566,7 @@ describe('CronJobService', () => {
     it('should skip processing if a cron job is already running', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
 
-      await service.processPaidEscrowCompletionTrackingWebhooks();
+      await service.processPaidEscrowCompletion();
 
       expect(startCronJobMock).not.toHaveBeenCalled();
       expect(assessReputationScoresMock).not.toHaveBeenCalled();
@@ -535,7 +583,7 @@ describe('CronJobService', () => {
         .spyOn(escrowCompletionTrackingRepository, 'updateOne')
         .mockResolvedValue(mockEntity as any);
 
-      await service.processPaidEscrowCompletionTrackingWebhooks();
+      await service.processPaidEscrowCompletion();
 
       expect(startCronJobMock).toHaveBeenCalledWith(
         CronJobType.ProcessPaidEscrowCompletionTracking,
@@ -569,7 +617,7 @@ describe('CronJobService', () => {
         })
         .mockResolvedValueOnce(mockEntity2 as any);
 
-      await service.processPaidEscrowCompletionTrackingWebhooks();
+      await service.processPaidEscrowCompletion();
 
       expect(updateOneMock).toHaveBeenCalledTimes(3);
       expect(completeCronJobMock).toHaveBeenCalled();
@@ -581,7 +629,7 @@ describe('CronJobService', () => {
         .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
         .mockResolvedValue([]);
 
-      await service.processPaidEscrowCompletionTrackingWebhooks();
+      await service.processPaidEscrowCompletion();
 
       expect(startCronJobMock).toHaveBeenCalled();
       expect(completeCronJobMock).toHaveBeenCalled();
@@ -591,12 +639,42 @@ describe('CronJobService', () => {
     it('should not call completeCronJob if startCronJob fails', async () => {
       startCronJobMock.mockRejectedValue(new Error('Start cron job failed'));
 
-      await expect(
-        service.processPaidEscrowCompletionTrackingWebhooks(),
-      ).rejects.toThrow('Start cron job failed');
+      await expect(service.processPaidEscrowCompletion()).rejects.toThrow(
+        'Start cron job failed',
+      );
 
       expect(startCronJobMock).toHaveBeenCalled();
       expect(completeCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should retry if createOutgoingWebhook throws a DatabaseError with Duplicated error code', async () => {
+      const mockEntity = { id: 1, status: EscrowCompletionTrackingStatus.PAID };
+
+      jest
+        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .mockResolvedValue([mockEntity as any]);
+
+      const updateOneMock = jest
+        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .mockResolvedValue(mockEntity as any);
+
+      const createOutgoingWebhookMock = jest
+        .spyOn(webhookService, 'createOutgoingWebhook')
+        .mockImplementation(() => {
+          throw new DatabaseError(
+            'Duplicate entry error',
+            PostgresErrorCodes.Duplicated,
+          );
+        });
+
+      await service.processPaidEscrowCompletion();
+
+      expect(createOutgoingWebhookMock).toHaveBeenCalled();
+      expect(updateOneMock).not.toHaveBeenCalledWith({
+        id: mockEntity.id,
+        status: EscrowCompletionTrackingStatus.COMPLETED,
+      });
+      expect(completeCronJobMock).toHaveBeenCalled();
     });
   });
 

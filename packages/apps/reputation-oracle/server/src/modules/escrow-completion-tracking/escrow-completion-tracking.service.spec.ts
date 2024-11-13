@@ -116,24 +116,6 @@ describe('escrowCompletionTrackingService', () => {
         escrowCompletionTrackingRepository.createUnique,
       ).toHaveBeenCalledWith(expect.any(Object));
     });
-
-    it('should throw NotFoundException if escrow completion tracking not created', async () => {
-      jest
-        .spyOn(escrowCompletionTrackingRepository as any, 'createUnique')
-        .mockResolvedValue(null);
-
-      await expect(
-        escrowCompletionTrackingService.createEscrowCompletionTracking(
-          ChainId.LOCALHOST,
-          MOCK_ADDRESS,
-        ),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorEscrowCompletionTracking.NotCreated,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
-    });
   });
 
   describe('handleEscrowCompletionTrackingError', () => {

@@ -4,7 +4,7 @@ import { EventType } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 
-export class CreateWebhookIncomingDto {
+export class IncomingWebhookDto {
   @ApiProperty({ name: 'chain_id' })
   @IsEnumCaseInsensitive(ChainId)
   public chainId: ChainId;

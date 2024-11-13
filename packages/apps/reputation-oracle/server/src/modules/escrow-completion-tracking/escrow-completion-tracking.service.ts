@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { ErrorEscrowCompletionTracking } from '../../common/constants/errors';
+import { Injectable } from '@nestjs/common';
 import { EscrowCompletionTrackingStatus } from '../../common/enums';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
 import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
 import { ChainId } from '@human-protocol/sdk';
@@ -20,7 +18,6 @@ export class EscrowCompletionTrackingService {
    * Sets initial status to 'PENDING'.
    * @param {ChainId} chainId - The blockchain chain ID.
    * @param {string} escrowAddress - The address of the escrow contract.
-   * @throws {ControlledError} If the tracking record cannot be created.
    */
   public async createEscrowCompletionTracking(
     chainId: ChainId,
@@ -38,13 +35,6 @@ export class EscrowCompletionTrackingService {
       await this.escrowCompletionTrackingRepository.createUnique(
         escrowCompletionTrackingEntity,
       );
-
-    if (!escrowCompletionTrackingEntity) {
-      throw new ControlledError(
-        ErrorEscrowCompletionTracking.NotCreated,
-        HttpStatus.NOT_FOUND,
-      );
-    }
   }
 
   /**
@@ -68,7 +58,7 @@ export class EscrowCompletionTrackingService {
       escrowCompletionTrackingEntity.status =
         EscrowCompletionTrackingStatus.FAILED;
     }
-    this.escrowCompletionTrackingRepository.updateOne(
+    await this.escrowCompletionTrackingRepository.updateOne(
       escrowCompletionTrackingEntity,
     );
   }

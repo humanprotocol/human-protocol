@@ -12,7 +12,7 @@ import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
-  CalculateResultsDto,
+  CalculatePayoutsDto,
   CvatManifestDto,
   FortuneManifestDto,
 } from '../../common/dto/manifest';
@@ -106,14 +106,14 @@ export class PayoutService {
 
     const requestType = getRequestType(manifest);
 
-    const { calculateResults } = this.createPayoutSpecificActions[requestType];
+    const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
-    const data: CalculateResultsDto = {
+    const data: CalculatePayoutsDto = {
       chainId,
       escrowAddress,
       finalResultsUrl: url,
     };
-    const results = await calculateResults(manifest, data);
+    const results = await calculatePayouts(manifest, data);
 
     await escrowClient.bulkPayOut(
       escrowAddress,
@@ -131,11 +131,11 @@ export class PayoutService {
 
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.FORTUNE]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: FortuneManifestDto,
-        data: CalculateResultsDto,
+        data: CalculatePayoutsDto,
       ): Promise<PayoutsDataDto> =>
-        this.calculateResultsFortune(manifest, data.finalResultsUrl),
+        this.calculatePayoutsFortune(manifest, data.finalResultsUrl),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
@@ -144,44 +144,44 @@ export class PayoutService {
         this.saveResultsFortune(manifest, chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculateResultsDto,
+        data: CalculatePayoutsDto,
       ): Promise<PayoutsDataDto> =>
-        this.calculateResultsCvat(manifest, data.chainId, data.escrowAddress),
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_POINTS]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculateResultsDto,
+        data: CalculatePayoutsDto,
       ): Promise<PayoutsDataDto> =>
-        this.calculateResultsCvat(manifest, data.chainId, data.escrowAddress),
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculateResultsDto,
+        data: CalculatePayoutsDto,
       ): Promise<PayoutsDataDto> =>
-        this.calculateResultsCvat(manifest, data.chainId, data.escrowAddress),
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculateResultsDto,
+        data: CalculatePayoutsDto,
       ): Promise<PayoutsDataDto> =>
-        this.calculateResultsCvat(manifest, data.chainId, data.escrowAddress),
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
@@ -275,7 +275,7 @@ export class PayoutService {
    * @param finalResultsUrl URL of the final results for this job.
    * @returns {Promise<PayoutsDataDto>} Recipients, amounts, and relevant storage data.
    */
-  public async calculateResultsFortune(
+  public async calculatePayoutsFortune(
     manifest: FortuneManifestDto,
     finalResultsUrl: string,
   ): Promise<PayoutsDataDto> {
@@ -303,7 +303,7 @@ export class PayoutService {
    * @param escrowAddress The escrow contract address.
    * @returns {Promise<PayoutsDataDto>} Recipients, amounts, and relevant storage data.
    */
-  public async calculateResultsCvat(
+  public async calculatePayoutsCvat(
     manifest: CvatManifestDto,
     chainId: ChainId,
     escrowAddress: string,
@@ -325,7 +325,7 @@ export class PayoutService {
       annotations.results &&
       Array.isArray(annotations.results) &&
       annotations.results.length === 0 &&
-      annotations.results &&
+      annotations.jobs &&
       Array.isArray(annotations.jobs) &&
       annotations.jobs.length === 0
     ) {

@@ -84,7 +84,7 @@ export class FortuneManifestDto {
   requestType: JobRequestType;
 }
 
-export class CalculateResultsDto {
+export class CalculatePayoutsDto {
   @IsEnum(ChainId)
   chainId: ChainId;
 

@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateWebhookIncomingDto } from './webhook.dto';
+import { IncomingWebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import {
-  EscrowCompletionTrackingStatus,
   EventType,
   WebhookIncomingStatus,
   WebhookOutgoingStatus,
@@ -34,12 +33,10 @@ export class WebhookService {
   /**
    * Creates an incoming webhook entry in the repository.
    * Validates that the event type is 'JOB_COMPLETED' and sets initial status to 'PENDING'.
-   * @param {CreateWebhookIncomingDto} dto - Contains webhook details like chain ID and escrow address.
+   * @param {IncomingWebhookDto} dto - Contains webhook details like chain ID and escrow address.
    * @throws {ControlledError} If the event type is invalid or the webhook cannot be created.
    */
-  public async createIncomingWebhook(
-    dto: CreateWebhookIncomingDto,
-  ): Promise<void> {
+  public async createIncomingWebhook(dto: IncomingWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.JOB_COMPLETED) {
       throw new ControlledError(
         ErrorWebhook.InvalidEventType,
@@ -68,10 +65,9 @@ export class WebhookService {
    * @param {object} payload - The payload to send in the webhook.
    * @param {string} hash - A hash generated from the URL and payload for unique identification.
    * @param {string} url - The destination URL for the outgoing webhook.
-   * @throws {ControlledError} If the webhook cannot be created.
    */
   public async createOutgoingWebhook(
-    payload: object,
+    payload: Record<string, unknown>,
     hash: string,
     url: string,
   ): Promise<void> {
@@ -85,10 +81,6 @@ export class WebhookService {
 
     webhookEntity =
       await this.webhookOutgoingRepository.createUnique(webhookEntity);
-
-    if (!webhookEntity) {
-      throw new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND);
-    }
   }
 
   /**
@@ -108,7 +100,7 @@ export class WebhookService {
       webhookEntity.failedReason = failedReason;
       webhookEntity.status = WebhookIncomingStatus.FAILED;
     }
-    this.webhookIncomingRepository.updateOne(webhookEntity);
+    await this.webhookIncomingRepository.updateOne(webhookEntity);
   }
 
   /**
@@ -128,7 +120,7 @@ export class WebhookService {
       webhookEntity.failedReason = failedReason;
       webhookEntity.status = WebhookOutgoingStatus.FAILED;
     }
-    this.webhookOutgoingRepository.updateOne(webhookEntity);
+    await this.webhookOutgoingRepository.updateOne(webhookEntity);
   }
 
   /**

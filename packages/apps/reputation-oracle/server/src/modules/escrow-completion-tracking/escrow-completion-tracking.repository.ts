@@ -26,7 +26,7 @@ export class EscrowCompletionTrackingRepository extends BaseRepository<EscrowCom
       },
 
       order: {
-        createdAt: 'DESC',
+        createdAt: 'ASC',
       },
     });
   }

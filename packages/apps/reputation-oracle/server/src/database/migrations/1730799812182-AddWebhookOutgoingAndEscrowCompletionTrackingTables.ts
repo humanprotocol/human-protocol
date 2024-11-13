@@ -7,7 +7,10 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "hmt"."webhook_incoming" RENAME COLUMN "results_url" TO "failed_reason"`,
+      `ALTER TABLE "hmt"."webhook_incoming" DROP COLUMN "results_url"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "hmt"."webhook_incoming" ADD COLUMN "failed_reason" varchar`,
     );
     await queryRunner.query(
       `CREATE TYPE "hmt"."webhook_outgoing_status_enum" AS ENUM('pending', 'sent', 'failed')`,
@@ -89,7 +92,10 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
     await queryRunner.query(`DROP TABLE "hmt"."webhook_outgoing"`);
     await queryRunner.query(`DROP TYPE "hmt"."webhook_outgoing_status_enum"`);
     await queryRunner.query(
-      `ALTER TABLE "hmt"."webhook_incoming" RENAME COLUMN "failed_reason" TO "results_url"`,
+      `ALTER TABLE "hmt"."webhook_incoming" DROP COLUMN "failed_reason"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "hmt"."webhook_incoming" ADD COLUMN "results_url" varchar`,
     );
   }
 }
