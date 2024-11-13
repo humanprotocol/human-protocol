@@ -4,7 +4,6 @@ import {
   EncryptionUtils,
   EscrowClient,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -24,9 +23,6 @@ import { HttpStatus } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
-  StorageClient: {
-    downloadFileFromUrl: jest.fn(),
-  },
   EscrowClient: {
     build: jest.fn(),
   },
@@ -63,6 +59,7 @@ describe('StorageService', () => {
   let storageService: StorageService;
   let pgpConfigService: PGPConfigService;
   let s3ConfigService: S3ConfigService;
+  let downloadFileFromUrlSpy: jest.SpyInstance;
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -108,6 +105,10 @@ describe('StorageService', () => {
       .fn()
       .mockResolvedValue(MOCK_ENCRYPTION_PUBLIC_KEY);
     jest.spyOn(pgpConfigService, 'encrypt', 'get').mockReturnValue(true);
+  });
+
+  beforeEach(() => {
+    downloadFileFromUrlSpy = jest.spyOn(StorageService, 'downloadFileFromUrl');
   });
 
   describe('uploadJobSolutions', () => {
@@ -302,13 +303,13 @@ describe('StorageService', () => {
     });
   });
 
-  describe('download', () => {
-    it('should download the file correctly', async () => {
+  describe('downloadJsonLikeData', () => {
+    it('should download data correctly', async () => {
       const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'test';
 
-      const expectedJobFile = {
+      const expectedJobJson = {
         exchangeAddress,
         solutions: [
           {
@@ -318,19 +319,21 @@ describe('StorageService', () => {
         ],
       };
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(expectedJobFile);
-      const solutionsFile = await storageService.download(MOCK_FILE_URL);
-      expect(solutionsFile).toStrictEqual(expectedJobFile);
+      downloadFileFromUrlSpy.mockResolvedValueOnce(
+        Buffer.from(JSON.stringify(expectedJobJson)),
+      );
+
+      const solutionsJson =
+        await storageService.downloadJsonLikeData(MOCK_FILE_URL);
+      expect(solutionsJson).toEqual(expectedJobJson);
     });
 
-    it('should download the encrypted file correctly', async () => {
+    it('should download the encrypted data correctly', async () => {
       const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'test';
 
-      const expectedJobFile = {
+      const expectedJobJson = {
         exchangeAddress,
         solutions: [
           {
@@ -340,36 +343,33 @@ describe('StorageService', () => {
         ],
       };
 
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce('encrypted');
+      downloadFileFromUrlSpy.mockResolvedValueOnce(Buffer.from('encrypted'));
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
       Encryption.build = jest.fn().mockResolvedValue({
-        decrypt: jest.fn().mockResolvedValue(JSON.stringify(expectedJobFile)),
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(expectedJobJson)),
       });
 
-      const solutionsFile = await storageService.download(MOCK_FILE_URL);
-      expect(solutionsFile).toStrictEqual(expectedJobFile);
+      const solutionsJson =
+        await storageService.downloadJsonLikeData(MOCK_FILE_URL);
+      expect(solutionsJson).toEqual(expectedJobJson);
     });
 
-    it('should return empty array when file cannot be downloaded', async () => {
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockRejectedValue('Network error');
+    it('should return empty array when data cannot be downloaded', async () => {
+      downloadFileFromUrlSpy.mockRejectedValue('Network error');
 
-      const solutionsFile = await storageService.download(MOCK_FILE_URL);
-      expect(solutionsFile).toStrictEqual([]);
+      const solutionsJson =
+        await storageService.downloadJsonLikeData(MOCK_FILE_URL);
+      expect(solutionsJson).toEqual([]);
     });
   });
 
   describe('copyFileFromURLToBucket', () => {
+    const someFileContent = Buffer.from('some-file-content');
     const escrowAddress = '0x1234567890123456789012345678901234567890';
     const chainId = ChainId.LOCALHOST;
 
     it('should copy a file from a valid URL to a bucket', async () => {
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce('some-file-content');
+      downloadFileFromUrlSpy.mockResolvedValueOnce(someFileContent);
 
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
       EncryptionUtils.encrypt = jest
@@ -395,21 +395,19 @@ describe('StorageService', () => {
         ),
       ).toBeTruthy();
       expect(uploadedFile.hash).toBeDefined();
-      expect(storageService.minioClient.putObject).toBeCalledWith(
+      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         s3ConfigService.bucket,
         `s3${crypto
           .createHash('sha1')
           .update('encrypted-file-content')
           .digest('hex')}.zip`,
         'encrypted-file-content',
-        { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+        { 'Cache-Control': 'no-store' },
       );
     });
 
     it('should copy an encrypted file from a valid URL to a bucket', async () => {
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce('some-file-content');
+      downloadFileFromUrlSpy.mockResolvedValueOnce(someFileContent);
       Encryption.build = jest.fn().mockResolvedValue({
         decrypt: jest.fn().mockResolvedValue('decrypted-file-content'),
       });
@@ -435,21 +433,19 @@ describe('StorageService', () => {
         ),
       ).toBeTruthy();
       expect(uploadedFile.hash).toBeDefined();
-      expect(storageService.minioClient.putObject).toBeCalledWith(
+      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         s3ConfigService.bucket,
         `s3${crypto
           .createHash('sha1')
           .update('encrypted-file-content')
           .digest('hex')}.zip`,
         'encrypted-file-content',
-        { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+        { 'Cache-Control': 'no-store' },
       );
     });
 
     it('should return the URL of the file and a hash if it already exists', async () => {
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce('some-file-content');
+      downloadFileFromUrlSpy.mockResolvedValueOnce(someFileContent);
       Encryption.build = jest.fn().mockResolvedValue({
         decrypt: jest.fn().mockResolvedValue('decrypted-file-content'),
       });
@@ -491,14 +487,9 @@ describe('StorageService', () => {
       });
 
       it('should copy a file from a valid URL to a bucket', async () => {
-        StorageClient.downloadFileFromUrl = jest
-          .fn()
-          .mockResolvedValueOnce('some-file-content');
+        downloadFileFromUrlSpy.mockResolvedValueOnce(someFileContent);
 
         EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(false);
-        EncryptionUtils.encrypt = jest
-          .fn()
-          .mockResolvedValueOnce('encrypted-file-content');
 
         storageService.minioClient.statObject = jest
           .fn()
@@ -519,26 +510,25 @@ describe('StorageService', () => {
           ),
         ).toBeTruthy();
         expect(uploadedFile.hash).toBeDefined();
-        expect(storageService.minioClient.putObject).toBeCalledWith(
+        expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
           s3ConfigService.bucket,
           `s3${crypto
             .createHash('sha1')
             .update('some-file-content')
             .digest('hex')}.zip`,
-          'some-file-content',
-          { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+          someFileContent,
+          { 'Cache-Control': 'no-store' },
         );
       });
 
       it('should copy an encrypted file from a valid URL to a bucket', async () => {
-        StorageClient.downloadFileFromUrl = jest
-          .fn()
-          .mockResolvedValueOnce('some-file-content');
-        Encryption.build = jest.fn().mockResolvedValue({
-          decrypt: jest.fn().mockResolvedValue('decrypted-file-content'),
-        });
+        downloadFileFromUrlSpy.mockResolvedValueOnce(someFileContent);
 
         EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
+        Encryption.build = jest.fn().mockResolvedValue({
+          decrypt: jest.fn().mockResolvedValue(someFileContent),
+        });
+
         EncryptionUtils.encrypt = jest
           .fn()
           .mockResolvedValueOnce('encrypted-file-content');
@@ -559,28 +549,24 @@ describe('StorageService', () => {
           ),
         ).toBeTruthy();
         expect(uploadedFile.hash).toBeDefined();
-        expect(storageService.minioClient.putObject).toBeCalledWith(
+        expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
           s3ConfigService.bucket,
           `s3${crypto
             .createHash('sha1')
-            .update('some-file-content')
+            .update(someFileContent)
             .digest('hex')}.zip`,
-          'some-file-content',
-          { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+          someFileContent,
+          { 'Cache-Control': 'no-store' },
         );
       });
     });
 
     it('should handle an invalid URL', async () => {
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockRejectedValueOnce('Invalid URL');
-
       await expect(
         storageService.copyFileFromURLToBucket(
           escrowAddress,
           chainId,
-          MOCK_FILE_URL,
+          'invalid url',
         ),
       ).rejects.toThrow(
         new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
