@@ -240,7 +240,13 @@ class _TaskValidator:
                 return item
 
         prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.lstrip("/\\") + "/"
-        if all(sample.id.startswith(prefix) for sample in merged_dataset):
+
+        # Remove prefixes if it can be done safely
+        sample_ids = {sample.id for sample in merged_dataset}
+        if all(
+            sample_id.startswith(prefix) and (sample_id[len(prefix) :] not in sample_ids)
+            for sample_id in sample_ids
+        ):
             merged_dataset.transform(RemoveCommonPrefix, prefix=prefix)
 
         return merged_dataset
@@ -258,8 +264,8 @@ class _TaskValidator:
         merged_dataset = dm.Dataset.import_from(
             os.fspath(merged_dataset_path), format=merged_dataset_format
         )
-        self._put_gt_into_merged_dataset(input_gt_dataset, merged_dataset, manifest=manifest)
         self._restore_original_image_paths(merged_dataset)
+        self._put_gt_into_merged_dataset(input_gt_dataset, merged_dataset, manifest=manifest)
 
         updated_merged_dataset_path = tempdir / "merged_updated"
         merged_dataset.export(
