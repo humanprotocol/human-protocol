@@ -54,6 +54,7 @@ LABEL_TYPE_MAPPING = {
     TaskTypes.image_label_binary: CvatLabelTypes.tag,
     TaskTypes.image_points: CvatLabelTypes.points,
     TaskTypes.image_boxes: CvatLabelTypes.rectangle,
+    TaskTypes.image_polygons: CvatLabelTypes.polygon,
     TaskTypes.image_boxes_from_points: CvatLabelTypes.rectangle,
     TaskTypes.image_skeletons_from_boxes: CvatLabelTypes.points,
 }
@@ -62,6 +63,7 @@ DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_person_keypoints",
     TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
@@ -71,6 +73,7 @@ DM_GT_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_instances",
     TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
@@ -2818,6 +2821,7 @@ def create_task(escrow_address: str, chain_id: int) -> None:
     if manifest.annotation.type in [
         TaskTypes.image_boxes,
         TaskTypes.image_label_binary,
+        TaskTypes.image_polygons,
     ]:
         builder_type = SimpleTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_points]:

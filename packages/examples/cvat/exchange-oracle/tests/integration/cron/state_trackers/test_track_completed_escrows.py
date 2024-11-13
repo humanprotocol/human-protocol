@@ -751,6 +751,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             )
             self.session.add(assignment)
 
+        create_escrow_validations(self.session)
+
         self.session.commit()
         validations = self.session.execute(select(EscrowValidation)).all()
         assert not validations

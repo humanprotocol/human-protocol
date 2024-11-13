@@ -21,8 +21,12 @@ import { StatsModule } from './modules/stats/stats.module';
       validationSchema: Joi.object({
         HOST: Joi.string().required(),
         PORT: Joi.number().port().default(3000),
+        REDIS_HOST: Joi.string(),
+        REDIS_PORT: Joi.number(),
         SUBGRAPH_API_KEY: Joi.string().required(),
         HCAPTCHA_API_KEY: Joi.string().required(),
+        CACHE_HMT_PRICE_TTL: Joi.number(),
+        CACHE_HMT_GENERAL_STATS_TTL: Joi.number(),
       }),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),

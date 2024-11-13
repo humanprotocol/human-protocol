@@ -9,7 +9,7 @@ import type { AuthType } from '@/shared/types/browser-auth-provider';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
 
-export function useGetAccessTokenMutation() {
+export function useAccessTokenRefresh() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
@@ -23,7 +23,7 @@ export function useGetAccessTokenMutation() {
     user: web3User,
   } = useWeb3Auth();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async ({
       authType,
       throwExpirationModalOnSignOut = true,
@@ -72,5 +72,13 @@ export function useGetAccessTokenMutation() {
     onError: async () => {
       await queryClient.invalidateQueries();
     },
+    scope: {
+      id: 'refresh-access-token',
+    },
   });
+
+  return {
+    refreshAccessToken: mutation.mutate,
+    refreshAccessTokenAsync: mutation.mutateAsync,
+  };
 }

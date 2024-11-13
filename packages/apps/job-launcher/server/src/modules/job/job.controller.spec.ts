@@ -23,8 +23,6 @@ import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
 
 describe('JobController', () => {
   let jobController: JobController;
-  let jobService: JobService;
-  let mutexManagerService: MutexManagerService;
 
   const mockJobService = {
     createJob: jest.fn(),
@@ -63,8 +61,6 @@ describe('JobController', () => {
       .compile();
 
     jobController = module.get<JobController>(JobController);
-    jobService = module.get<JobService>(JobService);
-    mutexManagerService = module.get<MutexManagerService>(MutexManagerService);
   });
 
   afterEach(() => {
@@ -85,7 +81,7 @@ describe('JobController', () => {
       };
 
       mockMutexManagerService.runExclusive.mockImplementationOnce(
-        async (id, timeout, fn) => {
+        async (_id, _timeout, fn) => {
           return await fn();
         },
       );

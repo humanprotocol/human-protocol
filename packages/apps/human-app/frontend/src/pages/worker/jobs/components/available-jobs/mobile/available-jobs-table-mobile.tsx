@@ -125,16 +125,11 @@ export function AvailableJobsTableMobile({
                     <EvmAddress address={d.escrow_address} />
                   </ListItem>
                   <ListItem label={t('worker.jobs.rewardAmount')}>
-                    <Typography
+                    <RewardAmount
                       color={colorPalette.secondary.light}
-                      variant="body2"
-                    >
-                      <RewardAmount
-                        color={colorPalette.secondary.light}
-                        reward_amount={d.reward_amount}
-                        reward_token={d.reward_token}
-                      />
-                    </Typography>
+                      reward_amount={d.reward_amount}
+                      reward_token={d.reward_token}
+                    />
                   </ListItem>
                 </Grid>
                 <Grid item xs={6}>

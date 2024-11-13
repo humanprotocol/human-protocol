@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
 DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_points: "coco_person_keypoints",
     TaskTypes.image_boxes: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
@@ -43,11 +44,11 @@ DM_DATASET_FORMAT_MAPPING = {
 DM_GT_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_instances",  # we compare points against boxes
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
-
 
 _JobResults = dict[int, float]
 
@@ -193,7 +194,6 @@ class _TaskValidator:
             honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
 
             job_honeypots = task_honeypots & set(job_meta.job_frame_range)
-
             if not job_honeypots:
                 job_results[cvat_job_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[cvat_job_id] = TooFewGtError
@@ -281,7 +281,7 @@ class _TaskValidator:
         """
 
         match manifest.annotation.type:
-            case TaskTypes.image_boxes.value:
+            case TaskTypes.image_boxes.value | TaskTypes.image_polygons.value:
                 merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_points.value:
                 merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
