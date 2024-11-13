@@ -11,16 +11,11 @@ from typing import TYPE_CHECKING, TypeVar
 import datumaro as dm
 import numpy as np
 
-import src.core.tasks.boxes_from_points as boxes_from_points_task
-import src.core.tasks.points as points_task
-import src.core.tasks.simple as simple_task
-import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.cvat.api_calls as cvat_api
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
 from src.core.gt_stats import GtStats, ValidationFrameStats
-from src.core.storage import compose_data_bucket_filename
 from src.core.types import TaskTypes
 from src.core.validation_errors import DatasetValidationError, LowAccuracyError, TooFewGtError
 from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
@@ -28,7 +23,7 @@ from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.db.utils import ForUpdateParams
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.annotations import ProjectLabels, flatten_points
+from src.utils.annotations import ProjectLabels
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
 
 if TYPE_CHECKING:
@@ -108,7 +103,7 @@ class _TaskValidator:
         self._rejected_jobs: _RejectedJobs | None = None
 
         self._temp_dir: Path | None = None
-        self._gt_dataset: dm.Dataset | None = None
+        self._input_gt_dataset: dm.Dataset | None = None
         self._meta: AnnotationMeta = meta
 
     def _require_field(self, field: T | None) -> T:
@@ -118,44 +113,26 @@ class _TaskValidator:
     def _gt_key_to_sample_id(self, gt_key: str) -> str:
         return gt_key
 
-    def _get_meta_layout_and_serializer(self):
-        if self.manifest.annotation.type == TaskTypes.image_boxes:
-            return (
-                simple_task.TaskMetaLayout(),
-                simple_task.TaskMetaSerializer(),
-            )
-        if self.manifest.annotation.type == TaskTypes.image_points:
-            return (
-                points_task.TaskMetaLayout(),
-                points_task.TaskMetaSerializer(),
-            )
-        if self.manifest.annotation.type == TaskTypes.image_boxes_from_points:
-            return (
-                boxes_from_points_task.TaskMetaLayout(),
-                boxes_from_points_task.TaskMetaSerializer(),
-            )
-        if self.manifest.annotation.type == TaskTypes.image_skeletons_from_boxes:
-            return (
-                skeletons_from_boxes_task.TaskMetaLayout(),
-                skeletons_from_boxes_task.TaskMetaSerializer(),
-            )
-        raise AssertionError(f"Unknown task type {self.manifest.annotation.type}")
+    def _parse_gt_dataset(self, gt_file_data: bytes) -> dm.Dataset:
+        with TemporaryDirectory() as gt_temp_dir:
+            gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
+            with open(gt_filename, "wb") as f:
+                f.write(gt_file_data)
 
-    def _parse_gt(self):
-        layout, serializer = self._get_meta_layout_and_serializer()
-
-        exchange_oracle_data_bucket = BucketAccessInfo.parse_obj(
-            Config.exchange_oracle_storage_config
-        )
-        storage_client = make_cloud_client(exchange_oracle_data_bucket)
-
-        self._gt_dataset = serializer.parse_gt_annotations(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.GT_FILENAME
-                ),
+            gt_dataset = dm.Dataset.import_from(
+                gt_filename,
+                format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
             )
-        )
+
+            gt_dataset.init_cache()
+
+            return gt_dataset
+
+    def _load_gt_dataset(self):
+        input_gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        gt_bucket_client = make_cloud_client(input_gt_bucket)
+        gt_data = gt_bucket_client.download_file(input_gt_bucket.path)
+        self._input_gt_dataset = self._parse_gt_dataset(gt_data)
 
     def _validate_jobs(self):
         manifest = self._require_field(self.manifest)
@@ -272,7 +249,7 @@ class _TaskValidator:
         tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
         merged_annotations = self._require_field(self._merged_annotations)
-        gt_dataset = self._require_field(self._gt_dataset)
+        input_gt_dataset = self._require_field(self._input_gt_dataset)
 
         merged_dataset_path = tempdir / "merged"
         merged_dataset_format = DM_DATASET_FORMAT_MAPPING[manifest.annotation.type]
@@ -281,7 +258,7 @@ class _TaskValidator:
         merged_dataset = dm.Dataset.import_from(
             os.fspath(merged_dataset_path), format=merged_dataset_format
         )
-        self._put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
+        self._put_gt_into_merged_dataset(input_gt_dataset, merged_dataset, manifest=manifest)
         self._restore_original_image_paths(merged_dataset)
 
         updated_merged_dataset_path = tempdir / "merged_updated"
@@ -297,7 +274,7 @@ class _TaskValidator:
 
     @classmethod
     def _put_gt_into_merged_dataset(
-        cls, gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
+        cls, input_gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
     ) -> None:
         """
         Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
@@ -305,44 +282,49 @@ class _TaskValidator:
 
         match manifest.annotation.type:
             case TaskTypes.image_boxes.value:
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_points.value:
                 merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
                     dm.AnnotationType.label
                 ]
+
+                # we support no more than 1 label so far
+                assert len(manifest.annotation.labels) == 1
+
                 skeleton_label_id = next(
                     i for i, label in enumerate(merged_label_cat) if not label.parent
                 )
                 point_label_id = next(i for i, label in enumerate(merged_label_cat) if label.parent)
 
-                for sample in gt_dataset:
+                for sample in input_gt_dataset:
                     annotations = [
                         dm.Skeleton(
                             elements=[
+                                # Put a point in the center of each GT bbox
+                                # Not ideal, but it's the target for now
                                 dm.Points(
-                                    point.points,
+                                    [bbox.x + bbox.w / 2, bbox.y + bbox.h / 2],
                                     label=point_label_id,
-                                    attributes=point.attributes,
+                                    attributes=bbox.attributes,
                                 )
                             ],
                             label=skeleton_label_id,
                         )
-                        for point in flatten_points(
-                            [p for p in sample.annotations if isinstance(p, dm.Points)]
-                        )
+                        for bbox in sample.annotations
+                        if isinstance(bbox, dm.Bbox)
                     ]
                     merged_dataset.put(sample.wrap(annotations=annotations))
             case TaskTypes.image_label_binary.value:
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_boxes_from_points:
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_skeletons_from_boxes:
-                # The original behavior is broken for skeletons
-                gt_dataset = dm.Dataset(gt_dataset)
-                gt_dataset = gt_dataset.transform(
+                # The original behavior of project_labels is broken for skeletons
+                input_gt_dataset = dm.Dataset(input_gt_dataset)
+                input_gt_dataset = input_gt_dataset.transform(
                     ProjectLabels, dst_labels=merged_dataset.categories()[dm.AnnotationType.label]
                 )
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case _:
                 raise AssertionError(f"Unknown task type {manifest.annotation.type}")
 
@@ -350,7 +332,7 @@ class _TaskValidator:
         with TemporaryDirectory() as tempdir:
             self._temp_dir = Path(tempdir)
 
-            self._parse_gt()
+            self._load_gt_dataset()
             self._validate_jobs()
             self._prepare_merged_dataset()
 
