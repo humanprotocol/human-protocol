@@ -24,6 +24,8 @@ if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
 load_dotenv(dotenv_path)
 
 
+# TODO: add some logic to report unused/deprecated env vars on startup
+
 class _BaseConfig:
     @classmethod
     def validate(cls) -> None:
