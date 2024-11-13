@@ -1,4 +1,4 @@
-export const SUPPORTED_TOKEN_SYMBOLS = ['HMT'];
+export const SUPPORTED_TOKEN_SYMBOLS = ['HMT', 'USDC'];
 
 export const ERROR_MESSAGES = {
   weakPassword:
