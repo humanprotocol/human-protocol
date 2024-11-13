@@ -40,8 +40,8 @@ def get_last_task_quality_report(task_id: int) -> models.QualityReport | None:
 def compute_task_quality_report(
     task_id: int,
     *,
-    max_waiting_time: int = 60 * 60,
-    sleep_interval: float = 0.5,
+    timeout: int = Config.cvat_config.cvat_quality_retrieval_timeout,
+    check_interval: float = Config.cvat_config.cvat_quality_check_interval,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
     start_time = utcnow()
@@ -56,7 +56,7 @@ def compute_task_quality_report(
             f"when creating a task({task_id}) quality report"
         )
 
-        while utcnow() - start_time < timedelta(seconds=max_waiting_time):
+        while utcnow() - start_time < timedelta(seconds=timeout):
             _, response = api_client.quality_api.create_report(
                 rq_id=rq_id, _check_status=False, _parse_response=False
             )
@@ -68,7 +68,7 @@ def compute_task_quality_report(
 
                     return report
                 case HTTPStatus.ACCEPTED:
-                    sleep(sleep_interval)
+                    sleep(check_interval)
                     continue
                 case _:
                     raise Exception(f"Unexpected response status: {response.status}")
@@ -91,8 +91,8 @@ def get_task(task_id: int) -> models.TaskRead:
 def get_task_quality_report(
     task_id: int,
     *,
-    max_waiting_time: int = 10 * 60,
-    sleep_interval: float = 0.5,
+    timeout: int = Config.cvat_config.cvat_quality_retrieval_timeout,
+    check_interval: float = Config.cvat_config.cvat_quality_check_interval,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
 
@@ -111,9 +111,7 @@ def get_task_quality_report(
             )
         return report
 
-    return compute_task_quality_report(
-        task_id, max_waiting_time=max_waiting_time, sleep_interval=sleep_interval
-    )
+    return compute_task_quality_report(task_id, timeout=timeout, check_interval=check_interval)
 
 
 def get_quality_report_data(report_id: int) -> QualityReportData:

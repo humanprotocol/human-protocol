@@ -229,6 +229,9 @@ class CvatConfig:
     cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
     cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "org1")
 
+    cvat_quality_retrieval_timeout = int(os.environ.get("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
+    cvat_quality_check_interval = int(os.environ.get("CVAT_QUALITY_CHECK_INTERVAL", 5))
+
 
 class Config:
     port = int(os.environ.get("PORT", 8000))
