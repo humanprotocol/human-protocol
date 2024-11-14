@@ -162,11 +162,11 @@ class CvatConfig:
     admin_pass = getenv("CVAT_ADMIN_PASS", "admin")
     org_slug = getenv("CVAT_ORG_SLUG", "")
 
-    cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
-    cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
-    cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
-    cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 1000))
-    cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
+    cvat_job_overlap = int(getenv("CVAT_JOB_OVERLAP", 0))
+    cvat_task_segment_size = int(getenv("CVAT_TASK_SEGMENT_SIZE", 150))
+    cvat_default_image_quality = int(getenv("CVAT_DEFAULT_IMAGE_QUALITY", 70))
+    cvat_max_jobs_per_task = int(getenv("CVAT_MAX_JOBS_PER_TASK", 1000))
+    cvat_task_creation_check_interval = int(getenv("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
     export_timeout = int(getenv("CVAT_EXPORT_TIMEOUT", 5 * 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
