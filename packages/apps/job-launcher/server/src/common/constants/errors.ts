@@ -96,6 +96,7 @@ export enum ErrorPayment {
   ClientSecretDoesNotExist = 'Client secret does not exist',
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
+  PaymentMethodInUse = 'Cannot delete the default payment method in use',
   IncorrectAmount = 'Incorrect amount',
   TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',

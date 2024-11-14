@@ -1,32 +1,23 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class PaymentIntent1725449786396 implements MigrationInterface {
-  name = 'PaymentIntent1725449786396';
+export class Abuse1731504887456 implements MigrationInterface {
+  name = 'Abuse1731504887456';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-            CREATE TABLE "hmt"."payments-info" (
-                "id" SERIAL NOT NULL,
-                "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "customer_id" character varying NOT NULL,
-                "payment_method_id" character varying NOT NULL,
-                "user_id" integer NOT NULL,
-                CONSTRAINT "PK_b4970c6db0e80ea900a06ebc171" PRIMARY KEY ("id")
-            )
+            ALTER TABLE "hmt"."users"
+            ADD "stripe_customer_id" character varying
         `);
     await queryRunner.query(`
-            CREATE UNIQUE INDEX "IDX_35c9ce414705e7b718a58aa6f0" ON "hmt"."payments-info" ("customer_id")
-        `);
-    await queryRunner.query(`
-            CREATE UNIQUE INDEX "IDX_63719fa3540ac47f61cc4a7ba1" ON "hmt"."payments-info" ("user_id")
+            ALTER TABLE "hmt"."users"
+            ADD CONSTRAINT "UQ_5ffbe395603641c29e8ce9b4c97" UNIQUE ("stripe_customer_id")
         `);
     await queryRunner.query(`
             ALTER TYPE "hmt"."payments_type_enum"
             RENAME TO "payments_type_enum_old"
         `);
     await queryRunner.query(`
-            CREATE TYPE "hmt"."payments_type_enum" AS ENUM('DEPOSIT', 'REFUND', 'WITHDRAWAL', 'SLASH')
+            CREATE TYPE "hmt"."payments_type_enum" AS ENUM('deposit', 'refund', 'withdrawal', 'slash')
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."payments"
@@ -84,16 +75,9 @@ export class PaymentIntent1725449786396 implements MigrationInterface {
     await queryRunner.query(`
             CREATE UNIQUE INDEX "IDX_012a8481fc9980fcc49f3f0dc2" ON "hmt"."webhook" ("chain_id", "escrow_address", "event_type")
         `);
-    await queryRunner.query(`
-            ALTER TABLE "hmt"."payments-info"
-            ADD CONSTRAINT "FK_63719fa3540ac47f61cc4a7ba11" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-            ALTER TABLE "hmt"."payments-info" DROP CONSTRAINT "FK_63719fa3540ac47f61cc4a7ba11"
-        `);
     await queryRunner.query(`
             DROP INDEX "hmt"."IDX_012a8481fc9980fcc49f3f0dc2"
         `);
@@ -142,7 +126,7 @@ export class PaymentIntent1725449786396 implements MigrationInterface {
             CREATE UNIQUE INDEX "IDX_012a8481fc9980fcc49f3f0dc2" ON "hmt"."webhook" ("chain_id", "escrow_address", "event_type")
         `);
     await queryRunner.query(`
-            CREATE TYPE "hmt"."payments_type_enum_old" AS ENUM('DEPOSIT', 'REFUND', 'WITHDRAWAL')
+            CREATE TYPE "hmt"."payments_type_enum_old" AS ENUM('deposit', 'refund', 'withdrawal')
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."payments"
@@ -156,13 +140,10 @@ export class PaymentIntent1725449786396 implements MigrationInterface {
             RENAME TO "payments_type_enum"
         `);
     await queryRunner.query(`
-            DROP INDEX "hmt"."IDX_63719fa3540ac47f61cc4a7ba1"
+            ALTER TABLE "hmt"."users" DROP CONSTRAINT "UQ_5ffbe395603641c29e8ce9b4c97"
         `);
     await queryRunner.query(`
-            DROP INDEX "hmt"."IDX_35c9ce414705e7b718a58aa6f0"
-        `);
-    await queryRunner.query(`
-            DROP TABLE "hmt"."payments-info"
+            ALTER TABLE "hmt"."users" DROP COLUMN "stripe_customer_id"
         `);
   }
 }

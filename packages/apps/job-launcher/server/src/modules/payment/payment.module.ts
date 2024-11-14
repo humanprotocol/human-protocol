@@ -10,14 +10,16 @@ import { PaymentRepository } from './payment.repository';
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
 import { RateService } from './rate.service';
-import { PaymentInfoEntity } from './payment-info.entity';
-import { PaymentInfoRepository } from './payment-info.repository';
 import { WhitelistModule } from '../whitelist/whitelist.module';
+import { JobEntity } from '../job/job.entity';
+import { UserEntity } from '../user/user.entity';
+import { JobRepository } from '../job/job.repository';
+import { UserRepository } from '../user/user.repository';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([PaymentEntity, PaymentInfoEntity]),
+    TypeOrmModule.forFeature([PaymentEntity, JobEntity, UserEntity]),
     ConfigModule,
     Web3Module,
     WhitelistModule,
@@ -40,13 +42,9 @@ import { WhitelistModule } from '../whitelist/whitelist.module';
     PaymentService,
     PaymentRepository,
     RateService,
-    PaymentInfoRepository,
+    JobRepository,
+    UserRepository,
   ],
-  exports: [
-    PaymentService,
-    PaymentRepository,
-    RateService,
-    PaymentInfoRepository,
-  ],
+  exports: [PaymentService, PaymentRepository, RateService],
 })
 export class PaymentModule {}

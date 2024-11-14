@@ -4,7 +4,10 @@ import { ethers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
+  AddressDto,
+  BillingInfoDto,
   CardConfirmDto,
+  CardDto,
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
@@ -17,6 +20,7 @@ import {
   PaymentType,
   StripePaymentStatus,
   TokenId,
+  VatType,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
@@ -33,10 +37,10 @@ import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from './rate.service';
 import { UserEntity } from '../user/user.entity';
-import { PaymentInfoRepository } from './payment-info.repository';
-import { PaymentInfoEntity } from './payment-info.entity';
 import { JobEntity } from '../job/job.entity';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import { UserRepository } from '../user/user.repository';
+import { JobRepository } from '../job/job.repository';
 
 @Injectable()
 export class PaymentService {
@@ -47,7 +51,8 @@ export class PaymentService {
     private readonly networkConfigService: NetworkConfigService,
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
-    private readonly paymentInfoRepository: PaymentInfoRepository,
+    private readonly userRepository: UserRepository,
+    private readonly jobRepository: JobRepository,
     private stripeConfigService: StripeConfigService,
     private rateService: RateService,
     private serverConfigService: ServerConfigService,
@@ -65,7 +70,7 @@ export class PaymentService {
   public async createCustomerAndAssignCard(user: UserEntity): Promise<string> {
     let setupIntent: Stripe.Response<Stripe.SetupIntent>;
 
-    if (!!user.paymentInfo) {
+    if (user.stripeCustomerId) {
       this.logger.log(ErrorPayment.CardAssigned, PaymentService.name);
       throw new ControlledError(
         ErrorPayment.CardAssigned,
@@ -126,11 +131,8 @@ export class PaymentService {
       },
     });
 
-    const paymentInfo = new PaymentInfoEntity();
-    paymentInfo.user = user;
-    paymentInfo.customerId = setup.customer as string;
-    paymentInfo.paymentMethodId = setup.payment_method as string;
-    await this.paymentInfoRepository.createUnique(paymentInfo);
+    user.stripeCustomerId = setup.customer as string;
+    await this.userRepository.updateOne(user);
 
     return true;
   }
@@ -145,8 +147,8 @@ export class PaymentService {
     const params: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
       currency: currency,
-      customer: user.paymentInfo.customerId,
-      payment_method: user.paymentInfo.paymentMethodId,
+      customer: user.stripeCustomerId,
+      payment_method: dto.paymentMethodId,
       off_session: false,
     };
 
@@ -374,14 +376,13 @@ export class PaymentService {
     });
     await this.paymentRepository.createUnique(paymentEntity);
   }
+
   public async createSlash(job: JobEntity): Promise<void> {
     const amount = this.serverConfigService.abuseAmount,
       currency = Currency.USD;
 
-    const paymentInfo = await this.paymentInfoRepository.findOneByUser(
-      job.userId,
-    );
-    if (!paymentInfo) {
+    const user = await this.userRepository.findById(job.userId);
+    if (!user) {
       this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
       throw new ControlledError(
         ErrorPayment.CustomerNotFound,
@@ -393,8 +394,7 @@ export class PaymentService {
     const params: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
       currency: currency,
-      customer: paymentInfo.customerId,
-      payment_method: paymentInfo.paymentMethodId,
+      customer: user.stripeCustomerId,
       off_session: true,
       confirm: true,
     };
@@ -438,5 +438,138 @@ export class PaymentService {
     await this.paymentRepository.createUnique(newPaymentEntity);
 
     return;
+  }
+
+  async listUserPaymentMethods(user: UserEntity) {
+    const paymentMethods = await this.stripe.customers.listPaymentMethods(
+      user.stripeCustomerId,
+      {
+        type: 'card',
+        limit: 100,
+      },
+    );
+
+    const cards: CardDto[] = [];
+    const defaultPaymentMethod = await this.getDefaultPaymentMethod(
+      user.stripeCustomerId,
+    );
+
+    for (const paymentMethod of paymentMethods.data) {
+      const card = new CardDto();
+      card.id = paymentMethod.id;
+      card.brand = paymentMethod.card?.brand as string;
+      card.last4 = paymentMethod.card?.last4 as string;
+      card.default = defaultPaymentMethod === paymentMethod.id;
+      cards.push(card);
+    }
+    return cards;
+  }
+
+  async deletePaymentMethod(user: UserEntity, paymentMethodId: string) {
+    const paymentMethod =
+      await this.stripe.paymentMethods.retrieve(paymentMethodId);
+    if (
+      paymentMethod.id ===
+        (await this.getDefaultPaymentMethod(user.stripeCustomerId)) &&
+      (await this.isPaymentMethodInUse(user.id))
+    ) {
+      throw new ControlledError(
+        ErrorPayment.PaymentMethodInUse,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return this.stripe.paymentMethods.detach(paymentMethodId);
+  }
+
+  async getUserBillingInfo(user: UserEntity) {
+    const taxIds = await this.stripe.customers.listTaxIds(
+      user.stripeCustomerId,
+    );
+
+    const customer = await this.stripe.customers.retrieve(
+      user.stripeCustomerId,
+    );
+
+    const userBillingInfo = new BillingInfoDto();
+    if ((customer as Stripe.Customer).address) {
+      const address = new AddressDto();
+      address.country = (customer as Stripe.Customer).address
+        ?.country as string;
+      address.postalCode = (customer as Stripe.Customer).address
+        ?.postal_code as string;
+      address.city = (customer as Stripe.Customer).address?.city as string;
+      address.line = (customer as Stripe.Customer).address?.line1 as string;
+      userBillingInfo.address = address;
+    }
+    userBillingInfo.name = (customer as Stripe.Customer).name as string;
+    userBillingInfo.email = (customer as Stripe.Customer).email as string;
+    userBillingInfo.vat = taxIds.data[0].value;
+    userBillingInfo.vatType = taxIds.data[0].type as VatType;
+    return userBillingInfo;
+  }
+
+  async updateUserBillingInfo(
+    user: UserEntity,
+    updateBillingInfoDto: BillingInfoDto,
+  ) {
+    if (updateBillingInfoDto.vat && updateBillingInfoDto.vatType) {
+      const existingTaxIds = await this.stripe.customers.listTaxIds(
+        user.stripeCustomerId,
+      );
+
+      for (const taxId of existingTaxIds.data) {
+        await this.stripe.customers.deleteTaxId(
+          user.stripeCustomerId,
+          taxId.id,
+        );
+      }
+      await this.stripe.customers.createTaxId(user.stripeCustomerId, {
+        type: updateBillingInfoDto.vatType,
+        value: updateBillingInfoDto.vat,
+      });
+    }
+
+    if (
+      updateBillingInfoDto.address ||
+      updateBillingInfoDto.name ||
+      updateBillingInfoDto.email
+    ) {
+      return this.stripe.customers.update(user.stripeCustomerId, {
+        address: {
+          line1: updateBillingInfoDto.address?.line,
+          city: updateBillingInfoDto.address?.city,
+          country: updateBillingInfoDto.address?.country,
+          postal_code: updateBillingInfoDto.address?.postalCode,
+        },
+        name: updateBillingInfoDto.name,
+        email: updateBillingInfoDto.email,
+      });
+    }
+  }
+
+  async changeDefaultPaymentMethod(user: UserEntity, cardId: string) {
+    return this.stripe.customers.update(user.stripeCustomerId, {
+      invoice_settings: { default_payment_method: cardId },
+    });
+  }
+
+  private async getDefaultPaymentMethod(
+    customerId: string,
+  ): Promise<string | null> {
+    const customer = await this.stripe.customers.retrieve(customerId);
+    return (customer as Stripe.Customer).invoice_settings
+      .default_payment_method as string;
+  }
+
+  private async isPaymentMethodInUse(userId: number): Promise<boolean> {
+    return (
+      (
+        await this.jobRepository.findActiveByUserAndPaymentSource(
+          userId,
+          PaymentSource.FIAT,
+        )
+      ).length == 0
+    );
   }
 }

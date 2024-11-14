@@ -10,7 +10,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
   }
 
   async findById(id: number): Promise<UserEntity | null> {
-    return this.findOne({ where: { id }, relations: ['paymentInfo'] });
+    return this.findOne({ where: { id } });
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {

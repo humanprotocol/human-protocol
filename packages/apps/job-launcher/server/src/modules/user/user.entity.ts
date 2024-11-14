@@ -8,7 +8,6 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { ApiKeyEntity } from '../auth/apikey.entity';
-import { PaymentInfoEntity } from '../payment/payment-info.entity';
 import { WhitelistEntity } from '../whitelist/whitelist.entity';
 
 @Entity({ schema: NS, name: 'users' })
@@ -29,14 +28,14 @@ export class UserEntity extends BaseEntity implements IUser {
   })
   public status: UserStatus;
 
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  public stripeCustomerId: string;
+
   @OneToMany(() => JobEntity, (job) => job.user)
   public jobs: JobEntity[];
 
   @OneToMany(() => PaymentEntity, (payment) => payment.user)
   public payments: PaymentEntity[];
-
-  @OneToOne(() => PaymentInfoEntity, (payment) => payment.user)
-  public paymentInfo: PaymentInfoEntity;
 
   @OneToOne(() => ApiKeyEntity, (apiKey) => apiKey.user, {
     nullable: true,

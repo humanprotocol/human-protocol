@@ -53,6 +53,7 @@ export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
       // see https://github.com/nestjs/passport/blob/master/lib/auth.guard.ts
       return (await super.canActivate(context)) as boolean;
     } catch (jwtError) {
+      console.log(jwtError);
       switch (jwtError?.response?.statusCode) {
         case HttpStatus.UNAUTHORIZED:
           return this.handleApiKeyAuthentication(context);

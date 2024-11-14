@@ -2,7 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { SortDirection } from '../../common/enums/collection';
-import { DataSource, In, LessThanOrEqual } from 'typeorm';
+import { DataSource, In, LessThanOrEqual, Not } from 'typeorm';
 import {
   JobSortField,
   JobStatus,
@@ -18,6 +18,7 @@ import {
   JobCountDto,
 } from '../statistic/statistic.dto';
 import { convertToDatabaseSortDirection } from '../../database/database.utils';
+import { PaymentSource } from 'src/common/enums/payment';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {
@@ -79,6 +80,21 @@ export class JobRepository extends BaseRepository<JobEntity> {
         waitUntil: SortDirection.ASC,
       },
       ...(take && { take }),
+    });
+  }
+
+  public async findActiveByUserAndPaymentSource(
+    userId: number,
+    paymentSource: PaymentSource,
+  ): Promise<JobEntity[]> {
+    return this.find({
+      where: {
+        userId,
+        status: Not(In([JobStatus.COMPLETED, JobStatus.CANCELED])),
+        payment: {
+          source: paymentSource,
+        },
+      },
     });
   }
 

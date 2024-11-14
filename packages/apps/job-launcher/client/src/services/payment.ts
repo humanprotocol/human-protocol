@@ -69,7 +69,7 @@ export const getOperatorAddress = async () => {
 };
 
 export const checkUserCard = async () => {
-  const { data } = await api.get('/payment/check-card');
+  const { data } = await api.get('/payment/fiat/check-card');
 
   return data;
 };
