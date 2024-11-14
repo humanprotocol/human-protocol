@@ -69,7 +69,13 @@ def cron_job(logger_name: str) -> Callable[[Callable[..., None]], Callable[[], N
 
 
 @contextmanager
-def handle_webhook(logger: logging.Logger, session: Session, webhook: Webhook):
+def handle_webhook(
+    logger: logging.Logger,
+    session: Session,
+    webhook: Webhook,
+    *,
+    queue: webhook_service.OracleWebhookQueue,
+):
     savepoint = session.begin_nested()
     logger.debug(
         "Processing webhook "
@@ -83,9 +89,9 @@ def handle_webhook(logger: logging.Logger, session: Session, webhook: Webhook):
         # TODO: should we rollback on any errors or just on database errors?
         savepoint.rollback()
         logger.exception(f"Webhook {webhook.id} sending failed: {e}")
-        webhook_service.outbox.handle_webhook_fail(session, webhook.id)
+        queue.handle_webhook_fail(session, webhook.id)
     else:
-        webhook_service.outbox.handle_webhook_success(session, webhook.id)
+        queue.handle_webhook_success(session, webhook.id)
         logger.debug("Webhook handled successfully")
 
 
@@ -124,6 +130,6 @@ def process_outgoing_webhooks(
         for_update=ForUpdateParams(skip_locked=True),
     )
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.outbox):
             webhook_url = url_getter(webhook.chain_id, webhook.escrow_address)
             send_webhook(webhook_url, webhook, with_timestamp=with_timestamp)
