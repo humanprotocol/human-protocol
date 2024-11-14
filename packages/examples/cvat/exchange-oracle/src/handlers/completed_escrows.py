@@ -13,7 +13,7 @@ import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
 from src import db
 from src.chain.escrow import get_escrow_manifest, validate_escrow
-from src.core.annotation_meta import RESULTING_ANNOTATIONS_FILE
+from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
 from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.storage import compose_results_bucket_filename
@@ -75,6 +75,8 @@ def _export_escrow_annotations(
     jobs = cvat_service.get_jobs_by_escrow_address(session, escrow_address, chain_id)
 
     annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
+    # FUTURE-TODO: probably can be removed in the future since
+    # these annotations are no longer used in Recording Oracle
     job_annotations = _download_job_annotations(logger, annotation_format, jobs)
 
     if manifest.annotation.type == TaskTypes.image_skeletons_from_boxes.value:
@@ -154,11 +156,15 @@ def _upload_annotations(
 ) -> None:
     storage_info = BucketAccessInfo.parse_obj(StorageConfig)
     storage_client = cloud_service.make_client(storage_info)
+
+    # always update annotation meta and resulting annotations files
+    # to have actual data for the current epoch
     existing_storage_files = set(
         storage_client.list_files(
             prefix=compose_results_bucket_filename(escrow_address, chain_id, ""),
+            trim_prefix=True,
         )
-    )
+    ) - {ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE}
     for file_descriptor in annotation_files:
         if file_descriptor.filename in existing_storage_files:
             continue

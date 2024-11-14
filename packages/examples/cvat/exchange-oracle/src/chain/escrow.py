@@ -67,6 +67,6 @@ def get_available_webhook_types(
             Config.localhost.recording_oracle_address or escrow.recording_oracle
         ).lower(): OracleWebhookTypes.recording_oracle,
         (
-            Config.localhost.reputation_oracle_url or escrow.reputation_oracle
+            Config.localhost.reputation_oracle_address or escrow.reputation_oracle
         ).lower(): OracleWebhookTypes.reputation_oracle,
     }

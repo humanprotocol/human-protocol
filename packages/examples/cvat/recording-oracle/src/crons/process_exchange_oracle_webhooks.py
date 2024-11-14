@@ -53,7 +53,7 @@ def process_outgoing_exchange_oracle_webhooks(logger: logging.Logger, session: S
     process_outgoing_webhooks(
         logger,
         session,
-        OracleWebhookTypes.recording_oracle,
+        OracleWebhookTypes.exchange_oracle,
         get_exchange_oracle_url,
         Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
     )

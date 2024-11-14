@@ -16,8 +16,12 @@ def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> st
     if project.job_type in [
         TaskTypes.image_skeletons_from_boxes,
         TaskTypes.image_boxes_from_points,
+        TaskTypes.image_points,
     ]:
         query_params = "?defaultWorkspace=single_shape"
+
+    if project.job_type == TaskTypes.image_skeletons_from_boxes:
+        query_params += "&defaultPointsCount=1"
 
     return urljoin(Config.cvat_config.cvat_url, f"/tasks/{task_id}/jobs/{job_id}{query_params}")
 

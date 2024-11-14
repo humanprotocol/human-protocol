@@ -105,14 +105,15 @@ class SkeletonLabelInfo(LabelInfoBase):
             existing_names.add(node_name.lower())
 
         nodes_count = len(values["nodes"])
-        joints = values["joints"]
-        for joint_idx, joint in enumerate(joints):
-            for v in joint:
-                if not (0 <= v < nodes_count):
-                    raise ValueError(
-                        f"Skeleton '{skeleton_name}' joint #{joint_idx}: invalid value. "
-                        f"Expected a number in the range [0; {nodes_count - 1}]"
-                    )
+        joints = values.get("joints")
+        if joints is not None:
+            for joint_idx, joint in enumerate(joints):
+                for v in joint:
+                    if not (0 <= v < nodes_count):
+                        raise ValueError(
+                            f"Skeleton '{skeleton_name}' joint #{joint_idx}: invalid value. "
+                            f"Expected a number in the range [0; {nodes_count - 1}]"
+                        )
 
         return values
 
