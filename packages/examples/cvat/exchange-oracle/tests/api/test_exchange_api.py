@@ -774,6 +774,47 @@ def test_cannot_create_assignment_401(client: TestClient) -> None:
         assert response.json() == {"message": message}
 
 
+def test_cannot_create_assignment_400_when_has_unfinished_assignments(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+
+    cvat_project, cvat_task, cvat_job1 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 0
+    )
+    create_job(session, 2, cvat_task.cvat_id, cvat_project.cvat_id)
+
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    assignment = Assignment(
+        created_at=utcnow(),
+        expires_at=utcnow() + timedelta(hours=1),
+        user_wallet_address=user_address,
+        cvat_job_id=cvat_job1.cvat_id,
+        status=AssignmentStatuses.created.value,
+    )
+    session.add(assignment)
+
+    session.commit()
+
+    response = client.post(
+        "/assignment",
+        headers=get_auth_header(),
+        json={
+            "escrow_address": cvat_project.escrow_address,
+            "chain_id": cvat_project.chain_id,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "There are unfinished assignments in this escrow" in response.text
+
+
 def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
     session.begin()
     user_1 = User(
