@@ -117,6 +117,10 @@ async def list_jobs(
 
     query = select(cvat_service.Project)
 
+    query = query.filter(
+        cvat_service.Project.status.not_in([ProjectStatuses.creation, ProjectStatuses.deleted])
+    )
+
     # We need only high-level jobs (i.e. escrows) without project details
     if db_engine.driver == "psycopg2":
         subquery = select(cvat_service.Project.id).distinct(

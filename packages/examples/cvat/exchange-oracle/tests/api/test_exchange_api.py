@@ -202,6 +202,48 @@ def test_can_list_jobs_200_with_address_and_pagination(
                 )
 
 
+def test_can_list_jobs_200_without_escrows_in_hidden_states(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    escrows = []
+
+    cvat_project, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC60", 0
+    )
+    cvat_project.status = ProjectStatuses.creation
+    session.add(cvat_project)
+
+    cvat_project, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC61", 1
+    )
+    cvat_project.status = ProjectStatuses.deleted
+    session.add(cvat_project)
+
+    escrows.append(cvat_project.escrow_address)
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(),
+        )
+        assert response.json()["results"] == []
+
+
 def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
