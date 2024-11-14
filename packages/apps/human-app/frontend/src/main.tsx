@@ -36,7 +36,7 @@ createRoot(root).render(
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <WalletConnectProvider>
+          <WalletConnectProvider client={queryClient}>
             <HomePageStateProvider>
               <Web3AuthProvider>
                 <AuthProvider>
