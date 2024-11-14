@@ -23,7 +23,7 @@ def process_incoming_reputation_oracle_webhooks(logger: logging.Logger, session:
         for_update=ForUpdateParams(skip_locked=True),
     )
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
             match webhook.event_type:
                 case ReputationOracleEventTypes.escrow_completed:
                     projects = db_service.get_projects_by_escrow_address(

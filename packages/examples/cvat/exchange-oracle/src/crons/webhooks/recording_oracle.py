@@ -35,7 +35,7 @@ def process_incoming_recording_oracle_webhooks(logger: logging.Logger, session: 
     )
 
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
             handle_recording_oracle_event(webhook, db_session=session, logger=logger)
 
 
