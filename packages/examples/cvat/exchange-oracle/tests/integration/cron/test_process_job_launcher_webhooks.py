@@ -43,9 +43,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.close()
 
     def test_process_incoming_job_launcher_webhooks_escrow_created_type(self):
-        webhok_id = str(uuid.uuid4())
+        webhook_id = str(uuid.uuid4())
         webhook = Webhook(
-            id=webhok_id,
+            id=webhook_id,
             signature="signature",
             escrow_address=escrow_address,
             chain_id=chain_id,
@@ -93,7 +93,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhook_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
