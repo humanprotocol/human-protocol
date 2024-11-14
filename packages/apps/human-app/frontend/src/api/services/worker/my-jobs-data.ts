@@ -18,16 +18,7 @@ export enum MyJobStatus {
   REJECTED = 'REJECTED',
 }
 
-// Repeated because of linting rule
-export enum MyJobStatusWithUnknown {
-  ACTIVE = 'ACTIVE',
-  CANCELED = 'CANCELED',
-  COMPLETED = 'COMPLETED',
-  VALIDATION = 'VALIDATION',
-  EXPIRED = 'EXPIRED',
-  REJECTED = 'REJECTED',
-  UNKNOWN = 'UNKNOWN',
-}
+const UNKNOWN_JOB_STATUS = 'UNKNOWN';
 
 const myJobSchema = z.object({
   assignment_id: z.string(),
@@ -37,14 +28,10 @@ const myJobSchema = z.object({
   status: z.string().transform((value) => {
     try {
       return z
-        .enum([
-          MyJobStatusWithUnknown.ACTIVE,
-          MyJobStatusWithUnknown.CANCELED,
-          MyJobStatusWithUnknown.COMPLETED,
-        ])
+        .enum([MyJobStatus.ACTIVE, MyJobStatus.CANCELED, MyJobStatus.COMPLETED])
         .parse(value.toUpperCase());
     } catch (error) {
-      return MyJobStatusWithUnknown.UNKNOWN;
+      return UNKNOWN_JOB_STATUS;
     }
   }),
   reward_amount: z.string(),
