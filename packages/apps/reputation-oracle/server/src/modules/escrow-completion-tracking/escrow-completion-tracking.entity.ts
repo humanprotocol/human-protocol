@@ -21,7 +21,7 @@ export class EscrowCompletionTrackingEntity extends BaseEntity {
   public finalResultsHash: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public failedReason: string;
+  public failureDetail: string;
 
   @Column({ type: 'int' })
   public retriesCount: number;

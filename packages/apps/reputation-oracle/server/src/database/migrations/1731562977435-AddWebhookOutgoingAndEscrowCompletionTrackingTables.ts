@@ -1,22 +1,22 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
+export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1731562977435
   implements MigrationInterface
 {
-  name = 'AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182';
+  name = 'AddWebhookOutgoingAndEscrowCompletionTrackingTables1731562977435';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `ALTER TABLE "hmt"."webhook_incoming" DROP COLUMN "results_url"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "hmt"."webhook_incoming" ADD COLUMN "failed_reason" varchar`,
+      `ALTER TABLE "hmt"."webhook_incoming" ADD COLUMN "failure_detail" varchar`,
     );
     await queryRunner.query(
       `CREATE TYPE "hmt"."webhook_outgoing_status_enum" AS ENUM('pending', 'sent', 'failed')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "hmt"."webhook_outgoing" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "payload" jsonb NOT NULL, "hash" character varying NOT NULL, "url" character varying NOT NULL, "failed_reason" character varying, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, "status" "hmt"."webhook_outgoing_status_enum" NOT NULL, CONSTRAINT "PK_d232b33ccee326e251936e16c5f" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "hmt"."webhook_outgoing" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "payload" jsonb NOT NULL, "hash" character varying NOT NULL, "url" character varying NOT NULL, "failure_detail" character varying, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, "status" "hmt"."webhook_outgoing_status_enum" NOT NULL, CONSTRAINT "PK_d232b33ccee326e251936e16c5f" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE UNIQUE INDEX "IDX_d33daa25634fccb127ead889d4" ON "hmt"."webhook_outgoing" ("hash") `,
@@ -25,7 +25,7 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
       `CREATE TYPE "hmt"."escrow_completion_tracking_status_enum" AS ENUM('pending', 'paid', 'completed', 'failed')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "hmt"."escrow_completion_tracking" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "chain_id" integer NOT NULL, "escrow_address" character varying NOT NULL, "final_results_url" character varying, "final_results_hash" character varying, "failed_reason" character varying, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, "status" "hmt"."escrow_completion_tracking_status_enum" NOT NULL, CONSTRAINT "PK_a6abebca3ce8e49155aaf14ccc8" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "hmt"."escrow_completion_tracking" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "chain_id" integer NOT NULL, "escrow_address" character varying NOT NULL, "final_results_url" character varying, "final_results_hash" character varying, "failure_detail" character varying, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, "status" "hmt"."escrow_completion_tracking_status_enum" NOT NULL, CONSTRAINT "PK_a6abebca3ce8e49155aaf14ccc8" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE UNIQUE INDEX "IDX_146945054beb996cfe6edf1789" ON "hmt"."escrow_completion_tracking" ("chain_id", "escrow_address") `,
@@ -42,7 +42,6 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
     await queryRunner.query(
       `DROP TYPE "hmt"."webhook_incoming_status_enum_old"`,
     );
-    await queryRunner.query(`DELETE FROM "hmt"."cron-jobs"`);
     await queryRunner.query(
       `ALTER TYPE "hmt"."cron-jobs_cron_job_type_enum" RENAME TO "cron-jobs_cron_job_type_enum_old"`,
     );
@@ -58,7 +57,6 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DELETE FROM "hmt"."cron-jobs"`);
     await queryRunner.query(
       `CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum_old" AS ENUM('process-pending-webhook', 'process-paid-webhook')`,
     );
@@ -92,7 +90,7 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1730799812182
     await queryRunner.query(`DROP TABLE "hmt"."webhook_outgoing"`);
     await queryRunner.query(`DROP TYPE "hmt"."webhook_outgoing_status_enum"`);
     await queryRunner.query(
-      `ALTER TABLE "hmt"."webhook_incoming" DROP COLUMN "failed_reason"`,
+      `ALTER TABLE "hmt"."webhook_incoming" DROP COLUMN "failure_detail"`,
     );
     await queryRunner.query(
       `ALTER TABLE "hmt"."webhook_incoming" ADD COLUMN "results_url" varchar`,

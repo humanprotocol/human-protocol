@@ -9,7 +9,10 @@ import {
 } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
 import { signMessage } from '../../common/utils/signature';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import {
+  BACKOFF_INTERVAL_SECONDS,
+  HEADER_SIGNATURE_KEY,
+} from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { ServerConfigService } from '../../common/config/server-config.service';
@@ -19,6 +22,7 @@ import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
+import { calculateBackoff } from '../../common/utils/cron';
 
 @Injectable()
 export class WebhookService {
@@ -87,17 +91,21 @@ export class WebhookService {
    * Handles errors that occur while processing an incoming webhook.
    * If retry count is below the maximum, increments retry count and reschedules; otherwise, marks as 'FAILED'.
    * @param webhookEntity - The incoming webhook entity.
-   * @param failedReason - Reason for the failure.
+   * @param failureDetail - Reason for the failure.
    */
   public async handleWebhookIncomingError(
     webhookEntity: WebhookIncomingEntity,
-    failedReason: string,
+    failureDetail: string,
   ): Promise<void> {
     if (webhookEntity.retriesCount < this.serverConfigService.maxRetryCount) {
-      webhookEntity.waitUntil = new Date();
+      const exponentialBackoff = calculateBackoff(
+        webhookEntity.retriesCount,
+        BACKOFF_INTERVAL_SECONDS,
+      );
+      webhookEntity.waitUntil = new Date(Date.now() + exponentialBackoff);
       webhookEntity.retriesCount += 1;
     } else {
-      webhookEntity.failedReason = failedReason;
+      webhookEntity.failureDetail = failureDetail;
       webhookEntity.status = WebhookIncomingStatus.FAILED;
     }
     await this.webhookIncomingRepository.updateOne(webhookEntity);
@@ -107,17 +115,21 @@ export class WebhookService {
    * Handles errors that occur while processing an outgoing webhook.
    * If retry count is below the maximum, increments retry count and reschedules; otherwise, marks as 'FAILED'.
    * @param webhookEntity - The outgoing webhook entity.
-   * @param failedReason - Reason for the failure.
+   * @param failureDetail - Reason for the failure.
    */
   public async handleWebhookOutgoingError(
     webhookEntity: WebhookOutgoingEntity,
-    failedReason: string,
+    failureDetail: string,
   ): Promise<void> {
     if (webhookEntity.retriesCount < this.serverConfigService.maxRetryCount) {
-      webhookEntity.waitUntil = new Date();
+      const exponentialBackoff = calculateBackoff(
+        webhookEntity.retriesCount,
+        BACKOFF_INTERVAL_SECONDS,
+      );
+      webhookEntity.waitUntil = new Date(Date.now() + exponentialBackoff);
       webhookEntity.retriesCount += 1;
     } else {
-      webhookEntity.failedReason = failedReason;
+      webhookEntity.failureDetail = failureDetail;
       webhookEntity.status = WebhookOutgoingStatus.FAILED;
     }
     await this.webhookOutgoingRepository.updateOne(webhookEntity);

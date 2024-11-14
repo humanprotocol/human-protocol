@@ -148,25 +148,25 @@ export class CronJobService {
               await this.webhookIncomingRepository.updateOne(webhookEntity);
             } else {
               const errorId = uuidv4();
-              const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+              const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
               this.logger.error(
-                `Database error for webhook processing. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+                `Database error for webhook processing. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
               );
               await this.webhookService.handleWebhookIncomingError(
                 webhookEntity,
-                failedReason,
+                failureDetail,
               );
               continue;
             }
           } else {
             const errorId = uuidv4();
-            const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+            const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
             this.logger.error(
-              `Unexpected error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+              `Unexpected error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
             );
             await this.webhookService.handleWebhookIncomingError(
               webhookEntity,
-              failedReason,
+              failureDetail,
             );
             continue;
           }
@@ -245,13 +245,13 @@ export class CronJobService {
           );
         } catch (err) {
           const errorId = uuidv4();
-          const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
           this.logger.error(
-            `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+            `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
           );
           await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
             escrowCompletionTrackingEntity,
-            failedReason,
+            failureDetail,
           );
           continue;
         }
@@ -373,13 +373,13 @@ export class CronJobService {
                 continue;
               } else {
                 const errorId = uuidv4();
-                const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+                const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
                 this.logger.error(
-                  `Error creating outgoing webhook. Error ID: ${errorId}, Escrow Address: ${escrowAddress}, Reason: ${failedReason}, Message: ${err.message}`,
+                  `Error creating outgoing webhook. Error ID: ${errorId}, Escrow Address: ${escrowAddress}, Reason: ${failureDetail}, Message: ${err.message}`,
                 );
                 await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
                   escrowCompletionTrackingEntity,
-                  failedReason,
+                  failureDetail,
                 );
                 allWebhooksCreated = false;
                 break;
@@ -397,13 +397,13 @@ export class CronJobService {
           }
         } catch (err) {
           const errorId = uuidv4();
-          const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
           this.logger.error(
-            `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+            `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
           );
           await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
             escrowCompletionTrackingEntity,
-            failedReason,
+            failureDetail,
           );
         }
       }
@@ -447,13 +447,13 @@ export class CronJobService {
           await this.webhookService.sendWebhook(url, payload);
         } catch (err) {
           const errorId = uuidv4();
-          const failedReason = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
           this.logger.error(
-            `Error processing pending outgoing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+            `Error processing pending outgoing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
           );
           await this.webhookService.handleWebhookOutgoingError(
             webhookEntity,
-            failedReason,
+            failureDetail,
           );
           continue;
         }
