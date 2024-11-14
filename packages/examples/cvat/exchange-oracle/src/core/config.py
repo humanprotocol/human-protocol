@@ -134,7 +134,7 @@ class CronConfig:
     track_creating_tasks_int = int(getenv("TRACK_CREATING_TASKS_INT", 300))
     track_creating_tasks_chunk_size = getenv("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
     track_assignments_int = int(getenv("TRACK_ASSIGNMENTS_INT", 5))
-    track_assignments_chunk_size = getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
+    track_assignments_chunk_size = int(getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
 
     track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
     track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 5))
@@ -149,10 +149,10 @@ class CronConfig:
     )
     "Maximum number of parallel downloading requests during results downloading"
 
-    process_rejected_projects_chunk_size = getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20)
-    process_accepted_projects_chunk_size = getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
+    process_rejected_projects_chunk_size = int(getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20))
+    process_accepted_projects_chunk_size = int(getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20))
 
-    track_escrow_creation_chunk_size = getenv("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20)
+    track_escrow_creation_chunk_size = int(getenv("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20))
     track_escrow_creation_int = int(getenv("TRACK_ESCROW_CREATION_INT", 300))
 
 

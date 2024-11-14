@@ -86,14 +86,14 @@ class LocalhostConfig(_NetworkConfig):
 
 class CronConfig:
     process_exchange_oracle_webhooks_int = int(getenv("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000))
-    process_exchange_oracle_webhooks_chunk_size = getenv(
-        "PROCESS_EXCHANGE_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
+    process_exchange_oracle_webhooks_chunk_size = int(
+        getenv("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_reputation_oracle_webhooks_int = int(
         getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 3000)
     )
-    process_reputation_oracle_webhooks_chunk_size = getenv(
-        "PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
+    process_reputation_oracle_webhooks_chunk_size = int(
+        getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
 
 
