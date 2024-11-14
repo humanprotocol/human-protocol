@@ -31,11 +31,6 @@ export class OracleDiscoveryService {
     const filteredOracles: OracleDiscoveryResponse[] = [];
     for (const oraclesForChainId of oraclesForChainIds) {
       for (const oracle of oraclesForChainId) {
-        // Filter out inactive oracles
-        if (oracle.retriesCount >= this.configService.maxRequestRetries) {
-          continue;
-        }
-
         if (command.selectedJobTypes?.length) {
           // Keep only oracles that have at least one selected job type
           const oracleJobTypesSet = new Set(oracle.jobTypes || []);

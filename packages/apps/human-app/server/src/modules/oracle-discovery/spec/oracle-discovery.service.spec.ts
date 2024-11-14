@@ -82,12 +82,14 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
@@ -107,12 +109,14 @@ describe('OracleDiscoveryService', () => {
         url: 'url1',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: '4200',
         retriesCount: 0,
+        executionsToSkip: 0,
       },
     ];
 
@@ -206,53 +210,5 @@ describe('OracleDiscoveryService', () => {
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId);
     });
-  });
-
-  it('should filter out inactive oracles from cached data', async () => {
-    const mockData: OracleDiscoveryResponse[] = [
-      {
-        address: 'mockAddress1',
-        role: 'validator',
-        chainId: '4200',
-        retriesCount: 5,
-      },
-      {
-        address: 'mockAddress2',
-        role: 'validator',
-        chainId: '4200',
-        retriesCount: 0,
-      },
-    ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
-
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
-
-    expect(result).toEqual([mockData[1]]);
-    expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
-  });
-
-  it('should return an empty array if all oracles are inactive', async () => {
-    const mockData: OracleDiscoveryResponse[] = [
-      {
-        address: 'mockAddress1',
-        role: 'validator',
-        chainId: '4200',
-        retriesCount: 5,
-      },
-      {
-        address: 'mockAddress2',
-        role: 'validator',
-        chainId: '4200',
-        retriesCount: 5,
-      },
-    ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
-
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
-
-    expect(result).toEqual([]);
-    expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
   });
 });

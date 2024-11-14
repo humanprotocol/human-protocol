@@ -11,6 +11,7 @@ export function generateOracleDiscoveryResponseBody() {
     url: 'common-url',
     jobTypes: ['job-type-3'],
     retriesCount: 0,
+    executionsToSkip: 0,
   };
   const response2: OracleDiscoveryResponse = {
     address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
@@ -19,6 +20,7 @@ export function generateOracleDiscoveryResponseBody() {
     url: 'common-url',
     jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],
     retriesCount: 0,
+    executionsToSkip: 0,
   };
   const response3: OracleDiscoveryResponse = {
     address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
@@ -27,6 +29,7 @@ export function generateOracleDiscoveryResponseBody() {
     url: 'common-url',
     jobTypes: ['job-type-2'],
     retriesCount: 0,
+    executionsToSkip: 0,
   };
   const response4: OracleDiscoveryResponse = {
     address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
@@ -34,6 +37,7 @@ export function generateOracleDiscoveryResponseBody() {
     role: 'role3',
     jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],
     retriesCount: 0,
+    executionsToSkip: 0,
   };
   return [response1, response2, response3, response4];
 }
