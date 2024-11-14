@@ -32,7 +32,7 @@ export function PageHeader({
         <Grid alignContent="center" container gap="1rem" justifyContent="start">
           <Grid
             sx={{
-              height: '70px',
+              height: '76px',
               width: '70px',
               position: 'relative',
             }}
