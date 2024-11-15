@@ -202,6 +202,48 @@ def test_can_list_jobs_200_with_address_and_pagination(
                 )
 
 
+def test_can_list_jobs_200_without_escrows_in_hidden_states(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    escrows = []
+
+    cvat_project, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC60", 0
+    )
+    cvat_project.status = ProjectStatuses.creation
+    session.add(cvat_project)
+
+    cvat_project, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC61", 1
+    )
+    cvat_project.status = ProjectStatuses.deleted
+    session.add(cvat_project)
+
+    escrows.append(cvat_project.escrow_address)
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(),
+        )
+        assert response.json()["results"] == []
+
+
 def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
@@ -730,6 +772,47 @@ def test_cannot_create_assignment_401(client: TestClient) -> None:
 
         assert response.status_code == 401
         assert response.json() == {"message": message}
+
+
+def test_cannot_create_assignment_400_when_has_unfinished_assignments(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+
+    cvat_project, cvat_task, cvat_job1 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 0
+    )
+    create_job(session, 2, cvat_task.cvat_id, cvat_project.cvat_id)
+
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    assignment = Assignment(
+        created_at=utcnow(),
+        expires_at=utcnow() + timedelta(hours=1),
+        user_wallet_address=user_address,
+        cvat_job_id=cvat_job1.cvat_id,
+        status=AssignmentStatuses.created.value,
+    )
+    session.add(assignment)
+
+    session.commit()
+
+    response = client.post(
+        "/assignment",
+        headers=get_auth_header(),
+        json={
+            "escrow_address": cvat_project.escrow_address,
+            "chain_id": cvat_project.chain_id,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "There are unfinished assignments in this escrow" in response.text
 
 
 def test_can_list_assignments_200(client: TestClient, session: Session) -> None:
