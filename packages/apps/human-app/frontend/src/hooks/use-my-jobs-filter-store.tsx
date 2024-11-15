@@ -2,18 +2,32 @@
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
 
-export const disabledJobsStatusesMobile = ['validation', 'expired', 'rejected'];
+type JobStatusMyJobs =
+  | 'active'
+  | 'completed'
+  | 'canceled'
+  | 'validation'
+  | 'expired'
+  | 'rejected';
 
-export const jobStatuses = [
+type JobStatusAvailableJobs = 'active' | 'completed' | 'canceled';
+
+type JobStatus = JobStatusMyJobs | JobStatusAvailableJobs;
+
+export const jobStatusesAvailableJobs: JobStatusAvailableJobs[] = [
+  'active',
+  'completed',
+  'canceled',
+];
+
+export const jobStatusesMyJobs: JobStatusMyJobs[] = [
   'active',
   'completed',
   'canceled',
   'validation',
   'expired',
   'rejected',
-] as const;
-
-type JobStatus = (typeof jobStatuses)[number];
+];
 
 export interface MyJobsFilterStoreProps {
   filterParams: {

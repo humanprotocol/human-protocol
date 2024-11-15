@@ -1,6 +1,6 @@
 import capitalize from 'lodash/capitalize';
 import {
-  jobStatuses,
+  jobStatusesMyJobs,
   useMyJobsFilterStore,
 } from '@/hooks/use-my-jobs-filter-store';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
@@ -16,7 +16,7 @@ export function MyJobsStatusFilter() {
           status: undefined,
         });
       }}
-      filteringOptions={jobStatuses.map((status) => ({
+      filteringOptions={jobStatusesMyJobs.map((status) => ({
         name: capitalize(status),
         option: status,
       }))}
