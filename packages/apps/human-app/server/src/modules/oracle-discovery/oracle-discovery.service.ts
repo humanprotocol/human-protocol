@@ -33,7 +33,7 @@ export class OracleDiscoveryService {
           .split(',')
           .map((job) => job.trim().toLowerCase());
 
-        return this.findOraclesByChainId(chainId, address, jobTypes);
+        return this.findOraclesByChainIdAndJobTypes(chainId, address, jobTypes);
       }),
     );
 
@@ -62,7 +62,7 @@ export class OracleDiscoveryService {
     return filteredOracles;
   }
 
-  private async findOraclesByChainId(
+  private async findOraclesByChainIdAndJobTypes(
     chainId: ChainId,
     address: string,
     jobTypes: string[],
