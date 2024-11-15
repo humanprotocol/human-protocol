@@ -8,7 +8,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
@@ -18,6 +18,7 @@ import {
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
 import { RewardAmount } from '@/pages/worker/jobs/components/reward-amount';
+import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { formatDate } from '@/shared/helpers/format-date';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
@@ -36,10 +37,15 @@ import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
 
-const getColumnsDefinition = (
-  resignJob: (assignment_id: string) => void,
-  refreshData: () => void
-): MRT_ColumnDef<MyJob>[] => [
+const getColumnsDefinition = ({
+  resignJob,
+  refreshData,
+  isRefreshTasksPending,
+}: {
+  resignJob: (assignment_id: string) => void;
+  refreshData: () => void;
+  isRefreshTasksPending: boolean;
+}): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
     header: t('worker.jobs.escrowAddress'),
@@ -226,6 +232,7 @@ const getColumnsDefinition = (
                   paddingInline: '1rem',
                   fontSize: '13px',
                 }}
+                loading={isRefreshTasksPending}
                 type="button"
                 variant="outlined"
                 onClick={refreshData}
@@ -256,7 +263,8 @@ export function MyJobsTable() {
   );
 
   const { mutate: rejectTaskMutation } = useRejectTaskMutation();
-  const { mutate: refreshTasksMutation } = useRefreshTasksMutation();
+  const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
+    useRefreshTasksMutation();
   const { address: oracle_address } = useParams<{ address: string }>();
 
   const [paginationState, setPaginationState] = useState({
@@ -294,10 +302,11 @@ export function MyJobsTable() {
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(
-      rejectTask(oracle_address ?? ''),
-      refreshTasks(oracle_address ?? '')
-    ),
+    columns: getColumnsDefinition({
+      resignJob: rejectTask(oracle_address ?? ''),
+      refreshData: refreshTasks(oracle_address ?? ''),
+      isRefreshTasksPending,
+    }),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
