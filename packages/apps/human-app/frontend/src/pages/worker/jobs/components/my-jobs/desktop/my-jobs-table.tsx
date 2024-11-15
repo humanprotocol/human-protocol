@@ -38,11 +38,11 @@ import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-a
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
 
 const getColumnsDefinition = ({
-  resignJob,
+  oracle_address,
   refreshData,
   isRefreshTasksPending,
 }: {
-  resignJob: (assignment_id: string) => void;
+  oracle_address: string | undefined;
   refreshData: () => void;
   isRefreshTasksPending: boolean;
 }): MRT_ColumnDef<MyJob>[] => [
@@ -188,7 +188,9 @@ const getColumnsDefinition = ({
     enableSorting: true,
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
+      const { mutate: rejectTaskMutation, isPending } = useRejectTaskMutation();
       const buttonDisabled = status !== 'active';
+
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           {url ? (
@@ -202,10 +204,14 @@ const getColumnsDefinition = ({
                 {t('worker.jobs.solve')}
               </TableButton>
               <RejectButton
-                disabled={buttonDisabled}
+                disabled={buttonDisabled || isPending}
+                loading={isPending}
                 onClick={() => {
                   if (buttonDisabled) return;
-                  resignJob(assignment_id);
+                  rejectTaskMutation({
+                    oracle_address: oracle_address ?? '',
+                    assignment_id,
+                  });
                 }}
               />
             </>
@@ -257,12 +263,12 @@ export function MyJobsTable() {
     resetFilterParams,
   } = useMyJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
+
   const memoizedTableDataResults = useMemo(
     () => tableData?.results ?? [],
     [tableData?.results]
   );
 
-  const { mutate: rejectTaskMutation } = useRejectTaskMutation();
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
     useRefreshTasksMutation();
   const { address: oracle_address } = useParams<{ address: string }>();
@@ -272,11 +278,6 @@ export function MyJobsTable() {
     pageSize: 5,
   });
 
-  const rejectTask = (address: string) => {
-    return (assignment_id: string) => {
-      rejectTaskMutation({ oracle_address: address, assignment_id });
-    };
-  };
   const refreshTasks = (address: string) => {
     return () => {
       refreshTasksMutation({ oracle_address: address });
@@ -303,7 +304,7 @@ export function MyJobsTable() {
 
   const table = useMaterialReactTable({
     columns: getColumnsDefinition({
-      resignJob: rejectTask(oracle_address ?? ''),
+      oracle_address: oracle_address ?? '',
       refreshData: refreshTasks(oracle_address ?? ''),
       isRefreshTasksPending,
     }),
