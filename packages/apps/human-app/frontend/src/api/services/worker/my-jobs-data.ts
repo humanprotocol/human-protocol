@@ -27,9 +27,7 @@ const myJobSchema = z.object({
   job_type: z.string(),
   status: z.string().transform((value) => {
     try {
-      return z
-        .enum([MyJobStatus.ACTIVE, MyJobStatus.CANCELED, MyJobStatus.COMPLETED])
-        .parse(value.toUpperCase());
+      return z.nativeEnum(MyJobStatus).parse(value.toUpperCase());
     } catch (error) {
       return UNKNOWN_JOB_STATUS;
     }
