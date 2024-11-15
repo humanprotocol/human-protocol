@@ -9,9 +9,11 @@ import {
   EnvironmentConfigService,
   HCAPTCHA_STATS_API_START_DATE,
   HMT_STATS_START_DATE,
+  MINIMUM_ESCROWS_COUNT,
   MINIMUM_HMT_TRANSFERS,
 } from '../../common/config/env-config.service';
 import {
+  AVAILABLE_NETWORKS_CACHE_KEY,
   HCAPTCHA_PREFIX,
   HMT_PREFIX,
   RedisConfigService,
@@ -423,7 +425,7 @@ export class StatsService implements OnModuleInit {
 
   public async getAvailableNetworks(): Promise<ChainId[]> {
     const cachedNetworks = await this.cacheManager.get<ChainId[]>(
-      this.redisConfigService.availableNetworksCacheKey,
+      AVAILABLE_NETWORKS_CACHE_KEY,
     );
 
     if (cachedNetworks) {
@@ -467,7 +469,8 @@ export class StatsService implements OnModuleInit {
         );
 
         // At least 1 escrow created in the last month
-        const recentEscrowsCreated = escrowStats.totalEscrows > 0;
+        const recentEscrowsCreated =
+          escrowStats.totalEscrows >= MINIMUM_ESCROWS_COUNT;
         // Total HMT transactions > MINIMUM_HMT_TRANSFERS in the last X months
         const sufficientHMTTransfers =
           totalTransactionCount > MINIMUM_HMT_TRANSFERS;
@@ -483,7 +486,7 @@ export class StatsService implements OnModuleInit {
     }
 
     await this.cacheManager.set(
-      this.redisConfigService.availableNetworksCacheKey,
+      AVAILABLE_NETWORKS_CACHE_KEY,
       availableNetworks,
       this.envConfigService.networkAvailableCacheTtl,
     );

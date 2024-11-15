@@ -42,9 +42,7 @@ describe('StatsService', () => {
         },
         {
           provide: RedisConfigService,
-          useValue: {
-            availableNetworksCacheKey: 'test-available-networks',
-          },
+          useValue: {},
         },
         {
           provide: StorageService,
@@ -88,7 +86,7 @@ describe('StatsService', () => {
 
     expect(firstCallResult).toEqual(mockNetworkList);
     expect(cacheManager.set).toHaveBeenCalledWith(
-      'test-available-networks',
+      'available-networks',
       mockNetworkList,
       1000,
     );
@@ -102,7 +100,7 @@ describe('StatsService', () => {
 
     // Ensure the cache is set again with the regenerated network list
     expect(cacheManager.set).toHaveBeenCalledWith(
-      'test-available-networks',
+      'available-networks',
       mockNetworkList,
       1000,
     );
@@ -114,7 +112,7 @@ describe('StatsService', () => {
 
     const result = await statsService.getAvailableNetworks();
     expect(result).toEqual(cachedNetworks);
-    expect(cacheManager.get).toHaveBeenCalledWith('test-available-networks');
+    expect(cacheManager.get).toHaveBeenCalledWith('available-networks');
   });
 
   it('should fetch and filter available networks correctly', async () => {
@@ -138,7 +136,7 @@ describe('StatsService', () => {
     );
 
     expect(cacheManager.set).toHaveBeenCalledWith(
-      'test-available-networks',
+      'available-networks',
       result,
       1000,
     );
