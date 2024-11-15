@@ -14,7 +14,6 @@ const DEFAULT_CORS_ALLOWED_HEADERS =
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
 const DEFAULT_MAX_EXECUTIONS_TO_SKIP = 32;
 const DEFAULT_CACHE_TTL_JOB_TYPES = 24 * 60 * 60;
-const DEFAULT_MAX_REQUEST_RETRIES = 5;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
 
 @Injectable()
@@ -280,7 +279,10 @@ export class EnvironmentConfigService {
     return chainIds
       .split(',')
       .map((id) => parseInt(id.trim(), 10))
-      .filter((id): id is ChainId => !isNaN(id) && Object.values(ChainId).includes(id));
+      .filter(
+        (id): id is ChainId =>
+          !isNaN(id) && Object.values(ChainId).includes(id),
+      );
   }
 
   /**

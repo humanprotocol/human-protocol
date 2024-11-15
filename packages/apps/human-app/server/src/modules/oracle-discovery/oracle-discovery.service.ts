@@ -28,7 +28,8 @@ export class OracleDiscoveryService {
     const oraclesForChainIds = await Promise.all(
       chainIds.map(async (chainId) => {
         const jobTypes = (
-          (await this.kvStoreGateway.getJobTypesByAddress(chainId, address)) ?? ''
+          (await this.kvStoreGateway.getJobTypesByAddress(chainId, address)) ??
+          ''
         )
           .split(',')
           .map((job) => job.trim().toLowerCase());
@@ -68,8 +69,9 @@ export class OracleDiscoveryService {
     jobTypes: string[],
   ): Promise<OracleDiscoveryResponse[]> {
     try {
-      const cachedOracles =
-        await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId.toString());
+      const cachedOracles = await this.cacheManager.get<
+        OracleDiscoveryResponse[]
+      >(chainId.toString());
       if (cachedOracles) return cachedOracles;
 
       const operators = await OperatorUtils.getReputationNetworkOperators(

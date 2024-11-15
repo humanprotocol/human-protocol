@@ -52,7 +52,10 @@ export class KvStoreGateway {
     }
   }
 
-  async getJobTypesByAddress(chainId: ChainId, address: string): Promise<string | void> {
+  async getJobTypesByAddress(
+    chainId: ChainId,
+    address: string,
+  ): Promise<string | void> {
     const key = `jobTypes:${address}`;
     const cachedData: string | undefined = await this.cacheManager.get(key);
     if (cachedData) {

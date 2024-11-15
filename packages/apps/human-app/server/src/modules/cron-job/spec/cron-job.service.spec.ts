@@ -347,7 +347,7 @@ describe('CronJobService', () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
-        
+
         chainId: ChainId.POLYGON,
         retriesCount: 6,
         executionsToSkip: 0,
