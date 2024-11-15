@@ -22,9 +22,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.getResponse();
-    } else if (exception.response && exception.response.data?.statusCode) {
-      status = exception.response.data.statusCode;
-      message = exception.response.data.message;
+    } else if (exception.response) {
+      status = exception.response.status;
+      message =
+        exception.response.data?.message || exception.response.statusText;
     } else {
       this.logger.error(
         `Exception without status code: ${JSON.stringify(exception)}`,
