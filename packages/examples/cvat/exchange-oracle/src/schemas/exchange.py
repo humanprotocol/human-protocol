@@ -11,9 +11,9 @@ DEFAULT_TOKEN = "HMT"  # noqa: S105 (it's  not a credential)
 
 
 class JobStatuses(StrEnum, metaclass=BetterEnumMeta):
-    active = "ACTIVE"
-    completed = "COMPLETED"
-    canceled = "CANCELED"
+    active = "active"
+    completed = "completed"
+    canceled = "canceled"
 
 
 class JobResponse(BaseModel):
@@ -44,12 +44,12 @@ class AssignmentIdRequest(BaseModel):
 
 
 class AssignmentStatuses(str, Enum, metaclass=BetterEnumMeta):
-    active = "ACTIVE"
-    validation = "VALIDATION"
-    completed = "COMPLETED"
-    expired = "EXPIRED"
-    canceled = "CANCELED"
-    rejected = "REJECTED"
+    active = "active"
+    validation = "validation"
+    completed = "completed"
+    expired = "expired"
+    canceled = "canceled"
+    rejected = "rejected"
 
 
 class AssignmentResponse(BaseModel):

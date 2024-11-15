@@ -39,9 +39,10 @@ export class JobAssignmentService {
   }
 
   private getCacheRetentionDate(): string {
-    const ttlMs = this.configService.cacheTtlJobAssignments * 1000;
-
-    return new Date(Date.now() - ttlMs).toISOString();
+    return new Date(
+      Date.now() -
+        this.configService.jobAssignmentsRetentionDays * 24 * 60 * 60 * 1000,
+    ).toISOString();
   }
 
   async processJobAssignment(

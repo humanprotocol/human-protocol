@@ -2,12 +2,12 @@ import { useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useConnectedWallet } from '@/auth-web3/use-connected-wallet';
-import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
+import { useAccessTokenRefresh } from '@/api/services/common/use-access-token-refresh';
 import { useWeb3AuthenticatedUser } from '@/auth-web3/use-web3-authenticated-user';
 
 export function useDisableWeb3Operator() {
   const { address, chainId } = useConnectedWallet();
-  const { mutateAsync } = useGetAccessTokenMutation();
+  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { updateUserData } = useWeb3AuthenticatedUser();
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) => {
@@ -21,8 +21,9 @@ export function useDisableWeb3Operator() {
         },
       });
 
-      await mutateAsync({ authType: 'web3' });
-      updateUserData({ status: 'INACTIVE' });
+      await refreshAccessTokenAsync({ authType: 'web3' });
+      updateUserData({ status: 'inactive' });
+
       return result;
     },
     mutationKey: ['disableOperator', address, chainId],

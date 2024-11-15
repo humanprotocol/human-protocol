@@ -18,6 +18,7 @@ def handle_webhook(
     session: Session,
     webhook: Webhook,
     *,
+    queue: webhook_service.OracleWebhookQueue,
     on_fail: Callable[[Session, Webhook, Exception], None] = lambda _s, _w, _e: None,
 ):
     logger.debug(
@@ -39,9 +40,9 @@ def handle_webhook(
             savepoint.rollback()
             raise
         finally:
-            webhook_service.outbox.handle_webhook_fail(session, webhook.id)
+            queue.handle_webhook_fail(session, webhook.id)
     else:
-        webhook_service.outbox.handle_webhook_success(session, webhook.id)
+        queue.handle_webhook_success(session, webhook.id)
         logger.debug("Webhook handled successfully")
 
 
@@ -80,6 +81,6 @@ def process_outgoing_webhooks(
         for_update=ForUpdateParams(skip_locked=True),
     )
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=webhook_service.outbox):
             webhook_url = url_getter(webhook.chain_id, webhook.escrow_address)
             _send_webhook(webhook_url, webhook, with_timestamp=with_timestamp)

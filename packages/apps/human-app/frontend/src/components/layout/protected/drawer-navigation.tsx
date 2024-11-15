@@ -16,6 +16,7 @@ import { NAVBAR_PADDING } from '@/components/layout/protected/navbar';
 import { colorPalette } from '@/styles/color-palette';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { onlyDarkModeColor } from '@/styles/dark-color-palette';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 
 const drawerWidth = 240;
 
@@ -49,6 +50,7 @@ export function DrawerNavigation({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
+  const handleMainNavIconClick = useHandleMainNavIconClick();
 
   return (
     <Box
@@ -72,7 +74,13 @@ export function DrawerNavigation({
         variant="persistent"
       >
         {!isMobile && (
-          <Stack alignItems="flex-start" sx={{ paddingLeft: '60px' }}>
+          <Stack
+            alignItems="flex-start"
+            sx={{ paddingLeft: '26px', cursor: 'pointer' }}
+            onClick={() => {
+              handleMainNavIconClick();
+            }}
+          >
             <HumanLogoNavbarIcon />
           </Stack>
         )}
@@ -84,7 +92,7 @@ export function DrawerNavigation({
         >
           <List
             sx={{
-              marginTop: '66px',
+              marginTop: isMobile ? '66px' : '16px',
             }}
           >
             {topMenuItems?.map((item, index) => {
@@ -107,7 +115,11 @@ export function DrawerNavigation({
               const isActive = Boolean(link && location.pathname === link);
 
               return (
-                <ListItem disablePadding key={link}>
+                <ListItem
+                  disablePadding
+                  key={link}
+                  sx={{ padding: '0 8px', borderRadius: '4px' }}
+                >
                   <ListItemButton
                     disabled={disabled}
                     onClick={() => {
@@ -131,7 +143,8 @@ export function DrawerNavigation({
                     }}
                     selected={isActive}
                     sx={{
-                      px: 0,
+                      borderRadius: '4px',
+                      p: 0,
                       '&.Mui-selected': {
                         backgroundColor: isDarkMode
                           ? onlyDarkModeColor.listItemColor
@@ -145,14 +158,17 @@ export function DrawerNavigation({
                       gap="32px"
                       justifyContent="center"
                       sx={{
-                        ml: isMobile ? '28px' : NAVBAR_PADDING,
+                        padding: '8px 16px',
                       }}
                     >
                       {icon}
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography component="span" variant="body1">
+                          <Typography
+                            component="span"
+                            variant={isMobile ? 'h5' : 'body1'}
+                          >
                             {label}
                           </Typography>
                         }
@@ -188,7 +204,12 @@ export function DrawerNavigation({
               const isActive = location.pathname === link;
 
               return (
-                <ListItem alignItems="center" disablePadding key={label}>
+                <ListItem
+                  alignItems="center"
+                  disablePadding
+                  key={label}
+                  sx={{ padding: '0 8px', borderRadius: '4px' }}
+                >
                   <ListItemButton
                     alignItems="center"
                     onClick={() => {
@@ -211,7 +232,8 @@ export function DrawerNavigation({
                     }}
                     selected={isActive}
                     sx={{
-                      px: 0,
+                      borderRadius: '4px',
+                      p: 0,
                       '&.Mui-selected': {
                         backgroundColor: isDarkMode
                           ? onlyDarkModeColor.listItemColor
@@ -225,14 +247,17 @@ export function DrawerNavigation({
                       gap="32px"
                       justifyContent="center"
                       sx={{
-                        ml: isMobile ? '28px' : NAVBAR_PADDING,
+                        padding: '8px 16px',
                       }}
                     >
                       {icon}
                       <ListItemText
                         disableTypography
                         primary={
-                          <Typography component="span" variant="body1">
+                          <Typography
+                            component="span"
+                            variant={isMobile ? 'h5' : 'body1'}
+                          >
                             {label}
                           </Typography>
                         }

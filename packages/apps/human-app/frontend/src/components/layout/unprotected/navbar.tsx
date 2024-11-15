@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Drawer, IconButton } from '@mui/material';
+import { Box, Drawer, Grid, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { breakpoints } from '@/styles/breakpoints';
 import { env } from '@/shared/env';
 import { useHomePageState } from '@/contexts/homepage-state';
 import { DarkModeSwitch } from '@/components/ui/dark-mode-switch';
+import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 
 interface NavbarProps {
   withNavigation: boolean;
@@ -20,6 +21,7 @@ export function Navbar({ withNavigation }: NavbarProps) {
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
+  const handleMainNavIconClick = useHandleMainNavIconClick();
 
   return (
     <Box
@@ -40,7 +42,17 @@ export function Navbar({ withNavigation }: NavbarProps) {
         },
       }}
     >
-      {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}
+      <Grid
+        sx={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleMainNavIconClick();
+        }}
+        role="button"
+        tabIndex={0}
+        aria-hidden="true"
+      >
+        {isMobile ? <HumanLogoIcon /> : <HumanLogoNavbarIcon />}
+      </Grid>
       {withNavigation ? (
         <Box
           sx={{

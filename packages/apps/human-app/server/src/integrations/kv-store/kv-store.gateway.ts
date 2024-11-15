@@ -43,9 +43,11 @@ export class KvStoreGateway {
         400,
       );
     } else {
-      await this.cacheManager.set(key, fetchedData, {
-        ttl: this.configService.cacheTtlExchangeOracleUrl,
-      } as any);
+      await this.cacheManager.set(
+        key,
+        fetchedData,
+        this.configService.cacheTtlExchangeOracleUrl,
+      );
       return fetchedData;
     }
   }

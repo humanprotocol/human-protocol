@@ -3,7 +3,6 @@ import * as crypto from 'crypto';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
-import { UserRepository } from '../../src/modules/user/user.repository';
 import { UserStatus } from '../../src/common/enums/user';
 import { UserService } from '../../src/modules/user/user.service';
 import { UserEntity } from '../../src/modules/user/user.entity';
@@ -33,7 +32,6 @@ import { JobRepository } from '../../src/modules/job/job.repository';
 import { AWSRegions, StorageProviders } from '../../src/common/enums/storage';
 import { ChainId } from '@human-protocol/sdk';
 import { StorageService } from '../../src/modules/storage/storage.service';
-import stringify from 'json-stable-stringify';
 import { delay, getFileNameFromURL } from './utils';
 import { PaymentService } from '../../src/modules/payment/payment.service';
 import { NetworkConfigService } from '../../src/common/config/network-config.service';
@@ -41,7 +39,6 @@ import { Web3ConfigService } from '../../src/common/config/web3-config.service';
 
 describe('CVAT E2E workflow', () => {
   let app: INestApplication;
-  let userRepository: UserRepository;
   let paymentRepository: PaymentRepository;
   let jobRepository: JobRepository;
   let userService: UserService;
@@ -80,7 +77,6 @@ describe('CVAT E2E workflow', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    userRepository = moduleFixture.get<UserRepository>(UserRepository);
     paymentRepository = moduleFixture.get<PaymentRepository>(PaymentRepository);
     jobRepository = moduleFixture.get<JobRepository>(JobRepository);
     userService = moduleFixture.get<UserService>(UserService);
@@ -135,15 +131,8 @@ describe('CVAT E2E workflow', () => {
 
     const groundTruthsData = MOCK_CVAT_GT;
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const cvatDto = {
       chain_id: ChainId.LOCALHOST,
@@ -187,7 +176,9 @@ describe('CVAT E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(manifest.job_bounty).toBeDefined();
 
@@ -211,15 +202,8 @@ describe('CVAT E2E workflow', () => {
 
     const groundTruthsData = MOCK_CVAT_GT;
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const cvatDto = {
       chain_id: ChainId.LOCALHOST,
@@ -263,7 +247,9 @@ describe('CVAT E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(manifest.job_bounty).toBeDefined();
 
@@ -287,24 +273,12 @@ describe('CVAT E2E workflow', () => {
 
     const datasetData = MOCK_CVAT_DATA;
 
-    const datasetHash = crypto
-      .createHash('sha1')
-      .update(stringify(datasetData))
-      .digest('hex');
-
-    const dataset = await storageService.uploadFile(datasetData, datasetHash);
+    const dataset = await storageService.uploadJsonLikeData(datasetData);
 
     const groundTruthsData = MOCK_CVAT_GT;
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const cvatDto = {
       chain_id: ChainId.LOCALHOST,
@@ -354,7 +328,9 @@ describe('CVAT E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(manifest.job_bounty).toBeDefined();
 
@@ -375,15 +351,8 @@ describe('CVAT E2E workflow', () => {
   it('should handle when data does not exist while creating a CVAT job with image boxes from points type', async () => {
     const groundTruthsData = MOCK_CVAT_GT;
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const cvatDto = {
       chain_id: ChainId.LOCALHOST,
@@ -425,24 +394,12 @@ describe('CVAT E2E workflow', () => {
 
     const datasetData = MOCK_CVAT_DATA;
 
-    const datasetHash = crypto
-      .createHash('sha1')
-      .update(stringify(datasetData))
-      .digest('hex');
-
-    const dataset = await storageService.uploadFile(datasetData, datasetHash);
+    const dataset = await storageService.uploadJsonLikeData(datasetData);
 
     const groundTruthsData = MOCK_CVAT_GT;
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const cvatDto = {
       chain_id: ChainId.LOCALHOST,
@@ -492,7 +449,9 @@ describe('CVAT E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
 
     expect(manifest.job_bounty).toBeDefined();
 
@@ -516,15 +475,8 @@ describe('CVAT E2E workflow', () => {
 
     const groundTruthsData = MOCK_CVAT_GT;
 
-    const groundTruthsHash = crypto
-      .createHash('sha1')
-      .update(stringify(groundTruthsData))
-      .digest('hex');
-
-    const groundTruths = await storageService.uploadFile(
-      groundTruthsData,
-      groundTruthsHash,
-    );
+    const groundTruths =
+      await storageService.uploadJsonLikeData(groundTruthsData);
 
     const cvatDto = {
       chain_id: ChainId.LOCALHOST,

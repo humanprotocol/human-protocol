@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  StreamableFile,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -21,8 +22,13 @@ export class SnakeCaseInterceptor implements NestInterceptor {
       request.query = CaseConverter.transformToCamelCase(request.query);
     }
 
-    return next
-      .handle()
-      .pipe(map((data) => CaseConverter.transformToSnakeCase(data)));
+    return next.handle().pipe(
+      map((data) => {
+        if (data instanceof StreamableFile) {
+          return data;
+        }
+        return CaseConverter.transformToSnakeCase(data);
+      }),
+    );
   }
 }

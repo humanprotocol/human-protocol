@@ -2,7 +2,7 @@ import HCaptcha from '@hcaptcha/react-hcaptcha';
 import Grid from '@mui/material/Grid';
 import { Paper, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { env } from '@/shared/env';
@@ -18,6 +18,7 @@ import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/hooks/use-hcaptcha-labeling-notifications';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { onlyDarkModeColor } from '@/styles/dark-color-palette';
+import { routerPaths } from '@/router/router-paths';
 
 export function HcaptchaLabelingPage() {
   const { colorPalette, isDarkMode } = useColorMode();
@@ -72,6 +73,10 @@ export function HcaptchaLabelingPage() {
   const hcaptchaOnSuccess = (token: string) => {
     solveHCaptchaMutation({ token });
   };
+
+  if (user.kyc_status !== 'approved') {
+    return <Navigate to={routerPaths.worker.profile} replace />;
+  }
 
   if (isHcaptchaUserStatsPending || isDailyHmtSpentPending) {
     return <PageCardLoader />;

@@ -6,12 +6,13 @@ const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_USER_STATS = 15 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_DISCOVERY = 24 * 60 * 60;
-const DEFAULT_CACHE_TTL_JOB_ASSIGNMENTS = 45 * 24 * 60 * 60;
+const DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS = 45;
 const DEFAULT_CACHE_TTL_DAILY_HMT_SPENT = 24 * 60 * 60;
 const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
   'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
+const DEFAULT_MAX_EXECUTIONS_TO_SKIP = 32;
 const DEFAULT_CACHE_TTL_JOB_TYPES = 24 * 60 * 60;
 const DEFAULT_MAX_REQUEST_RETRIES = 5;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
@@ -34,6 +35,10 @@ export class EnvironmentConfigService {
    */
   get port(): number {
     return this.configService.getOrThrow<number>('PORT');
+  }
+
+  get gitHash(): string {
+    return this.configService.get<string>('GIT_HASH', '');
   }
 
   /**
@@ -93,9 +98,11 @@ export class EnvironmentConfigService {
    * Default: 12 hours
    */
   get cacheTtlOracleStats(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_ORACLE_STATS',
-      DEFAULT_CACHE_TTL_ORACLE_STATS,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_ORACLE_STATS',
+        DEFAULT_CACHE_TTL_ORACLE_STATS,
+      ) * 1000
     );
   }
 
@@ -104,9 +111,11 @@ export class EnvironmentConfigService {
    * Default: 15 minutes
    */
   get cacheTtlUserStats(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_USER_STATS',
-      DEFAULT_CACHE_TTL_USER_STATS,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_USER_STATS',
+        DEFAULT_CACHE_TTL_USER_STATS,
+      ) * 1000
     );
   }
 
@@ -115,9 +124,11 @@ export class EnvironmentConfigService {
    * Default: 24 hours
    */
   get cacheTtlDailyHmtSpent(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_DAILY_HMT_SPENT',
-      DEFAULT_CACHE_TTL_DAILY_HMT_SPENT,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_DAILY_HMT_SPENT',
+        DEFAULT_CACHE_TTL_DAILY_HMT_SPENT,
+      ) * 1000
     );
   }
 
@@ -126,9 +137,11 @@ export class EnvironmentConfigService {
    * Default: 12 hours
    */
   get cacheTtlHCaptchaUserStats(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_HCAPTCHA_USER_STATS',
-      DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_HCAPTCHA_USER_STATS',
+        DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS,
+      ) * 1000
     );
   }
 
@@ -137,20 +150,22 @@ export class EnvironmentConfigService {
    * Default: 24 hours
    */
   get cacheTtlOracleDiscovery(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_ORACLE_DISCOVERY',
-      DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_ORACLE_DISCOVERY',
+        DEFAULT_CACHE_TTL_ORACLE_DISCOVERY,
+      ) * 1000
     );
   }
 
   /**
-   * The cache time-to-live (TTL) for user job assignments.
+   * Number of days without updates assignments data is retained.
    * Default: 45 days
    */
-  get cacheTtlJobAssignments(): number {
+  get jobAssignmentsRetentionDays(): number {
     return this.configService.get<number>(
-      'CACHE_TTL_JOB_ASSIGNMENTS',
-      DEFAULT_CACHE_TTL_JOB_ASSIGNMENTS,
+      'JOB_ASSIGNMENTS_DATA_RETENTION_DAYS',
+      DEFAULT_JOB_ASSIGNMENTS_DATA_RETENTION_DAYS,
     );
   }
 
@@ -196,9 +211,11 @@ export class EnvironmentConfigService {
    * Default: 24 hours
    */
   get cacheTtlExchangeOracleUrl(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_EXCHANGE_ORACLE_URL',
-      DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_EXCHANGE_ORACLE_URL',
+        DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL,
+      ) * 1000
     );
   }
 
@@ -218,9 +235,11 @@ export class EnvironmentConfigService {
    * Default: 24 hours
    */
   get cacheTtlExchangeOracleRegistrationNeeded(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED',
-      DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED',
+        DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED,
+      ) * 1000
     );
   }
 
@@ -289,15 +308,19 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * The maximum number of retries for requests.
+   * The maximum number of iteration to skip.
    * Default: 5
    */
-  get maxRequestRetries(): number {
+  get maxExecutionToSkip(): number {
     return this.configService.get<number>(
-      'MAX_REQUEST_RETRIES',
-      DEFAULT_MAX_REQUEST_RETRIES,
+      'MAX_EXECUTIONS_TO_SKIP',
+      DEFAULT_MAX_EXECUTIONS_TO_SKIP,
     );
   }
+
+  /**
+   * Feature flag for job discovery
+   */
   get jobsDiscoveryFlag(): boolean {
     const flag = this.configService.get<string>(
       'FEATURE_FLAG_JOBS_DISCOVERY',

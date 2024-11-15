@@ -93,12 +93,14 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
+        executionsToSkip: 0,
       },
       {
         address: 'mockAddress2',
         role: 'validator',
         chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
+        executionsToSkip: 0,
       },
     ];
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
@@ -118,6 +120,7 @@ describe('OracleDiscoveryService', () => {
         url: 'url1',
         chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
+        executionsToSkip: 0,
         jobTypes: ['job-type-1'],
       },
       {
@@ -125,6 +128,7 @@ describe('OracleDiscoveryService', () => {
         role: 'validator',
         chainId: ChainId.POLYGON_AMOY,
         retriesCount: 0,
+        executionsToSkip: 0,
         jobTypes: ['job-type-2'],
       },
     ];
@@ -235,53 +239,5 @@ describe('OracleDiscoveryService', () => {
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
     });
-  });
-
-  it('should filter out inactive oracles from cached data', async () => {
-    const mockData: OracleDiscoveryResponse[] = [
-      {
-        address: 'mockAddress1',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 5,
-      },
-      {
-        address: 'mockAddress2',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 0,
-      },
-    ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
-
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
-
-    expect(result).toEqual([mockData[1]]);
-    expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
-  });
-
-  it('should return an empty array if all oracles are inactive', async () => {
-    const mockData: OracleDiscoveryResponse[] = [
-      {
-        address: 'mockAddress1',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 5,
-      },
-      {
-        address: 'mockAddress2',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 5,
-      },
-    ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
-
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
-
-    expect(result).toEqual([]);
-    expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
   });
 });

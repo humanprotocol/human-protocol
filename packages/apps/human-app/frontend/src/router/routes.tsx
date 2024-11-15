@@ -90,18 +90,18 @@ export const protectedRoutes: {
       headerText: t('protectedPagesHeaders.profile'),
     },
   },
+  {
+    routerProps: {
+      path: routerPaths.worker.jobsDiscovery,
+      element: <JobsDiscoveryPage />,
+    },
+    pageHeaderProps: {
+      headerIcon: <HomepageWorkIcon />,
+      headerText: t('protectedPagesHeaders.jobsDiscovery'),
+    },
+  },
   ...(env.VITE_FEATURE_FLAG_JOBS_DISCOVERY
     ? [
-        {
-          routerProps: {
-            path: routerPaths.worker.jobsDiscovery,
-            element: <JobsDiscoveryPage />,
-          },
-          pageHeaderProps: {
-            headerIcon: <HomepageWorkIcon />,
-            headerText: t('protectedPagesHeaders.jobsDiscovery'),
-          },
-        },
         {
           routerProps: {
             path: `${routerPaths.worker.jobs}/:address`,

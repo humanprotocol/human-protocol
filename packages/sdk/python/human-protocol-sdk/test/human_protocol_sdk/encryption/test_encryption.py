@@ -58,20 +58,20 @@ class TestEncryption(unittest.TestCase):
     def test_decrypt(self):
         encryption = Encryption(private_key2)
         decrypted_message = encryption.decrypt(encrypted_message)
-        self.assertIsInstance(decrypted_message, str)
-        self.assertEqual(decrypted_message, message)
+        self.assertIsInstance(decrypted_message, bytes)
+        self.assertEqual(decrypted_message.decode("utf-8"), message)
 
     def test_decrypt_checking_signature(self):
         encryption = Encryption(private_key2)
         decrypted_message = encryption.decrypt(encrypted_message, public_key)
-        self.assertIsInstance(decrypted_message, str)
-        self.assertEqual(decrypted_message, message)
+        self.assertIsInstance(decrypted_message, bytes)
+        self.assertEqual(decrypted_message.decode("utf-8"), message)
 
     def test_decrypt_with_locked_private_key(self):
         encryption = Encryption(private_key3, passphrase)
         decrypted_message = encryption.decrypt(encrypted_message)
-        self.assertIsInstance(decrypted_message, str)
-        self.assertEqual(decrypted_message, message)
+        self.assertIsInstance(decrypted_message, bytes)
+        self.assertEqual(decrypted_message.decode("utf-8"), message)
 
     def test_decrypt_wrong_public_key(self):
         encryption = Encryption(private_key2)
@@ -85,8 +85,8 @@ class TestEncryption(unittest.TestCase):
     def test_decrypt_unsigned_message(self):
         encryption = Encryption(private_key3, passphrase)
         decrypted_message = encryption.decrypt(encrypted_unsigned_message)
-        self.assertIsInstance(decrypted_message, str)
-        self.assertEqual(decrypted_message, message)
+        self.assertIsInstance(decrypted_message, bytes)
+        self.assertEqual(decrypted_message.decode("utf-8"), message)
 
     def test_sign(self):
         encryption = Encryption(private_key)

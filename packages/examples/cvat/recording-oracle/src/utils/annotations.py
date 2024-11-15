@@ -1,10 +1,36 @@
 from argparse import ArgumentParser
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
 
 import datumaro as dm
 import numpy as np
-from datumaro.util import mask_tools
+from datumaro.util import filter_dict, mask_tools
+
+
+def flatten_points(input_points: Sequence[dm.Points]) -> list[dm.Points]:
+    results = []
+
+    for pts in input_points:
+        for point_idx in range(len(pts.points) // 2):
+            point_x = pts.points[2 * point_idx + 0]
+            point_y = pts.points[2 * point_idx + 1]
+
+            point_v = pts.visibility[point_idx]
+            if pts.attributes.get("outside") is True:
+                point_v = dm.Points.Visibility.absent
+            elif point_v == dm.Points.Visibility.visible and pts.attributes.get("occluded") is True:
+                point_v = dm.Points.Visibility.hidden
+
+            results.append(
+                dm.Points(
+                    [point_x, point_y],
+                    visibility=[point_v],
+                    label=pts.label,
+                    attributes=filter_dict(pts.attributes, exclude_keys=["occluded", "outside"]),
+                )
+            )
+
+    return results
 
 
 def shift_ann(

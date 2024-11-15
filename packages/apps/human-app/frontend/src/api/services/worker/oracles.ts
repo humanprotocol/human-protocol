@@ -31,31 +31,35 @@ const H_CAPTCHA_ORACLE: OracleSuccessResponse = {
 
 export async function getOracles({
   selected_job_types,
+  signal,
 }: {
   selected_job_types: string[];
+  signal: AbortSignal;
 }) {
   let oracles = [H_CAPTCHA_ORACLE];
-  const queryParams = selected_job_types.length
-    ? `?${stringifyUrlQueryObject({ selected_job_types })}`
-    : '';
+  if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
+    const queryParams = selected_job_types.length
+      ? `?${stringifyUrlQueryObject({ selected_job_types })}`
+      : '';
 
-  const result = await apiClient(
-    `${apiPaths.worker.oracles.path}${queryParams}`,
-    {
-      successSchema: OraclesSuccessSchema,
-      options: { method: 'GET' },
-    }
-  );
+    const result = await apiClient(
+      `${apiPaths.worker.oracles.path}${queryParams}`,
+      {
+        successSchema: OraclesSuccessSchema,
+        options: { method: 'GET' },
+      },
+      signal
+    );
 
-  oracles = oracles.concat(result);
-
+    oracles = oracles.concat(result);
+  }
   return oracles;
 }
 
 export function useGetOracles() {
   const { selected_job_types } = useJobsTypesOraclesFilter();
   return useQuery({
-    queryFn: () => getOracles({ selected_job_types }),
+    queryFn: ({ signal }) => getOracles({ selected_job_types, signal }),
     queryKey: ['oracles', selected_job_types],
   });
 }

@@ -7,5 +7,5 @@
   "fee": "250000000000",
   "fundAmount": "1250000000000",
   "mode": "BATCH",
-  "requestType": "IMAGE_LABEL_BINARY"
+  "requestType": "image_label_binary"
 }

@@ -157,6 +157,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             cvat_task_id=cvat_task.cvat_id,
             status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.add(cvat_job)
 
@@ -250,9 +252,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             status=OracleWebhookStatuses.pending.value,
             event_type=RecordingOracleEventTypes.submission_rejected.value,
             event_data={
-                "assignments": [
-                    {"assignment_id": "sample assignment id", "reason": "sample reason"}
-                ]
+                "assignments": [{"assignment_id": str(uuid.uuid4()), "reason": "sample reason"}]
             },
             direction=OracleWebhookDirectionTags.incoming,
         )

@@ -7,7 +7,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OracleDiscoveryService } from './oracle-discovery.service';
 import {
   OracleDiscoveryCommand,
@@ -17,6 +17,7 @@ import {
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { plainToInstance } from 'class-transformer';
 
 @Controller()
 export class OracleDiscoveryController {
@@ -28,6 +29,10 @@ export class OracleDiscoveryController {
   @ApiTags('Oracle-Discovery')
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
+  @ApiOkResponse({
+    type: OracleDiscoveryResponse,
+    description: 'List of oracles',
+  })
   @UsePipes(new ValidationPipe())
   public async getOracles(
     @Query() dto: OracleDiscoveryDto,
@@ -43,6 +48,9 @@ export class OracleDiscoveryController {
       OracleDiscoveryDto,
       OracleDiscoveryCommand,
     );
-    return this.service.processOracleDiscovery(command);
+    const oracles = await this.service.processOracleDiscovery(command);
+    return oracles.map((oracle) =>
+      plainToInstance(OracleDiscoveryResponse, oracle),
+    );
   }
 }

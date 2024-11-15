@@ -47,12 +47,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import {
-  isPGPMessage,
-  isValidJSON,
-  mapJobType,
-  parseUrl,
-} from '../../common/utils';
+import { mapJobType, parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -102,13 +97,11 @@ import {
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
 import { StorageService } from '../storage/storage.service';
-import stringify from 'json-stable-stringify';
 import {
   generateBucketUrl,
   listObjectsInBucket,
 } from '../../common/utils/storage';
 import { WebhookDataDto } from '../webhook/webhook.dto';
-import * as crypto from 'crypto';
 import { PaymentEntity } from '../payment/payment.entity';
 import {
   ManifestAction,
@@ -242,13 +235,9 @@ export class JobService {
 
     let groundTruthsData;
     if (jobDto.annotations.groundTruths) {
-      groundTruthsData = await this.storageService.download(
+      groundTruthsData = await this.storageService.downloadJsonLikeData(
         jobDto.annotations.groundTruths,
       );
-
-      if (isValidJSON(groundTruthsData)) {
-        groundTruthsData = JSON.parse(groundTruthsData);
-      }
     }
 
     switch (jobType) {
@@ -448,11 +437,7 @@ export class JobService {
       };
     });
 
-    const hash = crypto
-      .createHash('sha1')
-      .update(stringify(data))
-      .digest('hex');
-    const { url } = await this.storageService.uploadFile(data, hash);
+    const { url } = await this.storageService.uploadJsonLikeData(data);
     return url;
   }
 
@@ -543,9 +528,9 @@ export class JobService {
     },
     [JobRequestType.IMAGE_BOXES]: {
       getElementsCount: async (urls: GenerateUrls) => {
-        const gt = await this.storageService.download(
+        const gt = (await this.storageService.downloadJsonLikeData(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
-        );
+        )) as any;
         if (!gt || !gt.images || gt.images.length === 0)
           throw new ControlledError(
             ErrorJob.GroundThuthValidationFailed,
@@ -576,9 +561,9 @@ export class JobService {
     },
     [JobRequestType.IMAGE_POINTS]: {
       getElementsCount: async (urls: GenerateUrls) => {
-        const gt = await this.storageService.download(
+        const gt = (await this.storageService.downloadJsonLikeData(
           `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
-        );
+        )) as any;
         if (!gt || !gt.images || gt.images.length === 0)
           throw new ControlledError(
             ErrorJob.GroundThuthValidationFailed,
@@ -913,8 +898,12 @@ export class JobService {
   }
 
   public async getCvatElementsCount(gtUrl: URL, dataUrl: URL): Promise<number> {
-    const data = await this.storageService.download(dataUrl.href);
-    const gt = await this.storageService.download(gtUrl.href);
+    const data = (await this.storageService.downloadJsonLikeData(
+      dataUrl.href,
+    )) as any;
+    const gt = (await this.storageService.downloadJsonLikeData(
+      gtUrl.href,
+    )) as any;
 
     if (!gt || !gt.images || gt.images.length === 0) {
       throw new ControlledError(
@@ -1011,14 +1000,9 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    let manifest = await this.storageService.download(jobEntity.manifestUrl);
-    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      manifest = await this.encryption.decrypt(manifest as any);
-    }
-
-    if (isValidJSON(manifest)) {
-      manifest = JSON.parse(manifest);
-    }
+    const manifest = (await this.storageService.downloadJsonLikeData(
+      jobEntity.manifestUrl,
+    )) as any;
 
     await this.validateManifest(jobEntity.requestType, manifest);
 
@@ -1207,15 +1191,8 @@ export class JobService {
       manifestFile = encryptedManifest;
     }
 
-    const hash = crypto
-      .createHash('sha1')
-      .update(stringify(manifestFile))
-      .digest('hex');
-
-    const uploadedFile = await this.storageService.uploadFile(
-      manifestFile,
-      hash,
-    );
+    const uploadedFile =
+      await this.storageService.uploadJsonLikeData(manifestFile);
 
     if (!uploadedFile) {
       throw new ControlledError(
@@ -1324,10 +1301,11 @@ export class JobService {
     }
 
     if (jobEntity.requestType === JobRequestType.FORTUNE) {
-      const data = await this.storageService.download(finalResultUrl);
-      const result = typeof data === 'string' ? JSON.parse(data) : data;
+      const data = (await this.storageService.downloadJsonLikeData(
+        finalResultUrl,
+      )) as Array<FortuneFinalResultDto>;
 
-      if (!result) {
+      if (!data.length) {
         throw new ControlledError(
           ErrorJob.ResultNotFound,
           HttpStatus.NOT_FOUND,
@@ -1336,7 +1314,7 @@ export class JobService {
 
       const allFortuneValidationErrors: ValidationError[] = [];
 
-      for (const fortune of result) {
+      for (const fortune of data) {
         const fortuneDtoCheck = new FortuneFinalResultDto();
         Object.assign(fortuneDtoCheck, fortune);
         const fortuneValidationErrors: ValidationError[] =
@@ -1355,7 +1333,7 @@ export class JobService {
           HttpStatus.NOT_FOUND,
         );
       }
-      return result;
+      return data;
     }
     return finalResultUrl;
   }
@@ -1485,30 +1463,15 @@ export class JobService {
       allocation = await stakingClient.getAllocation(escrowAddress);
     }
 
-    let manifestData = await this.storageService.download(manifestUrl);
+    const manifestData = (await this.storageService.downloadJsonLikeData(
+      manifestUrl,
+    )) as any;
 
     if (!manifestData) {
       throw new ControlledError(
         ErrorJob.ManifestNotFound,
         HttpStatus.NOT_FOUND,
       );
-    }
-
-    let manifest;
-    if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
-      manifestData = await this.encryption.decrypt(manifestData as any);
-    }
-
-    if (isValidJSON(manifestData)) {
-      manifestData = JSON.parse(manifestData);
-    }
-
-    if (jobEntity.requestType === JobRequestType.FORTUNE) {
-      manifest = manifestData as FortuneManifestDto;
-    } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
-      manifest = manifestData as HCaptchaManifestDto;
-    } else {
-      manifest = manifestData as CvatManifestDto;
     }
 
     const baseManifestDetails = {
@@ -1525,7 +1488,7 @@ export class JobService {
 
     let specificManifestDetails;
     if (jobEntity.requestType === JobRequestType.FORTUNE) {
-      manifest = manifest as FortuneManifestDto;
+      const manifest = manifestData as FortuneManifestDto;
       specificManifestDetails = {
         title: manifest.requesterTitle,
         description: manifest.requesterDescription,
@@ -1537,7 +1500,7 @@ export class JobService {
           }),
       };
     } else if (jobEntity.requestType === JobRequestType.HCAPTCHA) {
-      manifest = manifest as HCaptchaManifestDto;
+      const manifest = manifestData as HCaptchaManifestDto;
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
         submissionsRequired: manifest.job_total_tasks,
@@ -1547,13 +1510,14 @@ export class JobService {
           }),
       };
     } else {
-      manifest = manifest as CvatManifestDto;
+      const manifest = manifestData as CvatManifestDto;
       specificManifestDetails = {
         requestType: manifest.annotation?.type,
         submissionsRequired: manifest.annotation?.job_size,
-        ...(manifest.annotation.qualifications &&
-          manifest.annotation.qualifications?.length > 0 && {
-            qualifications: manifest.annotation.qualifications,
+        description: manifest.annotation?.description,
+        ...(manifest.annotation?.qualifications &&
+          manifest.annotation?.qualifications?.length > 0 && {
+            qualifications: manifest.annotation?.qualifications,
           }),
       };
     }

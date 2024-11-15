@@ -196,7 +196,7 @@ describe('HCaptchaService', () => {
       expect(cacheManager.set).toHaveBeenCalledWith(
         DAILY_HMT_SPENT_CACHE_KEY,
         dailyHmtSpentResponseFixture,
-        { ttl: configService.cacheTtlDailyHmtSpent },
+        configService.cacheTtlDailyHmtSpent,
       );
     });
   });
@@ -225,7 +225,7 @@ describe('HCaptchaService', () => {
       expect(cacheManager.set).toHaveBeenCalledWith(
         command.email,
         userStatsResponseFixture,
-        { ttl: configService.cacheTtlHCaptchaUserStats },
+        configService.cacheTtlHCaptchaUserStats,
       );
     });
   });

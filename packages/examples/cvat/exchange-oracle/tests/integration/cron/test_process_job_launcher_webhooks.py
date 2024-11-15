@@ -21,6 +21,7 @@ from src.crons.webhooks.job_launcher import (
     process_incoming_job_launcher_webhooks,
     process_outgoing_job_launcher_webhooks,
 )
+from src.cvat.api_calls import UploadStatus
 from src.db import SessionLocal
 from src.models.cvat import EscrowCreation, Project
 from src.models.webhook import Webhook
@@ -79,6 +80,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_object
             mock_cvat_api.create_cloudstorage.return_value = mock_cvat_object
+            mock_cvat_api.get_task_upload_status.return_value = (UploadStatus.FINISHED, "Finished")
 
             gt_filenames = ["image1.jpg", "image2.png"]
             gt_dataset = build_gt_dataset(gt_filenames).encode()

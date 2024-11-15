@@ -41,6 +41,7 @@ import { TokenRefreshController } from './modules/token-refresh/token-refresh.co
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
+import { HealthModule } from './modules/health/health.module';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -86,10 +87,10 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         CACHE_TTL_DAILY_HMT_SPENT: Joi.number(),
         CACHE_TTL_HCAPTCHA_USER_STATS: Joi.number(),
         CACHE_TTL_ORACLE_DISCOVERY: Joi.number(),
-        CACHE_TTL_JOB_ASSIGNMENTS: Joi.number(),
+        JOB_ASSIGNMENTS_DATA_RETENTION_DAYS: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
-        MAX_REQUEST_RETRIES: Joi.number(),
+        MAX_EXECUTIONS_TO_SKIP: Joi.number(),
         FEATURE_FLAG_JOBS_DISCOVERY: JOI_BOOLEAN_STRING_SCHEMA,
       }),
     }),
@@ -120,6 +121,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     InterceptorModule,
     TokenRefreshModule,
     CronJobModule,
+    HealthModule,
   ],
   controllers: [
     AppController,

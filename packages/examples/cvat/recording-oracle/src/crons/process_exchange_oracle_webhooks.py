@@ -26,7 +26,7 @@ def process_incoming_exchange_oracle_webhooks(logger: logging.Logger, session: S
     )
 
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
             handle_exchange_oracle_event(webhook, db_session=session)
 
 
@@ -53,7 +53,7 @@ def process_outgoing_exchange_oracle_webhooks(logger: logging.Logger, session: S
     process_outgoing_webhooks(
         logger,
         session,
-        OracleWebhookTypes.recording_oracle,
+        OracleWebhookTypes.exchange_oracle,
         get_exchange_oracle_url,
         Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
     )

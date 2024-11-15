@@ -8,8 +8,8 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { Box } from '@mui/material';
-import { SearchForm } from '@/pages/playground/table-example/table-search-form';
+import { Box, Button, Typography } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
   useGetMyJobsData,
@@ -33,9 +33,12 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
+import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
+import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
 
 const getColumnsDefinition = (
-  resignJob: (assignment_id: string) => void
+  resignJob: (assignment_id: string) => void,
+  refreshData: () => void
 ): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -144,16 +147,18 @@ const getColumnsDefinition = (
       return (
         <Box
           sx={{
-            display: 'flex',
+            display: 'inline-flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '3px 4px',
+            padding: '6px 9px',
             color: lightModeColorPalette.white,
             backgroundColor: '#5D0CE9',
             borderRadius: '16px',
           }}
         >
-          {status}
+          <Typography color={lightModeColorPalette.white} variant="chip">
+            {status}
+          </Typography>
         </Box>
       );
     },
@@ -172,34 +177,67 @@ const getColumnsDefinition = (
   },
   {
     accessorKey: 'assignment_id',
-    header: '',
+    header: t('worker.jobs.refresh'),
     size: 100,
     enableSorting: true,
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
-      const buttonDisabled = status !== 'ACTIVE';
+      const buttonDisabled = status !== 'active';
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
           {url ? (
-            <TableButton
-              component={Link}
-              disabled={buttonDisabled}
-              target="_blank"
-              to={url}
-            >
-              {t('worker.jobs.solve')}
-            </TableButton>
+            <>
+              <TableButton
+                component={Link}
+                disabled={buttonDisabled}
+                target="_blank"
+                to={url}
+              >
+                {t('worker.jobs.solve')}
+              </TableButton>
+              <RejectButton
+                disabled={buttonDisabled}
+                onClick={() => {
+                  if (buttonDisabled) return;
+                  resignJob(assignment_id);
+                }}
+              />
+            </>
           ) : null}
-          <RejectButton
-            disabled={buttonDisabled}
-            onClick={() => {
-              if (buttonDisabled) return;
-              resignJob(assignment_id);
-            }}
-          />
         </Grid>
       );
     },
+    muiTableHeadCellProps: () => ({
+      component: (props) => {
+        return (
+          <td {...props}>
+            <Grid
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                width: '100%',
+              }}
+            >
+              <Button
+                size="small"
+                sx={{
+                  paddingTop: '0.4rem',
+                  paddingBottom: '0.4rem',
+                  paddingInline: '1rem',
+                  fontSize: '13px',
+                }}
+                type="button"
+                variant="outlined"
+                onClick={refreshData}
+              >
+                {t('worker.jobs.refresh')}
+                <RefreshIcon sx={{ marginLeft: '0.5rem' }} />
+              </Button>
+            </Grid>
+          </td>
+        );
+      },
+    }),
   },
 ];
 
@@ -211,7 +249,6 @@ export function MyJobsTable() {
     filterParams,
     resetFilterParams,
   } = useMyJobsFilterStore();
-
   const { data: tableData, status: tableStatus } = useGetMyJobsData();
   const memoizedTableDataResults = useMemo(
     () => tableData?.results ?? [],
@@ -219,6 +256,7 @@ export function MyJobsTable() {
   );
 
   const { mutate: rejectTaskMutation } = useRejectTaskMutation();
+  const { mutate: refreshTasksMutation } = useRefreshTasksMutation();
   const { address: oracle_address } = useParams<{ address: string }>();
 
   const [paginationState, setPaginationState] = useState({
@@ -229,6 +267,11 @@ export function MyJobsTable() {
   const rejectTask = (address: string) => {
     return (assignment_id: string) => {
       rejectTaskMutation({ oracle_address: address, assignment_id });
+    };
+  };
+  const refreshTasks = (address: string) => {
+    return () => {
+      refreshTasksMutation({ oracle_address: address });
     };
   };
   useEffect(() => {
@@ -251,7 +294,10 @@ export function MyJobsTable() {
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getColumnsDefinition(rejectTask(oracle_address ?? '')),
+    columns: getColumnsDefinition(
+      rejectTask(oracle_address ?? ''),
+      refreshTasks(oracle_address ?? '')
+    ),
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
@@ -282,10 +328,9 @@ export function MyJobsTable() {
     enableColumnFilters: false,
     enableSorting: false,
     renderTopToolbar: () => (
-      <SearchForm
+      <EscrowAddressSearchForm
         columnId={t('worker.jobs.escrowAddressColumnId')}
         label={t('worker.jobs.searchEscrowAddress')}
-        name={t('worker.jobs.searchEscrowAddress')}
         placeholder={t('worker.jobs.searchEscrowAddress')}
         updater={(address) => {
           setSearchEscrowAddress(address);

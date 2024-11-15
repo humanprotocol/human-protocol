@@ -14,7 +14,7 @@ import { EscrowUtilsGateway } from '../../../integrations/escrow/escrow-utils-ga
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ResignJobCommand } from '../model/job-assignment.model';
 
-const TEST_RETENTION_TTL = 60 * 60 * 24;
+const TEST_RETENTION_TTL = 1000 * 60 * 60 * 24;
 const cacheKey = `jobs:assigned:${USER_ADDRESS}:${EXCHANGE_ORACLE_ADDRESS}`;
 
 describe('JobAssignmentService', () => {
@@ -48,7 +48,7 @@ describe('JobAssignmentService', () => {
         {
           provide: EnvironmentConfigService,
           useValue: {
-            cacheTtlJobAssignments: TEST_RETENTION_TTL,
+            jobAssignmentsRetentionDays: 1,
           },
         },
       ],
@@ -110,7 +110,7 @@ describe('JobAssignmentService', () => {
         command,
       );
       expect(command.data.updatedAfter).toBe(
-        new Date(now - TEST_RETENTION_TTL * 1000).toISOString(),
+        new Date(now - TEST_RETENTION_TTL).toISOString(),
       );
 
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
