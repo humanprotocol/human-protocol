@@ -30,7 +30,7 @@ export const HEADER_SIGNATURE_KEY = 'human-signature';
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
 export const LOGOUT_PATH = '/auth/logout';
 
-export const BACKOFF_INTERVAL_SECONDS = 60;
+export const BACKOFF_INTERVAL_SECONDS = 120;
 
 export const CURSE_WORDS = [
   '4r5e',
