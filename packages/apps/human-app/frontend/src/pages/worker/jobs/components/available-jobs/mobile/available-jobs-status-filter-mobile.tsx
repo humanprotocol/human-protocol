@@ -1,5 +1,8 @@
 import capitalize from 'lodash/capitalize';
-import { jobStatuses } from '@/hooks/use-my-jobs-filter-store';
+import {
+  jobStatuses,
+  disabledJobsStatusesMobile,
+} from '@/hooks/use-my-jobs-filter-store';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 
@@ -15,10 +18,12 @@ export function AvailableJobsStatusFilterMobile() {
           page: 0,
         });
       }}
-      filteringOptions={jobStatuses.map((status) => ({
-        name: capitalize(status),
-        option: status,
-      }))}
+      filteringOptions={jobStatuses
+        .filter((el) => !disabledJobsStatusesMobile.includes(el))
+        .map((status) => ({
+          name: capitalize(status),
+          option: status,
+        }))}
       isChecked={(status) => status === filterParams.status}
       isMobile={false}
       setFiltering={(status) => {

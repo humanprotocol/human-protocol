@@ -2,6 +2,8 @@
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
 
+export const disabledJobsStatusesMobile = ['validation', 'expired', 'rejected'];
+
 export const jobStatuses = [
   'active',
   'completed',
