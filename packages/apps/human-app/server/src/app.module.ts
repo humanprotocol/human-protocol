@@ -90,7 +90,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         JOB_ASSIGNMENTS_DATA_RETENTION_DAYS: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_URL: Joi.number(),
         CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED: Joi.number(),
-        MAX_REQUEST_RETRIES: Joi.number(),
+        MAX_EXECUTIONS_TO_SKIP: Joi.number(),
         FEATURE_FLAG_JOBS_DISCOVERY: JOI_BOOLEAN_STRING_SCHEMA,
       }),
     }),

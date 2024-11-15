@@ -106,7 +106,7 @@ export function isValidJSON(str: string): boolean {
   try {
     JSON.parse(str);
     return true;
-  } catch (e) {
+  } catch (_error) {
     return false;
   }
 }

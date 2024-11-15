@@ -59,6 +59,7 @@ def add_cvat_task_to_db(cvat_id: int, cvat_project_id: int, status: str) -> str:
     return task_id
 
 
+# FUTURE-FIXME: a lot of ways to create a test job
 def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, status: str) -> str:
     with SessionLocal.begin() as session:
         job_id = str(uuid.uuid4())
@@ -68,6 +69,8 @@ def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, st
             cvat_task_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
             status=status,
+            start_frame=0,
+            stop_frame=1,
         )
 
         session.add(job)

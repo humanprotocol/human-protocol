@@ -11,7 +11,7 @@ const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
   'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
-const DEFAULT_MAX_REQUEST_RETRIES = 5;
+const DEFAULT_MAX_EXECUTIONS_TO_SKIP = 32;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
 
 @Injectable()
@@ -291,13 +291,13 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * The maximum number of retries for requests.
+   * The maximum number of iteration to skip.
    * Default: 5
    */
-  get maxRequestRetries(): number {
+  get maxExecutionToSkip(): number {
     return this.configService.get<number>(
-      'MAX_REQUEST_RETRIES',
-      DEFAULT_MAX_REQUEST_RETRIES,
+      'MAX_EXECUTIONS_TO_SKIP',
+      DEFAULT_MAX_EXECUTIONS_TO_SKIP,
     );
   }
 

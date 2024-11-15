@@ -17,7 +17,7 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.10.1.tgz#63430d04bd8c5e74f8d7d049338f1cd9d4f02069"
   integrity sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==
 
-"@adraffy/ens-normalize@1.11.0", "@adraffy/ens-normalize@^1.8.8":
+"@adraffy/ens-normalize@^1.10.1", "@adraffy/ens-normalize@^1.8.8":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.11.0.tgz#42cc67c5baa407ac25059fcd7d405cc5ecdb0c33"
   integrity sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg==
@@ -3132,10 +3132,10 @@
     "@babel/runtime" "^7.25.7"
     "@mui/utils" "^5.16.6 || ^6.0.0"
 
-"@nestjs/axios@^3.0.2":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-3.1.1.tgz#565160180c81b580e4b192792fe506f5db9e1bcc"
-  integrity sha512-ySoxrzqX80P1q6LKLKGcgyBd2utg4gbC+4FsJNpXYvILorMlxss/ECNogD9EXLCE4JS5exVFD5ez0nK5hXcNTQ==
+"@nestjs/axios@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-3.1.2.tgz#e55c39cfd2e0ed24304b9aa31d1854ecbfe760c7"
+  integrity sha512-pFlfi4ZQsZtTNNhvgssbxjCHUd1nMpV3sXy/xOOB2uEJhw3M8j8SFR08gjFNil2we2Har7VCsXLfCkwbMHECFQ==
 
 "@nestjs/cache-manager@^2.2.1", "@nestjs/cache-manager@^2.2.2":
   version "2.3.0"
@@ -4298,7 +4298,7 @@
     "@noble/hashes" "~1.4.0"
     "@scure/base" "~1.1.6"
 
-"@scure/bip32@1.5.0":
+"@scure/bip32@1.5.0", "@scure/bip32@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@scure/bip32/-/bip32-1.5.0.tgz#dd4a2e1b8a9da60e012e776d954c4186db6328e6"
   integrity sha512-8EnFYkqEQdnkuGBVpCzKxyIwDCBLDVj3oiX0EKUFre/tOjL/Hqba1D6n/8RcmaQy4f95qQFrO2A8Sr6ybh4NRw==
@@ -4331,7 +4331,7 @@
     "@noble/hashes" "~1.4.0"
     "@scure/base" "~1.1.6"
 
-"@scure/bip39@1.4.0":
+"@scure/bip39@1.4.0", "@scure/bip39@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@scure/bip39/-/bip39-1.4.0.tgz#664d4f851564e2e1d4bffa0339f9546ea55960a6"
   integrity sha512-BEEm6p8IueV/ZTfQLp/0vhw4NPnT9oWf5+28nvmeUICjP99f4vr2d+qc7AVGDDtwRep6ifR43Yed9ERVmiITzw==
@@ -4764,10 +4764,10 @@
   resolved "https://registry.yarnpkg.com/@synaps-io/verify-sdk/-/verify-sdk-4.0.48.tgz#c19ce9cbcb8306095ccc52749127b7a80cd9339b"
   integrity sha512-Oa3vVDq8Um2lJ2L1nG/vCPdOzTF6ccgbizrtaLPf/37VjbiLr4CGb1fVqMhzsMFs0niK4qL97NZni7DR/8nDmg==
 
-"@tanstack/eslint-plugin-query@^5.18.1":
-  version "5.59.7"
-  resolved "https://registry.yarnpkg.com/@tanstack/eslint-plugin-query/-/eslint-plugin-query-5.59.7.tgz#c2fdb1c5d60457b3094c33299a866b9a1a52209a"
-  integrity sha512-txQGX5yC+4gmbR81EXaum2tOxeDQkRCWnaLmaP/pSrbIVCUkbMbrxxsaoOgN+fBqqqGo9V3LoCVL6ez1tRUF7Q==
+"@tanstack/eslint-plugin-query@^5.60.1":
+  version "5.60.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/eslint-plugin-query/-/eslint-plugin-query-5.60.1.tgz#ce4d1307d5801834949607d8f60b2ff835ccf1fe"
+  integrity sha512-oCaWtFKa6WwX14fm/Sp486eTFXXgadiDzEYxhM/tiAlM+xzvPwp6ZHgR6sndmvYK+s/jbksDCTLIPS0PCH8L2g==
   dependencies:
     "@typescript-eslint/utils" "^8.3.0"
 
@@ -7158,7 +7158,7 @@ abitype@1.0.0:
   resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.0.0.tgz#237176dace81d90d018bebf3a45cb42f2a2d9e97"
   integrity sha512-NMeMah//6bJ56H5XRj8QCV4AwuW6hB6zqz2LnhhLdcWVQOsXki6/Pn3APeqxCma62nXIcmZWdu1DlHWS74umVQ==
 
-abitype@1.0.6:
+abitype@1.0.6, abitype@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.0.6.tgz#76410903e1d88e34f1362746e2d407513c38565b"
   integrity sha512-MMSqYh4+C/aVqI2RQaWqbvI4Kxo5cQV40WQ4QFtDnNzCkqChm8MuENhElmynZlO0qUy/ObkEUaXtKqYnx1Kp3A==
@@ -8441,13 +8441,6 @@ cacache@^18.0.0:
     ssri "^10.0.0"
     tar "^6.1.11"
     unique-filename "^3.0.0"
-
-cache-manager-redis-store@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/cache-manager-redis-store/-/cache-manager-redis-store-3.0.1.tgz#8eeb211212763d04cef4058666182d624f714299"
-  integrity sha512-o560kw+dFqusC9lQJhcm6L2F2fMKobJ5af+FoR2PdnMVdpQ3f3Bz6qzvObTGyvoazQJxjQNWgMQeChP4vRTuXQ==
-  dependencies:
-    redis "^4.3.1"
 
 cache-manager-redis-yet@^5.1.5:
   version "5.1.5"
@@ -16183,6 +16176,19 @@ os-tmpdir@~1.0.2:
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha512-D2FR03Vir7FIu45XBY20mTb+/ZSWB00sjU9jdQXt83gDrI4Ztz5Fs7/yy74g2N5SVQY4xY1qDr4rNddwYRVX0g==
 
+ox@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/ox/-/ox-0.1.2.tgz#0f791be2ccabeaf4928e6d423498fe1c8094e560"
+  integrity sha512-ak/8K0Rtphg9vnRJlbOdaX9R7cmxD2MiSthjWGaQdMk3D7hrAlDoM+6Lxn7hN52Za3vrXfZ7enfke/5WjolDww==
+  dependencies:
+    "@adraffy/ens-normalize" "^1.10.1"
+    "@noble/curves" "^1.6.0"
+    "@noble/hashes" "^1.5.0"
+    "@scure/bip32" "^1.5.0"
+    "@scure/bip39" "^1.4.0"
+    abitype "^1.0.6"
+    eventemitter3 "5.0.1"
+
 p-defer@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/p-defer/-/p-defer-3.0.0.tgz#d1dceb4ee9b2b604b1d94ffec83760175d4e6f83"
@@ -17448,7 +17454,7 @@ redeyed@~2.1.0:
   dependencies:
     esprima "~4.0.0"
 
-redis@^4.3.1, redis@^4.7.0:
+redis@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/redis/-/redis-4.7.0.tgz#b401787514d25dd0cfc22406d767937ba3be55d6"
   integrity sha512-zvmkHEAdGMn+hMRXuMBtu4Vo5P6rHQjLoHftu+lBqq8ZTA3RCVC/WzD790bkKKiNFp7d5/9PcSD19fJyyRvOdQ==
@@ -20224,17 +20230,17 @@ viem@2.7.14:
     ws "8.13.0"
 
 viem@2.x, viem@^2.1.1:
-  version "2.21.41"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.21.41.tgz#40c9af3f6e0fdbb45b532838b4e1be2418d1b0de"
-  integrity sha512-FxDALzW6I9lGSISbGKqGLfsc4GCtALrgm3mpQcOi7gpyTBkKkl39IWgRjAK1KGNOOvqneQmUKSxWsApkUYSn5w==
+  version "2.21.44"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.21.44.tgz#793600a6afa8c0c1d62b4b819d036f833f623195"
+  integrity sha512-oyLTCt7OQUetQN2m9KPNgSA//MzpnQLABAyglPKh+fAypU8cTT/hC5UyLQvaYt4WPg6dkbKOxfsahV4739pu9w==
   dependencies:
-    "@adraffy/ens-normalize" "1.11.0"
     "@noble/curves" "1.6.0"
     "@noble/hashes" "1.5.0"
     "@scure/bip32" "1.5.0"
     "@scure/bip39" "1.4.0"
     abitype "1.0.6"
     isows "1.0.6"
+    ox "0.1.2"
     webauthn-p256 "0.0.10"
     ws "8.18.0"
 

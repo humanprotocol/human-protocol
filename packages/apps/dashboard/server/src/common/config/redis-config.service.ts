@@ -18,18 +18,22 @@ export class RedisConfigService {
     return this.configService.get<string>('REDIS_HOST', DEFAULT_REDIS_HOST);
   }
   get redisPort(): number {
-    return +this.configService.get<number>('REDIS_PORT', DEFAULT_REDIS_PORT);
+    return this.configService.get<number>('REDIS_PORT', DEFAULT_REDIS_PORT);
   }
   get cacheHmtPriceTTL(): number {
-    return +this.configService.get<number>(
-      'CACHE_HMT_PRICE_TTL',
-      DEFAULT_CACHE_HMT_PRICE_TTL,
+    return (
+      this.configService.get<number>(
+        'CACHE_HMT_PRICE_TTL',
+        DEFAULT_CACHE_HMT_PRICE_TTL,
+      ) * 1000
     );
   }
   get cacheHmtGeneralStatsTTL(): number {
-    return +this.configService.get<number>(
-      'CACHE_HMT_GENERAL_STATS_TTL',
-      DEFAULT_CACHE_HMT_GENERAL_STATS_TTL,
+    return (
+      this.configService.get<number>(
+        'CACHE_HMT_GENERAL_STATS_TTL',
+        DEFAULT_CACHE_HMT_GENERAL_STATS_TTL,
+      ) * 1000
     );
   }
   get hmtPriceCacheKey(): string {

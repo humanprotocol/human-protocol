@@ -104,6 +104,8 @@ def add_cvat_entities(session, task_status: JobStatuses, job_status: TaskStatuse
         cvat_project_id=1,
         cvat_task_id=task.cvat_id,
         status=job_status,
+        start_frame=0,
+        stop_frame=1,
     )
     session.add_all([task, job])
 

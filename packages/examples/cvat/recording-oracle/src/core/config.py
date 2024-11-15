@@ -223,6 +223,16 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
+class CvatConfig:
+    cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
+    cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
+    cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
+    cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "org1")
+
+    cvat_quality_retrieval_timeout = int(os.environ.get("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
+    cvat_quality_check_interval = int(os.environ.get("CVAT_QUALITY_CHECK_INTERVAL", 5))
+
+
 class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
@@ -243,6 +253,7 @@ class Config:
     features = FeaturesConfig
     validation = ValidationConfig
     encryption_config = EncryptionConfig
+    cvat_config = CvatConfig
 
     @classmethod
     def validate(cls) -> None:

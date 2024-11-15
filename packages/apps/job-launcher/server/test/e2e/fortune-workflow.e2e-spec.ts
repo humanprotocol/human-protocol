@@ -148,7 +148,9 @@ describe('Fortune E2E workflow', () => {
     expect(jobEntity!.status).toBe(JobStatus.PAID);
     expect(jobEntity!.manifestUrl).toBeDefined();
 
-    const manifest = await storageService.download(jobEntity!.manifestUrl);
+    const manifest = (await storageService.downloadJsonLikeData(
+      jobEntity!.manifestUrl,
+    )) as any;
     expect(manifest).toMatchObject({
       chainId: ChainId.LOCALHOST,
       fundAmount: expect.any(Number),

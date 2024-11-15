@@ -57,10 +57,10 @@ class GtStats(Base):
     task_id = Column(
         String, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True, nullable=False
     )
-
-    # TODO: think how to store this better
-    gt_key = Column(String, index=True, primary_key=True, nullable=False)
+    gt_frame_name = Column(String, primary_key=True, nullable=False)
 
     failed_attempts = Column(Integer, default=0, nullable=False)
+    accepted_attempts = Column(Integer, default=0, nullable=False)
+    accumulated_quality = Column(Float, default=0.0, nullable=False)
 
     task: Mapped[Task] = relationship(back_populates="gt_stats")
