@@ -12,7 +12,6 @@ describe('CronJobService', () => {
   let service: CronJobService;
   let cronJobRepository: jest.Mocked<CronJobRepository>;
   let webhookService: jest.Mocked<WebhookService>;
-  let logger: Logger;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,7 +47,6 @@ describe('CronJobService', () => {
     service = module.get<CronJobService>(CronJobService);
     cronJobRepository = module.get(CronJobRepository);
     webhookService = module.get(WebhookService);
-    logger = module.get(Logger);
   });
 
   describe('startCronJob', () => {

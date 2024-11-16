@@ -76,7 +76,6 @@ describe('WebhookService', () => {
   let web3ConfigService: Web3ConfigService;
   let escrowCompletionTrackingService: EscrowCompletionTrackingService;
   let escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository;
-  let payoutService: PayoutService;
   let reputationService: ReputationService;
 
   const signerMock = {
@@ -152,7 +151,6 @@ describe('WebhookService', () => {
     escrowCompletionTrackingRepository = moduleRef.get(
       EscrowCompletionTrackingRepository,
     );
-    payoutService = moduleRef.get<PayoutService>(PayoutService);
     reputationService = moduleRef.get<ReputationService>(ReputationService);
     escrowCompletionTrackingService =
       moduleRef.get<EscrowCompletionTrackingService>(

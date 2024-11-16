@@ -23,7 +23,6 @@ jest.mock('rxjs', () => {
 describe('hCaptchaService', () => {
   let hcaptchaService: HCaptchaService;
   let httpService: HttpService;
-  let configService: ConfigService;
 
   beforeAll(async () => {
     const mockHttpService: DeepPartial<HttpService> = {
@@ -57,7 +56,6 @@ describe('hCaptchaService', () => {
     }).compile();
 
     httpService = moduleRef.get<HttpService>(HttpService);
-    configService = moduleRef.get<ConfigService>(ConfigService);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
   });
 
