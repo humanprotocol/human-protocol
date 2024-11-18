@@ -48,7 +48,7 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session):
             validate_escrow(
                 webhook.chain_id,
                 webhook.escrow_address,
-                accepted_states=[EscrowStatus.Pending, EscrowStatus.Cancelled],
+                accepted_states=list(EscrowStatus.__members__.values()),
             )
 
             clean_escrow(
