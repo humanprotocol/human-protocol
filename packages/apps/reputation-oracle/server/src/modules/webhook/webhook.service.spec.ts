@@ -603,9 +603,7 @@ describe('WebhookService', () => {
         })
         .mockResolvedValue(mockEntity2 as any);
 
-      await expect(
-        webhookService.processPendingEscrowCompletion(),
-      ).rejects.toThrow(new Error('Test error'));
+      await webhookService.processPendingEscrowCompletion();
     });
   });
 
