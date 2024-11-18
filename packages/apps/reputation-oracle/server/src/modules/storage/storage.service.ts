@@ -238,6 +238,7 @@ export class StorageService {
         key,
         content,
         {
+          'Content-Type': 'text/plain',
           'Cache-Control': 'no-store',
         },
       );

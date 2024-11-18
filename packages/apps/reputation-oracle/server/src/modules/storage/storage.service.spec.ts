@@ -402,7 +402,10 @@ describe('StorageService', () => {
           .update('encrypted-file-content')
           .digest('hex')}.zip`,
         'encrypted-file-content',
-        { 'Cache-Control': 'no-store' },
+        {
+          'Cache-Control': 'no-store',
+          'Content-Type': 'text/plain',
+        },
       );
     });
 
@@ -440,7 +443,10 @@ describe('StorageService', () => {
           .update('encrypted-file-content')
           .digest('hex')}.zip`,
         'encrypted-file-content',
-        { 'Cache-Control': 'no-store' },
+        {
+          'Cache-Control': 'no-store',
+          'Content-Type': 'text/plain',
+        },
       );
     });
 
@@ -517,7 +523,10 @@ describe('StorageService', () => {
             .update('some-file-content')
             .digest('hex')}.zip`,
           someFileContent,
-          { 'Cache-Control': 'no-store' },
+          {
+            'Cache-Control': 'no-store',
+            'Content-Type': 'text/plain',
+          },
         );
       });
 
@@ -556,7 +565,10 @@ describe('StorageService', () => {
             .update(someFileContent)
             .digest('hex')}.zip`,
           someFileContent,
-          { 'Cache-Control': 'no-store' },
+          {
+            'Cache-Control': 'no-store',
+            'Content-Type': 'text/plain',
+          },
         );
       });
     });
