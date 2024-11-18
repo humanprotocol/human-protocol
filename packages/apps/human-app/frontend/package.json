@@ -24,7 +24,7 @@
     "@mui/icons-material": "^6.1.1",
     "@mui/material": "^5.16.7",
     "@synaps-io/verify-sdk": "^4.0.45",
-    "@tanstack/react-query": "^5.18.1",
+    "@tanstack/react-query": "^5.60.5",
     "@walletconnect/ethereum-provider": "^2.16.1",
     "@walletconnect/modal": "^2.6.2",
     "@web3modal/ethers": "^5.1.5",
