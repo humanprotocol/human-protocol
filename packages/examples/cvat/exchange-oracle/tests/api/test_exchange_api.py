@@ -406,9 +406,7 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
             ProjectStatuses.validation,
             ProjectStatuses.canceled,
             ProjectStatuses.recorded,
-            # TODO: ProjectStatuses.deleted,
-            # raise NotImplementedError(f"Unknown status {project.status}")
-            # NotImplementedError: Unknown status deleted
+            ProjectStatuses.deleted,
         ]
     ):
         cvat_project = create_project(
@@ -437,7 +435,20 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
         session.add(assignment)
         assignments.append(assignment)
         cvat.touch(session, Job, [cvat_job.id])
-        session.commit()  # imitate different created_dates
+        session.commit()  # TODO: imitate different created_dates
+
+    visible_projects_ids = set(
+        p.cvat_id
+        for p in cvat_projects
+        if p.status
+        not in [
+            ProjectStatuses.creation,
+            ProjectStatuses.completed,
+            ProjectStatuses.validation,
+            ProjectStatuses.deleted,
+        ]
+    )
+    visible_projects_count = len(visible_projects_ids)
 
     middle_init_time = utcnow()
 
@@ -460,23 +471,28 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
             "status": (
                 (
                     APIJobStatuses.active.value,
-                    3,
-                ),  # ProjectStatuses::annotation,completed,validation
-                (APIJobStatuses.completed.value, 1),
-                (APIJobStatuses.canceled.value, 1),
+                    1,
+                    # ProjectStatuses.annotation
+                    # completed, validation are internal, so hidden
+                ),
+                (APIJobStatuses.completed.value, 1),  # ProjectStatuses.recorded
+                (APIJobStatuses.canceled.value, 1),  # ProjectStatuses.canceled
             ),
-            "chain_id": ((cvat_projects[0].chain_id, len(cvat_projects)),),
+            "chain_id": ((cvat_projects[0].chain_id, visible_projects_count),),
             "job_type": (
-                (cvat_projects[0].job_type, len(cvat_projects)),
+                (cvat_projects[0].job_type, visible_projects_count),
                 (TaskTypes.image_boxes_from_points.value, 0),
             ),
             "created_after": (
-                (str(pre_init_time - timedelta(minutes=1)), len(cvat_projects)),
+                (str(pre_init_time - timedelta(minutes=1)), visible_projects_count),
                 (str(post_init_time), 0),
             ),
             "updated_after": (
-                (str(pre_init_time - timedelta(minutes=1)), len(cvat_projects)),
-                (str(middle_init_time), len(updated_cvat_project_ids)),
+                (str(pre_init_time - timedelta(minutes=1)), visible_projects_count),
+                (
+                    str(middle_init_time),
+                    len(visible_projects_ids.intersection(updated_cvat_project_ids)),
+                ),
                 (str(post_init_time + timedelta(minutes=1)), 0),
             ),
         }.items():
