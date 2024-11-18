@@ -222,7 +222,7 @@ class User(Base):  # user does not have a UUID primary key
         return f"User. wallet_address={self.wallet_address} cvat_id={self.cvat_id}"
 
 
-class Assignment(BaseUUID):
+class Assignment(ChildOf[Job]):
     __tablename__ = "assignments"
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
