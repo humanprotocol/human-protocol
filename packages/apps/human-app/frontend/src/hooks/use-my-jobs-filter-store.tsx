@@ -16,7 +16,12 @@ type JobStatus = (typeof jobStatuses)[number];
 export interface MyJobsFilterStoreProps {
   filterParams: {
     sort?: 'asc' | 'desc';
-    sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'expires_at';
+    sort_field?:
+      | 'chain_id'
+      | 'job_type'
+      | 'reward_amount'
+      | 'expires_at'
+      | 'created_at';
     job_type?: string;
     status?: JobStatus;
     escrow_address?: string;
@@ -36,11 +41,11 @@ export interface MyJobsFilterStoreProps {
 }
 
 const initialFiltersState = {
+  escrow_address: '',
   page: 0,
   page_size: 5,
-  filterParams: {
-    escrow_address: '',
-  },
+  sort_field: 'created_at',
+  sort: 'desc',
 } as const;
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
