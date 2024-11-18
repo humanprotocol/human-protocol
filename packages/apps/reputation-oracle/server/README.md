@@ -115,6 +115,13 @@ $ yarn migration:show
 
 For detailed information about the Exchange Oracle, please refer to the [Human Protocol Tech Docs](https://human-protocol.gitbook.io/hub/human-tech-docs/architecture/components/reputation-oracle).
 
+### Generate env documentation
+
+```bash
+# Generate environment variables document
+$ yarn generate-env-doc
+```
+
 ## 📝 License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.
