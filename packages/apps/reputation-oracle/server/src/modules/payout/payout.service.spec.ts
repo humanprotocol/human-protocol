@@ -106,7 +106,7 @@ describe('PayoutService', () => {
     jest.restoreAllMocks();
   });
 
-  describe('saveResults', () => {
+  describe('processResults', () => {
     it('should successfully save results for CVAT', async () => {
       const manifest: CvatManifestDto = {
         data: {
@@ -141,7 +141,7 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const result = await payoutService.saveResults(chainId, escrowAddress);
+      const result = await payoutService.processResults(chainId, escrowAddress);
       expect(result).toEqual(results);
     });
 
@@ -168,7 +168,7 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const result = await payoutService.saveResults(chainId, escrowAddress);
+      const result = await payoutService.processResults(chainId, escrowAddress);
       expect(result).toEqual(results);
     });
 
@@ -190,12 +190,28 @@ describe('PayoutService', () => {
       const chainId = ChainId.LOCALHOST;
 
       await expect(
-        payoutService.saveResults(chainId, escrowAddress),
+        payoutService.processResults(chainId, escrowAddress),
       ).rejects.toThrow(
         new ControlledError(
           ErrorManifest.ManifestUrlDoesNotExist,
           HttpStatus.BAD_REQUEST,
         ),
+      );
+    });
+
+    it('should throw an error for unsupported request types', async () => {
+      const mockManifest = { requestType: 'unsupportedType' };
+
+      jest.spyOn(EscrowClient, 'build').mockResolvedValue({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      } as any);
+
+      jest.spyOn(storageService, 'download').mockResolvedValue(mockManifest);
+
+      await expect(
+        payoutService.processResults(ChainId.LOCALHOST, MOCK_ADDRESS),
+      ).rejects.toThrow(
+        `Unsupported request type: ${mockManifest.requestType.toLowerCase()}`,
       );
     });
   });
@@ -310,12 +326,28 @@ describe('PayoutService', () => {
       const chainId = ChainId.LOCALHOST;
 
       await expect(
-        payoutService.saveResults(chainId, escrowAddress),
+        payoutService.processResults(chainId, escrowAddress),
       ).rejects.toThrow(
         new ControlledError(
           ErrorManifest.ManifestUrlDoesNotExist,
           HttpStatus.BAD_REQUEST,
         ),
+      );
+    });
+
+    it('should throw an error for unsupported request types', async () => {
+      const mockManifest = { requestType: 'unsupportedType' };
+
+      jest.spyOn(EscrowClient, 'build').mockResolvedValue({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      } as any);
+
+      jest.spyOn(storageService, 'download').mockResolvedValue(mockManifest);
+
+      await expect(
+        payoutService.processResults(ChainId.LOCALHOST, MOCK_ADDRESS),
+      ).rejects.toThrow(
+        `Unsupported request type: ${mockManifest.requestType.toLowerCase()}`,
       );
     });
   });

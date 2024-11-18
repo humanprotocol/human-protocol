@@ -245,7 +245,7 @@ export class WebhookService {
         const escrowStatus = await escrowClient.getStatus(escrowAddress);
         if (escrowStatus === EscrowStatus.Launched) {
           if (!finalResultsUrl) {
-            const { url, hash } = await this.payoutService.saveResults(
+            const { url, hash } = await this.payoutService.processResults(
               chainId,
               escrowAddress,
             );

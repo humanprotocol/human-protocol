@@ -23,7 +23,7 @@ import {
   SaveResultDto,
 } from '../../common/dto/result';
 import { RequestAction } from './payout.interface';
-import { getRequestType } from '../../common/utils';
+import { getRequestType, isValidJobRequestType } from '../../common/utils';
 import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
@@ -36,14 +36,14 @@ export class PayoutService {
   ) {}
 
   /**
-   * Saves the final calculated results to be used for worker payouts.
+   * Process the final calculated results to be used for worker payouts.
    * Retrieves the manifest URL and downloads the manifest data to determine
    * the request type, then invokes the appropriate payout action for that type.
    * @param chainId The blockchain chain ID.
    * @param escrowAddress The escrow contract address.
    * @returns {Promise<SaveResultDto>} The URL and hash for the stored results.
    */
-  public async saveResults(
+  public async processResults(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<SaveResultDto> {
@@ -62,7 +62,14 @@ export class PayoutService {
 
     const manifest = await this.storageService.download(manifestUrl);
 
-    const requestType = getRequestType(manifest);
+    const requestType = getRequestType(manifest).toLowerCase();
+
+    if (!isValidJobRequestType(requestType)) {
+      throw new ControlledError(
+        `Unsupported request type: ${requestType}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
@@ -104,7 +111,14 @@ export class PayoutService {
 
     const manifest = await this.storageService.download(manifestUrl);
 
-    const requestType = getRequestType(manifest);
+    const requestType = getRequestType(manifest).toLowerCase();
+
+    if (!isValidJobRequestType(requestType)) {
+      throw new ControlledError(
+        `Unsupported request type: ${requestType}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 

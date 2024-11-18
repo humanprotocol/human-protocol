@@ -133,13 +133,12 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
+  @Cron('*/1 * * * *')
   /**
    * Processes paid escrow completion tracking, finalizing escrow operations if completed.
    * Notifies oracles via callbacks, logs errors, and updates tracking status.
    * @returns {Promise<void>} A promise that resolves when the paid escrow tracking has been processed.
    */
-  @Cron('*/2 * * * *')
   public async processPaidEscrowCompletion(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPaidEscrowCompletionTracking,
@@ -170,7 +169,6 @@ export class CronJobService {
    * Updates each webhook's status upon success, retries or logs errors as necessary.
    * @returns {Promise<void>} A promise that resolves once all pending outgoing webhooks have been processed.
    */
-  @Cron('*/2 * * * *')
   public async processPendingOutgoingWebhooks(): Promise<void> {
     if (await this.isCronJobRunning(CronJobType.ProcessPendingOutgoingWebhook))
       return;

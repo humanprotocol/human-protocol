@@ -35,6 +35,7 @@ import { ReputationModule } from '../reputation/reputation.module';
     WebhookService,
     WebhookIncomingRepository,
     WebhookOutgoingRepository,
+    EscrowCompletionTrackingRepository,
   ],
   exports: [WebhookService],
 })
