@@ -26,7 +26,7 @@ const getColumns = (
 ): MRT_ColumnDef<OracleSuccessResponse>[] => {
   return [
     {
-      accessorKey: 'url',
+      accessorKey: 'name',
       header: t('worker.oraclesTable.annotationTool'),
       size: 100,
       enableSorting: false,
