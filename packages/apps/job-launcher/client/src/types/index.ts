@@ -31,6 +31,7 @@ export type CryptoPaymentRequest = {
 export type FiatPaymentRequest = {
   amount: number;
   currency: string;
+  paymentMethodId: string;
 };
 
 export type CreateFortuneJobRequest = {
@@ -297,4 +298,28 @@ export type Qualification = {
   title: string;
   description: string;
   expires_at: string;
+};
+
+export type CardData = {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  default: boolean;
+};
+
+export type BillingInfo = {
+  name: string;
+  email?: string;
+  address: Address;
+  vat: string;
+  vatType: string;
+};
+
+type Address = {
+  city: string;
+  country: string;
+  line: string;
+  postalCode: string;
 };

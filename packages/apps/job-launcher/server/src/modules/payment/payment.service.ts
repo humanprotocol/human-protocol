@@ -69,31 +69,35 @@ export class PaymentService {
 
   public async createCustomerAndAssignCard(user: UserEntity): Promise<string> {
     let setupIntent: Stripe.Response<Stripe.SetupIntent>;
+    let customerId: string = user.stripeCustomerId;
 
-    if (user.stripeCustomerId) {
-      this.logger.log(ErrorPayment.CardAssigned, PaymentService.name);
-      throw new ControlledError(
-        ErrorPayment.CardAssigned,
-        HttpStatus.NOT_FOUND,
-      );
+    if (!user.stripeCustomerId) {
+      try {
+        customerId = (
+          await this.stripe.customers.create({
+            email: user.email,
+          })
+        ).id;
+      } catch (error) {
+        this.logger.log(error.message, PaymentService.name);
+        throw new ControlledError(
+          ErrorPayment.CustomerNotCreated,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
-
     try {
-      const customer = await this.stripe.customers.create({
-        email: user.email,
-      });
-
       setupIntent = await this.stripe.setupIntents.create({
         automatic_payment_methods: {
           enabled: true,
         },
-        customer: customer.id,
+        customer: customerId,
       });
     } catch (error) {
       this.logger.log(error.message, PaymentService.name);
       throw new ControlledError(
         ErrorPayment.CardNotAssigned,
-        HttpStatus.NOT_FOUND,
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -124,15 +128,17 @@ export class PaymentService {
         HttpStatus.NOT_FOUND,
       );
     }
-
-    await this.stripe.customers.update(<string>setup.customer, {
-      invoice_settings: {
-        default_payment_method: <string>setup.payment_method,
-      },
-    });
-
-    user.stripeCustomerId = setup.customer as string;
-    await this.userRepository.updateOne(user);
+    if (data.defaultCard || !user.stripeCustomerId) {
+      await this.stripe.customers.update(<string>setup.customer, {
+        invoice_settings: {
+          default_payment_method: <string>setup.payment_method,
+        },
+      });
+    }
+    if (!user.stripeCustomerId) {
+      user.stripeCustomerId = setup.customer as string;
+      await this.userRepository.updateOne(user);
+    }
 
     return true;
   }
@@ -459,6 +465,8 @@ export class PaymentService {
       card.id = paymentMethod.id;
       card.brand = paymentMethod.card?.brand as string;
       card.last4 = paymentMethod.card?.last4 as string;
+      card.expMonth = paymentMethod.card?.exp_month as number;
+      card.expYear = paymentMethod.card?.exp_year as number;
       card.default = defaultPaymentMethod === paymentMethod.id;
       cards.push(card);
     }
@@ -494,18 +502,19 @@ export class PaymentService {
     const userBillingInfo = new BillingInfoDto();
     if ((customer as Stripe.Customer).address) {
       const address = new AddressDto();
-      address.country = (customer as Stripe.Customer).address
-        ?.country as string;
+      address.country = (
+        (customer as Stripe.Customer).address?.country as string
+      ).toLowerCase();
       address.postalCode = (customer as Stripe.Customer).address
         ?.postal_code as string;
       address.city = (customer as Stripe.Customer).address?.city as string;
       address.line = (customer as Stripe.Customer).address?.line1 as string;
       userBillingInfo.address = address;
     }
-    userBillingInfo.name = (customer as Stripe.Customer).name as string;
-    userBillingInfo.email = (customer as Stripe.Customer).email as string;
-    userBillingInfo.vat = taxIds.data[0].value;
-    userBillingInfo.vatType = taxIds.data[0].type as VatType;
+    userBillingInfo.name = (customer as Stripe.Customer)?.name as string;
+    userBillingInfo.email = (customer as Stripe.Customer)?.email as string;
+    userBillingInfo.vat = taxIds.data[0]?.value;
+    userBillingInfo.vatType = taxIds.data[0]?.type as VatType;
     return userBillingInfo;
   }
 

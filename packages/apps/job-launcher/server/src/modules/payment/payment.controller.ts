@@ -256,27 +256,6 @@ export class PaymentController {
   }
 
   @ApiOperation({
-    summary: 'Check if a card has already been assigned to the user',
-    description:
-      'Endpoint to check if a card has already been assigned to the user.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Card assigned succesfully',
-    type: Boolean,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @Get('/fiat/check-card')
-  public async checkUserCard(
-    @Request() req: RequestWithUser,
-  ): Promise<boolean> {
-    return !!req.user?.stripeCustomerId;
-  }
-
-  @ApiOperation({
     summary: 'List user cards',
     description: 'Fetches all cards associated with the user.',
   })

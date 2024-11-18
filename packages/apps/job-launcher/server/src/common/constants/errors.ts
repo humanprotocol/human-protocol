@@ -91,7 +91,6 @@ export enum ErrorPayment {
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
   CardNotAssigned = 'Card not assigned',
-  CardAssigned = 'User already has a card assigned',
   SetupNotFound = 'Setup not found',
   ClientSecretDoesNotExist = 'Client secret does not exist',
   CustomerNotFound = 'Customer not found',

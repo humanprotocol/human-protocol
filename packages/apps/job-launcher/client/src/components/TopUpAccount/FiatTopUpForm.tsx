@@ -1,18 +1,25 @@
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Button,
   FormControl,
   Grid,
+  InputAdornment,
   Link,
   TextField,
   Typography,
 } from '@mui/material';
 import { useElements, useStripe } from '@stripe/react-stripe-js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
 import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
+import { CardData } from '../../types';
+import AddCardModal from '../CreditCard/AddCardModal';
+import SelectCardModal from '../CreditCard/SelectCardModal';
+import { CardIcon } from '../Icons/CardIcon';
+import SuccessModal from '../SuccessModal';
 import { TopUpSuccess } from './TopUpSuccess';
 
 export const FiatTopUpForm = () => {
@@ -23,9 +30,34 @@ export const FiatTopUpForm = () => {
   const [amount, setAmount] = useState<string>();
   const dispatch = useAppDispatch();
   const { showError } = useSnackbar();
+  const [cards, setCards] = useState<CardData[]>([]);
+  const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
+  const [isSelectCardModalOpen, setIsSelectCardModalOpen] = useState(false);
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
+
+  const fetchCards = async () => {
+    const data = await paymentService.getUserCards();
+    setCards(data);
+
+    const defaultCard = data.find((card: CardData) => card.default);
+    if (defaultCard) {
+      setSelectedCard(defaultCard);
+    }
+  };
+
+  const handleSuccessAction = (message: string) => {
+    setSuccessMessage(message);
+    setIsSuccessOpen(true);
+  };
 
   const handleTopUpAccount = async () => {
-    if (!stripe || !elements) {
+    if (!stripe || !elements || !selectedCard) {
       showError('Stripe.js has not yet loaded.');
       return;
     }
@@ -42,6 +74,7 @@ export const FiatTopUpForm = () => {
       const clientSecret = await paymentService.createFiatPayment({
         amount: Number(amount),
         currency: 'usd',
+        paymentMethodId: selectedCard.id,
       });
 
       // stripe payment
@@ -83,7 +116,45 @@ export const FiatTopUpForm = () => {
               value={amount}
               type="number"
               onChange={(e) => setAmount(e.target.value)}
+              sx={{ mb: 2 }}
             />
+            {selectedCard ? (
+              <TextField
+                label="Payment Method"
+                variant="outlined"
+                fullWidth
+                value={`**** **** **** ${selectedCard.last4}`}
+                InputProps={{
+                  readOnly: true,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CardIcon fontSize="medium" sx={{ marginX: 2 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        variant="contained"
+                        onClick={() => setIsSelectCardModalOpen(true)}
+                        size="small"
+                      >
+                        Change
+                      </Button>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ mb: 2 }}
+              />
+            ) : (
+              <Button
+                variant="contained"
+                onClick={() => setIsAddCardOpen(true)}
+                size="large"
+                sx={{ mb: 2 }}
+              >
+                Add Payment Method
+              </Button>
+            )}
           </FormControl>
         </Grid>
         <Grid item xs={12}>
@@ -94,6 +165,7 @@ export const FiatTopUpForm = () => {
             size="large"
             onClick={handleTopUpAccount}
             loading={isLoading}
+            disabled={!amount || !selectedCard}
           >
             Top up account
           </LoadingButton>
@@ -109,6 +181,29 @@ export const FiatTopUpForm = () => {
           </Link>
         </Grid>
       </Grid>
+
+      <SelectCardModal
+        open={isSelectCardModalOpen}
+        onClose={() => setIsSelectCardModalOpen(false)}
+        cards={cards}
+        onSelect={(card) => {
+          setSelectedCard(card);
+          setIsSelectCardModalOpen(false);
+        }}
+      />
+      <AddCardModal
+        open={isAddCardOpen}
+        onClose={() => setIsAddCardOpen(false)}
+        onComplete={() => {
+          handleSuccessAction('Your card has been successfully added.');
+          fetchCards();
+        }}
+      />
+      <SuccessModal
+        open={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        message={successMessage}
+      />
     </Box>
   );
 };

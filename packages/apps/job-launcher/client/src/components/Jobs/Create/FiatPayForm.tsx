@@ -8,6 +8,7 @@ import {
   FormControl,
   FormControlLabel,
   Grid,
+  InputAdornment,
   Link,
   Stack,
   TextField,
@@ -15,16 +16,30 @@ import {
 } from '@mui/material';
 import { useElements, useStripe } from '@stripe/react-stripe-js';
 import { useEffect, useMemo, useState } from 'react';
+
 import { Address } from 'viem';
 import { useReadContract } from 'wagmi';
+import AddCardModal from '../../../components/CreditCard/AddCardModal';
+import SelectCardModal from '../../../components/CreditCard/SelectCardModal';
+import { CardIcon } from '../../../components/Icons/CardIcon';
+import SuccessModal from '../../../components/SuccessModal';
 import { CURRENCY } from '../../../constants/payment';
-
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
-import * as jobService from '../../../services/job';
-import * as paymentService from '../../../services/payment';
+import {
+  createCvatJob,
+  createFortuneJob,
+  createHCaptchaJob,
+} from '../../../services/job';
+import {
+  confirmFiatPayment,
+  createFiatPayment,
+  getFee,
+  getOperatorAddress,
+  getUserCards,
+} from '../../../services/payment';
 import { useAppDispatch, useAppSelector } from '../../../state';
 import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
-import { JobType } from '../../../types';
+import { CardData, JobType } from '../../../types';
 
 export const FiatPayForm = ({
   onStart,
@@ -37,26 +52,42 @@ export const FiatPayForm = ({
 }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { jobRequest, goToPrevStep } = useCreateJobPageUI();
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
-
-  const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [amount, setAmount] = useState<string>('');
   const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
   const [minFee, setMinFee] = useState<number>(0.01);
+  const [cards, setCards] = useState<CardData[]>([]);
+  const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
+  const [isSelectCardModalOpen, setIsSelectCardModalOpen] = useState(false);
+  const [amount, setAmount] = useState<string>('');
+  const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { jobRequest, goToPrevStep } = useCreateJobPageUI();
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
-      const address = await paymentService.getOperatorAddress();
-      const fee = await paymentService.getFee();
+      const address = await getOperatorAddress();
+      const fee = await getFee();
       setJobLauncherAddress(address);
       setMinFee(fee);
     };
 
     fetchJobLauncherData();
+    fetchCards();
   }, []);
+
+  const fetchCards = async () => {
+    const data = await getUserCards();
+    setCards(data);
+
+    const defaultCard = data.find((card: CardData) => card.default);
+    if (defaultCard) {
+      setSelectedCard(defaultCard);
+    }
+  };
 
   const { data: jobLauncherFee } = useReadContract({
     address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
@@ -90,18 +121,26 @@ export const FiatPayForm = ({
     return totalAmount - accountAmount;
   }, [payWithAccountBalance, totalAmount, accountAmount]);
 
+  const handleSuccessAction = (message: string) => {
+    setSuccessMessage(message);
+    setIsSuccessOpen(true);
+  };
+
   const handlePay = async () => {
     if (!stripe || !elements) {
       onError('Stripe.js has not yet loaded.');
       return;
     }
 
+    onStart();
     setIsLoading(true);
+
     try {
-      if (creditCardPayAmount > 0) {
-        const clientSecret = await paymentService.createFiatPayment({
+      if (creditCardPayAmount > 0 && selectedCard) {
+        const clientSecret = await createFiatPayment({
           amount: creditCardPayAmount,
           currency: 'usd',
+          paymentMethodId: selectedCard.id,
         });
 
         const { error: stripeError, paymentIntent } =
@@ -111,9 +150,7 @@ export const FiatPayForm = ({
           throw stripeError;
         }
 
-        const success = await paymentService.confirmFiatPayment(
-          paymentIntent.id,
-        );
+        const success = await confirmFiatPayment(paymentIntent.id);
 
         if (!success) {
           throw new Error('Payment confirmation failed.');
@@ -126,30 +163,26 @@ export const FiatPayForm = ({
       if (!chainId) return;
 
       if (jobType === JobType.Fortune && fortuneRequest) {
-        await jobService.createFortuneJob(
+        await createFortuneJob(
           chainId,
           fortuneRequest,
           fundAmount,
           CURRENCY.usd,
         );
       } else if (jobType === JobType.CVAT && cvatRequest) {
-        await jobService.createCvatJob(
-          chainId,
-          cvatRequest,
-          fundAmount,
-          CURRENCY.usd,
-        );
+        await createCvatJob(chainId, cvatRequest, fundAmount, CURRENCY.usd);
       } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
-        await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
+        await createHCaptchaJob(chainId, hCaptchaRequest);
       }
 
+      // Update balance and finish payment
       dispatch(fetchUserBalanceAsync());
       onFinish();
     } catch (err) {
       onError(err);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
@@ -188,7 +221,45 @@ export const FiatPayForm = ({
                   value={amount}
                   type="number"
                   onChange={(e) => setAmount(e.target.value)}
+                  sx={{ mb: 2 }}
                 />
+                {selectedCard ? (
+                  <TextField
+                    label="Payment Method"
+                    variant="outlined"
+                    fullWidth
+                    value={`**** **** **** ${selectedCard.last4}`}
+                    InputProps={{
+                      readOnly: true,
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CardIcon fontSize="medium" sx={{ marginX: 2 }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Button
+                            variant="contained"
+                            onClick={() => setIsSelectCardModalOpen(true)}
+                            size="small"
+                          >
+                            Change
+                          </Button>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{ mb: 2 }}
+                  />
+                ) : (
+                  <Button
+                    variant="contained"
+                    onClick={() => setIsAddCardOpen(true)}
+                    size="large"
+                    sx={{ mb: 2 }}
+                  >
+                    Add Payment Method
+                  </Button>
+                )}
               </FormControl>
             </Grid>
           </Grid>
@@ -286,7 +357,7 @@ export const FiatPayForm = ({
             size="large"
             onClick={handlePay}
             loading={isLoading}
-            disabled={!amount}
+            disabled={!amount || (!payWithAccountBalance && !selectedCard)}
           >
             Pay now
           </LoadingButton>
@@ -308,7 +379,32 @@ export const FiatPayForm = ({
             Terms & conditions
           </Typography>
         </Link>
+
+        <SelectCardModal
+          open={isSelectCardModalOpen}
+          onClose={() => setIsSelectCardModalOpen(false)}
+          cards={cards}
+          onSelect={(card) => {
+            setSelectedCard(card);
+            setIsSelectCardModalOpen(false);
+          }}
+        />
+        <AddCardModal
+          open={isAddCardOpen}
+          onClose={() => setIsAddCardOpen(false)}
+          onComplete={() => {
+            handleSuccessAction('Your card has been successfully added.');
+            fetchCards();
+          }}
+        />
+        <SuccessModal
+          open={isSuccessOpen}
+          onClose={() => setIsSuccessOpen(false)}
+          message={successMessage}
+        />
       </Box>
     </Box>
   );
 };
+
+export default FiatPayForm;

@@ -55,6 +55,10 @@ export class CardConfirmDto {
   @ApiProperty({ name: 'payment_id' })
   @IsString()
   public setupId: string;
+
+  @ApiPropertyOptional({ name: 'default_card', default: false })
+  @IsBoolean()
+  public defaultCard = false;
 }
 
 export class GetRateDto {
@@ -149,6 +153,14 @@ export class CardDto {
   @ApiProperty()
   @IsString()
   public brand: string;
+
+  @ApiProperty({ name: 'exp_month' })
+  @IsNumber()
+  public expMonth: number;
+
+  @ApiProperty({ name: 'exp_year' })
+  @IsNumber()
+  public expYear: number;
 
   @ApiProperty()
   @IsBoolean()

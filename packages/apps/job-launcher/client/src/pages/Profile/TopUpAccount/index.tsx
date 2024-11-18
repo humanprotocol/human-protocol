@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CardSetupForm } from '../../../components/CardSetup/CardSetupForm';
+import { CardSetupForm } from '../../../components/CreditCard/CardSetupForm';
 import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { CryptoTopUpForm } from '../../../components/TopUpAccount/CryptoTopUpForm';
 import { FiatTopUpForm } from '../../../components/TopUpAccount/FiatTopUpForm';

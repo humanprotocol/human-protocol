@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab';
-import { Box, Grid, Link, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import {
   PaymentElement,
   useElements,
@@ -12,15 +12,15 @@ import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
 
 interface CardSetupFormProps {
-  onCardSetup: () => void; // Prop para notificar cuando la tarjeta está lista
+  onComplete: () => void;
 }
 
-export const CardSetupForm: React.FC<CardSetupFormProps> = ({
-  onCardSetup,
-}) => {
+export const CardSetupForm: React.FC<CardSetupFormProps> = ({ onComplete }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
+
+  const [defaultCard, setDefaultCard] = useState(false);
   const dispatch = useAppDispatch();
   const { showError } = useSnackbar();
 
@@ -60,6 +60,7 @@ export const CardSetupForm: React.FC<CardSetupFormProps> = ({
 
       const success = await paymentService.confirmSetupIntent(
         setupIntent?.id ?? '',
+        defaultCard,
       );
 
       if (!success) {
@@ -67,7 +68,7 @@ export const CardSetupForm: React.FC<CardSetupFormProps> = ({
       }
 
       dispatch(fetchUserBalanceAsync());
-      onCardSetup();
+      onComplete();
     } catch (err: any) {
       showError(err.message || 'An error occurred while setting up the card.');
     }
@@ -79,7 +80,21 @@ export const CardSetupForm: React.FC<CardSetupFormProps> = ({
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <PaymentElement
-            options={{ fields: { billingDetails: { name: 'auto' } } }}
+            options={{
+              fields: { billingDetails: { name: 'auto' } },
+            }}
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                defaultChecked
+                checked={defaultCard}
+                onChange={(e) => setDefaultCard(e.target.checked)}
+              />
+            }
+            label="Set this card as default payment method"
+            sx={{ mt: 2 }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -91,18 +106,8 @@ export const CardSetupForm: React.FC<CardSetupFormProps> = ({
             onClick={handleCardSetup}
             loading={isLoading}
           >
-            Save card details
+            Add Credit Card
           </LoadingButton>
-        </Grid>
-        <Grid item xs={12}>
-          <Link
-            href="https://humanprotocol.org/app/terms-and-conditions"
-            target="_blank"
-          >
-            <Typography variant="caption" component="p" textAlign="center">
-              Terms & conditions
-            </Typography>
-          </Link>
         </Grid>
       </Grid>
     </Box>

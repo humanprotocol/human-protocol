@@ -1,0 +1,203 @@
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  Typography,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import BillingDetailsModal from '../../../components/BillingDetails/BillingDetailsModal';
+import AddCardModal from '../../../components/CreditCard/AddCardModal';
+import CardList from '../../../components/CreditCard/CardList';
+import SuccessModal from '../../../components/SuccessModal';
+import { countryOptions, vatTypeOptions } from '../../../constants/payment';
+import { useSnackbar } from '../../../providers/SnackProvider';
+import { getUserBillingInfo, getUserCards } from '../../../services/payment';
+import { BillingInfo, CardData } from '../../../types';
+
+const Settings = () => {
+  const { showError } = useSnackbar();
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [isEditBillingOpen, setIsEditBillingOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [cards, setCards] = useState<CardData[]>([]);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo>({
+    name: '',
+    email: '',
+    address: {
+      city: '',
+      country: '',
+      postalCode: '',
+      line: '',
+    },
+    vat: '',
+    vatType: '',
+  });
+
+  const fetchCards = async () => {
+    try {
+      const data = await getUserCards();
+      setCards(data);
+    } catch (error) {
+      showError('Error fetching cards');
+    }
+  };
+
+  const fetchBillingInfo = async () => {
+    try {
+      const data = await getUserBillingInfo();
+      setBillingInfo(data);
+    } catch (error) {
+      showError('Error fetching billing info');
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+    fetchBillingInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSuccessAction = (message: string) => {
+    setSuccessMessage(message);
+    setIsSuccessOpen(true);
+  };
+
+  return (
+    <Box>
+      <Box
+        mb={8}
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h4" fontWeight={600}>
+          Settings
+        </Typography>
+      </Box>
+
+      <Grid container spacing={4} mb={11}>
+        {/* Payment Details card */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Grid container padding={3} spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <Box justifyContent="space-between" mb={4}>
+                    <Typography variant="h5" mb={1}>
+                      Payment Details
+                    </Typography>
+                    <Typography variant="body1" mb={4}>
+                      Manage your credit cards and payment options
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setIsAddCardOpen(true)}
+                    >
+                      + Add Credit Card
+                    </Button>
+                  </Box>
+                </Grid>
+                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+                <Grid item xs={12} sm={7}>
+                  <Box sx={{ height: '300px', overflowY: 'auto' }}>
+                    <CardList
+                      cards={cards}
+                      fetchCards={fetchCards}
+                      successMessage={(message) => handleSuccessAction(message)}
+                      openAddCreditCardModal={setIsAddCardOpen}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Billing Info card */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Grid container padding={3} spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ height: '300px' }}>
+                    <Typography variant="h5" mb={1}>
+                      Billing Details
+                    </Typography>
+                    <Typography variant="body1" mb={4}>
+                      Add/edit your billing details.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setIsEditBillingOpen(true)}
+                    >
+                      {billingInfo
+                        ? 'Edit Billing Details'
+                        : 'Add Billing Details'}
+                    </Button>
+                  </Box>
+                </Grid>
+                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+                <Grid item xs={12} sm={7}>
+                  <Typography variant="h6">Details</Typography>
+                  <Typography>
+                    Full Name / Company Name: {billingInfo?.name}
+                  </Typography>
+                  <Typography>Email: {billingInfo?.email}</Typography>
+                  <Typography>Address: {billingInfo?.address.line}</Typography>
+                  <Typography>
+                    Postal code: {billingInfo?.address.postalCode}
+                  </Typography>
+                  <Typography>City: {billingInfo?.address.city}</Typography>
+                  <Typography>
+                    Country: {countryOptions[billingInfo?.address.country]}
+                  </Typography>
+                  <Typography>
+                    VAT Type: {vatTypeOptions[billingInfo?.vatType]}
+                  </Typography>
+                  <Typography>VAT Number: {billingInfo?.vat}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      <AddCardModal
+        open={isAddCardOpen}
+        onClose={() => setIsAddCardOpen(false)}
+        onComplete={() => {
+          handleSuccessAction('Your card has been successfully added.');
+          fetchCards();
+        }}
+      />
+
+      <BillingDetailsModal
+        open={isEditBillingOpen}
+        onClose={() => setIsEditBillingOpen(false)}
+        billingInfo={billingInfo}
+        setBillingInfo={(info) => {
+          setBillingInfo(info);
+          handleSuccessAction(
+            'Your billing details have been successfully updated.',
+          );
+        }}
+      />
+
+      <SuccessModal
+        open={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        message={successMessage}
+      />
+    </Box>
+  );
+};
+
+export default Settings;

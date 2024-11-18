@@ -862,31 +862,22 @@ describe('PaymentService', () => {
       });
     });
 
-    it('should throw a bad request exception if user already has a stripeCustomerId', async () => {
-      const user = {
-        id: 1,
-        email: 'test@hmt.ai',
-        stripeCustomerId: 'cus_123',
-      };
-
-      await expect(
-        paymentService.createCustomerAndAssignCard(user as any),
-      ).rejects.toThrow(
-        new ControlledError(ErrorPayment.CardAssigned, HttpStatus.NOT_FOUND),
-      );
-    });
-
     it('should throw a bad request exception if the customer creation fails', async () => {
       const user = {
         id: 1,
         email: 'test@hmt.ai',
+        stripeCustomerId: undefined,
       };
-
       jest.spyOn(stripe.customers, 'create').mockRejectedValue(new Error());
 
       await expect(
         paymentService.createCustomerAndAssignCard(user as any),
-      ).rejects.toThrow(ErrorPayment.CardNotAssigned);
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.CustomerNotCreated,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
 
     it('should throw a bad request exception if the setup intent creation fails', async () => {
