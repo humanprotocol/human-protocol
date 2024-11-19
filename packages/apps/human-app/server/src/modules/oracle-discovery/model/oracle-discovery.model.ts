@@ -55,6 +55,19 @@ export class OracleDiscoveryResponse implements IOperator {
     this.registrationInstructions = registrationInstructions;
   }
 }
+
+export class OracleDiscoveryResponseDto {
+  @ApiProperty({
+    type: [OracleDiscoveryResponse],
+    description: 'List of discovered oracles',
+  })
+  oracles: OracleDiscoveryResponse[];
+  @ApiProperty({
+    type: [String],
+    description: 'Chain ids where oracles haven been discovered',
+  })
+  chainIdsEnabled: string[];
+}
 export class OracleDiscoveryDto {
   @ApiPropertyOptional({ type: [String] })
   @IsArray()

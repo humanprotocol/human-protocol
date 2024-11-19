@@ -48,9 +48,11 @@ export class CronJobService {
     this.logger.log('CRON START');
 
     const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
-    const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
-      oracleDiscoveryCommand,
-    );
+    const oracles = (
+      await this.oracleDiscoveryService.processOracleDiscovery(
+        oracleDiscoveryCommand,
+      )
+    ).oracles;
 
     if (!oracles || oracles.length < 1) return;
 

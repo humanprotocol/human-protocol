@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryResponse,
+  OracleDiscoveryResponseDto,
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -19,7 +20,7 @@ export class OracleDiscoveryService {
 
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryResponse[]> {
+  ): Promise<OracleDiscoveryResponseDto> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
     const oraclesForChainIds = await Promise.all(
@@ -28,7 +29,10 @@ export class OracleDiscoveryService {
       ),
     );
 
-    const filteredOracles: OracleDiscoveryResponse[] = [];
+    const response: OracleDiscoveryResponseDto = {
+      oracles: [],
+      chainIdsEnabled: this.configService.chainIdsEnabled,
+    };
     for (const oraclesForChainId of oraclesForChainIds) {
       for (const oracle of oraclesForChainId) {
         if (command.selectedJobTypes?.length) {
@@ -46,11 +50,11 @@ export class OracleDiscoveryService {
           }
         }
 
-        filteredOracles.push(oracle);
+        response.oracles.push(oracle);
       }
     }
 
-    return filteredOracles;
+    return response;
   }
 
   private async findOraclesByChainId(
