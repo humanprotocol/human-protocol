@@ -1,11 +1,19 @@
 import { ChainId } from '@human-protocol/sdk';
-import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
-import { ProcessingResultDto } from '../../common/dto/result';
+import {
+  CalculatePayoutsDto,
+  CvatManifestDto,
+  FortuneManifestDto,
+} from '../../common/dto/manifest';
+import { PayoutsDataDto, SaveResultDto } from '../../common/dto/result';
 
 export interface RequestAction {
-  calculateResults: (
+  calculatePayouts: (
     manifest: FortuneManifestDto | CvatManifestDto,
+    data: CalculatePayoutsDto,
+  ) => Promise<PayoutsDataDto>;
+  saveResults: (
     chainId: ChainId,
     escrowAddress: string,
-  ) => Promise<ProcessingResultDto>;
+    manifest?: FortuneManifestDto,
+  ) => Promise<SaveResultDto>;
 }

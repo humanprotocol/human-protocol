@@ -14,7 +14,6 @@ import {
   MOCK_S3_USE_SSL,
   mockConfig,
 } from '../../../test/constants';
-import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
 import {
   JobRequestType,
@@ -94,10 +93,6 @@ describe('ReputationService', () => {
         {
           provide: ReputationRepository,
           useValue: createMock<ReputationRepository>(),
-        },
-        {
-          provide: WebhookRepository,
-          useValue: createMock<WebhookRepository>(),
         },
         ReputationConfigService,
       ],
