@@ -25,8 +25,7 @@ import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repositor
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
 import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
 import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
-import { PostgresErrorCodes } from '../../common/enums/database';
-import { DatabaseError } from '../../common/errors/database';
+import { isDuplicatedError } from '../../common/utils/database';
 
 @Injectable()
 export class CronJobService {
@@ -135,41 +134,27 @@ export class CronJobService {
           webhookEntity.status = WebhookIncomingStatus.COMPLETED;
           await this.webhookIncomingRepository.updateOne(webhookEntity);
         } catch (err) {
-          if (err instanceof DatabaseError) {
-            if (
-              (err as DatabaseError).message.includes(
-                PostgresErrorCodes.Duplicated,
-              )
-            ) {
-              this.logger.warn(
-                `Duplicate tracking entity for escrowAddress: ${webhookEntity.escrowAddress}. Marking webhook as completed.`,
-              );
-              webhookEntity.status = WebhookIncomingStatus.COMPLETED;
-              await this.webhookIncomingRepository.updateOne(webhookEntity);
-            } else {
-              const errorId = uuidv4();
-              const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-              this.logger.error(
-                `Database error for webhook processing. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
-              );
-              await this.webhookService.handleWebhookIncomingError(
-                webhookEntity,
-                failureDetail,
-              );
-              continue;
-            }
+          const errorId = uuidv4();
+          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+
+          if (isDuplicatedError(err)) {
+            // Handle duplicated error: log and mark as completed
+            this.logger.warn(
+              `Duplicate tracking entity for escrowAddress: ${webhookEntity.escrowAddress}. Marking webhook as completed.`,
+            );
+            webhookEntity.status = WebhookIncomingStatus.COMPLETED;
+            await this.webhookIncomingRepository.updateOne(webhookEntity);
           } else {
-            const errorId = uuidv4();
-            const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+            // Handle other errors (general failure)
             this.logger.error(
-              `Unexpected error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+              `Error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
             );
             await this.webhookService.handleWebhookIncomingError(
               webhookEntity,
               failureDetail,
             );
-            continue;
           }
+          continue;
         }
       }
     } catch (e) {
@@ -363,10 +348,7 @@ export class CronJobService {
                 url,
               );
             } catch (err) {
-              if (
-                err instanceof DatabaseError &&
-                err.message.includes(PostgresErrorCodes.Duplicated)
-              ) {
+              if (isDuplicatedError(err)) {
                 this.logger.warn(
                   `Duplicate outgoing webhook for escrowAddress: ${escrowAddress}. Webhook creation skipped, but will not complete escrow until all URLs are successful.`,
                 );
