@@ -103,10 +103,25 @@ describe('PayoutService', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('saveResults', () => {
+    const results: SaveResultDto = {
+      url: MOCK_FILE_URL,
+      hash: MOCK_FILE_HASH,
+    };
+
+    beforeEach(() => {
+      EscrowClient.build = jest.fn().mockResolvedValue({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      });
+
+      payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
+        'saveResults'
+      ] = jest.fn().mockResolvedValue(results);
+    });
+
     it('should successfully save results for CVAT', async () => {
       const manifest: CvatManifestDto = {
         data: {
@@ -128,15 +143,6 @@ describe('PayoutService', () => {
       };
 
       jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
-
-      const results: SaveResultDto = {
-        url: MOCK_FILE_URL,
-        hash: MOCK_FILE_HASH,
-      };
-
-      payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
-        'saveResults'
-      ] = jest.fn().mockResolvedValue(results);
 
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
@@ -173,15 +179,6 @@ describe('PayoutService', () => {
     });
 
     it('should throw an error if the manifest url does not exist', async () => {
-      const results: SaveResultDto = {
-        url: MOCK_FILE_URL,
-        hash: MOCK_FILE_HASH,
-      };
-
-      payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
-        'saveResults'
-      ] = jest.fn().mockResolvedValue(results);
-
       EscrowClient.build = jest.fn().mockResolvedValue({
         getManifestUrl: jest.fn().mockResolvedValue(null),
       });
@@ -201,6 +198,24 @@ describe('PayoutService', () => {
   });
 
   describe('executePayouts', () => {
+    const results: PayoutsDataDto = {
+      recipients: [MOCK_ADDRESS],
+      amounts: [1n],
+    };
+    let escrowClientMock: any;
+
+    beforeEach(() => {
+      escrowClientMock = {
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        bulkPayOut: jest.fn().mockResolvedValue(true),
+      };
+      EscrowClient.build = jest.fn().mockImplementation(() => escrowClientMock);
+
+      payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
+        'calculatePayouts'
+      ] = jest.fn().mockResolvedValue(results);
+    });
+
     it('should successfully performs payouts for CVAT', async () => {
       const manifest: CvatManifestDto = {
         data: {
@@ -221,22 +236,7 @@ describe('PayoutService', () => {
         job_bounty: '10',
       };
 
-      const escrowClientMock = {
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-        bulkPayOut: jest.fn().mockResolvedValue(true),
-      };
-      EscrowClient.build = jest.fn().mockImplementation(() => escrowClientMock);
-
       jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
-
-      const results: PayoutsDataDto = {
-        recipients: [MOCK_ADDRESS],
-        amounts: [1n],
-      };
-
-      payoutService.createPayoutSpecificActions[JobRequestType.IMAGE_BOXES][
-        'calculatePayouts'
-      ] = jest.fn().mockResolvedValue(results);
 
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
@@ -260,12 +260,6 @@ describe('PayoutService', () => {
         fundAmount: 10,
         requestType: JobRequestType.FORTUNE,
       };
-
-      const escrowClientMock = {
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-        bulkPayOut: jest.fn().mockResolvedValue(true),
-      };
-      EscrowClient.build = jest.fn().mockImplementation(() => escrowClientMock);
 
       jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
 
@@ -293,15 +287,6 @@ describe('PayoutService', () => {
     });
 
     it('should throw an error if the manifest url does not exist', async () => {
-      const results: PayoutsDataDto = {
-        recipients: [MOCK_ADDRESS],
-        amounts: [1n],
-      };
-
-      payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
-        'calculatePayouts'
-      ] = jest.fn().mockResolvedValue(results);
-
       EscrowClient.build = jest.fn().mockResolvedValue({
         getManifestUrl: jest.fn().mockResolvedValue(null),
       });
@@ -520,6 +505,12 @@ describe('PayoutService', () => {
       },
       job_bounty: '10',
     };
+
+    beforeEach(() => {
+      EscrowClient.build = jest.fn().mockResolvedValue({
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      });
+    });
 
     it('should successfully process and return correct result values', async () => {
       const escrowAddress = MOCK_ADDRESS;

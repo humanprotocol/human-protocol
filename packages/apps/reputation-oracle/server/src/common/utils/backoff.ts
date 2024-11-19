@@ -1,6 +1,6 @@
 import { BACKOFF_INTERVAL_SECONDS } from '../constants';
 
-export function calculateBackoff(
+export function calculateExponentialBackoffMs(
   retriesCount: number,
   intervalSeconds = BACKOFF_INTERVAL_SECONDS,
 ) {

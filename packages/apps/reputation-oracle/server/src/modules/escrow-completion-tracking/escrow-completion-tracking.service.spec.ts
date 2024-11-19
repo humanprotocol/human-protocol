@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   MOCK_ADDRESS,
+  MOCK_BACKOFF_INTERVAL_SECONDS,
   MOCK_MAX_RETRY_COUNT,
   MOCK_PRIVATE_KEY,
   mockConfig,
@@ -25,6 +26,13 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn(),
   },
+}));
+
+jest.mock('../../common/utils/backoff', () => ({
+  ...jest.requireActual('../../common/utils/backoff'),
+  calculateExponentialBackoffMs: jest
+    .fn()
+    .mockReturnValue(MOCK_BACKOFF_INTERVAL_SECONDS * 1000),
 }));
 
 describe('escrowCompletionTrackingService', () => {
@@ -111,43 +119,80 @@ describe('escrowCompletionTrackingService', () => {
 
       expect(
         escrowCompletionTrackingRepository.createUnique,
-      ).toHaveBeenCalledWith(expect.any(Object));
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: ChainId.LOCALHOST,
+          escrowAddress: MOCK_ADDRESS,
+          status: EscrowCompletionTrackingStatus.PENDING,
+          retriesCount: 0,
+          waitUntil: expect.any(Date),
+        }),
+      );
     });
   });
 
   describe('handleEscrowCompletionTrackingError', () => {
     it('should set escrow completion tracking status to FAILED if retries exceed threshold', async () => {
-      const webhookEntity: Partial<EscrowCompletionTrackingEntity> = {
-        id: 1,
-        status: EscrowCompletionTrackingStatus.PENDING,
-        retriesCount: MOCK_MAX_RETRY_COUNT,
-      };
+      const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
+        {
+          id: 1,
+          status: EscrowCompletionTrackingStatus.PENDING,
+          retriesCount: MOCK_MAX_RETRY_COUNT,
+        };
       await (
         escrowCompletionTrackingService as any
       ).handleEscrowCompletionTrackingError(
-        webhookEntity,
+        escrowCompletionTrackingEntity,
         new Error('Sample error'),
       );
       expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(EscrowCompletionTrackingStatus.FAILED);
+      expect(escrowCompletionTrackingEntity.status).toBe(
+        EscrowCompletionTrackingStatus.FAILED,
+      );
     });
 
     it('should increment retries count if below threshold', async () => {
-      const webhookEntity: Partial<EscrowCompletionTrackingEntity> = {
-        id: 1,
-        status: EscrowCompletionTrackingStatus.PENDING,
-        retriesCount: 0,
-      };
+      const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
+        {
+          id: 1,
+          status: EscrowCompletionTrackingStatus.PENDING,
+          retriesCount: 0,
+        };
       await (
         escrowCompletionTrackingService as any
       ).handleEscrowCompletionTrackingError(
-        webhookEntity,
+        escrowCompletionTrackingEntity,
         new Error('Sample error'),
       );
       expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(EscrowCompletionTrackingStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
+      expect(escrowCompletionTrackingEntity.status).toBe(
+        EscrowCompletionTrackingStatus.PENDING,
+      );
+      expect(escrowCompletionTrackingEntity.retriesCount).toBe(1);
+      expect(escrowCompletionTrackingEntity.waitUntil).toBeInstanceOf(Date);
+    });
+
+    it('should set waitUntil to a future date when incrementing retries count', async () => {
+      const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
+        {
+          id: 1,
+          status: EscrowCompletionTrackingStatus.PENDING,
+          retriesCount: 0,
+          waitUntil: new Date(),
+        };
+
+      await (
+        escrowCompletionTrackingService as any
+      ).handleEscrowCompletionTrackingError(
+        escrowCompletionTrackingEntity,
+        new Error('Sample error'),
+      );
+
+      const now = new Date();
+      const waitUntil = escrowCompletionTrackingEntity.waitUntil as Date;
+
+      expect(waitUntil).toBeInstanceOf(Date);
+      expect(waitUntil.getTime()).toBeGreaterThan(now.getTime());
     });
   });
 });

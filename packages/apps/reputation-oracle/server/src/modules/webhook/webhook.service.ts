@@ -22,7 +22,7 @@ import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { calculateBackoff } from '../../common/utils/cron';
+import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
 
 @Injectable()
 export class WebhookService {
@@ -57,10 +57,6 @@ export class WebhookService {
 
     webhookEntity =
       await this.webhookIncomingRepository.createUnique(webhookEntity);
-
-    if (!webhookEntity) {
-      throw new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND);
-    }
   }
 
   /**
@@ -98,7 +94,7 @@ export class WebhookService {
     failureDetail: string,
   ): Promise<void> {
     if (webhookEntity.retriesCount < this.serverConfigService.maxRetryCount) {
-      const exponentialBackoff = calculateBackoff(
+      const exponentialBackoff = calculateExponentialBackoffMs(
         webhookEntity.retriesCount,
         BACKOFF_INTERVAL_SECONDS,
       );
@@ -122,7 +118,7 @@ export class WebhookService {
     failureDetail: string,
   ): Promise<void> {
     if (webhookEntity.retriesCount < this.serverConfigService.maxRetryCount) {
-      const exponentialBackoff = calculateBackoff(
+      const exponentialBackoff = calculateExponentialBackoffMs(
         webhookEntity.retriesCount,
         BACKOFF_INTERVAL_SECONDS,
       );
@@ -142,7 +138,10 @@ export class WebhookService {
    * @param {object} payload - The data payload to send.
    * @throws {ControlledError} If the webhook request fails.
    */
-  public async sendWebhook(url: string, payload: object): Promise<void> {
+  public async sendWebhook(
+    url: string,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
     const snake_case_body = CaseConverter.transformToSnakeCase(payload);
     const signedBody = await signMessage(
       snake_case_body,

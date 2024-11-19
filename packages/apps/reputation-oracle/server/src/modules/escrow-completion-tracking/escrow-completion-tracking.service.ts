@@ -5,7 +5,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
 import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
 import { ChainId } from '@human-protocol/sdk';
-import { calculateBackoff } from '../../common/utils/cron';
+import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 
 @Injectable()
@@ -53,7 +53,7 @@ export class EscrowCompletionTrackingService {
       escrowCompletionTrackingEntity.retriesCount <
       this.serverConfigService.maxRetryCount
     ) {
-      const exponentialBackoff = calculateBackoff(
+      const exponentialBackoff = calculateExponentialBackoffMs(
         escrowCompletionTrackingEntity.retriesCount,
         BACKOFF_INTERVAL_SECONDS,
       );

@@ -194,7 +194,7 @@ export class StorageService {
           Logger.error('Error checking if file exists:', err);
           throw new ControlledError(
             'Error accessing storage',
-            HttpStatus.BAD_GATEWAY,
+            HttpStatus.INTERNAL_SERVER_ERROR,
           );
         }
       }

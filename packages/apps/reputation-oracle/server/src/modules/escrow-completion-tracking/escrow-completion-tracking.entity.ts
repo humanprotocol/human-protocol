@@ -6,7 +6,7 @@ import { EscrowCompletionTrackingStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'escrow_completion_tracking' })
-@Index(['chainId', 'escrowAddress'], { unique: true })
+@Index(['escrowAddress', 'chainId'], { unique: true })
 export class EscrowCompletionTrackingEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;

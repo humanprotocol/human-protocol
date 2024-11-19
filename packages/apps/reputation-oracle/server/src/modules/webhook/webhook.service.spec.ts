@@ -103,7 +103,7 @@ describe('WebhookService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('createIncomingWebhook', () => {
@@ -130,24 +130,6 @@ describe('WebhookService', () => {
 
       expect(webhookIncomingRepository.createUnique).toHaveBeenCalledWith(
         expect.any(Object),
-      );
-    });
-
-    it('should throw NotFoundException if webhook entity not created', async () => {
-      const validDto: IncomingWebhookDto = {
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        eventType: EventType.JOB_COMPLETED,
-      };
-
-      jest
-        .spyOn(webhookIncomingRepository as any, 'createUnique')
-        .mockResolvedValue(null);
-
-      await expect(
-        webhookService.createIncomingWebhook(validDto),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND),
       );
     });
 

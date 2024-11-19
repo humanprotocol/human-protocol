@@ -28,7 +28,7 @@ export class AddWebhookOutgoingAndEscrowCompletionTrackingTables1731562977435
       `CREATE TABLE "hmt"."escrow_completion_tracking" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, "chain_id" integer NOT NULL, "escrow_address" character varying NOT NULL, "final_results_url" character varying, "final_results_hash" character varying, "failure_detail" character varying, "retries_count" integer NOT NULL, "wait_until" TIMESTAMP WITH TIME ZONE NOT NULL, "status" "hmt"."escrow_completion_tracking_status_enum" NOT NULL, CONSTRAINT "PK_a6abebca3ce8e49155aaf14ccc8" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE UNIQUE INDEX "IDX_146945054beb996cfe6edf1789" ON "hmt"."escrow_completion_tracking" ("chain_id", "escrow_address") `,
+      `CREATE UNIQUE INDEX "IDX_146945054beb996cfe6edf1789" ON "hmt"."escrow_completion_tracking" ("escrow_address", "chain_id") `,
     );
     await queryRunner.query(
       `ALTER TYPE "hmt"."webhook_incoming_status_enum" RENAME TO "webhook_incoming_status_enum_old"`,
