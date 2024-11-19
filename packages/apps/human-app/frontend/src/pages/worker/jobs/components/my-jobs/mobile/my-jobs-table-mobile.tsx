@@ -50,7 +50,8 @@ export function MyJobsTableMobile({
   } = useInfiniteGetMyJobsData();
 
   const { mutate: rejectTaskMutation } = useRejectTaskMutation();
-  const { mutate: refreshTasksMutation } = useRefreshTasksMutation();
+  const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
+    useRefreshTasksMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
@@ -106,6 +107,7 @@ export function MyJobsTableMobile({
             }}
             type="button"
             variant="outlined"
+            loading={isRefreshTasksPending}
             onClick={() => {
               refreshTasksMutation({
                 oracle_address: oracle_address ?? '',

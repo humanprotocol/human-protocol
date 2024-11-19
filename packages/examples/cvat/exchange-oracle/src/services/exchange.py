@@ -11,7 +11,11 @@ from src.utils.time import utcnow
 
 
 class UserHasUnfinishedAssignmentError(Exception):
-    pass
+    def __str__(self) -> str:
+        return (
+            "There are unfinished assignments in this escrow. "
+            "Please complete or resign them first."
+        )
 
 
 def create_assignment(escrow_address: str, chain_id: Networks, wallet_address: str) -> str | None:  # noqa: ARG001 (don't we want to use chain_id for filter?)

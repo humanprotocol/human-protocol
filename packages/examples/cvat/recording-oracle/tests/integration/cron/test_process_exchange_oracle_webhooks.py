@@ -82,7 +82,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         mock_storage_client = MagicMock(spec=StorageClient)
         with (
-            patch("src.chain.escrow.get_escrow"),
+            patch("src.crons.process_exchange_oracle_webhooks.validate_escrow"),
             patch("src.services.cloud.make_client", return_value=mock_storage_client),
         ):
             process_incoming_exchange_oracle_webhooks()

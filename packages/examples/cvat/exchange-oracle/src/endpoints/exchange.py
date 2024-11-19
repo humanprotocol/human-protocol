@@ -27,7 +27,6 @@ from src.endpoints.filtering import Filter, FilterDepends, OrderingDirection
 from src.endpoints.pagination import Page, paginate
 from src.endpoints.serializers import (
     ASSIGNMENT_PROJECT_VALIDATION_STATUSES,
-    PROJECT_ACTIVE_STATUSES,
     PROJECT_COMPLETED_STATUSES,
     serialize_assignment,
     serialize_job,
@@ -117,6 +116,18 @@ async def list_jobs(
 
     query = select(cvat_service.Project)
 
+    # These states are internal, they should not be visible through the API
+    query = query.filter(
+        cvat_service.Project.status.not_in(
+            [
+                ProjectStatuses.creation,
+                ProjectStatuses.deleted,
+                ProjectStatuses.completed,
+                ProjectStatuses.validation,
+            ]
+        )
+    )
+
     # We need only high-level jobs (i.e. escrows) without project details
     if db_engine.driver == "psycopg2":
         subquery = select(cvat_service.Project.id).distinct(
@@ -141,7 +152,7 @@ async def list_jobs(
     if status:
         match status:
             case JobStatuses.active:
-                query = query.filter(cvat_service.Project.status.in_(PROJECT_ACTIVE_STATUSES))
+                query = query.filter(cvat_service.Project.status == ProjectStatuses.annotation)
             case JobStatuses.canceled:
                 query = query.filter(
                     cvat_service.Project.status == cvat_service.ProjectStatuses.canceled

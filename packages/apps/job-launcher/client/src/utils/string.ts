@@ -7,3 +7,14 @@ export const parseErrorMessage = (error: any) => {
   }
   return error.message ?? 'Something went wrong.';
 };
+
+export const getFilenameFromContentDisposition = (
+  headerValue: string,
+): string | null => {
+  const match = /filename="(.+)"/.exec(headerValue);
+  if (!match) {
+    return null;
+  }
+
+  return match[1];
+};

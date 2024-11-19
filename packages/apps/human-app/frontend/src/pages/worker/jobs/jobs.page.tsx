@@ -59,7 +59,7 @@ export function JobsPage() {
 
   const oracleName = data?.find(
     ({ address }) => address === oracle_address
-  )?.role;
+  )?.name;
 
   if (isPending) {
     return <PageCardLoader />;
