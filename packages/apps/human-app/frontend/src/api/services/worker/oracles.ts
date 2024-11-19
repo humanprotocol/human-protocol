@@ -16,7 +16,10 @@ const OracleSuccessSchema = z.object({
   registrationInstructions: z.string().optional().nullable(),
 });
 
-const OraclesSuccessSchema = z.array(OracleSuccessSchema);
+const OraclesSuccessSchema = z.object({
+  oracles: z.array(OracleSuccessSchema),
+  chainIdsEnabled: z.array(z.string()),
+});
 
 export type OracleSuccessResponse = z.infer<typeof OracleSuccessSchema> & {
   name: string;
@@ -70,7 +73,7 @@ export async function getOracles({
     );
 
     oracles = oracles.concat(
-      fetchedOracles.map((oracle) => ({
+      fetchedOracles.oracles.map((oracle) => ({
         ...oracle,
         name: oracleUrlToNameMap.get(oracle.url) ?? '',
       }))
