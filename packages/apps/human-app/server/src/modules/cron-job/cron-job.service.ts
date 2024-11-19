@@ -52,7 +52,7 @@ export class CronJobService {
       await this.oracleDiscoveryService.processOracleDiscovery(
         oracleDiscoveryCommand,
       )
-    )?.oracles;
+    ).oracles;
 
     if (!oracles || oracles.length < 1) return;
 
