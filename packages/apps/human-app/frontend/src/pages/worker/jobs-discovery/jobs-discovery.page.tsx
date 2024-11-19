@@ -6,13 +6,15 @@ import { useEffect, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { OraclesTable } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table';
 import { OraclesTableJobTypesSelect } from '@/pages/worker/jobs-discovery/components/oracles-table/oracles-table-job-types-select';
-import type { OraclesSuccessResponse } from '@/api/services/worker/oracles';
+import type { OracleDiscoveryResponse } from '@/api/services/worker/oracles';
 import { useGetOracles } from '@/api/services/worker/oracles';
 import { useAuthenticatedUser } from '@/auth/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 import { useGetOraclesNotifications } from '@/hooks/use-get-oracles-notifications';
 
-export type OraclesDataQueryResult = UseQueryResult<OraclesSuccessResponse>;
+export type OraclesDataQueryResult = UseQueryResult<
+  OracleDiscoveryResponse['oracles']
+>;
 
 export function JobsDiscoveryPage() {
   const { onError } = useGetOraclesNotifications();

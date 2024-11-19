@@ -7,7 +7,7 @@ import { useJobsTypesOraclesFilter } from '@/hooks/use-job-types-oracles-table';
 import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
 import { env } from '@/shared/env';
 
-const OracleSuccessSchema = z.object({
+const OracleSchema = z.object({
   address: z.string(),
   role: z.string(),
   url: z.string(),
@@ -16,12 +16,18 @@ const OracleSuccessSchema = z.object({
   registrationInstructions: z.string().optional().nullable(),
 });
 
-const OraclesSuccessSchema = z.array(OracleSuccessSchema);
+const OraclesDiscoverSuccessSchema = z.object({
+  oracles: z.array(OracleSchema),
+  chainIdsEnabled: z.array(z.string()),
+});
 
-export type OracleSuccessResponse = z.infer<typeof OracleSuccessSchema> & {
+export type Oracle = z.infer<typeof OracleSchema> & {
   name: string;
 };
-export type OraclesSuccessResponse = OracleSuccessResponse[];
+
+export type OracleDiscoveryResponse = z.infer<
+  typeof OraclesDiscoverSuccessSchema
+>;
 
 const OracleNameToUrls = {
   CVAT: [
@@ -38,7 +44,7 @@ for (const [oracleName, oracleUrls] of Object.entries(OracleNameToUrls)) {
   }
 }
 
-const H_CAPTCHA_ORACLE: OracleSuccessResponse = {
+const H_CAPTCHA_ORACLE: Oracle = {
   address: env.VITE_H_CAPTCHA_ORACLE_ADDRESS,
   jobTypes: env.VITE_H_CAPTCHA_ORACLE_TASK_TYPES,
   role: env.VITE_H_CAPTCHA_ORACLE_ROLE,
@@ -60,17 +66,17 @@ export async function getOracles({
       ? `?${stringifyUrlQueryObject({ selected_job_types })}`
       : '';
 
-    const fetchedOracles = await apiClient(
+    const result = await apiClient(
       `${apiPaths.worker.oracles.path}${queryParams}`,
       {
-        successSchema: OraclesSuccessSchema,
+        successSchema: OraclesDiscoverSuccessSchema,
         options: { method: 'GET' },
       },
       signal
     );
 
     oracles = oracles.concat(
-      fetchedOracles.map((oracle) => ({
+      result.oracles.map((oracle) => ({
         ...oracle,
         name: oracleUrlToNameMap.get(oracle.url) ?? '',
       }))

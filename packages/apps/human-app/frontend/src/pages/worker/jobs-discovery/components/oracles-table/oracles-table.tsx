@@ -6,7 +6,7 @@ import {
 } from 'material-react-table';
 import { Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { type OracleSuccessResponse } from '@/api/services/worker/oracles';
+import type { Oracle } from '@/api/services/worker/oracles';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { EvmAddress } from '@/pages/worker/jobs/components/evm-address';
 import { Chips } from '@/components/ui/chips';
@@ -22,8 +22,8 @@ import { type JobType } from '@/smart-contracts/EthKVStore/config';
 import { useGetRegistrationInExchangeOracles } from '@/api/services/worker/get-registration-in-exchange-oracles';
 
 const getColumns = (
-  selectOracle: (oracle: OracleSuccessResponse) => void
-): MRT_ColumnDef<OracleSuccessResponse>[] => {
+  selectOracle: (oracle: Oracle) => void
+): MRT_ColumnDef<Oracle>[] => {
   return [
     {
       accessorKey: 'name',
@@ -91,7 +91,7 @@ export function OraclesTable({
   const { data: registrationInExchangeOraclesResult } =
     useGetRegistrationInExchangeOracles();
 
-  const selectOracle = (oracle: OracleSuccessResponse) => {
+  const selectOracle = (oracle: Oracle) => {
     if (
       oracle.registrationNeeded &&
       !registrationInExchangeOraclesResult?.oracle_addresses.find(
