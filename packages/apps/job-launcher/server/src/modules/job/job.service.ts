@@ -1338,6 +1338,53 @@ export class JobService {
     return finalResultUrl;
   }
 
+  public async downloadJobResults(
+    userId: number,
+    jobId: number,
+  ): Promise<{
+    filename: string;
+    contents: Buffer;
+  }> {
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
+      userId,
+    );
+
+    if (!jobEntity) {
+      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+    }
+
+    if (!jobEntity.escrowAddress) {
+      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+    }
+
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
+      throw new ControlledError(
+        ErrorJob.InvalidRequestType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const finalResultUrl = await escrowClient.getResultsUrl(
+      jobEntity.escrowAddress,
+    );
+
+    if (!finalResultUrl) {
+      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+    }
+
+    const contents = await this.storageService.downloadFile(finalResultUrl);
+    const filename = finalResultUrl.split('/').at(-1) as string;
+
+    return {
+      filename,
+      contents,
+    };
+  }
+
   public handleProcessJobFailure = async (
     jobEntity: JobEntity,
     failedReason: string,

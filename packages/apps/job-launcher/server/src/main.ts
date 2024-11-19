@@ -11,7 +11,9 @@ import { ServerConfigService } from './common/config/server-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
-    cors: true,
+    cors: {
+      exposedHeaders: ['Content-Disposition'],
+    },
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 

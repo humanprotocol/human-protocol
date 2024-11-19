@@ -287,9 +287,8 @@ describe('JobService', () => {
     });
 
     storageService.downloadJsonLikeData = jest.fn();
-  });
+    storageService.downloadFile = jest.fn();
 
-  beforeEach(async () => {
     encryption = await Encryption.build(MOCK_PGP_PRIVATE_KEY);
   });
 
@@ -3103,6 +3102,112 @@ describe('JobService', () => {
         MOCK_FILE_URL,
       );
       expect(storageService.downloadJsonLikeData).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('downloadJobResults', () => {
+    let downloadFileMock: any;
+
+    beforeEach(() => {
+      downloadFileMock = storageService.downloadFile;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should download and return the binary result', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.IMAGE_BOXES,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      }));
+
+      const sampleFile = Buffer.from('test-file-contents');
+      downloadFileMock.mockImplementationOnce((url: string) => {
+        if (url === MOCK_FILE_URL) {
+          return sampleFile;
+        }
+
+        return null;
+      });
+
+      const { contents, filename } = await jobService.downloadJobResults(
+        MOCK_USER_ID,
+        MOCK_JOB_ID,
+      );
+
+      expect(contents).toEqual(sampleFile);
+      expect(filename).toBe('file.json');
+    });
+
+    it('should throw a ControlledError if the result is not found', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.IMAGE_BOXES,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: () => null,
+      }));
+
+      await expect(
+        jobService.downloadJobResults(MOCK_USER_ID, MOCK_JOB_ID),
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw a ControlledError if attempt to download for fortune', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
+      await expect(
+        jobService.downloadJobResults(MOCK_USER_ID, MOCK_JOB_ID),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.InvalidRequestType,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
