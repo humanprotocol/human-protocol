@@ -25,10 +25,6 @@ export type Oracle = z.infer<typeof OracleSchema> & {
   name: string;
 };
 
-export type OracleDiscoveryResponse = z.infer<
-  typeof OraclesDiscoverSuccessSchema
->;
-
 const OracleNameToUrls = {
   CVAT: [
     'https://stg-exchange-oracle.humanprotocol.org',
