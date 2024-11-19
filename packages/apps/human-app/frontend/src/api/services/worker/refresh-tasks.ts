@@ -7,6 +7,7 @@ function refreshTasks(data: { oracle_address: string }) {
   return apiClient(apiPaths.worker.refreshJob.path, {
     successSchema: z.unknown(),
     authenticated: true,
+    withAuthRetry: true,
     options: { method: 'PUT', body: JSON.stringify(data) },
   });
 }
