@@ -2,32 +2,25 @@
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
 
-type JobStatusMyJobs =
-  | 'active'
-  | 'completed'
-  | 'canceled'
-  | 'validation'
-  | 'expired'
-  | 'rejected';
-
-type JobStatusAvailableJobs = 'active' | 'completed' | 'canceled';
-
-type JobStatus = JobStatusMyJobs | JobStatusAvailableJobs;
-
-export const jobStatusesAvailableJobs: JobStatusAvailableJobs[] = [
+export const jobStatusesAvailableJobs = [
   'active',
   'completed',
   'canceled',
-];
+] as const;
 
-export const jobStatusesMyJobs: JobStatusMyJobs[] = [
+export const jobStatusesMyJobs = [
   'active',
   'completed',
   'canceled',
   'validation',
   'expired',
   'rejected',
-];
+] as const;
+
+type JobStatusMyJobs = (typeof jobStatusesMyJobs)[number];
+type JobStatusAvailableJobs = (typeof jobStatusesAvailableJobs)[number];
+
+type JobStatus = JobStatusMyJobs | JobStatusAvailableJobs;
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
