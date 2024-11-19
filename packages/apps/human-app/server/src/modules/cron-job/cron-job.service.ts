@@ -36,7 +36,7 @@ export class CronJobService {
   }
 
   initializeCronJob() {
-    const job = new CronJob('*/3 * * * *', () => {
+    const job = new CronJob('* * * * *', () => {
       this.updateJobsListCron();
     });
 
