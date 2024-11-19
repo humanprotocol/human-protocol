@@ -1,5 +1,4 @@
 import { plainToInstance } from 'class-transformer';
-import { MainnetsId } from '../../common/utils/constants';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ChainId,
@@ -21,11 +20,13 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { StatsService } from '../stats/stats.service';
 
 @Injectable()
 export class DetailsService {
   private readonly logger = new Logger(DetailsService.name);
   constructor(
+    private readonly statsService: StatsService,
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly networkConfig: NetworkConfigService,
@@ -149,9 +150,7 @@ export class DetailsService {
 
   public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? (Object.values(MainnetsId).filter(
-          (value) => typeof value === 'number',
-        ) as number[])
+      ? await this.statsService.getAvailableNetworks()
       : [chainId];
 
     const leadersByRole: { [role: string]: LeaderDto } = {};
@@ -187,9 +186,7 @@ export class DetailsService {
 
   public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? (Object.values(MainnetsId).filter(
-          (value) => typeof value === 'number',
-        ) as number[])
+      ? await this.statsService.getAvailableNetworks()
       : [chainId];
 
     const allLeaders: LeaderDto[] = [];

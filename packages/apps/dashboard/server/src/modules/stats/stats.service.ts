@@ -180,9 +180,8 @@ export class StatsService implements OnModuleInit {
       totalHolders: 0,
       totalTransactions: 0,
     };
-    for (const network of Object.values(MainnetsId).filter(
-      (value) => typeof value === 'number',
-    ) as number[]) {
+    const availableNetworks = await this.getAvailableNetworks();
+    for (const network of availableNetworks) {
       const statisticsClient = new StatisticsClient(NETWORKS[network]);
       const generalStats = await statisticsClient.getHMTStatistics();
       aggregatedStats.totalHolders += generalStats.totalHolders;
@@ -219,13 +218,11 @@ export class StatsService implements OnModuleInit {
     const dailyData: Record<string, CachedHMTData> = {};
     const monthlyData: Record<string, CachedHMTData> = {};
 
+    const availableNetworks = await this.getAvailableNetworks();
+
     // Fetch daily data for each network
     await Promise.all(
-      (
-        Object.values(MainnetsId).filter(
-          (value) => typeof value === 'number',
-        ) as number[]
-      ).map(async (network) => {
+      availableNetworks.map(async (network) => {
         const statisticsClient = new StatisticsClient(NETWORKS[network]);
         let skip = 0;
         let fetchedRecords: DailyHMTData[] = [];
