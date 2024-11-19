@@ -201,7 +201,7 @@ export class CronJobService {
           const escrowClient = await EscrowClient.build(signer);
 
           const escrowStatus = await escrowClient.getStatus(escrowAddress);
-          if (escrowStatus === EscrowStatus.Launched) {
+          if (escrowStatus === EscrowStatus.Pending) {
             if (!finalResultsUrl) {
               const { url, hash } = await this.payoutService.saveResults(
                 chainId,
