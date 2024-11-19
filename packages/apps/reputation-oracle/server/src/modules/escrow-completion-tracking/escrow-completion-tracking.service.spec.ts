@@ -151,12 +151,13 @@ describe('escrowCompletionTrackingService', () => {
       );
     });
 
-    it('should increment retries count if below threshold', async () => {
+    it('should increment retries count if below threshold and set waitUntil to a future date', async () => {
       const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
         {
           id: 1,
           status: EscrowCompletionTrackingStatus.PENDING,
           retriesCount: 0,
+          waitUntil: new Date(),
         };
       await (
         escrowCompletionTrackingService as any
@@ -170,27 +171,9 @@ describe('escrowCompletionTrackingService', () => {
       );
       expect(escrowCompletionTrackingEntity.retriesCount).toBe(1);
       expect(escrowCompletionTrackingEntity.waitUntil).toBeInstanceOf(Date);
-    });
-
-    it('should set waitUntil to a future date when incrementing retries count', async () => {
-      const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
-        {
-          id: 1,
-          status: EscrowCompletionTrackingStatus.PENDING,
-          retriesCount: 0,
-          waitUntil: new Date(),
-        };
-
-      await (
-        escrowCompletionTrackingService as any
-      ).handleEscrowCompletionTrackingError(
-        escrowCompletionTrackingEntity,
-        new Error('Sample error'),
-      );
 
       const now = new Date();
       const waitUntil = escrowCompletionTrackingEntity.waitUntil as Date;
-
       expect(waitUntil).toBeInstanceOf(Date);
       expect(waitUntil.getTime()).toBeGreaterThan(now.getTime());
     });
