@@ -60,7 +60,8 @@ export class PayoutService {
       );
     }
 
-    const manifest = await this.storageService.download(manifestUrl);
+    const manifest =
+      await this.storageService.downloadJsonLikeData(manifestUrl);
 
     const requestType = getRequestType(manifest);
 
@@ -102,7 +103,8 @@ export class PayoutService {
       );
     }
 
-    const manifest = await this.storageService.download(manifestUrl);
+    const manifest =
+      await this.storageService.downloadJsonLikeData(manifestUrl);
 
     const requestType = getRequestType(manifest);
 
@@ -209,7 +211,7 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const intermediateResults = (await this.storageService.download(
+    const intermediateResults = (await this.storageService.downloadJsonLikeData(
       intermediateResultsUrl,
     )) as FortuneFinalResult[];
 
@@ -279,7 +281,7 @@ export class PayoutService {
     manifest: FortuneManifestDto,
     finalResultsUrl: string,
   ): Promise<PayoutsDataDto> {
-    const finalResults = (await this.storageService.download(
+    const finalResults = (await this.storageService.downloadJsonLikeData(
       finalResultsUrl,
     )) as FortuneFinalResult[];
 
@@ -315,9 +317,10 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: CvatAnnotationMeta = await this.storageService.download(
-      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
-    );
+    const annotations: CvatAnnotationMeta =
+      await this.storageService.downloadJsonLikeData(
+        `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
+      );
 
     // If annotation meta results does not exist
     if (

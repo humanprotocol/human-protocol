@@ -137,7 +137,7 @@ describe('ReputationService', () => {
         };
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest) // Mock manifest
           .mockResolvedValueOnce([]); // Mock final results
 
@@ -165,7 +165,7 @@ describe('ReputationService', () => {
         ];
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest)
           .mockResolvedValueOnce(finalResults);
 
@@ -238,7 +238,7 @@ describe('ReputationService', () => {
         }));
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest) // Mock manifest
           .mockResolvedValueOnce([]); // Mock final results
 
@@ -289,7 +289,7 @@ describe('ReputationService', () => {
         };
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest)
           .mockResolvedValueOnce(annotationMeta);
 

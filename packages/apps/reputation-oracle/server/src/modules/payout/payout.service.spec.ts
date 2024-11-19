@@ -142,7 +142,9 @@ describe('PayoutService', () => {
         job_bounty: '10',
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(manifest);
 
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
@@ -160,7 +162,9 @@ describe('PayoutService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(manifest);
 
       const results: SaveResultDto = {
         url: MOCK_FILE_URL,
@@ -236,7 +240,9 @@ describe('PayoutService', () => {
         job_bounty: '10',
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(manifest);
 
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
@@ -261,7 +267,9 @@ describe('PayoutService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue(manifest);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(manifest);
 
       const results: PayoutsDataDto = {
         recipients: [MOCK_ADDRESS],
@@ -332,7 +340,7 @@ describe('PayoutService', () => {
       ];
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(intermediateResults);
 
       jest.spyOn(storageService, 'uploadJobSolutions').mockResolvedValue({
@@ -361,7 +369,9 @@ describe('PayoutService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue([] as any);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue([] as any);
 
       await expect(
         payoutService.saveResultsFortune(manifest, chainId, escrowAddress),
@@ -393,7 +403,7 @@ describe('PayoutService', () => {
       ];
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(intermediateResults);
 
       await expect(
@@ -425,7 +435,7 @@ describe('PayoutService', () => {
       ];
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(intermediateResults);
 
       const result = await payoutService.calculatePayoutsFortune(
@@ -475,7 +485,9 @@ describe('PayoutService', () => {
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
       });
-      jest.spyOn(storageService, 'download').mockResolvedValue(results);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(results);
 
       const result = await payoutService.saveResultsCvat(
         chainId,
@@ -539,7 +551,9 @@ describe('PayoutService', () => {
         ],
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue(results);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(results);
 
       const result = await payoutService.calculatePayoutsCvat(
         manifest as any,
@@ -563,7 +577,9 @@ describe('PayoutService', () => {
         results: [],
       };
 
-      jest.spyOn(storageService, 'download').mockResolvedValue(results);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(results);
 
       await expect(
         payoutService.calculatePayoutsCvat(
