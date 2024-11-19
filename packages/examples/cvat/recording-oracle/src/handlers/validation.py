@@ -214,8 +214,6 @@ def validate_results(
 ):
     logger = get_function_logger(module_logger_name)
 
-    escrow.validate_escrow(chain_id=chain_id, escrow_address=escrow_address)
-
     manifest = parse_manifest(escrow.get_escrow_manifest(chain_id, escrow_address))
 
     validator = _TaskValidator(
