@@ -194,18 +194,19 @@ export class CronJobService {
 
       for (const escrowCompletionTrackingEntity of escrowCompletionTrackingEntities) {
         try {
-          const { chainId, escrowAddress, finalResultsUrl, finalResultsHash } =
-            escrowCompletionTrackingEntity;
-
-          const signer = this.web3Service.getSigner(chainId);
+          const signer = this.web3Service.getSigner(
+            escrowCompletionTrackingEntity.chainId,
+          );
           const escrowClient = await EscrowClient.build(signer);
 
-          const escrowStatus = await escrowClient.getStatus(escrowAddress);
+          const escrowStatus = await escrowClient.getStatus(
+            escrowCompletionTrackingEntity.escrowAddress,
+          );
           if (escrowStatus === EscrowStatus.Pending) {
-            if (!finalResultsUrl) {
+            if (!escrowCompletionTrackingEntity.finalResultsUrl) {
               const { url, hash } = await this.payoutService.saveResults(
-                chainId,
-                escrowAddress,
+                escrowCompletionTrackingEntity.chainId,
+                escrowCompletionTrackingEntity.escrowAddress,
               );
 
               escrowCompletionTrackingEntity.finalResultsUrl = url;
@@ -216,10 +217,10 @@ export class CronJobService {
             }
 
             await this.payoutService.executePayouts(
-              chainId,
-              escrowAddress,
-              finalResultsUrl,
-              finalResultsHash,
+              escrowCompletionTrackingEntity.chainId,
+              escrowCompletionTrackingEntity.escrowAddress,
+              escrowCompletionTrackingEntity.finalResultsUrl,
+              escrowCompletionTrackingEntity.finalResultsHash,
             );
           }
 

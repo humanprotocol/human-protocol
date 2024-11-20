@@ -115,7 +115,10 @@ describe('CronJobService', () => {
         },
         WebhookService,
         EscrowCompletionTrackingService,
-        PayoutService,
+        {
+          provide: PayoutService,
+          useValue: createMock<PayoutService>(),
+        },
         ReputationService,
         ServerConfigService,
         Web3ConfigService,
@@ -144,13 +147,13 @@ describe('CronJobService', () => {
 
     service = module.get<CronJobService>(CronJobService);
     repository = module.get<CronJobRepository>(CronJobRepository);
-    payoutService = module.get<PayoutService>(PayoutService);
     reputationService = module.get<ReputationService>(ReputationService);
     webhookIncomingRepository = module.get(WebhookIncomingRepository);
     webhookOutgoingRepository = module.get(WebhookOutgoingRepository);
     escrowCompletionTrackingRepository = module.get(
       EscrowCompletionTrackingRepository,
     );
+    payoutService = module.get(PayoutService);
 
     webhookService = module.get<WebhookService>(WebhookService);
     escrowCompletionTrackingService =
@@ -474,6 +477,10 @@ describe('CronJobService', () => {
         .mockResolvedValue({} as CronJobEntity);
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      EscrowClient.build = jest.fn().mockResolvedValue({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+      });
     });
 
     it('should skip processing if a cron job is already running', async () => {
@@ -487,11 +494,17 @@ describe('CronJobService', () => {
     it('should start and complete the cron job successfully', async () => {
       const mockEntity = {
         id: 1,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
         status: EscrowCompletionTrackingStatus.PENDING,
       };
       jest
         .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
         .mockResolvedValue([mockEntity as any]);
+
+      const saveResultsMock = jest
+        .spyOn(payoutService, 'saveResults')
+        .mockResolvedValueOnce({ url: MOCK_FILE_URL, hash: MOCK_FILE_HASH });
 
       const updateOneMock = jest
         .spyOn(escrowCompletionTrackingRepository, 'updateOne')
@@ -502,7 +515,17 @@ describe('CronJobService', () => {
       expect(startCronJobMock).toHaveBeenCalledWith(
         CronJobType.ProcessPendingEscrowCompletionTracking,
       );
-      expect(updateOneMock).toHaveBeenCalled();
+      expect(saveResultsMock).toHaveBeenCalledWith(
+        mockEntity.chainId,
+        mockEntity.escrowAddress,
+      );
+      expect(payoutService.executePayouts).toHaveBeenCalledWith(
+        mockEntity.chainId,
+        mockEntity.escrowAddress,
+        MOCK_FILE_URL,
+        MOCK_FILE_HASH,
+      );
+      expect(updateOneMock).toHaveBeenCalledTimes(2);
       expect(completeCronJobMock).toHaveBeenCalled();
     });
 
