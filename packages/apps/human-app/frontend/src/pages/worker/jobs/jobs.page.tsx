@@ -71,6 +71,7 @@ export function JobsPage() {
         {selectedTab === 'availableJobs' ? (
           <AvailableJobsDrawerMobile
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
+            chainIdsEnabled={data?.chainIdsEnabled}
           />
         ) : (
           <MyJobsDrawerMobile

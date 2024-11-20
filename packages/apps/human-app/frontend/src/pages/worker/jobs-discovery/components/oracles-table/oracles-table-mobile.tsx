@@ -41,7 +41,7 @@ export function OraclesTableMobile({
 
   return (
     <Stack flexDirection="column">
-      {oraclesData.oracles.map((d) => (
+      {oraclesData?.oracles.map((d) => (
         <Paper
           key={crypto.randomUUID()}
           sx={{
