@@ -128,18 +128,6 @@ async def list_jobs(
         )
     )
 
-    # We need only high-level jobs (i.e. escrows) without project details
-    if db_engine.driver == "psycopg2":
-        subquery = select(cvat_service.Project.id).distinct(
-            cvat_service.Project.escrow_address
-            # DISTINCT ON is a postgres feature
-        )
-        query = query.where(cvat_service.Project.id.in_(subquery))
-    else:
-        # should be something like
-        # select(Project).where(id.in_(select(Project.id).group_by(Project.escrow_address)))
-        raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
-
     if wallet_address:
         query = query.filter(
             cvat_service.Project.jobs.any(
@@ -169,6 +157,26 @@ async def list_jobs(
         query = query.filter(updated_after < cvat_service.Project.updated_at)
 
     query = filter.filter_(query)
+
+    # We need only high-level jobs (i.e. escrows) without project details
+    if db_engine.driver == "psycopg2":
+        # Here we create a subquery to leave only unique escrows from all the previous entries.
+        # This is required to support custom ordering after the filtering,
+        # as DISTINCT ON requires ORDER BY by the distinct on field
+        query = (
+            query.order_by(cvat_service.Project.escrow_address)
+            .distinct(
+                cvat_service.Project.escrow_address
+                # DISTINCT ON is a postgres feature
+            )
+            .with_only_columns(cvat_service.Project.id)
+        )
+        query = select(cvat_service.Project).filter(cvat_service.Project.id.in_(query))
+    else:
+        # should be something like
+        # select(Project).where(id.in_(select(Project.id).group_by(Project.escrow_address)))
+        raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
+
     query = filter.sort_(query)
 
     with SessionLocal() as session:
