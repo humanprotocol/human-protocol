@@ -1,11 +1,13 @@
 import json
 import math
 import uuid
+from collections.abc import Sequence
 from datetime import timedelta
-from itertools import combinations, product
+from itertools import combinations, count, product
 from unittest.mock import patch
 
 import jwt
+import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from fastapi.responses import Response
@@ -242,6 +244,61 @@ def test_can_list_jobs_200_without_escrows_in_hidden_states(
             headers=get_auth_header(),
         )
         assert response.json()["results"] == []
+
+
+@pytest.mark.parametrize(
+    ("escrow_address", "project_statuses"),
+    [
+        (f"0x{case_idx:040d}", project_statuses)
+        for case_idx, project_statuses in enumerate(
+            [
+                (ProjectStatuses.annotation, ProjectStatuses.annotation),
+                (ProjectStatuses.annotation, ProjectStatuses.completed),
+                (ProjectStatuses.annotation, ProjectStatuses.validation),
+                (ProjectStatuses.completed, ProjectStatuses.annotation),
+                (ProjectStatuses.validation, ProjectStatuses.annotation),
+            ]
+        )
+    ],
+)
+def test_can_list_jobs_200_with_only_one_entry_per_escrow_address_if_several_projects(
+    client: TestClient,
+    session: Session,
+    escrow_address: str,
+    project_statuses: Sequence[ProjectStatuses],
+) -> None:
+    # There must be only 1 result per escrow address, even if there are several projects internally
+    # If we filter for a status, projects must not be shadowed by other ones under the escrow
+
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    project_idx_counter = count()
+    for project_status, project_idx in zip(project_statuses, project_idx_counter, strict=False):
+        cvat_project, _, _ = create_project_task_and_job(session, escrow_address, project_idx)
+        cvat_project.status = project_status
+        session.add(cvat_project)
+
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(token=generate_jwt_token(wallet_address=None)),
+        )
+        response.raise_for_status()
+        assert len(response.json()["results"]) == 1
 
 
 def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> None:
