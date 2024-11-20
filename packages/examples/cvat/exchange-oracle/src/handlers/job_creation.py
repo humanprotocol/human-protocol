@@ -511,10 +511,28 @@ class PointsTaskBuilder(SimpleTaskBuilder):
         assert self._mean_gt_bbox_radius_estimation is not _unset
 
         values = {
-            # We have at most 1 annotation per frame, so accuracy is either 0 or 1.
+            # We have at most 1 annotation per frame, so accuracy on each frame is either 0 or 1,
+            # regardless of the points count. For job accuracy we'll have:
+            # quality = mean frame accuracy = count of correct frames / validation frame count.
+            # If we set quality threshold from the manifest on this value, it can break quality
+            # requirements.
+            # Example: target quality is 80%, 6 frames, 1 has 20 points, 5 others have 1.
+            # Suppose the 5 frames with 1 point are annotated correctly and
+            # the one with 20 - is not annotated. The mean frame accuracy will be 5 / 6 ~ 83%,
+            # which is higher than the target quality, so the job will be accepted.
+            # The per-point mean (aka micro) accuracy will be 5 / (20 + 5) = 20%.
+            #
+            # Instead, we require that each frame matches with the required quality threshold,
+            # so the job accuracy is 1. This is a more strict requirement, from which
+            # follows that the job quality >= required.
+            # For each frame, as we have just 1 annotation, quality is computed as mean
+            # point quality on the frame with frame matching threshold.
             # Point set accuracy is controlled by iou_threshold,
-            # so configure it with the requested value.
-            "target_metric_threshold": 0.9,
+            # so configure it with the requested quality value.
+            #
+            # TODO: consider adding a quality option to count points as separate,
+            # or implement and use the mean IoU as the target metric in CVAT.
+            "target_metric_threshold": 0.95,  # some big number close to 1
             "iou_threshold": self.manifest.validation.min_quality,
             "oks_sigma": self._mean_gt_bbox_radius_estimation,
             "point_size_base": "image_size",
