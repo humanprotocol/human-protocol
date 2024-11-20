@@ -218,7 +218,8 @@
       "allJobs": "All tasks"
     },
     "registrationInExchangeOracle": {
-      "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
+      "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
+      "instructionsButton": "See registration tutorial",
       "completeMessage": "Click on Complete once you have finished the registration process:",
       "completeButton": "Complete"
     },
