@@ -147,14 +147,10 @@ export class WebhookService {
       snake_case_body,
       this.web3ConfigService.privateKey,
     );
-    const { status } = await firstValueFrom(
+    await firstValueFrom(
       await this.httpService.post(url, snake_case_body, {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
       }),
     );
-
-    if (status !== HttpStatus.CREATED) {
-      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
-    }
   }
 }

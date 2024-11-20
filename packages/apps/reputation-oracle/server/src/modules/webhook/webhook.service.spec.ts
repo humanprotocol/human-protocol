@@ -25,7 +25,7 @@ import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { IncomingWebhookDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
 import { HttpStatus } from '@nestjs/common';
@@ -283,15 +283,14 @@ describe('WebhookService', () => {
         },
       );
     });
-    it('should return an error if there is no response', async () => {
+    it('throws an error if there request webhook sending fails', async () => {
+      const testError = new Error('non-axios error');
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
-        return of({});
+        return throwError(() => testError);
       });
       await expect(
         webhookService.sendWebhook(MOCK_WEBHOOK_URL, payload),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.NotSent, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(testError);
     });
   });
 });
