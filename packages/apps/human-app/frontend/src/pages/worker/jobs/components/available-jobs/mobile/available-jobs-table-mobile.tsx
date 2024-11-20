@@ -19,13 +19,16 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { AvailableJobsAssignJobButton } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-assign-job-button';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: ChainIdsEnabled;
 }
 
 export function AvailableJobsTableMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: AvailableJobsTableMobileProps) {
   const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<AvailableJob[]>([]);
@@ -138,7 +141,7 @@ export function AvailableJobsTableMobile({
                       color={colorPalette.secondary.light}
                       variant="body2"
                     >
-                      {getNetworkName()}
+                      {getNetworkName(chainIdsEnabled, d.chain_id)}
                     </Typography>
                   </ListItem>
                 </Grid>

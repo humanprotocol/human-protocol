@@ -25,6 +25,13 @@ export type Oracle = z.infer<typeof OracleSchema> & {
   name: string;
 };
 
+export type ChainIdsEnabled = (string | undefined)[];
+
+export interface Oracles {
+  oracles: Oracle[];
+  chainIdsEnabled: ChainIdsEnabled;
+}
+
 const OracleNameToUrls = {
   CVAT: [
     'https://stg-exchange-oracle.humanprotocol.org',
@@ -56,13 +63,16 @@ export async function getOracles({
   selected_job_types: string[];
   signal: AbortSignal;
 }) {
-  let oracles = [H_CAPTCHA_ORACLE];
+  let predefinedOracles: Oracles = {
+    oracles: [H_CAPTCHA_ORACLE],
+    chainIdsEnabled: [],
+  };
   if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
     const queryParams = selected_job_types.length
       ? `?${stringifyUrlQueryObject({ selected_job_types })}`
       : '';
 
-    const result = await apiClient(
+    const fetchedOracles = await apiClient(
       `${apiPaths.worker.oracles.path}${queryParams}`,
       {
         successSchema: OraclesDiscoverSuccessSchema,
@@ -71,14 +81,19 @@ export async function getOracles({
       signal
     );
 
-    oracles = oracles.concat(
-      result.oracles.map((oracle) => ({
-        ...oracle,
-        name: oracleUrlToNameMap.get(oracle.url) ?? '',
-      }))
-    );
+    predefinedOracles = {
+      oracles: predefinedOracles.oracles.concat(
+        fetchedOracles.oracles.map((oracle) => ({
+          ...oracle,
+          name: oracleUrlToNameMap.get(oracle.url) ?? '',
+        }))
+      ),
+      chainIdsEnabled: predefinedOracles.chainIdsEnabled.concat(
+        fetchedOracles.chainIdsEnabled
+      ),
+    };
   }
-  return oracles;
+  return predefinedOracles;
 }
 
 export function useGetOracles() {

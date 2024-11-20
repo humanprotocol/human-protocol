@@ -12,12 +12,15 @@ import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-clic
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { AvailableJobsRewardAmountSortMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-reward-amount-sort-mobile';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: ChainIdsEnabled | undefined;
 }
 export function AvailableJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: DrawerMobileProps) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
@@ -104,13 +107,17 @@ export function AvailableJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.network')}
         </Typography>
-        <Stack
-          alignItems="center"
-          flexDirection="row"
-          key={crypto.randomUUID()}
-        >
-          <AvailableJobsNetworkFilterMobile />
-        </Stack>
+        {chainIdsEnabled && (
+          <Stack
+            alignItems="center"
+            flexDirection="row"
+            key={crypto.randomUUID()}
+          >
+            <AvailableJobsNetworkFilterMobile
+              chainIdsEnabled={chainIdsEnabled}
+            />
+          </Stack>
+        )}
 
         <Divider
           sx={{

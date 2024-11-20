@@ -1,15 +1,25 @@
 /* eslint-disable camelcase --- ... */
+import { useCallback } from 'react';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
-import { chains } from '@/smart-contracts/chains';
+import { getChainsEnabled } from '@/smart-contracts/chains';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
-const allNetworks = chains.map(({ chainId, name }) => ({
-  option: chainId,
-  name,
-}));
+interface MyJobsNetworkFilterProps {
+  chainIdsEnabled: ChainIdsEnabled;
+}
 
-export function MyJobsNetworkFilter() {
+export function MyJobsNetworkFilter({
+  chainIdsEnabled,
+}: MyJobsNetworkFilterProps) {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
+
+  const allNetworks = useCallback(() => {
+    return getChainsEnabled(chainIdsEnabled).map(({ chainId, name }) => ({
+      option: chainId,
+      name,
+    }));
+  }, [chainIdsEnabled]);
 
   return (
     <Filtering
@@ -19,7 +29,7 @@ export function MyJobsNetworkFilter() {
           chain_id: undefined,
         });
       }}
-      filteringOptions={allNetworks}
+      filteringOptions={allNetworks()}
       isChecked={(option) => option === filterParams.chain_id}
       setFiltering={(chainId) => {
         setFilterParams({

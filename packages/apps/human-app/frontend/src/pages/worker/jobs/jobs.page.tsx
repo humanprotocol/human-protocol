@@ -57,7 +57,7 @@ export function JobsPage() {
     }
   }, [error]);
 
-  const oracleName = data?.find(
+  const oracleName = data?.oracles.find(
     ({ address }) => address === oracle_address
   )?.name;
 
@@ -137,12 +137,15 @@ export function JobsPage() {
                       <>
                         {isMobile ? (
                           <AvailableJobsTableMobile
+                            chainIdsEnabled={data.chainIdsEnabled}
                             setIsMobileFilterDrawerOpen={
                               setIsMobileFilterDrawerOpen
                             }
                           />
                         ) : (
-                          <AvailableJobsTable />
+                          <AvailableJobsTable
+                            chainIdsEnabled={data.chainIdsEnabled}
+                          />
                         )}
                       </>
                     )}
@@ -154,12 +157,13 @@ export function JobsPage() {
                       <>
                         {isMobile ? (
                           <MyJobsTableMobile
+                            chainIdsEnabled={data.chainIdsEnabled}
                             setIsMobileFilterDrawerOpen={
                               setIsMobileFilterDrawerOpen
                             }
                           />
                         ) : (
-                          <MyJobsTable />
+                          <MyJobsTable chainIdsEnabled={data.chainIdsEnabled} />
                         )}
                       </>
                     )}

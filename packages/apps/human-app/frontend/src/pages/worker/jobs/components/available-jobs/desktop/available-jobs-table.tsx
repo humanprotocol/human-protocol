@@ -27,6 +27,11 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
+
+interface AvailableJobsTableProps {
+  chainIdsEnabled: ChainIdsEnabled;
+}
 
 export type AvailableJobsTableData = AvailableJob & {
   rewardTokenInfo: {
@@ -35,7 +40,9 @@ export type AvailableJobsTableData = AvailableJob & {
   };
 };
 
-const columns: MRT_ColumnDef<AvailableJob>[] = [
+const getColumns = (
+  chainIdsEnabled: ChainIdsEnabled
+): MRT_ColumnDef<AvailableJob>[] => [
   {
     accessorKey: 'job_description',
     header: t('worker.jobs.jobDescription'),
@@ -56,8 +63,8 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
     header: t('worker.jobs.network'),
     size: 100,
     enableSorting: false,
-    Cell: () => {
-      return getNetworkName();
+    Cell: (props) => {
+      return getNetworkName(chainIdsEnabled, props.row.original.chain_id);
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {
@@ -66,7 +73,9 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
             {...props}
             headerText={t('worker.jobs.network')}
             iconType="filter"
-            popoverContent={<AvailableJobsNetworkFilter />}
+            popoverContent={
+              <AvailableJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
+            }
           />
         );
       },
@@ -156,7 +165,9 @@ const columns: MRT_ColumnDef<AvailableJob>[] = [
   },
 ];
 
-export function AvailableJobsTable() {
+export function AvailableJobsTable({
+  chainIdsEnabled,
+}: AvailableJobsTableProps) {
   const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,
@@ -165,6 +176,7 @@ export function AvailableJobsTable() {
     resetFilterParams,
   } = useJobsFilterStore();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
+
   const memoizedTableDataResults = useMemo(
     () => tableData?.results ?? [],
     [tableData?.results]
@@ -193,6 +205,8 @@ export function AvailableJobsTable() {
       resetFilterParams();
     };
   }, [resetFilterParams]);
+
+  const columns: MRT_ColumnDef<AvailableJob>[] = getColumns(chainIdsEnabled);
 
   const table = useMaterialReactTable({
     columns,

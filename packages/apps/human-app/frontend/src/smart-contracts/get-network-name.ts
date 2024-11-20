@@ -1,9 +1,24 @@
-import { MainnetChains, TestnetChains } from '@/smart-contracts/chains';
+import {
+  getTestnetChainsEnabled,
+  getMainnetChainsEnabled,
+} from '@/smart-contracts/chains';
 import { env } from '@/shared/env';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
-export const getNetworkName = (): string => {
+export const getNetworkName = (
+  chainIdsEnabled: ChainIdsEnabled,
+  chainId: number
+): string => {
   if (env.VITE_NETWORK === 'testnet') {
-    return TestnetChains[0]?.name;
+    return (
+      getTestnetChainsEnabled(chainIdsEnabled).find(
+        (el) => el.chainId === chainId
+      )?.name ?? ''
+    );
   }
-  return MainnetChains[0]?.name;
+  return (
+    getMainnetChainsEnabled(chainIdsEnabled).find(
+      (el) => el.chainId === chainId
+    )?.name ?? ''
+  );
 };

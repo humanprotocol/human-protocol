@@ -36,15 +36,22 @@ import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
+
+interface MyJobsTableProps {
+  chainIdsEnabled: ChainIdsEnabled;
+}
 
 const getColumnsDefinition = ({
   resignJob,
   refreshData,
   isRefreshTasksPending,
+  chainIdsEnabled,
 }: {
   resignJob: (assignment_id: string) => void;
   refreshData: () => void;
   isRefreshTasksPending: boolean;
+  chainIdsEnabled: ChainIdsEnabled;
 }): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -59,8 +66,8 @@ const getColumnsDefinition = ({
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
-    Cell: () => {
-      return getNetworkName();
+    Cell: (props) => {
+      return getNetworkName(chainIdsEnabled, props.row.original.chain_id);
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {
@@ -69,7 +76,9 @@ const getColumnsDefinition = ({
             {...props}
             headerText={t('worker.jobs.network')}
             iconType="filter"
-            popoverContent={<MyJobsNetworkFilter />}
+            popoverContent={
+              <MyJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
+            }
           />
         );
       },
@@ -248,7 +257,7 @@ const getColumnsDefinition = ({
   },
 ];
 
-export function MyJobsTable() {
+export function MyJobsTable({ chainIdsEnabled }: MyJobsTableProps) {
   const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,
@@ -306,6 +315,7 @@ export function MyJobsTable() {
       resignJob: rejectTask(oracle_address ?? ''),
       refreshData: refreshTasks(oracle_address ?? ''),
       isRefreshTasksPending,
+      chainIdsEnabled,
     }),
     data: memoizedTableDataResults,
     state: {

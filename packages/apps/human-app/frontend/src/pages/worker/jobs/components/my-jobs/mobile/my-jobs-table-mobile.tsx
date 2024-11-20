@@ -26,13 +26,16 @@ import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: ChainIdsEnabled;
 }
 
 export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: MyJobsTableMobileProps) {
   const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<MyJob[]>([]);
@@ -169,7 +172,7 @@ export function MyJobsTableMobile({
                         color={colorPalette.primary.light}
                         variant="body2"
                       >
-                        {getNetworkName()}
+                        {getNetworkName(chainIdsEnabled, d.chain_id)}
                       </Typography>
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>

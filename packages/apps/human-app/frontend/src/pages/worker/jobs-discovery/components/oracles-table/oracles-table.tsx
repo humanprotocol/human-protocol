@@ -125,7 +125,7 @@ export function OraclesTable({
       showAlertBanner: isOraclesDataError,
     },
     columns: getColumns(selectOracle),
-    data: oraclesData ?? [],
+    data: oraclesData?.oracles ?? [],
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
