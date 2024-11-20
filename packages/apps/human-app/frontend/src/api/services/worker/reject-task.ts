@@ -4,7 +4,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
 function rejectTask(data: { assignment_id: string; oracle_address: string }) {
-  return apiClient(apiPaths.worker.resignJob.path, {
+  return apiClient.fetcher(apiPaths.worker.resignJob.path, {
     successSchema: z.unknown(),
     authenticated: true,
     options: { method: 'POST', body: JSON.stringify(data) },

@@ -9,7 +9,7 @@ const RegisteredOraclesSuccessResponseSchema = z.object({
 });
 
 export async function getRegistrationInExchangeOracles() {
-  return apiClient(apiPaths.worker.registrationInExchangeOracle.path, {
+  return apiClient.fetcher(apiPaths.worker.registrationInExchangeOracle.path, {
     authenticated: true,
     successSchema: RegisteredOraclesSuccessResponseSchema,
     options: { method: 'GET' },

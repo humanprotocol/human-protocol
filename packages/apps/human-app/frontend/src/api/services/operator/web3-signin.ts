@@ -32,7 +32,7 @@ export function useWeb3SignIn() {
       }
       const signature = await signMessage(JSON.stringify(dataToSign));
 
-      return apiClient(apiPaths.operator.web3Auth.signIn.path, {
+      return apiClient.fetcher(apiPaths.operator.web3Auth.signIn.path, {
         successSchema: web3SignInSuccessResponseSchema,
         options: {
           method: 'POST',

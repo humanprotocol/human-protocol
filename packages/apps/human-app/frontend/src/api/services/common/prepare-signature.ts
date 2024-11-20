@@ -24,7 +24,7 @@ export interface PrepareSignatureBody {
 }
 
 export const prepareSignature = (body: PrepareSignatureBody) => {
-  return apiClient(apiPaths.operator.web3Auth.prepareSignature.path, {
+  return apiClient.fetcher(apiPaths.operator.web3Auth.prepareSignature.path, {
     successSchema: prepareSignatureSuccessSchema,
     options: { method: 'POST', body: JSON.stringify(body) },
   });

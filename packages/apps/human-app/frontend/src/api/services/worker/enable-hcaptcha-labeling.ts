@@ -22,7 +22,7 @@ export function useEnableHCaptchaLabelingMutation() {
 
   return useMutation({
     mutationFn: async () => {
-      const result = await apiClient(
+      const result = await apiClient.fetcher(
         apiPaths.worker.enableHCaptchaLabeling.path,
         {
           successSchema: enableHCaptchaLabelingSuccessSchema,

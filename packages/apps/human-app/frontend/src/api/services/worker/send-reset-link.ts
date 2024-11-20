@@ -33,7 +33,7 @@ export type SendResetLinkDto = SendResetLinkEmail & SendResetLinkHcaptcha;
 const SendResetLinkSuccessResponseSchema = z.unknown();
 
 function sendResetLinkMutationFn(data: SendResetLinkDto) {
-  return apiClient(apiPaths.worker.sendResetLink.path, {
+  return apiClient.fetcher(apiPaths.worker.sendResetLink.path, {
     successSchema: SendResetLinkSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });

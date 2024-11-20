@@ -4,7 +4,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
 function refreshTasks(data: { oracle_address: string }) {
-  return apiClient(apiPaths.worker.refreshJob.path, {
+  return apiClient.fetcher(apiPaths.worker.refreshJob.path, {
     successSchema: z.unknown(),
     authenticated: true,
     options: { method: 'PUT', body: JSON.stringify(data) },

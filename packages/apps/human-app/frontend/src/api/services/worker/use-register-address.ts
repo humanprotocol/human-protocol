@@ -15,7 +15,7 @@ import { useWalletConnect } from '@/hooks/use-wallet-connect';
 const RegisterAddressSuccessSchema = z.unknown();
 
 export const registerAddress = (address: string, signature: string) => {
-  return apiClient(apiPaths.worker.registerAddress.path, {
+  return apiClient.fetcher(apiPaths.worker.registerAddress.path, {
     authenticated: true,
     withAuthRetry: apiPaths.worker.registerAddress.withAuthRetry,
     successSchema: RegisterAddressSuccessSchema,

@@ -12,7 +12,7 @@ export type VerifyDto = z.infer<typeof verifyEmailDtoSchema>;
 const VerifyEmailSuccessResponseSchema = z.unknown();
 
 async function verifyEmailQueryFn(data: VerifyDto) {
-  return apiClient(apiPaths.worker.verifyEmail.path, {
+  return apiClient.fetcher(apiPaths.worker.verifyEmail.path, {
     authenticated: true,
     withAuthRetry: apiPaths.worker.verifyEmail.withAuthRetry,
     successSchema: VerifyEmailSuccessResponseSchema,

@@ -25,7 +25,7 @@ const RegistrationInExchangeOracleSuccessResponseSchema = z.unknown();
 function registrationInExchangeOracleMutationFn(
   data: RegistrationInExchangeOracleDto
 ) {
-  return apiClient(apiPaths.worker.registrationInExchangeOracle.path, {
+  return apiClient.fetcher(apiPaths.worker.registrationInExchangeOracle.path, {
     authenticated: true,
     successSchema: RegistrationInExchangeOracleSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },

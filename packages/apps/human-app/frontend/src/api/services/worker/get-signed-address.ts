@@ -11,7 +11,7 @@ const signedAddressSuccessSchema = z.object({
 export type SignedAddressSuccess = z.infer<typeof signedAddressSuccessSchema>;
 
 const getSignedAddress = async () => {
-  return apiClient(apiPaths.worker.signedAddress.path, {
+  return apiClient.fetcher(apiPaths.worker.signedAddress.path, {
     authenticated: true,
     withAuthRetry: apiPaths.worker.signedAddress.withAuthRetry,
     successSchema: signedAddressSuccessSchema,

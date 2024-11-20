@@ -74,6 +74,43 @@ export function createFetcher(defaultFetcherConfig?: {
   let isRefreshing = false;
   let refreshPromise: Promise<SignInSuccessResponse | undefined> | null = null;
 
+  async function refreshToken(): Promise<
+    { access_token: string; refresh_token: string } | null | undefined
+  > {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      refreshPromise = (async () => {
+        try {
+          const refetchAccessTokenSuccess = await apiClient.fetcher(
+            apiPaths.worker.obtainAccessToken.path,
+            {
+              successSchema: signInSuccessResponseSchema,
+              options: {
+                method: 'POST',
+                body: JSON.stringify({
+                  // eslint-disable-next-line camelcase -- camel case defined by api
+                  refresh_token: browserAuthProvider.getRefreshToken(),
+                }),
+              },
+            }
+          );
+          browserAuthProvider.signIn(
+            refetchAccessTokenSuccess,
+            browserAuthProvider.authType
+          );
+          return refetchAccessTokenSuccess;
+        } catch (e) {
+          browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+          return undefined;
+        } finally {
+          isRefreshing = false;
+          refreshPromise = null;
+        }
+      })();
+    }
+    return refreshPromise;
+  }
+
   async function fetcher<SuccessInput, SuccessOutput>(
     url: string | URL,
     fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>,
@@ -156,39 +193,7 @@ export function createFetcher(defaultFetcherConfig?: {
       fetcherOptions.authenticated &&
       fetcherOptions.withAuthRetry
     ) {
-      if (!isRefreshing) {
-        isRefreshing = true;
-        refreshPromise = (async () => {
-          try {
-            const refetchAccessTokenSuccess = await apiClient(
-              apiPaths.worker.obtainAccessToken.path,
-              {
-                successSchema: signInSuccessResponseSchema,
-                options: {
-                  method: 'POST',
-                  body: JSON.stringify({
-                    // eslint-disable-next-line camelcase -- camel case defined by api
-                    refresh_token: browserAuthProvider.getRefreshToken(),
-                  }),
-                },
-              }
-            );
-            browserAuthProvider.signIn(
-              refetchAccessTokenSuccess,
-              browserAuthProvider.authType
-            );
-            return refetchAccessTokenSuccess;
-          } catch (e) {
-            browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
-            return undefined;
-          } finally {
-            isRefreshing = false;
-            refreshPromise = null;
-          }
-        })();
-      }
-
-      const refetchAccessTokenSuccess = await refreshPromise;
+      const refetchAccessTokenSuccess = await refreshToken();
 
       if (!refetchAccessTokenSuccess) {
         return;
@@ -243,7 +248,7 @@ export function createFetcher(defaultFetcherConfig?: {
     }
   }
 
-  return fetcher;
+  return { fetcher, refreshToken };
 }
 
 export const isFetcherError = (error: ResponseError): error is FetchError =>

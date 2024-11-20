@@ -30,7 +30,7 @@ export const signInSuccessResponseSchema = z.object({
 export type SignInSuccessResponse = z.infer<typeof signInSuccessResponseSchema>;
 
 function signInMutationFn(data: SignInDto) {
-  return apiClient(apiPaths.worker.signIn.path, {
+  return apiClient.fetcher(apiPaths.worker.signIn.path, {
     successSchema: signInSuccessResponseSchema,
     options: {
       method: 'POST',

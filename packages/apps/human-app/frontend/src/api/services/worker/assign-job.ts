@@ -15,7 +15,7 @@ export interface AssignJobBody {
 const AssignJobBodySuccessResponseSchema = z.unknown();
 
 function assignJob(data: AssignJobBody) {
-  return apiClient(apiPaths.worker.assignJob.path, {
+  return apiClient.fetcher(apiPaths.worker.assignJob.path, {
     authenticated: true,
     successSchema: AssignJobBodySuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },

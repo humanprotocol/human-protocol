@@ -10,7 +10,7 @@ const dailyHmtSpentSchema = z.object({
 export type DailyHmtSpentSchemaSuccess = z.infer<typeof dailyHmtSpentSchema>;
 
 export async function getDailyHmtSpent() {
-  return apiClient(apiPaths.worker.dailyHmtSpend.path, {
+  return apiClient.fetcher(apiPaths.worker.dailyHmtSpend.path, {
     successSchema: dailyHmtSpentSchema,
     authenticated: true,
     options: { method: 'GET' },
