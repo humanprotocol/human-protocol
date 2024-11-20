@@ -10,15 +10,18 @@ import { useColorMode } from '@/hooks/use-color-mode';
 import { MyJobsRewardAmountSortMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-reward-amount-sort-mobile';
 import { MyJobsExpiresAtSortMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-expires-at-sort-mobile';
 import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
 import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
 import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: ChainIdsEnabled | undefined;
 }
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: DrawerMobileProps) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
@@ -111,7 +114,7 @@ export function MyJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <MyJobsNetworkFilterMobile />
+          <MyJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider

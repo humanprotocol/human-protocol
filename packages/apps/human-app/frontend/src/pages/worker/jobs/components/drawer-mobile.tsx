@@ -20,14 +20,17 @@ import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
 interface DrawerMobileProps {
   selectedTab: string;
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: ChainIdsEnabled;
 }
 export function DrawerMobile({
   selectedTab,
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: DrawerMobileProps) {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
@@ -188,7 +191,7 @@ export function DrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsNetworkFilterMobile />
+          <AvailableJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider

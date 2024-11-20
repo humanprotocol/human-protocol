@@ -76,6 +76,7 @@ export function JobsPage() {
         ) : (
           <MyJobsDrawerMobile
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
+            chainIdsEnabled={data?.chainIdsEnabled}
           />
         )}
       </Modal>

@@ -1,12 +1,12 @@
 /* eslint-disable camelcase --- ... */
 import { useCallback } from 'react';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
-import { getChainsEnabled } from '@/smart-contracts/chains';
+import { getChainsEnabled, chains } from '@/smart-contracts/chains';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 import { type ChainIdsEnabled } from '@/api/services/worker/oracles';
 
 interface MyJobsNetworkFilterMobileProps {
-  chainIdsEnabled: ChainIdsEnabled;
+  chainIdsEnabled: ChainIdsEnabled | undefined;
 }
 
 export function MyJobsNetworkFilterMobile({
@@ -14,8 +14,12 @@ export function MyJobsNetworkFilterMobile({
 }: MyJobsNetworkFilterMobileProps) {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
-  const allNetworks = useCallback(() => {
-    return getChainsEnabled(chainIdsEnabled).map(({ chainId, name }) => ({
+  const getAllNetworks = useCallback(() => {
+    const chainsSelected = chainIdsEnabled
+      ? getChainsEnabled(chainIdsEnabled)
+      : chains;
+
+    return chainsSelected.map(({ chainId, name }) => ({
       option: chainId,
       name,
     }));
@@ -30,7 +34,7 @@ export function MyJobsNetworkFilterMobile({
           page: 0,
         });
       }}
-      filteringOptions={allNetworks()}
+      filteringOptions={getAllNetworks()}
       isChecked={(option) => option === filterParams.chain_id}
       isMobile={false}
       setFiltering={(chainId) => {

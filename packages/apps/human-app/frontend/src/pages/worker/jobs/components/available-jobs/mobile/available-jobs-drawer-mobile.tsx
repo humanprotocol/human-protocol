@@ -107,18 +107,13 @@ export function AvailableJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.network')}
         </Typography>
-        {chainIdsEnabled && (
-          <Stack
-            alignItems="center"
-            flexDirection="row"
-            key={crypto.randomUUID()}
-          >
-            <AvailableJobsNetworkFilterMobile
-              chainIdsEnabled={chainIdsEnabled}
-            />
-          </Stack>
-        )}
-
+        <Stack
+          alignItems="center"
+          flexDirection="row"
+          key={crypto.randomUUID()}
+        >
+          <AvailableJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
+        </Stack>
         <Divider
           sx={{
             my: '16px',
