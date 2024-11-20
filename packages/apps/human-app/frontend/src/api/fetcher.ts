@@ -71,6 +71,9 @@ export function createFetcher(defaultFetcherConfig?: {
   options?: RequestInit | (() => RequestInit);
   baseUrl: FetcherUrl | (() => FetcherUrl);
 }) {
+  let isRefreshing = false;
+  let refreshPromise: Promise<SignInSuccessResponse | undefined> | null = null;
+
   async function fetcher<SuccessInput, SuccessOutput>(
     url: string | URL,
     fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>,
@@ -153,27 +156,41 @@ export function createFetcher(defaultFetcherConfig?: {
       fetcherOptions.authenticated &&
       fetcherOptions.withAuthRetry
     ) {
-      let refetchAccessTokenSuccess: SignInSuccessResponse | undefined;
-      try {
-        refetchAccessTokenSuccess = await apiClient(
-          apiPaths.worker.obtainAccessToken.path,
-          {
-            successSchema: signInSuccessResponseSchema,
-            options: {
-              method: 'POST',
-              body: JSON.stringify({
-                // eslint-disable-next-line camelcase -- camel case defined by api
-                refresh_token: browserAuthProvider.getRefreshToken(),
-              }),
-            },
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = (async () => {
+          try {
+            const refetchAccessTokenSuccess = await apiClient(
+              apiPaths.worker.obtainAccessToken.path,
+              {
+                successSchema: signInSuccessResponseSchema,
+                options: {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    // eslint-disable-next-line camelcase -- camel case defined by api
+                    refresh_token: browserAuthProvider.getRefreshToken(),
+                  }),
+                },
+              }
+            );
+            browserAuthProvider.signIn(
+              refetchAccessTokenSuccess,
+              browserAuthProvider.authType
+            );
+            return refetchAccessTokenSuccess;
+          } catch (e) {
+            browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+            return undefined;
+          } finally {
+            isRefreshing = false;
+            refreshPromise = null;
           }
-        );
-        browserAuthProvider.signIn(
-          refetchAccessTokenSuccess,
-          browserAuthProvider.authType
-        );
-      } catch {
-        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+        })();
+      }
+
+      const refetchAccessTokenSuccess = await refreshPromise;
+
+      if (!refetchAccessTokenSuccess) {
         return;
       }
 
