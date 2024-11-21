@@ -71,14 +71,12 @@ export function createFetcher(defaultFetcherConfig?: {
   options?: RequestInit | (() => RequestInit);
   baseUrl: FetcherUrl | (() => FetcherUrl);
 }) {
-  let isRefreshing = false;
   let refreshPromise: Promise<SignInSuccessResponse | undefined> | null = null;
 
   async function refreshToken(): Promise<
     { access_token: string; refresh_token: string } | null | undefined
   > {
-    if (!isRefreshing) {
-      isRefreshing = true;
+    if (!refreshPromise) {
       refreshPromise = (async () => {
         try {
           const refetchAccessTokenSuccess = await apiClient.fetcher(
@@ -103,7 +101,6 @@ export function createFetcher(defaultFetcherConfig?: {
           browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
           return undefined;
         } finally {
-          isRefreshing = false;
           refreshPromise = null;
         }
       })();
