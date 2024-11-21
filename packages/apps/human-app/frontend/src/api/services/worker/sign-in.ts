@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-// eslint-disable-next-line import/no-cycle -- cause by refresh token retry
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';

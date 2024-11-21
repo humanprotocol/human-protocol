@@ -2,10 +2,8 @@ import merge from 'lodash/merge';
 import { ZodError, type ZodType, type ZodTypeDef } from 'zod';
 import type { ResponseError } from '@/shared/types/global.type';
 import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
-// eslint-disable-next-line import/no-cycle -- cause by refresh token retry
-import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
-import { apiPaths } from '@/api/api-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { fetchTokenRefresh } from './fetch-refresh-token';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,
@@ -76,42 +74,16 @@ export function createFetcher(defaultFetcherConfig?: {
     { access_token: string; refresh_token: string } | null | undefined
   > {
     if (!refreshPromise) {
-      refreshPromise = (async () => {
-        try {
-          const response = await fetch(apiPaths.worker.obtainAccessToken.path, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              // eslint-disable-next-line camelcase -- camel case defined by api
-              refresh_token: browserAuthProvider.getRefreshToken(),
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to refresh token');
-          }
-
-          const data: unknown = await response.json();
-
-          const refetchAccessTokenSuccess: SignInSuccessResponse =
-            signInSuccessResponseSchema.parse(data);
-
-          browserAuthProvider.signIn(
-            refetchAccessTokenSuccess,
-            browserAuthProvider.authType
-          );
-
-          return refetchAccessTokenSuccess;
-        } catch (e) {
-          browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
-          return undefined;
-        } finally {
-          refreshPromise = null;
-        }
-      })();
+      try {
+        refreshPromise = fetchTokenRefresh();
+      } catch (error) {
+        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+        refreshPromise = null;
+      } finally {
+        refreshPromise = null;
+      }
     }
+
     return refreshPromise;
   }
 
