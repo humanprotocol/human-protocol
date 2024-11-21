@@ -6,7 +6,7 @@
 
 #### Changed
 
-Encryption module: update to work with binaries.
+* Encryption module: update to work with binaries.
 
 #### Deprecated
 
