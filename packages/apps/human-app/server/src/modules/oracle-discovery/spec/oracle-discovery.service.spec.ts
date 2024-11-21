@@ -14,7 +14,7 @@ import {
   generateOracleDiscoveryResponseBody,
   generateOracleDiscoveryResponseBodyByChainId,
   generateOracleDiscoveryResponseBodyByJobType,
-  generateOracleDiscoveryResponseBodyBySupportedJobType,
+  generateOraclesWithSupportedJobTypesOnly,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
 import { KvStoreGateway } from '../../../integrations/kv-store/kv-store.gateway';
@@ -221,8 +221,7 @@ describe('OracleDiscoveryService', () => {
 
     const result = await oracleDiscoveryService.processOracleDiscovery({});
 
-    const expectedResponse =
-      generateOracleDiscoveryResponseBodyBySupportedJobType();
+    const expectedResponse = generateOraclesWithSupportedJobTypesOnly();
     expect(result).toEqual(expectedResponse);
 
     result.oracles.forEach((oracle) => {
