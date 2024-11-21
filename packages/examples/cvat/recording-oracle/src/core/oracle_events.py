@@ -11,14 +11,6 @@ class OracleEvent(BaseModel):
         return get_type_tag_for_event_class(cls)
 
 
-class JobLauncherEvent_EscrowCreated(OracleEvent):
-    pass  # escrow is enough
-
-
-class JobLauncherEvent_EscrowCanceled(OracleEvent):
-    pass  # escrow is enough
-
-
 class RecordingOracleEvent_JobCompleted(OracleEvent):
     pass  # escrow is enough for now
 
@@ -41,11 +33,16 @@ class ExchangeOracleEvent_JobFinished(OracleEvent):
     pass  # escrow is enough for now
 
 
+class ExchangeOracleEvent_EscrowCleaned(OracleEvent):
+    pass
+
+
 _event_type_map = {
     RecordingOracleEventTypes.job_completed: RecordingOracleEvent_JobCompleted,
     RecordingOracleEventTypes.submission_rejected: RecordingOracleEvent_SubmissionRejected,
     ExchangeOracleEventTypes.job_creation_failed: ExchangeOracleEvent_JobCreationFailed,
     ExchangeOracleEventTypes.job_finished: ExchangeOracleEvent_JobFinished,
+    ExchangeOracleEventTypes.escrow_cleaned: ExchangeOracleEvent_EscrowCleaned,
 }
 
 

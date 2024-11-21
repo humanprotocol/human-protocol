@@ -7,6 +7,16 @@ export enum ErrorWebhook {
   NotCreated = 'Webhook has not been created',
   InvalidEventType = 'Invalid event type',
   NotSent = 'Webhook was not sent',
+  PendingProcessingFailed = 'Failed to process pending webhook',
+  PaidProcessingFailed = 'Failed to process paid webhook',
+}
+
+/**
+ * Represents error messages related to escrow completion tracking.
+ */
+export enum ErrorEscrowCompletionTracking {
+  NotFound = 'Escrow completion tracking not found',
+  NotCreated = 'Escrow completion tracking has not been created',
 }
 
 /**

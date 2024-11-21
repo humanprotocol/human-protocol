@@ -979,7 +979,19 @@ def touch(
         time = utcnow()
 
     session.execute(update(cls).where(cls.id.in_(ids)).values({cls.updated_at: time}))
-    while touch_parents and issubclass(cls, ChildOf):
+
+    if touch_parents:
+        touch_parent_objects(session, cls, ids, time=time)
+
+
+def touch_parent_objects(
+    session: Session,
+    cls: type["Base"],
+    ids: list[str],
+    *,
+    time: datetime | None = None,
+):
+    while issubclass(cls, ChildOf):
         parent_cls = cls.parent_cls
         foreign_key_column = next(iter(cls.parent.property.local_columns))
         parent_id_column = next(iter(foreign_key_column.foreign_keys)).column
@@ -997,3 +1009,49 @@ def touch(
         )
         ids = session.execute(parent_update_stmt).scalars().all()
         cls = parent_cls
+
+
+def touch_final_assignments(
+    session: Session,
+    cvat_project_ids: list[int],
+    *,
+    touch_parents: bool = True,
+    time: datetime | None = None,
+) -> None:
+    if time is None:
+        time = utcnow()
+
+    last_assignment_time_per_job_id_subquery = (
+        select(
+            Assignment.cvat_job_id.label("cvat_job_id"),
+            func.max(Assignment.created_at).label("max_created_at"),
+        )
+        .join(Job)
+        .where(
+            Assignment.status == AssignmentStatuses.completed,
+            Job.cvat_project_id.in_(cvat_project_ids),
+        )
+        .order_by(Assignment.cvat_job_id)
+        .group_by(Assignment.cvat_job_id)
+        .subquery()
+    )
+
+    last_assignment_ids_query = (
+        select(Assignment.id)
+        .join(
+            last_assignment_time_per_job_id_subquery,
+            Assignment.cvat_job_id == last_assignment_time_per_job_id_subquery.c.cvat_job_id,
+            isouter=True,
+        )
+        .where(Assignment.created_at == last_assignment_time_per_job_id_subquery.c.max_created_at)
+    )
+
+    ids = session.execute(
+        update(Assignment)
+        .where(Assignment.id.in_(last_assignment_ids_query))
+        .values({Assignment.updated_at: time})
+        .returning(Assignment.id)
+    )
+
+    if touch_parents:
+        touch_parent_objects(session, Assignment, ids.scalars().all(), time=time)

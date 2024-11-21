@@ -13,6 +13,7 @@ import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
 import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { generateOracleDiscoveryResponseBody } from '../../../modules/oracle-discovery/spec/oracle-discovery.fixture';
 import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('cron', () => {
@@ -135,10 +136,10 @@ describe('CronJobService', () => {
     });
 
     it('should proceed with valid oracles and update jobs list cache', async () => {
-      const oracles = [{ address: '0x123' }];
+      const oraclesDiscovery = generateOracleDiscoveryResponseBody();
       (
         oracleDiscoveryServiceMock.processOracleDiscovery as jest.Mock
-      ).mockResolvedValue(oracles);
+      ).mockResolvedValue(oraclesDiscovery);
       (workerServiceMock.signinWorker as jest.Mock).mockResolvedValue({
         access_token: 'token',
       });
@@ -157,7 +158,7 @@ describe('CronJobService', () => {
         password: configServiceMock.password,
       });
       expect(updateJobsListCacheSpy).toHaveBeenCalledWith(
-        oracles[0],
+        oraclesDiscovery.oracles[0],
         'Bearer token',
       );
     });

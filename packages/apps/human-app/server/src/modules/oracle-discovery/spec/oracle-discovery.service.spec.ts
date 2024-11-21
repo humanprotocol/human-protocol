@@ -5,14 +5,16 @@ import { Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
-import { OracleDiscoveryResponse } from '../model/oracle-discovery.model';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import {
   emptyCommandFixture,
+  errorResponse,
   filledCommandFixture,
+  generateGetReputationNetworkOperatorsResponseByChainId,
   generateOracleDiscoveryResponseBody,
+  generateOracleDiscoveryResponseBodyByChainId,
+  generateOracleDiscoveryResponseBodyByJobType,
   notSetCommandFixture,
-  reputationOracleSupportedJobTypes,
 } from './oracle-discovery.fixture';
 import { KvStoreGateway } from '../../../integrations/kv-store/kv-store.gateway';
 
@@ -28,13 +30,12 @@ jest.mock('@human-protocol/sdk', () => {
 
 describe('OracleDiscoveryService', () => {
   const EXCHANGE_ORACLE = 'Exchange Oracle';
-  const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY];
+  const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA];
   const REPUTATION_ORACLE_ADDRESS = 'the_oracle';
   const TTL = '300';
   const JOB_TYPES = 'job-type-1, job-type-2, job-type-3';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
-  let kvStoreGateway: KvStoreGateway;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -75,7 +76,6 @@ describe('OracleDiscoveryService', () => {
       OracleDiscoveryService,
     );
     cacheManager = module.get<Cache>(CACHE_MANAGER);
-    kvStoreGateway = module.get<KvStoreGateway>(KvStoreGateway);
   });
 
   afterEach(() => {
@@ -87,23 +87,14 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should return cached data if available', async () => {
-    const mockData: OracleDiscoveryResponse[] = [
-      {
-        address: 'mockAddress1',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 0,
-        executionsToSkip: 0,
-      },
-      {
-        address: 'mockAddress2',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 0,
-        executionsToSkip: 0,
-      },
-    ];
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockData);
+    const mockData = generateOracleDiscoveryResponseBody();
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      jest
+        .spyOn(cacheManager, 'get')
+        .mockResolvedValueOnce(
+          generateOracleDiscoveryResponseBodyByChainId(chainId).oracles,
+        );
+    });
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
@@ -113,40 +104,24 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should fetch and cache data if not already cached', async () => {
-    const mockData: OracleDiscoveryResponse[] = [
-      {
-        address: 'mockAddress1',
-        role: 'validator',
-        url: 'url1',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 0,
-        executionsToSkip: 0,
-        jobTypes: ['job-type-1'],
-      },
-      {
-        address: 'mockAddress2',
-        role: 'validator',
-        chainId: ChainId.POLYGON_AMOY,
-        retriesCount: 0,
-        executionsToSkip: 0,
-        jobTypes: ['job-type-2'],
-      },
-    ];
-
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
-    jest
-      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValueOnce(mockData);
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      jest
+        .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+        .mockResolvedValueOnce(
+          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+        );
+    });
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
 
-    expect(result).toEqual([mockData[0]]);
+    expect(result).toEqual(generateOracleDiscoveryResponseBody());
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
       expect(cacheManager.set).toHaveBeenCalledWith(
         chainId.toString(),
-        [mockData[0]],
+        generateOracleDiscoveryResponseBodyByChainId(chainId).oracles,
         TTL,
       );
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
@@ -158,53 +133,39 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should filter oracles if selectedJobTypes not empty, or url not set', async () => {
-    const mockData: OracleDiscoveryResponse[] =
-      generateOracleDiscoveryResponseBody();
-
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
-    jest
-      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValueOnce(mockData);
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      jest
+        .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+        .mockResolvedValueOnce(
+          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+        );
+    });
 
     const result =
       await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
-    expect(result).toEqual([mockData[1], mockData[2]]);
+
+    expect(result).toEqual(generateOracleDiscoveryResponseBodyByJobType());
   });
 
   it('should not filter responses if selectedJobTypes is empty', async () => {
-    const mockData: OracleDiscoveryResponse[] =
-      generateOracleDiscoveryResponseBody();
-
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
-    jest
-      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValueOnce(mockData);
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      jest
+        .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+        .mockResolvedValueOnce(
+          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+        );
+    });
 
     const result = await oracleDiscoveryService.processOracleDiscovery({
       selectedJobTypes: [],
     });
 
-    expect(result).toEqual([mockData[0], mockData[1], mockData[2]]);
+    expect(result).toEqual(generateOracleDiscoveryResponseBody());
   });
 
-  it('should filter out oracles that do not support the specified reputation oracle types', async () => {
-    const mockData: OracleDiscoveryResponse[] =
-      generateOracleDiscoveryResponseBody();
-
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
-    jest
-      .spyOn(OperatorUtils, 'getReputationNetworkOperators')
-      .mockResolvedValueOnce(mockData);
-
-    jest
-      .spyOn(kvStoreGateway, 'getJobTypesByAddress')
-      .mockResolvedValueOnce(reputationOracleSupportedJobTypes);
-
-    const result = await oracleDiscoveryService.processOracleDiscovery({});
-    expect(result).toEqual([mockData[1]]);
-  });
-
-  it('should handle errors and return an empty array', async () => {
+  it('should handle errors and return an empty array of oracles', async () => {
     const error = new Error('Test error');
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
@@ -219,14 +180,14 @@ describe('OracleDiscoveryService', () => {
     const result =
       await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual(errorResponse);
     expect(loggerErrorSpy).toHaveBeenCalledWith(
       `Error processing chainId ${ChainId.POLYGON_AMOY}:`,
       error,
     );
   });
 
-  it('should return an empty array if no oracles are found', async () => {
+  it('should return an empty array of oracles if no oracles are found', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
@@ -235,7 +196,7 @@ describe('OracleDiscoveryService', () => {
     const result =
       await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual(errorResponse);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
     });

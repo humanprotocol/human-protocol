@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Request,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -42,8 +43,8 @@ import { MUTEX_TIMEOUT } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@ApiTags('Job')
 @ApiKey()
+@ApiTags('Job')
 @Controller('/job')
 export class JobController {
   constructor(
@@ -261,6 +262,20 @@ export class JobController {
     @Request() req: RequestWithUser,
   ): Promise<FortuneFinalResultDto[] | string> {
     return this.jobService.getResult(req.user.id, params.id);
+  }
+
+  @Get('result/:id/download')
+  public async downloadResult(
+    @Param() params: JobIdDto,
+    @Request() req: RequestWithUser,
+  ): Promise<StreamableFile> {
+    const decryptedResult = await this.jobService.downloadJobResults(
+      req.user.id,
+      params.id,
+    );
+    return new StreamableFile(decryptedResult.contents, {
+      disposition: `attachment; filename="${decryptedResult.filename}"`,
+    });
   }
 
   @ApiOperation({

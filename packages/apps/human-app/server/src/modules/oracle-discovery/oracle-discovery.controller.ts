@@ -13,11 +13,11 @@ import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,
   OracleDiscoveryResponse,
+  OracleDiscoveryResponseDto,
 } from './model/oracle-discovery.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { plainToInstance } from 'class-transformer';
 
 @Controller()
 export class OracleDiscoveryController {
@@ -36,7 +36,7 @@ export class OracleDiscoveryController {
   @UsePipes(new ValidationPipe())
   public async getOracles(
     @Query() dto: OracleDiscoveryDto,
-  ): Promise<OracleDiscoveryResponse[]> {
+  ): Promise<OracleDiscoveryResponseDto> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
       throw new HttpException(
         'Oracles discovery is disabled',
@@ -48,9 +48,6 @@ export class OracleDiscoveryController {
       OracleDiscoveryDto,
       OracleDiscoveryCommand,
     );
-    const oracles = await this.service.processOracleDiscovery(command);
-    return oracles.map((oracle) =>
-      plainToInstance(OracleDiscoveryResponse, oracle),
-    );
+    return await this.service.processOracleDiscovery(command);
   }
 }
