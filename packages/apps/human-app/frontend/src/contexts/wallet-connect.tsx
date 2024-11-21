@@ -10,14 +10,11 @@ import {
   useAppKitAccount,
   useAppKitNetwork,
   createAppKit,
+  type AppKitOptions,
 } from '@reown/appkit/react';
 import { WagmiProvider } from 'wagmi';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import {
-  type AppKitNetwork,
-  polygonAmoy,
-  polygon,
-} from '@reown/appkit/networks';
+import { polygonAmoy, polygon } from '@reown/appkit/networks';
 import { env } from '@/shared/env';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useWeb3Provider } from '@/hooks/use-web3-provider';
@@ -32,7 +29,7 @@ const metadata = {
   icons: env.VITE_DAPP_ICONS,
 };
 
-const networks: [AppKitNetwork, ...AppKitNetwork[]] = [polygon, polygonAmoy];
+const networks: AppKitOptions['networks'] = [polygon, polygonAmoy];
 
 const wagmiAdapter = new WagmiAdapter({
   networks,

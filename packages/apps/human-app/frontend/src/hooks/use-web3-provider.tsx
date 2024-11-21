@@ -19,16 +19,15 @@ const getSignerAndProvider = async (walletProvider: Eip1193Provider) => {
 
 export function useWeb3Provider() {
   const { chainId } = useAppKitNetwork();
-  const { walletProvider } = useAppKitProvider('eip155');
+  const { walletProvider } = useAppKitProvider<Eip1193Provider>('eip155');
 
   const useSignerAndProviderMutation = useMutation({
     mutationFn: getSignerAndProvider,
   });
 
   useEffect(() => {
-    if (walletProvider) {
-      useSignerAndProviderMutation.mutate(walletProvider as Eip1193Provider);
-    }
+    useSignerAndProviderMutation.mutate(walletProvider);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps -- not nesseccary
   }, [walletProvider, chainId]);
 
