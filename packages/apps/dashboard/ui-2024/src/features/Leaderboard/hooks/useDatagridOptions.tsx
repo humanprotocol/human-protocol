@@ -91,8 +91,9 @@ export function useDatagridOptions<T extends GridValidRowModel>({
 
   const handleSortModelChange = useCallback(
     (_model: GridSortModel, details: GridCallbackDetails) => {
-      details.api.getSortedRows().forEach((row, idx) => {
-        apiRef.current.updateRows([{ ...row, id: idx }]);
+      const sortedRows = details.api.getSortedRows();
+      sortedRows.forEach((row) => {
+        apiRef.current.updateRows([row]);
       });
     },
     [apiRef]

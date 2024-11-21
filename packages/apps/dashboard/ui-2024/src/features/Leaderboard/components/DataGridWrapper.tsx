@@ -119,6 +119,9 @@ export const DataGridWrapper = ({
           '& .MuiDataGrid-columnHeaderTitleContainerContent ': {
             overflow: 'visible',
           },
+          '& .MuiDataGrid-columnHeaderTitleContainer': {
+            overflow: 'unset',
+          },
           '& .MuiDataGrid-columnHeader:focus': {
             outline: 'none',
           },

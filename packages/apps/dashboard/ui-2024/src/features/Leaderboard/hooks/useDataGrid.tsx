@@ -24,10 +24,10 @@ export const useDataGrid = (data: LeaderBoardData) => {
     mobile: { isMobile },
   } = useBreakPoints();
   const formattedData = useMemo(() => {
-    return data.map((row, index) => {
+    return data.map((row) => {
       return {
         ...row,
-        id: index,
+        id: row.address,
       };
     });
   }, [data]);
@@ -44,6 +44,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
     () => [
       {
         field: 'role',
+        sortable: false,
         flex: isMobile ? 0.8 : 1.5,
         minWidth: isMobile ? 100 : 240,
         headerClassName: isMobile
@@ -61,6 +62,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
       },
       {
         field: 'address',
+        sortable: false,
         flex: 1,
         minWidth: 150,
         headerClassName: 'home-page-table-header',
@@ -112,6 +114,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
         field: 'chainId',
         headerName: 'Network',
         flex: isMobile ? 1 : 1.5,
+        sortable: false,
         minWidth: isMobile ? 150 : 245,
         headerClassName: 'home-page-table-header',
         renderHeader: () => {
@@ -134,6 +137,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
       {
         field: 'reputation',
         headerName: 'Reputation Score',
+        sortable: false,
         flex: 1,
         minWidth: 210,
         headerClassName: 'home-page-table-header',
