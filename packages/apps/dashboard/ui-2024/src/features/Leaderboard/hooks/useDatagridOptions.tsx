@@ -52,7 +52,7 @@ export function useDatagridOptions<T extends GridValidRowModel>({
         ? cols
         : [
             {
-              field: 'id',
+              field: 'rowIndex',
               headerName: '',
               width: 30,
               headerClassName: 'home-page-table-header',
@@ -65,7 +65,7 @@ export function useDatagridOptions<T extends GridValidRowModel>({
                     display="flex"
                     alignItems="center"
                   >
-                    {params.row.rowIndex + 1}
+                    {params.value + 1}
                   </Typography>
                 );
               },
