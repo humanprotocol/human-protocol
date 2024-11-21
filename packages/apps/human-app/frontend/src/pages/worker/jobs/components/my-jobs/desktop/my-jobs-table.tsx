@@ -188,8 +188,9 @@ const getColumnsDefinition = ({
     enableSorting: true,
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
-      const { mutate: rejectTaskMutation, isPending } = useRejectTaskMutation();
-      const buttonDisabled = status !== 'active' || isPending;
+      const { mutate: rejectTaskMutation, isPending: isRejectPending } =
+        useRejectTaskMutation();
+      const buttonDisabled = status !== 'active' || isRejectPending;
 
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
@@ -205,7 +206,7 @@ const getColumnsDefinition = ({
               </TableButton>
               <RejectButton
                 disabled={buttonDisabled}
-                loading={isPending}
+                loading={isRejectPending}
                 onClick={() => {
                   if (buttonDisabled) return;
                   rejectTaskMutation({
