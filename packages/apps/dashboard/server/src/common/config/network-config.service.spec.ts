@@ -4,27 +4,26 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
 import { StatisticsClient } from '@human-protocol/sdk';
-import { StatsService } from './stats.service';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
-import { RedisConfigService } from '../../common/config/redis-config.service';
-import { StorageService } from '../storage/storage.service';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { MainnetsId } from '../../common/utils/constants';
 import { HttpService } from '@nestjs/axios';
+import { NetworkConfigService } from './network-config.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   StatisticsClient: jest.fn(),
 }));
 
-describe('StatsService', () => {
-  let statsService: StatsService;
+describe('NetworkConfigService', () => {
+  let networkConfigService: NetworkConfigService;
   let cacheManager: Cache;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        StatsService,
+        NetworkConfigService,
         { provide: HttpService, useValue: createMock<HttpService>() },
         {
           provide: CACHE_MANAGER,
@@ -40,19 +39,13 @@ describe('StatsService', () => {
             networkAvailableCacheTtl: 1000,
           },
         },
-        {
-          provide: RedisConfigService,
-          useValue: {},
-        },
-        {
-          provide: StorageService,
-          useValue: {},
-        },
+        ConfigService,
         Logger,
       ],
     }).compile();
 
-    statsService = module.get<StatsService>(StatsService);
+    networkConfigService =
+      module.get<NetworkConfigService>(NetworkConfigService);
     cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
@@ -82,7 +75,7 @@ describe('StatsService', () => {
     );
 
     // First call should populate cache
-    const firstCallResult = await statsService.getAvailableNetworks();
+    const firstCallResult = await networkConfigService.getAvailableNetworks();
 
     expect(firstCallResult).toEqual(mockNetworkList);
     expect(cacheManager.set).toHaveBeenCalledWith(
@@ -95,7 +88,7 @@ describe('StatsService', () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null);
 
     // Second call after TTL should re-generate the network list
-    const secondCallResult = await statsService.getAvailableNetworks();
+    const secondCallResult = await networkConfigService.getAvailableNetworks();
     expect(secondCallResult).toEqual(mockNetworkList);
 
     // Ensure the cache is set again with the regenerated network list
@@ -110,7 +103,7 @@ describe('StatsService', () => {
     const cachedNetworks = [ChainId.MAINNET, ChainId.POLYGON];
     jest.spyOn(cacheManager, 'get').mockResolvedValue(cachedNetworks);
 
-    const result = await statsService.getAvailableNetworks();
+    const result = await networkConfigService.getAvailableNetworks();
     expect(result).toEqual(cachedNetworks);
     expect(cacheManager.get).toHaveBeenCalledWith('available-networks');
   });
@@ -130,7 +123,7 @@ describe('StatsService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await statsService.getAvailableNetworks();
+    const result = await networkConfigService.getAvailableNetworks();
     expect(result).toEqual(
       expect.arrayContaining([ChainId.MAINNET, ChainId.POLYGON]),
     );
@@ -154,7 +147,7 @@ describe('StatsService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await statsService.getAvailableNetworks();
+    const result = await networkConfigService.getAvailableNetworks();
     expect(result).toEqual([]);
   });
 
@@ -177,7 +170,7 @@ describe('StatsService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await statsService.getAvailableNetworks();
+    const result = await networkConfigService.getAvailableNetworks();
 
     expect(result).not.toContain(MainnetsId.MAINNET);
     expect(result).toEqual(expect.arrayContaining([]));
@@ -197,7 +190,7 @@ describe('StatsService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await statsService.getAvailableNetworks();
+    const result = await networkConfigService.getAvailableNetworks();
     expect(result).toEqual([]);
   });
 
@@ -218,7 +211,7 @@ describe('StatsService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await statsService.getAvailableNetworks();
+    const result = await networkConfigService.getAvailableNetworks();
     expect(result).toEqual([]);
   });
 });

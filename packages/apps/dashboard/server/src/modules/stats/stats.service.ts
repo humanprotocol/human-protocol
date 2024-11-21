@@ -4,16 +4,13 @@ import { lastValueFrom } from 'rxjs';
 import dayjs from 'dayjs';
 import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import {
   EnvironmentConfigService,
   HCAPTCHA_STATS_API_START_DATE,
   HMT_STATS_START_DATE,
-  MINIMUM_ESCROWS_COUNT,
-  MINIMUM_HMT_TRANSFERS,
 } from '../../common/config/env-config.service';
 import {
-  AVAILABLE_NETWORKS_CACHE_KEY,
   HCAPTCHA_PREFIX,
   HMT_PREFIX,
   RedisConfigService,
@@ -21,11 +18,11 @@ import {
 import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
-import { MainnetsId } from '../../common/utils/constants';
 import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
 import { StorageService } from '../storage/storage.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -33,6 +30,7 @@ export class StatsService implements OnModuleInit {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly redisConfigService: RedisConfigService,
+    private readonly networkConfigService: NetworkConfigService,
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly storageService: StorageService,
@@ -180,7 +178,8 @@ export class StatsService implements OnModuleInit {
       totalHolders: 0,
       totalTransactions: 0,
     };
-    const availableNetworks = await this.getAvailableNetworks();
+    const availableNetworks =
+      await this.networkConfigService.getAvailableNetworks();
     for (const network of availableNetworks) {
       const statisticsClient = new StatisticsClient(NETWORKS[network]);
       const generalStats = await statisticsClient.getHMTStatistics();
@@ -218,7 +217,8 @@ export class StatsService implements OnModuleInit {
     const dailyData: Record<string, CachedHMTData> = {};
     const monthlyData: Record<string, CachedHMTData> = {};
 
-    const availableNetworks = await this.getAvailableNetworks();
+    const availableNetworks =
+      await this.networkConfigService.getAvailableNetworks();
 
     // Fetch daily data for each network
     await Promise.all(
@@ -418,75 +418,5 @@ export class StatsService implements OnModuleInit {
     );
 
     return stats.filter((stat): stat is HmtDailyStatsData => stat !== null);
-  }
-
-  public async getAvailableNetworks(): Promise<ChainId[]> {
-    const cachedNetworks = await this.cacheManager.get<ChainId[]>(
-      AVAILABLE_NETWORKS_CACHE_KEY,
-    );
-
-    if (cachedNetworks) {
-      return cachedNetworks;
-    }
-
-    const currentMonth = new Date();
-    const oneMonthAgo = new Date(currentMonth);
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-    const filterDate = new Date(currentMonth);
-    filterDate.setMonth(
-      filterDate.getMonth() - this.envConfigService.networkUsageFilterMonths,
-    );
-
-    const availableNetworks = [];
-
-    for (const networkKey of Object.values(MainnetsId)) {
-      const chainId = MainnetsId[networkKey as keyof typeof MainnetsId];
-
-      const networkConfig = NETWORKS[chainId];
-
-      if (!networkConfig) {
-        continue;
-      }
-
-      const statisticsClient = new StatisticsClient(networkConfig);
-
-      try {
-        const hmtData = await statisticsClient.getHMTDailyData({
-          from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
-        });
-        const escrowStats = await statisticsClient.getEscrowStatistics({
-          from: new Date(Math.floor(oneMonthAgo.getTime() / 1000) * 1000),
-        });
-
-        // Calculate total HMT transaction count across the period
-        const totalTransactionCount = hmtData.reduce(
-          (sum, day) => sum + day.totalTransactionCount,
-          0,
-        );
-
-        // At least 1 escrow created in the last month
-        const recentEscrowsCreated =
-          escrowStats.totalEscrows >= MINIMUM_ESCROWS_COUNT;
-        // Total HMT transactions > MINIMUM_HMT_TRANSFERS in the last X months
-        const sufficientHMTTransfers =
-          totalTransactionCount > MINIMUM_HMT_TRANSFERS;
-
-        if (recentEscrowsCreated && sufficientHMTTransfers) {
-          availableNetworks.push(chainId);
-        }
-      } catch (error) {
-        this.logger.error(
-          `Error processing network ${networkKey} (Chain ID: ${chainId}): ${error.message}`,
-        );
-      }
-    }
-
-    await this.cacheManager.set(
-      AVAILABLE_NETWORKS_CACHE_KEY,
-      availableNetworks,
-      this.envConfigService.networkAvailableCacheTtl,
-    );
-    return availableNetworks;
   }
 }

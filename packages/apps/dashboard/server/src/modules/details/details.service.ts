@@ -150,7 +150,7 @@ export class DetailsService {
 
   public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? await this.statsService.getAvailableNetworks()
+      ? await this.networkConfig.getAvailableNetworks()
       : [chainId];
 
     const leadersByRole: { [role: string]: LeaderDto } = {};
@@ -186,7 +186,7 @@ export class DetailsService {
 
   public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? await this.statsService.getAvailableNetworks()
+      ? await this.networkConfig.getAvailableNetworks()
       : [chainId];
 
     const allLeaders: LeaderDto[] = [];

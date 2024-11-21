@@ -11,11 +11,15 @@ import { HmtDailyStatsResponseDto } from './dto/hmt.dto';
 import { DateValidationPipe } from '../../common/pipes/date-validation.pipe';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
 import { ChainId } from '@human-protocol/sdk';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @ApiTags('Stats')
 @Controller('/stats')
 export class StatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(
+    private readonly statsService: StatsService,
+    private readonly networkConfigService: NetworkConfigService,
+  ) {}
 
   @Get('/hmt-price')
   @HttpCode(200)
@@ -141,6 +145,6 @@ export class StatsController {
     type: Array<ChainId>,
   })
   public async getAvailableNetworks(): Promise<ChainId[]> {
-    return this.statsService.getAvailableNetworks();
+    return this.networkConfigService.getAvailableNetworks();
   }
 }
