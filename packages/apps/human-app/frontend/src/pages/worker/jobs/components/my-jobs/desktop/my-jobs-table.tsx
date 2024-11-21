@@ -42,7 +42,7 @@ const getColumnsDefinition = ({
   refreshData,
   isRefreshTasksPending,
 }: {
-  oracle_address: string | undefined;
+  oracle_address: string;
   refreshData: () => void;
   isRefreshTasksPending: boolean;
 }): MRT_ColumnDef<MyJob>[] => [
@@ -189,7 +189,7 @@ const getColumnsDefinition = ({
     Cell: (props) => {
       const { url, assignment_id, status } = props.row.original;
       const { mutate: rejectTaskMutation, isPending } = useRejectTaskMutation();
-      const buttonDisabled = status !== 'active';
+      const buttonDisabled = status !== 'active' || isPending;
 
       return (
         <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
@@ -204,12 +204,12 @@ const getColumnsDefinition = ({
                 {t('worker.jobs.solve')}
               </TableButton>
               <RejectButton
-                disabled={buttonDisabled || isPending}
+                disabled={buttonDisabled}
                 loading={isPending}
                 onClick={() => {
                   if (buttonDisabled) return;
                   rejectTaskMutation({
-                    oracle_address: oracle_address ?? '',
+                    oracle_address,
                     assignment_id,
                   });
                 }}
