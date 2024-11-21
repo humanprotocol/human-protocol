@@ -371,6 +371,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
             status=JobStatuses.in_progress,
+            start_frame=0,
+            stop_frame=1,
         )
 
         cvat_id_3 = 458
@@ -493,6 +495,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task.cvat_id,
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         cvat_service.create_job(
             session=self.session,
@@ -500,6 +504,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task.cvat_id,
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
+            start_frame=2,
+            stop_frame=3,
         )
         self.session.commit()
 
@@ -790,6 +796,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
             status=status,
+            start_frame=0,
+            stop_frame=1,
         )
 
         job_count = self.session.query(Job).count()
@@ -813,6 +821,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task.cvat_id,
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -826,6 +836,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             cvat_task_id=None,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -841,6 +853,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=122,
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -856,6 +870,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task.cvat_id,
             cvat_project_id=122,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -871,6 +887,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task.cvat_id,
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.commit()
         cvat_service.create_job(
@@ -879,6 +897,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=cvat_task.cvat_id,
             cvat_project_id=cvat_project.cvat_id,
             status=JobStatuses.new,
+            start_frame=0,
+            stop_frame=1,
         )
         with pytest.raises(IntegrityError):
             self.session.commit()
@@ -898,7 +918,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=0,
+            stop_frame=1,
         )
         job = cvat_service.get_job_by_id(self.session, job_id)
 
@@ -926,7 +948,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=0,
+            stop_frame=1,
         )
 
         jobs = cvat_service.get_jobs_by_cvat_id(self.session, [cvat_id])
@@ -956,7 +980,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=0,
+            stop_frame=1,
         )
         job = cvat_service.get_job_by_id(self.session, job_id)
 
@@ -1035,7 +1061,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=0,
+            stop_frame=1,
         )
 
         cvat_id = 457
@@ -1046,7 +1074,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=2,
+            stop_frame=3,
         )
 
         cvat_id = 458
@@ -1057,7 +1087,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=4,
+            stop_frame=5,
         )
 
         jobs = cvat_service.get_jobs_by_cvat_task_id(self.session, cvat_task_id=cvat_task.cvat_id)
@@ -1078,7 +1110,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=0,
+            stop_frame=1,
         )
 
         cvat_id = 457
@@ -1089,7 +1123,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=2,
+            stop_frame=3,
         )
 
         cvat_id = 458
@@ -1100,7 +1136,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_id,
             cvat_task.cvat_id,
             cvat_project.cvat_id,
-            status,
+            status=status,
+            start_frame=4,
+            stop_frame=5,
         )
 
         jobs = cvat_service.get_jobs_by_cvat_project_id(self.session, cvat_project.cvat_id)

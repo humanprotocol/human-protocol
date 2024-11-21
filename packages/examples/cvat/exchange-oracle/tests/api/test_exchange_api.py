@@ -1,11 +1,13 @@
 import json
 import math
 import uuid
+from collections.abc import Sequence
 from datetime import timedelta
-from itertools import combinations, product
+from itertools import combinations, count, product
 from unittest.mock import patch
 
 import jwt
+import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from fastapi.responses import Response
@@ -202,6 +204,103 @@ def test_can_list_jobs_200_with_address_and_pagination(
                 )
 
 
+def test_can_list_jobs_200_without_escrows_in_hidden_states(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    escrows = []
+
+    cvat_project, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC60", 0
+    )
+    cvat_project.status = ProjectStatuses.creation
+    session.add(cvat_project)
+
+    cvat_project, _, _ = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC61", 1
+    )
+    cvat_project.status = ProjectStatuses.deleted
+    session.add(cvat_project)
+
+    escrows.append(cvat_project.escrow_address)
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(),
+        )
+        assert response.json()["results"] == []
+
+
+@pytest.mark.parametrize(
+    ("escrow_address", "project_statuses"),
+    [
+        (f"0x{case_idx:040d}", project_statuses)
+        for case_idx, project_statuses in enumerate(
+            [
+                (ProjectStatuses.annotation, ProjectStatuses.annotation),
+                (ProjectStatuses.annotation, ProjectStatuses.completed),
+                (ProjectStatuses.annotation, ProjectStatuses.validation),
+                (ProjectStatuses.completed, ProjectStatuses.annotation),
+                (ProjectStatuses.validation, ProjectStatuses.annotation),
+            ]
+        )
+    ],
+)
+def test_can_list_jobs_200_with_only_one_entry_per_escrow_address_if_several_projects(
+    client: TestClient,
+    session: Session,
+    escrow_address: str,
+    project_statuses: Sequence[ProjectStatuses],
+) -> None:
+    # There must be only 1 result per escrow address, even if there are several projects internally
+    # If we filter for a status, projects must not be shadowed by other ones under the escrow
+
+    session.begin()
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    project_idx_counter = count()
+    for project_status, project_idx in zip(project_statuses, project_idx_counter, strict=False):
+        cvat_project, _, _ = create_project_task_and_job(session, escrow_address, project_idx)
+        cvat_project.status = project_status
+        session.add(cvat_project)
+
+    session.commit()
+
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.endpoints.serializers.get_escrow_manifest") as mock_get_manifest,
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
+
+        response = client.get(
+            "/job",
+            headers=get_auth_header(token=generate_jwt_token(wallet_address=None)),
+        )
+        response.raise_for_status()
+        assert len(response.json()["results"]) == 1
+
+
 def test_can_list_jobs_200_with_fields(client: TestClient, session: Session) -> None:
     session.begin()
     user = User(
@@ -364,9 +463,7 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
             ProjectStatuses.validation,
             ProjectStatuses.canceled,
             ProjectStatuses.recorded,
-            # TODO: ProjectStatuses.deleted,
-            # raise NotImplementedError(f"Unknown status {project.status}")
-            # NotImplementedError: Unknown status deleted
+            ProjectStatuses.deleted,
         ]
     ):
         cvat_project = create_project(
@@ -395,7 +492,20 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
         session.add(assignment)
         assignments.append(assignment)
         cvat.touch(session, Job, [cvat_job.id])
-        session.commit()  # imitate different created_dates
+        session.commit()  # TODO: imitate different created_dates
+
+    visible_projects_ids = set(
+        p.cvat_id
+        for p in cvat_projects
+        if p.status
+        not in [
+            ProjectStatuses.creation,
+            ProjectStatuses.completed,
+            ProjectStatuses.validation,
+            ProjectStatuses.deleted,
+        ]
+    )
+    visible_projects_count = len(visible_projects_ids)
 
     middle_init_time = utcnow()
 
@@ -418,23 +528,28 @@ def test_can_list_jobs_200_with_filters(client: TestClient, session: Session):
             "status": (
                 (
                     APIJobStatuses.active.value,
-                    3,
-                ),  # ProjectStatuses::annotation,completed,validation
-                (APIJobStatuses.completed.value, 1),
-                (APIJobStatuses.canceled.value, 1),
+                    1,
+                    # ProjectStatuses.annotation
+                    # completed, validation are internal, so hidden
+                ),
+                (APIJobStatuses.completed.value, 1),  # ProjectStatuses.recorded
+                (APIJobStatuses.canceled.value, 1),  # ProjectStatuses.canceled
             ),
-            "chain_id": ((cvat_projects[0].chain_id, len(cvat_projects)),),
+            "chain_id": ((cvat_projects[0].chain_id, visible_projects_count),),
             "job_type": (
-                (cvat_projects[0].job_type, len(cvat_projects)),
+                (cvat_projects[0].job_type, visible_projects_count),
                 (TaskTypes.image_boxes_from_points.value, 0),
             ),
             "created_after": (
-                (str(pre_init_time - timedelta(minutes=1)), len(cvat_projects)),
+                (str(pre_init_time - timedelta(minutes=1)), visible_projects_count),
                 (str(post_init_time), 0),
             ),
             "updated_after": (
-                (str(pre_init_time - timedelta(minutes=1)), len(cvat_projects)),
-                (str(middle_init_time), len(updated_cvat_project_ids)),
+                (str(pre_init_time - timedelta(minutes=1)), visible_projects_count),
+                (
+                    str(middle_init_time),
+                    len(visible_projects_ids.intersection(updated_cvat_project_ids)),
+                ),
                 (str(post_init_time + timedelta(minutes=1)), 0),
             ),
         }.items():
@@ -730,6 +845,47 @@ def test_cannot_create_assignment_401(client: TestClient) -> None:
 
         assert response.status_code == 401
         assert response.json() == {"message": message}
+
+
+def test_cannot_create_assignment_400_when_has_unfinished_assignments(
+    client: TestClient, session: Session
+) -> None:
+    session.begin()
+
+    cvat_project, cvat_task, cvat_job1 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 0
+    )
+    create_job(session, 2, cvat_task.cvat_id, cvat_project.cvat_id)
+
+    user = User(
+        wallet_address=user_address,
+        cvat_email=cvat_email,
+        cvat_id=1,
+    )
+    session.add(user)
+
+    assignment = Assignment(
+        created_at=utcnow(),
+        expires_at=utcnow() + timedelta(hours=1),
+        user_wallet_address=user_address,
+        cvat_job_id=cvat_job1.cvat_id,
+        status=AssignmentStatuses.created.value,
+    )
+    session.add(assignment)
+
+    session.commit()
+
+    response = client.post(
+        "/assignment",
+        headers=get_auth_header(),
+        json={
+            "escrow_address": cvat_project.escrow_address,
+            "chain_id": cvat_project.chain_id,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "There are unfinished assignments in this escrow" in response.text
 
 
 def test_can_list_assignments_200(client: TestClient, session: Session) -> None:

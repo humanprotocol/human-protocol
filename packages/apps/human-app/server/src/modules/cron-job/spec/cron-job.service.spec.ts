@@ -13,6 +13,7 @@ import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
 import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { generateOracleDiscoveryResponseBody } from '../../../modules/oracle-discovery/spec/oracle-discovery.fixture';
 
 jest.mock('cron', () => {
   return {
@@ -54,6 +55,7 @@ describe('CronJobService', () => {
       cacheTtlOracleDiscovery: 600,
       chainIdsEnabled: ['137', '1'],
       jobsDiscoveryFlag: false,
+      maxExecutionToSkip: 32,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -133,10 +135,10 @@ describe('CronJobService', () => {
     });
 
     it('should proceed with valid oracles and update jobs list cache', async () => {
-      const oracles = [{ address: '0x123' }];
+      const oraclesDiscovery = generateOracleDiscoveryResponseBody();
       (
         oracleDiscoveryServiceMock.processOracleDiscovery as jest.Mock
-      ).mockResolvedValue(oracles);
+      ).mockResolvedValue(oraclesDiscovery);
       (workerServiceMock.signinWorker as jest.Mock).mockResolvedValue({
         access_token: 'token',
       });
@@ -155,7 +157,7 @@ describe('CronJobService', () => {
         password: configServiceMock.password,
       });
       expect(updateJobsListCacheSpy).toHaveBeenCalledWith(
-        oracles[0],
+        oraclesDiscovery.oracles[0],
         'Bearer token',
       );
     });
@@ -168,6 +170,7 @@ describe('CronJobService', () => {
         role: 'validator',
         chainId: '137',
         retriesCount: 0,
+        executionsToSkip: 0,
       };
       const token = 'Bearer token';
       const initialResponse = {
@@ -195,6 +198,7 @@ describe('CronJobService', () => {
         role: 'validator',
         chainId: '137',
         retriesCount: 0,
+        executionsToSkip: 0,
       };
       const token = 'Bearer token';
       const error = new Error('Test error');
@@ -220,6 +224,7 @@ describe('CronJobService', () => {
         role: 'validator',
         chainId: '137',
         retriesCount: 3,
+        executionsToSkip: 0,
       };
       const token = 'Bearer token';
       const initialResponse = {
@@ -230,14 +235,17 @@ describe('CronJobService', () => {
         initialResponse,
       );
 
-      const resetRetriesCountSpy = jest.spyOn(
+      const updateOracleInCacheSpy = jest.spyOn(
         service as any,
-        'resetRetriesCount',
+        'updateOracleInCache',
       );
 
       await service.updateJobsListCache(oracle, token);
 
-      expect(resetRetriesCountSpy).toHaveBeenCalledWith(oracle);
+      expect(updateOracleInCacheSpy).toHaveBeenCalledWith(oracle, {
+        retriesCount: 0,
+        executionsToSkip: 0,
+      });
     });
   });
 
@@ -309,71 +317,74 @@ describe('CronJobService', () => {
     });
   });
 
-  describe('resetRetriesCount', () => {
-    it('should reset retries count and activate oracle', async () => {
+  describe('updateOracleInCache', () => {
+    it('should update oracle in cache', async () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
         retriesCount: 5,
+        executionsToSkip: 2,
       };
 
       cacheManagerMock.get.mockResolvedValue([oracleData]);
 
-      await (service as any).resetRetriesCount(oracleData);
+      await (service as any).updateOracleInCache(oracleData, {
+        retriesCount: 0,
+        executionsToSkip: 0,
+      });
 
-      expect(oracleData.retriesCount).toBe(0);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
-        [oracleData],
+        [{ ...oracleData, retriesCount: 0, executionsToSkip: 0 }],
         configServiceMock.cacheTtlOracleDiscovery,
       );
     });
   });
 
   describe('handleJobListError', () => {
-    it('should increment retries count and deactivate oracle after 5 failures', async () => {
+    it('should increment retries count and executions to skip but not exceed the limit', async () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
-        retriesCount: 4,
+        retriesCount: 6,
+        executionsToSkip: 0,
       };
 
       cacheManagerMock.get.mockResolvedValue([oracleData]);
 
       await (service as any).handleJobListError(oracleData);
 
-      expect(oracleData.retriesCount).toBe(5);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
-        [oracleData],
+        [{ ...oracleData, retriesCount: 7, executionsToSkip: 32 }],
         configServiceMock.cacheTtlOracleDiscovery,
       );
     });
 
-    it('should increment retries count but keep oracle active if less than 5 failures', async () => {
+    it('should increment retries count and executions to skip', async () => {
       const oracleData: OracleDiscoveryResponse = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
         retriesCount: 2,
+        executionsToSkip: 0,
       };
 
       cacheManagerMock.get.mockResolvedValue([oracleData]);
 
       await (service as any).handleJobListError(oracleData);
 
-      expect(oracleData.retriesCount).toBe(3);
       expect(cacheManagerMock.set).toHaveBeenCalledWith(
         oracleData.chainId,
-        [oracleData],
+        [{ ...oracleData, retriesCount: 3, executionsToSkip: 4 }],
         configServiceMock.cacheTtlOracleDiscovery,
       );
     });
 
-    it('should do nothing if oracle is not found in cache', async () => {
-      cacheManagerMock.get.mockResolvedValue([]);
+    it('should do nothing if chainId is not found in cache', async () => {
+      cacheManagerMock.get.mockResolvedValue(undefined);
 
       await (service as any).handleJobListError('unknownAddress');
 

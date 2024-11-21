@@ -57,7 +57,8 @@ export class StorageService {
           this.pgpConfigService.passphrase,
         );
 
-        return JSON.parse(await encryption.decrypt(fileContent)) as ISolution[];
+        const decryptedData = await encryption.decrypt(fileContent);
+        return JSON.parse(Buffer.from(decryptedData).toString()) as ISolution[];
       }
 
       return typeof fileContent == 'string'

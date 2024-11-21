@@ -19,7 +19,7 @@ import { VerifyEmailWorkerPage } from '@/pages/worker/email-verification/verify-
 import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.page';
 import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
 import type { PageHeaderProps } from '@/components/layout/protected/page-header';
-import { HandIcon, HomepageWorkIcon, ProfileIcon } from '@/components/ui/icons';
+import { HandIcon, ProfileIcon, WorkHeaderIcon } from '@/components/ui/icons';
 import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/pages/worker/jobs/jobs.page';
 import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.page';
@@ -96,7 +96,7 @@ export const protectedRoutes: {
       element: <JobsDiscoveryPage />,
     },
     pageHeaderProps: {
-      headerIcon: <HomepageWorkIcon />,
+      headerIcon: <WorkHeaderIcon />,
       headerText: t('protectedPagesHeaders.jobsDiscovery'),
     },
   },
@@ -108,7 +108,7 @@ export const protectedRoutes: {
             element: <JobsPage />,
           },
           pageHeaderProps: {
-            headerIcon: <HomepageWorkIcon />,
+            headerIcon: <WorkHeaderIcon />,
             headerText: t('protectedPagesHeaders.jobs'),
           },
         },
@@ -118,7 +118,7 @@ export const protectedRoutes: {
             element: <RegistrationPage />,
           },
           pageHeaderProps: {
-            headerIcon: <HomepageWorkIcon />,
+            headerIcon: <WorkHeaderIcon />,
             headerText: t('protectedPagesHeaders.registrationInExchangeOracle'),
           },
         },

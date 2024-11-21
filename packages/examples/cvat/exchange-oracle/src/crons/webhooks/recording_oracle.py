@@ -35,7 +35,7 @@ def process_incoming_recording_oracle_webhooks(logger: logging.Logger, session: 
     )
 
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
             handle_recording_oracle_event(webhook, db_session=session, logger=logger)
 
 
@@ -81,6 +81,12 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                     )
 
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
+
+                cvat_db_service.touch_final_assignments(
+                    db_session,
+                    cvat_project_ids=[p.cvat_id for p in projects_chunk],
+                    touch_parents=True,
+                )
 
             cvat_db_service.update_escrow_validation(
                 db_session,

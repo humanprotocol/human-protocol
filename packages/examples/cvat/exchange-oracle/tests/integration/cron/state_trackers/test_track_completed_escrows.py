@@ -82,6 +82,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project_id,
             cvat_task_id=cvat_task_id,
             status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.add(cvat_job)
         wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -200,6 +202,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project_id,
             cvat_task_id=cvat_task_id,
             status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.add(cvat_job)
         wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -302,6 +306,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project_id,
             cvat_task_id=cvat_task_id,
             status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.add(cvat_job)
         wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -744,6 +750,8 @@ class ServiceIntegrationTest(unittest.TestCase):
                 status=AssignmentStatuses.completed.value,
             )
             self.session.add(assignment)
+
+        create_escrow_validations(self.session)
 
         self.session.commit()
         validations = self.session.execute(select(EscrowValidation)).all()

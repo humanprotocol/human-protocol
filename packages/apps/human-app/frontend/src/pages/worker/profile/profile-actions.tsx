@@ -12,6 +12,7 @@ import { RegisterAddressBtn } from '@/pages/worker/profile/register-address-btn'
 import { DoneLabel } from '@/pages/worker/profile/done-label';
 import { useRegisterAddressNotifications } from '@/hooks/use-register-address-notifications';
 import { useRegisterAddressMutation } from '@/api/services/worker/use-register-address';
+import { ErrorLabel } from './error-label';
 // import { RegisterAddressOnChainButton } from '@/pages/worker/profile/register-address-on-chain-btn';
 
 export function ProfileActions() {
@@ -38,6 +39,8 @@ export function ProfileActions() {
   const { t } = useTranslation();
   const emailVerified = user.status === 'active';
   const kycApproved = user.kyc_status === 'approved';
+  const kycDeclined = user.kyc_status === 'declined';
+  const kycToComplete = !(kycApproved || kycDeclined);
 
   const getConnectWalletBtn = () => {
     switch (true) {
@@ -87,11 +90,13 @@ export function ProfileActions() {
   return (
     <Grid container flexDirection="column" gap="1rem">
       <Grid>
-        {kycApproved ? (
+        {kycApproved && (
           <DoneLabel>{t('worker.profile.kycCompleted')}</DoneLabel>
-        ) : (
-          <StartKycButton />
         )}
+        {kycDeclined && (
+          <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>
+        )}
+        {kycToComplete && <StartKycButton />}
       </Grid>
       <Grid>{getConnectWalletBtn()}</Grid>
       {kycApproved && !user.wallet_address && isWalletConnected ? (

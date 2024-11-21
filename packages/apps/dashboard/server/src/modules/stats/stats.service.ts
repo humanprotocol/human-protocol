@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
@@ -322,7 +322,7 @@ export class StatsService implements OnModuleInit {
     await this.cacheManager.set(
       this.redisConfigService.hmtPriceCacheKey,
       hmtPrice,
-      { ttl: this.redisConfigService.cacheHmtPriceTTL } as any,
+      this.redisConfigService.cacheHmtPriceTTL,
     );
     return hmtPrice;
   }

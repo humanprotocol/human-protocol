@@ -200,10 +200,25 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
 def create_escrow_validations(session: Session):
     # if escrow have projects with `validation` AND `completed` statuses
     # it means, some jobs were rejected and re-annotated
-    allowed_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
+    active_statuses = [
+        ProjectStatuses.annotation,
+        ProjectStatuses.completed,
+        ProjectStatuses.validation,
+    ]
     # excluding escrows where all projects are still have `validation` status
     at_least_one_is_completed = (
-        func.count(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
+        func.sum(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
+    )
+    all_completed_or_validation = (
+        func.sum(
+            case(
+                (Project.status.in_([ProjectStatuses.completed, ProjectStatuses.validation]), 1),
+                else_=0,
+            )
+        )
+        == func.count()
+        # TODO: this is a draft implementation.
+        # Probably, better to check against the known job count from the escrow creation
     )
     select_stmt = (
         select(
@@ -211,9 +226,9 @@ def create_escrow_validations(session: Session):
             Project.chain_id,
             literal(EscrowValidationStatuses.awaiting).label("status"),
         )
-        .where(Project.status.in_(allowed_statuses))
+        .where(Project.status.in_(active_statuses))
         .group_by(Project.escrow_address, Project.chain_id)
-        .having(at_least_one_is_completed)
+        .having(at_least_one_is_completed, all_completed_or_validation)
     )
 
     insert_stmt = (
@@ -619,6 +634,9 @@ def create_job(
     cvat_id: int,
     cvat_task_id: int,
     cvat_project_id: int,
+    *,
+    start_frame: int,
+    stop_frame: int,
     status: JobStatuses = JobStatuses.new,
 ) -> str:
     """
@@ -630,6 +648,8 @@ def create_job(
         cvat_id=cvat_id,
         cvat_task_id=cvat_task_id,
         cvat_project_id=cvat_project_id,
+        start_frame=start_frame,
+        stop_frame=stop_frame,
         status=status.value,
     )
 
@@ -959,7 +979,19 @@ def touch(
         time = utcnow()
 
     session.execute(update(cls).where(cls.id.in_(ids)).values({cls.updated_at: time}))
-    while touch_parents and issubclass(cls, ChildOf):
+
+    if touch_parents:
+        touch_parent_objects(session, cls, ids, time=time)
+
+
+def touch_parent_objects(
+    session: Session,
+    cls: type["Base"],
+    ids: list[str],
+    *,
+    time: datetime | None = None,
+):
+    while issubclass(cls, ChildOf):
         parent_cls = cls.parent_cls
         foreign_key_column = next(iter(cls.parent.property.local_columns))
         parent_id_column = next(iter(foreign_key_column.foreign_keys)).column
@@ -977,3 +1009,49 @@ def touch(
         )
         ids = session.execute(parent_update_stmt).scalars().all()
         cls = parent_cls
+
+
+def touch_final_assignments(
+    session: Session,
+    cvat_project_ids: list[int],
+    *,
+    touch_parents: bool = True,
+    time: datetime | None = None,
+) -> None:
+    if time is None:
+        time = utcnow()
+
+    last_assignment_time_per_job_id_subquery = (
+        select(
+            Assignment.cvat_job_id.label("cvat_job_id"),
+            func.max(Assignment.created_at).label("max_created_at"),
+        )
+        .join(Job)
+        .where(
+            Assignment.status == AssignmentStatuses.completed,
+            Job.cvat_project_id.in_(cvat_project_ids),
+        )
+        .order_by(Assignment.cvat_job_id)
+        .group_by(Assignment.cvat_job_id)
+        .subquery()
+    )
+
+    last_assignment_ids_query = (
+        select(Assignment.id)
+        .join(
+            last_assignment_time_per_job_id_subquery,
+            Assignment.cvat_job_id == last_assignment_time_per_job_id_subquery.c.cvat_job_id,
+            isouter=True,
+        )
+        .where(Assignment.created_at == last_assignment_time_per_job_id_subquery.c.max_created_at)
+    )
+
+    ids = session.execute(
+        update(Assignment)
+        .where(Assignment.id.in_(last_assignment_ids_query))
+        .values({Assignment.updated_at: time})
+        .returning(Assignment.id)
+    )
+
+    if touch_parents:
+        touch_parent_objects(session, Assignment, ids.scalars().all(), time=time)

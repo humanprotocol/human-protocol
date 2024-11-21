@@ -53,7 +53,9 @@ def process_incoming_job_launcher_webhooks(logger: logging.Logger, session: Sess
     )
 
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook, on_fail=handle_failure):
+        with handle_webhook(
+            logger, session, webhook, on_fail=handle_failure, queue=oracle_db_service.inbox
+        ):
             handle_job_launcher_event(webhook, db_session=session, logger=logger)
 
 

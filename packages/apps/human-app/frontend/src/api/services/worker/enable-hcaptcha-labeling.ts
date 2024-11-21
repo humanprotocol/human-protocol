@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { routerPaths } from '@/router/router-paths';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { useGetAccessTokenMutation } from '@/api/services/common/get-access-token';
+import { useAccessTokenRefresh } from '@/api/services/common/use-access-token-refresh';
 
 const enableHCaptchaLabelingSuccessSchema = z.object({
   site_key: z.string(),
@@ -18,7 +18,7 @@ export type EnableHCaptchaLabelingSuccessResponse = z.infer<
 export function useEnableHCaptchaLabelingMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { mutateAsync: getAccessTokenMutation } = useGetAccessTokenMutation();
+  const { refreshAccessTokenAsync } = useAccessTokenRefresh();
 
   return useMutation({
     mutationFn: async () => {
@@ -30,7 +30,7 @@ export function useEnableHCaptchaLabelingMutation() {
           options: { method: 'POST' },
         }
       );
-      await getAccessTokenMutation({ authType: 'web2' });
+      await refreshAccessTokenAsync({ authType: 'web2' });
       return result;
     },
     onSuccess: async () => {

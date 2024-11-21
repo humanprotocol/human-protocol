@@ -25,7 +25,11 @@
     "captcha": "Please complete the captcha",
     "passwordMissing": "Please enter your password.",
     "invalidEmail": "Please enter a valid email address.",
-    "invalidOracleAddress": "Invalid oracle address."
+    "invalidOracleAddress": "Invalid oracle address.",
+    "publicKeyLengthError": "Public key must be exactly 128 characters long",
+    "publicKeyHexadecimalStringError": "Public key must be a valid hexadecimal string",
+    "urlValidationError": "Invalid URL",
+    "feeValidationError": "Fee value must be an integer between 0 and 100"
   },
   "errors": {
     "errorWithMessage": "Error with message: {{message}}",
@@ -192,6 +196,7 @@
       "KYCInProgress": "KYC in progress",
       "confirmEmail": "Confirm email",
       "kycCompleted": "KYC Completed",
+      "kycDeclined": "KYC Declined",
       "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
@@ -213,7 +218,8 @@
       "allJobs": "All tasks"
     },
     "registrationInExchangeOracle": {
-      "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
+      "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
+      "instructionsButton": "See registration tutorial",
       "completeMessage": "Click on Complete once you have finished the registration process:",
       "completeButton": "Complete"
     },

@@ -44,12 +44,14 @@ class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
     image_boxes = "image_boxes"
     image_boxes_from_points = "image_boxes_from_points"
     image_skeletons_from_boxes = "image_skeletons_from_boxes"
+    image_polygons = "image_polygons"
 
 
 class CvatLabelTypes(str, Enum, metaclass=BetterEnumMeta):
     tag = "tag"
     points = "points"
     rectangle = "rectangle"
+    polygon = "polygon"
 
 
 class OracleWebhookTypes(str, Enum, metaclass=BetterEnumMeta):

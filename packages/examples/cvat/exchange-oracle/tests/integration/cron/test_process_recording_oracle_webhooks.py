@@ -29,6 +29,7 @@ from src.services.webhook import OracleWebhookDirectionTags
 from src.utils.time import utcnow
 
 from tests.utils.constants import DEFAULT_MANIFEST_URL, RECORDING_ORACLE_ADDRESS
+from tests.utils.db_helper import create_project_task_and_job
 
 escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
 chain_id = Networks.localhost.value
@@ -42,22 +43,59 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.close()
 
     def test_process_incoming_recording_oracle_webhooks_job_completed_type(self):
-        project_id = str(uuid.uuid4())
-        cvat_project = Project(
-            id=project_id,
+        user = User(
+            wallet_address="sample_wallet",
             cvat_id=1,
-            cvat_cloudstorage_id=1,
-            status=ProjectStatuses.validation.value,
-            job_type=TaskTypes.image_label_binary.value,
-            escrow_address=escrow_address,
-            chain_id=Networks.localhost.value,
-            bucket_url="https://test.storage.googleapis.com/",
+            cvat_email="email@sample.com",
         )
+        self.session.add(user)
+
+        project_creation_time = utcnow() - timedelta(days=1)
+        project_completion_time = project_creation_time + timedelta(hours=10)
+
+        cvat_project, cvat_task, cvat_job = create_project_task_and_job(
+            self.session, escrow_address, 1
+        )
+        cvat_project.status = ProjectStatuses.validation
+        cvat_project.created_at = project_creation_time
+        cvat_project.updated_at = project_completion_time
         self.session.add(cvat_project)
 
-        webhok_id = str(uuid.uuid4())
+        cvat_task.status = TaskStatuses.completed
+        cvat_task.created_at = project_creation_time
+        cvat_task.updated_at = project_completion_time
+        self.session.add(cvat_task)
+
+        cvat_job.status = JobStatuses.completed
+        cvat_job.created_at = project_creation_time
+        cvat_job.updated_at = project_completion_time
+        self.session.add(cvat_job)
+
+        cvat_assignment1 = Assignment(
+            id=str(uuid.uuid4()),
+            created_at=project_creation_time,
+            updated_at=project_creation_time + timedelta(hours=1),
+            expires_at=project_creation_time + timedelta(hours=1),
+            user_wallet_address=user.wallet_address,
+            cvat_job_id=cvat_job.cvat_id,
+            status=AssignmentStatuses.expired,
+        )
+        self.session.add(cvat_assignment1)
+
+        cvat_assignment2 = Assignment(
+            id=str(uuid.uuid4()),
+            created_at=project_creation_time + timedelta(minutes=5),
+            updated_at=project_completion_time,
+            expires_at=project_creation_time + timedelta(minutes=5) + timedelta(hours=1),
+            user_wallet_address=user.wallet_address,
+            cvat_job_id=cvat_job.cvat_id,
+            status=AssignmentStatuses.completed,
+        )
+        self.session.add(cvat_assignment2)
+
+        webhook_id = str(uuid.uuid4())
         webhook = Webhook(
-            id=webhok_id,
+            id=webhook_id,
             signature="signature",
             escrow_address=escrow_address,
             chain_id=chain_id,
@@ -72,15 +110,25 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         process_incoming_recording_oracle_webhooks()
 
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
-
+        updated_webhook = self.session.query(Webhook).get(webhook_id)
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
         assert updated_webhook.attempts == 1
-        db_project = self.session.query(Project).filter_by(id=project_id).first()
 
+        db_project = self.session.query(Project).get(cvat_project.id)
         assert db_project.status == ProjectStatuses.recorded.value
+        assert db_project.updated_at > project_completion_time
+
+        db_task = self.session.query(Task).get(cvat_task.id)
+        assert db_task.updated_at > project_completion_time
+
+        db_job = self.session.query(Job).get(cvat_job.id)
+        assert db_job.updated_at > project_completion_time
+
+        db_assignment1 = self.session.query(Assignment).get(cvat_assignment1.id)
+        assert db_assignment1.updated_at < project_completion_time
+
+        db_assignment2 = self.session.query(Assignment).get(cvat_assignment2.id)
+        assert db_assignment2.updated_at > project_completion_time
 
     def test_process_incoming_recording_oracle_webhooks_job_completed_type_invalid_project_status(
         self,
@@ -157,6 +205,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_project_id=cvat_project.cvat_id,
             cvat_task_id=cvat_task.cvat_id,
             status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
         )
         self.session.add(cvat_job)
 

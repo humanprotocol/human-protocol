@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { LOCAL_STORAGE_KEYS } from '../constants';
 import { CaseConverter } from './case-converter';
-import { LOCAL_STORAGE_KEYS } from 'src/constants';
 
 interface FailedPromise {
   resolve: (value?: unknown) => void;
@@ -49,7 +49,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    if (response.data) {
+    if (response.data && response.config.responseType !== 'blob') {
       response.data = CaseConverter.transformToCamelCase(response.data);
     }
     return response;

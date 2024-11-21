@@ -4,9 +4,9 @@ import {
   EncryptionUtils,
   EscrowClient,
   KVStoreUtils,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import axios from 'axios';
 import * as Minio from 'minio';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
@@ -16,6 +16,12 @@ import { FortuneFinalResult } from '../../common/dto/result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { isNotFoundError } from '../../common/utils/minio';
+import {
+  FileDownloadError,
+  FileNotFoundError,
+  InvalidFileUrl,
+} from './storage.errors';
 
 @Injectable()
 export class StorageService {
@@ -34,6 +40,7 @@ export class StorageService {
       useSSL: this.s3ConfigService.useSSL,
     });
   }
+
   public getUrl(key: string): string {
     return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
       this.s3ConfigService.endpoint
@@ -74,32 +81,64 @@ export class StorageService {
     ]);
   }
 
-  private async decryptFile(fileContent: any): Promise<any> {
-    if (
-      typeof fileContent === 'string' &&
-      EncryptionUtils.isEncrypted(fileContent)
-    ) {
-      const encryption = await Encryption.build(
-        this.pgpConfigService.privateKey!,
-        this.pgpConfigService.passphrase,
-      );
-      try {
-        return JSON.parse(await encryption.decrypt(fileContent));
-      } catch {
-        return await encryption.decrypt(fileContent);
-      }
-    } else {
+  private async maybeDecryptFile(fileContent: Buffer): Promise<Buffer> {
+    const contentAsString = fileContent.toString();
+    if (!EncryptionUtils.isEncrypted(contentAsString)) {
       return fileContent;
+    }
+
+    const encryption = await Encryption.build(
+      this.pgpConfigService.privateKey!,
+      this.pgpConfigService.passphrase,
+    );
+
+    const decryptedData = await encryption.decrypt(contentAsString);
+
+    return Buffer.from(decryptedData);
+  }
+
+  public static isValidUrl(maybeUrl: string): boolean {
+    try {
+      const url = new URL(maybeUrl);
+      return ['http:', 'https:'].includes(url.protocol);
+    } catch (_error) {
+      return false;
     }
   }
 
-  public async download(url: string): Promise<any> {
-    try {
-      const fileContent = await StorageClient.downloadFileFromUrl(url);
+  public static async downloadFileFromUrl(url: string): Promise<Buffer> {
+    if (!this.isValidUrl(url)) {
+      throw new InvalidFileUrl(url);
+    }
 
-      return await this.decryptFile(fileContent);
+    try {
+      const { data } = await axios.get(url, {
+        responseType: 'arraybuffer',
+      });
+
+      return Buffer.from(data);
     } catch (error) {
-      Logger.error(`Error downloading ${url}:`, error);
+      if (error.response?.status === HttpStatus.NOT_FOUND) {
+        throw new FileNotFoundError(url);
+      }
+      throw new FileDownloadError(url, error.cause || error.message);
+    }
+  }
+
+  public async downloadJsonLikeData(url: string): Promise<any> {
+    try {
+      let fileContent = await StorageService.downloadFileFromUrl(url);
+
+      fileContent = await this.maybeDecryptFile(fileContent);
+
+      let jsonLikeData = fileContent.toString();
+      try {
+        jsonLikeData = JSON.parse(jsonLikeData);
+      } catch (_noop) {}
+
+      return jsonLikeData;
+    } catch (error) {
+      Logger.error(`Error downloading json like data ${url}:`, error);
       return [];
     }
   }
@@ -122,6 +161,22 @@ export class StorageService {
 
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `${hash}.json`;
+
+      // Check if the file already exists in the bucket
+      try {
+        await this.minioClient.statObject(this.s3ConfigService.bucket, key);
+        Logger.log(`File with key ${key} already exists. Skipping upload.`);
+        return { url: this.getUrl(key), hash };
+      } catch (err) {
+        if (!isNotFoundError(err)) {
+          Logger.error('Error checking if file exists:', err);
+          throw new ControlledError(
+            'Error accessing storage',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
+
       await this.minioClient.putObject(
         this.s3ConfigService.bucket,
         key,
@@ -150,10 +205,8 @@ export class StorageService {
     url: string,
   ): Promise<UploadedFile> {
     try {
-      // Download the content of the file from the bucket
-      let fileContent = await StorageClient.downloadFileFromUrl(url);
-      fileContent = await this.decryptFile(fileContent);
-
+      let fileContent = await StorageService.downloadFileFromUrl(url);
+      fileContent = await this.maybeDecryptFile(fileContent);
       // Encrypt for job launcher
       const content = await this.encryptFile(
         escrowAddress,
@@ -165,12 +218,27 @@ export class StorageService {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
 
+      // Check if the file already exists in the bucket
+      try {
+        await this.minioClient.statObject(this.s3ConfigService.bucket, key);
+        Logger.log(`File with key ${key} already exists. Skipping upload.`);
+        return { url: this.getUrl(key), hash };
+      } catch (err) {
+        if (!isNotFoundError(err)) {
+          Logger.error('Error checking if file exists:', err);
+          throw new ControlledError(
+            'Error accessing storage',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
+
       await this.minioClient.putObject(
         this.s3ConfigService.bucket,
         key,
         content,
         {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
           'Cache-Control': 'no-store',
         },
       );

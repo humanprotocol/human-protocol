@@ -48,6 +48,8 @@ def test_incoming_webhook_200(client: TestClient) -> None:
             "project_id": 1,
             "state": "new",
             "type": "annotation",
+            "start_frame": 0,
+            "stop_frame": 1,
         },
         "webhook_id": 1,
     }
@@ -86,6 +88,8 @@ def test_incoming_webhook_200_update_expired_assignmets(client: TestClient) -> N
             "task_id": 1,
             "project_id": 1,
             "state": "completed",
+            "start_frame": 0,
+            "stop_frame": 1,
             "assignee": {
                 "url": api_url + "users/1",
                 "id": 1,
@@ -129,6 +133,8 @@ def test_incoming_webhook_200_update(client: TestClient) -> None:
             "task_id": 1,
             "project_id": 1,
             "state": "completed",
+            "start_frame": 0,
+            "stop_frame": 1,
             "assignee": {
                 "url": api_url + "users/1",
                 "id": 2,
