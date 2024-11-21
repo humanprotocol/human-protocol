@@ -24,10 +24,11 @@ export const useDataGrid = (data: LeaderBoardData) => {
     mobile: { isMobile },
   } = useBreakPoints();
   const formattedData = useMemo(() => {
-    return data.map((row) => {
+    return data.map((row, idx) => {
       return {
         ...row,
         id: row.address,
+        rowIndex: idx,
       };
     });
   }, [data]);

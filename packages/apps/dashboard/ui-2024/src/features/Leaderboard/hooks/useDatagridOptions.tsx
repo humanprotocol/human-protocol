@@ -57,16 +57,18 @@ export function useDatagridOptions<T extends GridValidRowModel>({
               width: 30,
               headerClassName: 'home-page-table-header',
               sortable: false,
-              renderCell: (params: GridRenderCellParams) => (
-                <Typography
-                  variant="body1"
-                  height="100%"
-                  display="flex"
-                  alignItems="center"
-                >
-                  {params.api.state.sorting.sortedRows.indexOf(params.id) + 1}
-                </Typography>
-              ),
+              renderCell: (params: GridRenderCellParams) => {
+                return (
+                  <Typography
+                    variant="body1"
+                    height="100%"
+                    display="flex"
+                    alignItems="center"
+                  >
+                    {params.row.rowIndex + 1}
+                  </Typography>
+                );
+              },
             },
             ...cols,
           ];
@@ -91,9 +93,10 @@ export function useDatagridOptions<T extends GridValidRowModel>({
 
   const handleSortModelChange = useCallback(
     (_model: GridSortModel, details: GridCallbackDetails) => {
+      apiRef.current.applySorting();
       const sortedRows = details.api.getSortedRows();
-      sortedRows.forEach((row) => {
-        apiRef.current.updateRows([row]);
+      sortedRows.forEach((row, index) => {
+        apiRef.current.updateRows([{ ...row, rowIndex: index }]);
       });
     },
     [apiRef]
