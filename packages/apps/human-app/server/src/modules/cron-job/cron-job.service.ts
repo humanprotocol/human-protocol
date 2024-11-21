@@ -142,7 +142,7 @@ export class CronJobService {
     updates: Partial<OracleDiscoveryResponse>,
   ) {
     const updatedOracle = { ...oracleData, ...updates };
-    
+
     const chainId = oracleData.chainId?.toString();
     const cachedOracles =
       await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);

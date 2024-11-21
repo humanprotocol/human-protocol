@@ -72,6 +72,13 @@ export function generateOracleDiscoveryResponseBody() {
   };
 }
 
+export function generateOracleDiscoveryResponseBodyBySupportedJobType() {
+  return {
+    oracles: [response4],
+    chainIdsEnabled: [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA],
+  };
+}
+
 export function generateOracleDiscoveryResponseBodyByJobType() {
   return {
     oracles: [response3, response4],

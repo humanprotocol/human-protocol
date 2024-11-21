@@ -14,6 +14,7 @@ import {
   generateOracleDiscoveryResponseBody,
   generateOracleDiscoveryResponseBodyByChainId,
   generateOracleDiscoveryResponseBodyByJobType,
+  generateOracleDiscoveryResponseBodyBySupportedJobType,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
 import { KvStoreGateway } from '../../../integrations/kv-store/kv-store.gateway';
@@ -36,6 +37,7 @@ describe('OracleDiscoveryService', () => {
   const JOB_TYPES = 'job-type-1, job-type-2, job-type-3';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
+  let kvStoreGateway: KvStoreGateway;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -76,6 +78,7 @@ describe('OracleDiscoveryService', () => {
       OracleDiscoveryService,
     );
     cacheManager = module.get<Cache>(CACHE_MANAGER);
+    kvStoreGateway = module.get<KvStoreGateway>(KvStoreGateway);
   });
 
   afterEach(() => {
@@ -199,6 +202,31 @@ describe('OracleDiscoveryService', () => {
     expect(result).toEqual(errorResponse);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
+    });
+  });
+
+  it('should return only relevant oracles based on supported job types', async () => {
+    jest
+      .spyOn(kvStoreGateway, 'getJobTypesByAddress')
+      .mockResolvedValueOnce('job-type-1');
+    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
+
+    EXPECTED_CHAIN_IDS.forEach((chainId) => {
+      jest
+        .spyOn(OperatorUtils, 'getReputationNetworkOperators')
+        .mockResolvedValueOnce(
+          generateGetReputationNetworkOperatorsResponseByChainId(chainId),
+        );
+    });
+
+    const result = await oracleDiscoveryService.processOracleDiscovery({});
+
+    const expectedResponse =
+      generateOracleDiscoveryResponseBodyBySupportedJobType();
+    expect(result).toEqual(expectedResponse);
+
+    result.oracles.forEach((oracle) => {
+      expect(oracle.jobTypes).toContain('job-type-1');
     });
   });
 });
