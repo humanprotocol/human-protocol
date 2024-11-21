@@ -49,7 +49,8 @@ export function MyJobsTableMobile({
     hasNextPage,
   } = useInfiniteGetMyJobsData();
 
-  const { mutate: rejectTaskMutation } = useRejectTaskMutation();
+  const { mutate: rejectTaskMutation, isPending: isRejectPending } =
+    useRejectTaskMutation();
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
     useRefreshTasksMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
@@ -132,7 +133,7 @@ export function MyJobsTableMobile({
           </Stack>
         ) : null}
         {allPages.map((d) => {
-          const buttonDisabled = d.status !== 'active';
+          const buttonDisabled = d.status !== 'active' || isRejectPending;
           return (
             <Paper
               key={crypto.randomUUID()}
@@ -212,8 +213,8 @@ export function MyJobsTableMobile({
                         </TableButton>
                         <RejectButton
                           disabled={buttonDisabled}
+                          loading={isRejectPending}
                           onClick={() => {
-                            if (buttonDisabled) return;
                             rejectTaskMutation({
                               oracle_address: oracle_address ?? '',
                               assignment_id: d.assignment_id,

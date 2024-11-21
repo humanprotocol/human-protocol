@@ -208,7 +208,6 @@ const getColumnsDefinition = ({
                 disabled={buttonDisabled}
                 loading={isRejectPending}
                 onClick={() => {
-                  if (buttonDisabled) return;
                   rejectTaskMutation({
                     oracle_address,
                     assignment_id,
