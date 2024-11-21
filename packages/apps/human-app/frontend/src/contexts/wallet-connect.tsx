@@ -1,10 +1,6 @@
 import type { JsonRpcSigner, BrowserProvider, Eip1193Provider } from 'ethers';
 import React, { createContext, useEffect, useState } from 'react';
-import {
-  type UseMutationResult,
-  type QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
+import { type UseMutationResult } from '@tanstack/react-query';
 import {
   useAppKit,
   useAppKitAccount,
@@ -83,10 +79,8 @@ createAppKit({
 });
 
 export function WalletConnectProvider({
-  client,
   children,
 }: {
-  client: QueryClient;
   children: React.ReactNode;
 }) {
   const [initializing, setInitializing] = useState(true);
@@ -110,17 +104,34 @@ export function WalletConnectProvider({
 
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <QueryClientProvider client={client}>
-        <WalletConnectContext.Provider
-          value={
-            isConnected && address && chainId && web3ProviderMutation.data
-              ? {
-                  isConnected: true,
-                  address,
-                  chainId: Number(chainId),
-                  web3ProviderMutation,
-                  openModal,
-                  signMessage: async (message: string) => {
+      <WalletConnectContext.Provider
+        value={
+          isConnected && address && chainId && web3ProviderMutation.data
+            ? {
+                isConnected: true,
+                address,
+                chainId: Number(chainId),
+                web3ProviderMutation,
+                openModal,
+                signMessage: async (message: string) => {
+                  try {
+                    const signature =
+                      await web3ProviderMutation.data.signer.signMessage(
+                        message
+                      );
+                    return signature;
+                  } catch (error) {
+                    throw new JsonRpcError(error);
+                  }
+                },
+                initializing,
+              }
+            : {
+                isConnected: false,
+                web3ProviderMutation,
+                openModal,
+                signMessage: async (message: string) => {
+                  if (web3ProviderMutation.data) {
                     try {
                       const signature =
                         await web3ProviderMutation.data.signer.signMessage(
@@ -130,34 +141,15 @@ export function WalletConnectProvider({
                     } catch (error) {
                       throw new JsonRpcError(error);
                     }
-                  },
-                  initializing,
-                }
-              : {
-                  isConnected: false,
-                  web3ProviderMutation,
-                  openModal,
-                  signMessage: async (message: string) => {
-                    if (web3ProviderMutation.data) {
-                      try {
-                        const signature =
-                          await web3ProviderMutation.data.signer.signMessage(
-                            message
-                          );
-                        return signature;
-                      } catch (error) {
-                        throw new JsonRpcError(error);
-                      }
-                    }
-                    return Promise.resolve(undefined);
-                  },
-                  initializing,
-                }
-          }
-        >
-          {children}
-        </WalletConnectContext.Provider>
-      </QueryClientProvider>
+                  }
+                  return Promise.resolve(undefined);
+                },
+                initializing,
+              }
+        }
+      >
+        {children}
+      </WalletConnectContext.Provider>
     </WagmiProvider>
   );
 }
