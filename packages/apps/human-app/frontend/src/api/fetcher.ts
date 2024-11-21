@@ -4,7 +4,6 @@ import type { ResponseError } from '@/shared/types/global.type';
 import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
 // eslint-disable-next-line import/no-cycle -- cause by refresh token retry
 import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
-import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
@@ -79,23 +78,31 @@ export function createFetcher(defaultFetcherConfig?: {
     if (!refreshPromise) {
       refreshPromise = (async () => {
         try {
-          const refetchAccessTokenSuccess = await apiClient.fetcher(
-            apiPaths.worker.obtainAccessToken.path,
-            {
-              successSchema: signInSuccessResponseSchema,
-              options: {
-                method: 'POST',
-                body: JSON.stringify({
-                  // eslint-disable-next-line camelcase -- camel case defined by api
-                  refresh_token: browserAuthProvider.getRefreshToken(),
-                }),
-              },
-            }
-          );
+          const response = await fetch(apiPaths.worker.obtainAccessToken.path, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              // eslint-disable-next-line camelcase -- camel case defined by api
+              refresh_token: browserAuthProvider.getRefreshToken(),
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to refresh token');
+          }
+
+          const data: unknown = await response.json();
+
+          const refetchAccessTokenSuccess: SignInSuccessResponse =
+            signInSuccessResponseSchema.parse(data);
+
           browserAuthProvider.signIn(
             refetchAccessTokenSuccess,
             browserAuthProvider.authType
           );
+
           return refetchAccessTokenSuccess;
         } catch (e) {
           browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
