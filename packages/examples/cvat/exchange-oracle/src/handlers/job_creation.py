@@ -552,7 +552,7 @@ class PointsTaskBuilder(SimpleTaskBuilder):
 
 class PolygonTaskBuilder(SimpleTaskBuilder):
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
-        values = {"iou_threshold": Config.core_config.polygons_iou_threshold, **overrides}
+        values = {"iou_threshold": Config.cvat_config.cvat_polygons_iou_threshold, **overrides}
         super()._setup_quality_settings(task_id, **values)
 
 

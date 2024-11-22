@@ -195,6 +195,9 @@ class CvatConfig:
     cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
     cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
 
+    cvat_polygons_iou_threshold = float(os.environ.get("CVAT_POLYGONS_IOU_THRESHOLD", 0.5))
+    "`iou_threshold` parameter for quality settings in polygons tasks"
+
     cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
 
@@ -257,9 +260,6 @@ class CoreConfig:
 
     min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
     "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
-
-    polygons_iou_threshold = float(os.environ.get("POLYGONS_IOU_THRESHOLD", 0.5))
-    "`iou_threshold` parameter for quality settings in polygons tasks"
 
 
 class HumanAppConfig:
