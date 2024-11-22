@@ -2,17 +2,14 @@
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { FiltersButtonIcon, RefreshIcon } from '@/components/ui/icons';
 import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/components/ui/loader';
 import { Alert } from '@/components/ui/alert';
 import { getNetworkName } from '@/smart-contracts/get-network-name';
-import { TableButton } from '@/components/ui/table-button';
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
-import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
-import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
 import type { MyJob } from '@/api/services/worker/my-jobs-data';
 import { useInfiniteGetMyJobsData } from '@/api/services/worker/my-jobs-data';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
@@ -26,6 +23,7 @@ import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
+import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -49,8 +47,6 @@ export function MyJobsTableMobile({
     hasNextPage,
   } = useInfiniteGetMyJobsData();
 
-  const { mutate: rejectTaskMutation, isPending: isRejectPending } =
-    useRejectTaskMutation();
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
     useRefreshTasksMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
@@ -133,7 +129,6 @@ export function MyJobsTableMobile({
           </Stack>
         ) : null}
         {allPages.map((d) => {
-          const buttonDisabled = d.status !== 'active' || isRejectPending;
           return (
             <Paper
               key={crypto.randomUUID()}
@@ -200,29 +195,7 @@ export function MyJobsTableMobile({
                       width: '100%',
                     }}
                   >
-                    {d.url ? (
-                      <>
-                        <TableButton
-                          component={Link}
-                          disabled={buttonDisabled}
-                          fullWidth
-                          target="_blank"
-                          to={d.url}
-                        >
-                          {t('worker.jobs.solve')}
-                        </TableButton>
-                        <RejectButton
-                          disabled={buttonDisabled}
-                          loading={isRejectPending}
-                          onClick={() => {
-                            rejectTaskMutation({
-                              oracle_address: oracle_address ?? '',
-                              assignment_id: d.assignment_id,
-                            });
-                          }}
-                        />
-                      </>
-                    ) : null}
+                    <MyJobsTableActions page={d} />
                   </Grid>
                 </Grid>
               </List>

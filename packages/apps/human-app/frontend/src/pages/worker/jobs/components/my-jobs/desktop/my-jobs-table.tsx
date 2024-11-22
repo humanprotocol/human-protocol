@@ -2,7 +2,7 @@
 import { t } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -27,22 +27,18 @@ import { MyJobsRewardAmountSort } from '@/pages/worker/jobs/components/my-jobs/d
 import { MyJobsStatusFilter } from '@/pages/worker/jobs/components/my-jobs/desktop/my-jobs-status-filter';
 import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/desktop/my-jobs-expires-at-sort';
 import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/desktop/my-jobs-network-filter';
-import { TableButton } from '@/components/ui/table-button';
-import { useRejectTaskMutation } from '@/api/services/worker/reject-task';
-import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
+import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 const getColumnsDefinition = ({
-  oracle_address,
   refreshData,
   isRefreshTasksPending,
 }: {
-  oracle_address: string;
   refreshData: () => void;
   isRefreshTasksPending: boolean;
 }): MRT_ColumnDef<MyJob>[] => [
@@ -186,39 +182,11 @@ const getColumnsDefinition = ({
     header: t('worker.jobs.refresh'),
     size: 100,
     enableSorting: true,
-    Cell: (props) => {
-      const { url, assignment_id, status } = props.row.original;
-      const { mutate: rejectTaskMutation, isPending: isRejectPending } =
-        useRejectTaskMutation();
-      const buttonDisabled = status !== 'active' || isRejectPending;
-
-      return (
-        <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-          {url ? (
-            <>
-              <TableButton
-                component={Link}
-                disabled={buttonDisabled}
-                target="_blank"
-                to={url}
-              >
-                {t('worker.jobs.solve')}
-              </TableButton>
-              <RejectButton
-                disabled={buttonDisabled}
-                loading={isRejectPending}
-                onClick={() => {
-                  rejectTaskMutation({
-                    oracle_address,
-                    assignment_id,
-                  });
-                }}
-              />
-            </>
-          ) : null}
-        </Grid>
-      );
-    },
+    Cell: (props) => (
+      <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+        <MyJobsTableActions page={props.row.original} />
+      </Grid>
+    ),
     muiTableHeadCellProps: () => ({
       component: (props) => {
         return (
@@ -304,7 +272,6 @@ export function MyJobsTable() {
 
   const table = useMaterialReactTable({
     columns: getColumnsDefinition({
-      oracle_address: oracle_address ?? '',
       refreshData: refreshTasks(oracle_address ?? ''),
       isRefreshTasksPending,
     }),
