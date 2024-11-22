@@ -184,7 +184,7 @@ const getColumnsDefinition = ({
     enableSorting: true,
     Cell: (props) => (
       <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-        <MyJobsTableActions page={props.row.original} />
+        <MyJobsTableActions job={props.row.original} />
       </Grid>
     ),
     muiTableHeadCellProps: () => ({

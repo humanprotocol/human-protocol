@@ -195,7 +195,7 @@ export function MyJobsTableMobile({
                       width: '100%',
                     }}
                   >
-                    <MyJobsTableActions page={d} />
+                    <MyJobsTableActions job={d} />
                   </Grid>
                 </Grid>
               </List>

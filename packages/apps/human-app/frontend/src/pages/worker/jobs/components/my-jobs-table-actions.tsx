@@ -7,17 +7,17 @@ import { RejectButton } from '@/pages/worker/jobs/components/reject-button';
 import type { MyJob } from '@/api/services/worker/my-jobs-data';
 
 interface MyJobsTableRejectActionProps {
-  page: MyJob;
+  job: MyJob;
 }
 
-export function MyJobsTableActions({ page }: MyJobsTableRejectActionProps) {
+export function MyJobsTableActions({ job }: MyJobsTableRejectActionProps) {
   const { t } = useTranslation();
   const { mutate: rejectTaskMutation, isPending: isRejectPending } =
     useRejectTaskMutation();
   const { address: oracleAddress } = useParams<{ address: string }>();
-  const buttonDisabled = page.status !== 'active' || isRejectPending;
+  const buttonDisabled = job.status !== 'active' || isRejectPending;
 
-  if (!page.url) {
+  if (!job.url) {
     return null;
   }
 
@@ -28,7 +28,7 @@ export function MyJobsTableActions({ page }: MyJobsTableRejectActionProps) {
         disabled={buttonDisabled}
         fullWidth
         target="_blank"
-        to={page.url}
+        to={job.url}
       >
         {t('worker.jobs.solve')}
       </TableButton>
@@ -38,7 +38,7 @@ export function MyJobsTableActions({ page }: MyJobsTableRejectActionProps) {
         onClick={() => {
           rejectTaskMutation({
             oracle_address: oracleAddress ?? '',
-            assignment_id: page.assignment_id,
+            assignment_id: job.assignment_id,
           });
         }}
       />
