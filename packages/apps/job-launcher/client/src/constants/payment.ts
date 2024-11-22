@@ -5,6 +5,19 @@ export const CURRENCY = {
   usd: 'usd',
 };
 
+export const paymentType: { [key: string]: string } = {
+  deposit: 'Deposit',
+  refund: 'Refund',
+  withdrawal: 'Launch Job',
+  slash: 'Slash',
+};
+
+export const paymentSource: { [key: string]: string } = {
+  fiat: 'Credit Card',
+  crypto: 'Crypto',
+  balance: 'Balance',
+};
+
 export enum Country {
   AF = 'af',
   AL = 'al',

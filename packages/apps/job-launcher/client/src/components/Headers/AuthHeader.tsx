@@ -192,6 +192,7 @@ export const AuthHeader = () => {
                 cursor: 'pointer',
               }}
               to="/profile/transactions"
+              onClick={handleClose}
             >
               <TransactionsIcon /> My transactions
             </Link>
@@ -203,6 +204,7 @@ export const AuthHeader = () => {
                 cursor: 'pointer',
               }}
               to="/profile/settings"
+              onClick={handleClose}
             >
               <SettingsIcon /> Settings
             </Link>

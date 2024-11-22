@@ -120,7 +120,7 @@ const DeleteCardModal = ({
                     onClose();
                   }}
                 >
-                  Select a Credit Card
+                  Cancel
                 </Button>
                 &nbsp;
                 <Button

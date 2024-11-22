@@ -10,8 +10,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useSnackbar } from '../..//providers/SnackProvider';
 import { countryOptions, vatTypeOptions } from '../../constants/payment';
+import { useSnackbar } from '../../providers/SnackProvider';
 import { editUserBillingInfo } from '../../services/payment';
 import { BillingInfo } from '../../types';
 
@@ -61,23 +61,21 @@ const BillingDetailsModal = ({
     let newErrors: { [key: string]: string } = {};
 
     if (!formData.name) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'name required';
     }
 
     const addressFields = ['line', 'postalCode', 'city', 'country'];
-    const hasAddressFields = addressFields.some(
-      (field) => formData.address[field as keyof typeof formData.address],
-    );
-    const allAddressFieldsFilled = addressFields.every(
-      (field) => formData.address[field as keyof typeof formData.address],
-    );
+    addressFields.forEach((field) => {
+      if (!formData.address[field as keyof typeof formData.address]) {
+        newErrors[field] = `${field} required`;
+      }
+    });
 
-    if (hasAddressFields && !allAddressFieldsFilled) {
-      newErrors.address = 'All address fields must be filled or none.';
+    if (!formData.vat) {
+      newErrors.vat = 'Tax ID required';
     }
-
-    if (formData.vat && !formData.vatType) {
-      newErrors.vatType = 'VAT type is required if VAT number is provided';
+    if (!formData.vatType) {
+      newErrors.vatType = 'Tax ID type required';
     }
 
     setErrors(newErrors);
@@ -94,7 +92,7 @@ const BillingDetailsModal = ({
         setBillingInfo(formData);
       } catch (err: any) {
         showError(
-          err.message || 'An error occurred while setting up the card.',
+          err.message || 'An error occurred while saving billing details.',
         );
       }
       setIsLoading(false);
@@ -150,20 +148,22 @@ const BillingDetailsModal = ({
               helperText={errors.name}
             />
             <TextField
-              label="Address"
+              label="Address Line"
               name="line"
               value={formData.address.line}
               onChange={handleInputChange}
               fullWidth
-              error={!!errors.address}
+              error={!!errors.line}
+              helperText={errors.line || ''}
             />
             <TextField
-              label="Postal code"
+              label="Postal Code"
               name="postalCode"
               value={formData.address.postalCode}
               onChange={handleInputChange}
               fullWidth
-              error={!!errors.address}
+              error={!!errors.postalCode}
+              helperText={errors.postalCode || ''}
             />
             <TextField
               label="City"
@@ -171,7 +171,8 @@ const BillingDetailsModal = ({
               value={formData.address.city}
               onChange={handleInputChange}
               fullWidth
-              error={!!errors.address}
+              error={!!errors.city}
+              helperText={errors.city || ''}
             />
             <TextField
               select
@@ -180,7 +181,8 @@ const BillingDetailsModal = ({
               value={formData.address.country}
               onChange={handleInputChange}
               fullWidth
-              error={!!errors.address}
+              error={!!errors.country}
+              helperText={errors.country || ''}
             >
               {Object.entries(countryOptions).map(([key, label]) => (
                 <MenuItem key={key} value={key}>
@@ -214,8 +216,8 @@ const BillingDetailsModal = ({
                 value={formData.vat || ''}
                 onChange={handleInputChange}
                 fullWidth
-                error={!!errors.vatType}
-                helperText=""
+                error={!!errors.vat}
+                helperText={errors.vat || ''}
               />
             </Box>
             <LoadingButton

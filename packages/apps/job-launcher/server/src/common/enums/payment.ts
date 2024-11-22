@@ -77,6 +77,11 @@ export enum StripePaymentStatus {
   SUCCEEDED = 'succeeded',
 }
 
+export enum PaymentSortField {
+  CREATED_AT = 'created_at',
+  AMOUNT = 'amount',
+}
+
 export enum VatType {
   AD_NRT = 'ad_nrt',
   AE_TRN = 'ae_trn',

@@ -1,78 +1,18 @@
 import { Box, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { CardSetupForm } from '../../../components/CreditCard/CardSetupForm';
+import { useState } from 'react';
 import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { CryptoTopUpForm } from '../../../components/TopUpAccount/CryptoTopUpForm';
 import { FiatTopUpForm } from '../../../components/TopUpAccount/FiatTopUpForm';
 import { TopUpMethod } from '../../../components/TopUpAccount/TopUpMethod';
 import { IS_TESTNET } from '../../../constants/chains';
-import { checkUserCard } from '../../../services/payment';
 import { PayMethod } from '../../../types';
 
 export default function TopUpAccount() {
   const [payMethod, setPayMethod] = useState<PayMethod>();
-  const [hasCard, setHasCard] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const fetchCardStatus = async () => {
-      const result = await checkUserCard();
-      setHasCard(result);
-    };
-
-    fetchCardStatus();
-  }, []);
 
   const handleSelectMethod = (method: PayMethod) => {
     setPayMethod(method);
   };
-
-  if (hasCard === null) {
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        flex={1}
-        sx={{
-          background: '#fff',
-          border: '1px solid #dbe1f6',
-          borderRadius: '20px',
-          borderTopLeftRadius: payMethod === 0 ? '0px' : '20px',
-          borderTopRightRadius: payMethod === 1 ? '0px' : '20px',
-          px: '10%',
-          pt: 10,
-          pb: 5,
-        }}
-      >
-        <div>Loading...</div>
-      </Box>
-    );
-  }
-
-  if (!hasCard) {
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        flex={1}
-        sx={{
-          background: '#fff',
-          border: '1px solid #dbe1f6',
-          borderRadius: '20px',
-          borderTopLeftRadius: payMethod === 0 ? '0px' : '20px',
-          borderTopRightRadius: payMethod === 1 ? '0px' : '20px',
-          px: '10%',
-          pt: 10,
-          pb: 5,
-        }}
-      >
-        <CardSetupForm onCardSetup={() => setHasCard(true)} />
-      </Box>
-    );
-  }
 
   return (
     <Box px="10%">

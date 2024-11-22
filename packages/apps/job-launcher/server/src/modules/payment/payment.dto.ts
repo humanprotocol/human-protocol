@@ -8,10 +8,18 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Currency, VatType } from '../../common/enums/payment';
+import {
+  Currency,
+  PaymentSortField,
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+  VatType,
+} from '../../common/enums/payment';
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import { Country } from '../../common/enums/job';
+import { PageOptionsDto } from 'src/common/pagination/pagination.dto';
 
 export class PaymentFiatConfirmDto {
   @ApiProperty({ name: 'payment_id' })
@@ -165,4 +173,63 @@ export class CardDto {
   @ApiProperty()
   @IsBoolean()
   public default: boolean;
+}
+
+export class GetPaymentsDto extends PageOptionsDto {
+  @ApiPropertyOptional({
+    name: 'sort_field',
+    enum: PaymentSortField,
+    default: PaymentSortField.CREATED_AT,
+  })
+  @IsOptional()
+  @IsEnum(PaymentSortField)
+  sortField?: PaymentSortField = PaymentSortField.CREATED_AT;
+}
+
+export class PaymentDto {
+  @ApiProperty()
+  @IsNumber()
+  public amount: number;
+
+  @ApiProperty()
+  @IsNumber()
+  public rate: number;
+
+  @ApiProperty()
+  @IsString()
+  public currency: string;
+
+  @ApiProperty({ enum: PaymentType })
+  @IsEnum(PaymentType)
+  public type: PaymentType;
+
+  @ApiProperty({ enum: PaymentSource })
+  @IsEnum(PaymentSource)
+  public source: PaymentSource;
+
+  @ApiProperty({ enum: PaymentStatus })
+  @IsEnum(PaymentStatus)
+  public status: PaymentStatus;
+
+  @ApiProperty({
+    description:
+      'Transaction hash for crypto payments or Stripe payment ID for fiat payments',
+  })
+  @IsString()
+  @IsOptional()
+  public transaction?: string;
+
+  @ApiProperty({
+    name: 'escrow_address',
+    description: 'Escrow address associated with the payment (if applicable)',
+  })
+  @IsString()
+  @IsOptional()
+  public escrowAddress?: string;
+
+  @ApiProperty({
+    name: 'created_at',
+  })
+  @IsString()
+  public createdAt: string;
 }

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import BillingDetailsModal from '../../../components/BillingDetails/BillingDetailsModal';
 import AddCardModal from '../../../components/CreditCard/AddCardModal';
 import CardList from '../../../components/CreditCard/CardList';
+import { PaymentTable } from '../../../components/Payment/PaymentTable';
 import SuccessModal from '../../../components/SuccessModal';
 import { countryOptions, vatTypeOptions } from '../../../constants/payment';
 import { useSnackbar } from '../../../providers/SnackProvider';
@@ -22,6 +23,7 @@ const Settings = () => {
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
   const [isEditBillingOpen, setIsEditBillingOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [openBillingAfterAddCard, setOpenBillingAfterAddCard] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [cards, setCards] = useState<CardData[]>([]);
   const [billingInfo, setBillingInfo] = useState<BillingInfo>({
@@ -49,7 +51,7 @@ const Settings = () => {
   const fetchBillingInfo = async () => {
     try {
       const data = await getUserBillingInfo();
-      setBillingInfo(data);
+      setBillingInfo({ ...billingInfo, ...data });
     } catch (error) {
       showError('Error fetching billing info');
     }
@@ -82,50 +84,12 @@ const Settings = () => {
       </Box>
 
       <Grid container spacing={4} mb={11}>
-        {/* Payment Details card */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Grid container padding={3} spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <Box justifyContent="space-between" mb={4}>
-                    <Typography variant="h5" mb={1}>
-                      Payment Details
-                    </Typography>
-                    <Typography variant="body1" mb={4}>
-                      Manage your credit cards and payment options
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => setIsAddCardOpen(true)}
-                    >
-                      + Add Credit Card
-                    </Button>
-                  </Box>
-                </Grid>
-                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-                <Grid item xs={12} sm={7}>
-                  <Box sx={{ height: '300px', overflowY: 'auto' }}>
-                    <CardList
-                      cards={cards}
-                      fetchCards={fetchCards}
-                      successMessage={(message) => handleSuccessAction(message)}
-                      openAddCreditCardModal={setIsAddCardOpen}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-
         {/* Billing Info card */}
-        <Grid item xs={12} md={6}>
+        <Grid item md={12} lg={6}>
           <Card>
             <CardContent>
               <Grid container padding={3} spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item md={12} lg={4}>
                   <Box sx={{ height: '300px' }}>
                     <Typography variant="h5" mb={1}>
                       Billing Details
@@ -145,7 +109,7 @@ const Settings = () => {
                   </Box>
                 </Grid>
                 <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-                <Grid item xs={12} sm={7}>
+                <Grid item md={12} lg={6}>
                   <Typography variant="h6">Details</Typography>
                   <Typography>
                     Full Name / Company Name: {billingInfo?.name}
@@ -168,6 +132,64 @@ const Settings = () => {
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Payment Details card */}
+        <Grid item md={12} lg={6}>
+          <Card>
+            <CardContent>
+              <Grid container padding={3} spacing={2}>
+                <Grid item md={12} lg={4}>
+                  <Box justifyContent="space-between" mb={4}>
+                    <Typography variant="h5" mb={1}>
+                      Payment Details
+                    </Typography>
+                    <Typography variant="body1" mb={4}>
+                      Manage your credit cards and payment options
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setIsAddCardOpen(true)}
+                    >
+                      + Add Credit Card
+                    </Button>
+                  </Box>
+                </Grid>
+                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+                <Grid item md={12} lg={6}>
+                  <Box sx={{ height: '300px', overflowY: 'auto' }}>
+                    <CardList
+                      cards={cards}
+                      fetchCards={fetchCards}
+                      successMessage={(message) => handleSuccessAction(message)}
+                      openAddCreditCardModal={setIsAddCardOpen}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Box>
+                <Box
+                  sx={{
+                    mb: 6,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography variant="h4">Payments</Typography>
+                </Box>
+              </Box>
+              <PaymentTable rows={5} />
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
 
       <AddCardModal
@@ -176,6 +198,8 @@ const Settings = () => {
         onComplete={() => {
           handleSuccessAction('Your card has been successfully added.');
           fetchCards();
+          if (!billingInfo.name || !billingInfo.address)
+            setOpenBillingAfterAddCard(true);
         }}
       />
 
@@ -193,7 +217,10 @@ const Settings = () => {
 
       <SuccessModal
         open={isSuccessOpen}
-        onClose={() => setIsSuccessOpen(false)}
+        onClose={() => {
+          if (openBillingAfterAddCard) setIsEditBillingOpen(true);
+          setIsSuccessOpen(false);
+        }}
         message={successMessage}
       />
     </Box>

@@ -35,11 +35,13 @@ import {
   createFiatPayment,
   getFee,
   getOperatorAddress,
+  getUserBillingInfo,
   getUserCards,
 } from '../../../services/payment';
 import { useAppDispatch, useAppSelector } from '../../../state';
 import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
 import { CardData, JobType } from '../../../types';
+import BillingDetailsModal from '../../BillingDetails/BillingDetailsModal';
 
 export const FiatPayForm = ({
   onStart,
@@ -66,6 +68,8 @@ export const FiatPayForm = ({
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isBillingDetailsOpen, setIsBillingDetailsOpen] = useState(false);
+  const [openBillingAfterAddCard, setOpenBillingAfterAddCard] = useState(false);
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -75,8 +79,20 @@ export const FiatPayForm = ({
       setMinFee(fee);
     };
 
+    const fetchBillingInfo = async () => {
+      try {
+        const data = await getUserBillingInfo();
+        if (!data || !data.name || !data.address)
+          setOpenBillingAfterAddCard(true);
+      } catch {
+        setOpenBillingAfterAddCard(true);
+      }
+    };
+
     fetchJobLauncherData();
     fetchCards();
+    fetchBillingInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCards = async () => {
@@ -399,8 +415,35 @@ export const FiatPayForm = ({
         />
         <SuccessModal
           open={isSuccessOpen}
-          onClose={() => setIsSuccessOpen(false)}
+          onClose={() => {
+            if (openBillingAfterAddCard) {
+              setIsBillingDetailsOpen(true);
+            }
+            setIsSuccessOpen(false);
+          }}
           message={successMessage}
+        />
+
+        <BillingDetailsModal
+          open={isBillingDetailsOpen}
+          onClose={() => setIsBillingDetailsOpen(false)}
+          billingInfo={{
+            name: '',
+            email: '',
+            address: {
+              city: '',
+              country: '',
+              postalCode: '',
+              line: '',
+            },
+            vat: '',
+            vatType: '',
+          }}
+          setBillingInfo={(info) => {
+            handleSuccessAction(
+              'Your billing details have been successfully updated.',
+            );
+          }}
         />
       </Box>
     </Box>

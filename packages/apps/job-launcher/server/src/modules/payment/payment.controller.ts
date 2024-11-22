@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Patch,
   Delete,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -25,8 +26,10 @@ import {
   BillingInfoDto,
   BillingInfoUpdateDto,
   CardConfirmDto,
+  GetPaymentsDto,
   GetRateDto,
   PaymentCryptoCreateDto,
+  PaymentDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentMethodIdDto,
@@ -36,6 +39,7 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { RateService } from './rate.service';
+import { PageDto } from '../../common/pagination/pagination.dto';
 // import { WhitelistAuthGuard } from 'src/common/guards/whitelist.auth';
 
 @ApiBearerAuth()
@@ -349,5 +353,48 @@ export class PaymentController {
       req.user,
       data.paymentMethodId,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Get all payments',
+    description:
+      'Endpoint to retrieve all payments for the authenticated user.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payments retrieved successfully',
+    type: [PaymentDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @Get('/payments')
+  async getAllPayments(
+    @Query() data: GetPaymentsDto,
+    @Request() req: RequestWithUser,
+  ): Promise<PageDto<PaymentDto>> {
+    return this.paymentService.getAllPayments(data, req.user.id);
+  }
+
+  @ApiOperation({
+    summary: 'Get receipt for a payment',
+    description: 'Endpoint to retrieve the receipt for a specific payment.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Receipt retrieved successfully',
+    type: String,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested payment or receipt.',
+  })
+  @Get('/receipt/:paymentId')
+  async getReceipt(
+    @Param('paymentId') paymentId: string,
+    @Request() req: RequestWithUser,
+  ) {
+    return this.paymentService.getReceipt(paymentId, req.user);
   }
 }

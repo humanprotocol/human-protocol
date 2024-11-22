@@ -88,6 +88,7 @@ export enum ErrorToken {
  */
 export enum ErrorPayment {
   NotFound = 'Payment not found',
+  InvoiceNotFound = 'Invoice not found',
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
   CardNotAssigned = 'Card not assigned',
@@ -96,6 +97,7 @@ export enum ErrorPayment {
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
   PaymentMethodInUse = 'Cannot delete the default payment method in use',
+  PaymentMethodAssociationFailed = 'Payment method association failed',
   IncorrectAmount = 'Incorrect amount',
   TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',

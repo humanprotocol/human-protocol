@@ -76,12 +76,6 @@ export const getOperatorAddress = async () => {
   return data;
 };
 
-export const checkUserCard = async () => {
-  const { data } = await api.get('/payment/fiat/check-card');
-
-  return data;
-};
-
 export const getUserCards = async () => {
   const { data } = await api.get('/payment/fiat/cards');
   return data;
@@ -102,4 +96,21 @@ export const getUserBillingInfo = async () => {
 
 export const editUserBillingInfo = async (body: BillingInfo) => {
   await api.patch('/payment/fiat/billing-info', body);
+};
+
+export const getPayments = async ({
+  page,
+  pageSize,
+}: {
+  page?: number;
+  pageSize?: number;
+}) => {
+  const queryString = `page=${page}&page_size=${pageSize}&sort=desc&sort_field=created_at`;
+  const { data } = await api.get(`/payment/payments?${queryString}`);
+  return data;
+};
+
+export const getReceipt = async (paymentId: string) => {
+  const response = await api.get(`/payment/receipt/${paymentId}`);
+  return response.data;
 };

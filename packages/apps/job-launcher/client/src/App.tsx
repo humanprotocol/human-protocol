@@ -9,6 +9,7 @@ import JobDetail from './pages/Job/JobDetail';
 import JobList from './pages/Job/JobList';
 import Settings from './pages/Profile/Settings';
 import TopUpAccount from './pages/Profile/TopUpAccount';
+import Transactions from './pages/Profile/Transactions';
 import ResetPassword from './pages/ResetPassword';
 import ValidateEmail from './pages/ValidateEmail';
 import VerifyEmail from './pages/VerifyEmail';
@@ -62,6 +63,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <TopUpAccount />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/transactions"
+            element={
+              <ProtectedRoute>
+                <Transactions />
               </ProtectedRoute>
             }
           />
