@@ -258,6 +258,9 @@ class CoreConfig:
     min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
     "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
+    polygons_iou_threshold = float(os.environ.get("POLYGONS_IOU_THRESHOLD", 0.5))
+    "`iou_threshold` parameter for quality settings in polygons tasks"
+
 
 class HumanAppConfig:
     # jwt_public_key is obtained from the Human App.

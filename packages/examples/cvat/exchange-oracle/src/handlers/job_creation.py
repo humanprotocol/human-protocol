@@ -550,6 +550,12 @@ class PointsTaskBuilder(SimpleTaskBuilder):
         return super().build()
 
 
+class PolygonTaskBuilder(SimpleTaskBuilder):
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        values = {"iou_threshold": Config.core_config.polygons_iou_threshold, **overrides}
+        super()._setup_quality_settings(task_id, **values)
+
+
 class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
     def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
@@ -2836,12 +2842,10 @@ def create_task(escrow_address: str, chain_id: int) -> None:
 
     manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
 
-    if manifest.annotation.type in [
-        TaskTypes.image_boxes,
-        TaskTypes.image_label_binary,
-        TaskTypes.image_polygons,
-    ]:
+    if manifest.annotation.type in [TaskTypes.image_boxes, TaskTypes.image_label_binary]:
         builder_type = SimpleTaskBuilder
+    elif manifest.annotation.type is TaskTypes.image_polygons:
+        builder_type = PolygonTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_points]:
         builder_type = PointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
