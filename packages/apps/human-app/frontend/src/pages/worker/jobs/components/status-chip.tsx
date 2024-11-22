@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { type MyJob } from '@/api/services/worker/my-jobs-data';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
-import { getChipStatusColor } from '@/shared/helpers/get-chip-status-color';
+import { getChipStatusColor } from '@/pages/worker/jobs/helpers/get-chip-status-color';
 import { useColorMode } from '@/hooks/use-color-mode';
 
 export function StatusChip({ status }: { status: MyJob['status'] }) {

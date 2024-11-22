@@ -18,7 +18,7 @@ export enum MyJobStatus {
   REJECTED = 'REJECTED',
 }
 
-const UNKNOWN_JOB_STATUS = 'UNKNOWN';
+export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
 
 const myJobSchema = z.object({
   assignment_id: z.string(),
