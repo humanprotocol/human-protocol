@@ -106,12 +106,12 @@ export const NETWORKS: {
     scanUrl: 'https://testnet.bscscan.com',
     factoryAddress: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
     hmtAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
-    stakingAddress: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
+    stakingAddress: '0xD6D347ba6987519B4e42EcED43dF98eFf5465a23',
     kvstoreAddress: '0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmdq449rn4WKDf7NLvRZgt7CedZRrvpDzPqcvSmhvuu16D',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZ5fFGPrDSQBfvZHAVQbkaPAgymcCmbhTVk7iuqHXY72P',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',

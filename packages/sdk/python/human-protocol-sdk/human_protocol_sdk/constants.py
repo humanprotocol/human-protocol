@@ -104,11 +104,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmdq449rn4WKDf7NLvRZgt7CedZRrvpDzPqcvSmhvuu16D"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZ5fFGPrDSQBfvZHAVQbkaPAgymcCmbhTVk7iuqHXY72P"
         ),
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
-        "staking_address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
+        "staking_address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
         "kvstore_address": "0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF",
         "old_subgraph_url": (
             "https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest"

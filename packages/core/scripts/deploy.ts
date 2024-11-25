@@ -14,15 +14,11 @@ async function main() {
     'HMT'
   );
   await HMTokenContract.waitForDeployment();
-  console.log('HMToken Address: ', await HMTokenContract.getAddress());
+  const hmtAddress = await HMTokenContract.getAddress();
+  console.log('HMToken Address: ', hmtAddress);
 
   const Staking = await ethers.getContractFactory('Staking');
-  const stakingContract = await Staking.deploy(
-    '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
-    1,
-    1000,
-    1
-  );
+  const stakingContract = await Staking.deploy(hmtAddress, 1, 1000, 1);
 
   await stakingContract.waitForDeployment();
   console.log('Staking Address: ', await stakingContract.getAddress());
