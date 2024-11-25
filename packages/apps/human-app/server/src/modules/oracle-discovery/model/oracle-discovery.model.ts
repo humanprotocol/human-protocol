@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
 import { Exclude, Transform } from 'class-transformer';
 
-export class OracleDiscoveryResponse implements IOperator {
+export class OracleDiscoveryResult implements IOperator {
   @ApiProperty({ description: 'Address of the oracle operator' })
   address: string;
 
@@ -54,19 +54,6 @@ export class OracleDiscoveryResponse implements IOperator {
     this.registrationNeeded = registrationNeeded;
     this.registrationInstructions = registrationInstructions;
   }
-}
-
-export class OracleDiscoveryResponseDto {
-  @ApiProperty({
-    type: [OracleDiscoveryResponse],
-    description: 'List of discovered oracles',
-  })
-  oracles: OracleDiscoveryResponse[];
-  @ApiProperty({
-    type: [String],
-    description: 'Chain ids where oracles haven been discovered',
-  })
-  chainIdsEnabled: string[];
 }
 export class OracleDiscoveryDto {
   @ApiPropertyOptional({ type: [String] })

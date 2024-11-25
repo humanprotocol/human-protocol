@@ -11,7 +11,7 @@ import {
 } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../../common/constants/cache';
 import { JobStatus } from '../../../common/enums/global-common';
-import { OracleDiscoveryResponse } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
+import { OracleDiscoveryResult } from '../../../modules/oracle-discovery/model/oracle-discovery.model';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { generateOracleDiscoveryResponseBody } from '../../../modules/oracle-discovery/spec/oracle-discovery.fixture';
 
@@ -157,7 +157,7 @@ describe('CronJobService', () => {
         password: configServiceMock.password,
       });
       expect(updateJobsListCacheSpy).toHaveBeenCalledWith(
-        oraclesDiscovery.oracles[0],
+        oraclesDiscovery[0],
         'Bearer token',
       );
     });
@@ -165,7 +165,7 @@ describe('CronJobService', () => {
 
   describe('updateJobsListCache', () => {
     it('should fetch all jobs and update the cache', async () => {
-      const oracle: OracleDiscoveryResponse = {
+      const oracle: OracleDiscoveryResult = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
@@ -193,7 +193,7 @@ describe('CronJobService', () => {
     });
 
     it('should handle errors and call handleJobListError', async () => {
-      const oracle: OracleDiscoveryResponse = {
+      const oracle: OracleDiscoveryResult = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
@@ -219,7 +219,7 @@ describe('CronJobService', () => {
     });
 
     it('should reset retries count after successful job fetch', async () => {
-      const oracle: OracleDiscoveryResponse = {
+      const oracle: OracleDiscoveryResult = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
@@ -319,7 +319,7 @@ describe('CronJobService', () => {
 
   describe('updateOracleInCache', () => {
     it('should update oracle in cache', async () => {
-      const oracleData: OracleDiscoveryResponse = {
+      const oracleData: OracleDiscoveryResult = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
@@ -344,7 +344,7 @@ describe('CronJobService', () => {
 
   describe('handleJobListError', () => {
     it('should increment retries count and executions to skip but not exceed the limit', async () => {
-      const oracleData: OracleDiscoveryResponse = {
+      const oracleData: OracleDiscoveryResult = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',
@@ -364,7 +364,7 @@ describe('CronJobService', () => {
     });
 
     it('should increment retries count and executions to skip', async () => {
-      const oracleData: OracleDiscoveryResponse = {
+      const oracleData: OracleDiscoveryResult = {
         address: 'mockAddress1',
         role: 'validator',
         chainId: '137',

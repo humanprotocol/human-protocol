@@ -84,7 +84,7 @@ describe('OracleDiscoveryService', () => {
       jest
         .spyOn(cacheManager, 'get')
         .mockResolvedValueOnce(
-          generateOracleDiscoveryResponseBodyByChainId(chainId).oracles,
+          generateOracleDiscoveryResponseBodyByChainId(chainId),
         );
     });
 
@@ -113,7 +113,7 @@ describe('OracleDiscoveryService', () => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId);
       expect(cacheManager.set).toHaveBeenCalledWith(
         chainId,
-        generateOracleDiscoveryResponseBodyByChainId(chainId).oracles,
+        generateOracleDiscoveryResponseBodyByChainId(chainId),
         TTL,
       );
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(

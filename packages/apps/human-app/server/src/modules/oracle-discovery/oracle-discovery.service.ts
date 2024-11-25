@@ -1,8 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-  OracleDiscoveryResponseDto,
+  OracleDiscoveryResult,
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -20,7 +19,7 @@ export class OracleDiscoveryService {
 
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryResponseDto> {
+  ): Promise<OracleDiscoveryResult[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
     const oraclesForChainIds = await Promise.all(
@@ -29,10 +28,7 @@ export class OracleDiscoveryService {
       ),
     );
 
-    const response: OracleDiscoveryResponseDto = {
-      oracles: [],
-      chainIdsEnabled: this.configService.chainIdsEnabled,
-    };
+    const oracles: OracleDiscoveryResult[] = [];
     for (const oraclesForChainId of oraclesForChainIds) {
       for (const oracle of oraclesForChainId) {
         if (command.selectedJobTypes?.length) {
@@ -50,19 +46,19 @@ export class OracleDiscoveryService {
           }
         }
 
-        response.oracles.push(oracle);
+        oracles.push(oracle);
       }
     }
 
-    return response;
+    return oracles;
   }
 
   private async findOraclesByChainId(
     chainId: string,
     address: string,
-  ): Promise<OracleDiscoveryResponse[]> {
+  ): Promise<OracleDiscoveryResult[]> {
     try {
-      const cachedOracles: OracleDiscoveryResponse[] | undefined =
+      const cachedOracles: OracleDiscoveryResult[] | undefined =
         await this.cacheManager.get(chainId);
 
       if (cachedOracles) {
@@ -76,13 +72,13 @@ export class OracleDiscoveryService {
           Role.ExchangeOracle,
         );
 
-      const oraclesWithRetryData: OracleDiscoveryResponse[] = [];
+      const oraclesWithRetryData: OracleDiscoveryResult[] = [];
       for (const operator of operators) {
         const isOperatorValid = !!operator.url;
 
         if (isOperatorValid) {
           oraclesWithRetryData.push(
-            new OracleDiscoveryResponse(
+            new OracleDiscoveryResult(
               operator.address,
               chainId,
               operator.role,
