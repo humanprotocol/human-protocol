@@ -23,7 +23,7 @@ export function useWeb3SignUp() {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) =>
-      apiClient.fetcher(apiPaths.operator.web3Auth.signUp.path, {
+      apiClient(apiPaths.operator.web3Auth.signUp.path, {
         successSchema: web3SignInSuccessResponseSchema,
         options: {
           method: 'POST',

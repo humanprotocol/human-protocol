@@ -35,7 +35,7 @@ const getAvailableJobsTableData = async (
   dto: GetJobTableDataDto,
   abortSignal: AbortSignal
 ) => {
-  return apiClient.fetcher(
+  return apiClient(
     `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
     {
       authenticated: true,

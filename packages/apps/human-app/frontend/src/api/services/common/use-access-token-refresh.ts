@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '@/api/api-client';
 import { useAuth } from '@/auth/use-auth';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import type { AuthType } from '@/shared/types/browser-auth-provider';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
+import { refreshToken } from '@/api/fetcher';
 
 export function useAccessTokenRefresh() {
   const queryClient = useQueryClient();
@@ -30,7 +30,7 @@ export function useAccessTokenRefresh() {
       throwExpirationModalOnSignOut?: boolean;
     }) => {
       try {
-        const refetchAccessTokenSuccess = await apiClient.refreshToken();
+        const refetchAccessTokenSuccess = await refreshToken();
 
         if (!refetchAccessTokenSuccess) {
           throw new Error('Failed to refresh access token.');

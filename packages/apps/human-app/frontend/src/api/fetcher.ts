@@ -65,33 +65,33 @@ export type FetcherOptions<SuccessInput, SuccessOutput> =
 
 export type FetcherUrl = string | URL;
 
+let refreshPromise: Promise<SignInSuccessResponse | null> | null = null;
+
+export async function refreshToken(): Promise<{
+  access_token: string;
+  refresh_token: string;
+} | null> {
+  if (!refreshPromise) {
+    refreshPromise = fetchTokenRefresh(env.VITE_API_URL);
+  }
+
+  const result = await refreshPromise;
+
+  refreshPromise = null;
+
+  if (result) {
+    browserAuthProvider.signIn(result, browserAuthProvider.authType);
+  } else {
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+  }
+
+  return result;
+}
+
 export function createFetcher(defaultFetcherConfig?: {
   options?: RequestInit | (() => RequestInit);
   baseUrl: FetcherUrl | (() => FetcherUrl);
 }) {
-  let refreshPromise: Promise<SignInSuccessResponse | null> | null = null;
-
-  async function refreshToken(): Promise<{
-    access_token: string;
-    refresh_token: string;
-  } | null> {
-    if (!refreshPromise) {
-      refreshPromise = fetchTokenRefresh(env.VITE_API_URL);
-    }
-
-    const result = await refreshPromise;
-
-    refreshPromise = null;
-
-    if (result) {
-      browserAuthProvider.signIn(result, browserAuthProvider.authType);
-    } else {
-      browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
-    }
-
-    return result;
-  }
-
   async function fetcher<SuccessInput, SuccessOutput>(
     url: string | URL,
     fetcherOptions: FetcherOptionsWithValidation<SuccessInput, SuccessOutput>,
@@ -230,7 +230,7 @@ export function createFetcher(defaultFetcherConfig?: {
     }
   }
 
-  return { fetcher, refreshToken };
+  return fetcher;
 }
 
 export const isFetcherError = (error: ResponseError): error is FetchError =>

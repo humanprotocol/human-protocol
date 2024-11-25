@@ -4,7 +4,7 @@ import { apiPaths } from '../api-paths';
 import { testSchema } from './test.schema';
 
 function getTest() {
-  return apiClient.fetcher(apiPaths.test.path, {
+  return apiClient(apiPaths.test.path, {
     options: { method: 'GET' },
     successSchema: testSchema,
   });

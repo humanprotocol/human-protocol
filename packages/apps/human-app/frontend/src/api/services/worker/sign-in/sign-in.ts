@@ -8,7 +8,7 @@ import { type SignInDto } from './types';
 import { signInSuccessResponseSchema } from './schema';
 
 function signInMutationFn(data: SignInDto) {
-  return apiClient.fetcher(apiPaths.worker.signIn.path, {
+  return apiClient(apiPaths.worker.signIn.path, {
     successSchema: signInSuccessResponseSchema,
     options: {
       method: 'POST',

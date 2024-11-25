@@ -38,7 +38,7 @@ export type SignUpDto = z.infer<typeof signUpDtoSchema>;
 const signUpSuccessResponseSchema = z.unknown();
 
 async function signUpMutationFn(data: Omit<SignUpDto, 'confirmPassword'>) {
-  await apiClient.fetcher(apiPaths.worker.signUp.path, {
+  await apiClient(apiPaths.worker.signUp.path, {
     successSchema: signUpSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });

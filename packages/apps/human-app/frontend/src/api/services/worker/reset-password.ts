@@ -34,7 +34,7 @@ const ResetPasswordSuccessResponseSchema = z.unknown();
 function resetPasswordMutationFn(
   data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
 ) {
-  return apiClient.fetcher(apiPaths.worker.resetPassword.path, {
+  return apiClient(apiPaths.worker.resetPassword.path, {
     successSchema: ResetPasswordSuccessResponseSchema,
     options: { method: 'POST', body: JSON.stringify(data) },
   });

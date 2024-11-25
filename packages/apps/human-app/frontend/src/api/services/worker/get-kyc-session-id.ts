@@ -18,7 +18,7 @@ export function useKycStartMutation() {
   return useMutation({
     mutationFn: async () => {
       try {
-        const result = await apiClient.fetcher(apiPaths.worker.kycStart.path, {
+        const result = await apiClient(apiPaths.worker.kycStart.path, {
           successSchema: kycStartSchema,
           authenticated: true,
           withAuthRetry: apiPaths.worker.kycStart.withAuthRetry,

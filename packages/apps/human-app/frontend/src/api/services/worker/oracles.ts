@@ -42,7 +42,7 @@ export async function getOracles({
       ? `?${stringifyUrlQueryObject({ selected_job_types })}`
       : '';
 
-    const result = await apiClient.fetcher(
+    const result = await apiClient(
       `${apiPaths.worker.oracles.path}${queryParams}`,
       {
         successSchema: OraclesSuccessSchema,

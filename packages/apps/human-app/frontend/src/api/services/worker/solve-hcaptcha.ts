@@ -5,7 +5,7 @@ import { apiPaths } from '@/api/api-paths';
 import type { ResponseError } from '@/shared/types/global.type';
 
 function solveHCaptcha({ token }: { token: string }) {
-  return apiClient.fetcher(apiPaths.worker.verifyHCaptchaLabeling.path, {
+  return apiClient(apiPaths.worker.verifyHCaptchaLabeling.path, {
     successSchema: z.unknown(),
     authenticated: true,
     options: { method: 'POST', body: JSON.stringify({ token }) },

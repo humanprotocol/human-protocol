@@ -11,7 +11,7 @@ export function useDisableWeb3Operator() {
   const { updateUserData } = useWeb3AuthenticatedUser();
   return useMutation({
     mutationFn: async ({ signature }: { signature: string }) => {
-      const result = apiClient.fetcher(apiPaths.operator.disableOperator.path, {
+      const result = apiClient(apiPaths.operator.disableOperator.path, {
         skipValidation: true,
         authenticated: true,
         withAuthRetry: apiPaths.operator.disableOperator.withAuthRetry,

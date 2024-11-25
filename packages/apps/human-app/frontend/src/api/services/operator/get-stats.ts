@@ -36,15 +36,13 @@ export function useGetOperatorStats() {
       if (!keysData?.url) {
         return failedResponse;
       }
-      return apiClient
-        .fetcher(`/stats`, {
-          baseUrl: keysData.url,
-          successSchema: operatorStatsSuccessResponseSchema,
-          options: {
-            method: 'GET',
-          },
-        })
-        .catch(() => failedResponse);
+      return apiClient(`/stats`, {
+        baseUrl: keysData.url,
+        successSchema: operatorStatsSuccessResponseSchema,
+        options: {
+          method: 'GET',
+        },
+      }).catch(() => failedResponse);
     },
     // eslint-disable-next-line @tanstack/query/exhaustive-deps -- ...
     queryKey: ['getOperatorStats', keysData?.url],

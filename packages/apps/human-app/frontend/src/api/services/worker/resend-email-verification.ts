@@ -41,7 +41,7 @@ async function resendEmailVerificationMutationFn(
     throw new Error(t('worker.verifyEmail.authError'));
   }
 
-  return apiClient.fetcher(apiPaths.worker.resendEmailVerification.path, {
+  return apiClient(apiPaths.worker.resendEmailVerification.path, {
     authenticated: true,
     withAuthRetry: apiPaths.worker.resendEmailVerification.withAuthRetry,
     successSchema: ResendEmailVerificationSuccessResponseSchema,
