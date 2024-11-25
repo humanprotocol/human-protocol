@@ -600,10 +600,25 @@ describe('WebhookService', () => {
         .spyOn(escrowCompletionTrackingRepository, 'updateOne')
         .mockImplementationOnce(() => {
           throw new Error('Test error');
-        })
-        .mockResolvedValue(mockEntity2 as any);
+        }) // Fails for mockEntity1
+        .mockResolvedValue(mockEntity2 as any); // Succeeds for mockEntity2
+
+      const handleErrorMock = jest.spyOn(
+        escrowCompletionTrackingService,
+        'handleEscrowCompletionTrackingError',
+      );
 
       await webhookService.processPendingEscrowCompletion();
+
+      expect(handleErrorMock).toHaveBeenCalledWith(
+        mockEntity1,
+        expect.stringContaining(ErrorWebhook.PendingProcessingFailed),
+      );
+
+      // Ensure the second entity is processed successfully
+      expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalledWith(
+        mockEntity2,
+      );
     });
   });
 
