@@ -1,9 +1,9 @@
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
+  OracleDiscoveryResult,
 } from '../model/oracle-discovery.model';
 
-const response1: OracleDiscoveryResponse = {
+const response1: OracleDiscoveryResult = {
   address: '0xd06eac24a0c47c776Ce6826A93162c4AfC029047',
   chainId: '4200',
   role: 'role1',
@@ -14,7 +14,7 @@ const response1: OracleDiscoveryResponse = {
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
 };
-const response2: OracleDiscoveryResponse = {
+const response2: OracleDiscoveryResult = {
   address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
   chainId: '4200',
   role: 'role2',
@@ -24,7 +24,7 @@ const response2: OracleDiscoveryResponse = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response3: OracleDiscoveryResponse = {
+const response3: OracleDiscoveryResult = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: '4200',
   role: 'role3',
@@ -35,7 +35,7 @@ const response3: OracleDiscoveryResponse = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response4: OracleDiscoveryResponse = {
+const response4: OracleDiscoveryResult = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: '4201',
   role: 'role3',
@@ -56,26 +56,17 @@ export function generateGetReputationNetworkOperatorsResponseByChainId(
 }
 
 export function generateOracleDiscoveryResponseBodyByChainId(chainId: string) {
-  return {
-    oracles: [response1, response3, response4].filter(
-      (oracle) => oracle.chainId === chainId,
-    ),
-    chainIdsEnabled: ['4200', '4201'],
-  };
+  return [response1, response3, response4].filter(
+    (oracle) => oracle.chainId === chainId,
+  );
 }
 
 export function generateOracleDiscoveryResponseBody() {
-  return {
-    oracles: [response1, response3, response4],
-    chainIdsEnabled: ['4200', '4201'],
-  };
+  return [response1, response3, response4];
 }
 
 export function generateOracleDiscoveryResponseBodyByJobType() {
-  return {
-    oracles: [response3, response4],
-    chainIdsEnabled: ['4200', '4201'],
-  };
+  return [response3, response4];
 }
 
 export const filledCommandFixture = {
@@ -85,4 +76,4 @@ export const emptyCommandFixture = {
   selectedJobTypes: [],
 } as OracleDiscoveryCommand;
 export const notSetCommandFixture = {} as OracleDiscoveryCommand;
-export const errorResponse = { chainIdsEnabled: ['4200', '4201'], oracles: [] };
+export const errorResponse = [];
