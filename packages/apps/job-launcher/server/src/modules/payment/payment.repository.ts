@@ -1,7 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { PaymentSortField, PaymentStatus } from '../../common/enums/payment';
+import { PaymentStatus } from '../../common/enums/payment';
 import { BaseRepository } from '../../database/base.repository';
 import { PaymentEntity } from './payment.entity';
 import { ListResult } from '../payment/payment.interface';

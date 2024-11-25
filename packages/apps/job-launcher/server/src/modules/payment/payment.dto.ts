@@ -19,7 +19,7 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import { Country } from '../../common/enums/job';
-import { PageOptionsDto } from 'src/common/pagination/pagination.dto';
+import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 
 export class PaymentFiatConfirmDto {
   @ApiProperty({ name: 'payment_id' })
