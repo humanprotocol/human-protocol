@@ -1,10 +1,10 @@
 import merge from 'lodash/merge';
 import { ZodError, type ZodType, type ZodTypeDef } from 'zod';
 import type { ResponseError } from '@/shared/types/global.type';
-import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
-import { fetchTokenRefresh } from './fetch-refresh-token';
 import { env } from '@/shared/env';
+import { type SignInSuccessResponse } from '@/api/services/worker/sign-in/types';
+import { fetchTokenRefresh } from './fetch-refresh-token';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,

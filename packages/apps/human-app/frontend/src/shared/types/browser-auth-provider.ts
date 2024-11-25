@@ -1,4 +1,4 @@
-import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
+import type { SignInSuccessResponse } from '@/api/services/worker/sign-in/sign-in';
 import type { Web3UserData } from '@/auth-web3/web3-auth-context';
 import type { UserData } from '@/auth/auth-context';
 
