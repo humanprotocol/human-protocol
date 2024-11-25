@@ -133,7 +133,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/1 * * * *')
+  @Cron('*/2 * * * *')
   /**
    * Processes paid escrow completion tracking, finalizing escrow operations if completed.
    * Notifies oracles via callbacks, logs errors, and updates tracking status.
