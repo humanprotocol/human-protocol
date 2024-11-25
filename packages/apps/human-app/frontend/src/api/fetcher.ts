@@ -4,6 +4,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import { fetchTokenRefresh } from './fetch-refresh-token';
+import { env } from '@/shared/env';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,
@@ -74,17 +75,14 @@ export function createFetcher(defaultFetcherConfig?: {
     { access_token: string; refresh_token: string } | null | undefined
   > {
     if (!refreshPromise) {
-      try {
-        refreshPromise = fetchTokenRefresh();
-      } catch (error) {
-        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
-        refreshPromise = null;
-      } finally {
-        refreshPromise = null;
-      }
+      refreshPromise = fetchTokenRefresh(env.VITE_API_URL);
     }
 
-    return refreshPromise;
+    const result = await refreshPromise;
+
+    refreshPromise = null;
+
+    return result;
   }
 
   async function fetcher<SuccessInput, SuccessOutput>(
@@ -171,12 +169,8 @@ export function createFetcher(defaultFetcherConfig?: {
     ) {
       const refetchAccessTokenSuccess = await refreshToken();
 
-      if (!refetchAccessTokenSuccess) {
-        return;
-      }
-
       const newHeaders = appendHeader(fetcherOptionsWithDefaults, {
-        Authorization: `Bearer ${refetchAccessTokenSuccess.access_token}`,
+        Authorization: `Bearer ${refetchAccessTokenSuccess?.access_token}`,
       });
       response = await fetch(fetcherUrl, newHeaders);
 

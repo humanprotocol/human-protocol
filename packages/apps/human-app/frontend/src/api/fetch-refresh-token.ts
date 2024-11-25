@@ -2,17 +2,20 @@ import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
 import { apiPaths } from '@/api/api-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 
-export const fetchTokenRefresh = async () => {
-  const response = await fetch(apiPaths.worker.obtainAccessToken.path, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      // eslint-disable-next-line camelcase -- camel case defined by api
-      refresh_token: browserAuthProvider.getRefreshToken(),
-    }),
-  });
+export const fetchTokenRefresh = async (baseUrl: string) => {
+  const response = await fetch(
+    `${baseUrl}${apiPaths.worker.obtainAccessToken.path}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        // eslint-disable-next-line camelcase -- camel case defined by api
+        refresh_token: browserAuthProvider.getRefreshToken(),
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error('Failed to refresh token');
