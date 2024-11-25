@@ -42,6 +42,7 @@
     "react-imask": "^7.4.0",
     "react-number-format": "^5.3.4",
     "react-router-dom": "^6.22.0",
+    "viem": "^2.21.44",
     "vite-plugin-svgr": "^4.2.0",
     "wagmi": "2.12.29",
     "zod": "^3.22.4",
