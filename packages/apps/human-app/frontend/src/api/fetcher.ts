@@ -69,11 +69,12 @@ export function createFetcher(defaultFetcherConfig?: {
   options?: RequestInit | (() => RequestInit);
   baseUrl: FetcherUrl | (() => FetcherUrl);
 }) {
-  let refreshPromise: Promise<SignInSuccessResponse | undefined> | null = null;
+  let refreshPromise: Promise<SignInSuccessResponse | null> | null = null;
 
-  async function refreshToken(): Promise<
-    { access_token: string; refresh_token: string } | null | undefined
-  > {
+  async function refreshToken(): Promise<{
+    access_token: string;
+    refresh_token: string;
+  } | null> {
     if (!refreshPromise) {
       refreshPromise = fetchTokenRefresh(env.VITE_API_URL);
     }
@@ -81,6 +82,12 @@ export function createFetcher(defaultFetcherConfig?: {
     const result = await refreshPromise;
 
     refreshPromise = null;
+
+    if (result) {
+      browserAuthProvider.signIn(result, browserAuthProvider.authType);
+    } else {
+      browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+    }
 
     return result;
   }
@@ -169,9 +176,14 @@ export function createFetcher(defaultFetcherConfig?: {
     ) {
       const refetchAccessTokenSuccess = await refreshToken();
 
+      if (!refetchAccessTokenSuccess) {
+        return;
+      }
+
       const newHeaders = appendHeader(fetcherOptionsWithDefaults, {
-        Authorization: `Bearer ${refetchAccessTokenSuccess?.access_token}`,
+        Authorization: `Bearer ${refetchAccessTokenSuccess.access_token}`,
       });
+
       response = await fetch(fetcherUrl, newHeaders);
 
       if (!response.ok) {

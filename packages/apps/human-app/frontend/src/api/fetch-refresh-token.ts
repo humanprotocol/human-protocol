@@ -18,17 +18,12 @@ export const fetchTokenRefresh = async (baseUrl: string) => {
   );
 
   if (!response.ok) {
-    throw new Error('Failed to refresh token');
+    return null;
   }
 
   const data: unknown = await response.json();
 
   const refetchAccessTokenSuccess = signInSuccessResponseSchema.parse(data);
-
-  browserAuthProvider.signIn(
-    refetchAccessTokenSuccess,
-    browserAuthProvider.authType
-  );
 
   return refetchAccessTokenSuccess;
 };
