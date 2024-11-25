@@ -1,31 +1,13 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import * as crypto from 'crypto';
-import stringify from 'json-stable-stringify';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
+import { ErrorCronJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { WebhookService } from '../webhook/webhook.service';
-import {
-  EscrowCompletionTrackingStatus,
-  EventType,
-  WebhookIncomingStatus,
-  WebhookOutgoingStatus,
-} from '../../common/enums/webhook';
-import { PayoutService } from '../payout/payout.service';
-import { ReputationService } from '../reputation/reputation.service';
-import { Web3Service } from '../web3/web3.service';
-import { EscrowClient, EscrowStatus, OperatorUtils } from '@human-protocol/sdk';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
-import { WebhookIncomingRepository } from '../webhook/webhook-incoming.repository';
-import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
-import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
-import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
-import { isDuplicatedError } from '../../common/utils/database';
 
 @Injectable()
 export class CronJobService {
@@ -34,13 +16,6 @@ export class CronJobService {
   constructor(
     private readonly cronJobRepository: CronJobRepository,
     private readonly webhookService: WebhookService,
-    private readonly escrowCompletionTrackingService: EscrowCompletionTrackingService,
-    private readonly reputationService: ReputationService,
-    private readonly webhookIncomingRepository: WebhookIncomingRepository,
-    private readonly webhookOutgoingRepository: WebhookOutgoingRepository,
-    private readonly escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository,
-    private readonly payoutService: PayoutService,
-    private readonly web3Service: Web3Service,
   ) {}
 
   /**
@@ -118,45 +93,7 @@ export class CronJobService {
     );
 
     try {
-      const webhookEntities = await this.webhookIncomingRepository.findByStatus(
-        WebhookIncomingStatus.PENDING,
-      );
-
-      for (const webhookEntity of webhookEntities) {
-        try {
-          const { chainId, escrowAddress } = webhookEntity;
-
-          await this.escrowCompletionTrackingService.createEscrowCompletionTracking(
-            chainId,
-            escrowAddress,
-          );
-
-          webhookEntity.status = WebhookIncomingStatus.COMPLETED;
-          await this.webhookIncomingRepository.updateOne(webhookEntity);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-
-          if (isDuplicatedError(err)) {
-            // Handle duplicated error: log and mark as completed
-            this.logger.warn(
-              `Duplicate tracking entity for escrowAddress: ${webhookEntity.escrowAddress}. Marking webhook as completed.`,
-            );
-            webhookEntity.status = WebhookIncomingStatus.COMPLETED;
-            await this.webhookIncomingRepository.updateOne(webhookEntity);
-          } else {
-            // Handle other errors (general failure)
-            this.logger.error(
-              `Error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
-            );
-            await this.webhookService.handleWebhookIncomingError(
-              webhookEntity,
-              failureDetail,
-            );
-          }
-          continue;
-        }
-      }
+      await this.webhookService.processPendingIncomingWebhooks();
     } catch (e) {
       this.logger.error(e);
     }
@@ -167,7 +104,7 @@ export class CronJobService {
 
   @Cron('*/2 * * * *')
   /**
-   * Processes pending escrow completion tracking webhooks to manage escrow lifecycle actions.
+   * Processes pending escrow completion tracking to manage escrow lifecycle actions.
    * Checks escrow status and, if appropriate, saves results and initiates payouts.
    * Handles errors and logs detailed messages.
    * @returns {Promise<void>} A promise that resolves when the operation is complete.
@@ -187,61 +124,7 @@ export class CronJobService {
     );
 
     try {
-      const escrowCompletionTrackingEntities =
-        await this.escrowCompletionTrackingRepository.findByStatus(
-          EscrowCompletionTrackingStatus.PENDING,
-        );
-
-      for (const escrowCompletionTrackingEntity of escrowCompletionTrackingEntities) {
-        try {
-          const signer = this.web3Service.getSigner(
-            escrowCompletionTrackingEntity.chainId,
-          );
-          const escrowClient = await EscrowClient.build(signer);
-
-          const escrowStatus = await escrowClient.getStatus(
-            escrowCompletionTrackingEntity.escrowAddress,
-          );
-          if (escrowStatus === EscrowStatus.Pending) {
-            if (!escrowCompletionTrackingEntity.finalResultsUrl) {
-              const { url, hash } = await this.payoutService.saveResults(
-                escrowCompletionTrackingEntity.chainId,
-                escrowCompletionTrackingEntity.escrowAddress,
-              );
-
-              escrowCompletionTrackingEntity.finalResultsUrl = url;
-              escrowCompletionTrackingEntity.finalResultsHash = hash;
-              await this.escrowCompletionTrackingRepository.updateOne(
-                escrowCompletionTrackingEntity,
-              );
-            }
-
-            await this.payoutService.executePayouts(
-              escrowCompletionTrackingEntity.chainId,
-              escrowCompletionTrackingEntity.escrowAddress,
-              escrowCompletionTrackingEntity.finalResultsUrl,
-              escrowCompletionTrackingEntity.finalResultsHash,
-            );
-          }
-
-          escrowCompletionTrackingEntity.status =
-            EscrowCompletionTrackingStatus.PAID;
-          await this.escrowCompletionTrackingRepository.updateOne(
-            escrowCompletionTrackingEntity,
-          );
-        } catch (err) {
-          const errorId = uuidv4();
-          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
-          );
-          await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
-            escrowCompletionTrackingEntity,
-            failureDetail,
-          );
-          continue;
-        }
-      }
+      await this.webhookService.processPendingEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }
@@ -250,9 +133,9 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
+  @Cron('*/1 * * * *')
   /**
-   * Processes paid escrow completion tracking webhooks, finalizing escrow operations if completed.
+   * Processes paid escrow completion tracking, finalizing escrow operations if completed.
    * Notifies oracles via callbacks, logs errors, and updates tracking status.
    * @returns {Promise<void>} A promise that resolves when the paid escrow tracking has been processed.
    */
@@ -271,130 +154,12 @@ export class CronJobService {
     );
 
     try {
-      const escrowCompletionTrackingEntities =
-        await this.escrowCompletionTrackingRepository.findByStatus(
-          EscrowCompletionTrackingStatus.PAID,
-        );
-
-      // TODO: Add DB transactions
-      for (const escrowCompletionTrackingEntity of escrowCompletionTrackingEntities) {
-        try {
-          const { chainId, escrowAddress } = escrowCompletionTrackingEntity;
-
-          const signer = this.web3Service.getSigner(chainId);
-          const escrowClient = await EscrowClient.build(signer);
-
-          const escrowStatus = await escrowClient.getStatus(escrowAddress);
-          if (escrowStatus === EscrowStatus.Paid) {
-            await escrowClient.complete(escrowAddress, {
-              gasPrice: await this.web3Service.calculateGasPrice(chainId),
-            });
-
-            // TODO: Technically it's possible that the escrow completion could occur before the reputation scores are assessed,
-            // and the app might go down during this window. Currently, there isn’t a clear approach to handle this situation.
-            // Consider revisiting this section to explore potential solutions to improve resilience in such scenarios.
-            await this.reputationService.assessReputationScores(
-              chainId,
-              escrowAddress,
-            );
-          }
-
-          const callbackUrls = [
-            (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getJobLauncherAddress(escrowAddress),
-              )
-            ).webhookUrl,
-            (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getExchangeOracleAddress(escrowAddress),
-              )
-            ).webhookUrl,
-            // Temporarily disable sending webhook to Recording Oracle
-            // (
-            //   await OperatorUtils.getLeader(
-            //     chainId,
-            //     await escrowClient.getRecordingOracleAddress(escrowAddress),
-            //   )
-            // ).webhookUrl,
-          ];
-
-          let allWebhooksCreated = true;
-
-          for (const url of callbackUrls) {
-            if (!url) {
-              throw new ControlledError(
-                ErrorWebhook.UrlNotFound,
-                HttpStatus.NOT_FOUND,
-              );
-            }
-
-            const payload = {
-              chainId,
-              escrowAddress,
-              eventType: EventType.ESCROW_COMPLETED,
-            };
-
-            const hash = crypto
-              .createHash('sha1')
-              .update(stringify({ payload, url }))
-              .digest('hex');
-
-            try {
-              await this.webhookService.createOutgoingWebhook(
-                payload,
-                hash,
-                url,
-              );
-            } catch (err) {
-              if (isDuplicatedError(err)) {
-                this.logger.warn(
-                  `Duplicate outgoing webhook for escrowAddress: ${escrowAddress}. Webhook creation skipped, but will not complete escrow until all URLs are successful.`,
-                );
-                continue;
-              } else {
-                const errorId = uuidv4();
-                const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-                this.logger.error(
-                  `Error creating outgoing webhook. Error ID: ${errorId}, Escrow Address: ${escrowAddress}, Reason: ${failureDetail}, Message: ${err.message}`,
-                );
-                await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
-                  escrowCompletionTrackingEntity,
-                  failureDetail,
-                );
-                allWebhooksCreated = false;
-                break;
-              }
-            }
-          }
-
-          // Only set the status to COMPLETED if all webhooks were created successfully
-          if (allWebhooksCreated) {
-            escrowCompletionTrackingEntity.status =
-              EscrowCompletionTrackingStatus.COMPLETED;
-            await this.escrowCompletionTrackingRepository.updateOne(
-              escrowCompletionTrackingEntity,
-            );
-          }
-        } catch (err) {
-          const errorId = uuidv4();
-          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
-          );
-          await this.escrowCompletionTrackingService.handleEscrowCompletionTrackingError(
-            escrowCompletionTrackingEntity,
-            failureDetail,
-          );
-        }
-      }
+      await this.webhookService.processPaidEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }
 
-    this.logger.log('Pending escrow completion tracking STOP');
+    this.logger.log('Paid escrow completion tracking STOP');
     await this.completeCronJob(cronJob);
   }
 
@@ -405,13 +170,8 @@ export class CronJobService {
    * @returns {Promise<void>} A promise that resolves once all pending outgoing webhooks have been processed.
    */
   public async processPendingOutgoingWebhooks(): Promise<void> {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.ProcessPendingOutgoingWebhook,
-    );
-
-    if (isCronJobRunning) {
+    if (await this.isCronJobRunning(CronJobType.ProcessPendingOutgoingWebhook))
       return;
-    }
 
     this.logger.log('Pending outgoing webhooks START');
     const cronJob = await this.startCronJob(
@@ -419,32 +179,9 @@ export class CronJobService {
     );
 
     try {
-      const webhookEntities = await this.webhookOutgoingRepository.findByStatus(
-        WebhookOutgoingStatus.PENDING,
-      );
-
-      for (const webhookEntity of webhookEntities) {
-        try {
-          const { url, payload } = webhookEntity;
-
-          await this.webhookService.sendWebhook(url, payload);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error processing pending outgoing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
-          );
-          await this.webhookService.handleWebhookOutgoingError(
-            webhookEntity,
-            failureDetail,
-          );
-          continue;
-        }
-        webhookEntity.status = WebhookOutgoingStatus.SENT;
-        await this.webhookOutgoingRepository.updateOne(webhookEntity);
-      }
-    } catch (e) {
-      this.logger.error(e);
+      await this.webhookService.processPendingOutgoingWebhooks();
+    } catch (err) {
+      this.logger.error(err);
     }
 
     this.logger.log('Pending outgoing webhooks STOP');

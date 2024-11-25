@@ -106,7 +106,7 @@ describe('PayoutService', () => {
     jest.resetAllMocks();
   });
 
-  describe('saveResults', () => {
+  describe('processResults', () => {
     const results: SaveResultDto = {
       url: MOCK_FILE_URL,
       hash: MOCK_FILE_HASH,
@@ -149,7 +149,7 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const result = await payoutService.saveResults(chainId, escrowAddress);
+      const result = await payoutService.processResults(chainId, escrowAddress);
       expect(result).toEqual(results);
     });
 
@@ -178,7 +178,7 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      const result = await payoutService.saveResults(chainId, escrowAddress);
+      const result = await payoutService.processResults(chainId, escrowAddress);
       expect(result).toEqual(results);
     });
 
@@ -191,7 +191,7 @@ describe('PayoutService', () => {
       const chainId = ChainId.LOCALHOST;
 
       await expect(
-        payoutService.saveResults(chainId, escrowAddress),
+        payoutService.processResults(chainId, escrowAddress),
       ).rejects.toThrow(
         new ControlledError(
           ErrorManifest.ManifestUrlDoesNotExist,
@@ -303,12 +303,30 @@ describe('PayoutService', () => {
       const chainId = ChainId.LOCALHOST;
 
       await expect(
-        payoutService.saveResults(chainId, escrowAddress),
+        payoutService.processResults(chainId, escrowAddress),
       ).rejects.toThrow(
         new ControlledError(
           ErrorManifest.ManifestUrlDoesNotExist,
           HttpStatus.BAD_REQUEST,
         ),
+      );
+    });
+
+    it('should throw an error for unsupported request types', async () => {
+      const mockManifest = { requestType: 'unsupportedType' };
+
+      jest.spyOn(EscrowClient, 'build').mockResolvedValue({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      } as any);
+
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(mockManifest);
+
+      await expect(
+        payoutService.processResults(ChainId.LOCALHOST, MOCK_ADDRESS),
+      ).rejects.toThrow(
+        `Unsupported request type: ${mockManifest.requestType.toLowerCase()}`,
       );
     });
   });
