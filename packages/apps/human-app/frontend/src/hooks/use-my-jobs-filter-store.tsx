@@ -1,17 +1,7 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-
-export const jobStatuses = [
-  'active',
-  'completed',
-  'canceled',
-  'validation',
-  'expired',
-  'rejected',
-] as const;
-
-type JobStatus = (typeof jobStatuses)[number];
+import { type MyJobStatus } from '@/api/services/worker/my-jobs-data';
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
@@ -23,7 +13,7 @@ export interface MyJobsFilterStoreProps {
       | 'expires_at'
       | 'created_at';
     job_type?: string;
-    status?: JobStatus;
+    status?: MyJobStatus;
     escrow_address?: string;
     page: number;
     page_size: PageSize;

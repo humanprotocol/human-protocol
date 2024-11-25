@@ -8,7 +8,6 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from 'material-react-table';
-import { Box, Typography } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { TableHeaderCell } from '@/components/ui/table/table-header-cell';
 import {
@@ -29,10 +28,10 @@ import { MyJobsExpiresAtSort } from '@/pages/worker/jobs/components/my-jobs/desk
 import { MyJobsNetworkFilter } from '@/pages/worker/jobs/components/my-jobs/desktop/my-jobs-network-filter';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { createTableDarkMode } from '@/styles/create-table-dark-mode';
-import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
+import { StatusChip } from '@/pages/worker/jobs/components/status-chip';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 const getColumnsDefinition = ({
@@ -146,23 +145,7 @@ const getColumnsDefinition = ({
     enableSorting: true,
     Cell: (props) => {
       const status = props.row.original.status;
-      return (
-        <Box
-          sx={{
-            display: 'inline-flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '6px 9px',
-            color: lightModeColorPalette.white,
-            backgroundColor: '#5D0CE9',
-            borderRadius: '16px',
-          }}
-        >
-          <Typography color={lightModeColorPalette.white} variant="chip">
-            {status}
-          </Typography>
-        </Box>
-      );
+      return <StatusChip status={status} />;
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {

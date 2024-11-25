@@ -23,6 +23,7 @@ import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 import { colorPalette as lightModeColorPalette } from '@/styles/color-palette';
 import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
+import { getChipStatusColor } from '@/pages/worker/jobs/helpers/get-chip-status-color';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableMobileProps {
@@ -170,7 +171,10 @@ export function MyJobsTableMobile({
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>
                       <Chip
-                        backgroundColor={colorPalette.secondary.main}
+                        backgroundColor={getChipStatusColor(
+                          d.status,
+                          colorPalette
+                        )}
                         label={
                           <Typography
                             color={lightModeColorPalette.white}
