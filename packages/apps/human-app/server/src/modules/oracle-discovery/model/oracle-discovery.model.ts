@@ -1,4 +1,4 @@
-import { IOperator } from '@human-protocol/sdk';
+import { ChainId, IOperator } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
@@ -9,7 +9,7 @@ export class OracleDiscoveryResult implements IOperator {
   address: string;
 
   @ApiProperty({ description: 'Chain ID where the oracle is registered' })
-  chainId: string;
+  chainId: ChainId;
 
   @ApiPropertyOptional({ description: 'Role of the oracle operator' })
   role?: string;
@@ -39,7 +39,7 @@ export class OracleDiscoveryResult implements IOperator {
 
   constructor(
     address: string,
-    chainId: string,
+    chainId: ChainId,
     role?: string,
     url?: string,
     jobTypes?: string[],

@@ -15,6 +15,7 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ChainId } from '@human-protocol/sdk';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
@@ -23,7 +24,7 @@ describe('OracleDiscoveryController', () => {
     email: 'human-app@hmt.ai',
     password: 'Test1234*',
     cacheTtlOracleDiscovery: 600,
-    chainIdsEnabled: ['137', '1'],
+    chainIdsEnabled: [ChainId.POLYGON, ChainId.MAINNET],
     jobsDiscoveryFlag: true,
   };
 

@@ -5,8 +5,9 @@ import {
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
+import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
 
 @Injectable()
 export class OracleDiscoveryService {
@@ -15,6 +16,7 @@ export class OracleDiscoveryService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
+    private kvStoreGateway: KvStoreGateway,
   ) {}
 
   async processOracleDiscovery(
@@ -22,10 +24,18 @@ export class OracleDiscoveryService {
   ): Promise<OracleDiscoveryResult[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
+
     const oraclesForChainIds = await Promise.all(
-      chainIds.map(async (chainId) =>
-        this.findOraclesByChainId(chainId, address),
-      ),
+      chainIds.map(async (chainId) => {
+        const jobTypes = (
+          (await this.kvStoreGateway.getJobTypesByAddress(chainId, address)) ??
+          ''
+        )
+          .split(',')
+          .map((job) => job.trim().toLowerCase());
+
+        return this.findOraclesByChainIdAndJobTypes(chainId, address, jobTypes);
+      }),
     );
 
     const oracles: OracleDiscoveryResult[] = [];
@@ -53,31 +63,32 @@ export class OracleDiscoveryService {
     return oracles;
   }
 
-  private async findOraclesByChainId(
-    chainId: string,
+  private async findOraclesByChainIdAndJobTypes(
+    chainId: ChainId,
     address: string,
+    jobTypes: string[],
   ): Promise<OracleDiscoveryResult[]> {
     try {
-      const cachedOracles: OracleDiscoveryResult[] | undefined =
-        await this.cacheManager.get(chainId);
+      const cachedOracles = await this.cacheManager.get<
+        OracleDiscoveryResult[]
+      >(chainId.toString());
+      if (cachedOracles) return cachedOracles;
 
-      if (cachedOracles) {
-        return cachedOracles;
-      }
+      const operators = await OperatorUtils.getReputationNetworkOperators(
+        Number(chainId),
+        address,
+        Role.ExchangeOracle,
+      );
 
-      const operators: IOperator[] =
-        await OperatorUtils.getReputationNetworkOperators(
-          Number(chainId),
-          address,
-          Role.ExchangeOracle,
-        );
+      const jobTypeSet = new Set(jobTypes.map((j) => j.toLowerCase()));
 
-      const oraclesWithRetryData: OracleDiscoveryResult[] = [];
-      for (const operator of operators) {
-        const isOperatorValid = !!operator.url;
-
-        if (isOperatorValid) {
-          oraclesWithRetryData.push(
+      const oraclesWithRetryData: OracleDiscoveryResult[] = operators
+        .filter(
+          (operator) =>
+            operator.url && this.hasJobTypes(operator.jobTypes, jobTypeSet),
+        )
+        .map(
+          (operator) =>
             new OracleDiscoveryResult(
               operator.address,
               chainId,
@@ -87,12 +98,10 @@ export class OracleDiscoveryService {
               operator.registrationNeeded,
               operator.registrationInstructions,
             ),
-          );
-        }
-      }
+        );
 
       await this.cacheManager.set(
-        chainId,
+        chainId.toString(),
         oraclesWithRetryData,
         this.configService.cacheTtlOracleDiscovery,
       );
@@ -102,5 +111,14 @@ export class OracleDiscoveryService {
       this.logger.error(`Error processing chainId ${chainId}:`, error);
       return [];
     }
+  }
+
+  private hasJobTypes(
+    oracleJobTypes: string[] | undefined,
+    jobTypeSet: Set<string>,
+  ) {
+    return oracleJobTypes
+      ? oracleJobTypes.some((job) => jobTypeSet.has(job.toLowerCase()))
+      : false;
   }
 }

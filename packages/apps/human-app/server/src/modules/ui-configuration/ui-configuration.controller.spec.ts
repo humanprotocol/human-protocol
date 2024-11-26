@@ -2,8 +2,9 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UiConfigurationController } from './ui-configuration.controller';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { ChainId } from '@human-protocol/sdk';
 
-process.env.CHAIN_IDS_ENABLED = '15,42';
+process.env.CHAIN_IDS_ENABLED = '80002,11155111';
 
 describe('UiConfigurationController', () => {
   let controller: UiConfigurationController;
@@ -27,6 +28,9 @@ describe('UiConfigurationController', () => {
 
   it('should return proper config', async () => {
     const result = await controller.getConfig();
-    expect(result.chainIdsEnabled).toEqual(['15', '42']);
+    expect(result.chainIdsEnabled).toEqual([
+      ChainId.POLYGON_AMOY,
+      ChainId.SEPOLIA,
+    ]);
   });
 });
