@@ -1,7 +1,12 @@
-from collections.abc import Iterator
-from pathlib import Path
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from pathlib import Path
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from collections.abc import Collection, Iterator
 
 ANNOTATION_RESULTS_METAFILE_NAME = "annotation_meta.json"
 RESULTING_ANNOTATIONS_FILE = "resulting_annotations.zip"
@@ -24,5 +29,7 @@ class JobMeta(BaseModel):
 class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
 
-    def skip_jobs(self, job_ids: list[int]):
-        return AnnotationMeta(jobs=[job for job in self.jobs if job.job_id not in job_ids])
+    def skip_assignments(self, assignment_ids: Collection[int]) -> AnnotationMeta:
+        return AnnotationMeta(
+            jobs=[job for job in self.jobs if job.assignment_id not in assignment_ids]
+        )
