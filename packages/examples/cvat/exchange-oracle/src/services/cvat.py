@@ -9,7 +9,7 @@ from datetime import datetime
 from itertools import islice
 from typing import Any, NamedTuple
 
-from sqlalchemy import case, delete, func, literal, select, update
+from sqlalchemy import delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -209,24 +209,15 @@ def create_escrow_validations(session: Session, *, limit: int = 5):
     ).subquery()  # TODO: store in escrow creations
     # must not lock and doesn't need a lock (this information is static for created escrows)
 
-    active_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
     working_set = (
         select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
-        .where(Project.status.in_(active_statuses))
+        .where(Project.status == ProjectStatuses.completed)
         .with_for_update(skip_locked=True)
         .limit(limit)
     )  # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
     # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
 
-    all_completed_condition = (
-        func.sum(
-            case(
-                ((working_set.c["status"] == ProjectStatuses.completed), 1),
-                else_=0,
-            )
-        )
-        == project_counts_per_escrow.c["total_projects"]
-    )
+    all_completed_condition = func.count() == project_counts_per_escrow.c["total_projects"]
     completed_projects = (
         select(working_set.c["escrow_address"], working_set.c["chain_id"])
         .select_from(working_set)
@@ -241,7 +232,6 @@ def create_escrow_validations(session: Session, *, limit: int = 5):
             working_set.c["escrow_address"],
             working_set.c["chain_id"],
             project_counts_per_escrow.c["total_projects"],
-            working_set.c["status"],
         )
         .having(all_completed_condition)
     ).subquery()  # compute counts on the locked rows
@@ -350,12 +340,15 @@ def update_project_statuses_by_escrow_address(
     escrow_address: str,
     chain_id: int,
     status: ProjectStatuses,
+    *,
+    included_statuses: Sequence[ProjectStatuses] | None = None,
 ) -> None:
     statement = (
         update(Project)
         .where(
             Project.escrow_address == escrow_address,
             Project.chain_id == chain_id,
+            *([Project.status.in_(included_statuses)] if included_statuses else []),
         )
         .values(status=status.value)
         .returning(Project.cvat_id)

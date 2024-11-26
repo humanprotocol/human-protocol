@@ -152,6 +152,15 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                     )
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
+            # Mark all the remaining projects completed
+            cvat_db_service.update_project_statuses_by_escrow_address(
+                db_session,
+                escrow_address=webhook.escrow_address,
+                chain_id=webhook.chain_id,
+                status=ProjectStatuses.completed,
+                include_statuses=[ProjectStatuses.validation],
+            )
+
         case _:
             raise AssertionError(f"Unknown recording oracle event {webhook.event_type}")
 
