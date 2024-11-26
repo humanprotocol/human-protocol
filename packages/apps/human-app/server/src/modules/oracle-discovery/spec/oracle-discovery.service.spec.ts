@@ -222,7 +222,8 @@ describe('OracleDiscoveryService', () => {
 
     const result = await oracleDiscoveryService.processOracleDiscovery({});
 
-    const expectedResponse = generateOracleDiscoveryResponseBodyByJobType('job-type-1');
+    const expectedResponse =
+      generateOracleDiscoveryResponseBodyByJobType('job-type-1');
     expect(result).toEqual(expectedResponse);
 
     result.forEach((oracle) => {
