@@ -20,13 +20,11 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { StatsService } from '../stats/stats.service';
 
 @Injectable()
 export class DetailsService {
   private readonly logger = new Logger(DetailsService.name);
   constructor(
-    private readonly statsService: StatsService,
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly networkConfig: NetworkConfigService,
