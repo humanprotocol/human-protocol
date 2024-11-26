@@ -103,6 +103,7 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
     browserAuthProvider.signOut({
       triggerSignOutSubscriptions: throwExpirationModal,
     });
+
     setWeb3AuthState({ user: null, status: 'idle' });
   };
 

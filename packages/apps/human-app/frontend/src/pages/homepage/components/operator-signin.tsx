@@ -21,11 +21,6 @@ export function OperatorSignIn() {
   const modalWasOpened = useRef(false);
 
   useEffect(() => {
-    signOut(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ...
-  }, []);
-
-  useEffect(() => {
     if (isConnected && modalWasOpened.current) {
       signInMutation({ address, type: PrepareSignatureType.SignIn });
     }
@@ -64,6 +59,7 @@ export function OperatorSignIn() {
           fullWidth
           onClick={() => {
             modalWasOpened.current = true;
+            signOut();
             void openModal();
           }}
           size="large"
