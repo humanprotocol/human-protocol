@@ -13,7 +13,7 @@ import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
+  OracleDiscoveryResult,
 } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
@@ -48,11 +48,9 @@ export class CronJobService {
     this.logger.log('CRON START');
 
     const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
-    const oracles = (
-      await this.oracleDiscoveryService.processOracleDiscovery(
-        oracleDiscoveryCommand,
-      )
-    ).oracles;
+    const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
+      oracleDiscoveryCommand,
+    );
 
     if (!oracles || oracles.length < 1) return;
 
@@ -86,7 +84,7 @@ export class CronJobService {
     this.logger.log('CRON END');
   }
 
-  async updateJobsListCache(oracle: OracleDiscoveryResponse, token: string) {
+  async updateJobsListCache(oracle: OracleDiscoveryResult, token: string) {
     try {
       let allResults: JobsDiscoveryResponseItem[] = [];
 
@@ -138,14 +136,14 @@ export class CronJobService {
   }
 
   private async updateOracleInCache(
-    oracleData: OracleDiscoveryResponse,
-    updates: Partial<OracleDiscoveryResponse>,
+    oracleData: OracleDiscoveryResult,
+    updates: Partial<OracleDiscoveryResult>,
   ) {
     const updatedOracle = { ...oracleData, ...updates };
 
     const chainId = oracleData.chainId?.toString();
     const cachedOracles =
-      await this.cacheManager.get<OracleDiscoveryResponse[]>(chainId);
+      await this.cacheManager.get<OracleDiscoveryResult[]>(chainId);
 
     if (cachedOracles) {
       const updatedOracles = cachedOracles.map((oracle) =>
@@ -159,7 +157,7 @@ export class CronJobService {
     }
   }
 
-  private async handleJobListError(oracleData: OracleDiscoveryResponse) {
+  private async handleJobListError(oracleData: OracleDiscoveryResult) {
     const retriesCount = oracleData.retriesCount || 0;
     const newExecutionsToSkip = Math.min(
       (oracleData.executionsToSkip || 0) + Math.pow(2, retriesCount),

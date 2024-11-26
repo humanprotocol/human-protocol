@@ -1,8 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-  OracleDiscoveryResponseDto,
+  OracleDiscoveryResult,
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -22,7 +21,7 @@ export class OracleDiscoveryService {
 
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryResponseDto> {
+  ): Promise<OracleDiscoveryResult[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
 
@@ -39,10 +38,7 @@ export class OracleDiscoveryService {
       }),
     );
 
-    const response: OracleDiscoveryResponseDto = {
-      oracles: [],
-      chainIdsEnabled: this.configService.chainIdsEnabled,
-    };
+    const oracles: OracleDiscoveryResult[] = [];
     for (const oraclesForChainId of oraclesForChainIds) {
       for (const oracle of oraclesForChainId) {
         if (command.selectedJobTypes?.length) {
@@ -60,21 +56,21 @@ export class OracleDiscoveryService {
           }
         }
 
-        response.oracles.push(oracle);
+        oracles.push(oracle);
       }
     }
 
-    return response;
+    return oracles;
   }
 
   private async findOraclesByChainIdAndJobTypes(
     chainId: ChainId,
     address: string,
     jobTypes: string[],
-  ): Promise<OracleDiscoveryResponse[]> {
+  ): Promise<OracleDiscoveryResult[]> {
     try {
       const cachedOracles = await this.cacheManager.get<
-        OracleDiscoveryResponse[]
+        OracleDiscoveryResult[]
       >(chainId.toString());
       if (cachedOracles) return cachedOracles;
 
@@ -86,14 +82,14 @@ export class OracleDiscoveryService {
 
       const jobTypeSet = new Set(jobTypes.map((j) => j.toLowerCase()));
 
-      const oraclesWithRetryData: OracleDiscoveryResponse[] = operators
+      const oraclesWithRetryData: OracleDiscoveryResult[] = operators
         .filter(
           (operator) =>
             operator.url && this.hasJobTypes(operator.jobTypes, jobTypeSet),
         )
         .map(
           (operator) =>
-            new OracleDiscoveryResponse(
+            new OracleDiscoveryResult(
               operator.address,
               chainId,
               operator.role,

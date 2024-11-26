@@ -1,10 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
+  OracleDiscoveryResult,
 } from '../model/oracle-discovery.model';
 
-const response1: OracleDiscoveryResponse = {
+const response1: OracleDiscoveryResult = {
   address: '0xd06eac24a0c47c776Ce6826A93162c4AfC029047',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role1',
@@ -15,7 +15,7 @@ const response1: OracleDiscoveryResponse = {
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
 };
-const response2: OracleDiscoveryResponse = {
+const response2: OracleDiscoveryResult = {
   address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role2',
@@ -25,7 +25,7 @@ const response2: OracleDiscoveryResponse = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response3: OracleDiscoveryResponse = {
+const response3: OracleDiscoveryResult = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role3',
@@ -36,7 +36,7 @@ const response3: OracleDiscoveryResponse = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response4: OracleDiscoveryResponse = {
+const response4: OracleDiscoveryResult = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.MOONBASE_ALPHA,
   role: 'role3',
@@ -57,44 +57,28 @@ export function generateGetReputationNetworkOperatorsResponseByChainId(
 }
 
 export function generateOracleDiscoveryResponseBodyByChainId(chainId: ChainId) {
-  return {
-    oracles: [response1, response3, response4].filter(
-      (oracle) => oracle.chainId === chainId,
-    ),
-    chainIdsEnabled: [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA],
-  };
+  return [response1, response3, response4].filter(
+    (oracle) => oracle.chainId === chainId,
+  );
 }
 
 export function generateOracleDiscoveryResponseBody() {
-  return {
-    oracles: [response1, response3, response4],
-    chainIdsEnabled: [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA],
-  };
+  return [response1, response3, response4];
 }
 
-export function generateOraclesWithSupportedJobTypesOnly() {
-  return {
-    oracles: [response4],
-    chainIdsEnabled: [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA],
-  };
-}
-
-export function generateOracleDiscoveryResponseBodyByJobType() {
-  return {
-    oracles: [response3, response4],
-    chainIdsEnabled: [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA],
-  };
+export function generateOracleDiscoveryResponseBodyByJobType(jobType: string) {
+  return [response1, response3, response4].filter(
+    (oracle) =>
+      oracle.jobTypes !== undefined && oracle.jobTypes.indexOf(jobType) >= 0,
+  );
 }
 
 export const reputationOracleSupportedJobTypes = 'job-type-1, job-type-4';
 export const filledCommandFixture = {
-  selectedJobTypes: ['job-type-1', 'job-type-2'],
+  selectedJobTypes: ['job-type-1'],
 } as OracleDiscoveryCommand;
 export const emptyCommandFixture = {
   selectedJobTypes: [],
 } as OracleDiscoveryCommand;
 export const notSetCommandFixture = {} as OracleDiscoveryCommand;
-export const errorResponse = {
-  chainIdsEnabled: [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA],
-  oracles: [],
-};
+export const errorResponse = [];

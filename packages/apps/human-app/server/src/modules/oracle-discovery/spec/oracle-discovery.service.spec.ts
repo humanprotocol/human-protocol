@@ -14,7 +14,6 @@ import {
   generateOracleDiscoveryResponseBody,
   generateOracleDiscoveryResponseBodyByChainId,
   generateOracleDiscoveryResponseBodyByJobType,
-  generateOraclesWithSupportedJobTypesOnly,
   notSetCommandFixture,
 } from './oracle-discovery.fixture';
 import { KvStoreGateway } from '../../../integrations/kv-store/kv-store.gateway';
@@ -95,7 +94,7 @@ describe('OracleDiscoveryService', () => {
       jest
         .spyOn(cacheManager, 'get')
         .mockResolvedValueOnce(
-          generateOracleDiscoveryResponseBodyByChainId(chainId).oracles,
+          generateOracleDiscoveryResponseBodyByChainId(chainId),
         );
     });
 
@@ -124,7 +123,7 @@ describe('OracleDiscoveryService', () => {
       expect(cacheManager.get).toHaveBeenCalledWith(chainId.toString());
       expect(cacheManager.set).toHaveBeenCalledWith(
         chainId.toString(),
-        generateOracleDiscoveryResponseBodyByChainId(chainId).oracles,
+        generateOracleDiscoveryResponseBodyByChainId(chainId),
         TTL,
       );
       expect(OperatorUtils.getReputationNetworkOperators).toHaveBeenCalledWith(
@@ -148,7 +147,9 @@ describe('OracleDiscoveryService', () => {
     const result =
       await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
 
-    expect(result).toEqual(generateOracleDiscoveryResponseBodyByJobType());
+    expect(result).toEqual(
+      generateOracleDiscoveryResponseBodyByJobType('job-type-1'),
+    );
   });
 
   it('should not filter responses if selectedJobTypes is empty', async () => {
@@ -221,10 +222,10 @@ describe('OracleDiscoveryService', () => {
 
     const result = await oracleDiscoveryService.processOracleDiscovery({});
 
-    const expectedResponse = generateOraclesWithSupportedJobTypesOnly();
+    const expectedResponse = generateOracleDiscoveryResponseBodyByJobType('job-type-1');
     expect(result).toEqual(expectedResponse);
 
-    result.oracles.forEach((oracle) => {
+    result.forEach((oracle) => {
       expect(oracle.jobTypes).toContain('job-type-1');
     });
   });
