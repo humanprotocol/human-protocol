@@ -197,7 +197,7 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     return [row.cvat_id for row in result.all()]
 
 
-def create_escrow_validations(session: Session, *, limit: int = 5):
+def create_escrow_validations(session: Session, *, limit: int = 100):
     project_counts_per_escrow = (
         select(
             Project.escrow_address,
@@ -213,7 +213,7 @@ def create_escrow_validations(session: Session, *, limit: int = 5):
         select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
         .where(Project.status == ProjectStatuses.completed)
         .with_for_update(skip_locked=True)
-        .limit(limit)
+        .limit(limit) # TODO: might be too small to finish at least 1 escrow
     )  # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
     # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
 
