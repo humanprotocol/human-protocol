@@ -141,6 +141,10 @@ class TestManifestChange:
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
 
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+            )
+
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
                     "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
