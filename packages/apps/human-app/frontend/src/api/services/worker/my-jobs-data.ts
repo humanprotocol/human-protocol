@@ -18,6 +18,12 @@ export enum MyJobStatus {
   REJECTED = 'REJECTED',
 }
 
+export const unavailableStatusesForAvailableJobs: MyJobStatus[] = [
+  MyJobStatus.EXPIRED,
+  MyJobStatus.REJECTED,
+  MyJobStatus.VALIDATION,
+];
+
 export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
 
 const myJobSchema = z.object({
