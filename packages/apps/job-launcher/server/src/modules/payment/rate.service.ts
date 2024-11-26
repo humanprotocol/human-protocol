@@ -81,6 +81,8 @@ export class RateService {
 
       return finalRate;
     } catch (error) {
+      console.log(error);
+
       //   try {
       //     const coinMarketCapFrom = CoinMarketCupTokenId[from];
       //     const coinMarketCapTo = to;
