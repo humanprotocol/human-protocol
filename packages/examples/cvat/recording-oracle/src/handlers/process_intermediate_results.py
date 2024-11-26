@@ -375,13 +375,12 @@ def process_intermediate_results(  # noqa: PLR0912
         ),  # should not happen, but waiting should not block processing
     )
     if task:
-        # skip jobs that have already been accepted on the previous epochs
-        accepted_cvat_job_ids = [
-            validation_result.job.cvat_id
+        # Skip assignments that were validated earlier
+        validated_assignment_ids = {
+            validation_result.assignment_id
             for validation_result in db_service.get_task_validation_results(session, task.id)
-            if validation_result.annotation_quality >= manifest.validation.min_quality
-        ]
-        unchecked_jobs_meta = meta.skip_jobs(accepted_cvat_job_ids)
+        }
+        unchecked_jobs_meta = meta.skip_assignments(validated_assignment_ids)
     else:
         # Recording Oracle task represents all CVAT tasks related with the escrow
         task_id = db_service.create_task(session, escrow_address=escrow_address, chain_id=chain_id)
@@ -566,6 +565,16 @@ def process_intermediate_results(  # noqa: PLR0912
         else:
             assignment_validation_result_id = assignment_validation_result.id
 
+        # We consider only the last assignment as final even if there were assignments with higher
+        # quality score. The reason for this is that during escrow annotation there are various
+        # task changes possible, for instance:
+        # - GT can be changed in the middle of the task annotation
+        # - manifest can be updated with different quality parameters
+        # etc. It can be considered more of a development or testing conditions so far,
+        # according to the current system requirements, but it's likely to be
+        # a normal requirement in the future.
+        # Therefore, we use the logic: only the last job assignment can be considered
+        # a final annotation result, regardless of the assignment quality.
         job_final_result_ids[job.id] = assignment_validation_result_id
 
     task_jobs = task.jobs
