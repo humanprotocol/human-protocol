@@ -118,10 +118,9 @@ def track_assignments(logger: logging.Logger) -> None:
 def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
     awaiting_validations = cvat_service.create_escrow_validations(session)
     if awaiting_validations:
-        session.commit()
         logger.info(
             f"Got {len(awaiting_validations)} escrows "
-            f"awaiting validation: {format_sequence(awaiting_validations)}"
+            f"awaiting validation: {format_sequence([(v[1], v[2]) for v in awaiting_validations])}"
         )
 
 
