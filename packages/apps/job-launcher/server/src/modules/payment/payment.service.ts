@@ -199,7 +199,7 @@ export class PaymentService {
       await this.stripe.paymentIntents.update(paymentIntent.id, {
         payment_method: dto.paymentMethodId,
       });
-    } catch (error) {
+    } catch {
       throw new ControlledError(
         ErrorPayment.PaymentMethodAssociationFailed,
         HttpStatus.INTERNAL_SERVER_ERROR,
