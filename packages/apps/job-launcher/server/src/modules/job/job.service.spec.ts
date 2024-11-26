@@ -674,6 +674,53 @@ describe('JobService', () => {
       });
     });
 
+    it('should create a valid CVAT manifest for image polygons job type', async () => {
+      const jobBounty = '100';
+      jest
+        .spyOn(jobService, 'calculateJobBounty')
+        .mockResolvedValueOnce(jobBounty);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET,
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_POLYGONS,
+        fundAmount: 10,
+        currency: JobCurrency.HMT,
+      };
+
+      const requestType = JobRequestType.IMAGE_POLYGONS;
+      const tokenFundAmount = 100;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
     it('should create a valid CVAT manifest for image boxes from points job type', async () => {
       const jobBounty = '50.0';
 

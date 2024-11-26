@@ -462,6 +462,14 @@ export class JobService {
         fundAmount,
       }),
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
     [JobRequestType.IMAGE_BOXES]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
@@ -503,6 +511,9 @@ export class JobService {
     [JobRequestType.FORTUNE]: {
       getTrustedHandlers: () => [],
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      getTrustedHandlers: () => [],
+    },
     [JobRequestType.IMAGE_BOXES]: {
       getTrustedHandlers: () => [],
     },
@@ -525,6 +536,39 @@ export class JobService {
     [JobRequestType.FORTUNE]: {
       getElementsCount: async () => 0,
       generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
+    },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      getElementsCount: async (urls: GenerateUrls) => {
+        const gt = (await this.storageService.downloadJsonLikeData(
+          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
+        )) as any;
+        if (!gt || !gt.images || gt.images.length === 0)
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
+        const data = await listObjectsInBucket(urls.dataUrl);
+        if (!data || data.length === 0 || !data[0])
+          throw new ControlledError(
+            ErrorJob.DatasetValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
+        await this.checkImageConsistency(gt.images, data);
+
+        return data.length - gt.images.length;
+      },
+      generateUrls: (
+        data: CvatDataDto,
+        groundTruth: StorageDataDto,
+      ): GenerateUrls => {
+        const requestType = JobRequestType.IMAGE_POLYGONS;
+        return {
+          dataUrl: generateBucketUrl(data.dataset, requestType),
+          gtUrl: generateBucketUrl(groundTruth, requestType),
+        };
+      },
     },
     [JobRequestType.IMAGE_BOXES]: {
       getElementsCount: async (urls: GenerateUrls) => {
@@ -651,6 +695,16 @@ export class JobService {
           this.web3ConfigService.fortuneExchangeOracleAddress;
         const recordingOracle =
           this.web3ConfigService.fortuneRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };

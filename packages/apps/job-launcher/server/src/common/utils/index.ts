@@ -121,6 +121,8 @@ export const mapJobType = (requestType: JobRequestType): string => {
   switch (requestType) {
     case JobRequestType.IMAGE_POINTS:
       return 'Points';
+    case JobRequestType.IMAGE_POLYGONS:
+      return 'Polygons';
     case JobRequestType.IMAGE_BOXES:
       return 'Bounding Boxes';
     case JobRequestType.IMAGE_BOXES_FROM_POINTS:
