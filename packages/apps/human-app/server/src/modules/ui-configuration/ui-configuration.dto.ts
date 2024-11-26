@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UiConfigResponseDto {
   @ApiProperty({
-    type: [String],
+    type: [Number],
     description: 'Chain ids enabled for the application',
     enum: ChainId,
     enumName: 'ChainId',
