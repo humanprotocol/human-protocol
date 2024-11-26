@@ -264,7 +264,7 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
     with SessionLocal.begin() as session:
         escrow_validations = cvat_service.prepare_escrows_for_validation(
             session,
-            limit=CronConfig.track_completed_escrows_chunk_size,
+            limit=CronConfig.track_escrow_validations_chunk_size,
         )
     for escrow_address, chain_id in escrow_validations:
         with SessionLocal.begin() as session:

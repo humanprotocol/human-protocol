@@ -213,7 +213,7 @@ def create_escrow_validations(session: Session, *, limit: int = 100):
         select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
         .where(Project.status == ProjectStatuses.completed)
         .with_for_update(skip_locked=True)
-        .limit(limit) # TODO: might be too small to finish at least 1 escrow
+        .limit(limit)  # TODO: might be too small to finish at least 1 escrow
     )  # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
     # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
 
