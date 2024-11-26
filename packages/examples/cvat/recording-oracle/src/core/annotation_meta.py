@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from pathlib import Path  # noqa: TCH003
 from typing import TYPE_CHECKING
 
-from pathlib import Path
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
