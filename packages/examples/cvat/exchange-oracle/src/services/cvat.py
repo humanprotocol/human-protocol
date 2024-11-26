@@ -197,43 +197,96 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     return [row.cvat_id for row in result.all()]
 
 
-def create_escrow_validations(session: Session):
-    # if escrow have projects with `validation` AND `completed` statuses
-    # it means, some jobs were rejected and re-annotated
-    active_statuses = [
-        ProjectStatuses.annotation,
-        ProjectStatuses.completed,
-        ProjectStatuses.validation,
-    ]
-    # excluding escrows where all projects are still have `validation` status
-    at_least_one_is_completed = (
-        func.sum(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
-    )
-    all_completed_or_validation = (
-        func.sum(
-            case(
-                (Project.status.in_([ProjectStatuses.completed, ProjectStatuses.validation]), 1),
-                else_=0,
-            )
-        )
-        == func.count()
-        # TODO: this is a draft implementation.
-        # Probably, better to check against the known job count from the escrow creation
-    )
-    select_stmt = (
+def create_escrow_validations(session: Session, *, limit: int = 5):
+    project_counts_per_escrow = (
         select(
             Project.escrow_address,
             Project.chain_id,
+            func.count().label("total_projects"),
+        )
+        .where(Project.status != ProjectStatuses.creation)
+        .group_by(Project.escrow_address, Project.chain_id)
+    ).subquery()  # TODO: store in escrow creations
+    # must not lock and doesn't need a lock (this information is static for created escrows)
+
+    active_statuses = [ProjectStatuses.completed, ProjectStatuses.validation]
+    working_set = (
+        select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
+        .where(Project.status.in_(active_statuses))
+        .with_for_update(skip_locked=True)
+        .limit(limit)
+    )  # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
+    # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
+
+    all_completed_condition = (
+        func.sum(
+            case(
+                ((working_set.c["status"] == ProjectStatuses.completed), 1),
+                else_=0,
+            )
+        )
+        == project_counts_per_escrow.c["total_projects"]
+    )
+    completed_projects = (
+        select(working_set.c["escrow_address"], working_set.c["chain_id"])
+        .select_from(working_set)
+        .join(
+            project_counts_per_escrow,
+            (
+                (working_set.c["escrow_address"] == project_counts_per_escrow.c["escrow_address"])
+                & (working_set.c["chain_id"] == project_counts_per_escrow.c["chain_id"])
+            ),
+        )
+        .group_by(
+            working_set.c["escrow_address"],
+            working_set.c["chain_id"],
+            project_counts_per_escrow.c["total_projects"],
+            working_set.c["status"],
+        )
+        .having(all_completed_condition)
+    ).subquery()  # compute counts on the locked rows
+
+    completed_projects_for_update = (
+        select(working_set.c["id"])
+        .select_from(working_set)
+        .join(
+            completed_projects,
+            (
+                (working_set.c["escrow_address"] == completed_projects.c["escrow_address"])
+                & (working_set.c["chain_id"] == completed_projects.c["chain_id"])
+            ),
+        )
+    )
+    completed_projects_for_update_cte = completed_projects_for_update.cte("completed_projects")
+    update_stmt = (
+        update(Project)
+        .where(
+            Project.id == completed_projects_for_update_cte.c["id"],
+            Project.status == ProjectStatuses.completed,
+        )
+        .values({"status": ProjectStatuses.validation})
+        .returning(Project.escrow_address, Project.chain_id)
+    )  # update some of the locked rows
+
+    updated_projects_cte = update_stmt.cte("updated_projects")
+
+    updated_escrows_for_insert = (
+        select(
+            # literal(func.uuid_generate_v4()).label("id"),
+            updated_projects_cte.c["escrow_address"],
+            updated_projects_cte.c["chain_id"],
             literal(EscrowValidationStatuses.awaiting).label("status"),
         )
-        .where(Project.status.in_(active_statuses))
-        .group_by(Project.escrow_address, Project.chain_id)
-        .having(at_least_one_is_completed, all_completed_or_validation)
+        .select_from(updated_projects_cte)
+        .group_by(
+            updated_projects_cte.c["escrow_address"],
+            updated_projects_cte.c["chain_id"],
+        )
     )
 
     insert_stmt = (
         insert(EscrowValidation)
-        .from_select(("escrow_address", "chain_id", "status"), select_stmt)
+        .from_select(("escrow_address", "chain_id", "status"), updated_escrows_for_insert)
         .on_conflict_do_update(
             index_elements=("escrow_address", "chain_id"),
             set_={
@@ -241,7 +294,7 @@ def create_escrow_validations(session: Session):
             },
             where=EscrowValidation.status != EscrowValidationStatuses.awaiting,
         )
-        .returning(EscrowValidation.id)
+        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
     )
 
     return session.execute(insert_stmt).all()

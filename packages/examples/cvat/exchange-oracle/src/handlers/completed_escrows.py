@@ -138,12 +138,6 @@ def _export_escrow_annotations(
         event=ExchangeOracleEvent_JobFinished(),
     )
 
-    cvat_service.update_project_statuses_by_escrow_address(
-        session,
-        escrow_address=escrow_address,
-        chain_id=chain_id,
-        status=ProjectStatuses.validation,
-    )
 
     logger.info(
         f"The escrow ({escrow_address=}) is completed, "
