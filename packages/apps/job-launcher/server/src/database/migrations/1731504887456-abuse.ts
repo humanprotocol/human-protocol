@@ -40,7 +40,7 @@ export class Abuse1731504887456 implements MigrationInterface {
                 'escrow_completed',
                 'task_creation_failed',
                 'escrow_failed',
-                'abuse'
+                'abuse_detected'
             )
         `);
     await queryRunner.query(`

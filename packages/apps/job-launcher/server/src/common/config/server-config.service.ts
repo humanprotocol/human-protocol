@@ -74,7 +74,10 @@ export class ServerConfigService {
   get coingeckoApiKey(): string | undefined {
     return this.configService.get<string>('COINGECKO_API_KEY');
   }
-  get abuseAmount(): number {
-    return +this.configService.get<number>('ABUSE_AMOUNT', 10000);
-  }
+  /**
+   * The amount to charge abusive users.
+   */
+  // get abuseAmount(): number {
+  //   return +this.configService.get<number>('ABUSE_AMOUNT', 10000);
+  // }
 }

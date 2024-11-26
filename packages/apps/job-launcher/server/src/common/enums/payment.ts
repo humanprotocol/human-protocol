@@ -62,7 +62,7 @@ export enum PaymentType {
   DEPOSIT = 'deposit',
   REFUND = 'refund',
   WITHDRAWAL = 'withdrawal',
-  SLASH = 'slash',
+  // SLASH = 'slash',
 }
 
 export enum PaymentStatus {

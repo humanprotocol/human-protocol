@@ -4,7 +4,7 @@ import { CronJobType } from '../../common/enums/cron-job';
 import {
   ErrorCronJob,
   ErrorEscrow,
-  ErrorJob,
+  // ErrorJob,
 } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
@@ -318,67 +318,67 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/5 * * * *')
+  // @Cron('*/5 * * * *')
   /**
    * Process an abuse webhook.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
-  public async processAbuse(): Promise<void> {
-    const isCronJobRunning = await this.isCronJobRunning(CronJobType.Abuse);
+  // public async processAbuse(): Promise<void> {
+  //   const isCronJobRunning = await this.isCronJobRunning(CronJobType.Abuse);
 
-    if (isCronJobRunning) {
-      return;
-    }
+  //   if (isCronJobRunning) {
+  //     return;
+  //   }
 
-    this.logger.log('Abuse START');
-    const cronJob = await this.startCronJob(CronJobType.Abuse);
+  //   this.logger.log('Abuse START');
+  //   const cronJob = await this.startCronJob(CronJobType.Abuse);
 
-    try {
-      const webhookEntities = await this.webhookRepository.findByStatusAndType(
-        WebhookStatus.PENDING,
-        EventType.ABUSE,
-      );
+  //   try {
+  //     const webhookEntities = await this.webhookRepository.findByStatusAndType(
+  //       WebhookStatus.PENDING,
+  //       EventType.ABUSE_DETECTED,
+  //     );
 
-      for (const webhookEntity of webhookEntities) {
-        try {
-          const jobEntity =
-            await this.jobRepository.findOneByChainIdAndEscrowAddress(
-              webhookEntity.chainId,
-              webhookEntity.escrowAddress,
-            );
-          if (!jobEntity) {
-            this.logger.log(ErrorJob.NotFound, JobService.name);
-            throw new ControlledError(
-              ErrorJob.NotFound,
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-          if (
-            jobEntity.escrowAddress &&
-            jobEntity.status !== JobStatus.CANCELED
-          ) {
-            await this.jobService.processEscrowCancellation(jobEntity);
-            jobEntity.status = JobStatus.CANCELED;
-            await this.jobRepository.updateOne(jobEntity);
-          }
-          await this.paymentService.createSlash(jobEntity);
-        } catch (err) {
-          this.logger.error(
-            `Error slashing escrow (address: ${webhookEntity.escrowAddress}, chainId: ${webhookEntity.chainId}: ${err.message}`,
-          );
-          await this.webhookService.handleWebhookError(webhookEntity);
-          continue;
-        }
-        webhookEntity.status = WebhookStatus.COMPLETED;
-        await this.webhookRepository.updateOne(webhookEntity);
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
+  //     for (const webhookEntity of webhookEntities) {
+  //       try {
+  //         const jobEntity =
+  //           await this.jobRepository.findOneByChainIdAndEscrowAddress(
+  //             webhookEntity.chainId,
+  //             webhookEntity.escrowAddress,
+  //           );
+  //         if (!jobEntity) {
+  //           this.logger.log(ErrorJob.NotFound, JobService.name);
+  //           throw new ControlledError(
+  //             ErrorJob.NotFound,
+  //             HttpStatus.BAD_REQUEST,
+  //           );
+  //         }
+  //         if (
+  //           jobEntity.escrowAddress &&
+  //           jobEntity.status !== JobStatus.CANCELED
+  //         ) {
+  //           await this.jobService.processEscrowCancellation(jobEntity);
+  //           jobEntity.status = JobStatus.CANCELED;
+  //           await this.jobRepository.updateOne(jobEntity);
+  //         }
+  //         await this.paymentService.createSlash(jobEntity);
+  //       } catch (err) {
+  //         this.logger.error(
+  //           `Error slashing escrow (address: ${webhookEntity.escrowAddress}, chainId: ${webhookEntity.chainId}: ${err.message}`,
+  //         );
+  //         await this.webhookService.handleWebhookError(webhookEntity);
+  //         continue;
+  //       }
+  //       webhookEntity.status = WebhookStatus.COMPLETED;
+  //       await this.webhookRepository.updateOne(webhookEntity);
+  //     }
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //   }
 
-    this.logger.log('Abuse STOP');
-    await this.completeCronJob(cronJob);
-  }
+  //   this.logger.log('Abuse STOP');
+  //   await this.completeCronJob(cronJob);
+  // }
 
   @Cron('30 */2 * * * *')
   /**

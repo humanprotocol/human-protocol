@@ -143,9 +143,9 @@ export class WebhookService {
         await this.jobService.escrowFailedWebhook(webhook);
         break;
 
-      case EventType.ABUSE:
-        await this.createIncomingWebhook(webhook);
-        break;
+      // case EventType.ABUSE_DETECTED:
+      //   await this.createIncomingWebhook(webhook);
+      //   break;
 
       default:
         throw new ControlledError(
@@ -155,26 +155,26 @@ export class WebhookService {
     }
   }
 
-  public async createIncomingWebhook(webhook: WebhookDataDto): Promise<void> {
-    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
-      webhook.chainId,
-      webhook.escrowAddress,
-    );
+  // public async createIncomingWebhook(webhook: WebhookDataDto): Promise<void> {
+  //   const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+  //     webhook.chainId,
+  //     webhook.escrowAddress,
+  //   );
 
-    if (!jobEntity) {
-      throw new ControlledError(
-        ErrorWebhook.InvalidEscrow,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  //   if (!jobEntity) {
+  //     throw new ControlledError(
+  //       ErrorWebhook.InvalidEscrow,
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
 
-    const webhookEntity = new WebhookEntity();
-    Object.assign(webhookEntity, webhook);
-    webhookEntity.oracleType = this.jobService.getOracleType(
-      jobEntity.requestType,
-    );
-    webhookEntity.hasSignature = false;
+  //   const webhookEntity = new WebhookEntity();
+  //   Object.assign(webhookEntity, webhook);
+  //   webhookEntity.oracleType = this.jobService.getOracleType(
+  //     jobEntity.requestType,
+  //   );
+  //   webhookEntity.hasSignature = false;
 
-    this.webhookRepository.createUnique(webhookEntity);
-  }
+  //   this.webhookRepository.createUnique(webhookEntity);
+  // }
 }

@@ -561,7 +561,7 @@ export class JobCaptchaAdvancedDto {
 
   @ApiProperty({
     enum: Country,
-    name: 'workerocation',
+    name: 'worker_location',
   })
   @IsEnumCaseInsensitive(Country)
   @IsOptional()

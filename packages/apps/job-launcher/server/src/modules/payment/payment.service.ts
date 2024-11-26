@@ -40,7 +40,7 @@ import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from './rate.service';
 import { UserEntity } from '../user/user.entity';
-import { JobEntity } from '../job/job.entity';
+// import { JobEntity } from '../job/job.entity';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
@@ -435,68 +435,68 @@ export class PaymentService {
     await this.paymentRepository.createUnique(paymentEntity);
   }
 
-  public async createSlash(job: JobEntity): Promise<void> {
-    const amount = this.serverConfigService.abuseAmount,
-      currency = Currency.USD;
+  // public async createSlash(job: JobEntity): Promise<void> {
+  //   const amount = this.serverConfigService.abuseAmount,
+  //     currency = Currency.USD;
 
-    const user = await this.userRepository.findById(job.userId);
-    if (!user) {
-      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  //   const user = await this.userRepository.findById(job.userId);
+  //   if (!user) {
+  //     this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
+  //     throw new ControlledError(
+  //       ErrorPayment.CustomerNotFound,
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
 
-    const amountInCents = Math.ceil(mul(amount, 100));
-    const params: Stripe.PaymentIntentCreateParams = {
-      amount: amountInCents,
-      currency: currency,
-      customer: user.stripeCustomerId,
-      off_session: true,
-      confirm: true,
-    };
+  //   const amountInCents = Math.ceil(mul(amount, 100));
+  //   const params: Stripe.PaymentIntentCreateParams = {
+  //     amount: amountInCents,
+  //     currency: currency,
+  //     customer: user.stripeCustomerId,
+  //     off_session: true,
+  //     confirm: true,
+  //   };
 
-    const paymentIntent = await this.stripe.paymentIntents.create(params);
+  //   const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    if (!paymentIntent?.client_secret) {
-      this.logger.log(
-        ErrorPayment.ClientSecretDoesNotExist,
-        PaymentService.name,
-      );
-      throw new ControlledError(
-        ErrorPayment.ClientSecretDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  //   if (!paymentIntent?.client_secret) {
+  //     this.logger.log(
+  //       ErrorPayment.ClientSecretDoesNotExist,
+  //       PaymentService.name,
+  //     );
+  //     throw new ControlledError(
+  //       ErrorPayment.ClientSecretDoesNotExist,
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
 
-    const newPaymentEntity = new PaymentEntity();
-    Object.assign(newPaymentEntity, {
-      userId: job.user.id,
-      source: PaymentSource.FIAT,
-      type: PaymentType.DEPOSIT,
-      amount: div(amountInCents, 100),
-      currency,
-      rate: 1,
-      transaction: paymentIntent.id,
-      status: PaymentStatus.SUCCEEDED,
-    });
-    await this.paymentRepository.createUnique(newPaymentEntity);
+  //   const newPaymentEntity = new PaymentEntity();
+  //   Object.assign(newPaymentEntity, {
+  //     userId: job.user.id,
+  //     source: PaymentSource.FIAT,
+  //     type: PaymentType.DEPOSIT,
+  //     amount: div(amountInCents, 100),
+  //     currency,
+  //     rate: 1,
+  //     transaction: paymentIntent.id,
+  //     status: PaymentStatus.SUCCEEDED,
+  //   });
+  //   await this.paymentRepository.createUnique(newPaymentEntity);
 
-    Object.assign(newPaymentEntity, {
-      userId: job.user.id,
-      source: PaymentSource.FIAT,
-      type: PaymentType.SLASH,
-      amount: div(-amountInCents, 100),
-      currency,
-      rate: 1,
-      transaction: null,
-      status: PaymentStatus.SUCCEEDED,
-    });
-    await this.paymentRepository.createUnique(newPaymentEntity);
+  //   Object.assign(newPaymentEntity, {
+  //     userId: job.user.id,
+  //     source: PaymentSource.FIAT,
+  //     type: PaymentType.SLASH,
+  //     amount: div(-amountInCents, 100),
+  //     currency,
+  //     rate: 1,
+  //     transaction: null,
+  //     status: PaymentStatus.SUCCEEDED,
+  //   });
+  //   await this.paymentRepository.createUnique(newPaymentEntity);
 
-    return;
-  }
+  //   return;
+  // }
 
   async listUserPaymentMethods(user: UserEntity) {
     if (!user.stripeCustomerId) {
