@@ -79,9 +79,8 @@ export class KvStoreGateway {
     if (!jobTypes || jobTypes === '') {
       return;
     } else {
-      await this.cacheManager.set(key, jobTypes, {
-        ttl: this.configService.cacheTtlJobTypes,
-      } as any);
+      await this.cacheManager.set(key, jobTypes, this.configService.cacheTtlJobTypes);
+
       return jobTypes;
     }
   }
