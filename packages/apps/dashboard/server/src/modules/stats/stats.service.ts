@@ -352,7 +352,7 @@ export class StatsService implements OnModuleInit {
       }),
     );
 
-    return stats.filter((stat): stat is HcaptchaDailyStats => stat !== null);
+    return stats.filter(Boolean);
   }
 
   public async hCaptchaGeneralStats(): Promise<HcaptchaStats> {
@@ -417,6 +417,6 @@ export class StatsService implements OnModuleInit {
       }),
     );
 
-    return stats.filter((stat): stat is HmtDailyStatsData => stat !== null);
+    return stats.filter(Boolean);
   }
 }
