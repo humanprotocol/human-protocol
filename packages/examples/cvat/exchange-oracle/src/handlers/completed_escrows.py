@@ -17,7 +17,7 @@ from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING
 from src.core.config import CronConfig, StorageConfig
 from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.storage import compose_results_bucket_filename
-from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, ProjectStatuses, TaskTypes
+from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, TaskTypes
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
