@@ -566,6 +566,19 @@ def update_escrow_validation_statuses_by_ids(
     session.execute(stmt)
 
 
+def get_escrow_validation_by_escrow_address(
+    session: Session, escrow_address: str, chain_id: int
+) -> EscrowValidation | None:
+    stmt = (
+        select(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .limit(1)
+    )
+    return session.scalar(stmt)
+
+
 # Task
 def create_task(session: Session, cvat_id: int, cvat_project_id: int, status: TaskStatuses) -> str:
     """

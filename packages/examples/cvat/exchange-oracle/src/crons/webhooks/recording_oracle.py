@@ -44,13 +44,29 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
     match webhook.event_type:
         case RecordingOracleEventTypes.job_completed:
+            escrow_validation = cvat_db_service.get_escrow_validation_by_escrow_address(
+                db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+            )
+            if (
+                not escrow_validation
+                or escrow_validation.status != EscrowValidationStatuses.in_progress
+            ):
+                logger.error(
+                    "Unexpected event {} received for the escrow. "
+                    "There is no active validation now, ignoring (escrow_address={}) ".format(
+                        webhook.event_type,
+                        webhook.escrow_address,
+                    )
+                )
+                return
+
             chunk_size = CronConfig.accepted_projects_chunk_size
             project_ids = cvat_db_service.get_project_cvat_ids_by_escrow_address(
                 db_session, webhook.escrow_address
             )
             if not project_ids:
                 logger.error(
-                    f"Unexpected event {webhook.event_type} received for an unknown project, "
+                    f"Unexpected event {webhook.event_type} received for an unknown escrow, "
                     f"ignoring (escrow_address={webhook.escrow_address})"
                 )
                 return
@@ -97,6 +113,22 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
         case RecordingOracleEventTypes.submission_rejected:
             event = RecordingOracleEvent_SubmissionRejected.model_validate(webhook.event_data)
+
+            escrow_validation = cvat_db_service.get_escrow_validation_by_escrow_address(
+                db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+            )
+            if (
+                not escrow_validation
+                or escrow_validation.status != EscrowValidationStatuses.in_progress
+            ):
+                logger.error(
+                    "Unexpected event {} received for the escrow. "
+                    "There is no active validation now, ignoring (escrow_address={}) ".format(
+                        webhook.event_type,
+                        webhook.escrow_address,
+                    )
+                )
+                return
 
             rejected_assignments = cvat_db_service.get_assignments_by_id(
                 db_session, [t.assignment_id for t in event.assignments]
@@ -158,7 +190,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 escrow_address=webhook.escrow_address,
                 chain_id=webhook.chain_id,
                 status=ProjectStatuses.completed,
-                include_statuses=[ProjectStatuses.validation],
+                included_statuses=[ProjectStatuses.validation],
             )
 
             # TODO: need to update assignments,
