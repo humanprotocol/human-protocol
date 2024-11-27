@@ -65,7 +65,7 @@ def apply_local_development_patches():
         try:
             return OracleWebhookTypes(signature.split(":")[0])
         except (ValueError, TypeError):
-            return validate_oracle_webhook_signature(request, signature, webhook)
+            return await validate_oracle_webhook_signature(request, signature, webhook)
 
     import src.endpoints.webhook
 
