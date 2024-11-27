@@ -189,6 +189,17 @@ export class PayoutService {
         escrowAddress: string,
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      calculatePayouts: async (
+        manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
+    },
   };
 
   /**
