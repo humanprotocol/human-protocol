@@ -161,6 +161,9 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 include_statuses=[ProjectStatuses.validation],
             )
 
+            # TODO: need to update assignments,
+            # but there is no special db state for validated assignments
+
         case _:
             raise AssertionError(f"Unknown recording oracle event {webhook.event_type}")
 

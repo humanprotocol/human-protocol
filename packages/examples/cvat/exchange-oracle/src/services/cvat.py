@@ -206,14 +206,18 @@ def create_escrow_validations(session: Session, *, limit: int = 100):
         )
         .where(Project.status != ProjectStatuses.creation)
         .group_by(Project.escrow_address, Project.chain_id)
-    ).subquery()  # TODO: store in escrow creations
+    ).subquery()  # TODO: store counts in escrow creations or in a new "escrows" table
     # must not lock and doesn't need a lock (this information is static for created escrows)
 
     working_set = (
         select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
         .where(Project.status == ProjectStatuses.completed)
         .with_for_update(skip_locked=True)
-        .limit(limit)  # TODO: might be too small to finish at least 1 escrow
+        .limit(
+            # TODO: limit might be too small to finish at least 1 escrow.
+            # Maybe use max(project_counts_per_escrow) instead
+            limit
+        )
     )  # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
     # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
 
@@ -467,7 +471,7 @@ def finish_escrow_creations_by_escrow_address(
 
 def prepare_escrows_for_validation(
     session: Session, *, limit: int = 5
-) -> Sequence[tuple[str, str, int]]:
+) -> Sequence[tuple[str, int]]:
     subquery = (
         select(EscrowValidation.id)
         .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)

@@ -138,7 +138,6 @@ def _export_escrow_annotations(
         event=ExchangeOracleEvent_JobFinished(),
     )
 
-
     logger.info(
         f"The escrow ({escrow_address=}) is completed, "
         f"resulting annotations are processed successfully"
@@ -266,6 +265,7 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
             session,
             limit=CronConfig.track_escrow_validations_chunk_size,
         )
+
     for escrow_address, chain_id in escrow_validations:
         with SessionLocal.begin() as session:
             # Need to work in separate transactions for each escrow, as a failing DB call
@@ -275,6 +275,7 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
             if not handled:
                 # either escrow is invalid, or we couldn't get lock for projects/validations
                 continue
+
             # change status so validation won't be attempted again
             cvat_service.update_escrow_validation(
                 session,
