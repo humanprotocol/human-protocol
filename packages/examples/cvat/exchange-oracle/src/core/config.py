@@ -142,15 +142,12 @@ class CronConfig:
             "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
         )
     )
-    track_escrow_validations_int = int(
-        os.environ.get(
-            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
-        )
+    track_completed_escrows_chunk_size = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100)
     )
-    track_completed_escrows_chunk_size = os.environ.get(
-        # backward compatibility
-        "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
-        os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
+    track_escrow_validations_int = int(os.environ.get("TRACK_COMPLETED_ESCROWS_INT", 60))
+    track_escrow_validations_chunk_size = int(
+        os.environ.get("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 5)
     )
     track_completed_escrows_max_downloading_retries = int(
         os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
