@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 
 import uvicorn
 
@@ -22,6 +23,22 @@ def apply_local_development_patches():
     - Replaces `src.validators.signature.validate_oracle_webhook_signature` to always return
       `OracleWebhookTypes.exchange_oracle`.
     """
+    import src.crons._utils
+
+    def prepare_signed_message(
+        escrow_address,
+        chain_id,
+        message: str | None = None,
+        body: dict | None = None,
+    ) -> tuple[None, str]:
+        digest = (
+            hashlib.sha256((escrow_address + ":".join(map(str, (chain_id, message, body)))).encode())
+            .hexdigest()
+        )
+        return None, f"{OracleWebhookTypes.recording_oracle}:{digest}"
+
+    src.crons._utils.prepare_signed_message = prepare_signed_message
+
     logger = get_function_logger(apply_local_development_patches.__name__)
 
     from human_protocol_sdk.constants import ChainId
@@ -59,7 +76,9 @@ def apply_local_development_patches():
 
     src.schemas.webhook.validate_address = lambda x: x
 
-    async def lenient_validate_oracle_webhook_signature(request, signature, webhook):  # noqa: ARG001 (not relevant here)
+    async def lenient_validate_oracle_webhook_signature(
+        request, signature, webhook
+        ):  # noqa: ARG001 (not relevant here)
         try:
             return OracleWebhookTypes(signature.split(":")[0])
         except (ValueError, TypeError):
@@ -73,7 +92,9 @@ def apply_local_development_patches():
 
     import src.chain.escrow
 
-    def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:  # noqa: ARG001 (not relevant here)
+    def store_results(
+        chain_id: int, escrow_address: str, url: str, hash: str
+        ) -> None:  # noqa: ARG001 (not relevant here)
         logger.info(f"Would store results for escrow {escrow_address} on chain: {url}, {hash}")
 
     src.chain.escrow.store_results = store_results

@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 from pathlib import Path
 
 import uvicorn
@@ -22,6 +23,21 @@ def apply_local_development_patches():
     - Generates ECDSA keys if not already present for local JWT signing,
       and sets the public key in `Config.human_app_config`.
     """
+    import src.utils.webhooks
+
+    def prepare_signed_message(
+        escrow_address,
+        chain_id,
+        message: str | None = None,
+        body: dict | None = None,
+    ) -> tuple[None, str]:
+        digest = hashlib.sha256(
+            (escrow_address + ":".join(map(str, (chain_id, message, body)))).encode()
+        ).hexdigest()
+        return None, f"{OracleWebhookTypes.recording_oracle}:{digest}"
+
+    src.utils.webhooks.prepare_signed_message = prepare_signed_message
+
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.escrow import EscrowData, EscrowUtils
 
