@@ -22,6 +22,7 @@ from src.core.types import (
     TaskTypes,
 )
 from src.db import Base, ChildOf
+from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import (
@@ -198,6 +199,10 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
 
 
 def create_escrow_validations(session: Session, *, limit: int = 100) -> list[tuple[str, str, int]]:
+    if db_engine.driver != "psycopg2":
+        # Some of the code is likely to be only Postgres-related, e.g. UPDATE ... RETURNING as CTE
+        raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
+
     project_counts_per_escrow = (
         select(
             Project.escrow_address,
