@@ -31,10 +31,9 @@ def apply_local_development_patches():
         message: str | None = None,
         body: dict | None = None,
     ) -> tuple[None, str]:
-        digest = (
-            hashlib.sha256((escrow_address + ":".join(map(str, (chain_id, message, body)))).encode())
-            .hexdigest()
-        )
+        digest = hashlib.sha256(
+            (escrow_address + ":".join(map(str, (chain_id, message, body)))).encode()
+        ).hexdigest()
         return None, f"{OracleWebhookTypes.recording_oracle}:{digest}"
 
     src.crons._utils.prepare_signed_message = prepare_signed_message
@@ -77,8 +76,10 @@ def apply_local_development_patches():
     src.schemas.webhook.validate_address = lambda x: x
 
     async def lenient_validate_oracle_webhook_signature(
-        request, signature, webhook
-        ):  # noqa: ARG001 (not relevant here)
+        request,  # noqa: ARG001 (not relevant here)
+        signature,
+        webhook,  # noqa: ARG001 (not relevant here)
+    ):
         try:
             return OracleWebhookTypes(signature.split(":")[0])
         except (ValueError, TypeError):
@@ -93,8 +94,11 @@ def apply_local_development_patches():
     import src.chain.escrow
 
     def store_results(
-        chain_id: int, escrow_address: str, url: str, hash: str
-        ) -> None:  # noqa: ARG001 (not relevant here)
+        chain_id: int,  # noqa: ARG001 (not relevant here)
+        escrow_address: str,
+        url: str,
+        hash: str,
+    ) -> None:
         logger.info(f"Would store results for escrow {escrow_address} on chain: {url}, {hash}")
 
     src.chain.escrow.store_results = store_results
