@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
 import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
 import TopSearchBar from '@components/Search/TopBarSearch';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
   const navigate = useNavigate();
@@ -115,6 +116,10 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
         }}
       >
         <Box className="header-mobile-menu">
+          <Box display="flex" justifyContent="flex-end">
+            <CloseIcon onClick={() => toggleDrawer(false)} />
+          </Box>
+
           <div className="header-list-link">
             <div>
               <span
