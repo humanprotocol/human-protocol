@@ -405,6 +405,7 @@
     "image_points": "Points",
     "image_boxes": "Bounding Boxes",
     "image_boxes_from_points": "Bounding Boxes from Points",
-    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes"
+    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes",
+    "image_polygons": "Polygons"
   }
 }
