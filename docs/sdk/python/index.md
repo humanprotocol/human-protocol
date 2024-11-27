@@ -10,13 +10,13 @@ contain the root `toctree` directive. -->
 To install the Human Protocol SDK, run the following command:
 
 ```bash
-pip install human-protocol-sdk
+pip install human_protocol_sdk
 ```
 
 In case you want to use the features of the agreement module, make sure to install corresponding extras as well.
 
 ```bash
-pip install human-protocol-sdk[agreement]
+pip install human_protocol_sdk[agreement]
 ```
 
 ## Contents:

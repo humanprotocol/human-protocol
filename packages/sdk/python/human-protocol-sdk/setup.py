@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="human-protocol-sdk",
+    name="human_protocol_sdk",
     version="0.0.0",
     author="HUMAN Protocol",
     description="A python library to launch escrow contracts to the HUMAN network.",

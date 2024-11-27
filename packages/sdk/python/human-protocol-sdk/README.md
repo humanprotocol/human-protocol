@@ -7,7 +7,7 @@ Python SDK to interact with [Human Protocol](https://www.humanprotocol.org/)
 [Python3](https://www.python.org/) is required.
 
 ```bash
-pip install human-protocol-sdk
+pip install human_protocol_sdk
 ```
 
 ## Getting Started
