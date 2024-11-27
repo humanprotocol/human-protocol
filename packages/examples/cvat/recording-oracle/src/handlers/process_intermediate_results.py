@@ -61,6 +61,7 @@ _TaskIdToValidationLayout = dict[int, cvat_api.models.ITaskValidationLayoutRead]
 _TaskIdToHoneypotsMapping = dict[int, _HoneypotFrameToValFrame]
 _TaskIdToFrameNames = dict[int, list[str]]
 
+
 @dataclass
 class _ValidationResult:
     job_results: _JobResults
@@ -346,9 +347,7 @@ class _TaskValidator:
             gt_stats=self._require_field(self._gt_stats),
             task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
             task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
-            task_id_to_frame_names=self._require_field(
-                self._task_id_to_sequence_of_frame_names
-            ),
+            task_id_to_frame_names=self._require_field(self._task_id_to_sequence_of_frame_names),
         )
 
 
@@ -433,16 +432,16 @@ def process_intermediate_results(  # noqa: PLR0912
             for rejected_job_id in rejected_job_ids:
                 job_frame_range = job_id_to_frame_range[rejected_job_id]
                 cvat_task_id = job_id_to_task_id[rejected_job_id]
-                task_honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
+                task_honeypots_mapping = validation_result.task_id_to_honeypots_mapping[
+                    cvat_task_id
+                ]
                 job_honeypots = sorted(set(task_honeypots_mapping.keys()) & set(job_frame_range))
                 validation_frames = [
                     val_frame
                     for honeypot, val_frame in task_honeypots_mapping.items()
                     if honeypot in job_honeypots
                 ]
-                sorted_task_frame_names = validation_result.task_id_to_frame_names[
-                    cvat_task_id
-                ]
+                sorted_task_frame_names = validation_result.task_id_to_frame_names[cvat_task_id]
 
                 for val_frame in validation_frames:
                     val_frame_name = sorted_task_frame_names[val_frame]
@@ -486,17 +485,9 @@ def process_intermediate_results(  # noqa: PLR0912
                 )
                 break
 
-            task_updated_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
-
-            # validation frames may be repeated in the task
-            task_honeypot_to_position: dict[int, list[int]] = {
-                (honeypot, validation_frame)
-                for (honeypot, validation_frame) in zip(
-                    task_validation_layout.validation_frames,
-                    task_updated_honeypot_real_frames,
-                    strict=True
-                )
-            } # honeypot -> list index
+            task_honeypot_to_index: dict[int, int] = {
+                honeypot: i for i, honeypot in enumerate(task_validation_layout.validation_frames)
+            }  # honeypot -> list index
 
             task_honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
 
@@ -506,6 +497,7 @@ def process_intermediate_results(  # noqa: PLR0912
                 if j.job_id in rejected_job_ids and j.task_id == cvat_task_id
             ]
 
+            task_updated_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
             for job in task_rejected_jobs:
                 job_frame_range = job.job_frame_range
                 job_honeypots = sorted(set(task_honeypots_mapping.keys()) & set(job_frame_range))
@@ -522,7 +514,9 @@ def process_intermediate_results(  # noqa: PLR0912
                         job_validation_frames_to_keep.append(validation_frame)
 
                 # choose new unique validation frames for the job
-                assert not (set(job_validation_frames_to_replace) & set(task_good_validation_frames))
+                assert not (
+                    set(job_validation_frames_to_replace) & set(task_good_validation_frames)
+                )
                 job_available_validation_frames = list(
                     set(task_good_validation_frames) - set(job_validation_frames_to_keep)
                 )
@@ -537,14 +531,16 @@ def process_intermediate_results(  # noqa: PLR0912
                 for honeypot, new_validation_frame in zip(
                     job_validation_frames_to_replace, new_job_validation_frames, strict=True
                 ):
-                    honeypot_index = task_honeypot_to_position[honeypot]
+                    honeypot_index = task_honeypot_to_index[honeypot]
                     task_updated_honeypot_real_frames[honeypot_index] = new_validation_frame
 
                 # Make sure honeypots do not repeat in jobs
-                assert len(set(
-                    task_updated_honeypot_real_frames[task_honeypot_to_position[honeypot]]
-                    for honeypot in job_honeypots
-                )) == len(job_honeypots)
+                assert len(
+                    {
+                        task_updated_honeypot_real_frames[task_honeypot_to_index[honeypot]]
+                        for honeypot in job_honeypots
+                    }
+                ) == len(job_honeypots)
 
             cvat_api.update_task_validation_layout(
                 cvat_task_id,
