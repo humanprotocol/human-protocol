@@ -284,7 +284,9 @@ def create_escrow_validations(session: Session, *, limit: int = 100):
         .on_conflict_do_update(
             index_elements=("escrow_address", "chain_id"),
             set_={
+                # Reset the existing entry
                 "status": EscrowValidationStatuses.awaiting,
+                "attempts": 0,
             },
             where=EscrowValidation.status != EscrowValidationStatuses.awaiting,
         )

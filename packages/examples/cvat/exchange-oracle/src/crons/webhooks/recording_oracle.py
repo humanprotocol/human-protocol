@@ -164,6 +164,14 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
             # TODO: need to update assignments,
             # but there is no special db state for validated assignments
 
+            # TODO: maybe delete instead
+            cvat_db_service.update_escrow_validation(
+                db_session,
+                webhook.escrow_address,
+                webhook.chain_id,
+                status=EscrowValidationStatuses.completed,
+            )
+
         case _:
             raise AssertionError(f"Unknown recording oracle event {webhook.event_type}")
 
