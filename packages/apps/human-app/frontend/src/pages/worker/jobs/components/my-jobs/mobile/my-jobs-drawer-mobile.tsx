@@ -16,9 +16,11 @@ import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: number[] | undefined;
 }
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: DrawerMobileProps) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
@@ -111,7 +113,7 @@ export function MyJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <MyJobsNetworkFilterMobile />
+          <MyJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider

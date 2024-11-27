@@ -11,6 +11,7 @@ import { AvailableJobsTable } from '@/pages/worker/jobs/components/available-job
 import { MyJobsDrawerMobile } from '@/pages/worker/jobs/components/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-drawer-mobile';
 import { useGetOracles } from '@/api/services/worker/oracles';
+import { useGetUiConfig } from '@/api/services/worker/get-ui-config';
 import { PageCardLoader } from '@/components/ui/page-card';
 import { useColorMode } from '@/hooks/use-color-mode';
 import { useGetOraclesNotifications } from '@/hooks/use-get-oracles-notifications';
@@ -29,6 +30,7 @@ function generateTabA11yProps(index: number) {
 export function JobsPage() {
   const { isDarkMode } = useColorMode();
   const { data, isError, isPending, error } = useGetOracles();
+  const { data: uiConfigData, isPending: isPendingUiConfig } = useGetUiConfig();
   const { address: oracle_address } = useParams<{ address: string }>();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
@@ -36,6 +38,7 @@ export function JobsPage() {
   const [selectedTab, setSelectedTab] = useState<'availableJobs' | 'myJobs'>(
     'availableJobs'
   );
+
   const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
     useState(false);
   const { onError } = useGetOraclesNotifications();
@@ -61,7 +64,7 @@ export function JobsPage() {
     ({ address }) => address === oracle_address
   )?.name;
 
-  if (isPending) {
+  if (isPending || isPendingUiConfig) {
     return <PageCardLoader />;
   }
 
@@ -70,10 +73,12 @@ export function JobsPage() {
       <Modal isOpen={isMobileFilterDrawerOpen}>
         {selectedTab === 'availableJobs' ? (
           <AvailableJobsDrawerMobile
+            chainIdsEnabled={uiConfigData?.chainIdsEnabled}
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
           />
         ) : (
           <MyJobsDrawerMobile
+            chainIdsEnabled={uiConfigData?.chainIdsEnabled}
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
           />
         )}
@@ -137,12 +142,15 @@ export function JobsPage() {
                       <>
                         {isMobile ? (
                           <AvailableJobsTableMobile
+                            chainIdsEnabled={uiConfigData?.chainIdsEnabled}
                             setIsMobileFilterDrawerOpen={
                               setIsMobileFilterDrawerOpen
                             }
                           />
                         ) : (
-                          <AvailableJobsTable />
+                          <AvailableJobsTable
+                            chainIdsEnabled={uiConfigData?.chainIdsEnabled}
+                          />
                         )}
                       </>
                     )}
@@ -154,12 +162,15 @@ export function JobsPage() {
                       <>
                         {isMobile ? (
                           <MyJobsTableMobile
+                            chainIdsEnabled={uiConfigData?.chainIdsEnabled}
                             setIsMobileFilterDrawerOpen={
                               setIsMobileFilterDrawerOpen
                             }
                           />
                         ) : (
-                          <MyJobsTable />
+                          <MyJobsTable
+                            chainIdsEnabled={uiConfigData?.chainIdsEnabled}
+                          />
                         )}
                       </>
                     )}

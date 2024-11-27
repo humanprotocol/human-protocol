@@ -15,9 +15,11 @@ import { useColorMode } from '@/hooks/use-color-mode';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: number[] | undefined;
 }
 export function AvailableJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: DrawerMobileProps) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
@@ -109,7 +111,7 @@ export function AvailableJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsNetworkFilterMobile />
+          <AvailableJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider

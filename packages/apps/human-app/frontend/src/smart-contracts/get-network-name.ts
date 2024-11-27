@@ -1,9 +1,15 @@
-import { MainnetChains, TestnetChains } from '@/smart-contracts/chains';
+import { AllTestnetsChains, AllMainnetChains } from '@/smart-contracts/chains';
 import { env } from '@/shared/env';
 
-export const getNetworkName = (): string => {
-  if (env.VITE_NETWORK === 'testnet') {
-    return TestnetChains[0]?.name;
+export const getNetworkName = (
+  chainIdsEnabled: number[] | undefined,
+  chainId: number
+): string | null => {
+  if (!chainIdsEnabled) {
+    return null;
   }
-  return MainnetChains[0]?.name;
+  if (env.VITE_NETWORK === 'testnet') {
+    return AllTestnetsChains.find((el) => el.chainId === chainId)?.name ?? '';
+  }
+  return AllMainnetChains.find((el) => el.chainId === chainId)?.name ?? '';
 };

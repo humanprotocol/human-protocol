@@ -22,10 +22,12 @@ import { AvailableJobsAssignJobButton } from '@/pages/worker/jobs/components/ava
 
 interface AvailableJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: number[] | undefined;
 }
 
 export function AvailableJobsTableMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: AvailableJobsTableMobileProps) {
   const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<AvailableJob[]>([]);
@@ -138,7 +140,7 @@ export function AvailableJobsTableMobile({
                       color={colorPalette.secondary.light}
                       variant="body2"
                     >
-                      {getNetworkName()}
+                      {getNetworkName(chainIdsEnabled, d.chain_id)}
                     </Typography>
                   </ListItem>
                 </Grid>

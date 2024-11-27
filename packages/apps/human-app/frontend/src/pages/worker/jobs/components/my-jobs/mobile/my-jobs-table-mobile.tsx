@@ -28,10 +28,12 @@ import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
+  chainIdsEnabled: number[] | undefined;
 }
 
 export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
+  chainIdsEnabled,
 }: MyJobsTableMobileProps) {
   const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<MyJob[]>([]);
@@ -166,7 +168,7 @@ export function MyJobsTableMobile({
                         color={colorPalette.primary.light}
                         variant="body2"
                       >
-                        {getNetworkName()}
+                        {getNetworkName(chainIdsEnabled, d.chain_id)}
                       </Typography>
                     </ListItem>
                     <ListItem label={t('worker.jobs.status')}>

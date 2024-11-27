@@ -71,6 +71,9 @@ export const apiPaths = {
     registrationInExchangeOracle: {
       path: '/exchange-oracle-registration',
     },
+    uiConfig: {
+      path: '/ui-config',
+    },
   },
   operator: {
     web3Auth: {

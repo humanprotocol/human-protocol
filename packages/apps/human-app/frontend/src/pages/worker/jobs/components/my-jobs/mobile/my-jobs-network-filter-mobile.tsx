@@ -1,15 +1,17 @@
 /* eslint-disable camelcase --- ... */
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
-import { chains } from '@/smart-contracts/chains';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
+import { useGetAllNetworks } from '@/hooks/use-get-all-networks';
 
-const allNetworks = chains.map(({ chainId, name }) => ({
-  option: chainId,
-  name,
-}));
+interface MyJobsNetworkFilterMobileProps {
+  chainIdsEnabled: number[] | undefined;
+}
 
-export function MyJobsNetworkFilterMobile() {
+export function MyJobsNetworkFilterMobile({
+  chainIdsEnabled,
+}: MyJobsNetworkFilterMobileProps) {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
+  const { allNetworks } = useGetAllNetworks(chainIdsEnabled);
 
   return (
     <Filtering

@@ -34,12 +34,18 @@ import { useRefreshTasksMutation } from '@/api/services/worker/refresh-tasks';
 import { StatusChip } from '@/pages/worker/jobs/components/status-chip';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
+interface MyJobsTableProps {
+  chainIdsEnabled: number[] | undefined;
+}
+
 const getColumnsDefinition = ({
   refreshData,
   isRefreshTasksPending,
+  chainIdsEnabled,
 }: {
   refreshData: () => void;
   isRefreshTasksPending: boolean;
+  chainIdsEnabled: number[] | undefined;
 }): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -54,8 +60,8 @@ const getColumnsDefinition = ({
     accessorKey: 'network',
     header: t('worker.jobs.network'),
     size: 100,
-    Cell: () => {
-      return getNetworkName();
+    Cell: (props) => {
+      return getNetworkName(chainIdsEnabled, props.row.original.chain_id);
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {
@@ -64,7 +70,9 @@ const getColumnsDefinition = ({
             {...props}
             headerText={t('worker.jobs.network')}
             iconType="filter"
-            popoverContent={<MyJobsNetworkFilter />}
+            popoverContent={
+              <MyJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
+            }
           />
         );
       },
@@ -205,7 +213,7 @@ const getColumnsDefinition = ({
   },
 ];
 
-export function MyJobsTable() {
+export function MyJobsTable({ chainIdsEnabled }: MyJobsTableProps) {
   const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,
@@ -257,6 +265,7 @@ export function MyJobsTable() {
     columns: getColumnsDefinition({
       refreshData: refreshTasks(oracle_address ?? ''),
       isRefreshTasksPending,
+      chainIdsEnabled,
     }),
     data: memoizedTableDataResults,
     state: {
