@@ -66,6 +66,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9010 dev devdevdev;
+      /usr/bin/mc mb myminio/manifests;
       /usr/bin/mc anonymous set public myminio/manifests;
       /usr/bin/mc mb myminio/excor-data;
       /usr/bin/mc anonymous set public myminio/excor-data;
