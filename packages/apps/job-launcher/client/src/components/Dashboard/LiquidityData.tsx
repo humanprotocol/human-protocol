@@ -1,7 +1,6 @@
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React from 'react';
-import { useAppSelector } from '../../state';
+import { JobStatisticsDto } from '../../types';
 
 const StyledBox = styled(Box)`
   border-radius: 8px;
@@ -16,21 +15,23 @@ const StyledBox = styled(Box)`
   justify-content: space-between;
 `;
 
-export const LiquidityData = () => {
-  const { liquidity } = useAppSelector((state) => state.dashboard);
-
+export const LiquidityData = ({
+  stats,
+}: {
+  stats: JobStatisticsDto | undefined;
+}) => {
   return (
     <Card>
       <CardContent>
         <Typography fontWeight={500} mb={3}>
-          Liquidity data
+          Protocol metrics
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <StyledBox>
-              {liquidity?.avgTimeToComplete ? (
+              {stats?.averageCompletionTime ? (
                 <Typography variant="h4" fontWeight={600} mb={4}>
-                  {liquidity?.avgTimeToComplete}h
+                  {(stats?.averageCompletionTime / 60).toFixed(2)}h
                 </Typography>
               ) : (
                 <Typography
@@ -47,28 +48,7 @@ export const LiquidityData = () => {
               </Typography>
             </StyledBox>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StyledBox>
-              {liquidity?.performanceAccuracy ? (
-                <Typography variant="h4" fontWeight={600} mb={4}>
-                  {liquidity?.performanceAccuracy}/10
-                </Typography>
-              ) : (
-                <Typography
-                  fontWeight={600}
-                  variant="h4"
-                  color="#CBCFE6"
-                  mb={4}
-                >
-                  ---
-                </Typography>
-              )}
-              <Typography fontSize={10} fontWeight={500} lineHeight="14px">
-                Performance Accuracy
-              </Typography>
-            </StyledBox>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <Box
               sx={{
                 borderRadius: '8px',
@@ -83,11 +63,17 @@ export const LiquidityData = () => {
                 justifyContent: 'space-between',
               }}
             >
-              {liquidity?.jobCostRange ? (
+              {stats?.fundAmountStats ? (
                 <Box sx={{ mb: 1 }}>
-                  <Typography color="success.main">5 MINIMUM</Typography>
-                  <Typography color="warning.main">10 AVERAGE</Typography>
-                  <Typography color="error.main">15 MAXIMUM</Typography>
+                  <Typography color="success.main">
+                    {stats?.fundAmountStats.minimum.toFixed(2)} MINIMUM
+                  </Typography>
+                  <Typography color="warning.main">
+                    {stats?.fundAmountStats.average.toFixed(2)} AVERAGE
+                  </Typography>
+                  <Typography color="error.main">
+                    {stats?.fundAmountStats.maximum.toFixed(2)} MAXIMUM
+                  </Typography>
                 </Box>
               ) : (
                 <Box sx={{ mb: 1 }}>
@@ -101,11 +87,11 @@ export const LiquidityData = () => {
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <StyledBox>
-              {liquidity?.totalJobs ? (
+              {stats?.jobCounts.totalJobs ? (
                 <Typography variant="h4" fontWeight={600} mb={4}>
-                  {liquidity?.totalJobs}
+                  {stats?.jobCounts.totalJobs}
                 </Typography>
               ) : (
                 <Typography
