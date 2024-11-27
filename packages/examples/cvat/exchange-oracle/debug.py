@@ -1,6 +1,8 @@
 import datetime
 import hashlib
+import json
 from pathlib import Path
+from typing import Any
 
 import uvicorn
 
@@ -108,6 +110,21 @@ def apply_local_development_patches():
         public_key = human_app_public_key_file.read_text()
 
     Config.human_app_config.jwt_public_key = public_key
+
+    import src.endpoints.authentication
+
+    original_decode_token = src.endpoints.authentication.TokenAuthenticator._decode_token
+
+    def decode_plain_json_token(self, token) -> dict[str, Any]:
+        """
+        Allows Authentication: Bearer {"wallet_address": "...", "email": "..."}
+        """
+        try:
+            return json.loads(token)
+        except (ValueError, TypeError):
+            return original_decode_token(self, token)
+
+    src.endpoints.authentication.TokenAuthenticator._decode_token = decode_plain_json_token
 
 
 if __name__ == "__main__":
