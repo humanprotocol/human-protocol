@@ -3,18 +3,18 @@ import Typography from '@mui/material/Typography';
 import { useGeneralStats } from '@services/api/use-general-stats';
 
 export function Holders() {
-	const { data, status } = useGeneralStats();
+  const { data, status } = useGeneralStats();
 
-	return (
-		<div>
-			<Typography variant="body1" component="p">
-				Holders
-			</Typography>
-			<div className="count">
-				{status === 'success' && <FormatNumber value={data.totalHolders} />}
-				{status === 'pending' && '...'}
-				{status === 'error' && 'No data'}
-			</div>
-		</div>
-	);
+  return (
+    <div>
+      <Typography variant="body1" component="p">
+        Holders
+      </Typography>
+      <div className="count">
+        {status === 'success' && <FormatNumber value={data.totalHolders} />}
+        {status === 'pending' && '...'}
+        {status === 'error' && 'No data'}
+      </div>
+    </div>
+  );
 }

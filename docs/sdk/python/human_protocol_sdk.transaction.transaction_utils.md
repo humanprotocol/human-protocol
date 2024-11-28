@@ -23,11 +23,17 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
+### *class* human_protocol_sdk.transaction.transaction_utils.InternalTransaction(from_address, to_address, value, method, receiver, escrow, token)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method)
+#### \_\_init_\_(from_address, to_address, value, method, receiver, escrow, token)
+
+### *class* human_protocol_sdk.transaction.transaction_utils.TransactionData(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method, receiver, escrow, token, internal_transactions)
+
+Bases: `object`
+
+#### \_\_init_\_(chain_id, block, tx_hash, from_address, to_address, timestamp, value, method, receiver, escrow, token, internal_transactions)
 
 ### *class* human_protocol_sdk.transaction.transaction_utils.TransactionUtils
 

@@ -1,6 +1,7 @@
 import { DataSaved } from '../../generated/KVStore/KVStore';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, Address, BigInt } from '@graphprotocol/graph-ts';
+import { ethereum, Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
+import { generateUniqueHash } from '../../tests/utils';
 
 export function createDataSavedEvent(
   sender: string,
@@ -9,8 +10,17 @@ export function createDataSavedEvent(
   timestamp: BigInt
 ): DataSaved {
   const newDataSavedEvent = changetype<DataSaved>(newMockEvent());
+  newDataSavedEvent.transaction.hash = generateUniqueHash(
+    sender.toString(),
+    timestamp,
+    newDataSavedEvent.transaction.nonce
+  );
 
+  newDataSavedEvent.transaction.value = BigInt.fromI32(0);
   newDataSavedEvent.block.timestamp = timestamp;
+  newDataSavedEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
 
   newDataSavedEvent.parameters = [];
   newDataSavedEvent.parameters.push(

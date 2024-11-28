@@ -31,6 +31,7 @@ module.exports = {
     ],
     'eslint-comments/require-description': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
+    '@tanstack/query/exhaustive-deps': 'off',
     // allow imports from material react table library
     camelcase: ['error', { allow: ['MRT_'] }],
     'react/jsx-pascal-case': ['error', { ignore: ['MRT_'] }],

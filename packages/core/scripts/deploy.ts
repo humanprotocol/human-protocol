@@ -14,23 +14,14 @@ async function main() {
     'HMT'
   );
   await HMTokenContract.waitForDeployment();
-  console.log('HMToken Address: ', await HMTokenContract.getAddress());
+  const hmtAddress = await HMTokenContract.getAddress();
+  console.log('HMToken Address: ', hmtAddress);
 
   const Staking = await ethers.getContractFactory('Staking');
-  const stakingContract = await upgrades.deployProxy(
-    Staking,
-    [await HMTokenContract.getAddress(), 1, 10],
-    { initializer: 'initialize', kind: 'uups' }
-  );
+  const stakingContract = await Staking.deploy(hmtAddress, 1, 1000, 1);
 
   await stakingContract.waitForDeployment();
-  console.log('Staking Proxy Address: ', await stakingContract.getAddress());
-  console.log(
-    'Staking Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(
-      await stakingContract.getAddress()
-    )
-  );
+  console.log('Staking Address: ', await stakingContract.getAddress());
 
   const EscrowFactory = await ethers.getContractFactory(
     'contracts/EscrowFactory.sol:EscrowFactory'
@@ -57,27 +48,6 @@ async function main() {
   await kvStoreContract.waitForDeployment();
 
   console.log('KVStore Address: ', await kvStoreContract.getAddress());
-
-  const RewardPool = await ethers.getContractFactory('RewardPool');
-  const rewardPoolContract = await upgrades.deployProxy(
-    RewardPool,
-    [await HMTokenContract.getAddress(), await stakingContract.getAddress(), 1],
-    { initializer: 'initialize', kind: 'uups' }
-  );
-  await rewardPoolContract.waitForDeployment();
-  console.log(
-    'Reward Pool Proxy Address: ',
-    await rewardPoolContract.getAddress()
-  );
-  console.log(
-    'Reward Pool Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(
-      await rewardPoolContract.getAddress()
-    )
-  );
-
-  // Configure RewardPool in Staking
-  await stakingContract.setRewardPool(await rewardPoolContract.getAddress());
 
   for (const account of accounts) {
     await (HMTokenContract as HMToken).transfer(

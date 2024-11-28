@@ -20,13 +20,13 @@
 
 ### getTransaction()
 
-> `static` **getTransaction**(`chainId`, `hash`): `Promise`\<`ITransaction`\>
+> `static` **getTransaction**(`chainId`, `hash`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
 
 This function returns the transaction data for the given hash.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 The chain ID.
 
@@ -36,7 +36,7 @@ The transaction hash.
 
 #### Returns
 
-`Promise`\<`ITransaction`\>
+`Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
 
 Returns the transaction details.
 
@@ -50,13 +50,13 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 #### Defined in
 
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 ***
 
 ### getTransactions()
 
-> `static` **getTransactions**(`filter`): `Promise`\<`ITransaction`[]\>
+> `static` **getTransactions**(`filter`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
 This function returns all transaction details based on the provided filter.
 
@@ -93,13 +93,13 @@ type ITransaction = {
 
 #### Parameters
 
-• **filter**: `ITransactionsFilter`
+• **filter**: [`ITransactionsFilter`](../../interfaces/interfaces/ITransactionsFilter.md)
 
 Filter for the transactions.
 
 #### Returns
 
-`Promise`\<`ITransaction`[]\>
+`Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
 
 Returns an array with all the transaction details.
 
@@ -121,4 +121,4 @@ const transactions = await TransactionUtils.getTransactions(filter);
 
 #### Defined in
 
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)

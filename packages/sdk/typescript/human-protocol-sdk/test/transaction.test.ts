@@ -31,6 +31,14 @@ describe('TransactionUtils', () => {
       timestamp: 1625247600n,
       value: '1000000000000000000',
       method: 'transfer',
+      internalTransactions: [
+        {
+          from: '0x1234567890123456789012345678901234567890',
+          to: '0x1234567890123456789012345678901234567891',
+          value: '1000000000000000000',
+          method: 'transfer',
+        },
+      ],
     };
 
     test('should return transaction information', async () => {
@@ -74,12 +82,20 @@ describe('TransactionUtils', () => {
   describe('getTransactions', () => {
     const mockTransaction: ITransaction = {
       block: 12345n,
-      hash: '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
+      txHash: '0x62dD51230A30401C455c8398d06F85e4EaB6309f',
       from: '0x1234567890123456789012345678901234567890',
       to: '0x0987654321098765432109876543210987654321',
       timestamp: 1625247600n,
       value: '1000000000000000000',
       method: 'transfer',
+      internalTransactions: [
+        {
+          from: '0x1234567890123456789012345678901234567890',
+          to: '0x1234567890123456789012345678901234567891',
+          value: '1000000000000000000',
+          method: 'transfer',
+        },
+      ],
     };
 
     test('should return an array of transactions', async () => {

@@ -8,6 +8,8 @@ both the contracts and subgraph.
 * [human_protocol_sdk.transaction.transaction_utils module](human_protocol_sdk.transaction.transaction_utils.md)
   * [Code Example](human_protocol_sdk.transaction.transaction_utils.md#code-example)
   * [Module](human_protocol_sdk.transaction.transaction_utils.md#module)
+  * [`InternalTransaction`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.InternalTransaction)
+    * [`InternalTransaction.__init__()`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.InternalTransaction.__init__)
   * [`TransactionData`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData)
     * [`TransactionData.__init__()`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionData.__init__)
   * [`TransactionUtils`](human_protocol_sdk.transaction.transaction_utils.md#human_protocol_sdk.transaction.transaction_utils.TransactionUtils)

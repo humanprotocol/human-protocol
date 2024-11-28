@@ -1,4 +1,4 @@
-export const SUPPORTED_TOKEN_SYMBOLS = ['HMT'];
+export const SUPPORTED_TOKEN_SYMBOLS = ['HMT', 'USDC'];
 
 export const ERROR_MESSAGES = {
   weakPassword:
@@ -32,3 +32,5 @@ export const LOCAL_STORAGE_KEYS = {
   accessToken: 'HUMAN_JOB_LAUNCHER_ACCESS_TOKEN',
   refreshToken: 'HUMAN_JOB_LAUNCHER_REFRESH_TOKEN',
 };
+
+export const DASHBOARD_URL = 'https://dashboard.humanprotocol.org/';

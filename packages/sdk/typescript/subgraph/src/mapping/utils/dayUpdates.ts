@@ -14,7 +14,6 @@ export function getEventDayData(event: ethereum.Event): EventDayData {
     eventDayData = new EventDayData(eventDayDataID);
     eventDayData.timestamp = dayStartTimestamp;
     eventDayData.dailyFundEventCount = ZERO_BI;
-    eventDayData.dailySetupEventCount = ZERO_BI;
     eventDayData.dailyStoreResultsEventCount = ZERO_BI;
     eventDayData.dailyBulkPayoutEventCount = ZERO_BI;
     eventDayData.dailyPendingStatusEventCount = ZERO_BI;

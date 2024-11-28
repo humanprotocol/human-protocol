@@ -11,7 +11,7 @@ async function main() {
   const Staking = await ethers.getContractFactory('Staking');
   const stakingContract = await upgrades.deployProxy(
     Staking,
-    [hmtAddress, 1, 1],
+    [hmtAddress, 1, 1, 1],
     { initializer: 'initialize', kind: 'uups' }
   );
   await stakingContract.waitForDeployment();
@@ -47,27 +47,6 @@ async function main() {
   const kvStoreContract = await KVStore.deploy();
 
   console.log('KVStore Address: ', await kvStoreContract.getAddress());
-
-  const RewardPool = await ethers.getContractFactory('RewardPool');
-  const rewardPoolContract = await upgrades.deployProxy(
-    RewardPool,
-    [hmtAddress, await stakingContract.getAddress(), 1],
-    { initializer: 'initialize', kind: 'uups' }
-  );
-  await rewardPoolContract.waitForDeployment();
-  console.log(
-    'Reward Pool Proxy Address: ',
-    await rewardPoolContract.getAddress()
-  );
-  console.log(
-    'Reward Pool Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(
-      await rewardPoolContract.getAddress()
-    )
-  );
-
-  // Configure RewardPool in Staking
-  await stakingContract.setRewardPool(await rewardPoolContract.getAddress());
 }
 
 main().catch((error) => {

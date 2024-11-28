@@ -38,7 +38,7 @@ export const MainnetChains: ChainWithAddresses[] = [
   {
     chainId: 137,
     name: 'Polygon',
-    rpcUrl: 'https://polygon-rpc.com/',
+    rpcUrl: 'https://polygon-rpc.com',
     currency: 'MATIC',
     explorerUrl: 'https://polygonscan.com/',
     addresses: MainnetContracts.Polygon,

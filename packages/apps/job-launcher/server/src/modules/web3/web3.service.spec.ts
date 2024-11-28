@@ -323,6 +323,15 @@ describe('Web3Service', () => {
     });
 
     it('should return matching oracle addresses based on job type', async () => {
+      const mockLeader = {
+        address: '0x0000000000000000000000000000000000000000',
+        reputationNetworks: [
+          '0x0000000000000000000000000000000000000001',
+          '0x0000000000000000000000000000000000000002',
+          '0x0000000000000000000000000000000000000003',
+        ],
+      };
+
       const mockLeader1 = {
         address: '0x0000000000000000000000000000000000000001',
         jobTypes: ['Points'],
@@ -337,6 +346,7 @@ describe('Web3Service', () => {
       };
 
       (OperatorUtils.getLeader as jest.Mock)
+        .mockResolvedValueOnce(mockLeader)
         .mockResolvedValueOnce(mockLeader1)
         .mockResolvedValueOnce(mockLeader2)
         .mockResolvedValueOnce(mockLeader3);
@@ -350,10 +360,14 @@ describe('Web3Service', () => {
         '0x0000000000000000000000000000000000000001',
         '0x0000000000000000000000000000000000000003',
       ]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(3);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(4);
     });
 
-    it('should return an empty array if no oracles match the job type', async () => {
+    it('should return an empty array if reputation networks not found for chain', async () => {
+      const mockLeader = {
+        address: '0x0000000000000000000000000000000000000000',
+      };
+
       const mockLeader1 = {
         address: '0x0000000000000000000000000000000000000001',
         jobTypes: ['NewJobType1'],
@@ -368,6 +382,7 @@ describe('Web3Service', () => {
       };
 
       (OperatorUtils.getLeader as jest.Mock)
+        .mockResolvedValueOnce(mockLeader)
         .mockResolvedValueOnce(mockLeader1)
         .mockResolvedValueOnce(mockLeader2)
         .mockResolvedValueOnce(mockLeader3);
@@ -378,7 +393,45 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(3);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return an empty array if no oracles match the job type', async () => {
+      const mockLeader = {
+        address: '0x0000000000000000000000000000000000000000',
+        reputationNetworks: [
+          '0x0000000000000000000000000000000000000001',
+          '0x0000000000000000000000000000000000000002',
+          '0x0000000000000000000000000000000000000003',
+        ],
+      };
+
+      const mockLeader1 = {
+        address: '0x0000000000000000000000000000000000000001',
+        jobTypes: ['NewJobType1'],
+      };
+      const mockLeader2 = {
+        address: '0x0000000000000000000000000000000000000002',
+        jobTypes: ['NewJobType2'],
+      };
+      const mockLeader3 = {
+        address: '0x0000000000000000000000000000000000000003',
+        jobTypes: ['NewJobType3'],
+      };
+
+      (OperatorUtils.getLeader as jest.Mock)
+        .mockResolvedValueOnce(mockLeader)
+        .mockResolvedValueOnce(mockLeader1)
+        .mockResolvedValueOnce(mockLeader2)
+        .mockResolvedValueOnce(mockLeader3);
+
+      const result = await web3Service.getReputationOraclesByJobType(
+        ChainId.POLYGON_AMOY,
+        'Points',
+      );
+
+      expect(result).toEqual([]);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
     });
 
     it('should handle errors from getLeader and return an empty array', async () => {
@@ -392,7 +445,7 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(3);
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
     });
 
     it('should return an empty array if no reputation oracles are configured', async () => {
@@ -406,7 +459,7 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).not.toHaveBeenCalled();
+      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
     });
   });
 });

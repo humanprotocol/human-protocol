@@ -3,18 +3,18 @@ import Typography from '@mui/material/Typography';
 import { FormatNumber } from '@components/Home/FormatNumber';
 
 export function TotalNumberOfTasks() {
-	const { data, status } = useHcaptchaGeneralStats();
+  const { data, status } = useHcaptchaGeneralStats();
 
-	return (
-		<div>
-			<Typography variant="body1" component="p">
-				Total Number of Tasks
-			</Typography>
-			<div className="count">
-				{status === 'success' && <FormatNumber value={data.solved} />}
-				{status === 'pending' && '...'}
-				{status === 'error' && 'No data'}
-			</div>
-		</div>
-	);
+  return (
+    <div>
+      <Typography variant="body1" component="p">
+        Total Number of Tasks
+      </Typography>
+      <div className="count">
+        {status === 'success' && <FormatNumber value={data.solved} />}
+        {status === 'pending' && '...'}
+        {status === 'error' && 'No data'}
+      </div>
+    </div>
+  );
 }

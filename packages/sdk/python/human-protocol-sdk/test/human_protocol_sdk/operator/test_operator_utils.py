@@ -28,22 +28,22 @@ class TestOperatorUtils(unittest.TestCase):
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
                                 "amountStaked": "100",
-                                "amountAllocated": "50",
                                 "amountLocked": "25",
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
                                 "publicKey": None,
                                 "webhookUrl": None,
+                                "website": None,
                                 "url": None,
                                 "jobTypes": "type1,type2",
                                 "registrationNeeded": True,
                                 "registrationInstructions": "www.google.com",
+                                "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
                     }
@@ -62,22 +62,22 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].amount_staked, 100)
-            self.assertEqual(leaders[0].amount_allocated, 50)
             self.assertEqual(leaders[0].amount_locked, 25)
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
             self.assertEqual(leaders[0].fee, None)
             self.assertEqual(leaders[0].public_key, None)
             self.assertEqual(leaders[0].webhook_url, None)
+            self.assertEqual(leaders[0].website, None)
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(leaders[0].job_types, ["type1", "type2"])
             self.assertEqual(leaders[0].registration_needed, True)
             self.assertEqual(leaders[0].registration_instructions, "www.google.com")
+            self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_none(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -94,20 +94,20 @@ class TestOperatorUtils(unittest.TestCase):
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
                                 "amountStaked": "100",
-                                "amountAllocated": "50",
                                 "amountLocked": "25",
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
                                 "publicKey": None,
                                 "webhookUrl": None,
+                                "website": None,
                                 "url": None,
                                 "jobTypes": None,
+                                "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
                     }
@@ -126,23 +126,22 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].amount_staked, 100)
-            self.assertEqual(leaders[0].amount_allocated, 50)
             self.assertEqual(leaders[0].amount_locked, 25)
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
             self.assertEqual(leaders[0].fee, None)
             self.assertEqual(leaders[0].public_key, None)
             self.assertEqual(leaders[0].webhook_url, None)
+            self.assertEqual(leaders[0].website, None)
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(leaders[0].registration_needed, None)
             self.assertEqual(leaders[0].registration_instructions, None)
-            # Should rerutn empty array
             self.assertEqual(leaders[0].job_types, [])
+            self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_array(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -159,20 +158,20 @@ class TestOperatorUtils(unittest.TestCase):
                                 "id": DEFAULT_GAS_PAYER,
                                 "address": DEFAULT_GAS_PAYER,
                                 "amountStaked": "100",
-                                "amountAllocated": "50",
                                 "amountLocked": "25",
                                 "lockedUntilTimestamp": "0",
                                 "amountWithdrawn": "25",
                                 "amountSlashed": "25",
-                                "reputation": "25",
                                 "reward": "25",
                                 "amountJobsProcessed": "25",
                                 "role": "role",
                                 "fee": None,
                                 "publicKey": None,
                                 "webhookUrl": None,
+                                "website": None,
                                 "url": None,
                                 "jobTypes": ["type1", "type2", "type3"],
+                                "reputationNetworks": [{"address": "0x01"}],
                             }
                         ],
                     }
@@ -191,22 +190,22 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].id, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].address, DEFAULT_GAS_PAYER)
             self.assertEqual(leaders[0].amount_staked, 100)
-            self.assertEqual(leaders[0].amount_allocated, 50)
             self.assertEqual(leaders[0].amount_locked, 25)
             self.assertEqual(leaders[0].locked_until_timestamp, 0)
             self.assertEqual(leaders[0].amount_withdrawn, 25)
             self.assertEqual(leaders[0].amount_slashed, 25)
-            self.assertEqual(leaders[0].reputation, 25)
             self.assertEqual(leaders[0].reward, 25)
             self.assertEqual(leaders[0].amount_jobs_processed, 25)
             self.assertEqual(leaders[0].role, "role")
             self.assertEqual(leaders[0].fee, None)
             self.assertEqual(leaders[0].public_key, None)
             self.assertEqual(leaders[0].webhook_url, None)
+            self.assertEqual(leaders[0].website, None)
             self.assertEqual(leaders[0].url, None)
             self.assertEqual(
                 leaders[0].job_types, ["type1", "type2", "type3"]
             )  # Should the same array
+            self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_empty_data(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
@@ -248,22 +247,22 @@ class TestOperatorUtils(unittest.TestCase):
                             "id": staker_address,
                             "address": staker_address,
                             "amountStaked": "100",
-                            "amountAllocated": "50",
                             "amountLocked": "25",
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
                             "publicKey": None,
                             "webhookUrl": None,
+                            "website": None,
                             "url": None,
                             "jobTypes": "type1,type2",
                             "registrationNeeded": True,
                             "registrationInstructions": "www.google.com",
+                            "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
                 }
@@ -281,22 +280,22 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.id, staker_address)
             self.assertEqual(leader.address, staker_address)
             self.assertEqual(leader.amount_staked, 100)
-            self.assertEqual(leader.amount_allocated, 50)
             self.assertEqual(leader.amount_locked, 25)
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
             self.assertEqual(leader.fee, None)
             self.assertEqual(leader.public_key, None)
             self.assertEqual(leader.webhook_url, None)
+            self.assertEqual(leader.website, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2"])
             self.assertEqual(leader.registration_needed, True)
             self.assertEqual(leader.registration_instructions, "www.google.com")
+            self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_when_job_types_is_none(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -313,20 +312,20 @@ class TestOperatorUtils(unittest.TestCase):
                             "id": staker_address,
                             "address": staker_address,
                             "amountStaked": "100",
-                            "amountAllocated": "50",
                             "amountLocked": "25",
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
                             "publicKey": None,
                             "webhookUrl": None,
+                            "website": None,
                             "url": None,
                             "jobTypes": None,
+                            "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
                 }
@@ -344,22 +343,22 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.id, staker_address)
             self.assertEqual(leader.address, staker_address)
             self.assertEqual(leader.amount_staked, 100)
-            self.assertEqual(leader.amount_allocated, 50)
             self.assertEqual(leader.amount_locked, 25)
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
             self.assertEqual(leader.fee, None)
             self.assertEqual(leader.public_key, None)
             self.assertEqual(leader.webhook_url, None)
+            self.assertEqual(leader.website, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, [])
             self.assertEqual(leader.registration_needed, None)
             self.assertEqual(leader.registration_instructions, None)
+            self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_when_job_types_is_array(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -376,20 +375,20 @@ class TestOperatorUtils(unittest.TestCase):
                             "id": staker_address,
                             "address": staker_address,
                             "amountStaked": "100",
-                            "amountAllocated": "50",
                             "amountLocked": "25",
                             "lockedUntilTimestamp": "0",
                             "amountWithdrawn": "25",
                             "amountSlashed": "25",
-                            "reputation": "25",
                             "reward": "25",
                             "amountJobsProcessed": "25",
                             "role": "role",
                             "fee": None,
                             "publicKey": None,
                             "webhookUrl": None,
+                            "website": None,
                             "url": None,
                             "jobTypes": ["type1", "type2", "type3"],
+                            "reputationNetworks": [{"address": "0x01"}],
                         }
                     }
                 }
@@ -407,20 +406,20 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.id, staker_address)
             self.assertEqual(leader.address, staker_address)
             self.assertEqual(leader.amount_staked, 100)
-            self.assertEqual(leader.amount_allocated, 50)
             self.assertEqual(leader.amount_locked, 25)
             self.assertEqual(leader.locked_until_timestamp, 0)
             self.assertEqual(leader.amount_withdrawn, 25)
             self.assertEqual(leader.amount_slashed, 25)
-            self.assertEqual(leader.reputation, 25)
             self.assertEqual(leader.reward, 25)
             self.assertEqual(leader.amount_jobs_processed, 25)
             self.assertEqual(leader.role, "role")
             self.assertEqual(leader.fee, None)
             self.assertEqual(leader.public_key, None)
             self.assertEqual(leader.webhook_url, None)
+            self.assertEqual(leader.website, None)
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2", "type3"])
+            self.assertEqual(leader.reputation_networks, ["0x01"])
 
     def test_get_leader_empty_data(self):
         staker_address = "0x1234567890123456789012345678901234567891"

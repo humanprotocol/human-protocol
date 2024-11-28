@@ -4,8 +4,6 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  StakingClient,
-  IAllocation,
   EscrowUtils,
   Encryption,
   KVStoreUtils,
@@ -1942,7 +1940,7 @@ describe('JobService', () => {
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.SET_UP;
+      mockJobEntity.status = JobStatus.FUNDED;
       expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
@@ -2028,7 +2026,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -2054,7 +2052,7 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.FORTUNE,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         userId: 1,
         fundAmount: 100,
         save: jest.fn().mockResolvedValue(true),
@@ -2385,7 +2383,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -2429,7 +2427,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -3560,13 +3558,6 @@ describe('JobService', () => {
   describe('getDetails', () => {
     it('should return job details with escrow address successfully', async () => {
       const balance = '1';
-      const allocationMock: IAllocation = {
-        escrowAddress: ethers.ZeroAddress,
-        staker: ethers.ZeroAddress,
-        tokens: 1n,
-        createdAt: 1n,
-        closedAt: 1n,
-      };
 
       const manifestMock: FortuneManifestDto = {
         submissionsRequired: 10,
@@ -3612,11 +3603,6 @@ describe('JobService', () => {
           recordingOracleAddress: expect.any(String),
           reputationOracleAddress: expect.any(String),
         },
-        staking: {
-          staker: expect.any(String),
-          allocated: expect.any(Number),
-          slashed: 0,
-        },
       };
 
       const getEscrowData = {
@@ -3633,9 +3619,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
-      (StakingClient.build as any).mockImplementation(() => ({
-        getAllocation: jest.fn().mockResolvedValue(allocationMock),
-      }));
       storageService.downloadJsonLikeData = jest
         .fn()
         .mockResolvedValue(manifestMock);
@@ -3689,11 +3672,6 @@ describe('JobService', () => {
           exchangeOracleAddress: ethers.ZeroAddress,
           recordingOracleAddress: ethers.ZeroAddress,
           reputationOracleAddress: ethers.ZeroAddress,
-        },
-        staking: {
-          staker: expect.any(String),
-          allocated: 0,
-          slashed: 0,
         },
       };
 

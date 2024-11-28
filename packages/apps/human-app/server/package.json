@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/human-app-server",
   "version": "0.0.1",
-  "description": "",
+  "description": "HUMAN App server",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

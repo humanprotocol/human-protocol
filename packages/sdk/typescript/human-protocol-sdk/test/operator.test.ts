@@ -39,22 +39,27 @@ describe('OperatorUtils', () => {
       chainId: ChainId.LOCALHOST,
       address: stakerAddress,
       amountStaked: ethers.parseEther('100'),
-      amountAllocated: ethers.parseEther('50'),
       amountLocked: ethers.parseEther('25'),
       lockedUntilTimestamp: ethers.toBigInt(0),
       amountWithdrawn: ethers.parseEther('25'),
       amountSlashed: ethers.parseEther('25'),
-      reputation: ethers.parseEther('25'),
       reward: ethers.parseEther('25'),
       amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
       registrationNeeded: true,
       registrationInstructions: 'www.google.com',
+      website: 'www.google.com',
+      reputationNetworks: [
+        {
+          address: '0x01',
+        },
+      ],
     };
 
     const mockLeader: ILeader = {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
+      reputationNetworks: ['0x01'],
     };
 
     test('should return staker information', async () => {
@@ -82,6 +87,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: [],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -108,6 +114,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -175,22 +182,27 @@ describe('OperatorUtils', () => {
       chainId: ChainId.LOCALHOST,
       address: stakerAddress,
       amountStaked: ethers.parseEther('100'),
-      amountAllocated: ethers.parseEther('50'),
       amountLocked: ethers.parseEther('25'),
       lockedUntilTimestamp: ethers.toBigInt(0),
       amountWithdrawn: ethers.parseEther('25'),
       amountSlashed: ethers.parseEther('25'),
-      reputation: ethers.parseEther('25'),
       reward: ethers.parseEther('25'),
       amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
       registrationNeeded: true,
       registrationInstructions: 'www.google.com',
+      website: 'www.google.com',
+      reputationNetworks: [
+        {
+          address: '0x01',
+        },
+      ],
     };
 
     const mockLeader: ILeader = {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
+      reputationNetworks: ['0x01'],
     };
 
     test('should return an array of stakers', async () => {
@@ -216,6 +228,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: [],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -240,6 +253,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({

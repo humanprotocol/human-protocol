@@ -5,7 +5,6 @@ import {
   EscrowStatus,
   EscrowUtils,
   NETWORKS,
-  StakingClient,
   StorageParams,
   Encryption,
   KVStoreKeys,
@@ -1084,7 +1083,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.SET_UP;
+    jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
@@ -1103,7 +1102,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.LAUNCHED;
+    jobEntity.status = JobStatus.FUNDED;
     await this.jobRepository.updateOne(jobEntity);
 
     const oracleType = this.getOracleType(jobEntity.requestType);
@@ -1187,7 +1186,7 @@ export class JobService {
           status = JobStatus.FAILED;
         }
         break;
-      case JobStatus.SET_UP:
+      case JobStatus.FUNDED:
         if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
           status = JobStatus.FAILED;
         }
@@ -1555,13 +1554,10 @@ export class JobService {
     const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
-    let escrow, allocation;
+    let escrow;
 
     if (escrowAddress) {
-      const stakingClient = await StakingClient.build(signer);
-
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
-      allocation = await stakingClient.getAllocation(escrowAddress);
     }
 
     const manifestData = (await this.storageService.downloadJsonLikeData(
@@ -1640,11 +1636,6 @@ export class JobService {
           failedReason: jobEntity.failedReason,
         },
         manifest: manifestDetails,
-        staking: {
-          staker: ethers.ZeroAddress,
-          allocated: 0,
-          slashed: 0,
-        },
       };
     }
 
@@ -1659,11 +1650,6 @@ export class JobService {
         failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
-      staking: {
-        staker: allocation?.staker as string,
-        allocated: Number(ethers.formatEther(allocation?.tokens || 0)),
-        slashed: 0, // TODO: Retrieve slash tokens
-      },
     };
   }
 
