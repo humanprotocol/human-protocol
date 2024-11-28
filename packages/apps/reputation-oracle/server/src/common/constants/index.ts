@@ -23,6 +23,7 @@ export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_POINTS,
   JobRequestType.IMAGE_BOXES_FROM_POINTS,
   JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+  JobRequestType.IMAGE_POLYGONS,
 ];
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';

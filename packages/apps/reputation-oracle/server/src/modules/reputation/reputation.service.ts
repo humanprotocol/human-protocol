@@ -151,6 +151,13 @@ export class ReputationService {
         manifest: CvatManifestDto,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
   };
 
   private async processFortune(
