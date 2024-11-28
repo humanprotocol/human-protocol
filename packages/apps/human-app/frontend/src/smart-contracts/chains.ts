@@ -72,12 +72,12 @@ export const MainnetChains: ChainWithAddresses[] = [
 ];
 
 export const AllTestnetsChains: ChainWithAddresses[] =
-  getChainsCfgByType<TestnetNarrow>([...TestnetChainsIds]);
+  getChainConfigsForChainIds<TestnetNarrow>([...TestnetChainsIds]);
 
 export const AllMainnetChains: ChainWithAddresses[] =
-  getChainsCfgByType<MainnetNarrow>([...MainnetChainsIds]);
+  getChainConfigsForChainIds<MainnetNarrow>([...MainnetChainsIds]);
 
-function getChainsCfgByType<T extends TestnetNarrow | MainnetNarrow>(
+function getChainConfigsForChainIds<T extends TestnetNarrow | MainnetNarrow>(
   chainsArr: T[]
 ): ChainWithAddresses[] {
   const initVal: ChainWithAddresses[] = [];
