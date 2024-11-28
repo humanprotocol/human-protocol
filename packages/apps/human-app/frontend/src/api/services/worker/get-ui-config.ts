@@ -22,7 +22,7 @@ const getUiConfig = async (): Promise<UiConfig> => {
     },
   });
 
-  sessionStorage.setItem('ui-config', JSON.stringify(response));
+  // sessionStorage.setItem('ui-config', JSON.stringify(response));
   return response;
 };
 
