@@ -26,6 +26,7 @@ CVAT_EXPORT_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "CVAT for images 1.1",
     TaskTypes.image_points: "CVAT for images 1.1",
     TaskTypes.image_boxes: "COCO 1.0",
+    TaskTypes.image_polygons: "COCO 1.0",
     TaskTypes.image_boxes_from_points: "COCO 1.0",
     TaskTypes.image_skeletons_from_boxes: "CVAT for images 1.1",
 }
@@ -56,6 +57,9 @@ def prepare_annotation_metafile(
                 annotation_filename=job_annotations[job.cvat_id].filename,
                 annotator_wallet_address=job.latest_assignment.user_wallet_address,
                 assignment_id=job.latest_assignment.id,
+                task_id=job.cvat_task_id,
+                start_frame=job.start_frame,
+                stop_frame=job.stop_frame,
             )
             for job in jobs
         ]
@@ -157,6 +161,10 @@ class _LabelsTaskProcessor(_TaskProcessor):
 
 
 class _BoxesTaskProcessor(_TaskProcessor):
+    pass
+
+
+class _PolygonsTaskProcessor(_TaskProcessor):
     pass
 
 
@@ -586,6 +594,7 @@ def postprocess_annotations(
     processor_classes: dict[TaskTypes, type[_TaskProcessor]] = {
         TaskTypes.image_label_binary: _LabelsTaskProcessor,
         TaskTypes.image_boxes: _BoxesTaskProcessor,
+        TaskTypes.image_polygons: _PolygonsTaskProcessor,
         TaskTypes.image_points: _PointsTaskProcessor,
         TaskTypes.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
         TaskTypes.image_skeletons_from_boxes: _SkeletonsFromBoxesTaskProcessor,

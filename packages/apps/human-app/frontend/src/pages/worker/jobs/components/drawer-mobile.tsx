@@ -20,6 +20,7 @@ import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components
 import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { useColorMode } from '@/hooks/use-color-mode';
+import { MyJobStatus } from '@/api/services/worker/my-jobs-data';
 
 interface DrawerMobileProps {
   selectedTab: string;
@@ -226,7 +227,7 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'validation'}
+                  checked={filterParams.status === MyJobStatus.VALIDATION}
                   onClick={() => {
                     handleCheckboxClick('status', 'validation');
                   }}
@@ -241,7 +242,7 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'expired'}
+                  checked={filterParams.status === MyJobStatus.EXPIRED}
                   onClick={() => {
                     handleCheckboxClick('status', 'expired');
                   }}
@@ -256,7 +257,7 @@ export function DrawerMobile({
                 key={crypto.randomUUID()}
               >
                 <Checkbox
-                  checked={filterParams.status === 'rejected'}
+                  checked={filterParams.status === MyJobStatus.REJECTED}
                   onClick={() => {
                     handleCheckboxClick('status', 'rejected');
                   }}

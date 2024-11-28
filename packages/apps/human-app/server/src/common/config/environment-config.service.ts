@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+import { ChainId } from '@human-protocol/sdk';
 
 const DEFAULT_CACHE_TTL_HCAPTCHA_USER_STATS = 12 * 60 * 60;
 const DEFAULT_CACHE_TTL_ORACLE_STATS = 12 * 60 * 60;
@@ -11,7 +12,8 @@ const DEFAULT_CORS_ALLOWED_ORIGIN = 'http://localhost:5173';
 const DEFAULT_CORS_ALLOWED_HEADERS =
   'Content-Type,Authorization,X-Requested-With,Accept,Origin';
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_URL = 24 * 60 * 60;
-const DEFAULT_MAX_REQUEST_RETRIES = 5;
+const DEFAULT_MAX_EXECUTIONS_TO_SKIP = 32;
+const DEFAULT_CACHE_TTL_JOB_TYPES = 24 * 60 * 60;
 const DEFAULT_CACHE_TTL_EXCHANGE_ORACLE_REGISTRATION_NEEDED = 24 * 60 * 60;
 
 @Injectable()
@@ -217,6 +219,17 @@ export class EnvironmentConfigService {
   }
 
   /**
+   * The cache time-to-live (TTL) for job types.
+   * Default: 24 hours
+   */
+  get cacheTtlJobTypes(): number {
+    return this.configService.get<number>(
+      'CACHE_TTL_JOB_TYPES',
+      DEFAULT_CACHE_TTL_JOB_TYPES,
+    );
+  }
+
+  /**
    * The cache time-to-live (TTL) for exchange oracle registration needed.
    * Default: 24 hours
    */
@@ -261,9 +274,15 @@ export class EnvironmentConfigService {
    * The list of enabled chain IDs.
    * Required
    */
-  get chainIdsEnabled(): string[] {
+  get chainIdsEnabled(): ChainId[] {
     const chainIds = this.configService.getOrThrow<string>('CHAIN_IDS_ENABLED');
-    return chainIds.split(',').map((id) => id.trim());
+    return chainIds
+      .split(',')
+      .map((id) => parseInt(id.trim(), 10))
+      .filter(
+        (id): id is ChainId =>
+          !isNaN(id) && Object.values(ChainId).includes(id),
+      );
   }
 
   /**
@@ -291,13 +310,13 @@ export class EnvironmentConfigService {
   }
 
   /**
-   * The maximum number of retries for requests.
+   * The maximum number of iteration to skip.
    * Default: 5
    */
-  get maxRequestRetries(): number {
+  get maxExecutionToSkip(): number {
     return this.configService.get<number>(
-      'MAX_REQUEST_RETRIES',
-      DEFAULT_MAX_REQUEST_RETRIES,
+      'MAX_EXECUTIONS_TO_SKIP',
+      DEFAULT_MAX_EXECUTIONS_TO_SKIP,
     );
   }
 

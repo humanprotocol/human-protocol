@@ -116,12 +116,13 @@ def track_assignments(logger: logging.Logger) -> None:
 
 @cron_job
 def track_completed_escrows(logger: logging.Logger, session: Session) -> None:
-    awaiting_validations = cvat_service.create_escrow_validations(session)
-    if awaiting_validations:
-        session.commit()
+    new_validations = cvat_service.create_escrow_validations(
+        session, limit=CronConfig.track_completed_escrows_chunk_size
+    )
+    if new_validations:
         logger.info(
-            f"Got {len(awaiting_validations)} escrows "
-            f"awaiting validation: {format_sequence(awaiting_validations)}"
+            f"Got {len(new_validations)} escrows "
+            f"awaiting validation: {format_sequence([(v[1], v[2]) for v in new_validations])}"
         )
 
 
@@ -186,6 +187,8 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                         upload.task_id,
                         upload.task.cvat_project_id,
                         status=JobStatuses(cvat_job.state),
+                        start_frame=cvat_job.start_frame,
+                        stop_frame=cvat_job.stop_frame,
                     )
 
                 completed.append(upload)

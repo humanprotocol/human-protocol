@@ -1,24 +1,19 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-
-export const jobStatuses = [
-  'active',
-  'completed',
-  'canceled',
-  'validation',
-  'expired',
-  'rejected',
-] as const;
-
-type JobStatus = (typeof jobStatuses)[number];
+import { type MyJobStatus } from '@/api/services/worker/my-jobs-data';
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
     sort?: 'asc' | 'desc';
-    sort_field?: 'chain_id' | 'job_type' | 'reward_amount' | 'expires_at';
+    sort_field?:
+      | 'chain_id'
+      | 'job_type'
+      | 'reward_amount'
+      | 'expires_at'
+      | 'created_at';
     job_type?: string;
-    status?: JobStatus;
+    status?: MyJobStatus;
     escrow_address?: string;
     page: number;
     page_size: PageSize;
@@ -36,11 +31,11 @@ export interface MyJobsFilterStoreProps {
 }
 
 const initialFiltersState = {
+  escrow_address: '',
   page: 0,
   page_size: 5,
-  filterParams: {
-    escrow_address: '',
-  },
+  sort_field: 'created_at',
+  sort: 'desc',
 } as const;
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({

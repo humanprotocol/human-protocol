@@ -196,6 +196,7 @@
       "KYCInProgress": "KYC in progress",
       "confirmEmail": "Confirm email",
       "kycCompleted": "KYC Completed",
+      "kycDeclined": "KYC Declined",
       "walletAddressMessage": "This address is the wallet address where you will receive payments for completing tasks.",
       "connectWallet": "Connect Wallet",
       "walletConnected": "Wallet Connected ",
@@ -217,7 +218,8 @@
       "allJobs": "All tasks"
     },
     "registrationInExchangeOracle": {
-      "requiredMessage": "This oracle requires a registration process. Click on the link below to see the registration tutorial:",
+      "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
+      "instructionsButton": "See registration tutorial",
       "completeMessage": "Click on Complete once you have finished the registration process:",
       "completeButton": "Complete"
     },
@@ -403,6 +405,7 @@
     "image_points": "Points",
     "image_boxes": "Bounding Boxes",
     "image_boxes_from_points": "Bounding Boxes from Points",
-    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes"
+    "image_skeletons_from_boxes": "Skeletons from Bounding Boxes",
+    "image_polygons": "Polygons"
   }
 }

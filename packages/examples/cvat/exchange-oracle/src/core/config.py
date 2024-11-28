@@ -4,7 +4,8 @@
 import inspect
 import os
 from collections.abc import Iterable
-from typing import ClassVar
+from enum import Enum
+from typing import ClassVar, Optional
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
@@ -104,6 +105,8 @@ class LocalhostConfig(_NetworkConfig):
 
     recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
     recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
+
+    reputation_oracle_address = os.environ.get("LOCALHOST_REPUTATION_ORACLE_ADDRESS")
     reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
@@ -139,15 +142,12 @@ class CronConfig:
             "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
         )
     )
-    track_escrow_validations_int = int(
-        os.environ.get(
-            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
-        )
+    track_completed_escrows_chunk_size = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100)
     )
-    track_completed_escrows_chunk_size = os.environ.get(
-        # backward compatibility
-        "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
-        os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
+    track_escrow_validations_int = int(os.environ.get("TRACK_COMPLETED_ESCROWS_INT", 60))
+    track_escrow_validations_chunk_size = int(
+        os.environ.get("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 5)
     )
     track_completed_escrows_max_downloading_retries = int(
         os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
@@ -167,14 +167,33 @@ class CronConfig:
 
 
 class CvatConfig:
+    # TODO: remove cvat_ prefix
     cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
     cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
     cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
     cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "")
 
     cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
-    cvat_job_segment_size = int(os.environ.get("CVAT_JOB_SEGMENT_SIZE", 150))
+    cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
     cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
+    cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 1000))
+    cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
+
+    cvat_export_timeout = int(os.environ.get("CVAT_EXPORT_TIMEOUT", 5 * 60))
+    "Timeout, in seconds, for annotations or dataset export waiting"
+
+    cvat_import_timeout = int(os.environ.get("CVAT_IMPORT_TIMEOUT", 60 * 60))
+    "Timeout, in seconds, for waiting on GT annotations import"
+
+    # quality control settings
+    cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
+    "Maximum number of attempts to run a validation check on a job after completing annotation"
+
+    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
+    cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
+
+    cvat_polygons_iou_threshold = float(os.environ.get("CVAT_POLYGONS_IOU_THRESHOLD", 0.5))
+    "`iou_threshold` parameter for quality settings in polygons tasks"
 
     cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
@@ -219,9 +238,6 @@ class StorageConfig:
 class FeaturesConfig:
     enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
-
-    default_export_timeout = int(os.environ.get("DEFAULT_EXPORT_TIMEOUT", 60))
-    "Timeout, in seconds, for annotations or dataset export waiting"
 
     request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
     "Allow to log request details for each request"
@@ -282,10 +298,25 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
+class Environment(str, Enum):
+    PRODUCTION = "production"
+    DEVELOPMENT = "development"
+    TEST = "test"
+
+    @classmethod
+    def _missing_(cls, value: str) -> Optional["Environment"]:
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+
+        return None
+
+
 class Config:
     debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
-    environment = os.environ.get("ENVIRONMENT", "development")
+    environment = Environment(os.environ.get("ENVIRONMENT", Environment.DEVELOPMENT.value))
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
     webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES", 5))
     webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED", 60))
@@ -306,6 +337,21 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
+
+    @classmethod
+    def is_development_mode(cls) -> bool:
+        """Returns whether the oracle is running in development mode or not"""
+        return cls.environment == Environment.DEVELOPMENT
+
+    @classmethod
+    def is_test_mode(cls) -> bool:
+        """Returns whether the oracle is running in testing mode or not"""
+        return cls.environment == Environment.TEST
+
+    @classmethod
+    def is_production_mode(cls) -> bool:
+        """Returns whether the oracle is running in production mode or not"""
+        return cls.environment == Environment.PRODUCTION
 
     @classmethod
     def validate(cls) -> None:

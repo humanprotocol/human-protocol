@@ -59,7 +59,7 @@ export function JobsPage() {
 
   const oracleName = data?.find(
     ({ address }) => address === oracle_address
-  )?.role;
+  )?.name;
 
   if (isPending) {
     return <PageCardLoader />;
@@ -67,10 +67,7 @@ export function JobsPage() {
 
   return (
     <>
-      <Modal
-        isOpen={isMobileFilterDrawerOpen}
-        sx={{ position: 'absolute', zIndex: '1400' }}
-      >
+      <Modal isOpen={isMobileFilterDrawerOpen}>
         {selectedTab === 'availableJobs' ? (
           <AvailableJobsDrawerMobile
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}

@@ -9,12 +9,29 @@ import { createPaginationSchema } from '@/shared/helpers/create-pagination-schem
 import type { MyJobsFilterStoreProps } from '@/hooks/use-my-jobs-filter-store';
 import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
 
+export enum MyJobStatus {
+  ACTIVE = 'ACTIVE',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED',
+  VALIDATION = 'VALIDATION',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
+}
+
+export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
+
 const myJobSchema = z.object({
   assignment_id: z.string(),
   escrow_address: z.string(),
   chain_id: z.number(),
   job_type: z.string(),
-  status: z.string(),
+  status: z.string().transform((value) => {
+    try {
+      return z.nativeEnum(MyJobStatus).parse(value.toUpperCase());
+    } catch (error) {
+      return UNKNOWN_JOB_STATUS;
+    }
+  }),
   reward_amount: z.string(),
   reward_token: z.string(),
   created_at: z.string(),

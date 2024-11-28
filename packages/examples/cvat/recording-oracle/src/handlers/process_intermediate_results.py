@@ -3,45 +3,38 @@ from __future__ import annotations
 import io
 import logging
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, NamedTuple, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 import datumaro as dm
 import numpy as np
 
-import src.core.tasks.boxes_from_points as boxes_from_points_task
-import src.core.tasks.simple as simple_task
-import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
+import src.cvat.api_calls as cvat_api
 import src.services.validation as db_service
 from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
-from src.core.storage import compose_data_bucket_filename
+from src.core.gt_stats import GtStats, ValidationFrameStats
 from src.core.types import TaskTypes
-from src.core.validation_errors import DatasetValidationError, LowAccuracyError
+from src.core.validation_errors import DatasetValidationError, LowAccuracyError, TooFewGtError
 from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.db.utils import ForUpdateParams
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.annotations import ProjectLabels, shift_ann
+from src.utils.annotations import ProjectLabels
 from src.utils.zip_archive import extract_zip_archive, write_dir_to_zip_archive
-from src.validation.dataset_comparison import (
-    BboxDatasetComparator,
-    DatasetComparator,
-    PointsDatasetComparator,
-    SkeletonDatasetComparator,
-    TooFewGtError,
-)
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
     from src.core.manifest import TaskManifest
+    from src.cvat.interface import QualityReportData
 
 DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_points: "coco_person_keypoints",
     TaskTypes.image_boxes: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
@@ -51,35 +44,24 @@ DM_DATASET_FORMAT_MAPPING = {
 DM_GT_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_instances",  # we compare points against boxes
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
-}
-
-
-DATASET_COMPARATOR_TYPE_MAP: dict[TaskTypes, type[DatasetComparator]] = {
-    # TaskType.image_label_binary: TagDatasetComparator, # TODO: implement if support is needed
-    TaskTypes.image_boxes: BboxDatasetComparator,
-    TaskTypes.image_points: PointsDatasetComparator,
-    TaskTypes.image_boxes_from_points: BboxDatasetComparator,
-    TaskTypes.image_skeletons_from_boxes: SkeletonDatasetComparator,
 }
 
 _JobResults = dict[int, float]
 
 _RejectedJobs = dict[int, DatasetValidationError]
 
-_FailedGtAttempts = dict[str, int]
-"gt key -> attempts"
 
+_TaskIdToValidationLayout = dict[int, dict]
+_TaskIdToHoneypotsMapping = dict[int, dict]
+_TaskIdToSequenceOfFrameNames = dict[int, list[str]]
 
-@dataclass
-class _UpdatedFailedGtInfo:
-    failed_jobs: set[int] = field(default_factory=set)
-    occurrences: int = 0
-
-
-_UpdatedFailedGtStats = dict[str, _UpdatedFailedGtInfo]
+_HoneypotFrameId = int
+_ValidationFrameId = int
+_HoneypotFrameToValFrame = dict[_HoneypotFrameId, _ValidationFrameId]
 
 
 @dataclass
@@ -87,7 +69,10 @@ class _ValidationResult:
     job_results: _JobResults
     rejected_jobs: _RejectedJobs
     updated_merged_dataset: io.BytesIO
-    updated_gt_stats: _UpdatedFailedGtStats
+    gt_stats: GtStats
+    task_id_to_val_layout: _TaskIdToValidationLayout
+    task_id_to_honeypots_mapping: _TaskIdToHoneypotsMapping
+    task_id_to_sequence_of_frame_names: _TaskIdToSequenceOfFrameNames
 
 
 T = TypeVar("T")
@@ -103,120 +88,145 @@ class _TaskValidator:
         chain_id: int,
         manifest: TaskManifest,
         *,
-        job_annotations: dict[int, io.IOBase],
         merged_annotations: io.IOBase,
-        gt_stats: _FailedGtAttempts | None = None,
+        meta: AnnotationMeta,
+        gt_stats: GtStats | None = None,
     ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.manifest = manifest
 
-        self._initial_gt_attempts: _FailedGtAttempts = gt_stats or {}
-        self._job_annotations: dict[int, io.IOBase] = job_annotations
+        self._gt_stats: GtStats = gt_stats or {}
         self._merged_annotations: io.IOBase = merged_annotations
 
         self._updated_merged_dataset_archive: io.IOBase | None = None
-        self._updated_gt_stats: _UpdatedFailedGtStats | None = None
         self._job_results: _JobResults | None = None
         self._rejected_jobs: _RejectedJobs | None = None
 
         self._temp_dir: Path | None = None
-        self._gt_dataset: dm.Dataset | None = None
+        self._input_gt_dataset: dm.Dataset | None = None
+        self._meta: AnnotationMeta = meta
 
     def _require_field(self, field: T | None) -> T:
         assert field is not None
         return field
 
-    def _get_gt_weight(self, failed_attempts: int) -> float:
-        ban_threshold = Config.validation.gt_ban_threshold
-
-        weight = 1
-        if ban_threshold < failed_attempts:
-            weight = 0
-
-        return weight
-
-    def _get_gt_weights(self) -> dict[str, float]:
-        weights = {}
-
-        ban_threshold = Config.validation.gt_ban_threshold
-        if not ban_threshold:
-            return weights
-
-        for gt_key, attempts in self._initial_gt_attempts.items():
-            sample_id = self._gt_key_to_sample_id(gt_key)
-            weights[sample_id] = self._get_gt_weight(attempts)
-
-        return weights
-
     def _gt_key_to_sample_id(self, gt_key: str) -> str:
         return gt_key
 
-    def _parse_gt(self):
-        layout = simple_task.TaskMetaLayout()
-        serializer = simple_task.TaskMetaSerializer()
+    def _parse_gt_dataset(self, gt_file_data: bytes) -> dm.Dataset:
+        with TemporaryDirectory() as gt_temp_dir:
+            gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
+            with open(gt_filename, "wb") as f:
+                f.write(gt_file_data)
 
-        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
-        storage_client = make_cloud_client(oracle_data_bucket)
-
-        self._gt_dataset = serializer.parse_gt_annotations(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.GT_FILENAME
-                ),
+            gt_dataset = dm.Dataset.import_from(
+                gt_filename,
+                format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
             )
-        )
 
-    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:  # noqa: ARG002
-        manifest = self._require_field(self.manifest)
+            gt_dataset.init_cache()
 
-        return dm.Dataset.import_from(
-            os.fspath(job_dataset_path),
-            format=DM_DATASET_FORMAT_MAPPING[manifest.annotation.type],
-        )
+            return gt_dataset
+
+    def _load_gt_dataset(self):
+        input_gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        gt_bucket_client = make_cloud_client(input_gt_bucket)
+        gt_data = gt_bucket_client.download_file(input_gt_bucket.path)
+        self._input_gt_dataset = self._parse_gt_dataset(gt_data)
 
     def _validate_jobs(self):
-        tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
-        gt_dataset = self._require_field(self._gt_dataset)
-        job_annotations = self._require_field(self._job_annotations)
+        meta = self._require_field(self._meta)
 
         job_results: _JobResults = {}
         rejected_jobs: _RejectedJobs = {}
-        updated_gt_stats: _UpdatedFailedGtStats = {}
 
-        comparator = DATASET_COMPARATOR_TYPE_MAP[manifest.annotation.type](
-            min_similarity_threshold=manifest.validation.min_quality,
-            gt_weights=self._get_gt_weights(),
-        )
+        cvat_task_ids = {job_meta.task_id for job_meta in meta.jobs}
 
-        for job_cvat_id, job_annotations_file in job_annotations.items():
-            job_dataset_path = tempdir / str(job_cvat_id)
-            extract_zip_archive(job_annotations_file, job_dataset_path)
+        task_id_to_quality_report_data: dict[int, QualityReportData] = {}
+        task_id_to_val_layout: dict[int, cvat_api.models.TaskValidationLayoutRead] = {}
+        task_id_to_honeypots_mapping: dict[int, _HoneypotFrameToValFrame] = {}
 
-            job_dataset = self._load_job_dataset(job_cvat_id, job_dataset_path)
+        # store sequence of frame names for each task
+        # task honeypot with frame index matches the sequence[index]
+        task_id_to_sequence_of_frame_names: dict[int, list[str]] = {}
 
-            try:
-                job_mean_accuracy = comparator.compare(gt_dataset, job_dataset)
-            except TooFewGtError as e:
-                job_results[job_cvat_id] = self.self.UNKNOWN_QUALITY
-                rejected_jobs[job_cvat_id] = e
+        min_quality = manifest.validation.min_quality
+
+        job_id_to_quality_report: dict[int, cvat_api.models.QualityReport] = {}
+
+        for cvat_task_id in cvat_task_ids:
+            # obtain quality report details
+            task_quality_report = cvat_api.get_task_quality_report(cvat_task_id)
+            task_quality_report_data = cvat_api.get_quality_report_data(task_quality_report.id)
+            task_id_to_quality_report_data[cvat_task_id] = task_quality_report_data
+
+            # obtain task validation layout and define honeypots mapping
+            task_val_layout = cvat_api.get_task_validation_layout(cvat_task_id)
+            honeypot_frame_to_real = {
+                f: task_val_layout.honeypot_real_frames[idx]
+                for idx, f in enumerate(task_val_layout.honeypot_frames)
+            }
+            task_id_to_val_layout[cvat_task_id] = task_val_layout
+            task_id_to_honeypots_mapping[cvat_task_id] = honeypot_frame_to_real
+            task_id_to_sequence_of_frame_names[cvat_task_id] = [
+                frame.name for frame in cvat_api.get_task_data_meta(cvat_task_id).frames
+            ]
+
+            # obtain quality reports for each job from the task
+            job_id_to_quality_report.update(
+                {
+                    quality_report.job_id: quality_report
+                    for quality_report in cvat_api.get_jobs_quality_reports(task_quality_report.id)
+                }
+            )
+
+        # accepted jobs from the previous epochs are not included
+        for job_meta in meta.jobs:
+            cvat_job_id = job_meta.job_id
+            cvat_task_id = job_meta.task_id
+
+            # assess quality of the job's honeypots
+            task_quality_report_data = task_id_to_quality_report_data[cvat_task_id]
+            sorted_task_frame_names = task_id_to_sequence_of_frame_names[cvat_task_id]
+            task_honeypots = {int(frame) for frame in task_quality_report_data.frame_results}
+            honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
+
+            job_honeypots = task_honeypots & set(job_meta.job_frame_range)
+            if not job_honeypots:
+                job_results[cvat_job_id] = self.UNKNOWN_QUALITY
+                rejected_jobs[cvat_job_id] = TooFewGtError
                 continue
 
-            job_results[job_cvat_id] = job_mean_accuracy
+            for honeypot in job_honeypots:
+                val_frame = honeypots_mapping[honeypot]
+                val_frame_name = sorted_task_frame_names[val_frame]
 
-            for gt_sample in gt_dataset:
-                updated_gt_stats.setdefault(gt_sample.id, _UpdatedFailedGtInfo()).occurrences += 1
+                result = task_quality_report_data.frame_results[str(honeypot)]
+                self._gt_stats.setdefault(val_frame_name, ValidationFrameStats())
+                self._gt_stats[val_frame_name].accumulated_quality += result.annotations.accuracy
 
-            for sample_id in comparator.failed_gts:
-                updated_gt_stats[sample_id].failed_jobs.add(job_cvat_id)
+                if result.annotations.accuracy < min_quality:
+                    self._gt_stats[val_frame_name].failed_attempts += 1
+                else:
+                    self._gt_stats[val_frame_name].accepted_attempts += 1
 
-            if job_mean_accuracy < manifest.validation.min_quality:
-                rejected_jobs[job_cvat_id] = LowAccuracyError()
+            # assess job quality
+            job_quality_report = job_id_to_quality_report[cvat_job_id]
 
-        self._updated_gt_stats = updated_gt_stats
+            accuracy = job_quality_report.summary.accuracy
+
+            job_results[cvat_job_id] = accuracy
+
+            if accuracy < min_quality:
+                rejected_jobs[cvat_job_id] = LowAccuracyError()
+
         self._job_results = job_results
         self._rejected_jobs = rejected_jobs
+        self._task_id_to_val_layout = task_id_to_val_layout
+        self._task_id_to_honeypots_mapping = task_id_to_honeypots_mapping
+        self._task_id_to_sequence_of_frame_names = task_id_to_sequence_of_frame_names
 
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
@@ -230,7 +240,13 @@ class _TaskValidator:
                 return item
 
         prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.lstrip("/\\") + "/"
-        if all(sample.id.startswith(prefix) for sample in merged_dataset):
+
+        # Remove prefixes if it can be done safely
+        sample_ids = {sample.id for sample in merged_dataset}
+        if all(
+            sample_id.startswith(prefix) and (sample_id[len(prefix) :] not in sample_ids)
+            for sample_id in sample_ids
+        ):
             merged_dataset.transform(RemoveCommonPrefix, prefix=prefix)
 
         return merged_dataset
@@ -239,7 +255,7 @@ class _TaskValidator:
         tempdir = self._require_field(self._temp_dir)
         manifest = self._require_field(self.manifest)
         merged_annotations = self._require_field(self._merged_annotations)
-        gt_dataset = self._require_field(self._gt_dataset)
+        input_gt_dataset = self._require_field(self._input_gt_dataset)
 
         merged_dataset_path = tempdir / "merged"
         merged_dataset_format = DM_DATASET_FORMAT_MAPPING[manifest.annotation.type]
@@ -248,8 +264,8 @@ class _TaskValidator:
         merged_dataset = dm.Dataset.import_from(
             os.fspath(merged_dataset_path), format=merged_dataset_format
         )
-        self._put_gt_into_merged_dataset(gt_dataset, merged_dataset, manifest=manifest)
         self._restore_original_image_paths(merged_dataset)
+        self._put_gt_into_merged_dataset(input_gt_dataset, merged_dataset, manifest=manifest)
 
         updated_merged_dataset_path = tempdir / "merged_updated"
         merged_dataset.export(
@@ -264,25 +280,29 @@ class _TaskValidator:
 
     @classmethod
     def _put_gt_into_merged_dataset(
-        cls, gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
+        cls, input_gt_dataset: dm.Dataset, merged_dataset: dm.Dataset, *, manifest: TaskManifest
     ) -> None:
         """
         Updates the merged dataset inplace, writing GT annotations corresponding to the task type.
         """
 
         match manifest.annotation.type:
-            case TaskTypes.image_boxes.value:
-                merged_dataset.update(gt_dataset)
+            case TaskTypes.image_boxes.value | TaskTypes.image_polygons.value:
+                merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_points.value:
                 merged_label_cat: dm.LabelCategories = merged_dataset.categories()[
                     dm.AnnotationType.label
                 ]
+
+                # we support no more than 1 label so far
+                assert len(manifest.annotation.labels) == 1
+
                 skeleton_label_id = next(
                     i for i, label in enumerate(merged_label_cat) if not label.parent
                 )
                 point_label_id = next(i for i, label in enumerate(merged_label_cat) if label.parent)
 
-                for sample in gt_dataset:
+                for sample in input_gt_dataset:
                     annotations = [
                         dm.Skeleton(
                             elements=[
@@ -301,16 +321,16 @@ class _TaskValidator:
                     ]
                     merged_dataset.put(sample.wrap(annotations=annotations))
             case TaskTypes.image_label_binary.value:
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_boxes_from_points:
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case TaskTypes.image_skeletons_from_boxes:
-                # The original behavior is broken for skeletons
-                gt_dataset = dm.Dataset(gt_dataset)
-                gt_dataset = gt_dataset.transform(
+                # The original behavior of project_labels is broken for skeletons
+                input_gt_dataset = dm.Dataset(input_gt_dataset)
+                input_gt_dataset = input_gt_dataset.transform(
                     ProjectLabels, dst_labels=merged_dataset.categories()[dm.AnnotationType.label]
                 )
-                merged_dataset.update(gt_dataset)
+                merged_dataset.update(input_gt_dataset)
             case _:
                 raise AssertionError(f"Unknown task type {manifest.annotation.type}")
 
@@ -318,7 +338,7 @@ class _TaskValidator:
         with TemporaryDirectory() as tempdir:
             self._temp_dir = Path(tempdir)
 
-            self._parse_gt()
+            self._load_gt_dataset()
             self._validate_jobs()
             self._prepare_merged_dataset()
 
@@ -326,593 +346,13 @@ class _TaskValidator:
             job_results=self._require_field(self._job_results),
             rejected_jobs=self._require_field(self._rejected_jobs),
             updated_merged_dataset=self._require_field(self._updated_merged_dataset_archive),
-            updated_gt_stats=self._require_field(self._updated_gt_stats),
+            gt_stats=self._require_field(self._gt_stats),
+            task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
+            task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
+            task_id_to_sequence_of_frame_names=self._require_field(
+                self._task_id_to_sequence_of_frame_names
+            ),
         )
-
-
-class _TaskValidatorWithPerJobGt(_TaskValidator):
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:
-        raise NotImplementedError
-
-    def _get_gt_weights(self, *, job_cvat_id: int, job_gt_dataset: dm.Dataset) -> dict[str, float]:
-        weights = {}
-
-        ban_threshold = Config.validation.gt_ban_threshold
-        if not ban_threshold:
-            return weights
-
-        for gt_key, attempts in self._initial_gt_attempts.items():
-            sample_id = self._gt_key_to_sample_id(
-                gt_key, job_cvat_id=job_cvat_id, job_gt_dataset=job_gt_dataset
-            )
-            if not sample_id:
-                continue
-
-            weights[sample_id] = self._get_gt_weight(attempts)
-
-        return weights
-
-    def _gt_key_to_sample_id(
-        self,
-        gt_key: str,
-        *,
-        job_cvat_id: int,  # noqa: ARG002
-        job_gt_dataset: dm.Dataset,  # noqa: ARG002
-    ) -> str | None:
-        return gt_key
-
-    def _update_gt_stats(
-        self,
-        updated_gt_stats: _UpdatedFailedGtStats,
-        *,
-        job_cvat_id: int,
-        job_gt_dataset: dm.Dataset,
-        failed_gts: set[str],
-    ):
-        for gt_sample in job_gt_dataset:
-            updated_gt_stats.setdefault(gt_sample.id, _UpdatedFailedGtInfo()).occurrences += 1
-
-        for sample_id in failed_gts:
-            updated_gt_stats[sample_id].failed_jobs.add(job_cvat_id)
-
-        return updated_gt_stats
-
-    def _validate_jobs(self):
-        tempdir = self._require_field(self._temp_dir)
-        manifest = self._require_field(self.manifest)
-        job_annotations = self._require_field(self._job_annotations)
-
-        job_results: _JobResults = {}
-        rejected_jobs: _RejectedJobs = {}
-        updated_gt_stats: _UpdatedFailedGtStats = {}
-
-        for job_cvat_id, job_annotations_file in job_annotations.items():
-            job_dataset_path = tempdir / str(job_cvat_id)
-            extract_zip_archive(job_annotations_file, job_dataset_path)
-
-            job_dataset = self._load_job_dataset(job_cvat_id, job_dataset_path)
-            job_gt_dataset = self._make_gt_dataset_for_job(job_cvat_id, job_dataset)
-
-            comparator = DATASET_COMPARATOR_TYPE_MAP[manifest.annotation.type](
-                min_similarity_threshold=manifest.validation.min_quality,
-                gt_weights=self._get_gt_weights(
-                    job_cvat_id=job_cvat_id, job_gt_dataset=job_gt_dataset
-                ),
-            )
-
-            try:
-                job_mean_accuracy = comparator.compare(job_gt_dataset, job_dataset)
-            except TooFewGtError as e:
-                job_results[job_cvat_id] = self.UNKNOWN_QUALITY
-                rejected_jobs[job_cvat_id] = e
-                continue
-
-            job_results[job_cvat_id] = job_mean_accuracy
-
-            updated_gt_stats = self._update_gt_stats(
-                updated_gt_stats,
-                job_cvat_id=job_cvat_id,
-                job_gt_dataset=job_gt_dataset,
-                failed_gts=comparator.failed_gts,
-            )
-
-            if job_mean_accuracy < manifest.validation.min_quality:
-                rejected_jobs[job_cvat_id] = LowAccuracyError()
-
-        self._updated_gt_stats = updated_gt_stats
-        self._job_results = job_results
-        self._rejected_jobs = rejected_jobs
-
-
-class _BoxesFromPointsValidator(_TaskValidatorWithPerJobGt):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        (
-            boxes_to_points_mapping,
-            roi_filenames,
-            roi_infos,
-            gt_dataset,
-            points_dataset,
-        ) = self._download_task_meta()
-
-        self._gt_dataset = gt_dataset
-        self._points_dataset = points_dataset
-
-        point_key_to_sample = {
-            skeleton.id: sample
-            for sample in points_dataset
-            for skeleton in sample.annotations
-            if isinstance(skeleton, dm.Skeleton)
-        }
-
-        self.bbox_key_to_sample = {
-            bbox.id: sample
-            for sample in gt_dataset
-            for bbox in sample.annotations
-            if isinstance(bbox, dm.Bbox)
-        }
-
-        self._point_key_to_bbox_key = {v: k for k, v in boxes_to_points_mapping.items()}
-        self._roi_info_by_id = {roi_info.point_id: roi_info for roi_info in roi_infos}
-        self._roi_name_to_roi_info: dict[str, boxes_from_points_task.RoiInfo] = {
-            os.path.splitext(roi_filename)[0]: self._roi_info_by_id[roi_id]
-            for roi_id, roi_filename in roi_filenames.items()
-        }
-
-        self._point_offset_by_roi_id = {}
-        "Offset from new to old coords, (dx, dy)"
-
-        for roi_info in roi_infos:
-            point_sample = point_key_to_sample[roi_info.point_id]
-            old_point = next(
-                skeleton
-                for skeleton in point_sample.annotations
-                if skeleton.id == roi_info.point_id
-                if isinstance(skeleton, dm.Skeleton)
-            ).elements[0]
-            old_x, old_y = old_point.points[:2]
-            offset_x = old_x - roi_info.point_x
-            offset_y = old_y - roi_info.point_y
-            self._point_offset_by_roi_id[roi_info.point_id] = (offset_x, offset_y)
-
-    def _parse_gt(self):
-        pass  # handled by _download_task_meta()
-
-    def _download_task_meta(self):
-        layout = boxes_from_points_task.TaskMetaLayout()
-        serializer = boxes_from_points_task.TaskMetaSerializer()
-
-        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
-        storage_client = make_cloud_client(oracle_data_bucket)
-
-        boxes_to_points_mapping = serializer.parse_bbox_point_mapping(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.BBOX_POINT_MAPPING_FILENAME
-                ),
-            )
-        )
-
-        roi_filenames = serializer.parse_roi_filenames(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.ROI_FILENAMES_FILENAME
-                ),
-            )
-        )
-
-        rois = serializer.parse_roi_info(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.ROI_INFO_FILENAME
-                ),
-            )
-        )
-
-        gt_dataset = serializer.parse_gt_annotations(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.GT_FILENAME
-                ),
-            )
-        )
-
-        points_dataset = serializer.parse_points_annotations(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.POINTS_FILENAME
-                ),
-            )
-        )
-
-        return boxes_to_points_mapping, roi_filenames, rois, gt_dataset, points_dataset
-
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:  # noqa: ARG002
-        job_gt_dataset = dm.Dataset(categories=self._gt_dataset.categories(), media_type=dm.Image)
-
-        for job_sample in job_dataset:
-            roi_info = self._roi_name_to_roi_info[os.path.basename(job_sample.id)]
-
-            point_bbox_key = self._point_key_to_bbox_key.get(roi_info.point_id, None)
-            if point_bbox_key is None:
-                continue  # roi is not from GT set
-
-            bbox_sample = self.bbox_key_to_sample[point_bbox_key]
-
-            bbox = next(bbox for bbox in bbox_sample.annotations if bbox.id == point_bbox_key)
-            roi_shift_x, roi_shift_y = self._point_offset_by_roi_id[roi_info.point_id]
-
-            bbox_in_roi_coords = shift_ann(
-                bbox,
-                offset_x=-roi_shift_x,
-                offset_y=-roi_shift_y,
-                img_w=roi_info.roi_w,
-                img_h=roi_info.roi_h,
-            )
-
-            job_gt_dataset.put(job_sample.wrap(annotations=[bbox_in_roi_coords]))
-
-        return job_gt_dataset
-
-    def _prepare_merged_dataset(self):
-        super()._parse_gt()  # We need to download the original GT dataset
-        return super()._prepare_merged_dataset()
-
-
-class _SkeletonsFromBoxesValidator(_TaskValidatorWithPerJobGt):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        (
-            roi_filenames,
-            roi_infos,
-            boxes_dataset,
-            job_label_mapping,
-            gt_dataset,
-            skeletons_to_boxes_mapping,
-        ) = self._download_task_meta()
-
-        self._boxes_dataset = boxes_dataset
-        self._original_key_to_sample = {sample.attributes["id"]: sample for sample in boxes_dataset}
-
-        self._job_label_mapping = job_label_mapping
-
-        self._gt_dataset = gt_dataset
-
-        self._bbox_key_to_sample = {
-            bbox.id: sample
-            for sample in boxes_dataset
-            for bbox in sample.annotations
-            if isinstance(bbox, dm.Bbox)
-        }
-
-        self._skeleton_key_to_sample = {
-            skeleton.id: sample
-            for sample in gt_dataset
-            for skeleton in sample.annotations
-            if isinstance(skeleton, dm.Skeleton)
-        }
-
-        self._bbox_key_to_skeleton_key = {v: k for k, v in skeletons_to_boxes_mapping.items()}
-        self._roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in roi_infos}
-        self._roi_name_to_roi_info: dict[str, skeletons_from_boxes_task.RoiInfo] = {
-            os.path.splitext(roi_filename)[0]: self._roi_info_by_id[roi_id]
-            for roi_id, roi_filename in roi_filenames.items()
-        }
-
-        self._bbox_offset_by_roi_id = {}
-        "Offset from old to new coords, (dx, dy)"
-
-        for roi_info in roi_infos:
-            bbox_sample = self._bbox_key_to_sample[roi_info.bbox_id]
-
-            old_bbox = next(
-                bbox
-                for bbox in bbox_sample.annotations
-                if bbox.id == roi_info.bbox_id
-                if isinstance(bbox, dm.Bbox)
-            )
-            offset_x = roi_info.bbox_x - old_bbox.x
-            offset_y = roi_info.bbox_y - old_bbox.y
-
-            self._bbox_offset_by_roi_id[roi_info.bbox_id] = (offset_x, offset_y)
-
-    def _parse_gt(self):
-        pass  # handled by _download_task_meta()
-
-    def _download_task_meta(self):
-        layout = skeletons_from_boxes_task.TaskMetaLayout()
-        serializer = skeletons_from_boxes_task.TaskMetaSerializer()
-
-        oracle_data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
-        storage_client = make_cloud_client(oracle_data_bucket)
-
-        roi_filenames = serializer.parse_roi_filenames(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.ROI_FILENAMES_FILENAME
-                ),
-            )
-        )
-
-        rois = serializer.parse_roi_info(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.ROI_INFO_FILENAME
-                ),
-            )
-        )
-
-        boxes_dataset = serializer.parse_bbox_annotations(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.BOXES_FILENAME
-                ),
-            )
-        )
-
-        job_label_mapping = serializer.parse_point_labels(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.POINT_LABELS_FILENAME
-                ),
-            )
-        )
-
-        gt_dataset = serializer.parse_gt_annotations(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.GT_FILENAME
-                ),
-            )
-        )
-
-        skeletons_to_boxes_mapping = serializer.parse_skeleton_bbox_mapping(
-            storage_client.download_file(
-                compose_data_bucket_filename(
-                    self.escrow_address, self.chain_id, layout.SKELETON_BBOX_MAPPING_FILENAME
-                ),
-            )
-        )
-
-        return (
-            roi_filenames,
-            rois,
-            boxes_dataset,
-            job_label_mapping,
-            gt_dataset,
-            skeletons_to_boxes_mapping,
-        )
-
-    def _load_job_dataset(self, job_id: int, job_dataset_path: Path) -> dm.Dataset:
-        job_dataset = super()._load_job_dataset(job_id=job_id, job_dataset_path=job_dataset_path)
-
-        cat = job_dataset.categories()
-        updated_dataset = dm.Dataset(categories=cat, media_type=job_dataset.media_type())
-
-        job_label_cat: dm.LabelCategories = cat[dm.AnnotationType.label]
-        assert len(job_label_cat) == 2
-        job_skeleton_label_id = next(i for i, c in enumerate(job_label_cat) if not c.parent)
-        job_point_label_id = next(i for i, c in enumerate(job_label_cat) if c.parent)
-
-        for job_sample in job_dataset:
-            updated_annotations = job_sample.annotations.copy()
-
-            if not job_sample.annotations:
-                skeleton = dm.Skeleton(
-                    label=job_skeleton_label_id,
-                    elements=[
-                        dm.Points(
-                            [0, 0],
-                            visibility=[dm.Points.Visibility.absent],
-                            label=job_point_label_id,
-                        )
-                    ],
-                )
-
-                roi_info = self._roi_name_to_roi_info[os.path.basename(job_sample.id)]
-                bbox_sample = self._bbox_key_to_sample[roi_info.bbox_id]
-                bbox = next(
-                    bbox
-                    for bbox in bbox_sample.annotations
-                    if bbox.id == roi_info.bbox_id
-                    if isinstance(bbox, dm.Bbox)
-                )
-
-                roi_shift_x, roi_shift_y = self._bbox_offset_by_roi_id[roi_info.bbox_id]
-                converted_bbox = shift_ann(
-                    bbox,
-                    offset_x=roi_shift_x,
-                    offset_y=roi_shift_y,
-                    img_w=roi_info.roi_w,
-                    img_h=roi_info.roi_h,
-                )
-
-                skeleton.group = 1
-                converted_bbox.group = skeleton.group
-
-                updated_annotations = [skeleton, converted_bbox]
-
-            updated_dataset.put(job_sample.wrap(annotations=updated_annotations))
-
-        return updated_dataset
-
-    def _make_gt_dataset_for_job(self, job_id: int, job_dataset: dm.Dataset) -> dm.Dataset:  # noqa: ARG002
-        job_label_cat: dm.LabelCategories = job_dataset.categories()[dm.AnnotationType.label]
-        assert len(job_label_cat) == 2
-        job_skeleton_label_id, job_skeleton_label = next(
-            (i, c) for i, c in enumerate(job_label_cat) if not c.parent
-        )
-        job_point_label_id, job_point_label = next(
-            (i, c) for i, c in enumerate(job_label_cat) if c.parent
-        )
-
-        gt_label_cat = self._gt_dataset.categories()[dm.AnnotationType.label]
-        gt_point_label_id = gt_label_cat.find(job_point_label.name, parent=job_skeleton_label.name)[
-            0
-        ]
-
-        job_gt_dataset = dm.Dataset(categories=job_dataset.categories(), media_type=dm.Image)
-        for job_sample in job_dataset:
-            roi_info = self._roi_name_to_roi_info[os.path.basename(job_sample.id)]
-
-            gt_skeleton_key = self._bbox_key_to_skeleton_key.get(roi_info.bbox_id, None)
-            if gt_skeleton_key is None:
-                continue  # roi is not from GT set
-
-            bbox_sample = self._bbox_key_to_sample[roi_info.bbox_id]
-            bbox = next(
-                bbox
-                for bbox in bbox_sample.annotations
-                if bbox.id == roi_info.bbox_id
-                if isinstance(bbox, dm.Bbox)
-            )
-
-            gt_sample = self._skeleton_key_to_sample[gt_skeleton_key]
-            gt_skeleton = next(
-                skeleton
-                for skeleton in gt_sample.annotations
-                if skeleton.id == gt_skeleton_key
-                if isinstance(skeleton, dm.Skeleton)
-            )
-
-            roi_shift_x, roi_shift_y = self._bbox_offset_by_roi_id[roi_info.bbox_id]
-            converted_gt_skeleton = shift_ann(
-                gt_skeleton,
-                offset_x=roi_shift_x,
-                offset_y=roi_shift_y,
-                img_w=roi_info.roi_w,
-                img_h=roi_info.roi_h,
-            )
-            converted_bbox = shift_ann(
-                bbox,
-                offset_x=roi_shift_x,
-                offset_y=roi_shift_y,
-                img_w=roi_info.roi_w,
-                img_h=roi_info.roi_h,
-            )
-
-            # Join annotations into a group for correct distance comparison
-            skeleton_group = 1
-            converted_bbox.group = skeleton_group
-            converted_gt_skeleton.group = skeleton_group
-
-            # Convert labels
-            converted_gt_skeleton.label = job_skeleton_label_id
-            converted_gt_skeleton.elements = [
-                p.wrap(label=job_point_label_id)
-                for p in converted_gt_skeleton.elements
-                if p.label == gt_point_label_id
-            ]
-
-            job_gt_dataset.put(job_sample.wrap(annotations=[converted_gt_skeleton, converted_bbox]))
-
-        return job_gt_dataset
-
-    @dataclass
-    class _GtKey:
-        sample_id: str
-        skeleton_id: int
-        point_id: int
-
-    _GT_KEY_SEPARATOR = ":"
-
-    def _parse_gt_key(self, raw_gt_key: str) -> _GtKey:
-        # Assume "sample_id:skeleton_id:point_id"
-        sample_id, skeleton_id, point_id = raw_gt_key.rsplit(self._GT_KEY_SEPARATOR, maxsplit=2)
-
-        return self._GtKey(
-            sample_id=sample_id, skeleton_id=int(skeleton_id), point_id=int(point_id)
-        )
-
-    def _serialize_gt_key(self, parsed_gt_key: _GtKey) -> str:
-        # Assume "sample_id:skeleton_id:point_id"
-        return self._GT_KEY_SEPARATOR.join(
-            [parsed_gt_key.sample_id, str(parsed_gt_key.skeleton_id), str(parsed_gt_key.point_id)]
-        )
-
-    class _LabelId(NamedTuple):
-        skeleton_id: int
-        point_id: int
-
-    def _get_gt_dataset_label_id(self, job_gt_dataset: dm.Dataset) -> _LabelId:
-        label_cat: dm.LabelCategories = job_gt_dataset.categories()[dm.AnnotationType.label]
-        assert len(label_cat) == 2
-        job_skeleton_label = next(label for label in label_cat if not label.parent)
-        job_point_label = next(label for label in label_cat if label.parent)
-
-        return self._LabelId(
-            *next(
-                (skeleton_id, point_id)
-                for skeleton_id, skeleton_label in enumerate(self.manifest.annotation.labels)
-                for point_id, point_name in enumerate(skeleton_label.nodes)
-                if skeleton_label.name == job_skeleton_label.name
-                if point_name == job_point_label.name
-            )
-        )
-
-    def _gt_key_to_sample_id(
-        self,
-        gt_key: str,
-        *,
-        job_cvat_id: int,  # noqa: ARG002
-        job_gt_dataset: dm.Dataset,
-    ) -> str | None:
-        parsed_gt_key = self._parse_gt_key(gt_key)
-        job_label_id = self._get_gt_dataset_label_id(job_gt_dataset)
-        if (parsed_gt_key.skeleton_id, parsed_gt_key.point_id) != job_label_id:
-            return None
-
-        return parsed_gt_key.sample_id
-
-    def _update_gt_stats(
-        self,
-        updated_gt_stats: _UpdatedFailedGtStats,
-        *,
-        job_cvat_id: int,
-        job_gt_dataset: dm.Dataset,
-        failed_gts: set[str],
-    ):
-        job_label_id = self._get_gt_dataset_label_id(job_gt_dataset)
-
-        for gt_sample in job_gt_dataset:
-            raw_gt_key = self._serialize_gt_key(
-                self._GtKey(
-                    sample_id=gt_sample.id,
-                    skeleton_id=job_label_id.skeleton_id,
-                    point_id=job_label_id.point_id,
-                )
-            )
-            updated_gt_stats.setdefault(raw_gt_key, _UpdatedFailedGtInfo()).occurrences += 1
-
-        for gt_sample_id in failed_gts:
-            raw_gt_key = self._serialize_gt_key(
-                self._GtKey(
-                    sample_id=gt_sample_id,
-                    skeleton_id=job_label_id.skeleton_id,
-                    point_id=job_label_id.point_id,
-                )
-            )
-            updated_gt_stats[raw_gt_key].failed_jobs.add(job_cvat_id)
-
-        return updated_gt_stats
-
-    def _prepare_merged_dataset(self):
-        super()._parse_gt()  # We need to download the original GT dataset
-        return super()._prepare_merged_dataset()
-
-
-def _compute_gt_stats_update(
-    initial_gt_stats: _FailedGtAttempts, validation_gt_stats: _UpdatedFailedGtStats
-) -> _FailedGtAttempts:
-    updated_gt_stats = initial_gt_stats.copy()
-
-    for gt_key, gt_info in validation_gt_stats.items():
-        if gt_info.occurrences * Config.validation.gt_failure_threshold < len(gt_info.failed_jobs):
-            updated_gt_stats[gt_key] = updated_gt_stats.get(gt_key, 0) + 1
-
-    return updated_gt_stats
 
 
 def process_intermediate_results(  # noqa: PLR0912
@@ -921,22 +361,11 @@ def process_intermediate_results(  # noqa: PLR0912
     escrow_address: str,
     chain_id: int,
     meta: AnnotationMeta,
-    job_annotations: dict[int, io.RawIOBase],
     merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
 ) -> ValidationSuccess | ValidationFailure:
-    # actually validate jobs
-
-    task_type = manifest.annotation.type
-    if task_type in [TaskTypes.image_label_binary, TaskTypes.image_boxes, TaskTypes.image_points]:
-        validator_type = _TaskValidator
-    elif task_type == TaskTypes.image_boxes_from_points:
-        validator_type = _BoxesFromPointsValidator
-    elif task_type == TaskTypes.image_skeletons_from_boxes:
-        validator_type = _SkeletonsFromBoxesValidator
-    else:
-        raise Exception(f"Unknown task type {task_type}")
+    should_complete = False
 
     task = db_service.get_task_by_escrow_address(
         session,
@@ -945,26 +374,39 @@ def process_intermediate_results(  # noqa: PLR0912
             nowait=True
         ),  # should not happen, but waiting should not block processing
     )
-    if not task:
+    if task:
+        # Skip assignments that were validated earlier
+        validated_assignment_ids = {
+            validation_result.assignment_id
+            for validation_result in db_service.get_task_validation_results(session, task.id)
+        }
+        unchecked_jobs_meta = meta.skip_assignments(validated_assignment_ids)
+    else:
+        # Recording Oracle task represents all CVAT tasks related with the escrow
         task_id = db_service.create_task(session, escrow_address=escrow_address, chain_id=chain_id)
         task = db_service.get_task_by_id(session, task_id, for_update=True)
+        unchecked_jobs_meta = meta
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("process_intermediate_results for escrow %s", escrow_address)
         logger.debug("Task id %s, %s", getattr(task, "id", None), getattr(task, "__dict__", None))
 
-    initial_gt_stats = {
-        gt_image_stat.gt_key: gt_image_stat.failed_attempts
+    gt_stats = {
+        gt_image_stat.gt_frame_name: ValidationFrameStats(
+            failed_attempts=gt_image_stat.failed_attempts,
+            accepted_attempts=gt_image_stat.accepted_attempts,
+            accumulated_quality=gt_image_stat.accumulated_quality,
+        )
         for gt_image_stat in db_service.get_task_gt_stats(session, task.id)
     }
 
-    validator = validator_type(
+    validator = _TaskValidator(
         escrow_address=escrow_address,
         chain_id=chain_id,
         manifest=manifest,
-        job_annotations=job_annotations,
         merged_annotations=merged_annotations,
-        gt_stats=initial_gt_stats,
+        meta=unchecked_jobs_meta,
+        gt_stats=gt_stats,
     )
 
     validation_result = validator.validate()
@@ -980,17 +422,129 @@ def process_intermediate_results(  # noqa: PLR0912
             ", ".join(f"{k}: {v:.2f}" for k, v in job_results.items()),
         )
 
-    if validation_result.updated_gt_stats:
-        updated_gt_stats = _compute_gt_stats_update(
-            initial_gt_stats, validation_result.updated_gt_stats
-        )
+    gt_stats = validation_result.gt_stats
+    if gt_stats:
+        # cvat_task_id: {val_frame_id, ...}
+        cvat_task_id_to_failed_val_frames: dict[int, set[int]] = {}
+        rejected_job_ids = rejected_jobs.keys()
+
+        if rejected_job_ids:
+            job_id_to_task_id = {j.job_id: j.task_id for j in unchecked_jobs_meta.jobs}
+            job_id_to_frame_range = {j.job_id: j.job_frame_range for j in unchecked_jobs_meta.jobs}
+
+            # find validation frames to be disabled
+            for rejected_job_id in rejected_job_ids:
+                job_frame_range = job_id_to_frame_range[rejected_job_id]
+                cvat_task_id = job_id_to_task_id[rejected_job_id]
+                honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
+                job_honeypots = set(honeypots_mapping.keys()) & set(job_frame_range)
+                validation_frames = [
+                    val_frame
+                    for honeypot, val_frame in honeypots_mapping.items()
+                    if honeypot in job_honeypots
+                ]
+                sorted_task_frame_names = validation_result.task_id_to_sequence_of_frame_names[
+                    cvat_task_id
+                ]
+
+                for val_frame in validation_frames:
+                    val_frame_name = sorted_task_frame_names[val_frame]
+                    val_frame_stats = gt_stats[val_frame_name]
+                    if (
+                        val_frame_stats.failed_attempts >= Config.validation.gt_ban_threshold
+                        and not val_frame_stats.accepted_attempts
+                    ):
+                        cvat_task_id_to_failed_val_frames.setdefault(cvat_task_id, set()).add(
+                            val_frame
+                        )
+
+        for cvat_task_id, val_frame_ids in cvat_task_id_to_failed_val_frames.items():
+            task_validation_layout = validation_result.task_id_to_val_layout[cvat_task_id]
+            intersection = val_frame_ids & set(task_validation_layout.disabled_frames)
+
+            if intersection:
+                logger.error(
+                    "Logical error occurred while disabling validation frames "
+                    f"for the task({task_id}). Frames {intersection} "
+                    "are already disabled."
+                )
+
+            updated_disable_frames = task_validation_layout.disabled_frames + list(val_frame_ids)
+            non_disabled_frames = list(
+                set(task_validation_layout.validation_frames) - set(updated_disable_frames)
+            )
+
+            if len(non_disabled_frames) < task_validation_layout.frames_per_job_count:
+                should_complete = True
+                logger.info(
+                    f"Validation for escrow_address={escrow_address}: "
+                    "Too few validation frames left "
+                    f"(required: {task_validation_layout.frames_per_job_count}, "
+                    f"left: {len(non_disabled_frames)}) for the task({cvat_task_id}), "
+                    "stopping annotation"
+                )
+                break
+
+            updated_task_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
+
+            # validation frames may be repeated
+            task_honeypot_real_frames_index: dict[int, list[int]] = {}
+            for idx, f in enumerate(updated_task_honeypot_real_frames):
+                task_honeypot_real_frames_index.setdefault(f, []).append(idx)
+
+            rejected_jobs_for_task = [
+                j
+                for j in unchecked_jobs_meta.jobs
+                if j.job_id in rejected_job_ids and j.task_id == cvat_task_id
+            ]
+
+            for job in rejected_jobs_for_task:
+                job_frame_range = job.job_frame_range
+                honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
+                job_honeypots = set(honeypots_mapping.keys()) & set(job_frame_range)
+
+                validation_frames_to_replace = [
+                    honeypots_mapping[honeypot]
+                    for honeypot in job_honeypots
+                    if honeypots_mapping[honeypot] in val_frame_ids
+                ]
+                valid_used_validation_frames = [
+                    honeypots_mapping[honeypot]
+                    for honeypot in job_honeypots
+                    if honeypots_mapping[honeypot] not in validation_frames_to_replace
+                ]
+
+                # choose new unique validation frames for the job
+                assert not (set(validation_frames_to_replace) & set(non_disabled_frames))
+                available_validation_frames = list(
+                    set(non_disabled_frames) - set(valid_used_validation_frames)
+                )
+                rng = np.random.Generator(np.random.MT19937())
+                new_validation_frames = rng.choice(
+                    available_validation_frames,
+                    replace=False,
+                    size=len(validation_frames_to_replace),
+                ).tolist()
+
+                for prev_val_frame, new_val_frame in zip(
+                    validation_frames_to_replace, new_validation_frames, strict=True
+                ):
+                    idx = task_honeypot_real_frames_index[prev_val_frame].pop(0)
+                    updated_task_honeypot_real_frames[idx] = new_val_frame
+
+            cvat_api.update_task_validation_layout(
+                cvat_task_id,
+                disabled_frames=updated_disable_frames,
+                honeypot_real_frames=updated_task_honeypot_real_frames,
+            )
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("Updating GT stats: %s", updated_gt_stats)
+            logger.debug("Updating GT stats: %s", gt_stats)
 
-        db_service.update_gt_stats(session, task.id, updated_gt_stats)
+        db_service.update_gt_stats(session, task.id, gt_stats)
 
     job_final_result_ids: dict[int, str] = {}
+
     for job_meta in meta.jobs:
         job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
         if not job:
@@ -1011,11 +565,19 @@ def process_intermediate_results(  # noqa: PLR0912
         else:
             assignment_validation_result_id = assignment_validation_result.id
 
+        # We consider only the last assignment as final even if there were assignments with higher
+        # quality score. The reason for this is that during escrow annotation there are various
+        # task changes possible, for instance:
+        # - GT can be changed in the middle of the task annotation
+        # - manifest can be updated with different quality parameters
+        # etc. It can be considered more of a development or testing conditions so far,
+        # according to the current system requirements, but it's likely to be
+        # a normal requirement in the future.
+        # Therefore, we use the logic: only the last job assignment can be considered
+        # a final annotation result, regardless of the assignment quality.
         job_final_result_ids[job.id] = assignment_validation_result_id
 
     task_jobs = task.jobs
-
-    should_complete = False
 
     if Config.validation.max_escrow_iterations > 0:
         escrow_iteration = task.iteration

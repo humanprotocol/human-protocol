@@ -23,12 +23,15 @@ export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_POINTS,
   JobRequestType.IMAGE_BOXES_FROM_POINTS,
   JobRequestType.IMAGE_SKELETONS_FROM_BOXES,
+  JobRequestType.IMAGE_POLYGONS,
 ];
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
 export const LOGOUT_PATH = '/auth/logout';
+
+export const BACKOFF_INTERVAL_SECONDS = 120;
 
 export const CURSE_WORDS = [
   '4r5e',

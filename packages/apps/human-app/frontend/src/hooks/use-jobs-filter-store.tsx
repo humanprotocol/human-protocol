@@ -1,6 +1,7 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
+import { MyJobStatus } from '@/api/services/worker/my-jobs-data';
 
 export interface JobsFilterStoreProps {
   filterParams: {
@@ -14,13 +15,7 @@ export interface JobsFilterStoreProps {
     network?: 'MATIC' | 'POLYGON';
     // TODO add allowed job types
     job_type?: string;
-    status?:
-      | 'active'
-      | 'completed'
-      | 'canceled'
-      | 'validation'
-      | 'expired'
-      | 'rejected';
+    status?: MyJobStatus;
     escrow_address?: string;
     page: number;
     page_size: PageSize;
@@ -40,7 +35,7 @@ const initialFiltersState = {
   page: 0,
   page_size: 5,
   fields: ['reward_amount', 'job_description', 'reward_token'],
-  status: 'active',
+  status: MyJobStatus.ACTIVE,
   escrow_address: '',
 } satisfies Pick<
   JobsFilterStoreProps['filterParams'],

@@ -52,7 +52,7 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
             Config.encryption_config.pgp_private_key,
             passphrase=Config.encryption_config.pgp_passphrase,
         )
-        manifest_content = encryption.decrypt(manifest_content)
+        manifest_content = encryption.decrypt(manifest_content).decode("utf-8")
 
     return json.loads(manifest_content)
 
@@ -67,6 +67,6 @@ def get_available_webhook_types(
             Config.localhost.recording_oracle_address or escrow.recording_oracle
         ).lower(): OracleWebhookTypes.recording_oracle,
         (
-            Config.localhost.reputation_oracle_url or escrow.reputation_oracle
+            Config.localhost.reputation_oracle_address or escrow.reputation_oracle
         ).lower(): OracleWebhookTypes.reputation_oracle,
     }

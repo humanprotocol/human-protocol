@@ -123,6 +123,8 @@ def handle_create_job_event(payload: dict) -> None:
                 payload.job["task_id"],
                 payload.job["project_id"],
                 status=JobStatuses[payload.job["state"]],
+                start_frame=payload.job["start_frame"],
+                stop_frame=payload.job["stop_frame"],
             )
             cvat_service.touch(session, models.Job, [job_id])
 

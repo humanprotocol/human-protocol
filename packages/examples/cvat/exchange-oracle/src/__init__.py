@@ -32,6 +32,5 @@ async def startup_event():
     logger.info("Exchange Oracle is up and running!")
 
 
-is_test = Config.environment == "test"
-if not is_test:
+if not Config.is_test_mode():
     setup_cron_jobs(app)

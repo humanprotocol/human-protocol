@@ -12,11 +12,6 @@ from src.db import SessionLocal
 from src.schemas import exchange as service_api
 from src.utils.assignments import compose_assignment_url, parse_manifest
 
-PROJECT_ACTIVE_STATUSES = {
-    ProjectStatuses.annotation,
-    ProjectStatuses.completed,
-    ProjectStatuses.validation,
-}
 PROJECT_COMPLETED_STATUSES = {
     ProjectStatuses.recorded,
     ProjectStatuses.deleted,
@@ -50,12 +45,12 @@ def serialize_job(
 
         if project.status == ProjectStatuses.canceled:
             api_status = service_api.JobStatuses.canceled
-        elif project.status in PROJECT_ACTIVE_STATUSES:
+        elif project.status == ProjectStatuses.annotation:
             api_status = service_api.JobStatuses.active
         elif project.status in PROJECT_COMPLETED_STATUSES:
             api_status = service_api.JobStatuses.completed
         else:
-            raise NotImplementedError(f"Unknown status {project.status}")
+            raise AssertionError(f"Unexpected project status '{project.status}'")
 
         return service_api.JobResponse(
             escrow_address=project.escrow_address,

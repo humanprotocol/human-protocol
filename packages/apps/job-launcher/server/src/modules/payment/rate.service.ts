@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { COINGECKO_API_URL } from '../../common/constants';
@@ -13,6 +13,7 @@ import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class RateService {
+  public readonly logger = new Logger(RateService.name);
   private cache: Map<string, { rate: number; timestamp: number }>;
 
   constructor(
@@ -81,7 +82,7 @@ export class RateService {
 
       return finalRate;
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
 
       //   try {
       //     const coinMarketCapFrom = CoinMarketCupTokenId[from];

@@ -24,7 +24,7 @@ services:
       - 9000:9000
     entrypoint: 'sh'
     command:
-      -c "mkdir -p /data/manifests && minio server /data --console-address ':9001'"
+      -c "minio server /data --console-address ':9001'"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
@@ -38,7 +38,7 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000  access-key secret-key;
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
       /usr/bin/mc mb myminio/manifests;
       /usr/bin/mc anonymous set public myminio/manifests;
       "

@@ -7,12 +7,12 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OracleDiscoveryService } from './oracle-discovery.service';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,
-  OracleDiscoveryResponse,
+  OracleDiscoveryResult,
 } from './model/oracle-discovery.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -28,10 +28,14 @@ export class OracleDiscoveryController {
   @ApiTags('Oracle-Discovery')
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
+  @ApiOkResponse({
+    type: Array<OracleDiscoveryResult>,
+    description: 'List of oracles',
+  })
   @UsePipes(new ValidationPipe())
   public async getOracles(
     @Query() dto: OracleDiscoveryDto,
-  ): Promise<OracleDiscoveryResponse[]> {
+  ): Promise<OracleDiscoveryResult[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
       throw new HttpException(
         'Oracles discovery is disabled',
@@ -43,6 +47,6 @@ export class OracleDiscoveryController {
       OracleDiscoveryDto,
       OracleDiscoveryCommand,
     );
-    return this.service.processOracleDiscovery(command);
+    return await this.service.processOracleDiscovery(command);
   }
 }

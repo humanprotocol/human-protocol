@@ -60,11 +60,16 @@ class GcsClient(StorageClient):
             self.client.download_blob_to_file(blob, data)
             return data.getvalue()
 
-    def list_files(self, *, bucket: str | None = None, prefix: str | None = None) -> list[str]:
+    def list_files(
+        self, *, bucket: str | None = None, prefix: str | None = None, trim_prefix: bool = False
+    ) -> list[str]:
         bucket = unquote(bucket) if bucket else self._bucket
         prefix = self.normalize_prefix(prefix)
 
-        return [
+        if trim_prefix:
+            assert prefix, "The trim_prefix option cannot be used without a prefix"
+
+        files = [
             blob.name
             for blob in self.client.list_blobs(
                 bucket_or_name=bucket,
@@ -79,3 +84,7 @@ class GcsClient(StorageClient):
                 ),
             )
         ]
+        if trim_prefix:
+            files = [f[len(prefix) :].strip("/") for f in files]
+
+        return files
