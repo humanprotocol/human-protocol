@@ -12,7 +12,8 @@ export function generateBucketUrl(
   jobType: JobRequestType,
 ): URL {
   if (
-    (jobType === JobRequestType.IMAGE_BOXES ||
+    (jobType === JobRequestType.IMAGE_POLYGONS ||
+      jobType === JobRequestType.IMAGE_BOXES ||
       jobType === JobRequestType.IMAGE_POINTS ||
       jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
       jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
