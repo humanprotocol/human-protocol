@@ -68,12 +68,20 @@ export async function getOracles({
       signal
     );
 
-    oracles = oracles.concat(
-      results.map((oracle) => ({
-        ...oracle,
-        name: oracleUrlToNameMap.get(oracle.url) ?? '',
-      }))
-    );
+    // Add new results and filter duplicates based on `url` and `address`
+    const uniqueOraclesMap = new Map<string, Oracle>();
+
+    results.forEach((oracle) => {
+      const key = `${oracle.url}-${oracle.address}`;
+      if (!uniqueOraclesMap.has(key)) {
+        uniqueOraclesMap.set(key, {
+          ...oracle,
+          name: oracleUrlToNameMap.get(oracle.url) ?? '',
+        });
+      }
+    });
+
+    oracles = oracles.concat(Array.from(uniqueOraclesMap.values()));
   }
   return oracles;
 }
