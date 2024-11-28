@@ -29,7 +29,7 @@ import type { JobType } from '@/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/pages/worker/jobs/components/escrow-address-search-form';
 
 interface AvailableJobsTableProps {
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 
 export type AvailableJobsTableData = AvailableJob & {
@@ -40,7 +40,7 @@ export type AvailableJobsTableData = AvailableJob & {
 };
 
 const getColumns = (
-  chainIdsEnabled: number[] | undefined
+  chainIdsEnabled: number[]
 ): MRT_ColumnDef<AvailableJob>[] => [
   {
     accessorKey: 'job_description',
@@ -63,7 +63,7 @@ const getColumns = (
     size: 100,
     enableSorting: false,
     Cell: (props) => {
-      return getNetworkName(chainIdsEnabled, props.row.original.chain_id);
+      return getNetworkName(props.row.original.chain_id);
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {

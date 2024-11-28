@@ -4,7 +4,7 @@ import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 
 interface AvailableJobsNetworkFilterProps {
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 
 export function AvailableJobsNetworkFilterMobile({

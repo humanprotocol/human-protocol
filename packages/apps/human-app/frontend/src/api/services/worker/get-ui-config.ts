@@ -3,22 +3,20 @@ import { z } from 'zod';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 
-const uiConfigSuccessSchema = z.object({
+const uiConfigSchema = z.object({
   chainIdsEnabled: z.array(z.number()),
 });
 
-export type UiConfigSuccess = z.infer<typeof uiConfigSuccessSchema>;
+export type UiConfig = z.infer<typeof uiConfigSchema>;
 
-const getUiConfig = async (): Promise<UiConfigSuccess> => {
-  const cachedData = sessionStorage.getItem('ui-config');
-  if (cachedData) {
-    const parsedData = JSON.parse(cachedData) as number[];
-    return uiConfigSuccessSchema.parse(parsedData);
-  }
+const getUiConfig = async (): Promise<UiConfig> => {
+  // const cachedData = sessionStorage.getItem('ui-config');
+  // if (cachedData) {
+  //   return uiConfigSchema.parse(cachedData);
+  // }
 
   const response = await apiClient(apiPaths.worker.uiConfig.path, {
-    authenticated: true,
-    successSchema: uiConfigSuccessSchema,
+    successSchema: uiConfigSchema,
     options: {
       method: 'GET',
     },
@@ -32,5 +30,6 @@ export function useGetUiConfig() {
   return useQuery({
     queryKey: ['ui-config'],
     queryFn: getUiConfig,
+    staleTime: Infinity,
   });
 }

@@ -28,7 +28,7 @@ import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 
 export function MyJobsTableMobile({

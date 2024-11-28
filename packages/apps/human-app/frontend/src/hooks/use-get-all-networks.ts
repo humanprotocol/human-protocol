@@ -1,13 +1,11 @@
 import { useMemo } from 'react';
-import { chains, getChainsEnabled } from '@/smart-contracts/chains';
+import { getEnabledChainsByUiConfig } from '@/smart-contracts/chains';
 
-export const useGetAllNetworks = (chainIdsEnabled: number[] | undefined) => {
+export const useGetAllNetworks = (chainIdsEnabled: number[]) => {
   const allNetworks = useMemo(() => {
-    const chainsSelected = chainIdsEnabled
-      ? getChainsEnabled(chainIdsEnabled)
-      : chains;
+    const chains = getEnabledChainsByUiConfig(chainIdsEnabled);
 
-    return chainsSelected.map(({ chainId, name }) => ({
+    return chains.map(({ chainId, name }) => ({
       option: chainId,
       name,
     }));

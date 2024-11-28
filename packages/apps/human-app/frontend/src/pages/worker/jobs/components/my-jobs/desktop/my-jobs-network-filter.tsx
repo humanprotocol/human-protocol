@@ -4,7 +4,7 @@ import { useGetAllNetworks } from '@/hooks/use-get-all-networks';
 import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
 
 interface MyJobsNetworkFilterProps {
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 
 export function MyJobsNetworkFilter({

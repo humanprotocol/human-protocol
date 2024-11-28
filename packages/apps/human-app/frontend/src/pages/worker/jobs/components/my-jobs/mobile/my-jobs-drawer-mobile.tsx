@@ -16,7 +16,7 @@ import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,

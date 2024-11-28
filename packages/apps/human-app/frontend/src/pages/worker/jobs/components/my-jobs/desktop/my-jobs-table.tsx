@@ -35,7 +35,7 @@ import { StatusChip } from '@/pages/worker/jobs/components/status-chip';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableProps {
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 
 const getColumnsDefinition = ({
@@ -45,7 +45,7 @@ const getColumnsDefinition = ({
 }: {
   refreshData: () => void;
   isRefreshTasksPending: boolean;
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }): MRT_ColumnDef<MyJob>[] => [
   {
     accessorKey: 'escrow_address',
@@ -61,7 +61,7 @@ const getColumnsDefinition = ({
     header: t('worker.jobs.network'),
     size: 100,
     Cell: (props) => {
-      return getNetworkName(chainIdsEnabled, props.row.original.chain_id);
+      return getNetworkName(props.row.original.chain_id);
     },
     muiTableHeadCellProps: () => ({
       component: (props) => {

@@ -15,7 +15,7 @@ import { useColorMode } from '@/hooks/use-color-mode';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
-  chainIdsEnabled: number[] | undefined;
+  chainIdsEnabled: number[];
 }
 export function AvailableJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,

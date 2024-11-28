@@ -23,7 +23,7 @@ export type ChainWithAddresses = Chain & {
   addresses: ContractsAddresses;
 };
 
-export const testnetChains = [
+export const TestnetChainsIds = [
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
   ChainId.RINKEBY,
@@ -37,7 +37,7 @@ export const testnetChains = [
   ChainId.LOCALHOST,
 ] as const;
 
-export const mainnetChains = [
+export const MainnetChainsIds = [
   ChainId.POLYGON,
   ChainId.MAINNET,
   ChainId.BSC_MAINNET,
@@ -48,8 +48,8 @@ export const mainnetChains = [
   ChainId.ALL,
 ] as const;
 
-export type TestnetNarrow = Exclude<ChainId, (typeof mainnetChains)[number]>;
-export type MainnetNarrow = Exclude<ChainId, (typeof testnetChains)[number]>;
+export type TestnetNarrow = Exclude<ChainId, (typeof MainnetChainsIds)[number]>;
+export type MainnetNarrow = Exclude<ChainId, (typeof TestnetChainsIds)[number]>;
 
 export const TestnetChains: ChainWithAddresses[] = [
   {
@@ -72,10 +72,10 @@ export const MainnetChains: ChainWithAddresses[] = [
 ];
 
 export const AllTestnetsChains: ChainWithAddresses[] =
-  getChainsCfgByType<TestnetNarrow>([...testnetChains]);
+  getChainsCfgByType<TestnetNarrow>([...TestnetChainsIds]);
 
 export const AllMainnetChains: ChainWithAddresses[] =
-  getChainsCfgByType<MainnetNarrow>([...mainnetChains]);
+  getChainsCfgByType<MainnetNarrow>([...MainnetChainsIds]);
 
 function getChainsCfgByType<T extends TestnetNarrow | MainnetNarrow>(
   chainsArr: T[]
@@ -120,12 +120,9 @@ export const getMainnetChainsEnabled = (chainIdsEnabled: number[]) => {
 export const chainsWithSCAddresses: ChainWithAddresses[] =
   env.VITE_NETWORK === 'mainnet' ? MainnetChains : TestnetChains;
 
-// chains for wallet-connect modal
-export const chains: Chain[] = (
-  env.VITE_NETWORK === 'mainnet' ? MainnetChains : TestnetChains
-).map(({ addresses: _, ...chainData }) => chainData);
-
-export const getChainsEnabled = (chainIdsEnabled: number[]): Chain[] =>
+export const getEnabledChainsByUiConfig = (
+  chainIdsEnabled: number[]
+): Chain[] =>
   (env.VITE_NETWORK === 'mainnet'
     ? getMainnetChainsEnabled(chainIdsEnabled)
     : getTestnetChainsEnabled(chainIdsEnabled)
