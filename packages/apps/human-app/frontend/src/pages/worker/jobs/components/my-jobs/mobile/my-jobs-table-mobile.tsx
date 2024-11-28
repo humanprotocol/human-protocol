@@ -103,7 +103,7 @@ export function MyJobsTableMobile({
               marginBottom: '32px',
               marginTop: '21px',
               svg: {
-                marginLeft: '4px',
+                marginLeft: '2px',
               },
             }}
             type="button"
