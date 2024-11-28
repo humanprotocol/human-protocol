@@ -12,51 +12,51 @@ import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-param
 type graphType = 'bucketed';
 
 const Graph = () => {
-	const [graphType, setGraphType] = useState<graphType>('bucketed');
-	const handleGraphTypeChange = (_: unknown, newValue: graphType) => {
-		setGraphType(newValue);
-	};
-	const { revertToInitialParams } = useGraphPageChartParams();
+  const [graphType, setGraphType] = useState<graphType>('bucketed');
+  const handleGraphTypeChange = (_: unknown, newValue: graphType) => {
+    setGraphType(newValue);
+  };
+  const { revertToInitialParams } = useGraphPageChartParams();
 
-	useEffect(() => {
-		revertToInitialParams();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+  useEffect(() => {
+    revertToInitialParams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-	return (
-		<PageWrapper displaySearchBar className="standard-background">
-			<Breadcrumbs title="Charts" />
-			<TabContext value={graphType}>
-				<Tabs
-					textColor="primary"
-					sx={{ marginBottom: 2 }}
-					value={graphType}
-					onChange={handleGraphTypeChange}
-					aria-label="chart-tabs"
-				>
-					<Tab
-						sx={{
-							width: { xs: '50%', sm: 'auto' },
-						}}
-						label={
-							<Typography variant="Components/Button Large">
-								Bucketed
-							</Typography>
-						}
-						value="bucketed"
-					/>
-				</Tabs>
-				<TabPanel
-					sx={{
-						p: 0,
-					}}
-					value="bucketed"
-				>
-					<AreaChart />
-				</TabPanel>
-			</TabContext>
-		</PageWrapper>
-	);
+  return (
+    <PageWrapper displaySearchBar className="standard-background">
+      <Breadcrumbs title="Charts" />
+      <TabContext value={graphType}>
+        <Tabs
+          textColor="primary"
+          sx={{ marginBottom: 2 }}
+          value={graphType}
+          onChange={handleGraphTypeChange}
+          aria-label="chart-tabs"
+        >
+          <Tab
+            sx={{
+              width: { xs: '50%', sm: 'auto' },
+            }}
+            label={
+              <Typography variant="Components/Button Large">
+                Bucketed
+              </Typography>
+            }
+            value="bucketed"
+          />
+        </Tabs>
+        <TabPanel
+          sx={{
+            p: 0,
+          }}
+          value="bucketed"
+        >
+          <AreaChart />
+        </TabPanel>
+      </TabContext>
+    </PageWrapper>
+  );
 };
 
 export default Graph;

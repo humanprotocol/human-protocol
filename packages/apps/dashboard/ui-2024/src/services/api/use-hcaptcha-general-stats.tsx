@@ -5,27 +5,27 @@ import { apiPaths } from '../api-paths';
 import { validateResponse } from '@services/validate-response';
 
 const successHcaptchaGeneralStatsResponseSchema = z.object({
-	solved: z.number(),
+  solved: z.number(),
 });
 
 export type HcaptchaGeneralStats = z.infer<
-	typeof successHcaptchaGeneralStatsResponseSchema
+  typeof successHcaptchaGeneralStatsResponseSchema
 >;
 
 export function useHcaptchaGeneralStats() {
-	return useQuery({
-		queryFn: async () => {
-			const { data } = await httpService.get(
-				apiPaths.hcaptchaGeneralStats.path
-			);
+  return useQuery({
+    queryFn: async () => {
+      const { data } = await httpService.get(
+        apiPaths.hcaptchaGeneralStats.path
+      );
 
-			const validResponse = validateResponse(
-				data,
-				successHcaptchaGeneralStatsResponseSchema
-			);
+      const validResponse = validateResponse(
+        data,
+        successHcaptchaGeneralStatsResponseSchema
+      );
 
-			return validResponse;
-		},
-		queryKey: ['useHcaptchaGeneralStats'],
-	});
+      return validResponse;
+    },
+    queryKey: ['useHcaptchaGeneralStats'],
+  });
 }

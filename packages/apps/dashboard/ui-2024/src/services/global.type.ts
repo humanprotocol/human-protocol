@@ -4,7 +4,7 @@ import type { AxiosError } from 'axios';
 export type ResponseError = AxiosError | Error | ZodError | null;
 
 declare module '@tanstack/react-query' {
-	interface Register {
-		defaultError: ResponseError;
-	}
+  interface Register {
+    defaultError: ResponseError;
+  }
 }

@@ -12,88 +12,88 @@ import { useNavigate } from 'react-router-dom';
 import { Stack, TableRow } from '@mui/material';
 
 export const EscrowsTableBody = ({
-	role,
+  role,
 }: {
-	role: AddressDetailsLeader['role'];
+  role: AddressDetailsLeader['role'];
 }) => {
-	const navigate = useNavigate();
-	const { filterParams } = useWalletSearch();
-	const { data, isPending, isError, error } = useEscrowDetails({ role });
-	const {
-		setLastPageIndex,
-		setPrevPage,
-		pagination: { page },
-	} = useEscrowDetailsDto();
+  const navigate = useNavigate();
+  const { filterParams } = useWalletSearch();
+  const { data, isPending, isError, error } = useEscrowDetails({ role });
+  const {
+    setLastPageIndex,
+    setPrevPage,
+    pagination: { page },
+  } = useEscrowDetailsDto();
 
-	useEffect(() => {
-		if (data?.results.length === 0) {
-			setLastPageIndex(page);
-			setPrevPage();
-		}
-	}, [data?.results, page, setLastPageIndex, setPrevPage]);
+  useEffect(() => {
+    if (data?.results.length === 0) {
+      setLastPageIndex(page);
+      setPrevPage();
+    }
+  }, [data?.results, page, setLastPageIndex, setPrevPage]);
 
-	useEffect(() => {
-		setLastPageIndex(undefined);
-	}, [filterParams.address, filterParams.chainId, setLastPageIndex]);
+  useEffect(() => {
+    setLastPageIndex(undefined);
+  }, [filterParams.address, filterParams.chainId, setLastPageIndex]);
 
-	if (isPending) {
-		return (
-			<EscrowsTableBodyContainer>
-				<CircularProgress />
-			</EscrowsTableBodyContainer>
-		);
-	}
+  if (isPending) {
+    return (
+      <EscrowsTableBodyContainer>
+        <CircularProgress />
+      </EscrowsTableBodyContainer>
+    );
+  }
 
-	if (isError) {
-		return (
-			<EscrowsTableBodyContainer>
-				<div>{handleErrorMessage(error)}</div>
-			</EscrowsTableBodyContainer>
-		);
-	}
+  if (isError) {
+    return (
+      <EscrowsTableBodyContainer>
+        <div>{handleErrorMessage(error)}</div>
+      </EscrowsTableBodyContainer>
+    );
+  }
 
-	if (!data.results.length) {
-		return (
-			<EscrowsTableBodyContainer>
-				<div>No escrows launched yet</div>
-			</EscrowsTableBodyContainer>
-		);
-	}
+  if (!data.results.length) {
+    return (
+      <EscrowsTableBodyContainer>
+        <div>No escrows launched yet</div>
+      </EscrowsTableBodyContainer>
+    );
+  }
 
-	return (
-		<MuiTableBody>
-			{data.results.map((elem, idx) => (
-				<TableRow key={idx}>
-					<TableCell
-						sx={{
-							padding: '0 0 24px 0',
-						}}
-					>
-						<Stack
-							sx={{
-								':hover': {
-									cursor: 'pointer',
-								},
-							}}
-							onClick={(e) => {
-								e.stopPropagation();
-								e.preventDefault();
-								navigate(`/search/${filterParams.chainId}/${elem.address}`);
-							}}
-						>
-							<a
-								target="_blank"
-								href={`/search/${filterParams.chainId}/${elem.address}`}
-								style={{
-									textDecoration: 'unset',
-								}}
-							>
-								{elem.address}
-							</a>
-						</Stack>
-					</TableCell>
-				</TableRow>
-			))}
-		</MuiTableBody>
-	);
+  return (
+    <MuiTableBody>
+      {data.results.map((elem, idx) => (
+        <TableRow key={idx}>
+          <TableCell
+            sx={{
+              padding: '0 0 24px 0',
+            }}
+          >
+            <Stack
+              sx={{
+                ':hover': {
+                  cursor: 'pointer',
+                },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                navigate(`/search/${filterParams.chainId}/${elem.address}`);
+              }}
+            >
+              <a
+                target="_blank"
+                href={`/search/${filterParams.chainId}/${elem.address}`}
+                style={{
+                  textDecoration: 'unset',
+                }}
+              >
+                {elem.address}
+              </a>
+            </Stack>
+          </TableCell>
+        </TableRow>
+      ))}
+    </MuiTableBody>
+  );
 };
