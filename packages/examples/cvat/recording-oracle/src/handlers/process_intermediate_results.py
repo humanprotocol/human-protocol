@@ -486,7 +486,7 @@ def process_intermediate_results(  # noqa: PLR0912
                 break
 
             task_honeypot_to_index: dict[int, int] = {
-                honeypot: i for i, honeypot in enumerate(task_validation_layout.validation_frames)
+                honeypot: i for i, honeypot in enumerate(task_validation_layout.honeypot_frames)
             }  # honeypot -> list index
 
             task_honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
@@ -529,7 +529,7 @@ def process_intermediate_results(  # noqa: PLR0912
                 ).tolist()
 
                 for honeypot, new_validation_frame in zip(
-                    job_validation_frames_to_replace, new_job_validation_frames, strict=True
+                    job_honeypots_to_replace, new_job_validation_frames, strict=True
                 ):
                     honeypot_index = task_honeypot_to_index[honeypot]
                     task_updated_honeypot_real_frames[honeypot_index] = new_validation_frame
