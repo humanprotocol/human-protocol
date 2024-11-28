@@ -18,7 +18,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { ConfigService } from '@nestjs/config';
 import { mockConfig } from '../../../test/constants';
 
-describe.only('QualificationService', () => {
+describe('QualificationService', () => {
   let qualificationService: QualificationService;
   let qualificationRepository: QualificationRepository;
   let userRepository: UserRepository;

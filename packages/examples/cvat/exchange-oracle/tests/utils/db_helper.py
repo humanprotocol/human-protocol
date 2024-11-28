@@ -68,6 +68,8 @@ def create_job(session: Session, cvat_id: int, cvat_task_id: int, cvat_project_i
         cvat_project_id=cvat_project_id,
         cvat_task_id=cvat_task_id,
         status=JobStatuses.new,
+        start_frame=0,
+        stop_frame=1,
     )
     session.add(cvat_job)
 

@@ -48,7 +48,6 @@ class _TaskValidator:
         self.data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
         self.annotation_meta: annotation.AnnotationMeta | None = None
-        self.job_annotations: dict[int, bytes] | None = None
         self.merged_annotations: bytes | None = None
 
     def set_logger(self, logger: Logger):
@@ -70,23 +69,15 @@ class _TaskValidator:
 
         data_bucket_client = make_cloud_client(self.data_bucket)
 
-        job_annotations = {}
-        for job_meta in self.annotation_meta.jobs:
-            job_filename = compose_annotation_results_bucket_filename(
-                self.escrow_address,
-                self.chain_id,
-                job_meta.annotation_filename,
-            )
-            job_annotations[job_meta.job_id] = data_bucket_client.download_file(job_filename)
-
-        excor_merged_annotation_path = compose_annotation_results_bucket_filename(
+        exchange_oracle_merged_annotation_path = compose_annotation_results_bucket_filename(
             self.escrow_address,
             self.chain_id,
             annotation.RESULTING_ANNOTATIONS_FILE,
         )
-        merged_annotations = data_bucket_client.download_file(excor_merged_annotation_path)
+        merged_annotations = data_bucket_client.download_file(
+            exchange_oracle_merged_annotation_path
+        )
 
-        self.job_annotations = job_annotations
         self.merged_annotations = merged_annotations
 
     def _download_results(self):
@@ -97,7 +88,6 @@ class _TaskValidator:
 
     def _process_annotation_results(self) -> ValidationResult:
         assert self.annotation_meta is not None
-        assert self.job_annotations is not None
         assert self.merged_annotations is not None
 
         # TODO: refactor further
@@ -106,7 +96,6 @@ class _TaskValidator:
             escrow_address=self.escrow_address,
             chain_id=self.chain_id,
             meta=self.annotation_meta,
-            job_annotations={k: io.BytesIO(v) for k, v in self.job_annotations.items()},
             merged_annotations=io.BytesIO(self.merged_annotations),
             manifest=self.manifest,
             logger=self.logger,
@@ -201,7 +190,6 @@ class _TaskValidator:
                 OracleWebhookTypes.exchange_oracle,
                 event=RecordingOracleEvent_SubmissionRejected(
                     # TODO: send all assignments, handle rejection reason in Exchange Oracle
-                    # change validation frames in these jobs once possible
                     assignments=[
                         RecordingOracleEvent_SubmissionRejected.RejectedAssignmentInfo(
                             assignment_id=job_id_to_assignment_id[rejected_job_id],
@@ -225,8 +213,6 @@ def validate_results(
     db_session: Session,
 ):
     logger = get_function_logger(module_logger_name)
-
-    escrow.validate_escrow(chain_id=chain_id, escrow_address=escrow_address)
 
     manifest = parse_manifest(escrow.get_escrow_manifest(chain_id, escrow_address))
 

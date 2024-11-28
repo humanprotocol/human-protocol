@@ -1,13 +1,24 @@
-import {
-  Encryption,
-  EncryptionUtils,
-  HttpStatus,
-  StorageClient,
-} from '@human-protocol/sdk';
+jest.mock('minio', () => {
+  class Client {
+    putObject = jest.fn();
+    bucketExists = jest.fn();
+    constructor() {
+      (this as any).protocol = 'http:';
+      (this as any).host = 'localhost';
+      (this as any).port = 9000;
+    }
+  }
+
+  return { Client };
+});
+
+jest.mock('axios');
+
+import { Encryption, EncryptionUtils, HttpStatus } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import axios from 'axios';
 import {
-  MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
   MOCK_PGP_PRIVATE_KEY,
@@ -27,29 +38,11 @@ import { hashString } from '../../common/utils';
 import { ContentType } from '../../common/enums/storage';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
-
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  StorageClient: {
-    downloadFileFromUrl: jest.fn(),
-  },
-}));
-
-jest.mock('minio', () => {
-  class Client {
-    putObject = jest.fn();
-    bucketExists = jest.fn();
-    constructor() {
-      (this as any).protocol = 'http:';
-      (this as any).host = 'localhost';
-      (this as any).port = 9000;
-    }
-  }
-
-  return { Client };
-});
-
-jest.mock('axios');
+import {
+  FileDownloadError,
+  FileNotFoundError,
+  InvalidFileUrl,
+} from './storage.errors';
 
 describe('StorageService', () => {
   let storageService: StorageService;
@@ -93,7 +86,92 @@ describe('StorageService', () => {
     storageService = moduleRef.get<StorageService>(StorageService);
   });
 
-  describe('uploadFile', () => {
+  describe('downloadFileFromUrl', () => {
+    it.each(['no-protocol.com', 'ftp://invalid-protocol.com'])(
+      'throws if invalid URL [%#]',
+      async (url) => {
+        let thrownError;
+
+        try {
+          await StorageService.downloadFileFromUrl(url);
+        } catch (error) {
+          thrownError = error;
+        }
+
+        expect(thrownError).toBeInstanceOf(InvalidFileUrl);
+      },
+    );
+
+    it('throws if file not found', async () => {
+      const testUrl = 'https://file-not.found';
+      (axios.get as jest.Mock).mockImplementationOnce((url) => {
+        if (url === testUrl) {
+          return Promise.reject({
+            response: {
+              status: 404,
+            },
+          });
+        }
+        return Promise.resolve({});
+      });
+
+      let thrownError;
+      try {
+        await StorageService.downloadFileFromUrl(testUrl);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toBeInstanceOf(FileNotFoundError);
+      expect(thrownError.location).toBe(testUrl);
+    });
+
+    it('throws if netrowk error', async () => {
+      const testUrl = 'https://network-error.io';
+      const testError = new Error('ECONNRESET :443');
+      (axios.get as jest.Mock).mockImplementationOnce((url) => {
+        if (url === testUrl) {
+          return Promise.reject({
+            cause: testError,
+          });
+        }
+        return Promise.resolve({ data: null });
+      });
+
+      let thrownError;
+      try {
+        await StorageService.downloadFileFromUrl(testUrl);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toBeInstanceOf(FileDownloadError);
+      expect(thrownError.location).toBe(testUrl);
+      expect(thrownError.cause).toBe(testError);
+    });
+
+    it('returns response as buffer', async () => {
+      const testData = new Date().toISOString();
+      const testDataBuffer = Buffer.from(testData);
+      (axios.get as jest.Mock).mockImplementationOnce((_url, options) => {
+        if (options.responseType === 'arraybuffer') {
+          return Promise.resolve({
+            data: testDataBuffer.buffer.slice(
+              testDataBuffer.byteOffset,
+              testDataBuffer.byteOffset + testDataBuffer.byteLength,
+            ),
+          });
+        }
+
+        return Promise.resolve({ data: {} });
+      });
+
+      const result = await StorageService.downloadFileFromUrl('http://test.io');
+      expect(result.toString()).toBe(testData);
+    });
+  });
+
+  describe('uploadJsonLikeData', () => {
     it('should upload the manifest correctly', async () => {
       storageService.minioClient.bucketExists = jest
         .fn()
@@ -101,10 +179,10 @@ describe('StorageService', () => {
 
       const hash = hashString(stringify(MOCK_MANIFEST));
 
-      const fileData = await storageService.uploadFile(MOCK_MANIFEST, hash);
+      const fileData = await storageService.uploadJsonLikeData(MOCK_MANIFEST);
       expect(fileData).toEqual({
-        url: expect.any(String),
-        hash: expect.any(String),
+        url: expect.stringContaining(`s3${hash}.json`),
+        hash,
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         'solution',
@@ -123,7 +201,7 @@ describe('StorageService', () => {
         .mockResolvedValueOnce(false);
 
       await expect(
-        storageService.uploadFile(MOCK_MANIFEST, MOCK_FILE_HASH),
+        storageService.uploadJsonLikeData(MOCK_MANIFEST),
       ).rejects.toThrow(
         new ControlledError(ErrorBucket.NotExist, HttpStatus.BAD_REQUEST),
       );
@@ -138,14 +216,19 @@ describe('StorageService', () => {
         .mockRejectedValueOnce('Network error');
 
       await expect(
-        storageService.uploadFile(MOCK_MANIFEST, MOCK_FILE_HASH),
+        storageService.uploadJsonLikeData(MOCK_MANIFEST),
       ).rejects.toThrow(
         new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST),
       );
     });
   });
 
-  describe('download', () => {
+  describe('downloadJsonLikeData', () => {
+    const spyDownloadFileFromUrl = jest.spyOn(
+      StorageService,
+      'downloadFileFromUrl',
+    );
+
     it('should download the file correctly', async () => {
       const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
@@ -162,10 +245,11 @@ describe('StorageService', () => {
       };
 
       jest.spyOn(EncryptionUtils, 'isEncrypted').mockReturnValueOnce(false);
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(expectedJobFile);
-      const solutionsFile = await storageService.download(MOCK_FILE_URL);
+      spyDownloadFileFromUrl.mockResolvedValueOnce(
+        Buffer.from(JSON.stringify(expectedJobFile)),
+      );
+      const solutionsFile =
+        await storageService.downloadJsonLikeData(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
       jest.spyOn(EncryptionUtils, 'isEncrypted').mockRestore();
     });
@@ -190,20 +274,20 @@ describe('StorageService', () => {
         JSON.stringify(jobFile),
         [MOCK_PGP_PUBLIC_KEY],
       );
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockResolvedValueOnce(encryptedJobFile);
+      spyDownloadFileFromUrl.mockResolvedValueOnce(
+        Buffer.from(encryptedJobFile),
+      );
 
-      const solutionsFile = await storageService.download(MOCK_FILE_URL);
-      expect(JSON.parse(solutionsFile)).toStrictEqual(jobFile);
+      const solutionsFile =
+        await storageService.downloadJsonLikeData(MOCK_FILE_URL);
+      expect(solutionsFile).toStrictEqual(jobFile);
     });
 
     it('should return empty array when file cannot be downloaded', async () => {
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockRejectedValue('Network error');
+      spyDownloadFileFromUrl.mockRejectedValue('Network error');
 
-      const solutionsFile = await storageService.download(MOCK_FILE_URL);
+      const solutionsFile =
+        await storageService.downloadJsonLikeData(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual([]);
     });
   });

@@ -32,7 +32,7 @@ def setup_error_handlers(app: FastAPI):
             return JSONResponse(content=exc.detail.to_dict(), status_code=exc.status_code)
         if isinstance(error_detail, str):
             return JSONResponse(content={"message": error_detail}, status_code=status_code)
-        if Config.environment == "development":
+        if Config.is_development_mode():
             return JSONResponse(content={"message": str(error_detail)}, status_code=status_code)
 
         return JSONResponse(content={"message": "Something went wrong"}, status_code=status_code)
@@ -40,9 +40,7 @@ def setup_error_handlers(app: FastAPI):
     @app.exception_handler(Exception)
     async def generic_exception_handler(_, exc: Exception):
         message = (
-            "Something went wrong"
-            if Config.environment != "development"
-            else ".".join(map(str, exc.args))
+            "Something went wrong" if Config.is_production_mode() else ".".join(map(str, exc.args))
         )
 
         return JSONResponse(content={"message": message}, status_code=500)

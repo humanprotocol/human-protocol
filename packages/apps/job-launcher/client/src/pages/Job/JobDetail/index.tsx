@@ -1,8 +1,9 @@
 import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { saveAs } from 'file-saver';
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
@@ -24,17 +25,19 @@ const CardContainer = styled(Card)(({ theme }) => ({
 }));
 
 export default function JobDetail() {
-  const { jobId } = useParams();
-  const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
+  const { jobId: jobIdParam } = useParams();
+  const jobId = Number(jobIdParam);
+  const { data, isLoading, error, mutate } = useJobDetails(jobId);
   const [isCancelling, setIsCancelling] = useState(false);
   const { openSnackbar, showError } = useSnackbar();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [isDownloadingResults, setResultsDownloading] = useState(false);
 
   const handleCancel = async () => {
     setIsCancelling(true);
     try {
-      await jobService.cancelJob(Number(jobId));
+      await jobService.cancelJob(jobId);
 
       if (data) {
         mutate({
@@ -56,6 +59,22 @@ export default function JobDetail() {
   const handleChangeRowsPerPage = (event: any) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleDownloadDecryptedResultClick = async () => {
+    try {
+      setResultsDownloading(true);
+
+      const { data, filename } = await jobService.downloadJobResult(jobId);
+      const saveAsFilename =
+        filename || `${data.details.escrowAddress}-results.zip`;
+
+      saveAs(data, saveAsFilename);
+    } catch (err) {
+      showError(err);
+    } finally {
+      setResultsDownloading(false);
+    }
   };
 
   const isCancellable =
@@ -103,31 +122,22 @@ export default function JobDetail() {
                 Job details
               </Typography>
               <Stack spacing={2}>
-                <Grid container spacing={4}>
-                  <Grid item xs={12} md={6}>
-                    <CardTextRow
-                      label="Manifest URL"
-                      value={data.details.manifestUrl}
-                      url={data.details.manifestUrl}
-                    />
-                    <CardTextRow
-                      label="Manifest Hash"
-                      value={data.details.manifestHash}
-                    />
-                    <CardTextRow
-                      label="Balance of"
-                      value={`${data.details.balance} HMT`}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <CardTextRow
-                      label="Paid Out HMT"
-                      value={`${data.details.paidOut.toString()} HMT`}
-                    />
-                    <CardTextRow label="Amount of Jobs" value="" />
-                    <CardTextRow label="Workers assigned" value="" />
-                  </Grid>
-                </Grid>
+                <CardTextRow
+                  label="Manifest URL"
+                  value={data.details.manifestUrl}
+                />
+                <CardTextRow
+                  label="Manifest Hash"
+                  value={data.details.manifestHash}
+                />
+                <CardTextRow
+                  label="Balance of"
+                  value={`${data.details.balance} HMT`}
+                />
+                <CardTextRow
+                  label="Paid Out HMT"
+                  value={`${data.details.paidOut.toString()} HMT`}
+                />
               </Stack>
             </CardContainer>
           </Grid>
@@ -164,29 +174,25 @@ export default function JobDetail() {
                       value={data.manifest.submissionsRequired}
                     />
                     <CardTextRow
-                      label="Token"
-                      value={data.manifest.tokenAddress}
-                      url={generateDashboardURL(
-                        data.manifest.chainId,
-                        data.manifest.tokenAddress,
-                      )}
+                      label={'Status'}
+                      value={data?.details.status}
                     />
                     <CardTextRow
                       label="Fund Amount"
                       value={`${data.manifest.fundAmount.toString()} HMT`}
                     />
-                    <CardTextRow
-                      label="Job Requester"
-                      value={data.manifest.requesterAddress}
-                      url={generateDashboardURL(
-                        data.manifest.chainId,
-                        data.manifest.requesterAddress,
-                      )}
-                    />
                   </Stack>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
+                    <CardTextRow
+                      label="Token"
+                      value={data.manifest.tokenAddress}
+                    />
+                    <CardTextRow
+                      label="Job Requester"
+                      value={data.manifest.requesterAddress}
+                    />
                     <CardTextRow
                       label="Recording Oracle"
                       value={data.manifest.recordingOracleAddress}
@@ -211,9 +217,6 @@ export default function JobDetail() {
                         data.manifest.exchangeOracleAddress,
                       )}
                     />
-                    <CardTextRow label="Recording URL" value="" />
-                    <CardTextRow label="Reputation URL" value="" />
-                    <CardTextRow label="Exchange URL" value="" />
                   </Stack>
                 </Grid>
               </Grid>
@@ -265,12 +268,9 @@ export default function JobDetail() {
                   boxShadow:
                     '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
                   p: '14px 42px 18px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
                 }}
               >
-                <Stack direction="row" spacing={3}>
+                <Stack direction="row" spacing={3} alignItems="center">
                   <Typography
                     variant="body2"
                     color="text.secondary"
@@ -283,16 +283,15 @@ export default function JobDetail() {
                     color="primary"
                     sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                   >
-                    <Link
-                      style={{
-                        textDecoration: 'underline',
-                        alignItems: 'left',
-                      }}
-                      to={data.results as string}
-                    >
-                      {data.results as string}
-                    </Link>
+                    {data.results as string}
                   </Typography>
+                  <LoadingButton
+                    variant="contained"
+                    loading={isDownloadingResults}
+                    onClick={handleDownloadDecryptedResultClick}
+                  >
+                    Download
+                  </LoadingButton>
                 </Stack>
               </Box>
             )}

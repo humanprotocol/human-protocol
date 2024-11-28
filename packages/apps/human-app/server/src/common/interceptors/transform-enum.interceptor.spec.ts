@@ -82,7 +82,7 @@ describe('TransformEnumInterceptor', () => {
 
     // Access the modified request query
     const request = executionContext.switchToHttp().getRequest();
-    console.log(123213, request.query);
+
     // Expectations
     expect(request.query.userType).toBe('operator');
     expect(request.query).toEqual({

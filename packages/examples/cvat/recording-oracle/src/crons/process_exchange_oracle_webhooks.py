@@ -1,8 +1,10 @@
 import logging
 
+from human_protocol_sdk.constants import Status as EscrowStatus
 from sqlalchemy.orm import Session
 
 import src.services.webhook as oracle_db_service
+from src.chain.escrow import validate_escrow
 from src.chain.kvstore import get_exchange_oracle_url
 from src.core.config import Config
 from src.core.types import ExchangeOracleEventTypes, OracleWebhookTypes
@@ -26,7 +28,7 @@ def process_incoming_exchange_oracle_webhooks(logger: logging.Logger, session: S
     )
 
     for webhook in webhooks:
-        with handle_webhook(logger, session, webhook):
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
             handle_exchange_oracle_event(webhook, db_session=session)
 
 
@@ -35,12 +37,20 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session):
 
     match webhook.event_type:
         case ExchangeOracleEventTypes.job_finished:
+            validate_escrow(webhook.chain_id, webhook.escrow_address)
+
             validate_results(
                 escrow_address=webhook.escrow_address,
                 chain_id=webhook.chain_id,
                 db_session=db_session,
             )
         case ExchangeOracleEventTypes.escrow_cleaned:
+            validate_escrow(
+                webhook.chain_id,
+                webhook.escrow_address,
+                accepted_states=list(EscrowStatus.__members__.values()),
+            )
+
             clean_escrow(
                 db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
             )
@@ -53,7 +63,7 @@ def process_outgoing_exchange_oracle_webhooks(logger: logging.Logger, session: S
     process_outgoing_webhooks(
         logger,
         session,
-        OracleWebhookTypes.recording_oracle,
+        OracleWebhookTypes.exchange_oracle,
         get_exchange_oracle_url,
         Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
     )

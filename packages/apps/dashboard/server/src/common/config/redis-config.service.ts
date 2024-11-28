@@ -7,6 +7,7 @@ const DEFAULT_CACHE_HMT_PRICE_TTL = 60;
 const DEFAULT_CACHE_HMT_GENERAL_STATS_TTL = 2 * 60;
 const DEFAULT_HMT_PRICE_CACHE_KEY = 'hmt-price';
 const DEFAULT_HMT_GENERAL_STATS_CACHE_KEY = 'hmt-general';
+export const AVAILABLE_NETWORKS_CACHE_KEY = 'available-networks';
 export const HCAPTCHA_PREFIX = 'hcaptcha-';
 export const HMT_PREFIX = 'hmt-';
 
@@ -17,18 +18,22 @@ export class RedisConfigService {
     return this.configService.get<string>('REDIS_HOST', DEFAULT_REDIS_HOST);
   }
   get redisPort(): number {
-    return +this.configService.get<number>('REDIS_PORT', DEFAULT_REDIS_PORT);
+    return this.configService.get<number>('REDIS_PORT', DEFAULT_REDIS_PORT);
   }
   get cacheHmtPriceTTL(): number {
-    return +this.configService.get<number>(
-      'CACHE_HMT_PRICE_TTL',
-      DEFAULT_CACHE_HMT_PRICE_TTL,
+    return (
+      this.configService.get<number>(
+        'CACHE_HMT_PRICE_TTL',
+        DEFAULT_CACHE_HMT_PRICE_TTL,
+      ) * 1000
     );
   }
   get cacheHmtGeneralStatsTTL(): number {
-    return +this.configService.get<number>(
-      'CACHE_HMT_GENERAL_STATS_TTL',
-      DEFAULT_CACHE_HMT_GENERAL_STATS_TTL,
+    return (
+      this.configService.get<number>(
+        'CACHE_HMT_GENERAL_STATS_TTL',
+        DEFAULT_CACHE_HMT_GENERAL_STATS_TTL,
+      ) * 1000
     );
   }
   get hmtPriceCacheKey(): string {

@@ -1,8 +1,29 @@
 import { WalletClient } from 'viem';
 
 import { PAYMENT_SIGNATURE_KEY } from '../constants/payment';
-import { CryptoPaymentRequest, FiatPaymentRequest } from '../types';
+import {
+  BillingInfo,
+  CryptoPaymentRequest,
+  FiatPaymentRequest,
+} from '../types';
 import api from '../utils/api';
+
+export const createSetupIntent = async () => {
+  const { data } = await api.post('/payment/fiat/setup-card');
+  return data;
+};
+
+export const confirmSetupIntent = async (
+  setupIntentId: string,
+  defaultCard: boolean,
+) => {
+  const { data } = await api.post('/payment/fiat/confirm-card', {
+    setupId: setupIntentId,
+    defaultCard,
+  });
+
+  return data;
+};
 
 export const createCryptoPayment = async (
   signer: WalletClient,
@@ -53,4 +74,43 @@ export const getOperatorAddress = async () => {
   const { data } = await api.get('/web3/operator-address');
 
   return data;
+};
+
+export const getUserCards = async () => {
+  const { data } = await api.get('/payment/fiat/cards');
+  return data;
+};
+
+export const deleteUserCard = async (cardId: string) => {
+  await api.delete(`/payment/fiat/card?paymentMethodId=${cardId}`);
+};
+
+export const setUserDefaultCard = async (cardId: string) => {
+  await api.patch('/payment/fiat/default-card', { paymentMethodId: cardId });
+};
+
+export const getUserBillingInfo = async () => {
+  const { data } = await api.get('/payment/fiat/billing-info');
+  return data;
+};
+
+export const editUserBillingInfo = async (body: BillingInfo) => {
+  await api.patch('/payment/fiat/billing-info', body);
+};
+
+export const getPayments = async ({
+  page,
+  pageSize,
+}: {
+  page?: number;
+  pageSize?: number;
+}) => {
+  const queryString = `page=${page}&page_size=${pageSize}&sort=desc&sort_field=created_at`;
+  const { data } = await api.get(`/payment/payments?${queryString}`);
+  return data;
+};
+
+export const getReceipt = async (paymentId: string) => {
+  const response = await api.get(`/payment/receipt/${paymentId}`);
+  return response.data;
 };

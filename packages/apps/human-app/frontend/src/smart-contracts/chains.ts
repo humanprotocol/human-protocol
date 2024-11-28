@@ -4,13 +4,20 @@
 // Thanks to that we can get addresses for selected chain with getContractAddress
 // function
 
-import type { Chain } from '@web3modal/scaffold-utils/ethers';
 import {
   MainnetContracts,
   TestnetContracts,
   type ContractsAddresses,
 } from '@/smart-contracts/contracts';
 import { env } from '@/shared/env';
+
+export interface Chain {
+  rpcUrl: string;
+  explorerUrl: string;
+  currency: string;
+  name: string;
+  chainId: number;
+}
 
 export type ChainWithAddresses = Chain & {
   addresses: ContractsAddresses;

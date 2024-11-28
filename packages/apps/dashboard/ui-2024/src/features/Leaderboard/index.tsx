@@ -5,7 +5,7 @@ import { LeaderBoardData } from '@services/api/use-leaderboard-details';
 import { useNavigate } from 'react-router-dom';
 import SimpleBar from 'simplebar-react';
 import { SelectNetwork } from './components/SelectNetwork';
-import { Table } from './components/Table';
+import { DataGridWrapper } from './components/DataGridWrapper';
 import { Button, Typography } from '@mui/material';
 
 export type LeaderboardCommonProps = {
@@ -37,7 +37,7 @@ export const Leaderboard = ({
 				<SelectNetwork />
 			</div>
 			<SimpleBar>
-				<Table data={data} status={status} error={error} />
+				<DataGridWrapper data={data} status={status} error={error} />
 			</SimpleBar>
 			{viewAllBanner ? (
 				<Button

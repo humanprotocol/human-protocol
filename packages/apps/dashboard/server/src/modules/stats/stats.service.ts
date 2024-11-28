@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { Cron } from '@nestjs/schedule';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NETWORKS, StatisticsClient } from '@human-protocol/sdk';
@@ -18,11 +18,11 @@ import {
 import { HCAPTCHA_STATS_START_DATE } from '../../common/config/env-config.service';
 import { HcaptchaDailyStats, HcaptchaStats } from './dto/hcaptcha.dto';
 import { HmtGeneralStatsDto } from './dto/hmt-general-stats.dto';
-import { MainnetsId } from '../../common/utils/constants';
 import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
 import { StorageService } from '../storage/storage.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -30,6 +30,7 @@ export class StatsService implements OnModuleInit {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly redisConfigService: RedisConfigService,
+    private readonly networkConfigService: NetworkConfigService,
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly storageService: StorageService,
@@ -177,9 +178,9 @@ export class StatsService implements OnModuleInit {
       totalHolders: 0,
       totalTransactions: 0,
     };
-    for (const network of Object.values(MainnetsId).filter(
-      (value) => typeof value === 'number',
-    ) as number[]) {
+    const availableNetworks =
+      await this.networkConfigService.getAvailableNetworks();
+    for (const network of availableNetworks) {
       const statisticsClient = new StatisticsClient(NETWORKS[network]);
       const generalStats = await statisticsClient.getHMTStatistics();
       aggregatedStats.totalHolders += generalStats.totalHolders;
@@ -216,13 +217,12 @@ export class StatsService implements OnModuleInit {
     const dailyData: Record<string, CachedHMTData> = {};
     const monthlyData: Record<string, CachedHMTData> = {};
 
+    const availableNetworks =
+      await this.networkConfigService.getAvailableNetworks();
+
     // Fetch daily data for each network
     await Promise.all(
-      (
-        Object.values(MainnetsId).filter(
-          (value) => typeof value === 'number',
-        ) as number[]
-      ).map(async (network) => {
+      availableNetworks.map(async (network) => {
         const statisticsClient = new StatisticsClient(NETWORKS[network]);
         let skip = 0;
         let fetchedRecords: DailyHMTData[] = [];
@@ -322,7 +322,7 @@ export class StatsService implements OnModuleInit {
     await this.cacheManager.set(
       this.redisConfigService.hmtPriceCacheKey,
       hmtPrice,
-      { ttl: this.redisConfigService.cacheHmtPriceTTL } as any,
+      this.redisConfigService.cacheHmtPriceTTL,
     );
     return hmtPrice;
   }
@@ -352,7 +352,7 @@ export class StatsService implements OnModuleInit {
       }),
     );
 
-    return stats.filter((stat): stat is HcaptchaDailyStats => stat !== null);
+    return stats.filter(Boolean);
   }
 
   public async hCaptchaGeneralStats(): Promise<HcaptchaStats> {
@@ -417,6 +417,6 @@ export class StatsService implements OnModuleInit {
       }),
     );
 
-    return stats.filter((stat): stat is HmtDailyStatsData => stat !== null);
+    return stats.filter(Boolean);
   }
 }

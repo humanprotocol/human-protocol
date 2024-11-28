@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Header, HTTPException, Request
 
 import src.services.webhook as oracle_db_service
-from src.chain.escrow import validate_escrow
 from src.db import SessionLocal
 from src.schemas.webhook import OracleWebhook, OracleWebhookResponse
 from src.validators.signature import validate_oracle_webhook_signature
@@ -17,7 +16,6 @@ async def receive_oracle_webhook(
 ) -> OracleWebhookResponse:
     try:
         sender = await validate_oracle_webhook_signature(request, human_signature, webhook)
-        validate_escrow(webhook.chain_id, webhook.escrow_address)
 
         with SessionLocal.begin() as session:
             webhook_id = oracle_db_service.inbox.create_webhook(

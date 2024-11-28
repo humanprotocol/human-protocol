@@ -2,13 +2,7 @@ import { Test } from '@nestjs/testing';
 
 import { RoutingProtocolService } from './routing-protocol.service';
 import { ChainId, Role } from '@human-protocol/sdk';
-import {
-  MOCK_FILE_HASH,
-  MOCK_FILE_KEY,
-  MOCK_FILE_URL,
-  MOCK_REPUTATION_ORACLE_1,
-  mockConfig,
-} from '../../../test/constants';
+import { MOCK_REPUTATION_ORACLE_1, mockConfig } from '../../../test/constants';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3Service } from '../web3/web3.service';
@@ -28,18 +22,10 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({})),
   },
-  StorageClient: jest.fn().mockImplementation(() => ({
-    uploadFiles: jest
-      .fn()
-      .mockResolvedValue([
-        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-      ]),
-  })),
 }));
 
 describe('RoutingProtocolService', () => {
   let web3Service: Web3Service;
-  let configService: ConfigService;
   let routingProtocolService: RoutingProtocolService;
 
   beforeEach(async () => {
@@ -70,7 +56,6 @@ describe('RoutingProtocolService', () => {
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);
-    configService = moduleRef.get<ConfigService>(ConfigService);
     routingProtocolService = moduleRef.get(RoutingProtocolService);
   });
 

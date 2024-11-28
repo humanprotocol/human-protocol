@@ -5,7 +5,12 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { JobsDiscoveryService } from './jobs-discovery.service';
@@ -22,6 +27,7 @@ import { JwtUserData } from '../../common/utils/jwt-token.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 
 @Controller()
+@ApiTags('Jobs-Discovery')
 export class JobsDiscoveryController {
   constructor(
     private readonly service: JobsDiscoveryService,
@@ -29,12 +35,12 @@ export class JobsDiscoveryController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Jobs-Discovery')
   @Get('/jobs')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retrieve a list of jobs for given Exchange Oracle',
   })
+  @ApiOkResponse({ type: JobsDiscoveryResponse, description: 'List of jobs' })
   public async getJobs(
     @Query() jobsDiscoveryParamsDto: JobsDiscoveryParamsDto,
     @JwtPayload() jwtPayload: JwtUserData,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Link, Paper, Stack } from '@mui/material';
+import { Box, Grid, Paper, Stack } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -43,7 +43,8 @@ export function RegistrationPage() {
     error: registrationInExchangeOracleError,
   } = useExchangeOracleRegistrationMutation();
 
-  const handleLinkClick = () => {
+  const handleInstructionsLinkClick = () => {
+    window.open(oracleData?.registrationInstructions ?? '', '_blank');
     setHasClickedRegistrationLink(true);
   };
 
@@ -104,15 +105,13 @@ export function RegistrationPage() {
             <Box>
               {t('worker.registrationInExchangeOracle.requiredMessage')}
             </Box>
-            <Link
-              href={oracleData?.registrationInstructions ?? ''}
-              onClick={handleLinkClick}
-              rel="noopener"
-              sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}
-              target="_blank"
+            <Button
+              onClick={handleInstructionsLinkClick}
+              fullWidth
+              variant="contained"
             >
-              {oracleData?.registrationInstructions}
-            </Link>
+              {t('worker.registrationInExchangeOracle.instructionsButton')}
+            </Button>
             <Box>
               {t('worker.registrationInExchangeOracle.completeMessage')}
             </Box>

@@ -32,6 +32,7 @@ export enum ErrorWebhook {
   NotFound = 'Webhook not found',
   UrlNotFound = 'Webhook URL not found',
   NotCreated = 'Webhook has not been created',
+  InvalidEscrow = 'Invalid escrow data provided',
 }
 
 /**
@@ -87,11 +88,16 @@ export enum ErrorToken {
  */
 export enum ErrorPayment {
   NotFound = 'Payment not found',
+  InvoiceNotFound = 'Invoice not found',
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
-  ClientSecretDoesNotExist = 'Payment intent was not created',
+  CardNotAssigned = 'Card not assigned',
+  SetupNotFound = 'Setup not found',
+  ClientSecretDoesNotExist = 'Client secret does not exist',
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
+  PaymentMethodInUse = 'Cannot delete the default payment method in use',
+  PaymentMethodAssociationFailed = 'Payment method association failed',
   IncorrectAmount = 'Incorrect amount',
   TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',

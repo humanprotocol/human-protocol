@@ -1,11 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import {
-  useWeb3ModalAccount,
-  useWeb3ModalProvider,
-} from '@web3modal/ethers/react';
 import type { Eip1193Provider } from 'ethers';
 import { BrowserProvider } from 'ethers';
 import { useEffect } from 'react';
+import { useAppKitNetwork, useAppKitProvider } from '@reown/appkit/react';
 import { checkNetwork } from '@/smart-contracts/check-network';
 
 const getSignerAndProvider = async (walletProvider: Eip1193Provider) => {
@@ -21,16 +18,16 @@ const getSignerAndProvider = async (walletProvider: Eip1193Provider) => {
 };
 
 export function useWeb3Provider() {
-  const { chainId } = useWeb3ModalAccount();
-  const { walletProvider } = useWeb3ModalProvider();
+  const { chainId } = useAppKitNetwork();
+  const { walletProvider } = useAppKitProvider<Eip1193Provider>('eip155');
+
   const useSignerAndProviderMutation = useMutation({
     mutationFn: getSignerAndProvider,
   });
 
   useEffect(() => {
-    if (walletProvider) {
-      useSignerAndProviderMutation.mutate(walletProvider);
-    }
+    useSignerAndProviderMutation.mutate(walletProvider);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps -- not nesseccary
   }, [walletProvider, chainId]);
 

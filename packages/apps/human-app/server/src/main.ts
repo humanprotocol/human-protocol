@@ -1,8 +1,12 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import { GlobalExceptionsFilter } from './common/filter/global-exceptions.filter';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -37,6 +41,7 @@ async function bootstrap() {
     await cacheManager.reset();
   }
   app.useGlobalFilters(new GlobalExceptionsFilter());
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(port, host, async () => {
