@@ -3,7 +3,7 @@ import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering
 import { useJobsFilterStore } from '@/hooks/use-jobs-filter-store';
 import {
   MyJobStatus,
-  unavailableStatusesForAvailableJobs,
+  notSupportedStatusesForAvailableJobs,
 } from '@/api/services/worker/my-jobs-data';
 
 export function AvailableJobsStatusFilterMobile() {
@@ -19,7 +19,7 @@ export function AvailableJobsStatusFilterMobile() {
         });
       }}
       filteringOptions={Object.values(MyJobStatus)
-        .filter((el) => !unavailableStatusesForAvailableJobs.includes(el))
+        .filter((el) => !notSupportedStatusesForAvailableJobs.includes(el))
         .map((status) => ({
           name: capitalize(status),
           option: status,
