@@ -4,15 +4,19 @@ import { CronJobService } from './cron-job.service';
 import { CronJobRepository } from './cron-job.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CronJobEntity } from './cron-job.entity';
-import { WebhookModule } from '../webhook/webhook.module';
 import { ConfigModule } from '@nestjs/config';
+import { EscrowCompletionTrackingModule } from '../escrow-completion-tracking/escrow-completion-tracking.module';
+import { WebhookIncomingModule } from '../webhook/webhook-incoming.module';
+import { WebhookOutgoingModule } from '../webhook/webhook-outgoing.module';
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([CronJobEntity]),
     ConfigModule,
-    WebhookModule,
+    WebhookIncomingModule,
+    WebhookOutgoingModule,
+    EscrowCompletionTrackingModule,
   ],
   providers: [CronJobService, CronJobRepository],
   exports: [CronJobService],

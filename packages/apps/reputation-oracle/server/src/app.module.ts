@@ -7,7 +7,6 @@ import { DatabaseModule } from './database/database.module';
 import { HttpValidationPipe } from './common/pipes';
 import { HealthModule } from './modules/health/health.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
-import { WebhookModule } from './modules/webhook/webhook.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
 import { AuthModule } from './modules/auth/auth.module';
@@ -22,6 +21,8 @@ import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionTrackingModule } from './modules/escrow-completion-tracking/escrow-completion-tracking.module';
+import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
+import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
 
 @Module({
   providers: [
@@ -49,7 +50,8 @@ import { EscrowCompletionTrackingModule } from './modules/escrow-completion-trac
     DatabaseModule,
     HealthModule,
     ReputationModule,
-    WebhookModule,
+    WebhookIncomingModule,
+    WebhookOutgoingModule,
     Web3Module,
     AuthModule,
     KycModule,

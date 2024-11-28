@@ -5,9 +5,11 @@ import { ErrorCronJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { WebhookService } from '../webhook/webhook.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
+import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
+import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
 
 @Injectable()
 export class CronJobService {
@@ -15,7 +17,9 @@ export class CronJobService {
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
-    private readonly webhookService: WebhookService,
+    private readonly webhookIncomingService: WebhookIncomingService,
+    private readonly webhookOutgoingService: WebhookOutgoingService,
+    private readonly escrowCompletionTrackingService: EscrowCompletionTrackingService,
   ) {}
 
   /**
@@ -93,7 +97,7 @@ export class CronJobService {
     );
 
     try {
-      await this.webhookService.processPendingIncomingWebhooks();
+      await this.webhookIncomingService.processPendingIncomingWebhooks();
     } catch (e) {
       this.logger.error(e);
     }
@@ -124,7 +128,7 @@ export class CronJobService {
     );
 
     try {
-      await this.webhookService.processPendingEscrowCompletion();
+      await this.escrowCompletionTrackingService.processPendingEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }
@@ -154,7 +158,7 @@ export class CronJobService {
     );
 
     try {
-      await this.webhookService.processPaidEscrowCompletion();
+      await this.escrowCompletionTrackingService.processPaidEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }
@@ -179,7 +183,7 @@ export class CronJobService {
     );
 
     try {
-      await this.webhookService.processPendingOutgoingWebhooks();
+      await this.webhookOutgoingService.processPendingOutgoingWebhooks();
     } catch (err) {
       this.logger.error(err);
     }

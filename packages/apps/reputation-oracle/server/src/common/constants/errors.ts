@@ -17,6 +17,8 @@ export enum ErrorWebhook {
 export enum ErrorEscrowCompletionTracking {
   NotFound = 'Escrow completion tracking not found',
   NotCreated = 'Escrow completion tracking has not been created',
+  PendingProcessingFailed = 'Failed to process pending escrow completion tracking',
+  PaidProcessingFailed = 'Failed to process paid escrow completion tracking',
 }
 
 /**
