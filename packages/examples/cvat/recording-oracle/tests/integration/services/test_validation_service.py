@@ -1,5 +1,5 @@
 import io
-import itertools
+import math
 import random
 import unittest
 import uuid
@@ -10,10 +10,10 @@ from unittest import mock
 
 import numpy as np
 import pytest
+from datumaro.util import take_by
 from sqlalchemy.orm import Session
 
 from src.core.annotation_meta import AnnotationMeta, JobMeta
-from src.core.manifest import TaskManifest, parse_manifest
 from src.core.types import Networks
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.cvat import api_calls as cvat_api
@@ -31,9 +31,8 @@ from src.services.validation import (
     get_validation_result_by_assignment_id,
 )
 
-from datumaro.util import take_by
-
 from tests.utils.constants import ESCROW_ADDRESS, WALLET_ADDRESS1
+from tests.utils.helpers import generate_manifest
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -96,27 +95,6 @@ class ServiceIntegrationTest(unittest.TestCase):
 
 
 class TestManifestChange:
-    @staticmethod
-    def _generate_manifest(*, min_quality: float = 0.8) -> TaskManifest:
-        data = {
-            "data": {"data_url": "http://localhost:9010/datasets/sample"},
-            "annotation": {
-                "labels": [{"name": "person"}],
-                "description": "",
-                "user_guide": "",
-                "type": "image_points",
-                "job_size": 10,
-            },
-            "validation": {
-                "min_quality": min_quality,
-                "val_size": 2,
-                "gt_url": "http://localhost:9010/datasets/sample/annotations/sample_gt.json",
-            },
-            "job_bounty": "0.0001",
-        }
-
-        return parse_manifest(data)
-
     def test_can_handle_lowered_quality_requirements_in_manifest(self, session: Session):
         escrow_address = ESCROW_ADDRESS
         chain_id = Networks.localhost
@@ -125,7 +103,7 @@ class TestManifestChange:
         min_quality2 = 0.5
         frame_count = 10
 
-        manifest = self._generate_manifest(min_quality=min_quality1)
+        manifest = generate_manifest(min_quality=min_quality1)
 
         cvat_task_id = 1
         cvat_job_id = 1
@@ -302,52 +280,44 @@ class TestManifestChange:
 
 
 class TestValidationLogic:
-    @staticmethod
-    def _generate_manifest(
-        *, min_quality: float = 0.8, job_size: int = 10, validation_frames_per_job: int = 2
-    ) -> TaskManifest:
-        data = {
-            "data": {"data_url": "http://localhost:9010/datasets/sample"},
-            "annotation": {
-                "labels": [{"name": "person"}],
-                "description": "",
-                "user_guide": "",
-                "type": "image_points",
-                "job_size": job_size,
-            },
-            "validation": {
-                "min_quality": min_quality,
-                "val_size": validation_frames_per_job,
-                "gt_url": "http://localhost:9010/datasets/sample/annotations/sample_gt.json",
-            },
-            "job_bounty": "0.0001",
-        }
-
-        return parse_manifest(data)
-
-    @pytest.mark.parametrize("seed", range(100))
+    @pytest.mark.parametrize("seed", range(50))
     def test_can_change_bad_honeypots_in_jobs(self, session: Session, seed: int):
         escrow_address = ESCROW_ADDRESS
         chain_id = Networks.localhost
 
-        frame_count = 30
-        validation_frames_count = 10
+        # max excluded = job count * val per job / max val repeats =>
+        # val count must be >= max_excluded + val per job
+        max_validation_frame_uses = 2
+        frame_count = 32
+        validation_frames_per_job = 4
+        validation_frames_count = 12
         job_size = 5
-        validation_frames_per_job = 5
+        assert (
+            validation_frames_count
+            >= math.ceil((frame_count - validation_frames_count) / job_size)
+            * validation_frames_per_job
+            // max_validation_frame_uses
+            + validation_frames_per_job
+        )
 
-        manifest = self._generate_manifest(
+        manifest = generate_manifest(
             min_quality=0.8, job_size=job_size, validation_frames_per_job=validation_frames_per_job
         )
 
         (
-            task_real_frames,
+            _,
             task_frame_names,
             task_validation_frames,
             task_honeypots,
             task_honeypot_real_frames,
             jobs,
         ) = self._generate_task_frames(
-            frame_count, validation_frames_count, job_size, validation_frames_per_job, seed=seed
+            frame_count,
+            validation_frames_count,
+            job_size,
+            validation_frames_per_job,
+            seed=seed,
+            max_validation_frame_uses=max_validation_frame_uses,
         )
         job_frame_ranges = self._get_job_frame_ranges(jobs)
 
@@ -359,6 +329,12 @@ class TestValidationLogic:
         # create a validation input
         with ExitStack() as common_lock_es:
             logger = mock.Mock(Logger)
+
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.core.config.Config.validation.gt_ban_threshold", max_validation_frame_uses
+                )
+            )
 
             mock_make_cloud_client = common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
@@ -427,6 +403,9 @@ class TestValidationLogic:
                 ]
             )
 
+            rng = np.random.Generator(np.random.MT19937(seed))
+            rng.shuffle(annotation_meta.jobs)
+
             with (
                 mock.patch(
                     "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report"
@@ -444,6 +423,7 @@ class TestValidationLogic:
                 mock_get_task_quality_report.return_value = mock.Mock(
                     cvat_api.models.IQualityReport, id=1
                 )
+
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
@@ -461,7 +441,7 @@ class TestValidationLogic:
                     for i in range(len(jobs))
                 ]
 
-                process_intermediate_results(
+                vr = process_intermediate_results(
                     session,
                     escrow_address=escrow_address,
                     chain_id=chain_id,
@@ -470,6 +450,8 @@ class TestValidationLogic:
                     manifest=manifest,
                     logger=logger,
                 )
+
+                assert isinstance(vr, ValidationFailure)
 
                 assert mock_update_task_validation_layout.call_count == 1
 
@@ -488,7 +470,10 @@ class TestValidationLogic:
                         for i, v in enumerate(task_honeypots)
                         if v in range(job_start, job_stop + 1)
                     ]
-                    assert [updated_honeypot_real_frames[i] for i in job_honeypot_positions]
+                    job_updated_honeypots = [
+                        updated_honeypot_real_frames[i] for i in job_honeypot_positions
+                    ]
+                    assert sorted(job_updated_honeypots) == sorted(set(job_updated_honeypots))
 
     def _get_job_frame_ranges(self, jobs) -> list[tuple[int, int]]:
         job_frame_ranges = []
@@ -501,7 +486,13 @@ class TestValidationLogic:
         return job_frame_ranges
 
     def _generate_task_frames(
-        self, frame_count, validation_frames_count, job_size, validation_frames_per_job, seed
+        self,
+        frame_count,
+        validation_frames_count,
+        job_size,
+        validation_frames_per_job,
+        seed,
+        max_validation_frame_uses=None,
     ):
         rng = np.random.Generator(np.random.MT19937(seed))
         task_frames = list(range(frame_count))
@@ -509,12 +500,19 @@ class TestValidationLogic:
         task_real_frames = []
         task_honeypots = []
         task_honeypot_real_frames = []
+        validation_frame_uses = {vf: 0 for vf in task_validation_frames}
         jobs = []
         for job_real_frames in take_by(
             task_frames[: frame_count - validation_frames_count], job_size
         ):
+            available_validation_frames = [
+                vf
+                for vf in task_validation_frames
+                if not max_validation_frame_uses
+                or validation_frame_uses[vf] < max_validation_frame_uses
+            ]
             job_validation_frames = rng.choice(
-                task_validation_frames, validation_frames_per_job, replace=False
+                available_validation_frames, validation_frames_per_job, replace=False
             ).tolist()
 
             job_real_frames = job_real_frames + job_validation_frames
