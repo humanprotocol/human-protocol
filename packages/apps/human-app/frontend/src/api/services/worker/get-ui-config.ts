@@ -10,19 +10,12 @@ const uiConfigSchema = z.object({
 export type UiConfig = z.infer<typeof uiConfigSchema>;
 
 const getUiConfig = async (): Promise<UiConfig> => {
-  // const cachedData = sessionStorage.getItem('ui-config');
-  // if (cachedData) {
-  //   return uiConfigSchema.parse(cachedData);
-  // }
-
   const response = await apiClient(apiPaths.worker.uiConfig.path, {
     successSchema: uiConfigSchema,
     options: {
       method: 'GET',
     },
   });
-
-  // sessionStorage.setItem('ui-config', JSON.stringify(response));
   return response;
 };
 

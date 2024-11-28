@@ -116,10 +116,6 @@ export const getMainnetChainsEnabled = (chainIdsEnabled: number[]) => {
   return handleFilterChains(AllMainnetChains, chainIdsEnabled);
 };
 
-// chains for getContractAddress function
-export const chainsWithSCAddresses: ChainWithAddresses[] =
-  env.VITE_NETWORK === 'mainnet' ? MainnetChains : TestnetChains;
-
 export const getEnabledChainsByUiConfig = (
   chainIdsEnabled: number[]
 ): Chain[] =>
