@@ -298,3 +298,32 @@ export type Qualification = {
   description: string;
   expires_at: string;
 };
+
+export type JobCountDto = {
+  totalJobs: number;
+  launched: number;
+  partial: number;
+  completed: number;
+  canceled: number;
+};
+
+export type FundAmountStatisticsDto = {
+  average: number;
+  maximum: number;
+  minimum: number;
+};
+
+export type JobStatusPerDayDto = {
+  date: string;
+  launched: number;
+  partial: number;
+  completed: number;
+  canceled: number;
+};
+
+export type JobStatisticsDto = {
+  averageCompletionTime: number;
+  jobCounts: JobCountDto;
+  fundAmountStats: FundAmountStatisticsDto;
+  jobsByStatusPerDay: JobStatusPerDayDto[];
+};

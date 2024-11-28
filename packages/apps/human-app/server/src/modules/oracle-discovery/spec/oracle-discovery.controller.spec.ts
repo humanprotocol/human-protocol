@@ -7,7 +7,7 @@ import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,
-  OracleDiscoveryResponseDto,
+  OracleDiscoveryResult,
 } from '../model/oracle-discovery.model';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper.profile';
@@ -15,6 +15,7 @@ import { EnvironmentConfigService } from '../../../common/config/environment-con
 import { CommonConfigModule } from '../../../common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ChainId } from '@human-protocol/sdk';
 
 describe('OracleDiscoveryController', () => {
   let controller: OracleDiscoveryController;
@@ -23,7 +24,7 @@ describe('OracleDiscoveryController', () => {
     email: 'human-app@hmt.ai',
     password: 'Test1234*',
     cacheTtlOracleDiscovery: 600,
-    chainIdsEnabled: ['137', '1'],
+    chainIdsEnabled: [ChainId.POLYGON, ChainId.MAINNET],
     jobsDiscoveryFlag: true,
   };
 
@@ -68,7 +69,7 @@ describe('OracleDiscoveryController', () => {
       const commandFixture = {
         selectedJobTypes: ['job-type-1', 'job-type-2'],
       } as OracleDiscoveryCommand;
-      const result: OracleDiscoveryResponseDto =
+      const result: OracleDiscoveryResult[] =
         await controller.getOracles(dtoFixture);
       const expectedResponse = generateOracleDiscoveryResponseBody();
       expect(serviceMock.processOracleDiscovery).toHaveBeenCalledWith(

@@ -149,7 +149,9 @@ export class StatisticsClient {
       });
 
       return {
-        totalEscrows: +escrowStatistics.totalEscrowCount,
+        totalEscrows: escrowStatistics?.totalEscrowCount
+          ? +escrowStatistics.totalEscrowCount
+          : 0,
         dailyEscrowsData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
           escrowsTotal: +eventDayData.dailyEscrowCount,

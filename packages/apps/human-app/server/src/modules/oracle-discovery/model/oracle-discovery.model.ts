@@ -1,15 +1,15 @@
-import { IOperator } from '@human-protocol/sdk';
+import { ChainId, IOperator } from '@human-protocol/sdk';
 import { AutoMap } from '@automapper/classes';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
 import { Exclude, Transform } from 'class-transformer';
 
-export class OracleDiscoveryResponse implements IOperator {
+export class OracleDiscoveryResult implements IOperator {
   @ApiProperty({ description: 'Address of the oracle operator' })
   address: string;
 
   @ApiProperty({ description: 'Chain ID where the oracle is registered' })
-  chainId: string;
+  chainId: ChainId;
 
   @ApiPropertyOptional({ description: 'Role of the oracle operator' })
   role?: string;
@@ -39,7 +39,7 @@ export class OracleDiscoveryResponse implements IOperator {
 
   constructor(
     address: string,
-    chainId: string,
+    chainId: ChainId,
     role?: string,
     url?: string,
     jobTypes?: string[],
@@ -54,19 +54,6 @@ export class OracleDiscoveryResponse implements IOperator {
     this.registrationNeeded = registrationNeeded;
     this.registrationInstructions = registrationInstructions;
   }
-}
-
-export class OracleDiscoveryResponseDto {
-  @ApiProperty({
-    type: [OracleDiscoveryResponse],
-    description: 'List of discovered oracles',
-  })
-  oracles: OracleDiscoveryResponse[];
-  @ApiProperty({
-    type: [String],
-    description: 'Chain ids where oracles haven been discovered',
-  })
-  chainIdsEnabled: string[];
 }
 export class OracleDiscoveryDto {
   @ApiPropertyOptional({ type: [String] })

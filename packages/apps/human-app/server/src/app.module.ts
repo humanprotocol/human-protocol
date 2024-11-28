@@ -42,6 +42,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { EnvironmentConfigService } from './common/config/environment-config.service';
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
 import { HealthModule } from './modules/health/health.module';
+import { UiConfigurationModule } from './modules/ui-configuration/ui-configuration.module';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -122,6 +123,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     TokenRefreshModule,
     CronJobModule,
     HealthModule,
+    UiConfigurationModule,
   ],
   controllers: [
     AppController,

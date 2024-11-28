@@ -16,10 +16,7 @@ const OracleSchema = z.object({
   registrationInstructions: z.string().optional().nullable(),
 });
 
-const OraclesDiscoverSuccessSchema = z.object({
-  oracles: z.array(OracleSchema),
-  chainIdsEnabled: z.array(z.string()),
-});
+const OraclesDiscoverySuccessSchema = z.array(OracleSchema);
 
 export type Oracle = z.infer<typeof OracleSchema> & {
   name: string;
@@ -62,17 +59,17 @@ export async function getOracles({
       ? `?${stringifyUrlQueryObject({ selected_job_types })}`
       : '';
 
-    const result = await apiClient(
+    const results = await apiClient(
       `${apiPaths.worker.oracles.path}${queryParams}`,
       {
-        successSchema: OraclesDiscoverSuccessSchema,
+        successSchema: OraclesDiscoverySuccessSchema,
         options: { method: 'GET' },
       },
       signal
     );
 
     oracles = oracles.concat(
-      result.oracles.map((oracle) => ({
+      results.map((oracle) => ({
         ...oracle,
         name: oracleUrlToNameMap.get(oracle.url) ?? '',
       }))

@@ -17,7 +17,7 @@ from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING
 from src.core.config import CronConfig, StorageConfig
 from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.storage import compose_results_bucket_filename
-from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, ProjectStatuses, TaskTypes
+from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, TaskTypes
 from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
@@ -136,13 +136,6 @@ def _export_escrow_annotations(
         chain_id=chain_id,
         type=OracleWebhookTypes.recording_oracle,
         event=ExchangeOracleEvent_JobFinished(),
-    )
-
-    cvat_service.update_project_statuses_by_escrow_address(
-        session,
-        escrow_address=escrow_address,
-        chain_id=chain_id,
-        status=ProjectStatuses.validation,
     )
 
     logger.info(
@@ -270,8 +263,9 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
     with SessionLocal.begin() as session:
         escrow_validations = cvat_service.prepare_escrows_for_validation(
             session,
-            limit=CronConfig.track_completed_escrows_chunk_size,
+            limit=CronConfig.track_escrow_validations_chunk_size,
         )
+
     for escrow_address, chain_id in escrow_validations:
         with SessionLocal.begin() as session:
             # Need to work in separate transactions for each escrow, as a failing DB call
@@ -281,6 +275,7 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
             if not handled:
                 # either escrow is invalid, or we couldn't get lock for projects/validations
                 continue
+
             # change status so validation won't be attempted again
             cvat_service.update_escrow_validation(
                 session,

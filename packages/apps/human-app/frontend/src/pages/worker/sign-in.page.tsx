@@ -9,11 +9,7 @@ import { PageCard } from '@/components/ui/page-card';
 import { Input } from '@/components/data-entry/input';
 import { Button } from '@/components/ui/button';
 import { Password } from '@/components/data-entry/password/password';
-import type { SignInDto } from '@/api/services/worker/sign-in';
-import {
-  signInDtoSchema,
-  useSignInMutation,
-} from '@/api/services/worker/sign-in';
+import { useSignInMutation } from '@/api/services/worker/sign-in/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
@@ -21,6 +17,8 @@ import { Alert } from '@/components/ui/alert';
 import { FormCaptcha } from '@/components/h-captcha';
 import { useResetMutationErrors } from '@/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { type SignInDto } from '@/api/services/worker/sign-in/types';
+import { signInDtoSchema } from '@/api/services/worker/sign-in/schema';
 
 function formattedSignInErrorMessage(unknownError: unknown) {
   if (unknownError instanceof FetchError && unknownError.status === 400) {

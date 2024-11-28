@@ -40,7 +40,6 @@ class BaseUUID(Base):
         # At some point it would make sense to use UUID(as_uuid=True).
         UUID(as_uuid=False),
         primary_key=True,
-        default=lambda: str(uuid4()),
         server_default=func.uuid_generate_v4(),
         sort_order=-1,  # Make sure it's the first column.
         index=True,

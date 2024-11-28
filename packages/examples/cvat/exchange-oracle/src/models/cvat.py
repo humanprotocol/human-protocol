@@ -143,7 +143,7 @@ class EscrowValidation(BaseUUID):
     chain_id = Column(Integer, Enum(Networks), nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    attempts = Column(Integer, default=0, server_default="0")
+    attempts = Column(Integer, server_default="0")
     status = Column(String, Enum(EscrowValidationStatuses), nullable=False)
     projects: Mapped[list[Project]] = relationship(
         back_populates="escrow_validation",

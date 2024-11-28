@@ -137,8 +137,6 @@ export default function JobDetail() {
                   label="Paid Out HMT"
                   value={`${data.details.paidOut.toString()} HMT`}
                 />
-                <CardTextRow label="Amount of Jobs" value="" />
-                <CardTextRow label="Workers assigned" value="" />
               </Stack>
             </CardContainer>
           </Grid>
@@ -198,21 +196,25 @@ export default function JobDetail() {
                       value={data.manifest.submissionsRequired}
                     />
                     <CardTextRow
-                      label="Token"
-                      value={data.manifest.tokenAddress}
+                      label={'Status'}
+                      value={data?.details.status}
                     />
                     <CardTextRow
                       label="Fund Amount"
                       value={`${data.manifest.fundAmount.toString()} HMT`}
                     />
-                    <CardTextRow
-                      label="Job Requester"
-                      value={data.manifest.requesterAddress}
-                    />
                   </Stack>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
+                    <CardTextRow
+                      label="Token"
+                      value={data.manifest.tokenAddress}
+                    />
+                    <CardTextRow
+                      label="Job Requester"
+                      value={data.manifest.requesterAddress}
+                    />
                     <CardTextRow
                       label="Recording Oracle"
                       value={data.manifest.recordingOracleAddress}
@@ -225,9 +227,6 @@ export default function JobDetail() {
                       label="Exchange Oracle"
                       value={data.manifest.exchangeOracleAddress}
                     />
-                    <CardTextRow label="Recording URL" value="" />
-                    <CardTextRow label="Reputation URL" value="" />
-                    <CardTextRow label="Exchange URL" value="" />
                   </Stack>
                 </Grid>
               </Grid>

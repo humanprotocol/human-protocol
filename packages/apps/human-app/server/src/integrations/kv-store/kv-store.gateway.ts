@@ -51,4 +51,37 @@ export class KvStoreGateway {
       return fetchedData;
     }
   }
+
+  async getJobTypesByAddress(
+    chainId: ChainId,
+    address: string,
+  ): Promise<string | void> {
+    const key = `jobTypes:${address}`;
+    const cachedData: string | undefined = await this.cacheManager.get(key);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    let jobTypes: string;
+    try {
+      jobTypes = await KVStoreUtils.get(chainId, address, KVStoreKeys.jobTypes);
+    } catch (e) {
+      if (e.toString().includes('Error: Invalid address')) {
+        throw new HttpException(
+          `Unable to retrieve job types from address: ${address}`,
+          400,
+        );
+      } else {
+        throw new Error(`Error while fetching job types from kv-store: ${e}`);
+      }
+    }
+
+    if (!jobTypes || jobTypes === '') {
+      return;
+    } else {
+      await this.cacheManager.set(key, jobTypes, this.configService.cacheTtlJobTypes);
+
+      return jobTypes;
+    }
+  }
 }

@@ -12,8 +12,7 @@ import { OracleDiscoveryService } from './oracle-discovery.service';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,
-  OracleDiscoveryResponse,
-  OracleDiscoveryResponseDto,
+  OracleDiscoveryResult,
 } from './model/oracle-discovery.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
@@ -30,13 +29,13 @@ export class OracleDiscoveryController {
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @ApiOkResponse({
-    type: OracleDiscoveryResponse,
+    type: Array<OracleDiscoveryResult>,
     description: 'List of oracles',
   })
   @UsePipes(new ValidationPipe())
   public async getOracles(
     @Query() dto: OracleDiscoveryDto,
-  ): Promise<OracleDiscoveryResponseDto> {
+  ): Promise<OracleDiscoveryResult[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
       throw new HttpException(
         'Oracles discovery is disabled',
