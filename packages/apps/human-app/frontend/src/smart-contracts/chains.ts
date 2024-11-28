@@ -80,11 +80,11 @@ export const AllMainnetChains: ChainWithAddresses[] =
 function getChainConfigsForChainIds<T extends TestnetNarrow | MainnetNarrow>(
   chainsArr: T[]
 ): ChainWithAddresses[] {
-  const initVal: ChainWithAddresses[] = [];
+  const result: ChainWithAddresses[] = [];
 
-  return chainsArr.reduce<ChainWithAddresses[]>((acc, currentValue) => {
+  for (const currentValue of chainsArr) {
     if (currentValue in NETWORKS) {
-      acc.push({
+      result.push({
         chainId: currentValue,
         name: NETWORKS[currentValue]?.title ?? '',
         explorerUrl: NETWORKS[currentValue]?.scanUrl ?? '',
@@ -95,8 +95,8 @@ function getChainConfigsForChainIds<T extends TestnetNarrow | MainnetNarrow>(
         },
       });
     }
-    return acc;
-  }, initVal);
+  }
+  return result;
 }
 
 const handleFilterChains = (
