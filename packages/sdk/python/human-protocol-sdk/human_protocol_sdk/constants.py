@@ -156,11 +156,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/amoy/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmbwio5UnvDn5GQRJ5kLJfK27fqHK9nkEh4YXXYKWCc9rH"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmTZ33SRoH4o4HE9JMrH9kPTYS11z3T1N7evePrNZrEvBh"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
-        "staking_address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
+        "staking_address": "0xffE496683F842a923110415b7278ded3F265f2C5",
         "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
         "old_subgraph_url": "",
         "old_factory_address": "",

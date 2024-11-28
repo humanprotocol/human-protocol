@@ -153,12 +153,12 @@ export const NETWORKS: {
     scanUrl: 'https://amoy.polygonscan.com/',
     factoryAddress: '0xAFf5a986A530ff839d49325A5dF69F96627E8D29',
     hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
-    stakingAddress: '0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60',
+    stakingAddress: '0xffE496683F842a923110415b7278ded3F265f2C5',
     kvstoreAddress: '0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmbwio5UnvDn5GQRJ5kLJfK27fqHK9nkEh4YXXYKWCc9rH',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmTZ33SRoH4o4HE9JMrH9kPTYS11z3T1N7evePrNZrEvBh',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
