@@ -28,6 +28,9 @@ export class UserEntity extends BaseEntity implements IUser {
   })
   public status: UserStatus;
 
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  public stripeCustomerId: string;
+
   @OneToMany(() => JobEntity, (job) => job.user)
   public jobs: JobEntity[];
 

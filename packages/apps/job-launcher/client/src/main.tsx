@@ -48,7 +48,10 @@ loadStripe(publishableKey).then((stripePromise) => {
             <ThemeProvider theme={theme}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <CssBaseline />
-                <Elements stripe={stripePromise}>
+                <Elements
+                  stripe={stripePromise}
+                  options={{ mode: 'setup', currency: 'usd' }}
+                >
                   <SnackbarProvider>
                     <App />
                   </SnackbarProvider>

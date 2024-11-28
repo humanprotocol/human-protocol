@@ -36,7 +36,7 @@ import {
   JobStatusFilter,
   WorkerBrowser,
   WorkerLanguage,
-  WorkerLocation,
+  Country,
 } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
@@ -1714,7 +1714,7 @@ describe('JobService', () => {
       maxRequests: 4,
       advanced: {
         workerLanguage: WorkerLanguage.EN,
-        workerLocation: WorkerLocation.FR,
+        workerLocation: Country.FR,
         targetBrowser: WorkerBrowser.DESKTOP,
       },
       annotations: {

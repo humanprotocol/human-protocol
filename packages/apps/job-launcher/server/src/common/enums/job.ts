@@ -166,7 +166,7 @@ export enum WorkerLanguage {
   ZU = 'zu',
 }
 
-export enum WorkerLocation {
+export enum Country {
   AF = 'af',
   AL = 'al',
   DZ = 'dz',

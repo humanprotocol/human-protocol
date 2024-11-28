@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { CryptoTopUpForm } from '../../../components/TopUpAccount/CryptoTopUpForm';
 import { FiatTopUpForm } from '../../../components/TopUpAccount/FiatTopUpForm';

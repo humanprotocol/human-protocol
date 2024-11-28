@@ -31,7 +31,7 @@ import {
   JobStatusFilter,
   WorkerBrowser,
   WorkerLanguage,
-  WorkerLocation,
+  Country,
 } from '../../common/enums/job';
 import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
@@ -560,12 +560,12 @@ export class JobCaptchaAdvancedDto {
   workerLanguage?: WorkerLanguage;
 
   @ApiProperty({
-    enum: WorkerLocation,
-    name: 'workerocation',
+    enum: Country,
+    name: 'worker_location',
   })
-  @IsEnumCaseInsensitive(WorkerLocation)
+  @IsEnumCaseInsensitive(Country)
   @IsOptional()
-  workerLocation?: WorkerLocation;
+  workerLocation?: Country;
 
   @ApiProperty({
     enum: WorkerBrowser,
