@@ -9,14 +9,23 @@ const uiConfigSuccessSchema = z.object({
 
 export type UiConfigSuccess = z.infer<typeof uiConfigSuccessSchema>;
 
-const getUiConfig = async () => {
-  return apiClient(apiPaths.worker.uiConfig.path, {
+const getUiConfig = async (): Promise<UiConfigSuccess> => {
+  const cachedData = sessionStorage.getItem('ui-config');
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData) as number[];
+    return uiConfigSuccessSchema.parse(parsedData);
+  }
+
+  const response = await apiClient(apiPaths.worker.uiConfig.path, {
     authenticated: true,
     successSchema: uiConfigSuccessSchema,
     options: {
       method: 'GET',
     },
   });
+
+  sessionStorage.setItem('ui-config', JSON.stringify(response));
+  return response;
 };
 
 export function useGetUiConfig() {
