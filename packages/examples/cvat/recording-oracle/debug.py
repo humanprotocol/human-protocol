@@ -63,7 +63,9 @@ def apply_local_development_patches():
                 token="HMT",  # noqa: S106
                 total_funded_amount=10,
                 created_at=datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc),
-                manifest_url=f"http://127.0.0.1:9010/manifests/{possible_manifest_name}",
+                manifest_url=(
+                    f"http://{Config.storage_config.endpoint_url}/manifests/{possible_manifest_name}"
+                ),
             )
         return original_get_escrow(ChainId(chain_id), escrow_address)
 
