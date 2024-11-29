@@ -16,13 +16,13 @@ import {
 const CustomTextField = styled(TextField)(() => ({
   '& .Mui-disabled': {
     color: colorPalette.text.disabledSecondary,
-    '-webkit-text-fill-color': colorPalette.text.disabledSecondary,
+    WebkitTextFillColor: colorPalette.text.disabledSecondary,
   },
 }));
 const CustomTextFieldDark = styled(TextField)(() => ({
   '& .Mui-disabled': {
     color: darkColorPalette.text.disabledSecondary,
-    '-webkit-text-fill-color': darkColorPalette.text.disabledSecondary,
+    WebkitTextFillColor: darkColorPalette.text.disabledSecondary,
   },
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
