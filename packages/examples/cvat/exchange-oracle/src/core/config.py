@@ -298,6 +298,12 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
+class Development:
+    cvat_in_docker = bool(int(os.environ.get("DEV_CVAT_IN_DOCKER", "0")))
+    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
+    cvat_local_host = os.environ.get("DEV_CVAT_LOCAL_HOST", "localhost")
+
+
 class Environment(str, Enum):
     PRODUCTION = "production"
     DEVELOPMENT = "development"
@@ -311,12 +317,6 @@ class Environment(str, Enum):
                 return member
 
         return None
-
-
-class Development:
-    cvat_in_docker = bool(int(os.environ.get("CVAT_IN_DOCKER", "0")))
-    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
-    cvat_local_host = os.environ.get("CVAT_LOCAL_HOST", "localhost")
 
 
 class Config:
