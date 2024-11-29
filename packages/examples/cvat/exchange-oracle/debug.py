@@ -39,6 +39,9 @@ def apply_local_development_patches():
             bucket_info.host_url = str(
                 URL(original_host_url).copy_with(host=Config.development_config.cvat_local_host)
             )
+            logger.info(
+                f"DEV: Changed {original_host_url} to {bucket_info.host_url} for CVAT storage"
+            )
         try:
             return original_make_cvat_cloud_storage_params(bucket_info)
         finally:
@@ -57,7 +60,9 @@ def apply_local_development_patches():
         digest = hashlib.sha256(
             (escrow_address + ":".join(map(str, (chain_id, message, body)))).encode()
         ).hexdigest()
-        return None, f"{OracleWebhookTypes.recording_oracle}:{digest}"
+        signature = f"{OracleWebhookTypes.recording_oracle}:{digest}"
+        logger.info(f"DEV: Generated patched signature {signature}")
+        return None, signature
 
     src.utils.webhooks.prepare_signed_message = prepare_signed_message
 
@@ -71,8 +76,9 @@ def apply_local_development_patches():
     def get_local_escrow(chain_id: int, escrow_address: str) -> EscrowData:
         possible_manifest_name = escrow_address.split(":")[0]
         local_manifests = minio_client.list_files(bucket="manifests")
-        logger.info(f"Local manifests: {local_manifests}")
+        logger.info(f"DEV: Local manifests: {local_manifests}")
         if possible_manifest_name in local_manifests:
+            logger.info(f"DEV: Using local manifest {escrow_address}")
             return EscrowData(
                 chain_id=ChainId(chain_id),
                 id="test",
@@ -104,7 +110,8 @@ def apply_local_development_patches():
         from src.validators.signature import validate_oracle_webhook_signature
 
         try:
-            return OracleWebhookTypes(signature.split(":")[0])
+            parsed_type = OracleWebhookTypes(signature.split(":")[0])
+            logger.info(f"DEV: Recovered {parsed_type} from the signature {signature}")
         except (ValueError, TypeError):
             return await validate_oracle_webhook_signature(request, signature, webhook)
 
@@ -113,9 +120,22 @@ def apply_local_development_patches():
     src.endpoints.webhook.validate_oracle_webhook_signature = (
         lenient_validate_oracle_webhook_signature
     )
-    import logging
 
-    logging.warning("Local development patches applied.")
+    import src.endpoints.authentication
+
+    original_decode_token = src.endpoints.authentication.TokenAuthenticator._decode_token
+
+    def decode_plain_json_token(self, token) -> dict[str, Any]:
+        """
+        Allows Authentication: Bearer {"wallet_address": "...", "email": "..."}
+        """
+        try:
+            decoded = json.loads(token)
+            logger.info(f"DEV: Decoded plain JSON auth token: {decoded}")
+        except (ValueError, TypeError):
+            return original_decode_token(self, token)
+
+    src.endpoints.authentication.TokenAuthenticator._decode_token = decode_plain_json_token
 
     from tests.api.test_exchange_api import generate_ecdsa_keys
 
@@ -134,20 +154,7 @@ def apply_local_development_patches():
 
     Config.human_app_config.jwt_public_key = public_key
 
-    import src.endpoints.authentication
-
-    original_decode_token = src.endpoints.authentication.TokenAuthenticator._decode_token
-
-    def decode_plain_json_token(self, token) -> dict[str, Any]:
-        """
-        Allows Authentication: Bearer {"wallet_address": "...", "email": "..."}
-        """
-        try:
-            return json.loads(token)
-        except (ValueError, TypeError):
-            return original_decode_token(self, token)
-
-    src.endpoints.authentication.TokenAuthenticator._decode_token = decode_plain_json_token
+    logger.warning("DEV: Local development patches applied.")
 
 
 if __name__ == "__main__":

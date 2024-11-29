@@ -23,6 +23,8 @@ def apply_local_development_patches():
     - Replaces `src.validators.signature.validate_oracle_webhook_signature` to always return
       `OracleWebhookTypes.exchange_oracle`.
     """
+    logger = get_function_logger(apply_local_development_patches.__name__)
+
     import src.crons._utils
 
     def prepare_signed_message(
@@ -34,11 +36,11 @@ def apply_local_development_patches():
         digest = hashlib.sha256(
             (escrow_address + ":".join(map(str, (chain_id, message, body)))).encode()
         ).hexdigest()
-        return None, f"{OracleWebhookTypes.recording_oracle}:{digest}"
+        signature = f"{OracleWebhookTypes.recording_oracle}:{digest}"
+        logger.info(f"DEV: Generated patched signature {signature}")
+        return None, signature
 
     src.crons._utils.prepare_signed_message = prepare_signed_message
-
-    logger = get_function_logger(apply_local_development_patches.__name__)
 
     from human_protocol_sdk.constants import ChainId
     from human_protocol_sdk.escrow import EscrowData, EscrowUtils
@@ -50,6 +52,7 @@ def apply_local_development_patches():
         local_manifests = minio_client.list_files(bucket="manifests")
         logger.info(f"Local manifests: {local_manifests}")
         if possible_manifest_name in local_manifests:
+            logger.info(f"DEV: Using local manifest {escrow_address}")
             return EscrowData(
                 chain_id=ChainId(chain_id),
                 id="test",
@@ -83,8 +86,10 @@ def apply_local_development_patches():
         webhook,  # noqa: ARG001 (not relevant here)
     ):
         try:
-            return OracleWebhookTypes(signature.split(":")[0])
+            parsed_type = OracleWebhookTypes(signature.split(":")[0])
+            logger.info(f"DEV: Recovered {parsed_type} from the signature {signature}")
         except (ValueError, TypeError):
+            logger.info(f"DEV: Falling back to {OracleWebhookTypes.exchange_oracle} webhook sender")
             return OracleWebhookTypes.exchange_oracle
 
     import src.endpoints.webhook
