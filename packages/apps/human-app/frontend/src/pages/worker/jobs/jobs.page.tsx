@@ -174,7 +174,6 @@ export function JobsPage() {
                       <>
                         {isMobile ? (
                           <MyJobsTableMobile
-                            chainIdsEnabled={uiConfigData.chainIdsEnabled}
                             setIsMobileFilterDrawerOpen={
                               setIsMobileFilterDrawerOpen
                             }
