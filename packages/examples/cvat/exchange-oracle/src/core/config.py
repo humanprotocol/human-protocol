@@ -313,6 +313,12 @@ class Environment(str, Enum):
         return None
 
 
+class Development:
+    cvat_in_docker = bool(int(os.environ.get("CVAT_IN_DOCKER", "0")))
+    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
+    cvat_local_host = os.environ.get("CVAT_LOCAL_HOST", "localhost")
+
+
 class Config:
     debug = to_bool(os.environ.get("DEBUG", "false"))
     port = int(os.environ.get("PORT", 8000))
@@ -337,6 +343,7 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
+    development_config = Development
 
     @classmethod
     def is_development_mode(cls) -> bool:

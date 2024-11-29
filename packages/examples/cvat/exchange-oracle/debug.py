@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import uvicorn
+from httpx import URL
 
 from src.chain.kvstore import register_in_kvstore
 from src.core.config import Config
@@ -25,7 +26,27 @@ def apply_local_development_patches():
     - Generates ECDSA keys if not already present for local JWT signing,
       and sets the public key in `Config.human_app_config`.
     """
-    import src.utils.webhooks
+    import src.handlers.job_creation
+
+    original_make_cvat_cloud_storage_params = (
+        src.handlers.job_creation._make_cvat_cloud_storage_params
+    )
+
+    def patched_make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
+        original_host_url = bucket_info.host_url
+
+        if Config.development_config.cvat_in_docker:
+            bucket_info.host_url = str(
+                URL(original_host_url).copy_with(host=Config.development_config.cvat_local_host)
+            )
+        try:
+            return original_make_cvat_cloud_storage_params(bucket_info)
+        finally:
+            bucket_info.host_url = original_host_url
+
+    src.handlers.job_creation._make_cvat_cloud_storage_params = (
+        patched_make_cvat_cloud_storage_params
+    )
 
     def prepare_signed_message(
         escrow_address,
