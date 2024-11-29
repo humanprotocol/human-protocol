@@ -7,7 +7,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/components/ui/icons';
 import { AvailableJobsNetworkFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-network-filter-mobile';
-import { AvailableJobsStatusFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-status-filter-mobile';
 import { useHandleMainNavIconClick } from '@/hooks/use-handle-main-nav-icon-click';
 import { AvailableJobsJobTypeFilterMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { AvailableJobsRewardAmountSortMobile } from '@/pages/worker/jobs/components/available-jobs/mobile/available-jobs-reward-amount-sort-mobile';
@@ -130,16 +129,6 @@ export function AvailableJobsDrawerMobile({
         >
           <AvailableJobsJobTypeFilterMobile />
         </Stack>
-        <Divider
-          sx={{
-            my: '16px',
-            background: colorPalette.text.secondary,
-          }}
-        />
-        <Typography variant="mobileHeaderMid">
-          {t('worker.jobs.status')}
-        </Typography>
-        <AvailableJobsStatusFilterMobile />
       </Drawer>
     </Box>
   );
