@@ -47,7 +47,6 @@ export const RoleDetailsEscrowsTable = ({
         <TableContainer>
           <Table
             sx={{
-              minWidth: 800,
               '& .MuiTableCell-root': {
                 borderBottom: 'none',
               },
@@ -69,6 +68,11 @@ export const RoleDetailsEscrowsTable = ({
           <TablePagination
             // count is unknown but required as props
             count={9999}
+            sx={{
+              '& .MuiTablePagination-toolbar': {
+                paddingLeft: 0,
+              },
+            }}
             // onPageChange is required as props
             onPageChange={() => {}}
             page={page}
