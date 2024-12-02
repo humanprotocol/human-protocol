@@ -9,7 +9,7 @@ import {
   ResignDto,
 } from './assignment.dto';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
-import { MOCK_EXCHANGE_ORACLE } from '../../../test/constants';
+import { MOCK_ADDRESS, MOCK_EXCHANGE_ORACLE } from '../../../test/constants';
 
 jest.mock('../../common/utils/signature');
 
@@ -78,7 +78,7 @@ describe('assignmentController', () => {
       };
       jest
         .spyOn(assignmentService, 'createAssignment')
-        .mockResolvedValue({ id: 1 } as any);
+        .mockResolvedValue({ id: 1, workerAddress: MOCK_ADDRESS, job: { rewardToken: 'hmt' } } as any);
       await assignmentController.createAssignment(body, {
         user: { address: userAddress },
       } as RequestWithUser);
