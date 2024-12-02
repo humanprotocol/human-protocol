@@ -4,8 +4,6 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  StakingClient,
-  IAllocation,
   EscrowUtils,
   Encryption,
   KVStoreUtils,
@@ -36,7 +34,7 @@ import {
   JobStatusFilter,
   WorkerBrowser,
   WorkerLanguage,
-  WorkerLocation,
+  Country,
 } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
@@ -646,6 +644,53 @@ describe('JobService', () => {
       };
 
       const requestType = JobRequestType.IMAGE_BOXES;
+      const tokenFundAmount = 100;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
+    it('should create a valid CVAT manifest for image polygons job type', async () => {
+      const jobBounty = '100';
+      jest
+        .spyOn(jobService, 'calculateJobBounty')
+        .mockResolvedValueOnce(jobBounty);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET,
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_POLYGONS,
+        fundAmount: 10,
+        currency: JobCurrency.HMT,
+      };
+
+      const requestType = JobRequestType.IMAGE_POLYGONS;
       const tokenFundAmount = 100;
 
       const result = await jobService.createCvatManifest(
@@ -1667,7 +1712,7 @@ describe('JobService', () => {
       maxRequests: 4,
       advanced: {
         workerLanguage: WorkerLanguage.EN,
-        workerLocation: WorkerLocation.FR,
+        workerLocation: Country.FR,
         targetBrowser: WorkerBrowser.DESKTOP,
       },
       annotations: {
@@ -1895,7 +1940,7 @@ describe('JobService', () => {
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.SET_UP;
+      mockJobEntity.status = JobStatus.FUNDED;
       expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
@@ -1981,7 +2026,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -2007,7 +2052,7 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.FORTUNE,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         userId: 1,
         fundAmount: 100,
         save: jest.fn().mockResolvedValue(true),
@@ -2338,7 +2383,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -2382,7 +2427,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -3513,13 +3558,6 @@ describe('JobService', () => {
   describe('getDetails', () => {
     it('should return job details with escrow address successfully', async () => {
       const balance = '1';
-      const allocationMock: IAllocation = {
-        escrowAddress: ethers.ZeroAddress,
-        staker: ethers.ZeroAddress,
-        tokens: 1n,
-        createdAt: 1n,
-        closedAt: 1n,
-      };
 
       const manifestMock: FortuneManifestDto = {
         submissionsRequired: 10,
@@ -3565,11 +3603,6 @@ describe('JobService', () => {
           recordingOracleAddress: expect.any(String),
           reputationOracleAddress: expect.any(String),
         },
-        staking: {
-          staker: expect.any(String),
-          allocated: expect.any(Number),
-          slashed: 0,
-        },
       };
 
       const getEscrowData = {
@@ -3586,9 +3619,6 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
-      (StakingClient.build as any).mockImplementation(() => ({
-        getAllocation: jest.fn().mockResolvedValue(allocationMock),
-      }));
       storageService.downloadJsonLikeData = jest
         .fn()
         .mockResolvedValue(manifestMock);
@@ -3642,11 +3672,6 @@ describe('JobService', () => {
           exchangeOracleAddress: ethers.ZeroAddress,
           recordingOracleAddress: ethers.ZeroAddress,
           reputationOracleAddress: ethers.ZeroAddress,
-        },
-        staking: {
-          staker: expect.any(String),
-          allocated: 0,
-          slashed: 0,
         },
       };
 

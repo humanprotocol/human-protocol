@@ -33,12 +33,10 @@ type Leader @entity {
   id: Bytes!
   address: Bytes!
   amountStaked: BigInt!
-  amountAllocated: BigInt!
   amountLocked: BigInt!
   lockedUntilTimestamp: BigInt!
   amountWithdrawn: BigInt!
   amountSlashed: BigInt!
-  reputation: BigInt!
   reward: BigInt!
   amountJobsProcessed: BigInt!
 
@@ -46,10 +44,11 @@ type Leader @entity {
   fee: BigInt
   publicKey: String
   webhookUrl: String
+  website: String
   jobTypes: [String!]
   url: String
   urls: [LeaderURL!]! @derivedFrom(field: "leader")
-  reputationNetwork: ReputationNetwork
+  reputationNetworks: [ReputationNetwork!]
   registrationNeeded: Boolean
   registrationInstructions: String
 }
@@ -64,7 +63,7 @@ type LeaderURL @entity {
 type ReputationNetwork @entity {
   id: Bytes!
   address: Bytes!
-  operators: [Leader!]! @derivedFrom(field: "reputationNetwork")
+  operators: [Leader!]! @derivedFrom(field: "reputationNetworks")
 }
 
 type Escrow @entity {
@@ -73,6 +72,7 @@ type Escrow @entity {
   token: Bytes! # address
   factoryAddress: Bytes! # address
   launcher: Bytes! # address
+  canceler: Bytes! # address
   count: BigInt!
   balance: BigInt!
   totalFundedAmount: BigInt!
@@ -163,7 +163,7 @@ type FundEvent @entity(immutable: true) {
   amount: BigInt!
 }
 
-type SetupEvent @entity(immutable: true) {
+type PendingEvent @entity(immutable: true) {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
@@ -206,6 +206,19 @@ type EscrowStatusEvent @entity(immutable: true) {
   launcher: Bytes # address
   sender: Bytes! # address
   status: String!
+}
+
+type WithdrawEvent @entity(immutable: true) {
+  id: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+
+  escrowAddress: Bytes! # address
+  sender: Bytes! # address
+  receiver: Bytes! # address
+  token: Bytes! # address
+  amount: BigInt!
 }
 
 # KVStore
@@ -269,42 +282,7 @@ type StakeSlashedEvent @entity(immutable: true) {
 
   escrowAddress: Bytes! # address
   staker: Bytes! # address
-  slasher: Bytes! # address
-  amount: BigInt!
-}
-
-type StakeAllocatedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-type AllocationClosedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  amount: BigInt!
-}
-
-# RewardPool
-type RewardAddedEvent @entity(immutable: true) {
-  id: Bytes!
-  block: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-
-  escrowAddress: Bytes! # address
-  staker: Bytes! # address
-  slasher: Bytes # address
+  slashRequester: Bytes! # address
   amount: BigInt!
 }
 
@@ -325,7 +303,6 @@ type HMTokenStatistics @entity {
 type EscrowStatistics @entity {
   id: Bytes!
   fundEventCount: BigInt!
-  setupEventCount: BigInt!
   storeResultsEventCount: BigInt!
   bulkPayoutEventCount: BigInt!
   pendingStatusEventCount: BigInt!
@@ -341,7 +318,6 @@ type EventDayData @entity {
   id: Bytes!
   timestamp: Int!
   dailyFundEventCount: BigInt!
-  dailySetupEventCount: BigInt!
   dailyStoreResultsEventCount: BigInt!
   dailyBulkPayoutEventCount: BigInt!
   dailyPendingStatusEventCount: BigInt!
@@ -365,13 +341,30 @@ type LeaderStatistics @entity {
   leaders: BigInt!
 }
 
-type Transaction @entity(immutable: true) {
+type Transaction @entity {
   id: Bytes!
   block: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
   from: Bytes!
-  to: Bytes
-  value: BigInt
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
+  value: BigInt!
   method: String!
+  token: Bytes
+  internalTransactions: [InternalTransaction!]
+    @derivedFrom(field: "transaction")
+}
+
+type InternalTransaction @entity {
+  id: Bytes!
+  from: Bytes!
+  to: Bytes!
+  receiver: Bytes
+  escrow: Bytes
+  value: BigInt!
+  token: Bytes
+  method: String!
+  transaction: Transaction!
 }

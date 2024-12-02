@@ -137,6 +137,7 @@ export class PayoutService {
       results.amounts,
       url,
       hash,
+      true, // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
       {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
       },
@@ -193,6 +194,17 @@ export class PayoutService {
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      calculatePayouts: async (
+        manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_POLYGONS]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,

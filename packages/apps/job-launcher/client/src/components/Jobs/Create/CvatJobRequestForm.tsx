@@ -239,6 +239,9 @@ export const CvatJobRequestForm = () => {
                     onBlur={handleBlur}
                   >
                     <MenuItem value={CvatJobType.IMAGE_POINTS}>Points</MenuItem>
+                    <MenuItem value={CvatJobType.IMAGE_POLYGONS}>
+                      Polygons
+                    </MenuItem>
                     <MenuItem value={CvatJobType.IMAGE_BOXES}>
                       Bounding Boxes
                     </MenuItem>

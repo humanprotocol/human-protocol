@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
-import { StyledTabs, StyledTab } from '../../../components/Tabs';
+import { useState } from 'react';
+import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { IS_TESTNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';

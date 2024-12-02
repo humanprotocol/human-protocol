@@ -4,6 +4,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import { env } from '@/shared/env';
 import { type SignInSuccessResponse } from '@/api/services/worker/sign-in/types';
+import { normalizeBaseUrl } from '@/shared/helpers/normalize-base-url';
 import { fetchTokenRefresh } from './fetch-refresh-token';
 
 const appendHeader = (
@@ -72,7 +73,7 @@ export async function refreshToken(): Promise<{
   refresh_token: string;
 } | null> {
   if (!refreshPromise) {
-    refreshPromise = fetchTokenRefresh(env.VITE_API_URL);
+    refreshPromise = fetchTokenRefresh(normalizeBaseUrl(env.VITE_API_URL));
   }
 
   const result = await refreshPromise;
@@ -159,7 +160,7 @@ export function createFetcher(defaultFetcherConfig?: {
       const urlAsString = fetchUrlToString(baseUrl);
       if (!urlAsString) return url;
       const normalizedUrl = fetchUrlToString(url).replace(/\//, '');
-      const normalizedBaseUrl = urlAsString.replace(/\/$/, '');
+      const normalizedBaseUrl = normalizeBaseUrl(urlAsString);
 
       return `${normalizedBaseUrl}/${normalizedUrl}`;
     })();

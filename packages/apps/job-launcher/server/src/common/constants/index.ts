@@ -33,6 +33,7 @@ export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const CVAT_JOB_TYPES = [
+  JobRequestType.IMAGE_POLYGONS,
   JobRequestType.IMAGE_BOXES,
   JobRequestType.IMAGE_POINTS,
   JobRequestType.IMAGE_BOXES_FROM_POINTS,
@@ -44,7 +45,7 @@ export const CANCEL_JOB_STATUSES = [
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,
-  JobStatus.SET_UP,
+  JobStatus.FUNDED,
   JobStatus.CREATED,
   JobStatus.PARTIAL,
 ];

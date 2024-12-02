@@ -8,70 +8,70 @@ import { useGraphPageChartParams } from '@utils/hooks/use-graph-page-chart-param
 import { useEffect } from 'react';
 
 const GraphSwiper = () => {
-	const { data } = useGraphPageChartData();
-	const { revertToInitialParams } = useGraphPageChartParams();
+  const { data } = useGraphPageChartData();
+  const { revertToInitialParams } = useGraphPageChartParams();
 
-	useEffect(() => {
-		revertToInitialParams();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+  useEffect(() => {
+    revertToInitialParams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-	const transactionHistoryData = (data || []).map(
-		({ totalTransactionCount, date }) => ({
-			value: totalTransactionCount,
-			date,
-		})
-	);
-	const transferAmount = (data || []).map(
-		({ totalTransactionAmount, date }) => ({
-			value: totalTransactionAmount,
-			date,
-		})
-	);
-	const solvedTasks = (data || []).map(({ solved, date }) => ({
-		value: solved,
-		date,
-	}));
+  const transactionHistoryData = (data || []).map(
+    ({ totalTransactionCount, date }) => ({
+      value: totalTransactionCount,
+      date,
+    })
+  );
+  const transferAmount = (data || []).map(
+    ({ totalTransactionAmount, date }) => ({
+      value: totalTransactionAmount,
+      date,
+    })
+  );
+  const solvedTasks = (data || []).map(({ solved, date }) => ({
+    value: solved,
+    date,
+  }));
 
-	const uniqueSenders = (data || []).map(({ dailyUniqueSenders, date }) => ({
-		value: dailyUniqueSenders,
-		date,
-	}));
+  const uniqueSenders = (data || []).map(({ dailyUniqueSenders, date }) => ({
+    value: dailyUniqueSenders,
+    date,
+  }));
 
-	const uniqueReceivers = (data || []).map(
-		({ dailyUniqueReceivers, date }) => ({
-			value: dailyUniqueReceivers,
-			date,
-		})
-	);
+  const uniqueReceivers = (data || []).map(
+    ({ dailyUniqueReceivers, date }) => ({
+      value: dailyUniqueReceivers,
+      date,
+    })
+  );
 
-	return (
-		<Swiper
-			loop={true}
-			navigation={true}
-			modules={[Navigation]}
-			className="mySwiper"
-		>
-			<SwiperSlide>
-				<SmallGraph
-					graphData={transactionHistoryData}
-					title="Transaction history"
-				/>
-			</SwiperSlide>
-			<SwiperSlide>
-				<SmallGraph graphData={transferAmount} title="Transfer Amount" />
-			</SwiperSlide>
-			<SwiperSlide>
-				<SmallGraph graphData={solvedTasks} title="Number of Tasks" />
-			</SwiperSlide>
-			<SwiperSlide>
-				<SmallGraph graphData={uniqueSenders} title="Unique Senders" />
-			</SwiperSlide>
-			<SwiperSlide>
-				<SmallGraph graphData={uniqueReceivers} title="Unique Receivers" />
-			</SwiperSlide>
-		</Swiper>
-	);
+  return (
+    <Swiper
+      loop={true}
+      navigation={true}
+      modules={[Navigation]}
+      className="mySwiper"
+    >
+      <SwiperSlide>
+        <SmallGraph
+          graphData={transactionHistoryData}
+          title="Transaction history"
+        />
+      </SwiperSlide>
+      <SwiperSlide>
+        <SmallGraph graphData={transferAmount} title="Transfer Amount" />
+      </SwiperSlide>
+      <SwiperSlide>
+        <SmallGraph graphData={solvedTasks} title="Number of Tasks" />
+      </SwiperSlide>
+      <SwiperSlide>
+        <SmallGraph graphData={uniqueSenders} title="Unique Senders" />
+      </SwiperSlide>
+      <SwiperSlide>
+        <SmallGraph graphData={uniqueReceivers} title="Unique Receivers" />
+      </SwiperSlide>
+    </Swiper>
+  );
 };
 
 export default GraphSwiper;

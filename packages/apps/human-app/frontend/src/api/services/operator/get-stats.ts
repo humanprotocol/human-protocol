@@ -44,7 +44,6 @@ export function useGetOperatorStats() {
         },
       }).catch(() => failedResponse);
     },
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps -- ...
     queryKey: ['getOperatorStats', keysData?.url],
   });
 }

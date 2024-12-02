@@ -1,16 +1,19 @@
 import { Stack, Typography } from '@mui/material';
 import { FC } from 'react';
+import { Link } from 'react-router-dom';
 
 type CardTextRowProps = {
   label?: string;
   value?: string | number;
   minWidth?: number;
+  url?: string;
 };
 
 export const CardTextRow: FC<CardTextRowProps> = ({
   label,
   value,
   minWidth = 130,
+  url,
 }) => {
   return (
     <Stack direction="row" spacing={3}>
@@ -22,7 +25,19 @@ export const CardTextRow: FC<CardTextRowProps> = ({
         color="primary"
         sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
       >
-        {value}
+        {url ? (
+          <Link
+            style={{
+              textDecoration: 'underline',
+              alignItems: 'left',
+            }}
+            to={url}
+          >
+            {value}
+          </Link>
+        ) : (
+          value
+        )}
       </Typography>
     </Stack>
   );

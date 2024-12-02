@@ -99,6 +99,10 @@ describe('PayoutService', () => {
         calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
+      [JobRequestType.IMAGE_POLYGONS]: {
+        calculatePayouts: jest.fn(),
+        saveResults: jest.fn(),
+      },
     };
   });
 

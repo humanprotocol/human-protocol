@@ -63,6 +63,13 @@ export class LeaderDto {
   @Expose()
   public url?: string;
 
+  @ApiProperty({ example: 'https://example.test' })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUrl()
+  @Expose()
+  public website?: string;
+
   @ApiProperty({ example: 1 })
   @IsNumber()
   @Expose()

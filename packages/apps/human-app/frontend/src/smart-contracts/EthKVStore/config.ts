@@ -11,6 +11,7 @@ export enum JobType {
   BoundingBoxes = 'image_boxes',
   BoundingBoxesFromPoints = 'image_boxes_from_points',
   SkeletonsFromBoundingBoxes = 'image_skeletons_from_boxes',
+  Polygons = 'image_polygons',
 }
 
 export const EthKVStoreKeys = {

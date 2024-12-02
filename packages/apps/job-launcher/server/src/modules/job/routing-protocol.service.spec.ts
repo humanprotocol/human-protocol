@@ -2,11 +2,7 @@ import { Test } from '@nestjs/testing';
 
 import { RoutingProtocolService } from './routing-protocol.service';
 import { ChainId, Role } from '@human-protocol/sdk';
-import {
-  MOCK_ADDRESS,
-  MOCK_REPUTATION_ORACLE_1,
-  mockConfig,
-} from '../../../test/constants';
+import { MOCK_REPUTATION_ORACLE_1, mockConfig } from '../../../test/constants';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { Web3Service } from '../web3/web3.service';
@@ -24,9 +20,7 @@ jest.mock('../../common/utils', () => ({
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-    })),
+    build: jest.fn().mockImplementation(() => ({})),
   },
 }));
 

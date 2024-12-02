@@ -12,6 +12,7 @@ import { useJobDetails } from '../../../hooks/useJobDetails';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import * as jobService from '../../../services/job';
 import { JobStatus } from '../../../types';
+import { generateDashboardURL } from '../../../utils';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -110,7 +111,7 @@ export default function JobDetail() {
           </LoadingButton>
         )}
         <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <CardContainer>
               <Typography
                 variant="body2"
@@ -136,29 +137,6 @@ export default function JobDetail() {
                 <CardTextRow
                   label="Paid Out HMT"
                   value={`${data.details.paidOut.toString()} HMT`}
-                />
-              </Stack>
-            </CardContainer>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <CardContainer>
-              <Typography
-                variant="body2"
-                color="primary"
-                fontWeight={600}
-                sx={{ mb: 2 }}
-              >
-                Stake details
-              </Typography>
-              <Stack spacing={2}>
-                <CardTextRow label="Staker" value={data.staking.staker} />
-                <CardTextRow
-                  label="Staked HMT"
-                  value={`${data.staking.allocated.toString()} HMT`}
-                />
-                <CardTextRow
-                  label="Slashed HMT"
-                  value={`${data.staking.slashed.toString()} HMT`}
                 />
               </Stack>
             </CardContainer>
@@ -218,14 +196,26 @@ export default function JobDetail() {
                     <CardTextRow
                       label="Recording Oracle"
                       value={data.manifest.recordingOracleAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.recordingOracleAddress,
+                      )}
                     />
                     <CardTextRow
                       label="Reputation Oracle"
                       value={data.manifest.reputationOracleAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.recordingOracleAddress,
+                      )}
                     />
                     <CardTextRow
                       label="Exchange Oracle"
                       value={data.manifest.exchangeOracleAddress}
+                      url={generateDashboardURL(
+                        data.manifest.chainId,
+                        data.manifest.exchangeOracleAddress,
+                      )}
                     />
                   </Stack>
                 </Grid>
