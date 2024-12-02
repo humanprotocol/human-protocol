@@ -146,16 +146,18 @@ export class DetailsService {
     return result;
   }
 
-  public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
+  public async getBestLeadersByChainId(
+    chainId?: ChainId,
+  ): Promise<LeaderDto[]> {
     const chainIds = !chainId
       ? await this.networkConfig.getAvailableNetworks()
       : [chainId];
 
-    const leadersByRole: { [role: string]: LeaderDto } = {};
+    const leaders: { [role: string]: LeaderDto } = {};
 
     for (const id of chainIds) {
       const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-
+      console.log('leadersData', leadersData);
       for (const leaderData of leadersData) {
         const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
           excludeExtraneousValues: true,
@@ -166,20 +168,19 @@ export class DetailsService {
 
         if (Object.values(Role).includes(role)) {
           if (
-            !leadersByRole[role] ||
-            BigInt(leaderDto.amountStaked) >
-              BigInt(leadersByRole[role].amountStaked)
+            !leaders[role] ||
+            BigInt(leaderDto.amountStaked) > BigInt(leaders[role].amountStaked)
           ) {
-            leadersByRole[role] = leaderDto;
+            leaders[role] = leaderDto;
           }
         }
       }
     }
 
     const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(Object.values(leadersByRole), reputations);
+    this.assignReputationsToLeaders(Object.values(leaders), reputations);
 
-    return Object.values(leadersByRole);
+    return Object.values(leaders);
   }
 
   public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
