@@ -83,9 +83,10 @@ export const TransactionsTableHead = () => {
           </Stack>
         </TableCell>
         <TableCell>
-          <Typography variant="Components/Table Header">
-            Escrow Address
-          </Typography>
+          <Typography variant="Components/Table Header">From</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="Components/Table Header">To</Typography>
         </TableCell>
       </TableRow>
     </TableHead>
