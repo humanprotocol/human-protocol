@@ -65,7 +65,7 @@ export class WebhookOutgoingService {
    * @param webhookEntity - The outgoing webhook entity.
    * @param failureDetail - Reason for the failure.
    */
-  public async handleWebhookOutgoingError(
+  private async handleWebhookOutgoingError(
     webhookEntity: WebhookOutgoingEntity,
     failureDetail: string,
   ): Promise<void> {

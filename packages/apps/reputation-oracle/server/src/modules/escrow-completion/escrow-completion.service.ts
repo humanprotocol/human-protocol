@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { v4 as uuidv4 } from 'uuid';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { EscrowCompletionTrackingStatus, EventType } from '../../common/enums';
+import { EscrowCompletionStatus, EventType } from '../../common/enums';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
-import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
+import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {
   ChainId,
   EscrowClient,
@@ -18,7 +18,7 @@ import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import {
-  ErrorEscrowCompletionTracking,
+  ErrorEscrowCompletion,
   ErrorWebhook,
 } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
@@ -26,11 +26,11 @@ import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/utils/database';
 
 @Injectable()
-export class EscrowCompletionTrackingService {
+export class EscrowCompletionService {
   private readonly logger = new Logger(WebhookIncomingService.name);
 
   constructor(
-    private readonly escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository,
+    private readonly escrowCompletionRepository: EscrowCompletionRepository,
     private readonly web3Service: Web3Service,
     private readonly webhookOutgoingService: WebhookOutgoingService,
     private readonly payoutService: PayoutService,
@@ -44,107 +44,99 @@ export class EscrowCompletionTrackingService {
    * @param {ChainId} chainId - The blockchain chain ID.
    * @param {string} escrowAddress - The address of the escrow contract.
    */
-  public async createEscrowCompletionTracking(
+  public async createEscrowCompletion(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<void> {
-    let escrowCompletionTrackingEntity = new EscrowCompletionTrackingEntity();
-    escrowCompletionTrackingEntity.chainId = chainId;
-    escrowCompletionTrackingEntity.escrowAddress = escrowAddress;
-    escrowCompletionTrackingEntity.status =
-      EscrowCompletionTrackingStatus.PENDING;
-    escrowCompletionTrackingEntity.waitUntil = new Date();
-    escrowCompletionTrackingEntity.retriesCount = 0;
+    let escrowCompletionEntity = new EscrowCompletionEntity();
+    escrowCompletionEntity.chainId = chainId;
+    escrowCompletionEntity.escrowAddress = escrowAddress;
+    escrowCompletionEntity.status = EscrowCompletionStatus.PENDING;
+    escrowCompletionEntity.waitUntil = new Date();
+    escrowCompletionEntity.retriesCount = 0;
 
-    escrowCompletionTrackingEntity =
-      await this.escrowCompletionTrackingRepository.createUnique(
-        escrowCompletionTrackingEntity,
-      );
-  }
-
-  /**
-   * Handles errors that occur during escrow completion tracking.
-   * If retry count is below the maximum, increments retry count and reschedules; otherwise, marks as 'FAILED'.
-   * @param escrowCompletionTrackingEntity - The escrow tracking entity.
-   * @param failureDetail - Reason for the failure.
-   */
-  public async handleEscrowCompletionTrackingError(
-    escrowCompletionTrackingEntity: EscrowCompletionTrackingEntity,
-    failureDetail: string,
-  ): Promise<void> {
-    if (
-      escrowCompletionTrackingEntity.retriesCount <
-      this.serverConfigService.maxRetryCount
-    ) {
-      const exponentialBackoff = calculateExponentialBackoffMs(
-        escrowCompletionTrackingEntity.retriesCount,
-        BACKOFF_INTERVAL_SECONDS,
-      );
-      escrowCompletionTrackingEntity.waitUntil = new Date(
-        Date.now() + exponentialBackoff,
-      );
-      escrowCompletionTrackingEntity.retriesCount += 1;
-    } else {
-      escrowCompletionTrackingEntity.failureDetail = failureDetail;
-      escrowCompletionTrackingEntity.status =
-        EscrowCompletionTrackingStatus.FAILED;
-    }
-    await this.escrowCompletionTrackingRepository.updateOne(
-      escrowCompletionTrackingEntity,
+    escrowCompletionEntity = await this.escrowCompletionRepository.createUnique(
+      escrowCompletionEntity,
     );
   }
 
+  /**
+   * Handles errors that occur during escrow completion.
+   * If retry count is below the maximum, increments retry count and reschedules; otherwise, marks as 'FAILED'.
+   * @param escrowCompletionEntity - The escrow entity.
+   * @param failureDetail - Reason for the failure.
+   */
+  private async handleEscrowCompletionError(
+    escrowCompletionEntity: EscrowCompletionEntity,
+    failureDetail: string,
+  ): Promise<void> {
+    if (
+      escrowCompletionEntity.retriesCount <
+      this.serverConfigService.maxRetryCount
+    ) {
+      const exponentialBackoff = calculateExponentialBackoffMs(
+        escrowCompletionEntity.retriesCount,
+        BACKOFF_INTERVAL_SECONDS,
+      );
+      escrowCompletionEntity.waitUntil = new Date(
+        Date.now() + exponentialBackoff,
+      );
+      escrowCompletionEntity.retriesCount += 1;
+    } else {
+      escrowCompletionEntity.failureDetail = failureDetail;
+      escrowCompletionEntity.status = EscrowCompletionStatus.FAILED;
+    }
+    await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
+  }
+
   public async processPendingEscrowCompletion(): Promise<void> {
-    const escrowCompletionTrackingEntities =
-      await this.escrowCompletionTrackingRepository.findByStatus(
-        EscrowCompletionTrackingStatus.PENDING,
+    const escrowCompletionEntities =
+      await this.escrowCompletionRepository.findByStatus(
+        EscrowCompletionStatus.PENDING,
       );
 
-    for (const escrowCompletionTrackingEntity of escrowCompletionTrackingEntities) {
+    for (const escrowCompletionEntity of escrowCompletionEntities) {
       try {
         const signer = this.web3Service.getSigner(
-          escrowCompletionTrackingEntity.chainId,
+          escrowCompletionEntity.chainId,
         );
         const escrowClient = await EscrowClient.build(signer);
 
         const escrowStatus = await escrowClient.getStatus(
-          escrowCompletionTrackingEntity.escrowAddress,
+          escrowCompletionEntity.escrowAddress,
         );
         if (escrowStatus === EscrowStatus.Pending) {
-          if (!escrowCompletionTrackingEntity.finalResultsUrl) {
+          if (!escrowCompletionEntity.finalResultsUrl) {
             const { url, hash } = await this.payoutService.processResults(
-              escrowCompletionTrackingEntity.chainId,
-              escrowCompletionTrackingEntity.escrowAddress,
+              escrowCompletionEntity.chainId,
+              escrowCompletionEntity.escrowAddress,
             );
 
-            escrowCompletionTrackingEntity.finalResultsUrl = url;
-            escrowCompletionTrackingEntity.finalResultsHash = hash;
-            await this.escrowCompletionTrackingRepository.updateOne(
-              escrowCompletionTrackingEntity,
+            escrowCompletionEntity.finalResultsUrl = url;
+            escrowCompletionEntity.finalResultsHash = hash;
+            await this.escrowCompletionRepository.updateOne(
+              escrowCompletionEntity,
             );
           }
 
           await this.payoutService.executePayouts(
-            escrowCompletionTrackingEntity.chainId,
-            escrowCompletionTrackingEntity.escrowAddress,
-            escrowCompletionTrackingEntity.finalResultsUrl,
-            escrowCompletionTrackingEntity.finalResultsHash,
+            escrowCompletionEntity.chainId,
+            escrowCompletionEntity.escrowAddress,
+            escrowCompletionEntity.finalResultsUrl,
+            escrowCompletionEntity.finalResultsHash,
           );
         }
 
-        escrowCompletionTrackingEntity.status =
-          EscrowCompletionTrackingStatus.PAID;
-        await this.escrowCompletionTrackingRepository.updateOne(
-          escrowCompletionTrackingEntity,
-        );
+        escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+        await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
       } catch (err) {
         const errorId = uuidv4();
-        const failureDetail = `${ErrorEscrowCompletionTracking.PendingProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `${ErrorEscrowCompletion.PendingProcessingFailed} (Error ID: ${errorId})`;
         this.logger.error(
-          `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
         );
-        await this.handleEscrowCompletionTrackingError(
-          escrowCompletionTrackingEntity,
+        await this.handleEscrowCompletionError(
+          escrowCompletionEntity,
           failureDetail,
         );
         continue;
@@ -153,15 +145,15 @@ export class EscrowCompletionTrackingService {
   }
 
   public async processPaidEscrowCompletion(): Promise<void> {
-    const escrowCompletionTrackingEntities =
-      await this.escrowCompletionTrackingRepository.findByStatus(
-        EscrowCompletionTrackingStatus.PAID,
+    const escrowCompletionEntities =
+      await this.escrowCompletionRepository.findByStatus(
+        EscrowCompletionStatus.PAID,
       );
 
     // TODO: Add DB transactions
-    for (const escrowCompletionTrackingEntity of escrowCompletionTrackingEntities) {
+    for (const escrowCompletionEntity of escrowCompletionEntities) {
       try {
-        const { chainId, escrowAddress } = escrowCompletionTrackingEntity;
+        const { chainId, escrowAddress } = escrowCompletionEntity;
 
         const signer = this.web3Service.getSigner(chainId);
         const escrowClient = await EscrowClient.build(signer);
@@ -194,12 +186,12 @@ export class EscrowCompletionTrackingService {
               await escrowClient.getExchangeOracleAddress(escrowAddress),
             )
           ).webhookUrl,
-          (
+          /*(
             await OperatorUtils.getLeader(
               chainId,
               await escrowClient.getRecordingOracleAddress(escrowAddress),
             )
-          ).webhookUrl,
+          ).webhookUrl,*/
         ];
 
         let allWebhooksCreated = true;
@@ -231,12 +223,12 @@ export class EscrowCompletionTrackingService {
               continue;
             } else {
               const errorId = uuidv4();
-              const failureDetail = `${ErrorEscrowCompletionTracking.PaidProcessingFailed} (Error ID: ${errorId})`;
+              const failureDetail = `${ErrorEscrowCompletion.PaidProcessingFailed} (Error ID: ${errorId})`;
               this.logger.error(
                 `Error creating outgoing webhook. Error ID: ${errorId}, Escrow Address: ${escrowAddress}, Reason: ${failureDetail}, Message: ${err.message}`,
               );
-              await this.handleEscrowCompletionTrackingError(
-                escrowCompletionTrackingEntity,
+              await this.handleEscrowCompletionError(
+                escrowCompletionEntity,
                 failureDetail,
               );
               allWebhooksCreated = false;
@@ -247,20 +239,19 @@ export class EscrowCompletionTrackingService {
 
         // Only set the status to COMPLETED if all webhooks were created successfully
         if (allWebhooksCreated) {
-          escrowCompletionTrackingEntity.status =
-            EscrowCompletionTrackingStatus.COMPLETED;
-          await this.escrowCompletionTrackingRepository.updateOne(
-            escrowCompletionTrackingEntity,
+          escrowCompletionEntity.status = EscrowCompletionStatus.COMPLETED;
+          await this.escrowCompletionRepository.updateOne(
+            escrowCompletionEntity,
           );
         }
       } catch (err) {
         const errorId = uuidv4();
-        const failureDetail = `${ErrorEscrowCompletionTracking.PaidProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `${ErrorEscrowCompletion.PaidProcessingFailed} (Error ID: ${errorId})`;
         this.logger.error(
-          `Error processing escrow completion tracking. Error ID: ${errorId}, Escrow completion tracking ID: ${escrowCompletionTrackingEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
         );
-        await this.handleEscrowCompletionTrackingError(
-          escrowCompletionTrackingEntity,
+        await this.handleEscrowCompletionError(
+          escrowCompletionEntity,
           failureDetail,
         );
       }

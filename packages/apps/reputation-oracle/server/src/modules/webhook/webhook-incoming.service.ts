@@ -11,7 +11,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
-import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { isDuplicatedError } from '../../common/utils/database';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class WebhookIncomingService {
 
   constructor(
     private readonly webhookIncomingRepository: WebhookIncomingRepository,
-    private readonly escrowCompletionTrackingService: EscrowCompletionTrackingService,
+    private readonly escrowCompletionService: EscrowCompletionService,
     public readonly serverConfigService: ServerConfigService,
     public readonly web3ConfigService: Web3ConfigService,
   ) {}
@@ -48,10 +48,6 @@ export class WebhookIncomingService {
 
     webhookEntity =
       await this.webhookIncomingRepository.createUnique(webhookEntity);
-
-    if (!webhookEntity) {
-      throw new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND);
-    }
   }
 
   /**
@@ -60,7 +56,7 @@ export class WebhookIncomingService {
    * @param webhookEntity - The incoming webhook entity.
    * @param failureDetail - Reason for the failure.
    */
-  public async handleWebhookIncomingError(
+  private async handleWebhookIncomingError(
     webhookEntity: WebhookIncomingEntity,
     failureDetail: string,
   ): Promise<void> {
@@ -87,7 +83,7 @@ export class WebhookIncomingService {
       try {
         const { chainId, escrowAddress } = webhookEntity;
 
-        await this.escrowCompletionTrackingService.createEscrowCompletionTracking(
+        await this.escrowCompletionService.createEscrowCompletion(
           chainId,
           escrowAddress,
         );

@@ -9,7 +9,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 
 @Injectable()
 export class CronJobService {
@@ -19,7 +19,7 @@ export class CronJobService {
     private readonly cronJobRepository: CronJobRepository,
     private readonly webhookIncomingService: WebhookIncomingService,
     private readonly webhookOutgoingService: WebhookOutgoingService,
-    private readonly escrowCompletionTrackingService: EscrowCompletionTrackingService,
+    private readonly escrowCompletionService: EscrowCompletionService,
   ) {}
 
   /**
@@ -128,7 +128,7 @@ export class CronJobService {
     );
 
     try {
-      await this.escrowCompletionTrackingService.processPendingEscrowCompletion();
+      await this.escrowCompletionService.processPendingEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }
@@ -158,7 +158,7 @@ export class CronJobService {
     );
 
     try {
-      await this.escrowCompletionTrackingService.processPaidEscrowCompletion();
+      await this.escrowCompletionService.processPaidEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }

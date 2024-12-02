@@ -10,7 +10,7 @@ import {
   mockConfig,
 } from '../../../test/constants';
 import {
-  EscrowCompletionTrackingStatus,
+  EscrowCompletionStatus,
   EventType,
   WebhookIncomingStatus,
 } from '../../common/enums/webhook';
@@ -26,8 +26,8 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { ReputationService } from '../reputation/reputation.service';
-import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
-import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
+import { EscrowCompletionRepository } from '../escrow-completion/escrow-completion.repository';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
 import { WebhookOutgoingService } from './webhook-outgoing.service';
@@ -42,8 +42,8 @@ describe('WebhookIncomingService', () => {
   let webhookIncomingService: WebhookIncomingService,
     webhookIncomingRepository: WebhookIncomingRepository,
     web3ConfigService: Web3ConfigService,
-    escrowCompletionTrackingService: EscrowCompletionTrackingService,
-    escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository;
+    escrowCompletionService: EscrowCompletionService,
+    escrowCompletionRepository: EscrowCompletionRepository;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -73,7 +73,7 @@ describe('WebhookIncomingService', () => {
       providers: [
         WebhookIncomingService,
         WebhookOutgoingService,
-        EscrowCompletionTrackingService,
+        EscrowCompletionService,
         Web3ConfigService,
         ServerConfigService,
         PayoutService,
@@ -84,8 +84,8 @@ describe('WebhookIncomingService', () => {
         S3ConfigService,
         PGPConfigService,
         {
-          provide: EscrowCompletionTrackingRepository,
-          useValue: createMock<EscrowCompletionTrackingRepository>(),
+          provide: EscrowCompletionRepository,
+          useValue: createMock<EscrowCompletionRepository>(),
         },
         {
           provide: WebhookOutgoingRepository,
@@ -117,13 +117,10 @@ describe('WebhookIncomingService', () => {
       WebhookIncomingService,
     );
     webhookIncomingRepository = moduleRef.get(WebhookIncomingRepository);
-    escrowCompletionTrackingRepository = moduleRef.get(
-      EscrowCompletionTrackingRepository,
+    escrowCompletionRepository = moduleRef.get(EscrowCompletionRepository);
+    escrowCompletionService = moduleRef.get<EscrowCompletionService>(
+      EscrowCompletionService,
     );
-    escrowCompletionTrackingService =
-      moduleRef.get<EscrowCompletionTrackingService>(
-        EscrowCompletionTrackingService,
-      );
     web3ConfigService = moduleRef.get(Web3ConfigService);
 
     // Mocking privateKey getter
@@ -169,18 +166,6 @@ describe('WebhookIncomingService', () => {
           chainId: validDto.chainId,
           escrowAddress: validDto.escrowAddress,
         }),
-      );
-    });
-
-    it('should throw NotFoundException if webhook entity creation fails', async () => {
-      jest
-        .spyOn(webhookIncomingRepository as any, 'createUnique')
-        .mockResolvedValue(null);
-
-      await expect(
-        webhookIncomingService.createIncomingWebhook(validDto),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.NotCreated, HttpStatus.NOT_FOUND),
       );
     });
 
@@ -272,7 +257,7 @@ describe('WebhookIncomingService', () => {
   });
 
   describe('processPendingIncomingWebhooks', () => {
-    let createEscrowCompletionTrackingMock: any;
+    let createEscrowCompletionMock: any;
     let webhookEntity1: Partial<WebhookIncomingEntity>,
       webhookEntity2: Partial<WebhookIncomingEntity>;
 
@@ -299,11 +284,11 @@ describe('WebhookIncomingService', () => {
         .spyOn(webhookIncomingRepository, 'findByStatus')
         .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
-      createEscrowCompletionTrackingMock = jest.spyOn(
-        escrowCompletionTrackingService as any,
-        'createEscrowCompletionTracking',
+      createEscrowCompletionMock = jest.spyOn(
+        escrowCompletionService as any,
+        'createEscrowCompletion',
       );
-      createEscrowCompletionTrackingMock.mockResolvedValue(undefined);
+      createEscrowCompletionMock.mockResolvedValue(undefined);
     });
 
     afterEach(() => {
@@ -313,12 +298,12 @@ describe('WebhookIncomingService', () => {
     it('should send webhook for all of the pending incoming webhooks', async () => {
       await webhookIncomingService.processPendingIncomingWebhooks();
 
-      expect(createEscrowCompletionTrackingMock).toHaveBeenCalledTimes(2);
-      expect(createEscrowCompletionTrackingMock).toHaveBeenCalledWith(
+      expect(createEscrowCompletionMock).toHaveBeenCalledTimes(2);
+      expect(createEscrowCompletionMock).toHaveBeenCalledWith(
         webhookEntity1.chainId,
         webhookEntity1.escrowAddress,
       );
-      expect(createEscrowCompletionTrackingMock).toHaveBeenCalledWith(
+      expect(createEscrowCompletionMock).toHaveBeenCalledWith(
         webhookEntity2.chainId,
         webhookEntity2.escrowAddress,
       );
@@ -329,7 +314,7 @@ describe('WebhookIncomingService', () => {
     });
 
     it('should increase retriesCount by 1 if sending webhook fails', async () => {
-      createEscrowCompletionTrackingMock.mockRejectedValueOnce(new Error());
+      createEscrowCompletionMock.mockRejectedValueOnce(new Error());
       await webhookIncomingService.processPendingIncomingWebhooks();
 
       expect(webhookIncomingRepository.updateOne).toHaveBeenCalled();
@@ -339,7 +324,7 @@ describe('WebhookIncomingService', () => {
     });
 
     it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
-      createEscrowCompletionTrackingMock.mockRejectedValueOnce(new Error());
+      createEscrowCompletionMock.mockRejectedValueOnce(new Error());
 
       webhookEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
 
@@ -349,22 +334,19 @@ describe('WebhookIncomingService', () => {
       expect(webhookEntity1.status).toBe(WebhookIncomingStatus.FAILED);
     });
 
-    it('should handle duplicate errors when creating escrow completion tracking and not update entity status', async () => {
-      const mockEntity = { id: 1, status: EscrowCompletionTrackingStatus.PAID };
+    it('should handle duplicate errors when creating escrow completion and not update entity status', async () => {
+      const mockEntity = { id: 1, status: EscrowCompletionStatus.PAID };
 
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([mockEntity as any]);
 
       const updateOneMock = jest
-        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .spyOn(escrowCompletionRepository, 'updateOne')
         .mockResolvedValue(mockEntity as any);
 
-      const createEscrowCompletionTrackingMock = jest
-        .spyOn(
-          escrowCompletionTrackingService,
-          'createEscrowCompletionTracking',
-        )
+      const createEscrowCompletionMock = jest
+        .spyOn(escrowCompletionService, 'createEscrowCompletion')
         .mockImplementation(() => {
           throw new DatabaseError(
             'Duplicate entry error',
@@ -374,10 +356,10 @@ describe('WebhookIncomingService', () => {
 
       await webhookIncomingService.processPendingIncomingWebhooks();
 
-      expect(createEscrowCompletionTrackingMock).toHaveBeenCalled();
+      expect(createEscrowCompletionMock).toHaveBeenCalled();
       expect(updateOneMock).not.toHaveBeenCalledWith({
         id: mockEntity.id,
-        status: EscrowCompletionTrackingStatus.COMPLETED,
+        status: EscrowCompletionStatus.COMPLETED,
       });
     });
   });

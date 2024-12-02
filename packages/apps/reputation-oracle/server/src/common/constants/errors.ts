@@ -12,13 +12,13 @@ export enum ErrorWebhook {
 }
 
 /**
- * Represents error messages related to escrow completion tracking.
+ * Represents error messages related to escrow completion.
  */
-export enum ErrorEscrowCompletionTracking {
-  NotFound = 'Escrow completion tracking not found',
-  NotCreated = 'Escrow completion tracking has not been created',
-  PendingProcessingFailed = 'Failed to process pending escrow completion tracking',
-  PaidProcessingFailed = 'Failed to process paid escrow completion tracking',
+export enum ErrorEscrowCompletion {
+  NotFound = 'Escrow completion not found',
+  NotCreated = 'Escrow completion has not been created',
+  PendingProcessingFailed = 'Failed to process pending escrow completion',
+  PaidProcessingFailed = 'Failed to process paid escrow completion',
 }
 
 /**

@@ -7,8 +7,7 @@ import { Web3Module } from '../web3/web3.module';
 import { WebhookController } from './webhook.controller';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
-import { EscrowCompletionTrackingRepository } from '../escrow-completion-tracking/escrow-completion-tracking.repository';
-import { EscrowCompletionTrackingModule } from '../escrow-completion-tracking/escrow-completion-tracking.module';
+import { EscrowCompletionModule } from '../escrow-completion/escrow-completion.module';
 import { WebhookIncomingService } from './webhook-incoming.service';
 
 @Module({
@@ -17,15 +16,10 @@ import { WebhookIncomingService } from './webhook-incoming.service';
     ConfigModule,
     Web3Module,
     HttpModule,
-    EscrowCompletionTrackingModule,
+    EscrowCompletionModule,
   ],
   controllers: [WebhookController],
-  providers: [
-    Logger,
-    WebhookIncomingService,
-    WebhookIncomingRepository,
-    EscrowCompletionTrackingRepository,
-  ],
+  providers: [Logger, WebhookIncomingService, WebhookIncomingRepository],
   exports: [WebhookIncomingService],
 })
 export class WebhookIncomingModule {}

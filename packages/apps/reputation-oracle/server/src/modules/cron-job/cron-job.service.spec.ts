@@ -8,14 +8,14 @@ import { ErrorCronJob } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
-import { EscrowCompletionTrackingService } from '../escrow-completion-tracking/escrow-completion-tracking.service';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 
 describe('CronJobService', () => {
   let service: CronJobService;
   let cronJobRepository: jest.Mocked<CronJobRepository>;
   let webhookIncomingService: jest.Mocked<WebhookIncomingService>;
   let webhookOutgoingService: jest.Mocked<WebhookOutgoingService>;
-  let escrowCompletionTrackingService: jest.Mocked<EscrowCompletionTrackingService>;
+  let escrowCompletionService: jest.Mocked<EscrowCompletionService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,7 +42,7 @@ describe('CronJobService', () => {
           },
         },
         {
-          provide: EscrowCompletionTrackingService,
+          provide: EscrowCompletionService,
           useValue: {
             processPendingEscrowCompletion: jest.fn(),
             processPaidEscrowCompletion: jest.fn(),
@@ -62,9 +62,7 @@ describe('CronJobService', () => {
     cronJobRepository = module.get(CronJobRepository);
     webhookIncomingService = module.get(WebhookIncomingService);
     webhookOutgoingService = module.get(WebhookOutgoingService);
-    escrowCompletionTrackingService = module.get(
-      EscrowCompletionTrackingService,
-    );
+    escrowCompletionService = module.get(EscrowCompletionService);
   });
 
   describe('startCronJob', () => {
@@ -79,7 +77,9 @@ describe('CronJobService', () => {
       expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
         CronJobType.ProcessPendingIncomingWebhook,
       );
-      expect(cronJobRepository.createUnique).toHaveBeenCalled();
+      expect(cronJobRepository.createUnique).toHaveBeenCalledWith({
+        cronJobType: CronJobType.ProcessPendingIncomingWebhook,
+      });
       expect(result).toBeInstanceOf(CronJobEntity);
     });
 
@@ -102,7 +102,18 @@ describe('CronJobService', () => {
       expect(cronJobRepository.findOneByType).toHaveBeenCalledWith(
         CronJobType.ProcessPendingIncomingWebhook,
       );
-      expect(cronJobRepository.updateOne).toHaveBeenCalledWith(updatedCronJob);
+      expect(cronJobRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startedAt: expect.any(Date),
+          completedAt: null,
+        }),
+      );
+      expect(
+        Math.abs(
+          new Date(updatedCronJob.startedAt).getTime() -
+            existingCronJob.startedAt.getTime(),
+        ),
+      ).toBeLessThanOrEqual(1000);
       expect(result).toEqual(updatedCronJob);
     });
   });
@@ -154,15 +165,31 @@ describe('CronJobService', () => {
   describe('completeCronJob', () => {
     it('should complete a cron job', async () => {
       const cronJobEntity = new CronJobEntity();
-      const completedCronJob = { ...cronJobEntity, completedAt: new Date() };
+
+      const completedCronJob = {
+        ...cronJobEntity,
+        completedAt: new Date(),
+      };
+
       cronJobRepository.updateOne.mockResolvedValue(completedCronJob as any);
 
       const result = await service.completeCronJob(cronJobEntity);
 
       expect(cronJobRepository.updateOne).toHaveBeenCalledWith(
-        completedCronJob,
+        expect.objectContaining({
+          ...cronJobEntity,
+          completedAt: expect.any(Date),
+        }),
       );
+
       expect(result.completedAt).toBeInstanceOf(Date);
+
+      expect(
+        Math.abs(
+          new Date(result.completedAt!).getTime() -
+            completedCronJob.completedAt.getTime(),
+        ),
+      ).toBeLessThanOrEqual(1000);
     });
 
     it('should throw an error if the cron job is already completed', async () => {
@@ -230,7 +257,7 @@ describe('CronJobService', () => {
       await service.processPendingEscrowCompletion();
 
       expect(
-        escrowCompletionTrackingService.processPendingEscrowCompletion,
+        escrowCompletionService.processPendingEscrowCompletion,
       ).not.toHaveBeenCalled();
     });
 
@@ -246,7 +273,7 @@ describe('CronJobService', () => {
       await service.processPendingEscrowCompletion();
 
       expect(
-        escrowCompletionTrackingService.processPendingEscrowCompletion,
+        escrowCompletionService.processPendingEscrowCompletion,
       ).toHaveBeenCalled();
       expect(service.startCronJob).toHaveBeenCalled();
       expect(service.completeCronJob).toHaveBeenCalled();
@@ -261,7 +288,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValue(new CronJobEntity());
 
-      escrowCompletionTrackingService.processPendingEscrowCompletion.mockRejectedValue(
+      escrowCompletionService.processPendingEscrowCompletion.mockRejectedValue(
         new Error('Processing error'),
       );
 
@@ -278,7 +305,7 @@ describe('CronJobService', () => {
       await service.processPaidEscrowCompletion();
 
       expect(
-        escrowCompletionTrackingService.processPaidEscrowCompletion,
+        escrowCompletionService.processPaidEscrowCompletion,
       ).not.toHaveBeenCalled();
     });
 
@@ -294,7 +321,7 @@ describe('CronJobService', () => {
       await service.processPaidEscrowCompletion();
 
       expect(
-        escrowCompletionTrackingService.processPaidEscrowCompletion,
+        escrowCompletionService.processPaidEscrowCompletion,
       ).toHaveBeenCalled();
       expect(service.startCronJob).toHaveBeenCalled();
       expect(service.completeCronJob).toHaveBeenCalled();
@@ -309,7 +336,7 @@ describe('CronJobService', () => {
         .spyOn(service, 'completeCronJob')
         .mockResolvedValue(new CronJobEntity());
 
-      escrowCompletionTrackingService.processPaidEscrowCompletion.mockRejectedValue(
+      escrowCompletionService.processPaidEscrowCompletion.mockRejectedValue(
         new Error('Processing error'),
       );
 

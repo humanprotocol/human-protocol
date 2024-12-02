@@ -11,19 +11,19 @@ import {
   MOCK_WEBHOOK_URL,
   mockConfig,
 } from '../../../test/constants';
-import { EscrowCompletionTrackingStatus } from '../../common/enums/webhook';
+import { EscrowCompletionStatus } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
-import { EscrowCompletionTrackingRepository } from './escrow-completion-tracking.repository';
-import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
+import { EscrowCompletionEntity } from './escrow-completion.entity';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { EscrowCompletionTrackingService } from './escrow-completion-tracking.service';
+import { EscrowCompletionService } from './escrow-completion.service';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { DatabaseError } from '../../common/errors/database';
-import { ErrorEscrowCompletionTracking } from '../../common/constants/errors';
+import { ErrorEscrowCompletion } from '../../common/constants/errors';
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
 import { StorageService } from '../storage/storage.service';
 import { ReputationRepository } from '../reputation/reputation.repository';
@@ -56,9 +56,9 @@ jest.mock('../../common/utils/backoff', () => ({
     .mockReturnValue(MOCK_BACKOFF_INTERVAL_SECONDS * 1000),
 }));
 
-describe('escrowCompletionTrackingService', () => {
-  let escrowCompletionTrackingService: EscrowCompletionTrackingService,
-    escrowCompletionTrackingRepository: EscrowCompletionTrackingRepository,
+describe('escrowCompletionService', () => {
+  let escrowCompletionService: EscrowCompletionService,
+    escrowCompletionRepository: EscrowCompletionRepository,
     web3ConfigService: Web3ConfigService,
     webhookOutgoingService: WebhookOutgoingService,
     reputationService: ReputationService;
@@ -100,7 +100,7 @@ describe('escrowCompletionTrackingService', () => {
             }),
           },
         },
-        EscrowCompletionTrackingService,
+        EscrowCompletionService,
         {
           provide: Web3Service,
           useValue: {
@@ -108,8 +108,8 @@ describe('escrowCompletionTrackingService', () => {
           },
         },
         {
-          provide: EscrowCompletionTrackingRepository,
-          useValue: createMock<EscrowCompletionTrackingRepository>(),
+          provide: EscrowCompletionRepository,
+          useValue: createMock<EscrowCompletionRepository>(),
         },
         {
           provide: WebhookOutgoingRepository,
@@ -141,18 +141,15 @@ describe('escrowCompletionTrackingService', () => {
       ],
     }).compile();
 
-    escrowCompletionTrackingService =
-      moduleRef.get<EscrowCompletionTrackingService>(
-        EscrowCompletionTrackingService,
-      );
+    escrowCompletionService = moduleRef.get<EscrowCompletionService>(
+      EscrowCompletionService,
+    );
 
     webhookOutgoingService = moduleRef.get<WebhookOutgoingService>(
       WebhookOutgoingService,
     );
     reputationService = moduleRef.get<ReputationService>(ReputationService);
-    escrowCompletionTrackingRepository = moduleRef.get(
-      EscrowCompletionTrackingRepository,
-    );
+    escrowCompletionRepository = moduleRef.get(EscrowCompletionRepository);
     web3ConfigService = moduleRef.get(Web3ConfigService);
 
     jest
@@ -164,35 +161,30 @@ describe('escrowCompletionTrackingService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createEscrowCompletionTracking', () => {
-    const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
-      {
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        status: EscrowCompletionTrackingStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      };
+  describe('createEscrowCompletion', () => {
+    const escrowCompletionEntity: Partial<EscrowCompletionEntity> = {
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      status: EscrowCompletionStatus.PENDING,
+      waitUntil: new Date(),
+      retriesCount: 0,
+    };
 
-    it('should successfully create escrow completion tracking with valid DTO', async () => {
+    it('should successfully create escrow completion with valid DTO', async () => {
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'createUnique')
-        .mockResolvedValue(
-          escrowCompletionTrackingEntity as EscrowCompletionTrackingEntity,
-        );
+        .spyOn(escrowCompletionRepository, 'createUnique')
+        .mockResolvedValue(escrowCompletionEntity as EscrowCompletionEntity);
 
-      await escrowCompletionTrackingService.createEscrowCompletionTracking(
+      await escrowCompletionService.createEscrowCompletion(
         ChainId.LOCALHOST,
         MOCK_ADDRESS,
       );
 
-      expect(
-        escrowCompletionTrackingRepository.createUnique,
-      ).toHaveBeenCalledWith(
+      expect(escrowCompletionRepository.createUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           chainId: ChainId.LOCALHOST,
           escrowAddress: MOCK_ADDRESS,
-          status: EscrowCompletionTrackingStatus.PENDING,
+          status: EscrowCompletionStatus.PENDING,
           retriesCount: 0,
           waitUntil: expect.any(Date),
         }),
@@ -200,49 +192,41 @@ describe('escrowCompletionTrackingService', () => {
     });
   });
 
-  describe('handleEscrowCompletionTrackingError', () => {
-    it('should set escrow completion tracking status to FAILED if retries exceed threshold', async () => {
-      const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
-        {
-          id: 1,
-          status: EscrowCompletionTrackingStatus.PENDING,
-          retriesCount: MOCK_MAX_RETRY_COUNT,
-        };
-      await (
-        escrowCompletionTrackingService as any
-      ).handleEscrowCompletionTrackingError(
-        escrowCompletionTrackingEntity,
+  describe('handleEscrowCompletionError', () => {
+    it('should set escrow completion status to FAILED if retries exceed threshold', async () => {
+      const escrowCompletionEntity: Partial<EscrowCompletionEntity> = {
+        id: 1,
+        status: EscrowCompletionStatus.PENDING,
+        retriesCount: MOCK_MAX_RETRY_COUNT,
+      };
+      await (escrowCompletionService as any).handleEscrowCompletionError(
+        escrowCompletionEntity,
         new Error('Sample error'),
       );
-      expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalled();
-      expect(escrowCompletionTrackingEntity.status).toBe(
-        EscrowCompletionTrackingStatus.FAILED,
-      );
+      expect(escrowCompletionRepository.updateOne).toHaveBeenCalled();
+      expect(escrowCompletionEntity.status).toBe(EscrowCompletionStatus.FAILED);
     });
 
     it('should increment retries count if below threshold and set waitUntil to a future date', async () => {
-      const escrowCompletionTrackingEntity: Partial<EscrowCompletionTrackingEntity> =
-        {
-          id: 1,
-          status: EscrowCompletionTrackingStatus.PENDING,
-          retriesCount: 0,
-          waitUntil: new Date(),
-        };
-      await (
-        escrowCompletionTrackingService as any
-      ).handleEscrowCompletionTrackingError(
-        escrowCompletionTrackingEntity,
+      const escrowCompletionEntity: Partial<EscrowCompletionEntity> = {
+        id: 1,
+        status: EscrowCompletionStatus.PENDING,
+        retriesCount: 0,
+        waitUntil: new Date(),
+      };
+      await (escrowCompletionService as any).handleEscrowCompletionError(
+        escrowCompletionEntity,
         new Error('Sample error'),
       );
-      expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalled();
-      expect(escrowCompletionTrackingEntity.status).toBe(
-        EscrowCompletionTrackingStatus.PENDING,
+      expect(escrowCompletionRepository.updateOne).toHaveBeenCalled();
+      expect(escrowCompletionEntity.status).toBe(
+        EscrowCompletionStatus.PENDING,
       );
-      expect(escrowCompletionTrackingEntity.retriesCount).toBe(1);
-      expect(escrowCompletionTrackingEntity.waitUntil).toBeInstanceOf(Date);
+      expect(escrowCompletionEntity.retriesCount).toBe(1);
+      expect(escrowCompletionEntity.waitUntil).toBeInstanceOf(Date);
 
       const now = new Date();
-      const waitUntil = escrowCompletionTrackingEntity.waitUntil as Date;
+      const waitUntil = escrowCompletionEntity.waitUntil as Date;
       expect(waitUntil).toBeInstanceOf(Date);
       expect(waitUntil.getTime()).toBeGreaterThan(now.getTime());
     });
@@ -252,17 +236,17 @@ describe('escrowCompletionTrackingService', () => {
     it('should save results and execute paypouts for all of the pending escrows completion', async () => {
       const mockEntity = {
         id: 1,
-        status: EscrowCompletionTrackingStatus.PENDING,
+        status: EscrowCompletionStatus.PENDING,
       };
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([mockEntity as any]);
 
       const updateOneMock = jest
-        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .spyOn(escrowCompletionRepository, 'updateOne')
         .mockResolvedValue(mockEntity as any);
 
-      await escrowCompletionTrackingService.processPendingEscrowCompletion();
+      await escrowCompletionService.processPendingEscrowCompletion();
 
       expect(updateOneMock).toHaveBeenCalled();
     });
@@ -270,40 +254,38 @@ describe('escrowCompletionTrackingService', () => {
     it('should handle errors and continue processing other entities', async () => {
       const mockEntity1 = {
         id: 1,
-        status: EscrowCompletionTrackingStatus.PENDING,
+        status: EscrowCompletionStatus.PENDING,
       };
       const mockEntity2 = {
         id: 2,
-        status: EscrowCompletionTrackingStatus.PENDING,
+        status: EscrowCompletionStatus.PENDING,
       };
 
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([mockEntity1 as any, mockEntity2 as any]);
 
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .spyOn(escrowCompletionRepository, 'updateOne')
         .mockImplementationOnce(() => {
           throw new Error('Test error');
         }) // Fails for mockEntity1
         .mockResolvedValue(mockEntity2 as any); // Succeeds for mockEntity2
 
       const handleErrorMock = jest.spyOn(
-        escrowCompletionTrackingService,
-        'handleEscrowCompletionTrackingError',
+        escrowCompletionService as any,
+        'handleEscrowCompletionError',
       );
 
-      await escrowCompletionTrackingService.processPendingEscrowCompletion();
+      await escrowCompletionService.processPendingEscrowCompletion();
 
       expect(handleErrorMock).toHaveBeenCalledWith(
         mockEntity1,
-        expect.stringContaining(
-          ErrorEscrowCompletionTracking.PendingProcessingFailed,
-        ),
+        expect.stringContaining(ErrorEscrowCompletion.PendingProcessingFailed),
       );
 
       // Ensure the second entity is processed successfully
-      expect(escrowCompletionTrackingRepository.updateOne).toHaveBeenCalledWith(
+      expect(escrowCompletionRepository.updateOne).toHaveBeenCalledWith(
         mockEntity2,
       );
     });
@@ -332,21 +314,21 @@ describe('escrowCompletionTrackingService', () => {
     });
 
     it('should assess reputation scores and create outgoing webhook for all of the paid escrows completion', async () => {
-      const mockEntity = { id: 1, status: EscrowCompletionTrackingStatus.PAID };
+      const mockEntity = { id: 1, status: EscrowCompletionStatus.PAID };
 
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([mockEntity as any]);
 
       const updateOneMock = jest
-        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .spyOn(escrowCompletionRepository, 'updateOne')
         .mockResolvedValue(mockEntity as any);
 
-      await escrowCompletionTrackingService.processPaidEscrowCompletion();
+      await escrowCompletionService.processPaidEscrowCompletion();
 
       expect(updateOneMock).toHaveBeenCalledWith({
         id: mockEntity.id,
-        status: EscrowCompletionTrackingStatus.COMPLETED,
+        status: EscrowCompletionStatus.COMPLETED,
       });
       expect(assessReputationScoresMock).toHaveBeenCalledTimes(1);
     });
@@ -354,39 +336,39 @@ describe('escrowCompletionTrackingService', () => {
     it('should handle errors during entity processing without skipping remaining entities', async () => {
       const mockEntity1 = {
         id: 1,
-        status: EscrowCompletionTrackingStatus.PAID,
+        status: EscrowCompletionStatus.PAID,
       };
       const mockEntity2 = {
         id: 2,
-        status: EscrowCompletionTrackingStatus.PAID,
+        status: EscrowCompletionStatus.PAID,
       };
 
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([mockEntity1 as any, mockEntity2 as any]);
 
       const updateOneMock = jest
-        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .spyOn(escrowCompletionRepository, 'updateOne')
         .mockImplementationOnce(() => {
           throw new Error('Test error');
         })
         .mockResolvedValueOnce(mockEntity2 as any);
 
-      await escrowCompletionTrackingService.processPaidEscrowCompletion();
+      await escrowCompletionService.processPaidEscrowCompletion();
 
       expect(updateOneMock).toHaveBeenCalledTimes(3);
       expect(assessReputationScoresMock).toHaveBeenCalledTimes(2);
     });
 
     it('should handle duplicate errors when creating outgoing webhooks and not update entity status', async () => {
-      const mockEntity = { id: 1, status: EscrowCompletionTrackingStatus.PAID };
+      const mockEntity = { id: 1, status: EscrowCompletionStatus.PAID };
 
       jest
-        .spyOn(escrowCompletionTrackingRepository, 'findByStatus')
+        .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([mockEntity as any]);
 
       const updateOneMock = jest
-        .spyOn(escrowCompletionTrackingRepository, 'updateOne')
+        .spyOn(escrowCompletionRepository, 'updateOne')
         .mockResolvedValue(mockEntity as any);
 
       createOutgoingWebhookMock = jest
@@ -398,12 +380,12 @@ describe('escrowCompletionTrackingService', () => {
           );
         });
 
-      await escrowCompletionTrackingService.processPaidEscrowCompletion();
+      await escrowCompletionService.processPaidEscrowCompletion();
 
       expect(createOutgoingWebhookMock).toHaveBeenCalled();
       expect(updateOneMock).not.toHaveBeenCalledWith({
         id: mockEntity.id,
-        status: EscrowCompletionTrackingStatus.COMPLETED,
+        status: EscrowCompletionStatus.COMPLETED,
       });
     });
   });
