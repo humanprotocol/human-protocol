@@ -19,12 +19,8 @@ contract EscrowFactoryV0 is OwnableUpgradeable, UUPSUpgradeable {
     address public staking;
     uint256 public minimumStake;
 
-    event Launched(address indexed token, address indexed escrow);
-    event LaunchedV2(
-        address indexed token,
-        address indexed escrow,
-        string jobRequesterId
-    );
+    event Launched(address token, address escrow);
+    event LaunchedV2(address token, address escrow, string jobRequesterId);
     event SetStakingAddress(address indexed stakingAddress);
     event SetMinumumStake(uint256 indexed minimumStake);
 
