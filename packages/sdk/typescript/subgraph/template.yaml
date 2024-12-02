@@ -21,9 +21,9 @@ dataSources:
         - name: EscrowFactory
           file: '{{{ EscrowFactory.abi }}}'
       eventHandlers:
-        - event: Launched(indexed address,indexed address)
+        - event: Launched(address,address)
           handler: handleLaunched
-        - event: LaunchedV2(indexed address,indexed address,string)
+        - event: LaunchedV2(address,address,string)
           handler: handleLaunchedV2
   - kind: ethereum
     name: HMToken
