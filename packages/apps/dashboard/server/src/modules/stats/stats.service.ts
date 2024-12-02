@@ -23,6 +23,8 @@ import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
 import { StorageService } from '../storage/storage.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { CronJob } from 'cron';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -34,13 +36,26 @@ export class StatsService implements OnModuleInit {
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly storageService: StorageService,
-  ) {}
+    private schedulerRegistry: SchedulerRegistry,
+  ) {
+    if (this.envConfigService.hCaptchaStatsEnabled) {
+      const job = new CronJob('*/15 * * * *', () => {
+        this.fetchTodayHcaptchaStats();
+      });
+
+      this.schedulerRegistry.addCronJob('fetchTodayHcaptchaStats', job);
+      job.start();
+    }
+  }
 
   async onModuleInit() {
     const isHistoricalDataFetched = await this.isHistoricalDataFetched();
     const isHmtGeneralStatsFetched = await this.isHmtGeneralStatsFetched();
     const isHmtDailyStatsFetched = await this.isHmtDailyStatsFetched();
-    if (!isHistoricalDataFetched) {
+    if (
+      this.envConfigService.hCaptchaStatsEnabled &&
+      !isHistoricalDataFetched
+    ) {
       await this.fetchHistoricalHcaptchaStats();
     }
     if (!isHmtGeneralStatsFetched) {
@@ -115,7 +130,6 @@ export class StatsService implements OnModuleInit {
     return !!data;
   }
 
-  @Cron('*/15 * * * *')
   async fetchTodayHcaptchaStats() {
     this.logger.log('Fetching hCaptcha stats for today.');
     const today = dayjs().format('YYYY-MM-DD');
