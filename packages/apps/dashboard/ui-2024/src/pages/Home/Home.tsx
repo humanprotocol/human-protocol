@@ -1,5 +1,5 @@
 import PageWrapper from '@components/PageWrapper';
-import Search from '@components/Search';
+import SearchBar from '@components/SearchBar/SearchBar';
 import ShadowIcon from '@components/ShadowIcon';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -30,7 +30,10 @@ const Home: React.FC = () => {
         >
           All HUMAN activity. In one place.
         </Typography>
-        <Search className="home-page-search" />
+        <SearchBar
+          className="home-page-search"
+          borderColor={colorPalette.secondary.main}
+        />
       </div>
       <div className="home-page-boxes">
         <div className="home-page-box">

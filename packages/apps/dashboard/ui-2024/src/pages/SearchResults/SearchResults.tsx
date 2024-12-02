@@ -8,7 +8,7 @@ import EscrowAddress from '@pages/SearchResults/EscrowAddress';
 import WalletAddress from '@pages/SearchResults/WalletAddress';
 import NothingFound from '@components/NothingFound';
 import Breadcrumbs from '@components/Breadcrumbs';
-import Search from '@components/Search';
+import SearchBar from '@components/SearchBar/SearchBar';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import Loader from '@components/Loader';
 import { getNetwork } from '@utils/config/networks';
@@ -22,6 +22,7 @@ import RoleDetails from '@pages/SearchResults/RoleDetails/RoleDetails';
 import { AxiosError } from 'axios';
 import { WalletIcon } from '@components/Icons/WalletIcon';
 import { EscrowAddressIcon } from '@components/Icons/EscrowAddressIcon';
+import { colorPalette } from '@assets/styles/color-palette';
 
 const renderCurrentResultType = (
   addressDetails: AddressDetails,
@@ -161,7 +162,10 @@ const SearchResults = () => {
   return (
     <PageWrapper displaySearchBar className="standard-background">
       <Breadcrumbs title="Search Results" />
-      <Search className="search-results-bar" />
+      <SearchBar
+        className="search-results-bar"
+        borderColor={colorPalette.secondary.main}
+      />
       {paramsStatus === 'loading' && <Loader />}
       {paramsStatus === 'error' && (
         <Stack sx={{ paddingTop: '2rem' }}>Something went wrong</Stack>

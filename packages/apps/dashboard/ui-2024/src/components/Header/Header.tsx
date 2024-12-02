@@ -7,12 +7,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import Search from '@components/Search';
+import SearchBar from '@components/SearchBar/SearchBar';
 import { env } from '@helpers/env';
 import { useNavigate } from 'react-router-dom';
 import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
 import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
-import TopSearchBar from '@components/Search/TopBarSearch';
+import { colorPalette } from '@assets/styles/color-palette';
 import CloseIcon from '@mui/icons-material/Close';
 
 const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
@@ -34,7 +34,12 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
       })}
     >
       {displaySearchBar && (
-        <Search displaySearchBar className="search-header-mobile" />
+        <SearchBar
+          displaySearchBar
+          className="search-header-mobile"
+          isTopBar
+          borderColor={colorPalette.secondary.main}
+        />
       )}
       <Link
         onClick={() => {
@@ -56,7 +61,7 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
       </Link>
 
       {displaySearchBar && (
-        <TopSearchBar displaySearchBar className="search-header" />
+        <SearchBar displaySearchBar className="search-header" />
       )}
 
       <div className="header-list-link">

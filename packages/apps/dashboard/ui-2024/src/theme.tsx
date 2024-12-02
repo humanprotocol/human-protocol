@@ -272,6 +272,15 @@ const theme: ThemeOptions = createTheme({
         },
       },
     },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#1406B207)',
+          },
+        },
+      },
+    },
   },
 });
 
