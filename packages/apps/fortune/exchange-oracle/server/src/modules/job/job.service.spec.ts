@@ -163,7 +163,7 @@ describe('JobService', () => {
       jest
         .spyOn(HMToken__factory, 'connect')
         .mockReturnValue(mockTokenContract);
-      jest.spyOn(mockTokenContract, 'symbol').mockReturnValue('hmt');
+      jest.spyOn(mockTokenContract, 'symbol').mockReturnValue('HMT');
     });
     const webhook: WebhookDto = {
       chainId,
@@ -183,7 +183,7 @@ describe('JobService', () => {
         escrowAddress: escrowAddress,
         manifestUrl: MOCK_MANIFEST_URL,
         reputationNetwork: reputationNetwork,
-        rewardToken: 'hmt',
+        rewardToken: 'HMT',
         status: JobStatus.ACTIVE,
       });
     });

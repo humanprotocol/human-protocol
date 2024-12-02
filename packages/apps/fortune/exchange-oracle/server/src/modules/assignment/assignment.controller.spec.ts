@@ -78,7 +78,7 @@ describe('assignmentController', () => {
       };
       jest
         .spyOn(assignmentService, 'createAssignment')
-        .mockResolvedValue({ id: 1, workerAddress: MOCK_ADDRESS, job: { rewardToken: 'hmt' } } as any);
+        .mockResolvedValue({ id: 1, workerAddress: MOCK_ADDRESS, job: { rewardToken: 'HMT' } } as any);
       await assignmentController.createAssignment(body, {
         user: { address: userAddress },
       } as RequestWithUser);

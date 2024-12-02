@@ -82,7 +82,7 @@ export class JobService {
     newJobEntity.escrowAddress = escrowAddress;
     newJobEntity.manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     newJobEntity.chainId = chainId;
-    newJobEntity.rewardToken = (await tokenContract.symbol()).toLowerCase();
+    newJobEntity.rewardToken = await tokenContract.symbol();
     newJobEntity.status = JobStatus.ACTIVE;
     newJobEntity.reputationNetwork = reputationOracleAddress;
     await this.jobRepository.createUnique(newJobEntity);
