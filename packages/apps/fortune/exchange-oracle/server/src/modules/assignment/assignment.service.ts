@@ -10,7 +10,6 @@ import {
 import { AssignmentEntity } from './assignment.entity';
 import { AssignmentRepository } from './assignment.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { TOKEN } from '../../common/constant';
 import { JobService } from '../job/job.service';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
@@ -138,7 +137,7 @@ export class AssignmentService {
           JobType.FORTUNE,
           entity.status,
           entity.rewardAmount,
-          TOKEN,
+          entity.job.rewardToken,
           entity.createdAt.toISOString(),
           entity.expiresAt.toISOString(),
           entity.updatedAt.toISOString(),
