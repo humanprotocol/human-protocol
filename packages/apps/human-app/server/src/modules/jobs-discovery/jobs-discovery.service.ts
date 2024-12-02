@@ -81,13 +81,27 @@ export class JobsDiscoveryService {
       });
   }
 
+  static makeCacheKeyForOracle(oracleAddress: string): string {
+    return `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`;
+  }
+
   async getCachedJobs(
     oracleAddress: string,
   ): Promise<JobsDiscoveryResponseItem[]> {
-    return (
-      (await this.cacheManager.get<JobsDiscoveryResponseItem[]>(
-        `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
-      )) || []
-    );
+    const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
+
+    const cachedJobs = await this.cacheManager.get<
+      JobsDiscoveryResponseItem[] | undefined
+    >(cacheKey);
+
+    return cachedJobs || [];
+  }
+
+  async setCachedJobs(
+    oracleAddress: string,
+    jobs: JobsDiscoveryResponseItem[],
+  ): Promise<void> {
+    const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
+    await this.cacheManager.set(cacheKey, jobs);
   }
 }

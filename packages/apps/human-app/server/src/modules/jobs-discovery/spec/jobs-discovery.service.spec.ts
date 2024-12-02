@@ -7,7 +7,6 @@ import {
   responseItemFixture1,
   responseItemFixture3,
 } from './jobs-discovery.fixtures';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('JobsDiscoveryService', () => {
   let service: JobsDiscoveryService;
@@ -28,7 +27,6 @@ describe('JobsDiscoveryService', () => {
       providers: [
         JobsDiscoveryService,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
-        { provide: CACHE_MANAGER, useValue: cacheManagerMock },
       ],
     }).compile();
 
