@@ -157,7 +157,7 @@ export class DetailsService {
 
     for (const id of chainIds) {
       const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-      console.log('leadersData', leadersData);
+
       for (const leaderData of leadersData) {
         const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
           excludeExtraneousValues: true,

@@ -32,13 +32,13 @@ export class LeaderDto {
   public role?: string;
 
   @ApiProperty({ example: '0.07007358932392' })
-  @Transform(({ value }) => value.toString())
+  @Transform(({ value }) => value?.toString())
   @IsString()
   @Expose()
   public amountStaked: string;
 
   @ApiProperty({ example: 'High' })
-  @Transform(({ value }) => value.toString())
+  @Transform(({ value }) => value?.toString())
   @IsString()
   @Expose()
   public reputation: string;
