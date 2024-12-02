@@ -52,12 +52,9 @@ export class StatsService implements OnModuleInit {
     const isHistoricalDataFetched = await this.isHistoricalDataFetched();
     const isHmtGeneralStatsFetched = await this.isHmtGeneralStatsFetched();
     const isHmtDailyStatsFetched = await this.isHmtDailyStatsFetched();
-    console.log(
-      'hCaptchaStatsEnabled',
-      this.envConfigService.hCaptchaStatsEnabled,
-    );
+
     if (
-      this.envConfigService.hCaptchaStatsEnabled &&
+      this.envConfigService.hCaptchaStatsEnabled === true &&
       !isHistoricalDataFetched
     ) {
       await this.fetchHistoricalHcaptchaStats();
