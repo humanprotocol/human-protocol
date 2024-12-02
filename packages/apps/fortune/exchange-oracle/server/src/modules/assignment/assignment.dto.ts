@@ -150,4 +150,7 @@ export class AssignJobResponseDto {
 
   @ApiProperty({ name: 'worker_address' })
   workerAddress: string;
+
+  @ApiProperty({ name: 'reward_token' })
+  rewardToken: string;
 }
