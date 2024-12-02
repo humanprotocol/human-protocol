@@ -56,8 +56,6 @@ export class JobService {
   ) {}
 
   public async createJob(webhook: WebhookDto): Promise<void> {
-    // TODO: Get token from escrow address
-
     const { chainId, escrowAddress } = webhook;
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       chainId,
