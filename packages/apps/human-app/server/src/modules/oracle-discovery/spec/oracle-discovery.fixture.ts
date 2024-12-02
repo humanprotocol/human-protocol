@@ -1,10 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResult,
+  OracleDiscovered,
 } from '../model/oracle-discovery.model';
 
-const response1: OracleDiscoveryResult = {
+const response1: OracleDiscovered = {
   address: '0xd06eac24a0c47c776Ce6826A93162c4AfC029047',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role1',
@@ -15,7 +15,7 @@ const response1: OracleDiscoveryResult = {
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
 };
-const response2: OracleDiscoveryResult = {
+const response2: OracleDiscovered = {
   address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role2',
@@ -25,7 +25,7 @@ const response2: OracleDiscoveryResult = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response3: OracleDiscoveryResult = {
+const response3: OracleDiscovered = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role3',
@@ -36,7 +36,7 @@ const response3: OracleDiscoveryResult = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response4: OracleDiscoveryResult = {
+const response4: OracleDiscovered = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.MOONBASE_ALPHA,
   role: 'role3',

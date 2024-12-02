@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional } from 'class-validator';
 import { Exclude, Transform } from 'class-transformer';
 
-export class OracleDiscoveryResult implements IOperator {
+export class OracleDiscovered implements IOperator {
   @ApiProperty({ description: 'Address of the oracle operator' })
   address: string;
 

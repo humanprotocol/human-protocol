@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResult,
+  OracleDiscovered,
 } from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -21,7 +21,7 @@ export class OracleDiscoveryService {
 
   async processOracleDiscovery(
     command: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryResult[]> {
+  ): Promise<OracleDiscovered[]> {
     const address = this.configService.reputationOracleAddress;
     const chainIds = this.configService.chainIdsEnabled;
 
@@ -38,7 +38,7 @@ export class OracleDiscoveryService {
       }),
     );
 
-    const oracles: OracleDiscoveryResult[] = [];
+    const oracles: OracleDiscovered[] = [];
     for (const oraclesForChainId of oraclesForChainIds) {
       for (const oracle of oraclesForChainId) {
         if (command.selectedJobTypes?.length) {
@@ -67,11 +67,11 @@ export class OracleDiscoveryService {
     chainId: ChainId,
     address: string,
     jobTypes: string[],
-  ): Promise<OracleDiscoveryResult[]> {
+  ): Promise<OracleDiscovered[]> {
     try {
-      const cachedOracles = await this.cacheManager.get<
-        OracleDiscoveryResult[]
-      >(chainId.toString());
+      const cachedOracles = await this.cacheManager.get<OracleDiscovered[]>(
+        chainId.toString(),
+      );
       if (cachedOracles) return cachedOracles;
 
       const operators = await OperatorUtils.getReputationNetworkOperators(
@@ -82,14 +82,14 @@ export class OracleDiscoveryService {
 
       const jobTypeSet = new Set(jobTypes.map((j) => j.toLowerCase()));
 
-      const oraclesWithRetryData: OracleDiscoveryResult[] = operators
+      const oraclesWithRetryData: OracleDiscovered[] = operators
         .filter(
           (operator) =>
             operator.url && this.hasJobTypes(operator.jobTypes, jobTypeSet),
         )
         .map(
           (operator) =>
-            new OracleDiscoveryResult(
+            new OracleDiscovered(
               operator.address,
               chainId,
               operator.role,

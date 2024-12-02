@@ -13,7 +13,7 @@ import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import {
   OracleDiscoveryCommand,
-  OracleDiscoveryResult,
+  OracleDiscovered,
 } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
@@ -84,7 +84,7 @@ export class CronJobService {
     this.logger.log('CRON END');
   }
 
-  async updateJobsListCache(oracle: OracleDiscoveryResult, token: string) {
+  async updateJobsListCache(oracle: OracleDiscovered, token: string) {
     try {
       let allResults: JobsDiscoveryResponseItem[] = [];
 
@@ -136,14 +136,14 @@ export class CronJobService {
   }
 
   private async updateOracleInCache(
-    oracleData: OracleDiscoveryResult,
-    updates: Partial<OracleDiscoveryResult>,
+    oracleData: OracleDiscovered,
+    updates: Partial<OracleDiscovered>,
   ) {
     const updatedOracle = { ...oracleData, ...updates };
 
     const chainId = oracleData.chainId?.toString();
     const cachedOracles =
-      await this.cacheManager.get<OracleDiscoveryResult[]>(chainId);
+      await this.cacheManager.get<OracleDiscovered[]>(chainId);
 
     if (cachedOracles) {
       const updatedOracles = cachedOracles.map((oracle) =>
@@ -157,7 +157,7 @@ export class CronJobService {
     }
   }
 
-  private async handleJobListError(oracleData: OracleDiscoveryResult) {
+  private async handleJobListError(oracleData: OracleDiscovered) {
     const retriesCount = oracleData.retriesCount || 0;
     const newExecutionsToSkip = Math.min(
       (oracleData.executionsToSkip || 0) + Math.pow(2, retriesCount),

@@ -7,7 +7,7 @@ import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
 import {
   OracleDiscoveryCommand,
   OracleDiscoveryDto,
-  OracleDiscoveryResult,
+  OracleDiscovered,
 } from '../model/oracle-discovery.model';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper.profile';
@@ -69,7 +69,7 @@ describe('OracleDiscoveryController', () => {
       const commandFixture = {
         selectedJobTypes: ['job-type-1', 'job-type-2'],
       } as OracleDiscoveryCommand;
-      const result: OracleDiscoveryResult[] =
+      const result: OracleDiscovered[] =
         await controller.getOracles(dtoFixture);
       const expectedResponse = generateOracleDiscoveryResponseBody();
       expect(serviceMock.processOracleDiscovery).toHaveBeenCalledWith(
