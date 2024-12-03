@@ -6,7 +6,6 @@ import { Test } from '@nestjs/testing';
 import {
   MOCK_ADDRESS,
   MOCK_BACKOFF_INTERVAL_SECONDS,
-  MOCK_MAX_RETRY_COUNT,
   MOCK_PRIVATE_KEY,
   MOCK_WEBHOOK_URL,
   mockConfig,

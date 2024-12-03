@@ -9,11 +9,7 @@ import {
   MOCK_PRIVATE_KEY,
   mockConfig,
 } from '../../../test/constants';
-import {
-  EscrowCompletionStatus,
-  EventType,
-  WebhookIncomingStatus,
-} from '../../common/enums/webhook';
+import { EventType, WebhookIncomingStatus } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
@@ -42,8 +38,7 @@ describe('WebhookIncomingService', () => {
   let webhookIncomingService: WebhookIncomingService,
     webhookIncomingRepository: WebhookIncomingRepository,
     web3ConfigService: Web3ConfigService,
-    escrowCompletionService: EscrowCompletionService,
-    escrowCompletionRepository: EscrowCompletionRepository;
+    escrowCompletionService: EscrowCompletionService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -117,7 +112,6 @@ describe('WebhookIncomingService', () => {
       WebhookIncomingService,
     );
     webhookIncomingRepository = moduleRef.get(WebhookIncomingRepository);
-    escrowCompletionRepository = moduleRef.get(EscrowCompletionRepository);
     escrowCompletionService = moduleRef.get<EscrowCompletionService>(
       EscrowCompletionService,
     );
