@@ -153,63 +153,60 @@ export class DetailsService {
       ? await this.networkConfig.getAvailableNetworks()
       : [chainId];
 
-    const leaders: { [role: string]: LeaderDto } = {};
-
+    let allLeadersData: any[] = [];
     for (const id of chainIds) {
-      let leadersData = await OperatorUtils.getLeaders({ chainId: id });
-      leadersData = leadersData.filter((leader) => leader.amountStaked > 0);
-
-      for (const leaderData of leadersData) {
-        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-          excludeExtraneousValues: true,
-        });
-        leaderDto.chainId = id;
-
-        const role = leaderDto.role;
-
-        if (Object.values(Role).includes(role)) {
-          if (
-            !leaders[role] ||
-            BigInt(leaderDto.amountStaked) > BigInt(leaders[role].amountStaked)
-          ) {
-            leaders[role] = leaderDto;
-          }
-        }
-      }
+      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
+      allLeadersData = allLeadersData.concat(
+        leadersData
+          .filter((leader) => leader.amountStaked > 0 && leader.role)
+          .map((leader) => ({ ...leader, chainId: id })),
+      );
     }
 
-    const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(Object.values(leaders), reputations);
+    const leaders = allLeadersData
+      .sort((a, b) => (a.amountStaked >= b.amountStaked ? 1 : -1))
+      .slice(0, 4)
+      .map((leader) =>
+        plainToInstance(LeaderDto, leader, {
+          excludeExtraneousValues: true,
+        }),
+      );
 
-    return Object.values(leaders);
+    for (const id of chainIds) {
+      const reputations = await this.fetchReputations(id);
+      this.assignReputationsToLeaders(Object.values(leaders), reputations, id);
+    }
+
+    return leaders;
   }
 
-  public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
+  public async getAllLeadersByChainId(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
       ? await this.networkConfig.getAvailableNetworks()
       : [chainId];
 
-    const allLeaders: LeaderDto[] = [];
-
+    let allLeadersData: any[] = [];
     for (const id of chainIds) {
       const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-
-      for (const leaderData of leadersData) {
-        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-          excludeExtraneousValues: true,
-        });
-        leaderDto.chainId = id;
-
-        if (leaderDto.role) {
-          allLeaders.push(leaderDto);
-        }
-      }
+      allLeadersData = allLeadersData.concat(
+        leadersData
+          .filter((leader) => leader.amountStaked > 0 && leader.role)
+          .map((leader) => ({ ...leader, chainId: id })),
+      );
     }
 
-    const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(allLeaders, reputations);
+    const leaders = allLeadersData.map((leader) =>
+      plainToInstance(LeaderDto, leader, {
+        excludeExtraneousValues: true,
+      }),
+    );
 
-    return allLeaders;
+    for (const id of chainIds) {
+      const reputations = await this.fetchReputations(id);
+      this.assignReputationsToLeaders(Object.values(leaders), reputations, id);
+    }
+
+    return leaders;
   }
 
   private async fetchReputation(
@@ -234,21 +231,21 @@ export class DetailsService {
     }
   }
 
-  private async fetchReputations(): Promise<
-    { address: string; reputation: string }[]
-  > {
+  private async fetchReputations(
+    chainId: ChainId,
+  ): Promise<{ address: string; reputation: string }[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
           this.configService.reputationSource + '/reputation',
           {
             params: {
-              chain_id: ChainId.POLYGON,
+              chain_id: chainId,
               roles: [
-                'JOB_LAUNCHER',
-                'EXCHANGE_ORACLE',
-                'RECORDING_ORACLE',
-                'REPUTATION_ORACLE',
+                'job_launcher',
+                'exchange_oracle',
+                'recording_oracle',
+                'reputation_oracle',
               ],
             },
           },
@@ -256,7 +253,10 @@ export class DetailsService {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Error fetching reputations:', error);
+      this.logger.error(
+        `Error fetching reputations for chain id ${chainId}`,
+        error,
+      );
       return [];
     }
   }
@@ -264,15 +264,19 @@ export class DetailsService {
   private assignReputationsToLeaders(
     leaders: LeaderDto[],
     reputations: { address: string; reputation: string }[],
+    chainId: ChainId,
   ) {
     const reputationMap = new Map(
       reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
     );
-    leaders.forEach((leader) => {
-      const reputation = reputationMap.get(leader.address.toLowerCase());
-      if (reputation) {
-        leader.reputation = reputation;
-      }
-    });
+
+    leaders
+      .filter((leader) => leader.chainId === chainId)
+      .forEach((leader) => {
+        const reputation = reputationMap.get(leader.address.toLowerCase());
+        if (reputation) {
+          leader.reputation = reputation;
+        }
+      });
   }
 }

@@ -67,7 +67,7 @@ export class DetailsController {
   public async allLeaders(
     @Query('chainId') chainId?: ChainId,
   ): Promise<LeaderDto[]> {
-    return this.detailsService.getAllLeaders(chainId);
+    return this.detailsService.getAllLeadersByChainId(chainId);
   }
 
   @Get('/:address')
