@@ -70,7 +70,25 @@ export const RoleDetailsEscrowsTable = ({
             count={9999}
             sx={{
               '& .MuiTablePagination-toolbar': {
-                paddingLeft: 0,
+                '@media (max-width: 440px)': {
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '8px',
+                },
+              },
+              '& .MuiTablePagination-selectLabel, & .MuiTablePagination-input':
+                {
+                  '@media (max-width: 440px)': {
+                    marginBottom: 0,
+                  },
+                },
+              '& .MuiTablePagination-actions': {
+                '@media (max-width: 440px)': {
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginLeft: 0,
+                },
               },
             }}
             // onPageChange is required as props
