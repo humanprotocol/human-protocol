@@ -212,7 +212,7 @@ const theme: ThemeOptions = createTheme({
     MuiToolbar: {
       styleOverrides: {
         root: {
-          '@media (min-width:1001px)': {
+          '@media (min-width:1280px)': {
             paddingX: 56,
           },
         },
