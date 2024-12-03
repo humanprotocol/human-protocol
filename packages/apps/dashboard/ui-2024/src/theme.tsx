@@ -281,6 +281,53 @@ const theme: ThemeOptions = createTheme({
         },
       },
     },
+    MuiTablePagination: {
+      styleOverrides: {
+        toolbar: {
+          '@media (max-width: 440px)': {
+            display: 'grid',
+            gridTemplateColumns: '1fr 3fr 2fr',
+            gridTemplateRows: 'auto auto',
+            gap: '8px',
+            gridAutoFlow: 'row',
+            rowGap: '12px',
+          },
+        },
+        selectLabel: {
+          '@media (max-width: 440px)': {
+            gridColumn: '2 / 3',
+            gridRow: '1',
+            whiteSpace: 'nowrap',
+            color: colorPalette.fog.main,
+            justifySelf: 'end',
+            marginBottom: `15px`,
+          },
+        },
+        input: {
+          '@media (max-width: 440px)': {
+            gridColumn: '3 / 3',
+            gridRow: '1',
+            marginRight: '8px',
+          },
+        },
+        displayedRows: {
+          '@media (max-width: 440px)': {
+            gridColumn: '2 / 3',
+            gridRow: '2',
+            justifySelf: 'end',
+          },
+        },
+        actions: {
+          '@media (max-width: 440px)': {
+            gridColumn: '3 / 3',
+            gridRow: '2',
+            justifySelf: 'end',
+            marginLeft: 0,
+            minWidth: '80px',
+          },
+        },
+      },
+    },
   },
 });
 
