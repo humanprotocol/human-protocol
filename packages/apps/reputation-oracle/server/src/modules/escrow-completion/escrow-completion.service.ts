@@ -159,6 +159,7 @@ export class EscrowCompletionService {
         const escrowClient = await EscrowClient.build(signer);
 
         const escrowStatus = await escrowClient.getStatus(escrowAddress);
+
         if (escrowStatus === EscrowStatus.Paid) {
           await escrowClient.complete(escrowAddress, {
             gasPrice: await this.web3Service.calculateGasPrice(chainId),
