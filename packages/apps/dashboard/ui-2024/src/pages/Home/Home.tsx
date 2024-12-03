@@ -30,10 +30,7 @@ const Home: React.FC = () => {
         >
           All HUMAN activity. In one place.
         </Typography>
-        <SearchBar
-          className="home-page-search"
-          borderColor={colorPalette.secondary.main}
-        />
+        <SearchBar className="home-page-search" />
       </div>
       <div className="home-page-boxes">
         <div className="home-page-box">

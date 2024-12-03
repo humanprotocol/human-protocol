@@ -32,14 +32,12 @@ interface SearchBarProps {
   className?: string;
   displaySearchBar?: boolean;
   isTopBar?: boolean;
-  borderColor?: string;
   initialInputValue?: string;
 }
 
 const SearchBar: FC<SearchBarProps> = ({
   className = '',
   displaySearchBar,
-  borderColor = colorPalette.skyOpacity,
   initialInputValue = '',
   isTopBar = false,
 }) => {
@@ -47,13 +45,13 @@ const SearchBar: FC<SearchBarProps> = ({
   const [inputValue, setInputValue] = useState<string>(initialInputValue);
   const [selectValue, setSelectValue] = useState<number | null>(null);
   const [focus, setFocus] = useState<boolean>(false);
-  const { filterParams, setAddress } = useWalletSearch();
+  const { filterParams, setAddress, setChainId } = useWalletSearch();
   const navigate = useNavigate();
 
   const navigateToAddress = useCallback(
     (chainIdParam?: number | undefined) => {
       const chainId = chainIdParam || filterParams.chainId || -1;
-      const address = (isTopBar ? filterParams.address : inputValue) || '0x0';
+      const address = (isTopBar ? filterParams.address : inputValue) || '';
       navigate(`/search/${chainId}/${address}`);
     },
     [filterParams.address, filterParams.chainId, inputValue, isTopBar, navigate]
@@ -80,12 +78,20 @@ const SearchBar: FC<SearchBarProps> = ({
 
   const handleSelectChange = (event: SelectChangeEvent<number | null>) => {
     const chainId = Number(event.target.value);
-    navigateToAddress(chainId);
+    if (inputValue && !!inputValue.length) {
+      navigateToAddress(chainId);
+    } else if (!inputValue.length && filterParams.address) {
+      setInputValue(filterParams.address);
+      setChainId(chainId);
+    } else {
+      setChainId(chainId);
+    }
   };
 
   const handleClearClick = () => {
     setInputValue('');
     setAddress('');
+    navigate('/');
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -93,7 +99,9 @@ const SearchBar: FC<SearchBarProps> = ({
     if (!isTopBar) {
       setAddress(inputValue);
     }
-    navigateToAddress();
+    if (inputValue && !!inputValue.length) {
+      navigateToAddress();
+    }
   };
 
   const renderEmptyValue = (
@@ -130,7 +138,9 @@ const SearchBar: FC<SearchBarProps> = ({
         fullWidth
         sx={muiTextFieldSx(mobile)}
         InputProps={{
-          sx: muiTextFieldInputPropsSx(borderColor),
+          sx: muiTextFieldInputPropsSx(
+            focus ? colorPalette.secondary.main : colorPalette.skyOpacity
+          ),
           startAdornment: (
             <InputAdornment
               position="start"
@@ -175,6 +185,7 @@ const SearchBar: FC<SearchBarProps> = ({
                 className="search-button"
                 type="submit"
                 aria-label="search"
+                disabled={!inputValue.length}
                 sx={{
                   [mobile.mediaQuery]: {
                     padding: '4px',

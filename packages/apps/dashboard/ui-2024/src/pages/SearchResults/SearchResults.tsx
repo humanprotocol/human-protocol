@@ -22,7 +22,6 @@ import RoleDetails from '@pages/SearchResults/RoleDetails/RoleDetails';
 import { AxiosError } from 'axios';
 import { WalletIcon } from '@components/Icons/WalletIcon';
 import { EscrowAddressIcon } from '@components/Icons/EscrowAddressIcon';
-import { colorPalette } from '@assets/styles/color-palette';
 
 const renderCurrentResultType = (
   addressDetails: AddressDetails,
@@ -162,10 +161,7 @@ const SearchResults = () => {
   return (
     <PageWrapper displaySearchBar className="standard-background">
       <Breadcrumbs title="Search Results" />
-      <SearchBar
-        className="search-results-bar"
-        borderColor={colorPalette.secondary.main}
-      />
+      <SearchBar className="search-results-bar" />
       {paramsStatus === 'loading' && <Loader height="auto" paddingTop="2rem" />}
       {paramsStatus === 'error' && (
         <Stack sx={{ paddingTop: '2rem' }}>Something went wrong</Stack>

@@ -12,7 +12,6 @@ import { env } from '@helpers/env';
 import { useNavigate } from 'react-router-dom';
 import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
 import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
-import { colorPalette } from '@assets/styles/color-palette';
 import CloseIcon from '@mui/icons-material/Close';
 
 const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
@@ -34,12 +33,7 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
       })}
     >
       {displaySearchBar && (
-        <SearchBar
-          displaySearchBar
-          className="search-header-mobile"
-          isTopBar
-          borderColor={colorPalette.secondary.main}
-        />
+        <SearchBar displaySearchBar className="search-header-mobile" isTopBar />
       )}
       <Link
         onClick={() => {
