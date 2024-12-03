@@ -156,7 +156,8 @@ export class DetailsService {
     const leaders: { [role: string]: LeaderDto } = {};
 
     for (const id of chainIds) {
-      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
+      let leadersData = await OperatorUtils.getLeaders({ chainId: id });
+      leadersData = leadersData.filter((leader) => leader.amountStaked > 0);
 
       for (const leaderData of leadersData) {
         const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
