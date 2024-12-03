@@ -128,74 +128,6 @@ describe('WebhookOutgoingService', () => {
     });
   });
 
-  describe('handleWebhookOutgoingError', () => {
-    let webhookEntity: Partial<WebhookOutgoingEntity>;
-
-    beforeEach(() => {
-      webhookEntity = {
-        id: 1,
-        status: WebhookOutgoingStatus.PENDING,
-        retriesCount: 0,
-      };
-    });
-
-    it('should set outgoing webhook status to FAILED if retries exceed threshold', async () => {
-      webhookEntity.retriesCount = MOCK_MAX_RETRY_COUNT;
-      await (webhookOutgoingService as any).handleWebhookOutgoingError(
-        webhookEntity,
-        new Error('Sample error'),
-      );
-      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: webhookEntity.id,
-          status: WebhookOutgoingStatus.FAILED,
-        }),
-      );
-      expect(webhookEntity.status).toBe(WebhookOutgoingStatus.FAILED);
-    });
-
-    it('should increment retries count and set waitUntil if retries are below threshold', async () => {
-      webhookEntity.retriesCount = 0;
-      await (webhookOutgoingService as any).handleWebhookOutgoingError(
-        webhookEntity,
-        new Error('Sample error'),
-      );
-      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: webhookEntity.id,
-          status: WebhookOutgoingStatus.PENDING,
-          retriesCount: 1,
-        }),
-      );
-      expect(webhookEntity.status).toBe(WebhookOutgoingStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
-    });
-
-    it('should throw an error if the update operation fails', async () => {
-      jest
-        .spyOn(webhookOutgoingRepository, 'updateOne')
-        .mockRejectedValue(new Error('Database error'));
-      await expect(
-        (webhookOutgoingService as any).handleWebhookOutgoingError(
-          webhookEntity,
-          new Error('Sample error'),
-        ),
-      ).rejects.toThrow('Database error');
-    });
-
-    it('should handle webhook outgoing error gracefully when retries count is zero', async () => {
-      webhookEntity.retriesCount = 0;
-      await (webhookOutgoingService as any).handleWebhookOutgoingError(
-        webhookEntity,
-        new Error('Network failure'),
-      );
-      expect(webhookEntity.status).toBe(WebhookOutgoingStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
-    });
-  });
-
   describe('sendWebhook', () => {
     const payload = {
       chainId: ChainId.LOCALHOST,
@@ -293,25 +225,58 @@ describe('WebhookOutgoingService', () => {
       jest.restoreAllMocks();
     });
 
-    it('should increase retriesCount by 1 if sending webhook fails', async () => {
-      sendWebhookMock.mockRejectedValueOnce(new Error());
+    it('should mark the webhook as SENT when sending webhook succeeds', async () => {
+      sendWebhookMock.mockResolvedValueOnce(undefined);
+
       await webhookOutgoingService.processPendingOutgoingWebhooks();
 
-      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity1.status).toBe(WebhookOutgoingStatus.PENDING);
+      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: webhookEntity1.id,
+          status: WebhookOutgoingStatus.SENT,
+        }),
+      );
+      expect(webhookEntity1.status).toBe(WebhookOutgoingStatus.SENT);
+    });
+
+    it('should increment retriesCount and set waitUntil when sending webhook fails', async () => {
+      sendWebhookMock.mockRejectedValueOnce(new Error('Network error'));
+
+      await webhookOutgoingService.processPendingOutgoingWebhooks();
+
+      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: webhookEntity1.id,
+          retriesCount: 1,
+          waitUntil: expect.any(Date),
+          status: WebhookOutgoingStatus.PENDING,
+        }),
+      );
       expect(webhookEntity1.retriesCount).toBe(1);
       expect(webhookEntity1.waitUntil).toBeInstanceOf(Date);
     });
 
-    it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
-      sendWebhookMock.mockRejectedValueOnce(new Error());
+    it('should mark webhook as FAILED if retry count exceeds threshold', async () => {
+      const error = new Error('Random Error');
+      const loggerErrorSpy = jest.spyOn(
+        webhookOutgoingService['logger'],
+        'error',
+      );
+
+      sendWebhookMock.mockRejectedValueOnce(error);
 
       webhookEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
 
       await webhookOutgoingService.processPendingOutgoingWebhooks();
 
-      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity1.status).toBe(WebhookOutgoingStatus.FAILED);
+      expect(webhookOutgoingRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: WebhookOutgoingStatus.FAILED,
+        }),
+      );
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining(`Message: ${error.message}`),
+      );
     });
   });
 });

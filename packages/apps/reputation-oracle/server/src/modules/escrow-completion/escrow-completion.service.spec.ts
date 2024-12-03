@@ -192,46 +192,6 @@ describe('escrowCompletionService', () => {
     });
   });
 
-  describe('handleEscrowCompletionError', () => {
-    it('should set escrow completion status to FAILED if retries exceed threshold', async () => {
-      const escrowCompletionEntity: Partial<EscrowCompletionEntity> = {
-        id: 1,
-        status: EscrowCompletionStatus.PENDING,
-        retriesCount: MOCK_MAX_RETRY_COUNT,
-      };
-      await (escrowCompletionService as any).handleEscrowCompletionError(
-        escrowCompletionEntity,
-        new Error('Sample error'),
-      );
-      expect(escrowCompletionRepository.updateOne).toHaveBeenCalled();
-      expect(escrowCompletionEntity.status).toBe(EscrowCompletionStatus.FAILED);
-    });
-
-    it('should increment retries count if below threshold and set waitUntil to a future date', async () => {
-      const escrowCompletionEntity: Partial<EscrowCompletionEntity> = {
-        id: 1,
-        status: EscrowCompletionStatus.PENDING,
-        retriesCount: 0,
-        waitUntil: new Date(),
-      };
-      await (escrowCompletionService as any).handleEscrowCompletionError(
-        escrowCompletionEntity,
-        new Error('Sample error'),
-      );
-      expect(escrowCompletionRepository.updateOne).toHaveBeenCalled();
-      expect(escrowCompletionEntity.status).toBe(
-        EscrowCompletionStatus.PENDING,
-      );
-      expect(escrowCompletionEntity.retriesCount).toBe(1);
-      expect(escrowCompletionEntity.waitUntil).toBeInstanceOf(Date);
-
-      const now = new Date();
-      const waitUntil = escrowCompletionEntity.waitUntil as Date;
-      expect(waitUntil).toBeInstanceOf(Date);
-      expect(waitUntil.getTime()).toBeGreaterThan(now.getTime());
-    });
-  });
-
   describe('processPendingEscrowCompletion', () => {
     it('should save results and execute paypouts for all of the pending escrows completion', async () => {
       const mockEntity = {

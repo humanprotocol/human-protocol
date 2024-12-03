@@ -181,81 +181,6 @@ describe('WebhookIncomingService', () => {
     });
   });
 
-  describe('handleWebhookIncomingError', () => {
-    let webhookEntity: Partial<WebhookIncomingEntity>;
-
-    beforeEach(() => {
-      webhookEntity = {
-        id: 1,
-        status: WebhookIncomingStatus.PENDING,
-        retriesCount: 0,
-      };
-    });
-
-    it('should set incoming webhook status to FAILED if retries exceed threshold', async () => {
-      webhookEntity.retriesCount = MOCK_MAX_RETRY_COUNT;
-
-      await (webhookIncomingService as any).handleWebhookIncomingError(
-        webhookEntity,
-        new Error('Sample error'),
-      );
-
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: webhookEntity.id,
-          status: WebhookIncomingStatus.FAILED,
-        }),
-      );
-      expect(webhookEntity.status).toBe(WebhookIncomingStatus.FAILED);
-    });
-
-    it('should increment retries count if below threshold', async () => {
-      webhookEntity.retriesCount = 0;
-
-      await (webhookIncomingService as any).handleWebhookIncomingError(
-        webhookEntity,
-        new Error('Sample error'),
-      );
-
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: webhookEntity.id,
-          status: WebhookIncomingStatus.PENDING,
-          retriesCount: 1,
-        }),
-      );
-      expect(webhookEntity.status).toBe(WebhookIncomingStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
-    });
-
-    it('should throw an error if the update operation fails', async () => {
-      jest
-        .spyOn(webhookIncomingRepository, 'updateOne')
-        .mockRejectedValue(new Error('Database error'));
-
-      await expect(
-        (webhookIncomingService as any).handleWebhookIncomingError(
-          webhookEntity,
-          new Error('Sample error'),
-        ),
-      ).rejects.toThrow('Database error');
-    });
-
-    it('should handle webhook error gracefully when retries count is zero', async () => {
-      webhookEntity.retriesCount = 0;
-
-      await (webhookIncomingService as any).handleWebhookIncomingError(
-        webhookEntity,
-        new Error('Network failure'),
-      );
-
-      expect(webhookEntity.status).toBe(WebhookIncomingStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
-    });
-  });
-
   describe('processPendingIncomingWebhooks', () => {
     let createEscrowCompletionMock: any;
     let webhookEntity1: Partial<WebhookIncomingEntity>,
@@ -295,7 +220,7 @@ describe('WebhookIncomingService', () => {
       jest.restoreAllMocks();
     });
 
-    it('should send webhook for all of the pending incoming webhooks', async () => {
+    it('should process pending incoming webhooks and mark them as COMPLETED', async () => {
       await webhookIncomingService.processPendingIncomingWebhooks();
 
       expect(createEscrowCompletionMock).toHaveBeenCalledTimes(2);
@@ -313,54 +238,59 @@ describe('WebhookIncomingService', () => {
       expect(webhookEntity2.status).toBe(WebhookIncomingStatus.COMPLETED);
     });
 
-    it('should increase retriesCount by 1 if sending webhook fails', async () => {
-      createEscrowCompletionMock.mockRejectedValueOnce(new Error());
+    it('should retry the webhook if processing fails and retries are below threshold', async () => {
+      createEscrowCompletionMock.mockRejectedValueOnce(
+        new Error('Processing error'),
+      );
+
       await webhookIncomingService.processPendingIncomingWebhooks();
 
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity1.status).toBe(WebhookIncomingStatus.PENDING);
-      expect(webhookEntity1.retriesCount).toBe(1);
-      expect(webhookEntity1.waitUntil).toBeInstanceOf(Date);
+      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: WebhookIncomingStatus.PENDING,
+          retriesCount: 1,
+        }),
+      );
     });
 
-    it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
-      createEscrowCompletionMock.mockRejectedValueOnce(new Error());
+    it('should mark the webhook as FAILED if retries exceed the threshold', async () => {
+      const error = new Error('Processing error');
+      const loggerErrorSpy = jest.spyOn(
+        webhookIncomingService['logger'],
+        'error',
+      );
 
       webhookEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
+      createEscrowCompletionMock.mockRejectedValueOnce(error);
 
       await webhookIncomingService.processPendingIncomingWebhooks();
 
-      expect(webhookIncomingRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity1.status).toBe(WebhookIncomingStatus.FAILED);
+      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: WebhookIncomingStatus.FAILED,
+          retriesCount: MOCK_MAX_RETRY_COUNT,
+        }),
+      );
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining(`Message: ${error.message}`),
+      );
     });
 
-    it('should handle duplicate errors when creating escrow completion and not update entity status', async () => {
-      const mockEntity = { id: 1, status: EscrowCompletionStatus.PAID };
-
-      jest
-        .spyOn(escrowCompletionRepository, 'findByStatus')
-        .mockResolvedValue([mockEntity as any]);
-
-      const updateOneMock = jest
-        .spyOn(escrowCompletionRepository, 'updateOne')
-        .mockResolvedValue(mockEntity as any);
-
-      const createEscrowCompletionMock = jest
-        .spyOn(escrowCompletionService, 'createEscrowCompletion')
-        .mockImplementation(() => {
-          throw new DatabaseError(
-            'Duplicate entry error',
-            PostgresErrorCodes.Duplicated,
-          );
-        });
+    it('should handle duplicated errors and mark the webhook as COMPLETED', async () => {
+      createEscrowCompletionMock.mockImplementationOnce(() => {
+        throw new DatabaseError(
+          'Duplicate entry',
+          PostgresErrorCodes.Duplicated,
+        );
+      });
 
       await webhookIncomingService.processPendingIncomingWebhooks();
 
-      expect(createEscrowCompletionMock).toHaveBeenCalled();
-      expect(updateOneMock).not.toHaveBeenCalledWith({
-        id: mockEntity.id,
-        status: EscrowCompletionStatus.COMPLETED,
-      });
+      expect(webhookIncomingRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: WebhookIncomingStatus.COMPLETED,
+        }),
+      );
     });
   });
 });
