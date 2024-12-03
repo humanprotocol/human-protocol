@@ -8,8 +8,6 @@ import {
   leaderboardSearchSelectConfig,
   useLeaderboardSearch,
 } from '@utils/hooks/use-leaderboard-search';
-// import { NetworkIcon } from '@components/NetworkIcon';
-// import { Box } from '@mui/material';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { NetworkIcon } from '@components/NetworkIcon';
 

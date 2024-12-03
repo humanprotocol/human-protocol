@@ -47,7 +47,7 @@ const SearchBar: FC<SearchBarProps> = ({
   const [inputValue, setInputValue] = useState<string>(initialInputValue);
   const [selectValue, setSelectValue] = useState<string>('');
   const [focus, setFocus] = useState<boolean>(false);
-  const { filterParams, setAddress } = useWalletSearch();
+  const { filterParams, setAddress, setChainId } = useWalletSearch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,29 +61,24 @@ const SearchBar: FC<SearchBarProps> = ({
     setInputValue(filterParams.address);
   }, [filterParams.address]);
 
-  useEffect(() => {
-    if (initialInputValue) {
-      setInputValue(initialInputValue);
-    }
-  }, [initialInputValue]);
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+    if (isTopBar) {
+      setAddress(event.target.value);
+    } else {
+      setInputValue(event.target.value);
+    }
   };
 
   const handleSelectChange = (event: SelectChangeEvent<string>) => {
     const chainId = Number(event.target.value);
+    setChainId(chainId);
     const networkName = getNetwork(chainId)?.name || '';
     setSelectValue(networkName);
   };
 
-  const handleClear = () => {
-    setAddress('');
-  };
-
   const handleClearClick = () => {
     setInputValue('');
-    handleClear();
+    setAddress('');
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -91,10 +86,23 @@ const SearchBar: FC<SearchBarProps> = ({
     if (!isTopBar) {
       setAddress(inputValue);
     }
-    navigate(
-      `/search/${filterParams.chainId || -1}/${isTopBar ? filterParams.address : inputValue || '0x0'}`
-    );
+    const chainId = filterParams.chainId || -1;
+    const address = (isTopBar ? filterParams.address : inputValue) || '0x0';
+    navigate(`/search/${chainId}/${address}`);
   };
+
+  const renderEmptyValue = (
+    <span style={{ color: colorPalette.sky.main }}>Network</span>
+  );
+
+  const renderSelectedValue = (
+    <Grid sx={gridSx}>
+      <NetworkIcon
+        chainId={networks.find((n) => n.name === selectValue)?.id || -1}
+      />
+      <div>{mobile.isMobile ? null : selectValue}</div>
+    </Grid>
+  );
 
   return (
     <form
@@ -124,24 +132,8 @@ const SearchBar: FC<SearchBarProps> = ({
                 displayEmpty
                 sx={muiSelectSx(isTopBar, mobile)}
                 onChange={handleSelectChange}
-                renderValue={
-                  selectValue === ''
-                    ? () => (
-                        <span style={{ color: colorPalette.sky.main }}>
-                          Network
-                        </span>
-                      )
-                    : () => (
-                        <Grid sx={gridSx}>
-                          <NetworkIcon
-                            chainId={
-                              networks.find((n) => n.name === selectValue)
-                                ?.id || -1
-                            }
-                          />
-                          <div>{mobile.isMobile ? null : selectValue}</div>
-                        </Grid>
-                      )
+                renderValue={() =>
+                  selectValue === '' ? renderEmptyValue : renderSelectedValue
                 }
               >
                 {networks.map((network) => (
