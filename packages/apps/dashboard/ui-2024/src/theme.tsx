@@ -288,7 +288,6 @@ const theme: ThemeOptions = createTheme({
             display: 'grid',
             gridTemplateColumns: '1fr 3fr 2fr',
             gridTemplateRows: 'auto auto',
-            gap: '8px',
             gridAutoFlow: 'row',
             rowGap: '12px',
           },
@@ -300,7 +299,9 @@ const theme: ThemeOptions = createTheme({
             whiteSpace: 'nowrap',
             color: colorPalette.fog.main,
             justifySelf: 'end',
-            marginBottom: `15px`,
+            marginBottom: `17px`,
+            position: 'relative',
+            right: '-38px',
           },
         },
         input: {
@@ -314,7 +315,7 @@ const theme: ThemeOptions = createTheme({
           '@media (max-width: 440px)': {
             gridColumn: '2 / 3',
             gridRow: '2',
-            justifySelf: 'end',
+            justifySelf: 'center',
           },
         },
         actions: {
@@ -323,7 +324,10 @@ const theme: ThemeOptions = createTheme({
             gridRow: '2',
             justifySelf: 'end',
             marginLeft: 0,
-            minWidth: '80px',
+            minWidth: '100px',
+          },
+          button: {
+            marginLeft: '10px',
           },
         },
       },
