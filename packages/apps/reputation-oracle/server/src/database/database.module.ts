@@ -22,6 +22,8 @@ import { UserQualificationEntity } from '../modules/qualification/user-qualifica
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionTrackingEntity } from 'src/modules/escrow-completion-tracking/escrow-completion-tracking.entity';
+import { NDAEntity } from '../modules/nda/nda.entity';
+import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { EscrowCompletionTrackingEntity } from 'src/modules/escrow-completion-tr
             SiteKeyEntity,
             QualificationEntity,
             UserQualificationEntity,
+            NDAEntity,
+            NDAVersionEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,

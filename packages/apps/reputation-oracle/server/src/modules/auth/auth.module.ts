@@ -14,6 +14,7 @@ import { UserRepository } from '../user/user.repository';
 import { Web3Module } from '../web3/web3.module';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
+import { NDAModule } from '../nda/nda.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
     SendGridModule,
     Web3Module,
     HCaptchaModule,
+    NDAModule,
   ],
   providers: [JwtHttpStrategy, AuthService, TokenRepository, UserRepository],
   controllers: [AuthJwtController],

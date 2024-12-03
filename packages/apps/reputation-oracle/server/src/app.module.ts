@@ -20,6 +20,7 @@ import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { NDAModule } from './modules/nda/nda.module';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionTrackingModule } from './modules/escrow-completion-tracking/escrow-completion-tracking.module';
 
@@ -66,6 +67,7 @@ import { EscrowCompletionTrackingModule } from './modules/escrow-completion-trac
     HCaptchaModule,
     QualificationModule,
     EscrowCompletionTrackingModule,
+    NDAModule,
   ],
   controllers: [AppController],
 })

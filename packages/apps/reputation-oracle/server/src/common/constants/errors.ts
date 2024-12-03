@@ -160,3 +160,10 @@ export enum ErrorQualification {
   AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
   CannotDeleteAssignedQualification = 'Cannot delete qualification because it is assigned to users',
 }
+
+/**
+ * Represents error messages related to NDA.
+ */
+export enum ErrorNda {
+  NotFound = 'NDA version not found',
+}
