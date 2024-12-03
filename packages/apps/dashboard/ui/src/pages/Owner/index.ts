@@ -1,1 +1,0 @@
-export { Owner } from './Owner';

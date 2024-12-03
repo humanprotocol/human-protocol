@@ -1,16 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AutoMap } from '@automapper/classes';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   PageableData,
   PageableDto,
   PageableParams,
+  PageableResponse,
 } from '../../../common/utils/pageable.model';
 import {
   AssignmentSortField,
   AssignmentStatus,
 } from '../../../common/enums/global-common';
 import { Type } from 'class-transformer';
+import { IsEnumCaseInsensitive } from '../../../common/decorators';
 
 export class JobAssignmentDto {
   @AutoMap()
@@ -37,13 +39,6 @@ export class JobAssignmentCommand {
   token: string;
 }
 
-export class JobAssignmentDetails {
-  @AutoMap()
-  data: JobAssignmentParams;
-  @AutoMap()
-  token: string;
-  exchangeOracleUrl: string;
-}
 export class JobAssignmentData {
   @AutoMap()
   escrow_address: string;
@@ -68,13 +63,12 @@ export class JobAssignmentResponse {
 export class JobsFetchParamsDto extends PageableDto {
   @AutoMap()
   @ApiProperty()
-  address: string;
+  oracle_address: string;
   @AutoMap()
-  @Type(() => Number)
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @ApiPropertyOptional()
-  assignment_id: number;
+  assignment_id: string;
   @IsOptional()
   @AutoMap()
   @IsString()
@@ -93,13 +87,13 @@ export class JobsFetchParamsDto extends PageableDto {
   job_type: string;
   @AutoMap()
   @IsOptional()
-  @IsEnum(AssignmentStatus)
+  @IsEnumCaseInsensitive(AssignmentStatus)
   @ApiPropertyOptional({ enum: AssignmentStatus })
   status: AssignmentStatus;
   @AutoMap()
   @IsOptional()
-  @IsEnum(AssignmentSortField, { each: true })
-  @ApiPropertyOptional({ enum: AssignmentSortField, isArray: true })
+  @IsEnumCaseInsensitive(AssignmentSortField)
+  @ApiPropertyOptional({ enum: AssignmentSortField })
   sort_field: AssignmentSortField;
 }
 
@@ -115,18 +109,13 @@ export class JobsFetchParams extends PageableParams {
   @AutoMap()
   sortField: AssignmentSortField;
   @AutoMap()
-  assignmentId: number;
+  assignmentId: string;
+  @AutoMap()
+  updatedAfter?: string;
 }
 export class JobsFetchParamsCommand {
   @AutoMap()
-  address: string;
-  @AutoMap()
-  data: JobsFetchParams;
-  @AutoMap()
-  token: string;
-}
-export class JobsFetchParamsDetails {
-  exchangeOracleUrl: string;
+  oracleAddress: string;
   @AutoMap()
   data: JobsFetchParams;
   @AutoMap()
@@ -137,7 +126,7 @@ export class JobsFetchParamsData extends PageableData {
   @AutoMap()
   escrow_address: string;
   @AutoMap()
-  assignment_id: number;
+  assignment_id: string;
   @AutoMap()
   chain_id: number;
   @AutoMap()
@@ -146,6 +135,8 @@ export class JobsFetchParamsData extends PageableData {
   status: AssignmentStatus;
   @AutoMap()
   sort_field: AssignmentSortField;
+  @AutoMap()
+  updated_after?: string;
 }
 
 export class JobsFetchResponseItem {
@@ -158,10 +149,40 @@ export class JobsFetchResponseItem {
   reward_amount: string;
   reward_token: string;
   created_at: string;
-  updated_at: string; //Only for VALIDATION, COMPLETED, EXPIRED, CANCELED and REJECTED status
+  updated_at: string;
   expires_at: string;
 }
 
-export class JobsFetchResponse {
-  data: JobsFetchResponseItem[];
+export class JobsFetchResponse extends PageableResponse {
+  results: JobsFetchResponseItem[];
+}
+
+export class ResignJobDto {
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  oracle_address: string;
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  assignment_id: string;
+}
+
+export class ResignJobCommand {
+  @AutoMap()
+  oracleAddress: string;
+  @AutoMap()
+  assignmentId: string;
+  token: string;
+}
+export class ResignJobData {
+  @AutoMap()
+  assignment_id: string;
+}
+
+export class RefreshJobDto {
+  @AutoMap()
+  @IsString()
+  @ApiProperty()
+  oracle_address: string;
 }

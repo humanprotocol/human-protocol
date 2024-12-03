@@ -1,5 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, KVStoreClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, KVStoreUtils } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -8,7 +8,7 @@ import {
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_MAX_RETRY_COUNT,
-  MOCK_PRIVATE_KEY,
+  mockConfig,
 } from '../../../test/constants';
 import { ErrorWebhook } from '../../common/constants/errors';
 import {
@@ -28,13 +28,12 @@ import { HttpStatus } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { JobRepository } from '../job/job.repository';
+// import { JobRequestType } from '../../common/enums/job';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
-    build: jest.fn(),
-  },
-  KVStoreClient: {
     build: jest.fn(),
   },
 }));
@@ -44,6 +43,7 @@ describe('WebhookService', () => {
     webhookRepository: WebhookRepository,
     web3Service: Web3Service,
     jobService: JobService,
+    // jobRepository: JobRepository,
     httpService: HttpService;
 
   const signerMock = {
@@ -52,23 +52,20 @@ describe('WebhookService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'HOST':
-            return '127.0.0.1';
-          case 'PORT':
-            return 5000;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         WebhookService,
         ServerConfigService,
         Web3ConfigService,
@@ -86,7 +83,10 @@ describe('WebhookService', () => {
           provide: JobService,
           useValue: createMock<JobService>(),
         },
-        { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: JobRepository,
+          useValue: createMock<JobRepository>(),
+        },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
@@ -96,6 +96,7 @@ describe('WebhookService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
     jobService = moduleRef.get<JobService>(JobService);
+    // jobRepository = moduleRef.get<JobRepository>(JobRepository);
   });
 
   afterEach(() => {
@@ -259,9 +260,9 @@ describe('WebhookService', () => {
           .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
       }));
 
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
-      }));
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
 
       const result = await (webhookService as any).getExchangeOracleWebhookUrl(
         MOCK_EXCHANGE_ORACLE_ADDRESS,
@@ -341,6 +342,22 @@ describe('WebhookService', () => {
       expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(webhook);
     });
 
+    // it('should handle an incoming abused escrow webhook', async () => {
+    //   const webhook: WebhookDataDto = {
+    //     chainId,
+    //     escrowAddress,
+    //     eventType: EventType.ABUSE_DETECTED,
+    //   };
+
+    //   jest.spyOn(webhookService, 'createIncomingWebhook');
+
+    //   expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
+
+    //   expect(webhookService.createIncomingWebhook).toHaveBeenCalledWith(
+    //     webhook,
+    //   );
+    // });
+
     it('should return an error when the event type is invalid', async () => {
       const webhook: WebhookDataDto = {
         chainId,
@@ -356,4 +373,47 @@ describe('WebhookService', () => {
       );
     });
   });
+
+  // describe('createIncomingWebhook', () => {
+  //   it('should create a new incoming webhook', async () => {
+  //     const dto = {
+  //       chainId: ChainId.LOCALHOST,
+  //       escrowAddress: '',
+  //     };
+
+  //     jest
+  //       .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+  //       .mockResolvedValue({ requestType: JobRequestType.FORTUNE } as any);
+  //     jest
+  //       .spyOn(jobService, 'getOracleType')
+  //       .mockReturnValue(OracleType.FORTUNE);
+  //     const result = await webhookService.createIncomingWebhook(dto as any);
+
+  //     expect(result).toBe(undefined);
+  //     expect(webhookRepository.createUnique).toHaveBeenCalledWith({
+  //       chainId: ChainId.LOCALHOST,
+  //       escrowAddress: '',
+  //       hasSignature: false,
+  //       oracleType: OracleType.FORTUNE,
+  //       retriesCount: 0,
+  //       status: WebhookStatus.PENDING,
+  //       waitUntil: expect.any(Date),
+  //     });
+  //   });
+
+  //   it('should create a new incoming webhook', async () => {
+  //     const dto = {
+  //       chainId: ChainId.LOCALHOST,
+  //       escrowAddress: '',
+  //     };
+
+  //     jest
+  //       .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+  //       .mockResolvedValue(undefined as any);
+
+  //     await expect(
+  //       webhookService.createIncomingWebhook(dto as any),
+  //     ).rejects.toThrow(ErrorWebhook.InvalidEscrow);
+  //   });
+  // });
 });

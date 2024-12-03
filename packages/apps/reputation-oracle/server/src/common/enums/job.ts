@@ -1,12 +1,13 @@
 export enum JobRequestType {
-  IMAGE_BOXES = 'IMAGE_BOXES',
-  IMAGE_POINTS = 'IMAGE_POINTS',
-  IMAGE_BOXES_FROM_POINTS = 'IMAGE_BOXES_FROM_POINTS',
-  IMAGE_SKELETONS_FROM_BOXES = 'IMAGE_SKELETONS_FROM_BOXES',
-  FORTUNE = 'FORTUNE',
+  IMAGE_BOXES = 'image_boxes',
+  IMAGE_POINTS = 'image_points',
+  IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
+  IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
+  FORTUNE = 'fortune',
+  IMAGE_POLYGONS = 'image_polygons',
 }
 
 export enum SolutionError {
-  Duplicated = 'Duplicated',
-  CurseWord = 'CurseWord',
+  Duplicated = 'duplicated',
+  CurseWord = 'curse_word',
 }

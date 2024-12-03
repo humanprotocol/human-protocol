@@ -11,11 +11,16 @@ import { ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
-import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
+import {
+  CalculatePayoutsDto,
+  CvatManifestDto,
+  FortuneManifestDto,
+} from '../../common/dto/manifest';
 import {
   CvatAnnotationMeta,
   FortuneFinalResult,
-  ProcessingResultDto,
+  PayoutsDataDto,
+  SaveResultDto,
 } from '../../common/dto/result';
 import { RequestAction } from './payout.interface';
 import { getRequestType } from '../../common/utils';
@@ -31,17 +36,60 @@ export class PayoutService {
   ) {}
 
   /**
-   * Performs payouts for workers based on the calculated results.
-   * It retrieves the signer, builds an escrow client, calculates results,
-   * and initiates bulk payouts through the escrow client.
-   * @param chainId The ID of the blockchain chain.
-   * @param escrowAddress The address of the escrow contract.
-   * @returns {Promise<string>} URL for results.
+   * Saves the final calculated results to be used for worker payouts.
+   * Retrieves the manifest URL and downloads the manifest data to determine
+   * the request type, then invokes the appropriate payout action for that type.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<SaveResultDto>} The URL and hash for the stored results.
+   */
+  public async saveResults(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<SaveResultDto> {
+    this.logger.log('Save results START');
+
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    if (!manifestUrl) {
+      throw new ControlledError(
+        ErrorManifest.ManifestUrlDoesNotExist,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const manifest =
+      await this.storageService.downloadJsonLikeData(manifestUrl);
+
+    const requestType = getRequestType(manifest);
+
+    const { saveResults } = this.createPayoutSpecificActions[requestType];
+
+    const results = await saveResults(chainId, escrowAddress, manifest);
+
+    this.logger.log('Save results STOP');
+
+    return results;
+  }
+
+  /**
+   * Executes payouts to workers based on final result calculations.
+   * Retrieves the manifest, calculates results, and processes bulk payouts
+   * using the escrow client, providing transaction options for gas price.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @param url The URL containing the final results.
+   * @param hash The hash of the final results.
+   * @returns {Promise<void>}
    */
   public async executePayouts(
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<string> {
+    url: string,
+    hash: string,
+  ): Promise<void> {
     this.logger.log('Payouts START');
 
     const signer = this.web3Service.getSigner(chainId);
@@ -55,85 +103,119 @@ export class PayoutService {
       );
     }
 
-    const manifest = await this.storageService.download(manifestUrl);
+    const manifest =
+      await this.storageService.downloadJsonLikeData(manifestUrl);
 
     const requestType = getRequestType(manifest);
 
-    const { calculateResults } = this.createPayoutSpecificActions[requestType];
+    const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
-    const results = await calculateResults(manifest, chainId, escrowAddress);
+    const data: CalculatePayoutsDto = {
+      chainId,
+      escrowAddress,
+      finalResultsUrl: url,
+    };
+    const results = await calculatePayouts(manifest, data);
 
     await escrowClient.bulkPayOut(
       escrowAddress,
       results.recipients,
       results.amounts,
-      results.url,
-      results.hash,
+      url,
+      hash,
+      true, // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
       {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
       },
     );
 
     this.logger.log('Payouts STOP');
-
-    return results.url;
   }
 
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.FORTUNE]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: FortuneManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsFortune(manifest, data.finalResultsUrl),
+      saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-      ): Promise<ProcessingResultDto> =>
-        this.processFortune(manifest, chainId, escrowAddress),
+        manifest: FortuneManifestDto,
+      ): Promise<SaveResultDto> =>
+        this.saveResultsFortune(manifest, chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-      ): Promise<ProcessingResultDto> =>
-        this.processCvat(manifest, chainId, escrowAddress),
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_POINTS]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-      ): Promise<ProcessingResultDto> =>
-        this.processCvat(manifest, chainId, escrowAddress),
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-      ): Promise<ProcessingResultDto> =>
-        this.processCvat(manifest, chainId, escrowAddress),
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      calculateResults: async (
+      calculatePayouts: async (
         manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-      ): Promise<ProcessingResultDto> =>
-        this.processCvat(manifest, chainId, escrowAddress),
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      calculatePayouts: async (
+        manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
   };
 
   /**
-   * Processes a FORTUNE manifest type. It validates the intermediate results, finalizes them,
-   * and calculates payments for the associated workers.
-   * @param manifest The FORTUNE manifest data.
-   * @param intermediateResultsUrl The URL to retrieve intermediate results.
-   * @returns {Promise<ProcessingResultDto>} An object containing processing results including recipients, amounts, and storage data.
+   * Saves final results of a Fortune-type job, verifies intermediate results,
+   * and uploads the final job solutions. Throws an error if required submissions are not met.
+   * @param manifest The Fortune job manifest data.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
    */
-  public async processFortune(
+  public async saveResultsFortune(
     manifest: FortuneManifestDto,
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<ProcessingResultDto> {
+  ): Promise<SaveResultDto> {
     const signer = this.web3Service.getSigner(chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -141,7 +223,7 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const intermediateResults = (await this.storageService.download(
+    const intermediateResults = (await this.storageService.downloadJsonLikeData(
       intermediateResultsUrl,
     )) as FortuneFinalResult[];
 
@@ -170,30 +252,20 @@ export class PayoutService {
       intermediateResults,
     );
 
-    const recipients = intermediateResults
-      .filter((result) => !result.error)
-      .map((item) => item.workerAddress);
-
-    const payoutAmount =
-      BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
-      BigInt(recipients.length);
-    const amounts = new Array(recipients.length).fill(payoutAmount);
-
-    return { recipients, amounts, url, hash };
+    return { url, hash };
   }
 
   /**
-   * Processes an IMAGE_LABEL_BINARY manifest type. It retrieves annotations, calculates payouts
-   * for qualified annotators, and processes storage tasks.
-   * @param manifest The CVAT manifest data.
-   * @param intermediateResultsUrl The URL to retrieve intermediate results.
-   * @returns {Promise<ProcessingResultDto>} Returns the processing results including recipients, amounts, and storage data.
+   * Saves final results of a CVAT-type job, using intermediate results for annotations.
+   * Retrieves intermediate results, copies files to storage, and returns the final results URL and hash.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
    */
-  public async processCvat(
-    manifest: CvatManifestDto,
+  public async saveResultsCvat(
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<ProcessingResultDto> {
+  ): Promise<SaveResultDto> {
     const signer = this.web3Service.getSigner(chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -206,12 +278,72 @@ export class PayoutService {
       chainId,
       `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
     );
-    const annotations: CvatAnnotationMeta = await this.storageService.download(
-      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
-    );
 
-    // If annotation meta does not exist
-    if (annotations && Array.isArray(annotations) && annotations.length === 0) {
+    return { url, hash };
+  }
+
+  /**
+   * Calculates payment distributions for a Fortune-type job based on manifest data
+   * and final results. Distributes rewards proportionally to qualified recipients.
+   * @param manifest The Fortune manifest data.
+   * @param finalResultsUrl URL of the final results for this job.
+   * @returns {Promise<PayoutsDataDto>} Recipients, amounts, and relevant storage data.
+   */
+  public async calculatePayoutsFortune(
+    manifest: FortuneManifestDto,
+    finalResultsUrl: string,
+  ): Promise<PayoutsDataDto> {
+    const finalResults = (await this.storageService.downloadJsonLikeData(
+      finalResultsUrl,
+    )) as FortuneFinalResult[];
+
+    const recipients = finalResults
+      .filter((result) => !result.error)
+      .map((item) => item.workerAddress);
+
+    const payoutAmount =
+      BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
+      BigInt(recipients.length);
+    const amounts = new Array(recipients.length).fill(payoutAmount);
+
+    return { recipients, amounts };
+  }
+
+  /**
+   * Calculates payment distributions for a CVAT-type job based on annotations data.
+   * Verifies annotation quality, accumulates bounties, and assigns payouts to qualified annotators.
+   * @param manifest The CVAT manifest data.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<PayoutsDataDto>} Recipients, amounts, and relevant storage data.
+   */
+  public async calculatePayoutsCvat(
+    manifest: CvatManifestDto,
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<PayoutsDataDto> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const annotations: CvatAnnotationMeta =
+      await this.storageService.downloadJsonLikeData(
+        `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
+      );
+
+    // If annotation meta results does not exist
+    if (
+      annotations &&
+      annotations.results &&
+      Array.isArray(annotations.results) &&
+      annotations.results.length === 0 &&
+      annotations.jobs &&
+      Array.isArray(annotations.jobs) &&
+      annotations.jobs.length === 0
+    ) {
       throw new ControlledError(
         ErrorResults.NoAnnotationsMetaFound,
         HttpStatus.NOT_FOUND,
@@ -240,6 +372,6 @@ export class PayoutService {
     const recipients = [...accumulatedBounties.keys()];
     const amounts = [...accumulatedBounties.values()];
 
-    return { recipients, amounts, url, hash };
+    return { recipients, amounts };
   }
 }

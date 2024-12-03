@@ -12,7 +12,8 @@ export function generateBucketUrl(
   jobType: JobRequestType,
 ): URL {
   if (
-    (jobType === JobRequestType.IMAGE_BOXES ||
+    (jobType === JobRequestType.IMAGE_POLYGONS ||
+      jobType === JobRequestType.IMAGE_BOXES ||
       jobType === JobRequestType.IMAGE_POINTS ||
       jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
       jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
@@ -88,9 +89,9 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
                   nextContinuationToken,
                 )}`
               : ''
-          }${url.pathname ? `&prefix=${url.pathname}` : ''}`;
+          }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`;
         } else {
-          requestOptions += `${url.pathname ? `${url.pathname}` : ''}?list-type=2${
+          requestOptions += `${url.pathname ? `${url.pathname.replace(/^\//, '')}` : ''}?list-type=2${
             nextContinuationToken
               ? `&continuation-token=${encodeURIComponent(
                   nextContinuationToken,
@@ -98,7 +99,6 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
               : ''
           }`;
         }
-
         const response = await axios.get(requestOptions);
 
         if (response.status === HttpStatus.OK && response.data) {

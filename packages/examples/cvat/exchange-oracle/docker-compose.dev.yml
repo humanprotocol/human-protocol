@@ -1,7 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
+    container_name: oracle-postgres
     image: postgres:14.4
     restart: on-failure
     environment:
@@ -15,5 +14,80 @@ services:
       - 5431:5432
     command: ["postgres", "-c", "log_statement=all"]
 
+  redis:
+    container_name: oracle-redis
+    image: redis:7.2.3-alpine
+    restart: always
+    command: [
+      "redis-server",
+      "--save", "60", "100",
+      "--appendonly", "yes",
+      # Uncomment if you want to configure a password
+      # "--requirepass", "password",
+      # "--user", "username", "on", ">password", "~*", "allcommands",
+      # "--user", "default", "off", "nopass", "nocommands",
+    ]
+    volumes:
+      - redis:/data
+    ports:
+      - 6380:6379
+    networks:
+      - test-network
+
+  minio:
+    container_name: minio
+    image: minio/minio:RELEASE.2022-05-26T05-48-41Z
+    environment:
+      MINIO_ROOT_USER: dev
+      MINIO_ROOT_PASSWORD: devdevdev
+    volumes:
+      - minio:/data
+    entrypoint: 'sh'
+    ports:
+      - 9010:9010
+      - 9011:9011
+    command:
+      -c "minio server /data --console-address ':9011' --address ':9010'"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9010/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    networks:
+      - test-network
+      - cvat-human-bridge
+
+  minio-mc:
+    container_name: minio-mc
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9010 dev devdevdev;
+      /usr/bin/mc anonymous set public myminio/manifests;
+      /usr/bin/mc mb myminio/excor-data;
+      /usr/bin/mc anonymous set public myminio/excor-data;
+      /usr/bin/mc mb myminio/recor-data;
+      /usr/bin/mc anonymous set public myminio/recor-data;
+      /usr/bin/mc mb myminio/datasets;
+      /usr/bin/mc anonymous set public myminio/datasets;
+      /usr/bin/mc mb myminio/launcher;
+      /usr/bin/mc anonymous set public myminio/launcher;
+      "
+    networks:
+      - test-network
+
 volumes:
   postgres:
+  redis:
+  minio:
+
+networks:
+  test-network:
+  cvat-human-bridge:
+    name: cvat-human-bridge
+    external: true
+    # Create with:
+    # docker network create -o "com.docker.network.bridge.enable_icc=true"  -o "com.docker.network.driver.mtu=1500" -o "com.docker.network.bridge.enable_ip_masquerade=true" cvat-human-bridge

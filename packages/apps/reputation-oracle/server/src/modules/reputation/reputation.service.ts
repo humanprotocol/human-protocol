@@ -65,7 +65,8 @@ export class ReputationService {
       );
     }
 
-    const manifest = await this.storageService.download(manifestUrl);
+    const manifest =
+      await this.storageService.downloadJsonLikeData(manifestUrl);
 
     const requestType = getRequestType(manifest);
 
@@ -150,6 +151,13 @@ export class ReputationService {
         manifest: CvatManifestDto,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
   };
 
   private async processFortune(
@@ -160,7 +168,8 @@ export class ReputationService {
     const escrowClient = await EscrowClient.build(signer);
 
     const finalResultsUrl = await escrowClient.getResultsUrl(escrowAddress);
-    const finalResults = await this.storageService.download(finalResultsUrl);
+    const finalResults =
+      await this.storageService.downloadJsonLikeData(finalResultsUrl);
 
     if (finalResults.length === 0) {
       throw new ControlledError(
@@ -202,9 +211,10 @@ export class ReputationService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: CvatAnnotationMeta = await this.storageService.download(
-      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
-    );
+    const annotations: CvatAnnotationMeta =
+      await this.storageService.downloadJsonLikeData(
+        `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
+      );
 
     // If annotation meta does not exist
     if (annotations && Array.isArray(annotations) && annotations.length === 0) {
@@ -381,8 +391,14 @@ export class ReputationService {
    * @param chainId Optional. The ID of the blockchain chain.
    * @returns {Promise<ReputationDto[]>} A Promise containing an array of reputation data.
    */
-  public async getAllReputations(chainId?: ChainId): Promise<ReputationDto[]> {
-    const reputations = await this.reputationRepository.findByChainId(chainId);
+  public async getAllReputations(
+    chainId?: ChainId,
+    types?: ReputationEntityType[],
+  ): Promise<ReputationDto[]> {
+    const reputations = await this.reputationRepository.findByChainIdAndTypes(
+      chainId,
+      types,
+    );
 
     return reputations.map((reputation) => ({
       chainId: reputation.chainId,

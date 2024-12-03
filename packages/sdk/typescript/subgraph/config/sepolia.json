@@ -2,14 +2,16 @@
   "network": "sepolia",
   "description": "HUMAN subgraph on Sepolia Ethereum Testnet",
   "EscrowFactory": {
-    "address": "0xD6D347ba6987519B4e42EcED43dF98eFf5465a23",
-    "startBlock": 5716237,
+    "address": "0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf",
+    "startBlock": 7067993,
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
     "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
     "startBlock": 5716225,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0xF3D9a0ba9FA14273C515e519DFD0826Ff87d5164"
   },
   "Escrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
@@ -20,8 +22,8 @@
     "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
   },
   "Staking": {
-    "address": "0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203",
-    "startBlock": 5716235,
+    "address": "0x2163e3A40032Af1C359ac731deaB48258b317890",
+    "startBlock": 7062708,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "RewardPool": {

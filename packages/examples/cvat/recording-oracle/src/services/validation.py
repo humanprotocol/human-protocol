@@ -1,9 +1,9 @@
 import uuid
-from typing import Dict, List, Optional, Union
 
-from sqlalchemy import update
+from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
+from src.core.gt_stats import ValidationFrameStats
 from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
@@ -20,8 +20,8 @@ def create_task(session: Session, escrow_address: str, chain_id: int) -> str:
 
 
 def get_task_by_escrow_address(
-    session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Task]:
+    session: Session, escrow_address: str, *, for_update: bool | ForUpdateParams = False
+) -> Task | None:
     return (
         _maybe_for_update(session.query(Task), enable=for_update)
         .where(Task.escrow_address == escrow_address)
@@ -30,16 +30,16 @@ def get_task_by_escrow_address(
 
 
 def get_task_by_id(
-    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Task]:
+    session: Session, task_id: str, *, for_update: bool | ForUpdateParams = False
+) -> Task | None:
     return (
         _maybe_for_update(session.query(Task), enable=for_update).where(Task.id == task_id).first()
     )
 
 
 def get_task_validation_results(
-    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[ValidationResult]:
+    session: Session, task_id: str, *, for_update: bool | ForUpdateParams = False
+) -> list[ValidationResult]:
     return (
         _maybe_for_update(session.query(ValidationResult), enable=for_update)
         .where(ValidationResult.job.has(Job.task_id == task_id))
@@ -57,6 +57,16 @@ def update_escrow_iteration(session: Session, escrow_address: str, chain_id: int
     session.execute(expression)
 
 
+def mark_escrow_as_cleaned(session: Session, escrow_address: str, chain_id: int):
+    expression = (
+        update(Task)
+        .where(Task.escrow_address == escrow_address, Task.chain_id == chain_id)
+        .values(cleaned_at=func.now())
+    )
+
+    session.execute(expression)
+
+
 def create_job(session: Session, job_cvat_id: int, task_id: str) -> str:
     obj_id = str(uuid.uuid4())
     obj = Job(id=obj_id, cvat_id=job_cvat_id, task_id=task_id)
@@ -67,8 +77,8 @@ def create_job(session: Session, job_cvat_id: int, task_id: str) -> str:
 
 
 def get_job_by_cvat_id(
-    session: Session, job_cvat_id: int, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Job]:
+    session: Session, job_cvat_id: int, *, for_update: bool | ForUpdateParams = False
+) -> Job | None:
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(Job.cvat_id == job_cvat_id)
@@ -77,8 +87,8 @@ def get_job_by_cvat_id(
 
 
 def get_job_by_id(
-    session: Session, job_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Job]:
+    session: Session, job_id: str, *, for_update: bool | ForUpdateParams = False
+) -> Job | None:
     return _maybe_for_update(session.query(Job), enable=for_update).where(Job.id == job_id).first()
 
 
@@ -104,8 +114,8 @@ def create_validation_result(
 
 
 def get_validation_result_by_assignment_id(
-    session: Session, assignment_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[ValidationResult]:
+    session: Session, assignment_id: str, *, for_update: bool | ForUpdateParams = False
+) -> ValidationResult | None:
     return (
         _maybe_for_update(session.query(ValidationResult), enable=for_update)
         .where(ValidationResult.assignment_id == assignment_id)
@@ -114,8 +124,8 @@ def get_validation_result_by_assignment_id(
 
 
 def get_task_gt_stats(
-    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[GtStats]:
+    session: Session, task_id: str, *, for_update: bool | ForUpdateParams = False
+) -> list[GtStats]:
     return (
         _maybe_for_update(session.query(GtStats), enable=for_update)
         .where(GtStats.task_id == task_id)
@@ -123,11 +133,13 @@ def get_task_gt_stats(
     )
 
 
-def update_gt_stats(session: Session, task_id: str, values: Dict[str, int]):
+def update_gt_stats(
+    session: Session, task_id: str, updated_gt_stats: dict[str, ValidationFrameStats]
+):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
 
-    if not values:
+    if not updated_gt_stats:
         return
 
     if db_engine.driver != "psycopg2":
@@ -138,12 +150,14 @@ def update_gt_stats(session: Session, task_id: str, values: Dict[str, int]):
 
     statement = psql_insert(GtStats).values(
         [
-            dict(
-                task_id=task_id,
-                gt_key=gt_key,
-                failed_attempts=failed_attempts,
-            )
-            for gt_key, failed_attempts in values.items()
+            {
+                "task_id": task_id,
+                "gt_frame_name": gt_frame_name,
+                "failed_attempts": val_frame_stats.failed_attempts,
+                "accepted_attempts": val_frame_stats.accepted_attempts,
+                "accumulated_quality": val_frame_stats.accumulated_quality,
+            }
+            for gt_frame_name, val_frame_stats in updated_gt_stats.items()
         ],
     )
     statement = statement.on_conflict_do_update(

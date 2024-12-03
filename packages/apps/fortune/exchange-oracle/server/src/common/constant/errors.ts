@@ -30,6 +30,7 @@ export enum ErrorAssignment {
   NotFound = 'Assignment not found',
   InvalidStatus = 'Invalid assignment status',
   InvalidAssignment = 'Invalid assignment',
+  InvalidAssignmentQualification = 'Invalid assignment qualification',
   InvalidUser = 'Assignment does not belong to the user',
   AlreadyExists = 'Assignment already exists',
   FullyAssigned = 'Fully assigned job',
@@ -49,6 +50,9 @@ export enum ErrorJob {
   JobCompleted = 'This job has already been completed',
   ManifestDecryptionFailed = 'Unable to decrypt manifest',
   ManifestNotFound = 'Unable to get manifest',
+  NotFound = 'Job not found',
+  AlreadyCompleted = 'Job already completed',
+  AlreadyCanceled = 'Job already canceled',
 }
 
 /**

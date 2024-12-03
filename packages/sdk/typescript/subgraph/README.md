@@ -1,8 +1,25 @@
-# Human subgraph project
+<p align="center">
+  <a href="https://www.humanprotocol.org/" target="blank"><img src="https://s2.coinmarketcap.com/static/img/coins/64x64/10347.png" width="100" alt="Human Protocol" /></a>
+</p>
 
-This is the repo of the human subgraph.
-The goal of the subgraph is to index all of the emissions for Escrow and Escrow Factories
-To get more information about how the graph works : https://thegraph.com/en/
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
+
+<h1 align="center">Human subgraph</h1>
+<p align="center">This is the repo of the human subgraph.
+The goal of the subgraph is to index all of the emissions for Human Protocol
+To get more information about how the graph works : 
+<a href="https://thegraph.com/en/">https://thegraph.com/en/</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml">
+    <img src="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main" alt="Subgraph Check">
+  </a>
+  <a href="https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml">
+    <img src="https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main" alt="Subgraph deployment">
+  </a>
+</p>
 
 ## Installation
 
@@ -75,7 +92,8 @@ You can find networks configuration in the directory `config`. Each JSON file is
 - https://api.thegraph.com/subgraphs/name/humanprotocol/bsc
 - https://api.thegraph.com/subgraphs/name/humanprotocol/celo
 - https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores
-- https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet/graphql 
+- https://www.okx.com/api/v1/x1-testnet/index/subgraphs/name/human-protocol-x1-testnet/graphql
 
+## License
 
-
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/humanprotocol/human-protocol/blob/main/LICENSE) file for details.

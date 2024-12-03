@@ -6,11 +6,14 @@
     "generated"
   ],
   "scripts": {
-    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && yarn generate-escrow && yarn generate-hmt && yarn generate-staking && graph codegen",
+    "generate-escrow": "mustache ./config/$NETWORK.json src/mapping/EscrowTemplate.ts > src/mapping/Escrow.ts",
+    "generate-hmt": "mustache ./config/$NETWORK.json src/mapping/HMTokenTemplate.ts > src/mapping/HMToken.ts",
+    "generate-staking": "mustache ./config/$NETWORK.json src/mapping/StakingTemplate.ts > src/mapping/Staking.ts",
     "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=polygon yarn generate",
-    "test": "graph test ",
+    "test": "graph test",
     "create-local": "graph create --node http://localhost:8020/ humanprotocol/localhost",
     "remove-local": "graph remove --node http://localhost:8020/ humanprotocol/localhost",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5010 humanprotocol/localhost -l 0",
@@ -34,11 +37,11 @@
   "license": "MIT",
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.71.1",
-    "@graphprotocol/graph-ts": "^0.32.0",
+    "@graphprotocol/graph-ts": "^0.35.1",
     "@graphql-eslint/eslint-plugin": "^3.19.1",
     "@human-protocol/core": "*",
     "graphql": "^16.6.0",
-    "matchstick-as": "^0.5.2",
+    "matchstick-as": "^0.6.0",
     "mustache": "^4.2.0"
   },
   "lint-staged": {

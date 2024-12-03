@@ -4,7 +4,7 @@ import { SignatureAuthGuard } from './signature.auth';
 import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
-import { Role } from '../enums/role';
+import { AuthSignatureRole } from '../enums/role';
 import { ControlledError } from '../errors/controlled';
 
 jest.mock('../../common/utils/signature');
@@ -29,9 +29,9 @@ describe('SignatureAuthGuard', () => {
         {
           provide: SignatureAuthGuard,
           useValue: new SignatureAuthGuard([
-            Role.JobLauncher,
-            Role.Exchange,
-            Role.Recording,
+            AuthSignatureRole.JobLauncher,
+            AuthSignatureRole.Exchange,
+            AuthSignatureRole.Recording,
           ]),
         },
       ],

@@ -37,22 +37,27 @@ export class WebhookService {
     public readonly storageService: StorageService,
   ) {}
 
-  public async handleWebhook(wehbook: WebhookDto): Promise<void> {
-    switch (wehbook.eventType) {
+  public async handleWebhook(webhook: WebhookDto): Promise<void> {
+    switch (webhook.eventType) {
       case EventType.ESCROW_CREATED:
-        await this.jobService.createJob(wehbook);
+        await this.jobService.createJob(webhook);
+        break;
+
+      case EventType.ESCROW_COMPLETED:
+        await this.jobService.completeJob(webhook);
         break;
 
       case EventType.ESCROW_CANCELED:
+        await this.jobService.cancelJob(webhook);
         break;
 
       case EventType.SUBMISSION_REJECTED:
-        await this.jobService.processInvalidJobSolution(wehbook);
+        await this.jobService.processInvalidJobSolution(webhook);
         break;
 
       default:
         throw new BadRequestException(
-          `Invalid webhook event type: ${wehbook.eventType}`,
+          `Invalid webhook event type: ${webhook.eventType}`,
         );
     }
   }

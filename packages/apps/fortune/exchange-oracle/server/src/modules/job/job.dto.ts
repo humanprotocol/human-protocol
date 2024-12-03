@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   JobFieldName,
@@ -8,12 +8,14 @@ import {
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class ManifestDto {
   requesterTitle: string;
   requesterDescription: string;
   submissionsRequired: number;
   fundAmount: number;
+  qualifications?: string[];
 }
 
 export class SolveJobDto {
@@ -22,8 +24,8 @@ export class SolveJobDto {
   public solution: string;
 
   @ApiProperty({ name: 'assignment_id' })
-  @IsNumber()
-  public assignmentId: number;
+  @IsString()
+  public assignmentId: string;
 }
 
 export class GetJobsDto extends PageOptionsDto {
@@ -33,7 +35,7 @@ export class GetJobsDto extends PageOptionsDto {
     default: JobSortField.CREATED_AT,
   })
   @IsOptional()
-  @IsEnum(JobSortField)
+  @IsEnumCaseInsensitive(JobSortField)
   sortField?: JobSortField = JobSortField.CREATED_AT;
 
   @ApiPropertyOptional({ name: 'chain_id' })
@@ -43,13 +45,13 @@ export class GetJobsDto extends PageOptionsDto {
   chainId: number;
 
   @ApiPropertyOptional({ name: 'job_type', enum: JobType })
-  @IsEnum(JobType)
+  @IsEnumCaseInsensitive(JobType)
   @IsOptional()
   jobType: JobType;
 
   @ApiPropertyOptional({ enum: JobFieldName, isArray: true })
   @IsOptional()
-  @IsEnum(JobFieldName, { each: true })
+  @IsEnumCaseInsensitive(JobFieldName, { each: true })
   fields: JobFieldName[];
 
   @ApiPropertyOptional({ name: 'escrow_address' })
@@ -58,9 +60,21 @@ export class GetJobsDto extends PageOptionsDto {
   escrowAddress: string;
 
   @ApiPropertyOptional({ enum: JobStatus })
-  @IsEnum(JobStatus)
+  @IsEnumCaseInsensitive(JobStatus)
   @IsOptional()
   status: JobStatus;
+
+  @ApiPropertyOptional({ name: 'created_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @ApiPropertyOptional({ name: 'updated_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedAfter?: Date;
 }
 
 export class JobDto {
@@ -80,13 +94,19 @@ export class JobDto {
   jobDescription?: string;
 
   @ApiProperty({ name: 'reward_amount' })
-  rewardAmount?: number;
+  rewardAmount?: string;
 
   @ApiProperty({ name: 'reward_token' })
   rewardToken?: string;
 
   @ApiProperty({ name: 'created_at' })
   createdAt?: string;
+
+  @ApiProperty({ name: 'updated_at' })
+  updatedAt?: string;
+
+  @ApiProperty()
+  qualifications?: string[];
 
   constructor(
     escrowAddress: string,
@@ -103,7 +123,7 @@ export class JobDto {
 
 export class SolveJobResponseDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'solution' })
   solution: string;

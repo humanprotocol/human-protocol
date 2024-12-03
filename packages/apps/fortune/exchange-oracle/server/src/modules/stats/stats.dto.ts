@@ -21,6 +21,21 @@ export class OracleStatsDto {
   })
   assignmentsExpired: number;
 
+  @ApiProperty({
+    name: 'escrows_processed',
+  })
+  escrowsProcessed: number;
+
+  @ApiProperty({
+    name: 'escrows_active',
+  })
+  escrowsActive: number;
+
+  @ApiProperty({
+    name: 'escrows_cancelled',
+  })
+  escrowsCancelled: number;
+
   constructor(init?: Partial<OracleStatsDto>) {
     Object.assign(this, init);
   }

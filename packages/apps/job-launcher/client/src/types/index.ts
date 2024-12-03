@@ -31,6 +31,7 @@ export type CryptoPaymentRequest = {
 export type FiatPaymentRequest = {
   amount: number;
   currency: string;
+  paymentMethodId: string;
 };
 
 export type CreateFortuneJobRequest = {
@@ -40,11 +41,13 @@ export type CreateFortuneJobRequest = {
   requesterDescription: string;
   currency: string;
   fundAmount: number;
+  qualifications?: string[];
 };
 
 export type CreateCvatJobRequest = {
   chainId: number;
   requesterDescription: string;
+  qualifications?: string[];
   fundAmount: number;
   currency: string;
   data: CvatDataSource;
@@ -74,10 +77,11 @@ export enum JobType {
 }
 
 export enum CvatJobType {
-  IMAGE_POINTS = 'IMAGE_POINTS',
-  IMAGE_BOXES = 'IMAGE_BOXES',
-  IMAGE_BOXES_FROM_POINTS = 'IMAGE_BOXES_FROM_POINTS',
-  IMAGE_SKELETONS_FROM_BOXES = 'IMAGE_SKELETONS_FROM_BOXES',
+  IMAGE_POINTS = 'image_points',
+  IMAGE_POLYGONS = 'image_polygons',
+  IMAGE_BOXES = 'image_boxes',
+  IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
+  IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
 }
 
 export enum HCaptchaJobType {
@@ -92,11 +96,12 @@ export type FortuneRequest = {
   title: string;
   fortunesRequested: number;
   description: string;
+  qualifications?: string[];
 };
 
 export enum StorageProviders {
-  AWS = 'AWS',
-  GCS = 'GCS',
+  AWS = 'aws',
+  GCS = 'gcs',
 }
 
 export enum AWSRegions {
@@ -199,6 +204,7 @@ export type CvatRequest = {
   labels: Label[];
   type: CvatJobType;
   description: string;
+  qualifications?: string[];
   data: CvatData;
   groundTruth: CvatDataSource;
   userGuide: string;
@@ -211,6 +217,7 @@ export type HCaptchaRequest = {
   completionDate: Date;
   minRequests: number;
   maxRequests: number;
+  qualifications?: string[];
   advanced: {
     workerLanguage: string;
     workerLocation: string;
@@ -235,16 +242,16 @@ export type JobRequest = {
 };
 
 export enum JobStatus {
-  LAUNCHED = 'LAUNCHED',
-  PENDING = 'PENDING',
-  PARTIAL = 'PARTIAL',
-  CANCELED = 'CANCELED',
-  FAILED = 'FAILED',
-  COMPLETED = 'COMPLETED',
-  TO_CANCEL = 'TO_CANCEL',
-  PAID = 'PAID',
-  SET_UP = 'SET_UP',
-  CREATED = 'CREATED',
+  LAUNCHED = 'launched',
+  PENDING = 'pending',
+  PARTIAL = 'partial',
+  CANCELED = 'canceled',
+  FAILED = 'failed',
+  COMPLETED = 'completed',
+  TO_CANCEL = 'to_cancel',
+  PAID = 'paid',
+  SET_UP = 'set_up',
+  CREATED = 'created',
 }
 
 export type JobDetailsResponse = {
@@ -268,6 +275,7 @@ export type JobDetailsResponse = {
     exchangeOracleAddress: string;
     recordingOracleAddress: string;
     reputationOracleAddress: string;
+    qualifications?: string[];
   };
   staking: {
     staker: string;
@@ -284,4 +292,64 @@ export type FortuneFinalResult = {
   exchangeAddress: string;
   workerAddress: string;
   solution: string;
+};
+
+export type Qualification = {
+  reference: string;
+  title: string;
+  description: string;
+  expires_at: string;
+};
+
+export type CardData = {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  default: boolean;
+};
+
+export type BillingInfo = {
+  name: string;
+  email?: string;
+  address: Address;
+  vat: string;
+  vatType: string;
+};
+
+type Address = {
+  city: string;
+  country: string;
+  line: string;
+  postalCode: string;
+};
+
+export type JobCountDto = {
+  totalJobs: number;
+  launched: number;
+  partial: number;
+  completed: number;
+  canceled: number;
+};
+
+export type FundAmountStatisticsDto = {
+  average: number;
+  maximum: number;
+  minimum: number;
+};
+
+export type JobStatusPerDayDto = {
+  date: string;
+  launched: number;
+  partial: number;
+  completed: number;
+  canceled: number;
+};
+
+export type JobStatisticsDto = {
+  averageCompletionTime: number;
+  jobCounts: JobCountDto;
+  fundAmountStats: FundAmountStatisticsDto;
+  jobsByStatusPerDay: JobStatusPerDayDto[];
 };

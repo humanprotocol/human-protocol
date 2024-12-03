@@ -1,4 +1,4 @@
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { ERROR_MESSAGES } from './index';
 
 export const IS_MAINNET =
@@ -24,33 +24,13 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
     break;
 }
 
-export const RPC_URLS: Partial<Record<ChainId, string | undefined>> = {
-  [ChainId.MAINNET]: import.meta.env.VITE_APP_RPC_URL_MAINNET || '',
-  [ChainId.SEPOLIA]: import.meta.env.VITE_APP_RPC_URL_SEPOLIA || '',
-  [ChainId.BSC_MAINNET]: import.meta.env.VITE_APP_RPC_URL_BSC_MAINNET || '',
-  [ChainId.BSC_TESTNET]: import.meta.env.VITE_APP_RPC_URL_BSC_TESTNET || '',
-  [ChainId.POLYGON]: import.meta.env.VITE_APP_RPC_URL_POLYGON || '',
-  [ChainId.POLYGON_AMOY]: import.meta.env.VITE_APP_RPC_URL_POLYGON_AMOY || '',
-  [ChainId.MOONBEAM]: import.meta.env.VITE_APP_RPC_URL_MOONBEAM || '',
-  [ChainId.MOONBASE_ALPHA]:
-    import.meta.env.VITE_APP_RPC_URL_MOONBASE_ALPHA || '',
-  [ChainId.AVALANCHE_TESTNET]:
-    import.meta.env.VITE_APP_RPC_URL_AVALANCHE_TESTNET || '',
-  [ChainId.AVALANCHE]: import.meta.env.VITE_APP_RPC_URL_AVALANCHE || '',
-  [ChainId.CELO_ALFAJORES]:
-    import.meta.env.VITE_APP_RPC_URL_CELO_ALFAJORES || '',
-  [ChainId.CELO]: import.meta.env.VITE_APP_RPC_URL_CELO || '',
-  [ChainId.XLAYER]: import.meta.env.VITE_APP_RPC_URL_XLAYER || '',
-  [ChainId.XLAYER_TESTNET]:
-    import.meta.env.VITE_APP_RPC_URL_XLAYER_TESTNET || '',
-  [ChainId.LOCALHOST]: 'http://127.0.0.1:8545',
-};
+const supportedChains =
+  import.meta.env.VITE_APP_SUPPORTED_CHAINS?.split(',') || [];
 
 export const SUPPORTED_CHAIN_IDS: ChainId[] = initialSupportedChainIds.filter(
-  (chainId) => Boolean(RPC_URLS[chainId]),
+  (chainId) => supportedChains.includes(chainId.toString()),
 );
 
-// it no rpc set, throw error
 if (SUPPORTED_CHAIN_IDS.length === 0) {
   throw new Error(ERROR_MESSAGES.noRpcUrl);
 }
@@ -79,4 +59,46 @@ export const LOCALHOST = {
       http: ['http://127.0.0.1:8545'],
     },
   },
+};
+
+export const NETWORK_TOKENS: Record<
+  ChainId,
+  { [key: string]: string | undefined }
+> = {
+  [ChainId.POLYGON]: {
+    hmt: NETWORKS[ChainId.POLYGON]?.hmtAddress,
+  },
+  [ChainId.SEPOLIA]: {
+    hmt: NETWORKS[ChainId.SEPOLIA]?.hmtAddress,
+    usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+  },
+  [ChainId.POLYGON_AMOY]: {
+    hmt: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress,
+  },
+  [ChainId.ALL]: { hmt: NETWORKS[ChainId.ALL]?.hmtAddress },
+  [ChainId.MAINNET]: { hmt: NETWORKS[ChainId.MAINNET]?.hmtAddress },
+  [ChainId.RINKEBY]: { hmt: NETWORKS[ChainId.RINKEBY]?.hmtAddress },
+  [ChainId.GOERLI]: { hmt: NETWORKS[ChainId.GOERLI]?.hmtAddress },
+  [ChainId.BSC_MAINNET]: { hmt: NETWORKS[ChainId.BSC_MAINNET]?.hmtAddress },
+  [ChainId.BSC_TESTNET]: { hmt: NETWORKS[ChainId.BSC_TESTNET]?.hmtAddress },
+  [ChainId.POLYGON_MUMBAI]: {
+    hmt: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress,
+  },
+  [ChainId.MOONBEAM]: { hmt: NETWORKS[ChainId.MOONBEAM]?.hmtAddress },
+  [ChainId.MOONBASE_ALPHA]: {
+    hmt: NETWORKS[ChainId.MOONBASE_ALPHA]?.hmtAddress,
+  },
+  [ChainId.AVALANCHE_TESTNET]: {
+    hmt: NETWORKS[ChainId.AVALANCHE_TESTNET]?.hmtAddress,
+  },
+  [ChainId.AVALANCHE]: { hmt: NETWORKS[ChainId.AVALANCHE]?.hmtAddress },
+  [ChainId.CELO]: { hmt: NETWORKS[ChainId.CELO]?.hmtAddress },
+  [ChainId.CELO_ALFAJORES]: {
+    hmt: NETWORKS[ChainId.CELO_ALFAJORES]?.hmtAddress,
+  },
+  [ChainId.XLAYER_TESTNET]: {
+    hmt: NETWORKS[ChainId.XLAYER_TESTNET]?.hmtAddress,
+  },
+  [ChainId.LOCALHOST]: { hmt: NETWORKS[ChainId.LOCALHOST]?.hmtAddress },
+  [ChainId.XLAYER]: { hmt: NETWORKS[ChainId.XLAYER]?.hmtAddress },
 };

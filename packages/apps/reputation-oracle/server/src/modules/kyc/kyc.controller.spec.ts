@@ -1,9 +1,9 @@
 import { Test } from '@nestjs/testing';
 
 import { KycController } from './kyc.controller';
-import { KycService } from './kyc.service';
 import { KycSessionDto } from './kyc.dto';
-import { KycStatus } from '../../common/enums/user';
+import { KycService } from './kyc.service';
+import { EnvConfigModule } from '../../common/config/config.module';
 
 describe('KycController', () => {
   let kycController: KycController;
@@ -20,16 +20,18 @@ describe('KycController', () => {
           },
         },
       ],
+      controllers: [KycController],
+      imports: [EnvConfigModule],
     }).compile();
 
     kycService = moduleRef.get<KycService>(KycService);
-    kycController = new KycController(kycService);
+    kycController = moduleRef.get<KycController>(KycController);
   });
 
   describe('startKyc', () => {
     it('should call service for authorized user', async () => {
       const session: KycSessionDto = {
-        sessionId: '123',
+        url: 'https://example.test',
       };
 
       jest.spyOn(kycService, 'initSession').mockResolvedValueOnce(session);
@@ -48,19 +50,29 @@ describe('KycController', () => {
     it('should call service', async () => {
       kycService.updateKycStatus = jest.fn();
 
-      await kycController.updateKycStatus(
-        {
-          secret: 'secret',
-        },
-        {
-          session_id: '123',
-          state: KycStatus.APPROVED,
-        } as any,
-      );
+      await kycController.updateKycStatus({
+        status: 'success',
+        verification: {},
+        technicalData: {},
+      } as any);
 
-      expect(kycService.updateKycStatus).toHaveBeenCalledWith('secret', {
-        session_id: '123',
-        state: KycStatus.APPROVED,
+      expect(kycService.updateKycStatus).toHaveBeenCalledWith({
+        status: 'success',
+        verification: {},
+        technicalData: {},
+      });
+    });
+  });
+
+  describe('updateKycStatus', () => {
+    it('should call service', async () => {
+      kycService.getSignedAddress = jest.fn();
+      await kycController.getSignedAddress({
+        user: { evmAddress: '0x123' },
+      } as any);
+
+      expect(kycService.getSignedAddress).toHaveBeenCalledWith({
+        evmAddress: '0x123',
       });
     });
   });

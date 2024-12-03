@@ -2,7 +2,11 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
-import { OperatorStatus, UserStatus } from '../../common/enums/user';
+import {
+  OperatorStatus,
+  Role as UserRole,
+  UserStatus,
+} from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -24,7 +28,13 @@ import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient, KVStoreKeys, Role } from '@human-protocol/sdk';
+import {
+  ChainId,
+  KVStoreClient,
+  KVStoreKeys,
+  KVStoreUtils,
+  Role,
+} from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -32,6 +42,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { SiteKeyType } from '../../common/enums';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NDAService } from '../nda/nda.service';
 
@@ -45,7 +56,6 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
-    private readonly hCaptchaConfigService: HCaptchaConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
@@ -55,15 +65,6 @@ export class AuthService {
   ) {}
 
   public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -73,6 +74,18 @@ export class AuthService {
       throw new ControlledError(
         ErrorAuth.InvalidEmailOrPassword,
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (
+      userEntity.role !== UserRole.HUMAN_APP &&
+      (!data.hCaptchaToken ||
+        !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
+          .success)
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidToken,
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -89,7 +102,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const storedUser = await this.userRepository.findByEmail(data.email);
+    const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new ControlledError(
         ErrorUser.DuplicatedEmail,
@@ -103,7 +116,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -148,17 +161,55 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
+    let chainId: ChainId;
+    const currentWeb3Env = this.web3ConfigService.env;
+    if (currentWeb3Env === Web3Env.MAINNET) {
+      chainId = ChainId.POLYGON;
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      chainId = ChainId.LOCALHOST;
+    } else {
+      chainId = ChainId.POLYGON_AMOY;
+    }
+
+    let status = userEntity.status.toString();
+    if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
+      let operatorStatus: string | undefined;
+      try {
+        operatorStatus = await KVStoreUtils.get(
+          chainId,
+          this.web3Service.getOperatorAddress(),
+          userEntity.evmAddress.toLowerCase(),
+        );
+      } catch {}
+
+      if (operatorStatus && operatorStatus !== '') {
+        status = operatorStatus;
+      }
+    }
+
     const payload: any = {
       email: userEntity.email,
+      status,
       userId: userEntity.id,
-      address: userEntity.evmAddress,
+      wallet_address: userEntity.evmAddress,
+      role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       nda: await this.ndaService.isLatestSigned(userEntity),
       reputation_network: this.web3Service.getOperatorAddress(),
+      qualifications: userEntity.userQualifications
+        ? userEntity.userQualifications.map(
+            (userQualification) => userQualification.qualification.reference,
+          )
+        : [],
     };
 
-    if (userEntity.siteKey) {
-      payload.site_key = userEntity.siteKey.siteKey;
+    if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
+      const existingHcaptchaSiteKey = userEntity.siteKeys.find(
+        (key) => key.type === SiteKeyType.HCAPTCHA,
+      );
+      if (existingHcaptchaSiteKey) {
+        payload.site_key = existingHcaptchaSiteKey.siteKey;
+      }
     }
 
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -193,7 +244,7 @@ export class AuthService {
       );
     }
 
-    const userEntity = await this.userRepository.findByEmail(data.email);
+    const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
@@ -213,7 +264,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -306,7 +357,7 @@ export class AuthService {
       );
     }
 
-    const userEntity = await this.userRepository.findByEmail(data.email);
+    const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
@@ -326,7 +377,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -372,29 +423,70 @@ export class AuthService {
       );
     }
 
-    let kvstore: KVStoreClient;
+    let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;
     if (currentWeb3Env === Web3Env.MAINNET) {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON),
-      );
+      chainId = ChainId.POLYGON;
+    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
+      chainId = ChainId.LOCALHOST;
     } else {
-      kvstore = await KVStoreClient.build(
-        this.web3Service.getSigner(ChainId.POLYGON_AMOY),
-      );
+      chainId = ChainId.POLYGON_AMOY;
     }
 
+    const signer = this.web3Service.getSigner(chainId);
+    const kvstore = await KVStoreClient.build(signer);
+
+    let role: string | undefined;
+    try {
+      role = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role);
+    } catch {}
+
     if (
-      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].includes(
-        await kvstore.get(data.address, KVStoreKeys.role),
+      !role ||
+      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].some(
+        (r) => r.toLowerCase() === role.toLowerCase(),
       )
     ) {
       throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
     }
 
+    let fee: string | undefined;
+    try {
+      fee = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee);
+    } catch {}
+
+    if (!fee || fee === '') {
+      throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
+    }
+
+    let url: string | undefined;
+    try {
+      url = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url);
+    } catch {}
+
+    if (!url || url === '') {
+      throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
+    }
+
+    let jobTypes: string | undefined;
+    try {
+      jobTypes = await KVStoreUtils.get(
+        chainId,
+        data.address,
+        KVStoreKeys.jobTypes,
+      );
+    } catch {}
+
+    if (!jobTypes || jobTypes === '') {
+      throw new ControlledError(
+        ErrorAuth.InvalidJobType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const userEntity = await this.userService.createWeb3User(data.address);
 
-    await kvstore.set(data.address, OperatorStatus.ACTIVE);
+    await kvstore.set(data.address.toLowerCase(), OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }

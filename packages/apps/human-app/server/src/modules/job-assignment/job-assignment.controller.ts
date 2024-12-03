@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -18,9 +19,13 @@ import {
   JobsFetchParamsDto,
   JobsFetchParamsCommand,
   JobsFetchResponse,
+  ResignJobDto,
+  ResignJobCommand,
+  RefreshJobDto,
 } from './model/job-assignment.model';
 import { Authorization } from '../../common/config/params-decorators';
 
+@ApiTags('Job-Assignment')
 @Controller('/assignment')
 export class JobAssignmentController {
   constructor(
@@ -28,7 +33,6 @@ export class JobAssignmentController {
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
-  @ApiTags('Job-Assignment')
   @Post('/job')
   @ApiOperation({
     summary: 'Request to assign a job to a logged user',
@@ -48,11 +52,10 @@ export class JobAssignmentController {
     return this.service.processJobAssignment(jobAssignmentCommand);
   }
 
-  @ApiTags('Job-Assignment')
   @Get('/job')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Request to get a jobs assigned to a logged user',
+    summary: 'Request to get jobs assigned to a logged user',
   })
   public async getAssignedJobs(
     @Query() jobsAssignmentParamsDto: JobsFetchParamsDto,
@@ -64,6 +67,36 @@ export class JobAssignmentController {
       JobsFetchParamsCommand,
     );
     jobsAssignmentParamsCommand.token = token;
+
     return this.service.processGetAssignedJobs(jobsAssignmentParamsCommand);
+  }
+
+  @Post('/resign-job')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Request to resign from assigment',
+  })
+  public async resignAssigment(
+    @Body() dto: ResignJobDto,
+    @Authorization() token: string,
+  ) {
+    const command = this.mapper.map(dto, ResignJobDto, ResignJobCommand);
+    command.token = token;
+    return this.service.resignJob(command);
+  }
+
+  @Put('/refresh')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Request to refresh assigments data',
+  })
+  public async refreshAssigments(
+    @Body() dto: RefreshJobDto,
+    @Authorization() token: string,
+  ) {
+    const command = new JobsFetchParamsCommand();
+    command.oracleAddress = dto.oracle_address;
+    command.token = token;
+    return this.service.updateAssignmentsCache(command);
   }
 }

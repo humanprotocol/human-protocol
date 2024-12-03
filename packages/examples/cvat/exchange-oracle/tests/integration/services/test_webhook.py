@@ -1,10 +1,11 @@
 import unittest
 import uuid
 
+import pytest
 from sqlalchemy.exc import IntegrityError
 
 import src.services.webhook as webhook_service
-from src.core.oracle_events import ExchangeOracleEvent_TaskFinished
+from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.types import (
     ExchangeOracleEventTypes,
     JobLauncherEventTypes,
@@ -40,14 +41,14 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.attempts, 0)
-        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
-        self.assertEqual(webhook.event_type, JobLauncherEventTypes.escrow_created.value)
-        self.assertEqual(webhook.event_data, None)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
+        assert webhook.escrow_address == escrow_address
+        assert webhook.chain_id == chain_id
+        assert webhook.signature == signature
+        assert webhook.attempts == 0
+        assert webhook.type == OracleWebhookTypes.job_launcher.value
+        assert webhook.event_type == JobLauncherEventTypes.escrow_created.value
+        assert webhook.event_data == None
+        assert webhook.status == OracleWebhookStatuses.pending.value
 
     def test_create_incoming_webhook_none_escrow_address(self):
         chain_id = Networks.localhost.value
@@ -60,7 +61,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.job_launcher,
             event_type=JobLauncherEventTypes.escrow_created.value,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_incoming_webhook_none_chain_id(self):
@@ -74,13 +75,19 @@ class ServiceIntegrationTest(unittest.TestCase):
             type=OracleWebhookTypes.job_launcher,
             event_type=JobLauncherEventTypes.escrow_created.value,
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_incoming_webhook_none_event_type(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         signature = "signature"
-        with self.assertRaises(AssertionError) as error:
+        with pytest.raises(
+            AssertionError,
+            match=(
+                "'event' and 'event_type' cannot be used together. "
+                "Please use only one of the fields"
+            ),
+        ):
             webhook_service.inbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -88,16 +95,14 @@ class ServiceIntegrationTest(unittest.TestCase):
                 signature=signature,
                 type=OracleWebhookTypes.job_launcher,
             )
-        self.assertEqual(
-            str(error.exception),
-            "'event' and 'event_type' cannot be used together. Please use only one of the fields",
-        )
 
     def test_create_incoming_webhook_none_signature(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         chain_id = Networks.localhost.value
 
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(
+            ValueError, match="Webhook signature must be specified for incoming events"
+        ):
             webhook_service.inbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
@@ -105,9 +110,6 @@ class ServiceIntegrationTest(unittest.TestCase):
                 type=OracleWebhookTypes.job_launcher,
                 event_type=JobLauncherEventTypes.escrow_created.value,
             )
-        self.assertEqual(
-            str(error.exception), "Webhook signature must be specified for incoming events"
-        )
 
     def test_create_outgoing_webhook(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -118,18 +120,18 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=escrow_address,
             chain_id=chain_id,
             type=OracleWebhookTypes.exchange_oracle,
-            event=ExchangeOracleEvent_TaskFinished(),
+            event=ExchangeOracleEvent_JobFinished(),
         )
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.attempts, 0)
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_finished.value)
-        self.assertEqual(webhook.event_data, {})
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
+        assert webhook.escrow_address == escrow_address
+        assert webhook.chain_id == chain_id
+        assert webhook.attempts == 0
+        assert webhook.type == OracleWebhookTypes.exchange_oracle.value
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished.value
+        assert webhook.event_data == {}
+        assert webhook.status == OracleWebhookStatuses.pending.value
 
     def test_create_outgoing_webhook_none_escrow_address(self):
         chain_id = Networks.localhost.value
@@ -138,9 +140,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=None,
             chain_id=chain_id,
             type=OracleWebhookTypes.exchange_oracle,
-            event=ExchangeOracleEvent_TaskFinished(),
+            event=ExchangeOracleEvent_JobFinished(),
         )
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_outgoing_webhook_none_chain_id(self):
@@ -150,42 +152,43 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=escrow_address,
             chain_id=None,
             type=OracleWebhookTypes.exchange_oracle,
-            event=ExchangeOracleEvent_TaskFinished(),
+            event=ExchangeOracleEvent_JobFinished(),
         )
-        with self.assertRaises(IntegrityError) as error:
+        with pytest.raises(IntegrityError):
             self.session.commit()
 
     def test_create_outgoing_webhook_none_event_type(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        with self.assertRaises(AssertionError) as error:
+        with pytest.raises(
+            AssertionError,
+            match=(
+                "'event' and 'event_type' cannot be used together. "
+                "Please use only one of the fields"
+            ),
+        ):
             webhook_service.outbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
                 chain_id=None,
                 type=OracleWebhookTypes.exchange_oracle,
             )
-        self.assertEqual(
-            str(error.exception),
-            "'event' and 'event_type' cannot be used together. Please use only one of the fields",
-        )
 
     def test_create_outgoing_webhook_with_signature(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         chain_id = Networks.localhost.value
         signature = "signature"
 
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(
+            ValueError, match="Webhook signature must not be specified for outgoing events"
+        ):
             webhook_service.outbox.create_webhook(
                 self.session,
                 escrow_address=escrow_address,
                 chain_id=chain_id,
                 type=OracleWebhookTypes.exchange_oracle,
-                event=ExchangeOracleEvent_TaskFinished(),
+                event=ExchangeOracleEvent_JobFinished(),
                 signature=signature,
             )
-        self.assertEqual(
-            str(error.exception), "Webhook signature must not be specified for outgoing events"
-        )
 
     def test_get_pending_webhooks(self):
         chain_id = Networks.localhost.value
@@ -232,7 +235,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             chain_id=chain_id,
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
-            event_type=RecordingOracleEventTypes.task_completed.value,
+            event_type=RecordingOracleEventTypes.job_completed.value,
             direction=webhook_service.OracleWebhookDirectionTags.incoming,
         )
         webhook5_id = str(uuid.uuid4())
@@ -256,21 +259,21 @@ class ServiceIntegrationTest(unittest.TestCase):
         pending_webhooks = webhook_service.inbox.get_pending_webhooks(
             self.session, type=OracleWebhookTypes.job_launcher, limit=10
         )
-        self.assertEqual(len(pending_webhooks), 2)
-        self.assertEqual(pending_webhooks[0].id, webhook1_id)
-        self.assertEqual(pending_webhooks[1].id, webhook2_id)
+        assert len(pending_webhooks) == 2
+        assert pending_webhooks[0].id == webhook1_id
+        assert pending_webhooks[1].id == webhook2_id
 
         pending_webhooks = webhook_service.inbox.get_pending_webhooks(
             self.session, type=OracleWebhookTypes.recording_oracle, limit=10
         )
-        self.assertEqual(len(pending_webhooks), 1)
-        self.assertEqual(pending_webhooks[0].id, webhook4_id)
+        assert len(pending_webhooks) == 1
+        assert pending_webhooks[0].id == webhook4_id
 
         pending_webhooks = webhook_service.outbox.get_pending_webhooks(
             self.session, type=OracleWebhookTypes.job_launcher, limit=10
         )
-        self.assertEqual(len(pending_webhooks), 1)
-        self.assertEqual(pending_webhooks[0].id, webhook5_id)
+        assert len(pending_webhooks) == 1
+        assert pending_webhooks[0].id == webhook5_id
 
     def test_update_webhook_status(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -292,12 +295,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.attempts, 0)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.completed.value)
+        assert webhook.escrow_address == escrow_address
+        assert webhook.chain_id == chain_id
+        assert webhook.attempts == 0
+        assert webhook.signature == signature
+        assert webhook.type == OracleWebhookTypes.job_launcher.value
+        assert webhook.status == OracleWebhookStatuses.completed.value
 
     def test_handle_webhook_success(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -317,12 +320,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.attempts, 1)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.completed.value)
+        assert webhook.escrow_address == escrow_address
+        assert webhook.chain_id == chain_id
+        assert webhook.attempts == 1
+        assert webhook.signature == signature
+        assert webhook.type == OracleWebhookTypes.job_launcher.value
+        assert webhook.status == OracleWebhookStatuses.completed.value
 
     def test_handle_webhook_fail(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -342,21 +345,21 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.attempts, 1)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
+        assert webhook.escrow_address == escrow_address
+        assert webhook.chain_id == chain_id
+        assert webhook.attempts == 1
+        assert webhook.signature == signature
+        assert webhook.type == OracleWebhookTypes.job_launcher.value
+        assert webhook.status == OracleWebhookStatuses.pending.value
 
-        for i in range(4):
+        for _i in range(4):
             webhook_service.inbox.handle_webhook_fail(self.session, webhook_id)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.attempts, 5)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.failed.value)
+        assert webhook.escrow_address == escrow_address
+        assert webhook.chain_id == chain_id
+        assert webhook.attempts == 5
+        assert webhook.signature == signature
+        assert webhook.type == OracleWebhookTypes.job_launcher.value
+        assert webhook.status == OracleWebhookStatuses.failed.value

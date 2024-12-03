@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import src.cvat.api_calls as cvat_api
 from src.core.types import ExchangeOracleEventTypes, JobStatuses
-from src.crons.state_trackers import track_task_creation
+from src.crons.cvat.state_trackers import track_task_creation
 from src.db import SessionLocal
 from src.models.cvat import DataUpload, Job
 from src.models.webhook import Webhook
@@ -31,16 +31,16 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with patch(
-            "src.crons.state_trackers.cvat_api.get_task_upload_status"
+            "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
         ) as mock_get_task_upload_status:
             mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FAILED, "Failed")
 
             track_task_creation()
 
         webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
-        self.assertIsNotNone(webhook)
+        assert webhook is not None
         data_upload = self.session.query(DataUpload).filter_by(id=upload_id).first()
-        self.assertIsNone(data_upload)
+        assert data_upload is None
 
     def test_track_track_completed_task_creation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -56,17 +56,21 @@ class ServiceIntegrationTest(unittest.TestCase):
         new_cvat_job_id = 2
         with (
             patch(
-                "src.crons.state_trackers.cvat_api.get_task_upload_status"
+                "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
             ) as mock_get_task_upload_status,
-            patch("src.crons.state_trackers.cvat_api.fetch_task_jobs") as mock_fetch_task_jobs,
+            patch("src.crons.cvat.state_trackers.cvat_api.fetch_task_jobs") as mock_fetch_task_jobs,
         ):
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
+            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, "Finished")
             mock_cvat_job_1 = Mock()
             mock_cvat_job_1.id = cvat_job.cvat_id
+            mock_cvat_job_1.start_frame = 0
+            mock_cvat_job_1.stop_frame = 1
 
             mock_cvat_job_2 = Mock()
             mock_cvat_job_2.id = new_cvat_job_id
             mock_cvat_job_2.state = JobStatuses.in_progress
+            mock_cvat_job_2.start_frame = 2
+            mock_cvat_job_2.stop_frame = 3
 
             mock_fetch_task_jobs.return_value = [mock_cvat_job_1, mock_cvat_job_2]
 
@@ -75,11 +79,11 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         jobs = self.session.query(Job).all()
-        self.assertIsNotNone(jobs)
-        self.assertEqual(len(jobs), 2)
-        self.assertTrue(any(job.cvat_id == 2 for job in jobs))
+        assert jobs is not None
+        assert len(jobs) == 2
+        assert any(job.cvat_id == 2 for job in jobs)
         data_upload = self.session.query(DataUpload).filter_by(id=upload_id).first()
-        self.assertIsNone(data_upload)
+        assert data_upload is None
 
     def test_track_track_completed_task_creation_error(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
@@ -93,19 +97,19 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             patch(
-                "src.crons.state_trackers.cvat_api.get_task_upload_status"
+                "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
             ) as mock_get_task_upload_status,
             patch(
-                "src.crons.state_trackers.cvat_api.fetch_task_jobs",
+                "src.crons.cvat.state_trackers.cvat_api.fetch_task_jobs",
                 side_effect=cvat_api.exceptions.ApiException("Error"),
             ),
         ):
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, None)
+            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, "Finished")
 
             track_task_creation()
 
         self.session.commit()
 
         webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
-        self.assertIsNotNone(webhook)
-        self.assertEqual(webhook.event_type, ExchangeOracleEventTypes.task_creation_failed)
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.job_creation_failed

@@ -1,7 +1,11 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob, ErrorEscrow } from '../../common/constants/errors';
+import {
+  ErrorCronJob,
+  ErrorEscrow,
+  // ErrorJob,
+} from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
@@ -128,7 +132,7 @@ export class CronJobService {
 
     try {
       const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.CREATED,
+        JobStatus.FUNDED,
       );
 
       for (const jobEntity of jobEntities) {
@@ -169,7 +173,7 @@ export class CronJobService {
 
     try {
       const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.SET_UP,
+        JobStatus.CREATED,
       );
 
       for (const jobEntity of jobEntities) {
@@ -215,7 +219,12 @@ export class CronJobService {
 
       for (const jobEntity of jobEntities) {
         try {
-          if (jobEntity.escrowAddress) {
+          if (
+            await this.jobService.isEscrowFunded(
+              jobEntity.chainId,
+              jobEntity.escrowAddress,
+            )
+          ) {
             const { amountRefunded } =
               await this.jobService.processEscrowCancellation(jobEntity);
             await this.paymentService.createRefundPayment({
@@ -285,8 +294,9 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
 
     try {
-      const webhookEntities = await this.webhookRepository.findByStatus(
+      const webhookEntities = await this.webhookRepository.findByStatusAndType(
         WebhookStatus.PENDING,
+        EventType.ESCROW_CREATED,
       );
 
       for (const webhookEntity of webhookEntities) {
@@ -308,6 +318,68 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
+  // @Cron('*/5 * * * *')
+  /**
+   * Process an abuse webhook.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  // public async processAbuse(): Promise<void> {
+  //   const isCronJobRunning = await this.isCronJobRunning(CronJobType.Abuse);
+
+  //   if (isCronJobRunning) {
+  //     return;
+  //   }
+
+  //   this.logger.log('Abuse START');
+  //   const cronJob = await this.startCronJob(CronJobType.Abuse);
+
+  //   try {
+  //     const webhookEntities = await this.webhookRepository.findByStatusAndType(
+  //       WebhookStatus.PENDING,
+  //       EventType.ABUSE_DETECTED,
+  //     );
+
+  //     for (const webhookEntity of webhookEntities) {
+  //       try {
+  //         const jobEntity =
+  //           await this.jobRepository.findOneByChainIdAndEscrowAddress(
+  //             webhookEntity.chainId,
+  //             webhookEntity.escrowAddress,
+  //           );
+  //         if (!jobEntity) {
+  //           this.logger.log(ErrorJob.NotFound, JobService.name);
+  //           throw new ControlledError(
+  //             ErrorJob.NotFound,
+  //             HttpStatus.BAD_REQUEST,
+  //           );
+  //         }
+  //         if (
+  //           jobEntity.escrowAddress &&
+  //           jobEntity.status !== JobStatus.CANCELED
+  //         ) {
+  //           await this.jobService.processEscrowCancellation(jobEntity);
+  //           jobEntity.status = JobStatus.CANCELED;
+  //           await this.jobRepository.updateOne(jobEntity);
+  //         }
+  //         await this.paymentService.createSlash(jobEntity);
+  //       } catch (err) {
+  //         this.logger.error(
+  //           `Error slashing escrow (address: ${webhookEntity.escrowAddress}, chainId: ${webhookEntity.chainId}: ${err.message}`,
+  //         );
+  //         await this.webhookService.handleWebhookError(webhookEntity);
+  //         continue;
+  //       }
+  //       webhookEntity.status = WebhookStatus.COMPLETED;
+  //       await this.webhookRepository.updateOne(webhookEntity);
+  //     }
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //   }
+
+  //   this.logger.log('Abuse STOP');
+  //   await this.completeCronJob(cronJob);
+  // }
+
   @Cron('30 */2 * * * *')
   /**
    * Process a job that syncs job statuses.
@@ -326,14 +398,29 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.SyncJobStatuses);
 
     try {
-      const events = await EscrowUtils.getStatusEvents(
-        this.networkConfigService.networks.map((network) => network.chainId),
-        [EscrowStatus.Partial, EscrowStatus.Complete],
-        lastCronJob?.lastSubgraphTime || undefined,
-        undefined,
-        this.web3Service.getOperatorAddress(),
-      );
+      const events = [];
+      const statuses = [EscrowStatus.Partial, EscrowStatus.Complete];
+      const from = lastCronJob?.lastSubgraphTime || undefined;
 
+      for (const network of this.networkConfigService.networks) {
+        let skip = 0;
+        let eventsBatch;
+
+        do {
+          eventsBatch = await EscrowUtils.getStatusEvents(
+            network.chainId,
+            statuses,
+            from,
+            undefined,
+            this.web3Service.getOperatorAddress(),
+            100,
+            skip,
+          );
+
+          events.push(...eventsBatch);
+          skip += 100;
+        } while (eventsBatch.length === 100);
+      }
       if (events.length === 0) {
         this.logger.log('No events to process');
         await this.completeCronJob(cronJob);
@@ -343,7 +430,7 @@ export class CronJobService {
       const escrowAddresses = events.map((event) =>
         ethers.getAddress(event.escrowAddress),
       );
-      const chainIds = events.map((event) => event.chainId);
+      const chainIds = [...new Set(events.map((event) => event.chainId))];
 
       const jobs =
         await this.jobRepository.findManyByChainIdsAndEscrowAddresses(
@@ -363,7 +450,12 @@ export class CronJobService {
         const key = `${event.chainId}-${ethers.getAddress(event.escrowAddress)}`;
         const job = jobMap.get(key);
 
-        if (!job || job.status === JobStatus.TO_CANCEL) continue;
+        if (
+          !job ||
+          job.status === JobStatus.TO_CANCEL ||
+          job.status === JobStatus.CANCELED
+        )
+          continue;
 
         let newStatus: JobStatus | null = null;
         if (

@@ -13,11 +13,8 @@ export type EscrowData = {
   manifestHash?: string;
   manifestUrl?: string;
   recordingOracle?: string;
-  recordingOracleFee?: string;
   reputationOracle?: string;
-  reputationOracleFee?: string;
   exchangeOracle?: string;
-  exchangeOracleFee?: string;
   status: string;
   token: string;
   totalFundedAmount: string;
@@ -44,7 +41,6 @@ export type HMTStatisticsData = {
 
 export type EscrowStatisticsData = {
   fundEventCount: string;
-  setupEventCount: string;
   storeResultsEventCount: string;
   bulkPayoutEventCount: string;
   pendingStatusEventCount: string;
@@ -59,7 +55,6 @@ export type EscrowStatisticsData = {
 export type EventDayData = {
   timestamp: string;
   dailyFundEventCount: string;
-  dailySetupEventCount: string;
   dailyStoreResultsEventCount: string;
   dailyBulkPayoutEventCount: string;
   dailyPendingStatusEventCount: string;
@@ -141,8 +136,6 @@ export type HMTStatistics = {
   totalTransferAmount: bigint;
   totalTransferCount: number;
   totalHolders: number;
-  holders: HMTHolder[];
-  dailyHMTData: DailyHMTData[];
 };
 
 export type IMDataEntity = {

@@ -10,21 +10,22 @@ import {
 import { AssignmentEntity } from './assignment.entity';
 import { AssignmentRepository } from './assignment.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { TOKEN } from '../../common/constant';
 import { JobService } from '../job/job.service';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { ErrorAssignment } from '../../common/constant/errors';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
 export class AssignmentService {
-  public readonly logger = new Logger(AssignmentService.name);
+  private readonly logger = new Logger(AssignmentService.name);
 
   constructor(
-    public readonly assignmentRepository: AssignmentRepository,
-    public readonly jobRepository: JobRepository,
-    public readonly jobService: JobService,
-    public readonly web3Service: Web3Service,
+    private readonly assignmentRepository: AssignmentRepository,
+    private readonly jobRepository: JobRepository,
+    private readonly jobService: JobService,
+    private readonly web3Service: Web3Service,
+    private readonly serverConfigService: ServerConfigService,
   ) {}
 
   public async createAssignment(
@@ -53,7 +54,10 @@ export class AssignmentService {
         jwtUser.address,
       );
 
-    if (assignmentEntity) {
+    if (
+      assignmentEntity &&
+      assignmentEntity.status !== AssignmentStatus.CANCELED
+    ) {
       this.logger.log(ErrorAssignment.AlreadyExists, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.AlreadyExists);
     }
@@ -65,7 +69,19 @@ export class AssignmentService {
     const manifest = await this.jobService.getManifest(
       data.chainId,
       data.escrowAddress,
+      jobEntity.manifestUrl,
     );
+
+    // Check if all required qualifications are present
+    const userQualificationsSet = new Set(jwtUser.qualifications);
+    const missingQualifications = manifest.qualifications?.filter(
+      (qualification) => !userQualificationsSet.has(qualification),
+    );
+    if (missingQualifications && missingQualifications.length > 0) {
+      throw new BadRequestException(
+        ErrorAssignment.InvalidAssignmentQualification,
+      );
+    }
 
     if (currentAssignments >= manifest.submissionsRequired) {
       this.logger.log(ErrorAssignment.FullyAssigned, AssignmentService.name);
@@ -78,6 +94,12 @@ export class AssignmentService {
     if (expirationDate < new Date()) {
       this.logger.log(ErrorAssignment.ExpiredEscrow, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.ExpiredEscrow);
+    }
+
+    // Allow reassignation when status is Canceled
+    if (assignmentEntity) {
+      assignmentEntity.status = AssignmentStatus.ACTIVE;
+      return this.assignmentRepository.updateOne(assignmentEntity);
     }
 
     const newAssignmentEntity = new AssignmentEntity();
@@ -94,7 +116,6 @@ export class AssignmentService {
     data: GetAssignmentsDto,
     workerAddress: string,
     reputationNetwork: string,
-    requestUrl: string,
   ): Promise<PageDto<AssignmentDto>> {
     if (data.jobType && data.jobType !== JobType.FORTUNE)
       return new PageDto(data.page!, data.pageSize!, 0, []);
@@ -110,21 +131,22 @@ export class AssignmentService {
     const assignments = await Promise.all(
       entities.map(async (entity) => {
         const assignment = new AssignmentDto(
-          entity.id,
+          entity.id.toString(),
           entity.job.escrowAddress,
           entity.job.chainId,
           JobType.FORTUNE,
           entity.status,
           entity.rewardAmount,
-          TOKEN,
+          entity.job.rewardToken,
           entity.createdAt.toISOString(),
           entity.expiresAt.toISOString(),
+          entity.updatedAt.toISOString(),
         );
-
         if (entity.status === AssignmentStatus.ACTIVE)
-          assignment.url = requestUrl;
-        else assignment.updatedAt = entity.updatedAt.toISOString();
-
+          assignment.url =
+            this.serverConfigService.feURL +
+            '/assignment/' +
+            entity.id.toString();
         return assignment;
       }),
     );

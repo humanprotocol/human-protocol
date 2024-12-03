@@ -7,18 +7,27 @@ import {
   oracleStatsResponseFixture,
   statisticsExchangeOracleAddress,
   statisticsToken,
-  userStatsCommandFixture,
+  generalUserStatsCommandFixture,
   userStatsResponseFixture,
 } from './statistics.fixtures';
 import { OracleStatisticsDto } from '../model/oracle-statistics.model';
 import { UserStatisticsDto } from '../model/user-statistics.model';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
+import { StatisticsProfile } from '../statistics.mapper.profile';
+import { jwtUserDataFixture } from '../../h-captcha/spec/h-captcha.fixtures';
 
 describe('StatisticsController', () => {
   let controller: StatisticsController;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [StatisticsController],
-      providers: [StatisticsService],
+      imports: [
+        AutomapperModule.forRoot({
+          strategyInitializer: classes(),
+        }),
+      ],
+      providers: [StatisticsService, StatisticsProfile],
     })
       .overrideProvider(StatisticsService)
       .useValue(statisticsServiceMock)
@@ -54,10 +63,14 @@ describe('StatisticsController', () => {
       const dto: UserStatisticsDto = {
         oracle_address: statisticsExchangeOracleAddress,
       };
-      const result = await controller.getUserStatistics(dto, statisticsToken);
+      const result = await controller.getUserStatistics(
+        dto,
+        jwtUserDataFixture,
+        statisticsToken,
+      );
 
       expect(statisticsServiceMock.getUserStats).toHaveBeenCalledWith(
-        userStatsCommandFixture,
+        generalUserStatsCommandFixture,
       );
       expect(result).toEqual(userStatsResponseFixture);
     });

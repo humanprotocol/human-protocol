@@ -2,24 +2,32 @@ import io
 import json
 import logging
 import zipfile
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from http import HTTPStatus
 from io import BytesIO
+from pathlib import Path
 from time import sleep
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any
 
+from cvat_sdk import Client, make_client
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
 from cvat_sdk.core.helpers import get_paginated_collection
+from cvat_sdk.core.uploading import AnnotationUploader
 
 from src.core.config import Config
 from src.utils.enums import BetterEnumMeta
 from src.utils.time import utcnow
 
 _NOTSET = object()
+
+
+class CVATException(Exception):
+    """Indicates that CVAT API returned unexpected response"""
 
 
 def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> bool:
@@ -50,7 +58,7 @@ def _get_annotations(
     cvat_id: int,
     format_name: str,
     attempt_interval: int = 5,
-    timeout: Optional[int] = _NOTSET,
+    timeout: int | None = _NOTSET,
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -69,7 +77,7 @@ def _get_annotations(
     time_begin = utcnow()
 
     if timeout is _NOTSET:
-        timeout = Config.features.default_export_timeout
+        timeout = Config.cvat_config.cvat_export_timeout
 
     while True:
         (_, response) = endpoint.call_with_http_info(
@@ -121,17 +129,27 @@ def get_api_client() -> ApiClient:
     return api_client
 
 
+def get_sdk_client() -> Client:
+    client = make_client(
+        host=Config.cvat_config.cvat_url,
+        credentials=(Config.cvat_config.cvat_admin, Config.cvat_config.cvat_admin_pass),
+    )
+    client.organization_slug = Config.cvat_config.cvat_org_slug
+
+    return client
+
+
 def create_cloudstorage(
     provider: str,
     bucket_name: str,
     *,
-    credentials: Optional[Dict[str, Any]] = None,
-    bucket_host: Optional[str] = None,
+    credentials: dict[str, Any] | None = None,
+    bucket_host: str | None = None,
 ) -> models.CloudStorageRead:
     # credentials: access_key | secret_key | service_account_key
     # CVAT credentials: key | secret_key | key_file
-    def _to_cvat_credentials(credentials: Dict[str, Any]) -> Dict:
-        cvat_credentials = dict()
+    def _to_cvat_credentials(credentials: dict[str, Any]) -> dict:
+        cvat_credentials = {}
         for cvat_field, field in {
             "key": "access_key",
             "secret_key": "secret_key",
@@ -147,7 +165,7 @@ def create_cloudstorage(
                     cvat_credentials[cvat_field] = value
         return cvat_credentials
 
-    request_kwargs = dict()
+    request_kwargs = {}
 
     if credentials:
         request_kwargs.update(_to_cvat_credentials(credentials))
@@ -186,7 +204,7 @@ def create_cloudstorage(
 
 
 def create_project(
-    name: str, *, labels: Optional[list] = None, user_guide: str = ""
+    name: str, *, labels: list | None = None, user_guide: str = ""
 ) -> models.ProjectRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -239,7 +257,7 @@ def request_project_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_project_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -296,17 +314,22 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
             raise
 
 
-def create_task(project_id: int, name: str) -> models.TaskRead:
+def create_task(
+    project_id: int,
+    name: str,
+    *,
+    segment_size: int,
+) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         task_write_request = models.TaskWriteRequest(
             name=name,
             project_id=project_id,
             overlap=0,
-            segment_size=Config.cvat_config.cvat_job_segment_size,
+            segment_size=segment_size,
         )
         try:
-            (task_info, response) = api_client.tasks_api.create(task_write_request)
+            (task_info, _) = api_client.tasks_api.create(task_write_request)
             return task_info
 
         except exceptions.ApiException as e:
@@ -314,7 +337,7 @@ def create_task(project_id: int, name: str) -> models.TaskRead:
             raise
 
 
-def get_cloudstorage_contents(cloudstorage_id: int) -> List[str]:
+def get_cloudstorage_contents(cloudstorage_id: int) -> list[str]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
@@ -332,8 +355,10 @@ def put_task_data(
     task_id: int,
     cloudstorage_id: int,
     *,
-    filenames: Optional[list[str]] = None,
-    sort_images: bool = True,
+    chunk_size: int,
+    filenames: list[str] | None = None,
+    sort_images: bool | None = None,
+    validation_params: dict[str, str | float | list[str]] | None = None,
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -344,21 +369,52 @@ def put_task_data(
         else:
             kwargs["filename_pattern"] = "*"
 
+        sorting_method = None
+
+        if validation_params:
+            if sort_images:
+                raise AssertionError(
+                    f"sort_images={sort_images} cannot be used. "
+                    'Only random sorting can be used when task validation mode is "gt_pool"'
+                )
+            sorting_method = models.SortingMethod("random")
+
+            gt_filenames = validation_params["gt_filenames"]
+            if missed_filenames := set(gt_filenames) - set(filenames):
+                filenames.extend(missed_filenames)
+
+            kwargs["validation_params"] = models.DataRequestValidationParams(
+                mode=models.ValidationMode("gt_pool"),
+                frames=gt_filenames,
+                frame_selection_method=models.FrameSelectionMethod("manual"),
+                frames_per_job_count=validation_params["gt_frames_per_job_count"],
+            )
+
+        if sorting_method is None:
+            if sort_images is None:
+                sort_images = True
+
+            sorting_method = (
+                models.SortingMethod("lexicographical")
+                if sort_images
+                else models.SortingMethod("predefined")
+            )
+
         data_request = models.DataRequest(
-            chunk_size=Config.cvat_config.cvat_job_segment_size,
+            chunk_size=chunk_size,
             cloud_storage_id=cloudstorage_id,
             image_quality=Config.cvat_config.cvat_default_image_quality,
             use_cache=True,
             use_zip_chunks=True,
-            sorting_method="lexicographical" if sort_images else "predefined",
+            sorting_method=sorting_method,
             **kwargs,
         )
         try:
             (_, response) = api_client.tasks_api.create_data(task_id, data_request=data_request)
-            return None
+            return
 
         except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling ProjectsApi.put_task_data: {e}\n")
+            logger.exception(f"Exception when calling tasks_api.create_data: {e}\n")
             raise
 
 
@@ -388,7 +444,7 @@ def request_task_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_task_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -418,16 +474,15 @@ def get_task_annotations(
             raise
 
 
-def fetch_task_jobs(task_id: int) -> List[models.JobRead]:
+def fetch_task_jobs(task_id: int) -> list[models.JobRead]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            data = get_paginated_collection(
+            return get_paginated_collection(
                 api_client.jobs_api.list_endpoint,
                 task_id=task_id,
                 type="annotation",
             )
-            return data
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.list: {e}\n")
             raise
@@ -459,7 +514,7 @@ def request_job_annotations(cvat_id: int, format_name: str) -> bool:
 
 
 def get_job_annotations(
-    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
 ) -> io.RawIOBase:
     """
     Downloads annotations.
@@ -509,13 +564,13 @@ def delete_cloudstorage(cvat_id: int) -> None:
             raise
 
 
-def fetch_projects(assignee: str = "") -> List[models.ProjectRead]:
+def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
             return get_paginated_collection(
                 api_client.projects_api.list_endpoint,
-                **(dict(assignee=assignee) if assignee else {}),
+                **({"assignee": assignee} if assignee else {}),
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
@@ -529,7 +584,7 @@ class UploadStatus(str, Enum, metaclass=BetterEnumMeta):
     FAILED = "Failed"
 
 
-def get_task_upload_status(cvat_id: int) -> Tuple[Optional[UploadStatus], str]:
+def get_task_upload_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -557,40 +612,208 @@ def clear_job_annotations(job_id: int) -> None:
             )
         except exceptions.ApiException as e:
             if e.status == 404:
-                return None
+                return
 
             logger.exception(f"Exception when calling JobsApi.partial_update_annotations(): {e}\n")
             raise
 
 
-def update_job_assignee(id: str, assignee_id: Optional[int]):
+def get_gt_job(task_id: int) -> models.JobRead:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            (paginated_jobs, _) = api_client.jobs_api.list(task_id=task_id, type="ground_truth")
+            if (gt_jobs_count := len(paginated_jobs["results"])) != 1:
+                raise CVATException(
+                    f"CVAT returned {gt_jobs_count} GT jobs for the task({task_id})"
+                )
+
+            return paginated_jobs["results"][0]
+        except (exceptions.ApiException, AssertionError) as ex:
+            logger.exception(f"Exception when calling JobsApi.list(): {ex}\n")
+            raise
+
+
+def upload_gt_annotations(
+    job_id: int,
+    dataset_path: Path,
+    *,
+    format_name: str,
+    sleep_interval: int = 5,
+    timeout: int | None = Config.cvat_config.cvat_import_timeout,
+) -> None:
+    # FUTURE-TODO: use job.import_annotations when CVAT supports a waiting timeout
+    start_time = datetime.now(timezone.utc)
+    logger = logging.getLogger("app")
+
+    with get_sdk_client() as client:
+        uploader = AnnotationUploader(client)
+        url = client.api_map.make_endpoint_url(
+            client.api_client.jobs_api.create_annotations_endpoint.path, kwsub={"id": job_id}
+        )
+
+        try:
+            response = uploader.upload_file(
+                url,
+                dataset_path,
+                query_params={"format": format_name, "filename": dataset_path.name},
+                meta={"filename": dataset_path.name},
+            )
+        except Exception as ex:
+            logger.exception(f"Exception occurred while importing GT annotations: {ex}\n")
+            raise
+
+        request_id = json.loads(response.data).get("rq_id")
+        if not request_id:
+            raise CVATException(
+                "CVAT server has not returned rq_id in the response when "
+                f"uploading GT annotations to the {job_id} job"
+            )
+
+        while True:
+            try:
+                (request_details, _) = client.api_client.requests_api.retrieve(request_id)
+            except exceptions.ApiException as ex:
+                logger.exception(f"Exception occurred while importing GT annotations: {ex}\n")
+                raise
+
+            if (
+                request_details.status.value
+                == models.RequestStatus.allowed_values[("value",)]["FINISHED"]
+            ):
+                break
+
+            if (
+                request_details.status.value
+                == models.RequestStatus.allowed_values[("value",)]["FAILED"]
+            ):
+                raise Exception(
+                    "Annotations upload failed. "
+                    f"Previous status was: {request_details.status.value}."
+                )
+
+            if timeout is not None and timedelta(seconds=timeout) < (utcnow() - start_time):
+                raise Exception(
+                    "Failed to upload the GT annotations to CVAT within the timeout interval. "
+                    f"Previous status was: {request_details.status.value}. "
+                    f"Timeout: {timeout} seconds."
+                )
+
+            sleep(sleep_interval)
+
+    logger.info(f"GT annotations for the job {job_id} have been uploaded to CVAT.")
+
+
+def get_quality_control_settings(task_id: int) -> models.QualitySettings:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            paginated_data, _ = api_client.quality_api.list_settings(task_id=task_id)
+            if (settings_count := len(paginated_data["results"])) != 1:
+                raise CVATException(
+                    f"CVAT returned {settings_count}"
+                    f"quality control settings associated with the task({task_id})"
+                )
+            return paginated_data["results"][0]
+
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling QualityApi.list_settings(): {ex}\n")
+            raise
+
+
+def update_quality_control_settings(
+    settings_id: int,
+    *,
+    target_metric_threshold: float,
+    target_metric: str = "accuracy",
+    max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
+    iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
+    oks_sigma: float | None = None,
+    point_size_base: str | None = None,
+    match_empty_frames: bool | None = None,
+) -> None:
+    logger = logging.getLogger("app")
+
+    params = {
+        "max_validations_per_job": max_validations_per_job,
+        "target_metric": target_metric,
+        "target_metric_threshold": target_metric_threshold,
+        "iou_threshold": iou_threshold,
+        "low_overlap_threshold": iou_threshold,  # used only for warnings
+    }
+
+    if oks_sigma is not None:
+        params["oks_sigma"] = oks_sigma
+
+    if point_size_base is not None:
+        params["point_size_base"] = point_size_base
+
+    if match_empty_frames is not None:
+        params["match_empty_frames"] = match_empty_frames
+
+    with get_api_client() as api_client:
+        try:
+            api_client.quality_api.partial_update_settings(
+                settings_id,
+                patched_quality_settings_request=models.PatchedQualitySettingsRequest(**params),
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling QualityApi.partial_update_settings(): {e}\n")
+            raise
+
+
+def _update_job(
+    job_id: int,
+    *,
+    assignee_id: int | None | object = _NOTSET,
+    stage: models.JobStage | None = None,
+    state: models.OperationStatus | None = None,
+) -> None:
+    to_update = {
+        attr: value
+        for attr, value in {
+            "stage": stage,
+            "state": state,
+        }.items()
+        if value
+    }
+
+    if assignee_id is not _NOTSET:
+        to_update["assignee"] = assignee_id
+
+    assert to_update
+
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
         try:
             api_client.jobs_api.partial_update(
-                id=id,
-                patched_job_write_request=models.PatchedJobWriteRequest(assignee=assignee_id),
+                job_id, patched_job_write_request=models.PatchedJobWriteRequest(**to_update)
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.partial_update(): {e}\n")
             raise
 
 
-def restart_job(id: str, *, assignee_id: Optional[int] = None):
-    logger = logging.getLogger("app")
+def update_job_assignee(id: int, assignee_id: int | None):
+    _update_job(id, assignee_id=assignee_id)
 
-    with get_api_client() as api_client:
-        try:
-            api_client.jobs_api.partial_update(
-                id=id,
-                patched_job_write_request=models.PatchedJobWriteRequest(
-                    stage="annotation", state="new", assignee=assignee_id
-                ),
-            )
-        except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling JobsApi.partial_update(): {e}\n")
-            raise
+
+def restart_job(id: str, *, assignee_id: int | None = None):
+    _update_job(
+        id,
+        stage=models.JobStage("annotation"),
+        state=models.OperationStatus("new"),
+        assignee_id=assignee_id,
+    )
+
+
+def finish_gt_job(job_id: int) -> None:
+    _update_job(
+        job_id, stage=models.JobStage("acceptance"), state=models.OperationStatus("completed")
+    )
 
 
 def get_user_id(user_email: str) -> int:
@@ -615,7 +838,7 @@ def remove_user_from_org(user_id: int):
     with get_api_client() as api_client:
         try:
             (page, _) = api_client.users_api.list(
-                filter='{"==":[{"var":"id"},"%s"]}' % (user_id,),
+                filter='{"==":[{"var":"id"},"%s"]}' % user_id,  # noqa: UP031
                 org=Config.cvat_config.cvat_org_slug,
             )
             if not page.results:

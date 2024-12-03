@@ -54,11 +54,25 @@ Enum for KVStore keys
 
 #### public_key *= 'public_key'*
 
+#### registration_instructions *= 'registration_instructions'*
+
+#### registration_needed *= 'registration_needed'*
+
 #### role *= 'role'*
 
 #### url *= 'url'*
 
 #### webhook_url *= 'webhook_url'*
+
+### *class* human_protocol_sdk.constants.OrderDirection(value)
+
+Bases: `Enum`
+
+Enum for chain IDs.
+
+#### ASC *= 'asc'*
+
+#### DESC *= 'desc'*
 
 ### *class* human_protocol_sdk.constants.Role(value)
 

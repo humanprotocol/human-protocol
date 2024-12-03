@@ -11,6 +11,8 @@ export interface JobFilterData {
   skip: number;
   pageSize: number;
   reputationNetwork: string;
+  createdAfter?: Date;
+  updatedAfter?: Date;
 }
 
 export interface ListResult {

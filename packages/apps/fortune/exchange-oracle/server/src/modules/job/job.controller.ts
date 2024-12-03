@@ -27,7 +27,7 @@ import { JobService } from './job.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { RequestWithUser } from '../../common/types/jwt';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { Role } from '../../common/enums/role';
+import { AuthSignatureRole, Role } from '../../common/enums/role';
 import { SignatureAuthGuard } from '../../common/guards/signature.auth';
 import { AllowedRoles } from '../../common/decorators/role';
 
@@ -54,11 +54,12 @@ export class JobController {
     description: 'Unauthorized. Missing or invalid credentials.',
   })
   @UseGuards(JwtAuthGuard)
+  @AllowedRoles([Role.Worker, Role.HumanApp])
   @ApiBearerAuth()
   @Get()
   getJobs(
-    @Request() req: RequestWithUser,
     @Query() query: GetJobsDto,
+    @Request() req: RequestWithUser,
   ): Promise<PageDto<JobDto>> {
     return this.jobService.getJobList(query, req.user.reputationNetwork);
   }
@@ -91,14 +92,14 @@ export class JobController {
   })
   @Post('solve')
   @UseGuards(SignatureAuthGuard)
-  @AllowedRoles([Role.Worker])
+  @AllowedRoles([AuthSignatureRole.Worker])
   async solveJob(
-    @Headers(HEADER_SIGNATURE_KEY) signature: string,
     @Body() solveJobDto: SolveJobDto,
+    @Headers(HEADER_SIGNATURE_KEY) signature: string,
   ): Promise<SolveJobResponseDto> {
     const { assignmentId, solution } = solveJobDto;
 
-    await this.jobService.solveJob(assignmentId, solution);
+    await this.jobService.solveJob(Number(assignmentId), solution);
 
     const response: SolveJobResponseDto = {
       assignmentId,

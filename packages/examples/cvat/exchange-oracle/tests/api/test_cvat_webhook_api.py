@@ -48,6 +48,8 @@ def test_incoming_webhook_200(client: TestClient) -> None:
             "project_id": 1,
             "state": "new",
             "type": "annotation",
+            "start_frame": 0,
+            "stop_frame": 1,
         },
         "webhook_id": 1,
     }
@@ -76,7 +78,7 @@ def test_incoming_webhook_200_update_expired_assignmets(client: TestClient) -> N
     (job, _) = get_cvat_job_from_db(1)
     # Check if "update:job" event works with expired assignments
     wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
-    add_asignment_to_db(wallet_address, 1, job.cvat_id, datetime.now())
+    add_asignment_to_db(wallet_address, 1, job.cvat_id, datetime.now(tz=timezone.utc))
 
     data = {
         "event": "update:job",
@@ -86,6 +88,8 @@ def test_incoming_webhook_200_update_expired_assignmets(client: TestClient) -> N
             "task_id": 1,
             "project_id": 1,
             "state": "completed",
+            "start_frame": 0,
+            "stop_frame": 1,
             "assignee": {
                 "url": api_url + "users/1",
                 "id": 1,
@@ -129,6 +133,8 @@ def test_incoming_webhook_200_update(client: TestClient) -> None:
             "task_id": 1,
             "project_id": 1,
             "state": "completed",
+            "start_frame": 0,
+            "stop_frame": 1,
             "assignee": {
                 "url": api_url + "users/1",
                 "id": 2,
@@ -180,5 +186,5 @@ def test_incoming_webhook_401_without_signature(client: TestClient) -> None:
     # Send a request without a signature
     assert response.status_code == 400
     assert response.json() == {
-        "errors": [{"field": "x-signature-256", "message": "field required"}]
+        "errors": [{"field": "x-signature-256", "message": "Field required"}]
     }

@@ -1,8 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 import { SortOrder } from '../enums/global-common';
 import { AutoMap } from '@automapper/classes';
+import { IsEnumCaseInsensitive } from '../decorators';
 
 export abstract class PageableDto {
   @AutoMap()
@@ -32,7 +33,7 @@ export abstract class PageableDto {
 
   @AutoMap()
   @ApiPropertyOptional({ enum: SortOrder })
-  @IsEnum(SortOrder)
+  @IsEnumCaseInsensitive(SortOrder)
   @IsOptional()
   sort?: SortOrder = SortOrder.ASC;
 
@@ -62,4 +63,10 @@ export abstract class PageableData {
   sort?: SortOrder;
 
   abstract sort_field?: any;
+}
+export abstract class PageableResponse {
+  page: number;
+  page_size: number;
+  total_pages: number;
+  total_results: number;
 }

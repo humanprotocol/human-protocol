@@ -1,0 +1,32 @@
+name: CVAT Exchange Oracle Lint
+
+on:
+  push:
+    paths:
+      - 'packages/examples/cvat/exchange-oracle/**'
+      - '.github/workflows/ci-lint-cvat-exchange-oracle.yaml'
+
+env:
+  WORKING_DIR: ./packages/examples/cvat/exchange-oracle
+
+defaults:
+  run:
+    working-directory: ./packages/examples/cvat/exchange-oracle
+
+jobs:
+  cvat-exo-lint:
+    name: CVAT Exchange Oracle Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+          cache-dependency-path: ${{ env.WORKING_DIR }}/poetry.lock
+      - run: poetry install --no-root --only dev
+      - run: poetry run pre-commit run --all-files

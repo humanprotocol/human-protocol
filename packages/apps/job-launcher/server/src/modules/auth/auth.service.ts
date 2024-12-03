@@ -45,11 +45,11 @@ export class AuthService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
+  public async signin(data: SignInDto, _ip?: string): Promise<AuthDto> {
     // if (
     //   !(
     //     await verifyToken(
-    //       this.authConfigService.hCaptchaExchangeURL,
+    //       this.authConfigService.hcaptchaProtectionUrl,
     //       this.authConfigService.hCaptchaSiteKey,
     //       this.authConfigService.hCaptchaSecret,
     //       data.hCaptchaToken,
@@ -57,7 +57,10 @@ export class AuthService {
     //     )
     //   ).success
     // ) {
-    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
+    //   throw new ControlledError(
+    //     ErrorAuth.InvalidCaptchaToken,
+    //     HttpStatus.FORBIDDEN,
+    //   );
     // }
     const userEntity = await this.userService.getByCredentials(
       data.email,
@@ -75,19 +78,22 @@ export class AuthService {
   }
 
   public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    // if (
-    //   !(
-    //     await verifyToken(
-    //       this.authConfigService.hCaptchaExchangeURL,
-    //       this.authConfigService.hCaptchaSiteKey,
-    //       this.authConfigService.hCaptchaSecret,
-    //       data.hCaptchaToken,
-    //       ip,
-    //     )
-    //   ).success
-    // ) {
-    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
-    // }
+    if (
+      !(
+        await verifyToken(
+          this.authConfigService.hcaptchaProtectionUrl,
+          this.authConfigService.hCaptchaSiteKey,
+          this.authConfigService.hCaptchaSecret,
+          data.hCaptchaToken,
+          ip,
+        )
+      ).success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidCaptchaToken,
+        HttpStatus.FORBIDDEN,
+      );
+    }
     const storedUser = await this.userRepository.findByEmail(data.email);
     if (storedUser) {
       throw new ControlledError(
@@ -102,7 +108,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -200,7 +206,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
@@ -223,19 +229,22 @@ export class AuthService {
     data: RestorePasswordDto,
     ip?: string,
   ): Promise<void> {
-    // if (
-    //   !(
-    //     await verifyToken(
-    //       this.authConfigService.hCaptchaExchangeURL,
-    //       this.authConfigService.hCaptchaSiteKey,
-    //       this.authConfigService.hCaptchaSecret,
-    //       data.hCaptchaToken,
-    //       ip,
-    //     )
-    //   ).success
-    // ) {
-    //   throw new ControlledError(ErrorAuth.InvalidCaptchaToken, HttpStatus.UNAUTHORIZED);
-    // }
+    if (
+      !(
+        await verifyToken(
+          this.authConfigService.hcaptchaProtectionUrl,
+          this.authConfigService.hCaptchaSiteKey,
+          this.authConfigService.hCaptchaSecret,
+          data.hCaptchaToken,
+          ip,
+        )
+      ).success
+    ) {
+      throw new ControlledError(
+        ErrorAuth.InvalidCaptchaToken,
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
@@ -307,7 +316,7 @@ export class AuthService {
     tokenEntity.user = userEntity;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);

@@ -1,7 +1,8 @@
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, BigInt, Address } from '@graphprotocol/graph-ts';
+import { ethereum, BigInt, Address, dataSource } from '@graphprotocol/graph-ts';
 
 import { Launched } from '../../generated/EscrowFactory/EscrowFactory';
+import { generateUniqueHash } from '../../tests/utils';
 
 export function createLaunchedEvent(
   factory: Address,
@@ -11,9 +12,17 @@ export function createLaunchedEvent(
   timestamp: BigInt
 ): Launched {
   const newLaunchedEvent = changetype<Launched>(newMockEvent());
+  newLaunchedEvent.transaction.hash = generateUniqueHash(
+    escrow.toString(),
+    timestamp,
+    newLaunchedEvent.transaction.nonce
+  );
 
   newLaunchedEvent.block.timestamp = timestamp;
   newLaunchedEvent.transaction.from = launcher;
+  newLaunchedEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   newLaunchedEvent.address = factory;
 
   newLaunchedEvent.parameters = [];

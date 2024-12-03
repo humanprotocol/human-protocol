@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None)
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
 
 Initializes an LeaderData instance.
 
@@ -35,15 +35,17 @@ Initializes an LeaderData instance.
   * **locked_until_timestamp** (`int`) – Locked until timestamp
   * **amount_withdrawn** (`int`) – Amount withdrawn
   * **amount_slashed** (`int`) – Amount slashed
-  * **reputation** (`int`) – Reputation
   * **reward** (`int`) – Reward
-  * **amount_jobs_launched** (`int`) – Amount of jobs launched
+  * **amount_jobs_processed** (`int`) – Amount of jobs launched
   * **role** (`Optional`[`str`]) – Role
   * **fee** (`Optional`[`int`]) – Fee
   * **public_key** (`Optional`[`str`]) – Public key
   * **webhook_url** (`Optional`[`str`]) – Webhook url
   * **url** (`Optional`[`str`]) – Url
   * **job_types** (`Optional`[`List`[`str`]]) – Job types
+  * **registration_needed** (`Optional`[`bool`]) – True
+  * **registration_instructions** (`Optional`[`str`]) – Instructions url
+  * **reputation_networks** (`Optional`[`List`[`str`]]) – List of reputation networks
 
 ### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None)
 
@@ -59,17 +61,19 @@ Initializes a LeaderFilter instance.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Id to request data
   * **role** (`Optional`[`str`]) – Leader role
 
-### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[])
+### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[], registration_needed=None, registration_instructions=None)
 
 Bases: `object`
 
-#### \_\_init_\_(address, role, url='', job_types=[])
+#### \_\_init_\_(address, role, url='', job_types=[], registration_needed=None, registration_instructions=None)
 
 Initializes an Operator instance.
 
 * **Parameters:**
   * **address** (`str`) – Operator address
   * **role** (`str`) – Role of the operator
+  * **registration_needed** (`Optional`[`bool`]) – True,
+  * **registration_instructions** (`Optional`[`str`]) – Instructions url,
 
 ### *class* human_protocol_sdk.operator.operator_utils.OperatorUtils
 
@@ -129,8 +133,6 @@ Get the reputation network operators of the specified address.
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the reputation network exists
   * **address** (`str`) – Address of the reputation oracle
   * **role** (`Optional`[`str`]) – (Optional) Role of the operator
-* **Parem job_types:**
-  (Optional) Job types of the operator
 * **Return type:**
   `List`[[`Operator`](#human_protocol_sdk.operator.operator_utils.Operator)]
 * **Returns:**

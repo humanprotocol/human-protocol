@@ -3,11 +3,12 @@ import { ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
-import { ChainId } from '../src/enums';
+import { ChainId, OrderDirection } from '../src/enums';
 import { StatisticsClient } from '../src/statistics';
 import {
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
+  GET_HOLDERS_QUERY,
 } from '../src/graphql/queries';
 
 vi.mock('axios');
@@ -70,6 +71,9 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
@@ -129,6 +133,9 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
@@ -185,6 +192,9 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
@@ -218,39 +228,214 @@ describe('StatisticsClient', () => {
 
   describe('getHMTStatistics', () => {
     test('should successfully get HMT statistics', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        hmtokenStatistics: {
+          totalValueTransfered: '100',
+          totalTransferEventCount: '4',
+          holders: '2',
+        },
+      });
+
+      const result = await statisticsClient.getHMTStatistics();
+
+      expect(result).toEqual({
+        totalTransferAmount: ethers.toBigInt(100),
+        totalTransferCount: 4,
+        totalHolders: 2,
+      });
+    });
+
+    test('should throw error in case gql fetch fails from subgraph', async () => {
       const gqlFetchSpy = vi
         .spyOn(gqlFetch, 'default')
-        .mockResolvedValueOnce({
-          hmtokenStatistics: {
-            totalValueTransfered: '100',
-            totalTransferEventCount: '4',
-            holders: '2',
+        .mockRejectedValueOnce(new Error('Error'));
+
+      await expect(statisticsClient.getHMTStatistics()).rejects.toThrow(
+        'Error'
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getHMTHolders', () => {
+    test('should successfully get HMT holders', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x123',
+            balance: '10',
           },
-        })
-        .mockResolvedValueOnce({
-          holders: [
-            {
-              address: '0x123',
-              balance: '10',
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          eventDayDatas: [
-            {
-              timestamp: 1,
-              dailyHMTTransferCount: '4',
-              dailyHMTTransferAmount: '100',
-              dailyUniqueSenders: '100',
-              dailyUniqueReceivers: '100',
-            },
-          ],
-        });
+          {
+            address: '0x456',
+            balance: '20',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders();
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY(),
+        {
+          address: undefined,
+          orderBy: 'balance',
+          orderDirection: undefined,
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+        {
+          address: '0x456',
+          balance: ethers.toBigInt(20),
+        },
+      ]);
+    });
+
+    test('should filter HMT holders by address', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x123',
+            balance: '10',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders({
+        address: '0x123',
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY('0x123'),
+        {
+          address: '0x123',
+          orderBy: 'balance',
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+      ]);
+    });
+
+    test('should order HMT holders by balance ascending', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x123',
+            balance: '10',
+          },
+          {
+            address: '0x456',
+            balance: '20',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders({
+        orderBy: 'balance',
+        orderDirection: 'asc',
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY(),
+        {
+          orderBy: 'balance',
+          orderDirection: 'asc',
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+        {
+          address: '0x456',
+          balance: ethers.toBigInt(20),
+        },
+      ]);
+    });
+
+    test('should order HMT holders by balance descending', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        holders: [
+          {
+            address: '0x456',
+            balance: '20',
+          },
+          {
+            address: '0x123',
+            balance: '10',
+          },
+        ],
+      });
+
+      const result = await statisticsClient.getHMTHolders({
+        orderDirection: 'desc',
+      });
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
+        GET_HOLDERS_QUERY(),
+        {
+          orderBy: 'balance',
+          orderDirection: 'desc',
+        }
+      );
+
+      expect(result).toEqual([
+        {
+          address: '0x456',
+          balance: ethers.toBigInt(20),
+        },
+        {
+          address: '0x123',
+          balance: ethers.toBigInt(10),
+        },
+      ]);
+    });
+
+    test('should throw error in case gql fetch fails from subgraph', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
+
+      await expect(statisticsClient.getHMTHolders()).rejects.toThrow('Error');
+
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getHMTDailyData', () => {
+    test('should successfully get HMT daily data', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        eventDayDatas: [
+          {
+            timestamp: 1,
+            dailyHMTTransferCount: '4',
+            dailyHMTTransferAmount: '100',
+            dailyUniqueSenders: '100',
+            dailyUniqueReceivers: '100',
+          },
+        ],
+      });
 
       const from = new Date();
       const to = new Date(from.setDate(from.getDate() + 1));
 
-      const result = await statisticsClient.getHMTStatistics({
+      const result = await statisticsClient.getHMTDailyData({
         from,
         to,
       });
@@ -261,29 +446,21 @@ describe('StatisticsClient', () => {
         {
           from: from.getTime() / 1000,
           to: to.getTime() / 1000,
+          orderDirection: OrderDirection.ASC,
+          first: 10,
+          skip: 0,
         }
       );
 
-      expect(result).toEqual({
-        totalTransferAmount: ethers.toBigInt(100),
-        totalTransferCount: 4,
-        totalHolders: 2,
-        holders: [
-          {
-            address: '0x123',
-            balance: ethers.toBigInt(10),
-          },
-        ],
-        dailyHMTData: [
-          {
-            timestamp: new Date(1000),
-            totalTransactionAmount: ethers.toBigInt(100),
-            totalTransactionCount: 4,
-            dailyUniqueSenders: 100,
-            dailyUniqueReceivers: 100,
-          },
-        ],
-      });
+      expect(result).toEqual([
+        {
+          timestamp: new Date(1000),
+          totalTransactionAmount: ethers.toBigInt(100),
+          totalTransactionCount: 4,
+          dailyUniqueSenders: 100,
+          dailyUniqueReceivers: 100,
+        },
+      ]);
     });
 
     test('should throw error in case gql fetch fails from subgraph', async () => {

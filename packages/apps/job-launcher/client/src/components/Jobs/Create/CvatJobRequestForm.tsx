@@ -20,17 +20,19 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
 } from '../../../components/Accordion';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { getQualifications } from '../../../services/qualification';
 import {
   AWSRegions,
   CvatJobType,
   GCSRegions,
-  StorageProviders,
   Label,
+  Qualification,
+  StorageProviders,
 } from '../../../types';
 import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
 
@@ -39,12 +41,16 @@ export const CvatJobRequestForm = () => {
     useCreateJobPageUI();
   const [searchParams] = useSearchParams();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
+  const [qualificationsOptions, setQualificationsOptions] = useState<
+    Qualification[]
+  >([]);
 
   const initialValues = {
     labels: [],
     nodes: [],
     type: CvatJobType.IMAGE_BOXES,
     description: '',
+    qualifications: [],
     userGuide: '',
     accuracyTarget: 80,
     dataProvider: StorageProviders.AWS,
@@ -61,6 +67,21 @@ export const CvatJobRequestForm = () => {
     gtPath: '',
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (jobRequest.chainId !== undefined) {
+        try {
+          setQualificationsOptions(await getQualifications(jobRequest.chainId));
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error fetching data:', error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [jobRequest.chainId]);
+
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       if (newExpanded) {
@@ -75,6 +96,7 @@ export const CvatJobRequestForm = () => {
     nodes,
     type,
     description,
+    qualifications,
     dataProvider,
     dataRegion,
     dataBucketName,
@@ -120,6 +142,9 @@ export const CvatJobRequestForm = () => {
         labels: labelArray,
         type,
         description,
+        qualifications: (qualifications as Qualification[]).map(
+          (qualification) => qualification.reference,
+        ),
         data: {
           dataset: {
             provider: dataProvider,
@@ -214,6 +239,9 @@ export const CvatJobRequestForm = () => {
                     onBlur={handleBlur}
                   >
                     <MenuItem value={CvatJobType.IMAGE_POINTS}>Points</MenuItem>
+                    <MenuItem value={CvatJobType.IMAGE_POLYGONS}>
+                      Polygons
+                    </MenuItem>
                     <MenuItem value={CvatJobType.IMAGE_BOXES}>
                       Bounding Boxes
                     </MenuItem>
@@ -351,6 +379,57 @@ export const CvatJobRequestForm = () => {
                   />
                 </FormControl>
               </Grid>
+
+              <Grid item container xs={12} mt={0} spacing={2}>
+                <Grid item xs={12}>
+                  <Box display="flex">
+                    <Typography variant="body2" fontWeight={700}>
+                      Qualifications
+                    </Typography>
+                    <Tooltip title="Specify the required credentials or qualifications workers must have to get access to this job (e.g., english).">
+                      <HelpOutlineIcon
+                        color="secondary"
+                        sx={{ cursor: 'pointer', ml: 1 }}
+                      />
+                    </Tooltip>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <Autocomplete
+                      multiple
+                      options={qualificationsOptions}
+                      getOptionLabel={(option) => option.title}
+                      value={values.qualifications}
+                      onChange={(event, newValues) => {
+                        setFieldValue('qualifications', newValues);
+                      }}
+                      selectOnFocus
+                      onBlur={handleBlur}
+                      handleHomeEndKeys
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            label={option.title}
+                            {...getTagProps({ index })}
+                          />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <Box display="flex" alignItems="center" width="100%">
+                          <TextField
+                            {...params}
+                            label="Qualifications"
+                            variant="outlined"
+                            onBlur={handleBlur}
+                            fullWidth
+                          />
+                        </Box>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
             </Grid>
           </AccordionDetails>
         </Accordion>
@@ -454,6 +533,18 @@ export const CvatJobRequestForm = () => {
                       }
                       error={touched.dataPath && Boolean(errors.dataPath)}
                       helperText={errors.dataPath}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/bucket_name/data', the input should only include 'data'.">
+                              <HelpOutlineIcon
+                                color="secondary"
+                                sx={{ cursor: 'pointer' }}
+                              />
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                   </FormControl>
                 </Grid>
@@ -550,6 +641,18 @@ export const CvatJobRequestForm = () => {
                         }
                         error={touched.bpPath && Boolean(errors.bpPath)}
                         helperText={errors.bpPath}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points.json', the input should only include 'annotations/points.json'.">
+                                <HelpOutlineIcon
+                                  color="secondary"
+                                  sx={{ cursor: 'pointer' }}
+                                />
+                              </Tooltip>
+                            </InputAdornment>
+                          ),
+                        }}
                       />
                     </FormControl>
                   </Grid>
@@ -557,9 +660,17 @@ export const CvatJobRequestForm = () => {
               )}
               <Grid item container xs={12} spacing={2}>
                 <Grid item xs={12}>
-                  <Typography variant="body2" fontWeight={700}>
-                    Ground truth
-                  </Typography>
+                  <Box display="flex">
+                    <Typography variant="body2" fontWeight={700}>
+                      Ground truth
+                    </Typography>
+                    <Tooltip title="Ground truth data serves as the reference or gold standard for your annotations, representing the correct data against which annotations are compared for accuracy and quality assessment.">
+                      <HelpOutlineIcon
+                        color="secondary"
+                        sx={{ cursor: 'pointer', ml: 1 }}
+                      />
+                    </Tooltip>
+                  </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={6}>
                   <FormControl variant="outlined" fullWidth>
@@ -642,7 +753,7 @@ export const CvatJobRequestForm = () => {
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Tooltip title="This field should contain a URL or link to the ground truth data. Ground truth data serves as the reference or gold standard for your annotations. It represents the correct or desired data, against which the annotations are compared for accuracy and quality assessment.">
+                            <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/gt_name.json', the input should only include 'annotations/gt_name.json'.">
                               <HelpOutlineIcon
                                 color="secondary"
                                 sx={{ cursor: 'pointer' }}

@@ -1,13 +1,14 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsDate } from 'class-validator';
 import {
   AssignmentSortField,
   AssignmentStatus,
   JobType,
 } from '../../common/enums/job';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class CreateAssignmentDto {
   @ApiProperty({
@@ -15,7 +16,7 @@ export class CreateAssignmentDto {
     name: 'chain_id',
     required: false,
   })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
@@ -30,7 +31,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
     default: AssignmentSortField.CREATED_AT,
   })
   @IsOptional()
-  @IsEnum(AssignmentSortField)
+  @IsEnumCaseInsensitive(AssignmentSortField)
   sortField?: AssignmentSortField = AssignmentSortField.CREATED_AT;
 
   @ApiPropertyOptional({ name: 'chain_id' })
@@ -40,7 +41,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
   chainId?: number;
 
   @ApiPropertyOptional({ name: 'job_type', enum: JobType })
-  @IsEnum(JobType)
+  @IsEnumCaseInsensitive(JobType)
   @IsOptional()
   jobType?: JobType;
 
@@ -50,7 +51,7 @@ export class GetAssignmentsDto extends PageOptionsDto {
   escrowAddress?: string;
 
   @ApiPropertyOptional({ enum: AssignmentStatus })
-  @IsEnum(AssignmentStatus)
+  @IsEnumCaseInsensitive(AssignmentStatus)
   @IsOptional()
   status?: AssignmentStatus;
 
@@ -58,11 +59,23 @@ export class GetAssignmentsDto extends PageOptionsDto {
   @IsOptional()
   @IsString()
   assignmentId?: string;
+
+  @ApiPropertyOptional({ name: 'created_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAfter?: Date;
+
+  @ApiPropertyOptional({ name: 'updated_after' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  updatedAfter?: Date;
 }
 
 export class AssignmentDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;
@@ -95,7 +108,7 @@ export class AssignmentDto {
   expiresAt: string;
 
   constructor(
-    assignmentId: number,
+    assignmentId: string,
     escrowAddress: string,
     chainId: number,
     jobType: string,
@@ -104,6 +117,7 @@ export class AssignmentDto {
     rewardToken: string,
     createdAt: string,
     expiresAt: string,
+    updatedAt: string,
   ) {
     this.assignmentId = assignmentId;
     this.escrowAddress = escrowAddress;
@@ -114,18 +128,19 @@ export class AssignmentDto {
     this.rewardToken = rewardToken;
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
+    this.updatedAt = updatedAt;
   }
 }
 
 export class ResignDto {
   @ApiProperty({ name: 'assignment_id' })
-  @IsNumber()
-  public assignmentId: number;
+  @IsString()
+  public assignmentId: string;
 }
 
 export class AssignJobResponseDto {
   @ApiProperty({ name: 'assignment_id' })
-  assignmentId: number;
+  assignmentId: string;
 
   @ApiProperty({ name: 'escrow_address' })
   escrowAddress: string;
@@ -135,4 +150,7 @@ export class AssignJobResponseDto {
 
   @ApiProperty({ name: 'worker_address' })
   workerAddress: string;
+
+  @ApiProperty({ name: 'reward_token' })
+  rewardToken: string;
 }

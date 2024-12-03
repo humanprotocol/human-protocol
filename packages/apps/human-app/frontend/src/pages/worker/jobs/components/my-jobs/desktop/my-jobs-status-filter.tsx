@@ -1,0 +1,30 @@
+import capitalize from 'lodash/capitalize';
+import { useMyJobsFilterStore } from '@/hooks/use-my-jobs-filter-store';
+import { Filtering } from '@/components/ui/table/table-header-menu.tsx/filtering';
+import { MyJobStatus } from '@/api/services/worker/my-jobs-data';
+
+export function MyJobsStatusFilter() {
+  const { setFilterParams, filterParams } = useMyJobsFilterStore();
+
+  return (
+    <Filtering
+      clear={() => {
+        setFilterParams({
+          ...filterParams,
+          status: undefined,
+        });
+      }}
+      filteringOptions={Object.values(MyJobStatus).map((status) => ({
+        name: capitalize(status),
+        option: status,
+      }))}
+      isChecked={(status) => status === filterParams.status}
+      setFiltering={(status) => {
+        setFilterParams({
+          ...filterParams,
+          status,
+        });
+      }}
+    />
+  );
+}

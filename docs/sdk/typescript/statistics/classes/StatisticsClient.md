@@ -52,7 +52,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 #### Parameters
 
-• **networkData**: `NetworkData`
+• **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
 The network information required to connect to the Statistics contract
 
@@ -60,19 +60,19 @@ The network information required to connect to the Statistics contract
 
 [`StatisticsClient`](StatisticsClient.md)
 
-#### Source
+#### Defined in
 
-[statistics.ts:69](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L69)
+[statistics.ts:72](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L72)
 
 ## Properties
 
 ### networkData
 
-> **networkData**: `NetworkData`
+> **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-#### Source
+#### Defined in
 
-[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+[statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
 
 ***
 
@@ -80,25 +80,27 @@ The network information required to connect to the Statistics contract
 
 > **subgraphUrl**: `string`
 
-#### Source
+#### Defined in
 
-[statistics.ts:62](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L62)
+[statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
 
 ## Methods
 
 ### getEscrowStatistics()
 
-> **getEscrowStatistics**(`params`): `Promise`\<`EscrowStatistics`\>
+> **getEscrowStatistics**(`filter`): `Promise`\<[`EscrowStatistics`](../../graphql/types/type-aliases/EscrowStatistics.md)\>
 
 This function returns the statistical data of escrows.
 
 **Input parameters**
 
 ```ts
-interface IStatisticsParams {
+interface IStatisticsFilter {
   from?: Date;
   to?: Date;
-  limit?: number;
+  first?: number; // (Optional) Number of transactions per page. Default is 10.
+  skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+  orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
 }
 ```
 
@@ -120,13 +122,13 @@ type EscrowStatistics = {
 
 #### Parameters
 
-• **params**: `IStatisticsParams`= `{}`
+• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
 #### Returns
 
-`Promise`\<`EscrowStatistics`\>
+`Promise`\<[`EscrowStatistics`](../../graphql/types/type-aliases/EscrowStatistics.md)\>
 
 Escrow statistics data.
 
@@ -144,60 +146,134 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 });
 ```
 
-#### Source
+#### Defined in
 
-[statistics.ts:123](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L123)
+[statistics.ts:128](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L128)
 
 ***
 
-### getHMTStatistics()
+### getHMTDailyData()
 
-> **getHMTStatistics**(`params`): `Promise`\<`HMTStatistics`\>
+> **getHMTDailyData**(`filter`): `Promise`\<[`DailyHMTData`](../../graphql/types/type-aliases/DailyHMTData.md)[]\>
 
-This function returns the statistical data of HMToken.
+This function returns the statistical data of HMToken day by day.
 
 **Input parameters**
 
 ```ts
-interface IStatisticsParams {
+interface IStatisticsFilter {
   from?: Date;
   to?: Date;
-  limit?: number;
+  first?: number; // (Optional) Number of transactions per page. Default is 10.
+  skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+  orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
 }
 ```
 
 ```ts
-type HMTHolder = {
-  address: string;
-  balance: BigNumber;
-}
-
 type DailyHMTData = {
   timestamp: Date;
-  totalTransactionAmount: BigNumber;
+  totalTransactionAmount: bigint;
   totalTransactionCount: number;
-};
-
-type HMTStatistics = {
-  totalTransferAmount: BigNumber;
-  totalTransferCount: BigNumber;
-  totalHolders: number;
-  holders: HMTHolder[];
-  dailyHMTData: DailyHMTData[];
-};
+  dailyUniqueSenders: number;
+  dailyUniqueReceivers: number;
+}
 ```
 
 #### Parameters
 
-• **params**: `IStatisticsParams`= `{}`
+• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
 #### Returns
 
-`Promise`\<`HMTStatistics`\>
+`Promise`\<[`DailyHMTData`](../../graphql/types/type-aliases/DailyHMTData.md)[]\>
 
-HMToken statistics data.
+Daily HMToken statistics data.
+
+**Code example**
+
+```ts
+import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+
+const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+
+const dailyHMTStats = await statisticsClient.getHMTStatistics();
+
+console.log('Daily HMT statistics:', dailyHMTStats);
+
+const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
+  from: new Date(2023, 4, 8),
+  to: new Date(2023, 5, 8),
+});
+
+console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
+```
+
+#### Defined in
+
+[statistics.ts:495](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L495)
+
+***
+
+### getHMTHolders()
+
+> **getHMTHolders**(`params`): `Promise`\<[`HMTHolder`](../../graphql/types/type-aliases/HMTHolder.md)[]\>
+
+This function returns the holders of the HMToken with optional filters and ordering.
+
+**Input parameters**
+
+#### Parameters
+
+• **params**: [`IHMTHoldersParams`](../../interfaces/interfaces/IHMTHoldersParams.md) = `{}`
+
+HMT Holders params with filters and ordering
+
+#### Returns
+
+`Promise`\<[`HMTHolder`](../../graphql/types/type-aliases/HMTHolder.md)[]\>
+
+List of HMToken holders.
+
+**Code example**
+
+```ts
+import { StatisticsClient, ChainId, NETWORKS } from '@human-protocol/sdk';
+
+const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
+
+const hmtHolders = await statisticsClient.getHMTHolders({
+  orderDirection: 'asc',
+});
+
+console.log('HMT holders:', hmtHolders.map((h) => ({
+  ...h,
+  balance: h.balance.toString(),
+})));
+```
+
+#### Defined in
+
+[statistics.ts:421](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L421)
+
+***
+
+### getHMTStatistics()
+
+> **getHMTStatistics**(): `Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
+
+This function returns the statistical data of HMToken.
+
+type HMTStatistics = {
+  totalTransferAmount: BigNumber;
+  totalTransferCount: BigNumber;
+  totalHolders: number;
+};
+```
+
+@returns {HMTStatistics} HMToken statistics data.
 
 **Code example**
 
@@ -211,54 +287,34 @@ const hmtStatistics = await statisticsClient.getHMTStatistics();
 console.log('HMT statistics:', {
   ...hmtStatistics,
   totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
-  holders: hmtStatistics.holders.map((h) => ({
-    ...h,
-    balance: h.balance.toString(),
-  })),
-  dailyHMTData: hmtStatistics.dailyHMTData.map((d) => ({
-    ...d,
-    totalTransactionAmount: d.totalTransactionAmount.toString(),
-  })),
-});
-
-const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
-  from: new Date(2023, 4, 8),
-  to: new Date(2023, 5, 8),
-});
-
-console.log('HMT statistics from 5/8 - 6/8:', {
-  ...hmtStatisticsRange,
-  totalTransferAmount: hmtStatisticsRange.totalTransferAmount.toString(),
-  holders: hmtStatisticsRange.holders.map((h) => ({
-    ...h,
-    balance: h.balance.toString(),
-  })),
-  dailyHMTData: hmtStatisticsRange.dailyHMTData.map((d) => ({
-    ...d,
-    totalTransactionAmount: d.totalTransactionAmount.toString(),
-  })),
 });
 ```
 
-#### Source
+#### Returns
 
-[statistics.ts:396](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L396)
+`Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
+
+#### Defined in
+
+[statistics.ts:378](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L378)
 
 ***
 
 ### getPaymentStatistics()
 
-> **getPaymentStatistics**(`params`): `Promise`\<`PaymentStatistics`\>
+> **getPaymentStatistics**(`filter`): `Promise`\<[`PaymentStatistics`](../../graphql/types/type-aliases/PaymentStatistics.md)\>
 
 This function returns the statistical data of payments.
 
 **Input parameters**
 
 ```ts
-interface IStatisticsParams {
+interface IStatisticsFilter {
   from?: Date;
   to?: Date;
-  limit?: number;
+  first?: number; // (Optional) Number of transactions per page. Default is 10.
+  skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+  orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
 }
 ```
 
@@ -277,13 +333,13 @@ type PaymentStatistics = {
 
 #### Parameters
 
-• **params**: `IStatisticsParams`= `{}`
+• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
 #### Returns
 
-`Promise`\<`PaymentStatistics`\>
+`Promise`\<[`PaymentStatistics`](../../graphql/types/type-aliases/PaymentStatistics.md)\>
 
 Payment statistics data.
 
@@ -322,25 +378,27 @@ console.log(
 );
 ```
 
-#### Source
+#### Defined in
 
-[statistics.ts:287](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L287)
+[statistics.ts:312](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L312)
 
 ***
 
 ### getWorkerStatistics()
 
-> **getWorkerStatistics**(`params`): `Promise`\<`WorkerStatistics`\>
+> **getWorkerStatistics**(`filter`): `Promise`\<[`WorkerStatistics`](../../graphql/types/type-aliases/WorkerStatistics.md)\>
 
 This function returns the statistical data of workers.
 
 **Input parameters**
 
 ```ts
-interface IStatisticsParams {
+interface IStatisticsFilter {
   from?: Date;
   to?: Date;
-  limit?: number;
+  first?: number; // (Optional) Number of transactions per page. Default is 10.
+  skip?: number; // (Optional) Number of transactions to skip. Default is 0.
+  orderDirection?: OrderDirection; // (Optional) Order of the results. Default is ASC.
 }
 ```
 
@@ -357,13 +415,13 @@ type WorkerStatistics = {
 
 #### Parameters
 
-• **params**: `IStatisticsParams`= `{}`
+• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
 #### Returns
 
-`Promise`\<`WorkerStatistics`\>
+`Promise`\<[`WorkerStatistics`](../../graphql/types/type-aliases/WorkerStatistics.md)\>
 
 Worker statistics data.
 
@@ -381,6 +439,6 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 });
 ```
 
-#### Source
+#### Defined in
 
-[statistics.ts:198](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L198)
+[statistics.ts:213](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L213)

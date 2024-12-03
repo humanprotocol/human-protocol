@@ -1,26 +1,26 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { map } from 'rxjs/operators';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
-import { KycSessionDto, KycStatusDto } from './kyc.dto';
+import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
-import { ErrorKyc } from '../../common/constants/errors';
-import { SynapsConfigService } from '../../common/config/synaps-config.service';
-import { SYNAPS_API_KEY_DISABLED } from '../../common/constants';
-import { v4 as uuidv4 } from 'uuid';
+import { ErrorKyc, ErrorUser } from '../../common/constants/errors';
+import { KycConfigService } from '../../common/config/kyc-config.service';
 import { KycEntity } from './kyc.entity';
 import { ControlledError } from '../../common/errors/controlled';
-import { countriesA3ToA2 } from '../../common/enums/countries';
+import { Web3Service } from '../web3/web3.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class KycService {
   constructor(
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
-    private readonly synapsConfigService: SynapsConfigService,
+    private readonly kycConfigService: KycConfigService,
+    private readonly web3Service: Web3Service,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
@@ -32,139 +32,105 @@ export class KycService {
         );
       }
 
-      if (userEntity.kyc.status === KycStatus.PENDING_VERIFICATION) {
+      if (userEntity.kyc.status === KycStatus.REVIEW) {
         throw new ControlledError(
           ErrorKyc.VerificationInProgress,
           HttpStatus.BAD_REQUEST,
         );
       }
 
-      if (userEntity.kyc.status === KycStatus.REJECTED) {
+      if (userEntity.kyc.status === KycStatus.DECLINED) {
         throw new ControlledError(
-          `${ErrorKyc.Rejected}. Reason: ${userEntity.kyc.message}`,
+          `${ErrorKyc.Declined}. Reason: ${userEntity.kyc.message}`,
           HttpStatus.BAD_REQUEST,
         );
       }
 
       return {
-        sessionId: userEntity.kyc.sessionId,
-      };
-    }
-
-    if (this.synapsConfigService.apiKey === SYNAPS_API_KEY_DISABLED) {
-      const sessionId = uuidv4();
-      const kycEntity = new KycEntity();
-      kycEntity.sessionId = sessionId;
-      kycEntity.status = KycStatus.NONE;
-      kycEntity.userId = userEntity.id;
-
-      await this.kycRepository.createUnique(kycEntity);
-
-      return {
-        sessionId: sessionId,
+        url: userEntity.kyc.url,
       };
     }
 
     const { data } = await firstValueFrom(
       await this.httpService.post(
-        'session/init',
+        'sessions',
         {
-          alias: userEntity.email,
+          verification: {
+            vendorData: `${userEntity.id}`,
+          },
         },
         {
-          baseURL: this.synapsConfigService.baseUrl,
+          baseURL: this.kycConfigService.baseUrl,
           headers: {
-            'Api-Key': this.synapsConfigService.apiKey,
+            'X-AUTH-CLIENT': this.kycConfigService.apiKey,
           },
         },
       ),
     );
 
-    if (!data?.session_id) {
+    if (data?.status !== 'success' || !data?.verification?.url) {
       throw new ControlledError(
-        ErrorKyc.InvalidSynapsAPIResponse,
+        ErrorKyc.InvalidKycProviderAPIResponse,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
     const kycEntity = new KycEntity();
-    kycEntity.sessionId = data.session_id;
+    kycEntity.sessionId = data.verification.id;
     kycEntity.status = KycStatus.NONE;
     kycEntity.userId = userEntity.id;
+    kycEntity.url = data.verification.url;
 
     await this.kycRepository.createUnique(kycEntity);
 
     return {
-      sessionId: data.session_id,
+      url: data.verification.url,
     };
   }
 
-  public async updateKycStatus(
-    secret: string,
-    data: KycStatusDto,
-  ): Promise<void> {
-    if (secret !== this.synapsConfigService.webhookSecret) {
-      throw new ControlledError(
-        ErrorKyc.InvalidWebhookSecret,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  public async updateKycStatus(data: KycStatusDto): Promise<void> {
+    const { status, reason, id: sessionId } = data.verification;
+    const { country } = data.verification.document;
 
-    const { data: sessionData } = await firstValueFrom(
-      await this.httpService.get(`/individual/session/${data.sessionId}`, {
-        baseURL: this.synapsConfigService.baseUrl,
-        headers: {
-          'Api-Key': this.synapsConfigService.apiKey,
-        },
-      }),
-    );
-
-    if (
-      !sessionData?.session?.status ||
-      sessionData.session.status !== data.state
-    ) {
-      throw new ControlledError(
-        ErrorKyc.InvalidSynapsAPIResponse,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-
-    const kycEntity = await this.kycRepository.findOneBySessionId(
-      data.sessionId,
-    );
+    const kycEntity = await this.kycRepository.findOneBySessionId(sessionId);
     if (!kycEntity) {
       throw new ControlledError(ErrorKyc.NotFound, HttpStatus.BAD_REQUEST);
     }
 
-    if (data.state === KycStatus.APPROVED) {
-      const sessionInfo = await firstValueFrom(
-        this.httpService
-          .get(
-            `/individual/session/${data.sessionId}/step/${this.synapsConfigService.documentID}`,
-            {
-              baseURL: this.synapsConfigService.baseUrl,
-              headers: { 'Api-Key': this.synapsConfigService.apiKey },
-            },
-          )
-          .pipe(map((response) => response.data)),
-      );
-
-      if (
-        sessionInfo?.document?.country &&
-        sessionInfo.document.country.trim() !== ''
-      ) {
-        kycEntity.country = countriesA3ToA2[sessionInfo.document.country];
-      } else {
-        throw new ControlledError(
-          ErrorKyc.CountryNotSet,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+    if (!country) {
+      throw new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST);
     }
 
-    kycEntity.status = data.state;
-    kycEntity.message = data.reason;
+    kycEntity.status = status;
+    kycEntity.country = country;
+    kycEntity.message = reason;
 
     await this.kycRepository.updateOne(kycEntity);
+  }
+
+  public async getSignedAddress(
+    user: UserEntity,
+  ): Promise<KycSignedAddressDto> {
+    if (!user.evmAddress)
+      throw new ControlledError(
+        ErrorUser.NoWalletAddresRegistered,
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (user.kyc?.status !== KycStatus.APPROVED)
+      throw new ControlledError(
+        ErrorUser.KycNotApproved,
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const address = user.evmAddress.toLowerCase();
+    const signature = await this.web3Service
+      .getSigner(this.networkConfigService.networks[0].chainId)
+      .signMessage(address);
+
+    return {
+      key: `KYC-${this.web3Service.getOperatorAddress()}`,
+      value: signature,
+    };
   }
 }

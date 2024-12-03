@@ -22,11 +22,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, recording_oracle_fee=None, reputation_oracle=None, reputation_oracle_fee=None, exchange_oracle=None, exchange_oracle_fee=None)
+### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, recording_oracle_fee=None, reputation_oracle=None, reputation_oracle_fee=None, exchange_oracle=None, exchange_oracle_fee=None)
+#### \_\_init_\_(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, reputation_oracle=None, exchange_oracle=None)
 
 Initializes an EscrowData instance.
 
@@ -48,11 +48,8 @@ Initializes an EscrowData instance.
   * **manifest_hash** (`Optional`[`str`]) – Manifest hash.
   * **manifest_url** (`Optional`[`str`]) – Manifest URL.
   * **recording_oracle** (`Optional`[`str`]) – Recording Oracle address.
-  * **recording_oracle_fee** (`Optional`[`int`]) – Recording Oracle fee.
   * **reputation_oracle** (`Optional`[`str`]) – Reputation Oracle address.
-  * **reputation_oracle_fee** (`Optional`[`int`]) – Reputation Oracle fee.
   * **exchange_oracle** (`Optional`[`str`]) – Exchange Oracle address.
-  * **exchange_oracle_fee** (`Optional`[`int`]) – Exchange Oracle fee.
 
 ### *class* human_protocol_sdk.escrow.escrow_utils.EscrowUtils
 
@@ -84,7 +81,7 @@ Returns the escrow for a given address.
   )
   ```
 
-#### *static* get_escrows(filter=<human_protocol_sdk.filter.EscrowFilter object>)
+#### *static* get_escrows(filter)
 
 Get an array of escrow addresses based on the specified filter parameters.
 
@@ -111,16 +108,19 @@ Get an array of escrow addresses based on the specified filter parameters.
   )
   ```
 
-#### *static* get_status_events(networks, statuses=None, date_from=None, date_to=None, launcher=None)
+#### *static* get_status_events(chain_id, statuses=None, date_from=None, date_to=None, launcher=None, first=10, skip=0, order_direction=OrderDirection.DESC)
 
 Retrieve status events for specified networks and statuses within a date range.
 
 * **Parameters:**
-  * **(****List****[****ChainId****]****)** (*networks*) – List of network chain IDs to query.
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network to request data.
   * **(****Optional****[****List****[****Status****]****]****)** (*statuses*) – List of statuses to filter by.
   * **(****Optional****[****datetime****]****)** (*date_to*) – Start date for the query range.
   * **(****Optional****[****datetime****]****)** – End date for the query range.
   * **(****Optional****[****str****]****)** (*launcher*) – Address of the launcher to filter by.
+  * **(****int****)** (*skip*) – Number of items per page.
+  * **(****int****)** – Page number to retrieve.
+  * **(****OrderDirection****)** (*order_direction*) – Order of results, “asc” or “desc”.
 * **Return List[StatusEvent]:**
   List of status events matching the query parameters.
 * **Raises:**
@@ -137,7 +137,10 @@ Retrieve status events for specified networks and statuses within a date range.
           statuses=[Status.Pending, Status.Paid],
           date_from=datetime(2023, 1, 1),
           date_to=datetime(2023, 12, 31),
-          launcher="0x1234567890abcdef1234567890abcdef12345678"
+          launcher="0x1234567890abcdef1234567890abcdef12345678",
+          first=20,
+          skip=0,
+          order_direction=OrderDirection.DESC
       )
   )
   ```

@@ -4,11 +4,9 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  StakingClient,
-  IAllocation,
   EscrowUtils,
   Encryption,
-  KVStoreClient,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { HttpStatus } from '@nestjs/common';
@@ -36,7 +34,7 @@ import {
   JobStatusFilter,
   WorkerBrowser,
   WorkerLanguage,
-  WorkerLocation,
+  Country,
 } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
@@ -47,14 +45,10 @@ import {
   MOCK_ORACLE_FEE,
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
-  MOCK_HCAPTCHA_ORACLE_ADDRESS,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
   MOCK_PGP_PUBLIC_KEY,
-  MOCK_PRIVATE_KEY,
-  MOCK_RECORDING_ORACLE_ADDRESS,
-  MOCK_REPUTATION_ORACLE_ADDRESS,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
   MOCK_SUBMISSION_REQUIRED,
@@ -63,21 +57,18 @@ import {
   MOCK_STORAGE_DATA,
   MOCK_CVAT_DATA_DATASET,
   MOCK_CVAT_LABELS,
-  MOCK_CVAT_JOB_SIZE,
-  MOCK_CVAT_VAL_SIZE,
-  MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER,
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_HCAPTCHA_IMAGE_LABEL,
   MOCK_HCAPTCHA_IMAGE_URL,
-  MOCK_HCAPTCHA_REPO_URI,
-  MOCK_HCAPTCHA_RO_URI,
+  MOCK_RECORDING_ORACLE_URL,
   MOCK_BUCKET_FILE,
-  MOCK_MAX_RETRY_COUNT,
   MOCK_CVAT_LABELS_WITH_NODES,
   MOCK_CVAT_DATA_POINTS,
   MOCK_CVAT_DATA_BOXES,
   MOCK_CVAT_DATA,
   MOCK_CVAT_GT,
+  MOCK_REPUTATION_ORACLE_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -124,8 +115,11 @@ import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../payment/rate.service';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { CronJobType } from '../../common/enums/cron-job';
+import { QualificationService } from '../qualification/qualification.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 const rate = 1.5;
+const mappedJobType = 'mappedType';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -133,10 +127,10 @@ jest.mock('@human-protocol/sdk', () => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       setup: jest.fn().mockResolvedValue(null),
       fund: jest.fn().mockResolvedValue(null),
+      getBalance: jest.fn(),
     })),
   },
   EscrowUtils: {
-    getEscrows: jest.fn(),
     getEscrow: jest.fn(),
   },
   StakingClient: {
@@ -144,11 +138,9 @@ jest.mock('@human-protocol/sdk', () => ({
       getAllocation: jest.fn(),
     })),
   },
-  KVStoreClient: {
-    build: jest.fn().mockImplementation(() => ({
-      get: jest.fn(),
-      getPublicKey: jest.fn(),
-    })),
+  KVStoreUtils: {
+    get: jest.fn(),
+    getPublicKey: jest.fn(),
   },
 }));
 
@@ -162,6 +154,7 @@ jest.mock('../../common/utils', () => ({
       bucket: MOCK_BUCKET_NAME,
     };
   }),
+  mapJobType: jest.fn().mockImplementation(() => 'mappedType'),
 }));
 
 jest.mock('../../common/utils/storage', () => ({
@@ -189,58 +182,31 @@ describe('JobService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
-  beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
-            return MOCK_EXCHANGE_ORACLE_ADDRESS;
-          case 'FORTUNE_RECORDING_ORACLE_ADDRESS':
-            return MOCK_RECORDING_ORACLE_ADDRESS;
-          case 'CVAT_EXCHANGE_ORACLE_ADDRESS':
-            return MOCK_EXCHANGE_ORACLE_ADDRESS;
-          case 'CVAT_RECORDING_ORACLE_ADDRESS':
-            return MOCK_RECORDING_ORACLE_ADDRESS;
-          case 'REPUTATION_ORACLE_ADDRESS':
-            return MOCK_REPUTATION_ORACLE_ADDRESS;
-          case 'HOST':
-            return '127.0.0.1';
-          case 'PORT':
-            return 5000;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_PRIVATE_KEY;
-          case 'S3_BUCKET':
-            return MOCK_BUCKET_NAME;
-          case 'CVAT_JOB_SIZE':
-            return 1;
-          case 'PGP_PRIVATE_KEY':
-            return MOCK_PGP_PRIVATE_KEY;
-          case 'PGP_ENCRYPT':
-            return encrypt;
-          case 'HCAPTCHA_ORACLE_ADDRESS':
-            return MOCK_HCAPTCHA_ORACLE_ADDRESS;
-          case 'HCAPTCHA_SITE_KEY':
-            return MOCK_HCAPTCHA_SITE_KEY;
-          case 'CVAT_JOB_SIZE':
-            return MOCK_CVAT_JOB_SIZE;
-          case 'CVAT_VAL_SIZE':
-            return MOCK_CVAT_VAL_SIZE;
-          case 'CVAT_SKELETONS_JOB_SIZE_MULTIPLIER':
-            return MOCK_CVAT_SKELETONS_JOB_SIZE_MULTIPLIER;
-          case 'HCAPTCHA_REPUTATION_ORACLE_URI':
-            return MOCK_HCAPTCHA_REPO_URI;
-          case 'HCAPTCHA_RECORDING_ORACLE_URI':
-            return MOCK_HCAPTCHA_RO_URI;
-          case 'MAX_RETRY_COUNT':
-            return MOCK_MAX_RETRY_COUNT;
-        }
-      }),
-    };
+  const selectedOraclesMock = {
+    reputationOracle: '0xReputationOracle',
+    exchangeOracle: '0xExchangeOracle',
+    recordingOracle: '0xRecordingOracle',
+  };
 
+  beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'PGP_ENCRYPT') return encrypt;
+              return mockConfig[key];
+            }),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              if (key === 'PGP_ENCRYPT') return encrypt;
+              return mockConfig[key];
+            }),
+          },
+        },
         JobService,
         Encryption,
         ServerConfigService,
@@ -249,6 +215,8 @@ describe('JobService', () => {
         CvatConfigService,
         PGPConfigService,
         S3ConfigService,
+        QualificationService,
+        NetworkConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -280,13 +248,16 @@ describe('JobService', () => {
           },
         },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
-        { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: StorageService, useValue: createMock<StorageService>() },
         { provide: WebhookService, useValue: createMock<WebhookService>() },
         {
           provide: RoutingProtocolService,
-          useValue: createMock<RoutingProtocolService>(),
+          useValue: {
+            selectNetwork: jest.fn().mockReturnValue(ChainId.POLYGON_AMOY),
+            selectOracles: jest.fn().mockReturnValue(selectedOraclesMock),
+            validateOracles: jest.fn(),
+          },
         },
         {
           provide: CronJobService,
@@ -308,15 +279,14 @@ describe('JobService', () => {
 
     (jobService as any).cronJobRepository = cronJobRepository;
 
-    storageService.uploadFile = jest.fn().mockResolvedValue({
+    storageService.uploadJsonLikeData = jest.fn().mockResolvedValue({
       url: MOCK_FILE_URL,
       hash: MOCK_FILE_HASH,
     });
 
-    storageService.download = jest.fn();
-  });
+    storageService.downloadJsonLikeData = jest.fn();
+    storageService.downloadFile = jest.fn();
 
-  beforeEach(async () => {
     encryption = await Encryption.build(MOCK_PGP_PRIVATE_KEY);
   });
 
@@ -343,6 +313,96 @@ describe('JobService', () => {
       jest.restoreAllMocks();
     });
 
+    it('should use all oracles provided by the user and skip oracle selection', async () => {
+      const fundAmount = 10;
+      const userBalance = 25;
+
+      const userId = 1;
+      const providedReputationOracle = '0xProvidedReputationOracle';
+      const providedExchangeOracle = '0xProvidedExchangeOracle';
+      const providedRecordingOracle = '0xProvidedRecordingOracle';
+
+      const fortuneJobDto: JobFortuneDto = {
+        chainId: MOCK_CHAIN_ID,
+        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: fundAmount,
+        currency: JobCurrency.HMT,
+        reputationOracle: providedReputationOracle,
+        exchangeOracle: providedExchangeOracle,
+        recordingOracle: providedRecordingOracle,
+      };
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+
+      expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
+        MOCK_CHAIN_ID,
+        mappedJobType,
+        providedReputationOracle,
+        providedExchangeOracle,
+        providedRecordingOracle,
+      );
+
+      expect(jobRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reputationOracle: providedReputationOracle,
+          exchangeOracle: providedExchangeOracle,
+          recordingOracle: providedRecordingOracle,
+        }),
+      );
+    });
+
+    it('should select missing oracles when only partial oracles are provided by the user', async () => {
+      const fundAmount = 10;
+      const userBalance = 25;
+
+      const providedReputationOracle = '0xProvidedReputationOracle';
+      const providedExchangeOracle = '0xProvidedExchangeOracle';
+
+      const userId = 1;
+      const fortuneJobDto: JobFortuneDto = {
+        chainId: MOCK_CHAIN_ID,
+        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: fundAmount,
+        currency: JobCurrency.HMT,
+        reputationOracle: providedReputationOracle,
+        exchangeOracle: providedExchangeOracle,
+      };
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      jest.spyOn(routingProtocolService, 'selectOracles').mockResolvedValue({
+        reputationOracle: selectedOraclesMock.reputationOracle,
+        exchangeOracle: selectedOraclesMock.exchangeOracle,
+        recordingOracle: selectedOraclesMock.recordingOracle,
+      });
+
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+
+      expect(routingProtocolService.selectOracles).toHaveBeenCalledTimes(1);
+
+      expect(jobRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reputationOracle: providedReputationOracle,
+          exchangeOracle: providedExchangeOracle,
+          recordingOracle: selectedOraclesMock.recordingOracle,
+        }),
+      );
+    });
+
     it('should create a job successfully', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
@@ -364,14 +424,10 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-          getPublickKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -401,6 +457,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -426,14 +483,10 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-          getPublickKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -481,6 +534,7 @@ describe('JobService', () => {
         fundAmount: tokenFundAmount,
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -495,13 +549,10 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, {
         ...fortuneJobDto,
@@ -522,6 +573,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -546,9 +598,7 @@ describe('JobService', () => {
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
 
-      (KVStoreClient.build as any).mockImplementationOnce(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
@@ -565,7 +615,7 @@ describe('JobService', () => {
       const gtUrl = new URL('http://some-gt-url.com');
       const dataUrl = new URL('http://some-data-url.com');
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
@@ -576,7 +626,7 @@ describe('JobService', () => {
 
   describe('createCvatManifest', () => {
     it('should create a valid CVAT manifest for image boxes job type', async () => {
-      const jobBounty = '50';
+      const jobBounty = '100';
       jest
         .spyOn(jobService, 'calculateJobBounty')
         .mockResolvedValueOnce(jobBounty);
@@ -622,11 +672,58 @@ describe('JobService', () => {
       });
     });
 
+    it('should create a valid CVAT manifest for image polygons job type', async () => {
+      const jobBounty = '100';
+      jest
+        .spyOn(jobService, 'calculateJobBounty')
+        .mockResolvedValueOnce(jobBounty);
+
+      const dto: JobCvatDto = {
+        data: MOCK_CVAT_DATA_DATASET,
+        labels: MOCK_CVAT_LABELS,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        userGuide: MOCK_FILE_URL,
+        minQuality: 0.8,
+        groundTruth: MOCK_STORAGE_DATA,
+        type: JobRequestType.IMAGE_POLYGONS,
+        fundAmount: 10,
+        currency: JobCurrency.HMT,
+      };
+
+      const requestType = JobRequestType.IMAGE_POLYGONS;
+      const tokenFundAmount = 100;
+
+      const result = await jobService.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
+
+      expect(result).toEqual({
+        data: {
+          data_url: MOCK_BUCKET_FILE,
+        },
+        annotation: {
+          labels: MOCK_CVAT_LABELS,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
+          type: requestType,
+          job_size: 1,
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 2,
+          gt_url: MOCK_BUCKET_FILE,
+        },
+        job_bounty: jobBounty,
+      });
+    });
+
     it('should create a valid CVAT manifest for image boxes from points job type', async () => {
       const jobBounty = '50.0';
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
@@ -676,7 +773,7 @@ describe('JobService', () => {
       const jobBounty = '4.0';
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
@@ -782,7 +879,9 @@ describe('JobService', () => {
       const fileContent = JSON.stringify({
         [MOCK_HCAPTCHA_IMAGE_URL]: [true, true, true],
       });
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.COMPARISON;
       const jobDto: JobCaptchaDto = {
@@ -824,8 +923,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {},
@@ -834,10 +933,12 @@ describe('JobService', () => {
     });
 
     it('should create a valid HCaptcha manifest for CATEGORIZATION job type', async () => {
-      const fileContent = JSON.stringify({
+      const fileContent = {
         [MOCK_HCAPTCHA_IMAGE_URL]: [[MOCK_HCAPTCHA_IMAGE_LABEL]],
-      });
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
+      };
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.CATEGORIZATION;
       const jobDto: JobCaptchaDto = {
@@ -879,8 +980,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -910,7 +1011,9 @@ describe('JobService', () => {
           ],
         ],
       });
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POLYGON;
       const jobDto: JobCaptchaDto = {
@@ -961,8 +1064,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -984,7 +1087,9 @@ describe('JobService', () => {
           ],
         ],
       });
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POINT;
       const jobDto: JobCaptchaDto = {
@@ -1033,8 +1138,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -1056,7 +1161,9 @@ describe('JobService', () => {
           ],
         ],
       });
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.BOUNDING_BOX;
       const jobDto: JobCaptchaDto = {
@@ -1105,8 +1212,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: MOCK_HCAPTCHA_REPO_URI,
-        ro_uri: MOCK_HCAPTCHA_RO_URI,
+        repo_uri: MOCK_REPUTATION_ORACLE_URL,
+        ro_uri: MOCK_RECORDING_ORACLE_URL,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {
@@ -1120,7 +1227,9 @@ describe('JobService', () => {
       const fileContent = JSON.stringify({
         [MOCK_HCAPTCHA_IMAGE_URL]: [[MOCK_HCAPTCHA_IMAGE_LABEL]],
       });
-      jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POLYGON;
       const jobDto: JobCaptchaDto = {
@@ -1151,7 +1260,7 @@ describe('JobService', () => {
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly for image boxes from points type', async () => {
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
@@ -1172,7 +1281,7 @@ describe('JobService', () => {
 
     it('should calculate the job bounty correctly for image skeletons from boxed type', async () => {
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_DATA)
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
@@ -1244,16 +1353,13 @@ describe('JobService', () => {
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
       (listObjectsInBucket as any).mockResolvedValueOnce([
@@ -1294,6 +1400,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1330,9 +1437,7 @@ describe('JobService', () => {
         currency: JobCurrency.HMT,
       };
 
-      (KVStoreClient.build as any).mockImplementationOnce(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       await expect(
         jobService.createJob(
@@ -1386,9 +1491,7 @@ describe('JobService', () => {
         currency: JobCurrency.HMT,
       };
 
-      (KVStoreClient.build as any).mockImplementationOnce(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       await expect(
         jobService.createJob(
@@ -1437,9 +1540,7 @@ describe('JobService', () => {
         currency: JobCurrency.HMT,
       };
 
-      (KVStoreClient.build as any).mockImplementationOnce(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       await expect(
         jobService.createJob(
@@ -1488,9 +1589,7 @@ describe('JobService', () => {
         currency: JobCurrency.HMT,
       };
 
-      (KVStoreClient.build as any).mockImplementationOnce(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       await expect(
         jobService.createJob(
@@ -1519,16 +1618,13 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
       jest
-        .spyOn(storageService, 'download')
+        .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValueOnce(MOCK_CVAT_GT);
 
       (listObjectsInBucket as any).mockResolvedValueOnce([
@@ -1558,6 +1654,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1589,9 +1686,7 @@ describe('JobService', () => {
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      (KVStoreClient.build as any).mockImplementationOnce(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       await expect(
         jobService.createJob(
@@ -1617,7 +1712,7 @@ describe('JobService', () => {
       maxRequests: 4,
       advanced: {
         workerLanguage: WorkerLanguage.EN,
-        workerLocation: WorkerLocation.FR,
+        workerLocation: Country.FR,
         targetBrowser: WorkerBrowser.DESKTOP,
       },
       annotations: {
@@ -1634,13 +1729,10 @@ describe('JobService', () => {
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
-      (KVStoreClient.build as any)
-        .mockImplementationOnce(() => ({
-          get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-        }))
-        .mockImplementation(() => ({
-          getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-        }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
     });
 
     afterEach(() => {
@@ -1648,6 +1740,7 @@ describe('JobService', () => {
     });
 
     it('should create a job successfully', async () => {
+      hCaptchaJobDto.chainId = ChainId.LOCALHOST;
       const fundAmount = div(
         hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length,
         rate,
@@ -1702,6 +1795,7 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
@@ -1738,18 +1832,19 @@ describe('JobService', () => {
         fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
       });
     });
 
     it('should throw an exception for insufficient user balance', async () => {
       const userBalance = 1;
+      hCaptchaJobDto.chainId = ChainId.LOCALHOST;
 
       jest
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-
       await expect(
         jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
       ).rejects.toThrow(
@@ -1812,9 +1907,7 @@ describe('JobService', () => {
     const chainId = ChainId.LOCALHOST;
 
     beforeAll(() => {
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
     });
 
     it('should setup escrow and update the status to funding', async () => {
@@ -1841,13 +1934,13 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      storageService.download = jest.fn().mockReturnValue(manifest);
+      storageService.downloadJsonLikeData = jest.fn().mockReturnValue(manifest);
 
       const jobEntityResult = await jobService.setupEscrow(
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.SET_UP;
+      mockJobEntity.status = JobStatus.FUNDED;
       expect(jobRepository.updateOne).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
@@ -1875,7 +1968,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      storageService.download = jest.fn().mockReturnValue(manifest);
+      storageService.downloadJsonLikeData = jest.fn().mockReturnValue(manifest);
 
       await expect(
         jobService.setupEscrow(mockJobEntity as JobEntity),
@@ -1910,7 +2003,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      storageService.download = jest.fn().mockReturnValue(manifest);
+      storageService.downloadJsonLikeData = jest.fn().mockReturnValue(manifest);
 
       await expect(
         jobService.setupEscrow(mockJobEntity as JobEntity),
@@ -1933,7 +2026,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
         fee,
         fundAmount,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -1959,7 +2052,7 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         requestType: JobRequestType.FORTUNE,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         userId: 1,
         fundAmount: 100,
         save: jest.fn().mockResolvedValue(true),
@@ -2290,7 +2383,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -2334,7 +2427,7 @@ describe('JobService', () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.SET_UP,
+        status: JobStatus.FUNDED,
         chainId: ChainId.LOCALHOST,
         fundAmount: fundAmount,
         save: jest.fn().mockResolvedValue(true),
@@ -2571,16 +2664,16 @@ describe('JobService', () => {
       requesterTitle: MOCK_REQUESTER_TITLE,
     };
 
-    let uploadFilesMock: any;
+    let uploadJsonLikeMock: any;
 
     beforeEach(() => {
-      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+      uploadJsonLikeMock = jest.spyOn(storageService, 'uploadJsonLikeData');
     });
 
     beforeAll(() => {
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-      }));
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
     });
 
     afterEach(() => {
@@ -2588,7 +2681,7 @@ describe('JobService', () => {
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
-      uploadFilesMock.mockResolvedValue([
+      uploadJsonLikeMock.mockResolvedValue([
         {
           url: MOCK_FILE_URL,
           hash: MOCK_FILE_HASH,
@@ -2608,12 +2701,14 @@ describe('JobService', () => {
         },
       ]);
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2621,7 +2716,7 @@ describe('JobService', () => {
     it('should throw an error if the manifest file fails to upload', async () => {
       const uploadError = new Error(ErrorBucket.UnableSaveFile);
 
-      uploadFilesMock.mockRejectedValue(uploadError);
+      uploadJsonLikeMock.mockRejectedValue(uploadError);
 
       await expect(
         jobService.uploadManifest(
@@ -2633,12 +2728,14 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.UnableSaveFile, HttpStatus.BAD_GATEWAY),
       );
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2647,7 +2744,7 @@ describe('JobService', () => {
       const errorMessage = 'Something went wrong';
       const uploadError = new Error(errorMessage);
 
-      uploadFilesMock.mockRejectedValue(uploadError);
+      uploadJsonLikeMock.mockRejectedValue(uploadError);
 
       await expect(
         jobService.uploadManifest(
@@ -2657,12 +2754,14 @@ describe('JobService', () => {
         ),
       ).rejects.toThrow(new Error(errorMessage));
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(fortuneManifestParams);
     });
@@ -2679,7 +2778,7 @@ describe('JobService', () => {
         description: MOCK_REQUESTER_DESCRIPTION,
         user_guide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
-        job_size: 10,
+        job_size: 1,
       },
       validation: {
         min_quality: 1,
@@ -2689,16 +2788,16 @@ describe('JobService', () => {
       job_bounty: '1',
     };
 
-    let uploadFilesMock: any;
+    let uploadJsonLikeMock: any;
 
     beforeEach(() => {
-      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+      uploadJsonLikeMock = jest.spyOn(storageService, 'uploadJsonLikeData');
     });
 
     beforeAll(() => {
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-      }));
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
     });
 
     afterEach(() => {
@@ -2706,7 +2805,7 @@ describe('JobService', () => {
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
-      uploadFilesMock.mockResolvedValue([
+      uploadJsonLikeMock.mockResolvedValue([
         {
           url: MOCK_FILE_URL,
           hash: MOCK_FILE_HASH,
@@ -2726,13 +2825,14 @@ describe('JobService', () => {
         },
       ]);
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
-
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2740,7 +2840,7 @@ describe('JobService', () => {
     it('should throw an error if the manifest file fails to upload', async () => {
       const uploadError = new Error(ErrorBucket.UnableSaveFile);
 
-      uploadFilesMock.mockRejectedValue(uploadError);
+      uploadJsonLikeMock.mockRejectedValue(uploadError);
 
       await expect(
         jobService.uploadManifest(
@@ -2752,12 +2852,14 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.UnableSaveFile, HttpStatus.BAD_GATEWAY),
       );
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2766,7 +2868,7 @@ describe('JobService', () => {
       const errorMessage = 'Something went wrong';
       const uploadError = new Error(errorMessage);
 
-      uploadFilesMock.mockRejectedValue(uploadError);
+      uploadJsonLikeMock.mockRejectedValue(uploadError);
 
       await expect(
         jobService.uploadManifest(
@@ -2775,12 +2877,14 @@ describe('JobService', () => {
           manifest,
         ),
       ).rejects.toThrow(new Error(errorMessage));
-      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
       expect(
         JSON.parse(
-          await encryption.decrypt(
-            (storageService.uploadFile as any).mock.calls[0][0],
-          ),
+          Buffer.from(
+            await encryption.decrypt(
+              (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+            ),
+          ).toString(),
         ),
       ).toEqual(manifest);
     });
@@ -2796,16 +2900,16 @@ describe('JobService', () => {
       requesterTitle: MOCK_REQUESTER_TITLE,
     };
 
-    let uploadFilesMock: any;
+    let uploadJsonLikeMock: any;
 
     beforeEach(() => {
-      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+      uploadJsonLikeMock = jest.spyOn(storageService, 'uploadJsonLikeData');
     });
 
     beforeAll(() => {
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        getPublicKey: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
-      }));
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
       encrypt = false;
     });
 
@@ -2818,7 +2922,7 @@ describe('JobService', () => {
     });
 
     it('should save the manifest and return the manifest URL and hash', async () => {
-      uploadFilesMock.mockResolvedValue([
+      uploadJsonLikeMock.mockResolvedValue([
         {
           url: MOCK_FILE_URL,
           hash: MOCK_FILE_HASH,
@@ -2838,16 +2942,16 @@ describe('JobService', () => {
         },
       ]);
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
-      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
-        fortuneManifestParams,
-      );
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
+      expect(
+        (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+      ).toEqual(fortuneManifestParams);
     });
 
     it('should throw an error if the manifest file fails to upload', async () => {
       const uploadError = new Error(ErrorBucket.UnableSaveFile);
 
-      uploadFilesMock.mockRejectedValue(uploadError);
+      uploadJsonLikeMock.mockRejectedValue(uploadError);
 
       await expect(
         jobService.uploadManifest(
@@ -2859,17 +2963,17 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.UnableSaveFile, HttpStatus.BAD_GATEWAY),
       );
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
-      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
-        fortuneManifestParams,
-      );
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
+      expect(
+        (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+      ).toEqual(fortuneManifestParams);
     });
 
     it('should rethrow any other errors encountered', async () => {
       const errorMessage = 'Something went wrong';
       const uploadError = new Error(errorMessage);
 
-      uploadFilesMock.mockRejectedValue(uploadError);
+      uploadJsonLikeMock.mockRejectedValue(uploadError);
 
       await expect(
         jobService.uploadManifest(
@@ -2879,18 +2983,18 @@ describe('JobService', () => {
         ),
       ).rejects.toThrow(new Error(errorMessage));
 
-      expect(storageService.uploadFile).toHaveBeenCalled();
-      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
-        fortuneManifestParams,
-      );
+      expect(storageService.uploadJsonLikeData).toHaveBeenCalled();
+      expect(
+        (storageService.uploadJsonLikeData as any).mock.calls[0][0],
+      ).toEqual(fortuneManifestParams);
     });
   });
 
   describe('getResult', () => {
-    let downloadFileFromUrlMock: any;
+    let downloadJsonLIkeDataMock: any;
 
     beforeEach(() => {
-      downloadFileFromUrlMock = storageService.download;
+      downloadJsonLIkeDataMock = storageService.downloadJsonLikeData;
     });
 
     afterEach(() => {
@@ -2929,12 +3033,14 @@ describe('JobService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
+      downloadJsonLIkeDataMock.mockResolvedValueOnce(fortuneResult);
 
       const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
 
-      expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(1);
+      expect(storageService.downloadJsonLikeData).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(storageService.downloadJsonLikeData).toHaveBeenCalledTimes(1);
       expect(result).toEqual(fortuneResult);
     });
 
@@ -2981,15 +3087,17 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(jobEntityMock);
 
-      downloadFileFromUrlMock.mockResolvedValueOnce(null);
+      downloadJsonLIkeDataMock.mockResolvedValueOnce([]);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
       ).rejects.toThrow(
         new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND),
       );
-      expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(1);
+      expect(storageService.downloadJsonLikeData).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(storageService.downloadJsonLikeData).toHaveBeenCalledTimes(1);
     });
 
     it('should throw a ControlledError if the result is not valid', async () => {
@@ -3024,7 +3132,7 @@ describe('JobService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
+      downloadJsonLIkeDataMock.mockResolvedValueOnce(fortuneResult);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
@@ -3035,8 +3143,116 @@ describe('JobService', () => {
         ),
       );
 
-      expect(storageService.download).toHaveBeenCalledWith(MOCK_FILE_URL);
-      expect(storageService.download).toHaveBeenCalledTimes(1);
+      expect(storageService.downloadJsonLikeData).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(storageService.downloadJsonLikeData).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('downloadJobResults', () => {
+    let downloadFileMock: any;
+
+    beforeEach(() => {
+      downloadFileMock = storageService.downloadFile;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should download and return the binary result', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.IMAGE_BOXES,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      }));
+
+      const sampleFile = Buffer.from('test-file-contents');
+      downloadFileMock.mockImplementationOnce((url: string) => {
+        if (url === MOCK_FILE_URL) {
+          return sampleFile;
+        }
+
+        return null;
+      });
+
+      const { contents, filename } = await jobService.downloadJobResults(
+        MOCK_USER_ID,
+        MOCK_JOB_ID,
+      );
+
+      expect(contents).toEqual(sampleFile);
+      expect(filename).toBe('file.json');
+    });
+
+    it('should throw a ControlledError if the result is not found', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.IMAGE_BOXES,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: () => null,
+      }));
+
+      await expect(
+        jobService.downloadJobResults(MOCK_USER_ID, MOCK_JOB_ID),
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw a ControlledError if attempt to download for fortune', async () => {
+      const jobEntityMock = {
+        status: JobStatus.COMPLETED,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
+
+      jobRepository.findOneByIdAndUserId = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock);
+
+      await expect(
+        jobService.downloadJobResults(MOCK_USER_ID, MOCK_JOB_ID),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorJob.InvalidRequestType,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     });
   });
 
@@ -3342,13 +3558,6 @@ describe('JobService', () => {
   describe('getDetails', () => {
     it('should return job details with escrow address successfully', async () => {
       const balance = '1';
-      const allocationMock: IAllocation = {
-        escrowAddress: ethers.ZeroAddress,
-        staker: ethers.ZeroAddress,
-        tokens: 1n,
-        createdAt: 1n,
-        closedAt: 1n,
-      };
 
       const manifestMock: FortuneManifestDto = {
         submissionsRequired: 10,
@@ -3394,11 +3603,6 @@ describe('JobService', () => {
           recordingOracleAddress: expect.any(String),
           reputationOracleAddress: expect.any(String),
         },
-        staking: {
-          staker: expect.any(String),
-          allocated: expect.any(Number),
-          slashed: 0,
-        },
       };
 
       const getEscrowData = {
@@ -3415,10 +3619,9 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
-      (StakingClient.build as any).mockImplementation(() => ({
-        getAllocation: jest.fn().mockResolvedValue(allocationMock),
-      }));
-      storageService.download = jest.fn().mockResolvedValue(manifestMock);
+      storageService.downloadJsonLikeData = jest
+        .fn()
+        .mockResolvedValue(manifestMock);
       jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 
       const result = await jobService.getDetails(1, 123);
@@ -3470,17 +3673,14 @@ describe('JobService', () => {
           recordingOracleAddress: ethers.ZeroAddress,
           reputationOracleAddress: ethers.ZeroAddress,
         },
-        staking: {
-          staker: expect.any(String),
-          allocated: 0,
-          slashed: 0,
-        },
       };
 
       jobRepository.findOneByIdAndUserId = jest
         .fn()
         .mockResolvedValue(jobEntityMock as any);
-      storageService.download = jest.fn().mockResolvedValue(manifestMock);
+      storageService.downloadJsonLikeData = jest
+        .fn()
+        .mockResolvedValue(manifestMock);
       jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 
       const result = await jobService.getDetails(1, 123);
@@ -3573,9 +3773,7 @@ describe('JobService', () => {
         },
       });
 
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
 
       const result = await (jobService as any).getOracleFee(
         MOCK_EXCHANGE_ORACLE_ADDRESS,
@@ -3659,6 +3857,63 @@ describe('JobService', () => {
 
       expect(mockJobEntity.status).toBe(JobStatus.COMPLETED);
       expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isEscrowFunded', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return true for a valid escrow address with a non-zero balance', async () => {
+      const chainId = 1;
+      const escrowClientMock = {
+        getBalance: jest.fn().mockResolvedValue(BigInt(1000)),
+      };
+
+      (EscrowClient.build as any).mockImplementation(() => escrowClientMock);
+
+      const result = await jobService.isEscrowFunded(chainId, MOCK_ADDRESS);
+
+      expect(result).toBe(true);
+      expect(escrowClientMock.getBalance).toHaveBeenCalledWith(MOCK_ADDRESS);
+    });
+
+    it('should return false for a valid escrow address with a zero balance', async () => {
+      const chainId = 1;
+      const escrowClientMock = {
+        getBalance: jest.fn().mockResolvedValue(BigInt(0)),
+      };
+
+      (EscrowClient.build as any).mockImplementation(() => escrowClientMock);
+
+      const result = await jobService.isEscrowFunded(chainId, MOCK_ADDRESS);
+
+      expect(result).toBe(false);
+      expect(escrowClientMock.getBalance).toHaveBeenCalledWith(MOCK_ADDRESS);
+    });
+
+    it('should return false for an invalid escrow address', async () => {
+      const chainId = 1;
+      const escrowAddress = '';
+
+      const result = await jobService.isEscrowFunded(chainId, escrowAddress);
+
+      expect(result).toBe(false);
+      expect(EscrowClient.build).not.toHaveBeenCalled();
+    });
+
+    it('should return false when no escrow address is provided', async () => {
+      const chainId = 1;
+      const escrowAddress = undefined;
+
+      const result = await jobService.isEscrowFunded(
+        chainId,
+        escrowAddress as any,
+      );
+
+      expect(result).toBe(false);
+      expect(EscrowClient.build).not.toHaveBeenCalled();
     });
   });
 });

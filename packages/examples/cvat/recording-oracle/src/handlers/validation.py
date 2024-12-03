@@ -2,19 +2,18 @@ import io
 import os
 from collections import Counter
 from logging import Logger
-from typing import Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
-import src.chain.escrow as escrow
 import src.core.annotation_meta as annotation
 import src.core.validation_meta as validation
 import src.services.webhook as oracle_db_service
+from src.chain import escrow
 from src.core.config import Config
 from src.core.manifest import TaskManifest, parse_manifest
 from src.core.oracle_events import (
-    RecordingOracleEvent_TaskCompleted,
-    RecordingOracleEvent_TaskRejected,
+    RecordingOracleEvent_JobCompleted,
+    RecordingOracleEvent_SubmissionRejected,
 )
 from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
@@ -48,9 +47,8 @@ class _TaskValidator:
 
         self.data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
-        self.annotation_meta: Optional[annotation.AnnotationMeta] = None
-        self.job_annotations: Optional[Dict[int, bytes]] = None
-        self.merged_annotations: Optional[bytes] = None
+        self.annotation_meta: annotation.AnnotationMeta | None = None
+        self.merged_annotations: bytes | None = None
 
     def set_logger(self, logger: Logger):
         self.logger = logger
@@ -71,34 +69,25 @@ class _TaskValidator:
 
         data_bucket_client = make_cloud_client(self.data_bucket)
 
-        job_annotations = {}
-        for job_meta in self.annotation_meta.jobs:
-            job_filename = compose_annotation_results_bucket_filename(
-                self.escrow_address,
-                self.chain_id,
-                job_meta.annotation_filename,
-            )
-            job_annotations[job_meta.job_id] = data_bucket_client.download_file(job_filename)
-
-        excor_merged_annotation_path = compose_annotation_results_bucket_filename(
+        exchange_oracle_merged_annotation_path = compose_annotation_results_bucket_filename(
             self.escrow_address,
             self.chain_id,
             annotation.RESULTING_ANNOTATIONS_FILE,
         )
-        merged_annotations = data_bucket_client.download_file(excor_merged_annotation_path)
+        merged_annotations = data_bucket_client.download_file(
+            exchange_oracle_merged_annotation_path
+        )
 
-        self.job_annotations = job_annotations
         self.merged_annotations = merged_annotations
 
     def _download_results(self):
         self._download_results_meta()
         self._download_annotations()
 
-    ValidationResult = Union[ValidationSuccess, ValidationFailure]
+    ValidationResult = ValidationSuccess | ValidationFailure
 
     def _process_annotation_results(self) -> ValidationResult:
         assert self.annotation_meta is not None
-        assert self.job_annotations is not None
         assert self.merged_annotations is not None
 
         # TODO: refactor further
@@ -107,7 +96,6 @@ class _TaskValidator:
             escrow_address=self.escrow_address,
             chain_id=self.chain_id,
             meta=self.annotation_meta,
-            job_annotations={k: io.BytesIO(v) for k, v in self.job_annotations.items()},
             merged_annotations=io.BytesIO(self.merged_annotations),
             manifest=self.manifest,
             logger=self.logger,
@@ -122,6 +110,10 @@ class _TaskValidator:
 
     def _compose_validation_results_bucket_filename(self, filename: str) -> str:
         return f"{self.escrow_address}@{self.chain_id}/{filename}"
+
+    _LOW_QUALITY_REASON_MESSAGE_TEMPLATE = (
+        "Annotation quality ({}) is below the required threshold ({})"
+    )
 
     def _handle_validation_result(self, validation_result: ValidationResult):
         logger = self.logger
@@ -159,7 +151,7 @@ class _TaskValidator:
             escrow.store_results(
                 chain_id,
                 escrow_address,
-                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),
+                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),  # noqa: PTH120
                 compute_resulting_annotations_hash(validation_result.resulting_annotations),
             )
 
@@ -168,41 +160,51 @@ class _TaskValidator:
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.reputation_oracle,
-                event=RecordingOracleEvent_TaskCompleted(),
+                event=RecordingOracleEvent_JobCompleted(),
             )
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
-                event=RecordingOracleEvent_TaskCompleted(),
+                event=RecordingOracleEvent_JobCompleted(),
             )
-        else:
+        elif isinstance(validation_result, ValidationFailure):
             error_type_counts = Counter(
                 type(e).__name__ for e in validation_result.rejected_jobs.values()
             )
             logger.info(
-                f"Validation for escrow_address={escrow_address}: failed, "
+                f"Validation for escrow_address={escrow_address} failed, "
                 f"rejected {len(validation_result.rejected_jobs)} jobs. "
                 f"Problems: {dict(error_type_counts)}"
             )
+
+            job_id_to_assignment_id = {
+                job_meta.job_id: job_meta.assignment_id for job_meta in self.annotation_meta.jobs
+            }
 
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,
                 chain_id,
                 OracleWebhookTypes.exchange_oracle,
-                event=RecordingOracleEvent_TaskRejected(
-                    # TODO: update wrt. M2 API changes, send reason
-                    rejected_job_ids=list(
-                        jid
-                        for jid, reason in validation_result.rejected_jobs.items()
-                        if not isinstance(
-                            reason, TooFewGtError
-                        )  # prevent such jobs from reannotation, can also be handled in ExcOr
-                    )
+                event=RecordingOracleEvent_SubmissionRejected(
+                    # TODO: send all assignments, handle rejection reason in Exchange Oracle
+                    assignments=[
+                        RecordingOracleEvent_SubmissionRejected.RejectedAssignmentInfo(
+                            assignment_id=job_id_to_assignment_id[rejected_job_id],
+                            reason=self._LOW_QUALITY_REASON_MESSAGE_TEMPLATE.format(
+                                validation_result.job_results[rejected_job_id],
+                                self.manifest.validation.min_quality,
+                            ),
+                        )
+                        for rejected_job_id, reason in validation_result.rejected_jobs.items()
+                        if not isinstance(reason, TooFewGtError)
+                    ]
                 ),
             )
+        else:
+            raise TypeError(f"Unexpected validation result {type(validation_result)=}")
 
 
 def validate_results(
@@ -211,8 +213,6 @@ def validate_results(
     db_session: Session,
 ):
     logger = get_function_logger(module_logger_name)
-
-    escrow.validate_escrow(chain_id=chain_id, escrow_address=escrow_address)
 
     manifest = parse_manifest(escrow.get_escrow_manifest(chain_id, escrow_address))
 

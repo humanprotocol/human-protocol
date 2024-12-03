@@ -7,10 +7,10 @@ export const envValidator = Joi.object({
   PORT: Joi.string(),
   FE_URL: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
-  CRON_SECRET: Joi.string().required(),
+  QUALIFICATION_MIN_VALIDITY: Joi.number(),
   // Auth
-  JWT_PRIVATE_KEY: Joi.string(),
-  JWT_PUBLIC_KEY: Joi.string(),
+  JWT_PRIVATE_KEY: Joi.string().required(),
+  JWT_PUBLIC_KEY: Joi.string().required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.number(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.number(),
   VERIFY_EMAIL_TOKEN_EXPIRES_IN: Joi.number(),
@@ -32,6 +32,7 @@ export const envValidator = Joi.object({
   POSTGRES_DATABASE: Joi.string(),
   POSTGRES_PORT: Joi.string(),
   POSTGRES_SSL: Joi.string(),
+  POSTGRES_URL: Joi.string(),
   POSTGRES_LOGGING: Joi.string(),
   // Web3
   WEB3_ENV: Joi.string(),
@@ -61,12 +62,11 @@ export const envValidator = Joi.object({
   REPUTATION_LEVEL_LOW: Joi.number(),
   REPUTATION_LEVEL_HIGH: Joi.number(),
   // Encryption
-  PGP_PRIVATE_KEY: Joi.string(),
-  PGP_PASSPHRASE: Joi.string(),
+  PGP_PRIVATE_KEY: Joi.string().optional(),
+  PGP_PASSPHRASE: Joi.string().optional(),
   PGP_ENCRYPT: Joi.string(),
-  // Synaps Kyc
-  SYNAPS_API_KEY: Joi.string().required(),
-  SYNAPS_WEBHOOK_SECRET: Joi.string().required(),
-  SYNAPS_BASE_URL: Joi.string(),
-  SYNAPS_STEP_DOCUMENT_ID: Joi.string().required(),
+  // Kyc
+  KYC_API_KEY: Joi.string(),
+  KYC_API_PRIVATE_KEY: Joi.string().required(),
+  KYC_BASE_URL: Joi.string(),
 });

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict, Optional, Tuple
 
 from src.chain.web3 import sign_message
 from src.core.oracle_events import parse_event
@@ -11,8 +10,8 @@ def prepare_outgoing_webhook_body(
     chain_id: Networks,
     event_type: str,
     event_data: dict,
-    timestamp: Optional[datetime],
-) -> Dict:
+    timestamp: datetime | None,
+) -> dict:
     body = {"escrow_address": escrow_address, "chain_id": chain_id}
 
     if timestamp:
@@ -21,7 +20,7 @@ def prepare_outgoing_webhook_body(
     event = parse_event(OracleWebhookTypes.recording_oracle, event_type, event_data)
     body["event_type"] = event_type
 
-    body["event_data"] = event.dict()
+    body["event_data"] = event.model_dump()
     if not body["event_data"]:
         body.pop("event_data")
 
@@ -29,11 +28,11 @@ def prepare_outgoing_webhook_body(
 
 
 def prepare_signed_message(
-    escrow_address: str,
+    escrow_address: str,  # noqa: ARG001
     chain_id: Networks,
-    message: Optional[str] = None,
-    body: Optional[dict] = None,
-) -> Tuple[str, str]:
+    message: str | None = None,
+    body: dict | None = None,
+) -> tuple[str, str]:
     """
     Sign the message with the service identity.
     Optionally, can serialize the input structure.

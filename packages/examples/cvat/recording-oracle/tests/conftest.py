@@ -1,10 +1,11 @@
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from src import app
-from src.db import Base, engine
+from src.db import Base, SessionLocal, engine
 
 
 @pytest.fixture(autouse=True)
@@ -17,3 +18,14 @@ def db():
 def client() -> Generator:
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture
+def session() -> Generator[Session, None, None]:
+    session = SessionLocal()
+
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()

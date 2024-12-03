@@ -1,50 +1,76 @@
 # pylint: disable=too-few-public-methods,missing-class-docstring
-""" Project configuration from env vars """
+"""Project configuration from env vars"""
+
+import inspect
 import os
-from typing import ClassVar, Optional
+from collections.abc import Iterable
+from typing import ClassVar
 
 from attrs.converters import to_bool
 from dotenv import load_dotenv
+from human_protocol_sdk.encryption import Encryption
+from web3 import Web3
+from web3.providers.rpc import HTTPProvider
 
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
-
 dotenv_path = os.getenv("DOTENV_PATH", None)
-if dotenv_path and not os.path.exists(dotenv_path):
+if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 
 load_dotenv(dotenv_path)
 
 
+class _BaseConfig:
+    @classmethod
+    def validate(cls) -> None:
+        pass
+
+
 class Postgres:
     port = os.environ.get("PG_PORT", "5434")
-    host = os.environ.get("PG_HOST", "0.0.0.0")
+    host = os.environ.get("PG_HOST", "0.0.0.0")  # noqa: S104
     user = os.environ.get("PG_USER", "admin")
     password = os.environ.get("PG_PASSWORD", "admin")
     database = os.environ.get("PG_DB", "recording_oracle")
     lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
-    def connection_url(cls):
+    def connection_url(cls) -> str:
         return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.database}"
 
 
-class PolygonMainnetConfig:
+class _NetworkConfig:
+    chain_id: ClassVar[int]
+    rpc_api: ClassVar[str | None]
+    private_key: ClassVar[str | None]
+    addr: ClassVar[str | None]
+
+    @classmethod
+    def is_configured(cls) -> bool:
+        if all([cls.chain_id, cls.rpc_api, cls.private_key, cls.addr]):
+            w3 = Web3(HTTPProvider(cls.rpc_api))
+            return w3.is_connected()
+
+        return False
+
+
+class PolygonMainnetConfig(_NetworkConfig):
     chain_id = 137
     rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
     private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
 
-class PolygonAmoyConfig:
+class PolygonAmoyConfig(_NetworkConfig):
     chain_id = 80002
     rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
     private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_AMOY_ADDR")
 
 
-class LocalhostConfig:
+class LocalhostConfig(_NetworkConfig):
     chain_id = 1338
     rpc_api = os.environ.get("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
     private_key = os.environ.get(
@@ -77,12 +103,12 @@ class IStorageConfig:
     data_bucket_name: ClassVar[str]
     secure: ClassVar[bool]
     endpoint_url: ClassVar[str]  # TODO: probably should be optional
-    region: ClassVar[Optional[str]]
+    region: ClassVar[str | None]
     # AWS S3 specific attributes
-    access_key: ClassVar[Optional[str]]
-    secret_key: ClassVar[Optional[str]]
+    access_key: ClassVar[str | None]
+    secret_key: ClassVar[str | None]
     # GCS specific attributes
-    key_file_path: ClassVar[Optional[str]]
+    key_file_path: ClassVar[str | None]
 
     @classmethod
     def get_scheme(cls) -> str:
@@ -96,8 +122,7 @@ class IStorageConfig:
     def bucket_url(cls) -> str:
         if is_ipv4(cls.endpoint_url):
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
-        else:
-            return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
+        return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
 
 class StorageConfig(IStorageConfig):
@@ -168,12 +193,44 @@ class ValidationConfig:
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
-    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", 0))
+    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", "0"))
     """
     Maximum escrow annotation-validation iterations.
     After this, the escrow is finished automatically.
     Supposed only for testing. Use 0 to disable.
     """
+
+
+class EncryptionConfig(_BaseConfig):
+    pgp_passphrase = os.environ.get("PGP_PASSPHRASE", "")
+    pgp_private_key = os.environ.get("PGP_PRIVATE_KEY", "")
+    pgp_public_key_url = os.environ.get("PGP_PUBLIC_KEY_URL", "")
+
+    @classmethod
+    def validate(cls) -> None:
+        ex_prefix = "Wrong server configuration."
+
+        if (cls.pgp_public_key_url or cls.pgp_passphrase) and not cls.pgp_private_key:
+            raise Exception(f"{ex_prefix} The PGP_PRIVATE_KEY environment is not set.")
+
+        if cls.pgp_private_key:
+            try:
+                Encryption(cls.pgp_private_key, passphrase=cls.pgp_passphrase)
+            except Exception as ex:  # noqa: BLE001
+                # Possible reasons:
+                # - private key is invalid
+                # - private key is locked but no passphrase is provided
+                raise Exception(" ".join([ex_prefix, str(ex)]))
+
+
+class CvatConfig:
+    cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
+    cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
+    cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
+    cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "org1")
+
+    cvat_quality_retrieval_timeout = int(os.environ.get("CVAT_QUALITY_RETRIEVAL_TIMEOUT", 60 * 60))
+    cvat_quality_check_interval = int(os.environ.get("CVAT_QUALITY_CHECK_INTERVAL", 5))
 
 
 class Config:
@@ -195,3 +252,23 @@ class Config:
 
     features = FeaturesConfig
     validation = ValidationConfig
+    encryption_config = EncryptionConfig
+    cvat_config = CvatConfig
+
+    @classmethod
+    def validate(cls) -> None:
+        for attr_or_method in cls.__dict__:
+            attr_or_method = getattr(cls, attr_or_method)
+            if inspect.isclass(attr_or_method) and issubclass(attr_or_method, _BaseConfig):
+                attr_or_method.validate()
+
+    @classmethod
+    def get_network_configs(cls, *, only_configured: bool = True) -> Iterable[_NetworkConfig]:
+        for attr_or_method in cls.__dict__:
+            attr_or_method = getattr(cls, attr_or_method)
+            if (
+                inspect.isclass(attr_or_method)
+                and issubclass(attr_or_method, _NetworkConfig)
+                and (not only_configured or attr_or_method.is_configured())
+            ):
+                yield attr_or_method

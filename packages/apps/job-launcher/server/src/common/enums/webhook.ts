@@ -4,6 +4,7 @@ export enum EventType {
   ESCROW_COMPLETED = 'escrow_completed',
   TASK_CREATION_FAILED = 'task_creation_failed',
   ESCROW_FAILED = 'escrow_failed',
+  // ABUSE_DETECTED = 'abuse_detected',
 }
 
 export enum OracleType {
@@ -13,7 +14,7 @@ export enum OracleType {
 }
 
 export enum WebhookStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }

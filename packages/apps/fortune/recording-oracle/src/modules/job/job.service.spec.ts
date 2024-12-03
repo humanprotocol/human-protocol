@@ -4,7 +4,7 @@ import {
   EncryptionUtils,
   EscrowClient,
   EscrowStatus,
-  KVStoreClient,
+  KVStoreUtils,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -21,6 +21,7 @@ import {
   MOCK_S3_ENDPOINT,
   MOCK_S3_PORT,
   MOCK_WEB3_PRIVATE_KEY,
+  mockConfig,
 } from '../../../test/constants';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
@@ -52,9 +53,7 @@ jest.mock('minio', () => {
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-    })),
+    build: jest.fn().mockImplementation(() => ({})),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
     downloadFileFromUrl: jest.fn().mockResolvedValue(
@@ -64,11 +63,9 @@ jest.mock('@human-protocol/sdk', () => ({
       }),
     ),
   })),
-  KVStoreClient: {
-    build: jest.fn().mockImplementation(() => ({
-      get: jest.fn(),
-      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
-    })),
+  KVStoreUtils: {
+    get: jest.fn(),
+    getPublicKey: jest.fn().mockResolvedValue('publicKey'),
   },
   EncryptionUtils: {
     encrypt: jest.fn().mockResolvedValue('encrypted'),
@@ -95,9 +92,20 @@ describe('JobService', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         JobService,
         StorageService,
-        ConfigService,
         Web3ConfigService,
         S3ConfigService,
         PGPConfigService,
@@ -341,6 +349,9 @@ describe('JobService', () => {
       httpServicePostMock.mockRejectedValueOnce(
         new Error(ErrorJob.WebhookWasNotSent),
       );
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
 
       const newSolution: WebhookDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -425,10 +436,9 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const kvStoreClient = {
-        get: jest.fn().mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL),
-      };
-      (KVStoreClient.build as jest.Mock).mockResolvedValue(kvStoreClient);
+      KVStoreUtils.get = jest
+        .fn()
+        .mockResolvedValue(MOCK_REPUTATION_ORACLE_WEBHOOK_URL);
 
       const manifest: IManifest = {
         submissionsRequired: 2,
@@ -473,7 +483,7 @@ describe('JobService', () => {
       const expectedBody = {
         chain_id: jobSolution.chainId,
         escrow_address: jobSolution.escrowAddress,
-        event_type: EventType.TASK_COMPLETED,
+        event_type: EventType.JOB_COMPLETED,
       };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -565,7 +575,7 @@ describe('JobService', () => {
     const expectedBody = {
       chain_id: jobSolution.chainId,
       escrow_address: jobSolution.escrowAddress,
-      event_type: EventType.TASK_COMPLETED,
+      event_type: EventType.JOB_COMPLETED,
     };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
@@ -597,10 +607,10 @@ describe('JobService', () => {
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-    (KVStoreClient.build as jest.Mock).mockResolvedValue({
-      get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
-      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
-    });
+    KVStoreUtils.get = jest
+      .fn()
+      .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+    KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey');
 
     const manifest: IManifest = {
       submissionsRequired: 3,
@@ -681,10 +691,10 @@ describe('JobService', () => {
       storeResults: jest.fn().mockResolvedValue(true),
     };
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-    (KVStoreClient.build as jest.Mock).mockResolvedValue({
-      get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
-      getPublicKey: jest.fn().mockResolvedValue('publicKey'),
-    });
+    KVStoreUtils.get = jest
+      .fn()
+      .mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+    KVStoreUtils.getPublicKey = jest.fn().mockResolvedValue('publicKey');
 
     const manifest: IManifest = {
       submissionsRequired: 3,

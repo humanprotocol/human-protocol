@@ -8,6 +8,7 @@ export const envValidator = Joi.object({
   FE_URL: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
   MINIMUM_FEE_USD: Joi.number(),
+  // ABUSE_AMOUNT: Joi.number(),
   // Auth
   JWT_PRIVATE_KEY: Joi.string().required(),
   JWT_PUBLIC_KEY: Joi.string().required(),
@@ -28,6 +29,7 @@ export const envValidator = Joi.object({
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number(),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
+  REPUTATION_ORACLES: Joi.string().required(),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
@@ -36,8 +38,10 @@ export const envValidator = Joi.object({
   HCAPTCHA_REPUTATION_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
-  // HCAPTCHA_SECRET: Joi.string().required(),
-  HCAPTCHA_EXCHANGE_URL: Joi.string().description('hcaptcha exchange url'),
+  HCAPTCHA_SECRET: Joi.string().required(),
+  HCAPTCHA_PROTECTION_URL: Joi.string().description(
+    'Endpoint for validating signin/signup hcaptcha tokens',
+  ),
   RPC_URL_SEPOLIA: Joi.string(),
   RPC_URL_POLYGON: Joi.string(),
   RPC_URL_POLYGON_AMOY: Joi.string(),
@@ -76,8 +80,6 @@ export const envValidator = Joi.object({
   // APIKey
   APIKEY_ITERATIONS: Joi.number(),
   APIKEY_KEY_LENGTH: Joi.number(),
-  // Cron Job Secret
-  CRON_SECRET: Joi.string().required(),
   //COIN API KEYS
   RATE_CACHE_TIME: Joi.number().optional(),
   COINMARKETCAP_API_KEY: Joi.string().optional(),

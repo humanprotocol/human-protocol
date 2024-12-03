@@ -6,7 +6,6 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NS } from '../common/constants';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
-import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
@@ -18,6 +17,11 @@ import { ServerConfigService } from '../common/config/server-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
 import { CredentialEntity } from '../modules/credentials/credential.entity';
+import { QualificationEntity } from '../modules/qualification/qualification.entity';
+import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
+import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
+import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
+import { EscrowCompletionTrackingEntity } from 'src/modules/escrow-completion-tracking/escrow-completion-tracking.entity';
 import { NDAEntity } from '../modules/nda/nda.entity';
 import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
 
@@ -39,13 +43,15 @@ import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
-            : (loggerOptions as LoggerOptions) ?? false,
+            : ((loggerOptions as LoggerOptions) ?? false),
         );
         return {
           name: 'default',
           type: 'postgres',
           entities: [
             WebhookIncomingEntity,
+            WebhookOutgoingEntity,
+            EscrowCompletionTrackingEntity,
             ReputationEntity,
             CredentialEntity,
             CredentialValidationEntity,
@@ -54,6 +60,8 @@ import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
             KycEntity,
             CronJobEntity,
             SiteKeyEntity,
+            QualificationEntity,
+            UserQualificationEntity,
             NDAEntity,
             NDAVersionEntity,
           ],

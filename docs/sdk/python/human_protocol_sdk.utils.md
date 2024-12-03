@@ -50,13 +50,6 @@ Retrieve the KVStore interface.
 * **Returns:**
   The KVStore interface of smart contract.
 
-### human_protocol_sdk.utils.get_reward_pool_interface()
-
-Retrieve the RewardPool interface.
-
-* **Returns:**
-  The RewardPool interface of smart contract.
-
 ### human_protocol_sdk.utils.get_staking_interface()
 
 Retrieve the Staking interface.

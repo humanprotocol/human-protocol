@@ -8,21 +8,7 @@ import {
   Tooltip,
   XAxis,
 } from 'recharts';
-
-const JOBS_DATA = [
-  { date: '2022-07-31', value: 2181348 },
-  { date: '2022-08-31', value: 2537442 },
-  { date: '2022-09-30', value: 7014852 },
-  { date: '2022-10-31', value: 42615432 },
-  { date: '2022-11-30', value: 88708986 },
-  { date: '2022-12-31', value: 203793543 },
-  { date: '2023-01-31', value: 209093427 },
-  { date: '2023-02-28', value: 237012318 },
-  { date: '2023-03-31', value: 212012559 },
-  { date: '2023-04-30', value: 182462076 },
-  { date: '2023-05-31', value: 148126905 },
-  { date: '2023-06-30', value: 147005424 },
-];
+import { JobStatisticsDto } from '../../types';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -36,56 +22,30 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         }}
       >
         <Typography color="text.primary" variant="body2" fontWeight={600}>
-          {dayjs(label).format('YY/MM')}
+          {dayjs(label).format('YY/MM/DD')}
         </Typography>
         <Box
           mt={2}
           sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+            gridTemplateColumns: 'repeat(2,minmax(0,1fr))',
             gap: '16px',
           }}
         >
-          <Box>
-            <Typography color="text.primary" variant="caption" component="p">
-              Jobs Launched
-            </Typography>
-            <Typography color="text.primary" variant="h6" fontWeight={500}>
-              35,845
-            </Typography>
-          </Box>
-          <Box>
-            <Typography color="text.primary" variant="caption" component="p">
-              Jobs Completed
-            </Typography>
-            <Typography color="text.primary" variant="h6" fontWeight={500}>
-              35,845
-            </Typography>
-          </Box>
-          <Box>
-            <Typography color="text.primary" variant="caption" component="p">
-              Jobs Failed
-            </Typography>
-            <Typography color="text.primary" variant="h6" fontWeight={500}>
-              35,845
-            </Typography>
-          </Box>
-          <Box>
-            <Typography color="text.primary" variant="caption" component="p">
-              Jobs Pending
-            </Typography>
-            <Typography color="text.primary" variant="h6" fontWeight={500}>
-              35,845
-            </Typography>
-          </Box>
-          <Box>
-            <Typography color="text.primary" variant="caption" component="p">
-              Jobs Canceled
-            </Typography>
-            <Typography color="text.primary" variant="h6" fontWeight={500}>
-              35,845
-            </Typography>
-          </Box>
+          {payload.map((entry: any) => (
+            <Box key={entry.name}>
+              <Typography color="text.primary" variant="caption" component="p">
+                Jobs {entry.name.charAt(0).toUpperCase() + entry.name.slice(1)}
+              </Typography>
+              <Typography
+                variant="h6"
+                fontWeight={500}
+                sx={{ color: entry.color }}
+              >
+                {entry.value}
+              </Typography>
+            </Box>
+          ))}
         </Box>
       </Box>
     );
@@ -94,10 +54,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const JobsGraph = () => {
+export const JobsGraph = ({
+  stats,
+}: {
+  stats: JobStatisticsDto | undefined;
+}) => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const data = [];
+
+  const data = stats?.jobsByStatusPerDay || [];
 
   return (
     <Card sx={{ height: '100%', boxSizing: 'border-box', padding: '60px' }}>
@@ -106,10 +71,10 @@ export const JobsGraph = () => {
       </Typography>
 
       {data.length > 0 ? (
-        <Box sx={{ width: 400, height: 300, mx: 'auto' }}>
+        <Box sx={{ width: '100%', height: 300, mx: 'auto' }}>
           <ResponsiveContainer>
             <RechartsBarChart
-              data={JOBS_DATA}
+              data={data}
               margin={{ top: 30, left: 4, right: 4 }}
             >
               <XAxis
@@ -118,16 +83,13 @@ export const JobsGraph = () => {
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
-                ticks={[
-                  JOBS_DATA[0].date,
-                  JOBS_DATA[JOBS_DATA.length - 1].date,
-                ]}
+                ticks={[data[0].date, data[data.length - 1].date]}
                 tick={{
                   fill: '#320A8D',
                   fontSize: '12px',
                   fontFamily: 'Inter',
                 }}
-                tickFormatter={(value: any) => dayjs(value).format('MMM D')}
+                tickFormatter={(value: string) => dayjs(value).format('MMM D')}
                 tickMargin={12}
                 padding={{ left: 10, right: 10 }}
               />
@@ -136,8 +98,27 @@ export const JobsGraph = () => {
                 content={<CustomTooltip />}
               />
               <Bar
-                dataKey="value"
+                dataKey="launched"
+                stackId="a"
                 fill={theme.palette.primary.main}
+                barSize={16}
+              />
+              <Bar
+                dataKey="partial"
+                stackId="a"
+                fill={theme.palette.secondary.main}
+                barSize={16}
+              />
+              <Bar
+                dataKey="completed"
+                stackId="a"
+                fill={theme.palette.success.main}
+                barSize={16}
+              />
+              <Bar
+                dataKey="canceled"
+                stackId="a"
+                fill={theme.palette.error.main}
                 barSize={16}
               />
             </RechartsBarChart>
@@ -146,7 +127,7 @@ export const JobsGraph = () => {
       ) : (
         <Box sx={{ display: 'flex', alignItems: 'center', py: 8 }}>
           <Typography variant="h5" sx={{ flex: 1 }}>
-            No data to show at the moment, data will be available once job are
+            No data to show at the moment, data will be available once jobs are
             created
           </Typography>
           <Button

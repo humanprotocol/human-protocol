@@ -2,9 +2,9 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
-  KVStoreClient,
   EscrowClient,
   StorageClient,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import {
   BadRequestException,
@@ -53,11 +53,12 @@ export class StorageService {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
       if (EncryptionUtils.isEncrypted(fileContent)) {
         const encryption = await Encryption.build(
-          this.pgpConfigService.privateKey,
+          this.pgpConfigService.privateKey!,
           this.pgpConfigService.passphrase,
         );
 
-        return JSON.parse(await encryption.decrypt(fileContent)) as ISolution[];
+        const decryptedData = await encryption.decrypt(fileContent);
+        return JSON.parse(Buffer.from(decryptedData).toString()) as ISolution[];
       }
 
       return typeof fileContent == 'string'
@@ -85,12 +86,12 @@ export class StorageService {
         const recordingOracleAddress =
           await escrowClient.getRecordingOracleAddress(escrowAddress);
 
-        const kvstoreClient = await KVStoreClient.build(signer);
-
-        const exchangeOraclePublickKey = await kvstoreClient.getPublicKey(
+        const exchangeOraclePublickKey = await KVStoreUtils.getPublicKey(
+          chainId,
           signer.address,
         );
-        const recordingOraclePublicKey = await kvstoreClient.getPublicKey(
+        const recordingOraclePublicKey = await KVStoreUtils.getPublicKey(
+          chainId,
           recordingOracleAddress,
         );
         if (

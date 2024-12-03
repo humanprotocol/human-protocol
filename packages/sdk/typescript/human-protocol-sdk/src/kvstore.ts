@@ -15,11 +15,15 @@ import {
   ErrorKVStoreEmptyKey,
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
+  InvalidKeyError,
 } from './error';
 import gqlFetch from 'graphql-request';
 import { NetworkData } from './types';
 import { getSubgraphUrl, isValidUrl } from './utils';
-import { GET_KVSTORE_BY_ADDRESS_QUERY } from './graphql/queries/kvstore';
+import {
+  GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY,
+  GET_KVSTORE_BY_ADDRESS_QUERY,
+} from './graphql/queries/kvstore';
 import { KVStoreData } from './graphql';
 import { IKVStore } from './interfaces';
 /**
@@ -99,7 +103,7 @@ export class KVStoreClient extends BaseEthersClient {
    * **KVStoreClient constructor**
    *
    * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {NetworkData} network - The network information required to connect to the KVStore contract
+   * @param {NetworkData} networkData - The network information required to connect to the KVStore contract
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
@@ -277,142 +281,6 @@ export class KVStoreClient extends BaseEthersClient {
         throw Error(`Failed to set URL and hash: ${e.message}`);
     }
   }
-
-  /**
-   * Gets the value of a key-value pair in the contract.
-   *
-   * @param {string} address Address from which to get the key value.
-   * @param {string} key Key to obtain the value.
-   * @returns {string} Value of the key.
-   *
-   *
-   * **Code example**
-   *
-   * > Need to have available stake.
-   *
-   * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
-   * const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'Role');
-   * ```
-   */
-  public async get(address: string, key: string): Promise<string> {
-    if (key === '') throw ErrorKVStoreEmptyKey;
-    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-
-    try {
-      const result = await this.contract?.get(address, key);
-      return result;
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
-      return e;
-    }
-  }
-
-  /**
-   * Gets the URL value of the given entity, and verify its hash.
-   *
-   * @param {string} address Address from which to get the URL value.
-   * @param {string} urlKey  Configurable URL key. `url` by default.
-   * @returns {string} URL value for the given address if exists, and the content is valid
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
-   * const url = await kvstoreClient.getFileUrlAndVerifyHash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-   * const linkedinUrl = await kvstoreClient.getFileUrlAndVerifyHash(
-   *    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    'linkedin_url'
-   * );
-   * ```
-   */
-  public async getFileUrlAndVerifyHash(
-    address: string,
-    urlKey = 'url'
-  ): Promise<string> {
-    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
-    const hashKey = urlKey + '_hash';
-
-    let url = '',
-      hash = '';
-
-    try {
-      url = await this.contract?.get(address, urlKey);
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
-    }
-
-    // Return empty string
-    if (!url?.length) {
-      return '';
-    }
-
-    try {
-      hash = await this.contract?.get(address, hashKey);
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
-    }
-
-    const content = await fetch(url).then((res) => res.text());
-    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
-
-    if (hash !== contentHash) {
-      throw ErrorInvalidHash;
-    }
-
-    return url;
-  }
-
-  /**
-   * Gets the public key of the given entity, and verify its hash.
-   *
-   * @param {string} address Address from which to get the public key.
-   * @returns {string} Public key for the given address if exists, and the content is valid
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { providers } from 'ethers';
-   * import { KVStoreClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const kvstoreClient = await KVStoreClient.build(provider);
-   *
-   * const publicKey = await kvstoreClient.getPublicKey('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
-   * ```
-   */
-  public async getPublicKey(address: string): Promise<string> {
-    const publicKeyUrl = await this.getFileUrlAndVerifyHash(
-      address,
-      KVStoreKeys.publicKey
-    );
-
-    if (publicKeyUrl === '') {
-      return '';
-    }
-
-    const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
-
-    return publicKey;
-  }
 }
 
 /**
@@ -441,50 +309,21 @@ export class KVStoreClient extends BaseEthersClient {
  * ```ts
  * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
  *
- * const KVStoreAddresses = new KVStoreUtils.getData({
- *   networks: [ChainId.POLYGON_AMOY]
- * });
+ * const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
+ *   ChainId.POLYGON_AMOY,
+ *   "0x1234567890123456789012345678901234567890",
+ * );
  * ```
  */
 export class KVStoreUtils {
   /**
    * This function returns the KVStore data for a given address.
    *
-   * > This uses Subgraph
-   *
-   * **Input parameters**
-   *
-   * ```ts
-   * enum ChainId {
-   *   ALL = -1,
-   *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
-   *   BSC_MAINNET = 56,
-   *   BSC_TESTNET = 97,
-   *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
-   *   POLYGON_AMOY = 80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
-   *   LOCALHOST = 1338,
-   * }
-   * ```
-   *
-   * ```ts
-   * interface IKVStore {
-   *   key: string;
-   *   value: string;
-   * }
-   * ```
-   *
    * @param {ChainId} chainId Network in which the KVStore is deployed
    * @param {string} address Address of the KVStore
    * @returns {Promise<IKVStore[]>} KVStore data
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
    *
    * **Code example**
    *
@@ -521,5 +360,155 @@ export class KVStoreUtils {
     }));
 
     return kvStoreData || [];
+  }
+
+  /**
+   * Gets the value of a key-value pair in the KVStore using the subgraph.
+   *
+   * @param {ChainId} chainId Network in which the KVStore is deployed
+   * @param {string} address Address from which to get the key value.
+   * @param {string} key Key to obtain the value.
+   * @returns {Promise<string>} Value of the key.
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   * @throws {ErrorInvalidAddress} - Thrown if the Address sent is invalid
+   * @throws {ErrorKVStoreEmptyKey} - Thrown if the key is empty
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+   *
+   * const chainId = ChainId.POLYGON_AMOY;
+   * const address = '0x1234567890123456789012345678901234567890';
+   * const key = 'role';
+   *
+   * const value = await KVStoreUtils.get(chainId, address, key);
+   * console.log(value);
+   * ```
+   */
+  public static async get(
+    chainId: ChainId,
+    address: string,
+    key: string
+  ): Promise<string> {
+    if (key === '') throw ErrorKVStoreEmptyKey;
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    const { kvstores } = await gqlFetch<{ kvstores: KVStoreData[] }>(
+      getSubgraphUrl(networkData),
+      GET_KVSTORE_BY_ADDRESS_AND_KEY_QUERY(),
+      { address: address.toLowerCase(), key }
+    );
+
+    if (!kvstores || kvstores.length === 0) {
+      throw new InvalidKeyError(key, address);
+    }
+
+    return kvstores[0].value;
+  }
+
+  /**
+   * Gets the URL value of the given entity, and verifies its hash.
+   *
+   * @param {ChainId} chainId Network in which the KVStore is deployed
+   * @param {string} address Address from which to get the URL value.
+   * @param {string} urlKey Configurable URL key. `url` by default.
+   * @returns {Promise<string>} URL value for the given address if it exists, and the content is valid
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+   *
+   * const chainId = ChainId.POLYGON_AMOY;
+   * const address = '0x1234567890123456789012345678901234567890';
+   *
+   * const url = await KVStoreUtils.getFileUrlAndVerifyHash(chainId, address);
+   * console.log(url);
+   * ```
+   */
+  public static async getFileUrlAndVerifyHash(
+    chainId: ChainId,
+    address: string,
+    urlKey = 'url'
+  ): Promise<string> {
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
+    const hashKey = urlKey + '_hash';
+
+    let url = '',
+      hash = '';
+
+    try {
+      url = await this.get(chainId, address, urlKey);
+    } catch (e) {
+      if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
+    }
+
+    // Return empty string
+    if (!url?.length) {
+      return '';
+    }
+
+    try {
+      hash = await this.get(chainId, address, hashKey);
+    } catch (e) {
+      if (e instanceof Error) throw Error(`Failed to get Hash: ${e.message}`);
+    }
+
+    const content = await fetch(url).then((res) => res.text());
+    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
+
+    const formattedHash = hash?.replace(/^0x/, '');
+    const formattedContentHash = contentHash?.replace(/^0x/, '');
+
+    if (formattedHash !== formattedContentHash) {
+      throw ErrorInvalidHash;
+    }
+
+    return url;
+  }
+
+  /**
+   * Gets the public key of the given entity, and verifies its hash.
+   *
+   * @param {ChainId} chainId Network in which the KVStore is deployed
+   * @param {string} address Address from which to get the public key.
+   * @returns {Promise<string>} Public key for the given address if it exists, and the content is valid
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
+   *
+   * const chainId = ChainId.POLYGON_AMOY;
+   * const address = '0x1234567890123456789012345678901234567890';
+   *
+   * const publicKey = await KVStoreUtils.getPublicKey(chainId, address);
+   * console.log(publicKey);
+   * ```
+   */
+  public static async getPublicKey(
+    chainId: ChainId,
+    address: string
+  ): Promise<string> {
+    const publicKeyUrl = await this.getFileUrlAndVerifyHash(
+      chainId,
+      address,
+      KVStoreKeys.publicKey
+    );
+
+    if (publicKeyUrl === '') {
+      return '';
+    }
+
+    const publicKey = await fetch(publicKeyUrl).then((res) => res.text());
+
+    return publicKey;
   }
 }

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:14.4
@@ -13,6 +11,20 @@ services:
       - test-network
     ports:
       - 5432:5432
+
+  redis:
+    container_name: oracle-redis
+    image: redis:7.2.3-alpine
+    restart: always
+    command: [
+      "redis-server",
+      "--save", "60", "100",
+      "--appendonly", "yes",
+    ]
+    ports:
+      - 6379:6379
+    networks:
+      - test-network
 
   minio:
     container_name: minio
@@ -72,8 +84,11 @@ services:
       STORAGE_USE_SSL: False
       STORAGE_PROVIDER: 'aws'
       ENABLE_CUSTOM_CLOUD_HOST: Yes
+      REDIS_HOST: 'redis'
     depends_on:
       postgres:
+        condition: service_started
+      redis:
         condition: service_started
       minio-mc:
         condition: service_completed_successfully

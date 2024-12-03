@@ -4,8 +4,10 @@ import CloudIcon from '@mui/icons-material/Cloud';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import {
+  Autocomplete,
   Box,
   Button,
+  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -24,14 +26,15 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
 } from '../../../components/Accordion';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
 import languages from '../../../data/languages.json';
 import locations from '../../../data/locations.json';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
-import { HCaptchaJobType } from '../../../types';
+import { getQualifications } from '../../../services/qualification';
+import { HCaptchaJobType, Qualification } from '../../../types';
 import { HCaptchaJobRequesteValidationSchema } from './schema';
 
 export const HCaptchaJobRequestForm = () => {
@@ -39,6 +42,9 @@ export const HCaptchaJobRequestForm = () => {
     useCreateJobPageUI();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
   const [searchParams] = useSearchParams();
+  const [qualificationsOptions, setQualificationsOptions] = useState<
+    Qualification[]
+  >([]);
 
   const initialValues = {
     dataUrl: '',
@@ -46,6 +52,7 @@ export const HCaptchaJobRequestForm = () => {
     completionDate: null,
     minRequests: null,
     maxRequests: null,
+    qualifications: [],
     // Advanced
     workerLanguage: null,
     workerLocation: null,
@@ -75,6 +82,10 @@ export const HCaptchaJobRequestForm = () => {
       accuracyTarget: Number(data.accuracyTarget) / 100,
       minRequests: Number(data.minRequests),
       maxRequests: Number(data.maxRequests),
+
+      qualifications: (data.qualifications as Qualification[]).map(
+        (qualification) => qualification.reference,
+      ),
       advanced: {
         workerLanguage: data.workerLanguage,
         workerLocation: data.workerLocation,
@@ -122,8 +133,19 @@ export const HCaptchaJobRequestForm = () => {
     ) {
       setFieldValue('type', type);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const fetchData = async () => {
+      if (jobRequest.chainId !== undefined) {
+        try {
+          setQualificationsOptions(await getQualifications(jobRequest.chainId));
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error fetching data:', error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [jobRequest.chainId]);
 
   return (
     <Box mt="42px">
@@ -279,6 +301,69 @@ export const HCaptchaJobRequestForm = () => {
                     type="number"
                   />
                 </FormControl>
+              </Grid>
+
+              <Grid item container xs={12} mt={0} spacing={2}>
+                <Grid item xs={12}>
+                  <Box display="flex">
+                    <Typography variant="body2" fontWeight={700}>
+                      Qualifications
+                    </Typography>
+                    <Tooltip title="Specify the required credentials or qualifications workers must have to get access to this job (e.g., english).">
+                      <HelpOutlineIcon
+                        color="secondary"
+                        sx={{ cursor: 'pointer', ml: 1 }}
+                      />
+                    </Tooltip>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <Autocomplete
+                      multiple
+                      options={qualificationsOptions}
+                      getOptionLabel={(option) => option.title}
+                      value={values.qualifications}
+                      onChange={(event, newValues) => {
+                        setFieldValue('qualifications', newValues);
+                      }}
+                      selectOnFocus
+                      onBlur={handleBlur}
+                      handleHomeEndKeys
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                          <Chip
+                            label={option.title}
+                            {...getTagProps({ index })}
+                          />
+                        ))
+                      }
+                      renderInput={(params) => (
+                        <Box display="flex" alignItems="center" width="100%">
+                          <TextField
+                            {...params}
+                            label="Qualifications"
+                            variant="outlined"
+                            onBlur={handleBlur}
+                            fullWidth
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <Tooltip title="Specify the required credentials or qualifications workers must have to get access to this job (e.g., english).">
+                                    <HelpOutlineIcon
+                                      color="secondary"
+                                      sx={{ cursor: 'pointer' }}
+                                    />
+                                  </Tooltip>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Box>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
               </Grid>
             </Grid>
           </AccordionDetails>

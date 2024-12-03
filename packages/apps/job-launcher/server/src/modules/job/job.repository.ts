@@ -2,7 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { SortDirection } from '../../common/enums/collection';
-import { DataSource, In, LessThanOrEqual } from 'typeorm';
+import { DataSource, In, LessThanOrEqual, Not } from 'typeorm';
 import {
   JobSortField,
   JobStatus,
@@ -12,6 +12,13 @@ import { JobEntity } from './job.entity';
 import { BaseRepository } from '../../database/base.repository';
 import { ListResult } from './job.interface';
 import { GetJobsDto } from './job.dto';
+import {
+  JobStatusPerDayDto,
+  FundAmountStatisticsDto,
+  JobCountDto,
+} from '../statistic/statistic.dto';
+import { convertToDatabaseSortDirection } from '../../database/database.utils';
+import { PaymentSource } from 'src/common/enums/payment';
 
 @Injectable()
 export class JobRepository extends BaseRepository<JobEntity> {
@@ -76,6 +83,21 @@ export class JobRepository extends BaseRepository<JobEntity> {
     });
   }
 
+  public async findActiveByUserAndPaymentSource(
+    userId: number,
+    paymentSource: PaymentSource,
+  ): Promise<JobEntity[]> {
+    return this.find({
+      where: {
+        userId,
+        status: Not(In([JobStatus.COMPLETED, JobStatus.CANCELED])),
+        payment: {
+          source: paymentSource,
+        },
+      },
+    });
+  }
+
   public async fetchFiltered(
     data: GetJobsDto,
     userId: number,
@@ -88,7 +110,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
           JobStatus.PENDING,
           JobStatus.PAID,
           JobStatus.CREATED,
-          JobStatus.SET_UP,
+          JobStatus.FUNDED,
         ];
         break;
       case JobStatusFilter.CANCELED:
@@ -101,10 +123,11 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     const queryBuilder = this.createQueryBuilder('job');
 
+    const dbSortDirection = convertToDatabaseSortDirection(data.sort);
     if (data.sortField == JobSortField.CHAIN_ID)
-      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+      queryBuilder.orderBy(`job.${data.sortField}`, dbSortDirection);
     else if (data.sortField == JobSortField.CREATED_AT)
-      queryBuilder.orderBy(`job.${data.sortField}`, data.sort);
+      queryBuilder.orderBy(`job.${data.sortField}`, dbSortDirection);
 
     queryBuilder.where('job.userId = :userId', { userId });
     if (data.status !== undefined) {
@@ -125,5 +148,114 @@ export class JobRepository extends BaseRepository<JobEntity> {
     const entities = await queryBuilder.getMany();
 
     return { entities, itemCount };
+  }
+
+  async getAverageCompletionTime(): Promise<number> {
+    const queryBuilder = this.createQueryBuilder('job')
+      .select(
+        'AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60)',
+        'average_completion_time_minutes',
+      )
+      .where('job.status = :status', { status: JobStatus.COMPLETED });
+
+    const result = await queryBuilder.getRawOne();
+    return parseFloat(result.average_completion_time_minutes);
+  }
+
+  async getFundAmountStats(): Promise<FundAmountStatisticsDto> {
+    const queryBuilder = this.createQueryBuilder('job')
+      .select('AVG(job.fundAmount)', 'average')
+      .addSelect('MAX(job.fundAmount)', 'maximum')
+      .addSelect('MIN(job.fundAmount)', 'minimum');
+
+    const result = await queryBuilder.getRawOne();
+    return {
+      average: parseFloat(result.average),
+      maximum: parseFloat(result.maximum),
+      minimum: parseFloat(result.minimum),
+    };
+  }
+
+  async getGlobalJobCounts(): Promise<JobCountDto> {
+    const queryBuilder = this.createQueryBuilder('job')
+      .select('COUNT(job.id)', 'totalJobs')
+      .addSelect(
+        'SUM(CASE WHEN job.status = :partial THEN 1 ELSE 0 END)',
+        'partial',
+      )
+      .addSelect(
+        'SUM(CASE WHEN job.status = :completed THEN 1 ELSE 0 END)',
+        'completed',
+      )
+      .addSelect(
+        'SUM(CASE WHEN job.status = :canceled THEN 1 ELSE 0 END)',
+        'canceled',
+      )
+      .setParameters({
+        partial: JobStatus.PARTIAL,
+        completed: JobStatus.COMPLETED,
+        canceled: JobStatus.CANCELED,
+      });
+
+    const result = await queryBuilder.getRawOne();
+    return {
+      totalJobs: parseInt(result.totalJobs, 10),
+      launched: parseInt(result.totalJobs, 10),
+      partial: parseInt(result.partial, 10),
+      completed: parseInt(result.completed, 10),
+      canceled: parseInt(result.canceled, 10),
+    };
+  }
+
+  async getLaunchedJobsPerDay(): Promise<JobStatusPerDayDto[]> {
+    const queryBuilder = this.createQueryBuilder('job')
+      .select('DATE(job.created_at)', 'date')
+      .addSelect('COUNT(job.id)', 'launched')
+      .groupBy('DATE(job.created_at)')
+      .orderBy('DATE(job.created_at)', 'ASC');
+
+    const results = await queryBuilder.getRawMany();
+
+    return results.map((result) => ({
+      date: result.date.toISOString(),
+      launched: parseInt(result.launched, 10),
+      partial: 0,
+      completed: 0,
+      canceled: 0,
+    }));
+  }
+
+  async getJobsByStatusPerDay(): Promise<JobStatusPerDayDto[]> {
+    const queryBuilder = this.createQueryBuilder('job')
+      .select('DATE(job.updated_at)', 'date')
+      .addSelect(
+        'SUM(CASE WHEN job.status = :partial THEN 1 ELSE 0 END)',
+        'partial',
+      )
+      .addSelect(
+        'SUM(CASE WHEN job.status = :completed THEN 1 ELSE 0 END)',
+        'completed',
+      )
+      .addSelect(
+        'SUM(CASE WHEN job.status = :canceled THEN 1 ELSE 0 END)',
+        'canceled',
+      )
+      .groupBy('DATE(job.updated_at)')
+      .orderBy('DATE(job.updated_at)', 'ASC')
+      .setParameters({
+        partial: JobStatus.PARTIAL,
+        completed: JobStatus.COMPLETED,
+        canceled: JobStatus.CANCELED,
+      });
+
+    const results = await queryBuilder.getRawMany();
+
+    return results.map((result) => ({
+      date: result.date.toISOString(),
+      launched: 0,
+      partial: parseInt(result.partial, 10),
+      completed: parseInt(result.completed, 10),
+      canceled: parseInt(result.canceled, 10),
+    }));
   }
 }

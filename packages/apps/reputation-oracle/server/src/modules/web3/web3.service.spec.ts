@@ -1,7 +1,11 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_PRIVATE_KEY,
+  mockConfig,
+} from '../../../test/constants';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Service } from './web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -28,8 +32,19 @@ describe('Web3Service', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         Web3Service,
-        ConfigService,
         Web3ConfigService,
         NetworkConfigService,
       ],

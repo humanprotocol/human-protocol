@@ -33,26 +33,54 @@ from human_protocol_sdk.filter import TransactionFilter
 from human_protocol_sdk.utils import get_data_from_subgraph
 
 
+class InternalTransaction:
+    def __init__(
+        self,
+        from_address: str,
+        to_address: str,
+        value: str,
+        method: str,
+        receiver: str,
+        escrow: str,
+        token: str,
+    ):
+        self.from_address = from_address
+        self.to_address = to_address
+        self.value = value
+        self.method = method
+        self.receiver = receiver
+        self.escrow = escrow
+        self.token = token
+
+
 class TransactionData:
     def __init__(
         self,
         chain_id: ChainId,
         block: int,
-        hash: str,
+        tx_hash: str,
         from_address: str,
         to_address: str,
         timestamp: int,
         value: str,
         method: str,
+        receiver: str,
+        escrow: str,
+        token: str,
+        internal_transactions: list[InternalTransaction],
     ):
         self.chain_id = chain_id
         self.block = block
-        self.hash = hash
+        self.tx_hash = tx_hash
         self.from_address = from_address
         self.to_address = to_address
         self.timestamp = timestamp
         self.value = value
         self.method = method
+        self.receiver = receiver
+        self.escrow = escrow
+        self.token = token
+        self.internal_transactions = internal_transactions
 
 
 class TransactionUtilsError(Exception):
@@ -101,20 +129,29 @@ class TransactionUtils:
             query=get_transaction_query(),
             params={"hash": hash.lower()},
         )
-        transaction = transaction_data["data"]["transaction"]
-
-        if not transaction:
+        if (
+            not transaction_data
+            or "data" not in transaction_data
+            or "transaction" not in transaction_data["data"]
+            or not transaction_data["data"]["transaction"]
+        ):
             return None
+
+        transaction = transaction_data["data"]["transaction"]
 
         return TransactionData(
             chain_id=chain_id,
             block=transaction.get("block", 0),
-            hash=transaction.get("txHash", ""),
+            tx_hash=transaction.get("txHash", ""),
             from_address=transaction.get("from", ""),
             to_address=transaction.get("to", ""),
             timestamp=transaction.get("timestamp", 0),
             value=transaction.get("value", ""),
             method=transaction.get("method", ""),
+            receiver=transaction.get("receiver", ""),
+            escrow=transaction.get("escrow", ""),
+            token=transaction.get("token", ""),
+            internal_transactions=transaction.get("internalTransactions", []),
         )
 
     @staticmethod
@@ -134,7 +171,7 @@ class TransactionUtils:
                 print(
                     TransactionUtils.get_transactions(
                         TransactionFilter(
-                            networks=[ChainId.POLYGON_AMOY],
+                            chain_id=ChainId.POLYGON_AMOY,
                             from_address="0x1234567890123456789012345678901234567890",
                             to_address="0x0987654321098765432109876543210987654321",
                             start_date=datetime.datetime(2023, 5, 8),
@@ -143,58 +180,62 @@ class TransactionUtils:
                     )
                 )
         """
-        if not filter.networks:
-            raise TransactionUtilsError("Unsupported Chain ID")
-
         from human_protocol_sdk.gql.transaction import get_transactions_query
 
+        network_data = NETWORKS.get(filter.chain_id)
+        if not network_data:
+            raise TransactionUtilsError("Unsupported Chain ID")
+
+        data = get_data_from_subgraph(
+            network_data,
+            query=get_transactions_query(filter),
+            params={
+                "fromAddress": (
+                    filter.from_address.lower() if filter.from_address else None
+                ),
+                "toAddress": (filter.to_address.lower() if filter.to_address else None),
+                "startDate": (
+                    int(filter.start_date.timestamp()) if filter.start_date else None
+                ),
+                "endDate": (
+                    int(filter.end_date.timestamp()) if filter.end_date else None
+                ),
+                "startBlock": filter.start_block if filter.start_block else None,
+                "endBlock": filter.end_block if filter.end_block else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
+            },
+        )
+        if (
+            not data
+            or "data" not in data
+            or "transactions" not in data["data"]
+            or not data["data"]["transactions"]
+        ):
+            return []
+
+        transactions_raw = data["data"]["transactions"]
+
         transactions = []
-        for chain_id in filter.networks:
-            network_data = NETWORKS.get(chain_id)
-            if not network_data:
-                raise TransactionUtilsError("Unsupported Chain ID")
-
-            data = get_data_from_subgraph(
-                network_data,
-                query=get_transactions_query(filter),
-                params={
-                    "fromAddress": (
-                        filter.from_address.lower() if filter.from_address else None
-                    ),
-                    "toAddress": (
-                        filter.to_address.lower() if filter.to_address else None
-                    ),
-                    "startDate": (
-                        int(filter.start_date.timestamp())
-                        if filter.start_date
-                        else None
-                    ),
-                    "endDate": (
-                        int(filter.end_date.timestamp()) if filter.end_date else None
-                    ),
-                    "startBlock": filter.start_block if filter.start_block else None,
-                    "endBlock": filter.end_block if filter.end_block else None,
-                },
-            )
-            if not data or "data" not in data or "transactions" not in data["data"]:
-                continue
-
-            transactions_raw = data["data"]["transactions"]
-
-            transactions.extend(
-                [
-                    TransactionData(
-                        chain_id=chain_id,
-                        block=transaction.get("block", 0),
-                        hash=transaction.get("txHash", ""),
-                        from_address=transaction.get("from", ""),
-                        to_address=transaction.get("to", ""),
-                        timestamp=transaction.get("timestamp", 0),
-                        value=transaction.get("value", ""),
-                        method=transaction.get("method", ""),
-                    )
-                    for transaction in transactions_raw
-                ]
-            )
+        transactions.extend(
+            [
+                TransactionData(
+                    chain_id=filter.chain_id,
+                    block=transaction.get("block", 0),
+                    tx_hash=transaction.get("txHash", ""),
+                    from_address=transaction.get("from", ""),
+                    to_address=transaction.get("to", ""),
+                    timestamp=transaction.get("timestamp", 0),
+                    value=transaction.get("value", ""),
+                    method=transaction.get("method", ""),
+                    receiver=transaction.get("receiver", ""),
+                    escrow=transaction.get("escrow", ""),
+                    token=transaction.get("token", ""),
+                    internal_transactions=transaction.get("internalTransactions", []),
+                )
+                for transaction in transactions_raw
+            ]
+        )
 
         return transactions

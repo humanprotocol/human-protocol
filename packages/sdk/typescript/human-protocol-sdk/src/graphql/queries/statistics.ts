@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { IStatisticsParams } from '../../interfaces';
+import { IStatisticsFilter } from '../../interfaces';
 
 const HMTOKEN_STATISTICS_FRAGMENT = gql`
   fragment HMTokenStatisticsFields on HMTokenStatistics {
@@ -15,7 +15,6 @@ const HMTOKEN_STATISTICS_FRAGMENT = gql`
 const ESCROW_STATISTICS_FRAGMENT = gql`
   fragment EscrowStatisticsFields on EscrowStatistics {
     fundEventCount
-    setupEventCount
     storeResultsEventCount
     bulkPayoutEventCount
     pendingStatusEventCount
@@ -32,7 +31,6 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
   fragment EventDayDataFields on EventDayData {
     timestamp
     dailyFundEventCount
-    dailySetupEventCount
     dailyStoreResultsEventCount
     dailyBulkPayoutEventCount
     dailyPendingStatusEventCount
@@ -52,43 +50,51 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
   }
 `;
 
+const hmtStatisticsId = Buffer.from('hmt-statistics-id').toString('hex');
+
 export const GET_HMTOKEN_STATISTICS_QUERY = gql`
   query GetHMTokenStatistics {
-    hmtokenStatistics(id: "hmt-statistics-id") {
+    hmtokenStatistics(id: "${hmtStatisticsId}") {
       ...HMTokenStatisticsFields
     }
   }
   ${HMTOKEN_STATISTICS_FRAGMENT}
 `;
 
+const escrowStatisticsId = Buffer.from('escrow-statistics-id').toString('hex');
+
 export const GET_ESCROW_STATISTICS_QUERY = gql`
   query GetEscrowStatistics {
-    escrowStatistics(id: "escrow-statistics-id") {
+    escrowStatistics(id: "${escrowStatisticsId}") {
       ...EscrowStatisticsFields
     }
   }
   ${ESCROW_STATISTICS_FRAGMENT}
 `;
 
-export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsParams) => {
-  const { from, to, limit } = params;
+export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsFilter) => {
+  const { from, to } = params;
   const WHERE_CLAUSE = `
     where: {
       ${from !== undefined ? `timestamp_gte: $from` : ''}
       ${to !== undefined ? `timestamp_lte: $to` : ''}
     }
   `;
-  const LIMIT_CLAUSE = `
-    first: ${limit ? `$limit` : `1000`}
-  `;
 
   return gql`
-    query GetEscrowDayData($from: Int, $to: Int) {
+    query GetEscrowDayData(
+        $from: Int, 
+        $to: Int,
+        $orderDirection: String
+        $first: Int
+        $skip: Int
+    ) {
       eventDayDatas(
         ${WHERE_CLAUSE},
         orderBy: timestamp,
-        orderDirection: desc,
-        ${LIMIT_CLAUSE}
+        orderDirection: $orderDirection,
+        first: $first,
+        skip: $skip
       ) {
         ...EventDayDataFields
       }

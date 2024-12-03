@@ -21,9 +21,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from src.db import Base
-from src.models.cvat import Job, Task
-from src.models.webhook import Webhook
+from src.db import Base  # noqa: E402
 
 target_metadata = Base.metadata
 
@@ -51,6 +49,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        output_buffer=config.output_buffer,
     )
 
     with context.begin_transaction():

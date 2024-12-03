@@ -12,8 +12,8 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  mockConfig,
 } from '../../../test/constants';
-import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
 import {
   JobRequestType,
@@ -69,6 +69,18 @@ describe('ReputationService', () => {
       ],
       providers: [
         {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
+        {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
@@ -82,11 +94,6 @@ describe('ReputationService', () => {
           provide: ReputationRepository,
           useValue: createMock<ReputationRepository>(),
         },
-        {
-          provide: WebhookRepository,
-          useValue: createMock<WebhookRepository>(),
-        },
-        ConfigService,
         ReputationConfigService,
       ],
     }).compile();
@@ -130,9 +137,13 @@ describe('ReputationService', () => {
         };
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest) // Mock manifest
           .mockResolvedValueOnce([]); // Mock final results
+
+        jest
+          .spyOn(reputationService, 'increaseReputation')
+          .mockResolvedValueOnce();
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
@@ -154,7 +165,7 @@ describe('ReputationService', () => {
         ];
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest)
           .mockResolvedValueOnce(finalResults);
 
@@ -227,9 +238,13 @@ describe('ReputationService', () => {
         }));
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest) // Mock manifest
           .mockResolvedValueOnce([]); // Mock final results
+
+        jest
+          .spyOn(reputationService, 'increaseReputation')
+          .mockResolvedValueOnce();
 
         await expect(
           reputationService.assessReputationScores(chainId, escrowAddress),
@@ -274,7 +289,7 @@ describe('ReputationService', () => {
         };
 
         jest
-          .spyOn(storageService, 'download')
+          .spyOn(storageService, 'downloadJsonLikeData')
           .mockResolvedValueOnce(manifest)
           .mockResolvedValueOnce(annotationMeta);
 
@@ -541,7 +556,7 @@ describe('ReputationService', () => {
       };
 
       jest
-        .spyOn(reputationRepository, 'findByChainId')
+        .spyOn(reputationRepository, 'findByChainIdAndTypes')
         .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
 
       const result = await reputationService.getAllReputations();
@@ -552,7 +567,7 @@ describe('ReputationService', () => {
         reputation: ReputationLevel.LOW,
       };
 
-      expect(reputationRepository.findByChainId).toHaveBeenCalled();
+      expect(reputationRepository.findByChainIdAndTypes).toHaveBeenCalled();
       expect(result).toEqual([resultReputation]);
     });
   });

@@ -30,7 +30,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 The Signer or Provider object to interact with the Ethereum network
 
-• **networkData**: `NetworkData`
+• **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
 The network information required to connect to the contracts
 
@@ -38,19 +38,19 @@ The network information required to connect to the contracts
 
 [`BaseEthersClient`](BaseEthersClient.md)
 
-#### Source
+#### Defined in
 
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
 ### networkData
 
-> **networkData**: `NetworkData`
+> **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-#### Source
+#### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -58,6 +58,6 @@ The network information required to connect to the contracts
 
 > `protected` **runner**: `ContractRunner`
 
-#### Source
+#### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/00c0ef1cd5e15fe55363c28d74cb730c10dfa5a9/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)

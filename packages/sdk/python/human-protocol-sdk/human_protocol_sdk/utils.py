@@ -155,18 +155,6 @@ def get_staking_interface():
     )
 
 
-def get_reward_pool_interface():
-    """Retrieve the RewardPool interface.
-
-    :return: The RewardPool interface of smart contract.
-
-    """
-
-    return get_contract_interface(
-        "{}/contracts/RewardPool.sol/RewardPool.json".format(ARTIFACTS_FOLDER)
-    )
-
-
 def get_escrow_interface():
     """Retrieve the RewardPool interface.
 

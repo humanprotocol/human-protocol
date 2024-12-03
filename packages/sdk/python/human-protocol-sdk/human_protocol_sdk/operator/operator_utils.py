@@ -66,20 +66,22 @@ class LeaderData:
         id: str,
         address: str,
         amount_staked: int,
-        amount_allocated: int,
         amount_locked: int,
         locked_until_timestamp: int,
         amount_withdrawn: int,
         amount_slashed: int,
-        reputation: int,
         reward: int,
-        amount_jobs_launched: int,
+        amount_jobs_processed: int,
         role: Optional[str] = None,
         fee: Optional[int] = None,
         public_key: Optional[str] = None,
         webhook_url: Optional[str] = None,
+        website: Optional[str] = None,
         url: Optional[str] = None,
         job_types: Optional[List[str]] = None,
+        registration_needed: Optional[bool] = None,
+        registration_instructions: Optional[str] = None,
+        reputation_networks: Optional[List[str]] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -88,40 +90,44 @@ class LeaderData:
         :param id: Identifier
         :param address: Address
         :param amount_staked: Amount staked
-        :param amount_allocated: Amount allocated
         :param amount_locked: Amount locked
         :param locked_until_timestamp: Locked until timestamp
         :param amount_withdrawn: Amount withdrawn
         :param amount_slashed: Amount slashed
-        :param reputation: Reputation
         :param reward: Reward
-        :param amount_jobs_launched: Amount of jobs launched
+        :param amount_jobs_processed: Amount of jobs launched
         :param role: Role
         :param fee: Fee
         :param public_key: Public key
         :param webhook_url: Webhook url
+        :param website: Website url
         :param url: Url
         :param job_types: Job types
+        :param registration_needed: True
+        :param registration_instructions: Instructions url
+        :param reputation_networks: List of reputation networks
         """
 
         self.chain_id = chain_id
         self.id = id
         self.address = address
         self.amount_staked = amount_staked
-        self.amount_allocated = amount_allocated
         self.amount_locked = amount_locked
         self.locked_until_timestamp = locked_until_timestamp
         self.amount_withdrawn = amount_withdrawn
         self.amount_slashed = amount_slashed
-        self.reputation = reputation
         self.reward = reward
-        self.amount_jobs_launched = amount_jobs_launched
+        self.amount_jobs_processed = amount_jobs_processed
         self.role = role
         self.fee = fee
         self.public_key = public_key
         self.webhook_url = webhook_url
+        self.website = website
         self.url = url
         self.job_types = job_types
+        self.registration_needed = registration_needed
+        self.registration_instructions = registration_instructions
+        self.reputation_networks = reputation_networks
 
 
 class RewardData:
@@ -143,19 +149,29 @@ class RewardData:
 
 class Operator:
     def __init__(
-        self, address: str, role: str, url: str = "", job_types: List[str] = []
+        self,
+        address: str,
+        role: str,
+        url: str = "",
+        job_types: List[str] = [],
+        registration_needed: Optional[bool] = None,
+        registration_instructions: Optional[str] = None,
     ):
         """
         Initializes an Operator instance.
 
         :param address: Operator address
         :param role: Role of the operator
+        :param registration_needed: True,
+        :param registration_instructions: Instructions url,
         """
 
         self.address = address
         self.role = role
         self.url = url
         self.job_types = job_types
+        self.registration_needed = registration_needed
+        self.registration_instructions = registration_instructions
 
 
 class OperatorUtils:
@@ -197,36 +213,49 @@ class OperatorUtils:
             query=get_leaders_query(filter),
             params={"role": filter.role},
         )
-        leaders_raw = leaders_data["data"]["leaders"]
-
-        if not leaders_raw:
+        if (
+            not leaders_data
+            or "data" not in leaders_data
+            or "leaders" not in leaders_data["data"]
+            or not leaders_data["data"]["leaders"]
+        ):
             return []
 
-        job_types = []
-        if isinstance(job_types, str):
-            job_types = job_types.split(",")
-        elif isinstance(job_types, list):
-            job_types = job_types
+        leaders_raw = leaders_data["data"]["leaders"]
 
-        leaders.extend(
-            [
+        for leader in leaders_raw:
+            job_types = []
+            reputation_networks = []
+
+            if isinstance(leader.get("jobTypes"), str):
+                job_types = leader["jobTypes"].split(",")
+            elif isinstance(leader.get("jobTypes"), list):
+                job_types = leader["jobTypes"]
+
+            if leader.get("reputationNetworks") and isinstance(
+                leader.get("reputationNetworks"), list
+            ):
+                reputation_networks = [
+                    network["address"] for network in leader["reputationNetworks"]
+                ]
+
+            leaders.append(
                 LeaderData(
                     chain_id=filter.chain_id,
                     id=leader.get("id", ""),
                     address=leader.get("address", ""),
                     amount_staked=int(leader.get("amountStaked", 0)),
-                    amount_allocated=int(leader.get("amountAllocated", 0)),
                     amount_locked=int(leader.get("amountLocked", 0)),
                     locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
                     amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
                     amount_slashed=int(leader.get("amountSlashed", 0)),
-                    reputation=int(leader.get("reputation", 0)),
                     reward=int(leader.get("reward", 0)),
-                    amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                    amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
                     role=leader.get("role", None),
                     fee=int(leader.get("fee")) if leader.get("fee", None) else None,
                     public_key=leader.get("publicKey", None),
                     webhook_url=leader.get("webhookUrl", None),
+                    website=leader.get("website", None),
                     url=leader.get("url", None),
                     job_types=(
                         leader.get("jobTypes").split(",")
@@ -237,10 +266,13 @@ class OperatorUtils:
                             else []
                         )
                     ),
+                    registration_needed=leader.get("registrationNeeded", None),
+                    registration_instructions=leader.get(
+                        "registrationInstructions", None
+                    ),
+                    reputation_networks=reputation_networks,
                 )
-                for leader in leaders_raw
-            ]
-        )
+            )
 
         return leaders
 
@@ -283,28 +315,48 @@ class OperatorUtils:
             query=get_leader_query,
             params={"address": leader_address.lower()},
         )
+
+        if (
+            not leader_data
+            or "data" not in leader_data
+            or "leader" not in leader_data["data"]
+            or not leader_data["data"]["leader"]
+        ):
+            return None
+
         leader = leader_data["data"]["leader"]
 
-        if not leader:
-            return None
+        job_types = []
+        reputation_networks = []
+
+        if isinstance(leader.get("jobTypes"), str):
+            job_types = leader["jobTypes"].split(",")
+        elif isinstance(leader.get("jobTypes"), list):
+            job_types = leader["jobTypes"]
+
+        if leader.get("reputationNetworks") and isinstance(
+            leader.get("reputationNetworks"), list
+        ):
+            reputation_networks = [
+                network["address"] for network in leader["reputationNetworks"]
+            ]
 
         return LeaderData(
             chain_id=chain_id,
             id=leader.get("id", ""),
             address=leader.get("address", ""),
             amount_staked=int(leader.get("amountStaked", 0)),
-            amount_allocated=int(leader.get("amountAllocated", 0)),
             amount_locked=int(leader.get("amountLocked", 0)),
             locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
             amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
             amount_slashed=int(leader.get("amountSlashed", 0)),
-            reputation=int(leader.get("reputation", 0)),
             reward=int(leader.get("reward", 0)),
-            amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+            amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
             role=leader.get("role", None),
             fee=int(leader.get("fee")) if leader.get("fee", None) else None,
             public_key=leader.get("publicKey", None),
             webhook_url=leader.get("webhookUrl", None),
+            website=leader.get("website", None),
             url=leader.get("url", None),
             job_types=(
                 leader.get("jobTypes").split(",")
@@ -315,6 +367,9 @@ class OperatorUtils:
                     else []
                 )
             ),
+            registration_needed=leader.get("registrationNeeded", None),
+            registration_instructions=leader.get("registrationInstructions", None),
+            reputation_networks=reputation_networks,
         )
 
     @staticmethod
@@ -328,7 +383,6 @@ class OperatorUtils:
         :param chain_id: Network in which the reputation network exists
         :param address: Address of the reputation oracle
         :param role: (Optional) Role of the operator
-        :parem job_types: (Optional) Job types of the operator
 
         :return: Returns an array of operator details
 
@@ -360,7 +414,12 @@ class OperatorUtils:
             params={"address": address.lower(), "role": role},
         )
 
-        if not reputation_network_data["data"]["reputationNetwork"]:
+        if (
+            not reputation_network_data
+            or "data" not in reputation_network_data
+            or "reputationNetwork" not in reputation_network_data["data"]
+            or not reputation_network_data["data"]["reputationNetwork"]
+        ):
             return []
 
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
@@ -379,6 +438,8 @@ class OperatorUtils:
                         else []
                     )
                 ),
+                registration_needed=operator.get("registrationNeeded", ""),
+                registration_instructions=operator.get("registrationInstructions", ""),
             )
             for operator in operators
         ]
@@ -418,7 +479,12 @@ class OperatorUtils:
             params={"slasherAddress": slasher.lower()},
         )
 
-        if not reward_added_events_data["data"]["rewardAddedEvents"]:
+        if (
+            not reward_added_events_data
+            or "data" not in reward_added_events_data
+            or "rewardAddedEvents" not in reward_added_events_data["data"]
+            or not reward_added_events_data["data"]["rewardAddedEvents"]
+        ):
             return []
 
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]

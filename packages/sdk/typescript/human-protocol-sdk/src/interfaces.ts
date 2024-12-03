@@ -1,13 +1,5 @@
 import { EscrowStatus } from './types';
-import { ChainId } from './enums';
-
-export interface IAllocation {
-  escrowAddress: string;
-  staker: string;
-  tokens: bigint;
-  createdAt: bigint;
-  closedAt: bigint;
-}
+import { ChainId, OrderDirection } from './enums';
 
 export interface IReward {
   escrowAddress: string;
@@ -19,24 +11,28 @@ export interface ILeader {
   chainId: ChainId;
   address: string;
   amountStaked: bigint;
-  amountAllocated: bigint;
   amountLocked: bigint;
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  reputation: bigint;
   reward: bigint;
-  amountJobsLaunched: bigint;
+  amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
   publicKey?: string;
   webhookUrl?: string;
+  website?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
+  reputationNetworks?: string[];
 }
 
-export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+export interface ILeaderSubgraph
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks'> {
   jobTypes?: string;
+  reputationNetworks?: { address: string }[];
 }
 
 export interface ILeadersFilter {
@@ -60,13 +56,15 @@ export interface IOperator {
   role?: string;
   url?: string;
   jobTypes?: string[];
+  registrationNeeded?: boolean;
+  registrationInstructions?: string;
 }
 
 export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {
   jobTypes?: string;
 }
 
-export interface IEscrowsFilter {
+export interface IEscrowsFilter extends IPagination {
   launcher?: string;
   reputationOracle?: string;
   recordingOracle?: string;
@@ -75,7 +73,7 @@ export interface IEscrowsFilter {
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
-  networks: ChainId[];
+  chainId: ChainId;
 }
 
 export interface IEscrowConfig {
@@ -96,10 +94,13 @@ export interface IKeyPair {
   revocationCertificate?: string;
 }
 
-export interface IStatisticsParams {
+export interface IStatisticsFilter extends IPagination {
   from?: Date;
   to?: Date;
-  limit?: number;
+}
+
+export interface IHMTHoldersParams extends IPagination {
+  address?: string;
 }
 
 export interface IPayoutFilter {
@@ -114,22 +115,42 @@ export interface IKVStore {
   value: string;
 }
 
+export interface InternalTransaction {
+  from: string;
+  to: string;
+  value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+}
+
 export interface ITransaction {
   block: bigint;
-  hash: string;
+  txHash: string;
   from: string;
   to: string;
   timestamp: bigint;
   value: string;
   method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransaction[];
 }
 
-export interface ITransactionsFilter {
-  networks: ChainId[];
+export interface ITransactionsFilter extends IPagination {
+  chainId: ChainId;
   startBlock?: number;
   endBlock?: number;
   startDate?: Date;
   endDate?: Date;
   fromAddress?: string;
   toAddress?: string;
+}
+
+export interface IPagination {
+  first?: number;
+  skip?: number;
+  orderDirection?: OrderDirection;
 }

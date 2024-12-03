@@ -1,24 +1,28 @@
 from __future__ import annotations
 
+import math
 import os
 import random
 import uuid
+from abc import ABCMeta, abstractmethod
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
-from logging import Logger
 from math import ceil
+from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
+from time import sleep
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import cv2
 import datumaro as dm
 import numpy as np
-from datumaro.util import take_by
+from datumaro.util import filter_dict, take_by
 from datumaro.util.annotation_util import BboxCoords, bbox_iou
 from datumaro.util.image import IMAGE_EXTENSIONS, decode_image, encode_image
 
 import src.core.tasks.boxes_from_points as boxes_from_points_task
+import src.core.tasks.points as points_task
 import src.core.tasks.simple as simple_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.cvat.api_calls as cvat_api
@@ -26,16 +30,23 @@ import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
-from src.core.manifest import TaskManifest
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
-from src.log import ROOT_LOGGER_NAME
+from src.log import ROOT_LOGGER_NAME, format_sequence
+from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, get_function_logger
+from src.utils.zip_archive import write_dir_to_zip_archive
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Sequence
+    from logging import Logger
+
+    from src.core.manifest import TaskManifest
 
 module_logger = f"{ROOT_LOGGER_NAME}.cron.cvat"
 
@@ -43,6 +54,7 @@ LABEL_TYPE_MAPPING = {
     TaskTypes.image_label_binary: CvatLabelTypes.tag,
     TaskTypes.image_points: CvatLabelTypes.points,
     TaskTypes.image_boxes: CvatLabelTypes.rectangle,
+    TaskTypes.image_polygons: CvatLabelTypes.polygon,
     TaskTypes.image_boxes_from_points: CvatLabelTypes.rectangle,
     TaskTypes.image_skeletons_from_boxes: CvatLabelTypes.points,
 }
@@ -51,6 +63,7 @@ DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_person_keypoints",
     TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
@@ -60,6 +73,7 @@ DM_GT_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "cvat_images",
     TaskTypes.image_points: "coco_instances",
     TaskTypes.image_boxes: "coco_instances",
+    TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
 }
@@ -103,7 +117,7 @@ class _Undefined:
 
 _unset = _Undefined()
 
-_MaybeUnset = Union[T, _Undefined]
+_MaybeUnset = T | _Undefined
 
 
 @dataclass
@@ -115,7 +129,7 @@ class _ExcludedAnnotationInfo:
 
 @dataclass
 class _ExcludedAnnotationsInfo:
-    messages: List[_ExcludedAnnotationInfo] = field(default_factory=list)
+    messages: list[_ExcludedAnnotationInfo] = field(default_factory=list)
 
     excluded_count: int = 0
     "The number of excluded annotations. Can be different from len(messages)"
@@ -130,12 +144,8 @@ class _ExcludedAnnotationsInfo:
         )
 
 
-class SimpleTaskBuilder:
-    """
-    Handles task creation for IMAGE_POINTS and IMAGE_BOXES task types
-    """
-
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
+class _TaskBuilderBase(metaclass=ABCMeta):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
         self.exit_stack = ExitStack()
         self.manifest = manifest
         self.escrow_address = escrow_address
@@ -145,8 +155,17 @@ class SimpleTaskBuilder:
 
         self._oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
 
-        self.list_display_threshold = 5
-        "The maximum number of rendered list items in a message"
+    @property
+    def _task_segment_size(self) -> int:
+        return self.manifest.annotation.job_size
+
+    @property
+    def _job_val_frames_count(self) -> int:
+        return self.manifest.validation.val_size
+
+    @property
+    def _task_chunk_size(self) -> int:
+        return self._task_segment_size + self._job_val_frames_count
 
     def __enter__(self):
         return self
@@ -162,21 +181,94 @@ class SimpleTaskBuilder:
         self.logger = logger
         return self
 
-    def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
-    ) -> str:
-        if max_items is None:
-            max_items = self.list_display_threshold
-
-        remainder_count = len(items) - max_items
-        return "{}{}".format(
-            separator.join(items[:max_items]),
-            f" (and {remainder_count} more)" if remainder_count > 0 else "",
-        )
-
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
         return cloud_service.make_client(bucket_info)
+
+    def _save_cvat_gt_dataset_to_oracle_bucket(  # noqa: B027
+        self,
+        gt_dataset_path: Path,
+        *,
+        file_suffix: str = "",
+    ) -> None:
+        # method saves gt annotations that will be uploaded to CVAT
+        # into oracle bucket
+        pass
+
+    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+        # TODO: add a timeout or
+        # save gt datasets in the oracle bucket and upload in track_task_creation()
+        while True:
+            task_status, _ = cvat_api.get_task_upload_status(task_id)
+            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+                return task_status
+
+            sleep(Config.cvat_config.cvat_task_creation_check_interval)
+
+    def _setup_gt_job_for_cvat_task(
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
+    ) -> None:
+        task_status = self._wait_task_creation(task_id)
+        if task_status != cvat_api.UploadStatus.FINISHED:
+            return  # will be handled in state_trackers.py::track_task_creation
+
+        dm_format_to_cvat_format = {
+            "coco": "COCO 1.0",
+            "cvat": "CVAT 1.1",
+            "datumaro": "Datumaro 1.0",
+        }
+
+        with TemporaryDirectory() as tmp_dir:
+            export_dir = Path(tmp_dir) / "export"
+            gt_dataset.export(save_dir=str(export_dir), save_images=False, format=dm_export_format)
+
+            annotations_archive_path = Path(tmp_dir) / "annotations.zip"
+            with annotations_archive_path.open("wb") as annotations_archive:
+                write_dir_to_zip_archive(export_dir, annotations_archive)
+
+            if Config.is_development_mode():
+                self._save_cvat_gt_dataset_to_oracle_bucket(
+                    gt_dataset_path=annotations_archive_path, file_suffix=f"for_task_{task_id}"
+                )
+
+            self._setup_gt_job(
+                task_id,
+                annotations_archive_path,
+                format_name=dm_format_to_cvat_format[dm_export_format],
+            )
+
+    def _setup_gt_job(self, task_id: int, dataset_path: Path, format_name: str) -> None:
+        gt_job = cvat_api.get_gt_job(task_id)
+        cvat_api.upload_gt_annotations(gt_job.id, dataset_path, format_name=format_name)
+        cvat_api.finish_gt_job(gt_job.id)
+
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        settings = cvat_api.get_quality_control_settings(task_id)
+
+        values = {
+            "target_metric_threshold": self.manifest.validation.min_quality,
+            "match_empty_frames": True,
+        }
+        values.update(**overrides)
+        cvat_api.update_quality_control_settings(settings.id, **values)
+
+    def _split_dataset_per_task(
+        self,
+        data_filenames: list[str],
+        *,
+        subset_size: int,
+    ) -> Generator[str]:
+        random.shuffle(data_filenames)
+        yield from take_by(data_filenames, subset_size)
+
+    @abstractmethod
+    def build(self) -> None: ...
+
+
+class SimpleTaskBuilder(_TaskBuilderBase):
+    """
+    Handles task creation for the IMAGE_BOXES task type
+    """
 
     def _upload_task_meta(self, gt_dataset: dm.Dataset):
         layout = simple_task.TaskMetaLayout()
@@ -198,7 +290,7 @@ class SimpleTaskBuilder:
             )
 
     def _parse_gt_dataset(
-        self, gt_file_data: bytes, *, add_prefix: Optional[str] = None
+        self, gt_file_data: bytes, *, add_prefix: str | None = None
     ) -> dm.Dataset:
         with TemporaryDirectory() as gt_temp_dir:
             gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
@@ -222,8 +314,8 @@ class SimpleTaskBuilder:
             return gt_dataset
 
     def _get_gt_filenames(
-        self, gt_dataset: dm.Dataset, data_filenames: List[str], *, manifest: TaskManifest
-    ) -> List[str]:
+        self, gt_dataset: dm.Dataset, data_filenames: list[str], *, manifest: TaskManifest
+    ) -> list[str]:
         gt_filenames = set(s.id + s.media.ext for s in gt_dataset)
         known_data_filenames = set(data_filenames)
         matched_gt_filenames = gt_filenames.intersection(known_data_filenames)
@@ -232,7 +324,7 @@ class SimpleTaskBuilder:
             missing_gt = gt_filenames - matched_gt_filenames
             raise DatasetValidationError(
                 "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(list(missing_gt))
+                    format_sequence(list(missing_gt))
                 )
             )
 
@@ -242,28 +334,7 @@ class SimpleTaskBuilder:
                 f"at least {manifest.validation.val_size} required."
             )
 
-        return matched_gt_filenames
-
-    def _make_job_configuration(
-        self,
-        data_filenames: List[str],
-        gt_filenames: List[str],
-        *,
-        manifest: TaskManifest,
-    ) -> List[List[str]]:
-        # Make job layouts wrt. manifest params, 1 job per task (CVAT can't repeat images in jobs)
-        gt_filenames_index = set(gt_filenames)
-        data_filenames = [fn for fn in data_filenames if not fn in gt_filenames_index]
-        random.shuffle(data_filenames)
-
-        job_layout = []
-        for data_samples in take_by(data_filenames, manifest.annotation.job_size):
-            gt_samples = random.sample(gt_filenames, k=manifest.validation.val_size)
-            job_samples = list(data_samples) + list(gt_samples)
-            random.shuffle(job_samples)
-            job_layout.append(job_samples)
-
-        return job_layout
+        return list(matched_gt_filenames)
 
     def build(self):
         manifest = self.manifest
@@ -287,9 +358,7 @@ class SimpleTaskBuilder:
 
         # Create task configuration
         gt_filenames = self._get_gt_filenames(gt_dataset, data_filenames, manifest=manifest)
-        job_configuration = self._make_job_configuration(
-            data_filenames, gt_filenames, manifest=manifest
-        )
+        data_to_be_annotated = [f for f in data_filenames if f not in set(gt_filenames)]
         label_configuration = make_label_configuration(manifest)
 
         self._upload_task_meta(gt_dataset)
@@ -308,7 +377,9 @@ class SimpleTaskBuilder:
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
-            total_jobs = len(job_configuration)
+            segment_size = self._task_segment_size
+            total_jobs = math.ceil(len(data_to_be_annotated) / segment_size)
+
             self.logger.info(
                 "Task creation for escrow '%s': will create %s assignments",
                 escrow_address,
@@ -336,34 +407,158 @@ class SimpleTaskBuilder:
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(session, cvat_project.id, data_filenames)
 
-            for job_filenames in job_configuration:
-                cvat_task = cvat_api.create_task(cvat_project.id, escrow_address)
-
+            for data_subset in self._split_dataset_per_task(
+                data_to_be_annotated,
+                subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
+            ):
+                cvat_task = cvat_api.create_task(
+                    cvat_project.id, escrow_address, segment_size=segment_size
+                )
                 task_id = db_service.create_task(
                     session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
                 )
                 db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
-                # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                # The task is fully created once 'update:task' webhook is received.
                 cvat_api.put_task_data(
                     cvat_task.id,
                     cloud_storage.id,
-                    filenames=job_filenames,
-                    sort_images=False,
+                    filenames=data_subset,
+                    chunk_size=self._task_chunk_size,
+                    validation_params={
+                        "gt_filenames": gt_filenames,  # include whole GT dataset into each task
+                        "gt_frames_per_job_count": self._job_val_frames_count,
+                    },
                 )
 
+                self._setup_gt_job_for_cvat_task(cvat_task.id, gt_dataset)
+                self._setup_quality_settings(cvat_task.id)
+
                 db_service.create_data_upload(session, cvat_task.id)
+            db_service.touch(session, Project, [project_id])
 
 
-class BoxesFromPointsTaskBuilder:
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
-        self.exit_stack = ExitStack()
-        self.manifest = manifest
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
+class PointsTaskBuilder(SimpleTaskBuilder):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
-        self.logger: Logger = NullLogger()
+        self._mean_gt_bbox_radius_estimation: _MaybeUnset[float] = _unset
+
+    def _parse_gt_dataset(self, gt_file_data, *, add_prefix=None):
+        gt_dataset = super()._parse_gt_dataset(gt_file_data, add_prefix=add_prefix)
+
+        assert len(gt_dataset.categories()[dm.AnnotationType.label]) == 1
+        label_id = 0
+
+        updated_gt_dataset = dm.Dataset(categories=gt_dataset.categories(), media_type=dm.Image)
+
+        # Replace boxes with their center points
+        # Collect radius statistics
+        radiuses = []
+        for gt_sample in gt_dataset:
+            image_size = gt_sample.media_as(dm.Image).size
+            image_half_diag = ((image_size[0] ** 2 + image_size[1] ** 2) ** 0.5) / 2
+
+            sample_points = []
+            for gt_bbox in gt_sample.annotations:
+                if not isinstance(gt_bbox, dm.Bbox):
+                    continue
+
+                x, y, w, h = gt_bbox.get_bbox()
+                bbox_center = dm.Points([x + w / 2, y + h / 2], label=gt_bbox.label, id=gt_bbox.id)
+
+                rel_int_bbox_radius = min(w, h) / 2 / image_half_diag
+                radiuses.append(rel_int_bbox_radius)
+
+                sample_points.extend(bbox_center.points)
+
+            # Join points into a single annotation for compatibility with CVAT capabilities
+            updated_anns = [dm.Points(sample_points, label=label_id)]
+
+            updated_gt_dataset.put(gt_sample.wrap(annotations=updated_anns))
+
+        self._mean_gt_bbox_radius_estimation = min(0.5, np.mean(radiuses).item())
+
+        return updated_gt_dataset
+
+    def _upload_task_meta(self, gt_dataset: dm.Dataset):
+        layout = points_task.TaskMetaLayout()
+        serializer = points_task.TaskMetaSerializer()
+
+        file_list = []
+        file_list.append(
+            (
+                serializer.serialize_gt_annotations(gt_dataset),
+                layout.GT_FILENAME,
+            )
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        for file_data, filename in file_list:
+            storage_client.create_file(
+                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
+                file_data,
+            )
+
+    def _setup_gt_job_for_cvat_task(
+        self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "datumaro"
+    ) -> None:
+        super()._setup_gt_job_for_cvat_task(
+            task_id=task_id, gt_dataset=gt_dataset, dm_export_format=dm_export_format
+        )
+
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        assert self._mean_gt_bbox_radius_estimation is not _unset
+
+        values = {
+            # We have at most 1 annotation per frame, so accuracy on each frame is either 0 or 1,
+            # regardless of the points count. For job accuracy we'll have:
+            # quality = mean frame accuracy = count of correct frames / validation frame count.
+            # If we set quality threshold from the manifest on this value, it can break quality
+            # requirements.
+            # Example: target quality is 80%, 6 frames, 1 has 20 points, 5 others have 1.
+            # Suppose the 5 frames with 1 point are annotated correctly and
+            # the one with 20 - is not annotated. The mean frame accuracy will be 5 / 6 ~ 83%,
+            # which is higher than the target quality, so the job will be accepted.
+            # The per-point mean (aka micro) accuracy will be 5 / (20 + 5) = 20%.
+            #
+            # Instead, we require that each frame matches with the required quality threshold,
+            # so the job accuracy is 1. This is a more strict requirement, from which
+            # follows that the job quality >= required.
+            # For each frame, as we have just 1 annotation, quality is computed as mean
+            # point quality on the frame with frame matching threshold.
+            # Point set accuracy is controlled by iou_threshold,
+            # so configure it with the requested quality value.
+            #
+            # TODO: consider adding a quality option to count points as separate,
+            # or implement and use the mean IoU as the target metric in CVAT.
+            "target_metric_threshold": 0.95,  # some big number close to 1
+            "iou_threshold": self.manifest.validation.min_quality,
+            "oks_sigma": self._mean_gt_bbox_radius_estimation,
+            "point_size_base": "image_size",
+        }
+        values.update(overrides)
+        super()._setup_quality_settings(task_id, **values)
+
+    def build(self):
+        if len(self.manifest.annotation.labels) != 1:
+            # TODO: implement support for multiple labels
+            # Probably, need to split the whole task into projects per label
+            # for efficient annotation
+            raise NotImplementedError("Point annotation tasks can have only 1 label")
+
+        return super().build()
+
+
+class PolygonTaskBuilder(SimpleTaskBuilder):
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        values = {"iou_threshold": Config.cvat_config.cvat_polygons_iou_threshold, **overrides}
+        super()._setup_quality_settings(task_id, **values)
+
+
+class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
         self._input_gt_data: _MaybeUnset[bytes] = _unset
         self._input_points_data: _MaybeUnset[bytes] = _unset
@@ -371,16 +566,19 @@ class BoxesFromPointsTaskBuilder:
         self._data_filenames: _MaybeUnset[Sequence[str]] = _unset
         self._input_gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
+        self._gt_roi_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._points_dataset: _MaybeUnset[dm.Dataset] = _unset
 
         self._bbox_point_mapping: _MaybeUnset[boxes_from_points_task.BboxPointMapping] = _unset
         "bbox_id -> point_id"
 
-        self._roi_size_estimations: _MaybeUnset[Dict[int, Tuple[float, float]]] = _unset
+        self._roi_size_estimations: _MaybeUnset[dict[int, tuple[float, float]]] = _unset
         "label_id -> (rel. w, rel. h)"
 
         self._rois: _MaybeUnset[boxes_from_points_task.RoiInfos] = _unset
         self._roi_filenames: _MaybeUnset[boxes_from_points_task.RoiFilenames] = _unset
+        self._roi_filenames_to_be_annotated: _MaybeUnset[Sequence[str]] = _unset
+        self._gt_roi_filenames: _MaybeUnset[Sequence[str]] = _unset
 
         self._job_layout: _MaybeUnset[Sequence[Sequence[str]]] = _unset
         "File lists per CVAT job"
@@ -437,20 +635,6 @@ class BoxesFromPointsTaskBuilder:
 
         # TODO: probably, need to also add an absolute number of minimum GT RoIs
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.close()
-
-    def close(self):
-        self.exit_stack.close()
-
-    def set_logger(self, logger: Logger):
-        # TODO: add escrow info into messages
-        self.logger = logger
-        return self
-
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
@@ -465,6 +649,7 @@ class BoxesFromPointsTaskBuilder:
         self._data_filenames = filter_image_files(data_filenames)
 
         self._input_gt_data = gt_storage_client.download_file(gt_bucket.path)
+        self._input_gt_filename = Path(gt_bucket.path).name
 
         self._input_points_data = points_storage_client.download_file(points_bucket.path)
 
@@ -502,7 +687,7 @@ class BoxesFromPointsTaskBuilder:
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
-                    self._format_list(list(gt_labels - manifest_labels)),
+                    format_sequence(list(gt_labels - manifest_labels)),
                 )
             )
 
@@ -522,14 +707,14 @@ class BoxesFromPointsTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(extra_gt)
+                    format_sequence(extra_gt)
                 )
             )
 
-        if len(gt_filenames) < self.manifest.validation.val_size:
+        if len(gt_filenames) < self._job_val_frames_count:
             raise TooFewSamples(
                 f"Too few validation samples provided ({len(gt_filenames)}), "
-                f"at least {self.manifest.validation.val_size} required."
+                f"at least {self._job_val_frames_count} required."
             )
 
     def _validate_gt_annotations(self):
@@ -585,9 +770,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_gt_info.excluded_count:
             self.logger.warning(
                 "Some GT boxes were excluded due to the errors found: \n{}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -596,7 +779,7 @@ class BoxesFromPointsTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many GT boxes discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_gt_info.messages]
                     )
                 )
@@ -611,18 +794,6 @@ class BoxesFromPointsTaskBuilder:
         self._validate_gt_filenames()
         self._validate_gt_labels()
         self._validate_gt_annotations()
-
-    def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
-    ) -> str:
-        if max_items is None:
-            max_items = self.list_display_threshold
-
-        remainder_count = len(items) - max_items
-        return "{}{}".format(
-            separator.join(items[:max_items]),
-            f" (and {remainder_count} more)" if remainder_count > 0 else "",
-        )
 
     def _validate_points_categories(self):
         invalid_point_categories_messages = []
@@ -645,7 +816,7 @@ class BoxesFromPointsTaskBuilder:
         if invalid_point_categories_messages:
             raise InvalidCategories(
                 "Invalid categories in the input point annotations: {}".format(
-                    self._format_list(invalid_point_categories_messages, separator="; ")
+                    format_sequence(invalid_point_categories_messages, separator="; ")
                 )
             )
 
@@ -672,7 +843,7 @@ class BoxesFromPointsTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several samples in the dataset files: {}".format(
-                    self._format_list(extra_point_samples),
+                    format_sequence(extra_point_samples),
                 )
             )
 
@@ -683,7 +854,7 @@ class BoxesFromPointsTaskBuilder:
 
             if len(skeleton.elements) != 1:
                 raise DatasetValidationError(
-                    "invalid points count ({}), expected 1".format(len(skeleton.elements))
+                    f"invalid points count ({len(skeleton.elements)}), expected 1"
                 )
 
             point = skeleton.elements[0]
@@ -743,7 +914,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_points_info.excluded_count:
             self.logger.warning(
                 "Some points were excluded due to the errors found: \n{}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_points_info.messages], separator="\n"
                     )
                 )
@@ -754,7 +925,7 @@ class BoxesFromPointsTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many points discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_points_info.messages]
                     )
                 )
@@ -776,9 +947,9 @@ class BoxesFromPointsTaskBuilder:
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
-            input_skeletons: List[dm.Skeleton],
-            gt_boxes: List[dm.Bbox],
-        ) -> List[Tuple[dm.Skeleton, dm.Bbox]]:
+            input_skeletons: list[dm.Skeleton],
+            gt_boxes: list[dm.Bbox],
+        ) -> list[tuple[dm.Skeleton, dm.Bbox]]:
             matches = [
                 [
                     (input_skeleton.label == gt_bbox.label)
@@ -795,7 +966,7 @@ class BoxesFromPointsTaskBuilder:
             ambiguous_boxes: list[int] = set()
             ambiguous_skeletons: list[int] = set()
             for skeleton_idx, input_skeleton in enumerate(input_skeletons):
-                matched_boxes: List[dm.Bbox] = [
+                matched_boxes: list[dm.Bbox] = [
                     gt_boxes[j] for j in range(len(gt_boxes)) if matches[skeleton_idx][j]
                 ]
 
@@ -807,7 +978,7 @@ class BoxesFromPointsTaskBuilder:
                             points_sample.id,
                             input_skeleton.id,
                             points_label_cat[input_skeleton.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_boxes]),
+                            format_sequence([f"#{a.id}" for a in matched_boxes]),
                         ),
                         sample_id=points_sample.id,
                         sample_subset=points_sample.subset,
@@ -818,7 +989,7 @@ class BoxesFromPointsTaskBuilder:
                     continue
 
             for gt_idx, gt_bbox in enumerate(gt_boxes):
-                matched_skeletons: List[dm.Skeleton] = [
+                matched_skeletons: list[dm.Skeleton] = [
                     input_skeletons[i] for i in range(len(input_skeletons)) if matches[i][gt_idx]
                 ]
 
@@ -830,7 +1001,7 @@ class BoxesFromPointsTaskBuilder:
                             gt_sample.id,
                             gt_bbox.id,
                             gt_label_cat[gt_bbox.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_skeletons]),
+                            format_sequence([f"#{a.id}" for a in matched_skeletons]),
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
@@ -839,7 +1010,7 @@ class BoxesFromPointsTaskBuilder:
                     ambiguous_boxes.add(gt_bbox.id)
                     ambiguous_skeletons.update(a.id for a in matched_skeletons)
                     continue
-                elif not matched_skeletons:
+                if not matched_skeletons:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
                         "Sample '{}': GT bbox #{} ({}) skipped - "
@@ -854,7 +1025,7 @@ class BoxesFromPointsTaskBuilder:
                     excluded_gt_info.excluded_count += 1  # an error
                     continue
 
-            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
             for skeleton_idx, input_skeleton in enumerate(input_skeletons):
                 if input_skeleton.id in ambiguous_skeletons:
                     continue
@@ -874,9 +1045,9 @@ class BoxesFromPointsTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_boxes(
-            input_skeletons: List[dm.Skeleton],
-            gt_boxes: List[dm.Bbox],
-        ) -> List[dm.Bbox]:
+            input_skeletons: list[dm.Skeleton],
+            gt_boxes: list[dm.Bbox],
+        ) -> list[dm.Bbox]:
             matches = _find_unambiguous_matches(input_skeletons, gt_boxes)
 
             matched_boxes = []
@@ -935,7 +1106,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_points_info.messages:
             self.logger.warning(
                 "Some points were excluded from GT due to the problems found: \n{}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_points_info.messages], separator="\n"
                     )
                 )
@@ -944,9 +1115,7 @@ class BoxesFromPointsTaskBuilder:
         if excluded_gt_info.messages:
             self.logger.warning(
                 "Some GT annotations were excluded due to the problems found: \n{}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -963,7 +1132,7 @@ class BoxesFromPointsTaskBuilder:
 
         self.logger.info(
             "GT counts per class to be used for validation: {}".format(
-                self._format_list(
+                format_sequence(
                     [
                         f"{gt_label_cat[label_id].name}: {count}"
                         for label_id, count in gt_count_per_class.items()
@@ -980,7 +1149,7 @@ class BoxesFromPointsTaskBuilder:
         if gt_labels_without_anns:
             raise DatasetValidationError(
                 "No matching GT boxes/points annotations found for some classes: {}".format(
-                    self._format_list(gt_labels_without_anns)
+                    format_sequence(gt_labels_without_anns)
                 )
             )
 
@@ -1030,7 +1199,7 @@ class BoxesFromPointsTaskBuilder:
         if classes_with_default_roi:
             label_cat = self._gt_dataset.categories()[dm.AnnotationType.label]
             labels_by_reason = {
-                g_reason: list(v[0] for v in g_items)
+                g_reason: [v[0] for v in g_items]
                 for g_reason, g_items in groupby(
                     sorted(classes_with_default_roi.items(), key=lambda v: v[1]), key=lambda v: v[1]
                 )
@@ -1040,7 +1209,7 @@ class BoxesFromPointsTaskBuilder:
                     "; ".join(
                         "{}: {}".format(
                             g_reason,
-                            self._format_list([label_cat[label_id].name for label_id in g_labels]),
+                            format_sequence([label_cat[label_id].name for label_id in g_labels]),
                         )
                         for g_reason, g_labels in labels_by_reason.items()
                     )
@@ -1054,7 +1223,7 @@ class BoxesFromPointsTaskBuilder:
         assert self._roi_size_estimations is not _unset
         assert self._points_dataset is not _unset
 
-        rois: List[boxes_from_points_task.RoiInfo] = []
+        rois: list[boxes_from_points_task.RoiInfo] = []
         for sample in self._points_dataset:
             for skeleton in sample.annotations:
                 if not isinstance(skeleton, dm.Skeleton):
@@ -1113,9 +1282,6 @@ class BoxesFromPointsTaskBuilder:
         }
 
     def _prepare_job_layout(self):
-        # Make job layouts wrt. manifest params
-        # 1 job per task as CVAT can't repeat images in jobs, but GTs can repeat in the dataset
-
         assert self._rois is not _unset
         assert self._bbox_point_mapping is not _unset
         assert self._input_gt_dataset is not _unset
@@ -1128,25 +1294,14 @@ class BoxesFromPointsTaskBuilder:
         point_id_to_original_image_id = {roi.point_id: roi.original_image_key for roi in self._rois}
 
         gt_point_ids = set(self._bbox_point_mapping.values())
-        gt_filenames = [self._roi_filenames[point_id] for point_id in gt_point_ids]
-
-        data_filenames = [
+        self._gt_roi_filenames = [self._roi_filenames[point_id] for point_id in gt_point_ids]
+        self._roi_filenames_to_be_annotated = [
             fn
             for point_id, fn in self._roi_filenames.items()
-            if not point_id in gt_point_ids
-            if not original_image_id_to_filename[point_id_to_original_image_id[point_id]]
-            in input_gt_filenames
+            if point_id not in gt_point_ids
+            if original_image_id_to_filename[point_id_to_original_image_id[point_id]]
+            not in input_gt_filenames
         ]
-        random.shuffle(data_filenames)
-
-        job_layout = []
-        for data_samples in take_by(data_filenames, self.manifest.annotation.job_size):
-            gt_samples = random.sample(gt_filenames, k=self.manifest.validation.val_size)
-            job_samples = list(data_samples) + list(gt_samples)
-            random.shuffle(job_samples)
-            job_layout.append(job_samples)
-
-        self._job_layout = job_layout
 
     def _prepare_label_configuration(self):
         self._label_configuration = make_label_configuration(self.manifest)
@@ -1234,7 +1389,7 @@ class BoxesFromPointsTaskBuilder:
             (255, 255, 255),
             cv2.FILLED,
         )
-        roi_pixels = cv2.circle(
+        return cv2.circle(
             roi_pixels,
             center,
             point_size,
@@ -1242,10 +1397,9 @@ class BoxesFromPointsTaskBuilder:
             cv2.FILLED,
         )
 
-        return roi_pixels
-
     def _extract_and_upload_rois(self):
-        # TODO: maybe optimize via splitting into separate threads (downloading, uploading, processing)
+        # TODO: maybe optimize via splitting into separate
+        #  threads (downloading, uploading, processing)
 
         # Watch for the memory used, as the whole dataset can be quite big (gigabytes, terabytes)
         # Consider also packing RoIs cut into archives
@@ -1267,8 +1421,10 @@ class BoxesFromPointsTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self._points_dataset}
 
-        _roi_key = lambda e: e.original_image_key
-        rois_by_image: Dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
+        def _roi_key(e):
+            return e.original_image_key
+
+        rois_by_image: dict[str, Sequence[boxes_from_points_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(sorted(self._rois, key=_roi_key), key=_roi_key)
         }
@@ -1308,9 +1464,36 @@ class BoxesFromPointsTaskBuilder:
                     roi_bytes,
                 )
 
+    def _prepare_gt_roi_dataset(self):
+        self._gt_roi_dataset = dm.Dataset(
+            categories=self._gt_dataset.categories(), media_type=dm.Image
+        )
+
+        for sample in self._gt_dataset:
+            for gt_bbox in sample.annotations:
+                assert isinstance(gt_bbox, dm.Bbox)
+
+                point_id = self._bbox_point_mapping[gt_bbox.id]
+                gt_roi_filename = compose_data_bucket_filename(
+                    self.escrow_address, self.chain_id, self._roi_filenames[point_id]
+                )
+
+                self._gt_roi_dataset.put(
+                    sample.wrap(
+                        id=os.path.splitext(gt_roi_filename)[0],
+                        annotations=[gt_bbox],
+                        media=dm.Image(path=gt_roi_filename, size=sample.media_as(dm.Image).size),
+                        attributes=filter_dict(sample.attributes, exclude_keys=["id"]),
+                    )
+                )
+
+        assert len(self._gt_roi_dataset) == len(self._gt_roi_filenames)
+
     def _create_on_cvat(self):
-        assert self._job_layout is not _unset
+        assert self._roi_filenames_to_be_annotated is not _unset
+        assert self._gt_roi_filenames is not _unset
         assert self._label_configuration is not _unset
+        assert self._gt_roi_dataset is not _unset
 
         input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
@@ -1331,7 +1514,8 @@ class BoxesFromPointsTaskBuilder:
         cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
 
         with SessionLocal.begin() as session:
-            total_jobs = len(self._job_layout)
+            segment_size = self._task_segment_size
+            total_jobs = math.ceil(len(self._roi_filenames_to_be_annotated) / segment_size)
             self.logger.info(
                 "Task creation for escrow '%s': will create %s assignments",
                 self.escrow_address,
@@ -1358,7 +1542,6 @@ class BoxesFromPointsTaskBuilder:
                 ),
                 cvat_webhook_id=cvat_webhook.id,
             )
-
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
             db_service.add_project_images(
                 session,
@@ -1369,30 +1552,47 @@ class BoxesFromPointsTaskBuilder:
                 ],
             )
 
-            for job_filenames in self._job_layout:
-                cvat_task = cvat_api.create_task(cvat_project.id, self.escrow_address)
+            for data_subset in self._split_dataset_per_task(
+                self._roi_filenames_to_be_annotated,
+                subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
+            ):
+                cvat_task = cvat_api.create_task(
+                    cvat_project.id, self.escrow_address, segment_size=segment_size
+                )
 
                 task_id = db_service.create_task(
                     session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
                 )
                 db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                # Actual task creation in CVAT takes some time, so it's done in an async process.
+                filenames = [
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
+                    for fn in data_subset
+                ]
+                gt_filenames = [
+                    compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
+                    for fn in self._gt_roi_filenames
+                ]
+
                 cvat_api.put_task_data(
                     cvat_task.id,
                     cvat_cloud_storage.id,
-                    filenames=[
-                        compose_data_bucket_filename(self.escrow_address, self.chain_id, fn)
-                        for fn in job_filenames
-                    ],
-                    sort_images=False,
+                    filenames=filenames,
+                    chunk_size=self._task_chunk_size,
+                    validation_params={
+                        "gt_filenames": gt_filenames,
+                        "gt_frames_per_job_count": self._job_val_frames_count,
+                    },
                 )
+
+                self._setup_gt_job_for_cvat_task(
+                    cvat_task.id, self._gt_roi_dataset, dm_export_format="coco"
+                )
+                self._setup_quality_settings(cvat_task.id)
 
                 db_service.create_data_upload(session, cvat_task.id)
 
-    @classmethod
-    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
+            db_service.touch(session, Project, [project_id])
 
     def build(self):
         self._download_input_data()
@@ -1408,6 +1608,7 @@ class BoxesFromPointsTaskBuilder:
         self._mangle_filenames()
         self._prepare_label_configuration()
         self._prepare_job_layout()
+        self._prepare_gt_roi_dataset()
 
         # Data preparation
         self._extract_and_upload_rois()
@@ -1416,19 +1617,15 @@ class BoxesFromPointsTaskBuilder:
         self._create_on_cvat()
 
 
-class SkeletonsFromBoxesTaskBuilder:
+class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
     @dataclass
-    class _JobParams:
+    class _TaskParams:
         label_id: int
-        roi_ids: List[int]
+        roi_ids: list[int]
+        roi_gt_ids: list[int]
 
-    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int):
-        self.exit_stack = ExitStack()
-        self.manifest = manifest
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
-
-        self.logger: Logger = NullLogger()
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+        super().__init__(manifest=manifest, escrow_address=escrow_address, chain_id=chain_id)
 
         self._input_gt_data: _MaybeUnset[bytes] = _unset
         self._input_boxes_data: _MaybeUnset[bytes] = _unset
@@ -1438,12 +1635,20 @@ class SkeletonsFromBoxesTaskBuilder:
         self._gt_dataset: _MaybeUnset[dm.Dataset] = _unset
         self._boxes_dataset: _MaybeUnset[dm.Dataset] = _unset
 
-        self._skeleton_bbox_mapping: _MaybeUnset[
-            skeletons_from_boxes_task.SkeletonBboxMapping
-        ] = _unset
+        self._skeleton_bbox_mapping: _MaybeUnset[skeletons_from_boxes_task.SkeletonBboxMapping] = (
+            _unset
+        )
         self._roi_infos: _MaybeUnset[skeletons_from_boxes_task.RoiInfos] = _unset
-        self._roi_filenames: _MaybeUnset[Dict[int, str]] = _unset
-        self._job_params: _MaybeUnset[List[self._JobParams]] = _unset
+        self._roi_info_by_id: _MaybeUnset[dict[int, skeletons_from_boxes_task.RoiInfo]] = _unset
+
+        self._gt_points_per_label: _MaybeUnset[
+            dict[tuple[int, str], Sequence[tuple[int, dm.Points]]]
+        ] = _unset
+        "(skeleton_label_id, point_label_name) to [(skeleton_id, point), ...]"
+
+        self._roi_filenames: _MaybeUnset[dict[int, str]] = _unset
+
+        self._task_params: _MaybeUnset[list[self._TaskParams]] = _unset
 
         self._excluded_gt_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
         self._excluded_boxes_info: _MaybeUnset[_ExcludedAnnotationsInfo] = _unset
@@ -1489,20 +1694,6 @@ class SkeletonsFromBoxesTaskBuilder:
         """
 
         # TODO: probably, need to also add an absolute number of minimum GT RoIs per class
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.close()
-
-    def close(self):
-        self.exit_stack.close()
-
-    def set_logger(self, logger: Logger):
-        # TODO: add escrow info into messages
-        self.logger = logger
-        return self
 
     def _download_input_data(self):
         data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
@@ -1560,7 +1751,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if gt_labels - manifest_labels:
             raise DatasetValidationError(
                 "GT labels do not match job labels. Unknown labels: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [
                             label_name if not parent_name else f"{parent_name}.{label_name}"
                             for label_name, parent_name in gt_labels - manifest_labels
@@ -1586,14 +1777,14 @@ class SkeletonsFromBoxesTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several validation samples in the dataset files: {}".format(
-                    self._format_list(extra_gt)
+                    format_sequence(extra_gt)
                 )
             )
 
-        if len(gt_filenames) < self.manifest.validation.val_size:
+        if len(gt_filenames) < self._job_val_frames_count:
             raise TooFewSamples(
                 f"Too few validation samples provided ({len(gt_filenames)}), "
-                f"at least {self.manifest.validation.val_size} required."
+                f"at least {self._job_val_frames_count} required."
             )
 
     def _validate_gt_annotations(self):
@@ -1603,7 +1794,8 @@ class SkeletonsFromBoxesTaskBuilder:
 
             for element in skeleton.elements:
                 # This is what Datumaro is expected to parse
-                assert len(element.points) == 2 and len(element.visibility) == 1
+                assert len(element.points) == 2
+                assert len(element.visibility) == 1
 
                 if element.visibility[0] == dm.Points.Visibility.absent:
                     continue
@@ -1661,9 +1853,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_gt_info.excluded_count:
             self.logger.warning(
                 "Some GT skeletons were excluded due to the errors found: {}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -1672,7 +1862,7 @@ class SkeletonsFromBoxesTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many GT skeletons discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_gt_info.messages]
                     )
                 )
@@ -1718,7 +1908,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
             raise MismatchingAnnotations(
                 "Failed to find several samples in the dataset files: {}".format(
-                    self._format_list(extra_bbox_samples),
+                    format_sequence(extra_bbox_samples),
                 )
             )
 
@@ -1776,7 +1966,7 @@ class SkeletonsFromBoxesTaskBuilder:
         ):
             raise TooFewSamples(
                 "Too many boxes discarded, canceling job creation. Errors: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [error_info.message for error_info in excluded_boxes_info.messages]
                     )
                 )
@@ -1789,7 +1979,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_samples:
             self.logger.warning(
                 "Some boxes were excluded due to the errors found: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_boxes_info.messages], separator="\n"
                     )
                 )
@@ -1804,18 +1994,6 @@ class SkeletonsFromBoxesTaskBuilder:
         self._validate_boxes_categories()
         self._validate_boxes_filenames()
         self._validate_boxes_annotations()
-
-    def _format_list(
-        self, items: Sequence[str], *, max_items: int = None, separator: str = ", "
-    ) -> str:
-        if max_items is None:
-            max_items = self.list_display_threshold
-
-        remainder_count = len(items) - max_items
-        return "{}{}".format(
-            separator.join(items[:max_items]),
-            f" (and {remainder_count} more)" if remainder_count > 0 else "",
-        )
 
     def _match_boxes(self, a: BboxCoords, b: BboxCoords) -> bool:
         return bbox_iou(a, b) > 0
@@ -1849,11 +2027,11 @@ class SkeletonsFromBoxesTaskBuilder:
 
     def _prepare_gt(self):
         def _find_unambiguous_matches(
-            input_boxes: List[dm.Bbox],
-            gt_skeletons: List[dm.Skeleton],
+            input_boxes: list[dm.Bbox],
+            gt_skeletons: list[dm.Skeleton],
             *,
-            gt_annotations: List[dm.Annotation],
-        ) -> List[Tuple[dm.Bbox, dm.Skeleton]]:
+            gt_annotations: list[dm.Annotation],
+        ) -> list[tuple[dm.Bbox, dm.Skeleton]]:
             matches = [
                 [
                     (input_bbox.label == gt_skeleton.label)
@@ -1871,7 +2049,7 @@ class SkeletonsFromBoxesTaskBuilder:
             ambiguous_boxes: list[int] = set()
             ambiguous_skeletons: list[int] = set()
             for bbox_idx, input_bbox in enumerate(input_boxes):
-                matched_skeletons: List[dm.Skeleton] = [
+                matched_skeletons: list[dm.Skeleton] = [
                     gt_skeletons[j] for j in range(len(gt_skeletons)) if matches[bbox_idx][j]
                 ]
 
@@ -1883,7 +2061,7 @@ class SkeletonsFromBoxesTaskBuilder:
                             boxes_sample.id,
                             input_bbox.id,
                             boxes_label_cat[input_bbox.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_skeletons]),
+                            format_sequence([f"#{a.id}" for a in matched_skeletons]),
                         ),
                         sample_id=boxes_sample.id,
                         sample_subset=boxes_sample.subset,
@@ -1894,7 +2072,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     continue
 
             for skeleton_idx, gt_skeleton in enumerate(gt_skeletons):
-                matched_boxes: List[dm.Bbox] = [
+                matched_boxes: list[dm.Bbox] = [
                     input_boxes[i] for i in range(len(input_boxes)) if matches[i][skeleton_idx]
                 ]
 
@@ -1906,7 +2084,7 @@ class SkeletonsFromBoxesTaskBuilder:
                             gt_sample.id,
                             gt_skeleton.id,
                             gt_label_cat[gt_skeleton.label].name,
-                            self._format_list([f"#{a.id}" for a in matched_boxes]),
+                            format_sequence([f"#{a.id}" for a in matched_boxes]),
                         ),
                         sample_id=gt_sample.id,
                         sample_subset=gt_sample.subset,
@@ -1915,7 +2093,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     ambiguous_skeletons.add(gt_skeleton.id)
                     ambiguous_boxes.update(b.id for b in matched_boxes)
                     continue
-                elif not matched_boxes:
+                if not matched_boxes:
                     # Handle unmatched skeletons
                     excluded_gt_info.add_message(
                         "Sample '{}': GT skeleton #{} ({}) skipped - "
@@ -1930,7 +2108,7 @@ class SkeletonsFromBoxesTaskBuilder:
                     excluded_gt_info.excluded_count += 1  # an error
                     continue
 
-            unambiguous_matches: List[Tuple[dm.Bbox, dm.Skeleton]] = []
+            unambiguous_matches: list[tuple[dm.Bbox, dm.Skeleton]] = []
             for bbox_idx, input_bbox in enumerate(input_boxes):
                 if input_bbox.id in ambiguous_boxes:
                     continue
@@ -1950,11 +2128,11 @@ class SkeletonsFromBoxesTaskBuilder:
             return unambiguous_matches
 
         def _find_good_gt_skeletons(
-            input_boxes: List[dm.Bbox],
-            gt_skeletons: List[dm.Skeleton],
+            input_boxes: list[dm.Bbox],
+            gt_skeletons: list[dm.Skeleton],
             *,
-            gt_annotations: List[dm.Annotation],
-        ) -> List[dm.Bbox]:
+            gt_annotations: list[dm.Annotation],
+        ) -> list[dm.Skeleton]:
             matches = _find_unambiguous_matches(
                 input_boxes, gt_skeletons, gt_annotations=gt_annotations
             )
@@ -2023,7 +2201,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_boxes_info.messages:
             self.logger.warning(
                 "Some boxes were excluded from GT due to the problems found: {}".format(
-                    self._format_list(
+                    format_sequence(
                         [e.message for e in excluded_boxes_info.messages], separator="\n"
                     )
                 )
@@ -2032,9 +2210,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if excluded_gt_info.messages:
             self.logger.warning(
                 "Some GT annotations were excluded due to the errors found: {}".format(
-                    self._format_list(
-                        [e.message for e in excluded_gt_info.messages], separator="\n"
-                    )
+                    format_sequence([e.message for e in excluded_gt_info.messages], separator="\n")
                 )
             )
 
@@ -2052,7 +2228,7 @@ class SkeletonsFromBoxesTaskBuilder:
 
         self.logger.info(
             "GT counts per class to be used for validation: {}".format(
-                self._format_list(
+                format_sequence(
                     [
                         f"{gt_label_cat[label_id].name}: {count}"
                         for label_id, count in gt_count_per_class.items()
@@ -2069,7 +2245,7 @@ class SkeletonsFromBoxesTaskBuilder:
         if labels_with_few_gt:
             raise DatasetValidationError(
                 "Too few matching GT boxes/points annotations found for some classes: {}".format(
-                    self._format_list(labels_with_few_gt)
+                    format_sequence(labels_with_few_gt)
                 )
             )
 
@@ -2080,7 +2256,7 @@ class SkeletonsFromBoxesTaskBuilder:
         assert self._gt_dataset is not _unset
         assert self._boxes_dataset is not _unset
 
-        rois: List[skeletons_from_boxes_task.RoiInfo] = []
+        rois: list[skeletons_from_boxes_task.RoiInfo] = []
         for sample in self._boxes_dataset:
             for bbox in sample.annotations:
                 if not isinstance(bbox, dm.Bbox):
@@ -2116,6 +2292,7 @@ class SkeletonsFromBoxesTaskBuilder:
                 )
 
         self._roi_infos = rois
+        self._roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
 
     def _mangle_filenames(self):
         """
@@ -2130,7 +2307,19 @@ class SkeletonsFromBoxesTaskBuilder:
             roi_info.bbox_id: str(uuid.uuid4()) + self.roi_file_ext for roi_info in self._roi_infos
         }
 
-    def _prepare_job_params(self):
+    @property
+    def _task_segment_size(self) -> int:
+        # Here we use a job size multiplier, because each image
+        # is supposed to be simple and the assignment is expected
+        # to take little time with the default job size.
+        # Then, we add a percent of job tiles for validation, keeping the requested ratio.
+        return super()._task_segment_size * self.job_size_mult
+
+    @property
+    def _job_val_frames_count(self) -> int:
+        return super()._job_val_frames_count * self.job_size_mult
+
+    def _prepare_task_params(self):
         assert self._roi_infos is not _unset
         assert self._skeleton_bbox_mapping is not _unset
         assert self._input_gt_dataset is not _unset
@@ -2141,23 +2330,13 @@ class SkeletonsFromBoxesTaskBuilder:
             sample.attributes["id"]: sample.media.path for sample in self._boxes_dataset
         }
 
-        # Make job layouts wrt. manifest params
-        # 1 job per task, 1 task for each point label
-        #
-        # Unlike other task types, here we use a grid of RoIs,
-        # so the absolute job size numbers from manifest are multiplied by the job size multiplier.
-        # Then, we add a percent of job tiles for validation, keeping the requested ratio.
-        gt_ratio = self.manifest.validation.val_size / (self.manifest.annotation.job_size or 1)
-        job_size_mult = self.job_size_mult
-
-        job_params: List[self._JobParams] = []
-
-        roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in self._roi_infos}
+        task_params: list[self._TaskParams] = []
+        segment_size = self._task_segment_size
         for label_id, _ in enumerate(self.manifest.annotation.labels):
             label_gt_roi_ids = set(
                 roi_id
                 for roi_id in self._skeleton_bbox_mapping.values()
-                if roi_info_by_id[roi_id].bbox_label == label_id
+                if self._roi_info_by_id[roi_id].bbox_label == label_id
             )
 
             label_data_roi_ids = [
@@ -2169,29 +2348,53 @@ class SkeletonsFromBoxesTaskBuilder:
             ]
             random.shuffle(label_data_roi_ids)
 
-            for job_data_roi_ids in take_by(
-                label_data_roi_ids, int(job_size_mult * self.manifest.annotation.job_size)
-            ):
-                job_gt_count = max(
-                    self.manifest.validation.val_size, int(gt_ratio * len(job_data_roi_ids))
-                )
-                job_gt_count = min(len(label_gt_roi_ids), job_gt_count)
+            task_params.extend(
+                [
+                    self._TaskParams(
+                        label_id=label_id, roi_ids=task_data_roi_ids, roi_gt_ids=label_gt_roi_ids
+                    )
+                    for task_data_roi_ids in take_by(
+                        label_data_roi_ids, Config.cvat_config.cvat_max_jobs_per_task * segment_size
+                    )
+                ]
+            )
 
-                job_gt_roi_ids = random.sample(label_gt_roi_ids, k=job_gt_count)
-
-                job_roi_ids = list(job_data_roi_ids) + list(job_gt_roi_ids)
-                random.shuffle(job_roi_ids)
-
-                job_params.append(self._JobParams(label_id=label_id, roi_ids=job_roi_ids))
-
-        self._job_params = job_params
+        self._task_params = task_params
 
     def _prepare_job_labels(self):
-        self.point_labels = {}
+        self._point_labels = {}
 
         for skeleton_label in self.manifest.annotation.labels:
             for point_name in skeleton_label.nodes:
-                self.point_labels[(skeleton_label.name, point_name)] = point_name
+                self._point_labels[(skeleton_label.name, point_name)] = point_name
+
+    def _prepare_gt_points_mapping(self):
+        assert self._gt_dataset is not _unset
+
+        self._gt_points_per_label = {}
+
+        # GT should contain all GT images with only one point per skeleton node
+        for gt_sample in self._gt_dataset:
+            for gt_skeleton in gt_sample.annotations:
+                if not isinstance(gt_skeleton, dm.Skeleton):
+                    continue
+
+                for point in gt_skeleton.elements:
+                    if point.visibility[0] in [
+                        dm.Points.Visibility.absent,
+                        dm.Points.Visibility.hidden,
+                    ]:
+                        continue
+
+                    point_label_name = (
+                        self._gt_dataset.categories()[dm.AnnotationType.label]
+                        .items[point.label]
+                        .name
+                    )
+
+                    self._gt_points_per_label.setdefault(
+                        (gt_skeleton.label, point_label_name), []
+                    ).append((gt_skeleton.id, point))
 
     def _upload_task_meta(self):
         layout = skeletons_from_boxes_task.TaskMetaLayout()
@@ -2218,7 +2421,7 @@ class SkeletonsFromBoxesTaskBuilder:
             (serializer.serialize_roi_filenames(self._roi_filenames), layout.ROI_FILENAMES_FILENAME)
         )
         file_list.append(
-            (serializer.serialize_point_labels(self.point_labels), layout.POINT_LABELS_FILENAME)
+            (serializer.serialize_point_labels(self._point_labels), layout.POINT_LABELS_FILENAME)
         )
 
         storage_client = self._make_cloud_storage_client(self.oracle_data_bucket)
@@ -2289,8 +2492,10 @@ class SkeletonsFromBoxesTaskBuilder:
 
         filename_to_sample = {sample.image.path: sample for sample in self._boxes_dataset}
 
-        _roi_info_key = lambda e: e.original_image_key
-        roi_info_by_image: Dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
+        def _roi_info_key(e):
+            return e.original_image_key
+
+        roi_info_by_image: dict[str, Sequence[skeletons_from_boxes_task.RoiInfo]] = {
             image_id_to_filename[image_id]: list(g)
             for image_id, g in groupby(
                 sorted(self._roi_infos, key=_roi_info_key), key=_roi_info_key
@@ -2335,22 +2540,94 @@ class SkeletonsFromBoxesTaskBuilder:
                     data=roi_bytes,
                 )
 
-    def _create_on_cvat(self):
-        assert self._job_params is not _unset
-        assert self.point_labels is not _unset
+    def _prepare_gt_dataset_for_skeleton_point(
+        self,
+        *,
+        point_label_name: str,
+        skeleton_label_id: int,
+    ) -> dm.Dataset:
+        assert self._gt_points_per_label is not _unset
 
-        _job_params_label_key = lambda ts: ts.label_id
-        jobs_by_skeleton_label = {
+        # Change annotations to Points for validation in CVAT,
+        # as annotators will use this annotation type
+        point_dataset = dm.Dataset(
+            categories={
+                dm.AnnotationType.label: dm.LabelCategories.from_iterable([point_label_name]),
+            },
+            media_type=dm.Image,
+        )
+
+        for gt_skeleton_id, gt_point in self._gt_points_per_label[
+            (skeleton_label_id, point_label_name)
+        ]:
+            roi_key = self._skeleton_bbox_mapping[gt_skeleton_id]
+            roi_info = self._roi_info_by_id[roi_key]
+
+            mangled_cvat_sample_id = compose_data_bucket_filename(
+                self.escrow_address,
+                self.chain_id,
+                os.path.splitext(self._roi_filenames[roi_key])[0],
+            )
+
+            # update points coordinates in accordance with roi coordinates
+            updated_points = [
+                gt_point.points[0] - roi_info.roi_x,
+                gt_point.points[1] - roi_info.roi_y,
+            ]
+
+            point_dataset.put(
+                dm.DatasetItem(
+                    id=mangled_cvat_sample_id,
+                    annotations=[dm.Points(id=gt_skeleton_id, points=updated_points, label=0)],
+                )
+            )
+
+        return point_dataset
+
+    def _save_cvat_gt_dataset_to_oracle_bucket(
+        self,
+        gt_dataset_path: Path,
+        *,
+        file_suffix: str = "",
+    ) -> None:
+        layout = skeletons_from_boxes_task.TaskMetaLayout()
+
+        base_gt_filename = layout.GT_FILENAME.split(".", maxsplit=1)[0]
+        final_gt_filename = f"{base_gt_filename}_{file_suffix}" + ".zip"
+        gt_dataset_key = compose_data_bucket_filename(
+            self.escrow_address, self.chain_id, final_gt_filename
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        storage_client.create_file(gt_dataset_key, gt_dataset_path.read_bytes())
+
+    def _setup_quality_settings(self, task_id: int, **overrides) -> None:
+        values = {
+            "oks_sigma": Config.cvat_config.cvat_oks_sigma,
+            "point_size_base": "image_size",  # we don't expect any boxes or groups, so ignore them
+        }
+        values.update(overrides)
+        super()._setup_quality_settings(task_id, **values)
+
+    def _create_on_cvat(self):
+        assert self._task_params is not _unset
+        assert self._point_labels is not _unset
+        assert self._gt_points_per_label is not _unset
+
+        def _task_params_label_key(ts):
+            return ts.label_id
+
+        tasks_by_skeleton_label = {
             skeleton_label_id: list(g)
             for skeleton_label_id, g in groupby(
-                sorted(self._job_params, key=_job_params_label_key), key=_job_params_label_key
+                sorted(self._task_params, key=_task_params_label_key), key=_task_params_label_key
             )
         }
 
         label_specs_by_skeleton = {
             skeleton_label_id: [
                 {
-                    "name": self.point_labels[(skeleton_label.name, skeleton_point)],
+                    "name": self._point_labels[(skeleton_label.name, skeleton_point)],
                     "type": "points",
                 }
                 for skeleton_point in skeleton_label.nodes
@@ -2366,14 +2643,19 @@ class SkeletonsFromBoxesTaskBuilder:
             **_make_cvat_cloud_storage_params(oracle_bucket)
         )
 
+        segment_size = self._task_segment_size
+
         total_jobs = sum(
-            len(self.manifest.annotation.labels[jp.label_id].nodes) for jp in self._job_params
+            len(self.manifest.annotation.labels[tp.label_id].nodes)
+            * (math.ceil(len(tp.roi_ids) / segment_size))
+            for tp in self._task_params
         )
         self.logger.info(
             "Task creation for escrow '%s': will create %s assignments",
             self.escrow_address,
             total_jobs,
         )
+
         with SessionLocal.begin() as session:
             db_service.create_escrow_creation(
                 session,
@@ -2381,28 +2663,41 @@ class SkeletonsFromBoxesTaskBuilder:
                 chain_id=self.chain_id,
                 total_jobs=total_jobs,
             )
+            created_projects = []
 
-            for skeleton_label_id, skeleton_label_jobs in jobs_by_skeleton_label.items():
-                # Each skeleton point uses the same file layout in jobs
-                skeleton_label_filenames = []
-                for skeleton_label_job in skeleton_label_jobs:
+            for skeleton_label_id, skeleton_label_tasks in tasks_by_skeleton_label.items():
+                skeleton_label_filenames: list[list[str]] = []
+                gt_skeleton_label_filenames: list[list[str]] = []
+
+                for skeleton_label_task in skeleton_label_tasks:
                     skeleton_label_filenames.append(
                         [
                             compose_data_bucket_filename(
                                 self.escrow_address, self.chain_id, self._roi_filenames[roi_id]
                             )
-                            for roi_id in skeleton_label_job.roi_ids
-                        ]
+                            for roi_id in skeleton_label_task.roi_ids
+                        ],
+                    )
+
+                    gt_skeleton_label_filenames.append(
+                        [
+                            compose_data_bucket_filename(
+                                self.escrow_address, self.chain_id, self._roi_filenames[roi_id]
+                            )
+                            for roi_id in skeleton_label_task.roi_gt_ids
+                        ],
                     )
 
                 for point_label_spec in label_specs_by_skeleton[skeleton_label_id]:
+                    point_label_name = point_label_spec["name"]
+
                     # Create a project for each point label.
                     # CVAT doesn't support tasks with different labels in a project.
                     cvat_project = cvat_api.create_project(
                         name="{} ({} {})".format(
                             self.escrow_address,
                             self.manifest.annotation.labels[skeleton_label_id].name,
-                            point_label_spec["name"],
+                            point_label_name,
                         ),
                         user_guide=self.manifest.annotation.user_guide,
                         labels=[point_label_spec],
@@ -2426,6 +2721,7 @@ class SkeletonsFromBoxesTaskBuilder:
                         ),
                         cvat_webhook_id=cvat_webhook.id,
                     )
+                    created_projects.append(project_id)
 
                     db_service.get_project_by_id(
                         session, project_id, for_update=True
@@ -2436,28 +2732,47 @@ class SkeletonsFromBoxesTaskBuilder:
                         list(set(chain.from_iterable(skeleton_label_filenames))),
                     )
 
-                    for point_label_filenames in skeleton_label_filenames:
-                        cvat_task = cvat_api.create_task(cvat_project.id, name=cvat_project.name)
+                    for point_label_filenames, gt_point_label_filenames in zip(
+                        skeleton_label_filenames, gt_skeleton_label_filenames, strict=False
+                    ):
+                        cvat_task = cvat_api.create_task(
+                            cvat_project.id,
+                            name=cvat_project.name,
+                            segment_size=segment_size,
+                        )
 
                         task_id = db_service.create_task(
                             session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
                         )
                         db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
 
-                        # Actual task creation in CVAT takes some time, so it's done in an async process.
-                        # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                        # The task is fully created once 'update:task' webhook is received.
                         cvat_api.put_task_data(
                             cvat_task.id,
                             cvat_cloud_storage.id,
-                            filenames=point_label_filenames,
-                            sort_images=False,
+                            filenames=point_label_filenames + gt_point_label_filenames,
+                            chunk_size=self._task_chunk_size,
+                            validation_params={
+                                "gt_filenames": gt_point_label_filenames,
+                                "gt_frames_per_job_count": self._job_val_frames_count,
+                            },
+                        )
+
+                        gt_point_dataset = self._prepare_gt_dataset_for_skeleton_point(
+                            point_label_name=point_label_name,
+                            skeleton_label_id=skeleton_label_id,
+                        )
+
+                        self._setup_gt_job_for_cvat_task(
+                            cvat_task.id, gt_point_dataset, dm_export_format="cvat"
+                        )
+                        self._setup_quality_settings(
+                            cvat_task.id, oks_sigma=Config.cvat_config.cvat_oks_sigma
                         )
 
                         db_service.create_data_upload(session, cvat_task.id)
 
-    @classmethod
-    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
+            db_service.touch(session, Project, created_projects)
 
     def build(self):
         self._download_input_data()
@@ -2469,13 +2784,14 @@ class SkeletonsFromBoxesTaskBuilder:
         # Task configuration creation
         self._prepare_gt()
         self._prepare_roi_infos()
-        self._prepare_job_params()
+        self._prepare_task_params()
         self._mangle_filenames()
         self._prepare_job_labels()
 
         # Data preparation
         self._extract_and_upload_rois()
         self._upload_task_meta()
+        self._prepare_gt_points_mapping()
 
         self._create_on_cvat()
 
@@ -2485,15 +2801,15 @@ def is_image(path: str) -> bool:
     return trunk and ext.lower() in IMAGE_EXTENSIONS
 
 
-def filter_image_files(data_filenames: List[str]) -> List[str]:
-    return list(fn for fn in data_filenames if is_image(fn))
+def filter_image_files(data_filenames: list[str]) -> list[str]:
+    return [fn for fn in data_filenames if is_image(fn)]
 
 
-def strip_bucket_prefix(data_filenames: List[str], prefix: str) -> List[str]:
-    return list(os.path.relpath(fn, prefix) for fn in data_filenames)
+def strip_bucket_prefix(data_filenames: list[str], prefix: str) -> list[str]:
+    return [os.path.relpath(fn, prefix) for fn in data_filenames]
 
 
-def make_label_configuration(manifest: TaskManifest) -> List[dict]:
+def make_label_configuration(manifest: TaskManifest) -> list[dict]:
     return [
         {
             "name": label.name,
@@ -2503,7 +2819,7 @@ def make_label_configuration(manifest: TaskManifest) -> List[dict]:
     ]
 
 
-def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> Dict:
+def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
     CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER = {
         CloudProviders.aws: "AWS_S3_BUCKET",
         CloudProviders.gcs: "GOOGLE_CLOUD_STORAGE",
@@ -2526,12 +2842,12 @@ def create_task(escrow_address: str, chain_id: int) -> None:
 
     manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
 
-    if manifest.annotation.type in [
-        TaskTypes.image_boxes,
-        TaskTypes.image_points,
-        TaskTypes.image_label_binary,
-    ]:
+    if manifest.annotation.type in [TaskTypes.image_boxes, TaskTypes.image_label_binary]:
         builder_type = SimpleTaskBuilder
+    elif manifest.annotation.type is TaskTypes.image_polygons:
+        builder_type = PolygonTaskBuilder
+    elif manifest.annotation.type in [TaskTypes.image_points]:
+        builder_type = PointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_boxes_from_points]:
         builder_type = BoxesFromPointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
@@ -2542,14 +2858,3 @@ def create_task(escrow_address: str, chain_id: int) -> None:
     with builder_type(manifest, escrow_address, chain_id) as task_builder:
         task_builder.set_logger(logger)
         task_builder.build()
-
-
-def remove_task(escrow_address: str) -> None:
-    with SessionLocal.begin() as session:
-        project = db_service.get_project_by_escrow_address(session, escrow_address)
-        if project is not None:
-            if project.cvat_cloudstorage_id:
-                cvat_api.delete_cloudstorage(project.cvat_cloudstorage_id)
-            if project.cvat_id:
-                cvat_api.delete_project(project.cvat_id)
-            db_service.delete_project(session, project.id)

@@ -1,5 +1,6 @@
 export enum EventType {
   ESCROW_CREATED = 'escrow_created',
+  ESCROW_COMPLETED = 'escrow_completed',
   ESCROW_CANCELED = 'escrow_canceled',
   TASK_CREATION_FAILED = 'task_creation_failed',
   SUBMISSION_REJECTED = 'submission_rejected',
@@ -7,7 +8,7 @@ export enum EventType {
 }
 
 export enum WebhookStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }

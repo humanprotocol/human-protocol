@@ -1,8 +1,8 @@
 import {
   EscrowClient,
   EscrowStatus,
-  KVStoreClient,
   KVStoreKeys,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -55,40 +55,36 @@ export class JobService {
 
     filteredExchangeSolution.forEach((exchangeSolution) => {
       if (errorSolutions.includes(exchangeSolution)) return;
-
-      const duplicatedInRecording = recordingSolutions.filter(
+      const duplicatedInUnique = uniqueSolutions.filter(
         (solution) =>
           solution.workerAddress === exchangeSolution.workerAddress ||
           solution.solution === exchangeSolution.solution,
       );
+      if (
+        duplicatedInUnique.length > 0 &&
+        !errorSolutions.includes(exchangeSolution)
+      ) {
+        errorSolutions.push({
+          ...exchangeSolution,
+          error: SolutionError.Duplicated,
+        });
+        return;
+      }
+
+      const duplicatedInRecording = recordingSolutions.filter(
+        (solution) =>
+          solution.workerAddress === exchangeSolution.workerAddress &&
+          solution.solution === exchangeSolution.solution,
+      );
 
       if (duplicatedInRecording.length === 0) {
-        const duplicatedInExchange = filteredExchangeSolution.filter(
-          (solution) =>
-            solution.workerAddress === exchangeSolution.workerAddress ||
-            solution.solution === exchangeSolution.solution,
-        );
-        if (duplicatedInExchange.length > 1) {
-          duplicatedInExchange.forEach((duplicated) => {
-            if (
-              (duplicated.solution !== exchangeSolution.solution ||
-                duplicated.workerAddress !== exchangeSolution.workerAddress) &&
-              !errorSolutions.includes(duplicated)
-            ) {
-              errorSolutions.push({
-                ...duplicated,
-                error: SolutionError.Duplicated,
-              });
-            }
-          });
-        }
         if (checkCurseWords(exchangeSolution.solution))
           errorSolutions.push({
             ...exchangeSolution,
             error: SolutionError.CurseWord,
           });
         else uniqueSolutions.push(exchangeSolution);
-      }
+      } else uniqueSolutions.push(exchangeSolution);
     });
     return { errorSolutions, uniqueSolutions };
   }
@@ -96,7 +92,6 @@ export class JobService {
   async processJobSolution(webhook: WebhookDto): Promise<string> {
     const signer = this.web3Service.getSigner(webhook.chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const kvstoreClient = await KVStoreClient.build(signer);
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       webhook.escrowAddress,
@@ -162,7 +157,6 @@ export class JobService {
     );
 
     const recordingOracleSolutions: ISolution[] = [
-      ...existingJobSolutions,
       ...uniqueSolutions,
       ...errorSolutions,
     ];
@@ -183,54 +177,71 @@ export class JobService {
       recordingOracleSolutions.filter((solution) => !solution.error).length >=
       submissionsRequired
     ) {
-      const reputationOracleAddress =
-        await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
-      const reputationOracleWebhook = (await kvstoreClient.get(
-        reputationOracleAddress,
-        KVStoreKeys.webhookUrl,
-      )) as string;
+      let reputationOracleWebhook: string | null = null;
+      try {
+        const reputationOracleAddress =
+          await escrowClient.getReputationOracleAddress(webhook.escrowAddress);
+        reputationOracleWebhook = (await KVStoreUtils.get(
+          webhook.chainId,
+          reputationOracleAddress,
+          KVStoreKeys.webhookUrl,
+        )) as string;
+      } catch (e) {
+        //Ignore the error
+      }
 
-      await sendWebhook(
-        this.httpService,
-        this.logger,
-        reputationOracleWebhook,
-        {
-          chainId: webhook.chainId,
-          escrowAddress: webhook.escrowAddress,
-          eventType: EventType.TASK_COMPLETED,
-        },
-        this.web3ConfigService.privateKey,
-      );
+      if (reputationOracleWebhook) {
+        await sendWebhook(
+          this.httpService,
+          this.logger,
+          reputationOracleWebhook,
+          {
+            chainId: webhook.chainId,
+            escrowAddress: webhook.escrowAddress,
+            eventType: EventType.JOB_COMPLETED,
+          },
+          this.web3ConfigService.privateKey,
+        );
 
-      return 'The requested job is completed.';
+        return 'The requested job is completed.';
+      }
     }
+
     if (errorSolutions.length) {
-      const exchangeOracleURL = (await kvstoreClient.get(
-        await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
-        KVStoreKeys.webhookUrl,
-      )) as string;
+      let exchangeOracleURL: string | null = null;
+      try {
+        exchangeOracleURL = (await KVStoreUtils.get(
+          webhook.chainId,
+          await escrowClient.getExchangeOracleAddress(webhook.escrowAddress),
+          KVStoreKeys.webhookUrl,
+        )) as string;
+      } catch {
+        //Ignore the error
+      }
 
-      const eventData: AssignmentRejection[] = errorSolutions.map(
-        (solution) => ({
-          assigneeId: solution.workerAddress,
-          reason: solution.error as SolutionError,
-        }),
-      );
+      if (exchangeOracleURL) {
+        const eventData: AssignmentRejection[] = errorSolutions.map(
+          (solution) => ({
+            assigneeId: solution.workerAddress,
+            reason: solution.error as SolutionError,
+          }),
+        );
 
-      const webhookBody: WebhookDto = {
-        escrowAddress: webhook.escrowAddress,
-        chainId: webhook.chainId,
-        eventType: EventType.SUBMISSION_REJECTED,
-        eventData: { assignments: eventData },
-      };
+        const webhookBody: WebhookDto = {
+          escrowAddress: webhook.escrowAddress,
+          chainId: webhook.chainId,
+          eventType: EventType.SUBMISSION_REJECTED,
+          eventData: { assignments: eventData },
+        };
 
-      await sendWebhook(
-        this.httpService,
-        this.logger,
-        exchangeOracleURL,
-        webhookBody,
-        this.web3ConfigService.privateKey,
-      );
+        await sendWebhook(
+          this.httpService,
+          this.logger,
+          exchangeOracleURL,
+          webhookBody,
+          this.web3ConfigService.privateKey,
+        );
+      }
     }
 
     return 'Solutions recorded.';

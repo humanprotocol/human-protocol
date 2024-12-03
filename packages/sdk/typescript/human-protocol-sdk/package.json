@@ -40,20 +40,18 @@
   },
   "dependencies": {
     "@human-protocol/core": "*",
-    "aws-sdk": "^2.1528.0",
     "axios": "^1.4.0",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
     "minio": "7.1.3",
-    "openpgp": "^5.11.1",
+    "openpgp": "^5.11.2",
     "secp256k1": "^4.0.3",
-    "vitest": "^1.6.0",
-    "winston": "^3.13.0"
+    "vitest": "^1.6.0"
   },
   "devDependencies": {
-    "typedoc": "^0.25.1",
-    "typedoc-plugin-markdown": "^4.0.3"
+    "typedoc": "^0.26.5",
+    "typedoc-plugin-markdown": "^4.2.3"
   },
   "typedocOptions": {
     "entryPoints": [
@@ -65,7 +63,11 @@
       "./src/staking.ts",
       "./src/storage.ts",
       "./src/statistics.ts",
-      "./src/transaction.ts"
+      "./src/transaction.ts",
+      "./src/enums.ts",
+      "./src/graphql/types.ts",
+      "./src/interfaces.ts",
+      "./src/types.ts"
     ]
   }
 }

@@ -31,7 +31,7 @@ from typing import Dict, List, Optional
 
 from web3 import Web3
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.constants import NETWORKS, ChainId, Status, OrderDirection
 from human_protocol_sdk.filter import EscrowFilter
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
@@ -62,11 +62,8 @@ class EscrowData:
         manifest_hash: Optional[str] = None,
         manifest_url: Optional[str] = None,
         recording_oracle: Optional[str] = None,
-        recording_oracle_fee: Optional[int] = None,
         reputation_oracle: Optional[str] = None,
-        reputation_oracle_fee: Optional[int] = None,
         exchange_oracle: Optional[str] = None,
-        exchange_oracle_fee: Optional[int] = None,
     ):
         """
         Initializes an EscrowData instance.
@@ -88,11 +85,8 @@ class EscrowData:
         :param manifest_hash: Manifest hash.
         :param manifest_url: Manifest URL.
         :param recording_oracle: Recording Oracle address.
-        :param recording_oracle_fee: Recording Oracle fee.
         :param reputation_oracle: Reputation Oracle address.
-        :param reputation_oracle_fee: Reputation Oracle fee.
         :param exchange_oracle: Exchange Oracle address.
-        :param exchange_oracle_fee: Exchange Oracle fee.
         """
 
         self.id = id
@@ -107,11 +101,8 @@ class EscrowData:
         self.manifest_hash = manifest_hash
         self.manifest_url = manifest_url
         self.recording_oracle = recording_oracle
-        self.recording_oracle_fee = recording_oracle_fee
         self.reputation_oracle = reputation_oracle
-        self.reputation_oracle_fee = reputation_oracle_fee
         self.exchange_oracle = exchange_oracle
-        self.exchange_oracle_fee = exchange_oracle_fee
         self.status = status
         self.token = token
         self.total_funded_amount = total_funded_amount
@@ -145,7 +136,7 @@ class EscrowUtils:
 
     @staticmethod
     def get_escrows(
-        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_AMOY]),
+        filter: EscrowFilter,
     ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
@@ -170,94 +161,77 @@ class EscrowUtils:
                     )
                 )
         """
-        from human_protocol_sdk.gql.escrow import (
-            get_escrows_query,
-        )
+        from human_protocol_sdk.gql.escrow import get_escrows_query
+
+        chain_id = filter.chain_id
+        network = NETWORKS[chain_id]
 
         escrows = []
-        for chain_id in filter.networks:
-            network = NETWORKS[chain_id]
-            escrows_data = get_data_from_subgraph(
-                network,
-                query=get_escrows_query(filter),
-                params={
-                    "launcher": filter.launcher.lower() if filter.launcher else None,
-                    "reputationOracle": (
-                        filter.reputation_oracle.lower()
-                        if filter.reputation_oracle
-                        else None
-                    ),
-                    "recordingOracle": (
-                        filter.recording_oracle.lower()
-                        if filter.recording_oracle
-                        else None
-                    ),
-                    "exchangeOracle": (
-                        filter.exchange_oracle.lower()
-                        if filter.exchange_oracle
-                        else None
-                    ),
-                    "jobRequesterId": filter.job_requester_id,
-                    "status": filter.status.name if filter.status else None,
-                    "from": (
-                        int(filter.date_from.timestamp()) if filter.date_from else None
-                    ),
-                    "to": int(filter.date_to.timestamp()) if filter.date_to else None,
-                },
-            )
-            if (
-                not escrows_data
-                or "data" not in escrows_data
-                or "escrows" not in escrows_data["data"]
-            ):
-                continue
-            escrows_raw = escrows_data["data"]["escrows"]
 
-            escrows.extend(
-                [
-                    EscrowData(
-                        chain_id=chain_id,
-                        id=escrow.get("id", ""),
-                        address=escrow.get("address", ""),
-                        amount_paid=int(escrow.get("amountPaid", 0)),
-                        balance=int(escrow.get("balance", 0)),
-                        count=int(escrow.get("count", 0)),
-                        factory_address=escrow.get("factoryAddress", ""),
-                        launcher=escrow.get("launcher", ""),
-                        status=escrow.get("status", ""),
-                        token=escrow.get("token", ""),
-                        total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
-                        created_at=datetime.fromtimestamp(
-                            int(escrow.get("createdAt", 0))
-                        ),
-                        final_results_url=escrow.get("finalResultsUrl", None),
-                        intermediate_results_url=escrow.get(
-                            "intermediateResultsUrl", None
-                        ),
-                        manifest_hash=escrow.get("manifestHash", None),
-                        manifest_url=escrow.get("manifestUrl", None),
-                        recording_oracle=escrow.get("recordingOracle", None),
-                        recording_oracle_fee=(
-                            int(escrow.get("recordingOracleFee"))
-                            if escrow.get("recordingOracleFee", None)
-                            else None
-                        ),
-                        reputation_oracle=escrow.get("reputationOracle", None),
-                        reputation_oracle_fee=(
-                            int(escrow.get("reputationOracleFee"))
-                            if escrow.get("reputationOracleFee", None)
-                            else None
-                        ),
-                        exchange_oracle=escrow.get("exchangeOracle", None),
-                        exchange_oracle_fee=(
-                            int(escrow.get("exchangeOracleFee"))
-                            if escrow.get("exchangeOracleFee", None)
-                            else None
-                        ),
-                    )
-                    for escrow in escrows_raw
-                ]
-            )
+        escrows_data = get_data_from_subgraph(
+            network,
+            query=get_escrows_query(filter),
+            params={
+                "launcher": filter.launcher.lower() if filter.launcher else None,
+                "reputationOracle": (
+                    filter.reputation_oracle.lower()
+                    if filter.reputation_oracle
+                    else None
+                ),
+                "recordingOracle": (
+                    filter.recording_oracle.lower() if filter.recording_oracle else None
+                ),
+                "exchangeOracle": (
+                    filter.exchange_oracle.lower() if filter.exchange_oracle else None
+                ),
+                "jobRequesterId": filter.job_requester_id,
+                "status": filter.status.name if filter.status else None,
+                "from": (
+                    int(filter.date_from.timestamp()) if filter.date_from else None
+                ),
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                "first": filter.first,
+                "skip": filter.skip,
+                "orderDirection": filter.order_direction.value,
+            },
+        )
+
+        if (
+            not escrows_data
+            or "data" not in escrows_data
+            or "escrows" not in escrows_data["data"]
+            or not escrows_data["data"]["escrows"]
+        ):
+            return []
+
+        escrows_raw = escrows_data["data"]["escrows"]
+
+        escrows.extend(
+            [
+                EscrowData(
+                    chain_id=chain_id,
+                    id=escrow.get("id", ""),
+                    address=escrow.get("address", ""),
+                    amount_paid=int(escrow.get("amountPaid", 0)),
+                    balance=int(escrow.get("balance", 0)),
+                    count=int(escrow.get("count", 0)),
+                    factory_address=escrow.get("factoryAddress", ""),
+                    launcher=escrow.get("launcher", ""),
+                    status=escrow.get("status", ""),
+                    token=escrow.get("token", ""),
+                    total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
+                    created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
+                    final_results_url=escrow.get("finalResultsUrl", None),
+                    intermediate_results_url=escrow.get("intermediateResultsUrl", None),
+                    manifest_hash=escrow.get("manifestHash", None),
+                    manifest_url=escrow.get("manifestUrl", None),
+                    recording_oracle=escrow.get("recordingOracle", None),
+                    reputation_oracle=escrow.get("reputationOracle", None),
+                    exchange_oracle=escrow.get("exchangeOracle", None),
+                )
+                for escrow in escrows_raw
+            ]
+        )
 
         return escrows
 
@@ -334,41 +308,32 @@ class EscrowUtils:
             manifest_hash=escrow.get("manifestHash", None),
             manifest_url=escrow.get("manifestUrl", None),
             recording_oracle=escrow.get("recordingOracle", None),
-            recording_oracle_fee=(
-                int(escrow.get("recordingOracleFee"))
-                if escrow.get("recordingOracleFee", None)
-                else None
-            ),
             reputation_oracle=escrow.get("reputationOracle", None),
-            reputation_oracle_fee=(
-                int(escrow.get("reputationOracleFee"))
-                if escrow.get("reputationOracleFee", None)
-                else None
-            ),
             exchange_oracle=escrow.get("exchangeOracle", None),
-            exchange_oracle_fee=(
-                int(escrow.get("exchangeOracleFee"))
-                if escrow.get("exchangeOracleFee", None)
-                else None
-            ),
         )
 
     @staticmethod
     def get_status_events(
-        networks: List[ChainId],
+        chain_id: ChainId,
         statuses: Optional[List[Status]] = None,
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         launcher: Optional[str] = None,
+        first: int = 10,
+        skip: int = 0,
+        order_direction: OrderDirection = OrderDirection.DESC,
     ) -> List[StatusEvent]:
         """
         Retrieve status events for specified networks and statuses within a date range.
 
-        :param networks (List[ChainId]): List of network chain IDs to query.
+        :param chain_id: Network to request data.
         :param statuses (Optional[List[Status]]): List of statuses to filter by.
         :param date_from (Optional[datetime]): Start date for the query range.
         :param date_to (Optional[datetime]): End date for the query range.
         :param launcher (Optional[str]): Address of the launcher to filter by.
+        :param first (int): Number of items per page.
+        :param skip (int): Page number to retrieve.
+        :param order_direction (OrderDirection): Order of results, "asc" or "desc".
 
         :return List[StatusEvent]: List of status events matching the query parameters.
 
@@ -387,7 +352,10 @@ class EscrowUtils:
                         statuses=[Status.Pending, Status.Paid],
                         date_from=datetime(2023, 1, 1),
                         date_to=datetime(2023, 12, 31),
-                        launcher="0x1234567890abcdef1234567890abcdef12345678"
+                        launcher="0x1234567890abcdef1234567890abcdef12345678",
+                        first=20,
+                        skip=0,
+                        order_direction=OrderDirection.DESC
                     )
                 )
         """
@@ -395,13 +363,8 @@ class EscrowUtils:
             get_status_query,
         )
 
-        if not networks:
-            raise EscrowClientError("Unsupported Chain ID")
-
         if launcher and not Web3.is_address(launcher):
             raise EscrowClientError("Invalid Address")
-
-        escrow_addresses: List[StatusEvent] = []
 
         # If statuses are not provided, use all statuses except Launched
         effective_statuses = statuses or [
@@ -413,44 +376,44 @@ class EscrowUtils:
             Status.Cancelled,
         ]
 
-        for chain_id in networks:
-            network_data = NETWORKS.get(chain_id)
-            if not network_data:
-                raise EscrowClientError("Unsupported Chain ID")
+        network = NETWORKS.get(chain_id)
+        if not network:
+            raise EscrowClientError("Unsupported Chain ID")
 
-            status_names = [status.name for status in effective_statuses]
+        status_names = [status.name for status in effective_statuses]
 
-            data = get_data_from_subgraph(
-                network_data["subgraph_url"],
-                get_status_query(date_from, date_to, launcher),
-                {
-                    "status": status_names,
-                    "from": int(date_from.timestamp()) if date_from else None,
-                    "to": int(date_to.timestamp()) if date_to else None,
-                    "launcher": launcher or None,
-                },
+        data = get_data_from_subgraph(
+            network,
+            get_status_query(date_from, date_to, launcher),
+            {
+                "status": status_names,
+                "from": int(date_from.timestamp()) if date_from else None,
+                "to": int(date_to.timestamp()) if date_to else None,
+                "launcher": launcher or None,
+                "first": first,
+                "skip": skip,
+                "orderDirection": order_direction.value,
+            },
+        )
+
+        if (
+            not data
+            or "data" not in data
+            or "escrowStatusEvents" not in data["data"]
+            or not data["data"]["escrowStatusEvents"]
+        ):
+            return []
+
+        status_events = data["data"]["escrowStatusEvents"]
+
+        events_with_chain_id = [
+            StatusEvent(
+                timestamp=event["timestamp"],
+                escrow_address=event["escrowAddress"],
+                status=event["status"],
+                chain_id=chain_id,
             )
+            for event in status_events
+        ]
 
-            if (
-                not data
-                or "data" not in data
-                or "escrowStatusEvents" not in data["data"]
-            ):
-                continue
-
-            status_events = data["data"]["escrowStatusEvents"]
-
-            events_with_chain_id = [
-                StatusEvent(
-                    timestamp=event["timestamp"],
-                    escrow_address=event["escrowAddress"],
-                    status=event["status"],
-                    chain_id=chain_id,
-                )
-                for event in status_events
-            ]
-            escrow_addresses.extend(events_with_chain_id)
-
-        escrow_addresses.sort(key=lambda x: x.timestamp)
-
-        return escrow_addresses
+        return events_with_chain_id

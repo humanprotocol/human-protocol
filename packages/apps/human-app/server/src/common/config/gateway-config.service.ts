@@ -1,9 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ExternalApiName } from '../enums/external-api-name';
-import { GatewayConfig, Gateways } from '../interfaces/endpoint.interface';
+import {
+  HCaptchaLabelingStatsEndpoints,
+  HCaptchaLabelingVerifyEndpoints,
+  ReputationOracleEndpoints,
+} from '../enums/reputation-oracle-endpoints';
+import {
+  GatewayConfig,
+  GatewayEndpointConfig,
+  Gateways,
+} from '../interfaces/endpoint.interface';
 import { EnvironmentConfigService } from './environment-config.service';
 import { HttpMethod } from '../enums/http-method';
-import { ReputationOracleEndpoints } from '../enums/reputation-oracle-endpoints';
 
 @Injectable()
 export class GatewayConfigService {
@@ -30,6 +38,11 @@ export class GatewayConfigService {
             },
             [ReputationOracleEndpoints.WORKER_SIGNIN]: {
               endpoint: '/auth/signin',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.REGISTRATION_IN_EXCHANGE_ORACLE]: {
+              endpoint: '/user/exchange-oracle-registration',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
@@ -68,7 +81,66 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
-          },
+            [ReputationOracleEndpoints.ENABLE_LABELING]: {
+              endpoint: '/user/register-labeler',
+              method: HttpMethod.POST,
+            },
+            [ReputationOracleEndpoints.OPERATOR_SIGNIN]: {
+              endpoint: '/auth/web3/signin',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.REGISTER_ADDRESS]: {
+              endpoint: '/user/register-address',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.TOKEN_REFRESH]: {
+              endpoint: '/auth/refresh',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.KYC_ON_CHAIN]: {
+              endpoint: '/kyc/on-chain',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.GET_REGISTRATION_IN_EXCHANGE_ORACLES]: {
+              endpoint: '/user/exchange-oracle-registration',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+          } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
+        },
+        [ExternalApiName.HCAPTCHA_LABELING_STATS]: {
+          url: this.envConfig.hcaptchaLabelingStatsApiUrl,
+          endpoints: {
+            [HCaptchaLabelingStatsEndpoints.USER_STATS]: {
+              endpoint: '/support/labeler/', // email to append as url param
+              method: HttpMethod.GET,
+              params: {
+                api_key: this.envConfig.hcaptchaLabelingApiKey,
+              },
+            },
+            [HCaptchaLabelingStatsEndpoints.DAILY_HMT_SPENT]: {
+              endpoint: '/requester/daily_hmt_spend',
+              method: HttpMethod.GET,
+              params: {
+                api_key: this.envConfig.hcaptchaLabelingApiKey,
+                actual: false,
+              },
+            },
+          } as Record<HCaptchaLabelingStatsEndpoints, GatewayEndpointConfig>,
+        },
+        [ExternalApiName.HCAPTCHA_LABELING_VERIFY]: {
+          url: this.envConfig.hcaptchaLabelingVerifyApiUrl,
+          endpoints: {
+            [HCaptchaLabelingVerifyEndpoints.TOKEN_VERIFY]: {
+              endpoint: '/siteverify',
+              method: HttpMethod.POST,
+              // params in this method are dynamic
+            },
+          } as Record<HCaptchaLabelingVerifyEndpoints, GatewayEndpointConfig>,
         },
       },
     };

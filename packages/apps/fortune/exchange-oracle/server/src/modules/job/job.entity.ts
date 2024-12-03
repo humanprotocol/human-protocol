@@ -14,6 +14,12 @@ export class JobEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   public escrowAddress: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  public manifestUrl: string;
+
+  @Column({ type: 'varchar' })
+  public rewardToken: string;
+
   @Column({
     type: 'enum',
     enum: JobStatus,
@@ -23,6 +29,8 @@ export class JobEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   public reputationNetwork: string;
 
-  @OneToMany(() => AssignmentEntity, (assignment) => assignment.job)
+  @OneToMany(() => AssignmentEntity, (assignment) => assignment.job, {
+    cascade: true,
+  })
   public assignments: AssignmentEntity[];
 }

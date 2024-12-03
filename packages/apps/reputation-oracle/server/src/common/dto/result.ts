@@ -1,6 +1,6 @@
 import { SolutionError } from '../../common/enums';
 
-export class ProcessingResultDto {
+export class PayoutsDataDto {
   /**
    * List of recipient addresses.
    */
@@ -10,7 +10,9 @@ export class ProcessingResultDto {
    * Corresponding amounts to be paid out to recipients.
    */
   amounts: bigint[];
+}
 
+export class SaveResultDto {
   /**
    * URL to the stored results.
    */

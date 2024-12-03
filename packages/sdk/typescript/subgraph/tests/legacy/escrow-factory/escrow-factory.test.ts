@@ -1,10 +1,12 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
   assert,
   clearStore,
   afterAll,
+  beforeAll,
+  dataSourceMock,
 } from 'matchstick-as/assembly';
 
 import { createLaunchedEvent } from './fixtures';
@@ -23,6 +25,14 @@ const escrow2AddressString = '0xd979105297fb0eee83f7433fc09279cb5b94ffc7';
 const escrow2Address = Address.fromString(escrow2AddressString);
 
 describe('EscrowFactory', () => {
+  beforeAll(() => {
+    dataSourceMock.setReturnValues(
+      factoryAddressString,
+      'rinkeby',
+      new DataSourceContext()
+    );
+  });
+
   afterAll(() => {
     clearStore();
   });
@@ -121,7 +131,7 @@ describe('EscrowFactory', () => {
     // Stats Entity
     assert.fieldEquals(
       'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
+      STATISTICS_ENTITY_ID.toHex(),
       'totalEscrowCount',
       '2'
     );
@@ -130,51 +140,8 @@ describe('EscrowFactory', () => {
     assert.fieldEquals(
       'Leader',
       launcherAddressString,
-      'amountJobsLaunched',
+      'amountJobsProcessed',
       '2'
-    );
-
-    // EscrowStatusEvent
-    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
-      data1.block.timestamp
-    }`;
-
-    assert.fieldEquals(
-      'EscrowStatusEvent',
-      id1,
-      'block',
-      data1.block.number.toString()
-    );
-    assert.fieldEquals(
-      'EscrowStatusEvent',
-      id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'EscrowStatusEvent',
-      id1,
-      'txHash',
-      data1.transaction.hash.toHex()
-    );
-    assert.fieldEquals(
-      'EscrowStatusEvent',
-      id1,
-      'escrowAddress',
-      escrow1AddressString
-    );
-    assert.fieldEquals(
-      'EscrowStatusEvent',
-      id1,
-      'sender',
-      launcherAddressString
-    );
-    assert.fieldEquals('EscrowStatusEvent', id1, 'status', 'Launched');
-    assert.fieldEquals(
-      'EscrowStatusEvent',
-      id1,
-      'launcher',
-      launcherAddressString
     );
 
     // Transaction

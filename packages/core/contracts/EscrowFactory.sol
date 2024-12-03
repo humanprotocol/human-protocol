@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2;
+pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
@@ -17,38 +17,48 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     mapping(address => uint256) public escrowCounters;
     address public lastEscrow;
     address public staking;
+    uint256 public minimumStake;
 
     event Launched(address token, address escrow);
     event LaunchedV2(address token, address escrow, string jobRequesterId);
+    event SetStakingAddress(address indexed stakingAddress);
+    event SetMinumumStake(uint256 indexed minimumStake);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address _staking) external payable virtual initializer {
+    function initialize(
+        address _staking,
+        uint256 _minimumStake
+    ) external payable virtual initializer {
         __Ownable_init_unchained();
-        __EscrowFactory_init_unchained(_staking);
-    }
-
-    function __EscrowFactory_init_unchained(
-        address _staking
-    ) internal onlyInitializing {
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
-        staking = _staking;
+        _setStakingAddress(_staking);
+        _setMinimumStake(_minimumStake);
     }
 
+    /**
+     * @dev Creates a new Escrow contract.
+     *
+     * @param token Token address to be associated with the Escrow contract.
+     * @param trustedHandlers Array of addresses that will serve as the trusted handlers for the Escrow.
+     * @param jobRequesterId String identifier for the job requester, used for tracking purposes.
+     *
+     * @return The address of the newly created Escrow contract.
+     */
     function createEscrow(
         address token,
         address[] memory trustedHandlers,
         string memory jobRequesterId
-    ) public returns (address) {
-        bool hasAvailableStake = IStaking(staking).hasAvailableStake(
+    ) external returns (address) {
+        uint256 availableStake = IStaking(staking).getAvailableStake(
             msg.sender
         );
         require(
-            hasAvailableStake == true,
-            'Needs to stake HMT tokens to create an escrow.'
+            availableStake >= minimumStake,
+            'Insufficient stake to create an escrow.'
         );
 
         Escrow escrow = new Escrow(
@@ -65,11 +75,38 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         return lastEscrow;
     }
 
-    function hasEscrow(address _address) public view returns (bool) {
+    function hasEscrow(address _address) external view returns (bool) {
         return escrowCounters[_address] != 0;
     }
 
-    // solhint-disable-next-line no-empty-blocks
+    /**
+     * @dev Set the Staking address.
+     * @param _stakingAddress Staking address
+     */
+    function setStakingAddress(address _stakingAddress) external onlyOwner {
+        _setStakingAddress(_stakingAddress);
+    }
+
+    function _setStakingAddress(address _stakingAddress) private {
+        require(_stakingAddress != address(0), ERROR_ZERO_ADDRESS);
+        staking = _stakingAddress;
+        emit SetStakingAddress(_stakingAddress);
+    }
+
+    /**
+     * @dev Set the minimum stake amount.
+     * @param _minimumStake Minimum stake
+     */
+    function setMinimumStake(uint256 _minimumStake) external onlyOwner {
+        _setMinimumStake(_minimumStake);
+    }
+
+    function _setMinimumStake(uint256 _minimumStake) private {
+        require(_minimumStake > 0, 'Must be a positive number');
+        minimumStake = _minimumStake;
+        emit SetMinumumStake(minimumStake);
+    }
+
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     /**
@@ -77,5 +114,5 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[46] private __gap;
+    uint256[45] private __gap;
 }

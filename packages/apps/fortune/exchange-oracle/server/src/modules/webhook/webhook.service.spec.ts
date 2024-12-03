@@ -10,6 +10,7 @@ import {
   MOCK_ADDRESS,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_WEBHOOK_URL,
+  mockConfig,
 } from '../../../test/constants';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { ErrorWebhook } from '../../common/constant/errors';
@@ -36,8 +37,8 @@ jest.mock('@human-protocol/sdk', () => ({
   OperatorUtils: {
     getLeader: jest.fn(),
   },
-  KVStoreClient: {
-    build: jest.fn(),
+  KVStoreUtils: {
+    get: jest.fn(),
   },
 }));
 
@@ -76,7 +77,18 @@ describe('WebhookService', () => {
           useValue: createMock<AssignmentRepository>(),
         },
         StorageService,
-        ConfigService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
         Web3ConfigService,
         ServerConfigService,
         PGPConfigService,
@@ -131,12 +143,14 @@ describe('WebhookService', () => {
     });
 
     it('should handle an incoming escrow canceled webhook', async () => {
+      jest.spyOn(jobService, 'cancelJob').mockResolvedValue();
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
         eventType: EventType.ESCROW_CANCELED,
       };
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
+      expect(jobService.cancelJob).toHaveBeenCalledWith(webhook);
     });
 
     it('should mark a job solution as invalid', async () => {

@@ -1,9 +1,9 @@
 import io
 import os
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Optional, Type
 
 import datumaro as dm
 from datumaro.components.dataset import Dataset
@@ -26,6 +26,7 @@ CVAT_EXPORT_FORMAT_MAPPING = {
     TaskTypes.image_label_binary: "CVAT for images 1.1",
     TaskTypes.image_points: "CVAT for images 1.1",
     TaskTypes.image_boxes: "COCO 1.0",
+    TaskTypes.image_polygons: "COCO 1.0",
     TaskTypes.image_boxes_from_points: "COCO 1.0",
     TaskTypes.image_skeletons_from_boxes: "CVAT for images 1.1",
 }
@@ -39,11 +40,11 @@ CVAT_EXPORT_FORMAT_TO_DM_MAPPING = {
 @dataclass
 class FileDescriptor:
     filename: str
-    file: Optional[io.RawIOBase]
+    file: io.RawIOBase | None
 
 
 def prepare_annotation_metafile(
-    jobs: List[Job], job_annotations: Dict[int, FileDescriptor]
+    jobs: list[Job], job_annotations: dict[int, FileDescriptor]
 ) -> FileDescriptor:
     """
     Prepares a task/project annotation descriptor file with annotator mapping.
@@ -56,12 +57,17 @@ def prepare_annotation_metafile(
                 annotation_filename=job_annotations[job.cvat_id].filename,
                 annotator_wallet_address=job.latest_assignment.user_wallet_address,
                 assignment_id=job.latest_assignment.id,
+                task_id=job.cvat_task_id,
+                start_frame=job.start_frame,
+                stop_frame=job.stop_frame,
             )
             for job in jobs
         ]
     )
 
-    return FileDescriptor(ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.json().encode()))
+    return FileDescriptor(
+        ANNOTATION_RESULTS_METAFILE_NAME, file=io.BytesIO(meta.model_dump_json().encode())
+    )
 
 
 class _TaskProcessor:
@@ -69,12 +75,12 @@ class _TaskProcessor:
         self,
         escrow_address: str,
         chain_id: int,
-        annotations: List[FileDescriptor],
+        annotations: Sequence[FileDescriptor],
         merged_annotation: FileDescriptor,
         *,
         manifest: TaskManifest,
-        project_images: List[Image],
-    ):
+        project_images: list[Image],
+    ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.annotation_files = annotations
@@ -123,7 +129,7 @@ class _TaskProcessor:
         output_dataset = self._process_dataset(input_dataset, ann_descriptor=ann_descriptor)
         self._export_dataset(output_dataset, output_dir)
 
-    def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> dm.Dataset:
+    def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> dm.Dataset:  # noqa: ARG002
         return dm.Dataset.import_from(dataset_dir, self.input_format)
 
     def _export_dataset(self, dataset: dm.Dataset, output_dir: str):
@@ -158,6 +164,10 @@ class _BoxesTaskProcessor(_TaskProcessor):
     pass
 
 
+class _PolygonsTaskProcessor(_TaskProcessor):
+    pass
+
+
 class _PointsTaskProcessor(_TaskProcessor):
     def _parse_dataset(self, ann_descriptor: FileDescriptor, dataset_dir: str) -> Dataset:
         annotation_utils.prepare_cvat_annotations_for_dm(dataset_dir)
@@ -176,7 +186,7 @@ class _PointsTaskProcessor(_TaskProcessor):
 
 
 class _BoxesFromPointsTaskProcessor(_TaskProcessor):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         roi_filenames, roi_infos, points_dataset = self._download_task_meta()
@@ -186,7 +196,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
 
         roi_info_by_id = {roi_info.point_id: roi_info for roi_info in roi_infos}
 
-        self.roi_name_to_roi_info: Dict[str, boxes_from_points_task.RoiInfo] = {
+        self.roi_name_to_roi_info: dict[str, boxes_from_points_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -271,7 +281,7 @@ class _BoxesFromPointsTaskProcessor(_TaskProcessor):
 
 
 class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         roi_filenames, roi_infos, boxes_dataset, job_label_mapping = self._download_task_meta()
@@ -281,7 +291,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
 
         roi_info_by_id = {roi_info.bbox_id: roi_info for roi_info in roi_infos}
 
-        self.roi_name_to_roi_info: Dict[str, skeletons_from_boxes_task.RoiInfo] = {
+        self.roi_name_to_roi_info: dict[str, skeletons_from_boxes_task.RoiInfo] = {
             os.path.splitext(roi_filename)[0]: roi_info_by_id[roi_id]
             for roi_id, roi_filename in roi_filenames.items()
         }
@@ -503,7 +513,7 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
             skeleton_bbox.group = skeleton_group
             skeleton_bbox.label = converted_skeleton.label
             converted_job_dataset.put(
-                converted_sample.wrap(annotations=converted_sample.annotations + [skeleton_bbox])
+                converted_sample.wrap(annotations=[*converted_sample.annotations, skeleton_bbox])
             )
 
         # Rename the job skeleton and point to the original names
@@ -572,18 +582,19 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
 def postprocess_annotations(
     escrow_address: str,
     chain_id: int,
-    annotations: List[FileDescriptor],
+    annotations: Sequence[FileDescriptor],
     merged_annotation: FileDescriptor,
     *,
     manifest: TaskManifest,
-    project_images: List[Image],
+    project_images: list[Image],
 ) -> None:
     """
     Processes annotations and updates the files list inplace
     """
-    processor_classes: Dict[TaskTypes, Type[_TaskProcessor]] = {
+    processor_classes: dict[TaskTypes, type[_TaskProcessor]] = {
         TaskTypes.image_label_binary: _LabelsTaskProcessor,
         TaskTypes.image_boxes: _BoxesTaskProcessor,
+        TaskTypes.image_polygons: _PolygonsTaskProcessor,
         TaskTypes.image_points: _PointsTaskProcessor,
         TaskTypes.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
         TaskTypes.image_skeletons_from_boxes: _SkeletonsFromBoxesTaskProcessor,

@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Request,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -37,14 +38,19 @@ import { ApiKey } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
 import { ControlledError } from '../../common/errors/controlled';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { MutexManagerService } from '../mutex/mutex-manager.service';
+import { MUTEX_TIMEOUT } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@ApiTags('Job')
 @ApiKey()
+@ApiTags('Job')
 @Controller('/job')
 export class JobController {
-  constructor(private readonly jobService: JobService) {}
+  constructor(
+    private readonly jobService: JobService,
+    private readonly mutexManagerService: MutexManagerService,
+  ) {}
 
   @ApiOperation({
     summary: 'Create a job via quick launch',
@@ -71,10 +77,20 @@ export class JobController {
   })
   @Post('/quick-launch')
   public async quickLaunch(
-    @Request() req: RequestWithUser,
     @Body() data: JobQuickLaunchDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, data.requestType, data);
+    return await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(
+          req.user.id,
+          data.requestType,
+          data,
+        );
+      },
+    );
   }
 
   @ApiOperation({
@@ -101,10 +117,20 @@ export class JobController {
   })
   @Post('/fortune')
   public async createFortuneJob(
-    @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.FORTUNE, data);
+    return await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(
+          req.user.id,
+          JobRequestType.FORTUNE,
+          data,
+        );
+      },
+    );
   }
 
   @ApiOperation({
@@ -131,10 +157,16 @@ export class JobController {
   })
   @Post('/cvat')
   public async createCvatJob(
-    @Request() req: RequestWithUser,
     @Body() data: JobCvatDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, data.type, data);
+    return await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(req.user.id, data.type, data);
+      },
+    );
   }
 
   @ApiOperation({
@@ -161,17 +193,23 @@ export class JobController {
   })
   @Post('/hCaptcha')
   public async createCaptchaJob(
-    @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
+    @Request() req: RequestWithUser,
   ): Promise<number> {
     throw new ControlledError(
       'Hcaptcha jobs disabled temporally',
       HttpStatus.UNAUTHORIZED,
     );
-    return this.jobService.createJob(
-      req.user.id,
-      JobRequestType.HCAPTCHA,
-      data,
+    return await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(
+          req.user.id,
+          JobRequestType.HCAPTCHA,
+          data,
+        );
+      },
     );
   }
 
@@ -195,8 +233,8 @@ export class JobController {
   })
   @Get('/list')
   public async getJobList(
-    @Request() req: RequestWithUser,
     @Query() data: GetJobsDto,
+    @Request() req: RequestWithUser,
   ): Promise<PageDto<JobListDto>> {
     return this.jobService.getJobsByStatus(data, req.user.id);
   }
@@ -220,10 +258,24 @@ export class JobController {
   })
   @Get('/result/:id')
   public async getResult(
-    @Request() req: RequestWithUser,
     @Param() params: JobIdDto,
+    @Request() req: RequestWithUser,
   ): Promise<FortuneFinalResultDto[] | string> {
     return this.jobService.getResult(req.user.id, params.id);
+  }
+
+  @Get('result/:id/download')
+  public async downloadResult(
+    @Param() params: JobIdDto,
+    @Request() req: RequestWithUser,
+  ): Promise<StreamableFile> {
+    const decryptedResult = await this.jobService.downloadJobResults(
+      req.user.id,
+      params.id,
+    );
+    return new StreamableFile(decryptedResult.contents, {
+      disposition: `attachment; filename="${decryptedResult.filename}"`,
+    });
   }
 
   @ApiOperation({
@@ -249,14 +301,20 @@ export class JobController {
   })
   @Patch('/cancel/:chain_id/:escrow_address')
   public async cancelJobByChainIdAndEscrowAddress(
-    @Request() req: RequestWithUser,
     @Param('chain_id') chainId: ChainId,
     @Param('escrow_address') escrowAddress: string,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
-    await this.jobService.requestToCancelJobByAddress(
-      req.user.id,
-      chainId,
-      escrowAddress,
+    await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.requestToCancelJobByAddress(
+          req.user.id,
+          chainId,
+          escrowAddress,
+        );
+      },
     );
     return;
   }
@@ -283,10 +341,19 @@ export class JobController {
   })
   @Patch('/cancel/:id')
   public async cancelJobById(
-    @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
+    @Request() req: RequestWithUser,
   ): Promise<void> {
-    await this.jobService.requestToCancelJobById(req.user.id, params.id);
+    await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.requestToCancelJobById(
+          req.user.id,
+          params.id,
+        );
+      },
+    );
     return;
   }
 
@@ -309,8 +376,8 @@ export class JobController {
   })
   @Get('/details/:id')
   public async getDetails(
-    @Request() req: RequestWithUser,
     @Param() params: JobIdDto,
+    @Request() req: RequestWithUser,
   ): Promise<JobDetailsDto> {
     return this.jobService.getDetails(req.user.id, params.id);
   }

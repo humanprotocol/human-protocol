@@ -1,16 +1,17 @@
 import { WorkerController } from '../worker.controller';
 import { WorkerService } from '../worker.service';
-import { Mapper } from '@automapper/core';
 import {
+  RegistrationInExchangeOracleDto,
   SignupWorkerCommand,
   SignupWorkerDto,
 } from '../model/worker-registration.model';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { WorkerProfile } from '../worker.mapper';
+import { WorkerProfile } from '../worker.mapper.profile';
 import { workerServiceMock } from './worker.service.mock';
 import { SigninWorkerDto } from '../model/worker-signin.model';
+import { workerToken } from './worker.fixtures';
 
 describe('WorkerController', () => {
   let controller: WorkerController;
@@ -69,6 +70,24 @@ describe('WorkerController', () => {
         hCaptchaToken: dto.h_captcha_token,
       };
       expect(workerService.signinWorker).toHaveBeenCalledWith(expectedCommand);
+    });
+  });
+
+  describe('exchange oracle registration', () => {
+    it('should service a user registration in exchange oracle method with proper fields set', async () => {
+      const dto: RegistrationInExchangeOracleDto = {
+        oracle_address: '0x34df642',
+        h_captcha_token: 'h_captcha_token',
+      };
+      await controller.createRegistrationInExchangeOracle(dto, workerToken);
+      const expectedCommand = {
+        oracleAddress: dto.oracle_address,
+        hCaptchaToken: dto.h_captcha_token,
+        token: workerToken,
+      };
+      expect(workerService.registrationInExchangeOracle).toHaveBeenCalledWith(
+        expectedCommand,
+      );
     });
   });
 });

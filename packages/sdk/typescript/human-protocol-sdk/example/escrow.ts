@@ -13,7 +13,7 @@ export const getEscrows = async () => {
     status: EscrowStatus.Pending,
     from: new Date(2023, 4, 8),
     to: new Date(2023, 5, 8),
-    networks: [ChainId.POLYGON_AMOY],
+    chainId: ChainId.POLYGON_AMOY,
   });
 
   console.log('Pending escrows:', escrows);

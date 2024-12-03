@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsEthereumAddress, IsString } from 'class-validator';
 import { AutoMap } from '@automapper/classes';
 
 export class SignupWorkerDto {
@@ -40,4 +40,46 @@ export class SignupWorkerData {
   password: string;
   @AutoMap()
   h_captcha_token: string;
+}
+
+export class RegistrationInExchangeOracleDto {
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsEthereumAddress()
+  oracle_address: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  h_captcha_token: string;
+}
+
+export class RegistrationInExchangeOracleCommand {
+  @AutoMap()
+  oracleAddress: string;
+  @AutoMap()
+  @ApiProperty({ example: 'string' })
+  @IsString()
+  hCaptchaToken: string;
+
+  token: string;
+
+  constructor(oracleAddress: string, hCaptchaToken: string) {
+    this.oracleAddress = oracleAddress;
+    this.hCaptchaToken = hCaptchaToken;
+  }
+}
+
+export class RegistrationInExchangeOracleData {
+  @AutoMap()
+  oracle_address: string;
+  @AutoMap()
+  h_captcha_token: string;
+}
+
+export class RegistrationInExchangeOracleResponse {
+  oracle_address: string;
+}
+
+export class RegistrationInExchangeOraclesResponse {
+  oracle_addresses: string[];
 }

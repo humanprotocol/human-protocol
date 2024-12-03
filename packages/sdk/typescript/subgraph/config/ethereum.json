@@ -9,7 +9,9 @@
   "HMToken": {
     "address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
     "startBlock": 12184475,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0x3895d913a9A231d2B215F402c528511B569C676D"
   },
   "Escrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"

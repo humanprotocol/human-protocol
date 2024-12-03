@@ -3,12 +3,12 @@ name: Job Launcher Check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
     paths:
-      - "packages/core/**"
-      - "packages/sdk/typescript/human-protocol-sdk/**"
-      - "packages/apps/job-launcher/**"
+      - 'packages/core/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/apps/job-launcher/**'
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn job-launcher-client:test
+      - run: yarn workspace @human-protocol/job-launcher-client test
         name: Run Job Launcher Client test
   job-launcher-server-test:
     name: Job Launcher Server Test
@@ -28,5 +28,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn job-launcher-server:test
+      - run: yarn workspace @human-protocol/job-launcher-server test
         name: Run Job Launcher Server test

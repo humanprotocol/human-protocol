@@ -1,16 +1,49 @@
+"""
+Functions in this module are grouped by various categories, look for separators like  `# Job`, etc.
+"""
+
 import itertools
 import uuid
+from collections.abc import Iterable, Sequence
 from datetime import datetime
-from typing import List, Optional, Sequence, Union
+from itertools import islice
+from typing import Any, NamedTuple
 
-from sqlalchemy import delete, insert, update
+from sqlalchemy import delete, func, literal, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from src.core.types import AssignmentStatuses, JobStatuses, ProjectStatuses, TaskStatuses, TaskTypes
+from src.core.types import (
+    AssignmentStatuses,
+    EscrowValidationStatuses,
+    JobStatuses,
+    ProjectStatuses,
+    TaskStatuses,
+    TaskTypes,
+)
+from src.db import Base, ChildOf
+from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
-from src.models.cvat import Assignment, DataUpload, EscrowCreation, Image, Job, Project, Task, User
+from src.models.cvat import (
+    Assignment,
+    DataUpload,
+    EscrowCreation,
+    EscrowValidation,
+    Image,
+    Job,
+    Project,
+    Task,
+    User,
+)
 from src.utils.time import utcnow
+
+
+def batched(iterable: Iterable, *, batch_size: int) -> Iterable[Any]:
+    assert batch_size > 0
+    iterator = iter(iterable)
+    while batch := tuple(islice(iterator, batch_size)):
+        yield batch
 
 
 # Project
@@ -22,7 +55,7 @@ def create_project(
     escrow_address: str,
     chain_id: int,
     bucket_url: str,
-    cvat_webhook_id: Optional[int] = None,
+    cvat_webhook_id: int | None = None,
     status: ProjectStatuses = ProjectStatuses.creation,
 ) -> str:
     """
@@ -50,13 +83,10 @@ def get_project_by_id(
     session: Session,
     project_id: str,
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-    status_in: Optional[List[ProjectStatuses]] = None,
-) -> Optional[Project]:
-    if status_in:
-        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
-    else:
-        status_filter_arg = []
+    for_update: bool | ForUpdateParams = False,
+    status_in: list[ProjectStatuses] | None = None,
+) -> Project | None:
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
 
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
@@ -69,14 +99,11 @@ def get_projects_by_cvat_ids(
     session: Session,
     project_cvat_ids: Sequence[int],
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-    status_in: Optional[List[ProjectStatuses]] = None,
+    for_update: bool | ForUpdateParams = False,
+    status_in: list[ProjectStatuses] | None = None,
     limit: int = 5,
-) -> List[Project]:
-    if status_in:
-        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
-    else:
-        status_filter_arg = []
+) -> list[Project]:
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
 
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
@@ -87,11 +114,16 @@ def get_projects_by_cvat_ids(
 
 
 def get_project_by_escrow_address(
-    session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Project]:
+    session: Session,
+    escrow_address: str,
+    *,
+    for_update: bool | ForUpdateParams = False,
+    status_in: list[ProjectStatuses] | None = None,
+) -> Project | None:
+    status_filter_arg = [Project.status.in_(s.value for s in status_in)] if status_in else []
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
-        .where(Project.escrow_address == escrow_address)
+        .where(Project.escrow_address == escrow_address, *status_filter_arg)
         .first()
     )
 
@@ -100,9 +132,9 @@ def get_projects_by_escrow_address(
     session: Session,
     escrow_address: str,
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-    limit: Optional[int] = 5,
-) -> List[Project]:
+    for_update: bool | ForUpdateParams = False,
+    limit: int | None = 5,
+) -> list[Project]:
     projects = _maybe_for_update(session.query(Project), enable=for_update).where(
         Project.escrow_address == escrow_address
     )
@@ -116,7 +148,7 @@ def get_projects_by_escrow_address(
 def get_project_cvat_ids_by_escrow_address(
     session: Session,
     escrow_address: str,
-) -> List[int]:
+) -> list[int]:
     projects = session.query(Project).where(Project.escrow_address == escrow_address)
 
     return list(itertools.chain.from_iterable(projects.values(Project.cvat_id)))
@@ -126,11 +158,11 @@ def get_projects_by_status(
     session: Session,
     status: ProjectStatuses,
     *,
-    included_types: Optional[Sequence[TaskTypes]] = None,
-    task_status: Optional[TaskStatuses] = None,
+    included_types: Sequence[TaskTypes] | None = None,
+    task_status: TaskStatuses | None = None,
     limit: int = 5,
-    for_update: Union[bool, ForUpdateParams] = False,
-) -> List[Project]:
+    for_update: bool | ForUpdateParams = False,
+) -> list[Project]:
     projects = _maybe_for_update(session.query(Project), enable=for_update).where(
         Project.status == status.value
     )
@@ -141,33 +173,163 @@ def get_projects_by_status(
     if included_types is not None:
         projects = projects.where(Project.job_type.in_([t.value for t in included_types]))
 
-    projects = projects.limit(limit).all()
-
-    return projects
+    return projects.limit(limit).all()
 
 
-def get_escrows_by_project_status(
-    session: Session,
-    project_status: ProjectStatuses,
-    *,
-    included_types: Optional[Sequence[TaskTypes]] = None,
-    limit: int = 5,
-) -> List[tuple[str, int]]:
-    escrows = (
-        session.query(Project.escrow_address, Project.chain_id)
-        .group_by(Project.escrow_address, Project.chain_id)
-        .where(Project.status == project_status.value)
+def complete_projects_with_completed_tasks(session: Session) -> list[int]:
+    incomplete_tasks_exist = (
+        select(1)
+        .where(
+            Task.cvat_project_id == Project.cvat_id,
+            Task.status != TaskStatuses.completed,
+        )
+        .limit(1)
+        .correlate(Project)
+    ).exists()
+
+    stmt = (
+        update(Project)
+        .where(Project.status == ProjectStatuses.annotation, ~incomplete_tasks_exist)
+        .values(status=ProjectStatuses.completed)
+        .returning(Project.cvat_id)
     )
 
-    if included_types:
-        escrows = escrows.where(Project.job_type.in_([t.value for t in included_types]))
-
-    escrows = escrows.limit(limit).all()
-
-    return escrows
+    result = session.execute(stmt)
+    return [row.cvat_id for row in result.all()]
 
 
-def get_available_projects(session: Session, *, limit: int = 10) -> List[Project]:
+def create_escrow_validations(session: Session, *, limit: int = 100) -> list[tuple[str, str, int]]:
+    if db_engine.driver != "psycopg2":
+        # Some of the code is likely to be only Postgres-related, e.g. UPDATE ... RETURNING as CTE
+        raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
+
+    project_counts_per_escrow = (
+        select(
+            Project.escrow_address,
+            Project.chain_id,
+            func.count().label("total_projects"),
+        )
+        .where(Project.status != ProjectStatuses.creation)
+        .group_by(Project.escrow_address, Project.chain_id)
+    ).subquery()  # TODO: store counts in escrow creations or in a new "escrows" table
+    # must not lock and doesn't need a lock (this information is static for created escrows)
+
+    working_set = (
+        select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
+        .join(
+            EscrowValidation,
+            (
+                (Project.escrow_address == EscrowValidation.escrow_address)
+                & (Project.chain_id == EscrowValidation.chain_id)
+            ),
+            isouter=True,
+        )
+        .where(
+            Project.status == ProjectStatuses.completed,
+            (
+                # It's not expected to happen, but if it happens for some reason,
+                # this check will prevent a deadlock in insert (upsert) below.
+                # We don't need an EscrowValidation lock here, because the only reason why they
+                # can move from none or "completed" to "awaiting" is the upsert below.
+                # The upsert on such an escrow will be protected by the project locks in this
+                # query. If we skip some projects here, we'll just return to them on the next
+                # status check.
+                (EscrowValidation.status == None)
+                | (EscrowValidation.status == EscrowValidationStatuses.completed)
+            ),
+        )
+        .with_for_update(skip_locked=True, of=Project)
+        .limit(
+            # TODO: limit might be too small to finish at least 1 escrow.
+            # Maybe use max(project_counts_per_escrow) instead
+            limit
+        )
+        # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
+        # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
+    )
+
+    all_completed_condition = func.count() == project_counts_per_escrow.c["total_projects"]
+    completed_projects = (
+        select(working_set.c["escrow_address"], working_set.c["chain_id"])
+        .select_from(working_set)
+        .join(
+            project_counts_per_escrow,
+            (
+                (working_set.c["escrow_address"] == project_counts_per_escrow.c["escrow_address"])
+                & (working_set.c["chain_id"] == project_counts_per_escrow.c["chain_id"])
+            ),
+        )
+        .group_by(
+            working_set.c["escrow_address"],
+            working_set.c["chain_id"],
+            project_counts_per_escrow.c["total_projects"],
+        )
+        .having(all_completed_condition)
+    ).subquery()  # compute counts on the locked rows
+
+    completed_projects_for_update = (
+        select(working_set.c["id"])
+        .select_from(working_set)
+        .join(
+            completed_projects,
+            (
+                (working_set.c["escrow_address"] == completed_projects.c["escrow_address"])
+                & (working_set.c["chain_id"] == completed_projects.c["chain_id"])
+            ),
+        )
+    )
+    completed_projects_for_update_cte = completed_projects_for_update.cte("completed_projects")
+    update_stmt = (
+        # Update project statuses to validation for all the escrow projects,
+        # only for the locked rows
+        update(Project)
+        .where(
+            Project.id == completed_projects_for_update_cte.c["id"],
+            Project.status == ProjectStatuses.completed,
+        )
+        .values({"status": ProjectStatuses.validation})
+        .returning(Project.escrow_address, Project.chain_id)
+    )
+
+    updated_projects_cte = update_stmt.cte("updated_projects")
+    updated_escrows_for_insert = (
+        select(
+            updated_projects_cte.c["escrow_address"],
+            updated_projects_cte.c["chain_id"],
+            literal(EscrowValidationStatuses.awaiting).label("status"),
+        )
+        .select_from(updated_projects_cte)
+        .group_by(
+            updated_projects_cte.c["escrow_address"],
+            updated_projects_cte.c["chain_id"],
+        )
+    )
+
+    # Note, that it's possible to fail lock acquisition for on_conflict_do_update,
+    # if the escrow projects are all found in the completed status during an ongoing validation.
+    # It should not happen under normal working conditions, as projects are switched
+    # to the validation status here.
+    # TODO: maybe switch to separate rows for each validation on the same escrow
+    insert_stmt = (
+        insert(EscrowValidation)
+        .from_select(("escrow_address", "chain_id", "status"), updated_escrows_for_insert)
+        .on_conflict_do_update(
+            # Upsert - EscrowValidation can already be there from a previous validation
+            index_elements=("escrow_address", "chain_id"),
+            set_={
+                # Reset the existing entry
+                "status": EscrowValidationStatuses.awaiting,
+                "attempts": 0,
+            },
+            where=EscrowValidation.status == EscrowValidationStatuses.completed,
+        )
+        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
+    )
+
+    return session.execute(insert_stmt).all()
+
+
+def get_available_projects(session: Session, *, limit: int = 10) -> list[Project]:
     return (
         session.query(Project)
         .where(
@@ -185,11 +347,11 @@ def get_available_projects(session: Session, *, limit: int = 10) -> List[Project
 
 def get_projects_by_assignee(
     session: Session,
-    wallet_address: Optional[str] = None,
+    wallet_address: str | None = None,
     *,
     limit: int = 10,
-    for_update: Union[bool, ForUpdateParams] = False,
-) -> List[Project]:
+    for_update: bool | ForUpdateParams = False,
+) -> list[Project]:
     return (
         _maybe_for_update(session.query(Project), enable=for_update)
         .where(
@@ -217,16 +379,20 @@ def update_project_statuses_by_escrow_address(
     escrow_address: str,
     chain_id: int,
     status: ProjectStatuses,
+    *,
+    included_statuses: Sequence[ProjectStatuses] | None = None,
 ) -> None:
     statement = (
         update(Project)
         .where(
             Project.escrow_address == escrow_address,
             Project.chain_id == chain_id,
+            *([Project.status.in_(included_statuses)] if included_statuses else []),
         )
         .values(status=status.value)
+        .returning(Project.cvat_id)
     )
-    session.execute(statement)
+    session.execute(statement).all()
 
 
 def delete_project(session: Session, project_id: str) -> None:
@@ -234,16 +400,22 @@ def delete_project(session: Session, project_id: str) -> None:
     session.delete(project)
 
 
+def delete_projects(session: Session, escrow_address: str, chain_id: int) -> None:
+    session.execute(
+        delete(Project).where(
+            Project.escrow_address == escrow_address,
+            Project.chain_id == chain_id,
+        )
+    )
+
+
 def is_project_completed(session: Session, project_id: str) -> bool:
     project = get_project_by_id(session, project_id)
     jobs = get_jobs_by_cvat_project_id(session, project.cvat_id)
-    if len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs):
-        return True
-    else:
-        return False
+    return bool(len(jobs) > 0 and all(job.status == JobStatuses.completed.value for job in jobs))
 
 
-# EscrowCreation
+# Escrow
 def create_escrow_creation(
     session: Session,
     escrow_address: str,
@@ -271,8 +443,8 @@ def get_escrow_creation_by_id(
     session: Session,
     escrow_creation_id: str,
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-) -> Optional[EscrowCreation]:
+    for_update: bool | ForUpdateParams = False,
+) -> EscrowCreation | None:
     return (
         _maybe_for_update(session.query(EscrowCreation), enable=for_update)
         .where(EscrowCreation.id == escrow_creation_id, EscrowCreation.finished_at.is_(None))
@@ -285,8 +457,8 @@ def get_escrow_creation_by_escrow_address(
     escrow_address: str,
     chain_id: int,
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-) -> Optional[EscrowCreation]:
+    for_update: bool | ForUpdateParams = False,
+) -> EscrowCreation | None:
     return (
         _maybe_for_update(session.query(EscrowCreation), enable=for_update)
         .where(
@@ -299,8 +471,8 @@ def get_escrow_creation_by_escrow_address(
 
 
 def get_active_escrow_creations(
-    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
-) -> List[EscrowCreation]:
+    session: Session, *, limit: int = 10, for_update: bool | ForUpdateParams = False
+) -> list[EscrowCreation]:
     return (
         _maybe_for_update(session.query(EscrowCreation), enable=for_update)
         .where(EscrowCreation.finished_at.is_(None))
@@ -309,7 +481,7 @@ def get_active_escrow_creations(
     )
 
 
-def finish_escrow_creations(session: Session, escrow_creations: List[EscrowCreation]) -> None:
+def finish_escrow_creations(session: Session, escrow_creations: list[EscrowCreation]) -> None:
     statement = (
         update(EscrowCreation)
         .where(EscrowCreation.id.in_(c.id for c in escrow_creations))
@@ -327,6 +499,89 @@ def finish_escrow_creations_by_escrow_address(
         .values(finished_at=utcnow())
     )
     session.execute(statement)
+
+
+# EscrowValidation
+
+
+def prepare_escrows_for_validation(
+    session: Session, *, limit: int = 5
+) -> Sequence[tuple[str, int]]:
+    subquery = (
+        select(EscrowValidation.id)
+        .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
+        .limit(limit)
+        .order_by(EscrowValidation.attempts.asc())
+    )
+    update_stmt = (
+        update(EscrowValidation)
+        .where(EscrowValidation.id.in_(subquery))
+        .values(attempts=EscrowValidation.attempts + 1)
+        .returning(EscrowValidation.escrow_address, EscrowValidation.chain_id)
+    )
+    return session.execute(update_stmt).all()
+
+
+def lock_escrow_for_validation(
+    session: Session,
+    *,
+    escrow_address: str,
+    chain_id: int,
+) -> Sequence[tuple[str, str, int]]:
+    stmt = (
+        select(EscrowValidation.escrow_address, EscrowValidation.chain_id)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .with_for_update(nowait=True)
+    )
+    return session.execute(stmt)
+
+
+def update_escrow_validation(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    *,
+    status: EscrowValidationStatuses | None = None,
+    increase_attempts: bool = False,
+) -> None:
+    values = {}
+    if increase_attempts:
+        values["attempts"] = EscrowValidation.attempts + 1
+    if status is not None:
+        values["status"] = status
+
+    stmt = (
+        update(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .values(**values)
+    )
+    session.execute(stmt)
+
+
+def update_escrow_validation_statuses_by_ids(
+    session: Session,
+    ids: Iterable[str],
+    status: EscrowValidationStatuses,
+) -> None:
+    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
+    session.execute(stmt)
+
+
+def get_escrow_validation_by_escrow_address(
+    session: Session, escrow_address: str, chain_id: int
+) -> EscrowValidation | None:
+    stmt = (
+        select(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .limit(1)
+    )
+    return session.scalar(stmt)
 
 
 # Task
@@ -348,16 +603,16 @@ def create_task(session: Session, cvat_id: int, cvat_project_id: int, status: Ta
 
 
 def get_task_by_id(
-    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Task]:
+    session: Session, task_id: str, *, for_update: bool | ForUpdateParams = False
+) -> Task | None:
     return (
         _maybe_for_update(session.query(Task), enable=for_update).where(Task.id == task_id).first()
     )
 
 
 def get_tasks_by_cvat_id(
-    session: Session, task_ids: List[int], *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Task]:
+    session: Session, task_ids: list[int], *, for_update: bool | ForUpdateParams = False
+) -> list[Task]:
     return (
         _maybe_for_update(session.query(Task), enable=for_update)
         .where(Task.cvat_id.in_(task_ids))
@@ -369,11 +624,11 @@ def get_tasks_by_status(
     session: Session,
     status: TaskStatuses,
     *,
-    job_status: Optional[JobStatuses] = None,
-    project_status: Optional[ProjectStatuses] = None,
-    for_update: Union[bool, ForUpdateParams] = False,
-    limit: Optional[int] = 20,
-) -> List[Task]:
+    job_status: JobStatuses | None = None,
+    project_status: ProjectStatuses | None = None,
+    for_update: bool | ForUpdateParams = False,
+    limit: int | None = 20,
+) -> list[Task]:
     query = _maybe_for_update(session.query(Task), enable=for_update).where(
         Task.status == status.value
     )
@@ -390,14 +645,14 @@ def get_tasks_by_status(
     return query.all()
 
 
-def update_task_status(session: Session, task_id: int, status: TaskStatuses) -> None:
+def update_task_status(session: Session, task_id: str, status: TaskStatuses) -> None:
     upd = update(Task).where(Task.id == task_id).values(status=status.value)
     session.execute(upd)
 
 
 def get_tasks_by_cvat_project_id(
-    session: Session, cvat_project_id: int, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Task]:
+    session: Session, cvat_project_id: int, *, for_update: bool | ForUpdateParams = False
+) -> list[Task]:
     return (
         _maybe_for_update(session.query(Task), enable=for_update)
         .where(Task.cvat_project_id == cvat_project_id)
@@ -421,8 +676,8 @@ def create_data_upload(
 
 
 def get_active_task_uploads_by_task_id(
-    session: Session, task_ids: List[int], *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[DataUpload]:
+    session: Session, task_ids: list[int], *, for_update: bool | ForUpdateParams = False
+) -> list[DataUpload]:
     return (
         _maybe_for_update(session.query(DataUpload), enable=for_update)
         .where(DataUpload.task_id.in_(task_ids))
@@ -431,14 +686,42 @@ def get_active_task_uploads_by_task_id(
 
 
 def get_active_task_uploads(
-    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
-) -> List[DataUpload]:
+    session: Session, *, limit: int = 10, for_update: bool | ForUpdateParams = False
+) -> list[DataUpload]:
     return _maybe_for_update(session.query(DataUpload), enable=for_update).limit(limit).all()
 
 
 def finish_data_uploads(session: Session, uploads: list[DataUpload]) -> None:
     statement = delete(DataUpload).where(DataUpload.id.in_([upload.id for upload in uploads]))
     session.execute(statement)
+
+
+class TaskResult(NamedTuple):
+    id: str
+    cvat_id: int
+
+
+def complete_tasks_with_completed_jobs(session: Session) -> list[TaskResult]:
+    incomplete_jobs_exist = (
+        select(1)
+        .where(Job.cvat_task_id == Task.cvat_id, Job.status != JobStatuses.completed)
+        .limit(1)
+        .correlate(Task)
+    ).exists()
+
+    stmt = (
+        update(Task)
+        .where(
+            Task.status == TaskStatuses.annotation,
+            ~incomplete_jobs_exist,
+            Task.project.has(Project.status == ProjectStatuses.annotation),
+        )
+        .values(status=TaskStatuses.completed)
+        .returning(Task.id, Task.cvat_id)
+    )
+
+    result = session.execute(stmt)
+    return [TaskResult(row.id, row.cvat_id) for row in result.all()]
 
 
 # Job
@@ -449,6 +732,9 @@ def create_job(
     cvat_id: int,
     cvat_task_id: int,
     cvat_project_id: int,
+    *,
+    start_frame: int,
+    stop_frame: int,
     status: JobStatuses = JobStatuses.new,
 ) -> str:
     """
@@ -460,6 +746,8 @@ def create_job(
         cvat_id=cvat_id,
         cvat_task_id=cvat_task_id,
         cvat_project_id=cvat_project_id,
+        start_frame=start_frame,
+        stop_frame=stop_frame,
         status=status.value,
     )
 
@@ -469,14 +757,14 @@ def create_job(
 
 
 def get_job_by_id(
-    session: Session, job_id: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Job]:
+    session: Session, job_id: str, *, for_update: bool | ForUpdateParams = False
+) -> Job | None:
     return _maybe_for_update(session.query(Job), enable=for_update).where(Job.id == job_id).first()
 
 
 def get_jobs_by_cvat_id(
-    session: Session, cvat_ids: List[int], *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Job]:
+    session: Session, cvat_ids: list[int], *, for_update: bool | ForUpdateParams = False
+) -> list[Job]:
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(Job.cvat_id.in_(cvat_ids))
@@ -484,14 +772,14 @@ def get_jobs_by_cvat_id(
     )
 
 
-def update_job_status(session: Session, job_id: int, status: JobStatuses) -> None:
+def update_job_status(session: Session, job_id: str, status: JobStatuses) -> None:
     upd = update(Job).where(Job.id == job_id).values(status=status.value)
     session.execute(upd)
 
 
 def get_jobs_by_cvat_task_id(
-    session: Session, cvat_task_id: int, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Job]:
+    session: Session, cvat_task_id: int, *, for_update: bool | ForUpdateParams = False
+) -> list[Job]:
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(Job.cvat_task_id == cvat_task_id)
@@ -500,11 +788,29 @@ def get_jobs_by_cvat_task_id(
 
 
 def get_jobs_by_cvat_project_id(
-    session: Session, cvat_project_id: int, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Job]:
+    session: Session, cvat_project_id: int, *, for_update: bool | ForUpdateParams = False
+) -> list[Job]:
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(Job.cvat_project_id == cvat_project_id)
+        .all()
+    )
+
+
+def get_jobs_by_escrow_address(
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    *,
+    for_update: bool | ForUpdateParams = False,
+) -> list[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(
+            Job.project.has(
+                (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+            )
+        )
         .all()
     )
 
@@ -526,19 +832,26 @@ def count_jobs_by_escrow_address(
 
 def get_free_job(
     session: Session,
-    cvat_projects: List[int],
+    cvat_projects: list[int],
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-) -> Optional[Job]:
+    user_wallet_address: str,
+    for_update: bool | ForUpdateParams = False,
+) -> Job | None:
+    """
+    Returns the first available job that wasn't previously assigned to that user_walled_address.
+    """
     return (
         _maybe_for_update(session.query(Job), enable=for_update)
         .where(
             Job.cvat_project_id.in_(cvat_projects),
             Job.status == JobStatuses.new,
             ~Job.assignments.any(
-                (Assignment.status == AssignmentStatuses.created.value)
-                & (Assignment.completed_at == None)
-                & (utcnow() < Assignment.expires_at)
+                (
+                    (Assignment.status == AssignmentStatuses.created.value)
+                    & (Assignment.completed_at == None)
+                    & (utcnow() < Assignment.expires_at)
+                )
+                | (Assignment.user_wallet_address == user_wallet_address),
             ),
         )
         .first()
@@ -564,8 +877,8 @@ def put_user(session: Session, wallet_address: str, cvat_email: str, cvat_id: in
 
 
 def get_user_by_id(
-    session: Session, wallet_address: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[User]:
+    session: Session, wallet_address: str, *, for_update: bool | ForUpdateParams = False
+) -> User | None:
     return (
         _maybe_for_update(session.query(User), enable=for_update)
         .where(User.wallet_address == wallet_address)
@@ -574,8 +887,8 @@ def get_user_by_id(
 
 
 def get_user_by_email(
-    session: Session, email: str, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[User]:
+    session: Session, email: str, *, for_update: bool | ForUpdateParams = False
+) -> User | None:
     return (
         _maybe_for_update(session.query(User), enable=for_update)
         .where(User.cvat_email == email)
@@ -606,8 +919,8 @@ def create_assignment(
 
 
 def get_assignments_by_id(
-    session: Session, ids: List[str], *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Assignment]:
+    session: Session, ids: list[str], *, for_update: bool | ForUpdateParams = False
+) -> list[Assignment]:
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(Assignment.id.in_(ids))
@@ -616,8 +929,8 @@ def get_assignments_by_id(
 
 
 def get_latest_assignment_by_cvat_job_id(
-    session: Session, cvat_job_id: int, *, for_update: Union[bool, ForUpdateParams] = False
-) -> Optional[Assignment]:
+    session: Session, cvat_job_id: int, *, for_update: bool | ForUpdateParams = False
+) -> Assignment | None:
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(Assignment.cvat_job_id == cvat_job_id)
@@ -627,8 +940,8 @@ def get_latest_assignment_by_cvat_job_id(
 
 
 def get_unprocessed_expired_assignments(
-    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Assignment]:
+    session: Session, *, limit: int = 10, for_update: bool | ForUpdateParams = False
+) -> list[Assignment]:
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
@@ -642,8 +955,8 @@ def get_unprocessed_expired_assignments(
 
 
 def get_active_assignments(
-    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Assignment]:
+    session: Session, *, limit: int = 10, for_update: bool | ForUpdateParams = False
+) -> list[Assignment]:
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
@@ -661,7 +974,7 @@ def update_assignment(
     id: str,
     *,
     status: AssignmentStatuses,
-    completed_at: Optional[datetime] = None,
+    completed_at: datetime | None = None,
 ):
     statement = (
         update(Assignment)
@@ -679,6 +992,10 @@ def expire_assignment(session: Session, assignment_id: str):
     update_assignment(session, assignment_id, status=AssignmentStatuses.expired)
 
 
+def reject_assignment(session: Session, assignment_id: str):
+    update_assignment(session, assignment_id, status=AssignmentStatuses.rejected)
+
+
 def complete_assignment(session: Session, assignment_id: str, completed_at: datetime):
     update_assignment(
         session,
@@ -691,10 +1008,10 @@ def complete_assignment(session: Session, assignment_id: str, completed_at: date
 def get_user_assignments_in_cvat_projects(
     session: Session,
     wallet_address: int,
-    cvat_projects: List[int],
+    cvat_projects: list[int],
     *,
-    for_update: Union[bool, ForUpdateParams] = False,
-) -> List[Assignment]:
+    for_update: bool | ForUpdateParams = False,
+) -> list[Assignment]:
     return (
         _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
@@ -708,7 +1025,7 @@ def get_user_assignments_in_cvat_projects(
 def count_active_user_assignments(
     session: Session,
     wallet_address: int,
-    cvat_projects: List[int],
+    cvat_projects: list[int],
 ) -> int:
     return (
         session.query(Assignment)
@@ -724,25 +1041,115 @@ def count_active_user_assignments(
 
 
 # Image
-def add_project_images(session: Session, cvat_project_id: int, filenames: List[str]) -> None:
+def add_project_images(session: Session, cvat_project_id: int, filenames: list[str]) -> None:
     session.execute(
         insert(Image),
         [
-            dict(
-                id=str(uuid.uuid4()),
-                cvat_project_id=cvat_project_id,
-                filename=fn,
-            )
+            {
+                "id": str(uuid.uuid4()),
+                "cvat_project_id": cvat_project_id,
+                "filename": fn,
+            }
             for fn in filenames
         ],
     )
 
 
 def get_project_images(
-    session: Session, cvat_project_id: int, *, for_update: Union[bool, ForUpdateParams] = False
-) -> List[Image]:
+    session: Session, cvat_project_id: int, *, for_update: bool | ForUpdateParams = False
+) -> list[Image]:
     return (
         _maybe_for_update(session.query(Image), enable=for_update)
         .where(Image.cvat_project_id == cvat_project_id)
         .all()
     )
+
+
+def touch(
+    session: Session,
+    cls: type["Base"],
+    ids: list[str],
+    *,
+    touch_parents: bool = True,
+    time: datetime | None = None,
+) -> None:
+    if time is None:
+        time = utcnow()
+
+    session.execute(update(cls).where(cls.id.in_(ids)).values({cls.updated_at: time}))
+
+    if touch_parents:
+        touch_parent_objects(session, cls, ids, time=time)
+
+
+def touch_parent_objects(
+    session: Session,
+    cls: type["Base"],
+    ids: list[str],
+    *,
+    time: datetime | None = None,
+):
+    while issubclass(cls, ChildOf):
+        parent_cls = cls.parent_cls
+        foreign_key_column = next(iter(cls.parent.property.local_columns))
+        parent_id_column = next(iter(foreign_key_column.foreign_keys)).column
+        parent_update_stmt = (
+            update(parent_cls)
+            .where(
+                parent_id_column.in_(
+                    select(foreign_key_column)
+                    .where(cls.id.in_(ids))
+                    .where(foreign_key_column.is_not(None))
+                )
+            )
+            .values({parent_cls.updated_at: time})
+            .returning(parent_cls.id)
+        )
+        ids = session.execute(parent_update_stmt).scalars().all()
+        cls = parent_cls
+
+
+def touch_final_assignments(
+    session: Session,
+    cvat_project_ids: list[int],
+    *,
+    touch_parents: bool = True,
+    time: datetime | None = None,
+) -> None:
+    if time is None:
+        time = utcnow()
+
+    last_assignment_time_per_job_id_subquery = (
+        select(
+            Assignment.cvat_job_id.label("cvat_job_id"),
+            func.max(Assignment.created_at).label("max_created_at"),
+        )
+        .join(Job)
+        .where(
+            Assignment.status == AssignmentStatuses.completed,
+            Job.cvat_project_id.in_(cvat_project_ids),
+        )
+        .order_by(Assignment.cvat_job_id)
+        .group_by(Assignment.cvat_job_id)
+        .subquery()
+    )
+
+    last_assignment_ids_query = (
+        select(Assignment.id)
+        .join(
+            last_assignment_time_per_job_id_subquery,
+            Assignment.cvat_job_id == last_assignment_time_per_job_id_subquery.c.cvat_job_id,
+            isouter=True,
+        )
+        .where(Assignment.created_at == last_assignment_time_per_job_id_subquery.c.max_created_at)
+    )
+
+    ids = session.execute(
+        update(Assignment)
+        .where(Assignment.id.in_(last_assignment_ids_query))
+        .values({Assignment.updated_at: time})
+        .returning(Assignment.id)
+    )
+
+    if touch_parents:
+        touch_parent_objects(session, Assignment, ids.scalars().all(), time=time)

@@ -66,7 +66,6 @@ from human_protocol_sdk.utils import (
     get_erc20_interface,
     get_factory_interface,
     get_staking_interface,
-    get_reward_pool_interface,
     handle_transaction,
 )
 
@@ -81,35 +80,9 @@ class StakingClientError(Exception):
     pass
 
 
-class AllocationData:
-    def __init__(
-        self,
-        escrow_address: str,
-        staker: str,
-        tokens: str,
-        created_at: str,
-        closed_at: str,
-    ):
-        """
-        Initializes an AllocationData instance.
-
-        :param escrow_address: Escrow address
-        :param staker: Staker address
-        :param tokens: Amount allocated
-        :param created_at: Creation date
-        :param closed_at: Closing date
-        """
-
-        self.escrow_address = escrow_address
-        self.staker = staker
-        self.tokens = tokens
-        self.created_at = created_at
-        self.closed_at = closed_at
-
-
 class StakingClient:
     """
-    A class used to manage staking, and allocation on the HUMAN network.
+    A class used to manage staking on the HUMAN network.
     """
 
     def __init__(self, w3: Web3):
@@ -152,12 +125,6 @@ class StakingClient:
         staking_interface = get_staking_interface()
         self.staking_contract = self.w3.eth.contract(
             address=self.network["staking_address"], abi=staking_interface["abi"]
-        )
-
-        reward_pool_interface = get_reward_pool_interface()
-        self.reward_pool_contract = self.w3.eth.contract(
-            address=self.network["reward_pool_address"],
-            abi=reward_pool_interface["abi"],
         )
 
     def approve_stake(
@@ -263,117 +230,6 @@ class StakingClient:
             self.w3,
             "Stake HMT",
             self.staking_contract.functions.stake(amount),
-            StakingClientError,
-            tx_options,
-        )
-
-    def allocate(
-        self,
-        escrow_address: str,
-        amount: Decimal,
-        tx_options: Optional[TxParams] = None,
-    ) -> None:
-        """Allocates HMT token to the escrow.
-
-        :param escrow_address: Address of the escrow
-        :param amount: Amount to allocate
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :validate:
-            - Amount must be greater than 0
-            - Escrow address must be valid
-            - Amount must be less than or equal to the staked amount (on-chain)
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                staking_client.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount)
-        """
-
-        if amount <= 0:
-            raise StakingClientError("Amount to allocate must be greater than 0")
-
-        if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
-
-        handle_transaction(
-            self.w3,
-            "Allocate HMT",
-            self.staking_contract.functions.allocate(escrow_address, amount),
-            StakingClientError,
-            tx_options,
-        )
-
-    def close_allocation(
-        self, escrow_address: str, tx_options: Optional[TxParams] = None
-    ) -> None:
-        """Closes allocated HMT token from the escrow.
-
-        :param escrow_address: Address of the escrow
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :validate:
-            - Escrow address must be valid
-            - Escrow should be cancelled / completed (on-chain)
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                staking_client.close_allocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f')
-        """
-
-        if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
-
-        handle_transaction(
-            self.w3,
-            "Close allocation",
-            self.staking_contract.functions.closeAllocation(escrow_address),
             StakingClientError,
             tx_options,
         )
@@ -541,99 +397,6 @@ class StakingClient:
             ),
             StakingClientError,
             tx_options,
-        )
-
-    def distribute_reward(
-        self, escrow_address: str, tx_options: Optional[TxParams] = None
-    ) -> None:
-        """Pays out rewards to the slashers for the specified escrow address.
-
-        :param escrow_address: Address of the escrow
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :validate:
-            - Escrow address must be valid
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                    gas_payer = w3.eth.account.from_key(priv_key)
-                    w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
-                    )
-                    return (w3, gas_payer)
-
-                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
-                staking_client = StakingClient(w3)
-
-                staking_client.distribute_reward('0x62dD51230A30401C455c8398d06F85e4EaB6309f')
-        """
-
-        if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
-
-        handle_transaction(
-            self.w3,
-            "Distribute reward",
-            self.reward_pool_contract.functions.distributeReward(escrow_address),
-            StakingClientError,
-            tx_options,
-        )
-
-    def get_allocation(self, escrow_address: str) -> Optional[AllocationData]:
-        """Gets the allocation info for the specified escrow.
-
-        :param escrow_address: Address of the escrow
-
-        :return: Allocation info if escrow exists, otherwise None
-
-        :example:
-            .. code-block:: python
-
-                from eth_typing import URI
-                from web3 import Web3
-                from web3.providers.auto import load_provider_from_uri
-
-                from human_protocol_sdk.staking import StakingClient
-
-                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
-                staking_client = StakingClient(w3)
-
-                allocation = staking_client.get_allocation(
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                )
-        """
-
-        [
-            escrow_address,
-            staker,
-            tokens,
-            created_at,
-            closed_at,
-        ] = self.staking_contract.functions.getAllocation(escrow_address).call()
-
-        if escrow_address == web3.constants.ADDRESS_ZERO:
-            return None
-
-        return AllocationData(
-            escrow_address=escrow_address,
-            staker=staker,
-            tokens=tokens,
-            created_at=created_at,
-            closed_at=closed_at,
         )
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:

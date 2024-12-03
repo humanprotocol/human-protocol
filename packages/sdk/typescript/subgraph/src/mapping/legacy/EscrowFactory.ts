@@ -1,34 +1,32 @@
-import { Escrow, EscrowStatusEvent } from '../../../generated/schema';
+import { Escrow } from '../../../generated/schema';
 import { Launched } from '../../../generated/LegacyEscrowFactory/EscrowFactory';
 import { LegacyEscrow as EscrowTemplate } from '../../../generated/templates';
 import { ONE_BI, ZERO_BI } from '../utils/number';
 import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
 import { createOrLoadLeader } from '../Staking';
-import { toEventId } from '../utils/event';
 import { createTransaction } from '../utils/transaction';
+import { dataSource } from '@graphprotocol/graph-ts';
 
 export function handleLaunched(event: Launched): void {
-  createTransaction(event, 'createEscrow');
-  // Create LaunchedStatusEvent entity
-  const statusEventEntity = new EscrowStatusEvent(toEventId(event));
-  statusEventEntity.block = event.block.number;
-  statusEventEntity.timestamp = event.block.timestamp;
-  statusEventEntity.txHash = event.transaction.hash;
-  statusEventEntity.escrowAddress = event.params.escrow;
-  statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.launcher = event.transaction.from;
-  statusEventEntity.status = 'Launched';
-  statusEventEntity.save();
+  createTransaction(
+    event,
+    'createEscrow',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    event.params.escrow
+  );
 
   // Create Escrow entity
-  const entity = new Escrow(event.params.escrow.toHex());
+  const entity = new Escrow(event.params.escrow);
 
   entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;
   entity.token = event.params.eip20;
   entity.factoryAddress = event.address;
   entity.launcher = event.transaction.from;
+  entity.canceler = event.transaction.from;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;
@@ -54,6 +52,6 @@ export function handleLaunched(event: Launched): void {
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsLaunched = leader.amountJobsLaunched.plus(ONE_BI);
+  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
   leader.save();
 }

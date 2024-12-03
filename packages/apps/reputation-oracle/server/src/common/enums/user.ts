@@ -1,27 +1,28 @@
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  PENDING = 'PENDING',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
 }
 
-export enum UserType {
-  OPERATOR = 'OPERATOR',
-  EXCHANGE_ORACLE = 'EXCHANGE_ORACLE',
-  RECORDING_ORACLE = 'RECORDING_ORACLE',
-  WORKER = 'WORKER',
+export enum Role {
+  OPERATOR = 'operator',
+  WORKER = 'worker',
+  HUMAN_APP = 'human_app',
+  ADMIN = 'admin',
 }
 
 export enum KycStatus {
-  NONE = 'NONE',
-  APPROVED = 'APPROVED',
-  SUBMISSION_REQUIRED = 'SUBMISSION_REQUIRED',
-  RESUBMISSION_REQUIRED = 'RESUBMISSION_REQUIRED',
-  REJECTED = 'REJECTED',
-  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
-  RESET = 'RESET',
+  NONE = 'none',
+  APPROVED = 'approved',
+  RESUBMISSION_REQUESTED = 'resubmission_requested',
+  DECLINED = 'declined',
+  REVIEW = 'review',
+  EXPIRED = 'expired',
+  ABANDONED = 'abandoned',
+  ERROR = 'error',
 }
 
 export enum OperatorStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
 }

@@ -5,8 +5,8 @@ export const envValidator = Joi.object({
   NODE_ENV: Joi.string(),
   HOST: Joi.string(),
   PORT: Joi.string(),
+  FE_URL: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
-  CRON_SECRET: Joi.string().required(),
   // Database
   POSTGRES_HOST: Joi.string(),
   POSTGRES_USER: Joi.string(),
@@ -35,6 +35,6 @@ export const envValidator = Joi.object({
   S3_USE_SSL: Joi.string(),
   // PGP
   PGP_ENCRYPT: Joi.boolean(),
-  PGP_PRIVATE_KEY: Joi.string(),
-  PGP_PASSPHRASE: Joi.string(),
+  PGP_PRIVATE_KEY: Joi.string().optional(),
+  PGP_PASSPHRASE: Joi.string().optional(),
 });

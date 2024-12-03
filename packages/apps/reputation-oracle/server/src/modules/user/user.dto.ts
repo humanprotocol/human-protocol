@@ -1,15 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
   IsEthereumAddress,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { UserStatus, Role } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { SignatureType } from '../../common/enums/web3';
+import { IsEnumCaseInsensitive } from 'src/common/decorators';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -23,14 +23,14 @@ export class UserCreateDto extends ValidatePasswordDto {
 }
 
 export class UserDto extends UserCreateDto {
-  public type: UserType;
+  public type: Role;
   public status: UserStatus;
 }
 
 export class Web3UserDto {
   public evmAddress: string;
   public nonce: string;
-  public type: UserType;
+  public type: Role;
   public status: UserStatus;
 }
 
@@ -45,7 +45,7 @@ export class UserUpdateDto {
     enum: UserStatus,
   })
   @IsOptional()
-  @IsEnum(UserStatus)
+  @IsEnumCaseInsensitive(UserStatus)
   public status?: UserStatus;
 }
 
@@ -65,10 +65,10 @@ export class RegisterAddressRequestDto {
   public signature: string;
 }
 
-export class RegisterAddressResponseDto {
-  @ApiProperty({ name: 'signed_address' })
+export class EnableOperatorDto {
+  @ApiProperty()
   @IsString()
-  public signedAddress: string;
+  public signature: string;
 }
 
 export class DisableOperatorDto {
@@ -106,6 +106,27 @@ export class PrepareSignatureDto {
   @ApiProperty({
     enum: SignatureType,
   })
-  @IsEnum(SignatureType)
+  @IsEnumCaseInsensitive(SignatureType)
   public type: SignatureType;
+}
+
+export class RegistrationInExchangeOracleDto {
+  @ApiProperty({
+    name: 'oracle_address',
+    description: 'Ethereum address of the oracle',
+  })
+  @IsEthereumAddress()
+  public oracleAddress: string;
+
+  @ApiProperty({ name: 'h_captcha_token' })
+  @IsString()
+  public hCaptchaToken: string;
+}
+
+export class RegistrationInExchangeOracleResponseDto {
+  public oracleAddress: string;
+}
+
+export class RegistrationInExchangeOraclesDto {
+  public oracleAddresses: string[];
 }

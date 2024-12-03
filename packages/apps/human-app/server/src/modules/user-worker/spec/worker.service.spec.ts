@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WorkerService } from '../worker.service';
 import { ReputationOracleGateway } from '../../../integrations/reputation-oracle/reputation-oracle.gateway';
 import { reputationOracleGatewayMock } from '../../../integrations/reputation-oracle/spec/reputation-oracle.gateway.mock';
-import { UserType } from '../../../common/enums/user';
 import { SignupWorkerCommand } from '../model/worker-registration.model';
+import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
+import { exchangeOracleGatewayMock } from '../../../integrations/exchange-oracle/spec/exchange-oracle.gateway.mock';
 
 describe('WorkerService', () => {
   let service: WorkerService;
@@ -11,10 +12,16 @@ describe('WorkerService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WorkerService, ReputationOracleGateway],
+      providers: [
+        WorkerService,
+        ReputationOracleGateway,
+        ExchangeOracleGateway,
+      ],
     })
       .overrideProvider(ReputationOracleGateway)
       .useValue(reputationOracleGatewayMock)
+      .overrideProvider(ExchangeOracleGateway)
+      .useValue(exchangeOracleGatewayMock)
       .compile();
 
     service = module.get<WorkerService>(WorkerService);
@@ -52,6 +59,23 @@ describe('WorkerService', () => {
       expect(reputationOracleGateway.sendWorkerSignin).toHaveBeenCalledWith(
         command,
       );
+    });
+  });
+
+  describe('registrationInExchangeOracle', () => {
+    it('should call exchange and reputation oracle gateway', async () => {
+      const command = {
+        oracleAddress: '0x34df642',
+        hCaptchaToken: 'hcaptcha-token',
+        token: 'test-token',
+      };
+      await service.registrationInExchangeOracle(command);
+      expect(
+        exchangeOracleGatewayMock.sendRegistrationInExchangeOracle,
+      ).toHaveBeenCalledWith(command);
+      expect(
+        reputationOracleGateway.sendRegistrationInExchangeOracle,
+      ).toHaveBeenCalledWith(command);
     });
   });
 });

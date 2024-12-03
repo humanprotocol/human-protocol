@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy.sql import select
 
 from src.core.types import Networks, ProjectStatuses, TaskStatuses, TaskTypes
-from src.crons.state_trackers import track_completed_projects
+from src.crons.cvat.state_trackers import track_completed_projects
 from src.db import SessionLocal
 from src.models.cvat import Project, Task
 
@@ -46,7 +46,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Project).where(Project.id == project_id)).scalars().first()
         )
 
-        self.assertEqual(updated_project.status, ProjectStatuses.completed.value)
+        assert updated_project.status == ProjectStatuses.completed.value
 
     def test_track_completed_projects_with_unfinished_task(self):
         project_id = str(uuid.uuid4())
@@ -85,4 +85,4 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.execute(select(Project).where(Project.id == project_id)).scalars().first()
         )
 
-        self.assertEqual(updated_project.status, ProjectStatuses.annotation.value)
+        assert updated_project.status == ProjectStatuses.annotation.value

@@ -3,7 +3,7 @@ import { EmailConfirmationService } from '../email-confirmation.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutomapperModule } from '@automapper/nestjs';
 import { classes } from '@automapper/classes';
-import { EmailConfirmationProfile } from '../email-confirmation.mapper';
+import { EmailConfirmationProfile } from '../email-confirmation.mapper.profile';
 import { serviceMock } from './email-verification.service.mock';
 import { expect, it } from '@jest/globals';
 import {

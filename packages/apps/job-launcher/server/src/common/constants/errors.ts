@@ -17,6 +17,7 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+  DatasetValidationFailed = 'Dataset validation failed',
   ManifestHashNotExist = 'Manifest hash does not exist',
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
@@ -31,6 +32,7 @@ export enum ErrorWebhook {
   NotFound = 'Webhook not found',
   UrlNotFound = 'Webhook URL not found',
   NotCreated = 'Webhook has not been created',
+  InvalidEscrow = 'Invalid escrow data provided',
 }
 
 /**
@@ -51,12 +53,12 @@ export enum ErrorEscrow {
  * Represents error messages related to user.
  */
 export enum ErrorUser {
-  NotFound = 'User not found',
-  AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
-  InvalidCredentials = 'Invalid credentials',
-  UserNotActive = 'User not active',
-  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email',
+  NotFound = 'User not found.',
+  AccountCannotBeRegistered = 'Account cannot be registered.',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
+  InvalidCredentials = 'Invalid credentials.',
+  UserNotActive = 'User not active.',
+  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
 }
 
 /**
@@ -70,7 +72,7 @@ export enum ErrorAuth {
   TokenExpired = 'Token has expired',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
   ApiKeyNotFound = 'API key not found',
-  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least 8 characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
   InvalidToken = 'Invalid token',
 }
 
@@ -86,11 +88,16 @@ export enum ErrorToken {
  */
 export enum ErrorPayment {
   NotFound = 'Payment not found',
+  InvoiceNotFound = 'Invoice not found',
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
-  ClientSecretDoesNotExist = 'Payment intent was not created',
+  CardNotAssigned = 'Card not assigned',
+  SetupNotFound = 'Setup not found',
+  ClientSecretDoesNotExist = 'Client secret does not exist',
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
+  PaymentMethodInUse = 'Cannot delete the default payment method in use',
+  PaymentMethodAssociationFailed = 'Payment method association failed',
   IncorrectAmount = 'Incorrect amount',
   TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
@@ -129,6 +136,16 @@ export enum ErrorWeb3 {
   NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
+  ReputationOracleUrlNotSet = 'Reputation oracle URL not set',
+}
+
+/**
+ * Represents error messages related to routing protocol.
+ */
+export enum ErrorRoutingProtocol {
+  ReputationOracleNotFound = 'The specified Reputation Oracle address is not found in the set of available oracles. Ensure the address is correct and check available oracles for this network.',
+  ExchangeOracleNotFound = 'The specified Exchange Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
+  RecordingOracleNotFound = 'The specified Recording Oracle address is not found in the set of available oracles. Ensure the address is correct and part of the available oracle pool.',
 }
 
 /**
@@ -160,4 +177,19 @@ export enum ErrorPostgres {
 export enum ErrorCronJob {
   NotCompleted = 'Cron job is not completed',
   Completed = 'Cron job is completed',
+}
+
+/**
+ * Represents error messages associated with a qualification.
+ */
+export enum ErrorQualification {
+  FailedToFetchQualifications = 'Failed to fetch qualifications',
+  InvalidQualification = `Invalid qualification`,
+}
+
+/**
+ * Represents error messages associated with encryption.
+ */
+export enum ErrorEncryption {
+  MissingPrivateKey = 'Encryption private key cannot be empty, when it is enabled',
 }

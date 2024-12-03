@@ -1,6 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { RequestWithUser } from 'src/common/types/jwt';
+import { RequestWithUser } from '../../common/types/jwt';
 import { JobController } from './job.controller';
 import { GetJobsDto, SolveJobDto, JobDto } from './job.dto';
 import { JobService } from './job.service';
@@ -59,7 +59,7 @@ describe('JobController', () => {
 
       jest.spyOn(jobService, 'getJobList').mockResolvedValue(pageDto);
 
-      await jobController.getJobs(req, getJobsDto);
+      await jobController.getJobs(getJobsDto, req);
 
       expect(jobService.getJobList).toHaveBeenCalledWith(
         getJobsDto,
@@ -71,14 +71,14 @@ describe('JobController', () => {
   describe('solveJob', () => {
     it('should call jobService.solveJob', async () => {
       const solveJobDto: SolveJobDto = {
-        assignmentId: 1,
+        assignmentId: '1',
         solution: 'job-solution',
       };
 
-      await jobController.solveJob('signature', solveJobDto);
+      await jobController.solveJob(solveJobDto, 'signature');
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
-        solveJobDto.assignmentId,
+        Number(solveJobDto.assignmentId),
         solveJobDto.solution,
       );
     });

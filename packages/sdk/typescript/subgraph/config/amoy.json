@@ -9,7 +9,9 @@
   "HMToken": {
     "address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
     "startBlock": 5769546,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
+    "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json",
+    "totalSupply": "1000000000000000000000000000",
+    "contractDeployer": "0xF3D9a0ba9FA14273C515e519DFD0826Ff87d5164"
   },
   "Escrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
@@ -20,8 +22,8 @@
     "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
   },
   "Staking": {
-    "address": "0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60",
-    "startBlock": 5772993,
+    "address": "0xffE496683F842a923110415b7278ded3F265f2C5",
+    "startBlock": 14983952,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "RewardPool": {

@@ -1,11 +1,9 @@
-from typing import List
-
 from dateutil.parser import parse as parse_aware_datetime
-from sqlalchemy import exc as sa_errors
 
 import src.cvat.api_calls as cvat_api
 import src.models.cvat as models
 import src.services.cvat as cvat_service
+from src import db
 from src.core.types import AssignmentStatuses, CvatEventTypes, JobStatuses, ProjectStatuses
 from src.db import SessionLocal
 from src.db import errors as db_errors
@@ -42,7 +40,7 @@ def handle_update_job_event(payload: dict) -> None:
                 webhook_time = parse_aware_datetime(payload.job["updated_date"])
                 webhook_assignee_id = (payload.job["assignee"] or {}).get("id")
 
-                job_assignments: List[models.Assignment] = sorted(
+                job_assignments: list[models.Assignment] = sorted(
                     job_assignments, key=lambda a: a.created_at, reverse=True
                 )
                 latest_assignment = job.assignments[0]
@@ -68,6 +66,7 @@ def handle_update_job_event(payload: dict) -> None:
                             "Assignment is expired, rejecting the update"
                         )
                         cvat_service.expire_assignment(session, matching_assignment.id)
+                        cvat_service.touch(session, models.Job, [matching_assignment.job.id])
 
                         if matching_assignment.id == latest_assignment.id:
                             cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
@@ -90,6 +89,7 @@ def handle_update_job_event(payload: dict) -> None:
                         session, matching_assignment.id, completed_at=webhook_time
                     )
                     cvat_service.update_job_status(session, job.id, new_status)
+                    cvat_service.touch(session, models.Job, [job.id])
 
                     cvat_api.update_job_assignee(job.cvat_id, assignee_id=None)
 
@@ -117,15 +117,19 @@ def handle_create_job_event(payload: dict) -> None:
         jobs = cvat_service.get_jobs_by_cvat_id(session, [payload.job["id"]])
 
         if not jobs:
-            cvat_service.create_job(
+            job_id = cvat_service.create_job(
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
                 payload.job["project_id"],
                 status=JobStatuses[payload.job["state"]],
+                start_frame=payload.job["start_frame"],
+                stop_frame=payload.job["stop_frame"],
             )
+            cvat_service.touch(session, models.Job, [job_id])
 
-        try:
+        escrow_creation = None
+        with db.suppress(db_errors.LockNotAvailable):
             projects = cvat_service.get_projects_by_cvat_ids(
                 session, project_cvat_ids=[payload.job["project_id"]], for_update=True
             )
@@ -140,12 +144,9 @@ def handle_create_job_event(payload: dict) -> None:
                 chain_id=project.chain_id,
                 for_update=True,
             )
-            if not escrow_creation:
-                return
-        except sa_errors.OperationalError as e:
-            if isinstance(e.orig, db_errors.LockNotAvailable):
-                return
-            raise
+
+        if not escrow_creation:
+            return
 
         created_jobs_count = cvat_service.count_jobs_by_escrow_address(
             session,

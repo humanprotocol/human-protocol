@@ -10,3 +10,7 @@ subgraph.yaml
 # Graph test generated
 tests/.bin
 tests/.latest.json
+
+src/mapping/HMToken.ts
+src/mapping/Staking.ts
+src/mapping/Escrow.ts

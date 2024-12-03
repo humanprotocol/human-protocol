@@ -1,11 +1,17 @@
 repos:
-  -   repo: https://github.com/ambv/black
-      rev: 22.6.0
+  -   repo: local
       hooks:
-        - id: black
-          language_version: python3.10
-  -   repo: https://github.com/PyCQA/isort
-      rev: 5.12.0
-      hooks:
-        - id: isort
-          language_version: python3.11
+        - id: lint
+          name: lint
+          entry: ruff check --fix --unsafe-fixes --show-fixes
+          language: system
+          require_serial: true
+          files: "^packages/examples/cvat/recording-oracle/.*"
+          types: [python]
+        - id: format
+          name: format
+          entry: ruff format
+          require_serial: true
+          language: system
+          files: "^packages/examples/cvat/recording-oracle/.*"
+          types: [python]

@@ -39,20 +39,27 @@ describe('OperatorUtils', () => {
       chainId: ChainId.LOCALHOST,
       address: stakerAddress,
       amountStaked: ethers.parseEther('100'),
-      amountAllocated: ethers.parseEther('50'),
       amountLocked: ethers.parseEther('25'),
       lockedUntilTimestamp: ethers.toBigInt(0),
       amountWithdrawn: ethers.parseEther('25'),
       amountSlashed: ethers.parseEther('25'),
-      reputation: ethers.parseEther('25'),
       reward: ethers.parseEther('25'),
-      amountJobsLaunched: ethers.parseEther('25'),
+      amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
+      website: 'www.google.com',
+      reputationNetworks: [
+        {
+          address: '0x01',
+        },
+      ],
     };
 
     const mockLeader: ILeader = {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
+      reputationNetworks: ['0x01'],
     };
 
     test('should return staker information', async () => {
@@ -80,6 +87,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: [],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -106,6 +114,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -143,6 +152,26 @@ describe('OperatorUtils', () => {
       ).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
+
+    test('should return empty data', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leader: null,
+      });
+
+      const result = await OperatorUtils.getLeader(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADER_QUERY,
+        {
+          address: stakerAddress,
+        }
+      );
+      expect(result).toEqual(null);
+    });
   });
 
   describe('getLeaders', () => {
@@ -153,20 +182,27 @@ describe('OperatorUtils', () => {
       chainId: ChainId.LOCALHOST,
       address: stakerAddress,
       amountStaked: ethers.parseEther('100'),
-      amountAllocated: ethers.parseEther('50'),
       amountLocked: ethers.parseEther('25'),
       lockedUntilTimestamp: ethers.toBigInt(0),
       amountWithdrawn: ethers.parseEther('25'),
       amountSlashed: ethers.parseEther('25'),
-      reputation: ethers.parseEther('25'),
       reward: ethers.parseEther('25'),
-      amountJobsLaunched: ethers.parseEther('25'),
+      amountJobsProcessed: ethers.parseEther('25'),
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
+      website: 'www.google.com',
+      reputationNetworks: [
+        {
+          address: '0x01',
+        },
+      ],
     };
 
     const mockLeader: ILeader = {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
+      reputationNetworks: ['0x01'],
     };
 
     test('should return an array of stakers', async () => {
@@ -192,6 +228,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: [],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -216,6 +253,7 @@ describe('OperatorUtils', () => {
       const mockLeader: ILeader = {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
+        reputationNetworks: ['0x01'],
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -245,6 +283,17 @@ describe('OperatorUtils', () => {
       await expect(OperatorUtils.getLeaders(filter)).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
+
+    test('should return empty data', async () => {
+      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+
+      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: null,
+      });
+
+      const results = await OperatorUtils.getLeaders(filter);
+      expect(results).toEqual([]);
+    });
   });
 
   describe('getReputationNetworkOperators', () => {
@@ -254,6 +303,8 @@ describe('OperatorUtils', () => {
       role: Role.JobLauncher,
       url: 'www.google.com',
       jobTypes: 'type1,type2',
+      registrationNeeded: true,
+      registrationInstructions: 'www.google.com',
     };
     const mockOperator: IOperator = {
       ...mockOperatorSubgraph,
@@ -284,6 +335,27 @@ describe('OperatorUtils', () => {
         }
       );
       expect(result).toEqual([mockOperator]);
+    });
+
+    test('should return empty data ', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        reputationNetwork: null,
+      });
+
+      const result = await OperatorUtils.getReputationNetworkOperators(
+        ChainId.LOCALHOST,
+        stakerAddress
+      );
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_REPUTATION_NETWORK_QUERY(),
+        {
+          address: stakerAddress,
+          role: undefined,
+        }
+      );
+      expect(result).toEqual([]);
     });
 
     test('should return reputation network operators when jobTypes is undefined', async () => {
@@ -380,6 +452,19 @@ describe('OperatorUtils', () => {
       );
 
       expect(results).toEqual([mockReward, mockReward]);
+    });
+
+    test('should return empty data', async () => {
+      vi.spyOn(OperatorUtils, 'getRewards').mockImplementation(() =>
+        Promise.resolve([])
+      );
+
+      const results = await OperatorUtils.getRewards(
+        ChainId.LOCALHOST,
+        ethers.ZeroAddress
+      );
+
+      expect(results).toEqual([]);
     });
   });
 });

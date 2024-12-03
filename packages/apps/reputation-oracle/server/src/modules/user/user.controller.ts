@@ -13,19 +13,24 @@ import {
   Req,
   UseGuards,
   Request,
+  Get,
 } from '@nestjs/common';
 import {
   DisableOperatorDto,
   PrepareSignatureDto,
   RegisterAddressRequestDto,
-  RegisterAddressResponseDto,
   SignatureBodyDto,
   RegisterLabelerResponseDto,
+  EnableOperatorDto,
+  RegistrationInExchangeOracleDto,
+  RegistrationInExchangeOraclesDto,
+  RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
+import { KycSignedAddressDto } from '../kyc/kyc.dto';
 
 @ApiTags('User')
 @Controller('/user')
@@ -75,7 +80,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Blockchain address registered successfully',
-    type: RegisterAddressResponseDto,
+    type: KycSignedAddressDto,
   })
   @ApiResponse({
     status: 400,
@@ -92,13 +97,30 @@ export class UserController {
   public async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
-  ): Promise<RegisterAddressResponseDto> {
-    const signedAddress = await this.userService.registerAddress(
-      request.user,
-      data,
-    );
+  ): Promise<KycSignedAddressDto> {
+    return this.userService.registerAddress(request.user, data);
+  }
 
-    return { signedAddress };
+  @Post('/enable-operator')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Enable an operator',
+    description: 'Endpoint to enable an operator.',
+  })
+  @ApiBody({ type: EnableOperatorDto })
+  @ApiResponse({
+    status: 204,
+    description: 'Operator enabled succesfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
+  public enableOperator(
+    @Body() data: EnableOperatorDto,
+    @Request() req: RequestWithUser,
+  ): Promise<void> {
+    return this.userService.enableOperator(req.user, data.signature);
   }
 
   @Post('/disable-operator')
@@ -144,5 +166,59 @@ export class UserController {
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
     return await this.userService.prepareSignatureBody(data.type, data.address);
+  }
+
+  @Post('/exchange-oracle-registration')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Notifies registration in Exchange Oracle completed',
+    description:
+      'Notifies that the registration process in a Exchange Oracle has been completed by the user.',
+  })
+  @ApiBody({ type: RegistrationInExchangeOracleDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Oracle registered successfully',
+    type: RegistrationInExchangeOracleDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async registrationInExchangeOracle(
+    @Req() request: RequestWithUser,
+    @Body() data: RegistrationInExchangeOracleDto,
+  ): Promise<RegistrationInExchangeOracleResponseDto> {
+    await this.userService.registrationInExchangeOracle(request.user, data);
+
+    return { oracleAddress: data.oracleAddress };
+  }
+
+  @Get('/exchange-oracle-registration')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Retrieves Exchange Oracles the user is registered in',
+    description:
+      'Fetches the list of Exchange Oracles where the user has completed the registration process.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of registered oracles retrieved successfully',
+    type: RegistrationInExchangeOraclesDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  public async getRegistrationInExchangeOracles(
+    @Req() request: RequestWithUser,
+  ): Promise<RegistrationInExchangeOraclesDto> {
+    const oracleAddresses =
+      await this.userService.getRegistrationInExchangeOracles(request.user);
+    return { oracleAddresses };
   }
 }

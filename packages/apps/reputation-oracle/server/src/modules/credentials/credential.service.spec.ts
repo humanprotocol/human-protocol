@@ -23,8 +23,10 @@ jest.mock('@human-protocol/sdk', () => ({
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       set: jest.fn(),
-      get: jest.fn(),
     })),
+  },
+  KVStoreUtils: {
+    get: jest.fn(),
   },
 }));
 
@@ -111,7 +113,7 @@ describe('CredentialService', () => {
 
         const result = await credentialService.getCredentials(
           { id: 'user123' },
-          'ACTIVE',
+          CredentialStatus.ACTIVE,
         );
         expect(result).toEqual(credentials);
       });
@@ -129,7 +131,9 @@ describe('CredentialService', () => {
       });
 
       it('should return null if the credential is expired', async () => {
-        const credential = { status: 'EXPIRED' } as CredentialEntity;
+        const credential = {
+          status: CredentialStatus.EXPIRED,
+        } as CredentialEntity;
         jest
           .spyOn(credentialRepository, 'findByReference')
           .mockResolvedValue(credential);
@@ -141,14 +145,16 @@ describe('CredentialService', () => {
 
     describe('validateCredential', () => {
       it('should validate an active credential', async () => {
-        const credential = { status: 'ACTIVE' } as CredentialEntity;
+        const credential = {
+          status: CredentialStatus.ACTIVE,
+        } as CredentialEntity;
         jest
           .spyOn(credentialRepository, 'findByReference')
           .mockResolvedValue(credential);
         jest.spyOn(credentialRepository, 'save').mockResolvedValue(credential);
 
         await credentialService.validateCredential('ref123');
-        expect(credential.status).toEqual('VALIDATED');
+        expect(credential.status).toEqual(CredentialStatus.VALIDATED);
       });
 
       it('should throw an error if the credential is not found', async () => {

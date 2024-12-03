@@ -7,6 +7,7 @@ from hashlib import sha256
 from sqlalchemy.sql import select
 
 from src.core.config import CvatConfig
+from src.core.types import ProjectStatuses, TaskTypes
 from src.db import SessionLocal
 from src.models.cvat import Assignment, Job, Project, Task, User
 
@@ -14,7 +15,7 @@ from src.models.cvat import Assignment, Job, Project, Task, User
 def generate_cvat_signature(data: dict):
     b_data = json.dumps(data).encode("utf-8")
 
-    signature = (
+    return (
         "sha256="
         + hmac.new(
             CvatConfig.cvat_webhook_secret.encode("utf-8"),
@@ -22,8 +23,6 @@ def generate_cvat_signature(data: dict):
             digestmod=sha256,
         ).hexdigest()
     )
-
-    return signature
 
 
 def add_cvat_project_to_db(cvat_id: int) -> str:
@@ -33,8 +32,8 @@ def add_cvat_project_to_db(cvat_id: int) -> str:
             id=project_id,
             cvat_id=cvat_id,
             cvat_cloudstorage_id=1,
-            status="annotation",
-            job_type="IMAGE_LABEL_BINARY",
+            status=ProjectStatuses.annotation.value,
+            job_type=TaskTypes.image_label_binary.value,
             escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
             chain_id=80002,
             bucket_url="https://test.storage.googleapis.com/",
@@ -60,6 +59,7 @@ def add_cvat_task_to_db(cvat_id: int, cvat_project_id: int, status: str) -> str:
     return task_id
 
 
+# FUTURE-FIXME: a lot of ways to create a test job
 def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, status: str) -> str:
     with SessionLocal.begin() as session:
         job_id = str(uuid.uuid4())
@@ -69,6 +69,8 @@ def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, st
             cvat_task_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
             status=status,
+            start_frame=0,
+            stop_frame=1,
         )
 
         session.add(job)

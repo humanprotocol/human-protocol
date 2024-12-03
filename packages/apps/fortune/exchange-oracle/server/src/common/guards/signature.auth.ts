@@ -8,7 +8,7 @@ import {
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { EscrowUtils } from '@human-protocol/sdk';
-import { Role } from '../enums/role';
+import { AuthSignatureRole } from '../enums/role';
 import { Reflector } from '@nestjs/core';
 import { AssignmentRepository } from '../../modules/assignment/assignment.repository';
 import { ErrorAssignment, ErrorSignature } from '../constant/errors';
@@ -21,14 +21,17 @@ export class SignatureAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const roles = this.reflector.get<Role[]>('roles', context.getHandler());
+    const roles = this.reflector.get<AuthSignatureRole[]>(
+      'roles',
+      context.getHandler(),
+    );
     if (!roles) throw new NotImplementedException(ErrorSignature.MissingRoles);
     const request = context.switchToHttp().getRequest();
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
 
-    if (roles.includes(Role.Worker)) {
+    if (roles.includes(AuthSignatureRole.Worker)) {
       const assignment = await this.assignmentRepository.findOneById(
         data.assignment_id,
       );
@@ -43,15 +46,15 @@ export class SignatureAuthGuard implements CanActivate {
         data.escrow_address,
       );
 
-      if (roles.includes(Role.JobLauncher)) {
+      if (roles.includes(AuthSignatureRole.JobLauncher)) {
         oracleAdresses.push(escrowData.launcher);
       }
 
-      if (roles.includes(Role.Recording)) {
+      if (roles.includes(AuthSignatureRole.Recording)) {
         oracleAdresses.push(escrowData.recordingOracle!);
       }
 
-      if (roles.includes(Role.Reputation)) {
+      if (roles.includes(AuthSignatureRole.Reputation)) {
         oracleAdresses.push(escrowData.reputationOracle!);
       }
     }

@@ -10,6 +10,7 @@ import {
   FortuneFinalResult,
 } from '../types';
 import api from '../utils/api';
+import { getFilenameFromContentDisposition } from '../utils/string';
 
 export const createFortuneJob = async (
   chainId: number,
@@ -24,6 +25,7 @@ export const createFortuneJob = async (
     requesterDescription: data.description,
     currency: currency,
     fundAmount: Number(amount),
+    qualifications: data.qualifications,
   };
   await api.post('/job/fortune', body);
 };
@@ -45,6 +47,7 @@ export const createCvatJob = async (
     groundTruth: data.groundTruth,
     userGuide: data.userGuide,
     type: data.type,
+    qualifications: data.qualifications,
   };
   await api.post('/job/cvat', body);
 };
@@ -87,6 +90,18 @@ export const getJobResult = async (jobId: number) => {
     {},
   );
   return data;
+};
+
+export const downloadJobResult = async (jobId: number) => {
+  const { data, headers } = await api.get(`/job/result/${jobId}/download`, {
+    responseType: 'blob',
+  });
+
+  const contentDisposition = headers['content-disposition'] || '';
+  return {
+    data,
+    filename: getFilenameFromContentDisposition(contentDisposition),
+  };
 };
 
 export const getJobDetails = async (jobId: number) => {

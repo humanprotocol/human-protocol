@@ -1,14 +1,13 @@
 import {
   UserStatisticsCommand,
-  UserStatisticsDetails,
   UserStatisticsResponse,
 } from '../model/user-statistics.model';
 import {
   OracleStatisticsCommand,
-  OracleStatisticsDetails,
   OracleStatisticsResponse,
 } from '../model/oracle-statistics.model';
 import { AxiosRequestConfig } from 'axios';
+import { jwtUserDataFixture } from '../../h-captcha/spec/h-captcha.fixtures';
 
 const ASSIGNMENTS_AMOUNT = 2137;
 const SUBMISSIONS_SENT = 1969;
@@ -34,36 +33,33 @@ export const userStatsResponseFixture: UserStatisticsResponse = {
   assignments_completed: ASSIGNMENTS_COMPLETED_USER,
   assignments_rejected: ASSIGNMENTS_REJECTED_USER,
   assignments_expired: ASSIGNMENTS_EXPIRED_USER,
+  last_updated: new Date().toISOString(),
 };
 
 export const oracleStatsResponseFixture: OracleStatisticsResponse = {
-  escrows_processed: ESCROWS_PROCESSED,
-  escrows_active: ESCROWS_ACTIVE,
-  escrows_cancelled: ESCROWS_CANCELLED,
-  workers_amount: WORKERS_AMOUNT,
+  workers_total: WORKERS_AMOUNT,
   assignments_completed: ASSIGNMENTS_COMPLETED_ORACLE,
   assignments_rejected: ASSIGNMENTS_REJECTED_ORACLE,
   assignments_expired: ASSIGNMENTS_EXPIRED_ORACLE,
+  escrows_processed: ESCROWS_PROCESSED,
+  escrows_active: ESCROWS_ACTIVE,
+  escrows_cancelled: ESCROWS_CANCELLED,
 };
 
-export const userStatsCommandFixture: UserStatisticsCommand = {
+export const generalUserStatsCommandFixture: UserStatisticsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
   token: TOKEN,
-};
-export const userStatsDetailsFixture: UserStatisticsDetails = {
-  exchangeOracleUrl: EXCHANGE_ORACLE_ADDRESS,
-  token: TOKEN,
+  walletAddress: jwtUserDataFixture.wallet_address,
 };
 
 export const oracleStatsCommandFixture: OracleStatisticsCommand = {
   oracleAddress: EXCHANGE_ORACLE_ADDRESS,
 };
-export const oracleStatsDetailsFixture: OracleStatisticsDetails = {
-  exchangeOracleUrl: EXCHANGE_ORACLE_URL,
-};
+
 export const requestContextFixture = {
   token: TOKEN,
 };
+
 export const userStatsOptionsFixture: AxiosRequestConfig = {
   method: 'GET',
   url: `${EXCHANGE_ORACLE_URL}/stats/assignment`,

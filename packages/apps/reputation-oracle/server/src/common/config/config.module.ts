@@ -9,7 +9,7 @@ import { S3ConfigService } from './s3-config.service';
 import { SendgridConfigService } from './sendgrid-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { ReputationConfigService } from './reputation-config.service';
-import { SynapsConfigService } from './synaps-config.service';
+import { KycConfigService } from './kyc-config.service';
 import { NetworkConfigService } from './network-config.service';
 import { HCaptchaConfigService } from './hcaptcha-config.service';
 
@@ -24,7 +24,7 @@ import { HCaptchaConfigService } from './hcaptcha-config.service';
     S3ConfigService,
     ReputationConfigService,
     SendgridConfigService,
-    SynapsConfigService,
+    KycConfigService,
     PGPConfigService,
     NetworkConfigService,
     HCaptchaConfigService,
@@ -38,7 +38,7 @@ import { HCaptchaConfigService } from './hcaptcha-config.service';
     S3ConfigService,
     ReputationConfigService,
     SendgridConfigService,
-    SynapsConfigService,
+    KycConfigService,
     PGPConfigService,
     NetworkConfigService,
     HCaptchaConfigService,

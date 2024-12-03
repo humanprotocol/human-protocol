@@ -10,9 +10,17 @@ import { createTransaction } from './utils/transaction';
 import { getEventDayData } from './utils/dayUpdates';
 import { toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
+import { dataSource } from '@graphprotocol/graph-ts';
 
 export function handleLaunched(event: Launched): void {
-  createTransaction(event, 'createEscrow');
+  createTransaction(
+    event,
+    'createEscrow',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    event.params.escrow
+  );
   // Create LaunchedStatusEvent entity
   const statusEventEntity = new EscrowStatusEvent(toEventId(event));
   statusEventEntity.block = event.block.number;
@@ -25,13 +33,14 @@ export function handleLaunched(event: Launched): void {
   statusEventEntity.save();
 
   // Create Escrow entity
-  const entity = new Escrow(event.params.escrow.toHex());
+  const entity = new Escrow(event.params.escrow);
 
   entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;
   entity.token = event.params.token;
   entity.factoryAddress = event.address;
   entity.launcher = event.transaction.from;
+  entity.canceler = event.transaction.from;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;
@@ -57,14 +66,21 @@ export function handleLaunched(event: Launched): void {
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsLaunched = leader.amountJobsLaunched.plus(ONE_BI);
+  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
   leader.save();
 }
 
 export function handleLaunchedV2(event: LaunchedV2): void {
-  createTransaction(event, 'createEscrow');
+  createTransaction(
+    event,
+    'createEscrow',
+    event.transaction.from,
+    dataSource.address(),
+    null,
+    event.params.escrow
+  );
   // Create Escrow entity
-  const entity = new Escrow(event.params.escrow.toHex());
+  const entity = new Escrow(event.params.escrow);
 
   entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;
@@ -72,6 +88,7 @@ export function handleLaunchedV2(event: LaunchedV2): void {
   entity.jobRequesterId = event.params.jobRequesterId;
   entity.factoryAddress = event.address;
   entity.launcher = event.transaction.from;
+  entity.canceler = event.transaction.from;
 
   entity.balance = ZERO_BI;
   entity.amountPaid = ZERO_BI;
@@ -97,6 +114,6 @@ export function handleLaunchedV2(event: LaunchedV2): void {
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsLaunched = leader.amountJobsLaunched.plus(ONE_BI);
+  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
   leader.save();
 }

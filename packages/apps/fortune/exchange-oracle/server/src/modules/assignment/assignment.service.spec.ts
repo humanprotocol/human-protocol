@@ -3,10 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   MOCK_ADDRESS,
-  MOCK_EXCHANGE_ORACLE,
+  MOCK_MANIFEST_URL,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
-import { TOKEN } from '../../common/constant';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentService } from '../assignment/assignment.service';
@@ -21,6 +20,7 @@ import { SortDirection } from '../../common/enums/collection';
 import { AssignmentEntity } from './assignment.entity';
 import { ErrorAssignment } from '../../common/constant/errors';
 import { BadRequestException } from '@nestjs/common';
+import { ServerConfigService } from '../../common/config/server-config.service';
 
 jest.mock('@human-protocol/core/typechain-types', () => ({
   ...jest.requireActual('@human-protocol/core/typechain-types'),
@@ -82,6 +82,7 @@ describe('AssignmentService', () => {
             updateOne: jest.fn(),
           },
         },
+        ServerConfigService,
       ],
     }).compile();
 
@@ -103,6 +104,7 @@ describe('AssignmentService', () => {
     beforeAll(async () => {
       jest.spyOn(jobRepository, 'createUnique');
     });
+
     const createAssignmentDto: CreateAssignmentDto = {
       chainId,
       escrowAddress,
@@ -113,6 +115,7 @@ describe('AssignmentService', () => {
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue({
           id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
         } as any);
       jest
@@ -133,7 +136,11 @@ describe('AssignmentService', () => {
 
       expect(result).toEqual(undefined);
       expect(assignmentRepository.createUnique).toHaveBeenCalledWith({
-        job: { id: 1, reputationNetwork: reputationNetwork },
+        job: {
+          id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
+          reputationNetwork: reputationNetwork,
+        },
         workerAddress: workerAddress,
         status: AssignmentStatus.ACTIVE,
         expiresAt: expect.any(Date),
@@ -142,6 +149,39 @@ describe('AssignmentService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
+        MOCK_MANIFEST_URL,
+      );
+    });
+
+    it('should reassign user who has previously canceled', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
+          reputationNetwork: reputationNetwork,
+        } as any);
+      jest
+        .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
+        .mockResolvedValue({ id: 1, status: AssignmentStatus.CANCELED } as any);
+
+      const result = await assignmentService.createAssignment(
+        createAssignmentDto,
+        {
+          address: workerAddress,
+          reputationNetwork: reputationNetwork,
+        } as any,
+      );
+
+      expect(result).toEqual(undefined);
+      expect(assignmentRepository.updateOne).toHaveBeenCalledWith({
+        id: 1,
+        status: AssignmentStatus.ACTIVE,
+      });
+      expect(jobService.getManifest).toHaveBeenCalledWith(
+        chainId,
+        escrowAddress,
+        MOCK_MANIFEST_URL,
       );
     });
 
@@ -165,6 +205,7 @@ describe('AssignmentService', () => {
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue({
           id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: differentReputationNetwork,
         } as any);
 
@@ -181,11 +222,12 @@ describe('AssignmentService', () => {
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue({
           id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
-        .mockResolvedValue({ id: 1 } as any);
+        .mockResolvedValue({ id: 1, status: AssignmentStatus.REJECTED } as any);
 
       await expect(
         assignmentService.createAssignment(createAssignmentDto, {
@@ -200,6 +242,7 @@ describe('AssignmentService', () => {
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue({
           id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
         } as any);
       jest
@@ -216,11 +259,37 @@ describe('AssignmentService', () => {
       ).rejects.toThrow('Fully assigned job');
     });
 
+    it('should fail if job qualifications does not match with user qualifications', async () => {
+      manifest.qualifications = ['test'];
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
+          reputationNetwork: reputationNetwork,
+        } as any);
+      jest
+        .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
+        .mockResolvedValue(null);
+      jest.spyOn(assignmentRepository, 'countByJobId').mockResolvedValue(5);
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+
+      await expect(
+        assignmentService.createAssignment(createAssignmentDto, {
+          address: workerAddress,
+          reputationNetwork: reputationNetwork,
+          qualifications: ['test2'],
+        } as any),
+      ).rejects.toThrow(ErrorAssignment.InvalidAssignmentQualification);
+      manifest.qualifications = undefined;
+    });
+
     it('should fail if job is expired', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValue({
           id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
         } as any);
       jest
@@ -250,10 +319,13 @@ describe('AssignmentService', () => {
         job: {
           chainId: 1,
           escrowAddress,
+          manifestUrl: MOCK_MANIFEST_URL,
+          rewardToken: 'HMT',
         },
         status: AssignmentStatus.ACTIVE,
         createdAt: new Date(),
         expiresAt: new Date(),
+        updatedAt: new Date(),
         rewardAmount: 20,
       },
     ];
@@ -289,25 +361,26 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(result.totalResults).toEqual(1);
       expect(result.results[0]).toEqual({
-        assignmentId: 1,
+        assignmentId: '1',
         chainId: 1,
         escrowAddress: escrowAddress,
         jobType: JobType.FORTUNE,
         status: AssignmentStatus.ACTIVE,
-        rewardToken: TOKEN,
+        rewardToken: 'HMT',
         rewardAmount: 20,
         url: expect.any(String),
         createdAt: expect.any(String),
         expiresAt: expect.any(String),
+        updatedAt: expect.any(String),
       } as AssignmentDto);
       expect(jobService.getManifest).toHaveBeenCalledWith(
         chainId,
         escrowAddress,
+        MOCK_MANIFEST_URL,
       );
       expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({
         page: 0,
@@ -343,7 +416,6 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(result.totalResults).toEqual(0);
@@ -369,7 +441,6 @@ describe('AssignmentService', () => {
         },
         workerAddress,
         reputationNetwork,
-        MOCK_EXCHANGE_ORACLE,
       );
 
       expect(assignmentRepository.fetchFiltered).toHaveBeenCalledWith({

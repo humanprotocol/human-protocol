@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 from pydantic import BaseModel
 
@@ -9,10 +8,13 @@ RESULTING_ANNOTATIONS_FILE = "resulting_annotations.zip"
 
 class JobMeta(BaseModel):
     job_id: int
+    task_id: int
     annotation_filename: Path
     annotator_wallet_address: str
     assignment_id: str
+    start_frame: int
+    stop_frame: int
 
 
 class AnnotationMeta(BaseModel):
-    jobs: List[JobMeta]
+    jobs: list[JobMeta]

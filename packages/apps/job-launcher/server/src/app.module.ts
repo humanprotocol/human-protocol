@@ -22,6 +22,9 @@ import { EnvConfigModule } from './common/config/config.module';
 import { E2E_TEST_ENV } from './common/constants';
 import { ExceptionFilter } from './common/exceptions/exception.filter';
 import { ScheduleModule } from '@nestjs/schedule';
+import { StatisticModule } from './modules/statistic/statistic.module';
+import { QualificationModule } from './modules/qualification/qualification.module';
+import { TransformEnumInterceptor } from './common/interceptors/transform-enum.interceptor';
 
 @Module({
   providers: [
@@ -36,6 +39,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     {
       provide: APP_INTERCEPTOR,
       useClass: SnakeCaseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformEnumInterceptor,
     },
     {
       provide: APP_FILTER,
@@ -64,6 +71,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     Web3Module,
     StorageModule,
     WebhookModule,
+    StatisticModule,
+    QualificationModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,

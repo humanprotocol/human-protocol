@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsEthereumAddress,
   IsNumber,
   IsOptional,
@@ -9,10 +8,11 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { Transform } from 'class-transformer';
+import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class ReputationCreateDto {
   @ApiProperty({ name: 'chain_id' })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   public chainId: ChainId;
 
   @ApiProperty()
@@ -24,7 +24,7 @@ export class ReputationCreateDto {
   public reputationPoints: number;
 
   @ApiProperty()
-  @IsEnum(ReputationEntityType)
+  @IsEnumCaseInsensitive(ReputationEntityType)
   public type: ReputationEntityType;
 }
 
@@ -39,10 +39,20 @@ export class ReputationGetAllQueryDto {
     enum: ChainId,
     name: 'chain_id',
   })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   @IsOptional()
   @Transform(({ value }) => Number(value))
   public chainId?: ChainId;
+
+  @ApiPropertyOptional({
+    type: [ReputationEntityType],
+    enum: ReputationEntityType,
+    name: 'roles',
+  })
+  @IsEnumCaseInsensitive(ReputationEntityType, { each: true })
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  public roles?: ReputationEntityType[];
 }
 
 export class ReputationGetParamsDto {
@@ -54,14 +64,14 @@ export class ReputationGetParamsDto {
 
 export class ReputationGetQueryDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   @Transform(({ value }) => Number(value))
   public chainId: ChainId;
 }
 
 export class ReputationDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsEnum(ChainId)
+  @IsEnumCaseInsensitive(ChainId)
   @Transform(({ value }) => Number(value))
   chainId: ChainId;
 
@@ -71,7 +81,7 @@ export class ReputationDto {
   address: string;
 
   @ApiProperty({ enum: ReputationLevel })
-  @IsEnum(ReputationLevel)
+  @IsEnumCaseInsensitive(ReputationLevel)
   @Transform(({ value }) => Number(value))
   reputation: ReputationLevel;
 }
