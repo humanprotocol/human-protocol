@@ -78,7 +78,7 @@ const Results = () => {
   const { filterParams } = useWalletSearch();
 
   if (status === 'pending' && !data) {
-    return <Loader height="30vh" />;
+    return <Loader height="auto" paddingTop="2rem" />;
   }
 
   if (status === 'error') {
@@ -166,7 +166,7 @@ const SearchResults = () => {
         className="search-results-bar"
         borderColor={colorPalette.secondary.main}
       />
-      {paramsStatus === 'loading' && <Loader />}
+      {paramsStatus === 'loading' && <Loader height="auto" paddingTop="2rem" />}
       {paramsStatus === 'error' && (
         <Stack sx={{ paddingTop: '2rem' }}>Something went wrong</Stack>
       )}

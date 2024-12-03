@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
@@ -45,17 +45,26 @@ const SearchBar: FC<SearchBarProps> = ({
 }) => {
   const { mobile } = useBreakPoints();
   const [inputValue, setInputValue] = useState<string>(initialInputValue);
-  const [selectValue, setSelectValue] = useState<string>('');
+  const [selectValue, setSelectValue] = useState<number | null>(null);
   const [focus, setFocus] = useState<boolean>(false);
-  const { filterParams, setAddress, setChainId } = useWalletSearch();
+  const { filterParams, setAddress } = useWalletSearch();
   const navigate = useNavigate();
+
+  const navigateToAddress = useCallback(
+    (chainIdParam?: number | undefined) => {
+      const chainId = chainIdParam || filterParams.chainId || -1;
+      const address = (isTopBar ? filterParams.address : inputValue) || '0x0';
+      navigate(`/search/${chainId}/${address}`);
+    },
+    [filterParams.address, filterParams.chainId, inputValue, isTopBar, navigate]
+  );
 
   useEffect(() => {
     const networkName = getNetwork(filterParams.chainId || -1)?.name || '';
     if (networkName) {
-      setSelectValue(networkName);
+      setSelectValue(filterParams.chainId);
     }
-  }, [filterParams.chainId]);
+  }, [filterParams.chainId, navigateToAddress]);
 
   useEffect(() => {
     setInputValue(filterParams.address);
@@ -69,11 +78,9 @@ const SearchBar: FC<SearchBarProps> = ({
     }
   };
 
-  const handleSelectChange = (event: SelectChangeEvent<string>) => {
+  const handleSelectChange = (event: SelectChangeEvent<number | null>) => {
     const chainId = Number(event.target.value);
-    setChainId(chainId);
-    const networkName = getNetwork(chainId)?.name || '';
-    setSelectValue(networkName);
+    navigateToAddress(chainId);
   };
 
   const handleClearClick = () => {
@@ -86,9 +93,7 @@ const SearchBar: FC<SearchBarProps> = ({
     if (!isTopBar) {
       setAddress(inputValue);
     }
-    const chainId = filterParams.chainId || -1;
-    const address = (isTopBar ? filterParams.address : inputValue) || '0x0';
-    navigate(`/search/${chainId}/${address}`);
+    navigateToAddress();
   };
 
   const renderEmptyValue = (
@@ -98,9 +103,13 @@ const SearchBar: FC<SearchBarProps> = ({
   const renderSelectedValue = (
     <Grid sx={gridSx}>
       <NetworkIcon
-        chainId={networks.find((n) => n.name === selectValue)?.id || -1}
+        chainId={networks.find((n) => n.id === selectValue)?.id || -1}
       />
-      <div>{mobile.isMobile ? null : selectValue}</div>
+      <div>
+        {mobile.isMobile || !selectValue
+          ? null
+          : getNetwork(selectValue)?.name || ''}
+      </div>
     </Grid>
   );
 
@@ -127,20 +136,20 @@ const SearchBar: FC<SearchBarProps> = ({
               position="start"
               sx={startAdornmentInputAdornmentSx}
             >
-              <MuiSelect
+              <MuiSelect<number | null>
                 value={selectValue}
                 displayEmpty
                 sx={muiSelectSx(isTopBar, mobile)}
                 onChange={handleSelectChange}
                 renderValue={() =>
-                  selectValue === '' ? renderEmptyValue : renderSelectedValue
+                  selectValue === null ? renderEmptyValue : renderSelectedValue
                 }
               >
                 {networks.map((network) => (
                   <MenuItem
                     key={network.id}
                     value={network.id}
-                    sx={menuItemSx(network.name === selectValue)}
+                    sx={menuItemSx(network.id === selectValue)}
                   >
                     <Box sx={{ svg: { width: '24px', height: '24px' } }}>
                       <NetworkIcon chainId={network.id} />
