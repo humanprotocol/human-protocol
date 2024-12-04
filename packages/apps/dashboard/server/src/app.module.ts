@@ -10,6 +10,7 @@ import { CacheFactoryConfig } from './common/config/cache-factory.config';
 import { CommonConfigModule } from './common/config/config.module';
 import { DetailsModule } from './modules/details/details.module';
 import { StatsModule } from './modules/stats/stats.module';
+import { NetworksModule } from './modules/networks/networks.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { StatsModule } from './modules/stats/stats.module';
     DetailsModule,
     ScheduleModule.forRoot(),
     StatsModule,
+    NetworksModule,
   ],
   controllers: [AppController],
 })

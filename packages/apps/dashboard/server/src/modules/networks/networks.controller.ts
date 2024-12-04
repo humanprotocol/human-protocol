@@ -1,13 +1,19 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, HttpCode } from '@nestjs/common';
-
+import {
+  Controller,
+  Get,
+  HttpCode,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { NetworksService } from './networks.service';
 import { ChainId } from '@human-protocol/sdk';
-import { NetworkConfigService } from '../../common/config/network-config.service';
 
-@ApiTags('Config')
-@Controller('/config')
-export class ConfigController {
-  constructor(private readonly networkConfigService: NetworkConfigService) {}
+@ApiTags('Networks')
+@Controller('/networks')
+@UsePipes(new ValidationPipe({ transform: true }))
+export class NetworksController {
+  constructor(private readonly networksService: NetworksService) {}
 
   @Get('/available-networks')
   @HttpCode(200)
@@ -21,6 +27,6 @@ export class ConfigController {
     type: Array<ChainId>,
   })
   public async getAvailableNetworks(): Promise<ChainId[]> {
-    return this.networkConfigService.getAvailableNetworks();
+    return this.networksService.getOperatingNetworks();
   }
 }

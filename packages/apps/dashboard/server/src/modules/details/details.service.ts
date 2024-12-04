@@ -20,6 +20,7 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworksService } from '../networks/networks.service';
 
 @Injectable()
 export class DetailsService {
@@ -27,6 +28,7 @@ export class DetailsService {
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
+    private readonly networksService: NetworksService,
     private readonly networkConfig: NetworkConfigService,
   ) {}
 
@@ -148,7 +150,7 @@ export class DetailsService {
 
   public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? await this.networkConfig.getAvailableNetworks()
+      ? await this.networksService.getOperatingNetworks()
       : [chainId];
 
     const leadersByRole: { [role: string]: LeaderDto } = {};
@@ -184,7 +186,7 @@ export class DetailsService {
 
   public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? await this.networkConfig.getAvailableNetworks()
+      ? await this.networksService.getOperatingNetworks()
       : [chainId];
 
     const allLeaders: LeaderDto[] = [];

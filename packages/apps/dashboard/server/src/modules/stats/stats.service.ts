@@ -22,7 +22,7 @@ import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
 import { StorageService } from '../storage/storage.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworksService } from '../networks/networks.service';
 
 @Injectable()
 export class StatsService implements OnModuleInit {
@@ -30,7 +30,7 @@ export class StatsService implements OnModuleInit {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly redisConfigService: RedisConfigService,
-    private readonly networkConfigService: NetworkConfigService,
+    private readonly networksService: NetworksService,
     private readonly envConfigService: EnvironmentConfigService,
     private readonly httpService: HttpService,
     private readonly storageService: StorageService,
@@ -178,8 +178,7 @@ export class StatsService implements OnModuleInit {
       totalHolders: 0,
       totalTransactions: 0,
     };
-    const availableNetworks =
-      await this.networkConfigService.getAvailableNetworks();
+    const availableNetworks = await this.networksService.getOperatingNetworks();
     for (const network of availableNetworks) {
       const statisticsClient = new StatisticsClient(NETWORKS[network]);
       const generalStats = await statisticsClient.getHMTStatistics();
@@ -217,8 +216,7 @@ export class StatsService implements OnModuleInit {
     const dailyData: Record<string, CachedHMTData> = {};
     const monthlyData: Record<string, CachedHMTData> = {};
 
-    const availableNetworks =
-      await this.networkConfigService.getAvailableNetworks();
+    const availableNetworks = await this.networksService.getOperatingNetworks();
 
     // Fetch daily data for each network
     await Promise.all(
