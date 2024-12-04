@@ -80,9 +80,6 @@ const SearchBar: FC<SearchBarProps> = ({
     const chainId = Number(event.target.value);
     if (inputValue && !!inputValue.length) {
       navigateToAddress(chainId);
-    } else if (!inputValue.length && filterParams.address) {
-      setInputValue(filterParams.address);
-      setChainId(chainId);
     } else {
       setChainId(chainId);
     }
@@ -91,7 +88,6 @@ const SearchBar: FC<SearchBarProps> = ({
   const handleClearClick = () => {
     setInputValue('');
     setAddress('');
-    navigate('/');
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
