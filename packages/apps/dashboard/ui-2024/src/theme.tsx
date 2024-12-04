@@ -315,7 +315,9 @@ const theme: ThemeOptions = createTheme({
           '@media (max-width: 440px)': {
             gridColumn: '2 / 3',
             gridRow: '2',
-            justifySelf: 'center',
+            justifySelf: 'end',
+            position: 'relative',
+            right: '-12px',
           },
         },
         actions: {
@@ -324,10 +326,10 @@ const theme: ThemeOptions = createTheme({
             gridRow: '2',
             justifySelf: 'end',
             marginLeft: 0,
-            minWidth: '100px',
+            minWidth: '90px',
           },
           button: {
-            marginLeft: '10px',
+            marginLeft: '5px',
           },
         },
       },
