@@ -15,10 +15,10 @@ import { ChainId } from '@human-protocol/sdk';
 export class NetworksController {
   constructor(private readonly networksService: NetworksService) {}
 
-  @Get('/available-networks')
+  @Get('/operating')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get available networks with recent usage',
+    summary: 'Get operating networks with recent usage',
     description: 'Endpoint to return networks filtered by recent activity.',
   })
   @ApiResponse({
@@ -26,7 +26,7 @@ export class NetworksController {
     description: 'Networks retrieved successfully',
     type: Array<ChainId>,
   })
-  public async getAvailableNetworks(): Promise<ChainId[]> {
+  public async getOperatingNetworks(): Promise<ChainId[]> {
     return this.networksService.getOperatingNetworks();
   }
 }
