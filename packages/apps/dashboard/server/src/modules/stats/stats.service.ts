@@ -38,7 +38,7 @@ export class StatsService implements OnModuleInit {
     private readonly storageService: StorageService,
     private schedulerRegistry: SchedulerRegistry,
   ) {
-    if (this.envConfigService.hCaptchaStatsEnabled) {
+    if (this.envConfigService.hCaptchaStatsEnabled === true) {
       const job = new CronJob('*/15 * * * *', () => {
         this.fetchTodayHcaptchaStats();
       });
