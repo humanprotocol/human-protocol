@@ -255,7 +255,6 @@ export class DetailsService {
       );
       return response.data;
     } catch (error) {
-      console.log(error);
       this.logger.error('Error fetching reputations:', error);
       return [];
     }
