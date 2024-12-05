@@ -343,6 +343,19 @@ const theme: ThemeOptions = createTheme({
         },
       },
     },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: colorPalette.link,
+          '&:hover': {
+            color: `${colorPalette.linkHover}!important`,
+          },
+          '&:visited': {
+            color: colorPalette.linkVisited,
+          },
+        },
+      },
+    },
   },
 });
 
