@@ -308,6 +308,8 @@ const theme: ThemeOptions = createTheme({
             gridColumn: '3 / 3',
             gridRow: '1',
             marginRight: '8px',
+            width: '48px',
+            justifySelf: 'flex-end',
           },
         },
         displayedRows: {
