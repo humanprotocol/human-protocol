@@ -289,7 +289,6 @@ const theme: ThemeOptions = createTheme({
             gridTemplateColumns: '1fr 3fr 2fr',
             gridTemplateRows: 'auto auto',
             gridAutoFlow: 'row',
-            rowGap: '12px',
           },
         },
         selectLabel: {
