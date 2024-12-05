@@ -47,7 +47,6 @@ export const RoleDetailsEscrowsTable = ({
         <TableContainer>
           <Table
             sx={{
-              minWidth: 800,
               '& .MuiTableCell-root': {
                 borderBottom: 'none',
               },

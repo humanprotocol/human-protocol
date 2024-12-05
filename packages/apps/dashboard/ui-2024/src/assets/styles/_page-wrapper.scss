@@ -8,7 +8,7 @@
 	padding: 14px 0;
 	height: 100vh;
 
-	@media (max-width: 1100px) {
+	@media (max-width: 1280px) {
 		border-radius: 0;
 		height: auto;
 	}
@@ -22,7 +22,7 @@
 		}
 	}
 
-	@media (max-width: 1100px) {
+	@media (max-width: 1280px) {
 		min-height: calc(100vh - 386px);
 		margin: 0 24px;
 		&.search-white-header {

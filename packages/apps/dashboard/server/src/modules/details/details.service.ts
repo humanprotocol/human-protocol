@@ -21,6 +21,7 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { OracleRole } from '../../common/enums/roles';
 
 @Injectable()
 export class DetailsService {
@@ -216,10 +217,10 @@ export class DetailsService {
             params: {
               chain_id: chainId,
               roles: [
-                'job_launcher',
-                'exchange_oracle',
-                'recording_oracle',
-                'reputation_oracle',
+                OracleRole.JOB_LAUNCHER,
+                OracleRole.EXCHANGE_ORACLE,
+                OracleRole.RECORDING_ORACLE,
+                OracleRole.REPUTATION_ORACLE,
               ],
             },
           },
