@@ -87,7 +87,6 @@ const SearchBar: FC<SearchBarProps> = ({
 
   const handleClearClick = () => {
     setInputValue('');
-    setAddress('');
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
