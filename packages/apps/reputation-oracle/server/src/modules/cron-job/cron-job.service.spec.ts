@@ -231,7 +231,7 @@ describe('CronJobService', () => {
       expect(service.completeCronJob).toHaveBeenCalled();
     });
 
-    it('should log errors during processing', async () => {
+    it('should complete the cron job after processing', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
       jest
         .spyOn(service, 'startCronJob')
@@ -279,7 +279,7 @@ describe('CronJobService', () => {
       expect(service.completeCronJob).toHaveBeenCalled();
     });
 
-    it('should log errors during processing', async () => {
+    it('should complete the cron job after processing', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
       jest
         .spyOn(service, 'startCronJob')
@@ -327,7 +327,7 @@ describe('CronJobService', () => {
       expect(service.completeCronJob).toHaveBeenCalled();
     });
 
-    it('should log errors during processing', async () => {
+    it('should complete the cron job after processing', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
       jest
         .spyOn(service, 'startCronJob')
@@ -375,7 +375,7 @@ describe('CronJobService', () => {
       expect(service.completeCronJob).toHaveBeenCalled();
     });
 
-    it('should log errors during processing', async () => {
+    it('should complete the cron job after processing', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
       jest
         .spyOn(service, 'startCronJob')

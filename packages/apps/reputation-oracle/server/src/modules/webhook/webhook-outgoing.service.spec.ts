@@ -1,3 +1,5 @@
+import * as crypto from 'crypto';
+import stringify from 'json-stable-stringify';
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -108,10 +110,15 @@ describe('WebhookOutgoingService', () => {
 
     const url = MOCK_FILE_URL;
 
+    const hash = crypto
+      .createHash('sha1')
+      .update(stringify({ payload, url }))
+      .digest('hex');
+
     const webhookEntity: Partial<WebhookOutgoingEntity> = {
       payload,
-      url: MOCK_FILE_URL,
-      hash: MOCK_FILE_HASH,
+      url,
+      hash,
       status: WebhookOutgoingStatus.PENDING,
     };
 
@@ -123,7 +130,10 @@ describe('WebhookOutgoingService', () => {
       await webhookOutgoingService.createOutgoingWebhook(payload, url);
 
       expect(webhookOutgoingRepository.createUnique).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.objectContaining({
+          hash,
+          status: WebhookOutgoingStatus.PENDING,
+        }),
       );
     });
   });

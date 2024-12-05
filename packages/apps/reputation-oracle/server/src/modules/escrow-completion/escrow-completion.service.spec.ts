@@ -258,6 +258,9 @@ describe('escrowCompletionService', () => {
     });
 
     it('should handle errors and continue processing other entities', async () => {
+      escrowCompletionEntity1.finalResultsUrl = MOCK_FILE_URL;
+      escrowCompletionEntity2.finalResultsUrl = MOCK_FILE_URL;
+
       jest
         .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([
@@ -266,27 +269,29 @@ describe('escrowCompletionService', () => {
         ]);
 
       jest
-        .spyOn(escrowCompletionRepository, 'updateOne')
+        .spyOn(payoutService, 'executePayouts')
         .mockImplementationOnce(() => {
           throw new Error('Test error');
         }) // Fails for escrowCompletionEntity1
-        .mockResolvedValue(escrowCompletionEntity2 as any); // Succeeds for escrowCompletionEntity2
-
-      const handleErrorMock = jest.spyOn(
-        escrowCompletionService as any,
-        'handleEscrowCompletionError',
-      );
+        .mockResolvedValue(); // Succeeds for escrowCompletionEntity2
 
       await escrowCompletionService.processPendingEscrowCompletion();
 
-      expect(handleErrorMock).toHaveBeenCalledWith(
-        escrowCompletionEntity1,
-        expect.stringContaining(ErrorEscrowCompletion.PendingProcessingFailed),
-      );
-
-      // Ensure the second entity is processed successfully
+      // Verify that the first entity's error is handled, with retriesCount incremented to 1
       expect(escrowCompletionRepository.updateOne).toHaveBeenCalledWith(
-        escrowCompletionEntity2,
+        expect.objectContaining({
+          id: escrowCompletionEntity1.id,
+          status: EscrowCompletionStatus.PENDING,
+          retriesCount: 1, // Retries count should be 1 after the error
+        }),
+      );
+      // Verify that the second entity is successfully processed and its status is updated to 'PAID'
+      expect(escrowCompletionRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: escrowCompletionEntity2.id,
+          status: EscrowCompletionStatus.PAID,
+          retriesCount: 0,
+        }),
       );
     });
 
