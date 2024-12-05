@@ -165,7 +165,7 @@ export class DetailsService {
     }
 
     allLeadersData = allLeadersData.sort((a, b) =>
-      a.amountStaked >= b.amountStaked ? -1 : 1,
+      BigInt(a.amountStaked) >= BigInt(b.amountStaked) ? -1 : 1,
     );
     if (take && take > 0) {
       allLeadersData = allLeadersData.slice(0, take - 1);
