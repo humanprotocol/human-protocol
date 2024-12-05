@@ -70,6 +70,14 @@ export const FiatPayForm = ({
   const [successMessage, setSuccessMessage] = useState('');
   const [isBillingDetailsOpen, setIsBillingDetailsOpen] = useState(false);
   const [openBillingAfterAddCard, setOpenBillingAfterAddCard] = useState(false);
+  const [fundAmount, setFundAmount] = useState(0);
+  const [feeAmount, setFeeAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [balancePayAmount, setBalancePayAmount] = useState(0);
+  const [creditCardPayAmount, setCreditCardPayAmount] = useState(0);
+  const [accountAmount] = useState(
+    user?.balance ? Number(user?.balance?.amount) : 0,
+  );
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -117,25 +125,30 @@ export const FiatPayForm = ({
     },
   });
 
-  const fundAmount = amount ? Number(amount) : 0;
-  const feeAmount = Math.max(
+  useMemo(() => {
+    setFundAmount(amount ? Number(amount) : 0);
+    if (Number(jobLauncherFee) >= 0)
+      setFeeAmount(
+        Math.max(minFee, fundAmount * (Number(jobLauncherFee) / 100)),
+      );
+    setTotalAmount(fundAmount + feeAmount);
+    if (!payWithAccountBalance) setBalancePayAmount(0);
+    else if (totalAmount < accountAmount) setBalancePayAmount(totalAmount);
+    else setBalancePayAmount(accountAmount);
+
+    if (!payWithAccountBalance) setCreditCardPayAmount(totalAmount);
+    else if (totalAmount < accountAmount) setCreditCardPayAmount(0);
+    else setCreditCardPayAmount(totalAmount - accountAmount);
+  }, [
+    accountAmount,
+    amount,
+    feeAmount,
+    fundAmount,
+    jobLauncherFee,
     minFee,
-    fundAmount * (Number(jobLauncherFee) / 100),
-  );
-  const totalAmount = fundAmount + feeAmount;
-  const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
-
-  const balancePayAmount = useMemo(() => {
-    if (!payWithAccountBalance) return 0;
-    if (totalAmount < accountAmount) return totalAmount;
-    return accountAmount;
-  }, [payWithAccountBalance, totalAmount, accountAmount]);
-
-  const creditCardPayAmount = useMemo(() => {
-    if (!payWithAccountBalance) return totalAmount;
-    if (totalAmount < accountAmount) return 0;
-    return totalAmount - accountAmount;
-  }, [payWithAccountBalance, totalAmount, accountAmount]);
+    payWithAccountBalance,
+    totalAmount,
+  ]);
 
   const handleSuccessAction = (message: string) => {
     setSuccessMessage(message);
@@ -272,6 +285,7 @@ export const FiatPayForm = ({
                     onClick={() => setIsAddCardOpen(true)}
                     size="large"
                     sx={{ mb: 2 }}
+                    disabled={payWithAccountBalance}
                   >
                     Add Payment Method
                   </Button>
@@ -318,7 +332,11 @@ export const FiatPayForm = ({
             >
               <Typography>Fees</Typography>
               <Typography color="text.secondary">
-                ({Number(jobLauncherFee)}%) {feeAmount.toFixed(2)} USD
+                (
+                {Number(jobLauncherFee) >= 0
+                  ? `${Number(jobLauncherFee)}%`
+                  : 'loading...'}
+                ) {feeAmount.toFixed(2)} USD
               </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>

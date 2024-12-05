@@ -26,18 +26,7 @@ const Settings = () => {
   const [openBillingAfterAddCard, setOpenBillingAfterAddCard] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [cards, setCards] = useState<CardData[]>([]);
-  const [billingInfo, setBillingInfo] = useState<BillingInfo>({
-    name: '',
-    email: '',
-    address: {
-      city: '',
-      country: '',
-      postalCode: '',
-      line: '',
-    },
-    vat: '',
-    vatType: '',
-  });
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
 
   const fetchCards = async () => {
     try {
@@ -51,7 +40,7 @@ const Settings = () => {
   const fetchBillingInfo = async () => {
     try {
       const data = await getUserBillingInfo();
-      setBillingInfo({ ...billingInfo, ...data });
+      if (data) setBillingInfo({ ...billingInfo, ...data });
     } catch (error) {
       showError('Error fetching billing info');
     }
@@ -90,7 +79,7 @@ const Settings = () => {
             <CardContent>
               <Grid container padding={3} spacing={2}>
                 <Grid item md={12} lg={4}>
-                  <Box sx={{ height: '300px' }}>
+                  <Box justifyContent="space-between" mb={4}>
                     <Typography variant="h5" mb={1}>
                       Billing Details
                     </Typography>
@@ -104,30 +93,36 @@ const Settings = () => {
                     >
                       {billingInfo
                         ? 'Edit Billing Details'
-                        : 'Add Billing Details'}
+                        : '+ Add Billing Details'}
                     </Button>
                   </Box>
                 </Grid>
                 <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-                <Grid item md={12} lg={6}>
-                  <Typography variant="h6">Details</Typography>
-                  <Typography>
-                    Full Name / Company Name: {billingInfo?.name}
+                {billingInfo ? (
+                  <Grid item md={12} lg={6}>
+                    <Typography variant="h6">Details</Typography>
+                    <Typography>
+                      Full Name / Company Name: {billingInfo.name}
+                    </Typography>
+                    <Typography>Email: {billingInfo.email}</Typography>
+                    <Typography>Address: {billingInfo.address.line}</Typography>
+                    <Typography>
+                      Postal code: {billingInfo.address.postalCode}
+                    </Typography>
+                    <Typography>City: {billingInfo.address.city}</Typography>
+                    <Typography>
+                      Country: {countryOptions[billingInfo.address.country]}
+                    </Typography>
+                    <Typography>
+                      VAT Type: {vatTypeOptions[billingInfo.vatType]}
+                    </Typography>
+                    <Typography>VAT Number: {billingInfo.vat}</Typography>
+                  </Grid>
+                ) : (
+                  <Typography variant="body1">
+                    No billing details added yet
                   </Typography>
-                  <Typography>Email: {billingInfo?.email}</Typography>
-                  <Typography>Address: {billingInfo?.address.line}</Typography>
-                  <Typography>
-                    Postal code: {billingInfo?.address.postalCode}
-                  </Typography>
-                  <Typography>City: {billingInfo?.address.city}</Typography>
-                  <Typography>
-                    Country: {countryOptions[billingInfo?.address.country]}
-                  </Typography>
-                  <Typography>
-                    VAT Type: {vatTypeOptions[billingInfo?.vatType]}
-                  </Typography>
-                  <Typography>VAT Number: {billingInfo?.vat}</Typography>
-                </Grid>
+                )}
               </Grid>
             </CardContent>
           </Card>
@@ -157,7 +152,7 @@ const Settings = () => {
                 </Grid>
                 <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
                 <Grid item md={12} lg={6}>
-                  <Box sx={{ height: '300px', overflowY: 'auto' }}>
+                  <Box sx={{ overflowY: 'auto' }}>
                     <CardList
                       cards={cards}
                       fetchCards={fetchCards}
@@ -198,7 +193,7 @@ const Settings = () => {
         onComplete={() => {
           handleSuccessAction('Your card has been successfully added.');
           fetchCards();
-          if (!billingInfo.name || !billingInfo.address)
+          if (!billingInfo?.name || !billingInfo?.address)
             setOpenBillingAfterAddCard(true);
         }}
       />

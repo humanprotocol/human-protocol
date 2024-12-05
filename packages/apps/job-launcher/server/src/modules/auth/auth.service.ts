@@ -31,6 +31,7 @@ import { verifyToken } from '../../common/utils/hcaptcha';
 import { UserRepository } from '../user/user.repository';
 import { ApiKeyEntity } from './apikey.entity';
 import { ControlledError } from '../../common/errors/controlled';
+import { WhitelistService } from '../whitelist/whitelist.service';
 
 @Injectable()
 export class AuthService {
@@ -43,6 +44,7 @@ export class AuthService {
     private readonly sendgridService: SendGridService,
     private readonly apiKeyRepository: ApiKeyRepository,
     private readonly userRepository: UserRepository,
+    private readonly whitelistService: WhitelistService,
   ) {}
 
   public async signin(data: SignInDto, _ip?: string): Promise<AuthDto> {
@@ -152,12 +154,16 @@ export class AuthService {
         userEntity.id,
         TokenType.REFRESH,
       );
+    const whitelisted = await this.whitelistService.isUserWhitelisted(
+      userEntity.id,
+    );
 
     const accessToken = await this.jwtService.signAsync(
       {
         email: userEntity.email,
         userId: userEntity.id,
         status: userEntity.status,
+        whitelisted,
       },
       {
         expiresIn: this.authConfigService.accessTokenExpiresIn,
