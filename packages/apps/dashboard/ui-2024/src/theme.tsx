@@ -302,6 +302,9 @@ const theme: ThemeOptions = createTheme({
             position: 'relative',
             right: '-38px',
           },
+          '&:focus': {
+            background: 'inherit',
+          },
         },
         input: {
           '@media (max-width: 440px)': {
@@ -310,6 +313,11 @@ const theme: ThemeOptions = createTheme({
             marginRight: '8px',
             width: '48px',
             justifySelf: 'flex-end',
+          },
+        },
+        select: {
+          '&:focus': {
+            background: 'inherit',
           },
         },
         displayedRows: {
