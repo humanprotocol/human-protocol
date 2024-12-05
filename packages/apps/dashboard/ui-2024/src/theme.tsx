@@ -212,7 +212,7 @@ const theme: ThemeOptions = createTheme({
     MuiToolbar: {
       styleOverrides: {
         root: {
-          '@media (min-width:1001px)': {
+          '@media (min-width:1280px)': {
             paddingX: 56,
           },
         },
@@ -269,6 +269,15 @@ const theme: ThemeOptions = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: colorPalette.white,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#1406B207',
+          },
         },
       },
     },

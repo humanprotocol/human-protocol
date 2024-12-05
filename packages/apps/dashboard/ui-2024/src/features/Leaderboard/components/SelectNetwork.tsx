@@ -2,14 +2,14 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
 import HumanIcon from '@components/Icons/HumanIcon';
 import {
   leaderboardSearchSelectConfig,
   useLeaderboardSearch,
 } from '@utils/hooks/use-leaderboard-search';
-import { NetworkIcon } from '@components/NetworkIcon';
-import { Box } from '@mui/material';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
+import { NetworkIcon } from '@components/NetworkIcon';
 
 export const SelectNetwork = () => {
   const {
@@ -58,9 +58,12 @@ export const SelectNetwork = () => {
 
           return (
             <MenuItem
-              key={selectItem.name}
-              className="select-item"
+              key={selectItem.id}
               value={selectItem.id}
+              sx={{
+                display: 'flex',
+                gap: '10px',
+              }}
             >
               <Box sx={{ svg: { width: '24px', height: '24px' } }}>
                 <NetworkIcon chainId={selectItem.id} />
