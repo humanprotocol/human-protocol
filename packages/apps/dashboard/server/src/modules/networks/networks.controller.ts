@@ -18,7 +18,7 @@ export class NetworksController {
   @Get('/operating')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get operating networks with recent usage',
+    summary: 'Get recently used networks',
     description: 'Endpoint to return networks filtered by recent activity.',
   })
   @ApiResponse({

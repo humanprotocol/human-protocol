@@ -8,22 +8,22 @@ import { EnvironmentConfigService } from '../../common/config/env-config.service
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { MainnetsId } from '../../common/utils/constants';
 import { HttpService } from '@nestjs/axios';
-import { NetworkConfigService } from './network-config.service';
 import { ConfigService } from '@nestjs/config';
+import { NetworksService } from './networks.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   StatisticsClient: jest.fn(),
 }));
 
-describe('NetworkConfigService', () => {
-  let networkConfigService: NetworkConfigService;
+describe('NetworksService', () => {
+  let networksService: NetworksService;
   let cacheManager: Cache;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        NetworkConfigService,
+        NetworksService,
         { provide: HttpService, useValue: createMock<HttpService>() },
         {
           provide: CACHE_MANAGER,
@@ -36,7 +36,7 @@ describe('NetworkConfigService', () => {
           provide: EnvironmentConfigService,
           useValue: {
             networkUsageFilterMonths: 3,
-            networkAvailableCacheTtl: 1000,
+            networkOperatingCacheTtl: 1000,
           },
         },
         ConfigService,
@@ -44,8 +44,7 @@ describe('NetworkConfigService', () => {
       ],
     }).compile();
 
-    networkConfigService =
-      module.get<NetworkConfigService>(NetworkConfigService);
+    networksService = module.get<NetworksService>(NetworksService);
     cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
@@ -75,11 +74,11 @@ describe('NetworkConfigService', () => {
     );
 
     // First call should populate cache
-    const firstCallResult = await networkConfigService.getAvailableNetworks();
+    const firstCallResult = await networksService.getOperatingNetworks();
 
     expect(firstCallResult).toEqual(mockNetworkList);
     expect(cacheManager.set).toHaveBeenCalledWith(
-      'available-networks',
+      'operating-networks',
       mockNetworkList,
       1000,
     );
@@ -88,12 +87,12 @@ describe('NetworkConfigService', () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null);
 
     // Second call after TTL should re-generate the network list
-    const secondCallResult = await networkConfigService.getAvailableNetworks();
+    const secondCallResult = await networksService.getOperatingNetworks();
     expect(secondCallResult).toEqual(mockNetworkList);
 
     // Ensure the cache is set again with the regenerated network list
     expect(cacheManager.set).toHaveBeenCalledWith(
-      'available-networks',
+      'operating-networks',
       mockNetworkList,
       1000,
     );
@@ -103,9 +102,9 @@ describe('NetworkConfigService', () => {
     const cachedNetworks = [ChainId.MAINNET, ChainId.POLYGON];
     jest.spyOn(cacheManager, 'get').mockResolvedValue(cachedNetworks);
 
-    const result = await networkConfigService.getAvailableNetworks();
+    const result = await networksService.getOperatingNetworks();
     expect(result).toEqual(cachedNetworks);
-    expect(cacheManager.get).toHaveBeenCalledWith('available-networks');
+    expect(cacheManager.get).toHaveBeenCalledWith('operating-networks');
   });
 
   it('should fetch and filter available networks correctly', async () => {
@@ -123,13 +122,13 @@ describe('NetworkConfigService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await networkConfigService.getAvailableNetworks();
+    const result = await networksService.getOperatingNetworks();
     expect(result).toEqual(
       expect.arrayContaining([ChainId.MAINNET, ChainId.POLYGON]),
     );
 
     expect(cacheManager.set).toHaveBeenCalledWith(
-      'available-networks',
+      'operating-networks',
       result,
       1000,
     );
@@ -147,7 +146,7 @@ describe('NetworkConfigService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await networkConfigService.getAvailableNetworks();
+    const result = await networksService.getOperatingNetworks();
     expect(result).toEqual([]);
   });
 
@@ -170,7 +169,7 @@ describe('NetworkConfigService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await networkConfigService.getAvailableNetworks();
+    const result = await networksService.getOperatingNetworks();
 
     expect(result).not.toContain(MainnetsId.MAINNET);
     expect(result).toEqual(expect.arrayContaining([]));
@@ -190,7 +189,7 @@ describe('NetworkConfigService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await networkConfigService.getAvailableNetworks();
+    const result = await networksService.getOperatingNetworks();
     expect(result).toEqual([]);
   });
 
@@ -211,7 +210,7 @@ describe('NetworkConfigService', () => {
       () => mockStatisticsClient,
     );
 
-    const result = await networkConfigService.getAvailableNetworks();
+    const result = await networksService.getOperatingNetworks();
     expect(result).toEqual([]);
   });
 });

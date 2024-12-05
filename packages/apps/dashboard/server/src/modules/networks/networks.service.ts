@@ -1,14 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 import {
   EnvironmentConfigService,
   MINIMUM_ESCROWS_COUNT,
   MINIMUM_HMT_TRANSFERS,
 } from '../../common/config/env-config.service';
-import { AVAILABLE_NETWORKS_CACHE_KEY } from 'src/common/config/redis-config.service';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { MainnetsId } from 'src/common/utils/constants';
+import { OPERATING_NETWORKS_CACHE_KEY } from '../../common/config/redis-config.service';
+import { MainnetsId } from '../../common/utils/constants';
 
 @Injectable()
 export class NetworksService {
@@ -20,7 +20,7 @@ export class NetworksService {
 
   public async getOperatingNetworks(): Promise<ChainId[]> {
     const cachedNetworks = await this.cacheManager.get<ChainId[]>(
-      AVAILABLE_NETWORKS_CACHE_KEY,
+      OPERATING_NETWORKS_CACHE_KEY,
     );
 
     if (cachedNetworks) {
@@ -81,9 +81,9 @@ export class NetworksService {
     }
 
     await this.cacheManager.set(
-      AVAILABLE_NETWORKS_CACHE_KEY,
+      OPERATING_NETWORKS_CACHE_KEY,
       availableNetworks,
-      this.envConfigService.networkAvailableCacheTtl,
+      this.envConfigService.networkOperatingCacheTtl,
     );
     return availableNetworks;
   }
