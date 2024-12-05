@@ -48,7 +48,7 @@ export class DetailsController {
   public async leaders(
     @Query('chainId') chainId?: ChainId,
   ): Promise<LeaderDto[]> {
-    return this.detailsService.getBestLeadersByChainId(chainId);
+    return this.detailsService.getLeadersByChainId(chainId, 4);
   }
 
   @Get('/leaders/all')
@@ -67,7 +67,7 @@ export class DetailsController {
   public async allLeaders(
     @Query('chainId') chainId?: ChainId,
   ): Promise<LeaderDto[]> {
-    return this.detailsService.getAllLeadersByChainId(chainId);
+    return this.detailsService.getLeadersByChainId(chainId);
   }
 
   @Get('/:address')

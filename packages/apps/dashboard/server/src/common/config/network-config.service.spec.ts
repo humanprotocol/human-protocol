@@ -6,7 +6,6 @@ import { Logger } from '@nestjs/common';
 import { StatisticsClient } from '@human-protocol/sdk';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
-import { MainnetsId } from '../../common/utils/constants';
 import { HttpService } from '@nestjs/axios';
 import { NetworkConfigService } from './network-config.service';
 import { ConfigService } from '@nestjs/config';
@@ -19,6 +18,12 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('NetworkConfigService', () => {
   let networkConfigService: NetworkConfigService;
   let cacheManager: Cache;
+
+  beforeAll(async () => {
+    process.env.RPC_URL_POLYGON = 'https://testrpc.com';
+    process.env.RPC_URL_ETHEREUM = 'https://testrpc.com';
+    process.env.WEB3_ENV = 'mainnet';
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,15 +55,7 @@ describe('NetworkConfigService', () => {
   });
 
   it('should regenerate network list when cache TTL expires', async () => {
-    const mockNetworkList = [
-      ChainId.MAINNET,
-      ChainId.BSC_MAINNET,
-      ChainId.POLYGON,
-      ChainId.XLAYER,
-      ChainId.MOONBEAM,
-      ChainId.CELO,
-      ChainId.AVALANCHE,
-    ];
+    const mockNetworkList = [ChainId.MAINNET, ChainId.POLYGON];
 
     // Step 1: Initial request - populate cache
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
@@ -154,8 +151,8 @@ describe('NetworkConfigService', () => {
   it('should handle missing network configuration gracefully', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
 
-    const originalNetworkConfig = NETWORKS[MainnetsId.MAINNET];
-    NETWORKS[MainnetsId.MAINNET] = undefined;
+    const originalNetworkConfig = NETWORKS[ChainId.MAINNET];
+    NETWORKS[ChainId.MAINNET] = undefined;
 
     const mockStatisticsClient = {
       getHMTDailyData: jest
@@ -172,10 +169,10 @@ describe('NetworkConfigService', () => {
 
     const result = await networkConfigService.getAvailableNetworks();
 
-    expect(result).not.toContain(MainnetsId.MAINNET);
+    expect(result).not.toContain(ChainId.MAINNET);
     expect(result).toEqual(expect.arrayContaining([]));
 
-    NETWORKS[MainnetsId.MAINNET] = originalNetworkConfig;
+    NETWORKS[ChainId.MAINNET] = originalNetworkConfig;
   });
 
   it('should handle errors in getHMTDailyData gracefully', async () => {

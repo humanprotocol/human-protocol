@@ -27,6 +27,7 @@ import { StatsModule } from './modules/stats/stats.module';
         HCAPTCHA_API_KEY: Joi.string().required(),
         CACHE_HMT_PRICE_TTL: Joi.number(),
         CACHE_HMT_GENERAL_STATS_TTL: Joi.number(),
+        HCAPTCHA_STATS_ENABLED: Joi.boolean().default(true),
       }),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),

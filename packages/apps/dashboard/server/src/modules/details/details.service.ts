@@ -8,6 +8,7 @@ import {
   IEscrowsFilter,
   Role,
   NETWORKS,
+  ILeader,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
@@ -146,56 +147,29 @@ export class DetailsService {
     return result;
   }
 
-  public async getBestLeadersByChainId(
+  public async getLeadersByChainId(
     chainId?: ChainId,
+    take?: number,
   ): Promise<LeaderDto[]> {
     const chainIds = !chainId
       ? await this.networkConfig.getAvailableNetworks()
       : [chainId];
 
-    let allLeadersData: any[] = [];
+    let allLeadersData: ILeader[] = [];
     for (const id of chainIds) {
       const leadersData = await OperatorUtils.getLeaders({ chainId: id });
       allLeadersData = allLeadersData.concat(
-        leadersData
-          .filter((leader) => leader.amountStaked > 0 && leader.role)
-          .map((leader) => ({ ...leader, chainId: id })),
+        leadersData.filter((leader) => leader.amountStaked > 0 && leader.role),
       );
     }
 
-    const leaders = allLeadersData
-      .sort((a, b) => (a.amountStaked >= b.amountStaked ? 1 : -1))
-      .slice(0, 4)
-      .map((leader) =>
-        plainToInstance(LeaderDto, leader, {
-          excludeExtraneousValues: true,
-        }),
-      );
-
-    for (const id of chainIds) {
-      const reputations = await this.fetchReputations(id);
-      this.assignReputationsToLeaders(Object.values(leaders), reputations, id);
+    allLeadersData = allLeadersData.sort((a, b) =>
+      a.amountStaked >= b.amountStaked ? -1 : 1,
+    );
+    if (take && take > 0) {
+      allLeadersData = allLeadersData.slice(0, take - 1);
     }
-
-    return leaders;
-  }
-
-  public async getAllLeadersByChainId(chainId?: ChainId): Promise<LeaderDto[]> {
-    const chainIds = !chainId
-      ? await this.networkConfig.getAvailableNetworks()
-      : [chainId];
-
-    let allLeadersData: any[] = [];
-    for (const id of chainIds) {
-      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-      allLeadersData = allLeadersData.concat(
-        leadersData
-          .filter((leader) => leader.amountStaked > 0 && leader.role)
-          .map((leader) => ({ ...leader, chainId: id })),
-      );
-    }
-
-    const leaders = allLeadersData.map((leader) =>
+    const leaders = allLeadersData.slice(0, 3).map((leader) =>
       plainToInstance(LeaderDto, leader, {
         excludeExtraneousValues: true,
       }),
@@ -203,7 +177,7 @@ export class DetailsService {
 
     for (const id of chainIds) {
       const reputations = await this.fetchReputations(id);
-      this.assignReputationsToLeaders(Object.values(leaders), reputations, id);
+      this.assignReputationsToLeaders(leaders, reputations, id);
     }
 
     return leaders;
