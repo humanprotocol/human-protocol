@@ -3,6 +3,9 @@ export const colorPalette = {
   whiteBackground: '#FFF',
   whiteSolid: '#F6F5FC',
   skyOpacity: '#DADEF0CC',
+  link: '#0000EE',
+  linkHover: '#1406B2',
+  linkVisited: '#551A8B',
   primary: {
     main: '#320a8d',
     light: '#320a8d',
