@@ -30,31 +30,27 @@ import {
 
 interface SearchBarProps {
   className?: string;
-  displaySearchBar?: boolean;
-  isTopBar?: boolean;
   initialInputValue?: string;
 }
 
 const SearchBar: FC<SearchBarProps> = ({
   className = '',
-  displaySearchBar,
   initialInputValue = '',
-  isTopBar = false,
 }) => {
   const { mobile } = useBreakPoints();
   const [inputValue, setInputValue] = useState<string>(initialInputValue);
-  const [selectValue, setSelectValue] = useState<number | null>(null);
+  const [selectValue, setSelectValue] = useState<number | string>('');
   const [focus, setFocus] = useState<boolean>(false);
-  const { filterParams, setAddress, setChainId } = useWalletSearch();
+  const { filterParams } = useWalletSearch();
   const navigate = useNavigate();
 
   const navigateToAddress = useCallback(
     (chainIdParam?: number | undefined) => {
-      const chainId = chainIdParam || filterParams.chainId || -1;
-      const address = (isTopBar ? filterParams.address : inputValue) || '';
+      const chainId = chainIdParam || selectValue || -1;
+      const address = inputValue || '';
       navigate(`/search/${chainId}/${address}`);
     },
-    [filterParams.address, filterParams.chainId, inputValue, isTopBar, navigate]
+    [inputValue, selectValue, navigate]
   );
 
   useEffect(() => {
@@ -62,26 +58,22 @@ const SearchBar: FC<SearchBarProps> = ({
     if (networkName) {
       setSelectValue(filterParams.chainId);
     }
-  }, [filterParams.chainId, navigateToAddress]);
+  }, [filterParams.chainId]);
 
   useEffect(() => {
     setInputValue(filterParams.address);
   }, [filterParams.address]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (isTopBar) {
-      setAddress(event.target.value);
-    } else {
-      setInputValue(event.target.value);
-    }
+    setInputValue(event.target.value);
   };
 
-  const handleSelectChange = (event: SelectChangeEvent<number | null>) => {
+  const handleSelectChange = (event: SelectChangeEvent<number | string>) => {
     const chainId = Number(event.target.value);
-    if (inputValue && !!inputValue.length) {
+    const isAnyAddress = inputValue && !!inputValue.trim().length;
+    setSelectValue(chainId);
+    if (isAnyAddress) {
       navigateToAddress(chainId);
-    } else {
-      setChainId(chainId);
     }
   };
 
@@ -91,9 +83,6 @@ const SearchBar: FC<SearchBarProps> = ({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isTopBar) {
-      setAddress(inputValue);
-    }
     if (inputValue && !!inputValue.length) {
       navigateToAddress();
     }
@@ -111,18 +100,13 @@ const SearchBar: FC<SearchBarProps> = ({
       <div>
         {mobile.isMobile || !selectValue
           ? null
-          : getNetwork(selectValue)?.name || ''}
+          : getNetwork(Number(selectValue))?.name || ''}
       </div>
     </Grid>
   );
 
   return (
-    <form
-      className={clsx(
-        `search ${displaySearchBar ? 'search-white' : ''} ${className}`
-      )}
-      onSubmit={handleSubmit}
-    >
+    <form className={clsx(`search ${className}`)} onSubmit={handleSubmit}>
       <TextField
         id="search-bar"
         placeholder="Search by Wallet/Escrow"
@@ -141,10 +125,10 @@ const SearchBar: FC<SearchBarProps> = ({
               position="start"
               sx={startAdornmentInputAdornmentSx}
             >
-              <MuiSelect<number | null>
+              <MuiSelect<number | string>
                 value={selectValue}
                 displayEmpty
-                sx={muiSelectSx(isTopBar, mobile)}
+                sx={muiSelectSx(mobile)}
                 onChange={handleSelectChange}
                 renderValue={() =>
                   selectValue === null ? renderEmptyValue : renderSelectedValue
@@ -189,9 +173,7 @@ const SearchBar: FC<SearchBarProps> = ({
               >
                 <SearchIcon
                   style={{
-                    color: displaySearchBar
-                      ? colorPalette.textSecondary.main
-                      : colorPalette.white,
+                    color: colorPalette.white,
                   }}
                 />
               </IconButton>

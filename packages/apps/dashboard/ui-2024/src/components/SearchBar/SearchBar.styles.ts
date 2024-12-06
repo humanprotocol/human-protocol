@@ -22,12 +22,12 @@ export const gridSx = {
   overflow: 'hidden',
 };
 
-export const muiSelectSx = (
-  isTopBar: boolean,
-  mobile: { isMobile: boolean; mediaQuery: string }
-) => ({
+export const muiSelectSx = (mobile: {
+  isMobile: boolean;
+  mediaQuery: string;
+}) => ({
   backgroundColor: `${colorPalette.white}`,
-  width: isTopBar ? '220px' : 'unset',
+  width: 'unset',
   fontSize: '16px',
   boxShadow: 'none',
   outline: 'none',

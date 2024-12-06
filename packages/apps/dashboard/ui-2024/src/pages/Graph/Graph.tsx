@@ -24,7 +24,7 @@ const Graph = () => {
   }, []);
 
   return (
-    <PageWrapper displaySearchBar className="standard-background">
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Charts" />
       <TabContext value={graphType}>
         <Tabs

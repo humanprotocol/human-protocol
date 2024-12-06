@@ -159,7 +159,7 @@ const SearchResults = () => {
   }, [address, chainId, paramsStatus]);
 
   return (
-    <PageWrapper displaySearchBar className="standard-background">
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Search Results" />
       <SearchBar className="search-results-bar" />
       {paramsStatus === 'loading' && <Loader height="auto" paddingTop="2rem" />}

@@ -2,6 +2,9 @@
   position: relative;
   width: 920px;
   max-width: 100%;
+  border: 1px solid #DADEF0CC;
+  border-radius: 13px;
+
 
   #search-bar{
     width: 100%;
@@ -16,6 +19,7 @@
       -webkit-text-fill-color: $primary;
       box-shadow: 0 0 0px 1000px $white inset;
     }
+    
   }
 
   .search-close{
@@ -36,10 +40,7 @@
 
 .search-results-bar {
   display: block;
-
-  @media (max-width: 1280px) {
-    display: none;
-  }
+  
 }
 
 .search-white{
