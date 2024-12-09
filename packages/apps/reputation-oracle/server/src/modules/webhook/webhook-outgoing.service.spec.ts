@@ -129,12 +129,11 @@ describe('WebhookOutgoingService', () => {
 
       await webhookOutgoingService.createOutgoingWebhook(payload, url);
 
-      expect(webhookOutgoingRepository.createUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          hash,
-          status: WebhookOutgoingStatus.PENDING,
-        }),
-      );
+      expect(webhookOutgoingRepository.createUnique).toHaveBeenCalledWith({
+        ...webhookEntity,
+        waitUntil: expect.any(Date),
+        retriesCount: 0,
+      });
     });
   });
 
