@@ -168,7 +168,7 @@ export class DetailsService {
       BigInt(a.amountStaked) >= BigInt(b.amountStaked) ? -1 : 1,
     );
     if (take && take > 0) {
-      allLeadersData = allLeadersData.slice(0, take - 1);
+      allLeadersData = allLeadersData.slice(0, take);
     }
     const leaders = allLeadersData.map((leader) =>
       plainToInstance(LeaderDto, leader, {
