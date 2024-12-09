@@ -5,26 +5,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
 import { WebhookController } from './webhook.controller';
-import { WebhookService } from './webhook.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
-import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
+import { EscrowCompletionModule } from '../escrow-completion/escrow-completion.module';
+import { WebhookIncomingService } from './webhook-incoming.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WebhookIncomingEntity, WebhookOutgoingEntity]),
+    TypeOrmModule.forFeature([WebhookIncomingEntity]),
     ConfigModule,
     Web3Module,
     HttpModule,
+    EscrowCompletionModule,
   ],
   controllers: [WebhookController],
-  providers: [
-    Logger,
-    WebhookService,
-    WebhookIncomingRepository,
-    WebhookOutgoingRepository,
-  ],
-  exports: [WebhookService],
+  providers: [Logger, WebhookIncomingService, WebhookIncomingRepository],
+  exports: [WebhookIncomingService],
 })
-export class WebhookModule {}
+export class WebhookIncomingModule {}

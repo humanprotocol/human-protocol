@@ -15,7 +15,7 @@ export enum WebhookOutgoingStatus {
   FAILED = 'failed',
 }
 
-export enum EscrowCompletionTrackingStatus {
+export enum EscrowCompletionStatus {
   PENDING = 'pending',
   PAID = 'paid',
   COMPLETED = 'completed',

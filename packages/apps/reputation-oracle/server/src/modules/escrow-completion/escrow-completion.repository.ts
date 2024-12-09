@@ -2,22 +2,22 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { EscrowCompletionTrackingEntity } from './escrow-completion-tracking.entity';
-import { EscrowCompletionTrackingStatus } from '../../common/enums';
+import { EscrowCompletionEntity } from './escrow-completion.entity';
+import { EscrowCompletionStatus } from '../../common/enums';
 
 @Injectable()
-export class EscrowCompletionTrackingRepository extends BaseRepository<EscrowCompletionTrackingEntity> {
-  private readonly logger = new Logger(EscrowCompletionTrackingRepository.name);
+export class EscrowCompletionRepository extends BaseRepository<EscrowCompletionEntity> {
+  private readonly logger = new Logger(EscrowCompletionRepository.name);
   constructor(
     private dataSource: DataSource,
     public readonly serverConfigService: ServerConfigService,
   ) {
-    super(EscrowCompletionTrackingEntity, dataSource);
+    super(EscrowCompletionEntity, dataSource);
   }
 
   public findByStatus(
-    status: EscrowCompletionTrackingStatus,
-  ): Promise<EscrowCompletionTrackingEntity[]> {
+    status: EscrowCompletionStatus,
+  ): Promise<EscrowCompletionEntity[]> {
     return this.find({
       where: {
         status,
