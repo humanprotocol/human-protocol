@@ -75,7 +75,7 @@
     "eslint-import-resolver-typescript": "^3.5.3",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.34.3",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
     "happy-dom": "^12.9.1",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^25.0.1",
