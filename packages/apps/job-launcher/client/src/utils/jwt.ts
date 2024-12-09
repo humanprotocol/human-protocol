@@ -2,10 +2,12 @@ import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { UserStatus } from '../state/auth/types';
 
 export function getJwtPayload(token: string) {
-  const { email, status } = jwtDecode<{ email: string; status: UserStatus }>(
-    token,
-  );
-  return { email, status };
+  const { email, status, whitelisted } = jwtDecode<{
+    email: string;
+    status: UserStatus;
+    whitelisted: boolean;
+  }>(token);
+  return { email, status, whitelisted };
 }
 
 export function isJwtExpired(token: string) {

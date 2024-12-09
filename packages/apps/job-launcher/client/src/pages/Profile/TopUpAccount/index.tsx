@@ -4,11 +4,12 @@ import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { CryptoTopUpForm } from '../../../components/TopUpAccount/CryptoTopUpForm';
 import { FiatTopUpForm } from '../../../components/TopUpAccount/FiatTopUpForm';
 import { TopUpMethod } from '../../../components/TopUpAccount/TopUpMethod';
-import { IS_TESTNET } from '../../../constants/chains';
+import { useAppSelector } from '../../../state';
 import { PayMethod } from '../../../types';
 
 export default function TopUpAccount() {
   const [payMethod, setPayMethod] = useState<PayMethod>();
+  const { user } = useAppSelector((state) => state.auth);
 
   const handleSelectMethod = (method: PayMethod) => {
     setPayMethod(method);
@@ -35,8 +36,10 @@ export default function TopUpAccount() {
             value={payMethod}
             onChange={(e, newValue) => setPayMethod(newValue)}
           >
-            <StyledTab value={PayMethod.Crypto} label="Crypto" />
-            {IS_TESTNET && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
+            {user?.whitelisted && (
+              <StyledTab value={PayMethod.Crypto} label="Crypto" />
+            )}
+            <StyledTab value={PayMethod.Fiat} label="Fiat" />
           </StyledTabs>
           <Box
             display="flex"
@@ -49,9 +52,10 @@ export default function TopUpAccount() {
               border: '1px solid #dbe1f6',
               borderRadius: '20px',
               borderTopLeftRadius:
-                payMethod === PayMethod.Crypto ? '0px' : '20px',
-              borderTopRightRadius:
-                payMethod === PayMethod.Fiat ? '0px' : '20px',
+                payMethod === PayMethod.Crypto || !user?.whitelisted
+                  ? '0px'
+                  : '20px',
+              borderTopRightRadius: '20px',
               px: '10%',
               pt: 10,
               pb: 5,

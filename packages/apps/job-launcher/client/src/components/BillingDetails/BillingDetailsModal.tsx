@@ -23,12 +23,25 @@ const BillingDetailsModal = ({
 }: {
   open: boolean;
   onClose: () => void;
-  billingInfo: BillingInfo;
+  billingInfo: BillingInfo | null;
   setBillingInfo: (value: BillingInfo) => void;
 }) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<BillingInfo>(billingInfo);
+  const [formData, setFormData] = useState<BillingInfo>(
+    billingInfo ?? {
+      name: '',
+      email: '',
+      address: {
+        city: '',
+        country: '',
+        postalCode: '',
+        line: '',
+      },
+      vat: '',
+      vatType: '',
+    },
+  );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { showError } = useSnackbar();
 

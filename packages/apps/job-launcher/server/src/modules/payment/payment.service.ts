@@ -498,12 +498,10 @@ export class PaymentService {
   //   return;
   // }
 
-  async listUserPaymentMethods(user: UserEntity) {
+  async listUserPaymentMethods(user: UserEntity): Promise<CardDto[]> {
+    const cards: CardDto[] = [];
     if (!user.stripeCustomerId) {
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      return cards;
     }
 
     // List all the payment methods (cards) associated with the user's Stripe account
@@ -515,7 +513,6 @@ export class PaymentService {
       },
     );
 
-    const cards: CardDto[] = [];
     // Get the default payment method for the user
     const defaultPaymentMethod = await this.getDefaultPaymentMethod(
       user.stripeCustomerId,
@@ -555,12 +552,9 @@ export class PaymentService {
     return this.stripe.paymentMethods.detach(paymentMethodId);
   }
 
-  async getUserBillingInfo(user: UserEntity) {
+  async getUserBillingInfo(user: UserEntity): Promise<BillingInfoDto | null> {
     if (!user.stripeCustomerId) {
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      return null;
     }
 
     // Retrieve the customer's tax IDs and customer information
@@ -568,24 +562,21 @@ export class PaymentService {
       user.stripeCustomerId,
     );
 
-    const customer = await this.stripe.customers.retrieve(
+    const customer = (await this.stripe.customers.retrieve(
       user.stripeCustomerId,
-    );
+    )) as Stripe.Customer;
 
     const userBillingInfo = new BillingInfoDto();
-    if ((customer as Stripe.Customer).address) {
+    if (customer.address) {
       const address = new AddressDto();
-      address.country = (
-        (customer as Stripe.Customer).address?.country as string
-      ).toLowerCase();
-      address.postalCode = (customer as Stripe.Customer).address
-        ?.postal_code as string;
-      address.city = (customer as Stripe.Customer).address?.city as string;
-      address.line = (customer as Stripe.Customer).address?.line1 as string;
+      address.country = (customer.address.country as string).toLowerCase();
+      address.postalCode = customer.address.postal_code as string;
+      address.city = customer.address.city as string;
+      address.line = customer.address.line1 as string;
       userBillingInfo.address = address;
     }
-    userBillingInfo.name = (customer as Stripe.Customer)?.name as string;
-    userBillingInfo.email = (customer as Stripe.Customer)?.email as string;
+    userBillingInfo.name = customer.name as string;
+    userBillingInfo.email = customer.email as string;
     userBillingInfo.vat = taxIds.data[0]?.value;
     userBillingInfo.vatType = taxIds.data[0]?.type as VatType;
     return userBillingInfo;
