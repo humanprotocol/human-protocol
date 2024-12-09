@@ -36,7 +36,6 @@ describe('OperatorUtils', () => {
 
     const mockLeaderSubgraph: ILeaderSubgraph = {
       id: stakerAddress,
-      chainId: ChainId.LOCALHOST,
       address: stakerAddress,
       amountStaked: ethers.parseEther('100'),
       amountLocked: ethers.parseEther('25'),
@@ -60,6 +59,7 @@ describe('OperatorUtils', () => {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
       reputationNetworks: ['0x01'],
+      chainId: ChainId.LOCALHOST,
     };
 
     test('should return staker information', async () => {
@@ -88,6 +88,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: [],
         reputationNetworks: ['0x01'],
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -115,6 +116,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
         reputationNetworks: ['0x01'],
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -179,7 +181,6 @@ describe('OperatorUtils', () => {
 
     const mockLeaderSubgraph: ILeaderSubgraph = {
       id: stakerAddress,
-      chainId: ChainId.LOCALHOST,
       address: stakerAddress,
       amountStaked: ethers.parseEther('100'),
       amountLocked: ethers.parseEther('25'),
@@ -203,6 +204,7 @@ describe('OperatorUtils', () => {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
       reputationNetworks: ['0x01'],
+      chainId: ChainId.LOCALHOST,
     };
 
     test('should return an array of stakers', async () => {
@@ -229,6 +231,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: [],
         reputationNetworks: ['0x01'],
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -254,6 +257,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
         reputationNetworks: ['0x01'],
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({

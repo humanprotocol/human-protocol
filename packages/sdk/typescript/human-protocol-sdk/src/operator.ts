@@ -83,6 +83,7 @@ export class OperatorUtils {
       ...leader,
       jobTypes,
       reputationNetworks,
+      chainId,
     };
   }
 

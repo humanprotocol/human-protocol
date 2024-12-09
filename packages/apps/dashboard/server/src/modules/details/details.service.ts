@@ -164,13 +164,13 @@ export class DetailsService {
       );
     }
 
-    allLeadersData = allLeadersData.sort((a, b) =>
+    allLeadersData.sort((a, b) =>
       BigInt(a.amountStaked) >= BigInt(b.amountStaked) ? -1 : 1,
     );
     if (take && take > 0) {
       allLeadersData = allLeadersData.slice(0, take - 1);
     }
-    const leaders = allLeadersData.slice(0, 3).map((leader) =>
+    const leaders = allLeadersData.map((leader) =>
       plainToInstance(LeaderDto, leader, {
         excludeExtraneousValues: true,
       }),
