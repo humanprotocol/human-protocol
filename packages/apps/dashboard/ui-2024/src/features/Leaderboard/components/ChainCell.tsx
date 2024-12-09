@@ -2,10 +2,16 @@ import { Typography } from '@mui/material';
 import { NetworkIcon } from '@components/NetworkIcon';
 import { getNetwork } from '@utils/config/networks';
 
-export const ChainCell = ({ chainId }: { chainId: number }) => (
+export const ChainCell = ({
+  chainId,
+  isMobile,
+}: {
+  chainId: number;
+  isMobile: boolean;
+}) => (
   <Typography
     variant="body1"
-    whiteSpace="nowrap"
+    whiteSpace={isMobile ? 'wrap' : 'nowrap'}
     flexWrap="nowrap"
     alignItems="center"
     display="flex"
