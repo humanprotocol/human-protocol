@@ -389,12 +389,15 @@ export class StatsService implements OnModuleInit {
       }),
     );
 
-    const aggregatedStats: HcaptchaStats = stats.reduce((acc, stat) => {
-      if (stat) {
-        acc.solved += stat.solved;
-      }
-      return acc;
-    });
+    const aggregatedStats: HcaptchaStats = stats.reduce(
+      (acc, stat) => {
+        if (stat) {
+          acc.solved += stat.solved;
+        }
+        return acc;
+      },
+      { solved: 0 },
+    );
 
     return aggregatedStats;
   }
