@@ -22,23 +22,26 @@ export type Reputation = z.infer<typeof reputationSchema>;
 const leaderBoardEntity = z.object({
   address: z.string(),
   role: z.string(),
-  amountStaked: z.string().transform((value, ctx) => {
-    const valueAsNumber = Number(value);
+  amountStaked: z
+    .string()
+    .transform((value, ctx) => {
+      const valueAsNumber = Number(value);
 
-    if (Number.isNaN(valueAsNumber)) {
-      ctx.addIssue({
-        path: ['amountStaked'],
-        code: z.ZodIssueCode.custom,
-      });
-    }
+      if (Number.isNaN(valueAsNumber)) {
+        ctx.addIssue({
+          path: ['amountStaked'],
+          code: z.ZodIssueCode.custom,
+        });
+      }
 
-    return valueAsNumber / 10 ** 18;
-  }),
+      return valueAsNumber / 10 ** 18;
+    })
+    .nullable(),
   reputation: reputationSchema,
-  fee: z.number(),
-  jobTypes: z.array(z.string()),
-  url: z.string(),
-  website: z.string().optional(),
+  fee: z.number().nullable(),
+  jobTypes: z.array(z.string()).nullable(),
+  url: z.string().nullable(),
+  website: z.string().nullable(),
   chainId: z.number(),
 });
 

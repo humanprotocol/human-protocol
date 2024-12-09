@@ -2,12 +2,6 @@ import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Web3Env } from '../enums/web3';
-import {
-  LOCALHOST_CHAIN_IDS,
-  MAINNET_CHAIN_IDS,
-  MainnetsId,
-  TESTNET_CHAIN_IDS,
-} from '../utils/constants';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { AVAILABLE_NETWORKS_CACHE_KEY } from './redis-config.service';
 import {
@@ -15,6 +9,11 @@ import {
   MINIMUM_ESCROWS_COUNT,
   MINIMUM_HMT_TRANSFERS,
 } from './env-config.service';
+import {
+  LOCALHOST_CHAIN_IDS,
+  MAINNET_CHAIN_IDS,
+  TESTNET_CHAIN_IDS,
+} from '../utils/constants';
 
 export interface TokensList {
   [key: string]: string | undefined;
@@ -149,8 +148,8 @@ export class NetworkConfigService {
 
     const availableNetworks = [];
 
-    for (const networkKey of Object.values(MainnetsId)) {
-      const chainId = MainnetsId[networkKey as keyof typeof MainnetsId];
+    for (const network of Object.values(this.networks)) {
+      const chainId = network.chainId;
 
       const networkConfig = NETWORKS[chainId];
 
@@ -186,7 +185,7 @@ export class NetworkConfigService {
         }
       } catch (error) {
         this.logger.error(
-          `Error processing network ${networkKey} (Chain ID: ${chainId}): ${error.message}`,
+          `Error processing network Chain ID: ${chainId}): ${error.message}`,
         );
       }
     }

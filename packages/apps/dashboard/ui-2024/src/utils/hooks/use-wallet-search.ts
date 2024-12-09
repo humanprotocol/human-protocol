@@ -1,3 +1,4 @@
+import { networks } from '../config/networks';
 import { create } from 'zustand';
 
 export interface WalletSearchStore {
@@ -12,7 +13,7 @@ export interface WalletSearchStore {
 export const useWalletSearch = create<WalletSearchStore>((set) => ({
   filterParams: {
     address: '',
-    chainId: 137,
+    chainId: networks[0].id,
   },
   setAddress: (address) => {
     set((state) => ({

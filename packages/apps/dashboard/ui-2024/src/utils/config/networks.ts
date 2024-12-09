@@ -1,7 +1,10 @@
 import type { Chain } from 'viem/chains';
 import * as chains from 'viem/chains';
+import { env } from '@helpers/env';
 
-const chainIdsList = [1, 56, 137, 1284, 43114, 42220, 196];
+//TODO: temporal fix. Should be fetched from API. https://github.com/humanprotocol/human-protocol/issues/2855
+const ENABLED_CHAIN_IDS = env.VITE_ENABLED_CHAIN_IDS;
+const chainIdsList = ENABLED_CHAIN_IDS.split(',').map((id) => parseInt(id, 10));
 
 const viemChains = Object.values(chains);
 

@@ -30,7 +30,7 @@ export interface ILeader {
 }
 
 export interface ILeaderSubgraph
-  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks'> {
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
   jobTypes?: string;
   reputationNetworks?: { address: string }[];
 }
