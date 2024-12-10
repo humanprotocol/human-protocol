@@ -10,7 +10,7 @@ export const LeaderBoard = () => {
   const isMoreThatFiveEntries = data?.length && data.length > 5;
 
   return (
-    <PageWrapper displaySearchBar className="standard-background">
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Leaderboard" />
       <ShadowIcon
         className="home-page-leaderboard"
