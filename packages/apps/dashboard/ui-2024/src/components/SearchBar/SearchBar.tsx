@@ -70,11 +70,7 @@ const SearchBar: FC<SearchBarProps> = ({
 
   const handleSelectChange = (event: SelectChangeEvent<number | string>) => {
     const chainId = Number(event.target.value);
-    const isAnyAddress = inputValue && !!inputValue.trim().length;
     setSelectValue(chainId);
-    if (isAnyAddress) {
-      navigateToAddress(chainId);
-    }
   };
 
   const handleClearClick = () => {
