@@ -217,10 +217,19 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
-    // For backward compatibility: this function can only be called on existing escrows,
-    // as the "Paid" status is not set anywhere for new escrows.
     function complete() external override notExpired trustedOrReputationOracle {
-        require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
+        require(
+            status == EscrowStatuses.Paid || status == EscrowStatuses.Partial,
+            'Escrow not in Paid or Partial state'
+        );
+        _complete();
+    }
+
+    function _complete() private {
+        if (remainingFunds > 0) {
+            _safeTransfer(token, launcher, remainingFunds);
+            remainingFunds = 0;
+        }
         status = EscrowStatuses.Complete;
         emit Completed();
     }
@@ -346,13 +355,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         remainingFunds = cachedRemainingFunds;
 
         // Check the forceComplete flag and transfer remaining funds if true
-        if (forceComplete && cachedRemainingFunds > 0) {
-            _safeTransfer(token, launcher, cachedRemainingFunds);
-            cachedRemainingFunds = 0;
-        }
-
-        if (cachedRemainingFunds == 0) {
-            status = EscrowStatuses.Complete;
+        if (cachedRemainingFunds == 0 || forceComplete) {
             emit BulkTransferV2(
                 _txId,
                 _recipients,
@@ -360,7 +363,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 false,
                 finalResultsUrl
             );
-            emit Completed();
+            _complete();
         } else {
             status = EscrowStatuses.Partial;
             emit BulkTransferV2(
