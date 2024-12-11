@@ -128,6 +128,7 @@ export class GatewayConfigService {
               params: {
                 api_key: this.envConfig.hcaptchaLabelingApiKey,
                 actual: false,
+                network: 'polygon',
               },
             },
           } as Record<HCaptchaLabelingStatsEndpoints, GatewayEndpointConfig>,
