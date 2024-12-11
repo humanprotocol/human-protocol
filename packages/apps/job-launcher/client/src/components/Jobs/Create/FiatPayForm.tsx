@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Grid,
@@ -25,6 +26,7 @@ import { CardIcon } from '../../../components/Icons/CardIcon';
 import SuccessModal from '../../../components/SuccessModal';
 import { CURRENCY } from '../../../constants/payment';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { useSnackbar } from '../../../providers/SnackProvider';
 import {
   createCvatJob,
   createFortuneJob,
@@ -54,11 +56,14 @@ export const FiatPayForm = ({
 }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const { showError } = useSnackbar();
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [jobLauncherAddress, setJobLauncherAddress] = useState<string>();
   const [minFee, setMinFee] = useState<number>(0.01);
   const [cards, setCards] = useState<CardData[]>([]);
+  const [loadingInitialData, setLoadingInitialData] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
   const [isSelectCardModalOpen, setIsSelectCardModalOpen] = useState(false);
   const [amount, setAmount] = useState<string>('');
@@ -104,6 +109,7 @@ export const FiatPayForm = ({
   }, []);
 
   const fetchCards = async () => {
+    setLoadingInitialData(true);
     const data = await getUserCards();
     setCards(data);
 
@@ -111,9 +117,13 @@ export const FiatPayForm = ({
     if (defaultCard) {
       setSelectedCard(defaultCard);
     }
+    setLoadingInitialData(false);
   };
-
-  const { data: jobLauncherFee } = useReadContract({
+  const {
+    data: jobLauncherFee,
+    error,
+    isError,
+  } = useReadContract({
     address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
     abi: KVStoreABI,
     functionName: 'get',
@@ -123,7 +133,17 @@ export const FiatPayForm = ({
     query: {
       enabled: !!jobLauncherAddress,
     },
+    chainId: jobRequest.chainId,
   });
+
+  useEffect(() => {
+    if (isError && error) {
+      showError(`Error getting fee, please try again`);
+      setHasError(true);
+    } else {
+      setHasError(false);
+    }
+  }, [isError, error, showError]);
 
   useMemo(() => {
     setFundAmount(amount ? Number(amount) : 0);
@@ -216,254 +236,273 @@ export const FiatPayForm = ({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Grid container spacing={4} mb={6} sx={{ width: '100%' }}>
-        <Grid item xs={12} sm={12} md={6}>
-          <Grid container spacing={4} sx={{ width: '100%' }}>
-            <Grid item xs={12}>
+      {loadingInitialData ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight={400}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box>
+          <Grid container spacing={4} mb={6} sx={{ width: '100%' }}>
+            <Grid item xs={12} sm={12} md={6}>
+              <Grid container spacing={4} sx={{ width: '100%' }}>
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      borderRadius: '8px',
+                      background: '#F9FAFF',
+                      padding: '8px 31px 8px 22px',
+                    }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          defaultChecked
+                          checked={payWithAccountBalance}
+                          onChange={(e) =>
+                            setPayWithAccountBalance(e.target.checked)
+                          }
+                        />
+                      }
+                      label="I want to pay with my account balance"
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <TextField
+                      fullWidth
+                      placeholder="Amount USD"
+                      variant="outlined"
+                      value={amount}
+                      type="number"
+                      onChange={(e) => setAmount(e.target.value)}
+                      sx={{ mb: 2 }}
+                    />
+                    {selectedCard ? (
+                      <TextField
+                        label="Payment Method"
+                        variant="outlined"
+                        fullWidth
+                        value={`**** **** **** ${selectedCard.last4}`}
+                        InputProps={{
+                          readOnly: true,
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <CardIcon fontSize="medium" sx={{ marginX: 2 }} />
+                            </InputAdornment>
+                          ),
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <Button
+                                variant="contained"
+                                onClick={() => setIsSelectCardModalOpen(true)}
+                                size="small"
+                              >
+                                Change
+                              </Button>
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    ) : (
+                      <Button
+                        variant="contained"
+                        onClick={() => setIsAddCardOpen(true)}
+                        size="large"
+                        sx={{ mb: 2 }}
+                        disabled={payWithAccountBalance}
+                      >
+                        Add Payment Method
+                      </Button>
+                    )}
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
               <Box
                 sx={{
                   borderRadius: '8px',
                   background: '#F9FAFF',
-                  padding: '8px 31px 8px 22px',
+                  px: 4,
+                  py: 1.5,
+                  height: '100%',
+                  boxSizing: 'border-box',
                 }}
               >
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      defaultChecked
-                      checked={payWithAccountBalance}
-                      onChange={(e) =>
-                        setPayWithAccountBalance(e.target.checked)
-                      }
-                    />
-                  }
-                  label="I want to pay with my account balance"
-                />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    py: 2,
+                    borderBottom: '1px solid #E5E7EB',
+                  }}
+                >
+                  <Typography>Account Balance</Typography>
+                  {user?.balance && (
+                    <Typography color="text.secondary">
+                      {user?.balance?.amount?.toFixed(2)} USD
+                    </Typography>
+                  )}
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    py: 2,
+                    borderBottom: '1px solid #E5E7EB',
+                  }}
+                >
+                  <Typography>Fees</Typography>
+                  <Typography color="text.secondary">
+                    (
+                    {Number(jobLauncherFee) >= 0
+                      ? `${Number(jobLauncherFee)}%`
+                      : 'loading...'}
+                    ) {feeAmount.toFixed(2)} USD
+                  </Typography>
+                </Box>
+                <Box sx={{ py: 1.5 }}>
+                  <Typography mb={2}>Payment method</Typography>
+                  <Stack direction="column" spacing={1}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography color="text.secondary">Balance</Typography>
+                      <Typography color="text.secondary">
+                        {balancePayAmount.toFixed(2)} USD
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography color="text.secondary">
+                        Credit Card
+                      </Typography>
+                      <Typography color="text.secondary">
+                        {creditCardPayAmount.toFixed(2)} USD
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography>Total</Typography>
+                      <Typography>{totalAmount.toFixed(2)} USD</Typography>
+                    </Stack>
+                  </Stack>
+                </Box>
               </Box>
             </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <TextField
-                  fullWidth
-                  placeholder="Amount USD"
-                  variant="outlined"
-                  value={amount}
-                  type="number"
-                  onChange={(e) => setAmount(e.target.value)}
-                  sx={{ mb: 2 }}
-                />
-                {selectedCard ? (
-                  <TextField
-                    label="Payment Method"
-                    variant="outlined"
-                    fullWidth
-                    value={`**** **** **** ${selectedCard.last4}`}
-                    InputProps={{
-                      readOnly: true,
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CardIcon fontSize="medium" sx={{ marginX: 2 }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Button
-                            variant="contained"
-                            onClick={() => setIsSelectCardModalOpen(true)}
-                            size="small"
-                          >
-                            Change
-                          </Button>
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{ mb: 2 }}
-                  />
-                ) : (
-                  <Button
-                    variant="contained"
-                    onClick={() => setIsAddCardOpen(true)}
-                    size="large"
-                    sx={{ mb: 2 }}
-                    disabled={payWithAccountBalance}
-                  >
-                    Add Payment Method
-                  </Button>
-                )}
-              </FormControl>
-            </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
           <Box
             sx={{
-              borderRadius: '8px',
-              background: '#F9FAFF',
-              px: 4,
-              py: 1.5,
-              height: '100%',
-              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              mt: 4,
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                py: 2,
-                borderBottom: '1px solid #E5E7EB',
-              }}
-            >
-              <Typography>Account Balance</Typography>
-              {user?.balance && (
-                <Typography color="text.secondary">
-                  {user?.balance?.amount?.toFixed(2)} USD
-                </Typography>
-              )}
+            <Box>
+              <LoadingButton
+                color="primary"
+                variant="contained"
+                sx={{ width: '240px' }}
+                size="large"
+                onClick={handlePay}
+                loading={isLoading}
+                disabled={
+                  !amount ||
+                  (!payWithAccountBalance && !selectedCard) ||
+                  hasError
+                }
+              >
+                Pay now
+              </LoadingButton>
+              <Button
+                color="primary"
+                variant="outlined"
+                sx={{ width: '240px', ml: 4 }}
+                size="large"
+                onClick={() => goToPrevStep?.()}
+              >
+                Cancel
+              </Button>
             </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                py: 2,
-                borderBottom: '1px solid #E5E7EB',
-              }}
+            <Link
+              href="https://humanprotocol.org/app/terms-and-conditions"
+              target="_blank"
             >
-              <Typography>Fees</Typography>
-              <Typography color="text.secondary">
-                (
-                {Number(jobLauncherFee) >= 0
-                  ? `${Number(jobLauncherFee)}%`
-                  : 'loading...'}
-                ) {feeAmount.toFixed(2)} USD
+              <Typography variant="caption" mt={4} component="p">
+                Terms & conditions
               </Typography>
-            </Box>
-            <Box sx={{ py: 1.5 }}>
-              <Typography mb={2}>Payment method</Typography>
-              <Stack direction="column" spacing={1}>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography color="text.secondary">Balance</Typography>
-                  <Typography color="text.secondary">
-                    {balancePayAmount.toFixed(2)} USD
-                  </Typography>
-                </Stack>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography color="text.secondary">Credit Card</Typography>
-                  <Typography color="text.secondary">
-                    {creditCardPayAmount.toFixed(2)} USD
-                  </Typography>
-                </Stack>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography>Total</Typography>
-                  <Typography>{totalAmount.toFixed(2)} USD</Typography>
-                </Stack>
-              </Stack>
-            </Box>
+            </Link>
+
+            <SelectCardModal
+              open={isSelectCardModalOpen}
+              onClose={() => setIsSelectCardModalOpen(false)}
+              cards={cards}
+              onSelect={(card) => {
+                setSelectedCard(card);
+                setIsSelectCardModalOpen(false);
+              }}
+            />
+            <AddCardModal
+              open={isAddCardOpen}
+              onClose={() => setIsAddCardOpen(false)}
+              onComplete={() => {
+                handleSuccessAction('Your card has been successfully added.');
+                fetchCards();
+              }}
+            />
+            <SuccessModal
+              open={isSuccessOpen}
+              onClose={() => {
+                if (openBillingAfterAddCard) {
+                  setIsBillingDetailsOpen(true);
+                }
+                setIsSuccessOpen(false);
+              }}
+              message={successMessage}
+            />
+
+            <BillingDetailsModal
+              open={isBillingDetailsOpen}
+              onClose={() => setIsBillingDetailsOpen(false)}
+              billingInfo={{
+                name: '',
+                email: '',
+                address: {
+                  city: '',
+                  country: '',
+                  postalCode: '',
+                  line: '',
+                },
+                vat: '',
+                vatType: '',
+              }}
+              setBillingInfo={(info) => {
+                handleSuccessAction(
+                  'Your billing details have been successfully updated.',
+                );
+              }}
+            />
           </Box>
-        </Grid>
-      </Grid>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mt: 4,
-        }}
-      >
-        <Box>
-          <LoadingButton
-            color="primary"
-            variant="contained"
-            sx={{ width: '240px' }}
-            size="large"
-            onClick={handlePay}
-            loading={isLoading}
-            disabled={!amount || (!payWithAccountBalance && !selectedCard)}
-          >
-            Pay now
-          </LoadingButton>
-          <Button
-            color="primary"
-            variant="outlined"
-            sx={{ width: '240px', ml: 4 }}
-            size="large"
-            onClick={() => goToPrevStep?.()}
-          >
-            Cancel
-          </Button>
         </Box>
-        <Link
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-        >
-          <Typography variant="caption" mt={4} component="p">
-            Terms & conditions
-          </Typography>
-        </Link>
-
-        <SelectCardModal
-          open={isSelectCardModalOpen}
-          onClose={() => setIsSelectCardModalOpen(false)}
-          cards={cards}
-          onSelect={(card) => {
-            setSelectedCard(card);
-            setIsSelectCardModalOpen(false);
-          }}
-        />
-        <AddCardModal
-          open={isAddCardOpen}
-          onClose={() => setIsAddCardOpen(false)}
-          onComplete={() => {
-            handleSuccessAction('Your card has been successfully added.');
-            fetchCards();
-          }}
-        />
-        <SuccessModal
-          open={isSuccessOpen}
-          onClose={() => {
-            if (openBillingAfterAddCard) {
-              setIsBillingDetailsOpen(true);
-            }
-            setIsSuccessOpen(false);
-          }}
-          message={successMessage}
-        />
-
-        <BillingDetailsModal
-          open={isBillingDetailsOpen}
-          onClose={() => setIsBillingDetailsOpen(false)}
-          billingInfo={{
-            name: '',
-            email: '',
-            address: {
-              city: '',
-              country: '',
-              postalCode: '',
-              line: '',
-            },
-            vat: '',
-            vatType: '',
-          }}
-          setBillingInfo={(info) => {
-            handleSuccessAction(
-              'Your billing details have been successfully updated.',
-            );
-          }}
-        />
-      </Box>
+      )}
     </Box>
   );
 };
