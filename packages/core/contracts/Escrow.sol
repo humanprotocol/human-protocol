@@ -354,7 +354,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         remainingFunds = cachedRemainingFunds;
 
-        // Check the forceComplete flag and transfer remaining funds if true
         if (cachedRemainingFunds == 0 || forceComplete) {
             emit BulkTransferV2(
                 _txId,
