@@ -586,6 +586,12 @@ export class PaymentService {
     user: UserEntity,
     updateBillingInfoDto: BillingInfoDto,
   ) {
+    if (!user.stripeCustomerId) {
+      throw new ControlledError(
+        ErrorPayment.CustomerNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     // If the VAT or VAT type has changed, update it in Stripe
     if (updateBillingInfoDto.vat && updateBillingInfoDto.vatType) {
       const existingTaxIds = await this.stripe.customers.listTaxIds(
