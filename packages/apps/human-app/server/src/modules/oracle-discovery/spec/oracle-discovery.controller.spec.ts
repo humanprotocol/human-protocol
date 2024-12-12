@@ -5,9 +5,8 @@ import { OracleDiscoveryController } from '../oracle-discovery.controller';
 import { OracleDiscoveryService } from '../oracle-discovery.service';
 import { oracleDiscoveryServiceMock } from './oracle-discovery.service.mock';
 import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryDto,
-  OracleDiscoveryResult,
+  GetOraclesQuery,
+  DiscoveredOracle,
 } from '../model/oracle-discovery.model';
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 import { OracleDiscoveryProfile } from '../oracle-discovery.mapper.profile';
@@ -62,26 +61,21 @@ describe('OracleDiscoveryController', () => {
   });
 
   describe('oracle discovery', () => {
-    it('oracle discovery should be return OracleDiscoveryData', async () => {
+    it('should return discovered oracles', async () => {
       const dtoFixture = {
         selected_job_types: ['job-type-1', 'job-type-2'],
-      } as OracleDiscoveryDto;
-      const commandFixture = {
-        selectedJobTypes: ['job-type-1', 'job-type-2'],
-      } as OracleDiscoveryCommand;
-      const result: OracleDiscoveryResult[] =
+      } as GetOraclesQuery;
+      const result: DiscoveredOracle[] =
         await controller.getOracles(dtoFixture);
       const expectedResponse = generateOracleDiscoveryResponseBody();
-      expect(serviceMock.processOracleDiscovery).toHaveBeenCalledWith(
-        commandFixture,
-      );
+      expect(serviceMock.getOracles).toHaveBeenCalled();
       expect(result).toEqual(expectedResponse);
     });
 
     it('should throw an error if jobsDiscoveryFlag is disabled', async () => {
       const dtoFixture = {
         selected_job_types: ['job-type-1', 'job-type-2'],
-      } as OracleDiscoveryDto;
+      } as GetOraclesQuery;
 
       (configServiceMock as any).jobsDiscoveryFlag = false;
 

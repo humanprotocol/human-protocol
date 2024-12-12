@@ -1,10 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResult,
+  GetOraclesCommand,
+  DiscoveredOracle,
 } from '../model/oracle-discovery.model';
 
-const response1: OracleDiscoveryResult = {
+const response1: DiscoveredOracle = {
   address: '0xd06eac24a0c47c776Ce6826A93162c4AfC029047',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role1',
@@ -15,17 +15,18 @@ const response1: OracleDiscoveryResult = {
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
 };
-const response2: OracleDiscoveryResult = {
+const response2: DiscoveredOracle = {
   address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role2',
+  url: '',
   jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],
   retriesCount: 0,
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response3: OracleDiscoveryResult = {
+const response3: DiscoveredOracle = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role3',
@@ -36,7 +37,7 @@ const response3: OracleDiscoveryResult = {
   registrationNeeded: false,
   registrationInstructions: undefined,
 };
-const response4: OracleDiscoveryResult = {
+const response4: DiscoveredOracle = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.MOONBASE_ALPHA,
   role: 'role3',
@@ -73,12 +74,12 @@ export function generateOracleDiscoveryResponseBodyByJobType(jobType: string) {
   );
 }
 
-export const reputationOracleSupportedJobTypes = 'job-type-1, job-type-4';
+export const reputationOracleSupportedJobTypes = 'job-type-1,job-type-4';
 export const filledCommandFixture = {
   selectedJobTypes: ['job-type-1'],
-} as OracleDiscoveryCommand;
+} as GetOraclesCommand;
 export const emptyCommandFixture = {
   selectedJobTypes: [],
-} as OracleDiscoveryCommand;
-export const notSetCommandFixture = {} as OracleDiscoveryCommand;
+} as GetOraclesCommand;
+export const notSetCommandFixture = {} as GetOraclesCommand;
 export const errorResponse = [];
