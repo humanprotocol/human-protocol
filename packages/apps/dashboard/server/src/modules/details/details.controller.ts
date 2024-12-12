@@ -19,6 +19,7 @@ import {
 import {
   DetailsTransactionsPaginationDto,
   DetailsEscrowsPaginationDto,
+  LeadersPaginationDto,
 } from './dto/details-pagination.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
@@ -32,7 +33,6 @@ export class DetailsController {
   constructor(private readonly detailsService: DetailsService) {}
 
   @Get('/leaders')
-  @ApiQuery({ name: 'chainId', enum: ChainId, required: false })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get the best leaders by role',
@@ -46,28 +46,15 @@ export class DetailsController {
     isArray: true,
   })
   public async leaders(
-    @Query('chainId') chainId?: ChainId,
+    @Query() query: LeadersPaginationDto,
   ): Promise<LeaderDto[]> {
-    return this.detailsService.getLeadersByChainId(chainId, 4);
-  }
-
-  @Get('/leaders/all')
-  @ApiQuery({ name: 'chainId', enum: ChainId, required: false })
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get all leaders',
-    description: 'Returns all leaders for a given chain or all chains.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'All leaders retrieved successfully',
-    type: LeaderDto,
-    isArray: true,
-  })
-  public async allLeaders(
-    @Query('chainId') chainId?: ChainId,
-  ): Promise<LeaderDto[]> {
-    return this.detailsService.getLeadersByChainId(chainId);
+    return this.detailsService.getLeaders(
+      query.chainId,
+      query.orderBy,
+      query.orderDirection,
+      query.first,
+      query.skip,
+    );
   }
 
   @Get('/:address')

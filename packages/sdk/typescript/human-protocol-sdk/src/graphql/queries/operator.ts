@@ -26,22 +26,32 @@ const LEADER_FRAGMENT = gql`
 `;
 
 export const GET_LEADERS_QUERY = (filter: ILeadersFilter) => {
-  const { role } = filter;
+  const { role, roles, minAmountStaked } = filter;
 
   const WHERE_CLAUSE = `
     where: {
-      ${role ? `role: $role` : ''}
+      ${minAmountStaked ? `amountStaked_gt: $minAmountStaked` : ''}
+      ${roles ? `role_in: $roles` : ''}
+      ${role ? `role: $role` : ''},
     }
   `;
 
   return gql`
     query getLeaders(
+      $minAmountStaked: Int,
+      $roles: [String!]
       $role: String
+      $first: Int
+      $skip: Int
+      $orderBy: String
+      $orderDirection: String
     ) {
       leaders(
         ${WHERE_CLAUSE}
-        orderBy: amountStaked,
-        orderDirection: desc,
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
       ) {
         ...LeaderFields
       }

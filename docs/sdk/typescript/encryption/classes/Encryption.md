@@ -65,13 +65,13 @@ The private key.
 
 #### Defined in
 
-[encryption.ts:52](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L52)
+[encryption.ts:62](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L62)
 
 ## Methods
 
 ### decrypt()
 
-> **decrypt**(`message`, `publicKey`?): `Promise`\<`string`\>
+> **decrypt**(`message`, `publicKey`?): `Promise`\<`Uint8Array`\>
 
 This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
 
@@ -87,7 +87,7 @@ Public key used to verify signature if needed. This is optional.
 
 #### Returns
 
-`Promise`\<`string`\>
+`Promise`\<`Uint8Array`\>
 
 Message decrypted.
 
@@ -117,7 +117,7 @@ const resultMessage = await encription.decrypt('message');
 
 #### Defined in
 
-[encryption.ts:179](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L179)
+[encryption.ts:190](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L190)
 
 ***
 
@@ -153,7 +153,7 @@ const resultMessage = await encription.sign('message');
 
 #### Defined in
 
-[encryption.ts:216](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L216)
+[encryption.ts:247](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L247)
 
 ***
 
@@ -165,7 +165,7 @@ This function signs and encrypts a message using the private key used to initial
 
 #### Parameters
 
-• **message**: `string`
+• **message**: `MessageDataType`
 
 Message to sign and encrypt.
 
@@ -218,7 +218,7 @@ const resultMessage = await encription.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
-[encryption.ts:128](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L128)
+[encryption.ts:138](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L138)
 
 ***
 
@@ -246,4 +246,4 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
-[encryption.ts:63](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L63)
+[encryption.ts:73](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L73)

@@ -55,7 +55,15 @@ class TestOperatorUtils(unittest.TestCase):
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
-                params={"role": filter.role},
+                params={
+                    "minAmountStaked": filter.min_amount_staked,
+                    "roles": filter.roles,
+                    "role": filter.role,
+                    "orderBy": filter.order_by,
+                    "orderDirection": filter.order_direction.value,
+                    "first": filter.first,
+                    "skip": filter.skip,
+                },
             )
 
             self.assertEqual(len(leaders), 1)
@@ -116,10 +124,32 @@ class TestOperatorUtils(unittest.TestCase):
 
             leaders = OperatorUtils.get_leaders(filter)
 
+            print("Query used:", get_leaders_query(filter))
+            print(
+                "Params passed:",
+                {
+                    "role": filter.role,
+                    "minAmountStaked": filter.min_amount_staked,
+                    "roles": filter.roles,
+                    "orderBy": filter.order_by,
+                    "orderDirection": filter.order_direction.value,
+                    "first": filter.first,
+                    "skip": filter.skip,
+                },
+            )
+
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
-                params={"role": filter.role},
+                params={
+                    "minAmountStaked": filter.min_amount_staked,
+                    "roles": filter.roles,
+                    "role": filter.role,
+                    "orderBy": filter.order_by,
+                    "orderDirection": filter.order_direction.value,
+                    "first": filter.first,
+                    "skip": filter.skip,
+                },
             )
 
             self.assertEqual(len(leaders), 1)
@@ -183,7 +213,15 @@ class TestOperatorUtils(unittest.TestCase):
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
-                params={"role": filter.role},
+                params={
+                    "minAmountStaked": filter.min_amount_staked,
+                    "roles": filter.roles,
+                    "role": filter.role,
+                    "orderBy": filter.order_by,
+                    "orderDirection": filter.order_direction.value,
+                    "first": filter.first,
+                    "skip": filter.skip,
+                },
             )
 
             self.assertEqual(len(leaders), 1)
@@ -227,7 +265,15 @@ class TestOperatorUtils(unittest.TestCase):
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
-                params={"role": filter.role},
+                params={
+                    "minAmountStaked": filter.min_amount_staked,
+                    "roles": filter.roles,
+                    "role": filter.role,
+                    "orderBy": filter.order_by,
+                    "orderDirection": filter.order_direction.value,
+                    "first": filter.first,
+                    "skip": filter.skip,
+                },
             )
 
             self.assertEqual(leaders, [])

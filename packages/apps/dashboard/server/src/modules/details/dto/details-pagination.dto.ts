@@ -9,9 +9,59 @@ import {
   IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, OrderDirection } from '@human-protocol/sdk';
 
 import { IsRoleValid } from './validation/role-validation';
+import { LeadersOrderBy } from 'src/common/enums/leader';
+
+export class LeadersPaginationDto {
+  @ApiPropertyOptional({ enum: ChainId })
+  @IsEnum(ChainId)
+  @IsIn(Object.values(ChainId))
+  @Transform(({ value }) => parseInt(value))
+  @IsOptional()
+  public chainId?: ChainId;
+
+  @ApiPropertyOptional({
+    enum: LeadersOrderBy,
+    default: LeadersOrderBy.AMOUNT_STAKED,
+  })
+  @IsEnum(LeadersOrderBy)
+  @IsIn(Object.values(LeadersOrderBy))
+  @IsOptional()
+  public orderBy?: LeadersOrderBy;
+
+  @ApiPropertyOptional({
+    enum: OrderDirection,
+    default: OrderDirection.DESC,
+  })
+  @IsEnum(OrderDirection)
+  @IsIn(Object.values(OrderDirection))
+  @IsOptional()
+  public orderDirection?: OrderDirection;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    default: 10,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1000)
+  @IsOptional()
+  public first?: number = 10;
+
+  @ApiPropertyOptional({
+    minimum: 0,
+    default: 0,
+  })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1000)
+  @IsOptional()
+  public skip?: number = 0;
+}
 
 export class DetailsTransactionsPaginationDto {
   @ApiProperty({ enum: ChainId })
