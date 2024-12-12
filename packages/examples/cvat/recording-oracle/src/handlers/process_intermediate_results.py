@@ -420,119 +420,115 @@ def process_intermediate_results(  # noqa: PLR0912
 
     gt_stats = validation_result.gt_stats
     if gt_stats:
-        # cvat_task_id: {val_frame_id, ...}
-        cvat_task_id_to_failed_val_frames: dict[int, set[int]] = {}
-        rejected_job_ids = rejected_jobs.keys()
+        # Update honeypots in jobs
+        available_gt_frames = {
+            gt_key for gt_key in gt_stats
+            if gt_stats[gt_key].rating > Config.validation.gt_ban_threshold
+        }
 
-        if rejected_job_ids:
-            job_id_to_task_id = {j.job_id: j.task_id for j in unchecked_jobs_meta.jobs}
-            job_id_to_frame_range = {j.job_id: j.job_frame_range for j in unchecked_jobs_meta.jobs}
+        logger.debug(
+            "Iteration: {}"
+            ", available GT count: {} ({}%, banned {})",
+            ", remaining jobs count: {} ({}%)".format(
+                task.iteration,
+                *value_and_percent(len(available_gt_frames), len(gt_stats)),
+                len(gt_stats) - len(available_gt_frames),
+                *value_and_percent(len(rejected_jobs), len(meta.jobs)),
+            )
+        )
 
-            # find validation frames to be disabled
-            for rejected_job_id in rejected_job_ids:
-                job_frame_range = job_id_to_frame_range[rejected_job_id]
-                cvat_task_id = job_id_to_task_id[rejected_job_id]
-                task_honeypots_mapping = validation_result.task_id_to_honeypots_mapping[
-                    cvat_task_id
-                ]
-                job_honeypots = sorted(set(task_honeypots_mapping.keys()) & set(job_frame_range))
-                validation_frames = [
-                    val_frame
-                    for honeypot, val_frame in task_honeypots_mapping.items()
-                    if honeypot in job_honeypots
-                ]
-                sorted_task_frame_names = validation_result.task_id_to_frame_names[cvat_task_id]
+        if not rejected_jobs:
+            logger.debug("No rejected jobs found, finishing")
+            should_complete = True
+            break
 
-                for val_frame in validation_frames:
-                    val_frame_name = sorted_task_frame_names[val_frame]
-                    val_frame_stats = gt_stats[val_frame_name]
-                    if (
-                        val_frame_stats.failed_attempts >= Config.validation.gt_ban_threshold
-                        and not val_frame_stats.accepted_attempts
-                    ):
-                        cvat_task_id_to_failed_val_frames.setdefault(cvat_task_id, set()).add(
-                            val_frame
-                        )
+        if (
+            len(available_gt_frames) / len(gt_stats) < Config.validation.min_available_gt_threshold
+            # or len(available_gt_pool) < manifest.validation.val_size
+        ):
+            logger.debug("Not enough GT to continue, stopping")
+            should_complete = True
+            break
 
-        for cvat_task_id, task_bad_validation_frames in cvat_task_id_to_failed_val_frames.items():
+        if task.iteration >= Config.validation.max_escrow_iterations:
+            logger.debug("Too many annotation iterations, stopping")
+            should_complete = True
+            break
+
+        gt_frame_uses = {gt_key: gt_stat.total_uses for gt_key, gt_stat in gt_stats.items()}
+
+        rng = np.random.default_rng()
+
+        tasks_with_rejected_jobs = grouped(unchecked_jobs_meta.jobs, key=lambda v: v.task_id)
+
+        # Update honeypots in rejected jobs
+        for cvat_task_id, task_rejected_jobs in tasks_with_rejected_jobs.items():
+            if not task_rejected_jobs:
+                continue
+
             task_validation_layout = validation_result.task_id_to_val_layout[cvat_task_id]
+            task_frame_names = validation_result.task_id_to_frame_names[cvat_task_id]
 
-            task_disabled_bad_frames = (
-                set(task_validation_layout.disabled_frames) & task_bad_validation_frames
-            )
-            if task_disabled_bad_frames:
-                logger.error(
-                    "Logical error occurred while disabling validation frames "
-                    f"for the task({task_id}). Frames {task_disabled_bad_frames} "
-                    "are already disabled."
-                )
+            task_gt_key_to_validation_frame = {
+                # TODO: maybe switch to per GT case stats for GT frame stats
+                # e.g. per skeleton point (all skeleton points use the same GT frame names)
+                task_frame_names[validation_frame]: validation_frame
+                for validation_frame in task_validation_layout.validation_frames
+            }
 
-            task_updated_disabled_frames = list(
-                set(task_validation_layout.disabled_frames) | set(task_bad_validation_frames)
-            )
-            task_good_validation_frames = list(
-                set(task_validation_layout.validation_frames) - set(task_updated_disabled_frames)
-            )
+            task_available_validation_frames = {
+                validation_frame
+                for validation_frame in task_validation_layout.validation_frames
+                if task_frame_names[validation_frame] in available_gt_frames
+            }
 
-            if len(task_good_validation_frames) < task_validation_layout.frames_per_job_count:
+            if len(task_available_validation_frames) < task_validation_layout.frames_per_job_count:
                 should_complete = True
                 logger.info(
                     f"Validation for escrow_address={escrow_address}: "
                     "Too few validation frames left "
                     f"(required: {task_validation_layout.frames_per_job_count}, "
-                    f"left: {len(task_good_validation_frames)}) for the task({cvat_task_id}), "
+                    f"left: {len(task_available_validation_frames)}) for the task({cvat_task_id}), "
                     "stopping annotation"
                 )
                 break
 
+            task_updated_disabled_frames = list(
+                validation_frame
+                for validation_frame in task_validation_layout.validation_frames
+                if validation_frame not in task_available_validation_frames
+            )
+
             task_honeypot_to_index: dict[int, int] = {
                 honeypot: i for i, honeypot in enumerate(task_validation_layout.honeypot_frames)
-            }  # honeypot -> list index
-
-            task_honeypots_mapping = validation_result.task_id_to_honeypots_mapping[cvat_task_id]
-
-            task_rejected_jobs = [
-                j
-                for j in unchecked_jobs_meta.jobs
-                if j.job_id in rejected_job_ids and j.task_id == cvat_task_id
-            ]
+            }  # honeypot -> honeypot list index
 
             task_updated_honeypot_real_frames = task_validation_layout.honeypot_real_frames.copy()
-            for job in task_rejected_jobs:
-                job_frame_range = job.job_frame_range
-                job_honeypots = sorted(set(task_honeypots_mapping.keys()) & set(job_frame_range))
 
-                job_honeypots_to_replace = []
-                job_validation_frames_to_replace = []
-                job_validation_frames_to_keep = []
-                for honeypot in job_honeypots:
-                    validation_frame = task_honeypots_mapping[honeypot]
-                    if validation_frame in task_bad_validation_frames:
-                        job_honeypots_to_replace.append(honeypot)
-                        job_validation_frames_to_replace.append(validation_frame)
-                    else:
-                        job_validation_frames_to_keep.append(validation_frame)
-
-                # choose new unique validation frames for the job
-                assert not (
-                    set(job_validation_frames_to_replace) & set(task_good_validation_frames)
-                )
-                job_available_validation_frames = list(
-                    set(task_good_validation_frames) - set(job_validation_frames_to_keep)
+            for job_meta in task_rejected_jobs:
+                job_frame_range = job_meta.job_frame_range
+                job_honeypots = sorted(
+                    set(task_validation_layout.honeypot_frames).intersection(job_frame_range)
                 )
 
-                rng = np.random.Generator(np.random.MT19937())
-                new_job_validation_frames = rng.choice(
-                    job_available_validation_frames,
-                    replace=False,
-                    size=len(job_validation_frames_to_replace),
-                ).tolist()
+                # Choose new unique validation frames for the job
+                job_validation_frames = []
+                for _ in job_validation_frames:
+                    # TODO: optimize this search by using "bags" with known counts
+                    least_use_count = min(c for gt_key, c in gt_frame_uses.items() if gt_key not in job_validation_frames if task_gt_key_to_validation_frame[gt_key] in task_available_validation_frames)
+                    least_used_frames = [gt_key for gt_key, c in gt_frame_uses.items() if c == least_use_count if task_gt_key_to_validation_frame[gt_key] in task_available_validation_frames]
+                    available_choices = least_used_frames
 
-                for honeypot, new_validation_frame in zip(
-                    job_honeypots_to_replace, new_job_validation_frames, strict=True
+                    selected_gt_key = available_choices[rng.integers(len(available_choices))]
+
+                    job_validation_frames.append(task_gt_key_to_validation_frame[selected_gt_key])
+                    gt_frame_uses[selected_gt_key] += 1
+
+                for job_honeypot, job_validation_frame in zip(
+                    job_validation_frames, job_validation_frames
                 ):
-                    honeypot_index = task_honeypot_to_index[honeypot]
-                    task_updated_honeypot_real_frames[honeypot_index] = new_validation_frame
+                    honeypot_index = task_honeypot_to_index[job_honeypot]
+                    task_updated_honeypot_real_frames[honeypot_index] = job_validation_frame
 
                 # Make sure honeypots do not repeat in jobs
                 assert len(
