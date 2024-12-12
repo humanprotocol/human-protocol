@@ -119,7 +119,6 @@ import { QualificationService } from '../qualification/qualification.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 
 const rate = 1.5;
-const mappedJobType = 'mappedType';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -154,7 +153,6 @@ jest.mock('../../common/utils', () => ({
       bucket: MOCK_BUCKET_NAME,
     };
   }),
-  mapJobType: jest.fn().mockImplementation(() => 'mappedType'),
 }));
 
 jest.mock('../../common/utils/storage', () => ({
@@ -344,7 +342,7 @@ describe('JobService', () => {
 
       expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
         MOCK_CHAIN_ID,
-        mappedJobType,
+        JobRequestType.FORTUNE,
         providedReputationOracle,
         providedExchangeOracle,
         providedRecordingOracle,
