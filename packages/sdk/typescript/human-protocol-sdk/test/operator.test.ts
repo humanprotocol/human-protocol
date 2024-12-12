@@ -14,6 +14,7 @@ import {
 } from '../src/graphql/queries/operator';
 import {
   ILeader,
+  ILeadersFilter,
   ILeaderSubgraph,
   IOperator,
   IOperatorSubgraph,
@@ -21,7 +22,7 @@ import {
   IReward,
 } from '../src/interfaces';
 import { OperatorUtils } from '../src/operator';
-import { ChainId } from '../src/enums';
+import { ChainId, OrderDirection } from '../src/enums';
 
 vi.mock('graphql-request', () => {
   return {
@@ -211,7 +212,14 @@ describe('OperatorUtils', () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
-      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+      const filter: ILeadersFilter = {
+        chainId: ChainId.LOCALHOST,
+        role: 'role',
+      };
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
       const result = await OperatorUtils.getLeaders(filter);
 
@@ -219,7 +227,12 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          role: filter.role,
+          minAmountStaked: filter?.minAmountStaked,
+          role: filter?.role,
+          orderBy: filter?.orderBy,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
         }
       );
       expect(result).toEqual([mockLeader, mockLeader]);
@@ -237,7 +250,14 @@ describe('OperatorUtils', () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
-      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+      const filter: ILeadersFilter = {
+        chainId: ChainId.LOCALHOST,
+        role: 'role',
+      };
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
       const result = await OperatorUtils.getLeaders(filter);
 
@@ -245,9 +265,15 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          role: filter.role,
+          minAmountStaked: filter?.minAmountStaked,
+          role: filter?.role,
+          orderBy: filter?.orderBy,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
         }
       );
+
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
@@ -263,7 +289,15 @@ describe('OperatorUtils', () => {
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
-      const filter = { chainId: ChainId.LOCALHOST, role: 'role' };
+
+      const filter: ILeadersFilter = {
+        chainId: ChainId.LOCALHOST,
+        role: 'role',
+      };
+      const first =
+        filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
+      const skip = filter.skip || 0;
+      const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
       const result = await OperatorUtils.getLeaders(filter);
 
@@ -271,7 +305,12 @@ describe('OperatorUtils', () => {
         NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
-          role: filter.role,
+          minAmountStaked: filter?.minAmountStaked,
+          role: filter?.role,
+          orderBy: filter?.orderBy,
+          orderDirection: orderDirection,
+          first: first,
+          skip: skip,
         }
       );
       expect(result).toEqual([mockLeader, mockLeader]);
