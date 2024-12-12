@@ -132,7 +132,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
           );
         },
         renderCell: (params: GridRenderCellParams) => (
-          <ChainCell chainId={params.value} isMobile={isMobile} />
+          <ChainCell chainId={params.value} />
         ),
       },
       {
