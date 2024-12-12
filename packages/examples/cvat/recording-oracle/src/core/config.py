@@ -163,37 +163,27 @@ class FeaturesConfig:
 
 
 class ValidationConfig:
-    default_point_validity_relative_radius = float(
-        os.environ.get("DEFAULT_POINT_VALIDITY_RELATIVE_RADIUS", 0.9)
-    )
-
-    default_oks_sigma = float(
-        os.environ.get("DEFAULT_OKS_SIGMA", 0.1)  # average value for COCO points
-    )
-    "Default OKS sigma for GT skeleton points validation. Valid range is (0; 1]"
-
-    gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.9))
+    min_available_gt_threshold = float(os.environ.get("MIN_AVAILABLE_GT_THRESHOLD", "0.3"))
     """
-    The maximum allowed fraction of failed assignments per GT sample,
-    before it's considered failed for the current validation iteration.
-    v = 0 -> any GT failure leads to image failure
-    v = 1 -> any GT failures do not lead to image failure
+    The minimum required share of available GT frames required to continue annotation attempts.
+    When there is no enough GT left, annotation stops.
     """
 
-    gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
+    gt_ban_threshold = float(os.environ.get("GT_BAN_THRESHOLD", "0.03"))
     """
-    The maximum allowed number of failures per GT sample before it's excluded from validation
+    The minimum allowed rating (annotation probability) per GT sample,
+    before it's considered bad and banned for further use.
     """
 
     unverifiable_assignments_threshold = float(
-        os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1)
+        os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1")
     )
     """
     The maximum allowed fraction of jobs with insufficient GT available for validation.
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
-    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", "0"))
+    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", "50"))
     """
     Maximum escrow annotation-validation iterations.
     After this, the escrow is finished automatically.

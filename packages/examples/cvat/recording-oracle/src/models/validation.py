@@ -61,6 +61,8 @@ class GtStats(Base):
 
     failed_attempts = Column(Integer, default=0, nullable=False)
     accepted_attempts = Column(Integer, default=0, nullable=False)
+    total_uses = Column(Integer, default=0, nullable=False)
+
     accumulated_quality = Column(Float, default=0.0, nullable=False)
 
     task: Mapped[Task] = relationship(back_populates="gt_stats")

@@ -786,13 +786,13 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "cvat-sdk"
-version = "2.21.3"
+version = "2.23.1"
 description = "CVAT REST API"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "cvat_sdk-2.21.3-py3-none-any.whl", hash = "sha256:07fc2930df6ee3c567b60f4c4eca10b4d1cade31d840a383a56933dbbabb5d2c"},
-    {file = "cvat_sdk-2.21.3.tar.gz", hash = "sha256:749c3d010646a4e7d31a2743e113cda47cc803cb82dfa7f19a086aff28753999"},
+    {file = "cvat_sdk-2.23.1-py3-none-any.whl", hash = "sha256:31064d51064505916c77044372463c62689c0ac04c70d7c25b2ceaf462899548"},
+    {file = "cvat_sdk-2.23.1.tar.gz", hash = "sha256:dad9d637103029fd089bbce80e5af4561e0b4aaa305499945d90021b51248164"},
 ]
 
 [package.dependencies]
@@ -800,15 +800,16 @@ attrs = ">=21.4.0"
 packaging = ">=21.3"
 Pillow = ">=10.3.0"
 platformdirs = ">=2.1.0"
-python-dateutil = ">=2.5.3"
+python_dateutil = ">=2.5.3"
 setuptools = ">=21.0.0"
 tqdm = ">=4.64.0"
 tuspy = "0.2.5"
-typing-extensions = ">=4.2.0"
+typing_extensions = ">=4.2.0"
 urllib3 = ">=1.25.3"
 
 [package.extras]
-pytorch = ["torch", "torchvision"]
+masks = ["numpy (>=2)"]
+pytorch = ["cvat_sdk[masks]", "scikit-image (>=0.24)", "torch", "torchvision"]
 
 [[package]]
 name = "cycler"
@@ -4711,4 +4712,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10, <3.13"
-content-hash = "ece72f10bc9ea88f5cc3947f80003d8e5f41dcf7434e17edfc55edf8594b0369"
+content-hash = "cce8a85f0c617e7d88e528ecf6a0e24740fb83a6e202413926665cf416a49301"

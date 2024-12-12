@@ -25,7 +25,7 @@ datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1b
 human-protocol-sdk = ">=3.0.7b0,<3.1.0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
-cvat-sdk = "^2.21.3"
+cvat-sdk = "^2.23.0"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.82.6"
