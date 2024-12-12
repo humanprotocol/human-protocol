@@ -8,40 +8,10 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
     string,
     { color: { text: string; border: string } }
   > = {
-    createEscrow: {
-      color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
-      },
-    },
-    setup: {
-      color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
-      },
-    },
-    fund: {
-      color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
-      },
-    },
-    bulkTransfer: {
-      color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
-      },
-    },
-    storeResults: {
-      color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
-      },
-    },
     withdraw: {
       color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
       },
     },
     cancel: {
@@ -86,19 +56,7 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
         border: colorPalette.warning.light,
       },
     },
-    transfer: {
-      color: {
-        text: colorPalette.success.main,
-        border: colorPalette.success.light,
-      },
-    },
     complete: {
-      color: {
-        text: colorPalette.success.main,
-        border: colorPalette.success.light,
-      },
-    },
-    multimethod: {
       color: {
         text: colorPalette.success.main,
         border: colorPalette.success.light,
@@ -106,8 +64,10 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
     },
   };
 
-  const currentStatusColors =
-    methodAttributes[method]?.color || colorPalette.success.main;
+  const currentStatusColors = methodAttributes[method]?.color || {
+    text: colorPalette.primary.main,
+    border: colorPalette.primary.light,
+  };
 
   return (
     <Box
@@ -119,7 +79,13 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
         border: `1px solid ${currentStatusColors.border}`,
       }}
     >
-      <Typography>{capitalize(method)}</Typography>
+      <Typography
+        sx={{
+          color: `${currentStatusColors.text}`,
+        }}
+      >
+        {capitalize(method)}
+      </Typography>
     </Box>
   );
 };

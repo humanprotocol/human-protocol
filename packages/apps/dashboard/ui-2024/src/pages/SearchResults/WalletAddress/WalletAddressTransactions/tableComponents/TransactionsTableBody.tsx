@@ -5,8 +5,8 @@ import MuiTableBody from '@mui/material/TableBody';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AbbreviateClipboard from '@components/SearchResults/AbbreviateClipboard';
 import { colorPalette } from '@assets/styles/color-palette';
 
@@ -79,19 +79,23 @@ export const TransactionsTableBody: React.FC = () => {
             key={idx}
             sx={{
               backgroundColor: expandedRows[idx]
-                ? colorPalette.info.main
-                : 'inherit',
+                ? colorPalette.table.selected
+                : colorPalette.table.main,
             }}
           >
             <TableCell>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <IconButton onClick={() => toggleRow(idx)} size="small">
-                  {expandedRows[idx] ? (
-                    <RemoveIcon fontSize="small" />
-                  ) : (
-                    <AddIcon fontSize="small" />
+                <Box width={'30px'}>
+                  {elem.internalTransactions.length > 0 && (
+                    <IconButton onClick={() => toggleRow(idx)} size="small">
+                      {expandedRows[idx] ? (
+                        <RemoveCircleIcon fontSize="medium" />
+                      ) : (
+                        <AddCircleIcon fontSize="medium" />
+                      )}
+                    </IconButton>
                   )}
-                </IconButton>
+                </Box>
                 <AbbreviateClipboard value={elem.txHash} />
               </Box>
             </TableCell>
@@ -113,7 +117,7 @@ export const TransactionsTableBody: React.FC = () => {
             <TableRow
               key={`${idx}-${internalIdx}`}
               sx={{
-                backgroundColor: colorPalette.info.light,
+                backgroundColor: colorPalette.table.secondary,
                 display: expandedRows[idx] ? 'table-row' : 'none',
                 transition: 'all 1s ease',
               }}
