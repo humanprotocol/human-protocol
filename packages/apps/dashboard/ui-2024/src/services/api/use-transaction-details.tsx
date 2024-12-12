@@ -6,13 +6,23 @@ import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { useTransactionDetailsDto } from '@utils/hooks/use-transactions-details-dto';
 import { validateResponse } from '@services/validate-response';
 
-const transactionDetailsSuccessResponseSchema = z.object({
-  block: z.number(),
+const internalTransactionSchema = z.object({
   from: z.string(),
   to: z.string(),
   value: z.string(),
   method: z.string(),
+  receiver: z.string().nullable(),
+  escrow: z.string().nullable(),
+  token: z.string().nullable(),
+});
+const transactionDetailsSuccessResponseSchema = z.object({
   txHash: z.string(),
+  method: z.string(),
+  from: z.string(),
+  to: z.string(),
+  block: z.number(),
+  value: z.string(),
+  internalTransactions: z.array(internalTransactionSchema),
 });
 
 export type TransactionDetails = z.infer<
