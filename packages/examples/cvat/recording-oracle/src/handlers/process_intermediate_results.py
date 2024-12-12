@@ -350,6 +350,64 @@ class _TaskValidator:
             task_id_to_frame_names=self._require_field(self._task_id_to_sequence_of_frame_names),
         )
 
+@attrs.define
+class _HoneypotCache:
+    bags: dict[int, set[int]] = {}
+    least_use_count: int = attrs.field(init=False)
+
+    @staticmethod
+    def from_iterable(
+        it: Iterable[int], *, all_frames: Iterable[int] | None = None
+    ) -> _HoneypotCache:
+        frame_counts = {}
+
+        if all_frames is not None:
+            for f in all_frames:
+                frame_counts[f] = 0
+
+        for f in it:
+            frame_counts[f] = frame_counts.get(f, 0) + 1
+
+        return _HoneypotCache.from_dict(frame_counts)
+
+    @staticmethod
+    def from_dict(frame_counts: dict[int, int]) -> _HoneypotCache:
+        bags = {}
+
+        for frame, count in frame_counts.items():
+            bags.setdefault(count, set()).add(frame)
+
+        return _HoneypotCache(bags)
+
+    def __attrs_post_init__(self):
+        self.least_use_count = min(count for count, bag in self.bags if bag)
+
+    def get_least_used(self) -> tuple[int, set[int]]:
+        return (self.least_use_count, self.bags.get(self.least_use_count, set()))
+
+    def mark_used(self, frame: int, *, old_use_count: int | None = None):
+        if old_use_count is not None:
+            bag = self.bags.get(old_use_count)
+            if frame not in bag:
+                raise AssertionError(
+                    f"Frame '{frame}' is not found in the '{old_use_count}'-used bag"
+                )
+        else:
+            _, bag = self.find_frame_bag(frame)
+            if bag is None:
+                raise AssertionError(f"Unknown frame '{frame}'")
+
+            bag.remove(frame)
+            self.bags.setdefault(old_use_count + 1, set()).add(frame)
+
+    def find_frame_bag(self, frame: int) -> tuple[int | None, set | None]:
+        for i, bag in self.bags.items():
+            if frame in bag:
+                return i, bag
+
+        return None, bag
+
+
 
 def process_intermediate_results(  # noqa: PLR0912
     session: Session,
