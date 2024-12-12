@@ -108,6 +108,14 @@ def get_escrows():
 
 
 def get_leaders():
+    leaders = OperatorUtils.get_leaders(LeaderFilter(chain_id=ChainId.POLYGON_AMOY))
+    print(leaders)
+    print(OperatorUtils.get_leader(ChainId.POLYGON_AMOY, leaders[0].address))
+    print(
+        OperatorUtils.get_leaders(
+            LeaderFilter(chain_id=ChainId.POLYGON_AMOY, role="Job Launcher")
+        )
+    )
     leaders = OperatorUtils.get_leaders(
         LeaderFilter(chain_id=ChainId.POLYGON_AMOY, role="Job Launcher")
     )
@@ -140,4 +148,15 @@ if __name__ == "__main__":
 
     # Run single example while testing, and remove comments before commit
 
+    get_escrows()
     get_leaders()
+
+    statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
+    get_hmt_holders(statistics_client)
+    get_escrow_statistics(statistics_client)
+    get_hmt_statistics(statistics_client)
+    get_payment_statistics(statistics_client)
+    get_worker_statistics(statistics_client)
+    get_hmt_daily_data(statistics_client)
+
+    agreement_example()
