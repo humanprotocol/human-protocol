@@ -8,7 +8,6 @@ import {
   IEscrowsFilter,
   Role,
   NETWORKS,
-  ILeader,
   ILeadersFilter,
   OrderDirection,
 } from '@human-protocol/sdk';

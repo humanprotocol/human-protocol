@@ -12,7 +12,6 @@ import {
   OrderDirection,
 } from '@human-protocol/sdk';
 import { LeadersOrderBy } from '../../common/enums/leader';
-import { LeaderDto } from './dto/leader.dto';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -24,7 +23,6 @@ jest.mock('@human-protocol/sdk', () => ({
 describe('DetailsService', () => {
   let service: DetailsService;
   let httpService: HttpService;
-  let networkConfig: NetworkConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -56,7 +54,6 @@ describe('DetailsService', () => {
 
     service = module.get<DetailsService>(DetailsService);
     httpService = module.get<HttpService>(HttpService);
-    networkConfig = module.get<NetworkConfigService>(NetworkConfigService);
   });
 
   it('should fetch and return leaders with reputations', async () => {
