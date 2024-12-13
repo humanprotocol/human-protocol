@@ -152,7 +152,7 @@ class CronConfig:
     track_completed_escrows_max_downloading_retries = int(
         os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
-    "Maximum number of downloading attempts per job during results downloading"
+    "Maximum number of downloading attempts per job or project during results downloading"
 
     track_completed_escrows_jobs_downloading_batch_size = int(
         os.environ.get("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
