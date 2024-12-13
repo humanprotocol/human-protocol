@@ -486,3 +486,5 @@ export const CURSE_WORDS = [
   'xrated',
   'xxx',
 ];
+
+export const ESCROW_BULK_MAX_COUNT = 100;
