@@ -11,7 +11,6 @@ import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
-from src import db
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
@@ -19,7 +18,6 @@ from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.storage import compose_results_bucket_filename
 from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, TaskTypes
 from src.db import SessionLocal
-from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.job_export import (
     CVAT_EXPORT_FORMAT_MAPPING,
@@ -238,48 +236,41 @@ def _handle_escrow_validation(
     session: Session,
     escrow_address: str,
     chain_id: int,
-) -> bool:
-    try:
-        validate_escrow(chain_id, escrow_address)
-    except Exception as e:
-        logger.exception(f"Failed to handle completed projects for escrow {escrow_address}: {e}")
-        return False
+):
+    validate_escrow(chain_id, escrow_address)
 
-    # try to get pessimistic lock for projects and lock escrow validation
-    # if we fail to do that, simply skip the escrow
-    with db.suppress(db_errors.LockNotAvailable):
-        cvat_service.lock_escrow_for_validation(
-            session, escrow_address=escrow_address, chain_id=chain_id
-        )
-        escrow_projects = cvat_service.get_projects_by_escrow_address(
-            session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
-        )
-        _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
-        return True
-    return False
+    escrow_projects = cvat_service.get_projects_by_escrow_address(
+        session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
+    )
+    _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
 
 
 def handle_escrows_validations(logger: logging.Logger) -> None:
-    with SessionLocal.begin() as session:
-        escrow_validations = cvat_service.prepare_escrows_for_validation(
-            session,
-            limit=CronConfig.track_escrow_validations_chunk_size,
-        )
-
-    for escrow_address, chain_id in escrow_validations:
+    for _ in range(CronConfig.track_escrow_validations_chunk_size):
         with SessionLocal.begin() as session:
             # Need to work in separate transactions for each escrow, as a failing DB call
             # (e.g. a failed lock attempt) will abort the transaction. A nested transaction
             # can also be used for handling this.
-            handled = _handle_escrow_validation(logger, session, escrow_address, chain_id)
-            if not handled:
-                # either escrow is invalid, or we couldn't get lock for projects/validations
-                continue
+            escrow_validation = cvat_service.lock_escrow_for_validation(session)
+            if not escrow_validation:
+                break
 
-            # change status so validation won't be attempted again
+            escrow_address = escrow_validation.escrow_address
+            chain_id = escrow_validation.chain_id
+
+            update_kwargs = {}
+            try:
+                _handle_escrow_validation(logger, session, escrow_address, chain_id)
+
+                # Change status so validation won't be attempted again
+                update_kwargs["status"] = EscrowValidationStatuses.in_progress
+            except Exception as e:
+                logger.exception(e)
+
             cvat_service.update_escrow_validation(
                 session,
                 escrow_address=escrow_address,
                 chain_id=chain_id,
-                status=EscrowValidationStatuses.in_progress,
+                increase_attempts=True,  # increase attempts always to allow escrow rotation
+                **update_kwargs,
             )
