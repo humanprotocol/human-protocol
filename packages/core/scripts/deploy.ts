@@ -28,7 +28,7 @@ async function main() {
   );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
-    [await stakingContract.getAddress()],
+    [await stakingContract.getAddress(), 1],
     { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.waitForDeployment();
