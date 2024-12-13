@@ -11,7 +11,6 @@ import src.cvat.api_calls as cvat_api
 import src.services.cloud as cloud_service
 import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
-from src import db
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
@@ -19,7 +18,6 @@ from src.core.oracle_events import ExchangeOracleEvent_JobFinished
 from src.core.storage import compose_results_bucket_filename
 from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, TaskTypes
 from src.db import SessionLocal
-from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.job_export import (
     CVAT_EXPORT_FORMAT_MAPPING,
@@ -238,23 +236,13 @@ def _handle_escrow_validation(
     session: Session,
     escrow_address: str,
     chain_id: int,
-) -> bool:
-    try:
-        validate_escrow(chain_id, escrow_address)
-    except Exception as e:
-        logger.exception(f"Failed to handle completed projects for escrow {escrow_address}: {e}")
-        return False
+):
+    validate_escrow(chain_id, escrow_address)
 
-    # Try to lock escrow projects for validation. If we fail to do that, simply skip the escrow
-    with db.suppress(db_errors.LockNotAvailable):
-        escrow_projects = cvat_service.get_projects_by_escrow_address(
-            session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
-        )
-        _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
-
-        return True
-
-    return False
+    escrow_projects = cvat_service.get_projects_by_escrow_address(
+        session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
+    )
+    _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
 
 
 def handle_escrows_validations(logger: logging.Logger) -> None:
@@ -270,16 +258,19 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
             escrow_address = escrow_validation.escrow_address
             chain_id = escrow_validation.chain_id
 
-            handled = _handle_escrow_validation(logger, session, escrow_address, chain_id)
             update_kwargs = {}
-            if handled:
+            try:
+                _handle_escrow_validation(logger, session, escrow_address, chain_id)
+
                 # Change status so validation won't be attempted again
                 update_kwargs["status"] = EscrowValidationStatuses.in_progress
+            except Exception as e:
+                logger.exception(e)
 
             cvat_service.update_escrow_validation(
                 session,
                 escrow_address=escrow_address,
                 chain_id=chain_id,
-                increase_attempts=True, # increase attempts always to allow escrow rotation
+                increase_attempts=True,  # increase attempts always to allow escrow rotation
                 **update_kwargs,
             )
