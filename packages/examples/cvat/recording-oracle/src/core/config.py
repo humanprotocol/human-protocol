@@ -169,6 +169,13 @@ class ValidationConfig:
     When there is no enough GT left, annotation stops.
     """
 
+    max_gt_share = float(os.environ.get("MAX_USABLE_GT_SHARE", "0.05"))
+    """
+    The maximum share of the dataset to be used for validation. If the available GT share is
+    greater than this number, the extra frames will not be used. It's recommended to keep this
+    value small enough for faster convergence rate of the annotation process.
+    """
+
     gt_ban_threshold = float(os.environ.get("GT_BAN_THRESHOLD", "0.03"))
     """
     The minimum allowed rating (annotation probability) per GT sample,

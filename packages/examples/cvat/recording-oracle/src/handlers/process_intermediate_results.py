@@ -393,17 +393,61 @@ class _TaskHoneypotManager:
     def _get_gt_frame_uses(self) -> dict[GtKey, int]:
         return {gt_key: gt_stat.total_uses for gt_key, gt_stat in self.gt_stats.items()}
 
+    def _get_available_gt_frames(self):
+        if max_gt_share := Config.validation.max_gt_share:
+            # Limit maximum used GT frames
+
+            regular_frames_count = 0
+
+            gt_keys = list(self.gt_stats)
+            total_gt_frames_count = len(gt_keys)
+
+            for task_id, task_val_layout in self.validation_result.task_id_to_val_layout.items():
+                # Safety check for the next operations. Here we assume
+                # that all the tasks use the same GT frames.
+                task_validation_frames = task_val_layout.validation_frames
+                task_frame_names = self.validation_result.task_id_to_frame_names[task_id]
+                task_gt_keys = {
+                    self._make_gt_key(task_frame_names[f]) for f in task_validation_frames
+                }
+                assert gt_keys == task_gt_keys
+
+                regular_frames_count += (
+                    len(task_frame_names)
+                    - len(task_validation_frames)
+                    - task_val_layout.honeypot_count
+                )
+
+            enabled_gt_keys = {f for f, gt_stat in self.gt_stats.items() if gt_stat.enabled}
+            current_gt_share = len(enabled_gt_keys) / (regular_frames_count or 0)
+            max_usable_gt_share = min(len(gt_keys) / (regular_frames_count or 0), max_gt_share)
+            if max_gt_share < current_gt_share or (
+                # Allow restoring GT frames on max limit config changes
+                current_gt_share < max_usable_gt_share
+            ):
+                max_gt_count = min(int(max_gt_share * regular_frames_count), total_gt_frames_count)
+                enabled_gt_frames = self.rng.choice(
+                    gt_keys, max_gt_count, replace=False, shuffle=False
+                )
+                enabled_gt_keys = {gt_keys[i] for i in enabled_gt_frames}
+
+                for gt_key, gt_stat in self.gt_stats.items():
+                    gt_stat.enabled = gt_key in enabled_gt_keys
+
+        return {
+            gt_key
+            for gt_key, gt_stat in self.gt_stats.items()
+            if gt_stat.enabled
+            if gt_stat.rating > Config.validation.gt_ban_threshold
+        }
+
     def update_honeypots(self) -> _HoneypotUpdateResult:
         gt_stats = self.gt_stats
         validation_result = self.validation_result
         rejected_jobs = validation_result.rejected_jobs
 
         # Update honeypots in jobs
-        available_gt_frames = {
-            gt_key
-            for gt_key in gt_stats
-            if gt_stats[gt_key].rating > Config.validation.gt_ban_threshold
-        }
+        available_gt_frames = self._get_available_gt_frames()
 
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(
@@ -580,6 +624,7 @@ def process_intermediate_results(  # noqa: PLR0912
             accepted_attempts=gt_image_stat.accepted_attempts,
             accumulated_quality=gt_image_stat.accumulated_quality,
             total_uses=gt_image_stat.total_uses,
+            enabled=gt_image_stat.enabled,
         )
         for gt_image_stat in db_service.get_task_gt_stats(session, task.id)
     }

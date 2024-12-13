@@ -7,6 +7,7 @@ class ValidationFrameStats:
     failed_attempts: int = 0
     accepted_attempts: int = 0
     total_uses: int = 0
+    enabled: bool = True
 
     @property
     def rating(self) -> float:
