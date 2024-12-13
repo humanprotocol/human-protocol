@@ -8,7 +8,7 @@ import EscrowAddress from '@pages/SearchResults/EscrowAddress';
 import WalletAddress from '@pages/SearchResults/WalletAddress';
 import NothingFound from '@components/NothingFound';
 import Breadcrumbs from '@components/Breadcrumbs';
-import Search from '@components/Search';
+import SearchBar from '@components/SearchBar/SearchBar';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import Loader from '@components/Loader';
 import { getNetwork } from '@utils/config/networks';
@@ -77,7 +77,7 @@ const Results = () => {
   const { filterParams } = useWalletSearch();
 
   if (status === 'pending' && !data) {
-    return <Loader height="30vh" />;
+    return <Loader height="auto" paddingTop="2rem" />;
   }
 
   if (status === 'error') {
@@ -91,7 +91,7 @@ const Results = () => {
   return (
     <>
       <Stack
-        sx={{ marginBottom: 2, marginTop: { xs: 0, md: 4 } }}
+        sx={{ marginBottom: 2, marginTop: { xs: 2, md: 4 } }}
         direction={{ xs: 'column', md: 'row' }}
         gap={3}
         alignItems={{ xs: 'stretch', md: 'center' }}
@@ -159,10 +159,10 @@ const SearchResults = () => {
   }, [address, chainId, paramsStatus]);
 
   return (
-    <PageWrapper displaySearchBar className="standard-background">
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Search Results" />
-      <Search className="search-results-bar" />
-      {paramsStatus === 'loading' && <Loader />}
+      <SearchBar className="search-results-bar" />
+      {paramsStatus === 'loading' && <Loader height="auto" paddingTop="2rem" />}
       {paramsStatus === 'error' && (
         <Stack sx={{ paddingTop: '2rem' }}>Something went wrong</Stack>
       )}

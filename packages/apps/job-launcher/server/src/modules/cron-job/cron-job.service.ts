@@ -276,11 +276,11 @@ export class CronJobService {
     return true;
   }
 
-  @Cron('*/5 * * * *')
   /**
    * Process a pending webhook job.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
+  @Cron('*/5 * * * *')
   public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,
@@ -380,11 +380,11 @@ export class CronJobService {
   //   await this.completeCronJob(cronJob);
   // }
 
-  @Cron('30 */2 * * * *')
   /**
    * Process a job that syncs job statuses.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
+  @Cron('30 */2 * * * *')
   public async syncJobStuses(): Promise<void> {
     const lastCronJob = await this.cronJobRepository.findOneByType(
       CronJobType.SyncJobStatuses,

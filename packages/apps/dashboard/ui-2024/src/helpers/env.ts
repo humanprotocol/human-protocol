@@ -16,6 +16,7 @@ const envSchema = z.object({
   VITE_FOOTER_LINK_X: z.string(),
   VITE_FOOTER_LINK_TELEGRAM: z.string(),
   VITE_FOOTER_LINK_LINKEDIN: z.string(),
+  VITE_ENABLED_CHAIN_IDS: z.string(),
 });
 
 let validEnvs;

@@ -298,6 +298,12 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
+class Development:
+    cvat_in_docker = bool(int(os.environ.get("DEV_CVAT_IN_DOCKER", "0")))
+    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
+    cvat_local_host = os.environ.get("DEV_CVAT_LOCAL_HOST", "localhost")
+
+
 class Environment(str, Enum):
     PRODUCTION = "production"
     DEVELOPMENT = "development"
@@ -337,6 +343,7 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
+    development_config = Development
 
     @classmethod
     def is_development_mode(cls) -> bool:

@@ -10,6 +10,7 @@ import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { useNavigate } from 'react-router-dom';
 import { Stack, TableRow } from '@mui/material';
+import Link from '@mui/material/Link';
 
 export const EscrowsTableBody = ({
   role,
@@ -81,7 +82,7 @@ export const EscrowsTableBody = ({
                 navigate(`/search/${filterParams.chainId}/${elem.address}`);
               }}
             >
-              <a
+              <Link
                 target="_blank"
                 href={`/search/${filterParams.chainId}/${elem.address}`}
                 style={{
@@ -89,7 +90,7 @@ export const EscrowsTableBody = ({
                 }}
               >
                 {elem.address}
-              </a>
+              </Link>
             </Stack>
           </TableCell>
         </TableRow>

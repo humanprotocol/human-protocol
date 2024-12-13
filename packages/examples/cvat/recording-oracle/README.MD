@@ -19,9 +19,22 @@ For deployment it is required to have PostgreSQL(v14.4)
 ### Run the oracle locally:
 
 ```
-1. docker-compose -f docker-compose.dev.yml up -d
-2. ./bin/start_dev.sh
+docker-compose -f docker-compose.dev.yml up -d
+./bin/start_dev.sh
 ```
+
+or 
+
+```
+docker-compose -f docker-compose.dev.yml up -d
+./bin/start_debug.sh
+```
+
+When running service from `./bin/start_debug.sh` (`debug.py`), simplified development flow is available:
+
+- When webhook signature is required, `{oracle_name}:unique_string` can be used
+- You can upload manifest.json to minio `manifests` bucket and use its filename as an escrow_address
+
 
 ### Environemt
 Env example file: `/src/.env.example`

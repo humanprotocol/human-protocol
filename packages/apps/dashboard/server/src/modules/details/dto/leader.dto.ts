@@ -13,6 +13,7 @@ import { ChainId, Role } from '@human-protocol/sdk';
 export class LeaderDto {
   @ApiProperty({ example: ChainId.POLYGON_AMOY })
   @IsEnum(ChainId)
+  @Expose()
   public chainId: ChainId;
 
   @ApiProperty({ example: '0xb794f5ea0ba39494ce839613fffba74279579268' })
@@ -32,13 +33,13 @@ export class LeaderDto {
   public role?: string;
 
   @ApiProperty({ example: '0.07007358932392' })
-  @Transform(({ value }) => value.toString())
+  @Transform(({ value }) => value?.toString())
   @IsString()
   @Expose()
   public amountStaked: string;
 
   @ApiProperty({ example: 'High' })
-  @Transform(({ value }) => value.toString())
+  @Transform(({ value }) => value?.toString())
   @IsString()
   @Expose()
   public reputation: string;

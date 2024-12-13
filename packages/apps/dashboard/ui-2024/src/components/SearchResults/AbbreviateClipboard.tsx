@@ -29,7 +29,14 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
               });
             }}
           >
-            <Link href={link} target="_blank" underline="none">
+            <Link
+              href={link}
+              target="_blank"
+              underline="none"
+              sx={{
+                zIndex: 1,
+              }}
+            >
               {abbreviateValue(value)}
             </Link>
           </span>

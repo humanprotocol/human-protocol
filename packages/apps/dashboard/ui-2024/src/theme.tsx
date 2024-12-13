@@ -212,7 +212,7 @@ const theme: ThemeOptions = createTheme({
     MuiToolbar: {
       styleOverrides: {
         root: {
-          '@media (min-width:1001px)': {
+          '@media (min-width:1280px)': {
             paddingX: 56,
           },
         },
@@ -269,6 +269,90 @@ const theme: ThemeOptions = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: colorPalette.white,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#1406B207',
+          },
+        },
+      },
+    },
+    MuiTablePagination: {
+      styleOverrides: {
+        toolbar: {
+          '@media (max-width: 440px)': {
+            display: 'grid',
+            gridTemplateColumns: '1fr 3fr 2fr',
+            gridTemplateRows: 'auto auto',
+            gridAutoFlow: 'row',
+          },
+        },
+        selectLabel: {
+          '@media (max-width: 440px)': {
+            gridColumn: '2 / 3',
+            gridRow: '1',
+            whiteSpace: 'nowrap',
+            color: colorPalette.fog.main,
+            justifySelf: 'end',
+            marginBottom: `17px`,
+            position: 'relative',
+            right: '-38px',
+          },
+          '&:focus': {
+            background: 'inherit',
+          },
+        },
+        input: {
+          '@media (max-width: 440px)': {
+            gridColumn: '3 / 3',
+            gridRow: '1',
+            marginRight: '8px',
+            width: '48px',
+            justifySelf: 'flex-end',
+          },
+        },
+        select: {
+          '&:focus': {
+            background: 'inherit',
+          },
+        },
+        displayedRows: {
+          '@media (max-width: 440px)': {
+            gridColumn: '2 / 3',
+            gridRow: '2',
+            justifySelf: 'end',
+            position: 'relative',
+            right: '-12px',
+          },
+        },
+        actions: {
+          '@media (max-width: 440px)': {
+            gridColumn: '3 / 3',
+            gridRow: '2',
+            justifySelf: 'end',
+            marginLeft: 0,
+            minWidth: '90px',
+          },
+          button: {
+            marginLeft: '5px',
+          },
+        },
+      },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: colorPalette.link,
+          '&:hover': {
+            color: `${colorPalette.linkHover}!important`,
+          },
+          '&:visited': {
+            color: colorPalette.linkVisited,
+          },
         },
       },
     },

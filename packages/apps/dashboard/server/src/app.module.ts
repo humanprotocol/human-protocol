@@ -28,6 +28,8 @@ import { NetworksModule } from './modules/networks/networks.module';
         HCAPTCHA_API_KEY: Joi.string().required(),
         CACHE_HMT_PRICE_TTL: Joi.number(),
         CACHE_HMT_GENERAL_STATS_TTL: Joi.number(),
+        HCAPTCHA_STATS_ENABLED: Joi.boolean().default(true),
+        NETWORKS_OPERATING_CACHE_TTL: Joi.number(),
       }),
     }),
     CacheModule.registerAsync(CacheFactoryConfig),

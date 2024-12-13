@@ -42,3 +42,7 @@ export function getRequestType(
 
   return requestType;
 }
+
+export function isValidJobRequestType(value: string): value is JobRequestType {
+  return Object.values(JobRequestType).includes(value as JobRequestType);
+}

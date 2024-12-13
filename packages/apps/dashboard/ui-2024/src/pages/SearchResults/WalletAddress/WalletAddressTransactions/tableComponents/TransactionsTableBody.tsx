@@ -75,6 +75,9 @@ export const TransactionsTableBody = () => {
             <TransactionTableCellValue value={elem.value} />
           </TableCell>
           <TableCell>
+            <AbbreviateClipboard value={elem.from} />
+          </TableCell>
+          <TableCell>
             <AbbreviateClipboard value={elem.to} />
           </TableCell>
         </TableRow>

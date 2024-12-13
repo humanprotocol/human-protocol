@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   Grid,
   InputAdornment,
@@ -39,6 +40,7 @@ export const FiatTopUpForm = () => {
   const [openBillingAfterAddCard, setOpenBillingAfterAddCard] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isBillingDetailsOpen, setIsBillingDetailsOpen] = useState(false);
+  const [loadingInitialData, setLoadingInitialData] = useState(true);
 
   useEffect(() => {
     const fetchBillingInfo = async () => {
@@ -57,6 +59,7 @@ export const FiatTopUpForm = () => {
   }, []);
 
   const fetchCards = async () => {
+    setLoadingInitialData(true);
     const data = await paymentService.getUserCards();
     setCards(data);
 
@@ -64,6 +67,7 @@ export const FiatTopUpForm = () => {
     if (defaultCard) {
       setSelectedCard(defaultCard);
     }
+    setLoadingInitialData(false);
   };
 
   const handleSuccessAction = (message: string) => {
@@ -120,132 +124,145 @@ export const FiatTopUpForm = () => {
   return isSuccess ? (
     <TopUpSuccess />
   ) : (
-    <Box>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <FormControl fullWidth>
-            <TextField
-              fullWidth
-              placeholder="Amount USD"
-              variant="outlined"
-              value={amount}
-              type="number"
-              onChange={(e) => setAmount(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            {selectedCard ? (
-              <TextField
-                label="Payment Method"
-                variant="outlined"
-                fullWidth
-                value={`**** **** **** ${selectedCard.last4}`}
-                InputProps={{
-                  readOnly: true,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <CardIcon fontSize="medium" sx={{ marginX: 2 }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button
-                        variant="contained"
-                        onClick={() => setIsSelectCardModalOpen(true)}
-                        size="small"
-                      >
-                        Change
-                      </Button>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ mb: 2 }}
-              />
-            ) : (
-              <Button
+    <Box sx={{ width: '100%' }}>
+      {loadingInitialData ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight={400}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <TextField
+                  fullWidth
+                  placeholder="Amount USD"
+                  variant="outlined"
+                  value={amount}
+                  type="number"
+                  onChange={(e) => setAmount(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+                {selectedCard ? (
+                  <TextField
+                    label="Payment Method"
+                    variant="outlined"
+                    fullWidth
+                    value={`**** **** **** ${selectedCard.last4}`}
+                    InputProps={{
+                      readOnly: true,
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CardIcon fontSize="medium" sx={{ marginX: 2 }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Button
+                            variant="contained"
+                            onClick={() => setIsSelectCardModalOpen(true)}
+                            size="small"
+                          >
+                            Change
+                          </Button>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{ mb: 2 }}
+                  />
+                ) : (
+                  <Button
+                    variant="contained"
+                    onClick={() => setIsAddCardOpen(true)}
+                    size="large"
+                    sx={{ mb: 2 }}
+                  >
+                    Add Payment Method
+                  </Button>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <LoadingButton
+                color="primary"
                 variant="contained"
-                onClick={() => setIsAddCardOpen(true)}
+                fullWidth
                 size="large"
-                sx={{ mb: 2 }}
+                onClick={handleTopUpAccount}
+                loading={isLoading}
+                disabled={!amount || !selectedCard}
               >
-                Add Payment Method
-              </Button>
-            )}
-          </FormControl>
-        </Grid>
-        <Grid item xs={12}>
-          <LoadingButton
-            color="primary"
-            variant="contained"
-            fullWidth
-            size="large"
-            onClick={handleTopUpAccount}
-            loading={isLoading}
-            disabled={!amount || !selectedCard}
-          >
-            Top up account
-          </LoadingButton>
-        </Grid>
-        <Grid item xs={12}>
-          <Link
-            href="https://humanprotocol.org/app/terms-and-conditions"
-            target="_blank"
-          >
-            <Typography variant="caption" component="p" textAlign="center">
-              Terms & conditions
-            </Typography>
-          </Link>
-        </Grid>
-      </Grid>
+                Top up account
+              </LoadingButton>
+            </Grid>
+            <Grid item xs={12}>
+              <Link
+                href="https://humanprotocol.org/app/terms-and-conditions"
+                target="_blank"
+              >
+                <Typography variant="caption" component="p" textAlign="center">
+                  Terms & conditions
+                </Typography>
+              </Link>
+            </Grid>
+          </Grid>
 
-      <SelectCardModal
-        open={isSelectCardModalOpen}
-        onClose={() => setIsSelectCardModalOpen(false)}
-        cards={cards}
-        onSelect={(card) => {
-          setSelectedCard(card);
-          setIsSelectCardModalOpen(false);
-        }}
-      />
-      <AddCardModal
-        open={isAddCardOpen}
-        onClose={() => setIsAddCardOpen(false)}
-        onComplete={() => {
-          handleSuccessAction('Your card has been successfully added.');
-          fetchCards();
-        }}
-      />
-      <SuccessModal
-        open={isSuccessOpen}
-        onClose={() => {
-          if (openBillingAfterAddCard) {
-            setIsBillingDetailsOpen(true);
-          }
-          setIsSuccessOpen(false);
-        }}
-        message={successMessage}
-      />
+          <SelectCardModal
+            open={isSelectCardModalOpen}
+            onClose={() => setIsSelectCardModalOpen(false)}
+            cards={cards}
+            onSelect={(card) => {
+              setSelectedCard(card);
+              setIsSelectCardModalOpen(false);
+            }}
+          />
+          <AddCardModal
+            open={isAddCardOpen}
+            onClose={() => setIsAddCardOpen(false)}
+            onComplete={() => {
+              handleSuccessAction('Your card has been successfully added.');
+              fetchCards();
+            }}
+          />
+          <SuccessModal
+            open={isSuccessOpen}
+            onClose={() => {
+              if (openBillingAfterAddCard) {
+                setIsBillingDetailsOpen(true);
+              }
+              setIsSuccessOpen(false);
+            }}
+            message={successMessage}
+          />
 
-      <BillingDetailsModal
-        open={isBillingDetailsOpen}
-        onClose={() => setIsBillingDetailsOpen(false)}
-        billingInfo={{
-          name: '',
-          email: '',
-          address: {
-            city: '',
-            country: '',
-            postalCode: '',
-            line: '',
-          },
-          vat: '',
-          vatType: '',
-        }}
-        setBillingInfo={(info) => {
-          handleSuccessAction(
-            'Your billing details have been successfully updated.',
-          );
-        }}
-      />
+          <BillingDetailsModal
+            open={isBillingDetailsOpen}
+            onClose={() => setIsBillingDetailsOpen(false)}
+            billingInfo={{
+              name: '',
+              email: '',
+              address: {
+                city: '',
+                country: '',
+                postalCode: '',
+                line: '',
+              },
+              vat: '',
+              vatType: '',
+            }}
+            setBillingInfo={(info) => {
+              handleSuccessAction(
+                'Your billing details have been successfully updated.',
+              );
+            }}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

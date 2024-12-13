@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { createMap, forMember, mapFrom, Mapper } from '@automapper/core';
 import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryDto,
+  GetOraclesCommand,
+  GetOraclesQuery,
 } from './model/oracle-discovery.model';
 
 @Injectable()
@@ -16,8 +16,8 @@ export class OracleDiscoveryProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(
         mapper,
-        OracleDiscoveryDto,
-        OracleDiscoveryCommand,
+        GetOraclesQuery,
+        GetOraclesCommand,
         forMember(
           (destination) => destination.selectedJobTypes,
           mapFrom((source) => source.selected_job_types),

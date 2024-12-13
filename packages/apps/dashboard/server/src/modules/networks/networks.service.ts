@@ -8,7 +8,7 @@ import {
   MINIMUM_HMT_TRANSFERS,
 } from '../../common/config/env-config.service';
 import { OPERATING_NETWORKS_CACHE_KEY } from '../../common/config/redis-config.service';
-import { MainnetsId } from '../../common/utils/constants';
+import { MAINNET_CHAIN_IDS } from '../../common/utils/constants';
 
 @Injectable()
 export class NetworksService {
@@ -38,35 +38,24 @@ export class NetworksService {
 
     const availableNetworks = [];
 
-    for (const networkKey of Object.values(MainnetsId)) {
-      const chainId = MainnetsId[networkKey as keyof typeof MainnetsId];
-
+    for (const chainId of Object.values(MAINNET_CHAIN_IDS)) {
       const networkConfig = NETWORKS[chainId];
-
-      if (!networkConfig) {
-        continue;
-      }
+      if (!networkConfig) continue;
 
       const statisticsClient = new StatisticsClient(networkConfig);
-
       try {
-        const hmtData = await statisticsClient.getHMTDailyData({
-          from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
-        });
-        const escrowStats = await statisticsClient.getEscrowStatistics({
-          from: new Date(Math.floor(oneMonthAgo.getTime() / 1000) * 1000),
-        });
+        const [hmtData, escrowStats] = await Promise.all([
+          statisticsClient.getHMTDailyData({ from: filterDate }),
+          statisticsClient.getEscrowStatistics({ from: oneMonthAgo }),
+        ]);
 
-        // Calculate total HMT transaction count across the period
         const totalTransactionCount = hmtData.reduce(
           (sum, day) => sum + day.totalTransactionCount,
           0,
         );
 
-        // At least 1 escrow created in the last month
         const recentEscrowsCreated =
           escrowStats.totalEscrows >= MINIMUM_ESCROWS_COUNT;
-        // Total HMT transactions > MINIMUM_HMT_TRANSFERS in the last X months
         const sufficientHMTTransfers =
           totalTransactionCount > MINIMUM_HMT_TRANSFERS;
 
@@ -75,7 +64,7 @@ export class NetworksService {
         }
       } catch (error) {
         this.logger.error(
-          `Error processing network ${networkKey} (Chain ID: ${chainId}): ${error.message}`,
+          `Error processing network ${chainId}: ${error.message}`,
         );
       }
     }

@@ -30,6 +30,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
+import { WhitelistService } from '../whitelist/whitelist.service';
 
 jest.mock('@human-protocol/sdk');
 jest.mock('../../common/utils/hcaptcha', () => ({
@@ -47,6 +48,7 @@ describe('AuthService', () => {
   let userRepository: UserRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
+  let whitelistService: WhitelistService;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -79,6 +81,7 @@ describe('AuthService', () => {
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
         { provide: ApiKeyRepository, useValue: createMock<ApiKeyRepository>() },
+        { provide: WhitelistService, useValue: createMock<WhitelistService>() },
       ],
     }).compile();
 
@@ -88,6 +91,7 @@ describe('AuthService', () => {
     userRepository = moduleRef.get<UserRepository>(UserRepository);
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
+    whitelistService = moduleRef.get<WhitelistService>(WhitelistService);
   });
 
   afterEach(() => {
@@ -233,6 +237,9 @@ describe('AuthService', () => {
       jwtSignMock = jest
         .spyOn(jwtService, 'signAsync')
         .mockResolvedValueOnce(MOCK_ACCESS_TOKEN);
+      jest
+        .spyOn(whitelistService, 'isUserWhitelisted')
+        .mockResolvedValue(false);
     });
 
     afterEach(() => {
@@ -253,6 +260,7 @@ describe('AuthService', () => {
         {
           email: userEntity.email,
           userId: userEntity.id,
+          whitelisted: false,
         },
         {
           expiresIn: MOCK_EXPIRES_IN,
@@ -280,6 +288,7 @@ describe('AuthService', () => {
         {
           email: userEntity.email,
           userId: userEntity.id,
+          whitelisted: false,
         },
         {
           expiresIn: MOCK_EXPIRES_IN,

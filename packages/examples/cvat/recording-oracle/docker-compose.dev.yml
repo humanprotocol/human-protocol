@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data/pgdata
     ports:
-      - 5431:5432
+      - 5434:5432
     command: ["postgres", "-c", "log_statement=all"]
 
 volumes:

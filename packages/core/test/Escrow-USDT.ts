@@ -841,7 +841,7 @@ describe('Escrow with USDT', function () {
           (finalBalanceExchangeOracle - initialBalanceExchangeOracle).toString()
         ).to.equal('6');
 
-        expect(await escrow.remainingFunds()).to.equal('40');
+        expect(await escrow.remainingFunds()).to.equal('0');
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {
@@ -973,6 +973,88 @@ describe('Escrow with USDT', function () {
         await expect(await escrow.connect(owner).withdraw(usdt.getAddress()))
           .to.emit(escrow, 'Withdraw')
           .withArgs(usdt.getAddress(), amount);
+      });
+    });
+  });
+  describe('complete', () => {
+    describe('Validations', function () {
+      beforeEach(async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+      });
+
+      it('Should revert with the right error if escrow not in Paid or Partial state', async function () {
+        await expect(escrow.connect(owner).complete()).to.be.revertedWith(
+          'Escrow not in Paid or Partial state'
+        );
+      });
+    });
+
+    describe('Events', function () {
+      beforeEach(async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+
+        const recipients = [await restAccounts[0].getAddress()];
+        const amounts = [10];
+        await escrow
+          .connect(owner)
+          [
+            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000', false);
+      });
+
+      it('Should emit a Completed event when escrow is completed', async function () {
+        await expect(escrow.connect(owner).complete()).to.emit(
+          escrow,
+          'Completed'
+        );
+      });
+    });
+
+    describe('Complete escrow', async function () {
+      beforeEach(async () => {
+        await deployEscrow();
+        await fundEscrow();
+        await setupEscrow();
+      });
+
+      it('Should succeed if escrow is in Partial state', async function () {
+        const recipients = [await restAccounts[0].getAddress()];
+        const amounts = [10];
+        await escrow
+          .connect(owner)
+          [
+            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000', false);
+        expect(await escrow.status()).to.equal(Status.Partial);
+
+        await escrow.connect(owner).complete();
+        expect(await escrow.status()).to.equal(Status.Complete);
+        expect(await escrow.remainingFunds()).to.equal('0');
+      });
+
+      it('Should transfer remaining funds to launcher on complete', async function () {
+        const initialLauncherBalance = await usdt
+          .connect(owner)
+          .balanceOf(await launcher.getAddress());
+
+        const recipients = [await restAccounts[0].getAddress()];
+        const amounts = [10];
+        await escrow
+          .connect(owner)
+          [
+            'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
+          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000', false);
+        await escrow.connect(owner).complete();
+
+        const finalLauncherBalance = await usdt
+          .connect(owner)
+          .balanceOf(await launcher.getAddress());
+
+        expect(finalLauncherBalance - initialLauncherBalance).to.equal('90');
       });
     });
   });

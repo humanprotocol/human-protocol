@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -155,8 +156,8 @@ export default function JobDetail() {
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
                     <CardTextRow
-                      label="Chain Id"
-                      value={data.manifest.chainId}
+                      label="Network"
+                      value={`${NETWORKS[data.manifest.chainId as ChainId]!.title} (${data.manifest.chainId})`}
                     />
                     {data.manifest.title && (
                       <CardTextRow label="Title" value={data.manifest.title} />

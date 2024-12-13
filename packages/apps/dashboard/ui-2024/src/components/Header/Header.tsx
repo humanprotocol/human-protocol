@@ -7,15 +7,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import Search from '@components/Search';
 import { env } from '@helpers/env';
 import { useNavigate } from 'react-router-dom';
 import { LogoBlockIcon } from '@components/Icons/LogoBlockIcon';
 import { LogoBlockIconMobile } from '@components/Icons/LogoBlockIconMobile';
-import TopSearchBar from '@components/Search/TopBarSearch';
 import CloseIcon from '@mui/icons-material/Close';
 
-const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
+const Header: FC = () => {
   const navigate = useNavigate();
   const [open, setState] = useState(false);
 
@@ -28,14 +26,7 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
   };
 
   return (
-    <Toolbar
-      className={clsx('header-toolbar', {
-        'header-toolbar-search': displaySearchBar,
-      })}
-    >
-      {displaySearchBar && (
-        <Search displaySearchBar className="search-header-mobile" />
-      )}
+    <Toolbar className={clsx('header-toolbar')}>
       <Link
         onClick={() => {
           navigate('/');
@@ -54,10 +45,6 @@ const Header: FC<{ displaySearchBar?: boolean }> = ({ displaySearchBar }) => {
           <LogoBlockIconMobile />
         </span>
       </Link>
-
-      {displaySearchBar && (
-        <TopSearchBar displaySearchBar className="search-header" />
-      )}
 
       <div className="header-list-link">
         <span

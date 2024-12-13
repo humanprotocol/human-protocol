@@ -40,7 +40,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { RateService } from './rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
-// import { WhitelistAuthGuard } from 'src/common/guards/whitelist.auth';
+import { WhitelistAuthGuard } from 'src/common/guards/whitelist.auth';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -79,8 +79,7 @@ export class PaymentController {
     status: 409,
     description: 'Conflict. Conflict with the current state of the server.',
   })
-  // Disabled until billing system is active
-  // @UseGuards(WhitelistAuthGuard)
+  @UseGuards(WhitelistAuthGuard)
   @Post('/crypto')
   public async createCryptoPayment(
     @Headers(HEADER_SIGNATURE_KEY) signature: string,
@@ -309,7 +308,7 @@ export class PaymentController {
   @Get('/fiat/billing-info')
   public async getBillingInfo(
     @Request() req: RequestWithUser,
-  ): Promise<BillingInfoDto> {
+  ): Promise<BillingInfoDto | null> {
     return this.paymentService.getUserBillingInfo(req.user);
   }
 
