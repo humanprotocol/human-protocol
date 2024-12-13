@@ -245,41 +245,41 @@ def _handle_escrow_validation(
         logger.exception(f"Failed to handle completed projects for escrow {escrow_address}: {e}")
         return False
 
-    # try to get pessimistic lock for projects and lock escrow validation
-    # if we fail to do that, simply skip the escrow
+    # Try to lock escrow projects for validation. If we fail to do that, simply skip the escrow
     with db.suppress(db_errors.LockNotAvailable):
-        cvat_service.lock_escrow_for_validation(
-            session, escrow_address=escrow_address, chain_id=chain_id
-        )
         escrow_projects = cvat_service.get_projects_by_escrow_address(
             session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
         )
         _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
+
         return True
+
     return False
 
 
 def handle_escrows_validations(logger: logging.Logger) -> None:
-    with SessionLocal.begin() as session:
-        escrow_validations = cvat_service.prepare_escrows_for_validation(
-            session,
-            limit=CronConfig.track_escrow_validations_chunk_size,
-        )
-
-    for escrow_address, chain_id in escrow_validations:
+    for _ in range(CronConfig.track_escrow_validations_chunk_size):
         with SessionLocal.begin() as session:
             # Need to work in separate transactions for each escrow, as a failing DB call
             # (e.g. a failed lock attempt) will abort the transaction. A nested transaction
             # can also be used for handling this.
-            handled = _handle_escrow_validation(logger, session, escrow_address, chain_id)
-            if not handled:
-                # either escrow is invalid, or we couldn't get lock for projects/validations
-                continue
+            escrow_validation = cvat_service.lock_escrow_for_validation(session)
+            if not escrow_validation:
+                break
 
-            # change status so validation won't be attempted again
+            escrow_address = escrow_validation.escrow_address
+            chain_id = escrow_validation.chain_id
+
+            handled = _handle_escrow_validation(logger, session, escrow_address, chain_id)
+            update_kwargs = {}
+            if handled:
+                # Change status so validation won't be attempted again
+                update_kwargs["status"] = EscrowValidationStatuses.in_progress
+
             cvat_service.update_escrow_validation(
                 session,
                 escrow_address=escrow_address,
                 chain_id=chain_id,
-                status=EscrowValidationStatuses.in_progress,
+                increase_attempts=True, # increase attempts always to allow escrow rotation
+                **update_kwargs,
             )
