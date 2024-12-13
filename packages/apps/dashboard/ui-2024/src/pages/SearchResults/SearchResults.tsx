@@ -91,7 +91,7 @@ const Results = () => {
   return (
     <>
       <Stack
-        sx={{ marginBottom: 2, marginTop: { xs: 0, md: 4 } }}
+        sx={{ marginBottom: 2, marginTop: { xs: 2, md: 4 } }}
         direction={{ xs: 'column', md: 'row' }}
         gap={3}
         alignItems={{ xs: 'stretch', md: 'center' }}
@@ -159,7 +159,7 @@ const SearchResults = () => {
   }, [address, chainId, paramsStatus]);
 
   return (
-    <PageWrapper displaySearchBar className="standard-background">
+    <PageWrapper className="standard-background">
       <Breadcrumbs title="Search Results" />
       <SearchBar className="search-results-bar" />
       {paramsStatus === 'loading' && <Loader height="auto" paddingTop="2rem" />}

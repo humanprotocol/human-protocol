@@ -93,6 +93,7 @@ const SelectCardModal = ({
             fullWidth
             size="large"
             disabled={!selectedCardId}
+            sx={{ mt: 2 }}
             onClick={() => {
               const selected = cards.find((card) => card.id === selectedCardId);
               if (selected) {

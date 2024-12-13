@@ -5,7 +5,7 @@ import { getNetwork } from '@utils/config/networks';
 export const ChainCell = ({ chainId }: { chainId: number }) => (
   <Typography
     variant="body1"
-    whiteSpace="nowrap"
+    whiteSpace={'wrap'}
     flexWrap="nowrap"
     alignItems="center"
     display="flex"

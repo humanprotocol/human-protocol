@@ -33,7 +33,7 @@ describe('OracleDiscoveryService', () => {
   const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA];
   const REPUTATION_ORACLE_ADDRESS = 'the_oracle';
   const TTL = '300';
-  const JOB_TYPES = 'job-type-1, job-type-2, job-type-3';
+  const JOB_TYPES = 'job-type-1,job-type-2,job-type-3';
   let oracleDiscoveryService: OracleDiscoveryService;
   let cacheManager: Cache;
   let kvStoreGateway: KvStoreGateway;
@@ -99,14 +99,13 @@ describe('OracleDiscoveryService', () => {
     });
 
     const result =
-      await oracleDiscoveryService.processOracleDiscovery(notSetCommandFixture);
+      await oracleDiscoveryService.getOracles(notSetCommandFixture);
 
     expect(result).toEqual(mockData);
     expect(OperatorUtils.getReputationNetworkOperators).not.toHaveBeenCalled();
   });
 
   it('should fetch and cache data if not already cached', async () => {
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
@@ -115,8 +114,7 @@ describe('OracleDiscoveryService', () => {
         );
     });
 
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
+    const result = await oracleDiscoveryService.discoverOracles();
 
     expect(result).toEqual(generateOracleDiscoveryResponseBody());
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
@@ -135,7 +133,6 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should filter oracles if selectedJobTypes not empty, or url not set', async () => {
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
@@ -145,7 +142,7 @@ describe('OracleDiscoveryService', () => {
     });
 
     const result =
-      await oracleDiscoveryService.processOracleDiscovery(filledCommandFixture);
+      await oracleDiscoveryService.getOracles(filledCommandFixture);
 
     expect(result).toEqual(
       generateOracleDiscoveryResponseBodyByJobType('job-type-1'),
@@ -153,7 +150,6 @@ describe('OracleDiscoveryService', () => {
   });
 
   it('should not filter responses if selectedJobTypes is empty', async () => {
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       jest
         .spyOn(OperatorUtils, 'getReputationNetworkOperators')
@@ -162,7 +158,7 @@ describe('OracleDiscoveryService', () => {
         );
     });
 
-    const result = await oracleDiscoveryService.processOracleDiscovery({
+    const result = await oracleDiscoveryService.getOracles({
       selectedJobTypes: [],
     });
 
@@ -171,7 +167,6 @@ describe('OracleDiscoveryService', () => {
 
   it('should handle errors and return an empty array of oracles', async () => {
     const error = new Error('Test error');
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockRejectedValueOnce(error);
@@ -181,24 +176,21 @@ describe('OracleDiscoveryService', () => {
       'error',
     );
 
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
+    const result = await oracleDiscoveryService.discoverOracles();
 
     expect(result).toEqual(errorResponse);
     expect(loggerErrorSpy).toHaveBeenCalledWith(
-      `Error processing chainId ${ChainId.POLYGON_AMOY}:`,
+      `Failed to discover oracles for chain '${ChainId.POLYGON_AMOY}':`,
       error,
     );
   });
 
   it('should return an empty array of oracles if no oracles are found', async () => {
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
     jest
       .spyOn(OperatorUtils, 'getReputationNetworkOperators')
       .mockResolvedValueOnce([]);
 
-    const result =
-      await oracleDiscoveryService.processOracleDiscovery(emptyCommandFixture);
+    const result = await oracleDiscoveryService.getOracles(emptyCommandFixture);
 
     expect(result).toEqual(errorResponse);
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
@@ -210,7 +202,6 @@ describe('OracleDiscoveryService', () => {
     jest
       .spyOn(kvStoreGateway, 'getJobTypesByAddress')
       .mockResolvedValueOnce('job-type-1');
-    jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(undefined);
 
     EXPECTED_CHAIN_IDS.forEach((chainId) => {
       jest
@@ -220,7 +211,7 @@ describe('OracleDiscoveryService', () => {
         );
     });
 
-    const result = await oracleDiscoveryService.processOracleDiscovery({});
+    const result = await oracleDiscoveryService.getOracles({});
 
     const expectedResponse =
       generateOracleDiscoveryResponseBodyByJobType('job-type-1');

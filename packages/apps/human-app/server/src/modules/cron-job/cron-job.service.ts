@@ -1,6 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { Injectable, Logger } from '@nestjs/common';
 import { CronJob } from 'cron';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import {
@@ -9,24 +7,21 @@ import {
   JobsDiscoveryResponseItem,
 } from '../jobs-discovery/model/jobs-discovery.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResult,
-} from '../oracle-discovery/model/oracle-discovery.model';
+import { DiscoveredOracle } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
 
 @Injectable()
 export class CronJobService {
   private readonly logger = new Logger(CronJobService.name);
   constructor(
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
     private oracleDiscoveryService: OracleDiscoveryService,
+    private jobsDiscoveryService: JobsDiscoveryService,
     private workerService: WorkerService,
     private schedulerRegistry: SchedulerRegistry,
   ) {
@@ -47,12 +42,11 @@ export class CronJobService {
   async updateJobsListCron() {
     this.logger.log('CRON START');
 
-    const oracleDiscoveryCommand: OracleDiscoveryCommand = {};
-    const oracles = await this.oracleDiscoveryService.processOracleDiscovery(
-      oracleDiscoveryCommand,
-    );
+    const oracles = await this.oracleDiscoveryService.discoverOracles();
 
-    if (!oracles || oracles.length < 1) return;
+    if (oracles.length === 0) {
+      return;
+    }
 
     try {
       const response = await this.workerService.signinWorker({
@@ -66,7 +60,8 @@ export class CronJobService {
             `Skipping execution for oracle: ${oracle.address}. Remaining skips: ${oracle.executionsToSkip}`,
           );
 
-          await this.updateOracleInCache(oracle, {
+          await this.oracleDiscoveryService.updateOracleInCache({
+            ...oracle,
             executionsToSkip: oracle.executionsToSkip - 1,
           });
           continue;
@@ -84,7 +79,7 @@ export class CronJobService {
     this.logger.log('CRON END');
   }
 
-  async updateJobsListCache(oracle: OracleDiscoveryResult, token: string) {
+  async updateJobsListCache(oracle: DiscoveredOracle, token: string) {
     try {
       let allResults: JobsDiscoveryResponseItem[] = [];
 
@@ -120,51 +115,28 @@ export class CronJobService {
         allResults = this.mergeJobs(allResults, response.results);
       }
 
-      await this.updateOracleInCache(oracle, {
+      await this.oracleDiscoveryService.updateOracleInCache({
+        ...oracle,
         retriesCount: 0,
         executionsToSkip: 0,
       });
 
-      await this.cacheManager.set(
-        `${JOB_DISCOVERY_CACHE_KEY}:${oracle.address}`,
-        allResults,
-      );
+      await this.jobsDiscoveryService.setCachedJobs(oracle.address, allResults);
     } catch (e) {
       this.logger.error(e);
       await this.handleJobListError(oracle);
     }
   }
 
-  private async updateOracleInCache(
-    oracleData: OracleDiscoveryResult,
-    updates: Partial<OracleDiscoveryResult>,
-  ) {
-    const updatedOracle = { ...oracleData, ...updates };
-
-    const chainId = oracleData.chainId?.toString();
-    const cachedOracles =
-      await this.cacheManager.get<OracleDiscoveryResult[]>(chainId);
-
-    if (cachedOracles) {
-      const updatedOracles = cachedOracles.map((oracle) =>
-        oracle.address === oracleData.address ? updatedOracle : oracle,
-      );
-      await this.cacheManager.set(
-        chainId,
-        updatedOracles,
-        this.configService.cacheTtlOracleDiscovery,
-      );
-    }
-  }
-
-  private async handleJobListError(oracleData: OracleDiscoveryResult) {
+  private async handleJobListError(oracleData: DiscoveredOracle) {
     const retriesCount = oracleData.retriesCount || 0;
     const newExecutionsToSkip = Math.min(
       (oracleData.executionsToSkip || 0) + Math.pow(2, retriesCount),
       this.configService.maxExecutionToSkip,
     );
 
-    await this.updateOracleInCache(oracleData, {
+    await this.oracleDiscoveryService.updateOracleInCache({
+      ...oracleData,
       retriesCount: retriesCount + 1,
       executionsToSkip: newExecutionsToSkip,
     });
