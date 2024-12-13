@@ -10,7 +10,6 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 import datumaro as dm
-import pytest
 from sqlalchemy import select
 
 from src.core.types import (
