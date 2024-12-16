@@ -1,5 +1,5 @@
 [project]
-name = "human-protocol-sdk"
+name = "human_protocol_sdk"
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]

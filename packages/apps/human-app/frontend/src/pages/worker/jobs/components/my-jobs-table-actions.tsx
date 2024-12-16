@@ -29,6 +29,7 @@ export function MyJobsTableActions({ job }: MyJobsTableRejectActionProps) {
         fullWidth
         target="_blank"
         to={job.url}
+        sx={{ maxWidth: '160px ' }}
       >
         {t('worker.jobs.solve')}
       </TableButton>

@@ -3177,10 +3177,10 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.16.8.tgz#b83316d14dad08fac7cd0574f2643b01959b4464"
   integrity sha512-DARxShbBsWz6azwkTmv05rR7rJfcd9cXFsQtbcr24A+5esQBSnK2N3cbg/izlvuMGxonfWaysz/ae+6Ij9RAHQ==
 
-"@mui/icons-material@^6.1.1", "@mui/icons-material@^6.1.5":
-  version "6.1.9"
-  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-6.1.9.tgz#68b1003d3e29db4f5d5e5f46a4333f34762aeeeb"
-  integrity sha512-AzlhIT51rdjkZ/EcUV2dbhNkNSUHIqCnNoUxodpiTw8buyAUBd+qnxg5OBSuPpun/ZEdSSB8Q7Uyh6zqjiMsEQ==
+"@mui/icons-material@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-6.2.0.tgz#8815b7b064234f525a174dd8bc59eb2f8986e79b"
+  integrity sha512-WR1EEhGOSvxAsoTSzWZBlrWFjul8wziDrII4rC3PvMBHhBYBqEc2n/0aamfFbwkH5EiYb96aqc6kYY6tB310Sw==
   dependencies:
     "@babel/runtime" "^7.26.0"
 
@@ -3287,14 +3287,14 @@
     prop-types "^15.8.1"
     react-is "^18.3.1"
 
-"@mui/x-data-grid@^7.22.2":
-  version "7.22.3"
-  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-7.22.3.tgz#22c4c23212434c6256ed5d11f7ba12a8310f9c4b"
-  integrity sha512-O6kBf6yt/GkOcWjHca5xWN10qBQ/MkITvJmBuIOtX+LH7YtOAriMgD2zkhNbXxHChi7QdEud3bNC3jw5RLRVCA==
+"@mui/x-data-grid@^7.23.2":
+  version "7.23.2"
+  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-7.23.2.tgz#3cc82c609a56b02dfe0317d74ab21d0e69dbe964"
+  integrity sha512-Xhm4Bh+WiU5MSLFIZ8mE1egHoS0xPEVlwvjYvairPIkxNPubB7f+gtLkuAJ2+m+BYbgO7yDte+Pp7dfjkU+vOA==
   dependencies:
     "@babel/runtime" "^7.25.7"
     "@mui/utils" "^5.16.6 || ^6.0.0"
-    "@mui/x-internals" "7.21.0"
+    "@mui/x-internals" "7.23.0"
     clsx "^2.1.1"
     prop-types "^15.8.1"
     reselect "^5.1.1"
@@ -3316,6 +3316,14 @@
   version "7.21.0"
   resolved "https://registry.yarnpkg.com/@mui/x-internals/-/x-internals-7.21.0.tgz#daca984059015b27efdb47bb44dc7ff4a6816673"
   integrity sha512-94YNyZ0BhK5Z+Tkr90RKf47IVCW8R/1MvdUhh6MCQg6sZa74jsX+x+gEZ4kzuCqOsuyTyxikeQ8vVuCIQiP7UQ==
+  dependencies:
+    "@babel/runtime" "^7.25.7"
+    "@mui/utils" "^5.16.6 || ^6.0.0"
+
+"@mui/x-internals@7.23.0":
+  version "7.23.0"
+  resolved "https://registry.yarnpkg.com/@mui/x-internals/-/x-internals-7.23.0.tgz#3b1d0e47f1504cbd74c60b6a514eb18c108cc6dd"
+  integrity sha512-bPclKpqUiJYIHqmTxSzMVZi6MH51cQsn5U+8jskaTlo3J4QiMeCYJn/gn7YbeR9GOZFp8hetyHjoQoVHKRXCig==
   dependencies:
     "@babel/runtime" "^7.25.7"
     "@mui/utils" "^5.16.6 || ^6.0.0"
@@ -4251,10 +4259,10 @@
   resolved "https://registry.yarnpkg.com/@redis/time-series/-/time-series-1.1.0.tgz#cba454c05ec201bd5547aaf55286d44682ac8eb5"
   integrity sha512-c1Q99M5ljsIuc4YdaCwfUEXsofakb9c8+Zse2qxTadu8TalLXuAESzLvFAvNVbkmSlvlzIQOLpBCmWI9wTOt+g==
 
-"@reduxjs/toolkit@^2.2.7":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-2.3.0.tgz#d00134634d6c1678e8563ac50026e429e3b64420"
-  integrity sha512-WC7Yd6cNGfHx8zf+iu+Q1UPTfEcXhQ+ATi7CV1hlrSAaQBdlPzg7Ww/wJHNQem7qG9rxmWoFCDCPubSvFObGzA==
+"@reduxjs/toolkit@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-2.5.0.tgz#4679b09b4da211cb9a821803aabf86a13c96fbfa"
+  integrity sha512-awNe2oTodsZ6LmRqmkFhtb/KH03hUhxOamEQy411m3Njj3BbFvoBovxo4Q1cBWnV1ErprVj9MlF0UPXkng0eyg==
   dependencies:
     immer "^10.0.3"
     redux "^5.0.1"
@@ -19549,10 +19557,10 @@ typedoc-plugin-markdown@^4.2.3:
   resolved "https://registry.yarnpkg.com/typedoc-plugin-markdown/-/typedoc-plugin-markdown-4.3.0.tgz#d4ee289ea8e04b03801dc476eb3090142983bfe5"
   integrity sha512-yAR7+JGSwHWNzQhS8AFlGX6GmbWnK7/Q2Y8hHy5pkL/WB9ooJqhsI6B1abldhM3lOQCWqCdkzu9yFMPuvl2HUw==
 
-typedoc@^0.27.4:
-  version "0.27.4"
-  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.27.4.tgz#45be59ccf9383d3c52f4a96636d823345c6ff0e6"
-  integrity sha512-wXPQs1AYC2Crk+1XFpNuutLIkNWleokZf1UNf/X8w9KsMnirkvT+LzxTXDvfF6ug3TSLf3Xu5ZXRKGfoXPX7IA==
+typedoc@^0.27.5:
+  version "0.27.5"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.27.5.tgz#a86c89589213d7b36301eeafb4ddf6ad9dfd1ab3"
+  integrity sha512-x+fhKJtTg4ozXwKayh/ek4wxZQI/+2hmZUdO2i2NGDBRUflDble70z+ewHod3d4gRpXSO6fnlnjbDTnJk7HlkQ==
   dependencies:
     "@gerrit0/mini-shiki" "^1.24.0"
     lunr "^2.3.9"

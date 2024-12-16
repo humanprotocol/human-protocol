@@ -85,7 +85,6 @@ export class DetailsService {
     first: number,
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
-    // TODO: Switch to fetch all transactions related to this wallet address once SDK is changed
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,

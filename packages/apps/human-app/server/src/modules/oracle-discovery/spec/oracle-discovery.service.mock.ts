@@ -1,7 +1,7 @@
 import { generateOracleDiscoveryResponseBody } from './oracle-discovery.fixture';
 
 export const oracleDiscoveryServiceMock = {
-  processOracleDiscovery: jest
+  getOracles: jest
     .fn()
     .mockResolvedValue(generateOracleDiscoveryResponseBody()),
 };
