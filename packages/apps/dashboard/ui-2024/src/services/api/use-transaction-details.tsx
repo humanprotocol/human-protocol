@@ -20,6 +20,7 @@ const transactionDetailsSuccessResponseSchema = z.object({
   method: z.string(),
   from: z.string(),
   to: z.string(),
+  receiver: z.string().nullable(),
   block: z.number(),
   value: z.string(),
   internalTransactions: z.array(internalTransactionSchema),

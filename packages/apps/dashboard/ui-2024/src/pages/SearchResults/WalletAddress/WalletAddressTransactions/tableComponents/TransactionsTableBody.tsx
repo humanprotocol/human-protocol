@@ -103,10 +103,17 @@ export const TransactionsTableBody: React.FC = () => {
               <TransactionTableCellMethod method={elem.method} />
             </TableCell>
             <TableCell>
-              <AbbreviateClipboard value={elem.from} />
+              <AbbreviateClipboard
+                value={elem.from}
+                link={`/search/${data.chainId}/${elem.from}`}
+              />
             </TableCell>
             <TableCell>
-              <AbbreviateClipboard value={elem.to} />
+              {' '}
+              <AbbreviateClipboard
+                value={elem.receiver || elem.to}
+                link={`/search/${data.chainId}/${elem.receiver || elem.to}`}
+              />
             </TableCell>
             <TableCell>{elem.block}</TableCell>
             <TableCell>
@@ -127,10 +134,16 @@ export const TransactionsTableBody: React.FC = () => {
                 <TransactionTableCellMethod method={internalTx.method} />
               </TableCell>
               <TableCell>
-                <AbbreviateClipboard value={internalTx.from} />
+                <AbbreviateClipboard
+                  value={internalTx.from}
+                  link={`/search/${data.chainId}/${internalTx.from}`}
+                />
               </TableCell>
               <TableCell>
-                <AbbreviateClipboard value={internalTx.to} />
+                <AbbreviateClipboard
+                  value={internalTx.receiver || internalTx.to}
+                  link={`/search/${data.chainId}/${internalTx.receiver || internalTx.to}`}
+                />
               </TableCell>
               <TableCell></TableCell>
               <TableCell>

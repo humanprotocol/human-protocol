@@ -1,5 +1,5 @@
 import { Expose, Transform } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export interface InternalTransaction {
@@ -35,6 +35,12 @@ export class TransactionPaginationDto {
   @IsString()
   @Expose()
   public to: string;
+
+  @ApiProperty({ example: '0xad1F7e45D83624A0c628F1B03477c6E129EddB78' })
+  @IsOptional()
+  @IsString()
+  @Expose()
+  public receiver?: string;
 
   @ApiProperty({ example: 12345 })
   @Transform(({ value }) => Number(value))
