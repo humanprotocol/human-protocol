@@ -45,7 +45,9 @@ export class NetworksService {
       const statisticsClient = new StatisticsClient(networkConfig);
       try {
         const [hmtData, escrowStats] = await Promise.all([
-          statisticsClient.getHMTDailyData({ from: filterDate }),
+          statisticsClient.getHMTDailyData({
+            from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
+          }),
           statisticsClient.getEscrowStatistics({ from: oneMonthAgo }),
         ]);
 

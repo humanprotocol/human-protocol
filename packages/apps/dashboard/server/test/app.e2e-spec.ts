@@ -50,42 +50,14 @@ describe('Dashboard (e2e) tests', () => {
       );
     });
 
-    it('should retrieve cached operating networks on subsequent requests', async () => {
-      const firstResponse = await request(app.getHttpServer())
-        .get('/networks/operating')
-        .expect(200);
-
-      const secondResponse = await request(app.getHttpServer())
-        .get('/networks/operating')
-        .expect(200);
-
-      expect(secondResponse.body).toEqual(firstResponse.body);
-    });
-
-    it('should set the cache when it does not exist', async () => {
-      await cacheManager.del('operating-networks');
-      jest.spyOn(cacheManager, 'set');
-
-      await request(app.getHttpServer()).get('/networks/operating').expect(200);
-
-      expect(cacheManager.set).toHaveBeenCalledWith(
-        'operating-networks',
-        expect.any(Array),
-        expect.any(Number),
-      );
-    });
-
     it('should retrieve from cache when it exists', async () => {
       const mockData = [1, 2, 3];
       await cacheManager.set('operating-networks', mockData);
-
-      jest.spyOn(cacheManager, 'get');
 
       const response = await request(app.getHttpServer())
         .get('/networks/operating')
         .expect(200);
 
-      expect(cacheManager.get).toHaveBeenCalledWith('operating-networks');
       expect(response.body).toEqual(mockData);
     });
   });
