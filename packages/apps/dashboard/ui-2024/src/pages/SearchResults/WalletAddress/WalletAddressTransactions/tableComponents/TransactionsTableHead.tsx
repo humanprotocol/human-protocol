@@ -53,6 +53,12 @@ export const TransactionsTableHead = () => {
           </Stack>
         </TableCell>
         <TableCell>
+          <Typography variant="Components/Table Header">From</Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="Components/Table Header">To</Typography>
+        </TableCell>
+        <TableCell>
           <Stack direction="row" alignItems="center">
             <CustomTooltip title="Identifier of the block that contains the transaction">
               <IconButton sx={{ padding: 0, paddingRight: 1 }}>
@@ -81,12 +87,6 @@ export const TransactionsTableHead = () => {
             </CustomTooltip>
             <Typography variant="Components/Table Header">Value</Typography>
           </Stack>
-        </TableCell>
-        <TableCell>
-          <Typography variant="Components/Table Header">From</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="Components/Table Header">To</Typography>
         </TableCell>
       </TableRow>
     </TableHead>
