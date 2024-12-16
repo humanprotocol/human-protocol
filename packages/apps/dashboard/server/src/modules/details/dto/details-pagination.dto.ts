@@ -15,12 +15,11 @@ import { IsRoleValid } from './validation/role-validation';
 import { LeadersOrderBy } from 'src/common/enums/leader';
 
 export class LeadersPaginationDto {
-  @ApiPropertyOptional({ enum: ChainId })
+  @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
-  @IsIn(Object.values(ChainId))
+  @IsIn(Object.values(ChainId).filter((id) => id !== ChainId.ALL))
   @Transform(({ value }) => parseInt(value))
-  @IsOptional()
-  public chainId?: ChainId;
+  public chainId: ChainId;
 
   @ApiPropertyOptional({
     enum: LeadersOrderBy,
@@ -41,26 +40,15 @@ export class LeadersPaginationDto {
   public orderDirection?: OrderDirection;
 
   @ApiPropertyOptional({
-    minimum: 0,
+    minimum: 1,
     default: 10,
   })
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
+  @Min(1)
   @Max(1000)
   @IsOptional()
   public first?: number = 10;
-
-  @ApiPropertyOptional({
-    minimum: 0,
-    default: 0,
-  })
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(1000)
-  @IsOptional()
-  public skip?: number = 0;
 }
 
 export class DetailsTransactionsPaginationDto {

@@ -109,8 +109,11 @@ export class OperatorUtils {
     let leaders_data: ILeader[] = [];
 
     const first =
-      filter.first !== undefined ? Math.min(filter.first, 1000) : 10;
-    const skip = filter.skip || 0;
+      filter.first !== undefined && filter.first > 0
+        ? Math.min(filter.first, 1000)
+        : 10;
+    const skip =
+      filter.skip !== undefined && filter.skip >= 0 ? filter.skip : 0;
     const orderDirection = filter.orderDirection || OrderDirection.DESC;
 
     const networkData = NETWORKS[filter.chainId];
@@ -124,7 +127,6 @@ export class OperatorUtils {
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
       minAmountStaked: filter?.minAmountStaked,
       roles: filter?.roles,
-      role: filter?.role,
       orderBy: filter?.orderBy,
       orderDirection: orderDirection,
       first: first,

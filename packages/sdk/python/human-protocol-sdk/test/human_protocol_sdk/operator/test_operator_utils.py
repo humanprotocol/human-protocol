@@ -2,7 +2,7 @@ import unittest
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER
 from unittest.mock import MagicMock, patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, Role
 from human_protocol_sdk.gql.operator import (
     get_leader_query,
     get_leaders_query,
@@ -14,7 +14,7 @@ from human_protocol_sdk.operator import LeaderFilter, OperatorUtils
 
 class TestOperatorUtils(unittest.TestCase):
     def test_get_leaders(self):
-        filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
+        filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
         mock_function = MagicMock()
 
         with patch(
@@ -58,7 +58,6 @@ class TestOperatorUtils(unittest.TestCase):
                 params={
                     "minAmountStaked": filter.min_amount_staked,
                     "roles": filter.roles,
-                    "role": filter.role,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
@@ -88,7 +87,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_none(self):
-        filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
+        filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
         mock_function = MagicMock()
 
         with patch(
@@ -124,27 +123,12 @@ class TestOperatorUtils(unittest.TestCase):
 
             leaders = OperatorUtils.get_leaders(filter)
 
-            print("Query used:", get_leaders_query(filter))
-            print(
-                "Params passed:",
-                {
-                    "role": filter.role,
-                    "minAmountStaked": filter.min_amount_staked,
-                    "roles": filter.roles,
-                    "orderBy": filter.order_by,
-                    "orderDirection": filter.order_direction.value,
-                    "first": filter.first,
-                    "skip": filter.skip,
-                },
-            )
-
             mock_function.assert_any_call(
                 NETWORKS[ChainId.POLYGON],
                 query=get_leaders_query(filter),
                 params={
                     "minAmountStaked": filter.min_amount_staked,
                     "roles": filter.roles,
-                    "role": filter.role,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
@@ -174,7 +158,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_when_job_types_is_array(self):
-        filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
+        filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
         mock_function = MagicMock()
 
         with patch(
@@ -216,7 +200,6 @@ class TestOperatorUtils(unittest.TestCase):
                 params={
                     "minAmountStaked": filter.min_amount_staked,
                     "roles": filter.roles,
-                    "role": filter.role,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,
@@ -246,7 +229,7 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
 
     def test_get_leaders_empty_data(self):
-        filter = LeaderFilter(chain_id=ChainId.POLYGON, role="role")
+        filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
         mock_function = MagicMock()
 
         with patch(
@@ -268,7 +251,6 @@ class TestOperatorUtils(unittest.TestCase):
                 params={
                     "minAmountStaked": filter.min_amount_staked,
                     "roles": filter.roles,
-                    "role": filter.role,
                     "orderBy": filter.order_by,
                     "orderDirection": filter.order_direction.value,
                     "first": filter.first,

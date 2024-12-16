@@ -37,7 +37,6 @@ export interface ILeaderSubgraph
 
 export interface ILeadersFilter extends IPagination {
   chainId: ChainId;
-  role?: string;
   roles?: string[];
   minAmountStaked?: number;
   orderBy?: string;

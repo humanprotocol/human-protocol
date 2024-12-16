@@ -27,6 +27,8 @@ import { LeadersOrderBy } from '../../common/enums/leader';
 import { REPUTATION_RANK } from '../../common/constants/reputation';
 import { ReputationLevel } from '../../common/enums/reputation';
 import { MIN_AMOUNT_STAKED } from '../../common/constants/leader';
+import { GetLeadersPaginationOptions } from 'src/common/types';
+import { MAINNET_CHAIN_IDS } from 'src/common/utils/constants';
 
 @Injectable()
 export class DetailsService {
@@ -154,37 +156,22 @@ export class DetailsService {
   }
 
   public async getLeaders(
-    chainId?: ChainId,
-    orderBy?: LeadersOrderBy,
-    orderDirection?: OrderDirection,
-    first?: number,
-    skip?: number,
+    chainId: ChainId,
+    { orderBy, orderDirection, first }: GetLeadersPaginationOptions = {},
   ): Promise<LeaderDto[]> {
-    const chainIds = chainId
-      ? [chainId]
-      : await this.networkConfig.getAvailableNetworks();
-
-    const results = await Promise.all(
-      chainIds.map(async (id) => {
-        const filter = this.createLeadersFilter(
-          id,
-          orderBy,
-          orderDirection,
-          first,
-          skip,
-        );
-        const [leaders, reputations] = await Promise.all([
-          OperatorUtils.getLeaders(filter),
-          this.fetchReputations(id),
-        ]);
-        return { leaders, reputations };
-      }),
+    const filter = this.createLeadersFilter(
+      chainId,
+      orderBy,
+      orderDirection,
+      first,
     );
 
-    const leadersData = results.flatMap(({ leaders }) => leaders);
-    const reputations = results.flatMap(({ reputations }) => reputations);
+    const [rawLeaders, reputations] = await Promise.all([
+      OperatorUtils.getLeaders(filter),
+      this.fetchReputations(chainId),
+    ]);
 
-    const leaders = leadersData
+    const leaders = rawLeaders
       .filter((leader) => leader.role)
       .map((leader) =>
         plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
@@ -201,8 +188,9 @@ export class DetailsService {
             ? rankA - rankB
             : rankB - rankA;
         })
-        .slice(skip ?? 0, (skip ?? 0) + (first ?? leaders.length));
+        .slice(0, first ?? leaders.length);
     }
+
     return leaders;
   }
 
@@ -211,7 +199,6 @@ export class DetailsService {
     orderBy?: LeadersOrderBy,
     orderDirection?: OrderDirection,
     first?: number,
-    skip?: number,
   ): ILeadersFilter {
     const commonFilter = {
       chainId,
@@ -223,7 +210,6 @@ export class DetailsService {
         SubgraphOracleRole.REPUTATION_ORACLE,
       ],
       first,
-      skip,
     };
 
     if (orderBy === LeadersOrderBy.REPUTATION) {

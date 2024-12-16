@@ -48,13 +48,11 @@ export class DetailsController {
   public async leaders(
     @Query() query: LeadersPaginationDto,
   ): Promise<LeaderDto[]> {
-    return this.detailsService.getLeaders(
-      query.chainId,
-      query.orderBy,
-      query.orderDirection,
-      query.first,
-      query.skip,
-    );
+    return this.detailsService.getLeaders(query.chainId, {
+      orderBy: query.orderBy,
+      orderDirection: query.orderDirection,
+      first: query.first,
+    });
   }
 
   @Get('/:address')

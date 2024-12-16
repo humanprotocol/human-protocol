@@ -31,7 +31,6 @@ fragment LeaderFields on Leader {
 def get_leaders_query(filter: LeaderFilter):
     return """
 query GetLeaders(
-    $role: String,
     $minAmountStaked: Int,
     $roles: [String!]
     $orderBy: String
@@ -41,7 +40,6 @@ query GetLeaders(
 ) {{
     leaders(
       where: {{
-        {role_clause}
         {amount_staked_clause}
         {roles_clause}
       }},
@@ -56,9 +54,8 @@ query GetLeaders(
 {leader_fragment}
 """.format(
         leader_fragment=leader_fragment,
-        role_clause="role: $role" if filter.role else "",
         amount_staked_clause=(
-            "amountStaked_gt: $minAmountStaked" if filter.min_amount_staked else ""
+            "amountStaked_gte: $minAmountStaked" if filter.min_amount_staked else ""
         ),
         roles_clause="role_in: $roles" if filter.roles else "",
     )

@@ -47,7 +47,6 @@ class LeaderFilter:
     def __init__(
         self,
         chain_id: ChainId,
-        role: Optional[str] = None,
         roles: Optional[str] = [],
         min_amount_staked: int = None,
         order_by: Optional[str] = None,
@@ -59,7 +58,6 @@ class LeaderFilter:
         Initializes a LeaderFilter instance.
 
         :param chain_id: Chain Id to request data
-        :param role: Leader role
         :param order_by: Order by property, "role"
         :param order_direction: Order of results, "asc" or "desc"
         :param first: Number of items per page
@@ -75,14 +73,12 @@ class LeaderFilter:
             raise OperatorUtilsError(f"Invalid order: {order_direction}")
 
         self.chain_id = chain_id
-        self.role = role
-        self.role = role
         self.roles = roles
         self.min_amount_staked = min_amount_staked
         self.order_by = order_by
         self.order_direction = order_direction
-        self.first = min(first, 1000)
-        self.skip = skip
+        self.first = min(max(first, 1), 1000)
+        self.skip = max(skip, 0)
 
 
 class LeaderData:
@@ -240,7 +236,6 @@ class OperatorUtils:
             params={
                 "minAmountStaked": filter.min_amount_staked,
                 "roles": filter.roles,
-                "role": filter.role,
                 "orderBy": filter.order_by,
                 "orderDirection": filter.order_direction.value,
                 "first": filter.first,

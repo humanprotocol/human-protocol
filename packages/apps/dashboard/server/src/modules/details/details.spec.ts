@@ -67,7 +67,7 @@ describe('DetailsService', () => {
       .spyOn(httpService as any, 'get')
       .mockReturnValue(of({ data: mockReputations }));
 
-    const result = await service.getLeaders();
+    const result = await service.getLeaders(ChainId.ALL);
 
     expect(result).toEqual([
       expect.objectContaining({
@@ -86,7 +86,7 @@ describe('DetailsService', () => {
       .mockResolvedValue(mockLeaders as ILeader[]);
     jest.spyOn(httpService as any, 'get').mockReturnValue(of({ data: [] }));
 
-    const result = await service.getLeaders();
+    const result = await service.getLeaders(ChainId.ALL);
 
     expect(result).toEqual([
       expect.objectContaining({
@@ -114,11 +114,10 @@ describe('DetailsService', () => {
       .spyOn(httpService as any, 'get')
       .mockReturnValue(of({ data: mockReputations }));
 
-    const result = await service.getLeaders(
-      ChainId.POLYGON_AMOY,
-      LeadersOrderBy.REPUTATION,
-      OrderDirection.DESC,
-    );
+    const result = await service.getLeaders(ChainId.POLYGON_AMOY, {
+      orderBy: LeadersOrderBy.REPUTATION,
+      orderDirection: OrderDirection.DESC,
+    });
 
     expect(result[0].address).toBe('0x456');
     expect(result[1].address).toBe('0x123');
@@ -134,7 +133,7 @@ describe('DetailsService', () => {
       .spyOn(httpService, 'get')
       .mockReturnValue(throwError(() => new Error('API error')));
 
-    const result = await service.getLeaders();
+    const result = await service.getLeaders(ChainId.ALL);
 
     expect(result).toEqual([
       expect.objectContaining({
@@ -165,13 +164,12 @@ describe('DetailsService', () => {
       .spyOn(httpService as any, 'get')
       .mockReturnValue(of({ data: mockReputations }));
 
-    const result = await service.getLeaders(
-      ChainId.POLYGON_AMOY,
-      LeadersOrderBy.REPUTATION,
-      OrderDirection.DESC,
-      1,
-      0,
-    );
+    const result = await service.getLeaders(ChainId.POLYGON_AMOY, {
+      orderBy: LeadersOrderBy.REPUTATION,
+      orderDirection: OrderDirection.DESC,
+      first: 1,
+      skip: 0,
+    });
 
     expect(result.length).toBe(1);
     expect(result[0].address).toBe('0x333');
