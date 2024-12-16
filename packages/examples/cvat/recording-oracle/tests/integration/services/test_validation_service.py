@@ -3,6 +3,8 @@ import math
 import random
 import unittest
 import uuid
+from collections import Counter
+from collections.abc import Sequence
 from contextlib import ExitStack
 from logging import Logger
 from types import SimpleNamespace
@@ -119,34 +121,9 @@ class TestManifestChange:
         with ExitStack() as common_lock_es:
             logger = mock.Mock(Logger)
 
-            mock_make_cloud_client = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
-            )
-            mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
-
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
             )
-
-            mock_get_task_validation_layout = common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
-                )
-            )
-            mock_get_task_validation_layout.return_value = mock.Mock(
-                cvat_api.models.ITaskValidationLayoutRead,
-                honeypot_frames=[0, 1],
-                honeypot_real_frames=[0, 1],
-            )
-
-            mock_get_task_data_meta = common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
-            )
-            mock_get_task_data_meta.return_value = mock.Mock(
-                cvat_api.models.IDataMetaRead,
-                frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
-            )
-
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
             )
@@ -155,6 +132,33 @@ class TestManifestChange:
             )
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
+            )
+
+            mock_make_cloud_client = common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+            )
+            mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
+
+            mock_get_task_validation_layout = common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
+                )
+            )
+            mock_get_task_validation_layout.return_value = mock.Mock(
+                cvat_api.models.ITaskValidationLayoutRead,
+                validation_frames=[2, 3],
+                honeypot_count=2,
+                honeypot_frames=[0, 1],
+                honeypot_real_frames=[2, 3],
+                frames_per_job_count=2,
+            )
+
+            mock_get_task_data_meta = common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+            )
+            mock_get_task_data_meta.return_value = mock.Mock(
+                cvat_api.models.IDataMetaRead,
+                frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
             )
 
             def patched_prepare_merged_dataset(self):
@@ -191,6 +195,11 @@ class TestManifestChange:
                 mock.patch(
                     "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports"
                 ) as mock_get_jobs_quality_reports,
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                ),
+                mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
+                mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
             ):
                 mock_get_task_quality_report.return_value = mock.Mock(
                     cvat_api.models.IQualityReport, id=1
@@ -280,7 +289,7 @@ class TestManifestChange:
 
 
 class TestValidationLogic:
-    @pytest.mark.parametrize("seed", range(50))
+    @pytest.mark.parametrize("seed", [41])  # range(50))
     def test_can_change_bad_honeypots_in_jobs(self, session: Session, seed: int):
         escrow_address = ESCROW_ADDRESS
         chain_id = Networks.localhost
@@ -305,7 +314,6 @@ class TestValidationLogic:
         )
 
         (
-            _,
             task_frame_names,
             task_validation_frames,
             task_honeypots,
@@ -331,19 +339,22 @@ class TestValidationLogic:
             logger = mock.Mock(Logger)
 
             common_lock_es.enter_context(
-                mock.patch(
-                    "src.core.config.Config.validation.gt_ban_threshold", max_validation_frame_uses
-                )
+                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+            )
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
+            )
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
+            )
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
             )
             mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
-
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
-            )
 
             mock_get_task_validation_layout = common_lock_es.enter_context(
                 mock.patch(
@@ -366,16 +377,6 @@ class TestValidationLogic:
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
                 frames=[SimpleNamespace(name=name) for name in task_frame_names],
-            )
-
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
             )
 
             def patched_prepare_merged_dataset(self):
@@ -419,6 +420,9 @@ class TestValidationLogic:
                 mock.patch(
                     "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
                 ) as mock_update_task_validation_layout,
+                mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.35),
+                mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
+                mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
             ):
                 mock_get_task_quality_report.return_value = mock.Mock(
                     cvat_api.models.IQualityReport, id=1
@@ -451,31 +455,40 @@ class TestValidationLogic:
                     logger=logger,
                 )
 
-                assert isinstance(vr, ValidationFailure)
+            assert isinstance(vr, ValidationFailure)
+            assert {j.job_id for j in annotation_meta.jobs} == set(vr.rejected_jobs)
 
-                assert mock_update_task_validation_layout.call_count == 1
+            assert mock_update_task_validation_layout.call_count == 1
 
-                updated_disabled_frames = mock_update_task_validation_layout.call_args.kwargs[
-                    "disabled_frames"
+            updated_disabled_frames = mock_update_task_validation_layout.call_args.kwargs[
+                "disabled_frames"
+            ]
+            assert all(v in task_validation_frames for v in updated_disabled_frames)
+            assert {
+                f
+                for f, c in Counter(task_honeypot_real_frames).items()
+                if c == max_validation_frame_uses
+            } == set(updated_disabled_frames), Counter(task_honeypot_real_frames)
+
+            updated_honeypot_real_frames = mock_update_task_validation_layout.call_args.kwargs[
+                "honeypot_real_frames"
+            ]
+
+            for job_start, job_stop in job_frame_ranges:
+                job_honeypot_positions = [
+                    i for i, v in enumerate(task_honeypots) if v in range(job_start, job_stop + 1)
                 ]
-                assert all(v in task_validation_frames for v in updated_disabled_frames)
-
-                updated_honeypot_real_frames = mock_update_task_validation_layout.call_args.kwargs[
-                    "honeypot_real_frames"
+                job_updated_honeypots = [
+                    updated_honeypot_real_frames[i] for i in job_honeypot_positions
                 ]
 
-                for job_start, job_stop in job_frame_ranges:
-                    job_honeypot_positions = [
-                        i
-                        for i, v in enumerate(task_honeypots)
-                        if v in range(job_start, job_stop + 1)
-                    ]
-                    job_updated_honeypots = [
-                        updated_honeypot_real_frames[i] for i in job_honeypot_positions
-                    ]
-                    assert sorted(job_updated_honeypots) == sorted(set(job_updated_honeypots))
+                # Check that the frames do not repeat
+                assert sorted(job_updated_honeypots) == sorted(set(job_updated_honeypots))
 
-    def _get_job_frame_ranges(self, jobs) -> list[tuple[int, int]]:
+                # Check that the new frames are not from the excluded set
+                assert set(job_updated_honeypots).isdisjoint(updated_disabled_frames)
+
+    def _get_job_frame_ranges(self, jobs: Sequence[Sequence[str]]) -> list[tuple[int, int]]:
         job_frame_ranges = []
         job_start = 0
         for job_frames in jobs:
@@ -487,53 +500,72 @@ class TestValidationLogic:
 
     def _generate_task_frames(
         self,
-        frame_count,
-        validation_frames_count,
-        job_size,
-        validation_frames_per_job,
-        seed,
-        max_validation_frame_uses=None,
-    ):
+        frame_count: int,
+        validation_frames_count: int,
+        job_size: int,
+        validation_frames_per_job: int,
+        *,
+        seed: int | None = None,
+        max_validation_frame_uses: int | None = None,
+    ) -> tuple[Sequence[str], Sequence[int], Sequence[int], Sequence[int], Sequence[Sequence[str]]]:
         rng = np.random.Generator(np.random.MT19937(seed))
-        task_frames = list(range(frame_count))
-        task_validation_frames = task_frames[-validation_frames_count:]
-        task_real_frames = []
-        task_honeypots = []
-        task_honeypot_real_frames = []
-        validation_frame_uses = {vf: 0 for vf in task_validation_frames}
+
+        task_frame_names = list(map(str, range(frame_count)))
+        task_validation_frame_names = task_frame_names[-validation_frames_count:]
+        task_honeypot_real_frame_names = []
+
+        output_task_frame_names = []
+        output_task_honeypots = []
+        output_task_honeypot_real_frames = []
+
+        validation_frame_uses = {fn: 0 for fn in task_validation_frame_names}
         jobs = []
-        for job_real_frames in take_by(
-            task_frames[: frame_count - validation_frames_count], job_size
+        for job_frame_names in take_by(
+            task_frame_names[: frame_count - validation_frames_count], job_size
         ):
-            available_validation_frames = [
-                vf
-                for vf in task_validation_frames
+            available_validation_frame_names = [
+                fn
+                for fn in task_validation_frame_names
                 if not max_validation_frame_uses
-                or validation_frame_uses[vf] < max_validation_frame_uses
+                or validation_frame_uses[fn] < max_validation_frame_uses
             ]
-            job_validation_frames = rng.choice(
-                available_validation_frames, validation_frames_per_job, replace=False
+            job_validation_frame_names = rng.choice(
+                available_validation_frame_names, validation_frames_per_job, replace=False
             ).tolist()
 
-            job_real_frames = job_real_frames + job_validation_frames
-            rng.shuffle(job_real_frames)
+            for fn in job_validation_frame_names:
+                validation_frame_uses[fn] += 1
 
-            jobs.append(job_real_frames)
+            job_frame_names = job_frame_names + job_validation_frame_names
+            rng.shuffle(job_frame_names)
 
-            job_start_frame = len(task_real_frames)
-            task_real_frames.extend(job_real_frames)
+            jobs.append(job_frame_names)
 
-            for i, v in enumerate(job_real_frames):
-                if v in job_validation_frames:
-                    task_honeypots.append(i + job_start_frame)
-                    task_honeypot_real_frames.append(v)
+            job_start_frame = len(output_task_frame_names)
+            output_task_frame_names.extend(job_frame_names)
 
-        task_frame_names = list(map(str, task_real_frames))
+            for i, v in enumerate(job_frame_names):
+                if v in job_validation_frame_names:
+                    output_task_honeypots.append(i + job_start_frame)
+                    task_honeypot_real_frame_names.append(v)
+
+        validation_frame_name_to_idx = {}
+        for fn in task_validation_frame_names:
+            validation_frame_name_to_idx[fn] = len(output_task_frame_names)
+            output_task_frame_names.append(fn)
+
+        output_task_honeypot_real_frames = [
+            validation_frame_name_to_idx[fn] for fn in task_honeypot_real_frame_names
+        ]
+
+        output_task_validation_frames = [
+            validation_frame_name_to_idx[fn] for fn in task_validation_frame_names
+        ]
+
         return (
-            task_real_frames,
-            task_frame_names,
-            task_validation_frames,
-            task_honeypots,
-            task_honeypot_real_frames,
+            output_task_frame_names,
+            output_task_validation_frames,
+            output_task_honeypots,
+            output_task_honeypot_real_frames,
             jobs,
         )

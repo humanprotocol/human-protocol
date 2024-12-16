@@ -26,5 +26,6 @@ def grouped(
     """
 
     return {
-        group_key: list(group_iter) for group_key, group_iter in groupby(sorted(data, key), key)
+        group_key: list(group_iter)
+        for group_key, group_iter in groupby(sorted(data, key=key), key=key)
     }
