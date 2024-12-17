@@ -19,15 +19,21 @@ const TooltipMobileSup: FC<TooltipMobileSupProps> = ({
   const [open, setOpen] = useState<boolean>(false);
 
   const handleTooltipToggle = () => {
-    if (mobile.isMobile) setOpen((prev) => !prev);
+    if (mobile.isMobile) {
+      setOpen((prev) => !prev);
+    }
   };
 
   const handleMouseEnter = () => {
-    if (!mobile.isMobile) setOpen(true);
+    if (!mobile.isMobile) {
+      setOpen(true);
+    }
   };
 
   const handleMouseLeave = () => {
-    if (!mobile.isMobile) setOpen(false);
+    if (!mobile.isMobile) {
+      setOpen(false);
+    }
   };
 
   return (
