@@ -87,6 +87,25 @@ describe('JobAssignmentService', () => {
       ).toHaveBeenCalledWith(command);
       expect(result).toEqual({ assignment_id: '123' });
     });
+
+    it('handles errors when updating cached assignments', async () => {
+      const mockResult = {
+        assignment_id: '123',
+      };
+
+      const command = jobAssignmentCommandFixture;
+      (
+        exchangeOracleGatewayMock.postNewJobAssignment as jest.Mock
+      ).mockResolvedValue(mockResult);
+
+      (
+        exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
+      ).mockRejectedValueOnce(new Error('Unhandled error'));
+
+      const result = await service.processJobAssignment(command);
+
+      expect(result).toEqual(mockResult);
+    });
   });
 
   describe('processGetAssignedJobs', () => {
@@ -225,6 +244,23 @@ describe('JobAssignmentService', () => {
       expect(exchangeOracleGatewayMock.resignAssignedJob).toHaveBeenCalledWith(
         command,
       );
+    });
+
+    it('handles errors when updating cached assignments', async () => {
+      const command = new ResignJobCommand();
+
+      const mockResult = { success: true };
+      (
+        exchangeOracleGatewayMock.resignAssignedJob as jest.Mock
+      ).mockResolvedValue(mockResult);
+
+      (
+        exchangeOracleGatewayMock.fetchAssignedJobs as jest.Mock
+      ).mockRejectedValueOnce(new Error('Unhandled error'));
+
+      const result = await service.resignJob(command);
+
+      expect(result).toEqual(mockResult);
     });
   });
 });
