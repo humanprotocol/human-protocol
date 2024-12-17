@@ -24,7 +24,7 @@ datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1b
 boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
 pyinstrument = "^4.6.2"
-human-protocol-sdk = ">=3.0.7b0,<3.1.0"
+human-protocol-sdk = ">=3.0.8b0,<3.1.0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 pydantic = ">=2.6.1,<2.7.0"
 fastapi-pagination = "^0.12.17"
