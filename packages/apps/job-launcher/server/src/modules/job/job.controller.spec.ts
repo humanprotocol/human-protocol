@@ -91,7 +91,7 @@ describe('JobController', () => {
       const result = await jobController.quickLaunch(jobDto, mockRequest);
 
       expect(mockJobService.createJob).toHaveBeenCalledWith(
-        mockRequest.user.id,
+        mockRequest.user,
         jobDto.requestType,
         jobDto,
       );
@@ -192,7 +192,7 @@ describe('JobController', () => {
         expect.any(Function),
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
-        mockRequest.user.id,
+        mockRequest.user,
         JobRequestType.FORTUNE,
         jobFortuneDto,
       );
@@ -295,7 +295,7 @@ describe('JobController', () => {
         expect.any(Function),
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
-        mockRequest.user.id,
+        mockRequest.user,
         JobRequestType.IMAGE_BOXES,
         jobCvatDto,
       );
