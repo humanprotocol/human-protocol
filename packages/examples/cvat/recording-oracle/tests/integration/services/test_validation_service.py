@@ -134,6 +134,10 @@ class TestManifestChange:
                 mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
             )
 
+            common_lock_es.enter_context(
+                mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
+            )
+
             mock_make_cloud_client = common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
             )
@@ -423,6 +427,7 @@ class TestValidationLogic:
                 mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.35),
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
+                mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
             ):
                 mock_get_task_quality_report.return_value = mock.Mock(
                     cvat_api.models.IQualityReport, id=1

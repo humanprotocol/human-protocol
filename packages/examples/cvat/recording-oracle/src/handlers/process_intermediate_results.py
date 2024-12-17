@@ -526,7 +526,7 @@ class _TaskHoneypotManager:
         if (
             (Config.validation.warmup_iterations > 0)
             and (Config.validation.min_warmup_progress > 0)
-            and (self.task.iteration < Config.validation.warmup_iterations)
+            and (Config.validation.warmup_iterations <= self.task.iteration)
             and (current_progress < Config.validation.min_warmup_progress)
         ):
             self.logger.warning(

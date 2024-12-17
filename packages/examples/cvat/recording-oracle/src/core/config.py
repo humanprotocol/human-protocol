@@ -197,14 +197,14 @@ class ValidationConfig:
     Supposed only for testing. Use 0 to disable.
     """
 
-    warmup_iterations = int(os.getenv("WARMUP_ITERATIONS", "2"))
+    warmup_iterations = int(os.getenv("WARMUP_ITERATIONS", "1"))
     """
     The first escrow iterations where the annotation speed is checked to be big enough.
     """
 
     min_warmup_progress = float(os.getenv("MIN_WARMUP_PROGRESS", "10"))
     """
-    Minimum percent of the accepted jobs in an escrow during the first WARMUP iterations.
+    Minimum percent of the accepted jobs in an escrow after the first WARMUP iterations.
     If the value is lower, the escrow annotation is paused for manual investigation.
     """
 
