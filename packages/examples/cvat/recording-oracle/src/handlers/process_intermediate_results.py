@@ -447,12 +447,6 @@ class _TaskHoneypotManager:
 
     def _get_available_gt_frames(self):
         if max_gt_share := Config.validation.max_gt_share:
-            if len(self.manifest.annotation.labels) != 1:
-                # TODO: count GT frames per label set to avoid situations with empty GT sets
-                # for some labels or tasks.
-                # Note that different task types can have different label setups.
-                raise NotImplementedError("Tasks with multiple labels are not supported yet")
-
             # Limit maximum used GT frames
             regular_frames_count = 0
             for task_id, task_val_layout in self.validation_result.task_id_to_val_layout.items():
@@ -542,6 +536,16 @@ class _TaskHoneypotManager:
             )
 
     def update_honeypots(self) -> _HoneypotUpdateResult:
+        if len(self.manifest.annotation.labels) != 1:
+            # TODO: count GT frames per label set to avoid situations with empty GT sets
+            # for some labels or tasks.
+            # Note that different task types can have different label setups.
+            self.logger.warning(
+                "Tasks with multiple labels are not supported yet."
+                " Honeypots in tasks will not be updated"
+            )
+            return _HoneypotUpdateResult(self.gt_stats, can_continue_annotation=True)
+
         gt_stats = self.gt_stats
         validation_result = self.validation_result
         rejected_jobs = validation_result.rejected_jobs
