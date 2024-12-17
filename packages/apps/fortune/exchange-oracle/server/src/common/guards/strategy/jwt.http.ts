@@ -8,12 +8,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { KVStore__factory } from '@human-protocol/core/typechain-types';
-import {
-  ChainId,
-  KVStoreUtils,
-  NETWORKS,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { ChainId, NETWORKS, StorageClient } from '@human-protocol/sdk';
 import { ethers } from 'ethers';
 import * as jwt from 'jsonwebtoken';
 import { JWT_KVSTORE_KEY, KYC_APPROVED } from '../../../common/constant';
@@ -32,65 +27,12 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
         rawJwtToken: any,
         done: any,
       ) => {
-        const getFileUrlAndVerifyHash = async (
-          signer: ethers.Wallet,
-          chainId: ChainId,
-          address: string,
-          urlKey = 'url',
-        ): Promise<string> => {
-          if (!ethers.isAddress(address)) {
-            throw new BadRequestException('Invalid address');
-          }
-
-          const hashKey = urlKey + '_hash';
-          let url = '',
-            hash = '';
-
-          const contract = KVStore__factory.connect(
-            NETWORKS[chainId]!.kvstoreAddress,
-            signer,
-          );
-
-          try {
-            url = await contract.get(address, urlKey);
-          } catch (e) {
-            if (e instanceof Error) {
-              throw new Error(`Failed to get URL: ${e.message}`);
-            }
-          }
-
-          // Return empty string if no URL found
-          if (!url?.length) {
-            return '';
-          }
-
-          try {
-            hash = await contract.get(address, hashKey);
-          } catch (e) {
-            if (e instanceof Error) {
-              throw new Error(`Failed to get Hash: ${e.message}`);
-            }
-          }
-
-          const content = await fetch(url).then((res) => res.text());
-          const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
-
-          const formattedHash = hash?.replace(/^0x/, '');
-          const formattedContentHash = contentHash?.replace(/^0x/, '');
-
-          if (formattedHash !== formattedContentHash) {
-            throw new BadRequestException('Invalid hash');
-          }
-
-          return url;
-        };
-
         try {
           const payload = jwt.decode(rawJwtToken);
           const chainId = this.web3Service.getValidChains()[0];
           const signer = this.web3Service.getSigner(chainId);
 
-          const url = await getFileUrlAndVerifyHash(
+          const url = await this.getFileUrlAndVerifyHash(
             signer,
             chainId,
             (payload as any).reputation_network,
@@ -159,5 +101,57 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
       reputationNetwork: payload.reputation_network,
       qualifications: payload.qualifications,
     };
+  }
+
+  private async getFileUrlAndVerifyHash(
+    signer: ethers.Wallet,
+    chainId: ChainId,
+    address: string,
+    urlKey = 'url',
+  ): Promise<string> {
+    if (!ethers.isAddress(address)) {
+      throw new BadRequestException('Invalid address');
+    }
+
+    const hashKey = urlKey + '_hash';
+    let url = '',
+      hash = '';
+
+    const contract = KVStore__factory.connect(
+      NETWORKS[chainId]!.kvstoreAddress,
+      signer,
+    );
+
+    try {
+      url = await contract.get(address, urlKey);
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error(`Failed to get URL: ${e.message}`);
+      }
+    }
+
+    if (!url?.length) {
+      return '';
+    }
+
+    try {
+      hash = await contract.get(address, hashKey);
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error(`Failed to get Hash: ${e.message}`);
+      }
+    }
+
+    const content = await fetch(url).then((res) => res.text());
+    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
+
+    const formattedHash = hash?.replace(/^0x/, '');
+    const formattedContentHash = contentHash?.replace(/^0x/, '');
+
+    if (formattedHash !== formattedContentHash) {
+      throw new BadRequestException('Invalid hash');
+    }
+
+    return url;
   }
 }
