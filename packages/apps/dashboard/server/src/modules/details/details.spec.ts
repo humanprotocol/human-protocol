@@ -99,12 +99,14 @@ describe('DetailsService', () => {
 
   it('should return sorted leaders by reputation', async () => {
     const mockLeaders = [
-      { address: '0x123', role: 'Job Launcher' },
-      { address: '0x456', role: 'Exchange Oracle' },
+      { address: '0xA', role: 'Job Launcher' },
+      { address: '0xB', role: 'Exchange Oracle' },
+      { address: '0xC', role: 'Exchange Oracle' },
+      { address: '0xD', role: 'Exchange Oracle' },
     ];
     const mockReputations = [
-      { address: '0x456', reputation: 'hign' },
-      { address: '0x123', reputation: 'medium' },
+      { address: '0xB', reputation: 'hign' },
+      { address: '0xC', reputation: 'medium' },
     ];
 
     jest
@@ -119,8 +121,8 @@ describe('DetailsService', () => {
       orderDirection: OrderDirection.DESC,
     });
 
-    expect(result[0].address).toBe('0x456');
-    expect(result[1].address).toBe('0x123');
+    expect(result[0].address).toBe('0xB');
+    expect(result[1].address).toBe('0xC');
   });
 
   it('should handle errors when fetching reputations', async () => {

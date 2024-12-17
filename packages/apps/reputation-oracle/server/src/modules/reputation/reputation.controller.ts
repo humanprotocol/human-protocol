@@ -41,12 +41,14 @@ export class ReputationController {
   public async getReputations(
     @Query() query: ReputationGetAllQueryDto,
   ): Promise<ReputationDto[]> {
-    const { chainId, roles, orderBy, orderDirection } = query;
+    const { chainId, roles, orderBy, orderDirection, first, skip } = query;
     return this.reputationService.getReputations(
       chainId,
       roles,
       orderBy,
       orderDirection,
+      first,
+      skip,
     );
   }
 
