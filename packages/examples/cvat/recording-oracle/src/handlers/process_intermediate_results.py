@@ -522,7 +522,7 @@ class _TaskHoneypotManager:
 
         total_jobs_count = len(validation_result.job_results)
         completed_jobs_count = total_jobs_count - len(rejected_jobs)
-        current_progress = completed_jobs_count / (total_jobs_count or 1)
+        current_progress = completed_jobs_count / (total_jobs_count or 1) * 100
         if (
             (Config.validation.warmup_iterations > 0)
             and (Config.validation.min_warmup_progress > 0)
