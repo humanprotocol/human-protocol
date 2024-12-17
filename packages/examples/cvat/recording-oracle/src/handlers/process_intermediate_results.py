@@ -20,7 +20,12 @@ from src.core.annotation_meta import AnnotationMeta
 from src.core.config import Config
 from src.core.gt_stats import GtKey, GtStats, ValidationFrameStats
 from src.core.types import TaskTypes
-from src.core.validation_errors import DatasetValidationError, LowAccuracyError, TooFewGtError
+from src.core.validation_errors import (
+    DatasetValidationError,
+    LowAccuracyError,
+    TooFewGtError,
+    TooSlowAnnotationError,
+)
 from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.db.utils import ForUpdateParams
@@ -511,6 +516,30 @@ class _TaskHoneypotManager:
             if gt_stat.rating > Config.validation.gt_ban_threshold
         }
 
+    def _check_warmup_annotation_speed(self):
+        validation_result = self.validation_result
+        rejected_jobs = validation_result.rejected_jobs
+
+        total_jobs_count = len(validation_result.job_results)
+        completed_jobs_count = total_jobs_count - len(rejected_jobs)
+        current_progress = completed_jobs_count / (total_jobs_count or 1)
+        if (
+            (Config.validation.warmup_iterations > 0)
+            and (Config.validation.min_warmup_progress > 0)
+            and (self.task.iteration < Config.validation.warmup_iterations)
+            and (current_progress < Config.validation.min_warmup_progress)
+        ):
+            self.logger.warning(
+                f"Escrow validation failed for escrow_address={self.task.escrow_address}:"
+                f" progress is too slow. Min required {Config.validation.min_warmup_progress:.2f}%"
+                f" in the first {Config.validation.warmup_iterations} iterations,"
+                f" got {current_progress:2f} after the {self.task.iteration} iteration."
+                " Annotation will be stopped for a manual review."
+            )
+            raise TooSlowAnnotationError(
+                current_progress=current_progress, current_iteration=self.task.iteration
+            )
+
     def update_honeypots(self) -> _HoneypotUpdateResult:
         gt_stats = self.gt_stats
         validation_result = self.validation_result
@@ -521,9 +550,10 @@ class _TaskHoneypotManager:
 
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(
-                "Iteration: {}"
+                "Escrow validation for escrow_address={}: iteration: {}"
                 ", available GT count: {} ({}%, banned {})"
                 ", remaining jobs count: {} ({}%)".format(
+                    self.task.escrow_address,
                     self.task.iteration,
                     *value_and_percent(len(available_gt_frames), len(gt_stats)),
                     len(gt_stats) - len(available_gt_frames),
@@ -532,6 +562,8 @@ class _TaskHoneypotManager:
             )
 
         should_complete = False
+
+        self._check_warmup_annotation_speed()
 
         if len(available_gt_frames) / len(gt_stats) < Config.validation.min_available_gt_threshold:
             self.logger.debug("Not enough available GT to continue, stopping")
@@ -702,10 +734,8 @@ def process_intermediate_results(  # noqa: PLR0912
 
     gt_stats = validation_result.gt_stats
 
-    if (
-        (Config.validation.max_escrow_iterations > 0)
-        and (escrow_iteration := task.iteration)
-        and (Config.validation.max_escrow_iterations <= escrow_iteration)
+    if (Config.validation.max_escrow_iterations > 0) and (
+        Config.validation.max_escrow_iterations <= task.iteration
     ):
         logger.info(
             f"Validation for escrow_address={escrow_address}:"
