@@ -74,7 +74,7 @@ const SearchBar: FC<SearchBarProps> = ({
     if (isValidEVMAddress(value)) {
       setError(null);
     } else if (value.length > 0) {
-      setError('Invalid EVM address. Must start with 0x and be 40 characters.');
+      setError('Invalid EVM address. Must start with 0x and be 42 characters.');
     }
   };
 
