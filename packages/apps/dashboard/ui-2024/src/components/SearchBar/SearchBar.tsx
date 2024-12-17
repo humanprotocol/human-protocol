@@ -1,5 +1,4 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
@@ -29,6 +28,7 @@ import {
   gridSx,
 } from './SearchBar.styles';
 import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
+import TooltipMobileSup from '../TooltipMobileSup/TooltipMobileSup';
 
 interface SearchBarProps {
   className?: string;
@@ -172,7 +172,7 @@ const SearchBar: FC<SearchBarProps> = ({
                   }}
                 />
               </IconButton>
-              <Tooltip title={error || ''} arrow disableHoverListener={!error}>
+              <TooltipMobileSup title={error || ''}>
                 <IconButton
                   className="search-button"
                   type="submit"
@@ -191,7 +191,7 @@ const SearchBar: FC<SearchBarProps> = ({
                     }}
                   />
                 </IconButton>
-              </Tooltip>
+              </TooltipMobileSup>
             </InputAdornment>
           ),
         }}
