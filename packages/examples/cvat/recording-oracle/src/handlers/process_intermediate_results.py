@@ -520,24 +520,25 @@ class _TaskHoneypotManager:
         validation_result = self.validation_result
         rejected_jobs = validation_result.rejected_jobs
 
+        current_iteration = self.task.iteration + 1
         total_jobs_count = len(validation_result.job_results)
         completed_jobs_count = total_jobs_count - len(rejected_jobs)
         current_progress = completed_jobs_count / (total_jobs_count or 1) * 100
         if (
             (Config.validation.warmup_iterations > 0)
             and (Config.validation.min_warmup_progress > 0)
-            and (Config.validation.warmup_iterations <= self.task.iteration)
+            and (Config.validation.warmup_iterations <= current_iteration)
             and (current_progress < Config.validation.min_warmup_progress)
         ):
             self.logger.warning(
                 f"Escrow validation failed for escrow_address={self.task.escrow_address}:"
                 f" progress is too slow. Min required {Config.validation.min_warmup_progress:.2f}%"
-                f" in the first {Config.validation.warmup_iterations} iterations,"
-                f" got {current_progress:2f} after the {self.task.iteration} iteration."
+                f" after the first {Config.validation.warmup_iterations} iterations,"
+                f" got {current_progress:2f} after the {current_iteration} iteration."
                 " Annotation will be stopped for a manual review."
             )
             raise TooSlowAnnotationError(
-                current_progress=current_progress, current_iteration=self.task.iteration
+                current_progress=current_progress, current_iteration=current_iteration
             )
 
     def update_honeypots(self) -> _HoneypotUpdateResult:

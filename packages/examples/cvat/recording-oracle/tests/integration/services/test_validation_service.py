@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.core.annotation_meta import AnnotationMeta, JobMeta
 from src.core.types import Networks
+from src.core.validation_errors import TooSlowAnnotationError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.cvat import api_calls as cvat_api
 from src.db import SessionLocal
@@ -135,7 +136,7 @@ class TestManifestChange:
             )
 
             common_lock_es.enter_context(
-                mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
+                mock.patch("src.core.config.ValidationConfig.min_warmup_progress", 0),
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -427,7 +428,7 @@ class TestValidationLogic:
                 mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.35),
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
-                mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
+                mock.patch("src.core.config.ValidationConfig.min_warmup_progress", 0),
             ):
                 mock_get_task_quality_report.return_value = mock.Mock(
                     cvat_api.models.IQualityReport, id=1
@@ -574,3 +575,133 @@ class TestValidationLogic:
             output_task_honeypot_real_frames,
             jobs,
         )
+
+    def test_can_stop_on_slow_annotation_after_warmup_iterations(self, session: Session):
+        escrow_address = ESCROW_ADDRESS
+        chain_id = Networks.localhost
+
+        frame_count = 10
+
+        manifest = generate_manifest()
+
+        cvat_task_id = 1
+        cvat_job_id = 1
+        annotator1 = WALLET_ADDRESS1
+
+        assignment1_id = f"0x{0:040d}"
+        assignment1_quality = 0
+
+        # create a validation input
+        with ExitStack() as common_lock_es:
+            logger = mock.Mock(Logger)
+
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
+            )
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
+            )
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
+            )
+            common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
+            )
+
+            mock_make_cloud_client = common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
+            )
+            mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
+
+            mock_get_task_validation_layout = common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_validation_layout"
+                )
+            )
+            mock_get_task_validation_layout.return_value = mock.Mock(
+                cvat_api.models.ITaskValidationLayoutRead,
+                validation_frames=[2, 3],
+                honeypot_count=2,
+                honeypot_frames=[0, 1],
+                honeypot_real_frames=[2, 3],
+                frames_per_job_count=2,
+            )
+
+            mock_get_task_data_meta = common_lock_es.enter_context(
+                mock.patch("src.handlers.process_intermediate_results.cvat_api.get_task_data_meta")
+            )
+            mock_get_task_data_meta.return_value = mock.Mock(
+                cvat_api.models.IDataMetaRead,
+                frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
+            )
+
+            def patched_prepare_merged_dataset(self):
+                self._updated_merged_dataset_archive = io.BytesIO()
+
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
+                    patched_prepare_merged_dataset,
+                )
+            )
+
+            annotation_meta = AnnotationMeta(
+                jobs=[
+                    JobMeta(
+                        job_id=cvat_job_id,
+                        task_id=cvat_task_id,
+                        annotation_filename="",
+                        annotator_wallet_address=annotator1,
+                        assignment_id=assignment1_id,
+                        start_frame=0,
+                        stop_frame=manifest.annotation.job_size + manifest.validation.val_size,
+                    )
+                ]
+            )
+
+            with (
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_report"
+                ) as mock_get_task_quality_report,
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_quality_report_data"
+                ) as mock_get_quality_report_data,
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_jobs_quality_reports"
+                ) as mock_get_jobs_quality_reports,
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
+                ),
+                mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
+                mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
+                mock.patch("src.core.config.ValidationConfig.warmup_iterations", 1),
+                mock.patch("src.core.config.ValidationConfig.min_warmup_progress", 20),
+            ):
+                mock_get_task_quality_report.return_value = mock.Mock(
+                    cvat_api.models.IQualityReport, id=1
+                )
+                mock_get_quality_report_data.return_value = mock.Mock(
+                    cvat_api.QualityReportData,
+                    frame_results={
+                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
+                    },
+                )
+                mock_get_jobs_quality_reports.return_value = [
+                    mock.Mock(
+                        cvat_api.models.IQualityReport,
+                        job_id=1,
+                        summary=mock.Mock(accuracy=assignment1_quality),
+                    ),
+                ]
+
+                with pytest.raises(TooSlowAnnotationError):
+                    process_intermediate_results(
+                        session,
+                        escrow_address=escrow_address,
+                        chain_id=chain_id,
+                        meta=annotation_meta,
+                        merged_annotations=io.BytesIO(),
+                        manifest=manifest,
+                        logger=logger,
+                    )
