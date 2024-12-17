@@ -2,14 +2,14 @@ import { FC, ReactNode, useState } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
-interface CustomTooltipProps {
+interface TooltipMobileSupProps {
   title: string;
   children: ReactNode;
   arrow?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const TooltipMobileSup: FC<CustomTooltipProps> = ({
+const TooltipMobileSup: FC<TooltipMobileSupProps> = ({
   title,
   children,
   arrow = true,
