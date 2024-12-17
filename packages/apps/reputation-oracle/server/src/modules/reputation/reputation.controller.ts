@@ -41,8 +41,13 @@ export class ReputationController {
   public async getReputations(
     @Query() query: ReputationGetAllQueryDto,
   ): Promise<ReputationDto[]> {
-    const { chainId, roles } = query;
-    return this.reputationService.getAllReputations(chainId, roles);
+    const { chainId, roles, orderBy, orderDirection } = query;
+    return this.reputationService.getReputations(
+      chainId,
+      roles,
+      orderBy,
+      orderDirection,
+    );
   }
 
   @Get('/:address')

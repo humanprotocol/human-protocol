@@ -8,7 +8,9 @@ import {
   JobRequestType,
   ReputationEntityType,
   ReputationLevel,
+  ReputationOrderBy,
   SolutionError,
+  SortDirection,
 } from '../../common/enums';
 import { ReputationRepository } from './reputation.repository';
 import {
@@ -387,17 +389,32 @@ export class ReputationService {
   }
 
   /**
-   * Retrieves reputation data for all entities on a given blockchain chain, or for a specific chain if provided.
+   * Retrieves reputation data for entities on a given blockchain chain, optionally filtered by chain ID and roles.
+   * Supports pagination and sorting by reputation points.
+   *
    * @param chainId Optional. The ID of the blockchain chain.
-   * @returns {Promise<ReputationDto[]>} A Promise containing an array of reputation data.
+   * @param types Optional. An array of roles to filter by.
+   * @param orderBy Optional. The field to order the results by (e.g., reputation points).
+   * @param orderDirection Optional. The direction to sort the results (e.g., ascending or descending).
+   * @param first Number of records to retrieve.
+   * @param skip Number of records to skip.
+   * @returns A Promise containing an array of reputation data.
    */
-  public async getAllReputations(
+  public async getReputations(
     chainId?: ChainId,
     types?: ReputationEntityType[],
+    orderBy?: ReputationOrderBy,
+    orderDirection?: SortDirection,
+    first?: number,
+    skip?: number,
   ): Promise<ReputationDto[]> {
     const reputations = await this.reputationRepository.findByChainIdAndTypes(
       chainId,
       types,
+      orderBy,
+      orderDirection,
+      first,
+      skip,
     );
 
     return reputations.map((reputation) => ({

@@ -103,8 +103,8 @@ describe('DetailsService', () => {
       { address: '0x456', role: 'Exchange Oracle' },
     ];
     const mockReputations = [
-      { address: '0x123', reputation: 'medium' },
       { address: '0x456', reputation: 'hign' },
+      { address: '0x123', reputation: 'medium' },
     ];
 
     jest
@@ -142,36 +142,5 @@ describe('DetailsService', () => {
         reputation: 'low',
       }),
     ]);
-  });
-
-  it('should support pagination when sorting by reputation', async () => {
-    const mockLeaders = [
-      { address: '0x111', role: 'Exchange Oracle' },
-      { address: '0x222', role: 'Recording Oracle' },
-      { address: '0x333', role: 'Job Launcher' },
-    ];
-
-    const mockReputations = [
-      { address: '0x111', reputation: 'low' },
-      { address: '0x222', reputation: 'medium' },
-      { address: '0x333', reputation: 'hign' },
-    ];
-
-    jest
-      .spyOn(OperatorUtils, 'getLeaders')
-      .mockResolvedValue(mockLeaders as ILeader[]);
-    jest
-      .spyOn(httpService as any, 'get')
-      .mockReturnValue(of({ data: mockReputations }));
-
-    const result = await service.getLeaders(ChainId.POLYGON_AMOY, {
-      orderBy: LeadersOrderBy.REPUTATION,
-      orderDirection: OrderDirection.DESC,
-      first: 1,
-      skip: 0,
-    });
-
-    expect(result.length).toBe(1);
-    expect(result[0].address).toBe('0x333');
   });
 });
