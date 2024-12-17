@@ -434,7 +434,7 @@ class _TaskHoneypotManager:
             key = item_counts.__getitem__
 
         pick = set()
-        for randval in self.rng.random(count):
+        for randval in rng.random(count):
             # TODO: try to optimize item counting on each iteration
             # maybe by using a bagged data structure
             least_use_count = min(key(item) for item in items if item not in pick)
