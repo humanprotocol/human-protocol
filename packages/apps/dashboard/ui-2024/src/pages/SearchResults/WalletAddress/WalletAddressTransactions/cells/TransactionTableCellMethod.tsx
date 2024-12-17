@@ -8,10 +8,52 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
     string,
     { color: { text: string; border: string } }
   > = {
-    transfer: {
+    withdraw: {
+      color: {
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
+      },
+    },
+    cancel: {
+      color: {
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
+      },
+    },
+    stake: {
       color: {
         text: colorPalette.success.main,
         border: colorPalette.success.light,
+      },
+    },
+    unstake: {
+      color: {
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
+      },
+    },
+    slash: {
+      color: {
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
+      },
+    },
+    stakeWithdrawn: {
+      color: {
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
+      },
+    },
+    withdrawFees: {
+      color: {
+        text: colorPalette.error.main,
+        border: colorPalette.error.light,
+      },
+    },
+    approve: {
+      color: {
+        text: colorPalette.warning.main,
+        border: colorPalette.warning.light,
       },
     },
     complete: {
@@ -20,16 +62,12 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
         border: colorPalette.success.light,
       },
     },
-    payout: {
-      color: {
-        text: colorPalette.secondary.main,
-        border: colorPalette.secondary.light,
-      },
-    },
   };
 
-  const currentStatusColors =
-    methodAttributes[method]?.color || colorPalette.success.main;
+  const currentStatusColors = methodAttributes[method]?.color || {
+    text: colorPalette.primary.main,
+    border: colorPalette.primary.light,
+  };
 
   return (
     <Box
@@ -37,11 +75,17 @@ export const TransactionTableCellMethod = ({ method }: { method: string }) => {
         display: 'inline-flex',
         paddingX: 2,
         paddingY: 1,
-        borderRadius: 4,
+        borderRadius: 6,
         border: `1px solid ${currentStatusColors.border}`,
       }}
     >
-      <Typography>{capitalize(method)}</Typography>
+      <Typography
+        sx={{
+          color: `${currentStatusColors.text}`,
+        }}
+      >
+        {capitalize(method)}
+      </Typography>
     </Box>
   );
 };

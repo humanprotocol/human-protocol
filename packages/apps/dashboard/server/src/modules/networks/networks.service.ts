@@ -48,7 +48,9 @@ export class NetworksService {
           statisticsClient.getHMTDailyData({
             from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
           }),
-          statisticsClient.getEscrowStatistics({ from: oneMonthAgo }),
+          statisticsClient.getEscrowStatistics({
+            from: new Date(Math.floor(oneMonthAgo.getTime() / 1000) * 1000),
+          }),
         ]);
 
         const totalTransactionCount = hmtData.reduce(
