@@ -1,6 +1,6 @@
 import { apiPaths } from '@/api/api-paths';
-import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
-import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in/schema';
+import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
+import { signInSuccessResponseSchema } from '@/modules/worker/services/sign-in/schema';
 
 export const fetchTokenRefresh = async (baseUrl: string) => {
   const response = await fetch(
