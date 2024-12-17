@@ -1,4 +1,4 @@
-import { FC, ReactNode, useState } from 'react';
+import { FC, ReactNode, useState, useRef, useEffect } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 
@@ -17,6 +17,26 @@ const TooltipMobileSup: FC<TooltipMobileSupProps> = ({
 }) => {
   const { mobile } = useBreakPoints();
   const [open, setOpen] = useState<boolean>(false);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      tooltipRef.current &&
+      !tooltipRef.current.contains(event.target as Node)
+    ) {
+      setOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mobile.isMobile) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [mobile.isMobile]);
 
   const handleTooltipToggle = () => {
     if (mobile.isMobile) {
@@ -43,12 +63,17 @@ const TooltipMobileSup: FC<TooltipMobileSupProps> = ({
       open={open}
       disableHoverListener={mobile.isMobile}
       placement={placement}
+      sx={{
+        span: {
+          display: 'inline-block',
+        },
+      }}
     >
       <span
+        ref={tooltipRef}
         onClick={handleTooltipToggle}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        style={{ display: 'inline-block' }}
       >
         {children}
       </span>
