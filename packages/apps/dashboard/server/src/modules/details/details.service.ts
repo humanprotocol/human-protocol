@@ -21,6 +21,7 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworksService } from '../networks/networks.service';
 import { OracleRole } from '../../common/enums/roles';
 
 @Injectable()
@@ -29,6 +30,7 @@ export class DetailsService {
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
+    private readonly networksService: NetworksService,
     private readonly networkConfig: NetworkConfigService,
   ) {}
 
@@ -152,7 +154,7 @@ export class DetailsService {
     take?: number,
   ): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? await this.networkConfig.getAvailableNetworks()
+      ? await this.networksService.getOperatingNetworks()
       : [chainId];
 
     let allLeadersData: ILeader[] = [];
