@@ -469,39 +469,50 @@ class _TaskHoneypotManager:
                     - task_val_layout.honeypot_count
                 )
 
-            total_frames_count = regular_frames_count + len(self.gt_stats)
-            enabled_gt_keys = {k for k, gt_stat in self.gt_stats.items() if gt_stat.enabled}
-            current_gt_share = len(enabled_gt_keys) / (total_frames_count or 1)
-            max_usable_gt_share = min(len(self.gt_stats) / (total_frames_count or 1), max_gt_share)
-            max_gt_count = min(int(max_gt_share * total_frames_count), len(self.gt_stats))
-            has_updates = False
-            if max_gt_count < len(enabled_gt_keys):
-                # disable some validation frames, take the least used ones
-                pick = self._select_random_least_used(
-                    enabled_gt_keys,
-                    count=len(enabled_gt_keys) - max_gt_count,
-                    key=lambda k: self.gt_stats[k].total_uses,
+            if len(self.manifest.annotation.labels) != 1:
+                # TODO: count GT frames per label set to avoid situations with empty GT sets
+                # for some labels or tasks.
+                # Note that different task types can have different label setups.
+                self.logger.warning(
+                    "Tasks with multiple labels are not supported yet."
+                    " Honeypots in tasks will not be limited"
                 )
-
-                enabled_gt_keys.difference_update(pick)
-                has_updates = True
-            elif (
-                # Allow restoring GT frames on max limit config changes
-                current_gt_share < max_usable_gt_share
-            ):
-                # add more validation frames, take the most used ones
-                pick = self._select_random_least_used(
-                    enabled_gt_keys,
-                    count=max_gt_count - len(enabled_gt_keys),
-                    key=lambda k: -self.gt_stats[k].total_uses,
+            else:
+                total_frames_count = regular_frames_count + len(self.gt_stats)
+                enabled_gt_keys = {k for k, gt_stat in self.gt_stats.items() if gt_stat.enabled}
+                current_gt_share = len(enabled_gt_keys) / (total_frames_count or 1)
+                max_usable_gt_share = min(
+                    len(self.gt_stats) / (total_frames_count or 1), max_gt_share
                 )
+                max_gt_count = min(int(max_gt_share * total_frames_count), len(self.gt_stats))
+                has_updates = False
+                if max_gt_count < len(enabled_gt_keys):
+                    # disable some validation frames, take the least used ones
+                    pick = self._select_random_least_used(
+                        enabled_gt_keys,
+                        count=len(enabled_gt_keys) - max_gt_count,
+                        key=lambda k: self.gt_stats[k].total_uses,
+                    )
 
-                enabled_gt_keys.update(pick)
-                has_updates = True
+                    enabled_gt_keys.difference_update(pick)
+                    has_updates = True
+                elif (
+                    # Allow restoring GT frames on max limit config changes
+                    current_gt_share < max_usable_gt_share
+                ):
+                    # add more validation frames, take the most used ones
+                    pick = self._select_random_least_used(
+                        enabled_gt_keys,
+                        count=max_gt_count - len(enabled_gt_keys),
+                        key=lambda k: -self.gt_stats[k].total_uses,
+                    )
 
-            if has_updates:
-                for gt_key, gt_stat in self.gt_stats.items():
-                    gt_stat.enabled = gt_key in enabled_gt_keys
+                    enabled_gt_keys.update(pick)
+                    has_updates = True
+
+                if has_updates:
+                    for gt_key, gt_stat in self.gt_stats.items():
+                        gt_stat.enabled = gt_key in enabled_gt_keys
 
         return {
             gt_key
@@ -536,16 +547,6 @@ class _TaskHoneypotManager:
             )
 
     def update_honeypots(self) -> _HoneypotUpdateResult:
-        if len(self.manifest.annotation.labels) != 1:
-            # TODO: count GT frames per label set to avoid situations with empty GT sets
-            # for some labels or tasks.
-            # Note that different task types can have different label setups.
-            self.logger.warning(
-                "Tasks with multiple labels are not supported yet."
-                " Honeypots in tasks will not be updated"
-            )
-            return _HoneypotUpdateResult(self.gt_stats, can_continue_annotation=True)
-
         gt_stats = self.gt_stats
         validation_result = self.validation_result
         rejected_jobs = validation_result.rejected_jobs
