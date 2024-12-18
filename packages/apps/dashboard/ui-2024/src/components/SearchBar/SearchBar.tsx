@@ -12,6 +12,7 @@ import {
   Grid,
   MenuItem,
   Box,
+  Tooltip,
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 import { getNetwork, networks } from '@utils/config/networks';
@@ -28,7 +29,6 @@ import {
   gridSx,
 } from './SearchBar.styles';
 import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
-import TooltipMobileSup from '../TooltipMobileSup/TooltipMobileSup';
 
 interface SearchBarProps {
   className?: string;
@@ -172,7 +172,7 @@ const SearchBar: FC<SearchBarProps> = ({
                   }}
                 />
               </IconButton>
-              <TooltipMobileSup title={error || ''}>
+              <Tooltip title={error || ''} arrow enterTouchDelay={0}>
                 <IconButton
                   className="search-button"
                   type="submit"
@@ -191,7 +191,7 @@ const SearchBar: FC<SearchBarProps> = ({
                     }}
                   />
                 </IconButton>
-              </TooltipMobileSup>
+              </Tooltip>
             </InputAdornment>
           ),
         }}
