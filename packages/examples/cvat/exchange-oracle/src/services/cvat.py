@@ -504,38 +504,15 @@ def finish_escrow_creations_by_escrow_address(
 # EscrowValidation
 
 
-def prepare_escrows_for_validation(
-    session: Session, *, limit: int = 5
-) -> Sequence[tuple[str, int]]:
-    subquery = (
-        select(EscrowValidation.id)
+def lock_escrow_for_validation(session: Session) -> EscrowValidation | None:
+    query = (
+        select(EscrowValidation)
         .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
-        .limit(limit)
         .order_by(EscrowValidation.attempts.asc())
+        .limit(1)
+        .with_for_update(skip_locked=True)
     )
-    update_stmt = (
-        update(EscrowValidation)
-        .where(EscrowValidation.id.in_(subquery))
-        .values(attempts=EscrowValidation.attempts + 1)
-        .returning(EscrowValidation.escrow_address, EscrowValidation.chain_id)
-    )
-    return session.execute(update_stmt).all()
-
-
-def lock_escrow_for_validation(
-    session: Session,
-    *,
-    escrow_address: str,
-    chain_id: int,
-) -> Sequence[tuple[str, str, int]]:
-    stmt = (
-        select(EscrowValidation.escrow_address, EscrowValidation.chain_id)
-        .where(
-            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
-        )
-        .with_for_update(nowait=True)
-    )
-    return session.execute(stmt)
+    return session.execute(query).scalar()
 
 
 def update_escrow_validation(
@@ -559,15 +536,6 @@ def update_escrow_validation(
         )
         .values(**values)
     )
-    session.execute(stmt)
-
-
-def update_escrow_validation_statuses_by_ids(
-    session: Session,
-    ids: Iterable[str],
-    status: EscrowValidationStatuses,
-) -> None:
-    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
     session.execute(stmt)
 
 

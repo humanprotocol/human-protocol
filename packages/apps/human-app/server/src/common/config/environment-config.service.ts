@@ -223,9 +223,11 @@ export class EnvironmentConfigService {
    * Default: 24 hours
    */
   get cacheTtlJobTypes(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_JOB_TYPES',
-      DEFAULT_CACHE_TTL_JOB_TYPES,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_JOB_TYPES',
+        DEFAULT_CACHE_TTL_JOB_TYPES,
+      ) * 1000
     );
   }
 

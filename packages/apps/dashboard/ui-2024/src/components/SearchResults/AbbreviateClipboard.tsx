@@ -18,7 +18,13 @@ const AbbreviateClipboard = ({ value, link }: AbbreviateClipboardProps) => {
   const navigate = useNavigate();
   return (
     <Stack direction="row" gap={1}>
-      <Typography sx={{ whiteSpace: 'nowrap', textDecoration: 'inherit' }}>
+      <Typography
+        sx={{
+          whiteSpace: 'nowrap',
+          textDecoration: 'inherit',
+          color: colorPalette.link,
+        }}
+      >
         {link ? (
           <span
             onClick={(e) => {

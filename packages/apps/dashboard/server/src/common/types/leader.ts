@@ -5,5 +5,4 @@ export type GetLeadersPaginationOptions = {
   orderBy?: LeadersOrderBy;
   orderDirection?: OrderDirection;
   first?: number;
-  skip?: number;
 };

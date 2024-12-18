@@ -46,7 +46,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { mapJobType, parseUrl } from '../../common/utils';
+import { parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -773,11 +773,16 @@ export class JobService {
 
   public async createJob(
     userId: number,
-    requestType: JobRequestType,
+    jobRequestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
     let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
-    const mappedJobType = mapJobType(requestType);
+    if (!Object.values(JobRequestType).includes(jobRequestType)) {
+      throw new ControlledError(
+        ErrorJob.InvalidRequestType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     // Select network
     chainId = chainId || this.routingProtocolService.selectNetwork();
@@ -787,7 +792,7 @@ export class JobService {
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
       const selectedOracles = await this.routingProtocolService.selectOracles(
         chainId,
-        mappedJobType,
+        jobRequestType,
       );
 
       exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
@@ -797,7 +802,7 @@ export class JobService {
       // Validate if all oracles are provided
       await this.routingProtocolService.validateOracles(
         chainId,
-        mappedJobType,
+        jobRequestType,
         reputationOracle,
         exchangeOracle,
         recordingOracle,
@@ -824,7 +829,7 @@ export class JobService {
 
     const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
     const { calculateFundAmount, createManifest } =
-      this.createJobSpecificActions[requestType];
+      this.createJobSpecificActions[jobRequestType];
 
     const userBalance = await this.paymentService.getUserBalance(
       userId,
@@ -896,12 +901,12 @@ export class JobService {
     } else {
       const manifestOrigin = await createManifest(
         dto,
-        requestType,
+        jobRequestType,
         tokenFundAmount,
       );
 
       const { url, hash } = await this.uploadManifest(
-        requestType,
+        jobRequestType,
         chainId,
         manifestOrigin,
       );
@@ -915,7 +920,7 @@ export class JobService {
     jobEntity.exchangeOracle = exchangeOracle;
     jobEntity.recordingOracle = recordingOracle;
     jobEntity.userId = userId;
-    jobEntity.requestType = requestType;
+    jobEntity.requestType = jobRequestType;
     jobEntity.fee = tokenFee;
     jobEntity.fundAmount = tokenFundAmount;
     jobEntity.status = JobStatus.PENDING;

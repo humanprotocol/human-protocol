@@ -1,4 +1,4 @@
-import { ChainId, OrderDirection } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, ILike, In } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';

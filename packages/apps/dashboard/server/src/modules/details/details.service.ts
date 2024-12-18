@@ -34,6 +34,7 @@ export class DetailsService {
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
+    private readonly networksService: NetworksService,
     private readonly networkConfig: NetworkConfigService,
   ) {}
 
@@ -90,7 +91,6 @@ export class DetailsService {
     first: number,
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
-    // TODO: Switch to fetch all transactions related to this wallet address once SDK is changed
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,
