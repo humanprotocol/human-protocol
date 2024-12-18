@@ -17,11 +17,7 @@ export class KycErrorFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    let status = HttpStatus.BAD_REQUEST;
-
-    if (exception.message === KycErrorMessage.INVALID_WEBHOOK_SIGNATURE) {
-      status = HttpStatus.UNAUTHORIZED;
-    }
+    const status = HttpStatus.BAD_REQUEST;
 
     this.logger.error(exception.message, exception.stack, exception.userId);
 
