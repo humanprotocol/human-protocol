@@ -10,13 +10,13 @@ export type EscrowPayout = {
 };
 
 @Entity({ schema: NS, name: 'escrow_payouts_batch' })
-@Index(['escrowCompletionId', 'payoutsHash'], { unique: true })
+@Index(['escrowCompletionTrackingId', 'payoutsHash'], { unique: true })
 export class EscrowPayoutsBatchEntity extends BaseEntity {
   @ManyToOne('EscrowCompletionEntity', { onDelete: 'CASCADE' })
-  escrowCompletion: EscrowCompletionEntity;
+  escrowCompletionTracking: EscrowCompletionEntity;
 
   @Column()
-  escrowCompletionId: number;
+  escrowCompletionTrackingId: number;
   /**
    * Storing it as `json` in order to store it "as-is",
    * so if needed we can easilly see the original data.

@@ -6,6 +6,7 @@ export enum ErrorEscrowCompletion {
   NotCreated = 'Escrow completion has not been created',
   PendingProcessingFailed = 'Failed to process pending escrow completion',
   PaidProcessingFailed = 'Failed to process paid escrow completion',
+  AwaitingPayoutsProcessingFailed = 'Failed to process payouts for escrow completion',
 }
 
 /**

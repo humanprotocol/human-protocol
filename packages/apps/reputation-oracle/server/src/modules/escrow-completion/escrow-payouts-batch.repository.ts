@@ -9,4 +9,14 @@ export class EscrowPayoutsBatchRepository extends BaseRepository<EscrowPayoutsBa
   constructor(private dataSource: DataSource) {
     super(EscrowPayoutsBatchEntity, dataSource);
   }
+
+  public async findForEscrowCompletionTracking(
+    escrowCompletionTrackingId: number,
+  ): Promise<EscrowPayoutsBatchEntity[]> {
+    return this.find({
+      where: {
+        escrowCompletionTrackingId,
+      },
+    });
+  }
 }

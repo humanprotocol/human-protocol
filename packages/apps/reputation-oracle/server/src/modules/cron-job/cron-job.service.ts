@@ -191,4 +191,33 @@ export class CronJobService {
     this.logger.log('Pending outgoing webhooks STOP');
     await this.completeCronJob(cronJob);
   }
+
+  /**
+   * Runs processing of awaiting payouts for escrow completion.
+   * @returns {Promise<void>} A promise that resolves when the processing is finished.
+   */
+  @Cron('*/2 * * * *')
+  public async processAwaitingEscrowPayouts(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessAwaitingEscrowPayouts,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Awaiting payouts escrow completion tracking START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ProcessAwaitingEscrowPayouts,
+    );
+
+    try {
+      await this.escrowCompletionService.processAwaitingPayouts();
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Awaiting payouts escrow completion tracking STOP');
+    await this.completeCronJob(cronJob);
+  }
 }

@@ -128,21 +128,6 @@ export class PayoutService {
     return await calculatePayouts(manifest, data);
   }
 
-  /**
-   * // how to call actual payouts
-     await escrowClient.bulkPayOut(
-      escrowAddress,
-      results.recipients,
-      results.amounts,
-      url,
-      hash,
-      true, // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
-      {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
-      },
-    );
-   */
-
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.FORTUNE]: {
       calculatePayouts: async (
