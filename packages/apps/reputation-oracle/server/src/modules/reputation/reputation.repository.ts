@@ -71,6 +71,6 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
       [ReputationOrderBy.CREATED_AT]: 'createdAt',
       [ReputationOrderBy.REPUTATION_POINTS]: 'reputationPoints',
     };
-    return orderByMap[orderBy] || 'createdAt';
+    return orderByMap[orderBy] || orderByMap[ReputationOrderBy.CREATED_AT];
   }
 }

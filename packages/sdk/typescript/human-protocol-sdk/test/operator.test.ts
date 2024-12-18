@@ -233,6 +233,88 @@ describe('OperatorUtils', () => {
       expect(result).toEqual([mockLeader, mockLeader]);
     });
 
+    test('should apply default values when first is negative', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: [mockLeaderSubgraph],
+      });
+
+      const filter: ILeadersFilter = {
+        chainId: ChainId.LOCALHOST,
+        first: -5, // Invalid value
+        skip: 0,
+      };
+
+      const result = await OperatorUtils.getLeaders(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          minAmountStaked: filter?.minAmountStaked,
+          roles: filter?.roles,
+          orderBy: filter?.orderBy,
+          orderDirection: OrderDirection.DESC,
+          first: 10, // Default value
+          skip: 0,
+        }
+      );
+      expect(result).toEqual([mockLeader]);
+    });
+
+    test('should apply default values when skip is negative', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: [mockLeaderSubgraph],
+      });
+
+      const filter: ILeadersFilter = {
+        chainId: ChainId.LOCALHOST,
+        first: 10,
+        skip: -3, // Invalid value
+      };
+
+      const result = await OperatorUtils.getLeaders(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          minAmountStaked: filter?.minAmountStaked,
+          roles: filter?.roles,
+          orderBy: filter?.orderBy,
+          orderDirection: OrderDirection.DESC,
+          first: 10,
+          skip: 0, // Default value
+        }
+      );
+      expect(result).toEqual([mockLeader]);
+    });
+
+    test('should apply default values when first and skip are undefined', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: [mockLeaderSubgraph],
+      });
+
+      const filter: ILeadersFilter = {
+        chainId: ChainId.LOCALHOST,
+      };
+
+      const result = await OperatorUtils.getLeaders(filter);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        GET_LEADERS_QUERY(filter),
+        {
+          minAmountStaked: filter?.minAmountStaked,
+          roles: filter?.roles,
+          orderBy: filter?.orderBy,
+          orderDirection: OrderDirection.DESC,
+          first: 10, // Default value
+          skip: 0, // Default value
+        }
+      );
+      expect(result).toEqual([mockLeader]);
+    });
+
     test('should return an array of stakers when jobTypes is undefined', async () => {
       mockLeaderSubgraph.jobTypes = undefined;
       const mockLeader: ILeader = {

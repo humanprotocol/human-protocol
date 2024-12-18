@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 import { ChainId, OrderDirection } from '@human-protocol/sdk';
 import {
@@ -78,11 +79,13 @@ export class ReputationGetAllQueryDto {
 
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
+  @Min(1)
   @Transform(({ value }) => Number(value))
   public first?: number;
 
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
+  @Min(0)
   @Transform(({ value }) => Number(value))
   public skip?: number;
 }
