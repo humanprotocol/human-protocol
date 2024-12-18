@@ -382,6 +382,7 @@ describe('ReputationService', () => {
       const reputationEntity: Partial<ReputationEntity> = {
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
         save: jest.fn(),
       };
 
@@ -427,6 +428,7 @@ describe('ReputationService', () => {
       const reputationEntity: Partial<ReputationEntity> = {
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
         save: jest.fn(),
       };
 
@@ -447,6 +449,7 @@ describe('ReputationService', () => {
       const reputationEntity: Partial<ReputationEntity> = {
         address,
         reputationPoints: 701,
+        type: ReputationEntityType.RECORDING_ORACLE,
         save: jest.fn(),
       };
 
@@ -496,6 +499,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
       };
 
       jest
@@ -508,6 +512,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputation: ReputationLevel.HIGH,
+        role: ReputationEntityType.REPUTATION_ORACLE,
       };
 
       expect(result).toEqual(resultReputation);
@@ -519,6 +524,7 @@ describe('ReputationService', () => {
         chainId,
         address: NOT_ORACLE_ADDRESS,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
       };
 
       jest
@@ -534,6 +540,7 @@ describe('ReputationService', () => {
         chainId,
         address: NOT_ORACLE_ADDRESS,
         reputation: ReputationLevel.LOW,
+        role: ReputationEntityType.RECORDING_ORACLE,
       };
 
       expect(
@@ -553,6 +560,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
       };
 
       jest
@@ -565,6 +573,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputation: ReputationLevel.LOW,
+        role: ReputationEntityType.RECORDING_ORACLE,
       };
 
       expect(reputationRepository.findByChainIdAndTypes).toHaveBeenCalled();
