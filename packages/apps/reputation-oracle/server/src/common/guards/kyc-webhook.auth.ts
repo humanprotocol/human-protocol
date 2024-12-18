@@ -3,14 +3,16 @@ import {
   CanActivate,
   ExecutionContext,
   HttpStatus,
+  HttpException,
+  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { ControlledError } from '../errors/controlled';
 import { createHmac } from 'crypto';
 import { KycConfigService } from '../config/kyc-config.service';
 
 @Injectable()
 export class KycWebhookAuthGuard implements CanActivate {
+  logger = new Logger(KycWebhookAuthGuard.name);
   constructor(private readonly kycConfigService: KycConfigService) {}
   canActivate(context: ExecutionContext): boolean {
     const request: Request = context.switchToHttp().getRequest();
@@ -20,7 +22,15 @@ export class KycWebhookAuthGuard implements CanActivate {
     const hmacSignature = headers['x-hmac-signature'];
 
     if (!hmacSignature) {
-      throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+      const message = 'HMAC Signature not provided';
+      this.logger.error(message, request.path);
+      throw new HttpException(
+        {
+          message,
+          timestamp: new Date().toISOString(),
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const signedPayload = createHmac(
@@ -34,7 +44,15 @@ export class KycWebhookAuthGuard implements CanActivate {
       signedPayload !== hmacSignature ||
       this.kycConfigService.apiKey !== apiKey
     ) {
-      throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+      const message = 'HMAC Signature does not match';
+      this.logger.error(message, request.path);
+      throw new HttpException(
+        {
+          message,
+          timestamp: new Date().toISOString(),
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     return true;

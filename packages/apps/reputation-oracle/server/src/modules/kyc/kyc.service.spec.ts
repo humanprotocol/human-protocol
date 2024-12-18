@@ -10,13 +10,13 @@ import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { KycConfigService } from '../../common/config/kyc-config.service';
-import { ErrorKyc, ErrorUser } from '../../common/constants/errors';
 import { KycStatus } from '../../common/enums/user';
 import { ControlledError } from '../../common/errors/controlled';
 import { Web3Service } from '../web3/web3.service';
 import { KycEntity } from './kyc.entity';
 import { KycRepository } from './kyc.repository';
 import { KycService } from './kyc.service';
+import { KycError, KycErrorMessage } from './kyc.error';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
@@ -136,9 +136,7 @@ describe('Kyc Service', () => {
 
       await expect(
         kycService.initSession(mockUserEntity as any),
-      ).rejects.toThrow(
-        new ControlledError(ErrorKyc.AlreadyApproved, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new KycError(KycErrorMessage.ALREADY_APPROVED));
     });
 
     it("Should throw an error if user already has an active Kyc session, but it's in review", async () => {
@@ -152,12 +150,7 @@ describe('Kyc Service', () => {
 
       await expect(
         kycService.initSession(mockUserEntity as any),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorKyc.VerificationInProgress,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new KycError(KycErrorMessage.VERIFICATION_IN_PROGRESS));
     });
 
     it("Should throw an error if user already has an active Kyc session, but it's declined", async () => {
@@ -172,12 +165,7 @@ describe('Kyc Service', () => {
 
       await expect(
         kycService.initSession(mockUserEntity as any),
-      ).rejects.toThrow(
-        new ControlledError(
-          `${ErrorKyc.Declined}. Reason: ${mockUserEntity.kyc.message}`,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new KycError(KycErrorMessage.DECLINED));
     });
 
     it('Should start a Kyc session for the user', async () => {
@@ -271,10 +259,7 @@ describe('Kyc Service', () => {
       await expect(
         kycService.getSignedAddress(mockUserEntity as any),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorUser.NoWalletAddresRegistered,
-          HttpStatus.BAD_REQUEST,
-        ),
+        new KycError(KycErrorMessage.NO_WALLET_ADDRESS_REGISTERED),
       );
     });
 
@@ -288,9 +273,7 @@ describe('Kyc Service', () => {
 
       await expect(
         kycService.getSignedAddress(mockUserEntity as any),
-      ).rejects.toThrow(
-        new ControlledError(ErrorUser.KycNotApproved, HttpStatus.BAD_REQUEST),
-      );
+      ).rejects.toThrow(new KycError(KycErrorMessage.KYC_NOT_APPROVED));
     });
 
     it('Should return the signed address', async () => {
