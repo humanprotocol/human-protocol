@@ -25,7 +25,10 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { OracleRole, SubgraphOracleRole } from '../../common/enums/roles';
 import { LeadersOrderBy } from '../../common/enums/leader';
 import { ReputationLevel } from '../../common/enums/reputation';
-import { MIN_AMOUNT_STAKED } from '../../common/constants/leader';
+import {
+  MAX_LEADERS_COUNT,
+  MIN_AMOUNT_STAKED,
+} from '../../common/constants/leader';
 import { GetLeadersPaginationOptions } from 'src/common/types';
 
 @Injectable()
@@ -34,7 +37,6 @@ export class DetailsService {
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
-    private readonly networksService: NetworksService,
     private readonly networkConfig: NetworkConfigService,
   ) {}
 
@@ -166,7 +168,12 @@ export class DetailsService {
 
     const [rawLeaders, reputations] = await Promise.all([
       OperatorUtils.getLeaders(filter),
-      this.fetchReputations(chainId, orderBy, orderDirection, first),
+      this.fetchReputations(
+        chainId,
+        orderBy,
+        orderDirection,
+        orderBy !== LeadersOrderBy.REPUTATION && first,
+      ),
     ]);
 
     const leaders = rawLeaders
@@ -175,7 +182,12 @@ export class DetailsService {
         plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
       );
 
-    return this.assignReputationsToLeaders(leaders, reputations, orderBy);
+    return this.assignReputationsToLeaders(
+      leaders,
+      reputations,
+      orderBy,
+      first,
+    );
   }
 
   private createLeadersFilter(
@@ -184,6 +196,8 @@ export class DetailsService {
     orderDirection: OrderDirection,
     first?: number,
   ): ILeadersFilter {
+    const isReputationOrder = orderBy === LeadersOrderBy.REPUTATION;
+
     return {
       chainId,
       minAmountStaked: MIN_AMOUNT_STAKED,
@@ -193,10 +207,9 @@ export class DetailsService {
         SubgraphOracleRole.RECORDING_ORACLE,
         SubgraphOracleRole.REPUTATION_ORACLE,
       ],
-      orderBy: orderBy !== LeadersOrderBy.REPUTATION ? orderBy : undefined,
-      orderDirection:
-        orderBy !== LeadersOrderBy.REPUTATION ? orderDirection : undefined,
-      first,
+      orderBy: !isReputationOrder ? orderBy : undefined,
+      orderDirection: !isReputationOrder ? orderDirection : undefined,
+      first: isReputationOrder ? (first ?? MAX_LEADERS_COUNT) : first,
     };
   }
 
@@ -271,6 +284,7 @@ export class DetailsService {
     leaders: LeaderDto[],
     reputations: { address: string; reputation: string }[],
     orderBy: LeadersOrderBy,
+    first: number,
   ): LeaderDto[] {
     const leaderMap = new Map(leaders.map((l) => [l.address.toLowerCase(), l]));
 
@@ -284,7 +298,8 @@ export class DetailsService {
           }
           return null;
         })
-        .filter(Boolean) as LeaderDto[];
+        .filter(Boolean)
+        .slice(0, first) as LeaderDto[];
     }
 
     const reputationMap = new Map(

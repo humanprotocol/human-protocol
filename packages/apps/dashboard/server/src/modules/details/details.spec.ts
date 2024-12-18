@@ -20,6 +20,13 @@ jest.mock('@human-protocol/sdk', () => ({
   },
 }));
 
+const MOCK_MAX_LEADERS_COUNT = 5;
+
+jest.mock('../../common/constants/leader', () => ({
+  ...jest.requireActual('../../common/constants/leader'),
+  MAX_LEADERS_COUNT: MOCK_MAX_LEADERS_COUNT,
+}));
+
 describe('DetailsService', () => {
   let service: DetailsService;
   let httpService: HttpService;
@@ -123,6 +130,46 @@ describe('DetailsService', () => {
 
     expect(result[0].address).toBe('0xB');
     expect(result[1].address).toBe('0xC');
+  });
+
+  it('should return first 3 sorted leaders by reputation', async () => {
+    const mockLeaders = [
+      { address: '0xA', role: 'Job Launcher' },
+      { address: '0xB', role: 'Exchange Oracle' },
+      { address: '0xC', role: 'Exchange Oracle' },
+      { address: '0xD', role: 'Exchange Oracle' },
+      { address: '0xE', role: 'Recording Oracle' },
+    ];
+    const mockReputations = [
+      { address: '0xB', reputation: 'hign' },
+      { address: '0xC', reputation: 'hign' },
+      { address: '0xD', reputation: 'medium' },
+      { address: '0xF', reputation: 'medium' },
+      { address: '0xE', reputation: 'low' },
+    ];
+
+    const getLeadersSpy = jest.spyOn(OperatorUtils, 'getLeaders');
+    getLeadersSpy.mockResolvedValue(mockLeaders as ILeader[]);
+
+    jest
+      .spyOn(httpService as any, 'get')
+      .mockReturnValue(of({ data: mockReputations }));
+
+    const result = await service.getLeaders(ChainId.POLYGON_AMOY, {
+      orderBy: LeadersOrderBy.REPUTATION,
+      orderDirection: OrderDirection.DESC,
+      first: 3,
+    });
+
+    expect(result[0].address).toBe('0xB');
+    expect(result[1].address).toBe('0xC');
+    expect(result[2].address).toBe('0xD');
+    expect(result.length).toBe(3);
+    expect(getLeadersSpy).toBeCalledWith(
+      expect.objectContaining({
+        first: MOCK_MAX_LEADERS_COUNT,
+      }),
+    );
   });
 
   it('should handle errors when fetching reputations', async () => {

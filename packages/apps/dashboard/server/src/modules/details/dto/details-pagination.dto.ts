@@ -48,7 +48,7 @@ export class LeadersPaginationDto {
   @Min(1)
   @Max(1000)
   @IsOptional()
-  public first?: number = 10;
+  public first?: number;
 }
 
 export class DetailsTransactionsPaginationDto {
