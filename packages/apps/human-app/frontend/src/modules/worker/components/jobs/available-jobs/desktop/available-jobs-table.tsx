@@ -1,4 +1,4 @@
-/* eslint-disable camelcase --- ... */
+/* eslint-disable camelcase -- ... */
 import type { MRT_ColumnDef } from 'material-react-table';
 import {
   MaterialReactTable,

@@ -11,12 +11,13 @@ import { AvailableJobsTable } from '@/modules/worker/components/jobs/available-j
 import { MyJobsDrawerMobile } from '@/modules/worker/components/jobs/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-drawer-mobile';
 import { useGetOracles } from '@/modules/worker/services/oracles';
+import { useGetUiConfig } from '@/modules/worker/services/get-ui-config';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/shared/components/ui/no-records';
-import { TabPanel } from '@/modules/worker/components/jobs/jobs-tab-panel';
 import { AvailableJobsTableMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-table-mobile';
+import { TabPanel } from '@/modules/worker/components/jobs/jobs-tab-panel';
 import { MyJobsTable } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-table';
 
 function generateTabA11yProps(index: number) {
@@ -28,7 +29,17 @@ function generateTabA11yProps(index: number) {
 
 export function JobsPage() {
   const { isDarkMode } = useColorMode();
-  const { data, isError, isPending, error } = useGetOracles();
+  const {
+    data,
+    isError: isErrorGetOracles,
+    isPending: isPendingGetOracles,
+    error,
+  } = useGetOracles();
+  const {
+    data: uiConfigData,
+    isPending: isPendingUiConfig,
+    isError: isErrorUiConfig,
+  } = useGetUiConfig();
   const { address: oracle_address } = useParams<{ address: string }>();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
@@ -36,6 +47,10 @@ export function JobsPage() {
   const [selectedTab, setSelectedTab] = useState<'availableJobs' | 'myJobs'>(
     'availableJobs'
   );
+
+  const isError = isErrorGetOracles || isErrorUiConfig;
+  const isPending = isPendingGetOracles || isPendingUiConfig;
+
   const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
     useState(false);
   const { onError } = useGetOraclesNotifications();
@@ -68,12 +83,15 @@ export function JobsPage() {
   return (
     <>
       <Modal isOpen={isMobileFilterDrawerOpen}>
-        {selectedTab === 'availableJobs' ? (
+        {selectedTab === 'availableJobs' && uiConfigData && (
           <AvailableJobsDrawerMobile
+            chainIdsEnabled={uiConfigData.chainIdsEnabled}
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
           />
-        ) : (
+        )}
+        {selectedTab === 'myJobs' && uiConfigData && (
           <MyJobsDrawerMobile
+            chainIdsEnabled={uiConfigData.chainIdsEnabled}
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
           />
         )}
@@ -142,7 +160,9 @@ export function JobsPage() {
                             }
                           />
                         ) : (
-                          <AvailableJobsTable />
+                          <AvailableJobsTable
+                            chainIdsEnabled={uiConfigData.chainIdsEnabled}
+                          />
                         )}
                       </>
                     )}
@@ -159,7 +179,9 @@ export function JobsPage() {
                             }
                           />
                         ) : (
-                          <MyJobsTable />
+                          <MyJobsTable
+                            chainIdsEnabled={uiConfigData.chainIdsEnabled}
+                          />
                         )}
                       </>
                     )}
