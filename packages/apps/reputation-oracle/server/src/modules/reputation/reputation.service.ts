@@ -346,6 +346,7 @@ export class ReputationService {
         chainId,
         address,
         reputation: ReputationLevel.HIGH,
+        role: ReputationEntityType.REPUTATION_ORACLE,
       };
     }
 
@@ -366,6 +367,7 @@ export class ReputationService {
       chainId: reputationEntity.chainId,
       address: reputationEntity.address,
       reputation: this.getReputationLevel(reputationEntity.reputationPoints),
+      role: reputationEntity.type,
     };
   }
 
@@ -404,6 +406,7 @@ export class ReputationService {
       chainId: reputation.chainId,
       address: reputation.address,
       reputation: this.getReputationLevel(reputation.reputationPoints),
+      role: reputation.type,
     }));
   }
 }
