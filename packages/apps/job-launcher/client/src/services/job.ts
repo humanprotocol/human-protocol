@@ -80,7 +80,7 @@ export const getJobList = async ({
     queryString += `&status=${status}`;
   }
   queryString += `&page=${page}&page_size=${pageSize}`;
-  const { data } = await api.get(`/job/list?${queryString}`);
+  const { data } = await api.get(`/job/list?${queryString}&sort=DESC`);
   return data;
 };
 
