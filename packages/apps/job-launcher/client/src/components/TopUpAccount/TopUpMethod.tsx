@@ -32,7 +32,7 @@ export const TopUpMethod = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
-  console.log(IS_MAINNET);
+
   return (
     <>
       <Box
