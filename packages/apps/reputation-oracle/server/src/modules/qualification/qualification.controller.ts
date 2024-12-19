@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
   HttpCode,
+  UseFilters,
 } from '@nestjs/common';
 import {
   CreateQualificationDto,
@@ -21,14 +22,18 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
+import { QualificationErrorFilter } from './qualification.error.filter';
 import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
 import { Roles } from '../../common/decorators';
 import { Role } from '../../common/enums/user';
 
+// TODO: Revisit methods and status codes.
+
 @ApiTags('Qualification')
 @Controller('qualification')
 @ApiBearerAuth()
+@UseFilters(QualificationErrorFilter)
 export class QualificationController {
   constructor(private readonly qualificationService: QualificationService) {}
 

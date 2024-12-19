@@ -2,13 +2,12 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
-  HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { KycError, KycErrorMessage } from './kyc.error';
+import { KycError } from './kyc.error';
 
 @Catch(KycError)
 export class KycErrorFilter implements ExceptionFilter {
