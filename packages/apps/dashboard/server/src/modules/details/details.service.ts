@@ -182,7 +182,10 @@ export class DetailsService {
         plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
       );
 
-    return this.assignReputationsToLeaders(leaders, reputations, orderBy);
+    if (orderBy === LeadersOrderBy.REPUTATION) {
+      return this.filterLeadersWithReputations(leaders, reputations);
+    }
+    return this.assignReputationsToLeaders(leaders, reputations);
   }
 
   private createLeadersFilter(
@@ -282,56 +285,37 @@ export class DetailsService {
     }
   }
 
-  /**
-   * Assigns reputations to leaders based on fetched reputation records.
-   *
-   * Logic Description:
-   * - A map of leaders is created using their addresses for quick lookup.
-   * - If ordered by REPUTATION:
-   *   - Iterate through reputation records.
-   *   - If a corresponding leader is found, update their reputation.
-   *   - If no leader is found:
-   *     - Log a warning indicating a missing leader for the specific reputation record.
-   *     - This likely indicates an issue where the subgraph did not return the expected leader data.
-   *     - Skip processing the record without substituting a different leader.
-   *   - Return the top `first` leaders based on reputation.
-   * - If not ordered by REPUTATION:
-   *   - Create a map of reputation records for quick lookup.
-   *   - Update each leader's reputation if found, otherwise set it to LOW.
-   * - Return the list of updated leaders.
-   */
   private assignReputationsToLeaders(
     leaders: LeaderDto[],
     reputations: { address: string; reputation: string }[],
-    orderBy: LeadersOrderBy,
   ): LeaderDto[] {
-    const leaderMap = new Map(leaders.map((l) => [l.address.toLowerCase(), l]));
-
-    if (orderBy === LeadersOrderBy.REPUTATION) {
-      return reputations
-        .map((rep) => {
-          const leader = leaderMap.get(rep.address.toLowerCase());
-          if (!leader) {
-            this.logger.warn(
-              `Missing leader for reputation record with address: ${rep.address}`,
-            );
-            return null;
-          }
-          leader.reputation = rep.reputation;
-          return leader;
-        })
-        .filter((leader): leader is LeaderDto => leader !== null);
-    }
-
     const reputationMap = new Map(
       reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
     );
 
     leaders.forEach((leader) => {
-      const reputation = reputationMap.get(leader.address.toLowerCase());
-      leader.reputation = reputation || ReputationLevel.LOW;
+      leader.reputation =
+        reputationMap.get(leader.address.toLowerCase()) || ReputationLevel.LOW;
     });
 
     return leaders;
+  }
+
+  private filterLeadersWithReputations(
+    leaders: LeaderDto[],
+    reputations: { address: string; reputation: string }[],
+  ): LeaderDto[] {
+    const leaderMap = new Map(leaders.map((l) => [l.address.toLowerCase(), l]));
+
+    return reputations
+      .map((rep) => {
+        const leader = leaderMap.get(rep.address.toLowerCase());
+        if (!leader) {
+          return null;
+        }
+        leader.reputation = rep.reputation;
+        return leader;
+      })
+      .filter((leader): leader is LeaderDto => leader !== null);
   }
 }
