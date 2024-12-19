@@ -1,7 +1,7 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { PaymentStatus } from '../../common/enums/payment';
+import { DataSource, In } from 'typeorm';
+import { PaymentStatus, PaymentType } from '../../common/enums/payment';
 import { BaseRepository } from '../../database/base.repository';
 import { PaymentEntity } from './payment.entity';
 import { ListResult } from '../payment/payment.interface';
@@ -23,14 +23,18 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
     return this.findOne({ where: whereOptions });
   }
 
-  public findByUserAndStatus(
+  public findByUserTypeAndStatus(
     userId: number,
-    status: PaymentStatus,
+    type: PaymentType | PaymentType[],
+    status: PaymentStatus | PaymentStatus[],
   ): Promise<PaymentEntity[]> {
+    const typeArray = Array.isArray(type) ? type : [type];
+    const statusArray = Array.isArray(status) ? status : [status];
     return this.find({
       where: {
         userId,
-        status,
+        type: In(typeArray),
+        status: In(statusArray),
       },
       order: {
         createdAt: 'DESC',
