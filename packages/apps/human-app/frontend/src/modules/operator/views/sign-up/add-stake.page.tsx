@@ -34,10 +34,6 @@ export function AddStakeOperatorPage() {
     isPending: isDecimalsDataPending,
   } = useHMTokenDecimals();
 
-  const stakeAmount = addStakeMutationState?.variables?.amount
-    ? addStakeMutationState.variables.amount
-    : -1;
-
   const getAlert = () => {
     switch (true) {
       case Boolean(addStakeMutationState?.error):
@@ -50,7 +46,9 @@ export function AddStakeOperatorPage() {
         return (
           <Alert color="success" severity="success">
             {t('operator.stakeForm.successAlert', {
-              amount: stakeAmount,
+              amount: addStakeMutationState.variables?.amount
+                ? addStakeMutationState.variables.amount
+                : -1,
             })}
           </Alert>
         );

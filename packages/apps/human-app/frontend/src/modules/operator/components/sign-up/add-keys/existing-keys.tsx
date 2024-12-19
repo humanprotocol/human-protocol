@@ -103,7 +103,7 @@ export function ExistingKeys({
         {t('operator.addKeysPage.existingKeys.title')}
       </Typography>
       {sortedKeys.map((key) => {
-        const existingKeysConfigKey: EthKVStoreKeyValues = key;
+        const existingKeysConfigKey = key;
         return existingKeysInitialState[existingKeysConfigKey]
           ? existingKeysConfig[existingKeysConfigKey](formValues)
           : null;
