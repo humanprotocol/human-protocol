@@ -116,16 +116,6 @@ export enum ErrorSendGrid {
   InvalidApiKey = 'Invalid SendGrid API key',
 }
 
-export enum ErrorKyc {
-  NotFound = 'KYC session not found',
-  AlreadyApproved = 'KYC session already approved',
-  VerificationInProgress = 'KYC session verification in progress',
-  Declined = 'KYC session declined',
-  InvalidKycProviderAPIResponse = 'Invalid KYC provider API response',
-  InvalidWebhookSecret = 'Invalid webhook secret',
-  CountryNotSet = 'Сountry is not set for the user',
-}
-
 /**
  * Represents error messages associated with a cron job.
  */

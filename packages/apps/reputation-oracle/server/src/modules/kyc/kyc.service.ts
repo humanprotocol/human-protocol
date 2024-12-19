@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { UserEntity } from '../user/user.entity';
 import { HttpService } from '@nestjs/axios';
@@ -6,12 +6,12 @@ import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
-import { ErrorKyc, ErrorUser } from '../../common/constants/errors';
 import { KycConfigService } from '../../common/config/kyc-config.service';
 import { KycEntity } from './kyc.entity';
-import { ControlledError } from '../../common/errors/controlled';
 import { Web3Service } from '../web3/web3.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+
+import { KycErrorMessage, KycError } from './kyc.error';
 
 @Injectable()
 export class KycService {
@@ -26,24 +26,18 @@ export class KycService {
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
     if (userEntity.kyc?.sessionId) {
       if (userEntity.kyc.status === KycStatus.APPROVED) {
-        throw new ControlledError(
-          ErrorKyc.AlreadyApproved,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new KycError(KycErrorMessage.ALREADY_APPROVED, userEntity.id);
       }
 
       if (userEntity.kyc.status === KycStatus.REVIEW) {
-        throw new ControlledError(
-          ErrorKyc.VerificationInProgress,
-          HttpStatus.BAD_REQUEST,
+        throw new KycError(
+          KycErrorMessage.VERIFICATION_IN_PROGRESS,
+          userEntity.id,
         );
       }
 
       if (userEntity.kyc.status === KycStatus.DECLINED) {
-        throw new ControlledError(
-          `${ErrorKyc.Declined}. Reason: ${userEntity.kyc.message}`,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new KycError(KycErrorMessage.DECLINED, userEntity.id);
       }
 
       return {
@@ -69,9 +63,9 @@ export class KycService {
     );
 
     if (data?.status !== 'success' || !data?.verification?.url) {
-      throw new ControlledError(
-        ErrorKyc.InvalidKycProviderAPIResponse,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      throw new KycError(
+        KycErrorMessage.INVALID_KYC_PROVIDER_API_RESPONSE,
+        userEntity.id,
       );
     }
 
@@ -94,11 +88,15 @@ export class KycService {
 
     const kycEntity = await this.kycRepository.findOneBySessionId(sessionId);
     if (!kycEntity) {
-      throw new ControlledError(ErrorKyc.NotFound, HttpStatus.BAD_REQUEST);
+      // vendorData is a userId
+      throw new KycError(
+        KycErrorMessage.NOT_FOUND,
+        Number(data.verification.vendorData),
+      );
     }
 
     if (!country) {
-      throw new ControlledError(ErrorKyc.CountryNotSet, HttpStatus.BAD_REQUEST);
+      throw new KycError(KycErrorMessage.COUNTRY_NOT_SET, kycEntity.userId);
     }
 
     kycEntity.status = status;
@@ -112,16 +110,10 @@ export class KycService {
     user: UserEntity,
   ): Promise<KycSignedAddressDto> {
     if (!user.evmAddress)
-      throw new ControlledError(
-        ErrorUser.NoWalletAddresRegistered,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new KycError(KycErrorMessage.NO_WALLET_ADDRESS_REGISTERED, user.id);
 
     if (user.kyc?.status !== KycStatus.APPROVED)
-      throw new ControlledError(
-        ErrorUser.KycNotApproved,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new KycError(KycErrorMessage.KYC_NOT_APPROVED, user.id);
 
     const address = user.evmAddress.toLowerCase();
     const signature = await this.web3Service
