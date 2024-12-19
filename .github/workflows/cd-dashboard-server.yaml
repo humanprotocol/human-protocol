@@ -1,0 +1,57 @@
+name: Deploy Dashboard server
+
+on:
+  push:
+    branches: [ develop, main ]
+    paths:
+      - 'packages/apps/dashboard/server/**'
+  pull_request:
+    branches: [ develop, main ]
+    paths:
+      - 'packages/apps/dashboard/server/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  pull-request-check:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PR check
+        run: |
+          if [[ $GITHUB_REPOSITORY_OWNER == 'humanprotocol' ]] && [[ $GITHUB_BASE_REF == 'main' ]] && [[ $GITHUB_HEAD_REF == 'develop' ]]; then
+            echo "LGTM. PR from $GITHUB_HEAD_REF to $GITHUB_BASE_REF."
+          elif [[ $GITHUB_BASE_REF != 'main' ]]; then
+            echo "LGTM. PR from $GITHUB_HEAD_REF to $GITHUB_BASE_REF."
+          else
+            echo "Check out the target branch. A PR to 'main' can only be from the 'develop' branch within the 'humanprotocol' organization."
+            exit 1
+          fi
+
+  trigger-build-and-deploy:
+    if: always() && github.repository_owner == 'humanprotocol' && (needs.pull-request-check.result == 'skipped' || needs.pull-request-check.result == 'success')
+    needs: pull-request-check
+    name: Trigger build and deploy image
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - uses: convictional/trigger-workflow-and-wait@v1.6.5
+      with:
+        owner: humanprotocol
+        repo: multi-repo-cicd
+        github_token: ${{ secrets.GH_TOKEN }}
+        workflow_file_name: docker_build_and_deploy.yml
+        ref: dashboard
+        wait_interval: 15
+        client_payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repository": "${{ github.repository }}", "trigger": "${{  github.event_name }}", "app": "job-launcher"}'
+        propagate_failure: true
+        trigger_workflow: true
+        wait_workflow: true
