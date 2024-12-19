@@ -172,7 +172,7 @@ export class DetailsService {
         chainId,
         orderBy,
         orderDirection,
-        orderBy !== LeadersOrderBy.REPUTATION && first,
+        orderBy === LeadersOrderBy.REPUTATION ? first : undefined,
       ),
     ]);
 
@@ -182,12 +182,7 @@ export class DetailsService {
         plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
       );
 
-    return this.assignReputationsToLeaders(
-      leaders,
-      reputations,
-      orderBy,
-      first,
-    );
+    return this.assignReputationsToLeaders(leaders, reputations, orderBy);
   }
 
   private createLeadersFilter(
@@ -196,9 +191,7 @@ export class DetailsService {
     orderDirection: OrderDirection,
     first?: number,
   ): ILeadersFilter {
-    const isReputationOrder = orderBy === LeadersOrderBy.REPUTATION;
-
-    return {
+    const leadersFilter: ILeadersFilter = {
       chainId,
       minAmountStaked: MIN_AMOUNT_STAKED,
       roles: [
@@ -207,10 +200,19 @@ export class DetailsService {
         SubgraphOracleRole.RECORDING_ORACLE,
         SubgraphOracleRole.REPUTATION_ORACLE,
       ],
-      orderBy: !isReputationOrder ? orderBy : undefined,
-      orderDirection: !isReputationOrder ? orderDirection : undefined,
-      first: isReputationOrder ? (first ?? MAX_LEADERS_COUNT) : first,
     };
+
+    if (orderBy === LeadersOrderBy.REPUTATION) {
+      leadersFilter.first = MAX_LEADERS_COUNT;
+    } else {
+      Object.assign(leadersFilter, {
+        orderBy,
+        orderDirection,
+        first,
+      });
+    }
+
+    return leadersFilter;
   }
 
   private async fetchReputation(
@@ -280,11 +282,28 @@ export class DetailsService {
     }
   }
 
+  /**
+   * Assigns reputations to leaders based on fetched reputation records.
+   *
+   * Logic Description:
+   * - A map of leaders is created using their addresses for quick lookup.
+   * - If ordered by REPUTATION:
+   *   - Iterate through reputation records.
+   *   - If a corresponding leader is found, update their reputation.
+   *   - If no leader is found:
+   *     - Log a warning indicating a missing leader for the specific reputation record.
+   *     - This likely indicates an issue where the subgraph did not return the expected leader data.
+   *     - Skip processing the record without substituting a different leader.
+   *   - Return the top `first` leaders based on reputation.
+   * - If not ordered by REPUTATION:
+   *   - Create a map of reputation records for quick lookup.
+   *   - Update each leader's reputation if found, otherwise set it to LOW.
+   * - Return the list of updated leaders.
+   */
   private assignReputationsToLeaders(
     leaders: LeaderDto[],
     reputations: { address: string; reputation: string }[],
     orderBy: LeadersOrderBy,
-    first: number,
   ): LeaderDto[] {
     const leaderMap = new Map(leaders.map((l) => [l.address.toLowerCase(), l]));
 
@@ -292,14 +311,16 @@ export class DetailsService {
       return reputations
         .map((rep) => {
           const leader = leaderMap.get(rep.address.toLowerCase());
-          if (leader) {
-            leader.reputation = rep.reputation;
-            return leader;
+          if (!leader) {
+            this.logger.warn(
+              `Missing leader for reputation record with address: ${rep.address}`,
+            );
+            return null;
           }
-          return null;
+          leader.reputation = rep.reputation;
+          return leader;
         })
-        .filter(Boolean)
-        .slice(0, first) as LeaderDto[];
+        .filter((leader): leader is LeaderDto => leader !== null);
     }
 
     const reputationMap = new Map(
