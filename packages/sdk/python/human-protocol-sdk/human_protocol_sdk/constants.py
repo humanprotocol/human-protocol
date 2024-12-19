@@ -190,11 +190,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/moonbase-alpha/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmeC4JrotcrXWJtJU519RX3KkxE5879wveRJJ58EheH3j1"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmSDPbm5xxMvYVSJzHFVsRiMekvJVYSJ7UfZw17DhPMdaH"
         ),
         "hmt_address": "0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3",
         "factory_address": "0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed",
-        "staking_address": "0xBFC7009F3371F93F3B54DdC8caCd02914a37495c",
+        "staking_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
         "kvstore_address": "0xcC561f4482f4Ff051D2Dcc65c2cE1A0f291bbA46",
         "old_subgraph_url": "",
         "old_factory_address": "",
@@ -224,11 +224,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/fuji/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmcFhecY6w3AhKGSg8XeidXwwuXCV9DAQ5SYGE1sTzydgR"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYXwNPwC5DcitK1SLVUR6gPANmEn3UsVvGeTbjCv1tTb2"
         ),
         "hmt_address": "0x9406d5c635AD22b0d76c75E52De57A2177919ca3",
         "factory_address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
-        "staking_address": "0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3",
+        "staking_address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
         "kvstore_address": "0x3aD4B091E054f192a822D1406f4535eAd38580e4",
         "old_subgraph_url": (
             "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji"
@@ -290,11 +290,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/xlayer-testnet/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmQrTmq89ZCdVABsFpLHtQUWuyyVzbcARoan9eztHd21oP"
+            "https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNoRyqZtJTRrkbKAmWMZQUHuah7YSs8U9R3nzPu8WEhtY"
         ),
         "hmt_address": "0x792abbcC99c01dbDec49c9fa9A828a186Da45C33",
         "factory_address": "0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e",
-        "staking_address": "0x187edb5651464427b312De2AD40F4C679cf6e02D",
+        "staking_address": "0xeF9849a904dF0d494D69ac0B0a6860a3A7936114",
         "kvstore_address": "0xdE8BE9E3C12E9F546309A429cd88d026a25EaF8C",
         "old_subgraph_url": "",
         "old_factory_address": "",
