@@ -1,4 +1,4 @@
-name: dashboard Check
+name: Dashboard Check
 
 on:
   push:
