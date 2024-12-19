@@ -40,6 +40,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { MUTEX_TIMEOUT } from '../../common/constants';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -50,6 +51,7 @@ export class JobController {
   constructor(
     private readonly jobService: JobService,
     private readonly mutexManagerService: MutexManagerService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   @ApiOperation({
@@ -120,6 +122,10 @@ export class JobController {
     @Body() data: JobFortuneDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
+    if (this.web3ConfigService.env === 'mainnet') {
+      throw new ControlledError('Disabled', HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
       MUTEX_TIMEOUT,
