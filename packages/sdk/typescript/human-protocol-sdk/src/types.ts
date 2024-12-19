@@ -1,3 +1,5 @@
+import { TransactionLike } from 'ethers';
+
 /**
  * Enum for escrow statuses.
  * @readonly
@@ -168,3 +170,5 @@ export type EscrowWithdraw = {
    */
   amountWithdrawn: bigint;
 };
+
+export type TransactionLikeWithNonce = TransactionLike & { nonce: number };

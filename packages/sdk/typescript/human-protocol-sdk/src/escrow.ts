@@ -9,7 +9,14 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { ContractRunner, EventLog, Overrides, ethers } from 'ethers';
+import {
+  ContractRunner,
+  EventLog,
+  Overrides,
+  Signer,
+  TransactionLike,
+  ethers,
+} from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';
@@ -52,6 +59,7 @@ import {
   EscrowStatus,
   EscrowWithdraw,
   NetworkData,
+  TransactionLikeWithNonce,
 } from './types';
 import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 
@@ -601,54 +609,13 @@ export class EscrowClient extends BaseEthersClient {
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (recipients.length === 0) {
-      throw ErrorRecipientCannotBeEmptyArray;
-    }
-
-    if (amounts.length === 0) {
-      throw ErrorAmountsCannotBeEmptyArray;
-    }
-
-    if (recipients.length !== amounts.length) {
-      throw ErrorRecipientAndAmountsMustBeSameLength;
-    }
-
-    recipients.forEach((recipient) => {
-      if (!ethers.isAddress(recipient)) {
-        throw new InvalidEthereumAddressError(recipient);
-      }
-    });
-
-    if (!finalResultsUrl) {
-      throw ErrorUrlIsEmptyString;
-    }
-
-    if (!isValidUrl(finalResultsUrl)) {
-      throw ErrorInvalidUrl;
-    }
-
-    if (!finalResultsHash) {
-      throw ErrorHashIsEmptyString;
-    }
-
-    const balance = await this.getBalance(escrowAddress);
-
-    let totalAmount = 0n;
-    amounts.forEach((amount) => {
-      totalAmount = totalAmount + amount;
-    });
-
-    if (balance < totalAmount) {
-      throw ErrorEscrowDoesNotHaveEnoughBalance;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.ensureCorrectBulkPayoutInput(
+      escrowAddress,
+      recipients,
+      amounts,
+      finalResultsUrl,
+      finalResultsHash
+    );
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
@@ -924,6 +891,125 @@ export class EscrowClient extends BaseEthersClient {
       return escrowWithdrawData;
     } catch (e) {
       return throwError(e);
+    }
+  }
+
+  @requiresSigner
+  async createBulkPayoutTransaction(
+    escrowAddress: string,
+    recipients: string[],
+    amounts: bigint[],
+    finalResultsUrl: string,
+    finalResultsHash: string,
+    txOptions: Overrides = {}
+  ): Promise<{
+    rawTransaction: TransactionLikeWithNonce;
+    hash: string;
+  }> {
+    await this.ensureCorrectBulkPayoutInput(
+      escrowAddress,
+      recipients,
+      amounts,
+      finalResultsUrl,
+      finalResultsHash
+    );
+
+    const signer = this.runner as Signer;
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      const populatedTransaction = await escrowContract[
+        'bulkPayOut(address[],uint256[],string,string,uint256)'
+      ].populateTransaction(
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        txOptions
+      );
+      if (typeof txOptions.nonce !== 'number') {
+        populatedTransaction.nonce = await signer.getNonce();
+      }
+      /**
+       * It's needed to get all necessary info for tx object
+       * before signing it, e.g.:
+       * - type
+       * - chainId
+       * - fees params
+       * - etc.
+       *
+       * All information is needed in order to get proper hash value
+       */
+      const preparedTransaction =
+        await signer.populateTransaction(populatedTransaction);
+
+      const signedTransaction =
+        await signer.signTransaction(preparedTransaction);
+
+      return {
+        rawTransaction: preparedTransaction as TransactionLikeWithNonce,
+        hash: ethers.keccak256(signedTransaction),
+      };
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  private async ensureCorrectBulkPayoutInput(
+    escrowAddress: string,
+    recipients: string[],
+    amounts: bigint[],
+    finalResultsUrl: string,
+    finalResultsHash: string
+  ): Promise<void> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (recipients.length === 0) {
+      throw ErrorRecipientCannotBeEmptyArray;
+    }
+
+    if (amounts.length === 0) {
+      throw ErrorAmountsCannotBeEmptyArray;
+    }
+
+    if (recipients.length !== amounts.length) {
+      throw ErrorRecipientAndAmountsMustBeSameLength;
+    }
+
+    recipients.forEach((recipient) => {
+      if (!ethers.isAddress(recipient)) {
+        throw new InvalidEthereumAddressError(recipient);
+      }
+    });
+
+    if (!finalResultsUrl) {
+      throw ErrorUrlIsEmptyString;
+    }
+
+    if (!isValidUrl(finalResultsUrl)) {
+      throw ErrorInvalidUrl;
+    }
+
+    if (!finalResultsHash) {
+      throw ErrorHashIsEmptyString;
+    }
+
+    const balance = await this.getBalance(escrowAddress);
+
+    let totalAmount = 0n;
+    amounts.forEach((amount) => {
+      totalAmount = totalAmount + amount;
+    });
+
+    if (balance < totalAmount) {
+      throw ErrorEscrowDoesNotHaveEnoughBalance;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
   }
 

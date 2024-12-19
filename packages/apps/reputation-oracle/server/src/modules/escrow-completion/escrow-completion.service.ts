@@ -14,6 +14,7 @@ import {
   EscrowClient,
   EscrowStatus,
   OperatorUtils,
+  TransactionUtils,
 } from '@human-protocol/sdk';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
 import {
@@ -31,12 +32,6 @@ import { isDuplicatedError } from '../../common/utils/database';
 import { CalculatedPayout } from '../payout/payout.interface';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
-
-type ProcessPayoutBatchInput = {
-  chainId: ChainId;
-  escrowAddress: string;
-  payoutsBatch: EscrowPayoutsBatchEntity;
-};
 
 @Injectable()
 export class EscrowCompletionService {
@@ -313,11 +308,11 @@ export class EscrowCompletionService {
 
     const batchHash = crypto
       .createHash('sha1')
-      .update(stringify(payoutsBatch))
+      .update(stringify(formattedPayouts))
       .digest('hex');
 
     const escrowPayoutsBatchEntity = new EscrowPayoutsBatchEntity();
-    escrowPayoutsBatchEntity.escrowCompletionId = escrowCompletionId;
+    escrowPayoutsBatchEntity.escrowCompletionTrackingId = escrowCompletionId;
     escrowPayoutsBatchEntity.payouts = formattedPayouts;
     escrowPayoutsBatchEntity.payoutsHash = batchHash;
 
@@ -338,12 +333,31 @@ export class EscrowCompletionService {
           await this.escrowPayoutsBatchRepository.findForEscrowCompletionTracking(
             escrowCompletionEntity.id,
           );
+
+        let hasFailedPayouts = false;
         for (const payoutsBatch of payoutBatches) {
-          await this.processPayoutsBatch(escrowCompletionEntity, payoutsBatch);
+          try {
+            await this.processPayoutsBatch(
+              escrowCompletionEntity,
+              payoutsBatch,
+            );
+          } catch (error) {
+            this.logger.error(
+              `Failed to process payouts batch ${payoutsBatch.id}`,
+              error,
+            );
+            hasFailedPayouts = true;
+          }
         }
 
-        escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
-        await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
+        if (hasFailedPayouts) {
+          throw new Error('Not all payouts batches succeeded');
+        } else {
+          escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+          await this.escrowCompletionRepository.updateOne(
+            escrowCompletionEntity,
+          );
+        }
       } catch (error) {
         const errorId = uuidv4();
         const failureDetail = `${ErrorEscrowCompletion.AwaitingPayoutsProcessingFailed} (Error ID: ${errorId})`;
@@ -363,28 +377,79 @@ export class EscrowCompletionService {
     escrowCompletionEntity: EscrowCompletionEntity,
     payoutsBatch: EscrowPayoutsBatchEntity,
   ): Promise<void> {
+    /**
+     * In fact we need txHash only to get this "search success" operation.
+     * We can get rid of this code block in favor of the flow where we
+     * handle expired nonce; also we will be able to get rid of txHash prop.
+     */
+    if (payoutsBatch.txHash) {
+      const successfulTxData = await TransactionUtils.getTransaction(
+        escrowCompletionEntity.chainId,
+        payoutsBatch.txHash,
+      );
+      /**
+       * [Edge-case]
+       * We sent the tx, but didn't manage to wait for it to finish
+       * and it successfully completed by now.
+       */
+      if (successfulTxData) {
+        await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
+      }
+
+      /**
+       * [Edge-case]
+       * 1) we got the tx hash, but didn't get to sending the tx
+       * 2) we sent the tx, didn't manage to wait for it to finish,
+       * but by now there is no update in the subgraph, so it's either
+       * failed or not there yet
+       *
+       * Try to send it with the same nonce
+       */
+    }
+
     const signer = this.web3Service.getSigner(escrowCompletionEntity.chainId);
     const escrowClient = await EscrowClient.build(signer);
 
     const recipientToAmountMap = new Map<string, bigint>();
     for (const { address, amount } of payoutsBatch.payouts) {
-      recipientToAmountMap.set(address, ethers.parseUnits(amount, 18));
+      recipientToAmountMap.set(address, BigInt(amount));
     }
 
-    await escrowClient.bulkPayOut(
-      escrowCompletionEntity.escrowAddress,
-      Array.from(recipientToAmountMap.keys()),
-      Array.from(recipientToAmountMap.values()),
-      escrowCompletionEntity.finalResultsUrl,
-      escrowCompletionEntity.finalResultsHash,
-      false,
-      {
-        gasPrice: await this.web3Service.calculateGasPrice(
-          escrowCompletionEntity.chainId,
-        ),
-      },
-    );
+    const { rawTransaction, hash } =
+      await escrowClient.createBulkPayoutTransaction(
+        escrowCompletionEntity.escrowAddress,
+        Array.from(recipientToAmountMap.keys()),
+        Array.from(recipientToAmountMap.values()),
+        escrowCompletionEntity.finalResultsUrl,
+        escrowCompletionEntity.finalResultsHash,
+        {
+          gasPrice: await this.web3Service.calculateGasPrice(
+            escrowCompletionEntity.chainId,
+          ),
+          nonce: payoutsBatch.txNonce,
+        },
+      );
 
-    await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
+    if (!payoutsBatch.txNonce) {
+      payoutsBatch.txNonce = rawTransaction.nonce;
+    }
+    payoutsBatch.txHash = hash;
+
+    await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
+
+    try {
+      const transactionResponse = await signer.sendTransaction(rawTransaction);
+      await transactionResponse.wait();
+
+      await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
+    } catch (error) {
+      if (ethers.isError(error, 'NONCE_EXPIRED')) {
+        delete payoutsBatch.txNonce;
+        delete payoutsBatch.txHash;
+        await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
+      }
+
+      throw error;
+    }
   }
 }

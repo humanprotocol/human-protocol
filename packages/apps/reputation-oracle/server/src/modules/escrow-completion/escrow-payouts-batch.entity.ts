@@ -30,4 +30,7 @@ export class EscrowPayoutsBatchEntity extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   public txHash?: string;
+
+  @Column({ type: 'int', nullable: true })
+  public txNonce?: number;
 }

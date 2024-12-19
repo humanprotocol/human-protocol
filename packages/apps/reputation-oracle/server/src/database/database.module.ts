@@ -22,6 +22,7 @@ import { UserQualificationEntity } from '../modules/qualification/user-qualifica
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
+import { EscrowPayoutsBatchEntity } from 'src/modules/escrow-completion/escrow-payouts-batch.entity';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-comp
             WebhookIncomingEntity,
             WebhookOutgoingEntity,
             EscrowCompletionEntity,
+            EscrowPayoutsBatchEntity,
             ReputationEntity,
             CredentialEntity,
             CredentialValidationEntity,
