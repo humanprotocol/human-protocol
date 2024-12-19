@@ -66,16 +66,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/profile/transactions"
+            element={
+              <ProtectedRoute>
+                <Transactions />
+              </ProtectedRoute>
+            }
+          />
           {!IS_MAINNET && (
             <>
-              <Route
-                path="/profile/transactions"
-                element={
-                  <ProtectedRoute>
-                    <Transactions />
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="/profile/settings"
                 element={
