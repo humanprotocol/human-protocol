@@ -41,6 +41,7 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { MUTEX_TIMEOUT } from '../../common/constants';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { Web3Env } from '../../common/enums/web3';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -122,7 +123,7 @@ export class JobController {
     @Body() data: JobFortuneDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
-    if (this.web3ConfigService.env === 'mainnet') {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
       throw new ControlledError('Disabled', HttpStatus.METHOD_NOT_ALLOWED);
     }
 
