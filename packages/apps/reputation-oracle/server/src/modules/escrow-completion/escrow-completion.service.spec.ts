@@ -3,7 +3,6 @@ import { ChainId, EscrowClient, EscrowStatus } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
 import {
   MOCK_ADDRESS,
   MOCK_BACKOFF_INTERVAL_SECONDS,
@@ -11,6 +10,7 @@ import {
   MOCK_FILE_URL,
   MOCK_MAX_RETRY_COUNT,
   MOCK_PRIVATE_KEY,
+  MOCK_REPUTATION_ORACLE_ADDRESS,
   MOCK_WEBHOOK_URL,
   mockConfig,
 } from '../../../test/constants';
@@ -36,19 +36,13 @@ import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository'
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: {
-    build: jest.fn().mockImplementation(() => ({
-      getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      complete: jest.fn().mockResolvedValue(null),
-      getStatus: jest.fn(),
-    })),
-  },
   OperatorUtils: {
     getLeader: jest.fn().mockImplementation(() => {
       return { webhookUrl: MOCK_WEBHOOK_URL };
     }),
+  },
+  TransactionUtils: {
+    getTransaction: jest.fn(),
   },
 }));
 
@@ -58,6 +52,32 @@ jest.mock('../../common/utils/backoff', () => ({
     .fn()
     .mockReturnValue(MOCK_BACKOFF_INTERVAL_SECONDS * 1000),
 }));
+
+const ESCROW_CLIENT_MOCK = {
+  getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+  getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+  getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+  complete: jest.fn().mockResolvedValue(null),
+  getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
+  createBulkPayoutTransaction: jest.fn(),
+};
+
+EscrowClient.build = jest.fn().mockResolvedValue(ESCROW_CLIENT_MOCK);
+
+const MOCK_ADDRESS_PAYOUT = {
+  address: MOCK_ADDRESS,
+  amount: BigInt(42),
+};
+const mockPayouts = [
+  MOCK_ADDRESS_PAYOUT,
+  ...Array.from({ length: 100 }, (_value, index) => {
+    const _index = index + 1;
+    return {
+      address: `0x${_index}`.padEnd(42, '0'),
+      amount: BigInt(_index),
+    };
+  }),
+];
 
 describe('escrowCompletionService', () => {
   let escrowCompletionService: EscrowCompletionService,
@@ -71,6 +91,9 @@ describe('escrowCompletionService', () => {
   const signerMock = {
     address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+    sendTransaction: jest.fn().mockImplementation(() => ({
+      wait: jest.fn(),
+    })),
   };
 
   const mockConfigService = {
@@ -204,21 +227,6 @@ describe('escrowCompletionService', () => {
   });
 
   describe('processPendingEscrowCompletion', () => {
-    const MOCK_ADDRESS_PAYOUT = {
-      address: MOCK_ADDRESS,
-      amount: BigInt(42),
-    };
-    const mockPayouts = [
-      MOCK_ADDRESS_PAYOUT,
-      ...Array.from({ length: 100 }, (_value, index) => {
-        const _index = index + 1;
-        return {
-          address: `0x${_index}`.padEnd(42, '0'),
-          amount: BigInt(_index),
-        };
-      }),
-    ];
-
     let processResultsMock: any, calculatePayoutsMock: any;
     let escrowCompletionEntity1: Partial<EscrowCompletionEntity>,
       escrowCompletionEntity2: Partial<EscrowCompletionEntity>;
@@ -242,9 +250,7 @@ describe('escrowCompletionService', () => {
         retriesCount: 0,
       };
 
-      EscrowClient.build = jest.fn().mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-      });
+      ESCROW_CLIENT_MOCK.getStatus.mockResolvedValue(EscrowStatus.Pending);
 
       jest
         .spyOn(escrowCompletionRepository, 'findByStatus')
@@ -384,9 +390,7 @@ describe('escrowCompletionService', () => {
     });
 
     it('should skip calculatePayouts when escrowStatus is not pending', async () => {
-      EscrowClient.build = jest.fn().mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
-      });
+      ESCROW_CLIENT_MOCK.getStatus.mockResolvedValue(EscrowStatus.Launched);
 
       jest
         .spyOn(escrowCompletionRepository, 'findByStatus')
@@ -411,6 +415,7 @@ describe('escrowCompletionService', () => {
       escrowCompletionEntity2: Partial<EscrowCompletionEntity>;
 
     beforeEach(() => {
+      ESCROW_CLIENT_MOCK.getStatus.mockResolvedValue(EscrowStatus.Partial);
       escrowCompletionEntity1 = {
         id: 1,
         chainId: ChainId.LOCALHOST,
@@ -440,17 +445,11 @@ describe('escrowCompletionService', () => {
       createOutgoingWebhookMock = jest
         .spyOn(webhookOutgoingService, 'createOutgoingWebhook')
         .mockResolvedValue();
-
-      EscrowClient.build = jest.fn().mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Paid),
-        complete: jest.fn().mockResolvedValue(true),
-        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      });
     });
 
-    it('should assess reputation scores and create outgoing webhook for all of the paid escrows completion', async () => {
+    it('should assess reputation scores and create outgoing webhook for all of the partially paid escrows completion', async () => {
+      ESCROW_CLIENT_MOCK.getStatus.mockResolvedValueOnce(EscrowStatus.Partial);
+
       jest
         .spyOn(escrowCompletionRepository, 'findByStatus')
         .mockResolvedValue([escrowCompletionEntity1 as any]);
@@ -546,13 +545,7 @@ describe('escrowCompletionService', () => {
     });
 
     it('should skip assessReputationScores when escrowStatus is not paid', async () => {
-      EscrowClient.build = jest.fn().mockResolvedValue({
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
-        complete: jest.fn().mockResolvedValue(true),
-        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      });
+      ESCROW_CLIENT_MOCK.getStatus.mockResolvedValue(EscrowStatus.Launched);
 
       jest
         .spyOn(escrowCompletionRepository, 'findByStatus')
@@ -567,6 +560,231 @@ describe('escrowCompletionService', () => {
       expect(updateOneMock).toHaveBeenCalledTimes(1);
       expect(assessReputationScoresMock).toHaveBeenCalledTimes(0);
       expect(createOutgoingWebhookMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('processAwaitingPayouts', () => {
+    let escrowCompletionEntity1: Partial<EscrowCompletionEntity>;
+    let processPayoutsBatchMock: jest.SpyInstance;
+
+    beforeEach(() => {
+      escrowCompletionEntity1 = {
+        id: 1,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        finalResultsUrl: MOCK_FILE_URL,
+        finalResultsHash: MOCK_FILE_HASH,
+        status: EscrowCompletionStatus.AWAITING_PAYOUTS,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      processPayoutsBatchMock = jest
+        .spyOn(escrowCompletionService as any, 'processPayoutsBatch')
+        .mockResolvedValue(undefined);
+    });
+
+    afterAll(() => {
+      processPayoutsBatchMock.mockRestore();
+    });
+
+    it('should move completion entity to status paid when all payouts finished', async () => {
+      jest
+        .spyOn(escrowCompletionRepository, 'findByStatus')
+        .mockResolvedValueOnce([escrowCompletionEntity1 as any]);
+
+      jest
+        .spyOn(escrowPayoutsBatchRepository, 'findForEscrowCompletionTracking')
+        .mockResolvedValueOnce([
+          {
+            escrowCompletionTrackingId: escrowCompletionEntity1.id,
+            payouts: [MOCK_ADDRESS_PAYOUT],
+            payoutsHash: 'test-hash',
+          },
+        ] as any);
+
+      const updateOneEscrowCompletionMock = jest
+        .spyOn(escrowCompletionRepository, 'updateOne')
+        .mockResolvedValue(escrowCompletionEntity1 as any);
+
+      await escrowCompletionService.processAwaitingPayouts();
+
+      expect(processPayoutsBatchMock).toHaveBeenCalledTimes(1);
+
+      expect(updateOneEscrowCompletionMock).toHaveBeenCalledTimes(1);
+      expect(updateOneEscrowCompletionMock).toHaveBeenCalledWith({
+        ...escrowCompletionEntity1,
+        status: EscrowCompletionStatus.PAID,
+      });
+    });
+
+    it('should handle errors and keep processing other entities', async () => {
+      jest
+        .spyOn(escrowCompletionRepository, 'findByStatus')
+        .mockResolvedValueOnce([escrowCompletionEntity1 as any]);
+
+      const numBathes = 2;
+      jest
+        .spyOn(escrowPayoutsBatchRepository, 'findForEscrowCompletionTracking')
+        .mockResolvedValueOnce(
+          Array.from(
+            { length: numBathes },
+            () =>
+              ({
+                escrowCompletionTrackingId: escrowCompletionEntity1.id,
+                payouts: [MOCK_ADDRESS_PAYOUT],
+                payoutsHash: 'test-hash',
+              }) as any,
+          ),
+        );
+
+      processPayoutsBatchMock.mockRejectedValueOnce(new Error('Failed payout'));
+
+      const updateOneEscrowCompletionMock = jest
+        .spyOn(escrowCompletionRepository, 'updateOne')
+        .mockResolvedValue(escrowCompletionEntity1 as any);
+
+      await escrowCompletionService.processAwaitingPayouts();
+
+      expect(processPayoutsBatchMock).toHaveBeenCalledTimes(2);
+
+      expect(updateOneEscrowCompletionMock).toHaveBeenCalledTimes(1);
+      expect(updateOneEscrowCompletionMock).toHaveBeenCalledWith({
+        ...escrowCompletionEntity1,
+        retriesCount: 1,
+      });
+    });
+  });
+
+  describe('processPayoutsBatch', () => {
+    const escrowCompletionEntity = {
+      id: 1,
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      finalResultsUrl: MOCK_FILE_URL,
+      finalResultsHash: MOCK_FILE_HASH,
+      status: EscrowCompletionStatus.AWAITING_PAYOUTS,
+      waitUntil: new Date(),
+      retriesCount: 0,
+    };
+    const rawTransaction = {
+      from: MOCK_REPUTATION_ORACLE_ADDRESS,
+      to: MOCK_ADDRESS,
+      data: '0xtest-encoded-contact-data',
+      nonce: 0,
+    };
+    const transactionHash = '0x123456';
+
+    beforeAll(() => {
+      ESCROW_CLIENT_MOCK.createBulkPayoutTransaction.mockImplementation(
+        (...args) => {
+          const txOptions = args.at(-1);
+          return {
+            rawTransaction: {
+              ...rawTransaction,
+              nonce: txOptions.nonce ?? rawTransaction.nonce,
+            },
+            hash: transactionHash,
+          };
+        },
+      );
+    });
+
+    it('should correctly process payouts batch at first try', async () => {
+      const updateOneBatchSpy = jest.spyOn(
+        escrowPayoutsBatchRepository,
+        'updateOne',
+      );
+
+      const payoutsBatch = {
+        id: 1,
+        payouts: [MOCK_ADDRESS_PAYOUT],
+        payoutsHash: 'test-payouts-hash',
+        txHash: null,
+        txNonce: null,
+      };
+
+      await (escrowCompletionService as any).processPayoutsBatch(
+        escrowCompletionEntity,
+        { ...payoutsBatch },
+      );
+
+      expect(updateOneBatchSpy).toHaveBeenNthCalledWith(1, {
+        ...payoutsBatch,
+        txHash: transactionHash,
+        txNonce: rawTransaction.nonce,
+      });
+      expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
+      expect(signerMock.sendTransaction).toHaveBeenLastCalledWith(
+        rawTransaction,
+      );
+    });
+
+    it('should reuse nonce if exists in batch', async () => {
+      const updateOneBatchSpy = jest.spyOn(
+        escrowPayoutsBatchRepository,
+        'updateOne',
+      );
+
+      const payoutsBatch = {
+        id: 1,
+        payouts: [MOCK_ADDRESS_PAYOUT],
+        payoutsHash: 'test-payouts-hash',
+        txHash: '0xExisting-hash',
+        txNonce: 15,
+      };
+
+      await (escrowCompletionService as any).processPayoutsBatch(
+        escrowCompletionEntity,
+        payoutsBatch,
+      );
+
+      expect(updateOneBatchSpy).toHaveBeenCalledWith({
+        ...payoutsBatch,
+        txHash: transactionHash,
+      });
+      expect(signerMock.sendTransaction).toHaveBeenCalledWith({
+        ...rawTransaction,
+        nonce: payoutsBatch.txNonce,
+      });
+    });
+
+    it('should  erase tx data when nonce already used', async () => {
+      const updateOneBatchSpy = jest.spyOn(
+        escrowPayoutsBatchRepository,
+        'updateOne',
+      );
+      const NONCE_EXPIRED_CODE = 'NONCE_EXPIRED';
+      signerMock.sendTransaction.mockRejectedValueOnce({
+        code: NONCE_EXPIRED_CODE,
+      });
+
+      const payoutsBatch = {
+        id: 1,
+        payouts: [MOCK_ADDRESS_PAYOUT],
+        payoutsHash: 'test-payouts-hash',
+        txHash: '0xExisting-hash',
+        txNonce: 15,
+      };
+
+      let thrownError: any;
+      try {
+        await (escrowCompletionService as any).processPayoutsBatch(
+          escrowCompletionEntity,
+          { ...payoutsBatch },
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError).toBeDefined();
+      expect(thrownError.code).toBe(NONCE_EXPIRED_CODE);
+
+      expect(updateOneBatchSpy).toHaveBeenLastCalledWith({
+        ...payoutsBatch,
+        txHash: undefined,
+        txNonce: undefined,
+      });
     });
   });
 });
