@@ -401,19 +401,7 @@ export class PaymentService {
   }
 
   public async getUserBalance(userId: number, rate?: number): Promise<number> {
-    let paymentEntities: PaymentEntity[];
-    paymentEntities = await this.paymentRepository.findByUserTypeAndStatus(
-      userId,
-      [PaymentType.DEPOSIT, PaymentType.REFUND],
-      PaymentStatus.SUCCEEDED,
-    );
-    paymentEntities = paymentEntities.concat(
-      await this.paymentRepository.findByUserTypeAndStatus(
-        userId,
-        [PaymentType.WITHDRAWAL, PaymentType.SLASH],
-        [PaymentStatus.SUCCEEDED, PaymentStatus.PENDING],
-      ),
-    );
+    const paymentEntities = await this.paymentRepository.getBalance(userId);
 
     if (!rate) {
       rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);

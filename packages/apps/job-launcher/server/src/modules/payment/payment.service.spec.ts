@@ -814,9 +814,9 @@ describe('PaymentService', () => {
   describe('getUserBalance', () => {
     it('should return the correct balance for a user', async () => {
       const userId = 1;
-      const expectedBalance = 40;
+      const expectedBalance = 20;
 
-      paymentRepository.findByUserTypeAndStatus = jest.fn().mockResolvedValue([
+      paymentRepository.getBalance = jest.fn().mockResolvedValue([
         {
           amount: 50,
           rate: 1,
@@ -840,37 +840,17 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.findByUserTypeAndStatus).toHaveBeenCalledWith(
-        userId,
-        [PaymentType.DEPOSIT, PaymentType.REFUND],
-        PaymentStatus.SUCCEEDED,
-      );
-      expect(paymentRepository.findByUserTypeAndStatus).toHaveBeenCalledWith(
-        userId,
-        [PaymentType.WITHDRAWAL, PaymentType.SLASH],
-        [PaymentStatus.SUCCEEDED, PaymentStatus.PENDING],
-      );
+      expect(paymentRepository.getBalance).toHaveBeenCalledWith(userId);
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
       const userId = 1;
-      paymentRepository.findByUserTypeAndStatus = jest
-        .fn()
-        .mockResolvedValue([]);
+      paymentRepository.getBalance = jest.fn().mockResolvedValue([]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(0);
-      expect(paymentRepository.findByUserTypeAndStatus).toHaveBeenCalledWith(
-        userId,
-        [PaymentType.DEPOSIT, PaymentType.REFUND],
-        PaymentStatus.SUCCEEDED,
-      );
-      expect(paymentRepository.findByUserTypeAndStatus).toHaveBeenCalledWith(
-        userId,
-        [PaymentType.WITHDRAWAL, PaymentType.SLASH],
-        [PaymentStatus.SUCCEEDED, PaymentStatus.PENDING],
-      );
+      expect(paymentRepository.getBalance).toHaveBeenCalledWith(userId);
     });
   });
 
