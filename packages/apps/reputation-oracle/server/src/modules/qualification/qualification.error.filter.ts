@@ -21,11 +21,12 @@ export class QualificationErrorFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     let status = HttpStatus.BAD_REQUEST;
 
-    if (
-      exception.message === QualificationErrorMessage.NOT_FOUND ||
+    if (exception.message === QualificationErrorMessage.NOT_FOUND) {
+      status = HttpStatus.NOT_FOUND;
+    } else if (
       exception.message === QualificationErrorMessage.NO_WORKERS_FOUND
     ) {
-      status = HttpStatus.NOT_FOUND;
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
     }
 
     this.logger.error(exception.message, exception.stack, exception.reference);

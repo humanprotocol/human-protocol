@@ -74,6 +74,7 @@ export class QualificationController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 422, description: 'Unprocessable entity' })
   assign(@Body() assignQualificationDto: AssignQualificationDto) {
     return this.qualificationService.assign(assignQualificationDto);
   }
@@ -90,6 +91,7 @@ export class QualificationController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 422, description: 'Unprocessable entity' })
   unassign(@Body() unassignQualificationDto: UnassignQualificationDto) {
     return this.qualificationService.unassign(unassignQualificationDto);
   }
