@@ -1,11 +1,13 @@
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Callable, ClassVar
+from typing import Any, ClassVar
 
-from cachelib import BaseCache, RedisCache
-import cachelib.serializers
 import aiocache.serializers
+import cachelib.serializers
+from cachelib import BaseCache, RedisCache
 
 from src.core.config import Config
+
 
 class _RedisSerializer(cachelib.serializers.RedisSerializer):
     # The default Pickle-based serializer is not safe, here we use MsgPack as a safer alternative.
@@ -15,10 +17,10 @@ class _RedisSerializer(cachelib.serializers.RedisSerializer):
         super().__init__()
         self._impl = aiocache.serializers.MsgPackSerializer()
 
-    def dump(self, value, f):
+    def dump(self, *args, **kwargs):  # noqa: ARG002
         raise AssertionError("This method must not be called")
 
-    def load(self, f):
+    def load(self, *args, **kwargs):  # noqa: ARG002
         raise AssertionError("This method must not be called")
 
     def dumps(self, value: Any) -> bytes:
@@ -26,6 +28,7 @@ class _RedisSerializer(cachelib.serializers.RedisSerializer):
 
     def loads(self, bvalue: bytes) -> Any:
         return self._impl.loads(bvalue)
+
 
 class _RedisCache(RedisCache):
     def __init__(self, *args, **kwargs):
@@ -35,6 +38,7 @@ class _RedisCache(RedisCache):
         self.serializer = kwargs.pop("serializer", None) or _RedisSerializer()
 
         super().__init__(*args, **kwargs)
+
 
 class CacheManager:
     _configs: ClassVar[dict[str, dict]] = {
