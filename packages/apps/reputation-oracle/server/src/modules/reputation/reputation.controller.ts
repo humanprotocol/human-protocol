@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseFilters } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -14,10 +14,12 @@ import {
   ReputationGetParamsDto,
   ReputationGetQueryDto,
 } from './reputation.dto';
+import { KycErrorFilter } from '../kyc/kyc.error.filter';
 
 @Public()
 @ApiTags('Reputation')
 @Controller('reputation')
+@UseFilters(KycErrorFilter)
 export class ReputationController {
   constructor(private readonly reputationService: ReputationService) {}
 

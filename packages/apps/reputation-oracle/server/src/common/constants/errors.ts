@@ -22,14 +22,6 @@ export enum ErrorEscrowCompletion {
 }
 
 /**
- * Represents error messages related to reputation.
- */
-export enum ErrorReputation {
-  NotFound = 'Reputation not found',
-  NotCreated = 'Reputation has not been created',
-}
-
-/**
  * Represents error messages related to credential.
  */
 export enum ErrorCredential {
