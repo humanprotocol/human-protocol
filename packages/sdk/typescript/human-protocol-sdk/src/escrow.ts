@@ -594,7 +594,7 @@ export class EscrowClient extends BaseEthersClient {
    * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
    * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
-   * const resultsHash'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
    *
    * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
    * ```
@@ -894,6 +894,41 @@ export class EscrowClient extends BaseEthersClient {
     }
   }
 
+  /**
+   * Creates a prepared transaction for bulk payout without immediately sending it.
+   * @param {string} escrowAddress Escrow address to payout.
+   * @param {string[]} recipients Array of recipient addresses.
+   * @param {bigint[]} amounts Array of amounts the recipients will receive.
+   * @param {string} finalResultsUrl Final results file url.
+   * @param {string} finalResultsHash Final results file hash.
+   * @param {string} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns Returns object with raw transaction and signed transaction hash
+   *
+   * **Code example**
+   *
+   * > Only Reputation Oracle or a trusted handler can call it.
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const escrowClient = await EscrowClient.build(signer);
+   *
+   * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
+   * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
+   * const resultsUrl = 'http://localhost/results.json';
+   * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   *
+   * const result = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
+   * console.log('Raw transaction:', result.rawTransaction);
+   * console.log('Tx hash:', result.hash);
+   */
   @requiresSigner
   async createBulkPayoutTransaction(
     escrowAddress: string,
