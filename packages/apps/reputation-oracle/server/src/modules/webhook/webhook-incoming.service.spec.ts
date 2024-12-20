@@ -31,6 +31,7 @@ import { ReputationConfigService } from '../../common/config/reputation-config.s
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { IncomingWebhookError, WebhookErrorMessage } from './webhook.error';
+import { EscrowPayoutsBatchRepository } from '../escrow-completion/escrow-payouts-batch.repository';
 
 describe('WebhookIncomingService', () => {
   let webhookIncomingService: WebhookIncomingService,
@@ -79,6 +80,10 @@ describe('WebhookIncomingService', () => {
         {
           provide: EscrowCompletionRepository,
           useValue: createMock<EscrowCompletionRepository>(),
+        },
+        {
+          provide: EscrowPayoutsBatchRepository,
+          useValue: createMock<EscrowPayoutsBatchRepository>(),
         },
         {
           provide: WebhookOutgoingRepository,

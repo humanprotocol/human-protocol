@@ -373,7 +373,7 @@ export class EscrowCompletionService {
     }
   }
 
-  async processPayoutsBatch(
+  private async processPayoutsBatch(
     escrowCompletionEntity: EscrowCompletionEntity,
     payoutsBatch: EscrowPayoutsBatchEntity,
   ): Promise<void> {
