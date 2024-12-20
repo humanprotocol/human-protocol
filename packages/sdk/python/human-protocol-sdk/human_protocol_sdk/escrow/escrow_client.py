@@ -53,7 +53,7 @@ Module
 import logging
 import os
 from decimal import Decimal
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.utils import (
@@ -233,7 +233,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -310,7 +311,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -384,7 +386,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -397,7 +400,8 @@ class EscrowClient:
                 escrow_client = EscrowClient(w3)
 
                 amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                escrow_client.fund("0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount)
+                escrow_client.fund(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount)
         """
 
         if not Web3.is_address(escrow_address):
@@ -447,7 +451,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -506,7 +511,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -569,7 +575,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -602,29 +609,9 @@ class EscrowClient:
                 )
         """
 
-        if not Web3.is_address(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-        for recipient in recipients:
-            if not Web3.is_address(recipient):
-                raise EscrowClientError(f"Invalid recipient address: {recipient}")
-        if len(recipients) == 0:
-            raise EscrowClientError("Arrays must have any value")
-        if len(recipients) != len(amounts):
-            raise EscrowClientError("Arrays must have same length")
-        if 0 in amounts:
-            raise EscrowClientError("Amounts cannot be empty")
-        if any(amount < 0 for amount in amounts):
-            raise EscrowClientError("Amounts cannot be negative")
-        balance = self.get_balance(escrow_address)
-        total_amount = sum(amounts)
-        if total_amount > balance:
-            raise EscrowClientError(
-                f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
-            )
-        if not validate_url(final_results_url):
-            raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
-        if not final_results_hash:
-            raise EscrowClientError("Invalid empty final results hash")
+        self.ensure_correct_bulk_payout_input(
+            escrow_address, recipients, amounts, final_results_url, final_results_hash
+        )
 
         if force_complete:
             handle_transaction(
@@ -651,6 +638,151 @@ class EscrowClient:
                 EscrowClientError,
                 tx_options,
             )
+
+    def create_bulk_payout_transaction(
+        self,
+        escrow_address: str,
+        recipients: List[str],
+        amounts: List[Decimal],
+        final_results_url: str,
+        final_results_hash: str,
+        txId: Decimal,
+        tx_options: Optional[TxParams] = None,
+    ) -> Dict[str, TxParams]:
+        """Creates a prepared transaction for bulk payout without immediately sending it.
+
+        :param escrow_address: Address of the escrow
+        :param recipients: Array of recipient addresses
+        :param amounts: Array of amounts the recipients will receive
+        :param final_results_url: Final results file url
+        :param final_results_hash: Final results file hash
+        :param txId: Serial number of the bulks
+        :param tx_options: (Optional) Additional transaction parameters
+
+        :return: A dictionary containing the raw transaction and its hash
+
+        :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                recipients = [
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92267'
+                ]
+                amounts = [
+                    Web3.to_wei(5, 'ether'),
+                    Web3.to_wei(10, 'ether')
+                ]
+                results_url = 'http://localhost/results.json'
+                results_hash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079'
+
+                transaction = escrow_client.create_bulk_payout_transaction(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                    recipients,
+                    amounts,
+                    results_url,
+                    results_hash,
+                    1
+                )
+
+                print(f"Raw Transaction: {transaction['rawTransaction']}")
+                print(f"Transaction Hash: {transaction['hash']}")
+        """
+
+        self.ensure_correct_bulk_payout_input(
+            escrow_address, recipients, amounts, final_results_url, final_results_hash
+        )
+
+        transaction = (
+            self._get_escrow_contract(escrow_address)
+            .functions.bulkPayOut(
+                recipients, amounts, final_results_url, final_results_hash, txId
+            )
+            .build_transaction(tx_options or {})
+        )
+
+        if "nonce" not in transaction:
+            transaction["nonce"] = self.w3.eth.get_transaction_count(
+                self.w3.eth.default_account
+            )
+
+        # Populate other required fields like gas, gasPrice, and chainId
+        transaction["gas"] = self.w3.eth.estimate_gas(transaction)
+        transaction["gasPrice"] = self.w3.eth.gas_price
+        transaction["chainId"] = self.w3.eth.chain_id
+
+        transaction_hash = self.w3.keccak(transaction).hex()
+
+        return {
+            "rawTransaction": transaction,
+            "hash": transaction_hash,
+        }
+
+    def ensure_correct_bulk_payout_input(
+        self,
+        escrow_address: str,
+        recipients: List[str],
+        amounts: List[Decimal],
+        final_results_url: str,
+        final_results_hash: str,
+    ) -> None:
+        """Validates input parameters for bulk payout operations.
+
+        :param escrow_address: Address of the escrow
+        :param recipients: Array of recipient addresses
+        :param amounts: Array of amounts the recipients will receive
+        :param final_results_url: Final results file url
+        :param final_results_hash: Final results file hash
+
+        :return: None
+
+        :raise EscrowClientError: If validation fails
+        """
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+        for recipient in recipients:
+            if not Web3.is_address(recipient):
+                raise EscrowClientError(f"Invalid recipient address: {recipient}")
+        if len(recipients) == 0:
+            raise EscrowClientError("Arrays must have any value")
+        if len(recipients) != len(amounts):
+            raise EscrowClientError("Arrays must have same length")
+        if 0 in amounts:
+            raise EscrowClientError("Amounts cannot be empty")
+        if any(amount < 0 for amount in amounts):
+            raise EscrowClientError("Amounts cannot be negative")
+        balance = self.get_balance(escrow_address)
+        total_amount = sum(amounts)
+        if total_amount > balance:
+            raise EscrowClientError(
+                f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
+            )
+        if not validate_url(final_results_url):
+            raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
+        if not final_results_hash:
+            raise EscrowClientError("Invalid empty final results hash")
 
     def cancel(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
