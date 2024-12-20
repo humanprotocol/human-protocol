@@ -25,8 +25,7 @@ export class ReputationErrorFilter implements ExceptionFilter {
     this.logger.error(
       exception.message,
       exception.stack,
-      exception.chainId,
-      exception.address,
+      `${exception.chainId} - ${exception.address}`,
     );
 
     return response.status(status).json({

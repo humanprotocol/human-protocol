@@ -14,12 +14,12 @@ import {
   ReputationGetParamsDto,
   ReputationGetQueryDto,
 } from './reputation.dto';
-import { KycErrorFilter } from '../kyc/kyc.error.filter';
+import { ReputationErrorFilter } from './reputation.error.filter';
 
 @Public()
 @ApiTags('Reputation')
 @Controller('reputation')
-@UseFilters(KycErrorFilter)
+@UseFilters(ReputationErrorFilter)
 export class ReputationController {
   constructor(private readonly reputationService: ReputationService) {}
 
