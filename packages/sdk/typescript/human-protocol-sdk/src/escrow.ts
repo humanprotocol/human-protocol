@@ -928,7 +928,16 @@ export class EscrowClient extends BaseEthersClient {
         DEFAULT_TX_ID,
         txOptions
       );
-      if (typeof txOptions.nonce !== 'number') {
+
+      /**
+       * Safety-belt: explicitly set the passed nonce
+       * because 'populateTransaction' return value
+       * doesn't mention it even in library docs,
+       * even though it includes if from txOptions.
+       */
+      if (typeof txOptions.nonce === 'number') {
+        populatedTransaction.nonce = txOptions.nonce;
+      } else {
         populatedTransaction.nonce = await signer.getNonce();
       }
       /**

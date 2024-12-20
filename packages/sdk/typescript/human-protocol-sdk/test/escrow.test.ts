@@ -27,6 +27,7 @@ import {
   ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
+  ErrorSigner,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
@@ -67,6 +68,9 @@ describe('EscrowClient', () => {
     mockSigner = {
       provider: mockProvider.provider,
       getAddress: vi.fn().mockResolvedValue(ethers.ZeroAddress),
+      getNonce: vi.fn().mockResolvedValue(0),
+      populateTransaction: vi.fn().mockImplementation((tx) => tx),
+      signTransaction: vi.fn(),
     };
 
     mockEscrowContract = {
@@ -75,7 +79,12 @@ describe('EscrowClient', () => {
       fund: vi.fn(),
       storeResults: vi.fn(),
       complete: vi.fn(),
-      'bulkPayOut(address[],uint256[],string,string,uint256)': vi.fn(),
+      'bulkPayOut(address[],uint256[],string,string,uint256)': Object.assign(
+        vi.fn(),
+        {
+          populateTransaction: vi.fn(),
+        }
+      ),
       'bulkPayOut(address[],uint256[],string,string,uint256,bool)': vi.fn(),
       cancel: vi.fn(),
       withdraw: vi.fn(),
@@ -1187,6 +1196,300 @@ describe('EscrowClient', () => {
         DEFAULT_TX_ID,
         txOptions
       );
+    });
+  });
+
+  describe('createBulkPayoutTransaction', () => {
+    beforeEach(() => {
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+    });
+
+    test('should require signer', async () => {
+      const originalGetAddress = mockSigner.getAddress;
+      delete mockSigner.getAddress;
+
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [90n, 20n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      let thrownError;
+      try {
+        await escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).toBe(ErrorSigner);
+
+      mockSigner.getAddress = originalGetAddress;
+    });
+
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+      const recipients = [ethers.ZeroAddress];
+      const amounts = [100n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          invalidAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if recipients length is equal to 0', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients: string[] = [];
+      const amounts = [100n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorRecipientCannotBeEmptyArray);
+    });
+
+    test('should throw an error if amounts length is equal to 0', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress];
+      const amounts: number[] = [];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorAmountsCannotBeEmptyArray);
+    });
+
+    test('should throw an error if recipients and amounts do not have the same length', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress];
+      const amounts = [100n, 100n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorRecipientAndAmountsMustBeSameLength);
+    });
+
+    test('should throw an error if url is an empty string', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress];
+      const amounts = [100n];
+      const finalResultsUrl = '';
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorUrlIsEmptyString);
+    });
+
+    test('should throw an error if final results url is an invalid url', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress];
+      const amounts = [100n];
+      const finalResultsUrl = FAKE_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is an empty string', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress];
+      const amounts = [100n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = '';
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorHashIsEmptyString);
+    });
+
+    test('should throw an error if recipients contains invalid addresses', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [FAKE_ADDRESS];
+      const amounts = [100n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress];
+      const amounts = [100n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValueOnce(false);
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should throw an error if escrow does not have enough balance', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [90n, 20n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.getBalance = vi.fn().mockReturnValue(50n);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorEscrowDoesNotHaveEnoughBalance);
+    });
+
+    test('should create raw transaction for bulk payout with nonce of signer', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [10n, 10n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+      const signerAddress = ethers.ZeroAddress;
+      const encodedMethodData = '0xbulkPayOut-call-encoded-data';
+
+      escrowClient.escrowContract[
+        'bulkPayOut(address[],uint256[],string,string,uint256)'
+      ].populateTransaction.mockResolvedValueOnce({
+        from: signerAddress,
+        to: escrowAddress,
+        data: encodedMethodData,
+      });
+
+      const signedTransaction = '0x123456';
+      mockSigner.signTransaction.mockResolvedValueOnce(signedTransaction);
+
+      const result = await escrowClient.createBulkPayoutTransaction(
+        escrowAddress,
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash
+      );
+
+      expect(result.rawTransaction).toEqual({
+        from: signerAddress,
+        to: escrowAddress,
+        data: encodedMethodData,
+        nonce: 0,
+      });
+
+      expect(result.hash).toBe(ethers.keccak256(signedTransaction));
+    });
+
+    test('should create raw transaction for bulk payout with passed nonce', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = [ethers.ZeroAddress, ethers.ZeroAddress];
+      const amounts = [10n, 10n];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+      const signerAddress = ethers.ZeroAddress;
+      const encodedMethodData = '0xbulkPayOut-call-encoded-data';
+
+      escrowClient.escrowContract[
+        'bulkPayOut(address[],uint256[],string,string,uint256)'
+      ].populateTransaction.mockResolvedValueOnce({
+        from: signerAddress,
+        to: escrowAddress,
+        data: encodedMethodData,
+      });
+
+      mockSigner.signTransaction.mockResolvedValueOnce('0x123456');
+
+      const nonce = 42;
+      const result = await escrowClient.createBulkPayoutTransaction(
+        escrowAddress,
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        {
+          nonce,
+        }
+      );
+
+      expect(result.rawTransaction).toEqual({
+        from: signerAddress,
+        to: escrowAddress,
+        data: encodedMethodData,
+        nonce,
+      });
     });
   });
 
