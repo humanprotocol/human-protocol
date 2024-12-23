@@ -65,7 +65,7 @@
     "@types/chai": "^4.3.3",
     "@types/mocha": "^10.0.8",
     "chai": "^4.5.0",
-    "hardhat": "^2.22.10",
+    "hardhat": "^2.22.17",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-dependency-compiler": "^1.2.1",
