@@ -13,6 +13,7 @@ import {
   HttpCode,
   Post,
   Req,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards';
@@ -20,9 +21,11 @@ import { RequestWithUser } from '../../common/types';
 import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from '../../common/guards/kyc-webhook.auth';
+import { KycErrorFilter } from './kyc.error.filter';
 
 @ApiTags('Kyc')
 @Controller('/kyc')
+@UseFilters(KycErrorFilter)
 export class KycController {
   constructor(private readonly kycService: KycService) {}
 

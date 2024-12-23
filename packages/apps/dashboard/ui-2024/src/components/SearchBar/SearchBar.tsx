@@ -12,6 +12,7 @@ import {
   Grid,
   MenuItem,
   Box,
+  Tooltip,
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
 import { getNetwork, networks } from '@utils/config/networks';
@@ -27,6 +28,7 @@ import {
   muiTextFieldSx,
   gridSx,
 } from './SearchBar.styles';
+import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
 
 interface SearchBarProps {
   className?: string;
@@ -43,6 +45,7 @@ const SearchBar: FC<SearchBarProps> = ({
   const [focus, setFocus] = useState<boolean>(false);
   const { filterParams } = useWalletSearch();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   const navigateToAddress = useCallback(
     (chainIdParam?: number | undefined) => {
@@ -65,7 +68,14 @@ const SearchBar: FC<SearchBarProps> = ({
   }, [filterParams.address]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+    const value = event.target.value;
+    setInputValue(value);
+
+    if (isValidEVMAddress(value)) {
+      setError(null);
+    } else if (value.length > 0) {
+      setError('Invalid EVM address. Must start with 0x and be 42 characters.');
+    }
   };
 
   const handleSelectChange = (event: SelectChangeEvent<number | string>) => {
@@ -79,6 +89,11 @@ const SearchBar: FC<SearchBarProps> = ({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!isValidEVMAddress(inputValue)) {
+      return;
+    }
+
     if (inputValue && !!inputValue.length) {
       navigateToAddress();
     }
@@ -110,6 +125,7 @@ const SearchBar: FC<SearchBarProps> = ({
         onChange={handleInputChange}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
+        error={!!error}
         fullWidth
         sx={muiTextFieldSx(mobile)}
         InputProps={{
@@ -156,23 +172,26 @@ const SearchBar: FC<SearchBarProps> = ({
                   }}
                 />
               </IconButton>
-              <IconButton
-                className="search-button"
-                type="submit"
-                aria-label="search"
-                disabled={!inputValue.length}
-                sx={{
-                  [mobile.mediaQuery]: {
-                    padding: '4px',
-                  },
-                }}
-              >
-                <SearchIcon
-                  style={{
-                    color: colorPalette.white,
+              <Tooltip title={error || ''} arrow enterTouchDelay={0}>
+                <IconButton
+                  className="search-button"
+                  type="submit"
+                  aria-label="search"
+                  sx={{
+                    [mobile.mediaQuery]: {
+                      padding: '4px',
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <SearchIcon
+                    style={{
+                      color: error
+                        ? colorPalette.error.main
+                        : colorPalette.white,
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
             </InputAdornment>
           ),
         }}

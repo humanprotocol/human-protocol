@@ -116,16 +116,6 @@ export enum ErrorSendGrid {
   InvalidApiKey = 'Invalid SendGrid API key',
 }
 
-export enum ErrorKyc {
-  NotFound = 'KYC session not found',
-  AlreadyApproved = 'KYC session already approved',
-  VerificationInProgress = 'KYC session verification in progress',
-  Declined = 'KYC session declined',
-  InvalidKycProviderAPIResponse = 'Invalid KYC provider API response',
-  InvalidWebhookSecret = 'Invalid webhook secret',
-  CountryNotSet = 'Сountry is not set for the user',
-}
-
 /**
  * Represents error messages associated with a cron job.
  */
@@ -150,15 +140,4 @@ export enum ErrorWeb3 {
 export enum ErrorOperator {
   OperatorAlreadyActive = 'Operator is already active',
   OperatorNotActive = 'Operator not active',
-}
-
-/**
- * Represents error messages related to qualification.
- */
-export enum ErrorQualification {
-  InvalidExpiresAt = 'Qualification should be valid for at least %minValidity% hours',
-  NotFound = 'Qualification not found',
-  NoWorkersFound = 'No workers found for the provided addresses or emails',
-  AddressesOrEmailsMustBeProvided = 'Either addresses or emails must be provided',
-  CannotDeleteAssignedQualification = 'Cannot delete qualification because it is assigned to users',
 }

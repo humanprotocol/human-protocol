@@ -132,7 +132,7 @@ export default function JobDetail() {
                   value={data.details.manifestHash}
                 />
                 <CardTextRow
-                  label="Balance of"
+                  label="Balance"
                   value={`${data.details.balance} HMT`}
                 />
                 <CardTextRow

@@ -40,7 +40,9 @@ import { ControlledError } from '../../common/errors/controlled';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { RateService } from './rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { WhitelistAuthGuard } from 'src/common/guards/whitelist.auth';
+import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
+import { Web3Env } from '../../common/enums/web3';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -51,6 +53,7 @@ export class PaymentController {
     private readonly paymentService: PaymentService,
     private readonly serverConfigService: ServerConfigService,
     private readonly rateService: RateService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   @ApiOperation({
@@ -164,6 +167,12 @@ export class PaymentController {
   })
   @Post('/fiat/setup-card')
   public async assignCard(@Request() req: RequestWithUser): Promise<string> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.createCustomerAndAssignCard(req.user);
   }
 
@@ -195,6 +204,12 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: CardConfirmDto,
   ): Promise<boolean> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.confirmCard(req.user, data);
   }
 
@@ -225,6 +240,12 @@ export class PaymentController {
     @Body() data: PaymentFiatCreateDto,
     @Request() req: RequestWithUser,
   ): Promise<string> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.createFiatPayment(req.user, data);
   }
 
@@ -255,6 +276,12 @@ export class PaymentController {
     @Body() data: PaymentFiatConfirmDto,
     @Request() req: RequestWithUser,
   ): Promise<boolean> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.confirmFiatPayment(req.user.id, data);
   }
 
@@ -269,6 +296,12 @@ export class PaymentController {
   })
   @Get('/fiat/cards')
   public async listPaymentMethods(@Request() req: RequestWithUser) {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.listUserPaymentMethods(req.user);
   }
 
@@ -290,6 +323,12 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Query() data: PaymentMethodIdDto,
   ): Promise<void> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     await this.paymentService.deletePaymentMethod(
       req.user,
       data.paymentMethodId,
@@ -309,6 +348,12 @@ export class PaymentController {
   public async getBillingInfo(
     @Request() req: RequestWithUser,
   ): Promise<BillingInfoDto | null> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.getUserBillingInfo(req.user);
   }
 
@@ -326,6 +371,12 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: BillingInfoUpdateDto,
   ): Promise<void> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     await this.paymentService.updateUserBillingInfo(req.user, data);
   }
 
@@ -348,6 +399,12 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: PaymentMethodIdDto,
   ): Promise<void> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     await this.paymentService.changeDefaultPaymentMethod(
       req.user,
       data.paymentMethodId,
@@ -394,6 +451,12 @@ export class PaymentController {
     @Param('paymentId') paymentId: string,
     @Request() req: RequestWithUser,
   ) {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError(
+        'Temporally disabled',
+        HttpStatus.METHOD_NOT_ALLOWED,
+      );
+    }
     return this.paymentService.getReceipt(paymentId, req.user);
   }
 }

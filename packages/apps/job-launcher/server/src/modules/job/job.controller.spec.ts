@@ -20,6 +20,8 @@ import {
   MOCK_REQUESTER_TITLE,
 } from '../../../test/constants';
 import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -48,6 +50,8 @@ describe('JobController', () => {
           provide: MutexManagerService,
           useValue: mockMutexManagerService,
         },
+        Web3ConfigService,
+        ConfigService,
       ],
     })
       .overrideGuard(JwtAuthGuard)

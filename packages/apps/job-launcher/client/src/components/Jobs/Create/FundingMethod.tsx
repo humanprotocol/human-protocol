@@ -1,9 +1,10 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import fundCryptoImg from '../../../assets/fund-crypto.png';
 import fundFiatImg from '../../../assets/fund-fiat.png';
+import { IS_MAINNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useAppSelector } from '../../../state';
 import { PayMethod } from '../../../types';
@@ -46,7 +47,7 @@ export const FundingMethod = () => {
       >
         <Grid container spacing={4}>
           {user?.whitelisted && (
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={IS_MAINNET ? 12 : 6}>
               <Box
                 sx={{
                   width: '100%',
@@ -80,58 +81,60 @@ export const FundingMethod = () => {
               </Box>
             </Grid>
           )}
-          <Grid item xs={12} md={user?.whitelisted ? 6 : 12}>
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                boxSizing: 'border-box',
-                background: '#fbfbfe',
-                borderRadius: '10px',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                flexDirection: 'column',
-                py: 8,
-              }}
-            >
-              <img
-                src={fundFiatImg}
-                alt="fiat"
-                style={{ width: 143, height: 'auto' }}
-              />
-              <Typography variant="body2" color="primary" mt={8}>
-                Click to pay with credit card
-              </Typography>
+          {!IS_MAINNET && (
+            <Grid item xs={12} md={user?.whitelisted ? 6 : 12}>
               <Box
                 sx={{
-                  mt: 2.5,
+                  width: '100%',
+                  height: '100%',
+                  boxSizing: 'border-box',
+                  background: '#fbfbfe',
+                  borderRadius: '10px',
                   display: 'flex',
-                  justifyContent: 'center',
-                  gap: '18px',
-                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  py: 8,
                 }}
               >
-                <Button
-                  variant="outlined"
-                  sx={{ minWidth: '200px' }}
-                  onClick={() => {
-                    changePayMethod?.(PayMethod.Fiat);
-                    goToNextStep?.();
+                <img
+                  src={fundFiatImg}
+                  alt="fiat"
+                  style={{ width: 143, height: 'auto' }}
+                />
+                <Typography variant="body2" color="primary" mt={8}>
+                  Click to pay with credit card
+                </Typography>
+                <Box
+                  sx={{
+                    mt: 2.5,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '18px',
+                    flexWrap: 'wrap',
                   }}
                 >
-                  Pay with Credit Card
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{ minWidth: '200px' }}
-                  onClick={() => navigate('/profile/top-up')}
-                >
-                  Top up your account
-                </Button>
+                  <Button
+                    variant="outlined"
+                    sx={{ minWidth: '200px' }}
+                    onClick={() => {
+                      changePayMethod?.(PayMethod.Fiat);
+                      goToNextStep?.();
+                    }}
+                  >
+                    Pay with Credit Card
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    sx={{ minWidth: '200px' }}
+                    onClick={() => navigate('/profile/top-up')}
+                  >
+                    Top up your account
+                  </Button>
+                </Box>
               </Box>
-            </Box>
-          </Grid>
+            </Grid>
+          )}
         </Grid>
       </Box>
       <WalletModal

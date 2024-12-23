@@ -221,11 +221,11 @@ const theme: ThemeOptions = createTheme({
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          backgroundColor: '#320a8d',
-          color: '#fff',
+          backgroundColor: colorPalette.secondary.main,
+          color: colorPalette.whiteSolid,
         },
         arrow: {
-          color: '#320a8d',
+          color: colorPalette.secondary.main,
         },
       },
     },
@@ -241,19 +241,19 @@ const theme: ThemeOptions = createTheme({
         root: {
           borderRadius: 4,
           borderWidth: 2,
-          color: '#320a8d',
+          color: colorPalette.primary.main,
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#320a8d',
+            borderColor: colorPalette.primary.main,
             borderWidth: 2,
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#320a8d',
+            borderColor: colorPalette.primary.main,
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#320a8d',
+            borderColor: colorPalette.primary.main,
           },
           '& .MuiSvgIcon-root': {
-            color: '#320a8d',
+            color: colorPalette.primary.main,
           },
         },
       },
