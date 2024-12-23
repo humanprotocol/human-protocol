@@ -62,11 +62,7 @@ def get_available_webhook_types(
 ) -> dict[str, OracleWebhookTypes]:
     escrow = get_escrow(chain_id, escrow_address)
     return {
-        escrow.launcher.lower(): OracleWebhookTypes.job_launcher,
-        (
-            Config.localhost.recording_oracle_address or escrow.recording_oracle
-        ).lower(): OracleWebhookTypes.recording_oracle,
-        (
-            Config.localhost.reputation_oracle_address or escrow.reputation_oracle
-        ).lower(): OracleWebhookTypes.reputation_oracle,
+        (escrow.launcher or "").lower(): OracleWebhookTypes.job_launcher,
+        (escrow.recording_oracle or "").lower(): OracleWebhookTypes.recording_oracle,
+        (escrow.reputation_oracle or "").lower(): OracleWebhookTypes.reputation_oracle,
     }
