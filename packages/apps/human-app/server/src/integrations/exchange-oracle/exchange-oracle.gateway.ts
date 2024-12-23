@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import {
@@ -41,6 +41,8 @@ import {
 
 @Injectable()
 export class ExchangeOracleGateway {
+  logger = new Logger(ExchangeOracleGateway.name);
+
   constructor(
     private httpService: HttpService,
     private kvStoreGateway: KvStoreGateway,
@@ -54,8 +56,8 @@ export class ExchangeOracleGateway {
       const response = await lastValueFrom(this.httpService.request(options));
       return response.data as T;
     } catch (e) {
-      console.error(
-        `Error, while executing exchange oracle API call to ${options.url}, error details: ${e}`,
+      this.logger.error(
+        `Error, while executing exchange oracle API call to ${options.url}, error details: ${e.message}`,
       );
       throw e;
     }

@@ -37,6 +37,8 @@ import SunIconLight from '@/assets/icons/sun.svg';
 import MoonIconDark from '@/assets/icons-dark-mode/moon.svg';
 import MoonIconLight from '@/assets/icons/moon.svg';
 import { useColorMode } from '@/hooks/use-color-mode';
+import WorkHeaderDark from '@/assets/icons-dark-mode/work-header.svg';
+import WorkHeaderLight from '@/assets/icons/work-header.svg';
 
 function HomepageLogoIcon() {
   const { isDarkMode } = useColorMode();
@@ -65,6 +67,10 @@ function HumanLogoNavbarIcon() {
   ) : (
     <HumanLogoNavbarIconLight />
   );
+}
+function WorkHeaderIcon() {
+  const { isDarkMode } = useColorMode();
+  return isDarkMode ? <WorkHeaderDark /> : <WorkHeaderLight />;
 }
 function HandIcon() {
   const { isDarkMode } = useColorMode();
@@ -141,4 +147,5 @@ export {
   FiltersIcon,
   SunIcon,
   MoonIcon,
+  WorkHeaderIcon,
 };

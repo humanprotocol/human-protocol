@@ -6,22 +6,22 @@ const LEADER_FRAGMENT = gql`
     id
     address
     amountStaked
-    amountAllocated
     amountLocked
     lockedUntilTimestamp
     amountWithdrawn
     amountSlashed
-    reputation
     reward
     amountJobsProcessed
     role
     fee
     publicKey
     webhookUrl
+    website
     url
     jobTypes
     registrationNeeded
     registrationInstructions
+    reputationNetworks
   }
 `;
 

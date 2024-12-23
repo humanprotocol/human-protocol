@@ -5,7 +5,6 @@ import {
   EscrowStatus,
   EscrowUtils,
   NETWORKS,
-  StakingClient,
   StorageParams,
   Encryption,
   KVStoreKeys,
@@ -47,7 +46,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { mapJobType, parseUrl } from '../../common/utils';
+import { parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -462,6 +461,14 @@ export class JobService {
         fundAmount,
       }),
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
+      createManifest: (
+        dto: JobCvatDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount),
+    },
     [JobRequestType.IMAGE_BOXES]: {
       calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
@@ -503,6 +510,9 @@ export class JobService {
     [JobRequestType.FORTUNE]: {
       getTrustedHandlers: () => [],
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      getTrustedHandlers: () => [],
+    },
     [JobRequestType.IMAGE_BOXES]: {
       getTrustedHandlers: () => [],
     },
@@ -525,6 +535,39 @@ export class JobService {
     [JobRequestType.FORTUNE]: {
       getElementsCount: async () => 0,
       generateUrls: () => ({ dataUrl: new URL(''), gtUrl: new URL('') }),
+    },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      getElementsCount: async (urls: GenerateUrls) => {
+        const gt = (await this.storageService.downloadJsonLikeData(
+          `${urls.gtUrl.protocol}//${urls.gtUrl.host}${urls.gtUrl.pathname}`,
+        )) as any;
+        if (!gt || !gt.images || gt.images.length === 0)
+          throw new ControlledError(
+            ErrorJob.GroundThuthValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
+        const data = await listObjectsInBucket(urls.dataUrl);
+        if (!data || data.length === 0 || !data[0])
+          throw new ControlledError(
+            ErrorJob.DatasetValidationFailed,
+            HttpStatus.BAD_REQUEST,
+          );
+
+        await this.checkImageConsistency(gt.images, data);
+
+        return data.length - gt.images.length;
+      },
+      generateUrls: (
+        data: CvatDataDto,
+        groundTruth: StorageDataDto,
+      ): GenerateUrls => {
+        const requestType = JobRequestType.IMAGE_POLYGONS;
+        return {
+          dataUrl: generateBucketUrl(data.dataset, requestType),
+          gtUrl: generateBucketUrl(groundTruth, requestType),
+        };
+      },
     },
     [JobRequestType.IMAGE_BOXES]: {
       getElementsCount: async (urls: GenerateUrls) => {
@@ -656,6 +699,16 @@ export class JobService {
         return { exchangeOracle, recordingOracle, reputationOracle };
       },
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      getOracleAddresses: (): OracleAddresses => {
+        const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
+        const recordingOracle =
+          this.web3ConfigService.cvatRecordingOracleAddress;
+        const reputationOracle = this.web3ConfigService.reputationOracleAddress;
+
+        return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
     [JobRequestType.IMAGE_BOXES]: {
       getOracleAddresses: (): OracleAddresses => {
         const exchangeOracle = this.web3ConfigService.cvatExchangeOracleAddress;
@@ -720,11 +773,16 @@ export class JobService {
 
   public async createJob(
     userId: number,
-    requestType: JobRequestType,
+    jobRequestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
     let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
-    const mappedJobType = mapJobType(requestType);
+    if (!Object.values(JobRequestType).includes(jobRequestType)) {
+      throw new ControlledError(
+        ErrorJob.InvalidRequestType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     // Select network
     chainId = chainId || this.routingProtocolService.selectNetwork();
@@ -734,7 +792,7 @@ export class JobService {
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
       const selectedOracles = await this.routingProtocolService.selectOracles(
         chainId,
-        mappedJobType,
+        jobRequestType,
       );
 
       exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
@@ -744,7 +802,7 @@ export class JobService {
       // Validate if all oracles are provided
       await this.routingProtocolService.validateOracles(
         chainId,
-        mappedJobType,
+        jobRequestType,
         reputationOracle,
         exchangeOracle,
         recordingOracle,
@@ -771,7 +829,7 @@ export class JobService {
 
     const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
     const { calculateFundAmount, createManifest } =
-      this.createJobSpecificActions[requestType];
+      this.createJobSpecificActions[jobRequestType];
 
     const userBalance = await this.paymentService.getUserBalance(
       userId,
@@ -843,12 +901,12 @@ export class JobService {
     } else {
       const manifestOrigin = await createManifest(
         dto,
-        requestType,
+        jobRequestType,
         tokenFundAmount,
       );
 
       const { url, hash } = await this.uploadManifest(
-        requestType,
+        jobRequestType,
         chainId,
         manifestOrigin,
       );
@@ -862,7 +920,7 @@ export class JobService {
     jobEntity.exchangeOracle = exchangeOracle;
     jobEntity.recordingOracle = recordingOracle;
     jobEntity.userId = userId;
-    jobEntity.requestType = requestType;
+    jobEntity.requestType = jobRequestType;
     jobEntity.fee = tokenFee;
     jobEntity.fundAmount = tokenFundAmount;
     jobEntity.status = JobStatus.PENDING;
@@ -1030,7 +1088,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.SET_UP;
+    jobEntity.status = JobStatus.LAUNCHED;
     await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity;
@@ -1049,7 +1107,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.LAUNCHED;
+    jobEntity.status = JobStatus.FUNDED;
     await this.jobRepository.updateOne(jobEntity);
 
     const oracleType = this.getOracleType(jobEntity.requestType);
@@ -1133,7 +1191,7 @@ export class JobService {
           status = JobStatus.FAILED;
         }
         break;
-      case JobStatus.SET_UP:
+      case JobStatus.FUNDED:
         if (await this.isCronJobRunning(CronJobType.FundEscrow)) {
           status = JobStatus.FAILED;
         }
@@ -1338,6 +1396,53 @@ export class JobService {
     return finalResultUrl;
   }
 
+  public async downloadJobResults(
+    userId: number,
+    jobId: number,
+  ): Promise<{
+    filename: string;
+    contents: Buffer;
+  }> {
+    const jobEntity = await this.jobRepository.findOneByIdAndUserId(
+      jobId,
+      userId,
+    );
+
+    if (!jobEntity) {
+      throw new ControlledError(ErrorJob.NotFound, HttpStatus.NOT_FOUND);
+    }
+
+    if (!jobEntity.escrowAddress) {
+      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+    }
+
+    if (jobEntity.requestType === JobRequestType.FORTUNE) {
+      throw new ControlledError(
+        ErrorJob.InvalidRequestType,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const finalResultUrl = await escrowClient.getResultsUrl(
+      jobEntity.escrowAddress,
+    );
+
+    if (!finalResultUrl) {
+      throw new ControlledError(ErrorJob.ResultNotFound, HttpStatus.NOT_FOUND);
+    }
+
+    const contents = await this.storageService.downloadFile(finalResultUrl);
+    const filename = finalResultUrl.split('/').at(-1) as string;
+
+    return {
+      filename,
+      contents,
+    };
+  }
+
   public handleProcessJobFailure = async (
     jobEntity: JobEntity,
     failedReason: string,
@@ -1454,13 +1559,10 @@ export class JobService {
     const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
-    let escrow, allocation;
+    let escrow;
 
     if (escrowAddress) {
-      const stakingClient = await StakingClient.build(signer);
-
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
-      allocation = await stakingClient.getAllocation(escrowAddress);
     }
 
     const manifestData = (await this.storageService.downloadJsonLikeData(
@@ -1539,11 +1641,6 @@ export class JobService {
           failedReason: jobEntity.failedReason,
         },
         manifest: manifestDetails,
-        staking: {
-          staker: ethers.ZeroAddress,
-          allocated: 0,
-          slashed: 0,
-        },
       };
     }
 
@@ -1558,11 +1655,6 @@ export class JobService {
         failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
-      staking: {
-        staker: allocation?.staker as string,
-        allocated: Number(ethers.formatEther(allocation?.tokens || 0)),
-        slashed: 0, // TODO: Retrieve slash tokens
-      },
     };
   }
 

@@ -2,7 +2,7 @@ import { Column, Entity, Index } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { WebhookStatus } from '../../common/enums';
+import { WebhookIncomingStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'webhook_incoming' })
@@ -15,7 +15,7 @@ export class WebhookIncomingEntity extends BaseEntity {
   public escrowAddress: string;
 
   @Column({ type: 'varchar', nullable: true })
-  public resultsUrl: string;
+  public failureDetail: string;
 
   @Column({ type: 'int' })
   public retriesCount: number;
@@ -25,7 +25,7 @@ export class WebhookIncomingEntity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: WebhookStatus,
+    enum: WebhookIncomingStatus,
   })
-  public status: WebhookStatus;
+  public status: WebhookIncomingStatus;
 }

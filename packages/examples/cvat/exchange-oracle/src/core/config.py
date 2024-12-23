@@ -137,12 +137,15 @@ class CronConfig:
     track_assignments_chunk_size = int(getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
 
     track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
-    track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 5))
+    track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
     track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
+    track_escrow_validations_chunk_size = int(
+        getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1)
+    )
     track_completed_escrows_max_downloading_retries = int(
         getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
-    "Maximum number of downloading attempts per job during results downloading"
+    "Maximum number of downloading attempts per job or project during results downloading"
 
     track_completed_escrows_jobs_downloading_batch_size = int(
         getenv("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
@@ -283,6 +286,12 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
+class Development:
+    cvat_in_docker = bool(int(getenv("DEV_CVAT_IN_DOCKER", "0")))
+    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
+    cvat_local_host = getenv("DEV_CVAT_LOCAL_HOST", "localhost")
+
+
 class Environment(str, Enum):
     PRODUCTION = "production"
     DEVELOPMENT = "development"
@@ -322,6 +331,7 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
+    development_config = Development
 
     @classmethod
     def is_development_mode(cls) -> bool:

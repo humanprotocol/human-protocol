@@ -32,7 +32,7 @@ export function PageHeader({
         <Grid alignContent="center" container gap="1rem" justifyContent="start">
           <Grid
             sx={{
-              height: '70px',
+              height: '76px',
               width: '70px',
               position: 'relative',
             }}
@@ -40,7 +40,7 @@ export function PageHeader({
             <span
               style={{
                 position: 'absolute',
-                top: '50%',
+                top: '30%',
                 left: '50%',
                 transform: 'translate(-50%,-30%)',
               }}

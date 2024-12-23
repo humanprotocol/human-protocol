@@ -4,6 +4,7 @@ import {
   ExceptionFilter as IExceptionFilter,
   HttpStatus,
   Logger,
+  HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from '../errors/database';
@@ -34,6 +35,11 @@ export class ExceptionFilter implements IExceptionFilter {
         `Database error: ${exception.message}`,
         exception.stack,
       );
+      // Temp hack for the in progress exception handling refactoring
+    } else if (exception instanceof HttpException) {
+      return response
+        .status(exception.getStatus())
+        .json(exception.getResponse());
     } else {
       if (exception.statusCode === HttpStatus.BAD_REQUEST) {
         status = exception.statusCode;

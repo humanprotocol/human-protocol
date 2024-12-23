@@ -32,7 +32,7 @@
 		}
 	}
 
-	@media (max-width: 1100px) {
+	@media (max-width: 1280px) {
 		height: 62px;
 		.mobile-icon,
 		.search-header-mobile {
@@ -42,16 +42,14 @@
 		.search-header {
 			display: none;
 		}
-	}
-}
 
-.header-toolbar-search {
-	@media (max-width: 1100px) {
-		height: 118px;
-		flex-wrap: wrap;
-	}
-	.search-header-mobile {
-		width: 100%;
+    .logo-mobile {
+      margin-left: 24px;
+    }
+
+    .mobile-icon {
+      margin-right: 16px;
+    }
 	}
 }
 

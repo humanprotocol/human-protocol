@@ -1,4 +1,4 @@
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import {
   FormControl,
   InputLabel,
@@ -7,15 +7,25 @@ import {
   Select,
   SelectProps,
 } from '@mui/material';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { TOKEN_ICONS } from '../../components/Icons/chains';
 import { SUPPORTED_TOKEN_SYMBOLS } from '../../constants';
+import { NETWORK_TOKENS } from '../../constants/chains';
 
 type TokenSelectProps = SelectProps & {
   chainId: ChainId;
 };
 
 export const TokenSelect: FC<TokenSelectProps> = (props) => {
+  const availableTokens = useMemo(() => {
+    return SUPPORTED_TOKEN_SYMBOLS.filter(
+      (symbol) =>
+        NETWORK_TOKENS[props.chainId as keyof typeof NETWORK_TOKENS]?.[
+          symbol.toLowerCase()
+        ],
+    );
+  }, [props.chainId]);
+
   return (
     <FormControl fullWidth>
       <InputLabel id="token-select-label">Token</InputLabel>
@@ -35,17 +45,14 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
         }}
         {...props}
       >
-        {SUPPORTED_TOKEN_SYMBOLS.map((symbol) => {
+        {availableTokens.map((symbol) => {
           const IconComponent = TOKEN_ICONS[symbol];
+          const tokenAddress =
+            NETWORK_TOKENS[props.chainId as keyof typeof NETWORK_TOKENS]?.[
+              symbol.toLowerCase()
+            ];
           return (
-            <MenuItem
-              value={
-                (NETWORKS[props.chainId] as any)[
-                  symbol.toLowerCase() + 'Address'
-                ]
-              }
-              key={symbol}
-            >
+            <MenuItem value={tokenAddress} key={symbol}>
               {IconComponent && (
                 <ListItemIcon sx={{ color: '#320a8d' }}>
                   {IconComponent}

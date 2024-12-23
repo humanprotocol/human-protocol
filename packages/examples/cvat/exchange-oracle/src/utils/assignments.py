@@ -17,6 +17,7 @@ def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> st
         TaskTypes.image_skeletons_from_boxes,
         TaskTypes.image_boxes_from_points,
         TaskTypes.image_points,
+        TaskTypes.image_polygons,
     ]:
         query_params = "?defaultWorkspace=single_shape"
 

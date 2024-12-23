@@ -24,7 +24,7 @@ let token: Contract<typeof HMToken.abi>;
 
 const web3 = new Web3('http://127.0.0.1:8549');
 const owner = web3.eth.accounts.privateKeyToAccount(
-  `0x${process.env.PRIVATE_KEY}`
+  `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
 );
 web3.eth.defaultAccount = owner.address;
 const externalUser = '0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f';

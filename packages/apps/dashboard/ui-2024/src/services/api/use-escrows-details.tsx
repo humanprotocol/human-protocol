@@ -8,91 +8,91 @@ import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
 import { AddressDetailsLeader } from '@services/api/use-address-details';
 
 const escrowDetailsSuccessResponseSchema = z.object({
-	chainId: z.number(),
-	address: z.string(),
-	status: z.string(),
+  chainId: z.number(),
+  address: z.string(),
+  status: z.string(),
 });
 
 export type TransactionDetails = z.infer<
-	typeof escrowDetailsSuccessResponseSchema
+  typeof escrowDetailsSuccessResponseSchema
 >;
 
 const paginatedEscrowsDetailsSuccessResponseSchema = z.object({
-	address: z.string(),
-	chainId: z.number(),
-	first: z.number(),
-	skip: z.number(),
-	results: z.array(escrowDetailsSuccessResponseSchema),
+  address: z.string(),
+  chainId: z.number(),
+  first: z.number(),
+  skip: z.number(),
+  results: z.array(escrowDetailsSuccessResponseSchema),
 });
 
 export type PaginatedEscrowDetails = z.infer<
-	typeof paginatedEscrowsDetailsSuccessResponseSchema
+  typeof paginatedEscrowsDetailsSuccessResponseSchema
 >;
 
 export interface PaginatedEscrowsDetailsDto {
-	skip: number;
-	first: number;
-	chainId: number;
-	role: AddressDetailsLeader['role'];
+  skip: number;
+  first: number;
+  chainId: number;
+  role: AddressDetailsLeader['role'];
 }
 
 export function useEscrowDetails({
-	role,
+  role,
 }: {
-	role: AddressDetailsLeader['role'];
+  role: AddressDetailsLeader['role'];
 }) {
-	const { filterParams } = useWalletSearch();
-	const {
-		setLastPageIndex,
-		pagination: { page, lastPageIndex },
-		params,
-	} = useEscrowDetailsDto();
+  const { filterParams } = useWalletSearch();
+  const {
+    setLastPageIndex,
+    pagination: { page, lastPageIndex },
+    params,
+  } = useEscrowDetailsDto();
 
-	const dto: PaginatedEscrowsDetailsDto = {
-		chainId: filterParams.chainId,
-		skip: params.skip,
-		first: params.first,
-		role,
-	};
+  const dto: PaginatedEscrowsDetailsDto = {
+    chainId: filterParams.chainId,
+    skip: params.skip,
+    first: params.first,
+    role,
+  };
 
-	return useQuery({
-		queryFn: async () => {
-			const { data } = await httpService.get(
-				`${apiPaths.escrowDetails.path}/${filterParams.address}`,
-				{
-					params: dto,
-				}
-			);
+  return useQuery({
+    queryFn: async () => {
+      const { data } = await httpService.get(
+        `${apiPaths.escrowDetails.path}/${filterParams.address}`,
+        {
+          params: dto,
+        }
+      );
 
-			const validResponse = validateResponse(
-				data,
-				paginatedEscrowsDetailsSuccessResponseSchema
-			);
+      const validResponse = validateResponse(
+        data,
+        paginatedEscrowsDetailsSuccessResponseSchema
+      );
 
-			// check if last page
-			if (lastPageIndex === undefined) {
-				const { data: lastPageCheckData } = await httpService.get(
-					`${apiPaths.escrowDetails.path}/${filterParams.address}`,
-					{
-						params: {
-							...dto,
-							skip: dto.skip + validResponse.results.length,
-							first: 1,
-						},
-					}
-				);
-				const validLastPageCheckData = validateResponse(
-					lastPageCheckData,
-					paginatedEscrowsDetailsSuccessResponseSchema
-				);
+      // check if last page
+      if (lastPageIndex === undefined) {
+        const { data: lastPageCheckData } = await httpService.get(
+          `${apiPaths.escrowDetails.path}/${filterParams.address}`,
+          {
+            params: {
+              ...dto,
+              skip: dto.skip + validResponse.results.length,
+              first: 1,
+            },
+          }
+        );
+        const validLastPageCheckData = validateResponse(
+          lastPageCheckData,
+          paginatedEscrowsDetailsSuccessResponseSchema
+        );
 
-				if (validLastPageCheckData.results.length === 0) {
-					setLastPageIndex(page + 1);
-				}
-			}
+        if (validLastPageCheckData.results.length === 0) {
+          setLastPageIndex(page + 1);
+        }
+      }
 
-			return validResponse;
-		},
-		queryKey: ['useEscrowDetails', filterParams.address, dto],
-	});
+      return validResponse;
+    },
+    queryKey: ['useEscrowDetails', filterParams.address, dto],
+  });
 }

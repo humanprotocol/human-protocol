@@ -9,32 +9,52 @@ fragment TransactionFields on Transaction {
     timestamp
     value
     method
+    receiver
+    escrow
+    token
+    internalTransactions {
+      from
+      id
+      to
+      value
+      receiver
+      escrow
+      token
+      method
+    }
 }
 """
 
 
 def get_transactions_query(filter: TransactionFilter) -> str:
+    start_date = filter.start_date
+    end_date = filter.end_date
+    start_block = filter.start_block
+    end_block = filter.end_block
     from_address = filter.from_address
     to_address = filter.to_address
 
-    if from_address == to_address:
-        address_condition = f"""
+    address_condition = (
+        f"""
         {f'{{ from: $fromAddress }}' if from_address else ''}
-        {f'{{ to: $toAddress }}' if to_address else ''}
+        {f'{{ or: [{{ or: [{{ to: $toAddress }}, {{ receiver: $toAddress }}] }}, {{ internalTransactions_: {{ or: [{{ to: $toAddress }}, {{ receiver: $toAddress }}] }} }}] }}' if to_address else ''}
         """
-    else:
-        address_condition = f"""
-        {f'from: $fromAddress' if from_address else ''}
-        {f'to: $toAddress' if to_address else ''}
+        if from_address == to_address
+        else f"""
+        {f'{{ from: $fromAddress }}' if from_address else ''}
+        {f'{{ or: [{{ or: [{{ to: $toAddress }}, {{ receiver: $toAddress }}] }}, {{ internalTransactions_: {{ or: [{{ to: $toAddress }}, {{ receiver: $toAddress }}] }} }}] }}' if to_address else ''}
         """
+    )
 
     where_clause = f"""
     where: {{
-        {"or: [" + address_condition + "]," if from_address == to_address else address_condition}
-        {f'timestamp_gte: $startDate,' if filter.start_date else ''}
-        {f'timestamp_lte: $endDate,' if filter.end_date else ''}
-        {f'block_gte: $startBlock,' if filter.start_block else ''}
-        {f'block_lte: $endBlock,' if filter.end_block else ''}
+        and: [
+            {f'{{ or: [ {address_condition} ] }},' if from_address and from_address == to_address else address_condition}
+            {f'{{ timestamp_gte: $startDate }},' if start_date else ''}
+            {f'{{ timestamp_lte: $endDate }},' if end_date else ''}
+            {f'{{ block_gte: $startBlock }},' if start_block else ''}
+            {f'{{ block_lte: $endBlock }},' if end_block else ''}
+        ]
     }}
     """
 

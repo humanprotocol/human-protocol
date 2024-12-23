@@ -9,7 +9,7 @@ packages = [{include = "recording_oracle"}]
 [tool.poetry.dependencies]
 python = "^3.10, <3.13"
 fastapi = {version = "^0.115.4", extras = ["standard"]}
-uvicorn = "^0.22.0"
+uvicorn = ">=0.32.1" # post https://github.com/encode/uvicorn/pull/2397, where using several workers was fixed. Read more https://github.com/encode/uvicorn/discussions/2450
 python-dotenv = "^1.0.0"
 SQLAlchemy = "^2.0.17"
 psycopg2 = "^2.9.6"
@@ -22,10 +22,11 @@ numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
-human-protocol-sdk = "^3.0.4"
+human-protocol-sdk = ">=3.0.8b0,<3.1.0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
-cvat-sdk = "^2.21.3"
+cvat-sdk = "^2.23.1"
+cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.82.6"

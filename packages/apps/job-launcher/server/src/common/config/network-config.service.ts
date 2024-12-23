@@ -36,6 +36,7 @@ export class NetworkConfigService {
           rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
           tokens: {
             hmt: NETWORKS[ChainId.SEPOLIA]?.hmtAddress,
+            usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
           },
         },
       }),

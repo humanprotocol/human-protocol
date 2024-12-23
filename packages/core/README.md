@@ -55,12 +55,6 @@ On the other hand, it can be cancelled anytime.
 
   > Only trusted handlers can call this function.
 
-- `abort()`
-
-  Cancels the escrow, and self destruct the contract instance.
-
-  > Only trusted handlers can call this function.
-
 - `cancel()`
 
   Cancels the escrow, and sends the remaining funds to the canceler. Escrow status is changed to `Cancelled`.

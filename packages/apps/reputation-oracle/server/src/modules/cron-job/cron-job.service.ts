@@ -1,20 +1,15 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob, ErrorWebhook } from '../../common/constants/errors';
+import { ErrorCronJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { WebhookService } from '../webhook/webhook.service';
-import { EventType, WebhookStatus } from '../../common/enums/webhook';
-import { WebhookRepository } from '../webhook/webhook.repository';
-import { PayoutService } from '../payout/payout.service';
-import { ReputationService } from '../reputation/reputation.service';
-import { Web3Service } from '../web3/web3.service';
-import { EscrowClient, OperatorUtils } from '@human-protocol/sdk';
-import { WebhookDto } from '../webhook/webhook.dto';
 import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
+import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
+import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 
 @Injectable()
 export class CronJobService {
@@ -22,11 +17,9 @@ export class CronJobService {
 
   constructor(
     private readonly cronJobRepository: CronJobRepository,
-    private readonly webhookService: WebhookService,
-    private readonly reputationService: ReputationService,
-    private readonly webhookRepository: WebhookRepository,
-    private readonly payoutService: PayoutService,
-    private readonly web3Service: Web3Service,
+    private readonly webhookIncomingService: WebhookIncomingService,
+    private readonly webhookOutgoingService: WebhookOutgoingService,
+    private readonly escrowCompletionService: EscrowCompletionService,
   ) {}
 
   /**
@@ -85,140 +78,117 @@ export class CronJobService {
 
   @Cron('*/2 * * * *')
   /**
-   * Process a pending webhook job.
-   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   * Processes all pending incoming webhooks, marking them as completed upon success.
+   * Handles any errors by logging them and updating the webhook status.
+   * @returns {Promise<void>} A promise that resolves when all pending incoming webhooks have been processed.
    */
-  public async processPendingWebhooks(): Promise<void> {
+  public async processPendingIncomingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.ProcessPendingWebhook,
+      CronJobType.ProcessPendingIncomingWebhook,
     );
 
     if (isCronJobRunning) {
       return;
     }
 
-    this.logger.log('Pending webhooks START');
-    const cronJob = await this.startCronJob(CronJobType.ProcessPendingWebhook);
+    this.logger.log('Pending incoming webhooks START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ProcessPendingIncomingWebhook,
+    );
 
     try {
-      const webhookEntities = await this.webhookRepository.findByStatus(
-        WebhookStatus.PENDING,
-      );
-
-      for (const webhookEntity of webhookEntities) {
-        let resultsUrl;
-        try {
-          const { chainId, escrowAddress } = webhookEntity;
-          resultsUrl = await this.payoutService.executePayouts(
-            chainId,
-            escrowAddress,
-          );
-        } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.webhookService.handleWebhookError(webhookEntity);
-          continue;
-        }
-        webhookEntity.status = WebhookStatus.PAID;
-        webhookEntity.resultsUrl = resultsUrl;
-        webhookEntity.retriesCount = 0;
-        await this.webhookRepository.updateOne(webhookEntity);
-      }
+      await this.webhookIncomingService.processPendingIncomingWebhooks();
     } catch (e) {
       this.logger.error(e);
     }
 
-    this.logger.log('Pending webhooks STOP');
+    this.logger.log('Pending incoming webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('1-59/2 * * * *')
+  @Cron('*/2 * * * *')
   /**
-   * Process a paid webhook job.
-   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   * Processes pending escrow completion tracking to manage escrow lifecycle actions.
+   * Checks escrow status and, if appropriate, saves results and initiates payouts.
+   * Handles errors and logs detailed messages.
+   * @returns {Promise<void>} A promise that resolves when the operation is complete.
    */
-  public async processPaidWebhooks(): Promise<void> {
+  public async processPendingEscrowCompletion(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.ProcessPaidWebhook,
+      CronJobType.ProcessPendingEscrowCompletionTracking,
     );
 
     if (isCronJobRunning) {
       return;
     }
 
-    this.logger.log('Paid webhooks START');
-    const cronJob = await this.startCronJob(CronJobType.ProcessPaidWebhook);
+    this.logger.log('Pending escrow completion tracking START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ProcessPendingEscrowCompletionTracking,
+    );
 
     try {
-      const webhookEntities = await this.webhookRepository.findByStatus(
-        WebhookStatus.PAID,
-      );
-
-      for (const webhookEntity of webhookEntities) {
-        try {
-          const { chainId, escrowAddress } = webhookEntity;
-
-          await this.reputationService.assessReputationScores(
-            chainId,
-            escrowAddress,
-          );
-
-          const signer = this.web3Service.getSigner(chainId);
-          const escrowClient = await EscrowClient.build(signer);
-
-          await escrowClient.complete(escrowAddress, {
-            gasPrice: await this.web3Service.calculateGasPrice(chainId),
-          });
-
-          const webhookUrls = [
-            (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getJobLauncherAddress(escrowAddress),
-              )
-            ).webhookUrl,
-            (
-              await OperatorUtils.getLeader(
-                chainId,
-                await escrowClient.getExchangeOracleAddress(escrowAddress),
-              )
-            ).webhookUrl,
-            // Temporarily disable sending webhook to Recording Oracle
-            // (
-            //   await OperatorUtils.getLeader(
-            //     chainId,
-            //     await escrowClient.getRecordingOracleAddress(escrowAddress),
-            //   )
-            // ).webhookUrl,
-          ];
-          const webhookBody: WebhookDto = {
-            chainId,
-            escrowAddress,
-            eventType: EventType.ESCROW_COMPLETED,
-          };
-          for (const webhookUrl of webhookUrls) {
-            if (!webhookUrl) {
-              throw new ControlledError(
-                ErrorWebhook.UrlNotFound,
-                HttpStatus.NOT_FOUND,
-              );
-            }
-
-            await this.webhookService.sendWebhook(webhookUrl, webhookBody);
-          }
-        } catch (err) {
-          this.logger.error(`Error sending webhook: ${err.message}`);
-          await this.webhookService.handleWebhookError(webhookEntity);
-          continue;
-        }
-        webhookEntity.status = WebhookStatus.COMPLETED;
-
-        await this.webhookRepository.updateOne(webhookEntity);
-      }
+      await this.escrowCompletionService.processPendingEscrowCompletion();
     } catch (e) {
       this.logger.error(e);
     }
 
-    this.logger.log('Paid webhooks STOP');
+    this.logger.log('Pending escrow completion tracking STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/2 * * * *')
+  /**
+   * Processes paid escrow completion tracking, finalizing escrow operations if completed.
+   * Notifies oracles via callbacks, logs errors, and updates tracking status.
+   * @returns {Promise<void>} A promise that resolves when the paid escrow tracking has been processed.
+   */
+  public async processPaidEscrowCompletion(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessPaidEscrowCompletionTracking,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Paid escrow completion tracking START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ProcessPaidEscrowCompletionTracking,
+    );
+
+    try {
+      await this.escrowCompletionService.processPaidEscrowCompletion();
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Paid escrow completion tracking STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/2 * * * *')
+  /**
+   * Processes pending outgoing webhooks, sending requests to designated URLs.
+   * Updates each webhook's status upon success, retries or logs errors as necessary.
+   * @returns {Promise<void>} A promise that resolves once all pending outgoing webhooks have been processed.
+   */
+  public async processPendingOutgoingWebhooks(): Promise<void> {
+    if (await this.isCronJobRunning(CronJobType.ProcessPendingOutgoingWebhook))
+      return;
+
+    this.logger.log('Pending outgoing webhooks START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ProcessPendingOutgoingWebhook,
+    );
+
+    try {
+      await this.webhookOutgoingService.processPendingOutgoingWebhooks();
+    } catch (err) {
+      this.logger.error(err);
+    }
+
+    this.logger.log('Pending outgoing webhooks STOP');
     await this.completeCronJob(cronJob);
   }
 }

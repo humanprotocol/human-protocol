@@ -7,18 +7,25 @@ import {
 } from './model/jobs-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
 import { JobDiscoveryFieldName } from '../../common/enums/global-common';
 
 @Injectable()
 export class JobsDiscoveryService {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: EnvironmentConfigService,
+  ) {}
 
   async processJobsDiscovery(
     command: JobsDiscoveryParamsCommand,
   ): Promise<JobsDiscoveryResponse> {
     const allJobs = await this.getCachedJobs(command.oracleAddress);
-    const filteredJobs = this.applyFilters(allJobs || [], command.data);
+    let filteredJobs = this.applyFilters(allJobs, command.data);
+    filteredJobs = filteredJobs.filter((job) =>
+      this.configService.chainIdsEnabled.includes(job.chain_id),
+    );
 
     return paginateAndSortResults(
       filteredJobs,
@@ -81,13 +88,27 @@ export class JobsDiscoveryService {
       });
   }
 
+  static makeCacheKeyForOracle(oracleAddress: string): string {
+    return `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`;
+  }
+
   async getCachedJobs(
     oracleAddress: string,
   ): Promise<JobsDiscoveryResponseItem[]> {
-    return (
-      (await this.cacheManager.get<JobsDiscoveryResponseItem[]>(
-        `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`,
-      )) || []
-    );
+    const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
+
+    const cachedJobs = await this.cacheManager.get<
+      JobsDiscoveryResponseItem[] | undefined
+    >(cacheKey);
+
+    return cachedJobs || [];
+  }
+
+  async setCachedJobs(
+    oracleAddress: string,
+    jobs: JobsDiscoveryResponseItem[],
+  ): Promise<void> {
+    const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
+    await this.cacheManager.set(cacheKey, jobs);
   }
 }

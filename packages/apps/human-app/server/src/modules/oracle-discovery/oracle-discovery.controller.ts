@@ -10,19 +10,18 @@ import {
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OracleDiscoveryService } from './oracle-discovery.service';
 import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryDto,
-  OracleDiscoveryResponse,
+  GetOraclesCommand,
+  GetOraclesQuery,
+  DiscoveredOracle,
 } from './model/oracle-discovery.model';
 import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { plainToInstance } from 'class-transformer';
 
 @Controller()
 export class OracleDiscoveryController {
   constructor(
-    private readonly service: OracleDiscoveryService,
+    private readonly oracleDiscoveryService: OracleDiscoveryService,
     private readonly environmentConfigService: EnvironmentConfigService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
@@ -30,27 +29,20 @@ export class OracleDiscoveryController {
   @Get('/oracles')
   @ApiOperation({ summary: 'Oracles discovery' })
   @ApiOkResponse({
-    type: OracleDiscoveryResponse,
+    type: Array<DiscoveredOracle>,
     description: 'List of oracles',
   })
   @UsePipes(new ValidationPipe())
   public async getOracles(
-    @Query() dto: OracleDiscoveryDto,
-  ): Promise<OracleDiscoveryResponse[]> {
+    @Query() query: GetOraclesQuery,
+  ): Promise<DiscoveredOracle[]> {
     if (!this.environmentConfigService.jobsDiscoveryFlag) {
       throw new HttpException(
         'Oracles discovery is disabled',
         HttpStatus.FORBIDDEN,
       );
     }
-    const command = this.mapper.map(
-      dto,
-      OracleDiscoveryDto,
-      OracleDiscoveryCommand,
-    );
-    const oracles = await this.service.processOracleDiscovery(command);
-    return oracles.map((oracle) =>
-      plainToInstance(OracleDiscoveryResponse, oracle),
-    );
+    const command = this.mapper.map(query, GetOraclesQuery, GetOraclesCommand);
+    return await this.oracleDiscoveryService.getOracles(command);
   }
 }

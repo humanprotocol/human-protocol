@@ -1,14 +1,6 @@
 import { EscrowStatus } from './types';
 import { ChainId, OrderDirection } from './enums';
 
-export interface IAllocation {
-  escrowAddress: string;
-  staker: string;
-  tokens: bigint;
-  createdAt: bigint;
-  closedAt: bigint;
-}
-
 export interface IReward {
   escrowAddress: string;
   amount: bigint;
@@ -19,26 +11,28 @@ export interface ILeader {
   chainId: ChainId;
   address: string;
   amountStaked: bigint;
-  amountAllocated: bigint;
   amountLocked: bigint;
   lockedUntilTimestamp: bigint;
   amountWithdrawn: bigint;
   amountSlashed: bigint;
-  reputation: bigint;
   reward: bigint;
   amountJobsProcessed: bigint;
   role?: string;
   fee?: bigint;
   publicKey?: string;
   webhookUrl?: string;
+  website?: string;
   url?: string;
   jobTypes?: string[];
   registrationNeeded?: boolean;
   registrationInstructions?: string;
+  reputationNetworks?: string[];
 }
 
-export interface ILeaderSubgraph extends Omit<ILeader, 'jobTypes'> {
+export interface ILeaderSubgraph
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
   jobTypes?: string;
+  reputationNetworks?: { address: string }[];
 }
 
 export interface ILeadersFilter {
@@ -121,6 +115,16 @@ export interface IKVStore {
   value: string;
 }
 
+export interface InternalTransaction {
+  from: string;
+  to: string;
+  value: string;
+  method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+}
+
 export interface ITransaction {
   block: bigint;
   txHash: string;
@@ -129,6 +133,10 @@ export interface ITransaction {
   timestamp: bigint;
   value: string;
   method: string;
+  receiver?: string;
+  escrow?: string;
+  token?: string;
+  internalTransactions: InternalTransaction[];
 }
 
 export interface ITransactionsFilter extends IPagination {

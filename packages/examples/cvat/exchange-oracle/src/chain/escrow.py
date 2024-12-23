@@ -52,7 +52,7 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
             Config.encryption_config.pgp_private_key,
             passphrase=Config.encryption_config.pgp_passphrase,
         )
-        manifest_content = encryption.decrypt(manifest_content)
+        manifest_content = encryption.decrypt(manifest_content).decode("utf-8")
 
     return json.loads(manifest_content)
 

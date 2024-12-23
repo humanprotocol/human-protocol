@@ -1,4 +1,5 @@
 /* eslint-disable camelcase -- ...*/
+import { type SignInSuccessResponse } from '@/api/services/worker/sign-in/types';
 import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
 
 const accessTokenKey = btoa('access_token');
@@ -9,7 +10,11 @@ const userDataKey = btoa('extendable_user_data');
 const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
-  signIn({ access_token, refresh_token }, authType, signOutSubscription) {
+  signIn(
+    { access_token, refresh_token }: SignInSuccessResponse,
+    authType,
+    signOutSubscription
+  ) {
     browserAuthProvider.isAuthenticated = true;
     browserAuthProvider.authType = authType;
     localStorage.setItem(accessTokenKey, btoa(access_token));

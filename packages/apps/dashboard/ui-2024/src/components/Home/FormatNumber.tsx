@@ -1,33 +1,33 @@
 import { NumericFormat } from 'react-number-format';
 
 export const FormatNumber = ({
-	value,
+  value,
 }: {
-	value: number | string | undefined | null;
+  value: number | string | undefined | null;
 }) => {
-	return (
-		<NumericFormat
-			displayType="text"
-			value={value}
-			thousandsGroupStyle="thousand"
-			thousandSeparator=","
-		/>
-	);
+  return (
+    <NumericFormat
+      displayType="text"
+      value={value}
+      thousandsGroupStyle="thousand"
+      thousandSeparator=","
+    />
+  );
 };
 export const FormatNumberWithDecimals = ({
-	value,
+  value,
 }: {
-	value: number | string | undefined | null;
+  value: number | string | undefined | null;
 }) => {
-	if (value && Number(value) < 1) {
-		return value;
-	}
-	return (
-		<NumericFormat
-			displayType="text"
-			value={value}
-			thousandsGroupStyle="thousand"
-			thousandSeparator=","
-		/>
-	);
+  if (value && Number(value) < 1) {
+    return <span>{value}</span>;
+  }
+  return (
+    <NumericFormat
+      displayType="text"
+      value={value}
+      thousandsGroupStyle="thousand"
+      thousandSeparator=","
+    />
+  );
 };

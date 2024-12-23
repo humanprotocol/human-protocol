@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../README.md) • **Docs**
+[**@human-protocol/sdk**](../README.md)
 
 ***
 

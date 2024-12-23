@@ -143,7 +143,7 @@ class EscrowValidation(BaseUUID):
     chain_id = Column(Integer, Enum(Networks), nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    attempts = Column(Integer, default=0, server_default="0")
+    attempts = Column(Integer, server_default="0")
     status = Column(String, Enum(EscrowValidationStatuses), nullable=False)
     projects: Mapped[list[Project]] = relationship(
         back_populates="escrow_validation",
@@ -222,7 +222,7 @@ class User(Base):  # user does not have a UUID primary key
         return f"User. wallet_address={self.wallet_address} cvat_id={self.cvat_id}"
 
 
-class Assignment(BaseUUID):
+class Assignment(ChildOf[Job]):
     __tablename__ = "assignments"
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(

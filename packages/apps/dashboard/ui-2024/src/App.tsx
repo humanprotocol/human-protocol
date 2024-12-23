@@ -6,17 +6,17 @@ import SearchResults from '@pages/SearchResults';
 import { LeaderBoard } from '@pages/Leaderboard';
 
 const App: React.FC = () => {
-	return (
-		<Router>
-			<Routes>
-				<Route path="/" element={<Home />} />
-				<Route path="/leaderboard" element={<LeaderBoard />} />
-				<Route path="/graph" element={<Graph />} />
-				<Route path="/search/:chainId/:address" element={<SearchResults />} />
-				<Route path="*" element={<div>Not find</div>} />
-			</Routes>
-		</Router>
-	);
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/leaderboard" element={<LeaderBoard />} />
+        <Route path="/graph" element={<Graph />} />
+        <Route path="/search/:chainId/:address" element={<SearchResults />} />
+        <Route path="*" element={<div>Not find</div>} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

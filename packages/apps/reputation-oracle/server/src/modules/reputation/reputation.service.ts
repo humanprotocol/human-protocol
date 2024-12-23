@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 import {
   CVAT_VALIDATION_META_FILENAME,
@@ -11,11 +11,6 @@ import {
   SolutionError,
 } from '../../common/enums';
 import { ReputationRepository } from './reputation.repository';
-import {
-  ErrorManifest,
-  ErrorReputation,
-  ErrorResults,
-} from '../../common/constants/errors';
 import { ReputationDto } from './reputation.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
@@ -30,7 +25,7 @@ import { getRequestType } from '../../common/utils';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
-import { ControlledError } from '../../common/errors/controlled';
+import { ReputationError, ReputationErrorMessage } from './reputation.error';
 
 @Injectable()
 export class ReputationService {
@@ -58,14 +53,9 @@ export class ReputationService {
     const escrowClient = await EscrowClient.build(signer);
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-    if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
-    const manifest = await this.storageService.download(manifestUrl);
+    const manifest =
+      await this.storageService.downloadJsonLikeData(manifestUrl);
 
     const requestType = getRequestType(manifest);
 
@@ -150,6 +140,13 @@ export class ReputationService {
         manifest: CvatManifestDto,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
+    [JobRequestType.IMAGE_POLYGONS]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: CvatManifestDto,
+      ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
+    },
   };
 
   private async processFortune(
@@ -160,14 +157,8 @@ export class ReputationService {
     const escrowClient = await EscrowClient.build(signer);
 
     const finalResultsUrl = await escrowClient.getResultsUrl(escrowAddress);
-    const finalResults = await this.storageService.download(finalResultsUrl);
-
-    if (finalResults.length === 0) {
-      throw new ControlledError(
-        ErrorResults.NoResultsHaveBeenVerified,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const finalResults =
+      await this.storageService.downloadJsonLikeData(finalResultsUrl);
 
     // Assess reputation scores for workers based on the final results of a job.
     // Decreases or increases worker reputation based on the success or failure of their contributions.
@@ -202,17 +193,10 @@ export class ReputationService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: CvatAnnotationMeta = await this.storageService.download(
-      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
-    );
-
-    // If annotation meta does not exist
-    if (annotations && Array.isArray(annotations) && annotations.length === 0) {
-      throw new ControlledError(
-        ErrorResults.NoAnnotationsMetaFound,
-        HttpStatus.BAD_REQUEST,
+    const annotations: CvatAnnotationMeta =
+      await this.storageService.downloadJsonLikeData(
+        `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
       );
-    }
 
     // Assess reputation scores for workers based on the annoation quality.
     // Decreases or increases worker reputation based on comparison annoation quality to minimum threshold.
@@ -336,6 +320,7 @@ export class ReputationService {
         chainId,
         address,
         reputation: ReputationLevel.HIGH,
+        role: ReputationEntityType.REPUTATION_ORACLE,
       };
     }
 
@@ -346,9 +331,10 @@ export class ReputationService {
       );
 
     if (!reputationEntity) {
-      throw new ControlledError(
-        ErrorReputation.NotFound,
-        HttpStatus.BAD_REQUEST,
+      throw new ReputationError(
+        ReputationErrorMessage.NOT_FOUND,
+        chainId,
+        address,
       );
     }
 
@@ -356,6 +342,7 @@ export class ReputationService {
       chainId: reputationEntity.chainId,
       address: reputationEntity.address,
       reputation: this.getReputationLevel(reputationEntity.reputationPoints),
+      role: reputationEntity.type,
     };
   }
 
@@ -394,6 +381,7 @@ export class ReputationService {
       chainId: reputation.chainId,
       address: reputation.address,
       reputation: this.getReputationLevel(reputation.reputationPoints),
+      role: reputation.type,
     }));
   }
 }

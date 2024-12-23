@@ -44,17 +44,33 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
     match webhook.event_type:
         case RecordingOracleEventTypes.job_completed:
-            chunk_size = CronConfig.process_accepted_projects_chunk_size
+            escrow_validation = cvat_db_service.get_escrow_validation_by_escrow_address(
+                db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+            )
+            if (
+                not escrow_validation
+                or escrow_validation.status != EscrowValidationStatuses.in_progress
+            ):
+                logger.error(
+                    "Unexpected event {} received for the escrow. "
+                    "There is no active validation now, ignoring (escrow_address={}) ".format(
+                        webhook.event_type,
+                        webhook.escrow_address,
+                    )
+                )
+                return
+
             project_ids = cvat_db_service.get_project_cvat_ids_by_escrow_address(
                 db_session, webhook.escrow_address
             )
             if not project_ids:
                 logger.error(
-                    f"Unexpected event {webhook.event_type} received for an unknown project, "
+                    f"Unexpected event {webhook.event_type} received for an unknown escrow, "
                     f"ignoring (escrow_address={webhook.escrow_address})"
                 )
                 return
 
+            chunk_size = CronConfig.process_accepted_projects_chunk_size
             for ids_chunk in take_by(project_ids, chunk_size):
                 projects_chunk = cvat_db_service.get_projects_by_cvat_ids(
                     db_session, ids_chunk, for_update=True, limit=chunk_size
@@ -82,6 +98,12 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
 
+                cvat_db_service.touch_final_assignments(
+                    db_session,
+                    cvat_project_ids=[p.cvat_id for p in projects_chunk],
+                    touch_parents=True,
+                )
+
             cvat_db_service.update_escrow_validation(
                 db_session,
                 webhook.escrow_address,
@@ -91,6 +113,22 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
 
         case RecordingOracleEventTypes.submission_rejected:
             event = RecordingOracleEvent_SubmissionRejected.model_validate(webhook.event_data)
+
+            escrow_validation = cvat_db_service.get_escrow_validation_by_escrow_address(
+                db_session, escrow_address=webhook.escrow_address, chain_id=webhook.chain_id
+            )
+            if (
+                not escrow_validation
+                or escrow_validation.status != EscrowValidationStatuses.in_progress
+            ):
+                logger.error(
+                    "Unexpected event {} received for the escrow. "
+                    "There is no active validation now, ignoring (escrow_address={}) ".format(
+                        webhook.event_type,
+                        webhook.escrow_address,
+                    )
+                )
+                return
 
             rejected_assignments = cvat_db_service.get_assignments_by_id(
                 db_session, [t.assignment_id for t in event.assignments]
@@ -145,6 +183,26 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                         )
                     )
                     cvat_db_service.update_project_status(db_session, project.id, new_status)
+
+            # Mark all the remaining projects completed
+            cvat_db_service.update_project_statuses_by_escrow_address(
+                db_session,
+                escrow_address=webhook.escrow_address,
+                chain_id=webhook.chain_id,
+                status=ProjectStatuses.completed,
+                included_statuses=[ProjectStatuses.validation],
+            )
+
+            # TODO: need to update assignments,
+            # but there is no special db state for validated assignments
+
+            # TODO: maybe delete instead
+            cvat_db_service.update_escrow_validation(
+                db_session,
+                webhook.escrow_address,
+                webhook.chain_id,
+                status=EscrowValidationStatuses.completed,
+            )
 
         case _:
             raise AssertionError(f"Unknown recording oracle event {webhook.event_type}")

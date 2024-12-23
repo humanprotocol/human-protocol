@@ -1,12 +1,14 @@
+import _ from 'lodash';
+import { ChainId, IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import {
-  OracleDiscoveryCommand,
-  OracleDiscoveryResponse,
-} from './model/oracle-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { IOperator, OperatorUtils, Role } from '@human-protocol/sdk';
+import {
+  DiscoveredOracle,
+  GetOraclesCommand,
+} from './model/oracle-discovery.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { KvStoreGateway } from '../../integrations/kv-store/kv-store.gateway';
 
 @Injectable()
 export class OracleDiscoveryService {
@@ -15,92 +17,143 @@ export class OracleDiscoveryService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: EnvironmentConfigService,
+    private kvStoreGateway: KvStoreGateway,
   ) {}
 
-  async processOracleDiscovery(
-    command: OracleDiscoveryCommand,
-  ): Promise<OracleDiscoveryResponse[]> {
-    const address = this.configService.reputationOracleAddress;
-    const chainIds = this.configService.chainIdsEnabled;
-    const oraclesForChainIds = await Promise.all(
-      chainIds.map(async (chainId) =>
-        this.findOraclesByChainId(chainId, address),
-      ),
-    );
+  async getOracles(command: GetOraclesCommand): Promise<DiscoveredOracle[]> {
+    const oracles = await this.discoverOracles();
 
-    const filteredOracles: OracleDiscoveryResponse[] = [];
-    for (const oraclesForChainId of oraclesForChainIds) {
-      for (const oracle of oraclesForChainId) {
-        if (command.selectedJobTypes?.length) {
-          // Keep only oracles that have at least one selected job type
-          const oracleJobTypesSet = new Set(oracle.jobTypes || []);
-          let oracleHasSomeSelectedJobType = false;
-          for (const selectedJobType of command.selectedJobTypes) {
-            if (oracleJobTypesSet.has(selectedJobType)) {
-              oracleHasSomeSelectedJobType = true;
-              break;
-            }
-          }
-          if (!oracleHasSomeSelectedJobType) {
-            continue;
-          }
-        }
-
-        filteredOracles.push(oracle);
-      }
+    if (!command.selectedJobTypes?.length) {
+      return oracles;
     }
 
-    return filteredOracles;
+    const selectedJobTypesSet = new Set(command.selectedJobTypes);
+    return oracles.filter((oracle) =>
+      oracle.jobTypes.some((jobType) => selectedJobTypesSet.has(jobType)),
+    );
   }
 
-  private async findOraclesByChainId(
-    chainId: string,
-    address: string,
-  ): Promise<OracleDiscoveryResponse[]> {
+  async discoverOracles(): Promise<DiscoveredOracle[]> {
+    const discoveryPromises = [];
+    for (const enabledChainId of this.configService.chainIdsEnabled) {
+      discoveryPromises.push(this.discoverOraclesForChain(enabledChainId));
+    }
+
+    const oraclesDiscoveredForChains = await Promise.all(discoveryPromises);
+
+    return oraclesDiscoveredForChains.flat();
+  }
+
+  private async discoverOraclesForChain(
+    chainId: ChainId,
+  ): Promise<DiscoveredOracle[]> {
     try {
-      const cachedOracles: OracleDiscoveryResponse[] | undefined =
-        await this.cacheManager.get(chainId);
+      const cacheKey = chainId.toString();
+
+      const cachedOracles = await this.cacheManager.get<
+        DiscoveredOracle[] | undefined
+      >(cacheKey);
 
       if (cachedOracles) {
         return cachedOracles;
       }
 
-      const operators: IOperator[] =
-        await OperatorUtils.getReputationNetworkOperators(
-          Number(chainId),
-          address,
-          Role.ExchangeOracle,
+      const reputationOracleAddress =
+        this.configService.reputationOracleAddress;
+
+      const reputationOracleJobTypesValue =
+        await this.kvStoreGateway.getJobTypesByAddress(
+          chainId,
+          reputationOracleAddress,
         );
 
-      const oraclesWithRetryData: OracleDiscoveryResponse[] = [];
-      for (const operator of operators) {
-        const isOperatorValid = !!operator.url;
+      if (!reputationOracleJobTypesValue) {
+        return [];
+      }
+      const reputationOracleJobTypes = reputationOracleJobTypesValue.split(',');
 
-        if (isOperatorValid) {
-          oraclesWithRetryData.push(
-            new OracleDiscoveryResponse(
-              operator.address,
+      const exchangeOracles = await OperatorUtils.getReputationNetworkOperators(
+        chainId,
+        reputationOracleAddress,
+        Role.ExchangeOracle,
+      );
+
+      const discoveredOracles: DiscoveredOracle[] = [];
+      for (const exchangeOracle of exchangeOracles) {
+        if (
+          OracleDiscoveryService.checkExpectationsOfDiscoveredOracle(
+            exchangeOracle,
+            reputationOracleJobTypes,
+          )
+        ) {
+          discoveredOracles.push(
+            new DiscoveredOracle({
+              address: exchangeOracle.address,
+              role: exchangeOracle.role,
+              url: exchangeOracle.url,
+              jobTypes: exchangeOracle.jobTypes,
+              registrationNeeded: exchangeOracle.registrationNeeded,
+              registrationInstructions: exchangeOracle.registrationInstructions,
               chainId,
-              operator.role,
-              operator.url,
-              operator.jobTypes,
-              operator.registrationNeeded,
-              operator.registrationInstructions,
-            ),
+            }),
           );
         }
       }
 
       await this.cacheManager.set(
-        chainId,
-        oraclesWithRetryData,
+        cacheKey,
+        discoveredOracles,
         this.configService.cacheTtlOracleDiscovery,
       );
 
-      return oraclesWithRetryData;
+      return discoveredOracles;
     } catch (error) {
-      this.logger.error(`Error processing chainId ${chainId}:`, error);
+      this.logger.error(
+        `Failed to discover oracles for chain '${chainId}':`,
+        error,
+      );
       return [];
     }
+  }
+
+  static checkExpectationsOfDiscoveredOracle(
+    operator: IOperator,
+    possibleJobTypes: string[],
+  ): operator is DiscoveredOracle {
+    if (!operator.url) {
+      return false;
+    }
+
+    if (_.intersection(operator.jobTypes, possibleJobTypes).length === 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async updateOracleInCache(
+    oracleWithUpdates: DiscoveredOracle,
+  ): Promise<void> {
+    const cacheKey = oracleWithUpdates.chainId.toString();
+
+    const cachedOracles = await this.cacheManager.get<
+      DiscoveredOracle[] | undefined
+    >(cacheKey);
+
+    if (!cachedOracles) {
+      return;
+    }
+
+    const updatedOracles = cachedOracles.map((cachedOracle) =>
+      cachedOracle.address === oracleWithUpdates.address
+        ? oracleWithUpdates
+        : cachedOracle,
+    );
+
+    await this.cacheManager.set(
+      cacheKey,
+      updatedOracles,
+      this.configService.cacheTtlOracleDiscovery,
+    );
   }
 }

@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -20,21 +20,25 @@
 
 ### getLeader()
 
-> `static` **getLeader**(`chainId`, `address`): `Promise`\<`ILeader`\>
+> `static` **getLeader**(`chainId`, `address`): `Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)\>
 
 This function returns the leader data for the given address.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+##### chainId
 
-• **address**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+##### address
+
+`string`
 
 Leader address.
 
 #### Returns
 
-`Promise`\<`ILeader`\>
+`Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)\>
 
 Returns the leader details.
 
@@ -48,25 +52,27 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ***
 
 ### getLeaders()
 
-> `static` **getLeaders**(`filter`): `Promise`\<`ILeader`[]\>
+> `static` **getLeaders**(`filter`): `Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)[]\>
 
 This function returns all the leader details of the protocol.
 
 #### Parameters
 
-• **filter**: `ILeadersFilter`
+##### filter
+
+[`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
 
 Filter for the leaders.
 
 #### Returns
 
-`Promise`\<`ILeader`[]\>
+`Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)[]\>
 
 Returns an array with all the leader details.
 
@@ -83,31 +89,37 @@ const leaders = await OperatorUtils.getLeaders(filter);
 
 #### Defined in
 
-[operator.ts:99](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L99)
+[operator.ts:108](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L108)
 
 ***
 
 ### getReputationNetworkOperators()
 
-> `static` **getReputationNetworkOperators**(`chainId`, `address`, `role`?): `Promise`\<`IOperator`[]\>
+> `static` **getReputationNetworkOperators**(`chainId`, `address`, `role`?): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
 Retrieves the reputation network operators of the specified address.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+##### chainId
 
-• **address**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+##### address
+
+`string`
 
 Address of the reputation oracle.
 
-• **role?**: `string`
+##### role?
+
+`string`
 
 (Optional) Role of the operator.
 
 #### Returns
 
-`Promise`\<`IOperator`[]\>
+`Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
 - Returns an array of operator details.
 
@@ -121,27 +133,31 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-[operator.ts:151](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L151)
+[operator.ts:172](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L172)
 
 ***
 
 ### getRewards()
 
-> `static` **getRewards**(`chainId`, `slasherAddress`): `Promise`\<`IReward`[]\>
+> `static` **getRewards**(`chainId`, `slasherAddress`): `Promise`\<[`IReward`](../../interfaces/interfaces/IReward.md)[]\>
 
 This function returns information about the rewards for a given slasher address.
 
 #### Parameters
 
-• **chainId**: `ChainId`
+##### chainId
 
-• **slasherAddress**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+##### slasherAddress
+
+`string`
 
 Slasher address.
 
 #### Returns
 
-`Promise`\<`IReward`[]\>
+`Promise`\<[`IReward`](../../interfaces/interfaces/IReward.md)[]\>
 
 Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
 
@@ -155,4 +171,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
-[operator.ts:201](https://github.com/humanprotocol/human-protocol/blob/95ed623c67878973c127c8529a78774329277e86/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L201)
+[operator.ts:222](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L222)

@@ -65,6 +65,7 @@ export class OperatorUtils {
     }
 
     let jobTypes: string[] = [];
+    let reputationNetworks: string[] = [];
 
     if (typeof leader.jobTypes === 'string') {
       jobTypes = leader.jobTypes.split(',');
@@ -72,9 +73,17 @@ export class OperatorUtils {
       jobTypes = leader.jobTypes;
     }
 
+    if (leader.reputationNetworks && Array.isArray(leader.reputationNetworks)) {
+      reputationNetworks = leader.reputationNetworks.map(
+        (network) => network.address
+      );
+    }
+
     return {
       ...leader,
       jobTypes,
+      reputationNetworks,
+      chainId,
     };
   }
 
@@ -118,6 +127,7 @@ export class OperatorUtils {
     leaders_data = leaders_data.concat(
       leaders.map((leader) => {
         let jobTypes: string[] = [];
+        let reputationNetworks: string[] = [];
 
         if (typeof leader.jobTypes === 'string') {
           jobTypes = leader.jobTypes.split(',');
@@ -125,9 +135,20 @@ export class OperatorUtils {
           jobTypes = leader.jobTypes;
         }
 
+        if (
+          leader.reputationNetworks &&
+          Array.isArray(leader.reputationNetworks)
+        ) {
+          reputationNetworks = leader.reputationNetworks.map(
+            (network) => network.address
+          );
+        }
+
         return {
           ...leader,
           jobTypes,
+          reputationNetworks,
+          chainId: filter.chainId,
         };
       })
     );

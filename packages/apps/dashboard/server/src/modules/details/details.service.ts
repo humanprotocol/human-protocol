@@ -1,5 +1,4 @@
 import { plainToInstance } from 'class-transformer';
-import { MainnetsId } from '../../common/utils/constants';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ChainId,
@@ -9,6 +8,7 @@ import {
   IEscrowsFilter,
   Role,
   NETWORKS,
+  ILeader,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
@@ -21,6 +21,8 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworksService } from '../networks/networks.service';
+import { OracleRole } from '../../common/enums/roles';
 
 @Injectable()
 export class DetailsService {
@@ -28,6 +30,7 @@ export class DetailsService {
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly httpService: HttpService,
+    private readonly networksService: NetworksService,
     private readonly networkConfig: NetworkConfigService,
   ) {}
 
@@ -84,7 +87,6 @@ export class DetailsService {
     first: number,
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
-    // TODO: Switch to fetch all transactions related to this wallet address once SDK is changed
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,
@@ -93,13 +95,13 @@ export class DetailsService {
       skip,
     });
     const result = transactions.map((transaction) => {
-      const transcationPaginationObject: TransactionPaginationDto =
+      const transactionPaginationObject: TransactionPaginationDto =
         plainToInstance(
           TransactionPaginationDto,
           { ...transaction, currentAddress: address },
           { excludeExtraneousValues: true },
         );
-      return transcationPaginationObject;
+      return transactionPaginationObject;
     });
 
     return result;
@@ -147,72 +149,40 @@ export class DetailsService {
     return result;
   }
 
-  public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
+  public async getLeadersByChainId(
+    chainId?: ChainId,
+    take?: number,
+  ): Promise<LeaderDto[]> {
     const chainIds = !chainId
-      ? (Object.values(MainnetsId).filter(
-          (value) => typeof value === 'number',
-        ) as number[])
+      ? await this.networksService.getOperatingNetworks()
       : [chainId];
 
-    const leadersByRole: { [role: string]: LeaderDto } = {};
-
+    let allLeadersData: ILeader[] = [];
     for (const id of chainIds) {
       const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-
-      for (const leaderData of leadersData) {
-        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-          excludeExtraneousValues: true,
-        });
-        leaderDto.chainId = id;
-
-        const role = leaderDto.role;
-
-        if (Object.values(Role).includes(role)) {
-          if (
-            !leadersByRole[role] ||
-            BigInt(leaderDto.amountStaked) >
-              BigInt(leadersByRole[role].amountStaked)
-          ) {
-            leadersByRole[role] = leaderDto;
-          }
-        }
-      }
+      allLeadersData = allLeadersData.concat(
+        leadersData.filter((leader) => leader.amountStaked > 0 && leader.role),
+      );
     }
 
-    const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(Object.values(leadersByRole), reputations);
-
-    return Object.values(leadersByRole);
-  }
-
-  public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
-    const chainIds = !chainId
-      ? (Object.values(MainnetsId).filter(
-          (value) => typeof value === 'number',
-        ) as number[])
-      : [chainId];
-
-    const allLeaders: LeaderDto[] = [];
+    allLeadersData.sort((a, b) =>
+      BigInt(a.amountStaked) >= BigInt(b.amountStaked) ? -1 : 1,
+    );
+    if (take && take > 0) {
+      allLeadersData = allLeadersData.slice(0, take);
+    }
+    const leaders = allLeadersData.map((leader) =>
+      plainToInstance(LeaderDto, leader, {
+        excludeExtraneousValues: true,
+      }),
+    );
 
     for (const id of chainIds) {
-      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-
-      for (const leaderData of leadersData) {
-        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-          excludeExtraneousValues: true,
-        });
-        leaderDto.chainId = id;
-
-        if (leaderDto.role) {
-          allLeaders.push(leaderDto);
-        }
-      }
+      const reputations = await this.fetchReputations(id);
+      this.assignReputationsToLeaders(leaders, reputations, id);
     }
 
-    const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(allLeaders, reputations);
-
-    return allLeaders;
+    return leaders;
   }
 
   private async fetchReputation(
@@ -237,21 +207,21 @@ export class DetailsService {
     }
   }
 
-  private async fetchReputations(): Promise<
-    { address: string; reputation: string }[]
-  > {
+  private async fetchReputations(
+    chainId: ChainId,
+  ): Promise<{ address: string; reputation: string }[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
           this.configService.reputationSource + '/reputation',
           {
             params: {
-              chain_id: ChainId.POLYGON,
+              chain_id: chainId,
               roles: [
-                'JOB_LAUNCHER',
-                'EXCHANGE_ORACLE',
-                'RECORDING_ORACLE',
-                'REPUTATION_ORACLE',
+                OracleRole.JOB_LAUNCHER,
+                OracleRole.EXCHANGE_ORACLE,
+                OracleRole.RECORDING_ORACLE,
+                OracleRole.REPUTATION_ORACLE,
               ],
             },
           },
@@ -259,7 +229,10 @@ export class DetailsService {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Error fetching reputations:', error);
+      this.logger.error(
+        `Error fetching reputations for chain id ${chainId}`,
+        error,
+      );
       return [];
     }
   }
@@ -267,15 +240,19 @@ export class DetailsService {
   private assignReputationsToLeaders(
     leaders: LeaderDto[],
     reputations: { address: string; reputation: string }[],
+    chainId: ChainId,
   ) {
     const reputationMap = new Map(
       reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
     );
-    leaders.forEach((leader) => {
-      const reputation = reputationMap.get(leader.address.toLowerCase());
-      if (reputation) {
-        leader.reputation = reputation;
-      }
-    });
+
+    leaders
+      .filter((leader) => leader.chainId === chainId)
+      .forEach((leader) => {
+        const reputation = reputationMap.get(leader.address.toLowerCase());
+        if (reputation) {
+          leader.reputation = reputation;
+        }
+      });
   }
 }

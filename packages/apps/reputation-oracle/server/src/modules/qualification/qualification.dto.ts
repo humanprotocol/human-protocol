@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsDateString,
   IsEthereumAddress,
-  IsEmail,
 } from 'class-validator';
 
 export class QualificationDto {
@@ -38,15 +37,9 @@ export class AssignQualificationDto {
   @IsString()
   public reference: string;
 
-  @ApiPropertyOptional({ name: 'worker_addresses' })
-  @IsOptional()
+  @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
-  public workerAddresses?: string[];
-
-  @ApiPropertyOptional({ name: 'worker_emails' })
-  @IsOptional()
-  @IsEmail({}, { each: true })
-  public workerEmails?: string[];
+  public workerAddresses: string[];
 }
 
 export class UnassignQualificationDto {
@@ -54,13 +47,7 @@ export class UnassignQualificationDto {
   @IsString()
   public reference: string;
 
-  @ApiPropertyOptional({ name: 'worker_addresses' })
-  @IsOptional()
+  @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
-  public workerAddresses?: string[];
-
-  @ApiPropertyOptional({ name: 'worker_emails' })
-  @IsOptional()
-  @IsEmail({}, { each: true })
-  public workerEmails?: string[];
+  public workerAddresses: string[];
 }
