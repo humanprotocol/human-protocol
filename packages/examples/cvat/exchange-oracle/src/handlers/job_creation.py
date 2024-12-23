@@ -33,13 +33,13 @@ from src.core.config import Config
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
-from src.log import ROOT_LOGGER_NAME, format_sequence
+from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
-from src.utils.logging import NullLogger, get_function_logger
+from src.utils.logging import NullLogger, format_sequence, get_function_logger
 from src.utils.zip_archive import write_dir_to_zip_archive
 
 if TYPE_CHECKING:

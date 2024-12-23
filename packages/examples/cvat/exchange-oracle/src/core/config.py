@@ -301,10 +301,16 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
-class Development:
-    cvat_in_docker = bool(int(os.environ.get("DEV_CVAT_IN_DOCKER", "0")))
-    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
-    cvat_local_host = os.environ.get("DEV_CVAT_LOCAL_HOST", "localhost")
+class DevelopmentConfig:
+    cvat_in_docker = bool(int(os.environ.get("DEV_CVAT_IN_DOCKER", "1")))
+
+    exchange_oracle_host = os.environ.get("DEV_EXCHANGE_ORACLE_HOST", "172.22.0.1")
+    """
+    Might be `host.docker.internal` or `172.22.0.1` if CVAT is running in Docker.
+
+    Remember to allow this host via:
+    SMOKESCREEN_OPTS="--allow-address=<eo host>" docker compose ...
+    """
 
 
 class Environment(str, Enum):
@@ -346,7 +352,7 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
-    development_config = Development
+    development_config = DevelopmentConfig
 
     @classmethod
     def is_development_mode(cls) -> bool:
