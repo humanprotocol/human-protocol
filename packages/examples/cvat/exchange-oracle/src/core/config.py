@@ -139,9 +139,7 @@ class CronConfig:
     track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
     track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
     track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
-    track_escrow_validations_chunk_size = int(
-        getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1)
-    )
+    track_escrow_validations_chunk_size = int(getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1))
     track_completed_escrows_max_downloading_retries = int(
         getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
