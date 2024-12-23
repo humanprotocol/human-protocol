@@ -3,8 +3,6 @@ import {
   EscrowFactory__factory,
   HMToken,
   HMToken__factory,
-  RewardPool,
-  RewardPool__factory,
   Staking,
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
@@ -23,7 +21,6 @@ import {
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
 } from './error';
-import { IAllocation } from './interfaces';
 import { NetworkData } from './types';
 import { throwError } from './utils';
 
@@ -100,13 +97,12 @@ export class StakingClient extends BaseEthersClient {
   public tokenContract: HMToken;
   public stakingContract: Staking;
   public escrowFactoryContract: EscrowFactory;
-  public rewardPoolContract: RewardPool;
 
   /**
    * **StakingClient constructor**
    *
    * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {NetworkData} network - The network information required to connect to the Staking contract
+   * @param {NetworkData} networkData - The network information required to connect to the Staking contract
    */
   constructor(runner: ContractRunner, networkData: NetworkData) {
     super(runner, networkData);
@@ -125,18 +121,12 @@ export class StakingClient extends BaseEthersClient {
       networkData.hmtAddress,
       runner
     );
-
-    this.rewardPoolContract = RewardPool__factory.connect(
-      networkData.rewardPoolAddress,
-      this.runner
-    );
   }
 
   /**
    * Creates an instance of StakingClient from a Runner.
    *
    * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
-   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    *
    * @returns {Promise<StakingClient>} - An instance of StakingClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
@@ -360,7 +350,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * @param {string} slasher Wallet address from who requested the slash
    * @param {string} staker Wallet address from who is going to be slashed
-   * @param {string} escrowAddress Address of the escrow which allocation will be slashed
+   * @param {string} escrowAddress Address of the escrow that the slash is made
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @param {bigint} amount Amount in WEI of tokens to unstake.
    * @returns Returns void if successful. Throws error if any.
@@ -421,179 +411,6 @@ export class StakingClient extends BaseEthersClient {
       ).wait();
 
       return;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function allocates a portion of the staked tokens to a specific escrow.
-   *
-   * > Must have tokens staked
-   *
-   * @param {string} escrowAddress Address of the escrow contract to allocate in.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @param {bigint} amount Amount in WEI of tokens to allocate.
-   * @returns Returns void if successful. Throws error if any.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { ethers, Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
-   * await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
-   * ```
-   */
-  @requiresSigner
-  public async allocate(
-    escrowAddress: string,
-    amount: bigint,
-    txOptions: Overrides = {}
-  ): Promise<void> {
-    if (typeof amount !== 'bigint') {
-      throw ErrorInvalidStakingValueType;
-    }
-
-    if (amount < 0n) {
-      throw ErrorInvalidStakingValueSign;
-    }
-
-    await this.checkValidEscrow(escrowAddress);
-
-    try {
-      await (
-        await this.stakingContract.allocate(escrowAddress, amount, txOptions)
-      ).wait();
-      return;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function drops the allocation from a specific escrow.
-   *
-   * > The escrow must have allocation
-   * > The escrow must be cancelled or completed.
-   *
-   * @param {string} escrowAddress Address of the escrow contract to close allocation from.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
-   * ```
-   */
-  @requiresSigner
-  public async closeAllocation(
-    escrowAddress: string,
-    txOptions: Overrides = {}
-  ): Promise<void> {
-    await this.checkValidEscrow(escrowAddress);
-
-    try {
-      await (
-        await this.stakingContract.closeAllocation(escrowAddress, txOptions)
-      ).wait();
-      return;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function drops the allocation from a specific escrow.
-   *
-   * > The escrow must have rewards added
-   *
-   * @param {string} escrowAddress Escrow address from which rewards are distributed.
-   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns Returns void if successful. Throws error if any.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { Wallet, providers } from 'ethers';
-   * import { StakingClient } from '@human-protocol/sdk';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const signer = new Wallet(privateKey, provider);
-   * const stakingClient = await StakingClient.build(signer);
-   *
-   * await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
-   * ```
-   */
-  @requiresSigner
-  public async distributeReward(
-    escrowAddress: string,
-    txOptions: Overrides = {}
-  ): Promise<void> {
-    await this.checkValidEscrow(escrowAddress);
-
-    try {
-      (
-        await this.rewardPoolContract.distributeReward(escrowAddress, txOptions)
-      ).wait();
-      return;
-    } catch (e) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * This function returns information about the allocation of the specified escrow.
-   *
-   * @param {string} escrowAddress Escrow address from which we want to get allocation information.
-   * @returns {IAllocation} Returns allocation info if exists.
-   *
-   *
-   * **Code example**
-   *
-   * ```ts
-   * import { StakingClient } from '@human-protocol/sdk';
-   * import { providers } from 'ethers';
-   *
-   * const rpcUrl = 'YOUR_RPC_URL';
-   *
-   * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const stakingClient = await StakingClient.build(provider);
-   *
-   * const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
-   * ```
-   */
-  public async getAllocation(escrowAddress: string): Promise<IAllocation> {
-    await this.checkValidEscrow(escrowAddress);
-
-    try {
-      const result = await this.stakingContract.getAllocation(escrowAddress);
-      return result;
     } catch (e) {
       return throwError(e);
     }

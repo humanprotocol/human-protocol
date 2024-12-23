@@ -9,7 +9,7 @@ from datetime import datetime
 from itertools import islice
 from typing import Any, NamedTuple
 
-from sqlalchemy import case, delete, func, literal, select, update
+from sqlalchemy import delete, func, literal, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,7 @@ from src.core.types import (
     TaskTypes,
 )
 from src.db import Base, ChildOf
+from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import (
@@ -197,51 +198,132 @@ def complete_projects_with_completed_tasks(session: Session) -> list[int]:
     return [row.cvat_id for row in result.all()]
 
 
-def create_escrow_validations(session: Session):
-    # if escrow have projects with `validation` AND `completed` statuses
-    # it means, some jobs were rejected and re-annotated
-    active_statuses = [
-        ProjectStatuses.annotation,
-        ProjectStatuses.completed,
-        ProjectStatuses.validation,
-    ]
-    # excluding escrows where all projects are still have `validation` status
-    at_least_one_is_completed = (
-        func.sum(case((Project.status == ProjectStatuses.completed, 1), else_=0)) > 0
-    )
-    all_completed_or_validation = (
-        func.sum(
-            case(
-                (Project.status.in_([ProjectStatuses.completed, ProjectStatuses.validation]), 1),
-                else_=0,
-            )
-        )
-        == func.count()
-        # TODO: this is a draft implementation.
-        # Probably, better to check against the known job count from the escrow creation
-    )
-    select_stmt = (
+def create_escrow_validations(session: Session, *, limit: int = 100) -> list[tuple[str, str, int]]:
+    if db_engine.driver != "psycopg2":
+        # Some of the code is likely to be only Postgres-related, e.g. UPDATE ... RETURNING as CTE
+        raise NotImplementedError(f"DB engine {db_engine.driver} not supported in this operation")
+
+    project_counts_per_escrow = (
         select(
             Project.escrow_address,
             Project.chain_id,
-            literal(EscrowValidationStatuses.awaiting).label("status"),
+            func.count().label("total_projects"),
         )
-        .where(Project.status.in_(active_statuses))
+        .where(Project.status != ProjectStatuses.creation)
         .group_by(Project.escrow_address, Project.chain_id)
-        .having(at_least_one_is_completed, all_completed_or_validation)
+    ).subquery()  # TODO: store counts in escrow creations or in a new "escrows" table
+    # must not lock and doesn't need a lock (this information is static for created escrows)
+
+    working_set = (
+        select(Project.id, Project.escrow_address, Project.chain_id, Project.status)
+        .join(
+            EscrowValidation,
+            (
+                (Project.escrow_address == EscrowValidation.escrow_address)
+                & (Project.chain_id == EscrowValidation.chain_id)
+            ),
+            isouter=True,
+        )
+        .where(
+            Project.status == ProjectStatuses.completed,
+            (
+                # It's not expected to happen, but if it happens for some reason,
+                # this check will prevent a deadlock in insert (upsert) below.
+                # We don't need an EscrowValidation lock here, because the only reason why they
+                # can move from none or "completed" to "awaiting" is the upsert below.
+                # The upsert on such an escrow will be protected by the project locks in this
+                # query. If we skip some projects here, we'll just return to them on the next
+                # status check.
+                (EscrowValidation.status == None)
+                | (EscrowValidation.status == EscrowValidationStatuses.completed)
+            ),
+        )
+        .with_for_update(skip_locked=True, of=Project)
+        .limit(
+            # TODO: limit might be too small to finish at least 1 escrow.
+            # Maybe use max(project_counts_per_escrow) instead
+            limit
+        )
+        # lock the projects for processing, skip locked + limit to avoid deadlocks and hangs
+        # it's not possible to use FOR UPDATE with GROUP BY or HAVING, which we need later
     )
 
+    all_completed_condition = func.count() == project_counts_per_escrow.c["total_projects"]
+    completed_projects = (
+        select(working_set.c["escrow_address"], working_set.c["chain_id"])
+        .select_from(working_set)
+        .join(
+            project_counts_per_escrow,
+            (
+                (working_set.c["escrow_address"] == project_counts_per_escrow.c["escrow_address"])
+                & (working_set.c["chain_id"] == project_counts_per_escrow.c["chain_id"])
+            ),
+        )
+        .group_by(
+            working_set.c["escrow_address"],
+            working_set.c["chain_id"],
+            project_counts_per_escrow.c["total_projects"],
+        )
+        .having(all_completed_condition)
+    ).subquery()  # compute counts on the locked rows
+
+    completed_projects_for_update = (
+        select(working_set.c["id"])
+        .select_from(working_set)
+        .join(
+            completed_projects,
+            (
+                (working_set.c["escrow_address"] == completed_projects.c["escrow_address"])
+                & (working_set.c["chain_id"] == completed_projects.c["chain_id"])
+            ),
+        )
+    )
+    completed_projects_for_update_cte = completed_projects_for_update.cte("completed_projects")
+    update_stmt = (
+        # Update project statuses to validation for all the escrow projects,
+        # only for the locked rows
+        update(Project)
+        .where(
+            Project.id == completed_projects_for_update_cte.c["id"],
+            Project.status == ProjectStatuses.completed,
+        )
+        .values({"status": ProjectStatuses.validation})
+        .returning(Project.escrow_address, Project.chain_id)
+    )
+
+    updated_projects_cte = update_stmt.cte("updated_projects")
+    updated_escrows_for_insert = (
+        select(
+            updated_projects_cte.c["escrow_address"],
+            updated_projects_cte.c["chain_id"],
+            literal(EscrowValidationStatuses.awaiting).label("status"),
+        )
+        .select_from(updated_projects_cte)
+        .group_by(
+            updated_projects_cte.c["escrow_address"],
+            updated_projects_cte.c["chain_id"],
+        )
+    )
+
+    # Note, that it's possible to fail lock acquisition for on_conflict_do_update,
+    # if the escrow projects are all found in the completed status during an ongoing validation.
+    # It should not happen under normal working conditions, as projects are switched
+    # to the validation status here.
+    # TODO: maybe switch to separate rows for each validation on the same escrow
     insert_stmt = (
         insert(EscrowValidation)
-        .from_select(("escrow_address", "chain_id", "status"), select_stmt)
+        .from_select(("escrow_address", "chain_id", "status"), updated_escrows_for_insert)
         .on_conflict_do_update(
+            # Upsert - EscrowValidation can already be there from a previous validation
             index_elements=("escrow_address", "chain_id"),
             set_={
+                # Reset the existing entry
                 "status": EscrowValidationStatuses.awaiting,
+                "attempts": 0,
             },
-            where=EscrowValidation.status != EscrowValidationStatuses.awaiting,
+            where=EscrowValidation.status == EscrowValidationStatuses.completed,
         )
-        .returning(EscrowValidation.id)
+        .returning(EscrowValidation.id, EscrowValidation.escrow_address, EscrowValidation.chain_id)
     )
 
     return session.execute(insert_stmt).all()
@@ -297,12 +379,15 @@ def update_project_statuses_by_escrow_address(
     escrow_address: str,
     chain_id: int,
     status: ProjectStatuses,
+    *,
+    included_statuses: Sequence[ProjectStatuses] | None = None,
 ) -> None:
     statement = (
         update(Project)
         .where(
             Project.escrow_address == escrow_address,
             Project.chain_id == chain_id,
+            *([Project.status.in_(included_statuses)] if included_statuses else []),
         )
         .values(status=status.value)
         .returning(Project.cvat_id)
@@ -419,38 +504,15 @@ def finish_escrow_creations_by_escrow_address(
 # EscrowValidation
 
 
-def prepare_escrows_for_validation(
-    session: Session, *, limit: int = 5
-) -> Sequence[tuple[str, str, int]]:
-    subquery = (
-        select(EscrowValidation.id)
+def lock_escrow_for_validation(session: Session) -> EscrowValidation | None:
+    query = (
+        select(EscrowValidation)
         .where(EscrowValidation.status == EscrowValidationStatuses.awaiting)
-        .limit(limit)
         .order_by(EscrowValidation.attempts.asc())
+        .limit(1)
+        .with_for_update(skip_locked=True)
     )
-    update_stmt = (
-        update(EscrowValidation)
-        .where(EscrowValidation.id.in_(subquery))
-        .values(attempts=EscrowValidation.attempts + 1)
-        .returning(EscrowValidation.escrow_address, EscrowValidation.chain_id)
-    )
-    return session.execute(update_stmt).all()
-
-
-def lock_escrow_for_validation(
-    session: Session,
-    *,
-    escrow_address: str,
-    chain_id: int,
-) -> Sequence[tuple[str, str, int]]:
-    stmt = (
-        select(EscrowValidation.escrow_address, EscrowValidation.chain_id)
-        .where(
-            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
-        )
-        .with_for_update(nowait=True)
-    )
-    return session.execute(stmt)
+    return session.execute(query).scalar()
 
 
 def update_escrow_validation(
@@ -477,13 +539,17 @@ def update_escrow_validation(
     session.execute(stmt)
 
 
-def update_escrow_validation_statuses_by_ids(
-    session: Session,
-    ids: Iterable[str],
-    status: EscrowValidationStatuses,
-) -> None:
-    stmt = update(EscrowValidation).where(EscrowValidation.id.in_(ids)).values(status=status)
-    session.execute(stmt)
+def get_escrow_validation_by_escrow_address(
+    session: Session, escrow_address: str, chain_id: int
+) -> EscrowValidation | None:
+    stmt = (
+        select(EscrowValidation)
+        .where(
+            EscrowValidation.escrow_address == escrow_address, EscrowValidation.chain_id == chain_id
+        )
+        .limit(1)
+    )
+    return session.scalar(stmt)
 
 
 # Task

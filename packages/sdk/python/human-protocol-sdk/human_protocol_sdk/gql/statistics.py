@@ -14,7 +14,6 @@ fragment HMTokenStatisticsFields on HMTokenStatistics {
 escrow_statistics_fragment = """
 fragment EscrowStatisticsFields on EscrowStatistics {
     fundEventCount
-    setupEventCount
     storeResultsEventCount
     bulkPayoutEventCount
     pendingStatusEventCount
@@ -31,7 +30,6 @@ event_day_data_fragment = """
 fragment EventDayDataFields on EventDayData {
     timestamp
     dailyFundEventCount
-    dailySetupEventCount
     dailyStoreResultsEventCount
     dailyBulkPayoutEventCount
     dailyPendingStatusEventCount

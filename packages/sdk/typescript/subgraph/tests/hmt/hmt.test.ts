@@ -11,7 +11,6 @@ import {
 } from 'matchstick-as/assembly';
 
 import { Escrow } from '../../generated/schema';
-import { STATISTICS_ENTITY_ID } from '../../src/mapping/Escrow';
 import {
   HMT_STATISTICS_ENTITY_ID,
   handleTransfer,
@@ -28,6 +27,7 @@ import {
   createBulkApprovalEvent,
 } from './fixtures';
 
+const tokenAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ffaa';
 const escrowAddressString = '0xa16081f360e3847006db660bae1c6d1b2e17ec2a';
 const escrowAddress = Address.fromString(escrowAddressString);
 const operatorAddressString = '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266';
@@ -40,7 +40,7 @@ const holder1Address = Address.fromString(holder1AddressString);
 describe('HMToken', () => {
   beforeAll(() => {
     dataSourceMock.setReturnValues(
-      escrowAddressString,
+      tokenAddressString,
       'rinkeby',
       new DataSourceContext()
     );
@@ -50,6 +50,7 @@ describe('HMToken', () => {
     escrow.token = Address.zero();
     escrow.factoryAddress = Address.zero();
     escrow.launcher = Address.zero();
+    escrow.canceler = Address.zero();
     escrow.count = ZERO_BI;
     escrow.balance = BigInt.fromI32(100);
     escrow.totalFundedAmount = BigInt.fromI32(100);
@@ -100,29 +101,6 @@ describe('HMToken', () => {
       assert.fieldEquals('HMTTransferEvent', id, 'to', escrowAddressString);
       assert.fieldEquals('HMTTransferEvent', id, 'amount', '1');
 
-      // FundEvent
-      assert.fieldEquals(
-        'FundEvent',
-        id,
-        'block',
-        transfer.block.number.toString()
-      );
-      assert.fieldEquals(
-        'FundEvent',
-        id,
-        'timestamp',
-        transfer.block.timestamp.toString()
-      );
-      assert.fieldEquals(
-        'FundEvent',
-        id,
-        'txHash',
-        transfer.transaction.hash.toHex()
-      );
-      assert.fieldEquals('FundEvent', id, 'escrowAddress', escrowAddressString);
-      assert.fieldEquals('FundEvent', id, 'sender', operatorAddressString);
-      assert.fieldEquals('FundEvent', id, 'amount', '1');
-
       // Escrow
       assert.fieldEquals('Escrow', escrowAddressString, 'balance', '101');
       assert.fieldEquals(
@@ -153,13 +131,31 @@ describe('HMToken', () => {
         'Transaction',
         transfer.transaction.hash.toHex(),
         'from',
-        transfer.transaction.from.toHex()
+        operatorAddressString
       );
       assert.fieldEquals(
         'Transaction',
         transfer.transaction.hash.toHex(),
         'to',
+        tokenAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'receiver',
         escrowAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'escrow',
+        escrowAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'token',
+        tokenAddressString
       );
       assert.fieldEquals(
         'Transaction',
@@ -204,9 +200,6 @@ describe('HMToken', () => {
       assert.fieldEquals('HMTTransferEvent', id, 'to', holderAddressString);
       assert.fieldEquals('HMTTransferEvent', id, 'amount', '1');
 
-      // No FundEvent
-      assert.notInStore('FundEvent', id);
-
       // Holder
       assert.fieldEquals(
         'Holder',
@@ -215,6 +208,54 @@ describe('HMToken', () => {
         holderAddressString
       );
       assert.fieldEquals('Holder', holderAddressString, 'balance', '1');
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'txHash',
+        transfer.transaction.hash.toHex()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'method',
+        'transfer'
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'block',
+        transfer.block.number.toString()
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'from',
+        operatorAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'to',
+        tokenAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'receiver',
+        holderAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'token',
+        tokenAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'value',
+        '1'
+      );
     });
 
     test('Should properly handle Transfer event from Escrow', () => {
@@ -306,13 +347,25 @@ describe('HMToken', () => {
         'Transaction',
         transfer.transaction.hash.toHex(),
         'from',
-        transfer.transaction.from.toHex()
+        escrowAddressString
       );
       assert.fieldEquals(
         'Transaction',
         transfer.transaction.hash.toHex(),
         'to',
+        tokenAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'receiver',
         operatorAddressString
+      );
+      assert.fieldEquals(
+        'Transaction',
+        transfer.transaction.hash.toHex(),
+        'token',
+        tokenAddressString
       );
       assert.fieldEquals(
         'Transaction',
@@ -382,7 +435,7 @@ describe('HMToken', () => {
       holderAddressString,
       operatorAddressString,
       1,
-      BigInt.fromI32(10)
+      BigInt.fromI32(100)
     );
 
     handleApproval(approval);
@@ -443,19 +496,13 @@ describe('HMToken', () => {
     assert.fieldEquals(
       'Transaction',
       approval.transaction.hash.toHex(),
-      'to',
-      operatorAddressString
-    );
-    assert.fieldEquals(
-      'Transaction',
-      approval.transaction.hash.toHex(),
       'value',
       '1'
     );
   });
 
   test('Should properly handle BulkApproval event', () => {
-    const bulkApproval = createBulkApprovalEvent(1, 3, BigInt.fromI32(10));
+    const bulkApproval = createBulkApprovalEvent(1, 3, BigInt.fromI32(200));
 
     handleBulkApproval(bulkApproval);
 
@@ -661,72 +708,6 @@ describe('HMToken', () => {
         'HMTokenStatistics',
         HMT_STATISTICS_ENTITY_ID.toHex(),
         'totalBulkApprovalEventCount',
-        '2'
-      );
-    });
-
-    test('Should properly calculate FundEvent in statistics, when sending to escrow', () => {
-      const escrow = new Escrow(escrowAddress);
-      escrow.address = escrowAddress;
-      escrow.token = Address.zero();
-      escrow.factoryAddress = Address.zero();
-      escrow.launcher = Address.zero();
-      escrow.count = ZERO_BI;
-      escrow.balance = BigInt.fromI32(100);
-      escrow.totalFundedAmount = BigInt.fromI32(100);
-      escrow.amountPaid = ZERO_BI;
-      escrow.createdAt = BigInt.fromI32(0);
-      escrow.status = 'Launched';
-
-      escrow.save();
-
-      const transfer1 = createTransferEvent(
-        operatorAddressString,
-        escrowAddressString,
-        1,
-        BigInt.fromI32(10)
-      );
-
-      handleTransfer(transfer1);
-
-      const transfer2 = createTransferEvent(
-        operatorAddressString,
-        escrowAddressString,
-        1,
-        BigInt.fromI32(20)
-      );
-
-      handleTransfer(transfer2);
-
-      assert.fieldEquals(
-        'EscrowStatistics',
-        STATISTICS_ENTITY_ID.toHex(),
-        'fundEventCount',
-        '2'
-      );
-
-      [
-        'setupEventCount',
-        'storeResultsEventCount',
-        'bulkPayoutEventCount',
-        'pendingStatusEventCount',
-        'cancelledStatusEventCount',
-        'partialStatusEventCount',
-        'paidStatusEventCount',
-        'completedStatusEventCount',
-      ].forEach((field) => {
-        assert.fieldEquals(
-          'EscrowStatistics',
-          STATISTICS_ENTITY_ID.toHex(),
-          field,
-          '0'
-        );
-      });
-
-      assert.fieldEquals(
-        'EscrowStatistics',
-        STATISTICS_ENTITY_ID.toHex(),
-        'totalEventCount',
         '2'
       );
     });

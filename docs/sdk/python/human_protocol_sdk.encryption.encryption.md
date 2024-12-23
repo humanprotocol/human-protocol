@@ -60,7 +60,7 @@ Decrypts a message using the private key.
   * **message** (`str`) – Armored message to decrypt
   * **public_key** (`Optional`[`str`]) – Armored public key used for signature verification. Defaults to None.
 * **Return type:**
-  `str`
+  `bytes`
 * **Returns:**
   Decrypted message
 * **Example:**
@@ -94,7 +94,7 @@ Decrypts a message using the private key.
 Signs a message using the private key.
 
 * **Parameters:**
-  **message** (`str`) – Message to sign
+  **message** (`Union`[`str`, `bytes`]) – Message to sign
 * **Return type:**
   `str`
 * **Returns:**
@@ -130,7 +130,7 @@ Signs a message using the private key.
 Signs and encrypts a message using the private key and recipient’s public keys.
 
 * **Parameters:**
-  * **message** (`str`) – Message to sign and encrypt
+  * **message** (`Union`[`str`, `bytes`]) – Message to sign and encrypt
   * **public_keys** (`List`[`str`]) – List of armored public keys of the recipients
 * **Return type:**
   `str`

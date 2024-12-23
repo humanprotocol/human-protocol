@@ -1,11 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { HttpStatus } from '@nestjs/common';
 import { QualificationService } from './qualification.service';
 import { QualificationRepository } from './qualification.repository';
 import { UserRepository } from '../user/user.repository';
-import { ControlledError } from '../../common/errors/controlled';
-import { ErrorQualification } from '../../common/constants/errors';
+import {
+  QualificationError,
+  QualificationErrorMessage,
+} from './qualification.error';
 import {
   CreateQualificationDto,
   AssignQualificationDto,
@@ -126,15 +127,19 @@ describe('QualificationService', () => {
         expiresAt: new Date('2000-01-01'),
       };
 
-      const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
-        '%minValidity%',
-        '1',
-      );
+      const errorMessage =
+        QualificationErrorMessage.INVALID_EXPIRATION_TIME.replace(
+          '%minValidity%',
+          '1',
+        );
 
       await expect(
         qualificationService.createQualification(createQualificationDto),
       ).rejects.toThrow(
-        new ControlledError(errorMessage, HttpStatus.BAD_REQUEST),
+        new QualificationError(
+          errorMessage as QualificationErrorMessage,
+          'ref1',
+        ),
       );
     });
 
@@ -219,7 +224,7 @@ describe('QualificationService', () => {
         .mockResolvedValue(undefined);
 
       await expect(qualificationService.delete('ref1')).rejects.toThrow(
-        new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
     });
   });
@@ -233,7 +238,6 @@ describe('QualificationService', () => {
       const assignQualificationDto: AssignQualificationDto = {
         reference: 'ref1',
         workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
       };
 
       const qualificationEntity = new QualificationEntity();
@@ -258,7 +262,6 @@ describe('QualificationService', () => {
       const assignQualificationDto: AssignQualificationDto = {
         reference: 'ref1',
         workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
       };
 
       const qualificationEntity = new QualificationEntity();
@@ -289,10 +292,9 @@ describe('QualificationService', () => {
         qualificationService.assign({
           reference: 'ref1',
           workerAddresses: [],
-          workerEmails: [],
         }),
       ).rejects.toThrow(
-        new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
     });
   });
@@ -306,7 +308,6 @@ describe('QualificationService', () => {
       const unassignQualificationDto: UnassignQualificationDto = {
         reference: 'ref1',
         workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
       };
 
       const qualificationEntity = new QualificationEntity();
@@ -333,7 +334,6 @@ describe('QualificationService', () => {
       const unassignQualificationDto: UnassignQualificationDto = {
         reference: 'ref1',
         workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
       };
 
       const qualificationEntity = new QualificationEntity();
@@ -366,57 +366,23 @@ describe('QualificationService', () => {
         qualificationService.unassign({
           reference: 'ref1',
           workerAddresses: [],
-          workerEmails: [],
         }),
       ).rejects.toThrow(
-        new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
     });
   });
 
   describe('getWorkers', () => {
-    it('should throw an error if neither addresses nor emails are provided', async () => {
-      await expect(qualificationService.getWorkers([], [])).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.AddressesOrEmailsMustBeProvided,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
-    });
-
     it('should return workers by addresses', async () => {
       const addresses = ['address1'];
       const users = [{ id: 1 } as UserEntity];
 
       userRepository.findByAddress = jest.fn().mockResolvedValue(users);
 
-      const result = await qualificationService.getWorkers(addresses, []);
+      const result = await qualificationService.getWorkers(addresses);
 
       expect(result).toEqual(users);
-    });
-
-    it('should return workers by emails', async () => {
-      const emails = ['email1@example.com'];
-      const users = [{ id: 1 } as UserEntity];
-
-      userRepository.findByEmail = jest.fn().mockResolvedValue(users);
-
-      const result = await qualificationService.getWorkers([], emails);
-
-      expect(result).toEqual(users);
-    });
-
-    it('should throw an error if no workers are found', async () => {
-      userRepository.find = jest.fn().mockResolvedValue([]);
-
-      await expect(
-        qualificationService.getWorkers(['address1'], []),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.NoWorkersFound,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
     });
   });
 });

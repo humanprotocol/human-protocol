@@ -8,6 +8,7 @@ from sqlalchemy.sql import select
 
 from src.core.types import (
     AssignmentStatuses,
+    EscrowValidationStatuses,
     ExchangeOracleEventTypes,
     JobStatuses,
     Networks,
@@ -23,7 +24,7 @@ from src.crons.webhooks.recording_oracle import (
     process_outgoing_recording_oracle_webhooks,
 )
 from src.db import SessionLocal
-from src.models.cvat import Assignment, Job, Project, Task, User
+from src.models.cvat import Assignment, EscrowValidation, Job, Project, Task, User
 from src.models.webhook import Webhook
 from src.services.webhook import OracleWebhookDirectionTags
 from src.utils.time import utcnow
@@ -104,15 +105,24 @@ class ServiceIntegrationTest(unittest.TestCase):
             event_type=RecordingOracleEventTypes.job_completed.value,
             direction=OracleWebhookDirectionTags.incoming,
         )
-
         self.session.add(webhook)
+
+        validation_id = str(uuid.uuid4())
+        validation = EscrowValidation(
+            id=validation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            status=EscrowValidationStatuses.in_progress,
+        )
+        self.session.add(validation)
+
         self.session.commit()
 
         process_incoming_recording_oracle_webhooks()
 
-        updated_webhook = self.session.query(Webhook).get(webhook_id)
-        assert updated_webhook.status == OracleWebhookStatuses.completed.value
-        assert updated_webhook.attempts == 1
+        db_webhook = self.session.query(Webhook).get(webhook_id)
+        assert db_webhook.status == OracleWebhookStatuses.completed.value
+        assert db_webhook.attempts == 1
 
         db_project = self.session.query(Project).get(cvat_project.id)
         assert db_project.status == ProjectStatuses.recorded.value
@@ -130,7 +140,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_assignment2 = self.session.query(Assignment).get(cvat_assignment2.id)
         assert db_assignment2.updated_at > project_completion_time
 
-    def test_process_incoming_recording_oracle_webhooks_job_completed_type_invalid_project_status(
+        db_validation = self.session.query(EscrowValidation).get(validation_id)
+        assert db_validation.status == EscrowValidationStatuses.completed
+
+    def test_process_incoming_recording_oracle_webhooks_job_completed_type_invalid_escrow_status(
         self,
     ):
         project_id = str(uuid.uuid4())
@@ -146,9 +159,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(cvat_project)
 
-        webhok_id = str(uuid.uuid4())
+        webhook_id = str(uuid.uuid4())
         webhook = Webhook(
-            id=webhok_id,
+            id=webhook_id,
             signature="signature",
             escrow_address=escrow_address,
             chain_id=chain_id,
@@ -157,22 +170,30 @@ class ServiceIntegrationTest(unittest.TestCase):
             event_type=RecordingOracleEventTypes.job_completed.value,
             direction=OracleWebhookDirectionTags.incoming,
         )
-
         self.session.add(webhook)
+
+        validation_id = str(uuid.uuid4())
+        validation = EscrowValidation(
+            id=validation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            status=EscrowValidationStatuses.awaiting,
+        )
+        self.session.add(validation)
+
         self.session.commit()
 
         process_incoming_recording_oracle_webhooks()
 
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
+        db_webhook = self.session.query(Webhook).get(webhook_id)
+        assert db_webhook.status == OracleWebhookStatuses.completed.value
+        assert db_webhook.attempts == 1
 
-        assert updated_webhook.status == OracleWebhookStatuses.completed.value
-        assert updated_webhook.attempts == 1
-
-        db_project = self.session.query(Project).filter_by(id=project_id).first()
-
+        db_project = self.session.query(Project).get(project_id)
         assert db_project.status == ProjectStatuses.completed.value
+
+        db_validation = self.session.query(EscrowValidation).get(validation_id)
+        assert db_validation.status == EscrowValidationStatuses.awaiting
 
     def test_process_incoming_recording_oracle_webhooks_submission_rejected_type(self):
         cvat_id = 1
@@ -230,9 +251,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(assignment)
 
-        webhok_id = str(uuid.uuid4())
+        webhook_id = str(uuid.uuid4())
         webhook = Webhook(
-            id=webhok_id,
+            id=webhook_id,
             signature="signature",
             escrow_address=escrow_address,
             chain_id=chain_id,
@@ -246,31 +267,37 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(webhook)
 
+        validation_id = str(uuid.uuid4())
+        validation = EscrowValidation(
+            id=validation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            status=EscrowValidationStatuses.in_progress,
+        )
+        self.session.add(validation)
+
         self.session.commit()
 
         process_incoming_recording_oracle_webhooks()
 
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
-        )
+        db_webhook = self.session.query(Webhook).get(webhook_id)
+        assert db_webhook.status == OracleWebhookStatuses.completed.value
+        assert db_webhook.attempts == 1
 
-        assert updated_webhook.status == OracleWebhookStatuses.completed.value
-        assert updated_webhook.attempts == 1
-        db_project = self.session.query(Project).filter_by(id=project_id).first()
-
+        db_project = self.session.query(Project).get(project_id)
         assert db_project.status == ProjectStatuses.annotation.value
 
-        db_task = self.session.query(Task).filter_by(id=task_id).first()
-
+        db_task = self.session.query(Task).get(task_id)
         assert db_task.status == TaskStatuses.annotation.value
 
-        db_job = self.session.query(Job).filter_by(id=job_id).first()
-
+        db_job = self.session.query(Job).get(job_id)
         assert db_job.status == JobStatuses.new.value
 
-        db_assignment = self.session.query(Assignment).filter_by(id=assignment_id).first()
-
+        db_assignment = self.session.query(Assignment).get(assignment_id)
         assert db_assignment.status == AssignmentStatuses.rejected
+
+        db_validation = self.session.query(EscrowValidation).get(validation_id)
+        assert db_validation.status == EscrowValidationStatuses.completed
 
     def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_project_status(  # noqa: E501
         self,
@@ -282,7 +309,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=project_id,
             cvat_id=cvat_id,
             cvat_cloudstorage_id=1,
-            status=ProjectStatuses.completed.value,
+            status=ProjectStatuses.annotation.value,
             job_type=TaskTypes.image_label_binary.value,
             escrow_address=escrow_address,
             chain_id=Networks.localhost.value,
@@ -290,9 +317,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(cvat_project)
 
-        webhok_id = str(uuid.uuid4())
+        webhook_id = str(uuid.uuid4())
         webhook = Webhook(
-            id=webhok_id,
+            id=webhook_id,
             signature="signature",
             escrow_address=escrow_address,
             chain_id=chain_id,
@@ -306,20 +333,85 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(webhook)
 
+        validation_id = str(uuid.uuid4())
+        validation = EscrowValidation(
+            id=validation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            status=EscrowValidationStatuses.in_progress,
+        )
+        self.session.add(validation)
+
         self.session.commit()
 
         process_incoming_recording_oracle_webhooks()
 
-        updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+        db_webhook = self.session.query(Webhook).get(webhook_id)
+        assert db_webhook.status == OracleWebhookStatuses.completed.value
+        assert db_webhook.attempts == 1
+
+        db_project = self.session.query(Project).get(project_id)
+        assert db_project.status == ProjectStatuses.annotation.value
+
+        db_validation = self.session.query(EscrowValidation).get(validation_id)
+        assert db_validation.status == EscrowValidationStatuses.completed
+
+    def test_process_incoming_recording_oracle_webhooks_submission_rejected_type_invalid_escrow_status(  # noqa: E501
+        self,
+    ):
+        cvat_id = 1
+
+        project_id = str(uuid.uuid4())
+        cvat_project = Project(
+            id=project_id,
+            cvat_id=cvat_id,
+            cvat_cloudstorage_id=1,
+            status=ProjectStatuses.validation.value,
+            job_type=TaskTypes.image_label_binary.value,
+            escrow_address=escrow_address,
+            chain_id=Networks.localhost.value,
+            bucket_url="https://test.storage.googleapis.com/",
         )
+        self.session.add(cvat_project)
 
-        assert updated_webhook.status == OracleWebhookStatuses.completed.value
-        assert updated_webhook.attempts == 1
+        webhook_id = str(uuid.uuid4())
+        webhook = Webhook(
+            id=webhook_id,
+            signature="signature",
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.recording_oracle.value,
+            status=OracleWebhookStatuses.pending.value,
+            event_type=RecordingOracleEventTypes.submission_rejected.value,
+            event_data={
+                "assignments": [{"assignment_id": str(uuid.uuid4()), "reason": "sample reason"}]
+            },
+            direction=OracleWebhookDirectionTags.incoming,
+        )
+        self.session.add(webhook)
 
-        db_project = self.session.query(Project).filter_by(id=project_id).first()
+        validation_id = str(uuid.uuid4())
+        validation = EscrowValidation(
+            id=validation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            status=EscrowValidationStatuses.awaiting,
+        )
+        self.session.add(validation)
 
-        assert db_project.status == ProjectStatuses.completed.value
+        self.session.commit()
+
+        process_incoming_recording_oracle_webhooks()
+
+        db_webhook = self.session.query(Webhook).get(webhook_id)
+        assert db_webhook.status == OracleWebhookStatuses.completed.value
+        assert db_webhook.attempts == 1
+
+        db_project = self.session.query(Project).get(project_id)
+        assert db_project.status == ProjectStatuses.validation.value
+
+        db_validation = self.session.query(EscrowValidation).get(validation_id)
+        assert db_validation.status == EscrowValidationStatuses.awaiting
 
     def test_process_outgoing_recording_oracle_webhooks(self):
         chain_id = Networks.localhost.value

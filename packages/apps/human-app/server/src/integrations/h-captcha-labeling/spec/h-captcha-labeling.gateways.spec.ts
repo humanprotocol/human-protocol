@@ -103,7 +103,11 @@ describe('HCaptchaLabelingGateway', () => {
         method: 'GET',
         url: `${environmentConfigServiceMock.hcaptchaLabelingStatsApiUrl}/requester/daily_hmt_spend`,
         headers: {},
-        params: { api_key: 'mock-api-key', actual: false },
+        params: {
+          api_key: 'mock-api-key',
+          actual: false,
+          network: 'polygon',
+        },
       };
       expect(httpServiceMock.request).toHaveBeenCalledWith(expectedOptions);
     });

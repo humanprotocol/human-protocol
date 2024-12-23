@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.2;
+pragma solidity ^0.8.0;
 
 interface IEscrow {
     enum EscrowStatuses {
@@ -27,13 +27,22 @@ interface IEscrow {
         string memory _hash
     ) external;
 
-    function abort() external;
-
     function cancel() external returns (bool);
+
+    function withdraw(address _token) external returns (bool);
 
     function complete() external;
 
     function storeResults(string memory _url, string memory _hash) external;
+
+    function bulkPayOut(
+        address[] memory _recipients,
+        uint256[] memory _amounts,
+        string memory _url,
+        string memory _hash,
+        uint256 _txId,
+        bool forceComplete
+    ) external;
 
     function bulkPayOut(
         address[] memory _recipients,

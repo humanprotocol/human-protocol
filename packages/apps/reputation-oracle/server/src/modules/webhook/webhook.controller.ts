@@ -9,7 +9,7 @@ import {
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
-import { WebhookService } from './webhook.service';
+import { WebhookIncomingService } from './webhook-incoming.service';
 import { AuthSignatureRole } from '../../common/enums/role';
 import { IncomingWebhookDto } from './webhook.dto';
 
@@ -17,7 +17,9 @@ import { IncomingWebhookDto } from './webhook.dto';
 @ApiTags('Webhook')
 @Controller('/webhook')
 export class WebhookController {
-  constructor(private readonly webhookService: WebhookService) {}
+  constructor(
+    private readonly webhookIncomingService: WebhookIncomingService,
+  ) {}
 
   @UseGuards(new SignatureAuthGuard([AuthSignatureRole.Recording]))
   @Post('/')
@@ -51,7 +53,7 @@ export class WebhookController {
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: IncomingWebhookDto,
   ): Promise<void> {
-    await this.webhookService.createIncomingWebhook(data);
+    await this.webhookIncomingService.createIncomingWebhook(data);
     return;
   }
 }

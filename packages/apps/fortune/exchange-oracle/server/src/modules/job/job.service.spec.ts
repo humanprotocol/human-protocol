@@ -9,7 +9,11 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { MOCK_MANIFEST_URL, mockConfig } from '../../../test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_MANIFEST_URL,
+  mockConfig,
+} from '../../../test/constants';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -31,6 +35,7 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { ErrorJob, ErrorAssignment } from '../../common/constant/errors';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -146,7 +151,19 @@ describe('JobService', () => {
         getReputationOracleAddress: jest
           .fn()
           .mockResolvedValue(reputationNetwork),
+        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       }));
+
+      const mockTokenContract: any = {
+        symbol: jest.fn(),
+        interface: {
+          parseLog: jest.fn().mockReturnValue({ args: { _to: MOCK_ADDRESS } }),
+        },
+      };
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
+      jest.spyOn(mockTokenContract, 'symbol').mockReturnValue('HMT');
     });
     const webhook: WebhookDto = {
       chainId,
@@ -166,6 +183,7 @@ describe('JobService', () => {
         escrowAddress: escrowAddress,
         manifestUrl: MOCK_MANIFEST_URL,
         reputationNetwork: reputationNetwork,
+        rewardToken: 'HMT',
         status: JobStatus.ACTIVE,
       });
     });

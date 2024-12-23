@@ -90,8 +90,6 @@ dataSources:
         - StakeLocked
         - StakeWithdrawn
         - StakeSlashed
-        - StakeAllocated
-        - AllocationClosed
       abis:
         - name: Staking
           file: '{{{ Staking.abi }}}'
@@ -104,31 +102,9 @@ dataSources:
           handler: handleStakeWithdrawn
         - event: StakeSlashed(indexed address,uint256,indexed address,address)
           handler: handleStakeSlashed
-        - event: StakeAllocated(indexed address,uint256,indexed address,uint256)
-          handler: handleStakeAllocated
-        - event: AllocationClosed(indexed address,uint256,indexed address,uint256)
-          handler: handleAllocationClosed
+        - event: FeeWithdrawn(uint256)
+          handler: handleFeeWithdrawn
       file: ./src/mapping/Staking.ts
-  - kind: ethereum
-    name: RewardPool
-    network: '{{ network }}'
-    source:
-      abi: RewardPool
-      address: '{{ RewardPool.address }}'
-      startBlock: {{ RewardPool.startBlock }}
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - RewardAdded
-      abis:
-        - name: RewardPool
-          file: '{{{ RewardPool.abi }}}'
-      eventHandlers:
-        - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
-          handler: handleRewardAdded
-      file: ./src/mapping/RewardPool.ts
 {{ #LegacyEscrowFactory }}
   - kind: ethereum
     name: LegacyEscrowFactory
@@ -175,12 +151,20 @@ templates:
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending
+        - event: PendingV2(string,string,address,address,address)
+          handler: handlePendingV2
         - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
+          handler: handleBulkTransfer
+        - event: BulkTransferV2(indexed uint256,address[],uint256[],bool,string)
           handler: handleBulkTransfer
         - event: Cancelled()
           handler: handleCancelled
         - event: Completed()
           handler: handleCompleted
+        - event: Fund(uint256)
+          handler: handleFund
+        - event: Withdraw(address,uint256)
+          handler: handleWithdraw
   - name: LegacyEscrow
     kind: ethereum/contract
     network: '{{ network }}'

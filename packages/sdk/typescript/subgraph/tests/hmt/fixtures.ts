@@ -1,5 +1,5 @@
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { Address, ethereum, BigInt } from '@graphprotocol/graph-ts';
+import { Address, ethereum, BigInt, dataSource } from '@graphprotocol/graph-ts';
 
 import {
   Transfer,
@@ -7,6 +7,7 @@ import {
   BulkTransfer,
   BulkApproval,
 } from '../../generated/HMToken/HMToken';
+import { generateUniqueHash } from '../../tests/utils';
 
 export function createTransferEvent(
   from: string,
@@ -15,7 +16,17 @@ export function createTransferEvent(
   timestamp: BigInt
 ): Transfer {
   const transferEvent = changetype<Transfer>(newMockEvent());
+  transferEvent.transaction.hash = generateUniqueHash(
+    to,
+    timestamp,
+    transferEvent.transaction.nonce
+  );
+
   transferEvent.parameters = [];
+  transferEvent.transaction.from = Address.fromString(from);
+  transferEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   transferEvent.block.timestamp = timestamp;
   const fromParam = new ethereum.EventParam(
     '_from',
@@ -44,6 +55,16 @@ export function createApprovalEvent(
   timestamp: BigInt
 ): Approval {
   const approvalEvent = changetype<Approval>(newMockEvent());
+  approvalEvent.transaction.hash = generateUniqueHash(
+    owner,
+    timestamp,
+    approvalEvent.transaction.nonce
+  );
+
+  approvalEvent.transaction.from = Address.fromString(spender);
+  approvalEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
   approvalEvent.parameters = [];
   approvalEvent.block.timestamp = timestamp;
   const ownerParam = new ethereum.EventParam(
@@ -72,6 +93,15 @@ export function createBulkTransferEvent(
   timestamp: BigInt
 ): BulkTransfer {
   const bulkTransferEvent = changetype<BulkTransfer>(newMockEvent());
+  bulkTransferEvent.transaction.hash = generateUniqueHash(
+    bulkCount.toString(),
+    timestamp,
+    bulkTransferEvent.transaction.nonce
+  );
+  bulkTransferEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
+
   bulkTransferEvent.parameters = [];
   bulkTransferEvent.block.timestamp = timestamp;
   const txIdParam = new ethereum.EventParam(
@@ -95,6 +125,16 @@ export function createBulkApprovalEvent(
   timestamp: BigInt
 ): BulkApproval {
   const bulkApprovalEvent = changetype<BulkApproval>(newMockEvent());
+  bulkApprovalEvent.transaction.hash = generateUniqueHash(
+    bulkCount.toString(),
+    timestamp,
+    bulkApprovalEvent.transaction.nonce
+  );
+
+  bulkApprovalEvent.transaction.to = Address.fromString(
+    dataSource.address().toHexString()
+  );
+
   bulkApprovalEvent.parameters = [];
   bulkApprovalEvent.block.timestamp = timestamp;
   const txIdParam = new ethereum.EventParam(

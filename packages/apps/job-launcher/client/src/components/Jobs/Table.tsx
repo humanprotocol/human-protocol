@@ -42,7 +42,6 @@ export const JobTable = ({
         {
           id: 'escrowAddress',
           label: 'Address',
-          sortable: true,
           render: ({ escrowAddress }) =>
             escrowAddress ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -59,11 +58,10 @@ export const JobTable = ({
               <></>
             ),
         },
-        { id: 'network', label: 'Network', sortable: true },
+        { id: 'network', label: 'Network' },
         {
           id: 'fundAmount',
           label: 'Fund Amount',
-          sortable: true,
           render: ({ fundAmount }) => `${fundAmount} HMT`,
         },
         { id: 'status', label: 'Status' },

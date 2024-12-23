@@ -6,7 +6,6 @@ import {
   MOCK_MANIFEST_URL,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
-import { TOKEN } from '../../common/constant';
 import { AssignmentStatus, JobType } from '../../common/enums/job';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentService } from '../assignment/assignment.service';
@@ -321,6 +320,7 @@ describe('AssignmentService', () => {
           chainId: 1,
           escrowAddress,
           manifestUrl: MOCK_MANIFEST_URL,
+          rewardToken: 'HMT',
         },
         status: AssignmentStatus.ACTIVE,
         createdAt: new Date(),
@@ -370,7 +370,7 @@ describe('AssignmentService', () => {
         escrowAddress: escrowAddress,
         jobType: JobType.FORTUNE,
         status: AssignmentStatus.ACTIVE,
-        rewardToken: TOKEN,
+        rewardToken: 'HMT',
         rewardAmount: 20,
         url: expect.any(String),
         createdAt: expect.any(String),

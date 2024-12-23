@@ -1,4 +1,4 @@
-**@human-protocol/sdk** • [**Docs**](modules.md)
+**@human-protocol/sdk**
 
 ***
 

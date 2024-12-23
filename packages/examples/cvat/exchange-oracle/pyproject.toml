@@ -9,14 +9,14 @@ packages = [{include = "exchange_oracle"}]
 [tool.poetry.dependencies]
 python = "^3.10,<3.13"
 fastapi = {version = "^0.115.4", extras = ["standard"]}
-uvicorn = "^0.30.0"
+uvicorn = ">=0.32.1" # post https://github.com/encode/uvicorn/pull/2397, where using several workers was fixed. Read more https://github.com/encode/uvicorn/discussions/2450
 python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
 sqlalchemy-utils = "^0.41.1"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
 pytest = "^7.2.2"
-cvat-sdk = "^2.22.0"
+cvat-sdk = "^2.23.1"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
 xmltodict = "^0.13.0"
@@ -24,7 +24,7 @@ datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1b
 boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
 pyinstrument = "^4.6.2"
-human-protocol-sdk = ">=3.0.7b0,<3.1.0"
+human-protocol-sdk = ">=3.0.8b0,<3.1.0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 pydantic = ">=2.6.1,<2.7.0"
 fastapi-pagination = "^0.12.17"
@@ -33,6 +33,7 @@ fastapi-limiter = "^0.1.6"
 strenum = "^0.4.15"
 pyjwt = "^2.9.0"
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
+cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
 
 
 [tool.poetry.group.dev.dependencies]

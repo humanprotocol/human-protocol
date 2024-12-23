@@ -36,3 +36,7 @@ lerna-debug.log*
 
 # Redis Data
 /redis_data
+
+.env.development
+.env.production
+.env.test

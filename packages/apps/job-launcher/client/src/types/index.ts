@@ -31,6 +31,7 @@ export type CryptoPaymentRequest = {
 export type FiatPaymentRequest = {
   amount: number;
   currency: string;
+  paymentMethodId: string;
 };
 
 export type CreateFortuneJobRequest = {
@@ -77,6 +78,7 @@ export enum JobType {
 
 export enum CvatJobType {
   IMAGE_POINTS = 'image_points',
+  IMAGE_POLYGONS = 'image_polygons',
   IMAGE_BOXES = 'image_boxes',
   IMAGE_BOXES_FROM_POINTS = 'image_boxes_from_points',
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
@@ -297,4 +299,57 @@ export type Qualification = {
   title: string;
   description: string;
   expires_at: string;
+};
+
+export type CardData = {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: number;
+  expYear: number;
+  default: boolean;
+};
+
+export type BillingInfo = {
+  name: string;
+  email?: string;
+  address: Address;
+  vat: string;
+  vatType: string;
+};
+
+type Address = {
+  city: string;
+  country: string;
+  line: string;
+  postalCode: string;
+};
+
+export type JobCountDto = {
+  totalJobs: number;
+  launched: number;
+  partial: number;
+  completed: number;
+  canceled: number;
+};
+
+export type FundAmountStatisticsDto = {
+  average: number;
+  maximum: number;
+  minimum: number;
+};
+
+export type JobStatusPerDayDto = {
+  date: string;
+  launched: number;
+  partial: number;
+  completed: number;
+  canceled: number;
+};
+
+export type JobStatisticsDto = {
+  averageCompletionTime: number;
+  jobCounts: JobCountDto;
+  fundAmountStats: FundAmountStatisticsDto;
+  jobsByStatusPerDay: JobStatusPerDayDto[];
 };
