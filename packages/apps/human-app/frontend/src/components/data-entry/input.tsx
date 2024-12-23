@@ -57,8 +57,8 @@ export function Input({
           sx={{
             input: {
               '&:-webkit-autofill': {
-                '-webkit-box-shadow': `0 0 0 30px transparent inset !important`,
-                '-webkit-text-fill-color': `${colorPalette.text.primary} !important`,
+                WebkitBoxShadow: `0 0 0 30px transparent inset !important`,
+                WebkitTextFillColor: `${colorPalette.text.primary} !important`,
                 transition:
                   'background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s',
               },

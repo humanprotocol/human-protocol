@@ -1,12 +1,11 @@
 import merge from 'lodash/merge';
 import { ZodError, type ZodType, type ZodTypeDef } from 'zod';
 import type { ResponseError } from '@/shared/types/global.type';
-import type { SignInSuccessResponse } from '@/api/services/worker/sign-in';
-// eslint-disable-next-line import/no-cycle -- cause by refresh token retry
-import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
+import { env } from '@/shared/env';
+import { type SignInSuccessResponse } from '@/api/services/worker/sign-in/types';
+import { normalizeBaseUrl } from '@/shared/helpers/normalize-base-url';
+import { fetchTokenRefresh } from './fetch-refresh-token';
 
 const appendHeader = (
   fetcherOptionsWithDefaults: RequestInit | undefined,
@@ -66,6 +65,29 @@ export type FetcherOptions<SuccessInput, SuccessOutput> =
   | FetcherOptionsWithoutValidation;
 
 export type FetcherUrl = string | URL;
+
+let refreshPromise: Promise<SignInSuccessResponse | null> | null = null;
+
+export async function refreshToken(): Promise<{
+  access_token: string;
+  refresh_token: string;
+} | null> {
+  if (!refreshPromise) {
+    refreshPromise = fetchTokenRefresh(normalizeBaseUrl(env.VITE_API_URL));
+  }
+
+  const result = await refreshPromise;
+
+  refreshPromise = null;
+
+  if (result) {
+    browserAuthProvider.signIn(result, browserAuthProvider.authType);
+  } else {
+    browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+  }
+
+  return result;
+}
 
 export function createFetcher(defaultFetcherConfig?: {
   options?: RequestInit | (() => RequestInit);
@@ -138,7 +160,7 @@ export function createFetcher(defaultFetcherConfig?: {
       const urlAsString = fetchUrlToString(baseUrl);
       if (!urlAsString) return url;
       const normalizedUrl = fetchUrlToString(url).replace(/\//, '');
-      const normalizedBaseUrl = urlAsString.replace(/\/$/, '');
+      const normalizedBaseUrl = normalizeBaseUrl(urlAsString);
 
       return `${normalizedBaseUrl}/${normalizedUrl}`;
     })();
@@ -153,33 +175,16 @@ export function createFetcher(defaultFetcherConfig?: {
       fetcherOptions.authenticated &&
       fetcherOptions.withAuthRetry
     ) {
-      let refetchAccessTokenSuccess: SignInSuccessResponse | undefined;
-      try {
-        refetchAccessTokenSuccess = await apiClient(
-          apiPaths.worker.obtainAccessToken.path,
-          {
-            successSchema: signInSuccessResponseSchema,
-            options: {
-              method: 'POST',
-              body: JSON.stringify({
-                // eslint-disable-next-line camelcase -- camel case defined by api
-                refresh_token: browserAuthProvider.getRefreshToken(),
-              }),
-            },
-          }
-        );
-        browserAuthProvider.signIn(
-          refetchAccessTokenSuccess,
-          browserAuthProvider.authType
-        );
-      } catch {
-        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
+      const refetchAccessTokenSuccess = await refreshToken();
+
+      if (!refetchAccessTokenSuccess) {
         return;
       }
 
       const newHeaders = appendHeader(fetcherOptionsWithDefaults, {
         Authorization: `Bearer ${refetchAccessTokenSuccess.access_token}`,
       });
+
       response = await fetch(fetcherUrl, newHeaders);
 
       if (!response.ok) {

@@ -9,12 +9,6 @@ on:
       escrowFactory:
         description: 'deploy escrow factory'
         required: true
-      staking:
-        description: 'deploy staking'
-        required: true
-      rewardPool:
-        description: 'deploy reward pool'
-        required: true
 
 jobs:
   deploy-contracts:
@@ -51,63 +45,43 @@ jobs:
         run: |
           case ${{ github.event.inputs.network }} in
             "sepolia")
-              echo "escrow_factory=0xD6D347ba6987519B4e42EcED43dF98eFf5465a23" >> $GITHUB_OUTPUT
-              echo "staking=0x2B9C5EC6220BA8Ad08CB51A60FFdbC6a6235B203" >> $GITHUB_OUTPUT
-              echo "reward_pool=0xAFf5a986A530ff839d49325A5dF69F96627E8D29" >> $GITHUB_OUTPUT
+              echo "escrow_factory=0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "polygon")
               echo "escrow_factory=0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB" >> $GITHUB_OUTPUT
-              echo "staking=0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x1371057BAec59944B924A7963F2EeCF43ff94CE4" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "polygonAmoy")
               echo "escrow_factory=0xAFf5a986A530ff839d49325A5dF69F96627E8D29" >> $GITHUB_OUTPUT
-              echo "staking=0xCc0AF0635aa19fE799B6aFDBe28fcFAeA7f00a60" >> $GITHUB_OUTPUT
-              echo "reward_pool=0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "bsc")
               echo "escrow_factory=0x92FD968AcBd521c232f5fB8c33b342923cC72714" >> $GITHUB_OUTPUT
-              echo "staking=0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C" >> $GITHUB_OUTPUT
-              echo "reward_pool=0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "bscTestnet")
               echo "escrow_factory=0x2bfA592DBDaF434DDcbb893B1916120d181DAD18" >> $GITHUB_OUTPUT
-              echo "staking=0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18" >> $GITHUB_OUTPUT
-              echo "reward_pool=0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "moonbeam")
               echo "escrow_factory=0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a" >> $GITHUB_OUTPUT
-              echo "staking=0x05398211bA2046E296fBc9a9D3EB49e3F15C3123" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x4A5963Dd6792692e9147EdC7659936b96251917a" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "moonbaseAlpha")
               echo "escrow_factory=0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed" >> $GITHUB_OUTPUT
-              echo "staking=0xBFC7009F3371F93F3B54DdC8caCd02914a37495c" >> $GITHUB_OUTPUT
-              echo "reward_pool=0xf46B45Df3d956369726d8Bd93Ba33963Ab692920" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "mainnet")
               echo "escrow_factory=0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a" >> $GITHUB_OUTPUT
-              echo "staking=0x05398211bA2046E296fBc9a9D3EB49e3F15C3123" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x4A5963Dd6792692e9147EdC7659936b96251917a" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "avalanche")
               echo "escrow_factory=0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a" >> $GITHUB_OUTPUT
-              echo "staking=0x05398211bA2046E296fBc9a9D3EB49e3F15C3123" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x4A5963Dd6792692e9147EdC7659936b96251917a" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             "avalancheFujiTestnet")
               echo "escrow_factory=0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92" >> $GITHUB_OUTPUT
-              echo "staking=0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
             ;;
             *)
@@ -116,29 +90,17 @@ jobs:
               ;;
           esac
       - name: Upgrade Proxies
-        if: github.event.inputs.escrowFactory == 'true' || github.event.inputs.staking == 'true' || github.event.inputs.rewardPool== 'true'
+        if: github.event.inputs.escrowFactory == 'true'
         run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
         working-directory: ./packages/core
         env:
           PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
           DEPLOY_ESCROW_FACTORY: ${{ github.event.inputs.escrowFactory }}
-          DEPLOY_STAKING: ${{ github.event.inputs.staking }}
-          DEPLOY_REWARD_POOL: ${{ github.event.inputs.rewardPool }}
           ESCROW_FACTORY_ADDRESS: ${{ steps.networks.outputs.escrow_factory }}
-          STAKING_ADDRESS: ${{ steps.networks.outputs.staking }}
-          REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
 
       - name: Verify Escrow Factory Proxy
         if: always() && github.event.inputs.escrowFactory == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
-        working-directory: ./packages/core
-      - name: Verify Staking Proxy
-        if: always() && github.event.inputs.staking == 'true'
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.staking }}
-        working-directory: ./packages/core
-      - name: Verify Reward Pool Proxy
-        if: always() && github.event.inputs.rewardPool== 'true'
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
         working-directory: ./packages/core
         #Commit changes to develop
       - name: Check for Changes

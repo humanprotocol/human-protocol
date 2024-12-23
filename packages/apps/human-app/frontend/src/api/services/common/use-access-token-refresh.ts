@@ -1,13 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
-import { signInSuccessResponseSchema } from '@/api/services/worker/sign-in';
 import { useAuth } from '@/auth/use-auth';
 import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
 import type { AuthType } from '@/shared/types/browser-auth-provider';
 import { useWeb3Auth } from '@/auth-web3/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
+import { refreshToken } from '@/api/fetcher';
 
 export function useAccessTokenRefresh() {
   const queryClient = useQueryClient();
@@ -32,19 +30,11 @@ export function useAccessTokenRefresh() {
       throwExpirationModalOnSignOut?: boolean;
     }) => {
       try {
-        const refetchAccessTokenSuccess = await apiClient(
-          apiPaths.worker.obtainAccessToken.path,
-          {
-            successSchema: signInSuccessResponseSchema,
-            options: {
-              method: 'POST',
-              body: JSON.stringify({
-                // eslint-disable-next-line camelcase -- camel case defined by api
-                refresh_token: browserAuthProvider.getRefreshToken(),
-              }),
-            },
-          }
-        );
+        const refetchAccessTokenSuccess = await refreshToken();
+
+        if (!refetchAccessTokenSuccess) {
+          throw new Error('Failed to refresh access token.');
+        }
 
         if (authType === 'web2') {
           signInWeb2(refetchAccessTokenSuccess);

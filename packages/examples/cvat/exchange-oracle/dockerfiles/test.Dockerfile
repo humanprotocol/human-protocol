@@ -14,4 +14,6 @@ RUN poetry config virtualenvs.create false \
 
 COPY . .
 
+RUN rm -f ./src/.env
+
 CMD ["pytest", "-W", "ignore::DeprecationWarning", "-v"]

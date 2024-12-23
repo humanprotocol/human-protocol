@@ -1,5 +1,5 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { decode } from 'jsonwebtoken';
 import { EscrowUtilsGateway } from '../../integrations/escrow/escrow-utils-gateway.service';
@@ -19,6 +19,8 @@ import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
 export class JobAssignmentService {
+  logger = new Logger(JobAssignmentService.name);
+
   constructor(
     private readonly configService: EnvironmentConfigService,
     private readonly exchangeOracleGateway: ExchangeOracleGateway,
@@ -50,6 +52,7 @@ export class JobAssignmentService {
   ): Promise<JobAssignmentResponse> {
     const response =
       await this.exchangeOracleGateway.postNewJobAssignment(command);
+
     const assignmentsParamsCommand = new JobsFetchParamsCommand();
     assignmentsParamsCommand.oracleAddress =
       await this.escrowUtilsGateway.getExchangeOracleAddressByEscrowAddress(
@@ -58,7 +61,12 @@ export class JobAssignmentService {
       );
     assignmentsParamsCommand.token = command.token;
 
-    this.updateAssignmentsCache(assignmentsParamsCommand);
+    this.updateAssignmentsCache(assignmentsParamsCommand).catch((error) => {
+      this.logger.error(
+        `Failed to update assignments cache after processing assignment: ${error.message}`,
+        error.stack,
+      );
+    });
 
     return response;
   }
@@ -71,7 +79,12 @@ export class JobAssignmentService {
     assignmentsParamsCommand.oracleAddress = command.oracleAddress;
     assignmentsParamsCommand.token = command.token;
 
-    await this.updateAssignmentsCache(assignmentsParamsCommand);
+    this.updateAssignmentsCache(assignmentsParamsCommand).catch((error) => {
+      this.logger.error(
+        `Failed to update assignments cache after processing resignment: ${error.message}`,
+        error.stack,
+      );
+    });
 
     return response;
   }

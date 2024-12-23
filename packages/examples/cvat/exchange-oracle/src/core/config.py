@@ -43,9 +43,9 @@ class PostgresConfig:
 
 
 class RedisConfig:
-    port = os.environ.get("REDIS_PORT", "6379")
+    port = int(os.environ.get("REDIS_PORT", "6379"))
     host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
-    database = os.environ.get("REDIS_DB", "")
+    database = int(os.environ.get("REDIS_DB", "0"))
     user = os.environ.get("REDIS_USER", "")
     password = os.environ.get("REDIS_PASSWORD", "")
     use_ssl = to_bool(os.environ.get("REDIS_USE_SSL", "false"))
@@ -142,20 +142,17 @@ class CronConfig:
             "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
         )
     )
-    track_escrow_validations_int = int(
-        os.environ.get(
-            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
-        )
+    track_completed_escrows_chunk_size = int(
+        os.environ.get("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100)
     )
-    track_completed_escrows_chunk_size = os.environ.get(
-        # backward compatibility
-        "TRACK_COMPLETED_ESCROWS_CHUNK_SIZE",
-        os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5),
+    track_escrow_validations_int = int(os.environ.get("TRACK_COMPLETED_ESCROWS_INT", 60))
+    track_escrow_validations_chunk_size = int(
+        os.environ.get("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1)
     )
     track_completed_escrows_max_downloading_retries = int(
         os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
-    "Maximum number of downloading attempts per job during results downloading"
+    "Maximum number of downloading attempts per job or project during results downloading"
 
     track_completed_escrows_jobs_downloading_batch_size = int(
         os.environ.get("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
@@ -194,6 +191,9 @@ class CvatConfig:
 
     cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
     cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
+
+    cvat_polygons_iou_threshold = float(os.environ.get("CVAT_POLYGONS_IOU_THRESHOLD", 0.5))
+    "`iou_threshold` parameter for quality settings in polygons tasks"
 
     cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
@@ -244,6 +244,9 @@ class FeaturesConfig:
 
     profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
+
+    manifest_cache_ttl = int(os.getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    "TTL for cached manifests"
 
 
 class CoreConfig:
@@ -298,6 +301,12 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
+class Development:
+    cvat_in_docker = bool(int(os.environ.get("DEV_CVAT_IN_DOCKER", "0")))
+    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
+    cvat_local_host = os.environ.get("DEV_CVAT_LOCAL_HOST", "localhost")
+
+
 class Environment(str, Enum):
     PRODUCTION = "production"
     DEVELOPMENT = "development"
@@ -337,6 +346,7 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
+    development_config = Development
 
     @classmethod
     def is_development_mode(cls) -> bool:

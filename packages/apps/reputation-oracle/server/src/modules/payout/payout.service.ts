@@ -23,7 +23,7 @@ import {
   SaveResultDto,
 } from '../../common/dto/result';
 import { RequestAction } from './payout.interface';
-import { getRequestType } from '../../common/utils';
+import { getRequestType, isValidJobRequestType } from '../../common/utils';
 import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class PayoutService {
    * @param escrowAddress The escrow contract address.
    * @returns {Promise<SaveResultDto>} The URL and hash for the stored results.
    */
-  public async saveResults(
+  public async processResults(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<SaveResultDto> {
@@ -63,7 +63,14 @@ export class PayoutService {
     const manifest =
       await this.storageService.downloadJsonLikeData(manifestUrl);
 
-    const requestType = getRequestType(manifest);
+    const requestType = getRequestType(manifest).toLowerCase();
+
+    if (!isValidJobRequestType(requestType)) {
+      throw new ControlledError(
+        `Unsupported request type: ${requestType}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
@@ -106,7 +113,14 @@ export class PayoutService {
     const manifest =
       await this.storageService.downloadJsonLikeData(manifestUrl);
 
-    const requestType = getRequestType(manifest);
+    const requestType = getRequestType(manifest).toLowerCase();
+
+    if (!isValidJobRequestType(requestType)) {
+      throw new ControlledError(
+        `Unsupported request type: ${requestType}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
@@ -123,6 +137,7 @@ export class PayoutService {
       results.amounts,
       url,
       hash,
+      true, // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
       {
         gasPrice: await this.web3Service.calculateGasPrice(chainId),
       },
@@ -179,6 +194,17 @@ export class PayoutService {
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      calculatePayouts: async (
+        manifest: CvatManifestDto,
+        data: CalculatePayoutsDto,
+      ): Promise<PayoutsDataDto> =>
+        this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
+    },
+    [JobRequestType.IMAGE_POLYGONS]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,

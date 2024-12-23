@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts';
+import { Address, dataSource } from '@graphprotocol/graph-ts';
 
 import {
   BulkTransfer,
@@ -9,7 +9,7 @@ import {
 import {
   BulkPayoutEvent,
   Escrow,
-  SetupEvent,
+  PendingEvent,
   StoreResultsEvent,
 } from '../../../generated/schema';
 import { createOrLoadEscrowStatistics } from '../Escrow';
@@ -28,19 +28,17 @@ enum EscrowStatuses {
 }
 
 export function handlePending(event: Pending): void {
-  createTransaction(event, 'setup');
-  // Create SetupEvent entity
-  const setupEventEntity = new SetupEvent(toEventId(event));
-  setupEventEntity.block = event.block.number;
-  setupEventEntity.timestamp = event.block.timestamp;
-  setupEventEntity.txHash = event.transaction.hash;
-  setupEventEntity.escrowAddress = event.address;
-  setupEventEntity.sender = event.transaction.from;
-  setupEventEntity.save();
+  // Create PendingEvent entity
+  const pendingEventEntity = new PendingEvent(toEventId(event));
+  pendingEventEntity.block = event.block.number;
+  pendingEventEntity.timestamp = event.block.timestamp;
+  pendingEventEntity.txHash = event.transaction.hash;
+  pendingEventEntity.escrowAddress = dataSource.address();
+  pendingEventEntity.sender = event.transaction.from;
+  pendingEventEntity.save();
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.setupEventCount = statsEntity.setupEventCount.plus(ONE_BI);
   statsEntity.pendingStatusEventCount =
     statsEntity.pendingStatusEventCount.plus(ONE_BI);
   statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
@@ -50,8 +48,6 @@ export function handlePending(event: Pending): void {
 
   // Update event day data
   const eventDayData = getEventDayData(event);
-  eventDayData.dailySetupEventCount =
-    eventDayData.dailySetupEventCount.plus(ONE_BI);
   eventDayData.dailyPendingStatusEventCount =
     eventDayData.dailyPendingStatusEventCount.plus(ONE_BI);
   eventDayData.dailyTotalEventCount = eventDayData.dailyTotalEventCount.plus(
@@ -79,11 +75,19 @@ export function handlePending(event: Pending): void {
     }
 
     escrowEntity.save();
+
+    createTransaction(
+      event,
+      'setup',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
-  createTransaction(event, 'storeResults');
   // Create StoreResultsEvent entity
   const eventEntity = new StoreResultsEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -114,11 +118,19 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   if (escrowEntity) {
     escrowEntity.intermediateResultsUrl = event.params._url;
     escrowEntity.save();
+
+    createTransaction(
+      event,
+      'storeResults',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 }
 
 export function handleBulkTransfer(event: BulkTransfer): void {
-  createTransaction(event, 'bulkTransfer');
   // Create BulkPayoutEvent entity
   const eventEntity = new BulkPayoutEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -184,6 +196,15 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       escrowEntity.finalResultsUrl = finalResultsUrl.value;
     }
     escrowEntity.save();
+
+    createTransaction(
+      event,
+      'bulkTransfer',
+      event.transaction.from,
+      Address.fromBytes(escrowEntity.address),
+      null,
+      Address.fromBytes(escrowEntity.address)
+    );
   }
 
   // Save statistics, and event day data

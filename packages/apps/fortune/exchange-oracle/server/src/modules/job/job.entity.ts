@@ -17,6 +17,9 @@ export class JobEntity extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   public manifestUrl: string;
 
+  @Column({ type: 'varchar' })
+  public rewardToken: string;
+
   @Column({
     type: 'enum',
     enum: JobStatus,

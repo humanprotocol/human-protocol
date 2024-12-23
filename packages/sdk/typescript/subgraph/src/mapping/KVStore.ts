@@ -9,7 +9,7 @@ import { DataSaved } from '../../generated/KVStore/KVStore';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { isValidEthAddress } from './utils/ethAdrress';
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
@@ -58,7 +58,7 @@ export function createOrUpdateKVStore(event: DataSaved): void {
 }
 
 export function handleDataSaved(event: DataSaved): void {
-  createTransaction(event, 'set');
+  createTransaction(event, 'set', event.transaction.from, dataSource.address());
   // Create KVStoreSetEvent entity
   const eventEntity = new KVStoreSetEvent(toEventId(event));
   eventEntity.block = event.block.number;
@@ -84,6 +84,8 @@ export function handleDataSaved(event: DataSaved): void {
     leader.publicKey = event.params.value;
   } else if (key == 'webhookurl' || key == 'webhook_url') {
     leader.webhookUrl = event.params.value;
+  } else if (key == 'website') {
+    leader.website = event.params.value;
   } else if (key == 'url') {
     leader.url = event.params.value;
   } else if (key == 'jobtypes' || key == 'job_types') {
@@ -102,11 +104,25 @@ export function handleDataSaved(event: DataSaved): void {
 
     const operator = createOrLoadLeader(ethAddress);
 
-    if (event.params.value.toLowerCase() == 'active') {
-      operator.reputationNetwork = reputationNetwork.id;
-    } else if (event.params.value.toLowerCase() == 'inactive') {
-      operator.reputationNetwork = null;
+    let reputationNetworks = operator.reputationNetworks;
+    if (reputationNetworks === null) {
+      reputationNetworks = [];
     }
+
+    if (event.params.value.toLowerCase() == 'active') {
+      reputationNetworks.push(reputationNetwork.id);
+    } else if (event.params.value.toLowerCase() == 'inactive') {
+      const filteredNetworks: Bytes[] = [];
+      for (let i = 0; i < reputationNetworks.length; i++) {
+        if (reputationNetworks[i] != reputationNetwork.id) {
+          filteredNetworks.push(reputationNetworks[i]);
+        }
+      }
+      reputationNetworks = filteredNetworks;
+    }
+
+    operator.reputationNetworks = reputationNetworks;
+
     operator.save();
   } else if (key == 'registration_needed') {
     leader.registrationNeeded = event.params.value.toLowerCase() == 'true';

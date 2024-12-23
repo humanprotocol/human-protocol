@@ -51,11 +51,6 @@ export const DataGridWrapper = ({
           expand: true,
         }}
         onSortModelChange={handleSortModelChange}
-        initialState={{
-          sorting: {
-            sortModel: [{ field: 'amountStaked', sort: 'desc' }],
-          },
-        }}
         slots={{
           noRowsOverlay() {
             if (status === 'error') {

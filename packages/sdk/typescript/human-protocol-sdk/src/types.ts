@@ -116,10 +116,6 @@ export type NetworkData = {
    */
   stakingAddress: string;
   /**
-   * RewardPool contract address
-   */
-  rewardPoolAddress: string;
-  /**
    * KVStore contract address
    */
   kvstoreAddress: string;
@@ -153,4 +149,22 @@ export type EscrowCancel = {
    * The amount refunded in the escrow cancellation.
    */
   amountRefunded: bigint;
+};
+
+/**
+ * Represents the response data for an escrow withdrawal.
+ */
+export type EscrowWithdraw = {
+  /**
+   * The hash of the transaction associated with the escrow withdrawal.
+   */
+  txHash: string;
+  /**
+   * The address of the token used for the withdrawal.
+   */
+  tokenAddress: string;
+  /**
+   * The amount withdrawn from the escrow.
+   */
+  amountWithdrawn: bigint;
 };

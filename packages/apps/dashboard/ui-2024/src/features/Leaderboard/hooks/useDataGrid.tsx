@@ -27,7 +27,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
     return data.map((row, idx) => {
       return {
         ...row,
-        id: row.address,
+        id: `${row.address}${row.chainId}`,
         rowIndex: idx,
       };
     });

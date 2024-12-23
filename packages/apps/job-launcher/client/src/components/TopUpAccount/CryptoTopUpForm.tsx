@@ -82,8 +82,8 @@ export const CryptoTopUpForm = () => {
     return (
       <Box>
         <Typography>
-          You are on wrong network, please switch to one of the supported
-          networks.
+          Your wallet is connected to an unsupported network. Please switch to a
+          supported network.
         </Typography>
       </Box>
     );

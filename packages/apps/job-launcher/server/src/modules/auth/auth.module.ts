@@ -14,6 +14,8 @@ import { ApiKeyRepository } from './apikey.repository';
 import { ApiKeyEntity } from './apikey.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
+import { WhitelistModule } from '../whitelist/whitelist.module';
+import { WhitelistService } from '../whitelist/whitelist.service';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { UserRepository } from '../user/user.repository';
     }),
     TypeOrmModule.forFeature([TokenEntity, ApiKeyEntity, UserEntity]),
     SendGridModule,
+    WhitelistModule,
   ],
   providers: [
     JwtHttpStrategy,
@@ -37,6 +40,7 @@ import { UserRepository } from '../user/user.repository';
     TokenRepository,
     ApiKeyRepository,
     UserRepository,
+    WhitelistService,
   ],
   controllers: [AuthJwtController],
   exports: [AuthService],

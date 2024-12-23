@@ -34,10 +34,12 @@ import {
   MOCK_STRIPE_API_VERSION,
   MOCK_STRIPE_APP_INFO_URL,
   MOCK_STRIPE_SECRET_KEY,
+  MOCK_MAX_RETRY_COUNT,
 } from '../../../test/constants';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
+import { JobRepository } from '../job/job.repository';
 
 jest.mock('@human-protocol/sdk');
 
@@ -107,6 +109,29 @@ describe('WebhookController', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: JobRepository,
+          useValue: createMock<JobRepository>(),
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              switch (key) {
+                case 'HOST':
+                  return '127.0.0.1';
+                case 'PORT':
+                  return 5000;
+                case 'WEB3_PRIVATE_KEY':
+                  return MOCK_PRIVATE_KEY;
+                case 'MAX_RETRY_COUNT':
+                  return MOCK_MAX_RETRY_COUNT;
+                default:
+                  return null;
+              }
+            }),
+          },
         },
         {
           provide: HttpService,

@@ -84,4 +84,8 @@ export class ReputationDto {
   @IsEnumCaseInsensitive(ReputationLevel)
   @Transform(({ value }) => Number(value))
   reputation: ReputationLevel;
+
+  @ApiProperty({ enum: ReputationEntityType })
+  @IsEnumCaseInsensitive(ReputationEntityType)
+  role: ReputationEntityType;
 }

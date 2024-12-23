@@ -2,16 +2,7 @@ import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { ethers, upgrades } from 'hardhat';
 import { EventLog, Signer } from 'ethers';
-import {
-  Escrow,
-  EscrowFactory,
-  HMToken,
-  Staking,
-  RewardPool,
-} from '../typechain-types';
-
-const MOCK_URL = 'http://google.com/fake';
-const MOCK_HASH = 'kGKmnj9BRf';
+import { EscrowFactory, HMToken, Staking } from '../typechain-types';
 
 const mineNBlocks = async (n: number) => {
   await Promise.all(
@@ -26,7 +17,7 @@ const mineNBlocks = async (n: number) => {
 describe('Staking', function () {
   const minimumStake = 2;
   const lockPeriod = 2;
-  const rewardFee = 1;
+  const feePercentage = 10;
   const jobRequesterId = 'job-requester-id';
 
   let owner: Signer,
@@ -38,10 +29,7 @@ describe('Staking', function () {
     reputationOracle: Signer,
     recordingOracle: Signer;
 
-  let token: HMToken,
-    escrowFactory: EscrowFactory,
-    staking: Staking,
-    rewardPool: RewardPool;
+  let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
 
   this.beforeAll(async () => {
     [
@@ -90,13 +78,14 @@ describe('Staking', function () {
   });
 
   this.beforeEach(async () => {
-    // Deploy Staking Conract
+    // Deploy Staking Contract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = (await upgrades.deployProxy(
-      Staking,
-      [await token.getAddress(), minimumStake, lockPeriod],
-      { kind: 'uups', initializer: 'initialize' }
-    )) as unknown as Staking;
+    staking = await Staking.deploy(
+      await token.getAddress(),
+      minimumStake,
+      lockPeriod,
+      feePercentage
+    );
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory(
@@ -105,17 +94,9 @@ describe('Staking', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [await staking.getAddress()],
+      [await staking.getAddress(), minimumStake],
       { kind: 'uups', initializer: 'initialize' }
     )) as unknown as EscrowFactory;
-
-    // Deploy Reward Pool Conract
-    const RewardPool = await ethers.getContractFactory('RewardPool');
-    rewardPool = (await upgrades.deployProxy(
-      RewardPool,
-      [await token.getAddress(), await staking.getAddress(), rewardFee],
-      { kind: 'uups', initializer: 'initialize' }
-    )) as unknown as RewardPool;
 
     // Topup staking address
     await token.connect(owner).transfer(await staking.getAddress(), 1000);
@@ -151,6 +132,11 @@ describe('Staking', function () {
       const result = await staking.lockPeriod();
       expect(result.toString()).to.equal(lockPeriod.toString());
     });
+
+    it('Should set the right fee percentage', async () => {
+      const result = await staking.feePercentage();
+      expect(result.toString()).to.equal(feePercentage.toString());
+    });
   });
 
   describe('stake', function () {
@@ -182,8 +168,10 @@ describe('Staking', function () {
       it('Should stake token and increase staker stake', async function () {
         await staking.connect(operator).stake(2);
         await expect(
-          await staking.connect(operator).hasStake(await operator.getAddress())
-        ).to.equal(true);
+          await staking
+            .connect(operator)
+            .getStakedTokens(await operator.getAddress())
+        ).to.above(0);
       });
     });
   });
@@ -211,12 +199,13 @@ describe('Staking', function () {
         ).to.be.revertedWith('Insufficient amount to unstake');
       });
 
-      it('Should revert with the right error if total stake is below the minimum threshold', async function () {
-        const amount = 9;
+      it('Should revert with the right error if there is a pending unstake', async function () {
+        const amount = 1;
+        await staking.connect(operator).unstake(amount);
 
         await expect(
           staking.connect(operator).unstake(amount)
-        ).to.be.revertedWith('Total stake is below the minimum threshold');
+        ).to.be.revertedWith('Unstake in progress, complete it first');
       });
     });
 
@@ -237,116 +226,9 @@ describe('Staking', function () {
         await staking.connect(operator).unstake(amount);
         const staker = await staking
           .connect(operator)
-          .getStaker(await operator.getAddress());
+          .stakes(await operator.getAddress());
         await expect(staker.tokensLocked).to.equal(amount.toString());
         await expect(staker.tokensLockedUntil).to.not.equal('0');
-      });
-    });
-  });
-
-  describe('allocate', function () {
-    let escrowAddress: string;
-
-    this.beforeEach(async () => {
-      const amount = 10;
-
-      await staking.connect(operator).stake(amount);
-
-      const result = await (
-        await escrowFactory
-          .connect(operator)
-          .createEscrow(
-            await token.getAddress(),
-            [await validator.getAddress()],
-            jobRequesterId
-          )
-      ).wait();
-      const event = (
-        result?.logs?.find(({ topics }) =>
-          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
-        ) as EventLog
-      )?.args;
-
-      expect(event?.token).to.equal(
-        await token.getAddress(),
-        'token address is correct'
-      );
-      expect(event?.escrow).to.not.be.null;
-
-      escrowAddress = event?.escrow;
-    });
-
-    describe('Validations', function () {
-      it('Should revert with the right error if not a valid address', async function () {
-        const amount = 5;
-
-        await expect(
-          staking.connect(operator).allocate(ethers.ZeroAddress, amount)
-        ).to.be.revertedWith('Must be a valid address');
-      });
-
-      it('Should revert with the right error if not an insufficient amount of tokens in the stake', async function () {
-        const amount = 20;
-        await expect(
-          staking.connect(operator).allocate(escrowAddress.toString(), amount)
-        ).to.be.revertedWith('Insufficient amount of tokens in the stake');
-      });
-
-      it('Should revert with the right error if not a positive number', async function () {
-        const amount = 0;
-
-        await expect(
-          staking.connect(operator).allocate(escrowAddress.toString(), amount)
-        ).to.be.revertedWith('Must be a positive number');
-      });
-
-      it('Should revert with the right error if allocation already exists', async function () {
-        const amount = 3;
-
-        await staking
-          .connect(operator)
-          .allocate(escrowAddress.toString(), amount);
-
-        await expect(
-          staking.connect(operator).allocate(escrowAddress.toString(), amount)
-        ).to.be.revertedWith('Allocation already exists');
-      });
-    });
-
-    describe('Events', function () {
-      it('Should emit an event on stake allocated', async function () {
-        const amount = 5;
-
-        await expect(
-          await staking
-            .connect(operator)
-            .allocate(escrowAddress.toString(), amount)
-        )
-          .to.emit(staking, 'StakeAllocated')
-          .withArgs(
-            await operator.getAddress(),
-            amount,
-            escrowAddress.toString(),
-            anyValue
-          );
-      });
-    });
-
-    describe('Allocate tokens', function () {
-      it('Should allocate tokens to allocation', async function () {
-        const amount = 5;
-
-        await staking
-          .connect(operator)
-          .allocate(escrowAddress.toString(), amount);
-        const allocation = await staking
-          .connect(operator)
-          .getAllocation(escrowAddress.toString());
-
-        await expect(allocation.escrowAddress).to.equal(
-          escrowAddress.toString()
-        );
-        await expect(allocation.tokens).to.equal(amount.toString());
       });
     });
   });
@@ -379,7 +261,7 @@ describe('Staking', function () {
       expect(event?.escrow).to.not.be.null;
     });
 
-    describe('Withdrawal without allocation', function () {
+    describe('Withdrawal without tokens available', function () {
       describe('Validations', function () {
         it('Should revert with the right error if has no available tokens for withdrawal', async function () {
           await expect(staking.connect(operator).withdraw()).to.be.revertedWith(
@@ -411,7 +293,7 @@ describe('Staking', function () {
 
           const staker = await staking
             .connect(operator)
-            .getStaker(await operator.getAddress());
+            .stakes(await operator.getAddress());
 
           let latestBlockNumber = await ethers.provider.getBlockNumber();
           expect(latestBlockNumber).to.be.lessThan(staker.tokensLockedUntil);
@@ -427,7 +309,7 @@ describe('Staking', function () {
           await staking.connect(operator).withdraw();
           const stakerAfterWithdrawn = await staking
             .connect(operator)
-            .getStaker(await operator.getAddress());
+            .stakes(await operator.getAddress());
 
           await expect(stakerAfterWithdrawn.tokensStaked).to.equal(
             restTokensStaked.toString()
@@ -444,9 +326,9 @@ describe('Staking', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         const minumumStake = 0;
 
-        await expect(
-          staking.connect(operator).setMinimumStake(minumumStake)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).setMinimumStake(minumumStake))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -455,16 +337,6 @@ describe('Staking', function () {
         await expect(
           staking.connect(owner).setMinimumStake(minumumStake)
         ).to.be.revertedWith('Must be a positive number');
-      });
-    });
-
-    describe('Events', function () {
-      it('Should emit an event on stake locked', async function () {
-        const minumumStake = 5;
-
-        await expect(await staking.connect(owner).setMinimumStake(minumumStake))
-          .to.emit(staking, 'SetMinumumStake')
-          .withArgs(minumumStake);
       });
     });
 
@@ -483,9 +355,9 @@ describe('Staking', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         const lockPeriod = 0;
 
-        await expect(
-          staking.connect(operator).setLockPeriod(lockPeriod)
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        await expect(staking.connect(operator).setLockPeriod(lockPeriod))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -497,18 +369,8 @@ describe('Staking', function () {
       });
     });
 
-    describe('Events', function () {
-      it('Should emit an event on stake locked', async function () {
-        const lockPeriod = 5;
-
-        await expect(await staking.connect(owner).setLockPeriod(lockPeriod))
-          .to.emit(staking, 'SetLockPeriod')
-          .withArgs(lockPeriod);
-      });
-    });
-
-    describe('Set minimum stake', function () {
-      it('Should assign a value to minimum stake variable', async function () {
+    describe('Set lock period', function () {
+      it('Should assign a value to lock period variable', async function () {
         const lockPeriod = 5;
 
         await staking.connect(owner).setLockPeriod(lockPeriod);
@@ -517,186 +379,41 @@ describe('Staking', function () {
     });
   });
 
-  describe('setRewardPool', function () {
+  describe('setFeePercentage', function () {
     describe('Validations', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
+        const feePercentage = 0;
+
+        await expect(staking.connect(operator).setFeePercentage(feePercentage))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
+      });
+
+      it('Should revert with the right error if exceed the maximum value', async function () {
+        const feePercentage = 120;
+
         await expect(
-          staking.connect(operator).setRewardPool(await rewardPool.getAddress())
-        ).to.be.revertedWith('Ownable: caller is not the owner');
-      });
-
-      it('Should revert with the right error if not a positive number', async function () {
-        await expect(
-          staking.connect(owner).setRewardPool(ethers.ZeroAddress)
-        ).to.be.revertedWith('Must be a valid address');
+          staking.connect(owner).setFeePercentage(feePercentage)
+        ).to.be.revertedWith('Fee cannot exceed 100%');
       });
     });
 
-    describe('Events', function () {
-      it('Should emit an event on set reward pool', async function () {
-        await expect(
-          await staking
-            .connect(owner)
-            .setRewardPool(await rewardPool.getAddress())
-        )
-          .to.emit(staking, 'SetRewardPool')
-          .withArgs(await rewardPool.getAddress());
-      });
-    });
+    describe('Set fee percentage', function () {
+      it('Should assign a value to fee percentage variable', async function () {
+        const feePercentage = 5;
 
-    describe('Set minimum stake', function () {
-      it('Should assign a value to minimum stake variable', async function () {
-        await staking
-          .connect(owner)
-          .setRewardPool(await rewardPool.getAddress());
-        await expect(await staking.rewardPool()).to.equal(
-          await rewardPool.getAddress()
-        );
-      });
-    });
-  });
-
-  describe('isAllocation', function () {
-    describe('Is escrow address has allocation', function () {
-      let escrowAddress: string;
-
-      this.beforeEach(async () => {
-        const stakedTokens = 10;
-        await staking.connect(operator).stake(stakedTokens);
-
-        const result = await (
-          await escrowFactory
-            .connect(operator)
-            .createEscrow(
-              await token.getAddress(),
-              [await validator.getAddress()],
-              jobRequesterId
-            )
-        ).wait();
-        const event = (
-          result?.logs?.find(({ topics }) =>
-            topics.includes(ethers.id('LaunchedV2(address,address,string)'))
-          ) as EventLog
-        )?.args;
-
-        expect(event?.token).to.equal(
-          await token.getAddress(),
-          'token address is correct'
-        );
-        expect(event?.escrow).to.not.be.null;
-
-        escrowAddress = event?.escrow;
-      });
-
-      it('Should return an escrow address has not allocation', async function () {
-        expect(
-          await staking.connect(owner).isAllocation(escrowAddress)
-        ).to.equal(false);
-      });
-
-      it('Should return an escrow address has allocation', async function () {
-        const allocatedTokens = 5;
-        await staking
-          .connect(operator)
-          .allocate(escrowAddress, allocatedTokens);
-
-        expect(
-          await staking.connect(owner).isAllocation(escrowAddress)
-        ).to.equal(true);
-      });
-    });
-  });
-
-  describe('hasStake', function () {
-    describe('Is stakes has stake', function () {
-      it('Should return an escrow address has not allocation', async function () {
-        expect(
-          await staking.connect(owner).hasStake(await operator.getAddress())
-        ).to.equal(false);
-      });
-
-      it('Should return an escrow address has allocation', async function () {
-        const stakedTokens = 10;
-        await staking.connect(operator).stake(stakedTokens);
-
-        expect(
-          await staking.connect(owner).hasStake(await operator.getAddress())
-        ).to.equal(true);
-      });
-    });
-  });
-
-  describe('getAllocation', function () {
-    describe('Return allocation by escrow address', function () {
-      let escrowAddress: string;
-      const allocatedTokens = 5;
-
-      this.beforeEach(async () => {
-        const stakedTokens = 10;
-
-        await staking.connect(operator).stake(stakedTokens);
-
-        const result = await (
-          await escrowFactory
-            .connect(operator)
-            .createEscrow(
-              await token.getAddress(),
-              [await validator.getAddress()],
-              jobRequesterId
-            )
-        ).wait();
-        const event = (
-          result?.logs?.find(({ topics }) =>
-            topics.includes(ethers.id('LaunchedV2(address,address,string)'))
-          ) as EventLog
-        )?.args;
-
-        expect(event?.token).to.equal(
-          await token.getAddress(),
-          'token address is correct'
-        );
-        expect(event?.escrow).to.not.be.null;
-
-        escrowAddress = event?.escrow;
-
-        await staking
-          .connect(operator)
-          .allocate(escrowAddress, allocatedTokens);
-      });
-
-      it('Should return a null allocation by escrow address', async function () {
-        const allocation = await staking
-          .connect(operator)
-          .getAllocation(ethers.ZeroAddress);
-
-        expect(allocation.escrowAddress).to.equal(ethers.ZeroAddress);
-        expect(allocation.staker).to.equal(ethers.ZeroAddress);
-        expect(allocation.tokens).to.equal(0); // Tokens allocated to a escrowAddress
-        expect(allocation.createdAt).to.equal(0); // Time when allocation was created
-        expect(allocation.closedAt).to.equal(0); // Time when allocation was closed
-      });
-
-      it('Should return an allocation by escrow address', async function () {
-        const allocation = await staking
-          .connect(operator)
-          .getAllocation(escrowAddress);
-
-        expect(allocation.escrowAddress).to.equal(escrowAddress);
-        expect(allocation.staker).to.equal(await operator.getAddress());
-        expect(allocation.tokens).to.equal(allocatedTokens); // Tokens allocated to a escrowAddress
+        await staking.connect(owner).setFeePercentage(feePercentage);
+        await expect(await staking.feePercentage()).to.equal(feePercentage);
       });
     });
   });
 
   describe('slash', function () {
     let escrowAddress: string;
-    const stakedTokens = 10;
-    const allocatedTokens = 5;
-    const slashedTokens = 2;
+    const stakedTokens = 100;
+    const slashedTokens = 100;
 
     this.beforeEach(async () => {
-      await staking.connect(owner).setRewardPool(await rewardPool.getAddress());
-
       await staking.connect(validator).stake(stakedTokens);
 
       await staking.connect(operator).stake(stakedTokens);
@@ -723,12 +440,10 @@ describe('Staking', function () {
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
-
-      await staking.connect(operator).allocate(escrowAddress, allocatedTokens);
     });
 
     describe('Validations', function () {
-      it('Should revert with the right error if caller is not the owner', async function () {
+      it('Should revert with the right error if caller is not an allowed slasher', async function () {
         await expect(
           staking
             .connect(operator)
@@ -738,7 +453,7 @@ describe('Staking', function () {
               escrowAddress,
               slashedTokens
             )
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        ).to.be.revertedWith(`Caller is not a slasher`);
       });
 
       it('Should revert with the right error if invalid address', async function () {
@@ -751,10 +466,10 @@ describe('Staking', function () {
               ethers.ZeroAddress,
               slashedTokens
             )
-        ).to.be.revertedWith('Must be a valid address');
+        ).to.be.revertedWith('Must be a valid escrow address');
       });
 
-      it('Should revert if slash amount exceeds allocation', async function () {
+      it('Should revert if slash amount exceeds staking', async function () {
         await staking
           .connect(owner)
           .slash(
@@ -771,9 +486,9 @@ describe('Staking', function () {
               await validator.getAddress(),
               await operator.getAddress(),
               escrowAddress,
-              allocatedTokens
+              stakedTokens
             )
-        ).to.be.revertedWith('Slash tokens exceed allocated ones');
+        ).to.be.revertedWith('Slash amount exceeds staked amount');
       });
 
       it('Should revert if slash amount is 0', async function () {
@@ -792,6 +507,7 @@ describe('Staking', function () {
 
     describe('Events', function () {
       it('Should emit an event on stake slashed', async function () {
+        const feeAmount = (slashedTokens * feePercentage) / 100;
         await expect(
           await staking
             .connect(owner)
@@ -805,46 +521,32 @@ describe('Staking', function () {
           .to.emit(staking, 'StakeSlashed')
           .withArgs(
             await operator.getAddress(),
-            slashedTokens,
+            slashedTokens - feeAmount,
             escrowAddress,
             await validator.getAddress()
           );
       });
     });
 
-    describe('Return allocation by escrow address', function () {
-      it('Should slash tokens from stake and transfer to the reward pool', async function () {
-        const slashedTokens = 2;
-
-        await staking
-          .connect(owner)
-          .slash(
-            await validator.getAddress(),
-            await operator.getAddress(),
-            escrowAddress,
-            slashedTokens
-          );
-
-        // await staking.connect(operator).withdraw();
-
-        const allocation = await staking
-          .connect(operator)
-          .getAllocation(escrowAddress);
-        await expect(allocation.tokens).to.equal(
-          allocatedTokens - slashedTokens
+    it('Should transfer the slashed amount to the slasher', async function () {
+      const initialBalance = await token.connect(owner).balanceOf(validator);
+      const initialStake = (await staking.connect(owner).stakes(operator))
+        .tokensStaked;
+      await staking
+        .connect(owner)
+        .slash(
+          await validator.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          slashedTokens
         );
-
-        const stakerAfterSlash = await staking
-          .connect(operator)
-          .getStaker(await operator.getAddress());
-        await expect(stakerAfterSlash.tokensStaked).to.equal(
-          stakedTokens - slashedTokens
-        );
-
-        await expect(
-          await token.balanceOf(await rewardPool.getAddress())
-        ).to.equal(slashedTokens);
-      });
+      const feeAmount = (slashedTokens * feePercentage) / 100;
+      const finalBalance = await token.connect(owner).balanceOf(validator);
+      const finalStake = (await staking.connect(owner).stakes(operator))
+        .tokensStaked;
+      expect(finalBalance - initialBalance).to.equal(slashedTokens - feeAmount);
+      expect(initialStake - finalStake).to.equal(slashedTokens - feeAmount);
+      expect(await staking.connect(owner).feeBalance()).to.equal(feeAmount);
     });
   });
 
@@ -870,7 +572,7 @@ describe('Staking', function () {
     });
 
     it('Should return list of stakers', async () => {
-      const [stakers, stakes] = await staking.getListOfStakers();
+      const [stakers, stakes] = await staking.getListOfStakers(0, 10);
 
       expect(stakers.length).to.equal(6);
       expect(stakes.length).to.equal(6);
@@ -884,26 +586,22 @@ describe('Staking', function () {
     });
   });
 
-  describe('closeAllocation', function () {
+  describe('withdrawFees', function () {
     let escrowAddress: string;
-    let escrow: Escrow;
+    const stakedTokens = 100;
+    const slashedTokens = 100;
 
     this.beforeEach(async () => {
-      const amount = 10;
-      const allocationAmount = 5;
+      await staking.connect(validator).stake(stakedTokens);
 
-      await staking.connect(operator).stake(amount);
+      await staking.connect(operator).stake(stakedTokens);
 
       const result = await (
         await escrowFactory
           .connect(operator)
           .createEscrow(
             await token.getAddress(),
-            [
-              await validator.getAddress(),
-              await reputationOracle.getAddress(),
-              await recordingOracle.getAddress(),
-            ],
+            [await validator.getAddress()],
             jobRequesterId
           )
       ).wait();
@@ -918,99 +616,111 @@ describe('Staking', function () {
         'token address is correct'
       );
       expect(event?.escrow).to.not.be.null;
-
       escrowAddress = event?.escrow;
+    });
 
-      // Fund escrow
-      await token.connect(owner).transfer(escrowAddress, 100);
+    describe('Valitions', function () {
+      it('Should revert with the right error if caller is not an owner', async function () {
+        await expect(staking.connect(operator).withdrawFees())
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
+      });
 
-      const EscrowFactory = await ethers.getContractFactory(
-        'contracts/Escrow.sol:Escrow'
-      );
-      escrow = (await EscrowFactory.attach(escrowAddress)) as Escrow;
-
-      // Setup escrow
-      await escrow
-        .connect(operator)
-        .setup(
-          await reputationOracle.getAddress(),
-          await recordingOracle.getAddress(),
-          await exchangeOracle.getAddress(),
-          10,
-          10,
-          10,
-          MOCK_URL,
-          MOCK_HASH
+      it('Should revert with the right error if there are no fees to withdraw', async function () {
+        await expect(staking.connect(owner).withdrawFees()).to.be.revertedWith(
+          'No fees to withdraw'
         );
-
-      await staking
-        .connect(operator)
-        .allocate(escrowAddress.toString(), allocationAmount);
-    });
-
-    describe('Validations', function () {
-      it('Should revert with the right error if not a valid address', async function () {
-        await expect(
-          staking.connect(operator).closeAllocation(ethers.ZeroAddress)
-        ).to.be.revertedWith('Must be a valid address');
-      });
-
-      it('Should revert with the right error if the caller is not the allocator', async function () {
-        await expect(
-          staking.connect(validator).closeAllocation(escrowAddress.toString())
-        ).to.be.revertedWith('Only the allocator can close the allocation');
-      });
-
-      it('Should revert with the right error if escrow is not completed nor cancelled', async function () {
-        await expect(
-          staking.connect(operator).closeAllocation(escrowAddress.toString())
-        ).to.be.revertedWith('Allocation has no completed state');
       });
     });
 
-    describe('Close allocation on completed/cancelled escrows', function () {
-      it('Should close allocation on completed escrows', async function () {
-        // Bulk payout & Complete Escrow
-        await escrow
-          .connect(operator)
-          .bulkPayOut(
-            [await operator2.getAddress()],
-            [100],
-            MOCK_URL,
-            MOCK_HASH,
-            '000'
+    describe('Withdraw fees', function () {
+      let feeAmount: number;
+      this.beforeEach(async () => {
+        await staking
+          .connect(owner)
+          .slash(
+            await validator.getAddress(),
+            await operator.getAddress(),
+            escrowAddress,
+            slashedTokens
           );
 
-        await escrow.connect(operator).complete();
-
-        // Close allocation
-        await staking
-          .connect(operator)
-          .closeAllocation(escrowAddress.toString());
-
-        const allocation = await staking
-          .connect(operator)
-          .getAllocation(escrowAddress.toString());
-
-        expect(allocation.closedAt).not.to.be.null;
-        expect(allocation.tokens.toString()).to.equal('0');
+        feeAmount = (slashedTokens * feePercentage) / 100;
+        expect(await staking.connect(owner).feeBalance()).to.equal(feeAmount);
       });
 
-      it('Should close allocation on cancelled escrows', async function () {
-        // Close escrow
-        await escrow.connect(operator).cancel();
+      it('Should withdraw the correct amount of fees', async function () {
+        const initialBalance = await token.connect(owner).balanceOf(owner);
+        const initialFees = await staking.connect(owner).feeBalance();
+        expect(initialFees).to.equal(feeAmount.toString());
 
-        // Close allocation
-        await staking
-          .connect(operator)
-          .closeAllocation(escrowAddress.toString());
+        await staking.connect(owner).withdrawFees();
 
-        const allocation = await staking
-          .connect(operator)
-          .getAllocation(escrowAddress.toString());
+        const finalBalance = await token.connect(owner).balanceOf(owner);
+        const finalFees = await staking.connect(owner).feeBalance();
+        expect(finalFees).to.equal('0');
+        expect(finalBalance - initialBalance).to.equal(feeAmount);
+      });
+    });
+  });
 
-        expect(allocation.closedAt).not.to.be.null;
-        expect(allocation.tokens.toString()).to.equal('0');
+  describe('addSlasher', function () {
+    let newSlasher: string;
+
+    this.beforeEach(async () => {
+      newSlasher = await operator2.getAddress();
+    });
+
+    describe('Validaciones', function () {
+      it('Should revert with the right error if caller is not the owner', async function () {
+        await expect(staking.connect(operator).addSlasher(newSlasher))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
+      });
+
+      it('Should revert with the right error if the address is already a slasher', async function () {
+        await staking.connect(owner).addSlasher(newSlasher);
+        await expect(
+          staking.connect(owner).addSlasher(newSlasher)
+        ).to.be.revertedWith('Address is already a slasher');
+      });
+    });
+
+    describe('Add slasher', function () {
+      it('Should add a new slasher', async function () {
+        await staking.connect(owner).addSlasher(newSlasher);
+        expect(await staking.slashers(newSlasher)).to.equal(true);
+      });
+    });
+  });
+
+  describe('removeSlasher', function () {
+    let newSlasher: string;
+
+    this.beforeEach(async () => {
+      newSlasher = await operator2.getAddress();
+      await staking.connect(owner).addSlasher(newSlasher);
+    });
+
+    describe('Validaciones', function () {
+      it('Should revert with the right error if caller is not the owner', async function () {
+        await expect(staking.connect(operator).removeSlasher(newSlasher))
+          .to.be.revertedWithCustomError(staking, 'OwnableUnauthorizedAccount')
+          .withArgs(await operator.getAddress());
+      });
+
+      it('Should revert with the right error if the address is not a slasher', async function () {
+        const nonSlasher = await operator3.getAddress();
+        await expect(
+          staking.connect(owner).removeSlasher(nonSlasher)
+        ).to.be.revertedWith('Address is not a slasher');
+      });
+    });
+
+    describe('Remove slasher', function () {
+      it('Should remove the slasher', async function () {
+        await staking.connect(owner).removeSlasher(newSlasher);
+        expect(await staking.slashers(newSlasher)).to.equal(false);
       });
     });
   });

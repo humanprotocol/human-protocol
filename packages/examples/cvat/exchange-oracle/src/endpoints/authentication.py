@@ -1,4 +1,4 @@
-from typing import Annotated, TypeVar
+from typing import Annotated, Any, TypeVar
 
 import jwt
 import pydantic
@@ -65,11 +65,8 @@ class TokenAuthenticator:
         # Read more https://github.com/tiangolo/fastapi/issues/1474
         # Without Depends schema works, but not validation.
         # Thus, just use it as a separate function explicitly.
-
         try:
-            payload = jwt.decode(
-                token.credentials, Config.human_app_config.jwt_public_key, algorithms=["ES256"]
-            )
+            payload = self._decode_token(token.credentials)
             return self._auth_data_class.model_validate(payload)
         except (jwt.PyJWTError, pydantic.ValidationError) as e:
             raise HTTPException(
@@ -77,6 +74,9 @@ class TokenAuthenticator:
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
+
+    def _decode_token(self, credentials: str) -> dict[str, Any]:
+        return jwt.decode(credentials, Config.human_app_config.jwt_public_key, algorithms=["ES256"])
 
 
 def make_auth_dependency(auth_data_class: AuthDataT | None = None) -> params.Depends:

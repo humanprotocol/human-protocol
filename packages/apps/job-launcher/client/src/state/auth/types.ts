@@ -13,6 +13,7 @@ export type User = {
   balance?: UserBalance;
   email: string;
   status: UserStatus;
+  whitelisted: boolean;
 };
 
 export type AuthState = {

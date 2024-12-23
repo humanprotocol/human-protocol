@@ -6,13 +6,16 @@ import {
   StorageClient,
 } from '@human-protocol/sdk';
 import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
+import {
   BadRequestException,
   Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { TOKEN } from '../../common/constant';
 import {
   AssignmentStatus,
   JobFieldName,
@@ -69,10 +72,17 @@ export class JobService {
     const reputationOracleAddress =
       await escrowClient.getReputationOracleAddress(escrowAddress);
 
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    const tokenContract: HMToken = HMToken__factory.connect(
+      tokenAddress,
+      signer,
+    );
+
     const newJobEntity = new JobEntity();
     newJobEntity.escrowAddress = escrowAddress;
     newJobEntity.manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     newJobEntity.chainId = chainId;
+    newJobEntity.rewardToken = await tokenContract.symbol();
     newJobEntity.status = JobStatus.ACTIVE;
     newJobEntity.reputationNetwork = reputationOracleAddress;
     await this.jobRepository.createUnique(newJobEntity);
@@ -180,7 +190,7 @@ export class JobService {
             ).toString();
           }
           if (data.fields?.includes(JobFieldName.RewardToken)) {
-            job.rewardToken = TOKEN;
+            job.rewardToken = entity.rewardToken;
           }
           if (data.fields?.includes(JobFieldName.Qualifications)) {
             job.qualifications = manifest.qualifications;
