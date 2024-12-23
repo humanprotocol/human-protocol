@@ -33,12 +33,12 @@ export const NETWORKS: {
     scanUrl: 'https://etherscan.io',
     factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
     hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
-    stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+    stakingAddress: '0xEf6Da3aB52c33925Be3F84038193a7e1331F51E6',
     kvstoreAddress: '0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmaTcYR8NCzZuxwY7tBkMJAo1Q64BMqNNSzqjxd7FH9s2p',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNTdYHpQLW4sbrCxihXNdQwhxa2zdyu1yPkCUuTbqESba',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -91,12 +91,12 @@ export const NETWORKS: {
     scanUrl: 'https://bscscan.com',
     factoryAddress: '0x92FD968AcBd521c232f5fB8c33b342923cC72714',
     hmtAddress: '0x711Fd6ab6d65A98904522d4e3586F492B989c527',
-    stakingAddress: '0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C',
+    stakingAddress: '0xE24e5C08E28331D24758b69A5E9f383D2bDD1c98',
     kvstoreAddress: '0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXZ4QJMi8kyfXDEJwtdizyKf5JdJui89iYCLCE79N8Xf5',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmPMS6G5evLm5ZpbnmpCfUy8bHJPwzPkZTv9DgfNdFfrCM',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -122,12 +122,12 @@ export const NETWORKS: {
     scanUrl: 'https://polygonscan.com',
     factoryAddress: '0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB',
     hmtAddress: '0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF',
-    stakingAddress: '0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29',
+    stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
     kvstoreAddress: '0xbcB28672F826a50B03EE91B28145EAbddA73B2eD',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNdsofT4Cj2KRwr8vgyKgCWpZNmrMN41zUdygRz7eSGC9',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmTyCQMQd5QtogeTEuiqxnGQZa2PtgpUBsWLYwPCCFPbUe',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',

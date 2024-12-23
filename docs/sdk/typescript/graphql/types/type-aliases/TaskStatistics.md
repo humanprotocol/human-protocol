@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../../README.md)
 
 ***
 
@@ -16,4 +16,4 @@
 
 ## Defined in
 
-[graphql/types.ts:154](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L154)
+[graphql/types.ts:154](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L154)

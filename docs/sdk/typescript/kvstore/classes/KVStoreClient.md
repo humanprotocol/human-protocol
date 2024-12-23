@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -88,11 +88,15 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Parameters
 
-• **runner**: `ContractRunner`
+##### runner
+
+`ContractRunner`
 
 The Runner object to interact with the Ethereum network
 
-• **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
+##### networkData
+
+[`NetworkData`](../../types/type-aliases/NetworkData.md)
 
 The network information required to connect to the KVStore contract
 
@@ -106,7 +110,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
 
 ## Properties
 
@@ -120,7 +124,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -134,7 +138,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -146,15 +150,21 @@ This function sets a key-value pair associated with the address that submits the
 
 #### Parameters
 
-• **key**: `string`
+##### key
+
+`string`
 
 Key of the key-value pair
 
-• **value**: `string`
+##### value
+
+`string`
 
 Value of the key-value pair
 
-• **txOptions?**: `Overrides` = `{}`
+##### txOptions?
+
+`Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -184,7 +194,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
 
 ***
 
@@ -196,15 +206,21 @@ This function sets key-value pairs in bulk associated with the address that subm
 
 #### Parameters
 
-• **keys**: `string`[]
+##### keys
+
+`string`[]
 
 Array of keys (keys and value must have the same order)
 
-• **values**: `string`[]
+##### values
+
+`string`[]
 
 Array of values
 
-• **txOptions?**: `Overrides` = `{}`
+##### txOptions?
+
+`Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -236,7 +252,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
+[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
 
 ***
 
@@ -248,15 +264,21 @@ Sets a URL value for the address that submits the transaction, and its hash.
 
 #### Parameters
 
-• **url**: `string`
+##### url
+
+`string`
 
 URL to set
 
-• **urlKey**: `string` = `'url'`
+##### urlKey
+
+`string` = `'url'`
 
 Configurable URL key. `url` by default.
 
-• **txOptions?**: `Overrides` = `{}`
+##### txOptions?
+
+`Overrides` = `{}`
 
 Additional transaction parameters (optional, defaults to an empty object).
 
@@ -285,7 +307,7 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
 
 #### Defined in
 
-[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
+[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
 
 ***
 
@@ -297,7 +319,9 @@ Creates an instance of KVStoreClient from a runner.
 
 #### Parameters
 
-• **runner**: `ContractRunner`
+##### runner
+
+`ContractRunner`
 
 The Runner object to interact with the Ethereum network
 
@@ -317,4 +341,4 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
+[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)

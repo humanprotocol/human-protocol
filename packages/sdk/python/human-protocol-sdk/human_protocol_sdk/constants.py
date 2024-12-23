@@ -40,11 +40,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/ethereum/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmaTcYR8NCzZuxwY7tBkMJAo1Q64BMqNNSzqjxd7FH9s2p"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNTdYHpQLW4sbrCxihXNdQwhxa2zdyu1yPkCUuTbqESba"
         ),
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
-        "staking_address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
+        "staking_address": "0xEf6Da3aB52c33925Be3F84038193a7e1331F51E6",
         "kvstore_address": "0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D",
         "old_subgraph_url": "",
         "old_factory_address": "",
@@ -88,11 +88,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/bsc/version/latest"
         ),
         "subgraph_url_api_key": (
-            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmXZ4QJMi8kyfXDEJwtdizyKf5JdJui89iYCLCE79N8Xf5"
+            "hthttps://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmPMS6G5evLm5ZpbnmpCfUy8bHJPwzPkZTv9DgfNdFfrCM"
         ),
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
-        "staking_address": "0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C",
+        "staking_address": "0xE24e5C08E28331D24758b69A5E9f383D2bDD1c98",
         "kvstore_address": "0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1",
         "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsc",
         "old_factory_address": "0xc88bC422cAAb2ac8812de03176402dbcA09533f4",
@@ -122,11 +122,11 @@ NETWORKS = {
             "https://api.studio.thegraph.com/query/74256/polygon/version/latest"
         ),
         "subgraph_url_api_key": (
-            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNdsofT4Cj2KRwr8vgyKgCWpZNmrMN41zUdygRz7eSGC9"
+            "https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmTyCQMQd5QtogeTEuiqxnGQZa2PtgpUBsWLYwPCCFPbUe"
         ),
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
-        "staking_address": "0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29",
+        "staking_address": "0x01D115E9E8bF0C58318793624CC662a030D07F1D",
         "kvstore_address": "0xbcB28672F826a50B03EE91B28145EAbddA73B2eD",
         "old_subgraph_url": (
             "https://api.thegraph.com/subgraphs/name/humanprotocol/polygon"
