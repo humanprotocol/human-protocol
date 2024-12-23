@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
 
 Initializes an LeaderData instance.
 
@@ -30,7 +30,6 @@ Initializes an LeaderData instance.
   * **id** (`str`) – Identifier
   * **address** (`str`) – Address
   * **amount_staked** (`int`) – Amount staked
-  * **amount_allocated** (`int`) – Amount allocated
   * **amount_locked** (`int`) – Amount locked
   * **locked_until_timestamp** (`int`) – Locked until timestamp
   * **amount_withdrawn** (`int`) – Amount withdrawn
@@ -41,6 +40,7 @@ Initializes an LeaderData instance.
   * **fee** (`Optional`[`int`]) – Fee
   * **public_key** (`Optional`[`str`]) – Public key
   * **webhook_url** (`Optional`[`str`]) – Webhook url
+  * **website** (`Optional`[`str`]) – Website url
   * **url** (`Optional`[`str`]) – Url
   * **job_types** (`Optional`[`List`[`str`]]) – Job types
   * **registration_needed** (`Optional`[`bool`]) – True
