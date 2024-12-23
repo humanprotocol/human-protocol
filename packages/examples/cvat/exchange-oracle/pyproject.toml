@@ -34,6 +34,8 @@ strenum = "^0.4.15"
 pyjwt = "^2.9.0"
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
+aiocache = {extras = ["msgpack", "redis"], version = "^0.12.3"}  # convenient api for redis (async)
+cachelib = "^0.13.0" # convenient api for redis (sync)
 
 
 [tool.poetry.group.dev.dependencies]

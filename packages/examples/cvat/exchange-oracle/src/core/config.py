@@ -43,9 +43,9 @@ class PostgresConfig:
 
 
 class RedisConfig:
-    port = os.environ.get("REDIS_PORT", "6379")
+    port = int(os.environ.get("REDIS_PORT", "6379"))
     host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
-    database = os.environ.get("REDIS_DB", "")
+    database = int(os.environ.get("REDIS_DB", "0"))
     user = os.environ.get("REDIS_USER", "")
     password = os.environ.get("REDIS_PASSWORD", "")
     use_ssl = to_bool(os.environ.get("REDIS_USE_SSL", "false"))
@@ -244,6 +244,9 @@ class FeaturesConfig:
 
     profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
+
+    manifest_cache_ttl = int(os.getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    "TTL for cached manifests"
 
 
 class CoreConfig:

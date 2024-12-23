@@ -1,11 +1,13 @@
-from typing import Annotated, TypeVar
+from collections.abc import AsyncGenerator, Callable
+from contextlib import asynccontextmanager
+from typing import Annotated, Any, TypeVar
 
 import fastapi
 import fastapi.params
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
-OptionalQuery = Annotated[T | None, fastapi.Query()]
+OptionalQuery = Annotated[_T | None, fastapi.Query()]
 """
 Required to declare query parameters with default values in Depends.
 
@@ -24,3 +26,20 @@ def endpoint(
 ):
     ...
 """
+
+_App = TypeVar("_App", bound=fastapi.FastAPI)
+
+
+def register_lifespan_context(
+    app: _App, lifespan_context: Callable[[_App], AsyncGenerator[Any, None, None]]
+) -> _App:
+    router = app.router
+    original_lifespan_context = router.lifespan_context
+
+    @asynccontextmanager
+    async def wrapped_lifespan(app: _App) -> AsyncGenerator[Any, None, None]:
+        async with lifespan_context(app), original_lifespan_context(app) as maybe_state:
+            yield maybe_state
+
+    router.lifespan_context = wrapped_lifespan
+    return app
