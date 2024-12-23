@@ -136,7 +136,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
                 if raw_body:
                     body = body.decode(errors="ignore")
-                    body = body[: self.max_displayed_body_size]
+
+                    if len(body) > self.max_displayed_body_size:
+                        body = body[: self.max_displayed_body_size - 3] + "..."
 
             request_logging["body"] = body
 
