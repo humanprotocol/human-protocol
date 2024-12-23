@@ -79,7 +79,9 @@ class LocalhostConfig(_NetworkConfig):
     )
     addr = os.environ.get("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
+    exchange_oracle_address = os.environ.get("LOCALHOST_EXCHANGE_ORACLE_ADDRESS")
     exchange_oracle_url = os.environ.get("LOCALHOST_EXCHANGE_ORACLE_URL")
+
     reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
