@@ -47,9 +47,9 @@ class PostgresConfig:
 
 
 class RedisConfig:
-    port = getenv("REDIS_PORT", "6379")
+    port = int(getenv("REDIS_PORT", "6379"))
     host = getenv("REDIS_HOST", "0.0.0.0")  # noqa: S104
-    database = getenv("REDIS_DB", "")
+    database = int(getenv("REDIS_DB", "0"))
     user = getenv("REDIS_USER", "")
     password = getenv("REDIS_PASSWORD", "")
     use_ssl = to_bool(getenv("REDIS_USE_SSL", "false"))
@@ -231,6 +231,9 @@ class FeaturesConfig:
     profiling_enabled = to_bool(getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
 
+    manifest_cache_ttl = int(os.getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    "TTL for cached manifests"
+
 
 class CoreConfig:
     default_assignment_time = int(getenv("DEFAULT_ASSIGNMENT_TIME", 1800))
@@ -284,10 +287,16 @@ class EncryptionConfig(_BaseConfig):
                 raise Exception(" ".join([ex_prefix, str(ex)]))
 
 
-class Development:
-    cvat_in_docker = bool(int(getenv("DEV_CVAT_IN_DOCKER", "0")))
-    # might be `host.docker.internal` or `172.22.0.1` if CVAT is running in docker
-    cvat_local_host = getenv("DEV_CVAT_LOCAL_HOST", "localhost")
+class DevelopmentConfig:
+    cvat_in_docker = bool(int(getenv("DEV_CVAT_IN_DOCKER", "1")))
+
+    exchange_oracle_host = getenv("DEV_EXCHANGE_ORACLE_HOST", "172.22.0.1")
+    """
+    Might be `host.docker.internal` or `172.22.0.1` if CVAT is running in Docker.
+
+    Remember to allow this host via:
+    SMOKESCREEN_OPTS="--allow-address=<eo host>" docker compose ...
+    """
 
 
 class Environment(str, Enum):
@@ -329,7 +338,7 @@ class Config:
     features = FeaturesConfig
     core_config = CoreConfig
     encryption_config = EncryptionConfig
-    development_config = Development
+    development_config = DevelopmentConfig
 
     @classmethod
     def is_development_mode(cls) -> bool:

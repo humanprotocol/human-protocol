@@ -80,7 +80,9 @@ class LocalhostConfig(_NetworkConfig):
     )
     addr = getenv("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
+    exchange_oracle_address = getenv("LOCALHOST_EXCHANGE_ORACLE_ADDRESS")
     exchange_oracle_url = getenv("LOCALHOST_EXCHANGE_ORACLE_URL")
+
     reputation_oracle_url = getenv("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
@@ -159,12 +161,28 @@ class FeaturesConfig:
 
 
 class ValidationConfig:
-    gt_ban_threshold = int(getenv("GT_BAN_THRESHOLD", 3))
+    min_available_gt_threshold = float(getenv("MIN_AVAILABLE_GT_THRESHOLD", "0.3"))
     """
-    The maximum allowed number of failures per GT sample before it's excluded from validation
+    The minimum required share of available GT frames required to continue annotation attempts.
+    When there is no enough GT left, annotation stops.
     """
 
-    unverifiable_assignments_threshold = float(getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1))
+    max_gt_share = float(getenv("MAX_USABLE_GT_SHARE", "0.05"))
+    """
+    The maximum share of the dataset to be used for validation. If the available GT share is
+    greater than this number, the extra frames will not be used. It's recommended to keep this
+    value small enough for faster convergence rate of the annotation process.
+    """
+
+    gt_ban_threshold = float(getenv("GT_BAN_THRESHOLD", "0.03"))
+    """
+    The minimum allowed rating (annotation probability) per GT sample,
+    before it's considered bad and banned for further use.
+    """
+
+    unverifiable_assignments_threshold = float(
+        getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1")
+    )
     """
     Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
 
@@ -172,11 +190,22 @@ class ValidationConfig:
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
-    max_escrow_iterations = int(getenv("MAX_ESCROW_ITERATIONS", "0"))
+    max_escrow_iterations = int(getenv("MAX_ESCROW_ITERATIONS", "50"))
     """
     Maximum escrow annotation-validation iterations.
     After this, the escrow is finished automatically.
     Supposed only for testing. Use 0 to disable.
+    """
+
+    warmup_iterations = int(getenv("WARMUP_ITERATIONS", "1"))
+    """
+    The first escrow iterations where the annotation speed is checked to be big enough.
+    """
+
+    min_warmup_progress = float(getenv("MIN_WARMUP_PROGRESS", "10"))
+    """
+    Minimum percent of the accepted jobs in an escrow after the first WARMUP iterations.
+    If the value is lower, the escrow annotation is paused for manual investigation.
     """
 
 

@@ -11,7 +11,6 @@ from web3.providers.rpc import HTTPProvider
 
 from src.chain.escrow import (
     get_escrow_manifest,
-    get_reputation_oracle_address,
     store_results,
     validate_escrow,
 )
@@ -163,27 +162,3 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_function.return_value = self.w3
             with pytest.raises(EscrowClientError, match="Invalid empty hash"):
                 store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_MANIFEST_URL, "")
-
-    def test_get_reputation_oracle_address(self):
-        escrow_address = create_escrow(self.w3)
-        with (
-            patch("src.chain.escrow.get_web3") as mock_get_web3,
-            patch("src.chain.escrow.get_escrow") as mock_get_escrow,
-        ):
-            mock_get_web3.return_value = self.w3
-            mock_escrow = MagicMock()
-            mock_escrow.reputation_oracle = REPUTATION_ORACLE_ADDRESS
-            mock_get_escrow.return_value = mock_escrow
-            address = get_reputation_oracle_address(self.w3.eth.chain_id, escrow_address)
-            assert isinstance(address, str)
-            assert address is not None
-
-    def test_get_reputation_oracle_address_invalid_address(self):
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with pytest.raises(EscrowClientError, match="Invalid escrow address:"):
-                get_reputation_oracle_address(self.w3.eth.chain_id, "invalid_address")
-
-    def test_get_reputation_oracle_address_invalid_chain_id(self):
-        with pytest.raises(Exception, match="Can't find escrow"):
-            get_reputation_oracle_address(1, "0x1234567890123456789012345678901234567890")

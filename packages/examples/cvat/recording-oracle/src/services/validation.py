@@ -156,6 +156,8 @@ def update_gt_stats(
                 "failed_attempts": val_frame_stats.failed_attempts,
                 "accepted_attempts": val_frame_stats.accepted_attempts,
                 "accumulated_quality": val_frame_stats.accumulated_quality,
+                "total_uses": val_frame_stats.total_uses,
+                "enabled": val_frame_stats.enabled,
             }
             for gt_frame_name, val_frame_stats in updated_gt_stats.items()
         ],
