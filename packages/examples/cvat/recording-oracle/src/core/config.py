@@ -180,9 +180,7 @@ class ValidationConfig:
     before it's considered bad and banned for further use.
     """
 
-    unverifiable_assignments_threshold = float(
-        getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1")
-    )
+    unverifiable_assignments_threshold = float(getenv("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1"))
     """
     Deprecated. Not expected to happen in practice, kept only as a safety fallback rule.
 
