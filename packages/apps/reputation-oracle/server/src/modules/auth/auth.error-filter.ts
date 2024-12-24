@@ -18,7 +18,7 @@ type AuthControllerError =
   | DuplicatedUserError
   | InvalidOperatorSignupDataError;
 
-@Catch(AuthError, DuplicatedUserError)
+@Catch(AuthError, DuplicatedUserError, InvalidOperatorSignupDataError)
 export class AuthControllerErrorsFilter implements ExceptionFilter {
   private logger = new Logger(AuthControllerErrorsFilter.name);
   catch(exception: AuthControllerError, host: ArgumentsHost) {
