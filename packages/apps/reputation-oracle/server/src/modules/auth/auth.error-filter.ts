@@ -29,7 +29,7 @@ export class AuthControllerErrorsFilter implements ExceptionFilter {
 
     let logContext: string | undefined;
     if (exception instanceof DuplicatedUserError) {
-      status = HttpStatus.BAD_REQUEST;
+      status = HttpStatus.CONFLICT;
       logContext = exception.email;
     } else if (exception instanceof InvalidOperatorSignupDataError) {
       status = HttpStatus.BAD_REQUEST;
