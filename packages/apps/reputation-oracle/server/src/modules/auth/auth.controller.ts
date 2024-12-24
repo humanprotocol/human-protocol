@@ -16,6 +16,7 @@ import {
   UseInterceptors,
   Logger,
   Ip,
+  UseFilters,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { UserCreateDto } from '../user/user.dto';
@@ -35,6 +36,7 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { AuthControllerErrorsFilter } from './auth.error-filter';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -54,6 +56,7 @@ import { TokenType } from './token.entity';
   description: 'Unprocessable entity.',
 })
 @Controller('/auth')
+@UseFilters(AuthControllerErrorsFilter)
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
 

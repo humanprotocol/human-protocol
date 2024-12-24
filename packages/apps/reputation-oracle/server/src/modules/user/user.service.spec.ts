@@ -30,7 +30,7 @@ import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.servi
 import { HttpService } from '@nestjs/axios';
 import { ControlledError } from '../../common/errors/controlled';
 import {
-  ErrorAuth,
+  ErrorCapthca,
   ErrorOperator,
   ErrorSignature,
   ErrorUser,
@@ -116,6 +116,30 @@ describe('UserService', () => {
     siteKeyRepository = moduleRef.get(SiteKeyRepository);
   });
 
+  describe('checkPasswordMatchesHash', () => {
+    const password = 'password123';
+    const hashedPassword =
+      '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
+
+    it('should return true if password matches', () => {
+      const result = UserService.checkPasswordMatchesHash(
+        password,
+        hashedPassword,
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if password does not match', () => {
+      const result = UserService.checkPasswordMatchesHash(
+        password,
+        '321drowssap',
+      );
+
+      expect(result).toBe(false);
+    });
+  });
+
   describe('create', () => {
     it('should create a new user and return the created user entity', async () => {
       const dto: UserCreateDto = {
@@ -138,36 +162,6 @@ describe('UserService', () => {
         status: UserStatus.PENDING,
       });
       expect(result).toMatchObject(createdUser);
-    });
-  });
-
-  describe('getByCredentials', () => {
-    const email = 'test@example.com';
-    const password = 'password123';
-    const hashedPassword =
-      '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
-
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email,
-      password: hashedPassword,
-    };
-    it('should return the user entity if credentials are valid', async () => {
-      jest
-        .spyOn(userRepository, 'findOneByEmail')
-        .mockResolvedValue(userEntity as UserEntity);
-
-      const result = await userService.getByCredentials(email, password);
-
-      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(email);
-      expect(result).toBe(userEntity);
-    });
-
-    it('should return null if credentials are invalid', async () => {
-      jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(null);
-      const result = await userService.getByCredentials(email, password);
-      expect(result).toBe(null);
-      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(email);
     });
   });
 
@@ -888,7 +882,7 @@ describe('UserService', () => {
       expect(result).toEqual(siteKeyMock);
     });
 
-    it('should fail if token is invalid', async () => {
+    it('should throw if captcha verification fails', async () => {
       const userEntity: DeepPartial<UserEntity> = {
         id: 1,
         email: 'test@example.com',
@@ -909,7 +903,10 @@ describe('UserService', () => {
           oracleRegistration,
         ),
       ).rejects.toThrow(
-        new ControlledError(ErrorAuth.InvalidToken, HttpStatus.UNAUTHORIZED),
+        new ControlledError(
+          ErrorCapthca.VerificationFailed,
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     });
   });
