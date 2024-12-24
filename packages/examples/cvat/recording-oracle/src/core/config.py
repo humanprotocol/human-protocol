@@ -165,41 +165,49 @@ class FeaturesConfig:
 
 
 class ValidationConfig:
-    default_point_validity_relative_radius = float(
-        os.environ.get("DEFAULT_POINT_VALIDITY_RELATIVE_RADIUS", 0.9)
-    )
-
-    default_oks_sigma = float(
-        os.environ.get("DEFAULT_OKS_SIGMA", 0.1)  # average value for COCO points
-    )
-    "Default OKS sigma for GT skeleton points validation. Valid range is (0; 1]"
-
-    gt_failure_threshold = float(os.environ.get("GT_FAILURE_THRESHOLD", 0.9))
+    min_available_gt_threshold = float(os.environ.get("MIN_AVAILABLE_GT_THRESHOLD", "0.3"))
     """
-    The maximum allowed fraction of failed assignments per GT sample,
-    before it's considered failed for the current validation iteration.
-    v = 0 -> any GT failure leads to image failure
-    v = 1 -> any GT failures do not lead to image failure
+    The minimum required share of available GT frames required to continue annotation attempts.
+    When there is no enough GT left, annotation stops.
     """
 
-    gt_ban_threshold = int(os.environ.get("GT_BAN_THRESHOLD", 3))
+    max_gt_share = float(os.environ.get("MAX_USABLE_GT_SHARE", "0.05"))
     """
-    The maximum allowed number of failures per GT sample before it's excluded from validation
+    The maximum share of the dataset to be used for validation. If the available GT share is
+    greater than this number, the extra frames will not be used. It's recommended to keep this
+    value small enough for faster convergence rate of the annotation process.
+    """
+
+    gt_ban_threshold = float(os.environ.get("GT_BAN_THRESHOLD", "0.03"))
+    """
+    The minimum allowed rating (annotation probability) per GT sample,
+    before it's considered bad and banned for further use.
     """
 
     unverifiable_assignments_threshold = float(
-        os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", 0.1)
+        os.environ.get("UNVERIFIABLE_ASSIGNMENTS_THRESHOLD", "0.1")
     )
     """
     The maximum allowed fraction of jobs with insufficient GT available for validation.
     Each such job will be accepted "blindly", as we can't validate the annotations.
     """
 
-    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", "0"))
+    max_escrow_iterations = int(os.getenv("MAX_ESCROW_ITERATIONS", "50"))
     """
     Maximum escrow annotation-validation iterations.
     After this, the escrow is finished automatically.
     Supposed only for testing. Use 0 to disable.
+    """
+
+    warmup_iterations = int(os.getenv("WARMUP_ITERATIONS", "1"))
+    """
+    The first escrow iterations where the annotation speed is checked to be big enough.
+    """
+
+    min_warmup_progress = float(os.getenv("MIN_WARMUP_PROGRESS", "10"))
+    """
+    Minimum percent of the accepted jobs in an escrow after the first WARMUP iterations.
+    If the value is lower, the escrow annotation is paused for manual investigation.
     """
 
 

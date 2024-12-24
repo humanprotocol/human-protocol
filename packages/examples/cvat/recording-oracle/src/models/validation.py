@@ -1,7 +1,7 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
-from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
 
@@ -61,6 +61,10 @@ class GtStats(Base):
 
     failed_attempts = Column(Integer, default=0, nullable=False)
     accepted_attempts = Column(Integer, default=0, nullable=False)
+    total_uses = Column(Integer, default=0, nullable=False)
+
     accumulated_quality = Column(Float, default=0.0, nullable=False)
+
+    enabled = Column(Boolean, default=True, nullable=False)
 
     task: Mapped[Task] = relationship(back_populates="gt_stats")
