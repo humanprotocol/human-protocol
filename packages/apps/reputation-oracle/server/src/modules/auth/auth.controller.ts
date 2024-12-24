@@ -81,11 +81,8 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
-  public async signup(
-    @Body() data: UserCreateDto,
-    @Ip() ip: string,
-  ): Promise<void> {
-    await this.authService.signup(data, ip);
+  public async signup(@Body() data: UserCreateDto): Promise<void> {
+    await this.authService.signup(data);
     return;
   }
 
@@ -110,8 +107,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
-    return this.authService.signin(data, ip);
+  public signin(@Body() data: SignInDto): Promise<AuthDto> {
+    return this.authService.signin(data);
   }
 
   @Public()
@@ -230,11 +227,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public restorePassword(
-    @Body() data: RestorePasswordDto,
-    @Ip() ip: string,
-  ): Promise<void> {
-    return this.authService.restorePassword(data, ip);
+  public restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
+    return this.authService.restorePassword(data);
   }
 
   @Public()
