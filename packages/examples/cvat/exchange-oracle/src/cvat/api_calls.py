@@ -77,7 +77,7 @@ def _get_annotations(
     time_begin = utcnow()
 
     if timeout is _NOTSET:
-        timeout = Config.cvat_config.cvat_export_timeout
+        timeout = Config.cvat_config.export_timeout
 
     while True:
         (_, response) = endpoint.call_with_http_info(
@@ -118,23 +118,23 @@ def get_api_client() -> ApiClient:
         return current_api_client
 
     configuration = Configuration(
-        host=Config.cvat_config.cvat_url,
-        username=Config.cvat_config.cvat_admin,
-        password=Config.cvat_config.cvat_admin_pass,
+        host=Config.cvat_config.host_url,
+        username=Config.cvat_config.admin_login,
+        password=Config.cvat_config.admin_pass,
     )
 
     api_client = ApiClient(configuration=configuration)
-    api_client.set_default_header("X-organization", Config.cvat_config.cvat_org_slug)
+    api_client.set_default_header("X-organization", Config.cvat_config.org_slug)
 
     return api_client
 
 
 def get_sdk_client() -> Client:
     client = make_client(
-        host=Config.cvat_config.cvat_url,
-        credentials=(Config.cvat_config.cvat_admin, Config.cvat_config.cvat_admin_pass),
+        host=Config.cvat_config.host_url,
+        credentials=(Config.cvat_config.admin_login, Config.cvat_config.admin_pass),
     )
-    client.organization_slug = Config.cvat_config.cvat_org_slug
+    client.organization_slug = Config.cvat_config.org_slug
 
     return client
 
@@ -291,11 +291,11 @@ def create_cvat_webhook(project_id: int) -> models.WebhookRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         webhook_write_request = models.WebhookWriteRequest(
-            target_url=Config.cvat_config.cvat_incoming_webhooks_url,
+            target_url=Config.cvat_config.incoming_webhooks_url,
             description="Exchange Oracle notification",
             type=models.WebhookType("project"),
             content_type=models.WebhookContentType("application/json"),
-            secret=Config.cvat_config.cvat_webhook_secret,
+            secret=Config.cvat_config.webhook_secret,
             is_active=True,
             # enable_ssl=True,
             project_id=project_id,
@@ -403,7 +403,7 @@ def put_task_data(
         data_request = models.DataRequest(
             chunk_size=chunk_size,
             cloud_storage_id=cloudstorage_id,
-            image_quality=Config.cvat_config.cvat_default_image_quality,
+            image_quality=Config.cvat_config.image_quality,
             use_cache=True,
             use_zip_chunks=True,
             sorting_method=sorting_method,
@@ -641,7 +641,7 @@ def upload_gt_annotations(
     *,
     format_name: str,
     sleep_interval: int = 5,
-    timeout: int | None = Config.cvat_config.cvat_import_timeout,
+    timeout: int | None = Config.cvat_config.import_timeout,
 ) -> None:
     # FUTURE-TODO: use job.import_annotations when CVAT supports a waiting timeout
     start_time = datetime.now(timezone.utc)
@@ -728,8 +728,8 @@ def update_quality_control_settings(
     *,
     target_metric_threshold: float,
     target_metric: str = "accuracy",
-    max_validations_per_job: int = Config.cvat_config.cvat_max_validation_checks,
-    iou_threshold: float = Config.cvat_config.cvat_iou_threshold,
+    max_validations_per_job: int = Config.cvat_config.max_validation_checks,
+    iou_threshold: float = Config.cvat_config.iou_threshold,
     oks_sigma: float | None = None,
     point_size_base: str | None = None,
     match_empty_frames: bool | None = None,
@@ -823,7 +823,7 @@ def get_user_id(user_email: str) -> int:
         try:
             (invitation, _) = api_client.invitations_api.create(
                 models.InvitationWriteRequest(role="worker", email=user_email),
-                org=Config.cvat_config.cvat_org_slug,
+                org=Config.cvat_config.org_slug,
             )
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling get_user_id(): {e}\n")
@@ -839,7 +839,7 @@ def remove_user_from_org(user_id: int):
         try:
             (page, _) = api_client.users_api.list(
                 filter='{"==":[{"var":"id"},"%s"]}' % user_id,  # noqa: UP031
-                org=Config.cvat_config.cvat_org_slug,
+                org=Config.cvat_config.org_slug,
             )
             if not page.results:
                 return
@@ -849,7 +849,7 @@ def remove_user_from_org(user_id: int):
 
             (page, _) = api_client.memberships_api.list(
                 user=user.username,
-                org=Config.cvat_config.cvat_org_slug,
+                org=Config.cvat_config.org_slug,
             )
             if page.results:
                 api_client.memberships_api.destroy(page.results[0].id)

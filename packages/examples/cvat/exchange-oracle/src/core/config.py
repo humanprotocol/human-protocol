@@ -5,6 +5,7 @@ import inspect
 import os
 from collections.abc import Iterable
 from enum import Enum
+from os import getenv
 from typing import ClassVar, Optional
 
 from attrs.converters import to_bool
@@ -16,11 +17,14 @@ from web3.providers.rpc import HTTPProvider
 from src.utils.logging import parse_log_level
 from src.utils.net import is_ipv4
 
-dotenv_path = os.getenv("DOTENV_PATH", None)
+dotenv_path = getenv("DOTENV_PATH", None)
 if dotenv_path and not os.path.exists(dotenv_path):  # noqa: PTH110
     raise FileNotFoundError(dotenv_path)
 
 load_dotenv(dotenv_path)
+
+
+# TODO: add some logic to report unused/deprecated env vars on startup
 
 
 class _BaseConfig:
@@ -30,12 +34,12 @@ class _BaseConfig:
 
 
 class PostgresConfig:
-    port = os.environ.get("PG_PORT", "5432")
-    host = os.environ.get("PG_HOST", "0.0.0.0")  # noqa: S104
-    user = os.environ.get("PG_USER", "admin")
-    password = os.environ.get("PG_PASSWORD", "admin")
-    database = os.environ.get("PG_DB", "exchange_oracle")
-    lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
+    port = getenv("PG_PORT", "5432")
+    host = getenv("PG_HOST", "0.0.0.0")  # noqa: S104
+    user = getenv("PG_USER", "admin")
+    password = getenv("PG_PASSWORD", "admin")
+    database = getenv("PG_DB", "exchange_oracle")
+    lock_timeout = int(getenv("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
     def connection_url(cls) -> str:
@@ -43,12 +47,12 @@ class PostgresConfig:
 
 
 class RedisConfig:
-    port = int(os.environ.get("REDIS_PORT", "6379"))
-    host = os.environ.get("REDIS_HOST", "0.0.0.0")  # noqa: S104
-    database = int(os.environ.get("REDIS_DB", "0"))
-    user = os.environ.get("REDIS_USER", "")
-    password = os.environ.get("REDIS_PASSWORD", "")
-    use_ssl = to_bool(os.environ.get("REDIS_USE_SSL", "false"))
+    port = int(getenv("REDIS_PORT", "6379"))
+    host = getenv("REDIS_HOST", "0.0.0.0")  # noqa: S104
+    database = int(getenv("REDIS_DB", "0"))
+    user = getenv("REDIS_USER", "")
+    password = getenv("REDIS_PASSWORD", "")
+    use_ssl = to_bool(getenv("REDIS_USE_SSL", "false"))
 
     @classmethod
     def connection_url(cls) -> str:
@@ -80,144 +84,126 @@ class _NetworkConfig:
 
 class PolygonMainnetConfig(_NetworkConfig):
     chain_id = 137
-    rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_MAINNET_ADDR")
+    rpc_api = getenv("POLYGON_MAINNET_RPC_API_URL")
+    private_key = getenv("POLYGON_MAINNET_PRIVATE_KEY")
+    addr = getenv("POLYGON_MAINNET_ADDR")
 
 
 class PolygonAmoyConfig(_NetworkConfig):
     chain_id = 80002
-    rpc_api = os.environ.get("POLYGON_AMOY_RPC_API_URL")
-    private_key = os.environ.get("POLYGON_AMOY_PRIVATE_KEY")
-    addr = os.environ.get("POLYGON_AMOY_ADDR")
+    rpc_api = getenv("POLYGON_AMOY_RPC_API_URL")
+    private_key = getenv("POLYGON_AMOY_PRIVATE_KEY")
+    addr = getenv("POLYGON_AMOY_ADDR")
 
 
 class LocalhostConfig(_NetworkConfig):
     chain_id = 1338
-    rpc_api = os.environ.get("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
-    private_key = os.environ.get(
+    rpc_api = getenv("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
+    private_key = getenv(
         "LOCALHOST_PRIVATE_KEY",
         "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )
-    addr = os.environ.get("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    addr = getenv("LOCALHOST_AMOY_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
-    job_launcher_url = os.environ.get("LOCALHOST_JOB_LAUNCHER_URL")
+    job_launcher_url = getenv("LOCALHOST_JOB_LAUNCHER_URL")
 
-    recording_oracle_address = os.environ.get("LOCALHOST_RECORDING_ORACLE_ADDRESS")
-    recording_oracle_url = os.environ.get("LOCALHOST_RECORDING_ORACLE_URL")
+    recording_oracle_address = getenv("LOCALHOST_RECORDING_ORACLE_ADDRESS")
+    recording_oracle_url = getenv("LOCALHOST_RECORDING_ORACLE_URL")
 
-    reputation_oracle_address = os.environ.get("LOCALHOST_REPUTATION_ORACLE_ADDRESS")
-    reputation_oracle_url = os.environ.get("LOCALHOST_REPUTATION_ORACLE_URL")
+    reputation_oracle_address = getenv("LOCALHOST_REPUTATION_ORACLE_ADDRESS")
+    reputation_oracle_url = getenv("LOCALHOST_REPUTATION_ORACLE_URL")
 
 
 class CronConfig:
-    process_job_launcher_webhooks_int = int(os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
+    process_job_launcher_webhooks_int = int(getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 30))
     process_job_launcher_webhooks_chunk_size = int(
-        os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
+        getenv("PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5)
     )
-    process_recording_oracle_webhooks_int = int(
-        os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30)
-    )
+    process_recording_oracle_webhooks_int = int(getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 30))
     process_recording_oracle_webhooks_chunk_size = int(
-        os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
+        getenv("PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_reputation_oracle_webhooks_chunk_size = int(
-        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
+        getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5)
     )
     process_reputation_oracle_webhooks_int = int(
-        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
+        getenv("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 5)
     )
-    track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 30))
-    track_completed_projects_chunk_size = os.environ.get("TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5)
-    track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 30))
-    track_completed_tasks_chunk_size = os.environ.get("TRACK_COMPLETED_TASKS_CHUNK_SIZE", 20)
-    track_creating_tasks_int = int(os.environ.get("TRACK_CREATING_TASKS_INT", 300))
-    track_creating_tasks_chunk_size = os.environ.get("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
-    track_assignments_int = int(os.environ.get("TRACK_ASSIGNMENTS_INT", 5))
-    track_assignments_chunk_size = os.environ.get("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10)
+    track_completed_projects_int = int(getenv("TRACK_COMPLETED_PROJECTS_INT", 30))
+    track_completed_tasks_int = int(getenv("TRACK_COMPLETED_TASKS_INT", 30))
+    track_creating_tasks_int = int(getenv("TRACK_CREATING_TASKS_INT", 300))
+    track_creating_tasks_chunk_size = getenv("TRACK_CREATING_TASKS_CHUNK_SIZE", 5)
+    track_assignments_int = int(getenv("TRACK_ASSIGNMENTS_INT", 5))
+    track_assignments_chunk_size = int(getenv("TRACK_ASSIGNMENTS_CHUNK_SIZE", 10))
 
-    track_completed_escrows_int = int(
-        # backward compatibility
-        os.environ.get(
-            "TRACK_COMPLETED_ESCROWS_INT", os.environ.get("RETRIEVE_ANNOTATIONS_INT", 60)
-        )
-    )
-    track_completed_escrows_chunk_size = int(
-        os.environ.get("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100)
-    )
-    track_escrow_validations_int = int(os.environ.get("TRACK_COMPLETED_ESCROWS_INT", 60))
-    track_escrow_validations_chunk_size = int(
-        os.environ.get("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1)
-    )
+    track_completed_escrows_int = int(getenv("TRACK_COMPLETED_ESCROWS_INT", 60))
+    track_completed_escrows_chunk_size = int(getenv("TRACK_COMPLETED_ESCROWS_CHUNK_SIZE", 100))
+    track_escrow_validations_int = int(getenv("TRACK_ESCROW_VALIDATIONS_INT", 60))
+    track_escrow_validations_chunk_size = int(getenv("TRACK_ESCROW_VALIDATIONS_CHUNK_SIZE", 1))
     track_completed_escrows_max_downloading_retries = int(
-        os.environ.get("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
+        getenv("TRACK_COMPLETED_ESCROWS_MAX_DOWNLOADING_RETRIES", 10)
     )
     "Maximum number of downloading attempts per job or project during results downloading"
 
     track_completed_escrows_jobs_downloading_batch_size = int(
-        os.environ.get("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
+        getenv("TRACK_COMPLETED_ESCROWS_JOBS_DOWNLOADING_BATCH_SIZE", 500)
     )
     "Maximum number of parallel downloading requests during results downloading"
 
-    rejected_projects_chunk_size = os.environ.get("REJECTED_PROJECTS_CHUNK_SIZE", 20)
-    accepted_projects_chunk_size = os.environ.get("ACCEPTED_PROJECTS_CHUNK_SIZE", 20)
+    process_rejected_projects_chunk_size = int(getenv("REJECTED_PROJECTS_CHUNK_SIZE", 20))
+    process_accepted_projects_chunk_size = int(getenv("ACCEPTED_PROJECTS_CHUNK_SIZE", 20))
 
-    track_escrow_creation_chunk_size = os.environ.get("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20)
-    track_escrow_creation_int = int(os.environ.get("TRACK_ESCROW_CREATION_INT", 300))
+    track_escrow_creation_chunk_size = int(getenv("TRACK_ESCROW_CREATION_CHUNK_SIZE", 20))
+    track_escrow_creation_int = int(getenv("TRACK_ESCROW_CREATION_INT", 300))
 
 
 class CvatConfig:
-    # TODO: remove cvat_ prefix
-    cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
-    cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
-    cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
-    cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "")
+    host_url = getenv("CVAT_URL", "http://localhost:8080")
+    admin_login = getenv("CVAT_ADMIN", "admin")
+    admin_pass = getenv("CVAT_ADMIN_PASS", "admin")
+    org_slug = getenv("CVAT_ORG_SLUG", "")
 
-    cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
-    cvat_task_segment_size = int(os.environ.get("CVAT_TASK_SEGMENT_SIZE", 150))
-    cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
-    cvat_max_jobs_per_task = int(os.environ.get("CVAT_MAX_JOBS_PER_TASK", 1000))
-    cvat_task_creation_check_interval = int(os.environ.get("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
+    job_overlap = int(getenv("CVAT_JOB_OVERLAP", 0))
+    task_segment_size = int(getenv("CVAT_TASK_SEGMENT_SIZE", 150))
+    default_image_quality = int(getenv("CVAT_DEFAULT_IMAGE_QUALITY", 70))
+    max_jobs_per_task = int(getenv("CVAT_MAX_JOBS_PER_TASK", 1000))
+    task_creation_check_interval = int(getenv("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
-    cvat_export_timeout = int(os.environ.get("CVAT_EXPORT_TIMEOUT", 5 * 60))
+    export_timeout = int(getenv("CVAT_EXPORT_TIMEOUT", 5 * 60))
     "Timeout, in seconds, for annotations or dataset export waiting"
 
-    cvat_import_timeout = int(os.environ.get("CVAT_IMPORT_TIMEOUT", 60 * 60))
+    import_timeout = int(getenv("CVAT_IMPORT_TIMEOUT", 60 * 60))
     "Timeout, in seconds, for waiting on GT annotations import"
 
     # quality control settings
-    cvat_max_validation_checks = int(os.environ.get("CVAT_MAX_VALIDATION_CHECKS", 3))
+    max_validation_checks = int(getenv("CVAT_MAX_VALIDATION_CHECKS", 3))
     "Maximum number of attempts to run a validation check on a job after completing annotation"
 
-    cvat_iou_threshold = float(os.environ.get("CVAT_IOU_THRESHOLD", 0.8))
-    cvat_oks_sigma = float(os.environ.get("CVAT_OKS_SIGMA", 0.1))
+    iou_threshold = float(getenv("CVAT_IOU_THRESHOLD", 0.8))
+    oks_sigma = float(getenv("CVAT_OKS_SIGMA", 0.1))
 
-    cvat_polygons_iou_threshold = float(os.environ.get("CVAT_POLYGONS_IOU_THRESHOLD", 0.5))
-    "`iou_threshold` parameter for quality settings in polygons tasks"
-
-    cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
-    cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
+    incoming_webhooks_url = getenv("CVAT_INCOMING_WEBHOOKS_URL")
+    webhook_secret = getenv("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
 
 
 class StorageConfig:
     provider: ClassVar[str] = os.environ["STORAGE_PROVIDER"].lower()
     data_bucket_name: ClassVar[str] = (
-        os.environ.get("STORAGE_RESULTS_BUCKET_NAME")  # backward compatibility
+        getenv("STORAGE_RESULTS_BUCKET_NAME")  # backward compatibility
         or os.environ["STORAGE_BUCKET_NAME"]
     )
     endpoint_url: ClassVar[str] = os.environ[
         "STORAGE_ENDPOINT_URL"
     ]  # TODO: probably should be optional
-    region: ClassVar[str | None] = os.environ.get("STORAGE_REGION")
-    results_dir_suffix: ClassVar[str] = os.environ.get("STORAGE_RESULTS_DIR_SUFFIX", "-results")
-    secure: ClassVar[bool] = to_bool(os.environ.get("STORAGE_USE_SSL", "true"))
+    results_dir_suffix: ClassVar[str] = getenv("STORAGE_RESULTS_DIR_SUFFIX", "-results")
+    secure: ClassVar[bool] = to_bool(getenv("STORAGE_USE_SSL", "true"))
 
     # S3 specific attributes
-    access_key: ClassVar[str | None] = os.environ.get("STORAGE_ACCESS_KEY")
-    secret_key: ClassVar[str | None] = os.environ.get("STORAGE_SECRET_KEY")
+    access_key: ClassVar[str | None] = getenv("STORAGE_ACCESS_KEY")
+    secret_key: ClassVar[str | None] = getenv("STORAGE_SECRET_KEY")
 
     # GCS specific attributes
-    key_file_path: ClassVar[str | None] = os.environ.get("STORAGE_KEY_FILE_PATH")
+    key_file_path: ClassVar[str | None] = getenv("STORAGE_KEY_FILE_PATH")
 
     @classmethod
     def get_scheme(cls) -> str:
@@ -236,13 +222,13 @@ class StorageConfig:
 
 
 class FeaturesConfig:
-    enable_custom_cloud_host = to_bool(os.environ.get("ENABLE_CUSTOM_CLOUD_HOST", "no"))
+    enable_custom_cloud_host = to_bool(getenv("ENABLE_CUSTOM_CLOUD_HOST", "no"))
     "Allows using a custom host in manifest bucket urls"
 
-    request_logging_enabled = to_bool(os.getenv("REQUEST_LOGGING_ENABLED", "0"))
+    request_logging_enabled = to_bool(getenv("REQUEST_LOGGING_ENABLED", "0"))
     "Allow to log request details for each request"
 
-    profiling_enabled = to_bool(os.getenv("PROFILING_ENABLED", "0"))
+    profiling_enabled = to_bool(getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
 
     manifest_cache_ttl = int(os.getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
@@ -250,15 +236,15 @@ class FeaturesConfig:
 
 
 class CoreConfig:
-    default_assignment_time = int(os.environ.get("DEFAULT_ASSIGNMENT_TIME", 1800))
+    default_assignment_time = int(getenv("DEFAULT_ASSIGNMENT_TIME", 1800))
 
-    skeleton_assignment_size_mult = int(os.environ.get("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
+    skeleton_assignment_size_mult = int(getenv("SKELETON_ASSIGNMENT_SIZE_MULT", 1))
     "Assignment size multiplier for image_skeletons_from_boxes tasks"
 
-    min_roi_size_w = int(os.environ.get("MIN_ROI_SIZE_W", 350))
+    min_roi_size_w = int(getenv("MIN_ROI_SIZE_W", 350))
     "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
-    min_roi_size_h = int(os.environ.get("MIN_ROI_SIZE_H", 300))
+    min_roi_size_h = int(getenv("MIN_ROI_SIZE_H", 300))
     "Minimum absolute ROI size for image_boxes_from_points and image_skeletons_from_boxes tasks"
 
 
@@ -268,21 +254,21 @@ class HumanAppConfig:
     # openssl ecparam -name prime256v1 -genkey -noout -out ec_private.pem
     # openssl ec -in ec_private.pem -pubout -out ec_public.pem
     # HUMAN_APP_JWT_KEY=$(cat ec_public.pem)
-    jwt_public_key = os.environ.get("HUMAN_APP_JWT_KEY")
+    jwt_public_key = getenv("HUMAN_APP_JWT_KEY")
 
 
 class ApiConfig:
-    default_page_size = int(os.environ.get("DEFAULT_API_PAGE_SIZE", 5))
-    min_page_size = int(os.environ.get("MIN_API_PAGE_SIZE", 1))
-    max_page_size = int(os.environ.get("MAX_API_PAGE_SIZE", 10))
+    default_page_size = int(getenv("DEFAULT_API_PAGE_SIZE", 5))
+    min_page_size = int(getenv("MIN_API_PAGE_SIZE", 1))
+    max_page_size = int(getenv("MAX_API_PAGE_SIZE", 10))
 
-    stats_rps_limit = int(os.environ.get("STATS_RPS_LIMIT", 4))
+    stats_rps_limit = int(getenv("STATS_RPS_LIMIT", 4))
 
 
 class EncryptionConfig(_BaseConfig):
-    pgp_passphrase = os.environ.get("PGP_PASSPHRASE", "")
-    pgp_private_key = os.environ.get("PGP_PRIVATE_KEY", "")
-    pgp_public_key_url = os.environ.get("PGP_PUBLIC_KEY_URL", "")
+    pgp_passphrase = getenv("PGP_PASSPHRASE", "")
+    pgp_private_key = getenv("PGP_PRIVATE_KEY", "")
+    pgp_public_key_url = getenv("PGP_PUBLIC_KEY_URL", "")
 
     @classmethod
     def validate(cls) -> None:
@@ -302,9 +288,9 @@ class EncryptionConfig(_BaseConfig):
 
 
 class DevelopmentConfig:
-    cvat_in_docker = bool(int(os.environ.get("DEV_CVAT_IN_DOCKER", "1")))
+    cvat_in_docker = bool(int(getenv("DEV_CVAT_IN_DOCKER", "1")))
 
-    exchange_oracle_host = os.environ.get("DEV_EXCHANGE_ORACLE_HOST", "172.22.0.1")
+    exchange_oracle_host = getenv("DEV_EXCHANGE_ORACLE_HOST", "172.22.0.1")
     """
     Might be `host.docker.internal` or `172.22.0.1` if CVAT is running in Docker.
 
@@ -329,13 +315,13 @@ class Environment(str, Enum):
 
 
 class Config:
-    debug = to_bool(os.environ.get("DEBUG", "false"))
-    port = int(os.environ.get("PORT", 8000))
-    environment = Environment(os.environ.get("ENVIRONMENT", Environment.DEVELOPMENT.value))
-    workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
-    webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES", 5))
-    webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED", 60))
-    loglevel = parse_log_level(os.environ.get("LOGLEVEL", "info"))
+    debug = to_bool(getenv("DEBUG", "false"))
+    port = int(getenv("PORT", 8000))
+    environment = Environment(getenv("ENVIRONMENT", Environment.DEVELOPMENT.value))
+    workers_amount = int(getenv("WORKERS_AMOUNT", 1))
+    webhook_max_retries = int(getenv("WEBHOOK_MAX_RETRIES", 5))
+    webhook_delay_if_failed = int(getenv("WEBHOOK_DELAY_IF_FAILED", 60))
+    loglevel = parse_log_level(getenv("LOGLEVEL", "info"))
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_amoy = PolygonAmoyConfig

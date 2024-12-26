@@ -60,7 +60,6 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 )
                 return
 
-            chunk_size = CronConfig.accepted_projects_chunk_size
             project_ids = cvat_db_service.get_project_cvat_ids_by_escrow_address(
                 db_session, webhook.escrow_address
             )
@@ -71,6 +70,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 )
                 return
 
+            chunk_size = CronConfig.process_accepted_projects_chunk_size
             for ids_chunk in take_by(project_ids, chunk_size):
                 projects_chunk = cvat_db_service.get_projects_by_cvat_ids(
                     db_session, ids_chunk, for_update=True, limit=chunk_size
@@ -138,7 +138,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
             )
             rejected_project_cvat_ids = set(j.cvat_project_id for j in rejected_jobs)
 
-            chunk_size = CronConfig.rejected_projects_chunk_size
+            chunk_size = CronConfig.process_rejected_projects_chunk_size
             for chunk_ids in take_by(rejected_project_cvat_ids, chunk_size):
                 projects_chunk = cvat_db_service.get_projects_by_cvat_ids(
                     db_session, chunk_ids, for_update=True, limit=chunk_size
