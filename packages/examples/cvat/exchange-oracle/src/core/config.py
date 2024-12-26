@@ -163,9 +163,7 @@ class CvatConfig:
     admin_pass = getenv("CVAT_ADMIN_PASS", "admin")
     org_slug = getenv("CVAT_ORG_SLUG", "")
 
-    job_overlap = int(getenv("CVAT_JOB_OVERLAP", 0))
-    task_segment_size = int(getenv("CVAT_TASK_SEGMENT_SIZE", 150))
-    default_image_quality = int(getenv("CVAT_DEFAULT_IMAGE_QUALITY", 70))
+    image_quality = int(getenv("CVAT_IMAGE_QUALITY", 70))
     max_jobs_per_task = int(getenv("CVAT_MAX_JOBS_PER_TASK", 1000))
     task_creation_check_interval = int(getenv("CVAT_TASK_CREATION_CHECK_INTERVAL", 5))
 
