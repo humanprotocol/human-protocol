@@ -14,13 +14,13 @@ from src.utils.time import utcnow
 
 def get_api_client() -> ApiClient:
     configuration = Configuration(
-        host=Config.cvat_config.cvat_url,
-        username=Config.cvat_config.cvat_admin,
-        password=Config.cvat_config.cvat_admin_pass,
+        host=Config.cvat_config.host_url,
+        username=Config.cvat_config.admin_login,
+        password=Config.cvat_config.admin_pass,
     )
 
     api_client = ApiClient(configuration=configuration)
-    api_client.set_default_header("X-organization", Config.cvat_config.cvat_org_slug)
+    api_client.set_default_header("X-organization", Config.cvat_config.org_slug)
 
     return api_client
 
@@ -40,8 +40,8 @@ def get_last_task_quality_report(task_id: int) -> models.QualityReport | None:
 def compute_task_quality_report(
     task_id: int,
     *,
-    timeout: int = Config.cvat_config.cvat_quality_retrieval_timeout,
-    check_interval: float = Config.cvat_config.cvat_quality_check_interval,
+    timeout: int = Config.cvat_config.quality_retrieval_timeout,
+    check_interval: float = Config.cvat_config.quality_check_interval,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
     start_time = utcnow()
@@ -91,8 +91,8 @@ def get_task(task_id: int) -> models.TaskRead:
 def get_task_quality_report(
     task_id: int,
     *,
-    timeout: int = Config.cvat_config.cvat_quality_retrieval_timeout,
-    check_interval: float = Config.cvat_config.cvat_quality_check_interval,
+    timeout: int = Config.cvat_config.quality_retrieval_timeout,
+    check_interval: float = Config.cvat_config.quality_check_interval,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
 

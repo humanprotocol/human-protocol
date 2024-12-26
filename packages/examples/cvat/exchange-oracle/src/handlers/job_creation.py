@@ -33,13 +33,13 @@ from src.core.config import Config
 from src.core.storage import compose_data_bucket_filename
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
-from src.log import ROOT_LOGGER_NAME, format_sequence
+from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
 from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
-from src.utils.logging import NullLogger, get_function_logger
+from src.utils.logging import NullLogger, format_sequence, get_function_logger
 from src.utils.zip_archive import write_dir_to_zip_archive
 
 if TYPE_CHECKING:
@@ -203,7 +203,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
             if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
                 return task_status
 
-            sleep(Config.cvat_config.cvat_task_creation_check_interval)
+            sleep(Config.cvat_config.task_creation_check_interval)
 
     def _setup_gt_job_for_cvat_task(
         self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
@@ -409,7 +409,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
 
             for data_subset in self._split_dataset_per_task(
                 data_to_be_annotated,
-                subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
+                subset_size=Config.cvat_config.max_jobs_per_task * segment_size,
             ):
                 cvat_task = cvat_api.create_task(
                     cvat_project.id, escrow_address, segment_size=segment_size
@@ -552,7 +552,7 @@ class PointsTaskBuilder(SimpleTaskBuilder):
 
 class PolygonTaskBuilder(SimpleTaskBuilder):
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
-        values = {"iou_threshold": Config.cvat_config.cvat_polygons_iou_threshold, **overrides}
+        values = {"iou_threshold": Config.cvat_config.iou_threshold, **overrides}
         super()._setup_quality_settings(task_id, **values)
 
 
@@ -1554,7 +1554,7 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
 
             for data_subset in self._split_dataset_per_task(
                 self._roi_filenames_to_be_annotated,
-                subset_size=Config.cvat_config.cvat_max_jobs_per_task * segment_size,
+                subset_size=Config.cvat_config.max_jobs_per_task * segment_size,
             ):
                 cvat_task = cvat_api.create_task(
                     cvat_project.id, self.escrow_address, segment_size=segment_size
@@ -2354,7 +2354,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         label_id=label_id, roi_ids=task_data_roi_ids, roi_gt_ids=label_gt_roi_ids
                     )
                     for task_data_roi_ids in take_by(
-                        label_data_roi_ids, Config.cvat_config.cvat_max_jobs_per_task * segment_size
+                        label_data_roi_ids, Config.cvat_config.max_jobs_per_task * segment_size
                     )
                 ]
             )
@@ -2603,7 +2603,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         values = {
-            "oks_sigma": Config.cvat_config.cvat_oks_sigma,
+            "oks_sigma": Config.cvat_config.oks_sigma,
             "point_size_base": "image_size",  # we don't expect any boxes or groups, so ignore them
         }
         values.update(overrides)
@@ -2767,7 +2767,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                             cvat_task.id, gt_point_dataset, dm_export_format="cvat"
                         )
                         self._setup_quality_settings(
-                            cvat_task.id, oks_sigma=Config.cvat_config.cvat_oks_sigma
+                            cvat_task.id, oks_sigma=Config.cvat_config.oks_sigma
                         )
 
                         db_service.create_data_upload(session, cvat_task.id)

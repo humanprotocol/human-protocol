@@ -24,7 +24,7 @@ def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> st
     if project.job_type == TaskTypes.image_skeletons_from_boxes:
         query_params += "&defaultPointsCount=1"
 
-    return urljoin(Config.cvat_config.cvat_url, f"/tasks/{task_id}/jobs/{job_id}{query_params}")
+    return urljoin(Config.cvat_config.host_url, f"/tasks/{task_id}/jobs/{job_id}{query_params}")
 
 
 def get_default_assignment_timeout(task_type: TaskTypes) -> int:
