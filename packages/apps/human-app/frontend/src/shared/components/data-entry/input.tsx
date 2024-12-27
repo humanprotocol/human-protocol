@@ -2,8 +2,10 @@ import { Controller } from 'react-hook-form';
 import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
-import type { InputMask } from '@/shared/components/data-entry/input-masks/input-masks';
-import { InputMasks } from '@/shared/components/data-entry/input-masks/input-masks';
+import {
+  type InputMask,
+  InputMasks,
+} from '@/shared/components/data-entry/input-masks';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 
 export interface InputProps
