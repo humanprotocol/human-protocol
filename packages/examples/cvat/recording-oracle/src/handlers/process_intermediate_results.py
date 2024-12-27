@@ -526,7 +526,7 @@ class _TaskHoneypotManager:
         rejected_jobs = validation_result.rejected_jobs
 
         current_iteration = self.task.iteration + 1
-        total_jobs_count = len(validation_result.job_results)
+        total_jobs_count = len(self.annotation_meta.jobs)
         completed_jobs_count = total_jobs_count - len(rejected_jobs)
         current_progress = completed_jobs_count / (total_jobs_count or 1) * 100
         if (
@@ -539,7 +539,7 @@ class _TaskHoneypotManager:
                 f"Escrow validation failed for escrow_address={self.task.escrow_address}:"
                 f" progress is too slow. Min required {Config.validation.min_warmup_progress:.2f}%"
                 f" after the first {Config.validation.warmup_iterations} iterations,"
-                f" got {current_progress:2f} after the {current_iteration} iteration."
+                f" got {current_progress:.2f} after the {current_iteration} iteration."
                 " Annotation will be stopped for a manual review."
             )
             raise TooSlowAnnotationError(
