@@ -160,7 +160,7 @@ class AnnotationInfo(BaseModel):
 
 class ValidationInfo(BaseModel):
     min_quality: float = Field(ge=0)
-    "Minimal accepted annotation accuracy"
+    "Minimal accepted annotation quality"
 
     val_size: int = Field(default=2, gt=0)
     "Validation frames per job"

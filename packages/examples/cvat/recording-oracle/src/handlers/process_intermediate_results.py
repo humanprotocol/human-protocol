@@ -22,7 +22,7 @@ from src.core.gt_stats import GtKey, GtStats, ValidationFrameStats
 from src.core.types import TaskTypes
 from src.core.validation_errors import (
     DatasetValidationError,
-    LowAccuracyError,
+    LowQualityError,
     TooFewGtError,
     TooSlowAnnotationError,
 )
@@ -215,9 +215,9 @@ class _TaskValidator:
 
                 result = task_quality_report_data.frame_results[str(honeypot)]
                 self._gt_stats.setdefault(val_frame_name, ValidationFrameStats())
-                self._gt_stats[val_frame_name].accumulated_quality += result.annotations.accuracy
+                self._gt_stats[val_frame_name].accumulated_quality += result.annotations.precision
 
-                if result.annotations.accuracy < min_quality:
+                if result.annotations.precision < min_quality:
                     self._gt_stats[val_frame_name].failed_attempts += 1
                 else:
                     self._gt_stats[val_frame_name].accepted_attempts += 1
@@ -225,12 +225,12 @@ class _TaskValidator:
             # assess job quality
             job_quality_report = job_id_to_quality_report[cvat_job_id]
 
-            accuracy = job_quality_report.summary.accuracy
+            precision = job_quality_report.summary.precision
 
-            job_results[cvat_job_id] = accuracy
+            job_results[cvat_job_id] = precision
 
-            if accuracy < min_quality:
-                rejected_jobs[cvat_job_id] = LowAccuracyError()
+            if precision < min_quality:
+                rejected_jobs[cvat_job_id] = LowQualityError()
 
         for gt_stat in self._gt_stats.values():
             gt_stat.total_uses = max(

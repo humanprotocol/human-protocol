@@ -246,8 +246,9 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         settings = cvat_api.get_quality_control_settings(task_id)
 
         values = {
+            "target_metric": "precision",
             "target_metric_threshold": self.manifest.validation.min_quality,
-            "match_empty_frames": True,
+            "empty_is_annotated": True,
         }
         values.update(**overrides)
         cvat_api.update_quality_control_settings(settings.id, **values)

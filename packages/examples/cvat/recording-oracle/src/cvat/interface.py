@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class AnnotationInfo(BaseModel):
-    accuracy: float | int
+    precision: float | int
 
 
 class FrameResult(BaseModel):

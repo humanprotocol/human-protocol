@@ -212,15 +212,15 @@ class TestManifestChange:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
-                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
+                        "0": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
                     },
                 )
                 mock_get_jobs_quality_reports.return_value = [
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1,
-                        summary=mock.Mock(accuracy=assignment1_quality),
+                        summary=mock.Mock(precision=assignment1_quality),
                     ),
                 ]
 
@@ -258,15 +258,15 @@ class TestManifestChange:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment2_quality)),
-                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment2_quality)),
+                        "0": mock.Mock(annotations=mock.Mock(precision=assignment2_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(precision=assignment2_quality)),
                     },
                 )
                 mock_get_jobs_quality_reports.return_value = [
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1,
-                        summary=mock.Mock(accuracy=assignment2_quality),
+                        summary=mock.Mock(precision=assignment2_quality),
                     ),
                 ]
 
@@ -437,7 +437,7 @@ class TestValidationLogic:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        str(honeypot_frame): mock.Mock(annotations=mock.Mock(accuracy=0))
+                        str(honeypot_frame): mock.Mock(annotations=mock.Mock(precision=0))
                         for honeypot_frame in task_honeypots
                     },
                 )
@@ -446,7 +446,7 @@ class TestValidationLogic:
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1 + i,
-                        summary=mock.Mock(accuracy=0),
+                        summary=mock.Mock(precision=0),
                     )
                     for i in range(len(jobs))
                 ]
@@ -683,15 +683,15 @@ class TestValidationLogic:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
-                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
+                        "0": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
                     },
                 )
                 mock_get_jobs_quality_reports.return_value = [
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1,
-                        summary=mock.Mock(accuracy=assignment1_quality),
+                        summary=mock.Mock(precision=assignment1_quality),
                     ),
                 ]
 
