@@ -9,14 +9,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import {
-  ContractRunner,
-  EventLog,
-  Overrides,
-  Signer,
-  TransactionLike,
-  ethers,
-} from 'ethers';
+import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';

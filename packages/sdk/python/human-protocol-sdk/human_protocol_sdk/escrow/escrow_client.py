@@ -648,8 +648,8 @@ class EscrowClient:
         final_results_hash: str,
         txId: Decimal,
         tx_options: Optional[TxParams] = None,
-    ) -> Dict[str, TxParams]:
-        """Creates a prepared transaction for bulk payout without immediately sending it.
+    ) -> TxParams:
+        """Creates a prepared transaction for bulk payout without signing or sending it.
 
         :param escrow_address: Address of the escrow
         :param recipients: Array of recipient addresses
@@ -659,7 +659,7 @@ class EscrowClient:
         :param txId: Serial number of the bulks
         :param tx_options: (Optional) Additional transaction parameters
 
-        :return: A dictionary containing the raw transaction and its hash
+        :return: A dictionary containing the prepared transaction
 
         :raise EscrowClientError: If an error occurs while checking the parameters
 
@@ -707,8 +707,15 @@ class EscrowClient:
                     1
                 )
 
-                print(f"Raw Transaction: {transaction['rawTransaction']}")
-                print(f"Transaction Hash: {transaction['hash']}")
+                print(f"Transaction: {transaction}")
+
+                signed_transaction = w3.eth.account.sign_transaction(
+                    transaction, private_key)
+                tx_hash = w3.eth.send_raw_transaction(
+                    signed_transaction.raw_transaction)
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                print(f"Transaction sent with hash: {tx_hash.hex()}")
+                print(f"Transaction receipt: {tx_receipt}")
         """
 
         self.ensure_correct_bulk_payout_input(
@@ -723,22 +730,28 @@ class EscrowClient:
             .build_transaction(tx_options or {})
         )
 
+        # Add nonce if not provided
         if "nonce" not in transaction:
             transaction["nonce"] = self.w3.eth.get_transaction_count(
                 self.w3.eth.default_account
             )
 
-        # Populate other required fields like gas, gasPrice, and chainId
-        transaction["gas"] = self.w3.eth.estimate_gas(transaction)
-        transaction["gasPrice"] = self.w3.eth.gas_price
+        # Add estimated gas
+        if "gas" not in transaction:
+            transaction["gas"] = self.w3.eth.estimate_gas(transaction)
+
+        # Handle gas price and EIP-1559 fee fields
+        if "maxFeePerGas" in transaction or "maxPriorityFeePerGas" in transaction:
+            # Remove `gasPrice` if EIP-1559 fields are present
+            transaction.pop("gasPrice", None)
+        else:
+            # Use `gasPrice` if not provided
+            transaction.setdefault("gasPrice", self.w3.eth.gas_price)
+
+        # Add chain ID
         transaction["chainId"] = self.w3.eth.chain_id
 
-        transaction_hash = self.w3.keccak(transaction).hex()
-
-        return {
-            "rawTransaction": transaction,
-            "hash": transaction_hash,
-        }
+        return transaction
 
     def ensure_correct_bulk_payout_input(
         self,

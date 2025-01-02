@@ -1279,7 +1279,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_create_bulk_payout_transaction(self):
         mock_contract = MagicMock()
         mock_contract.functions.bulkPayOut = MagicMock()
-        mock_contract.functions.bulkPayOut.return_value.buildTransaction = MagicMock(
+        mock_contract.functions.bulkPayOut.return_value.build_transaction = MagicMock(
             return_value={
                 "to": "0x1234567890123456789012345678901234567890",
                 "data": "0x1234",
@@ -1287,9 +1287,7 @@ class TestEscrowClient(unittest.TestCase):
         )
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         self.escrow.get_balance = MagicMock(return_value=100)
-        self.escrow.w3.keccak = MagicMock(
-            return_value=b"\x12\x34\x56\x78"
-        )  # Mock del hash
+        self.w3.eth.estimate_gas = MagicMock(return_value=100)
 
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -1307,12 +1305,18 @@ class TestEscrowClient(unittest.TestCase):
             txId,
         )
 
+        # Verificar que el contrato y los métodos fueron llamados correctamente
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.bulkPayOut.assert_called_once_with(
             recipients, amounts, final_results_url, final_results_hash, txId
         )
-        self.assertIn("rawTransaction", result)
-        self.assertIn("hash", result)
+        mock_contract.functions.bulkPayOut.return_value.build_transaction.assert_called_once()
+
+        # Verificar que el resultado contiene los campos esperados
+        self.assertIn("to", result)
+        self.assertIn("data", result)
+        self.assertEqual(result["to"], "0x1234567890123456789012345678901234567890")
+        self.assertEqual(result["data"], "0x1234")
 
     def test_create_bulk_payout_transaction_invalid_escrow_address(self):
         invalid_escrow_address = "invalid_address"
