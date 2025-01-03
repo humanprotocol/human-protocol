@@ -1,33 +1,37 @@
 import type { RouteProps } from 'react-router-dom';
 import { t } from 'i18next';
-import { HomePage } from '@/pages/homepage/home.page';
-import { Playground } from '@/pages/playground/playground.page';
-import { ProtectedPage } from '@/pages/protected.page';
-import { SignInWorkerPage } from '@/pages/worker/sign-in.page';
-import { SignUpWorkerPage } from '@/pages/worker/sign-up.page';
-import { OperatorProfilePage } from '@/pages/operator/profile/profile.page';
-import { WorkerProfilePage } from '@/pages/worker/profile/profile.page';
-import { ConnectWalletOperatorPage } from '@/pages/operator/sign-up/connect-wallet.page';
+import { ProtectedPage } from '@/modules/worker/views/protected/protected.page';
+import { SignInWorkerPage } from '@/modules/worker/views/sign/sign-in.page';
+import { SignUpWorkerPage } from '@/modules/worker/views/sign/sign-up.page';
 import { routerPaths } from '@/router/router-paths';
-import { AddStakeOperatorPage } from '@/pages/operator/sign-up/add-stake/add-stake.page';
-import { SendResetLinkWorkerSuccessPage } from '@/pages/worker/send-reset-link/send-reset-link-success.page';
-import { ResetPasswordWorkerPage } from '@/pages/worker/reset-password/reset-password.page';
-import { SendResetLinkWorkerPage } from '@/pages/worker/send-reset-link/send-reset-link.page';
-import { ResetPasswordWorkerSuccessPage } from '@/pages/worker/reset-password/reset-password-success.page';
-import { EmailVerificationWorkerPage } from '@/pages/worker/email-verification/email-verification.page';
-import { VerifyEmailWorkerPage } from '@/pages/worker/email-verification/verify-email.page';
-import { AddKeysOperatorPage } from '@/pages/operator/sign-up/add-keys/add-keys.page';
-import { EditExistingKeysSuccessPage } from '@/pages/operator/sign-up/add-keys/edit-existing-keys-success.page';
-import type { PageHeaderProps } from '@/components/layout/protected/page-header';
-import { HandIcon, ProfileIcon, WorkHeaderIcon } from '@/components/ui/icons';
-import { JobsDiscoveryPage } from '@/pages/worker/jobs-discovery/jobs-discovery.page';
-import { JobsPage } from '@/pages/worker/jobs/jobs.page';
-import { EnableLabeler } from '@/pages/worker/hcaptcha-labeling/enable-labeler.page';
-import { HcaptchaLabelingPage } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/hcaptcha-labeling.page';
-import { UserStatsAccordion } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-accordion';
-import { SetUpOperatorPage } from '@/pages/operator/sign-up/set-up-operator';
+import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-reset-link/send-reset-link-success.page';
+import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
+import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/send-reset-link.page';
+import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-password/reset-password-success.page';
+import { JobsDiscoveryPage } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
+import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
+import { EnableLabeler } from '@/modules/worker/views/hcaptcha-labeling/enable-labeler.page';
+import { HcaptchaLabelingPage } from '@/modules/worker/views/hcaptcha-labeling/hcaptcha-labeling.page';
+import { UserStatsAccordion } from '@/modules/worker/components/hcaptcha-labeling/user-stats-accordion';
 import { env } from '@/shared/env';
-import { RegistrationPage } from '@/pages/worker/registration/registration.page';
+import { RegistrationPage } from '@/modules/worker/views/registration/registration.page';
+import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
+import {
+  HandIcon,
+  ProfileIcon,
+  WorkHeaderIcon,
+} from '@/shared/components/ui/icons';
+import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
+import { SetUpOperatorPage } from '@/modules/operator/views/sign-up/set-up-operator.page';
+import { EditExistingKeysSuccessPage } from '@/modules/operator/views/sign-up/edit-existing-keys-success.page';
+import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.page';
+import { VerifyEmailWorkerPage } from '@/modules/worker/views/email-verification/verify-email.page';
+import { EmailVerificationWorkerPage } from '@/modules/worker/views/email-verification/email-verification.page';
+import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
+import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
+import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.page';
+import { Playground } from '@/modules/playground/views/playground.page';
+import { HomePage } from '@/modules/homepage/views/home.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {

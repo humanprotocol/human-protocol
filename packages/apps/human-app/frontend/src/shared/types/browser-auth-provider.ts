@@ -1,6 +1,6 @@
-import type { SignInSuccessResponse } from '@/api/services/worker/sign-in/types';
-import type { Web3UserData } from '@/auth-web3/web3-auth-context';
-import type { UserData } from '@/auth/auth-context';
+import type { SignInSuccessResponse } from '@/modules/worker/services/sign-in/types';
+import type { Web3UserData } from '@/modules/auth-web3/context/web3-auth-context';
+import type { UserData } from '@/modules/auth/context/auth-context';
 
 export type AuthType = 'web2' | 'web3';
 type SubscriptionCallback = () => void;
