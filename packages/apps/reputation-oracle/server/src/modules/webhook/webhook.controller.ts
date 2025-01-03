@@ -1,4 +1,11 @@
-import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  Post,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -12,10 +19,12 @@ import { Public } from '../../common/decorators';
 import { WebhookIncomingService } from './webhook-incoming.service';
 import { AuthSignatureRole } from '../../common/enums/role';
 import { IncomingWebhookDto } from './webhook.dto';
+import { IncomingWebhookErrorFilter } from './webhook.error.filter';
 
 @Public()
 @ApiTags('Webhook')
 @Controller('/webhook')
+@UseFilters(IncomingWebhookErrorFilter)
 export class WebhookController {
   constructor(
     private readonly webhookIncomingService: WebhookIncomingService,

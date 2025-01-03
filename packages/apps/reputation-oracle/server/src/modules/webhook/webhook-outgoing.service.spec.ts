@@ -19,14 +19,13 @@ import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { WebhookOutgoingService } from './webhook-outgoing.service';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
-import { ErrorWebhook } from '../../common/constants/errors';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { signMessage } from '../../common/utils/signature';
 import { HttpStatus } from '@nestjs/common';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { ControlledError } from '../../common/errors/controlled';
+import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
 
 describe('WebhookOutgoingService', () => {
   let webhookOutgoingService: WebhookOutgoingService,
@@ -143,6 +142,11 @@ describe('WebhookOutgoingService', () => {
       escrowAddress: MOCK_ADDRESS,
       eventType: EventType.ESCROW_COMPLETED,
     };
+    const webhook: any = {
+      hash: 'test',
+      url: MOCK_WEBHOOK_URL,
+      payload,
+    };
 
     it('should successfully send a webhook', async () => {
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
@@ -150,9 +154,7 @@ describe('WebhookOutgoingService', () => {
           status: HttpStatus.CREATED,
         });
       });
-      expect(
-        await webhookOutgoingService.sendWebhook(MOCK_WEBHOOK_URL, payload),
-      ).toBe(undefined);
+      expect(await webhookOutgoingService.sendWebhook(webhook)).toBe(undefined);
 
       const expectedBody = {
         chain_id: payload.chainId,
@@ -177,10 +179,8 @@ describe('WebhookOutgoingService', () => {
       jest.spyOn(httpService as any, 'post').mockImplementation(() => {
         return of({});
       });
-      await expect(
-        webhookOutgoingService.sendWebhook(MOCK_WEBHOOK_URL, payload),
-      ).rejects.toThrow(
-        new ControlledError(ErrorWebhook.NotSent, HttpStatus.BAD_REQUEST),
+      await expect(webhookOutgoingService.sendWebhook(webhook)).rejects.toThrow(
+        new OutgoingWebhookError(WebhookErrorMessage.NOT_SENT, webhook.hash),
       );
     });
   });

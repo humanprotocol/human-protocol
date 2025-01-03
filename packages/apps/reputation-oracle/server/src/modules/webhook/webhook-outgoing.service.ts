@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookOutgoingStatus } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
 import { signMessage } from '../../common/utils/signature';
@@ -15,10 +14,10 @@ import { HttpService } from '@nestjs/axios';
 import { CaseConverter } from '../../common/utils/case-converter';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
 
 @Injectable()
 export class WebhookOutgoingService {
@@ -90,20 +89,27 @@ export class WebhookOutgoingService {
    * @param {object} payload - The data payload to send.
    * @throws {ControlledError} If the webhook request fails.
    */
-  public async sendWebhook(url: string, payload: object): Promise<void> {
-    const snake_case_body = CaseConverter.transformToSnakeCase(payload);
+  public async sendWebhook(
+    outgoingWebhook: WebhookOutgoingEntity,
+  ): Promise<void> {
+    const snake_case_body = CaseConverter.transformToSnakeCase(
+      outgoingWebhook.payload,
+    );
     const signedBody = await signMessage(
       snake_case_body,
       this.web3ConfigService.privateKey,
     );
     const { status } = await firstValueFrom(
-      await this.httpService.post(url, snake_case_body, {
+      await this.httpService.post(outgoingWebhook.url, snake_case_body, {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
       }),
     );
 
     if (status !== HttpStatus.CREATED) {
-      throw new ControlledError(ErrorWebhook.NotSent, HttpStatus.NOT_FOUND);
+      throw new OutgoingWebhookError(
+        WebhookErrorMessage.NOT_SENT,
+        outgoingWebhook.hash,
+      );
     }
   }
 
@@ -114,12 +120,10 @@ export class WebhookOutgoingService {
 
     for (const webhookEntity of webhookEntities) {
       try {
-        const { url, payload } = webhookEntity;
-
-        await this.sendWebhook(url, payload);
+        await this.sendWebhook(webhookEntity);
       } catch (err) {
         const errorId = uuidv4();
-        const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `${WebhookErrorMessage.PENDING_PROCESSING_FAILED} (Error ID: ${errorId})`;
         this.logger.error(
           `Error processing pending outgoing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
         );

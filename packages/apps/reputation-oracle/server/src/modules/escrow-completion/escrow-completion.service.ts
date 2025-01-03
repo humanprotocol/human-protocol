@@ -17,13 +17,11 @@ import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import {
-  ErrorEscrowCompletion,
-  ErrorWebhook,
-} from '../../common/constants/errors';
+import { ErrorEscrowCompletion } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/utils/database';
+import { WebhookErrorMessage } from '../webhook/webhook.error';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -206,7 +204,7 @@ export class EscrowCompletionService {
         for (const url of callbackUrls) {
           if (!url) {
             throw new ControlledError(
-              ErrorWebhook.UrlNotFound,
+              WebhookErrorMessage.URL_NOT_FOUND,
               HttpStatus.NOT_FOUND,
             );
           }
