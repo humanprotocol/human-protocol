@@ -94,6 +94,7 @@ describe('escrowCompletionService', () => {
     sendTransaction: jest.fn().mockImplementation(() => ({
       wait: jest.fn(),
     })),
+    signTransaction: jest.fn().mockResolvedValue('signed-tx'),
   };
 
   const mockConfigService = {
@@ -673,21 +674,20 @@ describe('escrowCompletionService', () => {
       data: '0xtest-encoded-contact-data',
       nonce: 0,
     };
-    const transactionHash = '0x123456';
+    const MOCK_TRANSACTION_HASH =
+      '0xed8ab4fde4c4e2749641d9d89de3d920f9845e086abd71e6921319f41f0e784f';
 
     beforeAll(() => {
       ESCROW_CLIENT_MOCK.createBulkPayoutTransaction.mockImplementation(
         (...args) => {
           const txOptions = args.at(-1);
           return {
-            rawTransaction: {
-              ...rawTransaction,
-              nonce: txOptions.nonce ?? rawTransaction.nonce,
-            },
-            hash: transactionHash,
+            ...rawTransaction,
+            nonce: txOptions.nonce ?? rawTransaction.nonce,
           };
         },
       );
+      signerMock.signTransaction.mockResolvedValue('0x1234567890abcdef');
     });
 
     it('should correctly process payouts batch at first try', async () => {
@@ -709,9 +709,11 @@ describe('escrowCompletionService', () => {
         { ...payoutsBatch },
       );
 
+      expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
+      expect(signerMock.signTransaction).toHaveBeenCalledWith(rawTransaction);
       expect(updateOneBatchSpy).toHaveBeenNthCalledWith(1, {
         ...payoutsBatch,
-        txHash: transactionHash,
+        txHash: MOCK_TRANSACTION_HASH,
         txNonce: rawTransaction.nonce,
       });
       expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
@@ -739,17 +741,23 @@ describe('escrowCompletionService', () => {
         payoutsBatch,
       );
 
+      expect(signerMock.signTransaction).toHaveBeenCalledTimes(1);
+      expect(signerMock.signTransaction).toHaveBeenCalledWith({
+        ...rawTransaction,
+        nonce: payoutsBatch.txNonce,
+      });
       expect(updateOneBatchSpy).toHaveBeenCalledWith({
         ...payoutsBatch,
-        txHash: transactionHash,
+        txHash: MOCK_TRANSACTION_HASH,
       });
+      expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
       expect(signerMock.sendTransaction).toHaveBeenCalledWith({
         ...rawTransaction,
         nonce: payoutsBatch.txNonce,
       });
     });
 
-    it('should  erase tx data when nonce already used', async () => {
+    it('should erase tx data when nonce already used', async () => {
       const updateOneBatchSpy = jest.spyOn(
         escrowPayoutsBatchRepository,
         'updateOne',

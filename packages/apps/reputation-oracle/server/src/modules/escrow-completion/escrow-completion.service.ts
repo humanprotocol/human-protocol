@@ -415,25 +415,25 @@ export class EscrowCompletionService {
       recipientToAmountMap.set(address, BigInt(amount));
     }
 
-    const { rawTransaction, hash } =
-      await escrowClient.createBulkPayoutTransaction(
-        escrowCompletionEntity.escrowAddress,
-        Array.from(recipientToAmountMap.keys()),
-        Array.from(recipientToAmountMap.values()),
-        escrowCompletionEntity.finalResultsUrl,
-        escrowCompletionEntity.finalResultsHash,
-        {
-          gasPrice: await this.web3Service.calculateGasPrice(
-            escrowCompletionEntity.chainId,
-          ),
-          nonce: payoutsBatch.txNonce,
-        },
-      );
+    const rawTransaction = await escrowClient.createBulkPayoutTransaction(
+      escrowCompletionEntity.escrowAddress,
+      Array.from(recipientToAmountMap.keys()),
+      Array.from(recipientToAmountMap.values()),
+      escrowCompletionEntity.finalResultsUrl,
+      escrowCompletionEntity.finalResultsHash,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(
+          escrowCompletionEntity.chainId,
+        ),
+        nonce: payoutsBatch.txNonce,
+      },
+    );
 
     if (!payoutsBatch.txNonce) {
       payoutsBatch.txNonce = rawTransaction.nonce;
     }
-    payoutsBatch.txHash = hash;
+    const signedTransaction = await signer.signTransaction(rawTransaction);
+    payoutsBatch.txHash = ethers.keccak256(signedTransaction);
 
     await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
 

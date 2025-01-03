@@ -918,9 +918,12 @@ export class EscrowClient extends BaseEthersClient {
    * const resultsUrl = 'http://localhost/results.json';
    * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
    *
-   * const result = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
-   * console.log('Raw transaction:', result.rawTransaction);
-   * console.log('Tx hash:', result.hash);
+   * const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
+   * console.log('Raw transaction:', rawTransaction);
+   *
+   * const signedTransaction = await signer.signTransaction(rawTransaction);
+   * console.log('Tx hash:', ethers.keccak256(signedTransaction));
+   * (await signer.sendTransaction(rawTransaction)).wait();
    */
   @requiresSigner
   async createBulkPayoutTransaction(
@@ -930,10 +933,7 @@ export class EscrowClient extends BaseEthersClient {
     finalResultsUrl: string,
     finalResultsHash: string,
     txOptions: Overrides = {}
-  ): Promise<{
-    rawTransaction: TransactionLikeWithNonce;
-    hash: string;
-  }> {
+  ): Promise<TransactionLikeWithNonce> {
     await this.ensureCorrectBulkPayoutInput(
       escrowAddress,
       recipients,
@@ -981,13 +981,7 @@ export class EscrowClient extends BaseEthersClient {
       const preparedTransaction =
         await signer.populateTransaction(populatedTransaction);
 
-      const signedTransaction =
-        await signer.signTransaction(preparedTransaction);
-
-      return {
-        rawTransaction: preparedTransaction as TransactionLikeWithNonce,
-        hash: ethers.keccak256(signedTransaction),
-      };
+      return preparedTransaction as TransactionLikeWithNonce;
     } catch (e) {
       return throwError(e);
     }

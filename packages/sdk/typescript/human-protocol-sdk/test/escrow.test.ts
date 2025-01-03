@@ -1435,7 +1435,7 @@ describe('EscrowClient', () => {
       const signedTransaction = '0x123456';
       mockSigner.signTransaction.mockResolvedValueOnce(signedTransaction);
 
-      const result = await escrowClient.createBulkPayoutTransaction(
+      const rawTransaction = await escrowClient.createBulkPayoutTransaction(
         escrowAddress,
         recipients,
         amounts,
@@ -1443,14 +1443,12 @@ describe('EscrowClient', () => {
         finalResultsHash
       );
 
-      expect(result.rawTransaction).toEqual({
+      expect(rawTransaction).toEqual({
         from: signerAddress,
         to: escrowAddress,
         data: encodedMethodData,
         nonce: 0,
       });
-
-      expect(result.hash).toBe(ethers.keccak256(signedTransaction));
     });
 
     test('should create raw transaction for bulk payout with passed nonce', async () => {
@@ -1473,7 +1471,7 @@ describe('EscrowClient', () => {
       mockSigner.signTransaction.mockResolvedValueOnce('0x123456');
 
       const nonce = 42;
-      const result = await escrowClient.createBulkPayoutTransaction(
+      const rawTransaction = await escrowClient.createBulkPayoutTransaction(
         escrowAddress,
         recipients,
         amounts,
@@ -1484,7 +1482,7 @@ describe('EscrowClient', () => {
         }
       );
 
-      expect(result.rawTransaction).toEqual({
+      expect(rawTransaction).toEqual({
         from: signerAddress,
         to: escrowAddress,
         data: encodedMethodData,
