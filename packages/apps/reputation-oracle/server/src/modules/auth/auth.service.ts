@@ -1,7 +1,7 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
+import { ErrorCapthca } from '../../common/constants/errors';
 import {
   OperatorStatus,
   Role as UserRole,
@@ -24,7 +24,6 @@ import {
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../common/utils/signature';
-import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
@@ -40,9 +39,17 @@ import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyType } from '../../common/enums';
+import {
+  AuthError,
+  AuthErrorMessage,
+  DuplicatedUserError,
+  InvalidOperatorFeeError,
+  InvalidOperatorJobTypesError,
+  InvalidOperatorRoleError,
+  InvalidOperatorUrlError,
+} from './auth.errors';
 
 @Injectable()
 export class AuthService {
@@ -61,50 +68,50 @@ export class AuthService {
     private readonly hCaptchaService: HCaptchaService,
   ) {}
 
-  public async signin(data: SignInDto, ip?: string): Promise<AuthDto> {
-    const userEntity = await this.userService.getByCredentials(
-      data.email,
-      data.password,
-    );
-
+  public async signin({
+    email,
+    password,
+    hCaptchaToken,
+  }: SignInDto): Promise<AuthDto> {
+    const userEntity = await this.userRepository.findOneByEmail(email);
     if (!userEntity) {
-      throw new ControlledError(
-        ErrorAuth.InvalidEmailOrPassword,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
-    if (
-      userEntity.role !== UserRole.HUMAN_APP &&
-      (!data.hCaptchaToken ||
-        !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-          .success)
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
+    if (!UserService.checkPasswordMatchesHash(password, userEntity.password)) {
+      throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
+    }
+
+    if (userEntity.role !== UserRole.HUMAN_APP) {
+      if (!hCaptchaToken) {
+        throw new AuthError(ErrorCapthca.InvalidToken);
+      }
+
+      const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+        token: hCaptchaToken,
+      });
+      if (!captchaVerificationResult.success) {
+        throw new AuthError(ErrorCapthca.VerificationFailed);
+      }
     }
 
     return this.auth(userEntity);
   }
 
-  public async signup(data: UserCreateDto, ip?: string): Promise<UserEntity> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
+  public async signup(data: UserCreateDto): Promise<UserEntity> {
+    if (!data.hCaptchaToken) {
+      throw new AuthError(ErrorCapthca.InvalidToken);
     }
+    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+      token: data.hCaptchaToken,
+    });
+    if (!captchaVerificationResult.success) {
+      throw new AuthError(ErrorCapthca.VerificationFailed);
+    }
+
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
-      throw new ControlledError(
-        ErrorUser.DuplicatedEmail,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new DuplicatedUserError(data.email);
     }
     const userEntity = await this.userService.create(data);
 
@@ -141,11 +148,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
+      throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
+      throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
     return this.auth(tokenEntity.user);
@@ -230,20 +237,20 @@ export class AuthService {
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
+    if (!data.hCaptchaToken) {
+      throw new AuthError(ErrorCapthca.InvalidToken);
+    }
+    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+      token: data.hCaptchaToken,
+    });
+    if (!captchaVerificationResult.success) {
+      throw new AuthError(ErrorCapthca.VerificationFailed);
     }
 
     const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity) {
-      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
+      return;
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -279,18 +286,15 @@ export class AuthService {
     });
   }
 
-  public async restorePassword(
-    data: RestorePasswordDto,
-    ip?: string,
-  ): Promise<void> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
+  public async restorePassword(data: RestorePasswordDto): Promise<void> {
+    if (!data.hCaptchaToken) {
+      throw new AuthError(ErrorCapthca.InvalidToken);
+    }
+    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+      token: data.hCaptchaToken,
+    });
+    if (!captchaVerificationResult.success) {
+      throw new AuthError(ErrorCapthca.VerificationFailed);
     }
 
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
@@ -299,11 +303,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN);
+      throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
+      throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
@@ -329,11 +333,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN);
+      throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN);
+      throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
     tokenEntity.user.status = UserStatus.ACTIVE;
@@ -343,20 +347,19 @@ export class AuthService {
   public async resendEmailVerification(
     data: ResendEmailVerificationDto,
   ): Promise<void> {
-    if (
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
-      throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
-      );
+    if (!data.hCaptchaToken) {
+      throw new AuthError(ErrorCapthca.InvalidToken);
+    }
+    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+      token: data.hCaptchaToken,
+    });
+    if (!captchaVerificationResult.success) {
+      throw new AuthError(ErrorCapthca.VerificationFailed);
     }
 
     const userEntity = await this.userRepository.findOneByEmail(data.email);
-
-    if (!userEntity || userEntity?.status != UserStatus.PENDING) {
-      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT);
+    if (!userEntity || userEntity.status !== UserStatus.PENDING) {
+      return;
     }
 
     const existingToken = await this.tokenRepository.findOneByUserIdAndType(
@@ -392,16 +395,6 @@ export class AuthService {
     });
   }
 
-  public hashToken(token: string): string {
-    const hash = createHash('sha256');
-    hash.update(token + this.salt);
-    return hash.digest('hex');
-  }
-
-  public compareToken(token: string, hashedToken: string): boolean {
-    return this.hashToken(token) === hashedToken;
-  }
-
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
     const preSignUpData = await this.userService.prepareSignatureBody(
       SignatureType.SIGNUP,
@@ -413,10 +406,7 @@ export class AuthService {
     ]);
 
     if (!verified) {
-      throw new ControlledError(
-        ErrorAuth.InvalidSignature,
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE);
     }
 
     let chainId: ChainId;
@@ -432,39 +422,40 @@ export class AuthService {
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
-    let role: string | undefined;
+    let role = '';
     try {
       role = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.role);
     } catch {}
 
-    if (
-      !role ||
-      ![Role.JobLauncher, Role.ExchangeOracle, Role.RecordingOracle].some(
-        (r) => r.toLowerCase() === role.toLowerCase(),
-      )
-    ) {
-      throw new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST);
+    const validRolesValue = [
+      Role.JobLauncher,
+      Role.ExchangeOracle,
+      Role.RecordingOracle,
+    ].map((role) => role.toLowerCase());
+
+    if (!validRolesValue.includes(role.toLowerCase())) {
+      throw new InvalidOperatorRoleError(role);
     }
 
-    let fee: string | undefined;
+    let fee = '';
     try {
       fee = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee);
     } catch {}
 
-    if (!fee || fee === '') {
-      throw new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST);
+    if (!fee) {
+      throw new InvalidOperatorFeeError(fee);
     }
 
-    let url: string | undefined;
+    let url = '';
     try {
       url = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url);
     } catch {}
 
-    if (!url || url === '') {
-      throw new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST);
+    if (!url) {
+      throw new InvalidOperatorUrlError(url);
     }
 
-    let jobTypes: string | undefined;
+    let jobTypes = '';
     try {
       jobTypes = await KVStoreUtils.get(
         chainId,
@@ -473,11 +464,8 @@ export class AuthService {
       );
     } catch {}
 
-    if (!jobTypes || jobTypes === '') {
-      throw new ControlledError(
-        ErrorAuth.InvalidJobType,
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!jobTypes) {
+      throw new InvalidOperatorJobTypesError(jobTypes);
     }
 
     const userEntity = await this.userService.createWeb3User(data.address);
@@ -500,10 +488,7 @@ export class AuthService {
     );
 
     if (!verified) {
-      throw new ControlledError(
-        ErrorAuth.InvalidSignature,
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE);
     }
 
     await this.userService.updateNonce(userEntity);

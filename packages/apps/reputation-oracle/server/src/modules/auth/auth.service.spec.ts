@@ -7,11 +7,7 @@ import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../user/user.entity';
-import {
-  ErrorAuth,
-  ErrorSignature,
-  ErrorUser,
-} from '../../common/constants/errors';
+import { ErrorSignature, ErrorUser } from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
@@ -45,6 +41,15 @@ import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.servi
 import { ControlledError } from '../../common/errors/controlled';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { JobRequestType } from '../../common/enums';
+import {
+  AuthError,
+  AuthErrorMessage,
+  DuplicatedUserError,
+  InvalidOperatorFeeError,
+  InvalidOperatorJobTypesError,
+  InvalidOperatorRoleError,
+  InvalidOperatorUrlError,
+} from './auth.errors';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -54,7 +59,7 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
   KVStoreUtils: {
-    get: jest.fn(),
+    get: jest.fn().mockResolvedValue(''),
   },
 }));
 
@@ -165,10 +170,11 @@ describe('AuthService', () => {
       status: UserStatus.ACTIVE,
     };
 
-    let getByCredentialsMock: any;
+    let findOneByEmailMock: any;
 
     beforeEach(() => {
-      getByCredentialsMock = jest.spyOn(userService, 'getByCredentials');
+      findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
+
       jest.spyOn(authService, 'auth').mockResolvedValue({
         accessToken: MOCK_ACCESS_TOKEN,
         refreshToken: MOCK_REFRESH_TOKEN,
@@ -180,14 +186,11 @@ describe('AuthService', () => {
     });
 
     it('should sign in the user and return the JWT', async () => {
-      getByCredentialsMock.mockResolvedValue(userEntity as UserEntity);
+      findOneByEmailMock.mockResolvedValue(userEntity as UserEntity);
 
       const result = await authService.signin(signInDto);
 
-      expect(userService.getByCredentials).toHaveBeenCalledWith(
-        signInDto.email,
-        signInDto.password,
-      );
+      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email);
       expect(authService.auth).toHaveBeenCalledWith(userEntity);
       expect(result).toStrictEqual({
         accessToken: MOCK_ACCESS_TOKEN,
@@ -195,17 +198,14 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw UnauthorizedException if user credentials are invalid', async () => {
-      getByCredentialsMock.mockResolvedValue(undefined);
+    it('should throw if user credentials are invalid', async () => {
+      findOneByEmailMock.mockResolvedValue(undefined);
 
       await expect(authService.signin(signInDto)).rejects.toThrow(
-        ErrorAuth.InvalidEmailOrPassword,
+        new AuthError(AuthErrorMessage.INVALID_CREDENTIALS),
       );
 
-      expect(userService.getByCredentials).toHaveBeenCalledWith(
-        signInDto.email,
-        signInDto.password,
-      );
+      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email);
     });
   });
 
@@ -216,7 +216,8 @@ describe('AuthService', () => {
       hCaptchaToken: 'token',
     };
 
-    const userEntity: Partial<UserEntity> = {
+    const userEntity: Partial<UserEntity> &
+      Pick<UserEntity, 'id' | 'email' | 'password'> = {
       id: 1,
       email: userCreateDto.email,
       password: MOCK_HASHED_PASSWORD,
@@ -262,7 +263,7 @@ describe('AuthService', () => {
         .mockResolvedValue(userEntity as any);
 
       await expect(authService.signup(userCreateDto)).rejects.toThrow(
-        new ControlledError(ErrorUser.DuplicatedEmail, HttpStatus.BAD_REQUEST),
+        new DuplicatedUserError(userEntity.email),
       );
 
       expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
@@ -350,16 +351,16 @@ describe('AuthService', () => {
         jest.clearAllMocks();
       });
 
-      it('should throw NotFound exception if user is not found', () => {
+      it('should exit early w/o action if user is not found', () => {
         findOneByEmailMock.mockResolvedValue(null);
         expect(
           authService.forgotPassword({
             email: 'user@example.com',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(
-          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
-        );
+        ).resolves.toBeUndefined();
+
+        expect(sendGridService.sendEmail).not.toHaveBeenCalledWith();
       });
 
       it('should remove existing token if it exists', async () => {
@@ -455,7 +456,7 @@ describe('AuthService', () => {
             hCaptchaToken: 'token',
           }),
         ).rejects.toThrow(
-          new ControlledError(ErrorAuth.InvalidToken, HttpStatus.FORBIDDEN),
+          new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN),
         );
       });
 
@@ -470,7 +471,7 @@ describe('AuthService', () => {
             hCaptchaToken: 'token',
           }),
         ).rejects.toThrow(
-          new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+          new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED),
         );
       });
 
@@ -523,7 +524,7 @@ describe('AuthService', () => {
         expect(
           authService.emailVerification({ token: 'token' }),
         ).rejects.toThrow(
-          new ControlledError(ErrorAuth.NotFound, HttpStatus.FORBIDDEN),
+          new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN),
         );
       });
       it('should throw an error if token is expired', () => {
@@ -532,7 +533,7 @@ describe('AuthService', () => {
         expect(
           authService.emailVerification({ token: 'token' }),
         ).rejects.toThrow(
-          new ControlledError(ErrorAuth.TokenExpired, HttpStatus.FORBIDDEN),
+          new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED),
         );
       });
 
@@ -571,19 +572,19 @@ describe('AuthService', () => {
         jest.clearAllMocks();
       });
 
-      it('should throw an error if user is not found', () => {
+      it('should exit early w/o action if user is not found', () => {
         findOneByEmailMock.mockResolvedValue(null);
         expect(
           authService.resendEmailVerification({
             email: 'user@example.com',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(
-          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
-        );
+        ).resolves.toBeUndefined();
+
+        expect(sendGridService.sendEmail).not.toHaveBeenCalledWith();
       });
 
-      it('should throw an error if user is not pending', () => {
+      it('should exit early w/o action if user is not pending', () => {
         userEntity.status = UserStatus.ACTIVE;
         findOneByEmailMock.mockResolvedValue(userEntity);
         expect(
@@ -591,9 +592,9 @@ describe('AuthService', () => {
             email: 'user@example.com',
             hCaptchaToken: 'token',
           }),
-        ).rejects.toThrow(
-          new ControlledError(ErrorUser.NotFound, HttpStatus.NO_CONTENT),
-        );
+        ).resolves.toBeUndefined();
+
+        expect(sendGridService.sendEmail).not.toHaveBeenCalledWith();
       });
 
       it('should create token and send email', async () => {
@@ -803,7 +804,7 @@ describe('AuthService', () => {
           });
         });
 
-        it("should throw ControlledError if signature doesn't match", async () => {
+        it("should throw if signature doesn't match", async () => {
           const invalidSignature = await signMessage(
             'invalid message',
             MOCK_PRIVATE_KEY,
@@ -822,7 +823,8 @@ describe('AuthService', () => {
             ),
           );
         });
-        it('should throw ControlledError if role is not in KVStore', async () => {
+        it('should throw if role is not in KVStore', async () => {
+          KVStoreUtils.get = jest.fn().mockResolvedValueOnce('');
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
@@ -834,11 +836,9 @@ describe('AuthService', () => {
               type: Role.WORKER,
               signature: signature,
             }),
-          ).rejects.toThrow(
-            new ControlledError(ErrorAuth.InvalidRole, HttpStatus.BAD_REQUEST),
-          );
+          ).rejects.toThrow(new InvalidOperatorRoleError(''));
         });
-        it('should throw ControlledError if fee is not in KVStore', async () => {
+        it('should throw if fee is not in KVStore', async () => {
           KVStoreUtils.get = jest.fn().mockResolvedValueOnce('Job Launcher');
           const signature = await signMessage(
             preSignUpDataMock,
@@ -851,11 +851,9 @@ describe('AuthService', () => {
               type: Role.WORKER,
               signature: signature,
             }),
-          ).rejects.toThrow(
-            new ControlledError(ErrorAuth.InvalidFee, HttpStatus.BAD_REQUEST),
-          );
+          ).rejects.toThrow(new InvalidOperatorFeeError(''));
         });
-        it('should throw ControlledError if url is not in KVStore', async () => {
+        it('should throw if url is not in KVStore', async () => {
           KVStoreUtils.get = jest
             .fn()
             .mockResolvedValueOnce('Job Launcher')
@@ -872,11 +870,9 @@ describe('AuthService', () => {
               type: Role.WORKER,
               signature: signature,
             }),
-          ).rejects.toThrow(
-            new ControlledError(ErrorAuth.InvalidUrl, HttpStatus.BAD_REQUEST),
-          );
+          ).rejects.toThrow(new InvalidOperatorUrlError(''));
         });
-        it('should throw ControlledError if job type is not in KVStore', async () => {
+        it('should throw if job type is not in KVStore', async () => {
           KVStoreUtils.get = jest
             .fn()
             .mockResolvedValueOnce('Job Launcher')
@@ -894,12 +890,7 @@ describe('AuthService', () => {
               type: Role.WORKER,
               signature: signature,
             }),
-          ).rejects.toThrow(
-            new ControlledError(
-              ErrorAuth.InvalidJobType,
-              HttpStatus.BAD_REQUEST,
-            ),
-          );
+          ).rejects.toThrow(new InvalidOperatorJobTypesError(''));
         });
       });
     });
