@@ -21,7 +21,6 @@ import { ErrorEscrowCompletion } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/utils/database';
-import { WebhookErrorMessage } from '../webhook/webhook.error';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -204,7 +203,8 @@ export class EscrowCompletionService {
         for (const url of callbackUrls) {
           if (!url) {
             throw new ControlledError(
-              WebhookErrorMessage.URL_NOT_FOUND,
+              // This is a temporary solution during the refactoring phase.
+              'Webhook url not found',
               HttpStatus.NOT_FOUND,
             );
           }
