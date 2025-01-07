@@ -58,7 +58,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
           </Typography>
         ),
         renderCell: (params: GridRenderCellParams) => (
-          <RoleCell role={params.value} />
+          <RoleCell role={params.value} websiteUrl={params.row.website} />
         ),
       },
       {
