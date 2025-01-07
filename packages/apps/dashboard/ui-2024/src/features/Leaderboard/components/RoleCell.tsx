@@ -19,6 +19,8 @@ export const RoleCell = ({
       {websiteUrl ? (
         <Link
           to={websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             textDecoration: 'none',
             color: 'inherit',
@@ -45,6 +47,7 @@ export const RoleCell = ({
             variant={isMobile ? 'subtitle2' : 'h6'}
             sx={{
               wordBreak: 'unset',
+              width: '100%',
               whiteSpace: isMobile ? 'wrap' : 'nowrap',
             }}
           >
