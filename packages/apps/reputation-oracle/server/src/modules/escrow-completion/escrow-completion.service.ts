@@ -14,7 +14,6 @@ import {
   EscrowClient,
   EscrowStatus,
   OperatorUtils,
-  TransactionUtils,
 } from '@human-protocol/sdk';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
 import {
@@ -377,36 +376,6 @@ export class EscrowCompletionService {
     escrowCompletionEntity: EscrowCompletionEntity,
     payoutsBatch: EscrowPayoutsBatchEntity,
   ): Promise<void> {
-    /**
-     * In fact we need txHash only to get this "search success" operation.
-     * We can get rid of this code block in favor of the flow where we
-     * handle expired nonce; also we will be able to get rid of txHash prop.
-     */
-    if (payoutsBatch.txHash) {
-      const successfulTxData = await TransactionUtils.getTransaction(
-        escrowCompletionEntity.chainId,
-        payoutsBatch.txHash,
-      );
-      /**
-       * [Edge-case]
-       * We sent the tx, but didn't manage to wait for it to finish
-       * and it successfully completed by now.
-       */
-      if (successfulTxData) {
-        await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
-      }
-
-      /**
-       * [Edge-case]
-       * 1) we got the tx hash, but didn't get to sending the tx
-       * 2) we sent the tx, didn't manage to wait for it to finish,
-       * but by now there is no update in the subgraph, so it's either
-       * failed or not there yet
-       *
-       * Try to send it with the same nonce
-       */
-    }
-
     const signer = this.web3Service.getSigner(escrowCompletionEntity.chainId);
     const escrowClient = await EscrowClient.build(signer);
 
@@ -432,8 +401,6 @@ export class EscrowCompletionService {
     if (!payoutsBatch.txNonce) {
       payoutsBatch.txNonce = rawTransaction.nonce;
     }
-    const signedTransaction = await signer.signTransaction(rawTransaction);
-    payoutsBatch.txHash = ethers.keccak256(signedTransaction);
 
     await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
 
@@ -445,7 +412,6 @@ export class EscrowCompletionService {
     } catch (error) {
       if (ethers.isError(error, 'NONCE_EXPIRED')) {
         delete payoutsBatch.txNonce;
-        delete payoutsBatch.txHash;
         await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
       }
 

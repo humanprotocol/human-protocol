@@ -674,8 +674,6 @@ describe('escrowCompletionService', () => {
       data: '0xtest-encoded-contact-data',
       nonce: 0,
     };
-    const MOCK_TRANSACTION_HASH =
-      '0xed8ab4fde4c4e2749641d9d89de3d920f9845e086abd71e6921319f41f0e784f';
 
     beforeAll(() => {
       ESCROW_CLIENT_MOCK.createBulkPayoutTransaction.mockImplementation(
@@ -687,7 +685,6 @@ describe('escrowCompletionService', () => {
           };
         },
       );
-      signerMock.signTransaction.mockResolvedValue('0x1234567890abcdef');
     });
 
     it('should correctly process payouts batch at first try', async () => {
@@ -700,7 +697,6 @@ describe('escrowCompletionService', () => {
         id: 1,
         payouts: [MOCK_ADDRESS_PAYOUT],
         payoutsHash: 'test-payouts-hash',
-        txHash: null,
         txNonce: null,
       };
 
@@ -709,11 +705,8 @@ describe('escrowCompletionService', () => {
         { ...payoutsBatch },
       );
 
-      expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
-      expect(signerMock.signTransaction).toHaveBeenCalledWith(rawTransaction);
       expect(updateOneBatchSpy).toHaveBeenNthCalledWith(1, {
         ...payoutsBatch,
-        txHash: MOCK_TRANSACTION_HASH,
         txNonce: rawTransaction.nonce,
       });
       expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
@@ -732,7 +725,6 @@ describe('escrowCompletionService', () => {
         id: 1,
         payouts: [MOCK_ADDRESS_PAYOUT],
         payoutsHash: 'test-payouts-hash',
-        txHash: '0xExisting-hash',
         txNonce: 15,
       };
 
@@ -741,14 +733,8 @@ describe('escrowCompletionService', () => {
         payoutsBatch,
       );
 
-      expect(signerMock.signTransaction).toHaveBeenCalledTimes(1);
-      expect(signerMock.signTransaction).toHaveBeenCalledWith({
-        ...rawTransaction,
-        nonce: payoutsBatch.txNonce,
-      });
       expect(updateOneBatchSpy).toHaveBeenCalledWith({
         ...payoutsBatch,
-        txHash: MOCK_TRANSACTION_HASH,
       });
       expect(signerMock.sendTransaction).toHaveBeenCalledTimes(1);
       expect(signerMock.sendTransaction).toHaveBeenCalledWith({
@@ -771,7 +757,6 @@ describe('escrowCompletionService', () => {
         id: 1,
         payouts: [MOCK_ADDRESS_PAYOUT],
         payoutsHash: 'test-payouts-hash',
-        txHash: '0xExisting-hash',
         txNonce: 15,
       };
 
@@ -790,7 +775,6 @@ describe('escrowCompletionService', () => {
 
       expect(updateOneBatchSpy).toHaveBeenLastCalledWith({
         ...payoutsBatch,
-        txHash: undefined,
         txNonce: undefined,
       });
     });
