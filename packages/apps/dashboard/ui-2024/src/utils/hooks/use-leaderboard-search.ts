@@ -1,11 +1,4 @@
-import { networks } from '@utils/config/networks';
 import { create } from 'zustand';
-import type { Chain } from 'viem/chains';
-
-export const leaderboardSearchSelectConfig: (
-  | Chain
-  | { name: 'All Networks'; allNetworksId: -1 }
-)[] = [{ name: 'All Networks', allNetworksId: -1 }, ...networks];
 
 export interface LeaderboardSearchStore {
   filterParams: {
