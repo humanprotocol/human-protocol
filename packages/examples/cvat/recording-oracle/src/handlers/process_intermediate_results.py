@@ -545,7 +545,7 @@ class _TaskHoneypotManager:
             gt_key
             for gt_key, gt_stat in self.gt_stats.items()
             if gt_stat.enabled
-            if gt_stat.rating > Config.validation.gt_ban_threshold
+            if gt_stat.rating > 1 - self.manifest.validation.min_quality
         }, task_id_to_gt_keys
 
     def _check_warmup_annotation_speed(self):
