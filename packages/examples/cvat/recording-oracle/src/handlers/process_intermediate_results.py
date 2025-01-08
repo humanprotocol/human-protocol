@@ -72,6 +72,7 @@ _HoneypotFrameToValFrame = dict[_HoneypotFrameId, _ValidationFrameId]
 _TaskIdToValidationLayout = dict[int, cvat_api.models.ITaskValidationLayoutRead]
 _TaskIdToHoneypotsMapping = dict[int, _HoneypotFrameToValFrame]
 _TaskIdToFrameNames = dict[int, list[str]]
+_TaskIdToLabels = dict[int, list[str]]
 
 
 @dataclass
@@ -83,6 +84,7 @@ class _ValidationResult:
     task_id_to_val_layout: _TaskIdToValidationLayout
     task_id_to_honeypots_mapping: _TaskIdToHoneypotsMapping
     task_id_to_frame_names: _TaskIdToFrameNames
+    task_id_to_labels: _TaskIdToLabels
 
 
 T = TypeVar("T")
@@ -162,27 +164,31 @@ class _TaskValidator:
         # task honeypot with frame index matches the sequence[index]
         task_id_to_sequence_of_frame_names: dict[int, list[str]] = {}
 
+        task_id_to_labels: dict[int, list[str]] = {}
+
         min_quality = manifest.validation.min_quality
 
         job_id_to_quality_report: dict[int, cvat_api.models.QualityReport] = {}
 
         for cvat_task_id in cvat_task_ids:
             # obtain quality report details
+            task_labels = cvat_api.get_task_labels(cvat_task_id)
             task_quality_report = cvat_api.get_task_quality_report(cvat_task_id)
             task_quality_report_data = cvat_api.get_quality_report_data(task_quality_report.id)
             task_id_to_quality_report_data[cvat_task_id] = task_quality_report_data
 
             # obtain task validation layout and define honeypots mapping
             task_val_layout = cvat_api.get_task_validation_layout(cvat_task_id)
-            honeypot_frame_to_real = {
+            task_honeypot_frame_to_real = {
                 f: task_val_layout.honeypot_real_frames[idx]
                 for idx, f in enumerate(task_val_layout.honeypot_frames)
             }
             task_id_to_val_layout[cvat_task_id] = task_val_layout
-            task_id_to_honeypots_mapping[cvat_task_id] = honeypot_frame_to_real
+            task_id_to_honeypots_mapping[cvat_task_id] = task_honeypot_frame_to_real
             task_id_to_sequence_of_frame_names[cvat_task_id] = [
                 frame.name for frame in cvat_api.get_task_data_meta(cvat_task_id).frames
             ]
+            task_id_to_labels[cvat_task_id] = task_labels
 
             # obtain quality reports for each job from the task
             job_id_to_quality_report.update(
@@ -202,6 +208,7 @@ class _TaskValidator:
             task_frame_names = task_id_to_sequence_of_frame_names[cvat_task_id]
             task_honeypots = set(task_id_to_val_layout[cvat_task_id].honeypot_frames)
             task_honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
+            task_labels = task_id_to_labels[cvat_task_id]
 
             job_honeypots = task_honeypots & set(job_meta.job_frame_range)
             if not job_honeypots:
@@ -212,15 +219,16 @@ class _TaskValidator:
             for honeypot in job_honeypots:
                 val_frame = task_honeypots_mapping[honeypot]
                 val_frame_name = task_frame_names[val_frame]
+                val_frame_key = GtKey(filename=val_frame_name, labels=task_labels)
 
                 result = task_quality_report_data.frame_results[str(honeypot)]
-                self._gt_stats.setdefault(val_frame_name, ValidationFrameStats())
-                self._gt_stats[val_frame_name].accumulated_quality += result.annotations.accuracy
+                self._gt_stats.setdefault(val_frame_key, ValidationFrameStats())
+                self._gt_stats[val_frame_key].accumulated_quality += result.annotations.accuracy
 
                 if result.annotations.accuracy < min_quality:
-                    self._gt_stats[val_frame_name].failed_attempts += 1
+                    self._gt_stats[val_frame_key].failed_attempts += 1
                 else:
-                    self._gt_stats[val_frame_name].accepted_attempts += 1
+                    self._gt_stats[val_frame_key].accepted_attempts += 1
 
             # assess job quality
             job_quality_report = job_id_to_quality_report[cvat_job_id]
@@ -245,6 +253,7 @@ class _TaskValidator:
         self._task_id_to_val_layout = task_id_to_val_layout
         self._task_id_to_honeypots_mapping = task_id_to_honeypots_mapping
         self._task_id_to_sequence_of_frame_names = task_id_to_sequence_of_frame_names
+        self._task_id_to_labels = task_id_to_labels
 
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
@@ -368,6 +377,7 @@ class _TaskValidator:
             task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
             task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
             task_id_to_frame_names=self._require_field(self._task_id_to_sequence_of_frame_names),
+            task_id_to_labels=self._require_field(self._task_id_to_labels),
         )
 
 
@@ -407,9 +417,6 @@ class _TaskHoneypotManager:
             rng = np.random.default_rng()
         self.rng = rng
 
-    def _make_gt_key(self, validation_frame_name: str) -> GtKey:
-        return validation_frame_name
-
     @cached_property
     def _get_gt_frame_uses(self) -> dict[GtKey, int]:
         return {gt_key: gt_stat.total_uses for gt_key, gt_stat in self.gt_stats.items()}
@@ -435,8 +442,7 @@ class _TaskHoneypotManager:
 
         pick = set()
         for randval in rng.random(count):
-            # TODO: try to optimize item counting on each iteration
-            # maybe by using a bagged data structure
+            # TODO: optimize like in https://github.com/cvat-ai/cvat/pull/8857 if needed
             least_use_count = min(key(item) for item in items if item not in pick)
             least_used_items = [
                 item for item in items if key(item) == least_use_count if item not in pick
@@ -445,46 +451,67 @@ class _TaskHoneypotManager:
 
         return pick
 
-    def _get_available_gt_frames(self):
+    def _get_available_gt(self) -> tuple[GtStats, dict[int, set[GtKey]]]:
+        task_id_to_gt_keys = {}
+        for task_id, task_val_layout in self.validation_result.task_id_to_val_layout.items():
+            # Here we assume that all the tasks with the same label set use the same GT frames
+            task_validation_frames = task_val_layout.validation_frames
+            task_frame_names = self.validation_result.task_id_to_frame_names[task_id]
+            task_labels = self.validation_result.task_id_to_labels[task_id]
+            task_gt_keys = {
+                GtKey(filename=task_frame_names[f], labels=task_labels)
+                for f in task_validation_frames
+            }
+
+            # Populate missing entries for unused GT frames.
+            # Not all the GT frames may be present in an iteration results.
+            for gt_key in task_gt_keys:
+                if gt_key not in self.gt_stats:
+                    self.gt_stats[gt_key] = ValidationFrameStats()
+
+            task_id_to_gt_keys[task_id] = task_gt_keys
+
         if max_gt_share := Config.validation.max_gt_share:
-            # Limit maximum used GT frames
-            regular_frames_count = 0
-            for task_id, task_val_layout in self.validation_result.task_id_to_val_layout.items():
-                # Safety check for the next operations. Here we assume
-                # that all the tasks use the same GT frames.
-                task_validation_frames = task_val_layout.validation_frames
-                task_frame_names = self.validation_result.task_id_to_frame_names[task_id]
-                task_gt_keys = {
-                    self._make_gt_key(task_frame_names[f]) for f in task_validation_frames
-                }
+            # Limit maximum used GT frames in the dataset. This allows us to get strong
+            # guarantees about GT frame uses during validation,
+            # resulting in clear exclusion rates of complex or invalid GT.
+            # Count GT frames per label set to avoid situations with empty GT sets
+            # for some labels or tasks after limiting GT percent in the whole dataset.
+            # Note that different task types can have different label setups in tasks, e.g.
+            # - skeleton tasks have 1 point label per task
+            # - bbox tasks may have several labels per task
+            # All these cases are expected to use the same GT per label set.
+            for label_set_task_ids in grouped(
+                self.validation_result.task_id_to_labels,
+                key=lambda t: frozenset(self.validation_result.task_id_to_labels[t]),
+            ).values():
+                regular_frames_count = 0
+                gt_keys = None
 
-                # Populate missing entries for unused GT frames
-                for gt_key in task_gt_keys:
-                    if gt_key not in self.gt_stats:
-                        self.gt_stats[gt_key] = ValidationFrameStats()
+                for task_id in label_set_task_ids:
+                    task_gt_keys = task_id_to_gt_keys[task_id]
+                    if gt_keys is None:
+                        gt_keys = task_gt_keys
+                    else:
+                        # Assume that all the tasks with the same label set use the same GT
+                        assert gt_keys == task_gt_keys
 
-                regular_frames_count += (
-                    len(task_frame_names)
-                    - len(task_validation_frames)
-                    - task_val_layout.honeypot_count
-                )
+                    task_val_layout = self.validation_result.task_id_to_val_layout[task_id]
+                    task_frame_names = self.validation_result.task_id_to_frame_names[task_id]
+                    task_regular_frames_count = (
+                        len(task_frame_names) - len(task_gt_keys) - task_val_layout.honeypot_count
+                    )
 
-            if len(self.manifest.annotation.labels) != 1:
-                # TODO: count GT frames per label set to avoid situations with empty GT sets
-                # for some labels or tasks.
-                # Note that different task types can have different label setups.
-                self.logger.warning(
-                    "Tasks with multiple labels are not supported yet."
-                    " Honeypots in tasks will not be limited"
-                )
-            else:
-                total_frames_count = regular_frames_count + len(self.gt_stats)
-                enabled_gt_keys = {k for k, gt_stat in self.gt_stats.items() if gt_stat.enabled}
+                    regular_frames_count += task_regular_frames_count
+
+                assert gt_keys is not None
+
+                gt_frames_count = len(gt_keys)
+                total_frames_count = regular_frames_count + gt_frames_count
+                enabled_gt_keys = {k for k in gt_keys if self.gt_stats[k].enabled}
                 current_gt_share = len(enabled_gt_keys) / (total_frames_count or 1)
-                max_usable_gt_share = min(
-                    len(self.gt_stats) / (total_frames_count or 1), max_gt_share
-                )
-                max_gt_count = min(int(max_gt_share * total_frames_count), len(self.gt_stats))
+                max_usable_gt_share = min(gt_frames_count / (total_frames_count or 1), max_gt_share)
+                max_gt_count = min(int(max_gt_share * total_frames_count), gt_frames_count)
                 has_updates = False
                 if max_gt_count < len(enabled_gt_keys):
                     # disable some validation frames, take the least used ones
@@ -511,15 +538,15 @@ class _TaskHoneypotManager:
                     has_updates = True
 
                 if has_updates:
-                    for gt_key, gt_stat in self.gt_stats.items():
-                        gt_stat.enabled = gt_key in enabled_gt_keys
+                    for gt_key in gt_keys:
+                        self.gt_stats[gt_key].enabled = gt_key in enabled_gt_keys
 
         return {
             gt_key
             for gt_key, gt_stat in self.gt_stats.items()
             if gt_stat.enabled
             if gt_stat.rating > Config.validation.gt_ban_threshold
-        }
+        }, task_id_to_gt_keys
 
     def _check_warmup_annotation_speed(self):
         validation_result = self.validation_result
@@ -552,7 +579,7 @@ class _TaskHoneypotManager:
         rejected_jobs = validation_result.rejected_jobs
 
         # Update honeypots in jobs
-        available_gt_frames = self._get_available_gt_frames()
+        all_available_gt_keys, task_id_to_gt_keys = self._get_available_gt()
 
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(
@@ -561,8 +588,8 @@ class _TaskHoneypotManager:
                 ", remaining jobs count: {} ({}%)".format(
                     self.task.escrow_address,
                     self.task.iteration,
-                    *value_and_percent(len(available_gt_frames), len(gt_stats)),
-                    len(gt_stats) - len(available_gt_frames),
+                    *value_and_percent(len(all_available_gt_keys), len(gt_stats)),
+                    len(gt_stats) - len(all_available_gt_keys),
                     *value_and_percent(len(rejected_jobs), len(self.annotation_meta.jobs)),
                 ),
             )
@@ -570,10 +597,6 @@ class _TaskHoneypotManager:
         should_complete = False
 
         self._check_warmup_annotation_speed()
-
-        if len(available_gt_frames) / len(gt_stats) < Config.validation.min_available_gt_threshold:
-            self.logger.debug("Not enough available GT to continue, stopping")
-            return _HoneypotUpdateResult(updated_gt_stats=gt_stats, can_continue_annotation=False)
 
         gt_frame_uses = self._get_gt_frame_uses
 
@@ -586,35 +609,54 @@ class _TaskHoneypotManager:
             if not task_rejected_jobs:
                 continue
 
+            task_gt_keys = task_id_to_gt_keys[cvat_task_id]
+            task_available_gt_keys = task_gt_keys.intersection(all_available_gt_keys)
+            if (
+                len(task_available_gt_keys) / len(task_gt_keys)
+                < Config.validation.min_available_gt_threshold
+            ):
+                self.logger.warning(
+                    f"Validation for escrow_address={self.task.escrow_address}: "
+                    f"Too many validation frames excluded in the task {cvat_task_id} "
+                    f"(required: {Config.validation.min_available_gt_threshold}%, "
+                    f"left: {len(task_available_gt_keys) / len(task_gt_keys)}%), "
+                    "stopping annotation"
+                )
+                return _HoneypotUpdateResult(
+                    updated_gt_stats=gt_stats, can_continue_annotation=False
+                )
+
             task_validation_layout = validation_result.task_id_to_val_layout[cvat_task_id]
-            task_frame_names = validation_result.task_id_to_frame_names[cvat_task_id]
 
-            task_validation_frame_to_gt_key = {
-                # TODO: maybe switch to per GT case stats for GT frame stats
-                # e.g. per skeleton point (all skeleton points use the same GT frame names)
-                validation_frame: self._make_gt_key(task_frame_names[validation_frame])
-                for validation_frame in task_validation_layout.validation_frames
-            }
-
-            task_available_validation_frames = {
-                validation_frame
-                for validation_frame in task_validation_layout.validation_frames
-                if task_frame_names[validation_frame] in available_gt_frames
-            }
-
-            if len(task_available_validation_frames) < task_validation_layout.frames_per_job_count:
+            if len(task_available_gt_keys) < task_validation_layout.frames_per_job_count:
                 # TODO: value from the manifest can be different from what's in the task
                 # because exchange oracle can use size multipliers for tasks
                 # Need to sync these values later (maybe by removing it from the manifest)
-                should_complete = True
-                self.logger.info(
+                self.logger.warning(
                     f"Validation for escrow_address={self.task.escrow_address}: "
-                    "Too few validation frames left "
+                    f"Too few validation frames left in the task {cvat_task_id} "
                     f"(required: {task_validation_layout.frames_per_job_count}, "
-                    f"left: {len(task_available_validation_frames)}) for the task({cvat_task_id}), "
+                    f"left: {len(task_available_gt_keys)}), "
                     "stopping annotation"
                 )
-                break
+                return _HoneypotUpdateResult(
+                    updated_gt_stats=gt_stats, can_continue_annotation=False
+                )
+
+            task_frame_names = validation_result.task_id_to_frame_names[cvat_task_id]
+            task_labels = validation_result.task_id_to_labels[cvat_task_id]
+            task_validation_frame_to_gt_key = {
+                validation_frame: GtKey(
+                    filename=task_frame_names[validation_frame], labels=task_labels
+                )
+                for validation_frame in task_validation_layout.validation_frames
+            }
+
+            task_available_validation_frames = [
+                validation_frame
+                for validation_frame in task_validation_layout.validation_frames
+                if task_validation_frame_to_gt_key[validation_frame] in task_available_gt_keys
+            ]
 
             task_updated_disabled_frames = [
                 validation_frame
@@ -707,14 +749,14 @@ def process_intermediate_results(  # noqa: PLR0912
         logger.debug("Task id %s, %s", getattr(task, "id", None), getattr(task, "__dict__", None))
 
     gt_stats = {
-        gt_image_stat.gt_frame_name: ValidationFrameStats(
-            failed_attempts=gt_image_stat.failed_attempts,
-            accepted_attempts=gt_image_stat.accepted_attempts,
-            accumulated_quality=gt_image_stat.accumulated_quality,
-            total_uses=gt_image_stat.total_uses,
-            enabled=gt_image_stat.enabled,
+        gt_stat.gt_key: ValidationFrameStats(
+            failed_attempts=gt_stat.failed_attempts,
+            accepted_attempts=gt_stat.accepted_attempts,
+            accumulated_quality=gt_stat.accumulated_quality,
+            total_uses=gt_stat.total_uses,
+            enabled=gt_stat.enabled,
         )
-        for gt_image_stat in db_service.get_task_gt_stats(session, task.id)
+        for gt_stat in db_service.get_task_gt_stats(session, task.id)
     }
 
     validator = _TaskValidator(
