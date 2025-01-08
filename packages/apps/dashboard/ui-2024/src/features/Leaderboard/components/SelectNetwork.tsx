@@ -4,12 +4,11 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
 import HumanIcon from '@components/Icons/HumanIcon';
-import {
-  leaderboardSearchSelectConfig,
-  useLeaderboardSearch,
-} from '@utils/hooks/use-leaderboard-search';
+import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
+import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { NetworkIcon } from '@components/NetworkIcon';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const SelectNetwork = () => {
   const {
@@ -17,16 +16,28 @@ export const SelectNetwork = () => {
     filterParams: { chainId },
   } = useLeaderboardSearch();
 
+  const { filteredNetworks, isLoading } = useFilteredNetworks();
   const {
     mobile: { isMobile },
   } = useBreakPoints();
 
   const handleChange = (event: SelectChangeEvent<number>) => {
-    const value = event.target.value;
-    if (typeof value === 'number') {
-      setChainId(value);
-    }
+    const value = Number(event.target.value);
+    setChainId(value);
   };
+
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="40px"
+      >
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
 
   return (
     <FormControl
@@ -42,38 +53,28 @@ export const SelectNetwork = () => {
         label="By Network"
         onChange={handleChange}
       >
-        {leaderboardSearchSelectConfig.map((selectItem) => {
-          if ('allNetworksId' in selectItem) {
-            return (
-              <MenuItem
-                key={selectItem.name}
-                className="select-item"
-                value={-1}
-              >
-                <HumanIcon />
-                All Networks
-              </MenuItem>
-            );
-          }
-
-          return (
-            <MenuItem
-              key={selectItem.id}
-              value={selectItem.id}
-              sx={{
-                display: 'flex',
-                gap: '10px',
-              }}
-            >
-              <Box sx={{ svg: { width: '24px', height: '24px' } }}>
-                <NetworkIcon chainId={selectItem.id} />
-              </Box>
-
-              {selectItem.name}
-            </MenuItem>
-          );
-        })}
+        <MenuItem key="all-networks" className="select-item" value={-1}>
+          <HumanIcon />
+          All Networks
+        </MenuItem>
+        {filteredNetworks.map((network) => (
+          <MenuItem
+            key={network.id}
+            value={network.id}
+            sx={{
+              display: 'flex',
+              gap: '10px',
+            }}
+          >
+            <Box sx={{ svg: { width: '24px', height: '24px' } }}>
+              <NetworkIcon chainId={network.id} />
+            </Box>
+            {network.name}
+          </MenuItem>
+        ))}
       </Select>
     </FormControl>
   );
 };
+
+export default SelectNetwork;
