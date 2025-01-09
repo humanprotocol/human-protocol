@@ -62,7 +62,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:72](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L72)
+[statistics.ts:72](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L72)
 
 ## Properties
 
@@ -72,7 +72,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
+[statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
 
 ***
 
@@ -82,7 +82,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
+[statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
 
 ## Methods
 
@@ -148,7 +148,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:128](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L128)
+[statistics.ts:128](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L128)
 
 ***
 
@@ -213,7 +213,7 @@ console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
 
 #### Defined in
 
-[statistics.ts:497](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L497)
+[statistics.ts:497](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L497)
 
 ***
 
@@ -256,7 +256,7 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 #### Defined in
 
-[statistics.ts:423](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L423)
+[statistics.ts:423](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L423)
 
 ***
 
@@ -296,7 +296,7 @@ console.log('HMT statistics:', {
 
 #### Defined in
 
-[statistics.ts:380](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L380)
+[statistics.ts:380](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L380)
 
 ***
 
@@ -380,7 +380,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:314](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L314)
+[statistics.ts:314](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L314)
 
 ***
 
@@ -441,4 +441,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:215](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L215)
+[statistics.ts:215](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L215)

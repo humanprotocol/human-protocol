@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
 
 ***
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[interfaces.ts:101](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L101)
+[interfaces.ts:100](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L100)
 
 ***
 
@@ -46,7 +46,7 @@
 
 #### Defined in
 
-[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
+[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -60,7 +60,7 @@
 
 #### Defined in
 
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+[interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
 
 ***
 
@@ -70,4 +70,4 @@
 
 #### Defined in
 
-[interfaces.ts:102](https://github.com/humanprotocol/human-protocol/blob/d7c2163eb6d737644fe4e633ac91e8fdfc2ed876/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L102)
+[interfaces.ts:101](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L101)

@@ -15,7 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
   Logger,
-  Ip,
+  UseFilters,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { UserCreateDto } from '../user/user.dto';
@@ -35,6 +35,7 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
+import { AuthControllerErrorsFilter } from './auth.error-filter';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -54,6 +55,7 @@ import { TokenType } from './token.entity';
   description: 'Unprocessable entity.',
 })
 @Controller('/auth')
+@UseFilters(AuthControllerErrorsFilter)
 export class AuthJwtController {
   private readonly logger = new Logger(AuthJwtController.name);
 
@@ -78,11 +80,8 @@ export class AuthJwtController {
     status: 400,
     description: 'Bad Request. Invalid input parameters.',
   })
-  public async signup(
-    @Body() data: UserCreateDto,
-    @Ip() ip: string,
-  ): Promise<void> {
-    await this.authService.signup(data, ip);
+  public async signup(@Body() data: UserCreateDto): Promise<void> {
+    await this.authService.signup(data);
     return;
   }
 
@@ -107,8 +106,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<AuthDto> {
-    return this.authService.signin(data, ip);
+  public signin(@Body() data: SignInDto): Promise<AuthDto> {
+    return this.authService.signin(data);
   }
 
   @Public()
@@ -227,11 +226,8 @@ export class AuthJwtController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public restorePassword(
-    @Body() data: RestorePasswordDto,
-    @Ip() ip: string,
-  ): Promise<void> {
-    return this.authService.restorePassword(data, ip);
+  public restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
+    return this.authService.restorePassword(data);
   }
 
   @Public()

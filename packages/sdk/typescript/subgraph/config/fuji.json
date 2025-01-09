@@ -17,8 +17,8 @@
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
-    "address": "0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3",
-    "startBlock": 26449192,
+    "address": "0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940",
+    "startBlock": 37208323,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
-  ErrorAuth,
+  ErrorCapthca,
   ErrorOperator,
   ErrorUser,
 } from '../../common/constants/errors';
@@ -55,6 +55,13 @@ export class UserService {
     private readonly hCaptchaService: HCaptchaService,
   ) {}
 
+  static checkPasswordMatchesHash(
+    password: string,
+    passwordHash: string,
+  ): boolean {
+    return bcrypt.compareSync(password, passwordHash);
+  }
+
   public async create(dto: UserCreateDto): Promise<UserEntity> {
     const newUser = new UserEntity();
     newUser.email = dto.email;
@@ -63,19 +70,6 @@ export class UserService {
     newUser.status = UserStatus.PENDING;
     await this.userRepository.createUnique(newUser);
     return newUser;
-  }
-
-  public async getByCredentials(
-    email: string,
-    password: string,
-  ): Promise<UserEntity | null> {
-    const userEntity = await this.userRepository.findOneByEmail(email);
-
-    if (!userEntity || !bcrypt.compareSync(password, userEntity.password)) {
-      return null;
-    }
-
-    return userEntity;
   }
 
   public updatePassword(
@@ -375,27 +369,33 @@ export class UserService {
 
   public async registrationInExchangeOracle(
     user: UserEntity,
-    data: RegistrationInExchangeOracleDto,
+    { hCaptchaToken, oracleAddress }: RegistrationInExchangeOracleDto,
   ): Promise<SiteKeyEntity> {
-    if (
-      !data.hCaptchaToken ||
-      !(await this.hCaptchaService.verifyToken({ token: data.hCaptchaToken }))
-        .success
-    ) {
+    if (!hCaptchaToken) {
       throw new ControlledError(
-        ErrorAuth.InvalidToken,
-        HttpStatus.UNAUTHORIZED,
+        ErrorCapthca.InvalidToken,
+        HttpStatus.BAD_REQUEST,
       );
     }
+    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+      token: hCaptchaToken,
+    });
+    if (!captchaVerificationResult.success) {
+      throw new ControlledError(
+        ErrorCapthca.VerificationFailed,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
       user,
-      data.oracleAddress,
+      oracleAddress,
       SiteKeyType.REGISTRATION,
     );
     if (siteKey) return siteKey;
 
     const newSiteKey = new SiteKeyEntity();
-    newSiteKey.siteKey = data.oracleAddress;
+    newSiteKey.siteKey = oracleAddress;
     newSiteKey.type = SiteKeyType.REGISTRATION;
     newSiteKey.user = user;
 

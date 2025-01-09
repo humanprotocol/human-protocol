@@ -22,7 +22,7 @@ numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
-human-protocol-sdk = ">=3.0.8b0,<3.1.0"
+human-protocol-sdk = ">=3.0.8,<3.1.0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cvat-sdk = "^2.23.1"
@@ -106,6 +106,7 @@ ignore = [
     "ANN002",  # Missing type annotation for `*args`
     "TRY300",  # Consider moving this statement to an `else` block
     "C901",    # Function is too complex
+    "PLW1508", # invalid-envvar-default. Alerts only for os.getenv(), but not for os.environ.get()
     "PLW2901", # Variable overwritten by assignment target
     "PTH118",  # Prefer pathlib instead of os.path
     "PTH119",  # `os.path.basename()` should be replaced by `Path.name`

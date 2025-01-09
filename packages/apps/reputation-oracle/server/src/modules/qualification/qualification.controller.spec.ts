@@ -114,7 +114,6 @@ describe('QualificationController', () => {
       const assignQualificationDto: AssignQualificationDto = {
         reference: 'test-ref',
         workerAddresses: ['0x123'],
-        workerEmails: ['test@example.com'],
       };
 
       jest.spyOn(qualificationService, 'assign').mockResolvedValue();
@@ -131,7 +130,6 @@ describe('QualificationController', () => {
       const unassignQualificationDto: UnassignQualificationDto = {
         reference: 'test-ref',
         workerAddresses: ['0x123'],
-        workerEmails: ['test@example.com'],
       };
 
       jest.spyOn(qualificationService, 'unassign').mockResolvedValue();

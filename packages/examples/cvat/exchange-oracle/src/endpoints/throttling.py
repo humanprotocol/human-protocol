@@ -1,19 +1,18 @@
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
 
-import redis.asyncio as redis
 from fastapi import FastAPI
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 
-from src.core.config import Config
+from src.endpoints.utils import register_lifespan_context
+from src.services.redis import get_aredis_client
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[Any]:
-    redis_connection = redis.from_url(Config.redis_config.connection_url(), encoding="utf8")
-    await FastAPILimiter.init(redis_connection)
+async def lifespan(_: FastAPI) -> AsyncGenerator[Any, None, None]:
+    await FastAPILimiter.init(get_aredis_client())
 
     try:
         yield
@@ -22,16 +21,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[Any]:
 
 
 def add_throttling(app: FastAPI):
-    router = app.router
-    original_lifespan_context = router.lifespan_context
-
-    @asynccontextmanager
-    async def wrapped_lifespan(app: FastAPI) -> AsyncIterator[Any]:
-        async with lifespan(app), original_lifespan_context(app) as maybe_state:
-            yield maybe_state
-
-    router.lifespan_context = wrapped_lifespan
-    return app
+    return register_lifespan_context(app, lifespan_context=lifespan)
 
 
 __all__ = ["add_throttling", "RateLimiter"]

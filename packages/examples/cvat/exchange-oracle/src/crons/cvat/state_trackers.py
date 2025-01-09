@@ -15,7 +15,7 @@ from src.db import SessionLocal
 from src.db import errors as db_errors
 from src.db.utils import ForUpdateParams
 from src.handlers.completed_escrows import handle_escrows_validations
-from src.log import format_sequence
+from src.utils.logging import format_sequence
 
 
 @cron_job

@@ -6,12 +6,13 @@ class ValidationFrameStats:
     accumulated_quality: float = 0.0
     failed_attempts: int = 0
     accepted_attempts: int = 0
+    total_uses: int = 0
+    enabled: bool = True
 
     @property
-    def average_quality(self) -> float:
-        return self.accumulated_quality / ((self.failed_attempts + self.accepted_attempts) or 1)
+    def rating(self) -> float:
+        return (self.accepted_attempts + 1) / (self.total_uses + 1)
 
 
-_TaskIdValFrameIdPair = tuple[int, int]
-
-GtStats = dict[_TaskIdValFrameIdPair, ValidationFrameStats]
+GtKey = str
+GtStats = dict[GtKey, ValidationFrameStats]

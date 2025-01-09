@@ -194,7 +194,8 @@ FjGp13DtiY8P2zNL5eMxGiMTp8xQJ7jC3HVZROqUOujcdLPglfE7b5n/Ao9TBwFO
 export const MOCK_PGP_PASSPHRASE = 'secure-passphrase';
 export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_PASSWORD = 'password123';
-export const MOCK_HASHED_PASSWORD = 'hashedPassword';
+export const MOCK_HASHED_PASSWORD =
+  '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
 export const MOCK_ACCESS_TOKEN = 'access_token';
 export const MOCK_REFRESH_TOKEN = 'refresh_token';
 export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';

@@ -29,4 +29,7 @@ export const apiPaths = {
   escrowDetails: {
     path: '/details/escrows',
   },
+  enabledChains: {
+    path: '/networks/operating',
+  },
 } as const;

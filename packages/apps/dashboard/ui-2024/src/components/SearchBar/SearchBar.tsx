@@ -12,9 +12,11 @@ import {
   Grid,
   MenuItem,
   Box,
+  Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import { colorPalette } from '@assets/styles/color-palette';
-import { getNetwork, networks } from '@utils/config/networks';
+import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { NetworkIcon } from '@components/NetworkIcon';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
@@ -27,6 +29,7 @@ import {
   muiTextFieldSx,
   gridSx,
 } from './SearchBar.styles';
+import { isValidEVMAddress } from '../../helpers/isValidEVMAddress';
 
 interface SearchBarProps {
   className?: string;
@@ -38,51 +41,65 @@ const SearchBar: FC<SearchBarProps> = ({
   initialInputValue = '',
 }) => {
   const { mobile } = useBreakPoints();
-  const [inputValue, setInputValue] = useState<string>(initialInputValue);
-  const [selectValue, setSelectValue] = useState<number | string>('');
-  const [focus, setFocus] = useState<boolean>(false);
-  const { filterParams } = useWalletSearch();
+  const { filteredNetworks, isLoading } = useFilteredNetworks();
+  const { filterParams, setChainId, setAddress } = useWalletSearch();
   const navigate = useNavigate();
-
-  const navigateToAddress = useCallback(
-    (chainIdParam?: number | undefined) => {
-      const chainId = chainIdParam || selectValue || -1;
-      const address = inputValue || '';
-      navigate(`/search/${chainId}/${address}`);
-    },
-    [inputValue, selectValue, navigate]
-  );
-
-  useEffect(() => {
-    const networkName = getNetwork(filterParams.chainId || -1)?.name || '';
-    if (networkName) {
-      setSelectValue(filterParams.chainId);
-    }
-  }, [filterParams.chainId]);
+  const [inputValue, setInputValue] = useState<string>(initialInputValue);
+  const [error, setError] = useState<string | null>(null);
+  const [focus, setFocus] = useState<boolean>(false);
 
   useEffect(() => {
     setInputValue(filterParams.address);
   }, [filterParams.address]);
 
+  useEffect(() => {
+    if (
+      !isLoading &&
+      filteredNetworks.length > 0 &&
+      filterParams.chainId === -1
+    ) {
+      setChainId(filteredNetworks[0].id);
+    }
+  }, [filteredNetworks, isLoading, filterParams.chainId, setChainId]);
+
+  const navigateToAddress = useCallback(() => {
+    if (!isValidEVMAddress(inputValue)) {
+      setError('Invalid EVM address.');
+      return;
+    }
+
+    setAddress(inputValue);
+    navigate(`/search/${filterParams.chainId}/${inputValue}`);
+  }, [inputValue, filterParams.chainId, navigate, setAddress]);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+    const value = event.target.value;
+    setInputValue(value);
+
+    if (isValidEVMAddress(value)) {
+      setError(null);
+    } else if (value.length > 0) {
+      setError('Invalid EVM address. Must start with 0x and be 42 characters.');
+    } else {
+      setError(null);
+    }
   };
 
-  const handleSelectChange = (event: SelectChangeEvent<number | string>) => {
-    const chainId = Number(event.target.value);
-    setSelectValue(chainId);
+  const handleSelectChange = (event: SelectChangeEvent<number>) => {
+    setChainId(Number(event.target.value));
   };
 
   const handleClearClick = () => {
     setInputValue('');
+    setError(null);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (inputValue && !!inputValue.length) {
-      navigateToAddress();
-    }
+    navigateToAddress();
   };
+
+  if (isLoading) return <CircularProgress />;
 
   const renderEmptyValue = (
     <span style={{ color: colorPalette.sky.main }}>Network</span>
@@ -91,12 +108,15 @@ const SearchBar: FC<SearchBarProps> = ({
   const renderSelectedValue = (
     <Grid sx={gridSx}>
       <NetworkIcon
-        chainId={networks.find((n) => n.id === selectValue)?.id || -1}
+        chainId={
+          filteredNetworks.find((n) => n.id === filterParams.chainId)?.id || -1
+        }
       />
       <div>
-        {mobile.isMobile || !selectValue
+        {mobile.isMobile || filterParams.chainId === -1
           ? null
-          : getNetwork(Number(selectValue))?.name || ''}
+          : filteredNetworks.find((n) => n.id === filterParams.chainId)?.name ||
+            ''}
       </div>
     </Grid>
   );
@@ -110,6 +130,8 @@ const SearchBar: FC<SearchBarProps> = ({
         onChange={handleInputChange}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
+        error={!!error}
+        helperText={error}
         fullWidth
         sx={muiTextFieldSx(mobile)}
         InputProps={{
@@ -121,20 +143,22 @@ const SearchBar: FC<SearchBarProps> = ({
               position="start"
               sx={startAdornmentInputAdornmentSx}
             >
-              <MuiSelect<number | string>
-                value={selectValue}
+              <MuiSelect<number>
+                value={filterParams.chainId}
                 displayEmpty
                 sx={muiSelectSx(mobile)}
                 onChange={handleSelectChange}
                 renderValue={() =>
-                  selectValue === null ? renderEmptyValue : renderSelectedValue
+                  filterParams.chainId === -1
+                    ? renderEmptyValue
+                    : renderSelectedValue
                 }
               >
-                {networks.map((network) => (
+                {filteredNetworks.map((network) => (
                   <MenuItem
                     key={network.id}
                     value={network.id}
-                    sx={menuItemSx(network.id === selectValue)}
+                    sx={menuItemSx(network.id === filterParams.chainId)}
                   >
                     <Box sx={{ svg: { width: '24px', height: '24px' } }}>
                       <NetworkIcon chainId={network.id} />
@@ -156,23 +180,26 @@ const SearchBar: FC<SearchBarProps> = ({
                   }}
                 />
               </IconButton>
-              <IconButton
-                className="search-button"
-                type="submit"
-                aria-label="search"
-                disabled={!inputValue.length}
-                sx={{
-                  [mobile.mediaQuery]: {
-                    padding: '4px',
-                  },
-                }}
-              >
-                <SearchIcon
-                  style={{
-                    color: colorPalette.white,
+              <Tooltip title={error || ''} arrow enterTouchDelay={0}>
+                <IconButton
+                  className="search-button"
+                  type="submit"
+                  aria-label="search"
+                  sx={{
+                    [mobile.mediaQuery]: {
+                      padding: '4px',
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <SearchIcon
+                    style={{
+                      color: error
+                        ? colorPalette.error.main
+                        : colorPalette.white,
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
             </InputAdornment>
           ),
         }}

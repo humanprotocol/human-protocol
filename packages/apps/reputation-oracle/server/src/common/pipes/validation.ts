@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ControlledError } from '../errors/controlled';
 
+// TODO: Revisit validation options
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
   constructor(options?: ValidationPipeOptions) {
