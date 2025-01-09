@@ -28,6 +28,7 @@ import {
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
   ErrorSigner,
+  ErrorTooManyRecipients,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
@@ -943,6 +944,26 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorRecipientCannotBeEmptyArray);
     });
 
+    test('should throw an error if too many recipients', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = Array.from({ length: 100 }, () => ethers.ZeroAddress);
+      const amounts = recipients.map(() => 100n);
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorTooManyRecipients);
+    });
+
     test('should throw an error if amounts length is equal to 0', async () => {
       const escrowAddress = ethers.ZeroAddress;
       const recipients = [ethers.ZeroAddress];
@@ -1265,6 +1286,26 @@ describe('EscrowClient', () => {
           finalResultsHash
         )
       ).rejects.toThrow(ErrorRecipientCannotBeEmptyArray);
+    });
+
+    test('should throw an error if too many recipients', async () => {
+      const escrowAddress = ethers.ZeroAddress;
+      const recipients = Array.from({ length: 100 }, () => ethers.ZeroAddress);
+      const amounts = recipients.map(() => 100n);
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.createBulkPayoutTransaction(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorTooManyRecipients);
     });
 
     test('should throw an error if amounts length is equal to 0', async () => {

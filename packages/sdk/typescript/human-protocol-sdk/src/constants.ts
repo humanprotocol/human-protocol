@@ -320,3 +320,5 @@ export const Role = {
 };
 
 export const SUBGRAPH_API_KEY_PLACEHOLDER = '[SUBGRAPH_API_KEY]';
+
+export const ESCROW_BULK_PAYOUT_MAX_ITEMS = 99;

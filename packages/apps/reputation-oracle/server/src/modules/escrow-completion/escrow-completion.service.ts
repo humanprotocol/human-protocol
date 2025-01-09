@@ -10,16 +10,14 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {
+  ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
   EscrowClient,
   EscrowStatus,
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
-import {
-  BACKOFF_INTERVAL_SECONDS,
-  ESCROW_BULK_MAX_COUNT,
-} from '../../common/constants';
+import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
@@ -139,7 +137,7 @@ export class EscrowCompletionService {
            */
           const payoutBatches = _.chunk(
             _.orderBy(calculatedPayouts, 'address', 'asc'),
-            ESCROW_BULK_MAX_COUNT,
+            ESCROW_BULK_PAYOUT_MAX_ITEMS,
           );
 
           await Promise.all(

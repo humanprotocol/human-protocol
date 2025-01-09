@@ -973,6 +973,25 @@ class TestEscrowClient(unittest.TestCase):
             )
         self.assertEqual("Arrays must have any value", str(cm.exception))
 
+    def test_bulk_payout_exceed_max_count(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"] * 100
+        amounts = [100] * 100
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.bulk_payout(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual("Too many recipients", str(cm.exception))
+
     def test_bulk_payout_zero_amount(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -1122,34 +1141,6 @@ class TestEscrowClient(unittest.TestCase):
             )
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
-        )
-
-    def test_bulk_payout_exceed_max_count(self):
-        mock_contract = MagicMock()
-        mock_contract.functions.bulkPayOut = MagicMock()
-        mock_contract.functions.bulkPayOut.return_value.transact.side_effect = Exception(
-            "Error: VM Exception while processing transaction: reverted with reason string 'Too many recipients'."
-        )
-        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.get_balance = MagicMock(return_value=100)
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        recipients = ["0x1234567890123456789012345678901234567890"]
-        amounts = [100]
-        final_results_url = "https://www.example.com/result"
-        final_results_hash = "test"
-        txId = 1
-
-        with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.bulk_payout(
-                escrow_address,
-                recipients,
-                amounts,
-                final_results_url,
-                final_results_hash,
-                txId,
-            )
-        self.assertEqual(
-            "Bulk Payout transaction failed: Too many recipients", str(cm.exception)
         )
 
     def test_bulk_payout_exceed_max_value(self):

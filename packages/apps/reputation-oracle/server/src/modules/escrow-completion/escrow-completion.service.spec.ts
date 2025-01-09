@@ -70,7 +70,7 @@ const MOCK_ADDRESS_PAYOUT = {
 };
 const mockPayouts = [
   MOCK_ADDRESS_PAYOUT,
-  ...Array.from({ length: 100 }, (_value, index) => {
+  ...Array.from({ length: 99 }, (_value, index) => {
     const _index = index + 1;
     return {
       address: `0x${_index}`.padEnd(42, '0'),

@@ -55,7 +55,12 @@ import os
 from decimal import Decimal
 from typing import Dict, List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.constants import (
+    ESCROW_BULK_PAYOUT_MAX_ITEMS,
+    NETWORKS,
+    ChainId,
+    Status,
+)
 from human_protocol_sdk.utils import (
     get_escrow_interface,
     get_factory_interface,
@@ -780,6 +785,8 @@ class EscrowClient:
                 raise EscrowClientError(f"Invalid recipient address: {recipient}")
         if len(recipients) == 0:
             raise EscrowClientError("Arrays must have any value")
+        if len(recipients) > ESCROW_BULK_PAYOUT_MAX_ITEMS:
+            raise EscrowClientError("Too many recipients")
         if len(recipients) != len(amounts):
             raise EscrowClientError("Arrays must have same length")
         if 0 in amounts:

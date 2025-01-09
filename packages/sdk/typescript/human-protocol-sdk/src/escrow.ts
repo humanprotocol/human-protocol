@@ -12,7 +12,11 @@ import {
 import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
-import { DEFAULT_TX_ID, NETWORKS } from './constants';
+import {
+  DEFAULT_TX_ID,
+  ESCROW_BULK_PAYOUT_MAX_ITEMS,
+  NETWORKS,
+} from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId, OrderDirection } from './enums';
 import {
@@ -33,6 +37,7 @@ import {
   ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
+  ErrorTooManyRecipients,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
@@ -1000,6 +1005,10 @@ export class EscrowClient extends BaseEthersClient {
 
     if (recipients.length === 0) {
       throw ErrorRecipientCannotBeEmptyArray;
+    }
+
+    if (recipients.length > ESCROW_BULK_PAYOUT_MAX_ITEMS) {
+      throw ErrorTooManyRecipients;
     }
 
     if (amounts.length === 0) {
