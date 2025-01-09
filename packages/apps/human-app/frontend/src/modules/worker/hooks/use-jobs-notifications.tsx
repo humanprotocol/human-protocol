@@ -1,28 +1,24 @@
 import { t } from 'i18next';
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
+import { useNotification } from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
-import { delay } from '@/shared/helpers/time';
 
 export const useJobsNotifications = () => {
-  const { setTopNotification, closeNotification } =
-    useProtectedLayoutNotification();
+  const { showNotification } = useNotification();
 
-  const onJobAssignmentSuccess = async () => {
-    setTopNotification({
-      content: t('worker.jobs.successFullyAssignedJob'),
+  const onJobAssignmentSuccess = () => {
+    showNotification({
+      message: t('worker.jobs.successFullyAssignedJob'),
       type: 'success',
+      duration: 5000,
     });
-    await delay(5000);
-    closeNotification();
   };
 
-  const onJobAssignmentError = async (error: unknown) => {
-    setTopNotification({
-      content: getErrorMessageForError(error),
+  const onJobAssignmentError = (error: unknown) => {
+    showNotification({
+      message: getErrorMessageForError(error),
       type: 'warning',
+      duration: 5000,
     });
-    await delay(5000);
-    closeNotification();
   };
 
   return { onJobAssignmentSuccess, onJobAssignmentError };

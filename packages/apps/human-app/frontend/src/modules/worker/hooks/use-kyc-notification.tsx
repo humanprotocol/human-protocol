@@ -1,14 +1,15 @@
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
+import { useNotification } from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export function useKycErrorNotifications() {
-  const { setTopNotification } = useProtectedLayoutNotification();
+  const { showNotification } = useNotification();
 
   return (error: ResponseError) => {
-    setTopNotification({
+    showNotification({
       type: 'warning',
-      content: getErrorMessageForError(error),
+      message: getErrorMessageForError(error),
+      duration: 5000,
     });
   };
 }

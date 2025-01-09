@@ -7,9 +7,6 @@ import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
 import { PageHeader } from '@/shared/components/layout/protected/page-header';
 import { breakpoints } from '@/shared/styles/breakpoints';
-import { TopNotification } from '@/shared/components/ui/top-notification';
-import type { TopNotificationPayload } from '@/shared/components/layout/protected/layout-notification-context';
-import { ProtectedLayoutContext } from '@/shared/components/layout/protected/layout-notification-context';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
@@ -48,13 +45,8 @@ export function Layout({
   ) => JSX.Element;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
 }) {
-  const [notificationWith, setNotificationWith] = useState<
-    number | undefined
-  >();
   const layoutElementRef = useRef<HTMLDivElement>();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
-  const [notification, setNotification] =
-    useState<TopNotificationPayload | null>(null);
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
@@ -75,150 +67,70 @@ export function Layout({
     }
   }, [isMobile]);
 
-  const setNotificationWidth = () => {
-    if (layoutElementRef.current) {
-      setNotificationWith(layoutElementRef.current.clientWidth);
-    }
-  };
-  useEffect(() => {
-    setNotificationWidth();
-    window.addEventListener('resize', () => {
-      setNotificationWidth();
-    });
-    return () => {
-      window.removeEventListener('resize', setNotificationWidth);
-    };
-  }, []);
-
-  useEffect(() => {
-    setNotificationWidth();
-  }, [notification]);
-
   useEffect(() => {
     setGrayBackground();
   }, [setGrayBackground]);
 
   return (
-    <ProtectedLayoutContext.Provider
-      value={{
-        setTopNotification: (data) => {
-          setNotification(data);
-        },
-        closeNotification: () => {
-          setNotification(null);
-        },
+    <Grid
+      alignItems="center"
+      container
+      direction="column"
+      flexWrap="nowrap"
+      justifyContent="space-between"
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        height: '100%',
+        width: '100%',
+        pt: '0',
+        pl: isMobile ? 0 : '120px',
+        pr: isMobile ? 0 : '20px',
+        backgroundColor,
       }}
     >
-      <Grid
-        alignItems="center"
-        container
-        direction="column"
-        flexWrap="nowrap"
-        justifyContent="space-between"
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          height: '100%',
-          width: '100%',
-          pt: '0',
-          pl: isMobile ? 0 : '120px',
-          pr: isMobile ? 0 : '20px',
-          backgroundColor,
-        }}
-      >
-        <Navbar
-          open={drawerOpen}
-          setOpen={setDrawerOpen}
-          toggleUserStatsDrawer={toggleUserStatsDrawer}
-          userStatsDrawerOpen={hcaptchaDrawerOpen}
-        />
-        {renderDrawer(drawerOpen, setDrawerOpen)}
-        {isHCaptchaLabelingPage && renderHCaptchaStatisticsDrawer
-          ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
-          : null}
-        <Main isMobile={isMobile} open={drawerOpen}>
+      <Navbar
+        open={drawerOpen}
+        setOpen={setDrawerOpen}
+        toggleUserStatsDrawer={toggleUserStatsDrawer}
+        userStatsDrawerOpen={hcaptchaDrawerOpen}
+      />
+      {renderDrawer(drawerOpen, setDrawerOpen)}
+      {isHCaptchaLabelingPage && renderHCaptchaStatisticsDrawer
+        ? renderHCaptchaStatisticsDrawer(hcaptchaDrawerOpen)
+        : null}
+      <Main isMobile={isMobile} open={drawerOpen}>
+        <Grid
+          component="div"
+          container
+          sx={{
+            margin: '1rem 0',
+            display: 'flex',
+            gap: '2rem',
+            flexDirection: 'column',
+            padding: '0 2rem',
+            flexWrap: 'nowrap',
+            [breakpoints.mobile]: {
+              gap: '1rem',
+              padding: '0 1rem',
+            },
+          }}
+        >
+          <Grid item>
+            <PageHeader {...pageHeaderProps} />
+          </Grid>
           <Grid
             component="div"
-            container
-            sx={{
-              margin: '1rem 0',
-              display: 'flex',
-              gap: '2rem',
-              flexDirection: 'column',
-              padding: '0 2rem',
-              flexWrap: 'nowrap',
-              [breakpoints.mobile]: {
-                gap: '1rem',
-                padding: '0 1rem',
-              },
-            }}
+            // @ts-expect-error -- MUI accepts this prop even if it's not typed
+            ref={layoutElementRef}
+            sx={{ height: '100%' }}
           >
-            <Grid
-              sx={{
-                height: '3.2rem',
-                [breakpoints.mobile]: {
-                  height: 'unset',
-                  position: 'absolute',
-                  zIndex: 200,
-                  top: '0',
-                  left: '0',
-                  width: notificationWith
-                    ? `${notificationWith.toString()}px`
-                    : 'unset',
-                },
-              }}
-            >
-              <Grid
-                item
-                sx={{
-                  minHeight: notification ? '3.2rem' : 'unset',
-                  position: 'fixed',
-                  width: notificationWith
-                    ? `${notificationWith.toString()}px`
-                    : 'unset',
-                  zIndex: '10',
-                  [breakpoints.mobile]: {
-                    minHeight: 'unset',
-                  },
-                }}
-              >
-                {notification ? (
-                  <Grid
-                    sx={{
-                      minHeight: '3.2rem',
-                      position: 'relative',
-                      zIndex: '10',
-                    }}
-                  >
-                    <TopNotification
-                      onClose={() => {
-                        setNotification(null);
-                      }}
-                      type={notification.type}
-                    >
-                      {notification.content}
-                    </TopNotification>
-                  </Grid>
-                ) : null}
-              </Grid>
-            </Grid>
-
-            <Grid item>
-              <PageHeader {...pageHeaderProps} />
-            </Grid>
-            <Grid
-              component="div"
-              // @ts-expect-error -- MUI accepts this prop even if it's not typed
-              ref={layoutElementRef}
-              sx={{ height: '100%' }}
-            >
-              <Outlet />
-            </Grid>
+            <Outlet />
           </Grid>
-        </Main>
-        <Footer displayChatIcon={!isMobile || !drawerOpen} isProtected />
-      </Grid>
-    </ProtectedLayoutContext.Provider>
+        </Grid>
+      </Main>
+      <Footer displayChatIcon={!isMobile || !drawerOpen} isProtected />
+    </Grid>
   );
 }

@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { t } from 'i18next';
 import { UserStatsDetails } from '@/modules/worker/components/hcaptcha-labeling/user-stats-details';
 import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
+import { useNotification } from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 
@@ -23,13 +23,13 @@ export function UserStatsAccordion() {
     error: hcaptchaUserStatsError,
     refetch: refetchUserStats,
   } = useHCaptchaUserStats();
-  const { setTopNotification } = useProtectedLayoutNotification();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     if (isHcaptchaUserStatsError) {
-      setTopNotification({
+      showNotification({
         type: 'warning',
-        content: getErrorMessageForError(hcaptchaUserStatsError),
+        message: getErrorMessageForError(hcaptchaUserStatsError),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...

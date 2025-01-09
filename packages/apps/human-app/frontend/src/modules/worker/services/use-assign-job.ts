@@ -24,8 +24,8 @@ function assignJob(data: AssignJobBody) {
 
 export function useAssignJobMutation(
   callbacks?: {
-    onSuccess: () => Promise<void>;
-    onError: (error: unknown) => Promise<void>;
+    onSuccess: () => void;
+    onError: (error: unknown) => void;
   },
   mutationKey?: MutationKey
 ) {
@@ -35,11 +35,11 @@ export function useAssignJobMutation(
     mutationFn: assignJob,
     onSuccess: async () => {
       await queryClient.invalidateQueries();
-      void callbacks?.onSuccess();
+      callbacks?.onSuccess();
     },
     onError: async (error) => {
       await queryClient.invalidateQueries();
-      void callbacks?.onError(error);
+      callbacks?.onError(error);
     },
     mutationKey,
   });

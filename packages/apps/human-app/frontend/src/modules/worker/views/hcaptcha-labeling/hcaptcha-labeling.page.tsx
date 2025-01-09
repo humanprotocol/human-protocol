@@ -37,12 +37,12 @@ export function HcaptchaLabelingPage() {
   };
 
   const { mutate: solveHCaptchaMutation } = useSolveHCaptchaMutation({
-    onSuccess: async () => {
-      await onSuccess();
+    onSuccess: () => {
+      onSuccess();
       resetCaptcha();
     },
-    onError: async (e) => {
-      await onError(e);
+    onError: (e) => {
+      onError(e);
       resetCaptcha();
     },
   });

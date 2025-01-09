@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { t } from 'i18next';
 import { ProfileData } from '@/modules/worker/components/profile/profile-data';
 import { ProfileActions } from '@/modules/worker/components/profile/profile-actions';
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
+import { useNotification } from '@/shared/hooks/use-notification';
 import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
@@ -12,16 +12,15 @@ export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
   const isMobile = useIsMobile();
   const { isConnected } = useWalletConnect();
-  const { setTopNotification: setTopNotificationInLayout } =
-    useProtectedLayoutNotification();
+  const { showNotification } = useNotification();
 
   const setNotifications = () => {
     if (user.wallet_address) {
       return;
     }
-    setTopNotificationInLayout({
+    showNotification({
       type: 'warning',
-      content: t('worker.profile.topNotifications.completeSteps'),
+      message: t('worker.profile.topNotifications.completeSteps'),
     });
   };
 

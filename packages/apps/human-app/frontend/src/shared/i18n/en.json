@@ -291,6 +291,9 @@
       "earnedLastHour": "HMT earned in the last hour",
       "statisticsNotLive": "Statistics are not live. Please refresh to view live statistics.",
       "solvedSuccess": "HCaptcha solved!"
+    },
+    "registerAddress": {
+      "success": "The address has been successfully registered."
     }
   },
   "operator": {
