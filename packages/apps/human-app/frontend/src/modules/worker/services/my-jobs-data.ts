@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { stringifyUrlQueryObject } from '@/shared/helpers/string';
+import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
 import type { MyJobsFilterStoreProps } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
