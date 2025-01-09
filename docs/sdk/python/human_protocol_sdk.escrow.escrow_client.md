@@ -148,7 +148,8 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
   from human_protocol_sdk.escrow import EscrowClient
 
   def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
       w3.middleware_onion.add(
@@ -248,7 +249,8 @@ Sets the status of an escrow to completed.
   from human_protocol_sdk.escrow import EscrowClient
 
   def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
       w3.middleware_onion.add(
@@ -261,6 +263,78 @@ Sets the status of an escrow to completed.
   escrow_client = EscrowClient(w3)
 
   escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
+  ```
+
+#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, tx_options=None)
+
+Creates a prepared transaction for bulk payout without signing or sending it.
+
+* **Parameters:**
+  * **escrow_address** (`str`) – Address of the escrow
+  * **recipients** (`List`[`str`]) – Array of recipient addresses
+  * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
+  * **final_results_url** (`str`) – Final results file url
+  * **final_results_hash** (`str`) – Final results file hash
+  * **txId** (`Decimal`) – Serial number of the bulks
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
+* **Return type:**
+  `TxParams`
+* **Returns:**
+  A dictionary containing the prepared transaction
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If an error occurs while checking the parameters
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.escrow import EscrowClient
+
+  def get_w3_with_priv_key(priv_key: str):
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
+      gas_payer = w3.eth.account.from_key(priv_key)
+      w3.eth.default_account = gas_payer.address
+      w3.middleware_onion.add(
+          construct_sign_and_send_raw_middleware(gas_payer),
+          "construct_sign_and_send_raw_middleware",
+      )
+      return (w3, gas_payer)
+
+  (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+  escrow_client = EscrowClient(w3)
+
+  recipients = [
+      '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+      '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92267'
+  ]
+  amounts = [
+      Web3.to_wei(5, 'ether'),
+      Web3.to_wei(10, 'ether')
+  ]
+  results_url = 'http://localhost/results.json'
+  results_hash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079'
+
+  transaction = escrow_client.create_bulk_payout_transaction(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+      recipients,
+      amounts,
+      results_url,
+      results_hash,
+      1
+  )
+
+  print(f"Transaction: {transaction}")
+
+  signed_transaction = w3.eth.account.sign_transaction(
+      transaction, private_key)
+  tx_hash = w3.eth.send_raw_transaction(
+      signed_transaction.raw_transaction)
+  tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+  print(f"Transaction sent with hash: {tx_hash.hex()}")
+  print(f"Transaction receipt: {tx_receipt}")
   ```
 
 #### create_escrow(token_address, trusted_handlers, job_requester_id, tx_options=None)
@@ -288,7 +362,8 @@ Creates an escrow contract that uses the token passed to pay oracle fees and rew
   from human_protocol_sdk.escrow import EscrowClient
 
   def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
       w3.middleware_onion.add(
@@ -312,6 +387,23 @@ Creates an escrow contract that uses the token passed to pay oracle fees and rew
       job_requester_id
   )
   ```
+
+#### ensure_correct_bulk_payout_input(escrow_address, recipients, amounts, final_results_url, final_results_hash)
+
+Validates input parameters for bulk payout operations.
+
+* **Parameters:**
+  * **escrow_address** (`str`) – Address of the escrow
+  * **recipients** (`List`[`str`]) – Array of recipient addresses
+  * **amounts** (`List`[`Decimal`]) – Array of amounts the recipients will receive
+  * **final_results_url** (`str`) – Final results file url
+  * **final_results_hash** (`str`) – Final results file hash
+* **Return type:**
+  `None`
+* **Returns:**
+  None
+* **Raises:**
+  [**EscrowClientError**](#human_protocol_sdk.escrow.escrow_client.EscrowClientError) – If validation fails
 
 #### fund(escrow_address, amount, tx_options=None)
 
@@ -337,7 +429,8 @@ Adds funds to the escrow.
   from human_protocol_sdk.escrow import EscrowClient
 
   def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
       w3.middleware_onion.add(
@@ -350,7 +443,8 @@ Adds funds to the escrow.
   escrow_client = EscrowClient(w3)
 
   amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-  escrow_client.fund("0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount)
+  escrow_client.fund(
+      "0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount)
   ```
 
 #### get_balance(escrow_address)
@@ -713,7 +807,8 @@ Sets up the parameters of the escrow.
   from human_protocol_sdk.escrow import EscrowClient
 
   def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
       w3.middleware_onion.add(
@@ -764,7 +859,8 @@ Stores the results url.
   from human_protocol_sdk.escrow import EscrowClient
 
   def get_w3_with_priv_key(priv_key: str):
-      w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+      w3 = Web3(load_provider_from_uri(
+          URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
       w3.middleware_onion.add(

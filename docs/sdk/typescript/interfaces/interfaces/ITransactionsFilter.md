@@ -18,7 +18,7 @@
 
 #### Defined in
 
-[interfaces.ts:143](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L143)
+[interfaces.ts:143](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L143)
 
 ***
 
@@ -28,7 +28,7 @@
 
 #### Defined in
 
-[interfaces.ts:145](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L145)
+[interfaces.ts:145](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L145)
 
 ***
 
@@ -38,7 +38,7 @@
 
 #### Defined in
 
-[interfaces.ts:147](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L147)
+[interfaces.ts:147](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L147)
 
 ***
 
@@ -52,7 +52,7 @@
 
 #### Defined in
 
-[interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+[interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
 
 ***
 
@@ -62,7 +62,7 @@
 
 #### Defined in
 
-[interfaces.ts:148](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L148)
+[interfaces.ts:148](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L148)
 
 ***
 
@@ -76,7 +76,7 @@
 
 #### Defined in
 
-[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
 
 ***
 
@@ -90,7 +90,7 @@
 
 #### Defined in
 
-[interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+[interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
 
 ***
 
@@ -100,7 +100,7 @@
 
 #### Defined in
 
-[interfaces.ts:144](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L144)
+[interfaces.ts:144](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L144)
 
 ***
 
@@ -110,7 +110,7 @@
 
 #### Defined in
 
-[interfaces.ts:146](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L146)
+[interfaces.ts:146](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L146)
 
 ***
 
@@ -120,4 +120,4 @@
 
 #### Defined in
 
-[interfaces.ts:149](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L149)
+[interfaces.ts:149](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L149)

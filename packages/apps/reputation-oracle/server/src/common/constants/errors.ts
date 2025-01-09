@@ -1,17 +1,4 @@
 /**
- * Represents error messages related to webhook.
- */
-export enum ErrorWebhook {
-  NotFound = 'Webhook not found',
-  UrlNotFound = 'Webhook url not found',
-  NotCreated = 'Webhook has not been created',
-  InvalidEventType = 'Invalid event type',
-  NotSent = 'Webhook was not sent',
-  PendingProcessingFailed = 'Failed to process pending webhook',
-  PaidProcessingFailed = 'Failed to process paid webhook',
-}
-
-/**
  * Represents error messages related to escrow completion.
  */
 export enum ErrorEscrowCompletion {
@@ -19,6 +6,7 @@ export enum ErrorEscrowCompletion {
   NotCreated = 'Escrow completion has not been created',
   PendingProcessingFailed = 'Failed to process pending escrow completion',
   PaidProcessingFailed = 'Failed to process paid escrow completion',
+  AwaitingPayoutsProcessingFailed = 'Failed to process payouts for escrow completion',
 }
 
 /**

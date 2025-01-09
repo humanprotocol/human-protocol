@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { IncomingWebhookDto } from './webhook.dto';
-import { ErrorWebhook } from '../../common/constants/errors';
-import { EventType, WebhookIncomingStatus } from '../../common/enums';
-import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ControlledError } from '../../common/errors/controlled';
+import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
+import { EventType, WebhookIncomingStatus } from '../../common/enums';
+import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { isDuplicatedError } from '../../common/utils/database';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
-import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
-import { isDuplicatedError } from '../../common/utils/database';
+import { IncomingWebhookDto } from './webhook.dto';
+import { IncomingWebhookError, WebhookErrorMessage } from './webhook.error';
 
 @Injectable()
 export class WebhookIncomingService {
@@ -33,9 +32,10 @@ export class WebhookIncomingService {
    */
   public async createIncomingWebhook(dto: IncomingWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.JOB_COMPLETED) {
-      throw new ControlledError(
-        ErrorWebhook.InvalidEventType,
-        HttpStatus.BAD_REQUEST,
+      throw new IncomingWebhookError(
+        WebhookErrorMessage.INVALID_EVENT_TYPE,
+        dto.chainId,
+        dto.escrowAddress,
       );
     }
 
@@ -92,7 +92,7 @@ export class WebhookIncomingService {
         await this.webhookIncomingRepository.updateOne(webhookEntity);
       } catch (err) {
         const errorId = uuidv4();
-        const failureDetail = `${ErrorWebhook.PendingProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `${WebhookErrorMessage.PENDING_PROCESSING_FAILED} (Error ID: ${errorId})`;
 
         if (isDuplicatedError(err)) {
           // Handle duplicated error: log and mark as completed

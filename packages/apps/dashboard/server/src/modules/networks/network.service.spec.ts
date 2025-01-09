@@ -9,6 +9,7 @@ import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { NetworksService } from './networks.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -21,6 +22,7 @@ describe('NetworksService', () => {
 
   beforeAll(async () => {
     process.env.RPC_URL_POLYGON = 'https://testrpc.com';
+    process.env.RPC_URL_BSC_MAINNET = 'https://testrpc.com';
     process.env.RPC_URL_ETHEREUM = 'https://testrpc.com';
     process.env.WEB3_ENV = 'mainnet';
   });
@@ -44,6 +46,7 @@ describe('NetworksService', () => {
             networkOperatingCacheTtl: 1000,
           },
         },
+        NetworkConfigService,
         ConfigService,
         Logger,
       ],
@@ -56,8 +59,8 @@ describe('NetworksService', () => {
   it('should regenerate network list when cache TTL expires', async () => {
     const mockNetworkList = [
       ChainId.MAINNET,
-      ChainId.BSC_MAINNET,
       ChainId.POLYGON,
+      ChainId.BSC_MAINNET,
     ];
 
     // Step 1: Initial request - populate cache

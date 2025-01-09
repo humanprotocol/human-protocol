@@ -9,10 +9,14 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { ContractRunner, EventLog, Overrides, ethers } from 'ethers';
+import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
-import { DEFAULT_TX_ID, NETWORKS } from './constants';
+import {
+  DEFAULT_TX_ID,
+  ESCROW_BULK_PAYOUT_MAX_ITEMS,
+  NETWORKS,
+} from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId, OrderDirection } from './enums';
 import {
@@ -33,6 +37,7 @@ import {
   ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
+  ErrorTooManyRecipients,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorTransferEventNotFoundInTransactionLogs,
   ErrorUnsupportedChainID,
@@ -52,6 +57,7 @@ import {
   EscrowStatus,
   EscrowWithdraw,
   NetworkData,
+  TransactionLikeWithNonce,
 } from './types';
 import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 
@@ -586,7 +592,7 @@ export class EscrowClient extends BaseEthersClient {
    * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
    * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
-   * const resultsHash'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
    *
    * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
    * ```
@@ -601,54 +607,13 @@ export class EscrowClient extends BaseEthersClient {
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (recipients.length === 0) {
-      throw ErrorRecipientCannotBeEmptyArray;
-    }
-
-    if (amounts.length === 0) {
-      throw ErrorAmountsCannotBeEmptyArray;
-    }
-
-    if (recipients.length !== amounts.length) {
-      throw ErrorRecipientAndAmountsMustBeSameLength;
-    }
-
-    recipients.forEach((recipient) => {
-      if (!ethers.isAddress(recipient)) {
-        throw new InvalidEthereumAddressError(recipient);
-      }
-    });
-
-    if (!finalResultsUrl) {
-      throw ErrorUrlIsEmptyString;
-    }
-
-    if (!isValidUrl(finalResultsUrl)) {
-      throw ErrorInvalidUrl;
-    }
-
-    if (!finalResultsHash) {
-      throw ErrorHashIsEmptyString;
-    }
-
-    const balance = await this.getBalance(escrowAddress);
-
-    let totalAmount = 0n;
-    amounts.forEach((amount) => {
-      totalAmount = totalAmount + amount;
-    });
-
-    if (balance < totalAmount) {
-      throw ErrorEscrowDoesNotHaveEnoughBalance;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.ensureCorrectBulkPayoutInput(
+      escrowAddress,
+      recipients,
+      amounts,
+      finalResultsUrl,
+      finalResultsHash
+    );
 
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
@@ -924,6 +889,167 @@ export class EscrowClient extends BaseEthersClient {
       return escrowWithdrawData;
     } catch (e) {
       return throwError(e);
+    }
+  }
+
+  /**
+   * Creates a prepared transaction for bulk payout without immediately sending it.
+   * @param {string} escrowAddress Escrow address to payout.
+   * @param {string[]} recipients Array of recipient addresses.
+   * @param {bigint[]} amounts Array of amounts the recipients will receive.
+   * @param {string} finalResultsUrl Final results file url.
+   * @param {string} finalResultsHash Final results file hash.
+   * @param {string} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @returns Returns object with raw transaction and signed transaction hash
+   *
+   * **Code example**
+   *
+   * > Only Reputation Oracle or a trusted handler can call it.
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { EscrowClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const escrowClient = await EscrowClient.build(signer);
+   *
+   * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
+   * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
+   * const resultsUrl = 'http://localhost/results.json';
+   * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   *
+   * const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
+   * console.log('Raw transaction:', rawTransaction);
+   *
+   * const signedTransaction = await signer.signTransaction(rawTransaction);
+   * console.log('Tx hash:', ethers.keccak256(signedTransaction));
+   * (await signer.sendTransaction(rawTransaction)).wait();
+   */
+  @requiresSigner
+  async createBulkPayoutTransaction(
+    escrowAddress: string,
+    recipients: string[],
+    amounts: bigint[],
+    finalResultsUrl: string,
+    finalResultsHash: string,
+    txOptions: Overrides = {}
+  ): Promise<TransactionLikeWithNonce> {
+    await this.ensureCorrectBulkPayoutInput(
+      escrowAddress,
+      recipients,
+      amounts,
+      finalResultsUrl,
+      finalResultsHash
+    );
+
+    const signer = this.runner as Signer;
+    try {
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      const populatedTransaction = await escrowContract[
+        'bulkPayOut(address[],uint256[],string,string,uint256)'
+      ].populateTransaction(
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        txOptions
+      );
+
+      /**
+       * Safety-belt: explicitly set the passed nonce
+       * because 'populateTransaction' return value
+       * doesn't mention it even in library docs,
+       * even though it includes if from txOptions.
+       */
+      if (typeof txOptions.nonce === 'number') {
+        populatedTransaction.nonce = txOptions.nonce;
+      } else {
+        populatedTransaction.nonce = await signer.getNonce();
+      }
+      /**
+       * It's needed to get all necessary info for tx object
+       * before signing it, e.g.:
+       * - type
+       * - chainId
+       * - fees params
+       * - etc.
+       *
+       * All information is needed in order to get proper hash value
+       */
+      const preparedTransaction =
+        await signer.populateTransaction(populatedTransaction);
+
+      return preparedTransaction as TransactionLikeWithNonce;
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  private async ensureCorrectBulkPayoutInput(
+    escrowAddress: string,
+    recipients: string[],
+    amounts: bigint[],
+    finalResultsUrl: string,
+    finalResultsHash: string
+  ): Promise<void> {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (recipients.length === 0) {
+      throw ErrorRecipientCannotBeEmptyArray;
+    }
+
+    if (recipients.length > ESCROW_BULK_PAYOUT_MAX_ITEMS) {
+      throw ErrorTooManyRecipients;
+    }
+
+    if (amounts.length === 0) {
+      throw ErrorAmountsCannotBeEmptyArray;
+    }
+
+    if (recipients.length !== amounts.length) {
+      throw ErrorRecipientAndAmountsMustBeSameLength;
+    }
+
+    recipients.forEach((recipient) => {
+      if (!ethers.isAddress(recipient)) {
+        throw new InvalidEthereumAddressError(recipient);
+      }
+    });
+
+    if (!finalResultsUrl) {
+      throw ErrorUrlIsEmptyString;
+    }
+
+    if (!isValidUrl(finalResultsUrl)) {
+      throw ErrorInvalidUrl;
+    }
+
+    if (!finalResultsHash) {
+      throw ErrorHashIsEmptyString;
+    }
+
+    const balance = await this.getBalance(escrowAddress);
+
+    let totalAmount = 0n;
+    amounts.forEach((amount) => {
+      totalAmount = totalAmount + amount;
+    });
+
+    if (balance < totalAmount) {
+      throw ErrorEscrowDoesNotHaveEnoughBalance;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
   }
 

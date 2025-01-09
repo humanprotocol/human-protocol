@@ -76,12 +76,12 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
-  @Cron('*/2 * * * *')
   /**
    * Processes all pending incoming webhooks, marking them as completed upon success.
    * Handles any errors by logging them and updating the webhook status.
    * @returns {Promise<void>} A promise that resolves when all pending incoming webhooks have been processed.
    */
+  @Cron('*/2 * * * *')
   public async processPendingIncomingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingIncomingWebhook,
@@ -106,13 +106,13 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
   /**
    * Processes pending escrow completion tracking to manage escrow lifecycle actions.
    * Checks escrow status and, if appropriate, saves results and initiates payouts.
    * Handles errors and logs detailed messages.
    * @returns {Promise<void>} A promise that resolves when the operation is complete.
    */
+  @Cron('*/2 * * * *')
   public async processPendingEscrowCompletion(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPendingEscrowCompletionTracking,
@@ -137,12 +137,12 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
   /**
    * Processes paid escrow completion tracking, finalizing escrow operations if completed.
    * Notifies oracles via callbacks, logs errors, and updates tracking status.
    * @returns {Promise<void>} A promise that resolves when the paid escrow tracking has been processed.
    */
+  @Cron('*/2 * * * *')
   public async processPaidEscrowCompletion(): Promise<void> {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.ProcessPaidEscrowCompletionTracking,
@@ -167,12 +167,12 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
   /**
    * Processes pending outgoing webhooks, sending requests to designated URLs.
    * Updates each webhook's status upon success, retries or logs errors as necessary.
    * @returns {Promise<void>} A promise that resolves once all pending outgoing webhooks have been processed.
    */
+  @Cron('*/2 * * * *')
   public async processPendingOutgoingWebhooks(): Promise<void> {
     if (await this.isCronJobRunning(CronJobType.ProcessPendingOutgoingWebhook))
       return;
@@ -189,6 +189,35 @@ export class CronJobService {
     }
 
     this.logger.log('Pending outgoing webhooks STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  /**
+   * Runs processing of awaiting payouts for escrow completion.
+   * @returns {Promise<void>} A promise that resolves when the processing is finished.
+   */
+  @Cron('*/2 * * * *')
+  public async processAwaitingEscrowPayouts(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessAwaitingEscrowPayouts,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Awaiting payouts escrow completion tracking START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ProcessAwaitingEscrowPayouts,
+    );
+
+    try {
+      await this.escrowCompletionService.processAwaitingPayouts();
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Awaiting payouts escrow completion tracking STOP');
     await this.completeCronJob(cronJob);
   }
 }
