@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { useSnackbar } from 'notistack';
+import { useSnackbar, type SnackbarKey } from 'notistack';
+import CloseIcon from '@mui/icons-material/Close';
 import { type ShowNotifProps } from '@/shared/types/notifications';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
@@ -9,8 +10,19 @@ const AUTO_HIDE_NOTIFICATION = 6000;
 
 export const useNotification = () => {
   const { colorPalette } = useColorMode();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const fontColor = lightColorPalette.white;
+
+  const action = useCallback(
+    (snackbarId: SnackbarKey) => (
+      <CloseIcon
+        onClick={() => {
+          closeSnackbar(snackbarId);
+        }}
+      />
+    ),
+    [closeSnackbar]
+  );
 
   const showNotification = useCallback(
     ({ message, type, duration = AUTO_HIDE_NOTIFICATION }: ShowNotifProps) => {
@@ -18,6 +30,7 @@ export const useNotification = () => {
         variant: type,
         autoHideDuration: duration,
         style: {
+          width: '100%',
           backgroundColor:
             type === 'success'
               ? colorPalette.success.main
@@ -30,9 +43,10 @@ export const useNotification = () => {
             fontSize: 14,
           },
         },
+        action,
       });
     },
-    [enqueueSnackbar, colorPalette, fontColor]
+    [enqueueSnackbar, colorPalette, fontColor, action]
   );
 
   return { showNotification };
