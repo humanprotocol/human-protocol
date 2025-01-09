@@ -314,6 +314,10 @@ describe('JobService', () => {
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
+      jest.spyOn(whitelistService, 'isUserWhitelisted').mockResolvedValue(true);
+      jest
+        .spyOn(paymentService, 'getDefaultPaymentMethod')
+        .mockResolvedValue('test_card_id');
     });
 
     afterEach(() => {
@@ -416,7 +420,7 @@ describe('JobService', () => {
       );
     });
 
-    it('should create a job successfully', async () => {
+    it('should create a job successfully if user is whitelisted', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -626,19 +630,87 @@ describe('JobService', () => {
       );
     });
 
-    it('should throw an exception if user does not have any active card', async () => {
+    it('should throw an exception if user is not whitelisted and does not have any active card', async () => {
       jest
         .spyOn(whitelistService, 'isUserWhitelisted')
-        .mockResolvedValue(false);
+        .mockResolvedValueOnce(false);
       jest
         .spyOn(paymentService, 'getDefaultPaymentMethod')
-        .mockResolvedValue(null);
+        .mockResolvedValueOnce(null);
 
       await expect(
         jobService.createJob(userMock, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrow(
         new ControlledError(ErrorJob.NotActiveCard, HttpStatus.BAD_REQUEST),
       );
+    });
+
+    it('should create a job successfully if user is not whitelisted but has an active card', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userMock.id,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        fee,
+        fundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
+      jest
+        .spyOn(whitelistService, 'isUserWhitelisted')
+        .mockResolvedValueOnce(false);
+      jest
+        .spyOn(paymentService, 'getDefaultPaymentMethod')
+        .mockResolvedValueOnce('test_card_id');
+
+      await jobService.createJob(
+        userMock,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
+        userMock.id,
+        div(1, rate),
+      );
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
+        userId: userMock.id,
+        jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: -mul(fundAmount + fee, rate),
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
+        chainId: fortuneJobDto.chainId,
+        userId: userMock.id,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        requestType: JobRequestType.FORTUNE,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
+      });
     });
   });
 
