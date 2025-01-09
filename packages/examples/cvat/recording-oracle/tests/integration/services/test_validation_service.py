@@ -302,7 +302,7 @@ class TestManifestChange:
 
 
 class TestValidationLogic:
-    @pytest.mark.parametrize("seed", [41])  # range(50))
+    @pytest.mark.parametrize("seed", range(25))
     def test_can_change_bad_honeypots_in_jobs(self, session: Session, seed: int):
         escrow_address = ESCROW_ADDRESS
         chain_id = Networks.localhost
@@ -323,7 +323,7 @@ class TestValidationLogic:
         )
 
         manifest = generate_manifest(
-            min_quality=0.8, job_size=job_size, validation_frames_per_job=validation_frames_per_job
+            min_quality=0.65, job_size=job_size, validation_frames_per_job=validation_frames_per_job
         )
 
         (
@@ -438,7 +438,6 @@ class TestValidationLogic:
                 mock.patch(
                     "src.handlers.process_intermediate_results.cvat_api.update_task_validation_layout"
                 ) as mock_update_task_validation_layout,
-                mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.35),
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
                 mock.patch("src.core.config.ValidationConfig.min_warmup_progress", 0),
@@ -633,7 +632,7 @@ class TestValidationLogic:
             )
             mock_get_task_validation_layout.return_value = mock.Mock(
                 cvat_api.models.ITaskValidationLayoutRead,
-                validation_frames=[2, 3],
+                validation_frames=[2, 3, 4, 5],
                 honeypot_count=2,
                 honeypot_frames=[0, 1],
                 honeypot_real_frames=[2, 3],
@@ -731,7 +730,7 @@ class TestValidationLogic:
         frame_count = 10
         label_count = 2
         manifest = generate_manifest(
-            min_quality=0.8, job_size=2, validation_frames_per_job=2, labels=[label_count]
+            min_quality=0.4, job_size=2, validation_frames_per_job=2, labels=[label_count]
         )
         validation_frames = [2, 3, 4, 5]
 
@@ -859,7 +858,7 @@ class TestValidationLogic:
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=task_id,
-                        summary=mock.Mock(accuracy=0.5),
+                        summary=mock.Mock(accuracy=manifest.validation.min_quality - 0.1),
                     ),
                 ]
 
@@ -882,7 +881,6 @@ class TestValidationLogic:
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
                 mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
-                mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.6),
             ):
                 vr = process_intermediate_results(
                     session,
@@ -933,7 +931,7 @@ class TestValidationLogic:
         frame_count = 10
         label_count = 2
         manifest = generate_manifest(
-            min_quality=0.8, job_size=2, validation_frames_per_job=2, labels=[label_count]
+            min_quality=0.4, job_size=2, validation_frames_per_job=2, labels=[label_count]
         )
         validation_frames = [2, 3, 4]
 
@@ -1084,7 +1082,6 @@ class TestValidationLogic:
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0.7),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
                 mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
-                mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.6),
             ):
                 vr = process_intermediate_results(
                     session,
@@ -1112,7 +1109,7 @@ class TestValidationLogic:
         frame_count = 10
         label_count = 2
         manifest = generate_manifest(
-            min_quality=0.8, job_size=2, validation_frames_per_job=2, labels=[label_count]
+            min_quality=0.4, job_size=2, validation_frames_per_job=2, labels=[label_count]
         )
         validation_frames = [2, 3]
 
@@ -1221,7 +1218,7 @@ class TestValidationLogic:
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=task_id,
-                        summary=mock.Mock(accuracy=0.5),
+                        summary=mock.Mock(accuracy=manifest.validation.min_quality - 0.1),
                     ),
                 ]
 
@@ -1244,7 +1241,6 @@ class TestValidationLogic:
                 mock.patch("src.core.config.ValidationConfig.min_available_gt_threshold", 0),
                 mock.patch("src.core.config.ValidationConfig.max_gt_share", 1),
                 mock.patch("src.core.config.ValidationConfig.warmup_iterations", 0),
-                mock.patch("src.core.config.ValidationConfig.gt_ban_threshold", 0.6),
             ):
                 vr = process_intermediate_results(
                     session,
