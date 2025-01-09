@@ -9,6 +9,7 @@ import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { NetworkIcon } from '@components/NetworkIcon';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useEffect } from 'react';
 
 export const SelectNetwork = () => {
   const {
@@ -20,6 +21,19 @@ export const SelectNetwork = () => {
   const {
     mobile: { isMobile },
   } = useBreakPoints();
+
+  // Filter out networks with id -1
+  const validNetworks = filteredNetworks.filter(network => network.id !== -1);
+
+  // Use 0 as the sentinel value for the unselected state
+  const defaultChainId = validNetworks.length > 0 ? validNetworks[0].id : 0;
+
+  useEffect(() => {
+    if (validNetworks.length > 0 && (chainId === 0 || chainId === -1)) {
+      setChainId(defaultChainId);
+    }
+  }, [validNetworks, chainId, defaultChainId, setChainId]);
+
 
   const handleChange = (event: SelectChangeEvent<number>) => {
     const value = Number(event.target.value);
@@ -49,15 +63,11 @@ export const SelectNetwork = () => {
       <Select<number>
         labelId="network-select-label"
         id="network-select"
-        value={chainId}
+        value={chainId !== -1 ? chainId : defaultChainId}
         label="By Network"
         onChange={handleChange}
       >
-        <MenuItem key="all-networks" className="select-item" value={-1}>
-          <HumanIcon />
-          All Networks
-        </MenuItem>
-        {filteredNetworks.map((network) => (
+        {validNetworks.map((network) => (
           <MenuItem
             key={network.id}
             value={network.id}
