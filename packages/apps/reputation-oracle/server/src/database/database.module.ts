@@ -42,7 +42,7 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
         typeOrmLoggerService.setOptions(
           loggerOptions && loggerOptions[0] === 'all'
             ? 'all'
-            : (loggerOptions as LoggerOptions) ?? false,
+            : ((loggerOptions as LoggerOptions) ?? false),
         );
         return {
           name: 'default',
