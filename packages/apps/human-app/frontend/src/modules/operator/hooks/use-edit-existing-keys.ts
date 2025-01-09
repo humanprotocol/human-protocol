@@ -18,7 +18,6 @@ import {
 import { ethKvStoreSetBulk } from '@/modules/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
-import { isArray } from '@/shared/helpers/is-array';
 import { urlDomainSchema } from '@/shared/helpers/url-domain-validation';
 
 const fieldsValidations = {
@@ -81,7 +80,7 @@ export const getEditEthKVStoreValuesMutationSchema = (
       const newFiledData = newData[key];
       const initialFiledData = initialData[key];
 
-      if (isArray(newFiledData) && isArray(initialFiledData)) {
+      if (Array.isArray(newFiledData) && Array.isArray(initialFiledData)) {
         if (
           newFiledData.sort().toString() === initialFiledData.sort().toString()
         ) {
