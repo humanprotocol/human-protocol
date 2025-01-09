@@ -808,6 +808,13 @@ class TestValidationLogic:
                 frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
             )
 
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_settings",
+                    return_value=cvat_api.QualitySettings(target_metric="accuracy"),
+                )
+            )
+
             def patched_get_task_labels(task_id: int):
                 return [manifest.annotation.labels[0].nodes[task_id - 1]]
 
@@ -1009,6 +1016,13 @@ class TestValidationLogic:
                 frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
             )
 
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_settings",
+                    return_value=cvat_api.QualitySettings(target_metric="accuracy"),
+                )
+            )
+
             def patched_get_task_labels(task_id: int):
                 return [manifest.annotation.labels[0].nodes[task_id - 1]]
 
@@ -1183,6 +1197,13 @@ class TestValidationLogic:
             mock_get_task_data_meta.return_value = mock.Mock(
                 cvat_api.models.IDataMetaRead,
                 frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
+            )
+
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_settings",
+                    return_value=cvat_api.QualitySettings(target_metric="accuracy"),
+                )
             )
 
             def patched_get_task_labels(task_id: int):
