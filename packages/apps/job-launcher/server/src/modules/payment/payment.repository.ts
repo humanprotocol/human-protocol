@@ -23,7 +23,7 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
     return this.findOne({ where: whereOptions });
   }
 
-  public async getBalance(userId: number): Promise<PaymentEntity[]> {
+  public async getUserPayments(userId: number): Promise<PaymentEntity[]> {
     // Find negative amounts with status 'PENDING' or 'SUCCEEDED'
     const negativePayments = await this.find({
       where: {

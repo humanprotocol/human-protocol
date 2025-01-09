@@ -34,7 +34,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { add, div, eq, mul } from '../../common/utils/decimal';
+import { div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
@@ -400,20 +400,32 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number, rate?: number): Promise<number> {
-    const paymentEntities = await this.paymentRepository.getBalance(userId);
+  public async getUserBalance(
+    userId: number,
+    currentRate?: number,
+  ): Promise<number> {
+    const paymentEntities =
+      await this.paymentRepository.getUserPayments(userId);
 
-    if (!rate) {
-      rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
+    if (!currentRate) {
+      currentRate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
     }
-    const totalAmount = paymentEntities.reduce((total, payment) => {
-      if (payment.currency === TokenId.HMT) {
-        return add(total, mul(payment.amount, rate));
-      }
-      return add(total, payment.amount);
-    }, 0);
 
-    return totalAmount;
+    const { hmtBalance, usdBalance } = paymentEntities.reduce(
+      (acc, payment) => {
+        if (payment.currency === TokenId.HMT) {
+          acc.hmtBalance += Number(payment.amount);
+        } else if (payment.currency === Currency.USD) {
+          acc.usdBalance += Number(payment.amount);
+        }
+        return acc;
+      },
+      { hmtBalance: 0, usdBalance: 0 },
+    );
+
+    const hmtBalanceInUSD = hmtBalance * currentRate;
+
+    return hmtBalanceInUSD + usdBalance;
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {

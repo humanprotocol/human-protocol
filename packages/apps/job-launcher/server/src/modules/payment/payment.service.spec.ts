@@ -816,41 +816,44 @@ describe('PaymentService', () => {
       const userId = 1;
       const expectedBalance = 20;
 
-      paymentRepository.getBalance = jest.fn().mockResolvedValue([
+      paymentRepository.getUserPayments = jest.fn().mockResolvedValue([
         {
           amount: 50,
           rate: 1,
           type: PaymentType.DEPOSIT,
           status: PaymentStatus.SUCCEEDED,
+          currency: Currency.USD,
         },
         {
           amount: 150,
           rate: 1,
           type: PaymentType.DEPOSIT,
           status: PaymentStatus.SUCCEEDED,
+          currency: Currency.USD,
         },
         {
           amount: -180,
           rate: 1,
           type: PaymentType.WITHDRAWAL,
           status: PaymentStatus.SUCCEEDED,
+          currency: Currency.USD,
         },
       ]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.getBalance).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.getUserPayments).toHaveBeenCalledWith(userId);
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
       const userId = 1;
-      paymentRepository.getBalance = jest.fn().mockResolvedValue([]);
+      paymentRepository.getUserPayments = jest.fn().mockResolvedValue([]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(0);
-      expect(paymentRepository.getBalance).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.getUserPayments).toHaveBeenCalledWith(userId);
     });
   });
 
