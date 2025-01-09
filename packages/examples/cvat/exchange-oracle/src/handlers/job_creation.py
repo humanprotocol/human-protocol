@@ -246,7 +246,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         settings = cvat_api.get_quality_control_settings(task_id)
 
         values = {
-            "target_metric": "precision",
+            "target_metric": "accuracy",
             "target_metric_threshold": self.manifest.validation.min_quality,
             "empty_is_annotated": True,
         }
@@ -2604,6 +2604,7 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
 
     def _setup_quality_settings(self, task_id: int, **overrides) -> None:
         values = {
+            "target_metric": "precision",  # better than accuracy for 1 annotation per image cases
             "oks_sigma": Config.cvat_config.oks_sigma,
             "point_size_base": "image_size",  # we don't expect any boxes or groups, so ignore them
         }

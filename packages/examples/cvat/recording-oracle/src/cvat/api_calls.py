@@ -8,7 +8,7 @@ from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.core.helpers import get_paginated_collection
 
 from src.core.config import Config
-from src.cvat.interface import QualityReportData
+from src.cvat.interface import QualityReportData, QualitySettings
 from src.utils.time import utcnow
 
 
@@ -85,6 +85,21 @@ def get_task(task_id: int) -> models.TaskRead:
 
         except exceptions.ApiException as ex:
             logger.exception(f"Exception when calling TaskApi.retrieve: {ex}\n")
+            raise
+
+
+def get_task_quality_settings(task_id: int) -> QualitySettings:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            _, response = api_client.quality_api.list_settings(
+                task_id=task_id, _parse_response=False
+            )
+
+            return QualityReportData.model_validate(response.json()["results"][0])
+
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling QualityApi.list_settings: {ex}\n")
             raise
 
 

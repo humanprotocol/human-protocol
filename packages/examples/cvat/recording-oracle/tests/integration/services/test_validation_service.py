@@ -166,6 +166,13 @@ class TestManifestChange:
                 frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
             )
 
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_settings",
+                    return_value=cvat_api.QualitySettings(target_metric="accuracy"),
+                )
+            )
+
             def patched_prepare_merged_dataset(self):
                 self._updated_merged_dataset_archive = io.BytesIO()
 
@@ -212,15 +219,15 @@ class TestManifestChange:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        "0": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
-                        "1": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
+                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
                     },
                 )
                 mock_get_jobs_quality_reports.return_value = [
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1,
-                        summary=mock.Mock(precision=assignment1_quality),
+                        summary=mock.Mock(accuracy=assignment1_quality),
                     ),
                 ]
 
@@ -258,15 +265,15 @@ class TestManifestChange:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        "0": mock.Mock(annotations=mock.Mock(precision=assignment2_quality)),
-                        "1": mock.Mock(annotations=mock.Mock(precision=assignment2_quality)),
+                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment2_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment2_quality)),
                     },
                 )
                 mock_get_jobs_quality_reports.return_value = [
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1,
-                        summary=mock.Mock(precision=assignment2_quality),
+                        summary=mock.Mock(accuracy=assignment2_quality),
                     ),
                 ]
 
@@ -384,6 +391,13 @@ class TestValidationLogic:
                 frames=[SimpleNamespace(name=name) for name in task_frame_names],
             )
 
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_settings",
+                    return_value=cvat_api.QualitySettings(target_metric="accuracy"),
+                )
+            )
+
             def patched_prepare_merged_dataset(self):
                 self._updated_merged_dataset_archive = io.BytesIO()
 
@@ -437,7 +451,7 @@ class TestValidationLogic:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        str(honeypot_frame): mock.Mock(annotations=mock.Mock(precision=0))
+                        str(honeypot_frame): mock.Mock(annotations=mock.Mock(accuracy=0))
                         for honeypot_frame in task_honeypots
                     },
                 )
@@ -446,7 +460,7 @@ class TestValidationLogic:
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1 + i,
-                        summary=mock.Mock(precision=0),
+                        summary=mock.Mock(accuracy=0),
                     )
                     for i in range(len(jobs))
                 ]
@@ -635,6 +649,13 @@ class TestValidationLogic:
                 frames=[SimpleNamespace(name=f"frame_{i}.jpg") for i in range(frame_count)],
             )
 
+            common_lock_es.enter_context(
+                mock.patch(
+                    "src.handlers.process_intermediate_results.cvat_api.get_task_quality_settings",
+                    return_value=cvat_api.QualitySettings(target_metric="accuracy"),
+                )
+            )
+
             def patched_prepare_merged_dataset(self):
                 self._updated_merged_dataset_archive = io.BytesIO()
 
@@ -683,15 +704,15 @@ class TestValidationLogic:
                 mock_get_quality_report_data.return_value = mock.Mock(
                     cvat_api.QualityReportData,
                     frame_results={
-                        "0": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
-                        "1": mock.Mock(annotations=mock.Mock(precision=assignment1_quality)),
+                        "0": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
+                        "1": mock.Mock(annotations=mock.Mock(accuracy=assignment1_quality)),
                     },
                 )
                 mock_get_jobs_quality_reports.return_value = [
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=1,
-                        summary=mock.Mock(precision=assignment1_quality),
+                        summary=mock.Mock(accuracy=assignment1_quality),
                     ),
                 ]
 
