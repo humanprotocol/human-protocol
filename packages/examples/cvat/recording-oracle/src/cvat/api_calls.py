@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 from http import HTTPStatus
 from time import sleep
+from typing import cast
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.core.helpers import get_paginated_collection
@@ -217,4 +218,24 @@ def get_task_data_meta(task_id: int) -> models.DataMetaRead:
 
         except exceptions.ApiException as ex:
             logger.exception(f"Exception when calling TaskApi.retrieve_data_meta: {ex}\n")
+            raise
+
+
+def get_task_labels(task_id: int) -> list[str]:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            task, _ = api_client.tasks_api.retrieve(task_id)
+            project_id = task.project_id
+
+            return [
+                cast(models.ILabel, label).name
+                for label in get_paginated_collection(
+                    api_client.labels_api.list_endpoint,
+                    **({"project_id": project_id} if project_id else {"task_id": task_id}),
+                )
+            ]
+
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling QualityApi.list_reports: {e}\n")
             raise

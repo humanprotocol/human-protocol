@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { FetchError } from '@/api/fetcher';
-import { JsonRpcError } from '@/smart-contracts/json-rpc-error';
+import { JsonRpcError } from '@/modules/smart-contracts/json-rpc-error';
 
 type CustomErrorHandler = (unknownError: unknown) => string | undefined;
 
