@@ -404,26 +404,24 @@ export class PaymentService {
     const paymentEntities =
       await this.paymentRepository.getUserBalancePayments(userId);
 
-    const currentRates: Record<string, number> = {};
     const uniqueTokens = Array.from(
       new Set(paymentEntities.map((payment) => payment.currency)),
     );
 
-    await Promise.all(
-      uniqueTokens.map(async (token) => {
-        currentRates[token] = await this.rateService.getRate(
-          token,
-          Currency.USD,
-        );
-      }),
-    );
+    let totalBalance = 0;
 
-    const totalBalance = paymentEntities.reduce((balance, payment) => {
-      const rate = currentRates[payment.currency] || 1;
-      const amountInBaseCurrency = Number(payment.amount) * rate;
+    for (const token of uniqueTokens) {
+      const tokenAmountSum = paymentEntities
+        .filter((payment) => payment.currency === token)
+        .reduce((sum, payment) => sum + Number(payment.amount), 0);
 
-      return balance + amountInBaseCurrency;
-    }, 0);
+      const rate =
+        token === Currency.USD
+          ? 1
+          : await this.rateService.getRate(token, Currency.USD);
+
+      totalBalance += tokenAmountSum * rate;
+    }
 
     return totalBalance;
   }
