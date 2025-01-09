@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Encryption } from '../src/encryption';
 
 const ExampleKeys = {
