@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { ChainId } from '../src/enums';
 import { TransactionUtils } from '../src/transaction';
 import * as dotenv from 'dotenv';

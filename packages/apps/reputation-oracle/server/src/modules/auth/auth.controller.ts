@@ -15,7 +15,6 @@ import {
   UseGuards,
   UseInterceptors,
   Logger,
-  Ip,
   UseFilters,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';

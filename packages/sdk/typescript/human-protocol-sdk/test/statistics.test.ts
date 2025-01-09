@@ -228,7 +228,7 @@ describe('StatisticsClient', () => {
 
   describe('getHMTStatistics', () => {
     test('should successfully get HMT statistics', async () => {
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         hmtokenStatistics: {
           totalValueTransfered: '100',
           totalTransferEventCount: '4',

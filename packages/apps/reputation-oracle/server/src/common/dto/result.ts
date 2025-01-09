@@ -1,29 +1,5 @@
 import { SolutionError } from '../../common/enums';
 
-export class PayoutsDataDto {
-  /**
-   * List of recipient addresses.
-   */
-  recipients: string[];
-
-  /**
-   * Corresponding amounts to be paid out to recipients.
-   */
-  amounts: bigint[];
-}
-
-export class SaveResultDto {
-  /**
-   * URL to the stored results.
-   */
-  url: string;
-
-  /**
-   * Hash of the stored results.
-   */
-  hash: string;
-}
-
 export class FortuneFinalResult {
   workerAddress: string;
   solution: string;

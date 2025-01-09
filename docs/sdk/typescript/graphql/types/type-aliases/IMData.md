@@ -10,4 +10,4 @@
 
 ## Defined in
 
-[graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)
+[graphql/types.ts:146](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L146)
