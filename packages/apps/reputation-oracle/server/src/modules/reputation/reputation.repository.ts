@@ -46,8 +46,8 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     types?: ReputationEntityType[],
     orderBy?: ReputationOrderBy,
     orderDirection?: SortDirection,
-    skip?: number,
     first?: number,
+    skip?: number,
   ): Promise<ReputationEntity[]> {
     const mapOrderBy = ReputationRepository.mapOrderBy(
       orderBy || ReputationOrderBy.CREATED_AT,

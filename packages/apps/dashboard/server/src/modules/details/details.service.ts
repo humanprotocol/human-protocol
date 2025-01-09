@@ -172,7 +172,7 @@ export class DetailsService {
         chainId,
         orderBy,
         orderDirection,
-        orderBy === LeadersOrderBy.REPUTATION ? first : undefined,
+        orderBy === LeadersOrderBy.REPUTATION ? filter.first : undefined,
       ),
     ]);
 
@@ -182,10 +182,20 @@ export class DetailsService {
         plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
       );
 
+    const leadersWithReputation = this.assignReputationsToLeaders(
+      leaders,
+      reputations,
+    );
+
     if (orderBy === LeadersOrderBy.REPUTATION) {
-      return this.filterLeadersWithReputations(leaders, reputations);
+      return this.sortLeadersByReputation(
+        leadersWithReputation,
+        orderDirection,
+        first,
+      );
     }
-    return this.assignReputationsToLeaders(leaders, reputations);
+
+    return leadersWithReputation;
   }
 
   private createLeadersFilter(
@@ -254,26 +264,23 @@ export class DetailsService {
   ): Promise<{ address: string; reputation: string }[]> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(
-          `${this.configService.reputationSource}/reputation`,
-          {
-            params: {
-              chain_id: chainId,
-              roles: [
-                OracleRole.JOB_LAUNCHER,
-                OracleRole.EXCHANGE_ORACLE,
-                OracleRole.RECORDING_ORACLE,
-                OracleRole.REPUTATION_ORACLE,
-              ],
-              ...(orderBy &&
-                orderBy === LeadersOrderBy.REPUTATION && {
-                  order_by: 'reputation_points',
-                }),
-              ...(orderDirection && { order_direction: orderDirection }),
-              ...(first && { first }),
-            },
+        this.httpService.get(`http://localhost:5001/reputation`, {
+          params: {
+            chain_id: chainId,
+            roles: [
+              OracleRole.JOB_LAUNCHER,
+              OracleRole.EXCHANGE_ORACLE,
+              OracleRole.RECORDING_ORACLE,
+              OracleRole.REPUTATION_ORACLE,
+            ],
+            ...(orderBy &&
+              orderBy === LeadersOrderBy.REPUTATION && {
+                order_by: 'reputation_points',
+              }),
+            ...(orderDirection && { order_direction: orderDirection }),
+            ...(first && { first }),
           },
-        ),
+        }),
       );
       return response.data;
     } catch (error) {
@@ -294,28 +301,39 @@ export class DetailsService {
     );
 
     leaders.forEach((leader) => {
-      leader.reputation =
-        reputationMap.get(leader.address.toLowerCase()) || ReputationLevel.LOW;
+      const reputation = reputationMap.get(leader.address.toLowerCase());
+      leader.reputation = reputation || ReputationLevel.LOW;
     });
 
     return leaders;
   }
 
-  private filterLeadersWithReputations(
+  private sortLeadersByReputation(
     leaders: LeaderDto[],
-    reputations: { address: string; reputation: string }[],
+    orderDirection: OrderDirection,
+    first?: number,
   ): LeaderDto[] {
-    const leaderMap = new Map(leaders.map((l) => [l.address.toLowerCase(), l]));
+    const reputationOrder = {
+      [ReputationLevel.LOW]: 1,
+      [ReputationLevel.MEDIUM]: 2,
+      [ReputationLevel.HIGH]: 3,
+    };
 
-    return reputations
-      .map((rep) => {
-        const leader = leaderMap.get(rep.address.toLowerCase());
-        if (!leader) {
-          return null;
-        }
-        leader.reputation = rep.reputation;
-        return leader;
-      })
-      .filter((leader): leader is LeaderDto => leader !== null);
+    const sortedLeaders = leaders.sort((a, b) => {
+      const reputationA = reputationOrder[a.reputation || ReputationLevel.LOW];
+      const reputationB = reputationOrder[b.reputation || ReputationLevel.LOW];
+
+      if (orderDirection === OrderDirection.ASC) {
+        return reputationA - reputationB;
+      } else {
+        return reputationB - reputationA;
+      }
+    });
+
+    if (first) {
+      return sortedLeaders.slice(0, first);
+    }
+
+    return sortedLeaders;
   }
 }

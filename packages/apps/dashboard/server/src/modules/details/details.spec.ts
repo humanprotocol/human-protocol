@@ -102,7 +102,7 @@ describe('DetailsService', () => {
     ]);
   });
 
-  it('should return first 3 sorted leaders by reputation', async () => {
+  it('should return sorted leaders by reputation', async () => {
     const mockLeaders = [
       { address: '0xA', role: 'Job Launcher' },
       { address: '0xB', role: 'Exchange Oracle' },
@@ -111,8 +111,8 @@ describe('DetailsService', () => {
       { address: '0xE', role: 'Recording Oracle' },
     ];
     const mockReputations = [
-      { address: '0xB', reputation: 'hign' },
-      { address: '0xC', reputation: 'hign' },
+      { address: '0xB', reputation: 'high' },
+      { address: '0xC', reputation: 'high' },
       { address: '0xD', reputation: 'medium' },
     ];
 
@@ -128,13 +128,13 @@ describe('DetailsService', () => {
     const result = await service.getLeaders(ChainId.POLYGON_AMOY, {
       orderBy: LeadersOrderBy.REPUTATION,
       orderDirection: OrderDirection.DESC,
-      first: 3,
+      first: 5,
     });
 
     expect(result[0].address).toBe('0xB');
     expect(result[1].address).toBe('0xC');
     expect(result[2].address).toBe('0xD');
-    expect(result.length).toBe(3);
+    expect(result.length).toBe(5);
     expect(getLeadersSpy).toBeCalledWith(
       expect.objectContaining({
         first: 5,
