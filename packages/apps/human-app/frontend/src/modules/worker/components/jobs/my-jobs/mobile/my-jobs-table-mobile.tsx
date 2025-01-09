@@ -5,7 +5,6 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon, RefreshIcon } from '@/shared/components/ui/icons';
-import { formatDate } from '@/shared/helpers/format-date';
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
@@ -24,6 +23,7 @@ import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow
 import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { useRefreshTasksMutation } from '@/modules/worker/services/refresh-tasks';
 import { getChipStatusColor } from '@/modules/worker/utils/get-chip-status-color';
+import { formatDate } from '@/shared/helpers/date';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableMobileProps {

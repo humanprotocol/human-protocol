@@ -1,6 +1,6 @@
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { wait } from '@/shared/helpers/wait';
+import { wait } from '@/shared/helpers/async';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export function useGetOraclesNotifications() {

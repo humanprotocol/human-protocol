@@ -13,7 +13,7 @@ import { PageCardError } from '@/shared/components/ui/page-card-error';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { useDailyHmtSpent } from '@/modules/worker/services/daily-hmt-spent';
-import { getTomorrowDate } from '@/shared/helpers/counter-helpers';
+import { getTomorrowDate } from '@/shared/helpers/date';
 import { useSolveHCaptchaMutation } from '@/modules/worker/services/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';

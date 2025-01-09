@@ -4,10 +4,10 @@ import { z } from 'zod';
 import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
+import { stringifyUrlQueryObject } from '@/shared/helpers/string';
 import type { JobsFilterStoreProps } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
-import { createPaginationSchema } from '@/shared/helpers/create-pagination-schema';
+import { createPaginationSchema } from '@/shared/helpers/pagination';
 
 const availableJobSchema = z.object({
   escrow_address: z.string(),

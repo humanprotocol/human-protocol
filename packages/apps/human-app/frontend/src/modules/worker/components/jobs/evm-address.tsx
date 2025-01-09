@@ -1,6 +1,6 @@
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { shortenEscrowAddress } from '@/shared/helpers/shorten-escrow-address';
+import { shortenEscrowAddress } from '@/shared/helpers/address';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useColorMode } from '@/shared/hooks/use-color-mode';

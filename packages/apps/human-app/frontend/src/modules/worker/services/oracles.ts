@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useJobsTypesOraclesFilter } from '@/modules/worker/hooks/use-job-types-oracles-table';
-import { stringifyUrlQueryObject } from '@/shared/helpers/stringify-url-query-object';
+import { stringifyUrlQueryObject } from '@/shared/helpers/string';
 import { env } from '@/shared/env';
 
 const OracleSchema = z.object({
