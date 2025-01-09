@@ -431,10 +431,7 @@ describe('JobService', () => {
 
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -508,10 +505,7 @@ describe('JobService', () => {
       expect(jobService.createHCaptchaManifest).toHaveBeenCalledTimes(0);
       expect(jobService.uploadManifest).toHaveBeenCalledTimes(0);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -557,10 +551,7 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -1374,10 +1365,7 @@ describe('JobService', () => {
         imageLabelBinaryJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -1450,10 +1438,7 @@ describe('JobService', () => {
         ),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
 
     it('should throw an error for invalid region', async () => {
@@ -1501,10 +1486,7 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.InvalidRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
 
     it('should throw an error for empty region', async () => {
@@ -1550,10 +1532,7 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
 
     it('should throw an error for empty bucket', async () => {
@@ -1599,10 +1578,7 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
 
     it('should create a image label job successfully on network selected from round robin logic', async () => {
@@ -1638,10 +1614,7 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -1769,10 +1742,7 @@ describe('JobService', () => {
         hCaptchaJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId,
         jobId,
@@ -1816,10 +1786,7 @@ describe('JobService', () => {
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,

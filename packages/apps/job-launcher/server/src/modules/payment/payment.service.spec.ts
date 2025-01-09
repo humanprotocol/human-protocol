@@ -101,11 +101,10 @@ describe('PaymentService', () => {
           },
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
-        { provide: RateService, useValue: createMock<RateService>() },
         {
           provide: RateService,
           useValue: {
-            getRate: jest.fn().mockResolvedValue(1.5),
+            getRate: jest.fn().mockResolvedValue(1),
           },
         },
         NetworkConfigService,
@@ -556,7 +555,7 @@ describe('PaymentService', () => {
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
         amount: 10,
-        rate: 1.5,
+        rate: 1,
         transaction: MOCK_TRANSACTION_HASH,
         chainId: ChainId.POLYGON_AMOY,
         status: PaymentStatus.SUCCEEDED,
@@ -816,7 +815,7 @@ describe('PaymentService', () => {
       const userId = 1;
       const expectedBalance = 20;
 
-      paymentRepository.getUserPayments = jest.fn().mockResolvedValue([
+      paymentRepository.getUserBalancePayments = jest.fn().mockResolvedValue([
         {
           amount: 50,
           rate: 1,
@@ -843,17 +842,23 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.getUserPayments).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
+        userId,
+      );
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
       const userId = 1;
-      paymentRepository.getUserPayments = jest.fn().mockResolvedValue([]);
+      paymentRepository.getUserBalancePayments = jest
+        .fn()
+        .mockResolvedValue([]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(0);
-      expect(paymentRepository.getUserPayments).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
+        userId,
+      );
     });
   });
 
@@ -1348,7 +1353,7 @@ describe('PaymentService', () => {
       const mockEntities = [
         {
           amount: 100,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.DEPOSIT,
           source: PaymentSource.FIAT,
@@ -1359,7 +1364,7 @@ describe('PaymentService', () => {
         },
         {
           amount: -50,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.WITHDRAWAL,
           source: PaymentSource.CRYPTO,
@@ -1382,7 +1387,7 @@ describe('PaymentService', () => {
       const expectedPayments = [
         {
           amount: 100,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.DEPOSIT,
           source: PaymentSource.FIAT,
@@ -1393,7 +1398,7 @@ describe('PaymentService', () => {
         },
         {
           amount: -50,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.WITHDRAWAL,
           source: PaymentSource.CRYPTO,

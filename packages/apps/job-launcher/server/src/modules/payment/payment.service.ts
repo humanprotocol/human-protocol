@@ -400,32 +400,32 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(
-    userId: number,
-    currentRate?: number,
-  ): Promise<number> {
+  public async getUserBalance(userId: number): Promise<number> {
     const paymentEntities =
-      await this.paymentRepository.getUserPayments(userId);
+      await this.paymentRepository.getUserBalancePayments(userId);
 
-    if (!currentRate) {
-      currentRate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
-    }
-
-    const { hmtBalance, usdBalance } = paymentEntities.reduce(
-      (acc, payment) => {
-        if (payment.currency === TokenId.HMT) {
-          acc.hmtBalance += Number(payment.amount);
-        } else if (payment.currency === Currency.USD) {
-          acc.usdBalance += Number(payment.amount);
-        }
-        return acc;
-      },
-      { hmtBalance: 0, usdBalance: 0 },
+    const currentRates: Record<string, number> = {};
+    const uniqueTokens = Array.from(
+      new Set(paymentEntities.map((payment) => payment.currency)),
     );
 
-    const hmtBalanceInUSD = hmtBalance * currentRate;
+    await Promise.all(
+      uniqueTokens.map(async (token) => {
+        currentRates[token] = await this.rateService.getRate(
+          token,
+          Currency.USD,
+        );
+      }),
+    );
 
-    return hmtBalanceInUSD + usdBalance;
+    const totalBalance = paymentEntities.reduce((balance, payment) => {
+      const rate = currentRates[payment.currency] || 1;
+      const amountInBaseCurrency = Number(payment.amount) * rate;
+
+      return balance + amountInBaseCurrency;
+    }, 0);
+
+    return totalBalance;
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {
