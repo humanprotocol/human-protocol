@@ -264,23 +264,26 @@ export class DetailsService {
   ): Promise<{ address: string; reputation: string }[]> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`http://localhost:5001/reputation`, {
-          params: {
-            chain_id: chainId,
-            roles: [
-              OracleRole.JOB_LAUNCHER,
-              OracleRole.EXCHANGE_ORACLE,
-              OracleRole.RECORDING_ORACLE,
-              OracleRole.REPUTATION_ORACLE,
-            ],
-            ...(orderBy &&
-              orderBy === LeadersOrderBy.REPUTATION && {
-                order_by: 'reputation_points',
-              }),
-            ...(orderDirection && { order_direction: orderDirection }),
-            ...(first && { first }),
+        this.httpService.get(
+          `${this.configService.reputationSource}/reputation`,
+          {
+            params: {
+              chain_id: chainId,
+              roles: [
+                OracleRole.JOB_LAUNCHER,
+                OracleRole.EXCHANGE_ORACLE,
+                OracleRole.RECORDING_ORACLE,
+                OracleRole.REPUTATION_ORACLE,
+              ],
+              ...(orderBy &&
+                orderBy === LeadersOrderBy.REPUTATION && {
+                  order_by: 'reputation_points',
+                }),
+              ...(orderDirection && { order_direction: orderDirection }),
+              ...(first && { first }),
+            },
           },
-        }),
+        ),
       );
       return response.data;
     } catch (error) {
