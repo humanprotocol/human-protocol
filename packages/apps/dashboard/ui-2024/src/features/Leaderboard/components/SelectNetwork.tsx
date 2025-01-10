@@ -17,22 +17,16 @@ export const SelectNetwork = () => {
   } = useLeaderboardSearch();
 
   const { filteredNetworks, isLoading } = useFilteredNetworks();
+
+  useEffect(() => {
+    if (chainId === -1 && filteredNetworks.length > 0) {
+      setChainId(filteredNetworks[0].id);
+    }
+  }, [chainId, filteredNetworks, setChainId]);
+
   const {
     mobile: { isMobile },
   } = useBreakPoints();
-
-  // Filter out networks with id -1
-  const validNetworks = filteredNetworks.filter(network => network.id !== -1);
-
-  // Use 0 as the sentinel value for the unselected state
-  const defaultChainId = validNetworks.length > 0 ? validNetworks[0].id : 0;
-
-  useEffect(() => {
-    if (validNetworks.length > 0 && (chainId === 0 || chainId === -1)) {
-      setChainId(defaultChainId);
-    }
-  }, [validNetworks, chainId, defaultChainId, setChainId]);
-
 
   const handleChange = (event: SelectChangeEvent<number>) => {
     const value = Number(event.target.value);
@@ -62,11 +56,11 @@ export const SelectNetwork = () => {
       <Select<number>
         labelId="network-select-label"
         id="network-select"
-        value={chainId !== -1 ? chainId : defaultChainId}
+        value={chainId === -1 ? '' : chainId}
         label="By Network"
         onChange={handleChange}
       >
-        {validNetworks.map((network) => (
+        {filteredNetworks.map((network) => (
           <MenuItem
             key={network.id}
             value={network.id}

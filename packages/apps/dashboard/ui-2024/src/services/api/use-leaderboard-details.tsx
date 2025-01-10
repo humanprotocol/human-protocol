@@ -56,8 +56,11 @@ export function useLeaderboardDetails() {
 
   return useQuery({
     queryFn: async () => {
+      if (chainId === -1) {
+        return [];
+      }
       const { data } = await httpService.get(apiPaths.leaderboardDetails.path, {
-        params: { chainId: chainId === -1 ? undefined : chainId },
+        params: { chainId },
       });
 
       const validResponse = validateResponse(
