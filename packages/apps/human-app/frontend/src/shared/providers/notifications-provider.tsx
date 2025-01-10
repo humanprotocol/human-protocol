@@ -22,8 +22,8 @@ export function NotificationProvider({
         horizontal: 'right',
       }}
       iconVariant={{
-        success: getNotificationIconByType('success', { marginRight: '4px' }),
-        warning: getNotificationIconByType('warning', { marginRight: '4px' }),
+        success: getNotificationIconByType('success', { marginRight: '12px' }),
+        warning: getNotificationIconByType('warning', { marginRight: '12px' }),
       }}
     >
       {children}
