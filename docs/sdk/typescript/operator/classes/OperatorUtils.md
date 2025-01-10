@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -26,9 +26,13 @@ This function returns the leader data for the given address.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
 
-• **address**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+##### address
+
+`string`
 
 Leader address.
 
@@ -48,7 +52,7 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ***
 
@@ -60,7 +64,9 @@ This function returns all the leader details of the protocol.
 
 #### Parameters
 
-• **filter**: [`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
+##### filter
+
+[`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
 
 Filter for the leaders.
 
@@ -83,7 +89,7 @@ const leaders = await OperatorUtils.getLeaders(filter);
 
 #### Defined in
 
-[operator.ts:108](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L108)
+[operator.ts:108](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L108)
 
 ***
 
@@ -95,13 +101,19 @@ Retrieves the reputation network operators of the specified address.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
 
-• **address**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+##### address
+
+`string`
 
 Address of the reputation oracle.
 
-• **role?**: `string`
+##### role?
+
+`string`
 
 (Optional) Role of the operator.
 
@@ -121,7 +133,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-[operator.ts:185](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L185)
+[operator.ts:185](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L185)
 
 ***
 
@@ -133,9 +145,13 @@ This function returns information about the rewards for a given slasher address.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
 
-• **slasherAddress**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+##### slasherAddress
+
+`string`
 
 Slasher address.
 
@@ -155,4 +171,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
-[operator.ts:235](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L235)
+[operator.ts:235](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L235)

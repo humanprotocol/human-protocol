@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -26,11 +26,15 @@ This function returns the transaction data for the given hash.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
+
+[`ChainId`](../../enums/enumerations/ChainId.md)
 
 The chain ID.
 
-• **hash**: `string`
+##### hash
+
+`string`
 
 The transaction hash.
 
@@ -50,7 +54,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 #### Defined in
 
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 ***
 
@@ -93,7 +97,9 @@ type ITransaction = {
 
 #### Parameters
 
-• **filter**: [`ITransactionsFilter`](../../interfaces/interfaces/ITransactionsFilter.md)
+##### filter
+
+[`ITransactionsFilter`](../../interfaces/interfaces/ITransactionsFilter.md)
 
 Filter for the transactions.
 
@@ -121,4 +127,4 @@ const transactions = await TransactionUtils.getTransactions(filter);
 
 #### Defined in
 
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
