@@ -3,7 +3,6 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
-import HumanIcon from '@components/Icons/HumanIcon';
 import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
