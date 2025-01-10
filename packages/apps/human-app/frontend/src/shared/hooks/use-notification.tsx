@@ -21,7 +21,7 @@ export const useNotification = () => {
         sx={{
           width: '20px',
           height: '20px',
-          zIndex: 131,
+          zIndex: 1,
           cursor: 'pointer',
           marginRight: '4px',
         }}
