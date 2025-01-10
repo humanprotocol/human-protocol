@@ -60,10 +60,21 @@ export function Form({
 }: {
   keysData: GetEthKVStoreValuesSuccessResponse;
 }) {
-  const areSomeExistingKeys = Object.values(keysData).filter(Boolean).length;
-  const areSomePendingKeys = Object.entries(keysData).filter(
-    ([key, values]) => key && !values.length
-  ).length;
+  const hasSomeNotEmptyKeys =
+    Object.values(keysData).filter(Boolean).length > 0;
+  const hasSomePendingKeys =
+    Object.values(keysData).filter((value) => {
+      /**
+       * This check is necessary because TS can't infer
+       * "undefined" from optional object's property
+       */
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (value === undefined) {
+        return false;
+      }
+
+      return value.length === 0;
+    }).length > 0;
 
   return (
     <Grid container gap="2rem">
@@ -75,9 +86,9 @@ export function Form({
           gap: '3rem',
         }}
       >
-        {areSomeExistingKeys ? <ExistingKeysForm keysData={keysData} /> : null}
-        {areSomePendingKeys ? <PendingKeysForm keysData={keysData} /> : null}
-        {areSomeExistingKeys && !areSomePendingKeys ? (
+        {hasSomeNotEmptyKeys ? <ExistingKeysForm keysData={keysData} /> : null}
+        {hasSomePendingKeys ? <PendingKeysForm keysData={keysData} /> : null}
+        {hasSomeNotEmptyKeys && !hasSomePendingKeys ? (
           <Button
             component={Link}
             to={routerPaths.operator.editExistingKeysSuccess}
