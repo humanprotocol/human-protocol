@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { Button } from '@/shared/components/ui/button';
 import { Password } from '@/shared/components/data-entry/password/password';
-import { PageCard } from '@/shared/components/ui/page-card';
+import { PageCard } from '@/shared/components/ui/page-card/page-card';
 import type { ResetPasswordDto } from '@/modules/worker/services/reset-password';
 import {
   resetPasswordDtoSchema,

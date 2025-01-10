@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { PageCard } from '@/shared/components/ui/page-card';
+import { PageCard } from '@/shared/components/ui/page-card/page-card';
 import { Input } from '@/shared/components/data-entry/input';
 import { Button } from '@/shared/components/ui/button';
 import type { SendResetLinkDto } from '@/modules/worker/services/send-reset-link';

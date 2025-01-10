@@ -1,8 +1,8 @@
 import { t } from 'i18next';
 import { Grid, Typography } from '@mui/material';
-import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { PageCard } from '@/shared/components/ui/page-card';
+import { PageCardError } from '@/shared/components/ui/page-card/page-card-error';
+import { PageCardLoader } from '@/shared/components/ui/page-card/page-card-loader';
+import { PageCard } from '@/shared/components/ui/page-card/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useWeb3SignUp } from '@/modules/operator/hooks/use-web3-signup';

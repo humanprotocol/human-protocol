@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import type { AuthenticatedUserContextType } from '@/modules/auth/context/auth-context';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import { PageCardLoader } from '@/shared/components/ui/page-card/page-card-loader';
 
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType | null>(null);

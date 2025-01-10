@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { t as i18NextT } from 'i18next';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { PageCard } from '@/shared/components/ui/page-card';
+import { PageCard } from '@/shared/components/ui/page-card/page-card';
 import { Input } from '@/shared/components/data-entry/input';
 import { Button } from '@/shared/components/ui/button';
 import { Password } from '@/shared/components/data-entry/password/password';

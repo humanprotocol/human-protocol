@@ -1,7 +1,7 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
-import { PageCard } from '@/shared/components/ui/page-card';
+import { PageCard } from '@/shared/components/ui/page-card/page-card';
 import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';

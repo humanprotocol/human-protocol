@@ -12,7 +12,7 @@ import { MyJobsDrawerMobile } from '@/modules/worker/components/jobs/my-jobs/mob
 import { AvailableJobsDrawerMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-drawer-mobile';
 import { useGetOracles } from '@/modules/worker/services/oracles';
 import { useGetUiConfig } from '@/modules/worker/services/get-ui-config';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import { PageCardLoader } from '@/shared/components/ui/page-card/page-card-loader';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/shared/components/ui/no-records';
