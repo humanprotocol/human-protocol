@@ -28,7 +28,7 @@ export class LeadersPaginationDto {
   @IsEnum(LeadersOrderBy)
   @IsIn(Object.values(LeadersOrderBy))
   @IsOptional()
-  public orderBy?: LeadersOrderBy;
+  public orderBy?: LeadersOrderBy = LeadersOrderBy.AMOUNT_STAKED;
 
   @ApiPropertyOptional({
     enum: OrderDirection,
@@ -37,7 +37,7 @@ export class LeadersPaginationDto {
   @IsEnum(OrderDirection)
   @IsIn(Object.values(OrderDirection))
   @IsOptional()
-  public orderDirection?: OrderDirection;
+  public orderDirection?: OrderDirection = OrderDirection.DESC;
 
   @ApiPropertyOptional({
     minimum: 1,
@@ -48,7 +48,7 @@ export class LeadersPaginationDto {
   @Min(1)
   @Max(1000)
   @IsOptional()
-  public first?: number;
+  public first?: number = 10;
 }
 
 export class DetailsTransactionsPaginationDto {
