@@ -1,41 +1,13 @@
-import type { SxProps, Theme } from '@mui/material';
 import { Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
-import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
-import { colorPalette as constColorPalette } from '@/shared/styles/color-palette';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import { Alert } from '@/shared/components/ui/alert';
-import { darkColorPalette as constDarkColorPalette } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
-
-const commonStyles: SxProps<Theme> = {
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  minHeight: '70vh',
-  maxWidth: '1600px',
-  width: '100%',
-  background: constColorPalette.white,
-};
-
-const commonStylesDark: SxProps<Theme> = {
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  minHeight: '70vh',
-  maxWidth: '1600px',
-  width: '100%',
-  background: constDarkColorPalette.paper.main,
-  [breakpoints.mobile]: {
-    background: constDarkColorPalette.backgroundColor,
-  },
-};
+import { commonDarkPageCardStyles, commonPageCardStyles } from './consts';
 
 export function PageCardError({
   errorMessage,
@@ -58,7 +30,9 @@ export function PageCardError({
   const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
   const { setGrayBackground } = useBackgroundColorStore();
-  const commonStyleForTheme = isDarkMode ? commonStylesDark : commonStyles;
+  const commonStyleForTheme = isDarkMode
+    ? commonDarkPageCardStyles
+    : commonPageCardStyles;
 
   const sx = cardMaxWidth
     ? { ...commonStyleForTheme, maxWidth: cardMaxWidth }

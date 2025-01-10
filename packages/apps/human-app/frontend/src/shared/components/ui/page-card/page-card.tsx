@@ -1,4 +1,3 @@
-import type { SxProps, Theme } from '@mui/material';
 import { Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -7,14 +6,11 @@ import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
-import { colorPalette as constColorPalette } from '@/shared/styles/color-palette';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
-import {
-  darkColorPalette as constDarkColorPalette,
-  onlyDarkModeColor,
-} from '@/shared/styles/dark-color-palette';
+import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { commonDarkPageCardStyles, commonPageCardStyles } from './consts';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -29,31 +25,6 @@ const IconWrapper = styled('div')(() => ({
   },
   fontSize: '26px',
 }));
-
-const commonStyles: SxProps<Theme> = {
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  minHeight: '70vh',
-  maxWidth: '1600px',
-  width: '100%',
-  background: constColorPalette.white,
-};
-
-const commonStylesDark: SxProps<Theme> = {
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  minHeight: '70vh',
-  maxWidth: '1600px',
-  width: '100%',
-  background: constDarkColorPalette.paper.main,
-  [breakpoints.mobile]: {
-    background: constDarkColorPalette.backgroundColor,
-  },
-};
 
 type ButtonsProps = string | -1 | (() => void);
 
@@ -118,7 +89,7 @@ export function PageCard({
     <Grid
       container
       sx={{
-        ...(isDarkMode ? commonStylesDark : commonStyles),
+        ...(isDarkMode ? commonDarkPageCardStyles : commonPageCardStyles),
         padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
