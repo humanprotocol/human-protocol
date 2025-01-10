@@ -154,7 +154,7 @@ export function PageCard({
               },
             }}
           >
-            {backArrowPath && !hiddenArrowButton ? (
+            {backArrowPath && !hiddenArrowButton && (
               <IconWrapper
                 onClick={goBack.bind(null, backArrowPath)}
                 sx={{
@@ -168,7 +168,7 @@ export function PageCard({
               >
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
-            ) : null}
+            )}
             {!hiddenCancelButton && (
               <Button
                 onClick={() => {
@@ -200,7 +200,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            <Grid sx={contentStyles}>{alert ? <>{alert}</> : null}</Grid>
+            <Grid sx={contentStyles}>{alert && <>{alert}</>}</Grid>
           </Grid>
           <Grid
             item
@@ -216,7 +216,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            {backArrowPath && !hiddenArrowButton ? (
+            {backArrowPath && !hiddenArrowButton && (
               <IconWrapper
                 onClick={goBack.bind(null, backArrowPath)}
                 sx={{
@@ -227,7 +227,7 @@ export function PageCard({
               >
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
-            ) : null}
+            )}
           </Grid>
           <Grid
             item
