@@ -6,4 +6,6 @@ export const InputMasks = {
   PercentsInputMask,
 };
 
-export type InputMask = keyof typeof InputMasks;
+export type InputMask =
+  | typeof HumanCurrencyInputMask
+  | typeof PercentsInputMask;
