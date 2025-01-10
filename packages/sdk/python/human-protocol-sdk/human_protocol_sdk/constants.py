@@ -352,3 +352,6 @@ class KVStoreKeys(Enum):
     job_types = "job_types"
     registration_needed = "registration_needed"
     registration_instructions = "registration_instructions"
+
+
+ESCROW_BULK_PAYOUT_MAX_ITEMS = 99

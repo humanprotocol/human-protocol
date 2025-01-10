@@ -19,4 +19,5 @@
 - [NetworkData](type-aliases/NetworkData.md)
 - [StorageCredentials](type-aliases/StorageCredentials.md)
 - [StorageParams](type-aliases/StorageParams.md)
+- [TransactionLikeWithNonce](type-aliases/TransactionLikeWithNonce.md)
 - [UploadFile](type-aliases/UploadFile.md)

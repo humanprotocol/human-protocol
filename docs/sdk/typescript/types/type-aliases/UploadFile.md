@@ -32,4 +32,4 @@ Uploaded object URL
 
 ## Defined in
 
-[types.ts:75](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L75)
+[types.ts:77](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L77)

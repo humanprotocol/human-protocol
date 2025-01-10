@@ -1,4 +1,4 @@
-from attrs import define
+from attrs import define, field, frozen
 
 
 @define(kw_only=True)
@@ -14,5 +14,10 @@ class ValidationFrameStats:
         return (self.accepted_attempts + 1) / (self.total_uses + 1)
 
 
-GtKey = str
+@frozen(kw_only=True)
+class GtKey:
+    filename: str
+    labels: frozenset[str] = field(converter=frozenset)
+
+
 GtStats = dict[GtKey, ValidationFrameStats]

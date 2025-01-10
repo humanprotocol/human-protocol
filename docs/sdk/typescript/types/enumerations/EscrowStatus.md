@@ -18,7 +18,7 @@ Escrow is cancelled.
 
 #### Defined in
 
-[types.ts:30](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L30)
+[types.ts:32](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L32)
 
 ***
 
@@ -30,7 +30,7 @@ Escrow is finished..
 
 #### Defined in
 
-[types.ts:26](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L26)
+[types.ts:28](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L28)
 
 ***
 
@@ -42,7 +42,7 @@ Escrow is launched.
 
 #### Defined in
 
-[types.ts:10](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L10)
+[types.ts:12](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L12)
 
 ***
 
@@ -54,7 +54,7 @@ Escrow is fully paid.
 
 #### Defined in
 
-[types.ts:22](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L22)
+[types.ts:24](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L24)
 
 ***
 
@@ -66,7 +66,7 @@ Escrow is partially paid out.
 
 #### Defined in
 
-[types.ts:18](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L18)
+[types.ts:20](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L20)
 
 ***
 
@@ -78,4 +78,4 @@ Escrow is funded, and waiting for the results to be submitted.
 
 #### Defined in
 
-[types.ts:14](https://github.com/humanprotocol/human-protocol/blob/70b05280cb6fa8b46457684271d61737e32b6cad/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L14)
+[types.ts:16](https://github.com/humanprotocol/human-protocol/blob/397a6102fd594d5978fe79f36e3d14a3e178f166/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L16)
