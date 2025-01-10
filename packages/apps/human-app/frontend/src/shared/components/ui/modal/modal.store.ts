@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import type { ReactNode } from 'react';
 import type { DialogProps as DialogMuiProps } from '@mui/material/Dialog';
+import { type ModalType } from './modal-type.enum';
 
 interface ModalState {
   isModalOpen: boolean;
-  modalState: ModalStateUnion | undefined;
+  modalState: ModalType | undefined;
   maxWidth?: DialogMuiProps['maxWidth'];
   openModal: (args: {
-    modalState: ModalStateUnion;
+    modalState: ModalType;
     additionalContent?: ReactNode;
     maxWidth?: DialogMuiProps['maxWidth'];
     displayCloseButton?: boolean;
@@ -16,16 +17,6 @@ interface ModalState {
   additionalContent: ReactNode;
   displayCloseButton?: boolean;
 }
-
-export const MODAL_STATE = {
-  MODAL_EXAMPLE: 'MODAL_EXAMPLE',
-  WALLET_CONNECT: 'WALLET_CONNECT',
-  EXPIRATION_MODAL: 'EXPIRATION_MODAL',
-} as const;
-
-export type ModalStateUnion = (typeof MODAL_STATE)[keyof typeof MODAL_STATE];
-
-export type ModalStateKeys = keyof typeof MODAL_STATE;
 
 export const useModalStore = create<ModalState>((set) => ({
   isModalOpen: false,
