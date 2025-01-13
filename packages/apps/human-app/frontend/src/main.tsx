@@ -13,7 +13,7 @@ import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/800.css';
-import { WalletConnectProvider } from '@/shared/providers/wallet-connect';
+import { WalletConnectProvider } from '@/shared/contexts/wallet-connect';
 import { Web3AuthProvider } from '@/modules/auth-web3/context/web3-auth-context';
 import { JWTExpirationCheck } from '@/shared/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/shared/contexts/color-mode-context';
