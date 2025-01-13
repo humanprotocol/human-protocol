@@ -15,7 +15,7 @@ import { HcaptchaLabelingPage } from '@/modules/worker/views/hcaptcha-labeling/h
 import { UserStatsAccordion } from '@/modules/worker/components/hcaptcha-labeling/user-stats-accordion';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/views/registration/registration.page';
-import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
+import { WorkerProfilePage } from '@/modules/worker/components/profile/views/profile.page';
 import {
   HandIcon,
   ProfileIcon,
