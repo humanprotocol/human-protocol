@@ -22,7 +22,7 @@ from src.core.gt_stats import GtKey, GtStats, ValidationFrameStats
 from src.core.types import TaskTypes
 from src.core.validation_errors import (
     DatasetValidationError,
-    LowAccuracyError,
+    LowQualityError,
     TooFewGtError,
     TooSlowAnnotationError,
 )
@@ -159,6 +159,7 @@ class _TaskValidator:
         task_id_to_quality_report_data: dict[int, QualityReportData] = {}
         task_id_to_val_layout: dict[int, cvat_api.models.TaskValidationLayoutRead] = {}
         task_id_to_honeypots_mapping: dict[int, _HoneypotFrameToValFrame] = {}
+        task_id_to_settings: dict[int, cvat_api.QualitySettings] = {}
 
         # store sequence of frame names for each task
         # task honeypot with frame index matches the sequence[index]
@@ -171,6 +172,8 @@ class _TaskValidator:
         job_id_to_quality_report: dict[int, cvat_api.models.QualityReport] = {}
 
         for cvat_task_id in cvat_task_ids:
+            task_id_to_settings[cvat_task_id] = cvat_api.get_task_quality_settings(cvat_task_id)
+
             # obtain quality report details
             task_labels = cvat_api.get_task_labels(cvat_task_id)
             task_quality_report = cvat_api.get_task_quality_report(cvat_task_id)
@@ -208,6 +211,7 @@ class _TaskValidator:
             task_frame_names = task_id_to_sequence_of_frame_names[cvat_task_id]
             task_honeypots = set(task_id_to_val_layout[cvat_task_id].honeypot_frames)
             task_honeypots_mapping = task_id_to_honeypots_mapping[cvat_task_id]
+            task_quality_settings = task_id_to_settings[cvat_task_id]
             task_labels = task_id_to_labels[cvat_task_id]
 
             job_honeypots = task_honeypots & set(job_meta.job_frame_range)
@@ -222,23 +226,24 @@ class _TaskValidator:
                 val_frame_key = GtKey(filename=val_frame_name, labels=task_labels)
 
                 result = task_quality_report_data.frame_results[str(honeypot)]
-                self._gt_stats.setdefault(val_frame_key, ValidationFrameStats())
-                self._gt_stats[val_frame_key].accumulated_quality += result.annotations.accuracy
+                frame_score = getattr(result.annotations, task_quality_settings.target_metric)
 
-                if result.annotations.accuracy < min_quality:
-                    self._gt_stats[val_frame_key].failed_attempts += 1
+                frame_stat = self._gt_stats.setdefault(val_frame_key, ValidationFrameStats())
+                frame_stat.accumulated_quality += frame_score
+
+                if frame_score < min_quality:
+                    frame_stat.failed_attempts += 1
                 else:
-                    self._gt_stats[val_frame_key].accepted_attempts += 1
+                    frame_stat.accepted_attempts += 1
 
             # assess job quality
             job_quality_report = job_id_to_quality_report[cvat_job_id]
+            job_score = getattr(job_quality_report.summary, task_quality_settings.target_metric)
 
-            accuracy = job_quality_report.summary.accuracy
+            job_results[cvat_job_id] = job_score
 
-            job_results[cvat_job_id] = accuracy
-
-            if accuracy < min_quality:
-                rejected_jobs[cvat_job_id] = LowAccuracyError()
+            if job_score < min_quality:
+                rejected_jobs[cvat_job_id] = LowQualityError()
 
         for gt_stat in self._gt_stats.values():
             gt_stat.total_uses = max(
