@@ -7,7 +7,7 @@ import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
 import { colorPalette as constColorPalette } from '@/shared/styles/color-palette';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
+import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
 import { Alert } from '@/shared/components/ui/alert';
 import { darkColorPalette as constDarkColorPalette } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
@@ -57,7 +57,7 @@ export function PageCardError({
     }) {
   const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
-  const { setGrayBackground } = useBackgroundColorStore();
+  const { setGrayBackground } = useBackgroundColorContext();
   const commonStyleForTheme = isDarkMode ? commonStylesDark : commonStyles;
 
   const sx = cardMaxWidth

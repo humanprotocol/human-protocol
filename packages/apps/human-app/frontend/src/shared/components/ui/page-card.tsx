@@ -8,7 +8,7 @@ import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
 import { colorPalette as constColorPalette } from '@/shared/styles/color-palette';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
+import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
 import {
   darkColorPalette as constDarkColorPalette,
   onlyDarkModeColor,
@@ -84,7 +84,7 @@ export function PageCard({
   hiddenArrowButton = false,
 }: FormCardProps) {
   const { isDarkMode, colorPalette } = useColorMode();
-  const { setGrayBackground } = useBackgroundColorStore();
+  const { setGrayBackground } = useBackgroundColorContext();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
   const contentStyles = {
