@@ -53,14 +53,6 @@ export enum ErrorUser {
 }
 
 /**
- * Represents error messages related to captcha.
- */
-export enum ErrorCapthca {
-  InvalidToken = 'Invalid captcha token provided',
-  VerificationFailed = 'Captcha verification failed',
-}
-
-/**
  * Represents error messages related to send grid.
  */
 export enum ErrorSendGrid {

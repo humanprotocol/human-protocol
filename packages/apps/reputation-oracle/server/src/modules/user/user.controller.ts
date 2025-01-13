@@ -27,6 +27,7 @@ import {
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
+import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
@@ -170,6 +171,7 @@ export class UserController {
 
   @Post('/exchange-oracle-registration')
   @HttpCode(200)
+  @UseGuards(HCaptchaGuard)
   @ApiOperation({
     summary: 'Notifies registration in Exchange Oracle completed',
     description:
