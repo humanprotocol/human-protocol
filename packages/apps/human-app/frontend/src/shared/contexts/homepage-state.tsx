@@ -1,8 +1,7 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
-
-export type HomePageStateType = 'welcome' | 'chooseSignUpAccountType';
+import { type HomePageStateType } from '../types/homepage-state';
 
 interface HomePageStageContextProps {
   pageView: HomePageStateType;
@@ -32,13 +31,3 @@ export function HomePageStateProvider({
     </HomePageStateContext.Provider>
   );
 }
-
-export const useHomePageState = () => {
-  const context = useContext(HomePageStateContext);
-  if (!context) {
-    throw new Error(
-      'useHomePageState must be used within a HomePageStageProvider'
-    );
-  }
-  return context;
-};
