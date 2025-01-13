@@ -6,30 +6,17 @@ import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palet
 import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { BackgroundProvider } from '@/shared/contexts/background-color-store';
+import {
+  isDarkInModeLocalStorage,
+  setModeInLocalStorage,
+  isModeSetILocalStorage,
+} from '../helpers/dark-mode';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;
   colorPalette: typeof defaultColorPalette;
   switchMode: () => void;
 }
-
-const MODE_LOCAL_STORAGE_KEY = 'mode';
-
-const setModeInLocalStorage = (mode: 'dark' | 'light') => {
-  localStorage.setItem(MODE_LOCAL_STORAGE_KEY, mode);
-};
-
-const isDarkInModeLocalStorage = () => {
-  const mode = localStorage.getItem(MODE_LOCAL_STORAGE_KEY);
-  if (mode === 'dark') {
-    return true;
-  }
-  return false;
-};
-
-const isModeSetILocalStorage = () => {
-  return Boolean(localStorage.getItem(MODE_LOCAL_STORAGE_KEY));
-};
 
 export const ColorModeContext = createContext<
   ColorModeContextProps | undefined
