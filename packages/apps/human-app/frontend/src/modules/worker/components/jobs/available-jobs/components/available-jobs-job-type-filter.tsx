@@ -4,28 +4,36 @@ import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/fi
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { JOB_TYPES } from '@/shared/consts';
 
-export function AvailableJobsJobTypeFilter() {
+export function AvailableJobsJobTypeFilter({ isMobile = false }) {
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
+
+  const updateFilterParams = (updates: Partial<typeof filterParams>) => {
+    const baseUpdate = {
+      ...filterParams,
+      ...updates,
+    };
+
+    if (!isMobile) {
+      baseUpdate.page = 0;
+    }
+
+    setFilterParams(baseUpdate);
+  };
 
   return (
     <Filtering
       clear={() => {
-        setFilterParams({
-          ...filterParams,
-          job_type: undefined,
-        });
+        updateFilterParams({ job_type: undefined });
       }}
       filteringOptions={JOB_TYPES.map((jobType) => ({
         name: t(`jobTypeLabels.${jobType}`),
         option: jobType,
       }))}
       isChecked={(option) => option === filterParams.job_type}
+      isMobile={isMobile}
       setFiltering={(jobType) => {
-        setFilterParams({
-          ...filterParams,
-          job_type: jobType,
-        });
+        updateFilterParams({ job_type: jobType });
       }}
     />
   );

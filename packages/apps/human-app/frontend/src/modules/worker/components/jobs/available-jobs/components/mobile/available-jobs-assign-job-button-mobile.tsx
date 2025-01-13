@@ -6,7 +6,7 @@ import {
 import { TableButton } from '@/shared/components/ui/table-button';
 import { useJobsNotifications } from '@/modules/worker/hooks/use-jobs-notifications';
 
-export function AvailableJobsAssignJobButton({
+export function AvailableJobsAssignJobButtonMobile({
   assignJobPayload,
 }: {
   assignJobPayload: AssignJobBody;
