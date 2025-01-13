@@ -5,7 +5,7 @@ import { theme } from '@/shared/styles/theme';
 import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palette';
 import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
-import { BackgroundProvider } from '@/shared/providers/background-provider';
+import { BackgroundProvider } from '@/shared/contexts/background-provider';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;
