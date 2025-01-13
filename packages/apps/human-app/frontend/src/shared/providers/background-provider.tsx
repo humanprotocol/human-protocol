@@ -1,16 +1,7 @@
 import type { ReactNode } from 'react';
-import { createContext, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ColorPalette } from '@/shared/styles/color-palette';
-
-export interface BackgroundContextProps {
-  backgroundColor: string;
-  setWhiteBackground: () => void;
-  setGrayBackground: () => void;
-}
-
-export const BackgroundContext = createContext<
-  BackgroundContextProps | undefined
->(undefined);
+import { BackgroundContext } from '../contexts/background-context';
 
 interface BackgroundProviderProps {
   children: ReactNode;
