@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import {
-  type BackgroundContextProps,
   BackgroundContext,
-} from '../contexts/background-context';
+  type BackgroundContextProps,
+} from '../contexts/background-provider';
 
 export const useBackgroundColorStore = (): BackgroundContextProps => {
   const context = useContext(BackgroundContext);
