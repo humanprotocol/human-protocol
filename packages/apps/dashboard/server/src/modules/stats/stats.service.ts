@@ -22,7 +22,6 @@ import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import { CachedHMTData } from './stats.interface';
 import { HmtDailyStatsData } from './dto/hmt.dto';
 import { StorageService } from '../storage/storage.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
 import { CronJob } from 'cron';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { NetworksService } from '../networks/networks.service';

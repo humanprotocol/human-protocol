@@ -117,6 +117,19 @@ def get_leaders():
             LeaderFilter(chain_id=ChainId.POLYGON_AMOY, role="Job Launcher")
         )
     )
+    leaders = OperatorUtils.get_leaders(
+        LeaderFilter(chain_id=ChainId.POLYGON_AMOY, role="Job Launcher")
+    )
+    print(len(leaders))
+
+    leaders = OperatorUtils.get_leaders(
+        LeaderFilter(
+            chain_id=ChainId.POLYGON_AMOY,
+            min_amount_staked=1,
+            roles=["Job Launcher", "Reputation Oracle"],
+        )
+    )
+    print(len(leaders))
 
 
 def agreement_example():

@@ -47,19 +47,23 @@ Initializes an LeaderData instance.
   * **registration_instructions** (`Optional`[`str`]) – Instructions url
   * **reputation_networks** (`Optional`[`List`[`str`]]) – List of reputation networks
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, role=None, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Bases: `object`
 
 A class used to filter leaders.
 
-#### \_\_init_\_(chain_id, role=None)
+#### \_\_init_\_(chain_id, role=None, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Initializes a LeaderFilter instance.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Id to request data
   * **role** (`Optional`[`str`]) – Leader role
+  * **order_by** (`Optional`[`str`]) – Order by property, “role”
+  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order of results, “asc” or “desc”
+  * **first** (`int`) – Number of items per page
+  * **skip** (`int`) – Page number to retrieve
 
 ### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[], registration_needed=None, registration_instructions=None)
 

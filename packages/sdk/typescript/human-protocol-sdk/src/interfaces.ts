@@ -35,9 +35,11 @@ export interface ILeaderSubgraph
   reputationNetworks?: { address: string }[];
 }
 
-export interface ILeadersFilter {
+export interface ILeadersFilter extends IPagination {
   chainId: ChainId;
-  role?: string;
+  roles?: string[];
+  minAmountStaked?: number;
+  orderBy?: string;
 }
 
 export interface IReputationNetwork {

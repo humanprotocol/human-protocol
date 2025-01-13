@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { networks as allNetworks } from '@utils/config/networks';
 import { httpService } from '@services/http-service';
 import { apiPaths } from '@services/api-paths';
+import { useMemo } from 'react';
 
 const enabledChainsSchema = z.array(z.number());
 
@@ -19,9 +20,11 @@ export const useFilteredNetworks = () => {
     },
   });
 
-  const filteredNetworks = enabledChains
-    ? allNetworks.filter((network) => enabledChains.includes(network.id))
-    : [];
+  const filteredNetworks = useMemo(() => {
+    return enabledChains
+      ? allNetworks.filter((network) => enabledChains.includes(network.id))
+      : [];
+  }, [enabledChains]);
 
   return { filteredNetworks, isLoading, error };
 };
