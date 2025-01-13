@@ -1,15 +1,15 @@
 import { Grid, Paper } from '@mui/material';
 import { useEffect } from 'react';
 import { t } from 'i18next';
-import { ProfileData } from '@/modules/worker/components/profile/profile-data';
-import { ProfileActions } from '@/modules/worker/components/profile/profile-actions';
+import { ProfileData } from '@/modules/worker/components/profile/components/profile-data';
+import { ProfileActions } from '@/modules/worker/components/profile/components/profile-actions';
+import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import { useWalletConnect } from '@/shared/contexts/wallet-connect';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();

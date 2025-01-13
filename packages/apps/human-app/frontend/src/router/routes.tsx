@@ -8,7 +8,6 @@ import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-pas
 import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
-import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
 import {
   HandIcon,
   ProfileIcon,
@@ -33,6 +32,7 @@ import {
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { SignInWorkerPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
+import { WorkerProfilePage } from '@/modules/worker/components/profile/views/profile.page';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
