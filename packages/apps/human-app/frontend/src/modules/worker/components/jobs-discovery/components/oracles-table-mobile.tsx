@@ -11,18 +11,21 @@ import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import type { Oracle } from '@/modules/worker/services/oracles';
 import { NoRecords } from '@/shared/components/ui/no-records';
 
+interface OraclesTableMobileProps {
+  selectOracle: (oracle: Oracle) => void;
+  oraclesQueryDataResult: OraclesDataQueryResult;
+}
+
 export function OraclesTableMobile({
   selectOracle,
-  oraclesQueryDataResult: {
+  oraclesQueryDataResult,
+}: OraclesTableMobileProps) {
+  const { colorPalette } = useColorMode();
+  const {
     data: oraclesData,
     isError: isOraclesDataError,
     isPending: isOraclesDataPending,
-  },
-}: {
-  selectOracle: (oracle: Oracle, jobTypes: string[]) => void;
-  oraclesQueryDataResult: OraclesDataQueryResult;
-}) {
-  const { colorPalette } = useColorMode();
+  } = oraclesQueryDataResult;
 
   if (isOraclesDataPending) {
     return (
@@ -74,7 +77,7 @@ export function OraclesTableMobile({
           <TableButton
             fullWidth
             onClick={() => {
-              selectOracle(d, d.jobTypes);
+              selectOracle(d);
             }}
           >
             {t('worker.oraclesTable.seeJobs')}

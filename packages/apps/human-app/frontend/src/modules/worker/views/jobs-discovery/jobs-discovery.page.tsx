@@ -9,7 +9,7 @@ import { useGetOracles } from '@/modules/worker/services/oracles';
 import { routerPaths } from '@/router/router-paths';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { OraclesTableJobTypesSelect } from '@/modules/worker/components/jobs-discovery/oracles-table-job-types-select';
+import { OraclesTableJobTypesSelect } from '@/modules/worker/components/jobs-discovery/components/oracles-table-job-types-select';
 import { OraclesTable } from '@/modules/worker/components/jobs-discovery/oracles-table';
 
 export type OraclesDataQueryResult = UseQueryResult<Oracle[]>;
