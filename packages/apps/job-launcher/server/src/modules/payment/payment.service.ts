@@ -639,9 +639,7 @@ export class PaymentService {
     });
   }
 
-  private async getDefaultPaymentMethod(
-    customerId: string,
-  ): Promise<string | null> {
+  async getDefaultPaymentMethod(customerId: string): Promise<string | null> {
     if (!customerId) {
       throw new ControlledError(
         ErrorPayment.CustomerNotFound,
