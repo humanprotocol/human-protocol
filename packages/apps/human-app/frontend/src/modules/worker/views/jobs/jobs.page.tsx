@@ -7,18 +7,17 @@ import { TableQueryContextProvider } from '@/shared/components/ui/table/table-qu
 import { Modal } from '@/shared/components/ui/modal/modal';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { MyJobsTableMobile } from '@/modules/worker/components/jobs/my-jobs/mobile/my-jobs-table-mobile';
-import { AvailableJobsTable } from '@/modules/worker/components/jobs/available-jobs/desktop/available-jobs-table';
+import { AvailableJobsTable } from '@/modules/worker/components/jobs/available-jobs/available-jobs-table';
 import { MyJobsDrawerMobile } from '@/modules/worker/components/jobs/my-jobs/mobile/my-jobs-drawer-mobile';
-import { AvailableJobsDrawerMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-drawer-mobile';
-import { useGetOracles } from '@/modules/worker/jobs-discovery';
 import { useGetUiConfig } from '@/modules/worker/services/get-ui-config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/shared/components/ui/no-records';
-import { AvailableJobsTableMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-table-mobile';
 import { TabPanel } from '@/modules/worker/components/jobs/jobs-tab-panel';
 import { MyJobsTable } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-table';
+import { AvailableJobsDrawerMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-drawer-mobile';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
+import { useGetOracles } from '../../jobs-discovery';
 
 function generateTabA11yProps(index: number) {
   return {
@@ -152,19 +151,12 @@ export function JobsPage() {
                     {isError ? (
                       <NoRecords />
                     ) : (
-                      <>
-                        {isMobile ? (
-                          <AvailableJobsTableMobile
-                            setIsMobileFilterDrawerOpen={
-                              setIsMobileFilterDrawerOpen
-                            }
-                          />
-                        ) : (
-                          <AvailableJobsTable
-                            chainIdsEnabled={uiConfigData.chainIdsEnabled}
-                          />
-                        )}
-                      </>
+                      <AvailableJobsTable
+                        chainIdsEnabled={uiConfigData.chainIdsEnabled}
+                        setIsMobileFilterDrawerOpen={
+                          setIsMobileFilterDrawerOpen
+                        }
+                      />
                     )}
                   </TabPanel>
                   <TabPanel activeTab={activeTab} index={1}>

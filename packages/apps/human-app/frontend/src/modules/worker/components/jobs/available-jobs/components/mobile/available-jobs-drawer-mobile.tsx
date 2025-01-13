@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
-import { AvailableJobsNetworkFilterMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-network-filter-mobile';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
-import { AvailableJobsJobTypeFilterMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-job-type-filter-mobile';
-import { AvailableJobsRewardAmountSortMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-reward-amount-sort-mobile';
+import { AvailableJobsNetworkFilter } from '@/modules/worker/components/jobs/available-jobs/components/available-jobs-network-filter';
+import { AvailableJobsJobTypeFilter } from '@/modules/worker/components/jobs/available-jobs/components/available-jobs-job-type-filter';
+import { AvailableJobsRewardAmountSortMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-reward-amount-sort-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface DrawerMobileProps {
@@ -19,7 +19,7 @@ interface DrawerMobileProps {
 export function AvailableJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
   chainIdsEnabled,
-}: DrawerMobileProps) {
+}: Readonly<DrawerMobileProps>) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
@@ -110,7 +110,7 @@ export function AvailableJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
+          <AvailableJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider
@@ -127,7 +127,7 @@ export function AvailableJobsDrawerMobile({
           flexDirection="row"
           key={crypto.randomUUID()}
         >
-          <AvailableJobsJobTypeFilterMobile />
+          <AvailableJobsJobTypeFilter />
         </Stack>
       </Drawer>
     </Box>

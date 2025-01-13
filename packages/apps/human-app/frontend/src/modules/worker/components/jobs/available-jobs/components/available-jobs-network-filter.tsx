@@ -5,29 +5,39 @@ import { useGetAllNetworks } from '@/modules/worker/hooks/use-get-all-networks';
 
 interface AvailableJobsNetworkFilterProps {
   chainIdsEnabled: number[];
+  isMobile?: boolean;
 }
 
 export function AvailableJobsNetworkFilter({
   chainIdsEnabled,
+  isMobile = false,
 }: AvailableJobsNetworkFilterProps) {
   const { setFilterParams, filterParams } = useJobsFilterStore();
   const { allNetworks } = useGetAllNetworks(chainIdsEnabled);
 
+  const updateFilterParams = (updates: Partial<typeof filterParams>) => {
+    const baseUpdate = {
+      ...filterParams,
+      ...updates,
+    };
+
+    if (!isMobile) {
+      baseUpdate.page = 0;
+    }
+
+    setFilterParams(baseUpdate);
+  };
+
   return (
     <Filtering
       clear={() => {
-        setFilterParams({
-          ...filterParams,
-          chain_id: undefined,
-        });
+        updateFilterParams({ chain_id: undefined });
       }}
       filteringOptions={allNetworks}
       isChecked={(option) => option === filterParams.chain_id}
+      isMobile={isMobile}
       setFiltering={(chainId) => {
-        setFilterParams({
-          ...filterParams,
-          chain_id: chainId,
-        });
+        updateFilterParams({ chain_id: chainId });
       }}
     />
   );
