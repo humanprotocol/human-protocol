@@ -1,9 +1,8 @@
-import { HumanCurrencyInputMask } from '@/shared/components/data-entry/input-masks/human-currency-input-mask';
-import { PercentsInputMask } from '@/shared/components/data-entry/input-masks/percents-input-mask';
+import { HumanCurrencyInputMask } from '@/shared/components/data-entry/input-masks/human-currency';
+import { PercentsInputMask } from '@/shared/components/data-entry/input-masks/percents';
 
-export const InputMasks = {
-  HumanCurrencyInputMask,
-  PercentsInputMask,
-};
+export type InputMask =
+  | typeof HumanCurrencyInputMask
+  | typeof PercentsInputMask;
 
-export type InputMask = keyof typeof InputMasks;
+export { HumanCurrencyInputMask, PercentsInputMask };

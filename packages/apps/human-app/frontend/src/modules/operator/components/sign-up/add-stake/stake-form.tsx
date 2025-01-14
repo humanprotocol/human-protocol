@@ -15,6 +15,7 @@ import { Input } from '@/shared/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
+import { HumanCurrencyInputMask } from '@/shared/components/data-entry/input-masks';
 
 export function StakeForm({
   decimals,
@@ -58,7 +59,7 @@ export function StakeForm({
             <Input
               fullWidth
               label={t('operator.stakeForm.label')}
-              mask="HumanCurrencyInputMask"
+              mask={HumanCurrencyInputMask}
               name="amount"
               type="text"
             />

@@ -2,10 +2,7 @@ import { Controller } from 'react-hook-form';
 import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
-import {
-  type InputMask,
-  InputMasks,
-} from '@/shared/components/data-entry/input-masks';
+import { type InputMask } from '@/shared/components/data-entry/input-masks';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 
 export interface InputProps
@@ -38,7 +35,7 @@ export function Input({
             mask
               ? {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any -- disable
-                  inputComponent: InputMasks[mask] as any,
+                  inputComponent: mask as any,
                 }
               : undefined
           }
