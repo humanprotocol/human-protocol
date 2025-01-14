@@ -24,3 +24,8 @@ export enum OrderDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
+
+export enum LeaderCategory {
+  MACHINE_LEARNING = 'Machine Learning',
+  MARKET_MAKING = 'Market Making',
+}

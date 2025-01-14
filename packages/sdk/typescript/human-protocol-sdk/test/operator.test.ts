@@ -199,6 +199,8 @@ describe('OperatorUtils', () => {
           address: '0x01',
         },
       ],
+      name: 'Alice',
+      category: 'Machine Learning',
     };
 
     const mockLeader: ILeader = {

@@ -104,6 +104,8 @@ class LeaderData:
         registration_needed: Optional[bool] = None,
         registration_instructions: Optional[str] = None,
         reputation_networks: Optional[List[str]] = None,
+        name: Optional[str] = None,
+        category: Optional[str] = None,
     ):
         """
         Initializes an LeaderData instance.
@@ -128,6 +130,8 @@ class LeaderData:
         :param registration_needed: True
         :param registration_instructions: Instructions url
         :param reputation_networks: List of reputation networks
+        :param name: Name
+        :param category: Category
         """
 
         self.chain_id = chain_id
@@ -150,6 +154,8 @@ class LeaderData:
         self.registration_needed = registration_needed
         self.registration_instructions = registration_instructions
         self.reputation_networks = reputation_networks
+        self.name = name
+        self.category = category
 
 
 class RewardData:
@@ -301,6 +307,8 @@ class OperatorUtils:
                         "registrationInstructions", None
                     ),
                     reputation_networks=reputation_networks,
+                    name=leader.get("name", None),
+                    category=leader.get("category", None),
                 )
             )
 
@@ -400,6 +408,8 @@ class OperatorUtils:
             registration_needed=leader.get("registrationNeeded", None),
             registration_instructions=leader.get("registrationInstructions", None),
             reputation_networks=reputation_networks,
+            name=leader.get("name", None),
+            category=leader.get("category", None),
         )
 
     @staticmethod
