@@ -694,8 +694,8 @@ describe('KVStore', () => {
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'category',
       'Market Making',
-      'Operator',
       BigInt.fromI32(11)
     );
 
