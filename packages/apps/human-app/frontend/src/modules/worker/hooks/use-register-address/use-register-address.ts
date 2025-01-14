@@ -7,8 +7,8 @@ export function useRegisterAddress(callbacks?: RegisterAddressCallbacks) {
   const mutation = useRegisterAddressMutation(callbacks);
 
   return {
-    register: mutation.mutate,
-    isRegistering: mutation.isPending,
+    mutate: mutation.mutate,
+    isPending: mutation.isPending,
     error: mutation.error,
     isValid: validation.isValid,
     validationErrors: validation.errors,

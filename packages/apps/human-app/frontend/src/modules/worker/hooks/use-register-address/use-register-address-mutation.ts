@@ -26,7 +26,7 @@ export function useRegisterAddressMutation(
 
       const dataToSign = await prepareSignature({
         address,
-        type: PrepareSignatureType.RegisterAddress,
+        type: PrepareSignatureType.REGISTER_ADDRESS,
       });
 
       const messageToSign = JSON.stringify(dataToSign);
