@@ -10,14 +10,14 @@ export function useHCaptchaLabelingNotifications() {
     showNotification({
       type: 'success',
       message: t('worker.hcaptchaLabelingStats.solvedSuccess'),
-      duration: 2000,
+      durationMs: 2000,
     });
   };
   const onError = (error: ResponseError) => {
     showNotification({
       type: 'warning',
       message: getErrorMessageForError(error),
-      duration: 5000,
+      durationMs: 5000,
     });
   };
 

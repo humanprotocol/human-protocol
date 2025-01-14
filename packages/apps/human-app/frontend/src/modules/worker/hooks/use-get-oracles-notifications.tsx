@@ -9,7 +9,7 @@ export function useGetOraclesNotifications() {
     showNotification({
       type: 'warning',
       message: getErrorMessageForError(error),
-      duration: 5000,
+      durationMs: 5000,
     });
   };
 

@@ -9,7 +9,7 @@ export const useJobsNotifications = () => {
     showNotification({
       message: t('worker.jobs.successFullyAssignedJob'),
       type: 'success',
-      duration: 5000,
+      durationMs: 5000,
     });
   };
 
@@ -17,7 +17,7 @@ export const useJobsNotifications = () => {
     showNotification({
       message: getErrorMessageForError(error),
       type: 'warning',
-      duration: 5000,
+      durationMs: 5000,
     });
   };
 
