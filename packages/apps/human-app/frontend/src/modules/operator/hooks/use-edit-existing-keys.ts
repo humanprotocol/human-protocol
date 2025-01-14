@@ -18,7 +18,7 @@ import {
 import { ethKvStoreSetBulk } from '@/modules/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
-import { urlDomainSchema } from '@/shared/helpers/url-domain-validation';
+import { urlDomainSchema } from '@/shared/schemas';
 
 const fieldsValidations = {
   [EthKVStoreKeys.PublicKey]: urlDomainSchema,
