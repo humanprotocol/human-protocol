@@ -394,7 +394,7 @@
   },
   "walletConnectModal": {
     "header": "Connect Wallet",
-    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains. <1>Learn more or FAQ link.</1>",
+    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains.",
     "connectBtn": "Connect Wallet",
     "cancelBtn": "Cancel"
   },
