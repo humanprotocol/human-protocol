@@ -6,7 +6,10 @@ import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { Alert } from '@/shared/components/ui/alert';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import { Button } from '@/shared/components/ui/button';
-import { useModalStore } from '@/shared/components/ui/modal/modal.store';
+import {
+  ModalType,
+  useModalStore,
+} from '@/shared/components/ui/modal/modal.store';
 import { routerPaths } from '@/router/router-paths';
 
 export function ConnectWalletOperatorPage() {
@@ -52,7 +55,7 @@ export function ConnectWalletOperatorPage() {
         </Typography>
         <Button
           onClick={() => {
-            openModal({ modalState: 'WALLET_CONNECT' });
+            openModal({ modalType: ModalType.WALLET_CONNECT });
           }}
           variant="contained"
         >

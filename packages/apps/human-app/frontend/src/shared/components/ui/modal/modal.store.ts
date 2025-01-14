@@ -1,14 +1,21 @@
 import { create } from 'zustand';
 import type { ReactNode } from 'react';
 import type { DialogProps as DialogMuiProps } from '@mui/material/Dialog';
-import { type ModalType } from './modal-type.enum';
 
+export enum ModalType {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  MODAL_EXAMPLE = 'MODAL_EXAMPLE',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  WALLET_CONNECT = 'WALLET_CONNECT',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  EXPIRATION_MODAL = 'EXPIRATION_MODAL',
+}
 interface ModalState {
   isModalOpen: boolean;
-  modalState: ModalType | undefined;
+  modalType: ModalType | undefined;
   maxWidth?: DialogMuiProps['maxWidth'];
   openModal: (args: {
-    modalState: ModalType;
+    modalType: ModalType;
     additionalContent?: ReactNode;
     maxWidth?: DialogMuiProps['maxWidth'];
     displayCloseButton?: boolean;
@@ -20,19 +27,19 @@ interface ModalState {
 
 export const useModalStore = create<ModalState>((set) => ({
   isModalOpen: false,
-  modalState: undefined,
+  modalType: undefined,
   additionalContent: undefined,
   displayCloseButton: undefined,
   maxWidth: undefined,
   openModal: ({
-    modalState,
+    modalType,
     additionalContent,
     maxWidth,
     displayCloseButton = true,
   }) => {
     set(() => ({
       isModalOpen: true,
-      modalState,
+      modalType,
       displayCloseButton,
       maxWidth,
       additionalContent,
@@ -42,7 +49,7 @@ export const useModalStore = create<ModalState>((set) => ({
     set(() => ({
       isModalOpen: false,
       displayCloseButton: undefined,
-      modalState: undefined,
+      modalType: undefined,
     }));
   },
 }));
