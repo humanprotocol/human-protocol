@@ -12,8 +12,7 @@ import { Checkbox } from '@/shared/components/data-entry/checkbox';
 import { Slider } from '@/shared/components/data-entry/slider';
 import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { Password } from '@/shared/components/data-entry/password/password';
-import { PercentsInputMask } from './input-masks/percents-input-mask';
-import { HumanCurrencyInputMask } from './input-masks/human-currency-input-mask';
+import { PercentsInputMask, HumanCurrencyInputMask } from './input-masks';
 
 export interface Inputs {
   name: string;

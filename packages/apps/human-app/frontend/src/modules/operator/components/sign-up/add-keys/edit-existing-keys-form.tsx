@@ -18,7 +18,7 @@ import {
   order,
   sortFormKeys,
 } from '@/modules/operator/components/sign-up/add-keys/sort-form';
-import { PercentsInputMask } from '@/shared/components/data-entry/input-masks/percents-input-mask';
+import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
 
 const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
 
