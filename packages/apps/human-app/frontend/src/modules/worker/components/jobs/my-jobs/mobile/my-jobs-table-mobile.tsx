@@ -11,7 +11,7 @@ import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import type { MyJob } from '@/modules/worker/services/my-jobs-data';
 import { useInfiniteGetMyJobsData } from '@/modules/worker/services/my-jobs-data';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { ListItem } from '@/shared/components/ui/list-item';
 import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
@@ -121,7 +121,7 @@ export function MyJobsTableMobile({
       <Stack flexDirection="column">
         {isTableError ? (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(tableError)}
+            {getErrorMessageForError(tableError)}
           </Alert>
         ) : null}
         {tableStatus === 'pending' ? (

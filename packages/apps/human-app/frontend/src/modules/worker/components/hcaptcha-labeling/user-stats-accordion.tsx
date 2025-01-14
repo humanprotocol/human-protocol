@@ -9,7 +9,7 @@ import { t } from 'i18next';
 import { UserStatsDetails } from '@/modules/worker/components/hcaptcha-labeling/user-stats-details';
 import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 
 const accordionWidth = { width: '284px' };
@@ -29,7 +29,7 @@ export function UserStatsAccordion() {
     if (isHcaptchaUserStatsError) {
       setTopNotification({
         type: 'warning',
-        content: defaultErrorMessage(hcaptchaUserStatsError),
+        content: getErrorMessageForError(hcaptchaUserStatsError),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ...

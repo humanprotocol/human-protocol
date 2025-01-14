@@ -8,7 +8,7 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useEnableHCaptchaLabelingMutation } from '@/modules/worker/services/enable-hcaptcha-labeling';
 import { Button } from '@/shared/components/ui/button';
 import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
@@ -32,7 +32,7 @@ export function EnableLabeler() {
   }
 
   if (isError) {
-    return <PageCardError errorMessage={defaultErrorMessage(error)} />;
+    return <PageCardError errorMessage={getErrorMessageForError(error)} />;
   }
 
   return (

@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { delay } from '@/shared/helpers/time';
 
 export const useJobsNotifications = () => {
@@ -18,7 +18,7 @@ export const useJobsNotifications = () => {
 
   const onJobAssignmentError = async (error: unknown) => {
     setTopNotification({
-      content: defaultErrorMessage(error),
+      content: getErrorMessageForError(error),
       type: 'warning',
     });
     await delay(5000);

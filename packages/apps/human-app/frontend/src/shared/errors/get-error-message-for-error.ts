@@ -4,7 +4,7 @@ import { JsonRpcError } from '@/modules/smart-contracts/json-rpc-error';
 
 type CustomErrorHandler = (unknownError: unknown) => string | undefined;
 
-export function defaultErrorMessage(
+export function getErrorMessageForError(
   unknownError: unknown,
   customErrorHandler?: CustomErrorHandler
 ): string {

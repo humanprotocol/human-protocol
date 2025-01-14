@@ -7,7 +7,7 @@ import { FiltersButtonIcon } from '@/shared/components/ui/icons';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { Alert } from '@/shared/components/ui/alert';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import type { AvailableJob } from '@/modules/worker/services/available-jobs-data';
 import { useInfiniteGetAvailableJobsData } from '@/modules/worker/services/available-jobs-data';
 import { Loader } from '@/shared/components/ui/loader';
@@ -85,7 +85,7 @@ export function AvailableJobsTableMobile({
       <Stack flexDirection="column">
         {isTableError ? (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(tableError)}
+            {getErrorMessageForError(tableError)}
           </Alert>
         ) : null}
         {tableStatus === 'pending' ? (

@@ -1,5 +1,5 @@
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export function useRegisterAddressNotifications() {
@@ -12,7 +12,7 @@ export function useRegisterAddressNotifications() {
   const onError = (error: ResponseError) => {
     setTopNotification({
       type: 'warning',
-      content: defaultErrorMessage(error),
+      content: getErrorMessageForError(error),
     });
   };
 

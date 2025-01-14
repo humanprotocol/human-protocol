@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { delay } from '@/shared/helpers/time';
 import type { ResponseError } from '@/shared/types/global.type';
 
@@ -20,7 +20,7 @@ export function useHCaptchaLabelingNotifications() {
   const onError = async (error: ResponseError) => {
     setTopNotification({
       type: 'warning',
-      content: defaultErrorMessage(error),
+      content: getErrorMessageForError(error),
     });
 
     await delay(2000);

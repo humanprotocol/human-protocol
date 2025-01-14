@@ -5,12 +5,11 @@ import { Link } from 'react-router-dom';
 import { PageCardError } from '@/shared/components/ui/page-card-error';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
 import { PageCard } from '@/shared/components/ui/page-card';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError, jsonRpcErrorHandler } from '@/shared/errors';
 import type { EditEthKVStoreValuesMutationData } from '@/modules/operator/hooks/use-edit-existing-keys';
 import { useEditExistingKeysMutationState } from '@/modules/operator/hooks/use-edit-existing-keys';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
-import { jsonRpcErrorHandler } from '@/shared/helpers/json-rpc-error-handler';
 import { routerPaths } from '@/router/router-paths';
 import { ExistingKeysForm } from '@/modules/operator/components/sign-up/add-keys/existing-keys-form';
 import { PendingKeysForm } from '@/modules/operator/components/sign-up/add-keys/pending-keys-form';
@@ -33,7 +32,7 @@ export function AddKeysOperatorPage() {
 
   const errorAlert = editExistingKeysMutationState?.error ? (
     <Alert color="error" severity="error">
-      {defaultErrorMessage(
+      {getErrorMessageForError(
         editExistingKeysMutationState.error,
         jsonRpcErrorHandler
       )}
@@ -41,7 +40,9 @@ export function AddKeysOperatorPage() {
   ) : undefined;
 
   if (isGetKeysError) {
-    return <PageCardError errorMessage={defaultErrorMessage(getKeysError)} />;
+    return (
+      <PageCardError errorMessage={getErrorMessageForError(getKeysError)} />
+    );
   }
 
   if (isGetKeysPending) {

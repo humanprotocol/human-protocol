@@ -11,7 +11,7 @@ import { Counter } from '@/shared/components/ui/counter';
 import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
 import { PageCardError } from '@/shared/components/ui/page-card-error';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { useDailyHmtSpent } from '@/modules/worker/services/daily-hmt-spent';
 import { getTomorrowDate } from '@/shared/helpers/date';
 import { useSolveHCaptchaMutation } from '@/modules/worker/services/solve-hcaptcha';
@@ -87,7 +87,7 @@ export function HcaptchaLabelingPage() {
     return (
       <PageCardError
         cardMaxWidth="100%"
-        errorMessage={defaultErrorMessage(
+        errorMessage={getErrorMessageForError(
           hcaptchaUserStatsError ?? dailyHmtSpentError
         )}
       />
