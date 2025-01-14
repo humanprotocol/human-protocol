@@ -5,5 +5,4 @@ export type InputMask =
   | typeof HumanCurrencyInputMask
   | typeof PercentsInputMask;
 
-export { HumanCurrencyInputMask };
-export { PercentsInputMask };
+export { HumanCurrencyInputMask, PercentsInputMask };
