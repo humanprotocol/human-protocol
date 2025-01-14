@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -55,7 +55,9 @@ Constructor for the Encryption class.
 
 #### Parameters
 
-• **privateKey**: `PrivateKey`
+##### privateKey
+
+`PrivateKey`
 
 The private key.
 
@@ -65,29 +67,33 @@ The private key.
 
 #### Defined in
 
-[encryption.ts:52](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L52)
+[encryption.ts:62](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L62)
 
 ## Methods
 
 ### decrypt()
 
-> **decrypt**(`message`, `publicKey`?): `Promise`\<`string`\>
+> **decrypt**(`message`, `publicKey`?): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
 This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
 
 #### Parameters
 
-• **message**: `string`
+##### message
+
+`string`
 
 Message to decrypt.
 
-• **publicKey?**: `string`
+##### publicKey?
+
+`string`
 
 Public key used to verify signature if needed. This is optional.
 
 #### Returns
 
-`Promise`\<`string`\>
+`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
 Message decrypted.
 
@@ -117,7 +123,7 @@ const resultMessage = await encription.decrypt('message');
 
 #### Defined in
 
-[encryption.ts:179](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L179)
+[encryption.ts:190](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L190)
 
 ***
 
@@ -129,7 +135,9 @@ This function signs a message using the private key used to initialize the clien
 
 #### Parameters
 
-• **message**: `string`
+##### message
+
+`string`
 
 Message to sign.
 
@@ -153,7 +161,7 @@ const resultMessage = await encription.sign('message');
 
 #### Defined in
 
-[encryption.ts:216](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L216)
+[encryption.ts:247](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L247)
 
 ***
 
@@ -165,11 +173,15 @@ This function signs and encrypts a message using the private key used to initial
 
 #### Parameters
 
-• **message**: `string`
+##### message
+
+`MessageDataType`
 
 Message to sign and encrypt.
 
-• **publicKeys**: `string`[]
+##### publicKeys
+
+`string`[]
 
 Array of public keys to use for encryption.
 
@@ -218,7 +230,7 @@ const resultMessage = await encription.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
-[encryption.ts:128](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L128)
+[encryption.ts:138](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L138)
 
 ***
 
@@ -230,11 +242,15 @@ Builds an Encryption instance by decrypting the private key from an encrypted pr
 
 #### Parameters
 
-• **privateKeyArmored**: `string`
+##### privateKeyArmored
+
+`string`
 
 The encrypted private key in armored format.
 
-• **passphrase?**: `string`
+##### passphrase?
+
+`string`
 
 Optional: The passphrase for the private key.
 
@@ -246,4 +262,4 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
-[encryption.ts:63](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L63)
+[encryption.ts:73](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L73)

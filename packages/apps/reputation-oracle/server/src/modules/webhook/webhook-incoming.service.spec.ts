@@ -16,11 +16,8 @@ import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { WebhookIncomingService } from './webhook-incoming.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { IncomingWebhookDto } from './webhook.dto';
-import { ErrorWebhook } from '../../common/constants/errors';
-import { HttpStatus } from '@nestjs/common';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { ReputationService } from '../reputation/reputation.service';
 import { EscrowCompletionRepository } from '../escrow-completion/escrow-completion.repository';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
@@ -33,6 +30,8 @@ import { ReputationRepository } from '../reputation/reputation.repository';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { IncomingWebhookError, WebhookErrorMessage } from './webhook.error';
+import { EscrowPayoutsBatchRepository } from '../escrow-completion/escrow-payouts-batch.repository';
 
 describe('WebhookIncomingService', () => {
   let webhookIncomingService: WebhookIncomingService,
@@ -81,6 +80,10 @@ describe('WebhookIncomingService', () => {
         {
           provide: EscrowCompletionRepository,
           useValue: createMock<EscrowCompletionRepository>(),
+        },
+        {
+          provide: EscrowPayoutsBatchRepository,
+          useValue: createMock<EscrowPayoutsBatchRepository>(),
         },
         {
           provide: WebhookOutgoingRepository,
@@ -167,9 +170,10 @@ describe('WebhookIncomingService', () => {
       await expect(
         webhookIncomingService.createIncomingWebhook(invalidDto),
       ).rejects.toThrow(
-        new ControlledError(
-          ErrorWebhook.InvalidEventType,
-          HttpStatus.BAD_REQUEST,
+        new IncomingWebhookError(
+          WebhookErrorMessage.INVALID_EVENT_TYPE,
+          invalidDto.chainId,
+          invalidDto.escrowAddress,
         ),
       );
     });

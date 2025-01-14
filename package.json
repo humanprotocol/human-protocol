@@ -6,8 +6,8 @@
   "repository": "https://github.com/humanprotocol/human-protocol",
   "license": "MIT",
   "scripts": {
-    "test": "concurrently \"yarn workspace @human-protocol/core test\" \"yarn workspace @human-protocol/sdk test\" \"yarn workspace @human-protocol/subgraph test\" \"yarn workspace @human-protocol/dashboard-ui test\" \"yarn workspace @human-protocol/faucet-server test\" \"yarn workspace @human-protocol/job-launcher-server test\" \"yarn workspace @human-protocol/job-launcher-client test\" \"yarn workspace @human-protocol/human-app-frontend test\" \"yarn workspace @human-protocol/human-app-server test\" \"yarn workspace @human-protocol/reputation-oracle test\" \"yarn workspace @human-protocol/fortune-exchange-oracle-server test\" \"yarn workspace @human-protocol/fortune-recording-oracle test\"",
-    "lint": "concurrently \"yarn workspace @human-protocol/core lint\" \"yarn workspace @human-protocol/sdk lint\" \"yarn workspace @human-protocol/subgraph lint\" \"yarn workspace @human-protocol/faucet-client lint\" \"yarn workspace @human-protocol/faucet-server lint\" \"yarn workspace @human-protocol/job-launcher-server lint\" \"yarn workspace @human-protocol/job-launcher-client lint\" \"yarn workspace @human-protocol/human-app-frontend lint\" \"yarn workspace @human-protocol/human-app-server lint\" \"yarn workspace @human-protocol/reputation-oracle lint\" \"yarn workspace @human-protocol/fortune-exchange-oracle-server lint\" \"yarn workspace @human-protocol/fortune-recording-oracle lint\"",
+    "test": "concurrently \"yarn workspace @human-protocol/core test\" \"yarn workspace @human-protocol/sdk test\" \"yarn workspace @human-protocol/subgraph test\" \"yarn workspace @human-protocol/faucet-server test\" \"yarn workspace @human-protocol/job-launcher-server test\" \"yarn workspace @human-protocol/job-launcher-client test\" \"yarn workspace @human-protocol/human-app-frontend test\" \"yarn workspace @human-protocol/human-app-server test\" \"yarn workspace @human-protocol/reputation-oracle test\" \"yarn workspace @human-protocol/fortune-exchange-oracle-server test\" \"yarn workspace @human-protocol/fortune-recording-oracle test\"",
+    "lint": "concurrently \"yarn workspace @human-protocol/core lint\" \"yarn workspace @human-protocol/sdk lint\" \"yarn workspace @human-protocol/subgraph lint\" \"yarn workspace @human-protocol/faucet-client lint\" \"yarn workspace @human-protocol/faucet-server lint\" \"yarn workspace @human-protocol/job-launcher-server lint\" \"yarn workspace @human-protocol/job-launcher-client lint\" \"yarn workspace @human-protocol/human-app-frontend lint\" \"yarn workspace @human-protocol/human-app-server lint\" \"yarn workspace @human-protocol/reputation-oracle lint\" \"yarn workspace @human-protocol/fortune-exchange-oracle-server lint\" \"yarn workspace @human-protocol/fortune-recording-oracle lint\" \"yarn workspace @human-protocol/dashboard-ui-2024 lint\"",
     "prepare": "husky",
     "postinstall": "yarn workspace @human-protocol/sdk build"
   },
@@ -38,7 +38,7 @@
     "husky": "^9.1.6",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "lint-staged": "^15.2.7",
+    "lint-staged": "^15.3.0",
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",

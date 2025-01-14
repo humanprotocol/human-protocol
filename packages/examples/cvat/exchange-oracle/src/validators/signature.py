@@ -32,7 +32,7 @@ async def validate_cvat_signature(request: Request, x_signature_256: str):
     signature = (
         "sha256="
         + hmac.new(
-            Config.cvat_config.cvat_webhook_secret.encode("utf-8"),
+            Config.cvat_config.webhook_secret.encode("utf-8"),
             data,
             digestmod=sha256,
         ).hexdigest()

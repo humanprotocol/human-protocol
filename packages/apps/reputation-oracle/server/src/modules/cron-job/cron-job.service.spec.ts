@@ -46,6 +46,7 @@ describe('CronJobService', () => {
           useValue: {
             processPendingEscrowCompletion: jest.fn(),
             processPaidEscrowCompletion: jest.fn(),
+            processAwaitingPayouts: jest.fn(),
           },
         },
         {
@@ -293,6 +294,52 @@ describe('CronJobService', () => {
       );
 
       await service.processPendingEscrowCompletion();
+
+      expect(service.completeCronJob).toHaveBeenCalled();
+    });
+  });
+
+  describe('processAwaitingEscrowPayouts', () => {
+    it('should skip processing if a cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(true);
+
+      await service.processAwaitingEscrowPayouts();
+
+      expect(
+        escrowCompletionService.processAwaitingPayouts,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should process pending escrow completion and complete the cron job', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(new CronJobEntity());
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue(new CronJobEntity());
+
+      await service.processAwaitingEscrowPayouts();
+
+      expect(escrowCompletionService.processAwaitingPayouts).toHaveBeenCalled();
+      expect(service.startCronJob).toHaveBeenCalled();
+      expect(service.completeCronJob).toHaveBeenCalled();
+    });
+
+    it('should complete the cron job after processing', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(new CronJobEntity());
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValue(new CronJobEntity());
+
+      escrowCompletionService.processAwaitingPayouts.mockRejectedValue(
+        new Error('Processing error'),
+      );
+
+      await service.processAwaitingEscrowPayouts();
 
       expect(service.completeCronJob).toHaveBeenCalled();
     });

@@ -7,6 +7,7 @@ from human_protocol_sdk.storage import StorageUtils
 
 from src.chain.web3 import get_web3
 from src.core.config import Config
+from src.core.types import OracleWebhookTypes
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -64,9 +65,8 @@ def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> No
     escrow_client.store_results(escrow_address, url, hash)
 
 
-def get_reputation_oracle_address(chain_id: int, escrow_address: str) -> str:
-    return get_escrow(chain_id, escrow_address).reputation_oracle
-
-
-def get_exchange_oracle_address(chain_id: int, escrow_address: str) -> str:
-    return get_escrow(chain_id, escrow_address).exchange_oracle
+def get_available_webhook_types(
+    chain_id: int, escrow_address: str
+) -> dict[str, OracleWebhookTypes]:
+    escrow = get_escrow(chain_id, escrow_address)
+    return {(escrow.exchange_oracle or "").lower(): OracleWebhookTypes.exchange_oracle}

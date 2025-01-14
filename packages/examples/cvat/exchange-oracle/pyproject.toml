@@ -24,7 +24,7 @@ datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1b
 boto3 = "^1.28.33"
 google-cloud-storage = "^2.14.0"
 pyinstrument = "^4.6.2"
-human-protocol-sdk = ">=3.0.8b0,<3.1.0"
+human-protocol-sdk = ">=3.0.8,<3.1.0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 pydantic = ">=2.6.1,<2.7.0"
 fastapi-pagination = "^0.12.17"
@@ -34,6 +34,8 @@ strenum = "^0.4.15"
 pyjwt = "^2.9.0"
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
+aiocache = {extras = ["msgpack", "redis"], version = "^0.12.3"}  # convenient api for redis (async)
+cachelib = "^0.13.0" # convenient api for redis (sync)
 
 
 [tool.poetry.group.dev.dependencies]
@@ -112,6 +114,7 @@ ignore = [
     "ANN002",  # Missing type annotation for `*args`
     "TRY300",  # Consider moving this statement to an `else` block
     "C901",    # Function is too complex
+    "PLW1508", # invalid-envvar-default. Alerts only for os.getenv(), but not for os.environ.get()
     "PLW2901", # Variable overwritten by assignment target
     "PTH118",  # Prefer pathlib instead of os.path
     "PTH119",  # `os.path.basename()` should be replaced by `Path.name`

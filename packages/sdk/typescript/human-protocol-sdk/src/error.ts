@@ -244,6 +244,11 @@ export const ErrorRecipientCannotBeEmptyArray = new Error(
 );
 
 /**
+ * @constant {Error} - Too many recipients.
+ */
+export const ErrorTooManyRecipients = new Error('Too many recipients');
+
+/**
  * @constant {Error} - Amount must be greater than zero..
  */
 export const ErrorAmountMustBeGreaterThanZero = new Error(

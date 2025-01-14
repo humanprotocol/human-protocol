@@ -22,7 +22,7 @@ import {
   ErrorUnsupportedChainID,
 } from './error';
 import { getSubgraphUrl } from './utils';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 import { NETWORKS } from './constants';
 
 export class OperatorUtils {
@@ -108,6 +108,14 @@ export class OperatorUtils {
   public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
     let leaders_data: ILeader[] = [];
 
+    const first =
+      filter.first !== undefined && filter.first > 0
+        ? Math.min(filter.first, 1000)
+        : 10;
+    const skip =
+      filter.skip !== undefined && filter.skip >= 0 ? filter.skip : 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+
     const networkData = NETWORKS[filter.chainId];
 
     if (!networkData) {
@@ -117,7 +125,12 @@ export class OperatorUtils {
     const { leaders } = await gqlFetch<{
       leaders: ILeaderSubgraph[];
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
-      role: filter?.role,
+      minAmountStaked: filter?.minAmountStaked,
+      roles: filter?.roles,
+      orderBy: filter?.orderBy,
+      orderDirection: orderDirection,
+      first: first,
+      skip: skip,
     });
 
     if (!leaders) {

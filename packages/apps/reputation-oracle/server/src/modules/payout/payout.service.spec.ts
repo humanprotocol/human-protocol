@@ -1,3 +1,6 @@
+import { createMock } from '@golevelup/ts-jest';
+import { ConfigModule, registerAs } from '@nestjs/config';
+import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import {
@@ -14,19 +17,13 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { JobRequestType } from '../../common/enums';
-import { ConfigModule, registerAs } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
-import { createMock } from '@golevelup/ts-jest';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
-import {
-  CvatAnnotationMeta,
-  PayoutsDataDto,
-  SaveResultDto,
-} from '../../common/dto/result';
-import { HttpStatus } from '@nestjs/common';
+import { CvatAnnotationMeta } from '../../common/dto/result';
+import { CalculatedPayout, SaveResultDto } from './payout.interface';
 import { ControlledError } from '../../common/errors/controlled';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -203,19 +200,38 @@ describe('PayoutService', () => {
         ),
       );
     });
+
+    it('should throw an error for unsupported request types', async () => {
+      const mockManifest = { requestType: 'unsupportedType' };
+
+      jest.spyOn(EscrowClient, 'build').mockResolvedValue({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      } as any);
+
+      jest
+        .spyOn(storageService, 'downloadJsonLikeData')
+        .mockResolvedValue(mockManifest);
+
+      await expect(
+        payoutService.processResults(ChainId.LOCALHOST, MOCK_ADDRESS),
+      ).rejects.toThrow(
+        `Unsupported request type: ${mockManifest.requestType.toLowerCase()}`,
+      );
+    });
   });
 
-  describe('executePayouts', () => {
-    const results: PayoutsDataDto = {
-      recipients: [MOCK_ADDRESS],
-      amounts: [1n],
-    };
+  describe('calculatePayouts', () => {
+    const results: CalculatedPayout[] = [
+      {
+        address: MOCK_ADDRESS,
+        amount: 1n,
+      },
+    ];
     let escrowClientMock: any;
 
     beforeEach(() => {
       escrowClientMock = {
         getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-        bulkPayOut: jest.fn().mockResolvedValue(true),
       };
       EscrowClient.build = jest.fn().mockImplementation(() => escrowClientMock);
 
@@ -224,7 +240,7 @@ describe('PayoutService', () => {
       ] = jest.fn().mockResolvedValue(results);
     });
 
-    it('should successfully performs payouts for CVAT', async () => {
+    it('should successfully calculate payouts for CVAT', async () => {
       const manifest: CvatManifestDto = {
         data: {
           data_url: MOCK_FILE_URL,
@@ -251,15 +267,15 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      await payoutService.executePayouts(
+      const payouts = await payoutService.calculatePayouts(
         chainId,
         escrowAddress,
         MOCK_FILE_URL,
-        MOCK_FILE_HASH,
       );
 
+      expect(payouts).toEqual(results);
+
       expect(escrowClientMock.getManifestUrl).toHaveBeenCalledTimes(1);
-      expect(escrowClientMock.bulkPayOut).toHaveBeenCalledTimes(1);
     });
 
     it('should successfully performs payouts for Fortune', async () => {
@@ -275,10 +291,12 @@ describe('PayoutService', () => {
         .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(manifest);
 
-      const results: PayoutsDataDto = {
-        recipients: [MOCK_ADDRESS],
-        amounts: [1n],
-      };
+      const results: CalculatedPayout[] = [
+        {
+          address: MOCK_ADDRESS,
+          amount: 1n,
+        },
+      ];
 
       payoutService.createPayoutSpecificActions[JobRequestType.FORTUNE][
         'calculatePayouts'
@@ -287,51 +305,15 @@ describe('PayoutService', () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
 
-      await payoutService.executePayouts(
+      const payouts = await payoutService.calculatePayouts(
         chainId,
         escrowAddress,
         MOCK_FILE_URL,
-        MOCK_FILE_HASH,
       );
+
+      expect(payouts).toEqual(results);
 
       expect(escrowClientMock.getManifestUrl).toHaveBeenCalledTimes(1);
-      expect(escrowClientMock.bulkPayOut).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw an error if the manifest url does not exist', async () => {
-      EscrowClient.build = jest.fn().mockResolvedValue({
-        getManifestUrl: jest.fn().mockResolvedValue(null),
-      });
-
-      const escrowAddress = MOCK_ADDRESS;
-      const chainId = ChainId.LOCALHOST;
-
-      await expect(
-        payoutService.processResults(chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorManifest.ManifestUrlDoesNotExist,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
-    });
-
-    it('should throw an error for unsupported request types', async () => {
-      const mockManifest = { requestType: 'unsupportedType' };
-
-      jest.spyOn(EscrowClient, 'build').mockResolvedValue({
-        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-      } as any);
-
-      jest
-        .spyOn(storageService, 'downloadJsonLikeData')
-        .mockResolvedValue(mockManifest);
-
-      await expect(
-        payoutService.processResults(ChainId.LOCALHOST, MOCK_ADDRESS),
-      ).rejects.toThrow(
-        `Unsupported request type: ${mockManifest.requestType.toLowerCase()}`,
-      );
     });
   });
 
@@ -464,8 +446,7 @@ describe('PayoutService', () => {
         manifest,
         MOCK_FILE_URL,
       );
-      expect(result.recipients).toEqual(expect.any(Array));
-      expect(result.amounts).toEqual(expect.any(Array));
+      expect(result).toEqual(expect.any(Array));
     });
   });
 
@@ -582,12 +563,7 @@ describe('PayoutService', () => {
         chainId,
         escrowAddress,
       );
-      expect(result).toEqual({
-        recipients: expect.any(Array),
-        amounts: expect.any(Array),
-      });
-      expect(result.recipients.length).toEqual(1);
-      expect(result.amounts.length).toEqual(1);
+      expect(result.length).toEqual(1);
     });
 
     it('should throw an error if no annotations meta found', async () => {

@@ -10,7 +10,7 @@ export function requiresSigner(
 
   descriptor.value = async function (this: any, ...args: any[]) {
     try {
-      !this.runner.getAddress();
+      this.runner.getAddress();
     } catch {
       throw ErrorSigner;
     }

@@ -20,6 +20,8 @@ export const MOCK_EXCHANGE_ORACLE_ADDRESS =
   '0xCf88b3f1992458C2f5a229573c768D0E9F70C441';
 export const MOCK_RECORDING_ORACLE_ADDRESS =
   '0xCf88b3f1992458C2f5a229573c768D0E9F70C442';
+export const MOCK_REPUTATION_ORACLE_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C443';
 export const MOCK_MANIFEST: IFortuneManifest = {
   submissionsRequired: 2,
   requesterTitle: 'Fortune',
@@ -194,7 +196,8 @@ FjGp13DtiY8P2zNL5eMxGiMTp8xQJ7jC3HVZROqUOujcdLPglfE7b5n/Ao9TBwFO
 export const MOCK_PGP_PASSPHRASE = 'secure-passphrase';
 export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_PASSWORD = 'password123';
-export const MOCK_HASHED_PASSWORD = 'hashedPassword';
+export const MOCK_HASHED_PASSWORD =
+  '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
 export const MOCK_ACCESS_TOKEN = 'access_token';
 export const MOCK_REFRESH_TOKEN = 'refresh_token';
 export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';

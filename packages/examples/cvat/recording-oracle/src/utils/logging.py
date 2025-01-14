@@ -1,5 +1,6 @@
 import logging
-from typing import NewType
+from collections.abc import Sequence
+from typing import Any, NewType
 
 from src.utils.stack import current_function_name
 
@@ -30,3 +31,9 @@ class NullLogger(logging.Logger):
     def __init__(self, name: str = "", level=0) -> None:
         super().__init__(name, level)
         self.disabled = True
+
+
+def format_sequence(items: Sequence[Any], *, max_items: int = 5, separator: str = ", ") -> str:
+    remainder_count = len(items) - max_items
+    tail = f" (and {remainder_count} more)" if remainder_count > 0 else ""
+    return f"{separator.join(map(str, items[:max_items]))}{tail}"

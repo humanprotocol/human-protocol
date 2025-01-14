@@ -7,9 +7,13 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { ControlledError } from '../errors/controlled';
+import { JWT_STRATEGY_NAME } from '../constants';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt-http') implements CanActivate {
+export class JwtAuthGuard
+  extends AuthGuard(JWT_STRATEGY_NAME)
+  implements CanActivate
+{
   constructor(private readonly reflector: Reflector) {
     super();
   }

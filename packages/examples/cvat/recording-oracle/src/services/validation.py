@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
-from src.core.gt_stats import ValidationFrameStats
+from src.core.gt_stats import GtKey, ValidationFrameStats
 from src.db import engine as db_engine
 from src.db.utils import ForUpdateParams
 from src.db.utils import maybe_for_update as _maybe_for_update
@@ -134,7 +134,7 @@ def get_task_gt_stats(
 
 
 def update_gt_stats(
-    session: Session, task_id: str, updated_gt_stats: dict[str, ValidationFrameStats]
+    session: Session, task_id: str, updated_gt_stats: dict[GtKey, ValidationFrameStats]
 ):
     # Read more about upsert:
     # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-upsert-statements
@@ -152,12 +152,15 @@ def update_gt_stats(
         [
             {
                 "task_id": task_id,
-                "gt_frame_name": gt_frame_name,
+                "gt_frame_name": gt_key.filename,
+                "label_set": GtStats.encode_label_set(gt_key.labels),
                 "failed_attempts": val_frame_stats.failed_attempts,
                 "accepted_attempts": val_frame_stats.accepted_attempts,
                 "accumulated_quality": val_frame_stats.accumulated_quality,
+                "total_uses": val_frame_stats.total_uses,
+                "enabled": val_frame_stats.enabled,
             }
-            for gt_frame_name, val_frame_stats in updated_gt_stats.items()
+            for gt_key, val_frame_stats in updated_gt_stats.items()
         ],
     )
     statement = statement.on_conflict_do_update(

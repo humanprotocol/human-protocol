@@ -122,6 +122,8 @@ import { CronJobType } from '../../common/enums/cron-job';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { ModuleRef } from '@nestjs/core';
 import { QualificationService } from '../qualification/qualification.service';
+import { WhitelistService } from '../whitelist/whitelist.service';
+import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class JobService {
@@ -144,6 +146,7 @@ export class JobService {
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
     private readonly rateService: RateService,
+    private readonly whitelistService: WhitelistService,
     private moduleRef: ModuleRef,
     @Inject(Encryption) private readonly encryption: Encryption,
     private readonly qualificationService: QualificationService,
@@ -772,12 +775,12 @@ export class JobService {
   }
 
   public async createJob(
-    userId: number,
-    jobRequestType: JobRequestType,
+    user: UserEntity,
+    requestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
     let { chainId, reputationOracle, exchangeOracle, recordingOracle } = dto;
-    if (!Object.values(JobRequestType).includes(jobRequestType)) {
+    if (!Object.values(JobRequestType).includes(requestType)) {
       throw new ControlledError(
         ErrorJob.InvalidRequestType,
         HttpStatus.BAD_REQUEST,
@@ -788,11 +791,25 @@ export class JobService {
     chainId = chainId || this.routingProtocolService.selectNetwork();
     this.web3Service.validateChainId(chainId);
 
+    // Check if not whitelisted user has an active payment method
+    const whitelisted = await this.whitelistService.isUserWhitelisted(user.id);
+    if (!whitelisted) {
+      if (
+        !(await this.paymentService.getDefaultPaymentMethod(
+          user.stripeCustomerId,
+        ))
+      )
+        throw new ControlledError(
+          ErrorJob.NotActiveCard,
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+
     // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
       const selectedOracles = await this.routingProtocolService.selectOracles(
         chainId,
-        jobRequestType,
+        requestType,
       );
 
       exchangeOracle = exchangeOracle || selectedOracles.exchangeOracle;
@@ -802,7 +819,7 @@ export class JobService {
       // Validate if all oracles are provided
       await this.routingProtocolService.validateOracles(
         chainId,
-        jobRequestType,
+        requestType,
         reputationOracle,
         exchangeOracle,
         recordingOracle,
@@ -829,9 +846,9 @@ export class JobService {
 
     const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
     const { calculateFundAmount, createManifest } =
-      this.createJobSpecificActions[jobRequestType];
+      this.createJobSpecificActions[requestType];
 
-    const userBalance = await this.paymentService.getUserBalance(userId);
+    const userBalance = await this.paymentService.getUserBalance(user.id);
     const feePercentage = Number(
       await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
@@ -898,12 +915,12 @@ export class JobService {
     } else {
       const manifestOrigin = await createManifest(
         dto,
-        jobRequestType,
+        requestType,
         tokenFundAmount,
       );
 
       const { url, hash } = await this.uploadManifest(
-        jobRequestType,
+        requestType,
         chainId,
         manifestOrigin,
       );
@@ -916,8 +933,8 @@ export class JobService {
     jobEntity.reputationOracle = reputationOracle;
     jobEntity.exchangeOracle = exchangeOracle;
     jobEntity.recordingOracle = recordingOracle;
-    jobEntity.userId = userId;
-    jobEntity.requestType = jobRequestType;
+    jobEntity.userId = user.id;
+    jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;
     jobEntity.fundAmount = tokenFundAmount;
     jobEntity.status = JobStatus.PENDING;
@@ -926,7 +943,7 @@ export class JobService {
     jobEntity = await this.jobRepository.createUnique(jobEntity);
 
     const paymentEntity = new PaymentEntity();
-    paymentEntity.userId = userId;
+    paymentEntity.userId = user.id;
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;

@@ -1,0 +1,23 @@
+name: Dashboard Check
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths:
+      - 'packages/core/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/apps/dashboard/**'
+  workflow_dispatch:
+
+jobs:
+  dashboard-server-test:
+    name: Dashboard Server Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn workspace @human-protocol/dashboard-server test
+        name: Run dashboard Server test

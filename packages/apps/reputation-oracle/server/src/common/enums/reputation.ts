@@ -12,3 +12,8 @@ export enum ReputationLevel {
   MEDIUM = 'medium',
   HIGH = 'high',
 }
+
+export enum ReputationOrderBy {
+  CREATED_AT = 'created_at',
+  REPUTATION_POINTS = 'reputation_points',
+}

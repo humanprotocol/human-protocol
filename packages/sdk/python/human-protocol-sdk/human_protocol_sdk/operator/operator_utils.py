@@ -23,7 +23,7 @@ import logging
 import os
 from typing import List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, OrderDirection
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.utils import get_data_from_subgraph
 from web3 import Web3
@@ -44,19 +44,41 @@ class LeaderFilter:
     A class used to filter leaders.
     """
 
-    def __init__(self, chain_id: ChainId, role: Optional[str] = None):
+    def __init__(
+        self,
+        chain_id: ChainId,
+        roles: Optional[str] = [],
+        min_amount_staked: int = None,
+        order_by: Optional[str] = None,
+        order_direction: OrderDirection = OrderDirection.DESC,
+        first: int = 10,
+        skip: int = 0,
+    ):
         """
         Initializes a LeaderFilter instance.
 
         :param chain_id: Chain Id to request data
-        :param role: Leader role
+        :param order_by: Order by property, "role"
+        :param order_direction: Order of results, "asc" or "desc"
+        :param first: Number of items per page
+        :param skip: Page number to retrieve
         """
 
         if chain_id not in ChainId:
             raise OperatorUtilsError("Invalid ChainId")
 
+        if order_direction.value not in set(
+            order_direction.value for order_direction in OrderDirection
+        ):
+            raise OperatorUtilsError(f"Invalid order: {order_direction}")
+
         self.chain_id = chain_id
-        self.role = role
+        self.roles = roles
+        self.min_amount_staked = min_amount_staked
+        self.order_by = order_by
+        self.order_direction = order_direction
+        self.first = min(max(first, 1), 1000)
+        self.skip = max(skip, 0)
 
 
 class LeaderData:
@@ -211,8 +233,16 @@ class OperatorUtils:
         leaders_data = get_data_from_subgraph(
             network,
             query=get_leaders_query(filter),
-            params={"role": filter.role},
+            params={
+                "minAmountStaked": filter.min_amount_staked,
+                "roles": filter.roles,
+                "orderBy": filter.order_by,
+                "orderDirection": filter.order_direction.value,
+                "first": filter.first,
+                "skip": filter.skip,
+            },
         )
+
         if (
             not leaders_data
             or "data" not in leaders_data

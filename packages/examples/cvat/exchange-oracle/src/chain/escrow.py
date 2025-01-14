@@ -1,4 +1,5 @@
 import json
+from functools import partial
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
@@ -7,6 +8,7 @@ from human_protocol_sdk.storage import StorageUtils
 
 from src.core.config import Config
 from src.core.types import OracleWebhookTypes
+from src.services.cache import Cache
 
 
 def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
@@ -42,7 +44,7 @@ def validate_escrow(
         raise ValueError("Escrow doesn't have funds")
 
 
-def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
+def download_manifest(chain_id: int, escrow_address: str) -> dict:
     escrow = get_escrow(chain_id, escrow_address)
 
     manifest_content = StorageUtils.download_file_from_url(escrow.manifest_url).decode("utf-8")
@@ -57,16 +59,21 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     return json.loads(manifest_content)
 
 
+def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
+    cache = Cache()
+    return cache.get_or_set_manifest(
+        escrow_address=escrow_address,
+        chain_id=chain_id,
+        set_callback=partial(download_manifest, chain_id, escrow_address),
+    )
+
+
 def get_available_webhook_types(
     chain_id: int, escrow_address: str
 ) -> dict[str, OracleWebhookTypes]:
     escrow = get_escrow(chain_id, escrow_address)
     return {
-        escrow.launcher.lower(): OracleWebhookTypes.job_launcher,
-        (
-            Config.localhost.recording_oracle_address or escrow.recording_oracle
-        ).lower(): OracleWebhookTypes.recording_oracle,
-        (
-            Config.localhost.reputation_oracle_address or escrow.reputation_oracle
-        ).lower(): OracleWebhookTypes.reputation_oracle,
+        (escrow.launcher or "").lower(): OracleWebhookTypes.job_launcher,
+        (escrow.recording_oracle or "").lower(): OracleWebhookTypes.recording_oracle,
+        (escrow.reputation_oracle or "").lower(): OracleWebhookTypes.reputation_oracle,
     }
