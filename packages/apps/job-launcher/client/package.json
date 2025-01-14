@@ -10,7 +10,7 @@
     "@mui/icons-material": "^6.2.0",
     "@mui/lab": "^5.0.0-alpha.141",
     "@mui/material": "^5.16.7",
-    "@mui/x-date-pickers": "^7.5.0",
+    "@mui/x-date-pickers": "^7.23.6",
     "@reduxjs/toolkit": "^2.5.0",
     "@stripe/react-stripe-js": "^3.0.0",
     "@stripe/stripe-js": "^4.2.0",
