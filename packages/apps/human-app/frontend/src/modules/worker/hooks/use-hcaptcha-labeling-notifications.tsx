@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { wait } from '@/shared/helpers/async';
+import { delay } from '@/shared/helpers/time';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export function useHCaptchaLabelingNotifications() {
@@ -14,7 +14,7 @@ export function useHCaptchaLabelingNotifications() {
       content: t('worker.hcaptchaLabelingStats.solvedSuccess'),
     });
 
-    await wait(2000);
+    await delay(2000);
     closeNotification();
   };
   const onError = async (error: ResponseError) => {
@@ -23,7 +23,7 @@ export function useHCaptchaLabelingNotifications() {
       content: defaultErrorMessage(error),
     });
 
-    await wait(2000);
+    await delay(2000);
     closeNotification();
   };
 

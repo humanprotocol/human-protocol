@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
 import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { wait } from '@/shared/helpers/async';
+import { delay } from '@/shared/helpers/time';
 
 export const useJobsNotifications = () => {
   const { setTopNotification, closeNotification } =
@@ -12,7 +12,7 @@ export const useJobsNotifications = () => {
       content: t('worker.jobs.successFullyAssignedJob'),
       type: 'success',
     });
-    await wait(5000);
+    await delay(5000);
     closeNotification();
   };
 
@@ -21,7 +21,7 @@ export const useJobsNotifications = () => {
       content: defaultErrorMessage(error),
       type: 'warning',
     });
-    await wait(5000);
+    await delay(5000);
     closeNotification();
   };
 
