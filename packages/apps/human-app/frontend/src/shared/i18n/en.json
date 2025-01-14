@@ -13,6 +13,9 @@
     "jobs": "Tasks",
     "registrationInExchangeOracle": "Registration in Exchange Oracle"
   },
+  "protectedPage": {
+    "header": "Protected Page"
+  },
   "web3ProtectedPagesHeaders": {
     "profile": "Profile"
   },
