@@ -1,3 +1,10 @@
+import { parseISO, format } from 'date-fns';
+
+export const formatDate = (dateString: string) => {
+  const parsedDate = parseISO(dateString);
+  return format(parsedDate, 'yyyy-MM-dd HH:mm:ss');
+};
+
 export interface ParsedDate {
   days: number;
   hours: number;
@@ -17,10 +24,6 @@ export function parseDate(delta: number): ParsedDate {
     minutes,
     seconds,
   };
-}
-
-export function padZero(num: number): string {
-  return num < 10 ? `0${num.toString()}` : num.toString();
 }
 
 // implementation used like in prev version of human app

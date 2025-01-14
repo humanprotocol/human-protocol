@@ -16,7 +16,7 @@ import {
   useResetPasswordMutation,
 } from '@/modules/worker/services/reset-password';
 import { Alert } from '@/shared/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { routerPaths } from '@/router/router-paths';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -55,7 +55,7 @@ export function ResetPasswordWorkerPage() {
       alert={
         isResetPasswordWorkerError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {defaultErrorMessage(resetPasswordWorkerError)}
+            {getErrorMessageForError(resetPasswordWorkerError)}
           </Alert>
         ) : undefined
       }

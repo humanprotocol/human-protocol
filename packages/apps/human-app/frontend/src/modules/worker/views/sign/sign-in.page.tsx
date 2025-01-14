@@ -12,7 +12,7 @@ import { Password } from '@/shared/components/data-entry/password/password';
 import { useSignInMutation } from '@/modules/worker/services/sign-in/sign-in';
 import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -62,7 +62,7 @@ export function SignInWorkerPage() {
       alert={
         isSignInWorkerError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {defaultErrorMessage(
+            {getErrorMessageForError(
               signInWorkerError,
               formattedSignInErrorMessage
             )}

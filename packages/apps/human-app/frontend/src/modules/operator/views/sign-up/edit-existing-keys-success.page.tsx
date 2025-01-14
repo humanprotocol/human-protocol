@@ -4,7 +4,7 @@ import { PageCardError } from '@/shared/components/ui/page-card-error';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { useWeb3SignUp } from '@/modules/operator/hooks/use-web3-signup';
 import type { SignatureData } from '@/api/hooks/use-prepare-signature';
 import {
@@ -41,7 +41,7 @@ export function EditExistingKeysSuccessPage() {
   if (isSignatureDataError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(errorSignatureDataError)}
+        errorMessage={getErrorMessageForError(errorSignatureDataError)}
       />
     );
   }
@@ -55,7 +55,7 @@ export function EditExistingKeysSuccessPage() {
       alert={
         isWeb3SignUpError ? (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(web3SignUpError)}
+            {getErrorMessageForError(web3SignUpError)}
           </Alert>
         ) : undefined
       }
