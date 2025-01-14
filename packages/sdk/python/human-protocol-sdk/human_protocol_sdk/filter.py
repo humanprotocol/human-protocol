@@ -205,7 +205,27 @@ class TransactionFilter:
 
 class StatisticsFilter:
     """
-    A class used to filter statistics requests.
+    A class used to filter statistical data.
+
+    :param date_from: Start date for the query range.
+    :param date_to: End date for the query range.
+    :param first: Number of items per page.
+    :param skip: Page number to retrieve.
+    :param order_direction: Order of results, "asc" or "desc".
+
+    :example:
+        .. code-block:: python
+
+            from datetime import datetime
+            from human_protocol_sdk.filter import StatisticsFilter
+
+            filter = StatisticsFilter(
+                date_from=datetime(2023, 1, 1),
+                date_to=datetime(2023, 12, 31),
+                first=10,
+                skip=0,
+                order_direction=OrderDirection.DESC
+            )
     """
 
     def __init__(
@@ -214,18 +234,8 @@ class StatisticsFilter:
         date_to: Optional[datetime] = None,
         first: int = 10,
         skip: int = 0,
-        order_direction: OrderDirection = OrderDirection.ASC,
+        order_direction: OrderDirection = OrderDirection.DESC,
     ):
-        """
-        Initializes a StatisticsFilter instance.
-
-        :param date_from: Created from date
-        :param date_to: Created to date
-        :param first: Number of items per page
-        :param skip: Page number to retrieve
-        :param order_direction: Order of results, "asc" or "desc"
-        """
-
         if date_from and date_to and date_from > date_to:
             raise FilterError(
                 f"Invalid dates: {date_from} must be earlier than {date_to}"

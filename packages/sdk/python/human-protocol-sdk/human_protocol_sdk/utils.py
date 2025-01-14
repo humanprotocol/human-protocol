@@ -30,7 +30,7 @@ def with_retry(fn, retries=3, delay=5, backoff=2):
     """Retry a function
 
     Mainly used with handle_transaction to retry on case of failure.
-    Uses expnential backoff.
+    Uses exponential backoff.
 
     :param fn: <Partial> to run with retry logic.
     :param retries: number of times to retry the transaction
@@ -64,7 +64,7 @@ def with_retry(fn, retries=3, delay=5, backoff=2):
 
 
 def get_hmt_balance(wallet_addr, token_addr, w3):
-    """Get hmt balance
+    """Get HMT balance
 
     :param wallet_addr: wallet address
     :param token_addr: ERC-20 contract
@@ -89,6 +89,13 @@ def get_hmt_balance(wallet_addr, token_addr, w3):
 def parse_transfer_transaction(
     hmtoken_contract: Contract, tx_receipt: Optional[TxReceipt]
 ) -> Tuple[bool, Optional[int]]:
+    """Parse a transfer transaction receipt.
+
+    :param hmtoken_contract: The HMT token contract
+    :param tx_receipt: The transaction receipt
+
+    :return: A tuple indicating if HMT was transferred and the transaction balance
+    """
     hmt_transferred = False
     tx_balance = None
     if not tx_receipt:
@@ -180,6 +187,16 @@ def get_kvstore_interface():
 
 
 def get_data_from_subgraph(network: dict, query: str, params: dict = None):
+    """Fetch data from the subgraph.
+
+    :param network: Network configuration dictionary
+    :param query: GraphQL query string
+    :param params: Query parameters
+
+    :return: JSON response from the subgraph
+
+    :raise Exception: If the subgraph query fails
+    """
     subgraph_api_key = os.getenv("SUBGRAPH_API_KEY", "")
     if subgraph_api_key:
         subgraph_url = network["subgraph_url_api_key"].replace(
@@ -220,6 +237,7 @@ def handle_transaction(
     :validate:
         - There must be a default account
 
+    :raise exception: If the transaction fails
     """
     if not w3.eth.default_account:
         raise exception("You must add an account to Web3 instance")
@@ -252,16 +270,16 @@ def handle_transaction(
 
 
 def validate_url(url: str) -> bool:
-    """Gets the url string.
+    """Validates the given URL.
 
-    :param url: Public or private url address
+    :param url: Public or private URL address
 
-    :return: True if url is valid
+    :return: True if URL is valid, False otherwise
 
-    :raise ValidationFailure: If the url is invalid
+    :raise ValidationFailure: If the URL is invalid
     """
 
-    # validators.url tracks docker network URL as ivalid
+    # validators.url tracks docker network URL as invalid
     pattern = re.compile(
         r"^"
         # protocol identifier
