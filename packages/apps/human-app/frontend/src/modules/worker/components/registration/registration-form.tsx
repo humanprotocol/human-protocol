@@ -1,0 +1,51 @@
+import { Box, Stack } from '@mui/material';
+import { FormProvider } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/shared/components/ui/button';
+import { type RegistrationInExchangeOracleDto } from '@/modules/worker/services/registration-in-exchange-oracles';
+import { useRegistrationForm } from '@/modules/worker/hooks/use-registration-form';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+
+interface RegistrationFormProps {
+  hasClickedRegistrationLink: boolean;
+  isLoading: boolean;
+  error: unknown;
+  onInstructionsClick: () => void;
+  onSubmit: (data: RegistrationInExchangeOracleDto) => void;
+}
+
+export function RegistrationForm({
+  hasClickedRegistrationLink,
+  isLoading,
+  error,
+  onInstructionsClick,
+  onSubmit,
+}: Readonly<RegistrationFormProps>) {
+  const { t } = useTranslation();
+  const methods = useRegistrationForm();
+
+  return (
+    <>
+      <Button onClick={onInstructionsClick} fullWidth variant="contained">
+        {t('worker.registrationInExchangeOracle.instructionsButton')}
+      </Button>
+      <Box>{t('worker.registrationInExchangeOracle.completeMessage')}</Box>
+      <FormProvider {...methods}>
+        <form onSubmit={(event) => void methods.handleSubmit(onSubmit)(event)}>
+          <Stack alignItems="center" spacing={2}>
+            <HCaptchaForm error={error} name="h_captcha_token" />
+            <Button
+              disabled={!hasClickedRegistrationLink}
+              fullWidth
+              loading={isLoading}
+              type="submit"
+              variant="contained"
+            >
+              {t('worker.registrationInExchangeOracle.completeButton')}
+            </Button>
+          </Stack>
+        </form>
+      </FormProvider>
+    </>
+  );
+}
