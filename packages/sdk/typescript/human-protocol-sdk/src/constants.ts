@@ -310,6 +310,8 @@ export const KVStoreKeys = {
   jobTypes: 'job_types',
   registrationNeeded: 'registration_needed',
   registrationInstructions: 'registration_instructions',
+  name: 'name',
+  category: 'category',
 };
 
 export const Role = {

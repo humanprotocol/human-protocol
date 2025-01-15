@@ -689,13 +689,13 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'category',
-      'Machine Learning',
+      'machine_learning',
       BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'category',
-      'Market Making',
+      'market_making',
       BigInt.fromI32(11)
     );
 
@@ -706,13 +706,13 @@ describe('KVStore', () => {
       'Leader',
       data1.params.sender.toHex(),
       'category',
-      'Machine Learning'
+      'machine_learning'
     );
     assert.fieldEquals(
       'Leader',
       data2.params.sender.toHex(),
       'category',
-      'Market Making'
+      'market_making'
     );
   });
 });

@@ -200,7 +200,7 @@ describe('OperatorUtils', () => {
         },
       ],
       name: 'Alice',
-      category: 'Machine Learning',
+      category: 'machine_learning',
     };
 
     const mockLeader: ILeader = {

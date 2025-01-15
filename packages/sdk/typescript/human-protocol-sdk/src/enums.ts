@@ -26,6 +26,6 @@ export enum OrderDirection {
 }
 
 export enum LeaderCategory {
-  MACHINE_LEARNING = 'Machine Learning',
-  MARKET_MAKING = 'Market Making',
+  MACHINE_LEARNING = 'machine_learning',
+  MARKET_MAKING = 'market_making',
 }
