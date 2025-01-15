@@ -11,6 +11,7 @@ import { WagmiProvider } from './providers/WagmiProvider';
 import { QueryClientProvider } from './providers/QueryClientProvider';
 import './assets/styles/main.scss';
 import 'simplebar-react/dist/simplebar.min.css';
+import { StakeProvider } from './contexts/stake';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -20,7 +21,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           <Router>
             <CssBaseline />
             <SnackbarProvider>
-              <App />
+              <StakeProvider>
+                <App />
+              </StakeProvider>
             </SnackbarProvider>
           </Router>
         </ThemeProvider>

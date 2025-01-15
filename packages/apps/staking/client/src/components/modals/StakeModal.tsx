@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
 import {
-  Typography,
-  TextField,
   Button,
   CircularProgress,
   InputAdornment,
+  TextField,
+  Typography,
 } from '@mui/material';
+import React, { useState } from 'react';
+import { useStakeContext } from '../../contexts/stake';
 import BaseModal from './BaseModal';
-import { useStake } from 'src/hooks/useStake';
 
 type Props = {
   open: boolean;
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const StakeModal: React.FC<Props> = ({ open, onClose }) => {
-  const { handleStake, tokenBalance } = useStake();
+  const { handleStake, tokenBalance } = useStakeContext();
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
 

@@ -1,12 +1,12 @@
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Paper, Typography } from '@mui/material';
 import React from 'react';
+import { useStakeContext } from '../../contexts/stake';
 import { colorPalette } from '../../assets/styles/color-palette';
 import CustomTooltip from '../CustomTooltip';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { useStake } from '../../hooks/useStake';
 
 const BalanceCard: React.FC = () => {
-  const { tokenBalance } = useStake();
+  const { tokenBalance } = useStakeContext();
 
   return (
     <Paper

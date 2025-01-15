@@ -2,11 +2,11 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { colorPalette } from '../../assets/styles/color-palette';
-import { useStake } from '../../hooks/useStake';
+import { useStakeContext } from '../../contexts/stake';
 import CustomTooltip from '../CustomTooltip';
 
 const LockedAmountCard: React.FC = () => {
-  const { lockedAmount, lockedUntil } = useStake();
+  const { lockedAmount, lockedUntil } = useStakeContext();
 
   return (
     <Paper

@@ -1,9 +1,9 @@
-import React from 'react';
-import { Box, Paper, Typography, Button } from '@mui/material';
-import { useStake } from '../../hooks/useStake';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import CustomTooltip from '../CustomTooltip';
+import { Box, Button, Paper, Typography } from '@mui/material';
+import React from 'react';
 import { colorPalette } from '../../assets/styles/color-palette';
+import { useStakeContext } from '../../contexts/stake';
+import CustomTooltip from '../CustomTooltip';
 
 type Props = {
   onStakeOpen: () => void;
@@ -11,7 +11,7 @@ type Props = {
 };
 
 const StakedAmountCard: React.FC<Props> = ({ onStakeOpen, onUnstakeOpen }) => {
-  const { stakedAmount } = useStake();
+  const { stakedAmount } = useStakeContext();
 
   return (
     <Paper

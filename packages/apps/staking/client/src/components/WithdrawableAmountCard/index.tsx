@@ -1,18 +1,18 @@
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import {
   Box,
   Button,
+  CircularProgress,
   Paper,
   Typography,
-  CircularProgress,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { useStake } from '../../hooks/useStake';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import CustomTooltip from '../CustomTooltip';
 import { colorPalette } from '../../assets/styles/color-palette';
+import { useStakeContext } from '../../contexts/stake';
+import CustomTooltip from '../CustomTooltip';
 
 const WithdrawableAmountCard: React.FC = () => {
-  const { withdrawableAmount, handleWithdraw } = useStake();
+  const { withdrawableAmount, handleWithdraw } = useStakeContext();
   const [loading, setLoading] = useState(false);
 
   const handleWithdrawClick = async () => {
