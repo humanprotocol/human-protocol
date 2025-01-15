@@ -2,9 +2,9 @@ import { type ReactNode } from 'react';
 import { SnackbarProvider } from 'notistack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import { type TopNotificationType } from '@/shared/hooks/use-notification';
+import { TopNotificationType } from '@/shared/hooks/use-notification';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
-import { exhaustiveMatchingGuard } from '@/shared/helpers/exhaustive-matching-guard';
+import { handleUnreachableCase } from '@/shared/helpers/handle-unreachable-case';
 
 interface NotificationProviderProps {
   children: ReactNode;
@@ -18,14 +18,14 @@ const getNotificationIconByType = (
   sx?: Record<string, string>
 ) => {
   switch (type) {
-    case 'success':
+    case TopNotificationType.SUCCESS:
       return <CheckCircleIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
 
-    case 'warning':
+    case TopNotificationType.WARNING:
       return <ErrorIcon sx={{ fill: lightColorPalette.white, ...sx }} />;
 
     default: {
-      exhaustiveMatchingGuard(type);
+      handleUnreachableCase(type);
     }
   }
 };
@@ -42,8 +42,12 @@ export function NotificationProvider({
         horizontal: 'right',
       }}
       iconVariant={{
-        success: getNotificationIconByType('success', { marginRight: '12px' }),
-        warning: getNotificationIconByType('warning', { marginRight: '12px' }),
+        success: getNotificationIconByType(TopNotificationType.SUCCESS, {
+          marginRight: '12px',
+        }),
+        warning: getNotificationIconByType(TopNotificationType.WARNING, {
+          marginRight: '12px',
+        }),
       }}
     >
       {children}
