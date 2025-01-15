@@ -21,7 +21,7 @@ const widthStylesForDesktop = {
   width: 'calc(100svw - 344px',
 };
 
-const AUTO_HIDE_NOTIFICATION_MS = 116000;
+const AUTO_HIDE_NOTIFICATION_MS = 6000;
 const FONT_COLOR = lightColorPalette.white;
 
 export const useNotification = () => {
