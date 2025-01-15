@@ -17,7 +17,7 @@ export function ProfileDisableButton() {
     isPending: isSignatureDataPending,
   } = usePrepareSignature({
     address,
-    type: PrepareSignatureType.DisableOperator,
+    type: PrepareSignatureType.DISABLE_OPERATOR,
   });
 
   const {

@@ -23,7 +23,7 @@ export function EditExistingKeysSuccessPage() {
     isPending: isSignatureDataPending,
   } = usePrepareSignature({
     address,
-    type: PrepareSignatureType.SignUp,
+    type: PrepareSignatureType.SIGN_UP,
   });
 
   const {

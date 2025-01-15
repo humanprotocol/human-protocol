@@ -15,7 +15,11 @@ import {
   sortFormKeys,
 } from '@/modules/operator/components/sign-up/add-keys/sort-form';
 
-const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
+const OPTIONS = [
+  Role.EXCHANGE_ORACLE,
+  Role.JOB_LAUNCHER,
+  Role.RECORDING_ORACLE,
+];
 
 const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
   [EthKVStoreKeys.Fee]: (

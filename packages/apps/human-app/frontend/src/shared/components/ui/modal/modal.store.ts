@@ -3,11 +3,8 @@ import type { ReactNode } from 'react';
 import type { DialogProps as DialogMuiProps } from '@mui/material/Dialog';
 
 export enum ModalType {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   MODAL_EXAMPLE = 'MODAL_EXAMPLE',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   WALLET_CONNECT = 'WALLET_CONNECT',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   EXPIRATION_MODAL = 'EXPIRATION_MODAL',
 }
 interface ModalState {

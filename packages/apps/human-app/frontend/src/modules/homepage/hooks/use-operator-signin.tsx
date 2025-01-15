@@ -22,7 +22,7 @@ export function OperatorSignIn() {
 
   useEffect(() => {
     if (isConnected && modalWasOpened.current) {
-      signInMutation({ address, type: PrepareSignatureType.SignIn });
+      signInMutation({ address, type: PrepareSignatureType.SIGN_IN });
     }
   }, [address, isConnected, signInMutation]);
 
@@ -77,7 +77,7 @@ export function OperatorSignIn() {
       <Button
         fullWidth
         onClick={() => {
-          signInMutation({ address, type: PrepareSignatureType.SignIn });
+          signInMutation({ address, type: PrepareSignatureType.SIGN_IN });
         }}
         size="large"
         variant="outlined"

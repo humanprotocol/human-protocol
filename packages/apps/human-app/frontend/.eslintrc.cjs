@@ -43,6 +43,13 @@ module.exports = {
         allowNullish: true,
       },
     ],
+    '@typescript-eslint/naming-convention': [
+      'error',
+      {
+        selector: 'enumMember',
+        format: ['UPPER_CASE'],
+      },
+    ],
   },
   settings: {
     'import/resolver': {
