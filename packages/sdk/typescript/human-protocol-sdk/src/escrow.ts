@@ -12,11 +12,7 @@ import {
 import { ContractRunner, EventLog, Overrides, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
-import {
-  DEFAULT_TX_ID,
-  ESCROW_BULK_PAYOUT_MAX_ITEMS,
-  NETWORKS,
-} from './constants';
+import { ESCROW_BULK_PAYOUT_MAX_ITEMS, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId, OrderDirection } from './enums';
 import {
@@ -604,6 +600,7 @@ export class EscrowClient extends BaseEthersClient {
     amounts: bigint[],
     finalResultsUrl: string,
     finalResultsHash: string,
+    txId: number,
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<void> {
@@ -626,7 +623,7 @@ export class EscrowClient extends BaseEthersClient {
             amounts,
             finalResultsUrl,
             finalResultsHash,
-            DEFAULT_TX_ID,
+            txId,
             forceComplete,
             txOptions
           )
@@ -640,7 +637,7 @@ export class EscrowClient extends BaseEthersClient {
             amounts,
             finalResultsUrl,
             finalResultsHash,
-            DEFAULT_TX_ID,
+            txId,
             txOptions
           )
         ).wait();
@@ -937,6 +934,7 @@ export class EscrowClient extends BaseEthersClient {
     amounts: bigint[],
     finalResultsUrl: string,
     finalResultsHash: string,
+    txId: number,
     forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<TransactionLikeWithNonce> {
@@ -959,7 +957,7 @@ export class EscrowClient extends BaseEthersClient {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID,
+        txId,
         forceComplete,
         txOptions
       );

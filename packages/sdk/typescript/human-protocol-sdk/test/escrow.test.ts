@@ -8,7 +8,7 @@ import {
 import { Overrides, ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { DEFAULT_TX_ID, NETWORKS } from '../src/constants';
+import { NETWORKS } from '../src/constants';
 import { ChainId, OrderDirection } from '../src/enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
@@ -39,6 +39,7 @@ import { GET_ESCROWS_QUERY, GET_ESCROW_BY_ADDRESS_QUERY } from '../src/graphql';
 import { EscrowStatus } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
+  DEFAULT_TX_ID,
   FAKE_ADDRESS,
   FAKE_HASH,
   FAKE_URL,
@@ -86,7 +87,10 @@ describe('EscrowClient', () => {
           populateTransaction: vi.fn(),
         }
       ),
-      'bulkPayOut(address[],uint256[],string,string,uint256,bool)': vi.fn(),
+      'bulkPayOut(address[],uint256[],string,string,uint256,bool)':
+        Object.assign(vi.fn(), {
+          populateTransaction: vi.fn(),
+        }),
       cancel: vi.fn(),
       withdraw: vi.fn(),
       addTrustedHandlers: vi.fn(),
@@ -1128,7 +1132,8 @@ describe('EscrowClient', () => {
         recipients,
         amounts,
         finalResultsUrl,
-        finalResultsHash
+        finalResultsHash,
+        DEFAULT_TX_ID
       );
 
       expect(bulkPayOutSpy).toHaveBeenCalledWith(
@@ -1165,6 +1170,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
+        DEFAULT_TX_ID,
         true
       );
 
@@ -1205,6 +1211,7 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
+        DEFAULT_TX_ID,
         false,
         txOptions
       );
@@ -1466,7 +1473,7 @@ describe('EscrowClient', () => {
       const encodedMethodData = '0xbulkPayOut-call-encoded-data';
 
       escrowClient.escrowContract[
-        'bulkPayOut(address[],uint256[],string,string,uint256)'
+        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
       ].populateTransaction.mockResolvedValueOnce({
         from: signerAddress,
         to: escrowAddress,
@@ -1481,7 +1488,9 @@ describe('EscrowClient', () => {
         recipients,
         amounts,
         finalResultsUrl,
-        finalResultsHash
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        false
       );
 
       expect(rawTransaction).toEqual({
@@ -1502,7 +1511,7 @@ describe('EscrowClient', () => {
       const encodedMethodData = '0xbulkPayOut-call-encoded-data';
 
       escrowClient.escrowContract[
-        'bulkPayOut(address[],uint256[],string,string,uint256)'
+        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
       ].populateTransaction.mockResolvedValueOnce({
         from: signerAddress,
         to: escrowAddress,
@@ -1518,6 +1527,8 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
+        DEFAULT_TX_ID,
+        false,
         {
           nonce,
         }
