@@ -38,7 +38,7 @@ export const useStake = () => {
           await fetchTokenBalance(provider, address, chainId);
         }
       } catch (error) {
-        showError('Error initializing staking client');
+        showError('Invalid network');
       }
     };
 
@@ -51,7 +51,6 @@ export const useStake = () => {
       setStakingData(stakingInfo);
     } catch (error) {
       showError('Error fetching staking data');
-      console.error(error);
     }
   };
 
@@ -77,7 +76,6 @@ export const useStake = () => {
       setTokenBalance(formatAmount(balance));
     } catch (error) {
       showError('Error fetching token balance');
-      console.error('Error fetching token balance:', error);
     }
   };
 

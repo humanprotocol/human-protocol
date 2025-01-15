@@ -4,7 +4,7 @@ import bagImg from '../../assets/bag.png';
 import humanImg from '../../assets/human.png';
 import userImg from '../../assets/user.png';
 import { DefaultHeader } from '../../components/Headers/DefaultHeader';
-import { FundingMethod } from '../../components/Wallet/FundingMethod';
+import { ConnectWallet } from '../../components/Wallet/ConnectWallet';
 
 const Home: React.FC = () => {
   return (
@@ -44,12 +44,12 @@ const Home: React.FC = () => {
                 Staking Dashboard
               </Typography>
               <Typography color="primary" variant="h5" fontWeight={400} my={3}>
-                Stake Tokens, Empower Solutions.
+                Stake Tokens, Contribute to HUMAN Protocol.
               </Typography>
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={6}>
-            <FundingMethod />
+            <ConnectWallet />
           </Grid>
         </Grid>
       </Box>

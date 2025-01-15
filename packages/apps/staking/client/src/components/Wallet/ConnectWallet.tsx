@@ -4,7 +4,7 @@ import { useAccount } from 'wagmi';
 import fundCryptoImg from '../../assets/fund-crypto.png';
 import WalletModal from './WalletModal';
 
-export const FundingMethod = () => {
+export const ConnectWallet = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const { isConnected } = useAccount();
 
@@ -68,14 +68,8 @@ export const FundingMethod = () => {
                 sx={{ mb: 2, borderRadius: '10px' }}
                 onClick={handleClickCrypto}
               >
-                Connect with Crypto
+                Connect
               </Button>
-              <Typography
-                variant="body2"
-                sx={{ fontSize: '12px', color: '#6b7280' }}
-              >
-                Secure and instant transactions
-              </Typography>
             </Box>
           </Grid>
         </Grid>
