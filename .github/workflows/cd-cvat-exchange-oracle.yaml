@@ -18,6 +18,9 @@ permissions:
 jobs:
   pull-request-check:
     runs-on: ubuntu-latest
+    concurrency:
+      group: docker-compose-operations
+      cancel-in-progress: false  # Ensure the job waits instead of canceling others
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
