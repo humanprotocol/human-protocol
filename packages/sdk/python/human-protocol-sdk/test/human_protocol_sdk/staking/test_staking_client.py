@@ -321,6 +321,85 @@ class TestStakingClient(unittest.TestCase):
             )
             mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
 
+    def test_get_staker_info(self):
+        staker_address = "0xYourStakerAddress"
+        staker_info = {
+            "tokensStaked": 100,
+            "tokensLocked": 50,
+            "tokensLockedUntil": 1234567890,
+        }
+        current_block = 1234567880
+
+        self.staking_client.staking_contract.functions.stakes = MagicMock(
+            return_value=staker_info
+        )
+        self.w3.eth.block_number = current_block
+
+        result = self.staking_client.get_staker_info(staker_address)
+
+        self.assertEqual(
+            result,
+            {
+                "stakedAmount": staker_info["tokensStaked"],
+                "lockedAmount": staker_info["tokensLocked"],
+                "lockedUntil": staker_info["tokensLockedUntil"],
+                "withdrawableAmount": 0,
+            },
+        )
+        self.staking_client.staking_contract.functions.stakes.assert_called_once_with(
+            staker_address
+        )
+
+    def test_get_staker_info_with_locked_amount_0_and_withdrawable_tokens(self):
+        staker_address = "0xYourStakerAddress"
+        staker_info = {
+            "tokensStaked": 100,
+            "tokensLocked": 50,
+            "tokensLockedUntil": 1234567890,
+        }
+        current_block = 1234567891
+
+        self.staking_client.staking_contract.functions.stakes = MagicMock(
+            return_value=staker_info
+        )
+        self.w3.eth.block_number = current_block
+
+        result = self.staking_client.get_staker_info(staker_address)
+
+        self.assertEqual(
+            result,
+            {
+                "stakedAmount": staker_info["tokensStaked"],
+                "lockedAmount": 0,
+                "lockedUntil": 0,
+                "withdrawableAmount": staker_info["tokensLocked"],
+            },
+        )
+        self.staking_client.staking_contract.functions.stakes.assert_called_once_with(
+            staker_address
+        )
+
+    def test_get_staker_info_invalid_address(self):
+        invalid_address = "InvalidAddress"
+
+        with self.assertRaises(StakingClientError) as cm:
+            self.staking_client.get_staker_info(invalid_address)
+        self.assertEqual(
+            f"Invalid staker address: {invalid_address}", str(cm.exception)
+        )
+
+    def test_get_staker_info_fails(self):
+        staker_address = "0xYourStakerAddress"
+        self.staking_client.staking_contract.functions.stakes = MagicMock(
+            side_effect=Exception("Failed to get staker info")
+        )
+
+        with self.assertRaises(StakingClientError) as cm:
+            self.staking_client.get_staker_info(staker_address)
+        self.assertEqual(
+            "Failed to get staker info: Failed to get staker info", str(cm.exception)
+        )
+
 
 if __name__ == "__main__":
     unittest.main(exit=True)

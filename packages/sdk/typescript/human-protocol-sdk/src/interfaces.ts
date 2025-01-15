@@ -156,3 +156,10 @@ export interface IPagination {
   skip?: number;
   orderDirection?: OrderDirection;
 }
+
+export interface StakerInfo {
+  stakedAmount: bigint;
+  lockedAmount: bigint;
+  lockedUntil: bigint;
+  withdrawableAmount: bigint;
+}

@@ -23,6 +23,7 @@ import {
 } from './error';
 import { NetworkData } from './types';
 import { throwError } from './utils';
+import { StakerInfo } from './interfaces';
 
 /**
  * ## Introduction
@@ -413,6 +414,59 @@ export class StakingClient extends BaseEthersClient {
       return;
     } catch (e) {
       return throwError(e);
+    }
+  }
+
+  /**
+   * Retrieves comprehensive staking information for a staker.
+   *
+   * @param {string} stakerAddress - The address of the staker.
+   * @returns {Promise<StakerInfo>}
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const stakingClient = await StakingClient.build(provider);
+   *
+   * const stakingInfo = await stakingClient.getStakerInfo('0xYourStakerAddress');
+   * console.log(stakingInfo.tokensStaked);
+   * ```
+   */
+  public async getStakerInfo(stakerAddress: string): Promise<StakerInfo> {
+    if (!ethers.isAddress(stakerAddress)) {
+      throw ErrorInvalidStakerAddressProvided;
+    }
+
+    try {
+      const stakerInfo = await this.stakingContract.stakes(stakerAddress);
+      const currentBlock = await this.runner.provider!.getBlockNumber();
+
+      const tokensWithdrawable =
+        stakerInfo.tokensLockedUntil !== 0n &&
+        currentBlock >= stakerInfo.tokensLockedUntil
+          ? stakerInfo.tokensLocked
+          : 0n;
+
+      const adjustedLockedAmount =
+        stakerInfo.tokensLockedUntil !== 0n &&
+        currentBlock >= stakerInfo.tokensLockedUntil
+          ? 0n
+          : stakerInfo.tokensLocked;
+
+      return {
+        stakedAmount: stakerInfo.tokensStaked,
+        lockedAmount: adjustedLockedAmount,
+        lockedUntil:
+          adjustedLockedAmount === 0n ? 0n : stakerInfo.tokensLockedUntil,
+        withdrawableAmount: tokensWithdrawable,
+      };
+    } catch (error) {
+      return throwError(error);
     }
   }
 }
