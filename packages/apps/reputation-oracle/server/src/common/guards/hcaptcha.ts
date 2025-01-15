@@ -27,7 +27,7 @@ export class HCaptchaGuard implements CanActivate {
     if (request.path === '/auth/signin') {
       const email = body['email'];
       // Need to validate email because guards being called before any interceptors or pipes
-      // Basically to avoid any SQL injections and calling DB to check if user is correct.
+      // Basically to avoid unnecessary db calls
       if (email === this.authConfigSerice.humanAppEmail) {
         return true;
       }
