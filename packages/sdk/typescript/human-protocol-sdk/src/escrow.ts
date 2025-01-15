@@ -64,19 +64,19 @@ import { getSubgraphUrl, isValidUrl, throwError } from './utils';
 /**
  * ## Introduction
  *
- * This client enables to perform actions on Escrow contracts and obtain information from both the contracts and subgraph.
+ * This client enables performing actions on Escrow contracts and obtaining information from both the contracts and subgraph.
  *
  * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
  *
  * ```ts
- * static async build(runner: ContractRunner);
+ * static async build(runner: ContractRunner): Promise<EscrowClient>;
  * ```
  *
  * A `Signer` or a `Provider` should be passed depending on the use case of this module:
  *
- * - **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
- * - **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+ * - **Signer**: when the user wants to use this model to send transactions calling the contract functions.
+ * - **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
  *
  * ## Installation
  *
@@ -94,21 +94,21 @@ import { getSubgraphUrl, isValidUrl, throwError } from './utils';
  *
  * ### Signer
  *
- * **Using private key(backend)**
+ * **Using private key (backend)**
  *
  * ```ts
  * import { EscrowClient } from '@human-protocol/sdk';
  * import { Wallet, providers } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
- * const privateKey = 'YOUR_PRIVATE_KEY'
+ * const privateKey = 'YOUR_PRIVATE_KEY';
  *
  * const provider = new providers.JsonRpcProvider(rpcUrl);
  * const signer = new Wallet(privateKey, provider);
  * const escrowClient = await EscrowClient.build(signer);
  * ```
  *
- * **Using Wagmi(frontend)**
+ * **Using Wagmi (frontend)**
  *
  * ```ts
  * import { useSigner, useChainId } from 'wagmi';
@@ -157,7 +157,7 @@ export class EscrowClient extends BaseEthersClient {
    * @throws {ErrorProviderDoesNotExist} Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} Thrown if the network's chainId is not supported
    */
-  public static async build(runner: ContractRunner) {
+  public static async build(runner: ContractRunner): Promise<EscrowClient> {
     if (!runner.provider) {
       throw ErrorProviderDoesNotExist;
     }
@@ -190,11 +190,11 @@ export class EscrowClient extends BaseEthersClient {
   /**
    * This function creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
    *
-   * @param {string} tokenAddress Token address to use for pay outs.
+   * @param {string} tokenAddress Token address to use for payouts.
    * @param {string[]} trustedHandlers Array of addresses that can perform actions on the contract.
    * @param {string} jobRequesterId Job Requester Id
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @returns {Promise<string>} Return the address of the escrow created.
+   * @returns {Promise<string>} Returns the address of the escrow created.
    *
    *
    * **Code example**
@@ -206,7 +206,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -279,7 +279,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -290,10 +290,10 @@ export class EscrowClient extends BaseEthersClient {
    *    recordingOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    reputationOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    exchangeOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    recordingOracleFee: bigint.from('10'),
-   *    reputationOracleFee: bigint.from('10'),
-   *    exchangeOracleFee: bigint.from('10'),
-   *    manifestUrl: 'htttp://localhost/manifest.json',
+   *    recordingOracleFee: BigInt('10'),
+   *    reputationOracleFee: BigInt('10'),
+   *    exchangeOracleFee: BigInt('10'),
+   *    manifestUrl: 'http://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
    * await escrowClient.setup(escrowAddress, escrowConfig);
@@ -399,7 +399,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -447,10 +447,10 @@ export class EscrowClient extends BaseEthersClient {
   }
 
   /**
-   * This function stores the results url and hash.
+   * This function stores the results URL and hash.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @param {string} url Results file url.
+   * @param {string} url Results file URL.
    * @param {string} hash Results file hash.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
@@ -465,13 +465,13 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
    * const escrowClient = await EscrowClient.build(signer);
    *
-   * await storeResults.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
+   * await escrowClient.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
    * ```
    */
   @requiresSigner
@@ -529,7 +529,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -567,9 +567,9 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} escrowAddress Escrow address to payout.
    * @param {string[]} recipients Array of recipient addresses.
    * @param {bigint[]} amounts Array of amounts the recipients will receive.
-   * @param {string} finalResultsUrl Final results file url.
+   * @param {string} finalResultsUrl Final results file URL.
    * @param {string} finalResultsHash Final results file hash.
-   * @param {string} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
+   * @param {boolean} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
@@ -583,7 +583,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -668,7 +668,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -753,13 +753,13 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
    * const escrowClient = await EscrowClient.build(signer);
    *
-   * const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266']
+   * const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
    * await escrowClient.addTrustedHandlers('0x62dD51230A30401C455c8398d06F85e4EaB6309f', trustedHandlers);
    * ```
    */
@@ -817,7 +817,7 @@ export class EscrowClient extends BaseEthersClient {
    * import { EscrowClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -897,7 +897,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} escrowAddress Escrow address to payout.
    * @param {string[]} recipients Array of recipient addresses.
    * @param {bigint[]} amounts Array of amounts the recipients will receive.
-   * @param {string} finalResultsUrl Final results file url.
+   * @param {string} finalResultsUrl Final results file URL.
    * @param {string} finalResultsHash Final results file hash.
    * @param {string} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
@@ -1057,7 +1057,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the balance for a specified escrow address.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {bigint} Balance of the escrow in the token used to fund it.
+   * @returns {Promise<bigint>} Balance of the escrow in the token used to fund it.
    *
    * **Code example**
    *
@@ -1068,7 +1068,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const balance = await escrowClient.getBalance('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1101,7 +1101,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the manifest file hash.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Hash of the manifest file content.
+   * @returns {Promise<string>} Hash of the manifest file content.
    *
    * **Code example**
    *
@@ -1112,7 +1112,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const manifestHash = await escrowClient.getManifestHash('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1139,7 +1139,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the manifest file URL.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Url of the manifest.
+   * @returns {Promise<string>} Url of the manifest.
    *
    * **Code example**
    *
@@ -1150,7 +1150,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1177,7 +1177,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the results file URL.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Results file url.
+   * @returns {Promise<string>} Results file url.
    *
    * **Code example**
    *
@@ -1188,7 +1188,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const resultsUrl = await escrowClient.getResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1215,7 +1215,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the intermediate results file URL.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Url of the file that store results from Recording Oracle.
+   * @returns {Promise<string>} Url of the file that store results from Recording Oracle.
    *
    * **Code example**
    *
@@ -1226,9 +1226,9 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
-   * const intemediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const intermediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   async getIntermediateResultsUrl(escrowAddress: string): Promise<string> {
@@ -1244,7 +1244,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.intermediateResultsUrl();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -1253,7 +1253,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the token address used for funding the escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Address of the token used to fund the escrow.
+   * @returns {Promise<string>} Address of the token used to fund the escrow.
    *
    * **Code example**
    *
@@ -1264,7 +1264,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const tokenAddress = await escrowClient.getTokenAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1291,7 +1291,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the current status of the escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {EscrowStatus} Current status of the escrow.
+   * @returns {Promise<EscrowStatus>} Current status of the escrow.
    *
    * **Code example**
    *
@@ -1302,7 +1302,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const status = await escrowClient.getStatus('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1329,7 +1329,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the recording oracle address for a given escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Address of the Recording Oracle.
+   * @returns {Promise<string>} Address of the Recording Oracle.
    *
    * **Code example**
    *
@@ -1340,7 +1340,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const oracleAddress = await escrowClient.getRecordingOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1358,7 +1358,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.recordingOracle();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -1367,7 +1367,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the job launcher address for a given escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {string} Address of the Job Launcher.
+   * @returns {Promise<string>} Address of the Job Launcher.
    *
    * **Code example**
    *
@@ -1378,7 +1378,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const jobLauncherAddress = await escrowClient.getJobLauncherAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1396,7 +1396,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.launcher();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -1405,7 +1405,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the reputation oracle address for a given escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {EscrowStatus} Address of the Reputation Oracle.
+   * @returns {Promise<string>} Address of the Reputation Oracle.
    *
    * **Code example**
    *
@@ -1416,7 +1416,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const oracleAddress = await escrowClient.getReputationOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1434,7 +1434,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.reputationOracle();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -1443,7 +1443,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the exchange oracle address for a given escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {EscrowStatus} Address of the Exchange Oracle.
+   * @returns {Promise<string>} Address of the Exchange Oracle.
    *
    * **Code example**
    *
@@ -1454,7 +1454,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const oracleAddress = await escrowClient.getExchangeOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1472,7 +1472,7 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.exchangeOracle();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -1481,7 +1481,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the escrow factory address for a given escrow.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {EscrowStatus} Address of the escrow factory.
+   * @returns {Promise<string>} Address of the escrow factory.
    *
    * **Code example**
    *
@@ -1492,7 +1492,7 @@ export class EscrowClient extends BaseEthersClient {
    * const rpcUrl = 'YOUR_RPC_URL';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
-   * const escrowClient = await EscrowClient.build(signer);
+   * const escrowClient = await EscrowClient.build(provider);
    *
    * const factoryAddress = await escrowClient.getFactoryAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
@@ -1510,12 +1510,11 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       return escrowContract.escrowFactory();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
 }
-
 /**
  * ## Introduction
  *
@@ -1543,7 +1542,7 @@ export class EscrowClient extends BaseEthersClient {
  * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
  *
  * const escrowAddresses = new EscrowUtils.getEscrows({
- *   network: ChainId.POLYGON_AMOY
+ *   chainId: ChainId.POLYGON_AMOY
  * });
  * ```
  */
@@ -1588,7 +1587,6 @@ export class EscrowUtils {
    *   AVALANCHE_TESTNET = 43113,
    *   CELO = 42220,
    *   CELO_ALFAJORES = 44787,
-   *    = 1273227453,
    *   LOCALHOST = 1338,
    * }
    * ```

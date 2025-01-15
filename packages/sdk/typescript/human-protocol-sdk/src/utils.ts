@@ -57,7 +57,6 @@ export const isValidUrl = (url: string) => {
  * **Get the subgraph URL.*
  *
  * @param {NetworkData} networkData
- * @param {string} apiKey
  * @returns
  */
 export const getSubgraphUrl = (networkData: NetworkData) => {
