@@ -263,7 +263,7 @@ Sets the status of an escrow to completed.
   escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
   ```
 
-#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, tx_options=None)
+#### create_bulk_payout_transaction(escrow_address, recipients, amounts, final_results_url, final_results_hash, txId, force_complete=False, tx_options=None)
 
 Creates a prepared transaction for bulk payout without signing or sending it.
 
@@ -320,7 +320,8 @@ Creates a prepared transaction for bulk payout without signing or sending it.
       amounts,
       results_url,
       results_hash,
-      1
+      1,
+      false
   )
 
   print(f"Transaction: {transaction}")

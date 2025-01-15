@@ -647,6 +647,7 @@ class EscrowClient:
         final_results_url: str,
         final_results_hash: str,
         txId: Decimal,
+        force_complete: Optional[bool] = False,
         tx_options: Optional[TxParams] = None,
     ) -> TxParams:
         """
@@ -704,7 +705,8 @@ class EscrowClient:
                     amounts,
                     results_url,
                     results_hash,
-                    1
+                    1,
+                    false
                 )
 
                 print(f"Transaction: {transaction}")
@@ -726,7 +728,12 @@ class EscrowClient:
         transaction = (
             self._get_escrow_contract(escrow_address)
             .functions.bulkPayOut(
-                recipients, amounts, final_results_url, final_results_hash, txId
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+                force_complete,
             )
             .build_transaction(tx_options or {})
         )
