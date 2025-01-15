@@ -1,5 +1,17 @@
+import { z } from 'zod';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
-import { tokenSchema } from '@/modules/worker/types/email-verification.types';
+
+export const tokenSchema = z.string().transform((value, ctx) => {
+  const token = value.split('=')[1];
+  if (!token) {
+    ctx.addIssue({
+      fatal: true,
+      code: z.ZodIssueCode.custom,
+      message: 'error',
+    });
+  }
+  return token;
+});
 
 export function useVerificationToken() {
   const { field: token } = useLocationState({
