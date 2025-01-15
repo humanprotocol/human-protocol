@@ -322,27 +322,24 @@ class TestStakingClient(unittest.TestCase):
             mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
 
     def test_get_staker_info(self):
-        staker_address = "0xYourStakerAddress"
-        staker_info = {
-            "tokensStaked": 100,
-            "tokensLocked": 50,
-            "tokensLockedUntil": 1234567890,
-        }
+        staker_address = "0x1234567890123456789012345678901234567890"
+        staker_info = [100, 50, 1234567890]
         current_block = 1234567880
 
         self.staking_client.staking_contract.functions.stakes = MagicMock(
-            return_value=staker_info
+            return_value=MagicMock(call=MagicMock(return_value=staker_info))
         )
-        self.w3.eth.block_number = current_block
+
+        type(self.w3.eth).block_number = PropertyMock(return_value=current_block)
 
         result = self.staking_client.get_staker_info(staker_address)
 
         self.assertEqual(
             result,
             {
-                "stakedAmount": staker_info["tokensStaked"],
-                "lockedAmount": staker_info["tokensLocked"],
-                "lockedUntil": staker_info["tokensLockedUntil"],
+                "stakedAmount": staker_info[0],
+                "lockedAmount": staker_info[1],
+                "lockedUntil": staker_info[2],
                 "withdrawableAmount": 0,
             },
         )
@@ -351,28 +348,25 @@ class TestStakingClient(unittest.TestCase):
         )
 
     def test_get_staker_info_with_locked_amount_0_and_withdrawable_tokens(self):
-        staker_address = "0xYourStakerAddress"
-        staker_info = {
-            "tokensStaked": 100,
-            "tokensLocked": 50,
-            "tokensLockedUntil": 1234567890,
-        }
+        staker_address = "0x1234567890123456789012345678901234567890"
+        staker_info = [100, 50, 1234567890]
         current_block = 1234567891
 
         self.staking_client.staking_contract.functions.stakes = MagicMock(
-            return_value=staker_info
+            return_value=MagicMock(call=MagicMock(return_value=staker_info))
         )
-        self.w3.eth.block_number = current_block
+
+        type(self.w3.eth).block_number = PropertyMock(return_value=current_block)
 
         result = self.staking_client.get_staker_info(staker_address)
 
         self.assertEqual(
             result,
             {
-                "stakedAmount": staker_info["tokensStaked"],
+                "stakedAmount": staker_info[0],
                 "lockedAmount": 0,
                 "lockedUntil": 0,
-                "withdrawableAmount": staker_info["tokensLocked"],
+                "withdrawableAmount": staker_info[1],
             },
         )
         self.staking_client.staking_contract.functions.stakes.assert_called_once_with(
@@ -380,7 +374,7 @@ class TestStakingClient(unittest.TestCase):
         )
 
     def test_get_staker_info_invalid_address(self):
-        invalid_address = "InvalidAddress"
+        invalid_address = "invalid_address"
 
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.get_staker_info(invalid_address)
@@ -389,7 +383,7 @@ class TestStakingClient(unittest.TestCase):
         )
 
     def test_get_staker_info_fails(self):
-        staker_address = "0xYourStakerAddress"
+        staker_address = "0x1234567890123456789012345678901234567890"
         self.staking_client.staking_contract.functions.stakes = MagicMock(
             side_effect=Exception("Failed to get staker info")
         )

@@ -431,21 +431,21 @@ class StakingClient:
             current_block = self.w3.eth.block_number
 
             tokens_withdrawable = (
-                (staker_info[2] != 0 and current_block >= staker_info[2])
-                and staker_info[1]
-                or 0
+                staker_info[1]
+                if (staker_info[2] != 0 and current_block >= staker_info[2])
+                else 0
             )
 
             adjusted_locked_amount = (
-                (staker_info[2] != 0 and current_block >= staker_info[2])
-                and 0
-                or staker_info[1]
+                0
+                if (staker_info[2] != 0 and current_block >= staker_info[2])
+                else staker_info[1]
             )
 
             return {
                 "stakedAmount": staker_info[0],
                 "lockedAmount": adjusted_locked_amount,
-                "lockedUntil": adjusted_locked_amount == 0 and 0 or staker_info[2],
+                "lockedUntil": 0 if adjusted_locked_amount == 0 else staker_info[2],
                 "withdrawableAmount": tokens_withdrawable,
             }
         except Exception as e:
