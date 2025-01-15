@@ -6,22 +6,13 @@ import { routerPaths } from '@/router/router-paths';
 import { Alert } from '@/shared/components/ui/alert';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
+import { type ChildErrorProps, type ErrorMessageProps } from './types';
 
 export function PageCardError({
   errorMessage,
   children,
   cardMaxWidth = '100%',
-}:
-  | {
-      errorMessage: string;
-      children?: never;
-      cardMaxWidth?: string;
-    }
-  | {
-      errorMessage?: never;
-      children: React.ReactElement;
-      cardMaxWidth?: string;
-    }) {
+}: ErrorMessageProps | ChildErrorProps) {
   const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
 

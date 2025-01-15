@@ -2,12 +2,9 @@ import { Grid } from '@mui/material';
 import { Loader } from '@/shared/components/ui/loader';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
+import { type CommonProps } from './types';
 
-export function PageCardLoader({
-  cardMaxWidth = '100%',
-}: {
-  cardMaxWidth?: string;
-}) {
+export function PageCardLoader({ cardMaxWidth = '100%' }: CommonProps) {
   const { isDarkMode } = useColorMode();
 
   const commonStyleForTheme = isDarkMode

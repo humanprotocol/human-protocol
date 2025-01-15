@@ -24,16 +24,16 @@ const IconWrapper = styled('div')(() => ({
   fontSize: '26px',
 }));
 
-type ButtonsProps = string | -1 | (() => void);
+type PageCardRouteButton = string | -1 | (() => void);
 
-interface FormCardProps {
+interface PageCardProps {
   children: React.JSX.Element;
   maxContentWidth?: string;
   childrenMaxWidth?: string;
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
-  backArrowPath?: ButtonsProps;
-  cancelRouterPathOrCallback?: ButtonsProps;
+  backArrowPath?: PageCardRouteButton;
+  cancelRouterPathOrCallback?: PageCardRouteButton;
   showCancelButton?: boolean;
   showArrowButton?: boolean;
   loader?: boolean;
@@ -49,7 +49,7 @@ export function PageCard({
   cancelRouterPathOrCallback = routerPaths.homePage,
   showCancelButton = true,
   showArrowButton = true,
-}: FormCardProps) {
+}: PageCardProps) {
   const { isDarkMode, colorPalette } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
@@ -62,7 +62,7 @@ export function PageCard({
     },
   };
 
-  const goBack = (pathOrCallback: ButtonsProps) => {
+  const goBack = (pathOrCallback: PageCardRouteButton) => {
     if (pathOrCallback instanceof Function) {
       pathOrCallback();
       return;
@@ -72,6 +72,14 @@ export function PageCard({
       return;
     }
     navigate(pathOrCallback);
+  };
+
+  const handleCancelButton = () => {
+    if (cancelRouterPathOrCallback instanceof Function) {
+      cancelRouterPathOrCallback();
+      return;
+    }
+    goBack(cancelRouterPathOrCallback);
   };
 
   return (
@@ -93,15 +101,7 @@ export function PageCard({
             },
           }}
         >
-          <Button
-            onClick={() => {
-              if (cancelRouterPathOrCallback instanceof Function) {
-                cancelRouterPathOrCallback();
-                return;
-              }
-              goBack(cancelRouterPathOrCallback);
-            }}
-          >
+          <Button onClick={handleCancelButton}>
             <Typography variant="buttonMedium">
               {t('components.modal.header.closeBtn')}
             </Typography>
@@ -159,15 +159,7 @@ export function PageCard({
               </IconWrapper>
             )}
             {showCancelButton && (
-              <Button
-                onClick={() => {
-                  if (cancelRouterPathOrCallback instanceof Function) {
-                    cancelRouterPathOrCallback();
-                    return;
-                  }
-                  goBack(cancelRouterPathOrCallback);
-                }}
-              >
+              <Button onClick={handleCancelButton}>
                 <Typography variant="buttonMedium">
                   {t('components.modal.header.closeBtn')}
                 </Typography>
