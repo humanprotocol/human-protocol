@@ -17,7 +17,11 @@ export interface ShowNotifProps {
   durationMs?: number;
 }
 
-const AUTO_HIDE_NOTIFICATION_MS = 6000;
+const widthStylesForDesktop = {
+  width: 'calc(100svw - 344px',
+};
+
+const AUTO_HIDE_NOTIFICATION_MS = 116000;
 const FONT_COLOR = lightColorPalette.white;
 
 export const useNotification = () => {
@@ -30,20 +34,18 @@ export const useNotification = () => {
       <CloseIcon
         sx={{
           width: '20px',
-          position: 'absolute',
-          top: '15px',
-          right: isMobile ? '5px' : '38px',
           height: '20px',
           zIndex: 1,
           cursor: 'pointer',
           marginRight: '4px',
+          alignSelf: 'flex-start',
         }}
         onClick={() => {
           closeSnackbar(snackbarId);
         }}
       />
     ),
-    [closeSnackbar, isMobile]
+    [closeSnackbar]
   );
 
   const showNotification = useCallback(
@@ -56,8 +58,10 @@ export const useNotification = () => {
         variant: type,
         autoHideDuration: durationMs,
         style: {
-          width: `calc(100svw - ${isMobile ? '54px' : '344px'})`,
+          display: 'flex',
+          flexWrap: 'nowrap',
           marginRight: isMobile ? '0' : '32px',
+          maxWidth: '100%',
           backgroundColor:
             type === TopNotificationType.SUCCESS
               ? colorPalette.success.main
@@ -69,6 +73,7 @@ export const useNotification = () => {
           [breakpoints.mobile]: {
             fontSize: 14,
           },
+          ...(isMobile ? {} : widthStylesForDesktop),
         },
         action,
       });

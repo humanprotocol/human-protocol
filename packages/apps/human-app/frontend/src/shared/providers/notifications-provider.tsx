@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { SnackbarProvider } from 'notistack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import { Stack } from '@mui/material';
 import { TopNotificationType } from '@/shared/hooks/use-notification';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
 import { handleUnreachableCase } from '@/shared/helpers/handle-unreachable-case';
@@ -35,22 +36,36 @@ export function NotificationProvider({
   maxSnacks = MAX_NOTIFICATIONS_VISIBLE,
 }: NotificationProviderProps) {
   return (
-    <SnackbarProvider
-      maxSnack={maxSnacks}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      iconVariant={{
-        success: getNotificationIconByType(TopNotificationType.SUCCESS, {
-          marginRight: '12px',
-        }),
-        warning: getNotificationIconByType(TopNotificationType.WARNING, {
-          marginRight: '12px',
-        }),
+    <Stack
+      sx={{
+        '@media (min-width: 800px) and (max-width: 899px)': {
+          '.notistack-SnackbarContainer': {
+            width: '100%',
+          },
+          '.notistack-SnackbarContainer > div': {
+            width: '100%',
+            maxWidth: '100%',
+          },
+        },
       }}
     >
-      {children}
-    </SnackbarProvider>
+      <SnackbarProvider
+        maxSnack={maxSnacks}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        iconVariant={{
+          success: getNotificationIconByType(TopNotificationType.SUCCESS, {
+            marginRight: '12px',
+          }),
+          warning: getNotificationIconByType(TopNotificationType.WARNING, {
+            marginRight: '12px',
+          }),
+        }}
+      >
+        {children}
+      </SnackbarProvider>
+    </Stack>
   );
 }

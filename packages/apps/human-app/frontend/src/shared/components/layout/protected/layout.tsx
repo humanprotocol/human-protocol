@@ -105,7 +105,7 @@ export function Layout({
           component="div"
           container
           sx={{
-            margin: '1rem 0',
+            margin: !isMobile ? '5.2rem 0 1rem 0' : '1rem 0',
             display: 'flex',
             gap: '2rem',
             flexDirection: 'column',
