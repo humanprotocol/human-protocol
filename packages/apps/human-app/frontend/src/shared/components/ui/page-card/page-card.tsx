@@ -36,8 +36,8 @@ interface FormCardProps {
   alert?: React.JSX.Element;
   backArrowPath?: ButtonsProps;
   cancelRouterPathOrCallback?: ButtonsProps;
-  hiddenCancelButton?: boolean;
-  hiddenArrowButton?: boolean;
+  showCancelButton?: boolean;
+  showArrowButton?: boolean;
   withLayoutBackground?: boolean;
   loader?: boolean;
 }
@@ -51,8 +51,8 @@ export function PageCard({
   backArrowPath = -1,
   cancelRouterPathOrCallback = routerPaths.homePage,
   withLayoutBackground = true,
-  hiddenCancelButton = false,
-  hiddenArrowButton = false,
+  showCancelButton = true,
+  showArrowButton = true,
 }: FormCardProps) {
   const { isDarkMode, colorPalette } = useColorMode();
   const { setGrayBackground } = useBackgroundColorStore();
@@ -93,7 +93,7 @@ export function PageCard({
         padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
-      {!hiddenCancelButton && (
+      {showCancelButton && (
         <Grid
           sx={{
             display: 'flex',
@@ -154,7 +154,7 @@ export function PageCard({
               },
             }}
           >
-            {backArrowPath && !hiddenArrowButton && (
+            {backArrowPath && showArrowButton && (
               <IconWrapper
                 onClick={goBack.bind(null, backArrowPath)}
                 sx={{
@@ -169,7 +169,7 @@ export function PageCard({
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
             )}
-            {!hiddenCancelButton && (
+            {showCancelButton && (
               <Button
                 onClick={() => {
                   if (cancelRouterPathOrCallback instanceof Function) {
@@ -216,7 +216,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            {backArrowPath && !hiddenArrowButton && (
+            {backArrowPath && showArrowButton && (
               <IconWrapper
                 onClick={goBack.bind(null, backArrowPath)}
                 sx={{
