@@ -24,7 +24,7 @@ const IconWrapper = styled('div')(() => ({
   fontSize: '26px',
 }));
 
-type PageCardRouteButton = string | -1 | (() => void);
+type NavigationTarget = string | -1 | (() => void);
 
 interface PageCardProps {
   children: React.JSX.Element;
@@ -32,8 +32,8 @@ interface PageCardProps {
   childrenMaxWidth?: string;
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
-  backArrowPath?: PageCardRouteButton;
-  cancelRouterPathOrCallback?: PageCardRouteButton;
+  arrowButtonNavigationTarget?: NavigationTarget;
+  cancelButtonNavigationTarget?: NavigationTarget;
   showCancelButton?: boolean;
   showArrowButton?: boolean;
   loader?: boolean;
@@ -45,8 +45,8 @@ export function PageCard({
   alert,
   maxContentWidth = '376px',
   childrenMaxWidth = '486px',
-  backArrowPath = -1,
-  cancelRouterPathOrCallback = routerPaths.homePage,
+  arrowButtonNavigationTarget = -1,
+  cancelButtonNavigationTarget = routerPaths.homePage,
   showCancelButton = true,
   showArrowButton = true,
 }: PageCardProps) {
@@ -62,24 +62,24 @@ export function PageCard({
     },
   };
 
-  const goBack = (pathOrCallback: PageCardRouteButton) => {
-    if (pathOrCallback instanceof Function) {
-      pathOrCallback();
+  const goBack = (navigationTarget: NavigationTarget) => {
+    if (navigationTarget instanceof Function) {
+      navigationTarget();
       return;
     }
-    if (typeof pathOrCallback === 'string') {
-      navigate(pathOrCallback);
+    if (typeof navigationTarget === 'string') {
+      navigate(navigationTarget);
       return;
     }
-    navigate(pathOrCallback);
+    navigate(navigationTarget);
+  };
+
+  const handleArrowButton = () => {
+    goBack(arrowButtonNavigationTarget);
   };
 
   const handleCancelButton = () => {
-    if (cancelRouterPathOrCallback instanceof Function) {
-      cancelRouterPathOrCallback();
-      return;
-    }
-    goBack(cancelRouterPathOrCallback);
+    goBack(cancelButtonNavigationTarget);
   };
 
   return (
@@ -138,14 +138,16 @@ export function PageCard({
               [breakpoints.mobile]: {
                 display: 'flex',
                 width: '100%',
-                justifyContent: backArrowPath ? 'space-between' : 'flex-end',
+                justifyContent: arrowButtonNavigationTarget
+                  ? 'space-between'
+                  : 'flex-end',
                 alignItems: 'center',
               },
             }}
           >
-            {backArrowPath && showArrowButton && (
+            {arrowButtonNavigationTarget && showArrowButton && (
               <IconWrapper
-                onClick={goBack.bind(null, backArrowPath)}
+                onClick={handleArrowButton}
                 sx={{
                   width: '25px',
                   height: '25px',
@@ -197,9 +199,9 @@ export function PageCard({
             }}
             xs={12}
           >
-            {backArrowPath && showArrowButton && (
+            {arrowButtonNavigationTarget && showArrowButton && (
               <IconWrapper
-                onClick={goBack.bind(null, backArrowPath)}
+                onClick={handleArrowButton}
                 sx={{
                   backgroundColor: isDarkMode
                     ? onlyDarkModeColor.backArrowBg

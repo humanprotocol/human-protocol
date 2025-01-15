@@ -59,7 +59,7 @@ export function ResetPasswordWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelRouterPathOrCallback={routerPaths.worker.profile}
+      cancelButtonNavigationTarget={routerPaths.worker.profile}
       showArrowButton={false}
       title={t('worker.resetPassword.title')}
     >

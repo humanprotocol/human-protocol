@@ -27,8 +27,8 @@ export function ChooseSignUpAccountType() {
 
   return (
     <PageCard
-      backArrowPath={backToWelcomeStage}
-      cancelRouterPathOrCallback={backToWelcomeStage}
+      arrowButtonNavigationTarget={backToWelcomeStage}
+      cancelButtonNavigationTarget={backToWelcomeStage}
       childrenMaxWidth="876px"
       showCancelButton={isMobileMd}
       maxContentWidth="748px"
