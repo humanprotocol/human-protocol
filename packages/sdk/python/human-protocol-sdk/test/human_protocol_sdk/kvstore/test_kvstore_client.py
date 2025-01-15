@@ -89,7 +89,7 @@ class TestKVStoreClient(unittest.TestCase):
         value = "value"
         with self.assertRaises(KVStoreClientError) as cm:
             self.kvstore.set(key, value)
-        self.assertEqual("Key can not be empty", str(cm.exception))
+        self.assertEqual("Key cannot be empty", str(cm.exception))
 
     def test_set_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -151,14 +151,14 @@ class TestKVStoreClient(unittest.TestCase):
         values = ["value1", "value2", "value3"]
         with self.assertRaises(KVStoreClientError) as cm:
             self.kvstore.set_bulk(keys, values)
-        self.assertEqual("Key can not be empty", str(cm.exception))
+        self.assertEqual("Key cannot be empty", str(cm.exception))
 
     def test_set_bulk_different_length_array(self):
         keys = ["key1", "key2", "key3"]
         values = ["value1", "value3"]
         with self.assertRaises(KVStoreClientError) as cm:
             self.kvstore.set_bulk(keys, values)
-        self.assertEqual("Arrays must have same length", str(cm.exception))
+        self.assertEqual("Arrays must have the same length", str(cm.exception))
 
     def test_set_bulk_empty_array(self):
         keys = []

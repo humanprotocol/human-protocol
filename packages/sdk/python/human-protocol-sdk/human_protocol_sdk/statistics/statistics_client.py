@@ -21,7 +21,6 @@ import logging
 from typing import List, Optional
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
-from human_protocol_sdk.gql.hmtoken import get_holders_query
 
 from human_protocol_sdk.utils import get_data_from_subgraph
 from human_protocol_sdk.filter import StatisticsFilter

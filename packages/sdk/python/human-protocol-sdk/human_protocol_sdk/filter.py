@@ -224,7 +224,7 @@ class StatisticsFilter:
                 date_to=datetime(2023, 12, 31),
                 first=10,
                 skip=0,
-                order_direction=OrderDirection.DESC
+                order_direction=OrderDirection.ASC
             )
     """
 
@@ -234,7 +234,7 @@ class StatisticsFilter:
         date_to: Optional[datetime] = None,
         first: int = 10,
         skip: int = 0,
-        order_direction: OrderDirection = OrderDirection.DESC,
+        order_direction: OrderDirection = OrderDirection.ASC,
     ):
         if date_from and date_to and date_from > date_to:
             raise FilterError(

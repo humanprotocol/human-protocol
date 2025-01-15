@@ -1296,14 +1296,17 @@ class TestEscrowClient(unittest.TestCase):
             txId,
         )
 
-        # Verificar que el contrato y los métodos fueron llamados correctamente
         self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.bulkPayOut.assert_called_once_with(
-            recipients, amounts, final_results_url, final_results_hash, txId
+            recipients,
+            amounts,
+            final_results_url,
+            final_results_hash,
+            txId,
+            False,
         )
         mock_contract.functions.bulkPayOut.return_value.build_transaction.assert_called_once()
 
-        # Verificar que el resultado contiene los campos esperados
         self.assertIn("to", result)
         self.assertIn("data", result)
         self.assertEqual(result["to"], "0x1234567890123456789012345678901234567890")
