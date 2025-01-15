@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { routerPaths } from '@/router/router-paths';
-import { PageCard } from '@/shared/components/ui/page-card/page-card';
+import { PageCard } from '@/shared/components/ui/page-card';
 import type { HomePageStageType } from '@/modules/homepage/views/home.page';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useHomePageState } from '@/shared/contexts/homepage-state';

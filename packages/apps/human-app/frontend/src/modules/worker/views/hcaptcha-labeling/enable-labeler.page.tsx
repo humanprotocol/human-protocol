@@ -6,7 +6,7 @@ import { Navigate } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useEnableHCaptchaLabelingMutation } from '@/modules/worker/services/enable-hcaptcha-labeling';
 import { Button } from '@/shared/components/ui/button';
-import { PageCardError } from '@/shared/components/ui/page-card/page-card-error';
+import { PageCardError } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';

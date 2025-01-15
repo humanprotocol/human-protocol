@@ -7,7 +7,7 @@ import { routerPaths } from '@/router/router-paths';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import { Alert } from '@/shared/components/ui/alert';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
-import { commonDarkPageCardStyles, commonPageCardStyles } from './consts';
+import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 
 export function PageCardError({
   errorMessage,

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import { Loader } from '@/shared/components/ui/loader';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
-import { commonDarkPageCardStyles, commonPageCardStyles } from './consts';
+import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 
 export function PageCardLoader({
   withLayoutBackground = true,

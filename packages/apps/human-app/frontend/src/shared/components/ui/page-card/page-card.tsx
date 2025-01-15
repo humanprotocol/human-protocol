@@ -10,7 +10,7 @@ import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { commonDarkPageCardStyles, commonPageCardStyles } from './consts';
+import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',

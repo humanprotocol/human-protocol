@@ -1,7 +1,7 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PageCard } from '@/shared/components/ui/page-card/page-card';
+import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';

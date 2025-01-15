@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { PageCard } from '@/shared/components/ui/page-card/page-card';
+import { PageCard } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 import { env } from '@/shared/env';

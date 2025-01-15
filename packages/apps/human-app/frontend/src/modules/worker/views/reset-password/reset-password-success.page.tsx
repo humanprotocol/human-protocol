@@ -6,7 +6,7 @@ import CheckCircle from '@mui/icons-material/CheckCircle';
 import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
-import { PageCard } from '@/shared/components/ui/page-card/page-card';
+import { PageCard } from '@/shared/components/ui/page-card';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 
