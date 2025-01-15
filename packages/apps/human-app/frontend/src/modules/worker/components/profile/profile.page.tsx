@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import { t } from 'i18next';
 import { ProfileData } from '@/modules/worker/components/profile/profile-data';
 import { ProfileActions } from '@/modules/worker/components/profile/profile-actions';
-import { useNotification } from '@/shared/hooks/use-notification';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
 import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
@@ -19,7 +22,7 @@ export function WorkerProfilePage() {
       return;
     }
     showNotification({
-      type: 'warning',
+      type: TopNotificationType.WARNING,
       message: t('worker.profile.topNotifications.completeSteps'),
     });
   };

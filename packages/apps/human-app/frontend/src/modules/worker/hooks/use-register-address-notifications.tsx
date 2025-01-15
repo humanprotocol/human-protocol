@@ -1,5 +1,8 @@
 import { t } from 'i18next';
-import { useNotification } from '@/shared/hooks/use-notification';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
 import type { ResponseError } from '@/shared/types/global.type';
 
@@ -8,15 +11,15 @@ export function useRegisterAddressNotifications() {
 
   const onSuccess = () => {
     showNotification({
-      type: 'success',
+      type: TopNotificationType.SUCCESS,
       message: t('worker.registerAddress.success'),
     });
   };
   const onError = (error: ResponseError) => {
     showNotification({
-      type: 'warning',
+      type: TopNotificationType.WARNING,
       message: getErrorMessageForError(error),
-      duration: 5000,
+      durationMs: 5000,
     });
   };
 
