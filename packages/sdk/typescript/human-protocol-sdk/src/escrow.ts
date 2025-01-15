@@ -937,6 +937,7 @@ export class EscrowClient extends BaseEthersClient {
     amounts: bigint[],
     finalResultsUrl: string,
     finalResultsHash: string,
+    forceComplete = false,
     txOptions: Overrides = {}
   ): Promise<TransactionLikeWithNonce> {
     await this.ensureCorrectBulkPayoutInput(
@@ -952,13 +953,14 @@ export class EscrowClient extends BaseEthersClient {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
       const populatedTransaction = await escrowContract[
-        'bulkPayOut(address[],uint256[],string,string,uint256)'
+        'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
       ].populateTransaction(
         recipients,
         amounts,
         finalResultsUrl,
         finalResultsHash,
         DEFAULT_TX_ID,
+        forceComplete,
         txOptions
       );
 

@@ -1,6 +1,10 @@
 import * as openpgp from 'openpgp';
 import { IKeyPair } from './interfaces';
 
+/**
+ * Type representing the data type of a message.
+ * It can be either a string or a Uint8Array.
+ */
 type MessageDataType = string | Uint8Array;
 
 function makeMessageDataBinary(message: MessageDataType): Uint8Array {
@@ -94,7 +98,7 @@ export class Encryption {
   /**
    * This function signs and encrypts a message using the private key used to initialize the client and the specified public keys.
    *
-   * @param {string} message Message to sign and encrypt.
+   * @param {MessageDataType} message Message to sign and encrypt.
    * @param {string[]} publicKeys Array of public keys to use for encryption.
    * @returns {Promise<string>} Message signed and encrypted.
    *
@@ -400,7 +404,7 @@ export class EncryptionUtils {
   /**
    * This function encrypts a message using the specified public keys.
    *
-   * @param {string} message Message to encrypt.
+   * @param {MessageDataType} message Message to encrypt.
    * @param {string[]} publicKeys Array of public keys to use for encryption.
    * @returns {Promise<string>} Message encrypted.
    *

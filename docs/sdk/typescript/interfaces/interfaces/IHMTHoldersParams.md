@@ -18,7 +18,7 @@
 
 #### Defined in
 
-[interfaces.ts:105](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L105)
+[interfaces.ts:105](https://github.com/humanprotocol/human-protocol/blob/a1e2a06b28417189ba5afdeeabc4d8c772bbd90b/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L105)
 
 ***
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/a1e2a06b28417189ba5afdeeabc4d8c772bbd90b/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
 
 ***
 
@@ -46,7 +46,7 @@
 
 #### Defined in
 
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/a1e2a06b28417189ba5afdeeabc4d8c772bbd90b/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -60,4 +60,4 @@
 
 #### Defined in
 
-[interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)
+[interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/a1e2a06b28417189ba5afdeeabc4d8c772bbd90b/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)

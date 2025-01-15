@@ -388,6 +388,7 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl,
       escrowCompletionEntity.finalResultsHash,
+      false,
       {
         gasPrice: await this.web3Service.calculateGasPrice(
           escrowCompletionEntity.chainId,
