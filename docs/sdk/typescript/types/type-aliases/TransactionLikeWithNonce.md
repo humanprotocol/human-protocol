@@ -16,4 +16,4 @@
 
 ## Defined in
 
-[types.ts:174](https://github.com/humanprotocol/human-protocol/blob/56ae619ae33e232b0271b9dc076dbc65267827e9/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L174)
+[types.ts:174](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L174)

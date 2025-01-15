@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/56ae619ae33e232b0271b9dc076dbc65267827e9/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[interfaces.ts:102](https://github.com/humanprotocol/human-protocol/blob/56ae619ae33e232b0271b9dc076dbc65267827e9/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L102)
+[interfaces.ts:102](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L102)
 
 ***
 
@@ -46,7 +46,7 @@
 
 #### Defined in
 
-[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/56ae619ae33e232b0271b9dc076dbc65267827e9/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
+[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
 
 ***
 
@@ -60,7 +60,7 @@
 
 #### Defined in
 
-[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/56ae619ae33e232b0271b9dc076dbc65267827e9/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
+[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
 
 ***
 
@@ -70,4 +70,4 @@
 
 #### Defined in
 
-[interfaces.ts:103](https://github.com/humanprotocol/human-protocol/blob/56ae619ae33e232b0271b9dc076dbc65267827e9/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L103)
+[interfaces.ts:103](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L103)
