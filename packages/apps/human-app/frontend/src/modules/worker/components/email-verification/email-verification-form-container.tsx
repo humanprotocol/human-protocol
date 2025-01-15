@@ -17,6 +17,11 @@ export function EmailVerificationFormContainer() {
 
   const isAuthenticated = Boolean(user);
 
+  const handleCancel = () => {
+    signOut();
+    navigate(routerPaths.homePage);
+  };
+
   if (!routerState?.email) {
     return <PageCardLoader />;
   }
@@ -30,10 +35,7 @@ export function EmailVerificationFormContainer() {
           </Alert>
         ) : undefined
       }
-      cancelRouterPathOrCallback={() => {
-        signOut();
-        navigate(routerPaths.homePage);
-      }}
+      cancelRouterPathOrCallback={handleCancel}
       title="Verify Email"
     >
       <ResendVerificationEmailForm
