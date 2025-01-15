@@ -1,17 +1,17 @@
 export enum Role {
-  JobLauncher = 'Job Launcher',
-  ExchangeOracle = 'Exchange Oracle',
-  ReputationOracle = 'Reputation Oracle',
-  RecordingOracle = 'Recording Oracle',
+  JOB_LAUNCHER = 'Job Launcher',
+  EXCHANGE_ORACLE = 'Exchange Oracle',
+  REPUTATION_ORACLE = 'Reputation Oracle',
+  RECORDING_ORACLE = 'Recording Oracle',
 }
 
 export enum JobType {
-  Fortune = 'fortune',
-  Points = 'image_points',
-  BoundingBoxes = 'image_boxes',
-  BoundingBoxesFromPoints = 'image_boxes_from_points',
-  SkeletonsFromBoundingBoxes = 'image_skeletons_from_boxes',
-  Polygons = 'image_polygons',
+  FORTUNE = 'fortune',
+  POINTS = 'image_points',
+  BOUNDING_BOXES = 'image_boxes',
+  BOUNDING_BOXES_FROM_POINTS = 'image_boxes_from_points',
+  SKELETONS_FROM_BOUNDING_BOXES = 'image_skeletons_from_boxes',
+  POLYGONS = 'image_polygons',
 }
 
 export const EthKVStoreKeys = {

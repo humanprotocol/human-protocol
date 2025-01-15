@@ -20,7 +20,11 @@ import {
 } from '@/modules/operator/components/sign-up/add-keys/sort-form';
 import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
 
-const OPTIONS = [Role.ExchangeOracle, Role.JobLauncher, Role.RecordingOracle];
+const OPTIONS = [
+  Role.EXCHANGE_ORACLE,
+  Role.JOB_LAUNCHER,
+  Role.RECORDING_ORACLE,
+];
 
 const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
   [EthKVStoreKeys.Fee]: (
