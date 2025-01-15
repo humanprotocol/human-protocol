@@ -1,12 +1,10 @@
 import { Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
@@ -38,7 +36,6 @@ interface FormCardProps {
   cancelRouterPathOrCallback?: ButtonsProps;
   showCancelButton?: boolean;
   showArrowButton?: boolean;
-  withLayoutBackground?: boolean;
   loader?: boolean;
 }
 
@@ -50,14 +47,13 @@ export function PageCard({
   childrenMaxWidth = '486px',
   backArrowPath = -1,
   cancelRouterPathOrCallback = routerPaths.homePage,
-  withLayoutBackground = true,
   showCancelButton = true,
   showArrowButton = true,
 }: FormCardProps) {
   const { isDarkMode, colorPalette } = useColorMode();
-  const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
+
   const contentStyles = {
     maxWidth: maxContentWidth,
     width: '100%',
@@ -65,13 +61,6 @@ export function PageCard({
       maxWidth: 'unset',
     },
   };
-
-  useEffect(() => {
-    if (withLayoutBackground && !isDarkMode) {
-      setGrayBackground();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
 
   const goBack = (pathOrCallback: ButtonsProps) => {
     if (pathOrCallback instanceof Function) {
