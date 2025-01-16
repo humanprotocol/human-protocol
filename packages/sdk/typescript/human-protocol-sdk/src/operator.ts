@@ -22,16 +22,16 @@ import {
   ErrorUnsupportedChainID,
 } from './error';
 import { getSubgraphUrl } from './utils';
-import { ChainId } from './enums';
+import { ChainId, OrderDirection } from './enums';
 import { NETWORKS } from './constants';
 
 export class OperatorUtils {
   /**
    * This function returns the leader data for the given address.
    *
+   * @param {ChainId} chainId Network in which the leader is deployed
    * @param {string} address Leader address.
-   * @returns {ILeader} Returns the leader details.
-   *
+   * @returns {Promise<ILeader>} Returns the leader details.
    *
    * **Code example**
    *
@@ -91,13 +91,12 @@ export class OperatorUtils {
    * This function returns all the leader details of the protocol.
    *
    * @param {ILeadersFilter} filter Filter for the leaders.
-   * @returns {ILeader[]} Returns an array with all the leader details.
-   *
+   * @returns {Promise<ILeader[]>} Returns an array with all the leader details.
    *
    * **Code example**
    *
    * ```ts
-   * import { OperatorUtils } from '@human-protocol/sdk';
+   * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
    * const filter: ILeadersFilter = {
    *  chainId: ChainId.POLYGON
@@ -108,6 +107,14 @@ export class OperatorUtils {
   public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
     let leaders_data: ILeader[] = [];
 
+    const first =
+      filter.first !== undefined && filter.first > 0
+        ? Math.min(filter.first, 1000)
+        : 10;
+    const skip =
+      filter.skip !== undefined && filter.skip >= 0 ? filter.skip : 0;
+    const orderDirection = filter.orderDirection || OrderDirection.DESC;
+
     const networkData = NETWORKS[filter.chainId];
 
     if (!networkData) {
@@ -117,7 +124,12 @@ export class OperatorUtils {
     const { leaders } = await gqlFetch<{
       leaders: ILeaderSubgraph[];
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
-      role: filter?.role,
+      minAmountStaked: filter?.minAmountStaked,
+      roles: filter?.roles,
+      orderBy: filter?.orderBy,
+      orderDirection: orderDirection,
+      first: first,
+      skip: skip,
     });
 
     if (!leaders) {
@@ -158,12 +170,14 @@ export class OperatorUtils {
   /**
    * Retrieves the reputation network operators of the specified address.
    *
-   * @param {string} address - Address of the reputation oracle.
+   * @param {ChainId} chainId Network in which the reputation network is deployed
+   * @param {string} address Address of the reputation oracle.
    * @param {string} [role] - (Optional) Role of the operator.
    * @returns {Promise<IOperator[]>} - Returns an array of operator details.
    *
-   * @example
-   * ```typescript
+   * **Code example**
+   *
+   * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
    * const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
@@ -207,9 +221,9 @@ export class OperatorUtils {
   /**
    * This function returns information about the rewards for a given slasher address.
    *
+   * @param {ChainId} chainId Network in which the rewards are deployed
    * @param {string} slasherAddress Slasher address.
-   * @returns {IReward[]} Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
-   *
+   * @returns {Promise<IReward[]>} Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
    *
    * **Code example**
    *

@@ -17,9 +17,6 @@ export const apiPaths = {
   leaderboardDetails: {
     path: '/details/leaders',
   },
-  leaderboardDetailsAll: {
-    path: '/details/leaders/all',
-  },
   addressDetails: {
     path: '/details',
   },
@@ -28,5 +25,8 @@ export const apiPaths = {
   },
   escrowDetails: {
     path: '/details/escrows',
+  },
+  enabledChains: {
+    path: '/networks/operating',
   },
 } as const;

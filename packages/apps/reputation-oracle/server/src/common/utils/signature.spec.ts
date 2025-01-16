@@ -1,6 +1,6 @@
 import { verifySignature, recoverSigner, signMessage } from './signature';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { ErrorAuth, ErrorSignature } from '../constants/errors';
+import { ErrorSignature } from '../constants/errors';
 import { ControlledError } from '../errors/controlled';
 import { HttpStatus } from '@nestjs/common';
 
@@ -13,7 +13,7 @@ jest.doMock('ethers', () => {
             return 'recovered-address';
           } else {
             throw new ControlledError(
-              ErrorAuth.InvalidSignature,
+              ErrorSignature.InvalidSignature,
               HttpStatus.UNAUTHORIZED,
             );
           }

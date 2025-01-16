@@ -6,6 +6,10 @@
 
 # Interface: ILeadersFilter
 
+## Extends
+
+- [`IPagination`](IPagination.md)
+
 ## Properties
 
 ### chainId
@@ -14,14 +18,76 @@
 
 #### Defined in
 
-[interfaces.ts:39](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L39)
+[interfaces.ts:39](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L39)
 
 ***
 
-### role?
+### first?
 
-> `optional` **role**: `string`
+> `optional` **first**: `number`
+
+#### Inherited from
+
+[`IPagination`](IPagination.md).[`first`](IPagination.md#first)
 
 #### Defined in
 
-[interfaces.ts:40](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L40)
+[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+
+***
+
+### minAmountStaked?
+
+> `optional` **minAmountStaked**: `number`
+
+#### Defined in
+
+[interfaces.ts:41](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L41)
+
+***
+
+### orderBy?
+
+> `optional` **orderBy**: `string`
+
+#### Defined in
+
+[interfaces.ts:42](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L42)
+
+***
+
+### orderDirection?
+
+> `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
+
+#### Inherited from
+
+[`IPagination`](IPagination.md).[`orderDirection`](IPagination.md#orderdirection)
+
+#### Defined in
+
+[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+
+***
+
+### roles?
+
+> `optional` **roles**: `string`[]
+
+#### Defined in
+
+[interfaces.ts:40](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L40)
+
+***
+
+### skip?
+
+> `optional` **skip**: `number`
+
+#### Inherited from
+
+[`IPagination`](IPagination.md).[`skip`](IPagination.md#skip)
+
+#### Defined in
+
+[interfaces.ts:156](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L156)

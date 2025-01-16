@@ -8,7 +8,7 @@ import {
   MINIMUM_HMT_TRANSFERS,
 } from '../../common/config/env-config.service';
 import { OPERATING_NETWORKS_CACHE_KEY } from '../../common/config/redis-config.service';
-import { MAINNET_CHAIN_IDS } from '../../common/utils/constants';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 
 @Injectable()
 export class NetworksService {
@@ -16,6 +16,7 @@ export class NetworksService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly envConfigService: EnvironmentConfigService,
+    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   public async getOperatingNetworks(): Promise<ChainId[]> {
@@ -38,8 +39,8 @@ export class NetworksService {
 
     const availableNetworks = [];
 
-    for (const chainId of Object.values(MAINNET_CHAIN_IDS)) {
-      const networkConfig = NETWORKS[chainId];
+    for (const network of Object.values(this.networkConfigService.networks)) {
+      const networkConfig = NETWORKS[network.chainId];
       if (!networkConfig) continue;
 
       const statisticsClient = new StatisticsClient(networkConfig);
@@ -64,11 +65,11 @@ export class NetworksService {
           totalTransactionCount > MINIMUM_HMT_TRANSFERS;
 
         if (recentEscrowsCreated && sufficientHMTTransfers) {
-          availableNetworks.push(chainId);
+          availableNetworks.push(network.chainId);
         }
       } catch (error) {
         this.logger.error(
-          `Error processing network ${chainId}: ${error.message}`,
+          `Error processing network ${network.chainId}: ${error.message}`,
         );
       }
     }

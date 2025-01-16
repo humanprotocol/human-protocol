@@ -8,19 +8,19 @@
 
 ## Introduction
 
-This client enables to perform actions on Escrow contracts and obtain information from both the contracts and subgraph.
+This client enables performing actions on Escrow contracts and obtaining information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the `runner`.
 To use this client, it is recommended to initialize it using the static `build` method.
 
 ```ts
-static async build(runner: ContractRunner);
+static async build(runner: ContractRunner): Promise<EscrowClient>;
 ```
 
 A `Signer` or a `Provider` should be passed depending on the use case of this module:
 
-- **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
-- **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+- **Signer**: when the user wants to use this model to send transactions calling the contract functions.
+- **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
 
 ## Installation
 
@@ -38,21 +38,21 @@ yarn install @human-protocol/sdk
 
 ### Signer
 
-**Using private key(backend)**
+**Using private key (backend)**
 
 ```ts
 import { EscrowClient } from '@human-protocol/sdk';
 import { Wallet, providers } from 'ethers';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const escrowClient = await EscrowClient.build(signer);
 ```
 
-**Using Wagmi(frontend)**
+**Using Wagmi (frontend)**
 
 ```ts
 import { useSigner, useChainId } from 'wagmi';
@@ -110,7 +110,7 @@ The network information required to connect to the Escrow contract
 
 #### Defined in
 
-[escrow.ts:136](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L136)
+[escrow.ts:138](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L138)
 
 ## Properties
 
@@ -124,7 +124,7 @@ The network information required to connect to the Escrow contract
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -138,7 +138,7 @@ The network information required to connect to the Escrow contract
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -183,25 +183,25 @@ import { Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const escrowClient = await EscrowClient.build(signer);
 
-const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266']
+const trustedHandlers = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
 await escrowClient.addTrustedHandlers('0x62dD51230A30401C455c8398d06F85e4EaB6309f', trustedHandlers);
 ```
 
 #### Defined in
 
-[escrow.ts:802](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L802)
+[escrow.ts:766](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L766)
 
 ***
 
 ### bulkPayOut()
 
-> **bulkPayOut**(`escrowAddress`, `recipients`, `amounts`, `finalResultsUrl`, `finalResultsHash`, `forceComplete`, `txOptions`?): `Promise`\<`void`\>
+> **bulkPayOut**(`escrowAddress`, `recipients`, `amounts`, `finalResultsUrl`, `finalResultsHash`, `txId`, `forceComplete`, `txOptions`?): `Promise`\<`void`\>
 
 This function pays out the amounts specified to the workers and sets the URL of the final results file.
 
@@ -229,13 +229,19 @@ Array of amounts the recipients will receive.
 
 `string`
 
-Final results file url.
+Final results file URL.
 
 ##### finalResultsHash
 
 `string`
 
 Final results file hash.
+
+##### txId
+
+`number`
+
+Transaction ID.
 
 ##### forceComplete
 
@@ -264,7 +270,7 @@ import { ethers, Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -273,14 +279,15 @@ const escrowClient = await EscrowClient.build(signer);
 const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
 const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
 const resultsUrl = 'http://localhost/results.json';
-const resultsHash'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+const txId = 1;
 
-await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
+await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
 ```
 
 #### Defined in
 
-[escrow.ts:595](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L595)
+[escrow.ts:599](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L599)
 
 ***
 
@@ -319,7 +326,7 @@ import { ethers, Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -330,7 +337,7 @@ await escrowClient.cancel('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 
 #### Defined in
 
-[escrow.ts:716](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L716)
+[escrow.ts:680](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L680)
 
 ***
 
@@ -369,7 +376,7 @@ import { Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -380,7 +387,103 @@ await escrowClient.complete('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 
 #### Defined in
 
-[escrow.ts:536](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L536)
+[escrow.ts:538](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L538)
+
+***
+
+### createBulkPayoutTransaction()
+
+> **createBulkPayoutTransaction**(`escrowAddress`, `recipients`, `amounts`, `finalResultsUrl`, `finalResultsHash`, `txId`, `forceComplete`, `txOptions`?): `Promise`\<[`TransactionLikeWithNonce`](../../types/type-aliases/TransactionLikeWithNonce.md)\>
+
+Creates a prepared transaction for bulk payout without immediately sending it.
+
+#### Parameters
+
+##### escrowAddress
+
+`string`
+
+Escrow address to payout.
+
+##### recipients
+
+`string`[]
+
+Array of recipient addresses.
+
+##### amounts
+
+`bigint`[]
+
+Array of amounts the recipients will receive.
+
+##### finalResultsUrl
+
+`string`
+
+Final results file URL.
+
+##### finalResultsHash
+
+`string`
+
+Final results file hash.
+
+##### txId
+
+`number`
+
+Transaction ID.
+
+##### forceComplete
+
+`boolean` = `false`
+
+Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
+
+##### txOptions?
+
+`Overrides` = `{}`
+
+Additional transaction parameters (optional, defaults to an empty object).
+
+#### Returns
+
+`Promise`\<[`TransactionLikeWithNonce`](../../types/type-aliases/TransactionLikeWithNonce.md)\>
+
+Returns object with raw transaction and signed transaction hash
+
+**Code example**
+
+> Only Reputation Oracle or a trusted handler can call it.
+
+```ts
+import { ethers, Wallet, providers } from 'ethers';
+import { EscrowClient } from '@human-protocol/sdk';
+
+const rpcUrl = 'YOUR_RPC_URL';
+const privateKey = 'YOUR_PRIVATE_KEY'
+
+const provider = new providers.JsonRpcProvider(rpcUrl);
+const signer = new Wallet(privateKey, provider);
+const escrowClient = await EscrowClient.build(signer);
+
+const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
+const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
+const resultsUrl = 'http://localhost/results.json';
+const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+const txId = 1;
+
+const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
+console.log('Raw transaction:', rawTransaction);
+
+const signedTransaction = await signer.signTransaction(rawTransaction);
+console.log('Tx hash:', ethers.keccak256(signedTransaction));
+(await signer.sendTransaction(rawTransaction)).wait();
+
+#### Defined in
+
+[escrow.ts:935](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L935)
 
 ***
 
@@ -396,7 +499,7 @@ This function creates an escrow contract that uses the token passed to pay oracl
 
 `string`
 
-Token address to use for pay outs.
+Token address to use for payouts.
 
 ##### trustedHandlers
 
@@ -420,7 +523,7 @@ Additional transaction parameters (optional, defaults to an empty object).
 
 `Promise`\<`string`\>
 
-Return the address of the escrow created.
+Returns the address of the escrow created.
 
 **Code example**
 
@@ -431,7 +534,7 @@ import { Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -445,7 +548,7 @@ const escrowAddress = await escrowClient.createEscrow(tokenAddress, trustedHandl
 
 #### Defined in
 
-[escrow.ts:216](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L216)
+[escrow.ts:218](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L218)
 
 ***
 
@@ -488,7 +591,7 @@ import { ethers, Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -500,7 +603,7 @@ await escrowClient.fund('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 
 #### Defined in
 
-[escrow.ts:407](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L407)
+[escrow.ts:409](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L409)
 
 ***
 
@@ -533,14 +636,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const balance = await escrowClient.getBalance('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:950](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L950)
+[escrow.ts:1080](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1080)
 
 ***
 
@@ -573,14 +676,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const oracleAddress = await escrowClient.getExchangeOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1336](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1336)
+[escrow.ts:1466](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1466)
 
 ***
 
@@ -613,14 +716,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const factoryAddress = await escrowClient.getFactoryAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1374](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1374)
+[escrow.ts:1504](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1504)
 
 ***
 
@@ -653,14 +756,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
-const intemediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+const intermediateResultsUrl = await escrowClient.getIntermediateResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1108](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1108)
+[escrow.ts:1238](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1238)
 
 ***
 
@@ -693,14 +796,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const jobLauncherAddress = await escrowClient.getJobLauncherAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1260](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1260)
+[escrow.ts:1390](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1390)
 
 ***
 
@@ -733,14 +836,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const manifestHash = await escrowClient.getManifestHash('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:994](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L994)
+[escrow.ts:1124](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1124)
 
 ***
 
@@ -773,14 +876,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const manifestUrl = await escrowClient.getManifestUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1032](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1032)
+[escrow.ts:1162](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1162)
 
 ***
 
@@ -813,14 +916,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const oracleAddress = await escrowClient.getRecordingOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1222](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1222)
+[escrow.ts:1352](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1352)
 
 ***
 
@@ -853,14 +956,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const oracleAddress = await escrowClient.getReputationOracleAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1298](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1298)
+[escrow.ts:1428](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1428)
 
 ***
 
@@ -893,14 +996,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const resultsUrl = await escrowClient.getResultsUrl('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1070](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1070)
+[escrow.ts:1200](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1200)
 
 ***
 
@@ -933,14 +1036,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const status = await escrowClient.getStatus('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1184](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1184)
+[escrow.ts:1314](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1314)
 
 ***
 
@@ -973,14 +1076,14 @@ import { EscrowClient } from '@human-protocol/sdk';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const escrowClient = await EscrowClient.build(signer);
+const escrowClient = await EscrowClient.build(provider);
 
 const tokenAddress = await escrowClient.getTokenAddress('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[escrow.ts:1146](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1146)
+[escrow.ts:1276](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1276)
 
 ***
 
@@ -1025,7 +1128,7 @@ import { Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -1036,10 +1139,10 @@ const escrowConfig = {
    recordingOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    reputationOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    exchangeOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   recordingOracleFee: bigint.from('10'),
-   reputationOracleFee: bigint.from('10'),
-   exchangeOracleFee: bigint.from('10'),
-   manifestUrl: 'htttp://localhost/manifest.json',
+   recordingOracleFee: BigInt('10'),
+   reputationOracleFee: BigInt('10'),
+   exchangeOracleFee: BigInt('10'),
+   manifestUrl: 'http://localhost/manifest.json',
    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
 };
 await escrowClient.setup(escrowAddress, escrowConfig);
@@ -1047,7 +1150,7 @@ await escrowClient.setup(escrowAddress, escrowConfig);
 
 #### Defined in
 
-[escrow.ts:297](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L297)
+[escrow.ts:299](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L299)
 
 ***
 
@@ -1055,7 +1158,7 @@ await escrowClient.setup(escrowAddress, escrowConfig);
 
 > **storeResults**(`escrowAddress`, `url`, `hash`, `txOptions`?): `Promise`\<`void`\>
 
-This function stores the results url and hash.
+This function stores the results URL and hash.
 
 #### Parameters
 
@@ -1069,7 +1172,7 @@ Address of the escrow.
 
 `string`
 
-Results file url.
+Results file URL.
 
 ##### hash
 
@@ -1098,18 +1201,18 @@ import { ethers, Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const escrowClient = await EscrowClient.build(signer);
 
-await storeResults.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
+await escrowClient.storeResults('0x62dD51230A30401C455c8398d06F85e4EaB6309f', 'http://localhost/results.json', 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079');
 ```
 
 #### Defined in
 
-[escrow.ts:472](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L472)
+[escrow.ts:474](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L474)
 
 ***
 
@@ -1154,7 +1257,7 @@ import { ethers, Wallet, providers } from 'ethers';
 import { EscrowClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -1168,7 +1271,7 @@ await escrowClient.withdraw(
 
 #### Defined in
 
-[escrow.ts:868](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L868)
+[escrow.ts:832](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L832)
 
 ***
 
@@ -1202,4 +1305,4 @@ Thrown if the network's chainId is not supported
 
 #### Defined in
 
-[escrow.ts:154](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L154)
+[escrow.ts:156](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L156)

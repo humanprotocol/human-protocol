@@ -11,7 +11,7 @@ Code Example
 
     print(
         OperatorUtils.get_leaders(
-            LeaderFilter(networks=[ChainId.POLYGON_AMOY], role="Job Launcher")
+            LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
         )
     )
 
@@ -23,7 +23,7 @@ import logging
 import os
 from typing import List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import NETWORKS, ChainId, OrderDirection
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.utils import get_data_from_subgraph
 from web3 import Web3
@@ -33,7 +33,7 @@ LOG = logging.getLogger("human_protocol_sdk.operator")
 
 class OperatorUtilsError(Exception):
     """
-    Raises when some error happens when interacting with operator.
+    Raised when an error occurs while interacting with the operator.
     """
 
     pass
@@ -44,19 +44,43 @@ class LeaderFilter:
     A class used to filter leaders.
     """
 
-    def __init__(self, chain_id: ChainId, role: Optional[str] = None):
+    def __init__(
+        self,
+        chain_id: ChainId,
+        roles: Optional[str] = [],
+        min_amount_staked: int = None,
+        order_by: Optional[str] = None,
+        order_direction: OrderDirection = OrderDirection.DESC,
+        first: int = 10,
+        skip: int = 0,
+    ):
         """
         Initializes a LeaderFilter instance.
 
-        :param chain_id: Chain Id to request data
-        :param role: Leader role
+        :param chain_id: Chain ID to request data
+        :param roles: Roles to filter by
+        :param min_amount_staked: Minimum amount staked to filter by
+        :param order_by: Property to order by, e.g., "role"
+        :param order_direction: Order direction of results, "asc" or "desc"
+        :param first: Number of items per page
+        :param skip: Number of items to skip (for pagination)
         """
 
         if chain_id not in ChainId:
             raise OperatorUtilsError("Invalid ChainId")
 
+        if order_direction.value not in set(
+            order_direction.value for order_direction in OrderDirection
+        ):
+            raise OperatorUtilsError("Invalid order direction")
+
         self.chain_id = chain_id
-        self.role = role
+        self.roles = roles
+        self.min_amount_staked = min_amount_staked
+        self.order_by = order_by
+        self.order_direction = order_direction
+        self.first = min(max(first, 1), 1000)
+        self.skip = max(skip, 0)
 
 
 class LeaderData:
@@ -84,7 +108,7 @@ class LeaderData:
         reputation_networks: Optional[List[str]] = None,
     ):
         """
-        Initializes an LeaderData instance.
+        Initializes a LeaderData instance.
 
         :param chain_id: Chain Identifier
         :param id: Identifier
@@ -99,12 +123,12 @@ class LeaderData:
         :param role: Role
         :param fee: Fee
         :param public_key: Public key
-        :param webhook_url: Webhook url
-        :param website: Website url
-        :param url: Url
+        :param webhook_url: Webhook URL
+        :param website: Website URL
+        :param url: URL
         :param job_types: Job types
-        :param registration_needed: True
-        :param registration_instructions: Instructions url
+        :param registration_needed: Whether registration is needed
+        :param registration_instructions: Registration instructions
         :param reputation_networks: List of reputation networks
         """
 
@@ -162,8 +186,10 @@ class Operator:
 
         :param address: Operator address
         :param role: Role of the operator
-        :param registration_needed: True,
-        :param registration_instructions: Instructions url,
+        :param url: URL of the operator
+        :param job_types: List of job types
+        :param registration_needed: Whether registration is needed
+        :param registration_instructions: Registration instructions
         """
 
         self.address = address
@@ -181,7 +207,7 @@ class OperatorUtils:
 
     @staticmethod
     def get_leaders(filter: LeaderFilter) -> List[LeaderData]:
-        """Get leaders data of the protocol
+        """Get leaders data of the protocol.
 
         :param filter: Leader filter
 
@@ -195,7 +221,7 @@ class OperatorUtils:
 
                 print(
                     OperatorUtils.get_leaders(
-                        LeaderFilter(chain_id=ChainId.POLYGON_AMOY)
+                        LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
                     )
                 )
         """
@@ -211,8 +237,16 @@ class OperatorUtils:
         leaders_data = get_data_from_subgraph(
             network,
             query=get_leaders_query(filter),
-            params={"role": filter.role},
+            params={
+                "minAmountStaked": filter.min_amount_staked,
+                "roles": filter.roles,
+                "orderBy": filter.order_by,
+                "orderDirection": filter.order_direction.value,
+                "first": filter.first,
+                "skip": filter.skip,
+            },
         )
+
         if (
             not leaders_data
             or "data" not in leaders_data
@@ -281,7 +315,7 @@ class OperatorUtils:
         chain_id: ChainId,
         leader_address: str,
     ) -> Optional[LeaderData]:
-        """Get the leader details.
+        """Gets the leader details.
 
         :param chain_id: Network in which the leader exists
         :param leader_address: Address of the leader
@@ -294,10 +328,11 @@ class OperatorUtils:
                 from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.operator import OperatorUtils
 
-                leader = OperatorUtils.get_leader(
-                    ChainId.POLYGON_AMOY,
-                    '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
-                )
+                chain_id = ChainId.POLYGON_AMOY
+                leader_address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+
+                leader_data = OperatorUtils.get_leader(chain_id, leader_address)
+                print(leader_data)
         """
 
         from human_protocol_sdk.gql.operator import get_leader_query
@@ -392,10 +427,11 @@ class OperatorUtils:
                 from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.operator import OperatorUtils
 
-                leader = OperatorUtils.get_reputation_network_operators(
+                operators = OperatorUtils.get_reputation_network_operators(
                     ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
+                print(operators)
         """
 
         from human_protocol_sdk.gql.operator import get_reputation_network_query
@@ -446,7 +482,7 @@ class OperatorUtils:
 
     @staticmethod
     def get_rewards_info(chain_id: ChainId, slasher: str) -> List[RewardData]:
-        """Get rewards of the given slasher
+        """Get rewards of the given slasher.
 
         :param chain_id: Network in which the slasher exists
         :param slasher: Address of the slasher
@@ -463,6 +499,7 @@ class OperatorUtils:
                     ChainId.POLYGON_AMOY,
                     '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
                 )
+                print(rewards_info)
         """
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):

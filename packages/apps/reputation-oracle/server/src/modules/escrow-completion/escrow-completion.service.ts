@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import crypto from 'crypto';
+import { ethers } from 'ethers';
+import stringify from 'json-stable-stringify';
+import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { EscrowCompletionStatus, EventType } from '../../common/enums';
@@ -6,24 +10,28 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {
+  ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
   EscrowClient,
   EscrowStatus,
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
-import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
+import {
+  BACKOFF_INTERVAL_SECONDS,
+  DEFAULT_BULK_PAYOUT_TX_ID,
+} from '../../common/constants';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import {
-  ErrorEscrowCompletion,
-  ErrorWebhook,
-} from '../../common/constants/errors';
+import { ErrorEscrowCompletion } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/utils/database';
+import { CalculatedPayout } from '../payout/payout.interface';
+import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
+import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
 
 @Injectable()
 export class EscrowCompletionService {
@@ -31,6 +39,7 @@ export class EscrowCompletionService {
 
   constructor(
     private readonly escrowCompletionRepository: EscrowCompletionRepository,
+    private readonly escrowPayoutsBatchRepository: EscrowPayoutsBatchRepository,
     private readonly web3Service: Web3Service,
     private readonly webhookOutgoingService: WebhookOutgoingService,
     private readonly payoutService: PayoutService,
@@ -119,21 +128,49 @@ export class EscrowCompletionService {
             );
           }
 
-          await this.payoutService.executePayouts(
+          const calculatedPayouts = await this.payoutService.calculatePayouts(
             escrowCompletionEntity.chainId,
             escrowCompletionEntity.escrowAddress,
             escrowCompletionEntity.finalResultsUrl,
-            escrowCompletionEntity.finalResultsHash,
+          );
+
+          /**
+           * When creating payout batches we need to guarantee deterministic result,
+           * so order it first.
+           */
+          const payoutBatches = _.chunk(
+            _.orderBy(calculatedPayouts, 'address', 'asc'),
+            ESCROW_BULK_PAYOUT_MAX_ITEMS,
+          );
+
+          await Promise.all(
+            payoutBatches.map(async (payoutsBatch) => {
+              try {
+                await this.createEscrowPayoutsBatch(
+                  escrowCompletionEntity.id,
+                  payoutsBatch,
+                );
+              } catch (error) {
+                if (isDuplicatedError(error)) {
+                  /**
+                   * Already created. Noop.
+                   */
+                  return;
+                }
+
+                throw error;
+              }
+            }),
           );
         }
 
-        escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+        escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
-      } catch (err) {
+      } catch (error) {
         const errorId = uuidv4();
         const failureDetail = `${ErrorEscrowCompletion.PendingProcessingFailed} (Error ID: ${errorId})`;
         this.logger.error(
-          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${error.message}`,
         );
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
@@ -160,7 +197,7 @@ export class EscrowCompletionService {
 
         const escrowStatus = await escrowClient.getStatus(escrowAddress);
 
-        if (escrowStatus === EscrowStatus.Paid) {
+        if ([EscrowStatus.Partial, EscrowStatus.Paid].includes(escrowStatus)) {
           await escrowClient.complete(escrowAddress, {
             gasPrice: await this.web3Service.calculateGasPrice(chainId),
           });
@@ -206,7 +243,8 @@ export class EscrowCompletionService {
         for (const url of callbackUrls) {
           if (!url) {
             throw new ControlledError(
-              ErrorWebhook.UrlNotFound,
+              // This is a temporary solution during the refactoring phase.
+              'Webhook url not found',
               HttpStatus.NOT_FOUND,
             );
           }
@@ -256,6 +294,131 @@ export class EscrowCompletionService {
           failureDetail,
         );
       }
+    }
+  }
+
+  public async createEscrowPayoutsBatch(
+    escrowCompletionId: number,
+    payoutsBatch: CalculatedPayout[],
+  ): Promise<void> {
+    const formattedPayouts = payoutsBatch.map((payout) => ({
+      ...payout,
+      amount: payout.amount.toString(),
+    }));
+
+    const batchHash = crypto
+      .createHash('sha1')
+      .update(stringify(formattedPayouts))
+      .digest('hex');
+
+    const escrowPayoutsBatchEntity = new EscrowPayoutsBatchEntity();
+    escrowPayoutsBatchEntity.escrowCompletionTrackingId = escrowCompletionId;
+    escrowPayoutsBatchEntity.payouts = formattedPayouts;
+    escrowPayoutsBatchEntity.payoutsHash = batchHash;
+
+    await this.escrowPayoutsBatchRepository.createUnique(
+      escrowPayoutsBatchEntity,
+    );
+  }
+
+  public async processAwaitingPayouts(): Promise<void> {
+    const escrowCompletionEntities =
+      await this.escrowCompletionRepository.findByStatus(
+        EscrowCompletionStatus.AWAITING_PAYOUTS,
+      );
+
+    for (const escrowCompletionEntity of escrowCompletionEntities) {
+      try {
+        const payoutBatches =
+          await this.escrowPayoutsBatchRepository.findForEscrowCompletionTracking(
+            escrowCompletionEntity.id,
+          );
+
+        let hasFailedPayouts = false;
+        for (const payoutsBatch of payoutBatches) {
+          try {
+            await this.processPayoutsBatch(
+              escrowCompletionEntity,
+              payoutsBatch,
+            );
+          } catch (error) {
+            this.logger.error(
+              `Failed to process payouts batch ${payoutsBatch.id}`,
+              error,
+            );
+            hasFailedPayouts = true;
+          }
+        }
+
+        if (hasFailedPayouts) {
+          throw new Error('Not all payouts batches succeeded');
+        } else {
+          escrowCompletionEntity.status = EscrowCompletionStatus.PAID;
+          await this.escrowCompletionRepository.updateOne(
+            escrowCompletionEntity,
+          );
+        }
+      } catch (error) {
+        const errorId = uuidv4();
+        const failureDetail = `${ErrorEscrowCompletion.AwaitingPayoutsProcessingFailed} (Error ID: ${errorId})`;
+        this.logger.error(
+          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${error.message}`,
+        );
+        await this.handleEscrowCompletionError(
+          escrowCompletionEntity,
+          failureDetail,
+        );
+        continue;
+      }
+    }
+  }
+
+  private async processPayoutsBatch(
+    escrowCompletionEntity: EscrowCompletionEntity,
+    payoutsBatch: EscrowPayoutsBatchEntity,
+  ): Promise<void> {
+    const signer = this.web3Service.getSigner(escrowCompletionEntity.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const recipientToAmountMap = new Map<string, bigint>();
+    for (const { address, amount } of payoutsBatch.payouts) {
+      recipientToAmountMap.set(address, BigInt(amount));
+    }
+
+    const rawTransaction = await escrowClient.createBulkPayoutTransaction(
+      escrowCompletionEntity.escrowAddress,
+      Array.from(recipientToAmountMap.keys()),
+      Array.from(recipientToAmountMap.values()),
+      escrowCompletionEntity.finalResultsUrl,
+      escrowCompletionEntity.finalResultsHash,
+      DEFAULT_BULK_PAYOUT_TX_ID,
+      false,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(
+          escrowCompletionEntity.chainId,
+        ),
+        nonce: payoutsBatch.txNonce,
+      },
+    );
+
+    if (!payoutsBatch.txNonce) {
+      payoutsBatch.txNonce = rawTransaction.nonce;
+    }
+
+    await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
+
+    try {
+      const transactionResponse = await signer.sendTransaction(rawTransaction);
+      await transactionResponse.wait();
+
+      await this.escrowPayoutsBatchRepository.deleteOne(payoutsBatch);
+    } catch (error) {
+      if (ethers.isError(error, 'NONCE_EXPIRED')) {
+        delete payoutsBatch.txNonce;
+        await this.escrowPayoutsBatchRepository.updateOne(payoutsBatch);
+      }
+
+      throw error;
     }
   }
 }

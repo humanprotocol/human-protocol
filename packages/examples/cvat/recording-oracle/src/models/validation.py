@@ -1,12 +1,19 @@
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 
+import json
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.sql import func
 
+from src.core.gt_stats import GtKey
 from src.core.types import Networks
 from src.db import Base
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class Task(Base):
@@ -58,6 +65,7 @@ class GtStats(Base):
         String, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True, nullable=False
     )
     gt_frame_name = Column(String, primary_key=True, nullable=False)
+    label_set = Column(String, primary_key=True, nullable=False)
 
     failed_attempts = Column(Integer, default=0, nullable=False)
     accepted_attempts = Column(Integer, default=0, nullable=False)
@@ -68,3 +76,15 @@ class GtStats(Base):
     enabled = Column(Boolean, default=True, nullable=False)
 
     task: Mapped[Task] = relationship(back_populates="gt_stats")
+
+    @property
+    def gt_key(self) -> GtKey:
+        return GtKey(filename=self.gt_frame_name, labels=self.decode_label_set(self.label_set))
+
+    @staticmethod
+    def decode_label_set(data: str) -> Sequence[str]:
+        return json.loads(data)
+
+    @staticmethod
+    def encode_label_set(labels: set[str]) -> str:
+        return json.dumps(sorted(labels))

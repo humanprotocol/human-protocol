@@ -212,3 +212,5 @@ YQewhcp3TUu3pEsG0j8BF+0/ajgt8o6HaC6eBY0BIdUq2nQLo/4IOKMOhMNR
 a4M5ieM80J/k+DaMAmHMsTjwAqQGBWTeqe7w6aHgRvU=
 =/oOd
 -----END PGP MESSAGE-----`;
+
+export const DEFAULT_TX_ID = 1;

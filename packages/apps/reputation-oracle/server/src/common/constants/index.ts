@@ -5,6 +5,7 @@ export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
 export const JWT_PREFIX = 'bearer ';
+export const JWT_STRATEGY_NAME = 'jwt-http';
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
 export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
@@ -17,6 +18,7 @@ export const SENDGRID_TEMPLATES = {
 
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
+export const DEFAULT_BULK_PAYOUT_TX_ID = 1;
 
 export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_BOXES,

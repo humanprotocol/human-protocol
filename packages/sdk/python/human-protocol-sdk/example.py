@@ -1,5 +1,4 @@
 import datetime
-import json
 
 from human_protocol_sdk.constants import ChainId, Status
 from human_protocol_sdk.escrow import EscrowUtils
@@ -10,7 +9,6 @@ from human_protocol_sdk.statistics import (
 )
 from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
 from human_protocol_sdk.agreement import agreement
-from human_protocol_sdk.transaction import TransactionUtils, TransactionFilter
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):
@@ -113,9 +111,22 @@ def get_leaders():
     print(OperatorUtils.get_leader(ChainId.POLYGON_AMOY, leaders[0].address))
     print(
         OperatorUtils.get_leaders(
-            LeaderFilter(chain_id=ChainId.POLYGON_AMOY, role="Job Launcher")
+            LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
         )
     )
+    leaders = OperatorUtils.get_leaders(
+        LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
+    )
+    print(len(leaders))
+
+    leaders = OperatorUtils.get_leaders(
+        LeaderFilter(
+            chain_id=ChainId.POLYGON_AMOY,
+            min_amount_staked=1,
+            roles=["Job Launcher", "Reputation Oracle"],
+        )
+    )
+    print(len(leaders))
 
 
 def agreement_example():

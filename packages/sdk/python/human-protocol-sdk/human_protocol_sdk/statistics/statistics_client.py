@@ -21,7 +21,6 @@ import logging
 from typing import List, Optional
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
-from human_protocol_sdk.gql.hmtoken import get_holders_query
 
 from human_protocol_sdk.utils import get_data_from_subgraph
 from human_protocol_sdk.filter import StatisticsFilter
@@ -302,7 +301,7 @@ class StatisticsClient:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient
                 from human_protocol_sdk.filter import StatisticsFilter
 
@@ -380,7 +379,7 @@ class StatisticsClient:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient
                 from human_protocol_sdk.filter import StatisticsFilter
 
@@ -437,7 +436,7 @@ class StatisticsClient:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient
                 from human_protocol_sdk.filter import StatisticsFilter
 
@@ -498,7 +497,7 @@ class StatisticsClient:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
@@ -538,7 +537,7 @@ class StatisticsClient:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
@@ -578,7 +577,7 @@ class StatisticsClient:
     def get_hmt_daily_data(
         self, filter: StatisticsFilter = StatisticsFilter()
     ) -> List[DailyHMTData]:
-        """Get HMT dailt statistics data for the given date range.
+        """Get HMT daily statistics data for the given date range.
 
         :param filter: Object containing the date range
 
@@ -587,7 +586,7 @@ class StatisticsClient:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.constants import ChainId
                 from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
 
                 statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)

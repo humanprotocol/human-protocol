@@ -1,17 +1,4 @@
 /**
- * Represents error messages related to webhook.
- */
-export enum ErrorWebhook {
-  NotFound = 'Webhook not found',
-  UrlNotFound = 'Webhook url not found',
-  NotCreated = 'Webhook has not been created',
-  InvalidEventType = 'Invalid event type',
-  NotSent = 'Webhook was not sent',
-  PendingProcessingFailed = 'Failed to process pending webhook',
-  PaidProcessingFailed = 'Failed to process paid webhook',
-}
-
-/**
  * Represents error messages related to escrow completion.
  */
 export enum ErrorEscrowCompletion {
@@ -19,15 +6,7 @@ export enum ErrorEscrowCompletion {
   NotCreated = 'Escrow completion has not been created',
   PendingProcessingFailed = 'Failed to process pending escrow completion',
   PaidProcessingFailed = 'Failed to process paid escrow completion',
-}
-
-/**
- * Represents error messages related to credential.
- */
-export enum ErrorCredential {
-  NotFound = 'Credential not found',
-  NotCreated = 'Credential has not been created',
-  InvalidCredential = 'Invalid credential',
+  AwaitingPayoutsProcessingFailed = 'Failed to process payouts for escrow completion',
 }
 
 /**
@@ -68,36 +47,17 @@ export enum ErrorUser {
   AlreadyAssigned = 'User already has an address assigned.',
   NoWalletAddresRegistered = 'No wallet address registered on your account.',
   KycNotApproved = 'KYC not approved.',
-  UserNotActive = 'User not active',
   LabelingEnableFailed = 'Failed to enable labeling for this account.',
   InvalidType = 'User has invalid type.',
-  DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
   DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address.',
 }
 
 /**
- * Represents error messages related to auth.
+ * Represents error messages related to captcha.
  */
-export enum ErrorAuth {
-  NotFound = 'Auth not found',
-  InvalidEmailOrPassword = 'Invalid email or password',
-  RefreshTokenHasExpired = 'Refresh token has expired',
-  TokenExpired = 'Token has expired',
-  UserNotActive = 'User not active',
-  InvalidSignature = 'Invalid signature',
-  InvalidRole = 'Invalid role in KVStore',
-  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least 8 characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
-  InvalidToken = 'Invalid token',
-  InvalidJobType = 'Invalid operator job type',
-  InvalidUrl = 'Invalid operator URL',
-  InvalidFee = 'Invalid operator fee',
-}
-
-/**
- * Represents error messages related to token.
- */
-export enum ErrorToken {
-  NotFound = 'Token not found',
+export enum ErrorCapthca {
+  InvalidToken = 'Invalid captcha token provided',
+  VerificationFailed = 'Captcha verification failed',
 }
 
 /**

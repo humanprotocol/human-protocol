@@ -1,24 +1,24 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout as LayoutProtected } from '@/components/layout/protected/layout';
-import { Layout as LayoutUnprotected } from '@/components/layout/unprotected/layout';
+import { Layout as LayoutProtected } from '@/shared/components/layout/protected/layout';
+import { Layout as LayoutUnprotected } from '@/shared/components/layout/unprotected/layout';
 import {
   protectedRoutes,
   walletConnectRoutes,
   unprotectedRoutes,
   web3ProtectedRoutes,
 } from '@/router/routes';
-import { RequireAuth } from '@/auth/require-auth';
-import { RequireWalletConnect } from '@/auth-web3/require-wallet-connect';
-import { RequireWeb3Auth } from '@/auth-web3/require-web3-auth';
-import { DrawerNavigation } from '@/components/layout/protected/drawer-navigation';
+import { RequireAuth } from '@/modules/auth/providers/require-auth';
+import { RequireWalletConnect } from '@/modules/auth-web3/providers/require-wallet-connect';
+import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
+import { DrawerNavigation } from '@/shared/components/layout/protected/drawer-navigation';
 import {
   workerDrawerTopMenuItems,
   workerDrawerBottomMenuItems,
-} from '@/components/layout/drawer-menu-items/drawer-menu-items-worker';
-import { operatorDrawerBottomMenuItems } from '@/components/layout/drawer-menu-items/drawer-menu-items-operator';
-import { browserAuthProvider } from '@/shared/helpers/browser-auth-provider';
-import { UserStatsDrawer } from '@/pages/worker/hcaptcha-labeling/hcaptcha-labeling/user-stats-drawer';
-import { useAuth } from '@/auth/use-auth';
+} from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-worker';
+import { operatorDrawerBottomMenuItems } from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-operator';
+import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
+import { UserStatsDrawer } from '@/modules/worker/components/hcaptcha-labeling/user-stats-drawer';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from './router-paths';
 
 export function Router() {

@@ -11,8 +11,6 @@ export const DEFAULT_PORT = 9000;
 
 export const DEFAULT_USE_SSL = false;
 
-export const DEFAULT_TX_ID = 1;
-
 export enum HttpStatus {
   OK = 200,
   CREATED = 201,
@@ -320,3 +318,5 @@ export const Role = {
 };
 
 export const SUBGRAPH_API_KEY_PLACEHOLDER = '[SUBGRAPH_API_KEY]';
+
+export const ESCROW_BULK_PAYOUT_MAX_ITEMS = 99;

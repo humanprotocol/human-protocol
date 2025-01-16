@@ -5,7 +5,7 @@ import { CredentialEntity } from './credential.entity';
 import { CredentialStatus } from '../../common/enums/credential';
 import { Web3Service } from '../web3/web3.service';
 import { verifySignature } from '../../common/utils/signature';
-import { ErrorAuth } from '../../common/constants/errors';
+import { ErrorSignature } from '../../common/constants/errors';
 import { ChainId, KVStoreClient } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
@@ -142,7 +142,7 @@ export class CredentialService {
 
     if (!verifySignature(signatureBody.contents, signature, [workerAddress])) {
       throw new ControlledError(
-        ErrorAuth.InvalidSignature,
+        ErrorSignature.InvalidSignature,
         HttpStatus.UNAUTHORIZED,
       );
     }

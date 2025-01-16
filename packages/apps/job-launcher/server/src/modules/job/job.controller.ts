@@ -88,7 +88,7 @@ export class JobController {
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
-          req.user.id,
+          req.user,
           data.requestType,
           data,
         );
@@ -132,7 +132,7 @@ export class JobController {
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
-          req.user.id,
+          req.user,
           JobRequestType.FORTUNE,
           data,
         );
@@ -171,7 +171,7 @@ export class JobController {
       { id: `user${req.user.id}` },
       MUTEX_TIMEOUT,
       async () => {
-        return await this.jobService.createJob(req.user.id, data.type, data);
+        return await this.jobService.createJob(req.user, data.type, data);
       },
     );
   }
@@ -212,7 +212,7 @@ export class JobController {
       MUTEX_TIMEOUT,
       async () => {
         return await this.jobService.createJob(
-          req.user.id,
+          req.user,
           JobRequestType.HCAPTCHA,
           data,
         );

@@ -54,6 +54,7 @@ import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { QualificationService } from '../qualification/qualification.service';
+import { WhitelistService } from '../whitelist/whitelist.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -135,6 +136,7 @@ describe('CronJobService', () => {
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
+        { provide: WhitelistService, useValue: createMock<WhitelistService>() },
         { provide: ConfigService, useValue: mockConfigService },
         {
           provide: RoutingProtocolService,

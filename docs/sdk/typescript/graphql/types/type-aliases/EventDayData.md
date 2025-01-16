@@ -84,4 +84,4 @@
 
 ## Defined in
 
-[graphql/types.ts:55](https://github.com/humanprotocol/human-protocol/blob/d09ba07adfea005abceaa4b9fc19ef8d97dfa6cc/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L55)
+[graphql/types.ts:55](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L55)
