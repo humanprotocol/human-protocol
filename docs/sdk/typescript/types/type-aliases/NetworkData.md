@@ -80,4 +80,4 @@ Network title
 
 ## Defined in
 
-[types.ts:95](https://github.com/humanprotocol/human-protocol/blob/a1e2a06b28417189ba5afdeeabc4d8c772bbd90b/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)
+[types.ts:95](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)

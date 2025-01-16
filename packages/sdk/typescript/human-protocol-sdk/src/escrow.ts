@@ -565,6 +565,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {bigint[]} amounts Array of amounts the recipients will receive.
    * @param {string} finalResultsUrl Final results file URL.
    * @param {string} finalResultsHash Final results file hash.
+   * @param {number} txId Transaction ID.
    * @param {boolean} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
@@ -589,8 +590,9 @@ export class EscrowClient extends BaseEthersClient {
    * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
    * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   * const txId = 1;
    *
-   * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
+   * await escrowClient.bulkPayOut('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
    * ```
    */
   @requiresSigner
@@ -896,7 +898,8 @@ export class EscrowClient extends BaseEthersClient {
    * @param {bigint[]} amounts Array of amounts the recipients will receive.
    * @param {string} finalResultsUrl Final results file URL.
    * @param {string} finalResultsHash Final results file hash.
-   * @param {string} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
+   * @param {number} txId Transaction ID.
+   * @param {boolean} forceComplete Indicates if remaining balance should be transferred to the escrow creator (optional, defaults to false).
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns object with raw transaction and signed transaction hash
    *
@@ -919,8 +922,9 @@ export class EscrowClient extends BaseEthersClient {
    * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
    * const resultsHash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
+   * const txId = 1;
    *
-   * const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash);
+   * const rawTransaction = await escrowClient.createBulkPayoutTransaction('0x62dD51230A30401C455c8398d06F85e4EaB6309f', recipients, amounts, resultsUrl, resultsHash, txId);
    * console.log('Raw transaction:', rawTransaction);
    *
    * const signedTransaction = await signer.signTransaction(rawTransaction);
