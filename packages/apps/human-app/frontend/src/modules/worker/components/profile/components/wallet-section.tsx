@@ -29,7 +29,7 @@ export function WalletSection({
     );
   }
 
-  if ((!hasWalletAddress && isConnected) || hasWalletAddress) {
+  if (isConnected || hasWalletAddress) {
     return (
       <DoneLabel>
         <WalletConnectDone />

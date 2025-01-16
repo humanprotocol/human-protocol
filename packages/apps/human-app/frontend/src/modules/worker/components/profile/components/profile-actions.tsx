@@ -1,8 +1,6 @@
 import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
-import { Navigate } from 'react-router-dom';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { routerPaths } from '@/router/router-paths';
 import { KycStatus } from '@/modules/worker/components/profile/components/kyc-status';
 import { WalletSection } from '@/modules/worker/components/profile/components/wallet-section';
 import { useProfileStatus } from '@/modules/worker/components/profile/hooks/use-profile-status';
@@ -15,16 +13,6 @@ export function ProfileActions() {
   const status = useProfileStatus();
   const { isConnected, isRegisterAddressPending, handleConnectWallet } =
     useWalletActions();
-
-  if (!status.emailVerified) {
-    return (
-      <Navigate
-        replace
-        state={{ routerState: { email: user.email } }}
-        to={routerPaths.worker.verifyEmail}
-      />
-    );
-  }
 
   return (
     <Grid container flexDirection="column" gap="1rem">
