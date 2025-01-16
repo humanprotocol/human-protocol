@@ -4,7 +4,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
 import { breakpoints } from '@/shared/styles/breakpoints';
-import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 export enum TopNotificationType {
   SUCCESS = 'success',
@@ -17,17 +16,12 @@ export interface ShowNotifProps {
   durationMs?: number;
 }
 
-const widthStylesForDesktop = {
-  width: 'calc(100vw - 344px)',
-};
-
 const AUTO_HIDE_NOTIFICATION_MS = 6000;
 const FONT_COLOR = lightColorPalette.white;
 
 export const useNotification = () => {
   const { colorPalette } = useColorMode();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const isMobile = useIsMobile();
 
   const action = useCallback(
     (snackbarId: SnackbarKey) => (
@@ -60,7 +54,7 @@ export const useNotification = () => {
         style: {
           display: 'flex',
           flexWrap: 'nowrap',
-          marginRight: isMobile ? '0' : '32px',
+          width: '100%',
           maxWidth: '100%',
           backgroundColor:
             type === TopNotificationType.SUCCESS
@@ -73,12 +67,11 @@ export const useNotification = () => {
           [breakpoints.mobile]: {
             fontSize: 14,
           },
-          ...(isMobile ? {} : widthStylesForDesktop),
         },
         action,
       });
     },
-    [enqueueSnackbar, colorPalette, action, isMobile]
+    [enqueueSnackbar, colorPalette, action]
   );
 
   return { showNotification };

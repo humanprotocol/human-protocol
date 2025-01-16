@@ -6,6 +6,7 @@ import { Stack } from '@mui/material';
 import { TopNotificationType } from '@/shared/hooks/use-notification';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
 import { handleUnreachableCase } from '@/shared/helpers/handle-unreachable-case';
+import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 interface NotificationProviderProps {
   children: ReactNode;
@@ -35,17 +36,27 @@ export function NotificationProvider({
   children,
   maxSnacks = MAX_NOTIFICATIONS_VISIBLE,
 }: NotificationProviderProps) {
+  const isMobile = useIsMobile();
+
   return (
     <Stack
       sx={{
-        '@media (min-width: 600px) and (max-width: 899px)': {
-          '.notistack-SnackbarContainer': {
-            width: '100%',
-          },
-          '.notistack-SnackbarContainer > div': {
-            width: '100%',
-            maxWidth: '100%',
-          },
+        '.notistack-SnackbarContainer': {
+          width: '100%',
+        },
+        '.notistack-SnackbarContainer > div': {
+          width: '100%',
+          maxWidth: '100%',
+        },
+        '.notistack-Snackbar': {
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: isMobile ? '100%' : 'calc(100% - 303px)',
+          marginRight: isMobile ? '0' : '32px',
+        },
+        '.notistack-CollapseWrapper': {
+          display: 'flex',
+          justifyContent: 'flex-end',
         },
       }}
     >
