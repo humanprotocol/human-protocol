@@ -42,7 +42,7 @@ import { Encryption } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 ```
 
 ## Constructors
@@ -67,7 +67,7 @@ The private key.
 
 #### Defined in
 
-[encryption.ts:62](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L62)
+[encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
 
 ## Methods
 
@@ -104,7 +104,7 @@ import { Encryption } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 
 const publicKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
@@ -118,12 +118,12 @@ XdYkEU+66G1CjgAA0xgBAK4AIahFFnmWR2Mp6A3q021cZXpGklc0Xw1Hfswc
 UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
 -----END PGP PUBLIC KEY BLOCK-----`;
 
-const resultMessage = await encription.decrypt('message');
+const resultMessage = await encryption.decrypt('message');
 ```
 
 #### Defined in
 
-[encryption.ts:190](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L190)
+[encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
 
 ***
 
@@ -154,14 +154,14 @@ import { Encryption } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 
-const resultMessage = await encription.sign('message');
+const resultMessage = await encryption.sign('message');
 ```
 
 #### Defined in
 
-[encryption.ts:247](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L247)
+[encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
 
 ***
 
@@ -199,7 +199,7 @@ import { EscrowClient } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 const publicKey1 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
 WYxJQn3vo1/NFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
@@ -225,12 +225,12 @@ s/88AQCDErzvn+SOX4s3gvZcM3Vr4wh4Q2syHV8Okgx8STYPDg===DsVk
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 const publicKeys = [publicKey1, publicKey2];
-const resultMessage = await encription.signAndEncrypt('message', publicKeys);
+const resultMessage = await encryption.signAndEncrypt('message', publicKeys);
 ```
 
 #### Defined in
 
-[encryption.ts:138](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L138)
+[encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
 
 ***
 
@@ -262,4 +262,4 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
-[encryption.ts:73](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L73)
+[encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)

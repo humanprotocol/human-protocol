@@ -8,19 +8,19 @@
 
 ## Introduction
 
-This client enables to perform actions on KVStore contract and obtain information from both the contracts and subgraph.
+This client enables performing actions on KVStore contract and obtaining information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the `runner`.
 To use this client, it is recommended to initialize it using the static `build` method.
 
 ```ts
-static async build(runner: ContractRunner);
+static async build(runner: ContractRunner): Promise<KVStoreClient>;
 ```
 
 A `Signer` or a `Provider` should be passed depending on the use case of this module:
 
-- **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
-- **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+- **Signer**: when the user wants to use this model to send transactions calling the contract functions.
+- **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
 
 ## Installation
 
@@ -38,21 +38,21 @@ yarn install @human-protocol/sdk
 
 ### Signer
 
-**Using private key(backend)**
+**Using private key (backend)**
 
 ```ts
 import { KVStoreClient } from '@human-protocol/sdk';
 import { Wallet, providers } from 'ethers';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const kvstoreClient = await KVStoreClient.build(signer);
 ```
 
-**Using Wagmi(frontend)**
+**Using Wagmi (frontend)**
 
 ```ts
 import { useSigner, useChainId } from 'wagmi';
@@ -71,7 +71,7 @@ import { providers } from 'ethers';
 const rpcUrl = 'YOUR_RPC_URL';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
-const kvstoreClient = await KVStoreClient.build(signer);
+const kvstoreClient = await KVStoreClient.build(provider);
 ```
 
 ## Extends
@@ -110,7 +110,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
 
 ## Properties
 
@@ -124,7 +124,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -138,7 +138,7 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -183,7 +183,7 @@ import { Wallet, providers } from 'ethers';
 import { KVStoreClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -194,7 +194,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
 
 ***
 
@@ -239,7 +239,7 @@ import { Wallet, providers } from 'ethers';
 import { KVStoreClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
@@ -247,12 +247,12 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 const keys = ['role', 'webhook_url'];
 const values = ['RecordingOracle', 'http://localhost'];
-await kvstoreClient.set(keys, values);
+await kvstoreClient.setBulk(keys, values);
 ```
 
 #### Defined in
 
-[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
+[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
 
 ***
 
@@ -295,19 +295,19 @@ import { Wallet, providers } from 'ethers';
 import { KVStoreClient } from '@human-protocol/sdk';
 
 const rpcUrl = 'YOUR_RPC_URL';
-const privateKey = 'YOUR_PRIVATE_KEY'
+const privateKey = 'YOUR_PRIVATE_KEY';
 
 const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const kvstoreClient = await KVStoreClient.build(signer);
 
 await kvstoreClient.setFileUrlAndHash('example.com');
-await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
+await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url');
 ```
 
 #### Defined in
 
-[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
+[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
 
 ***
 
@@ -341,4 +341,4 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
-[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
+[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)

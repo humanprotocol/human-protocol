@@ -29,19 +29,19 @@ import { IKVStore } from './interfaces';
 /**
  * ## Introduction
  *
- * This client enables to perform actions on KVStore contract and obtain information from both the contracts and subgraph.
+ * This client enables performing actions on KVStore contract and obtaining information from both the contracts and subgraph.
  *
  * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
  *
  * ```ts
- * static async build(runner: ContractRunner);
+ * static async build(runner: ContractRunner): Promise<KVStoreClient>;
  * ```
  *
  * A `Signer` or a `Provider` should be passed depending on the use case of this module:
  *
- * - **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
- * - **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+ * - **Signer**: when the user wants to use this model to send transactions calling the contract functions.
+ * - **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
  *
  * ## Installation
  *
@@ -59,21 +59,21 @@ import { IKVStore } from './interfaces';
  *
  * ### Signer
  *
- * **Using private key(backend)**
+ * **Using private key (backend)**
  *
  * ```ts
  * import { KVStoreClient } from '@human-protocol/sdk';
  * import { Wallet, providers } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
- * const privateKey = 'YOUR_PRIVATE_KEY'
+ * const privateKey = 'YOUR_PRIVATE_KEY';
  *
  * const provider = new providers.JsonRpcProvider(rpcUrl);
  * const signer = new Wallet(privateKey, provider);
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  *
- * **Using Wagmi(frontend)**
+ * **Using Wagmi (frontend)**
  *
  * ```ts
  * import { useSigner, useChainId } from 'wagmi';
@@ -92,7 +92,7 @@ import { IKVStore } from './interfaces';
  * const rpcUrl = 'YOUR_RPC_URL';
  *
  * const provider = new providers.JsonRpcProvider(rpcUrl);
- * const kvstoreClient = await KVStoreClient.build(signer);
+ * const kvstoreClient = await KVStoreClient.build(provider);
  * ```
  */
 
@@ -123,7 +123,7 @@ export class KVStoreClient extends BaseEthersClient {
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(runner: ContractRunner) {
+  public static async build(runner: ContractRunner): Promise<KVStoreClient> {
     if (!runner.provider) {
       throw ErrorProviderDoesNotExist;
     }
@@ -158,7 +158,7 @@ export class KVStoreClient extends BaseEthersClient {
    * import { KVStoreClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -199,7 +199,7 @@ export class KVStoreClient extends BaseEthersClient {
    * import { KVStoreClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -207,7 +207,7 @@ export class KVStoreClient extends BaseEthersClient {
    *
    * const keys = ['role', 'webhook_url'];
    * const values = ['RecordingOracle', 'http://localhost'];
-   * await kvstoreClient.set(keys, values);
+   * await kvstoreClient.setBulk(keys, values);
    * ```
    */
   @requiresSigner
@@ -243,14 +243,14 @@ export class KVStoreClient extends BaseEthersClient {
    * import { KVStoreClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
    * const kvstoreClient = await KVStoreClient.build(signer);
    *
    * await kvstoreClient.setFileUrlAndHash('example.com');
-   * await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url);
+   * await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url');
    * ```
    */
   @requiresSigner
@@ -309,9 +309,9 @@ export class KVStoreClient extends BaseEthersClient {
  * ```ts
  * import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
  *
- * const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
+ * const KVStoreAddresses = await KVStoreUtils.getKVStoreData(
  *   ChainId.POLYGON_AMOY,
- *   "0x1234567890123456789012345678901234567890",
+ *   "0x1234567890123456789012345678901234567890"
  * );
  * ```
  */

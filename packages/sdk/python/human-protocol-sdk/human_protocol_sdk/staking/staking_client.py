@@ -1,9 +1,9 @@
 """
-This client enables to perform actions on staking contracts and
-obtain staking information from both the contracts and subgraph.
+This client enables performing actions on staking contracts and
+obtaining staking information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create Web3 instance, and configure default account,
+To use this client, you need to create a Web3 instance and configure the default account,
 as well as some middlewares.
 
 Code Example
@@ -216,10 +216,8 @@ class StakingClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 staking_client = StakingClient(w3)
 
-                amount = Web3.to_wei(5, 'ether')
-                    # convert from ETH to WEI
-                staking_client.approve_stake(amount)
-                    # if it was already approved before, this is not necessary
+                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
+                staking_client.approve_stake(amount) # if it was already approved before, this is not necessary
                 staking_client.stake(amount)
         """
 

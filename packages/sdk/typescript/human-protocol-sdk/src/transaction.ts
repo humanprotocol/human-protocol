@@ -5,7 +5,7 @@ import { NETWORKS } from './constants';
 import { ChainId, OrderDirection } from './enums';
 import {
   ErrorCannotUseDateAndBlockSimultaneously,
-  ErrorInvalidHahsProvided,
+  ErrorInvalidHashProvided,
   ErrorUnsupportedChainID,
 } from './error';
 import {
@@ -36,7 +36,7 @@ export class TransactionUtils {
     hash: string
   ): Promise<ITransaction> {
     if (!ethers.isHexString(hash)) {
-      throw ErrorInvalidHahsProvided;
+      throw ErrorInvalidHashProvided;
     }
     const networkData = NETWORKS[chainId];
 
