@@ -1,10 +1,10 @@
 import { type NavigateFunction } from 'react-router-dom';
-import { shouldNavigateToRegistration } from '@/modules/worker/components/jobs-discovery/utils/should-navigate-to-registration';
-import { navigateToRegistration } from '@/modules/worker/components/jobs-discovery/utils/navigate-to-registration';
-import { isHCaptchaOracle } from '@/modules/worker/components/jobs-discovery/utils/is-hcaptcha-oracle';
+import { shouldNavigateToRegistration } from '@/modules/worker/components/jobs-discovery/helpers/should-navigate-to-registration';
+import { navigateToRegistration } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-registration';
+import { isHCaptchaOracle } from '@/modules/worker/components/jobs-discovery/helpers/is-hcaptcha-oracle';
 import type { Oracle } from '@/modules/worker/services/oracles';
-import { handleHCaptchaNavigation } from '@/modules/worker/components/jobs-discovery/utils/handle-hcaptcha-navigation';
-import { navigateToOracleJobs } from '@/modules/worker/components/jobs-discovery/utils/navigate-to-oracle-jobs';
+import { handleHCaptchaNavigation } from '@/modules/worker/components/jobs-discovery/helpers/handle-hcaptcha-navigation';
+import { navigateToOracleJobs } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-oracle-jobs';
 
 interface RegistrationResult {
   oracle_addresses: string[];
