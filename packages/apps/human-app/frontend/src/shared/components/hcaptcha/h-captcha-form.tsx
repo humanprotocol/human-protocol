@@ -14,7 +14,7 @@ export function HCaptchaForm({ name, error }: HCaptchaFormProps) {
   const { colorPalette } = useColorMode();
   const { setValue, formState } = useFormContext<Record<string, unknown>>();
 
-  function setCaptchaToken(token: string) {
+  function onVerify(token: string) {
     setValue(name, token);
   }
 
@@ -26,7 +26,7 @@ export function HCaptchaForm({ name, error }: HCaptchaFormProps) {
 
   return (
     <div>
-      <CustomHCaptcha error={error} setCustomHCaptchaToken={setCaptchaToken} />
+      <CustomHCaptcha error={error} onVerify={onVerify} />
       <Typography
         color={colorPalette.error.main}
         component="div"

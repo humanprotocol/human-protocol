@@ -5,14 +5,11 @@ import { FetchError } from '@/api/fetcher';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 
 interface CustomHCaptchaProps {
-  setCustomHCaptchaToken: (token: string) => void;
+  onVerify: (token: string) => void;
   error?: unknown;
 }
 
-export function CustomHCaptcha({
-  setCustomHCaptchaToken,
-  error,
-}: CustomHCaptchaProps) {
+export function CustomHCaptcha({ onVerify, error }: CustomHCaptchaProps) {
   const { isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
 
@@ -24,7 +21,9 @@ export function CustomHCaptcha({
 
   return (
     <HCaptcha
-      onVerify={setCustomHCaptchaToken}
+      onVerify={(token: string) => {
+        onVerify(token);
+      }}
       ref={captchaRef}
       sitekey={env.VITE_H_CAPTCHA_SITE_KEY}
       theme={isDarkMode ? 'dark' : 'light'}
