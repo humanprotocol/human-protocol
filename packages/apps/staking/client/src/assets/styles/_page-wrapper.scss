@@ -1,3 +1,5 @@
+@use 'const';
+
 .page-wrapper {
 	margin: 0 56px;
 	min-height: calc(100vh - 206px);
@@ -36,7 +38,7 @@
 	z-index: 10;
 	border-radius: 20px;
 	background-size: 100% 100%;
-	background: linear-gradient(to bottom, $primary 252px, $maWhite 1px);
+	background: linear-gradient(to bottom, const.$primary 252px, const.$maWhite 1px);
 
 	@media (max-width: 600px) {
 		border-top-left-radius: 0;
@@ -45,5 +47,5 @@
 }
 
 .standard-background {
-	background-color: $maWhite;
+	background-color: const.$maWhite;
 }

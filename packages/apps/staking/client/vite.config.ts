@@ -14,6 +14,13 @@ export default defineConfig({
       protocolImports: true,
     }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        implementation: require('sass'),
+      },
+    },
+  },
   resolve: {
     alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
   },

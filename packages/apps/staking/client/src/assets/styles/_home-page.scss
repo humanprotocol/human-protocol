@@ -1,5 +1,7 @@
+@use 'const';
+
 .home-page-header {
-	color: $white;
+	color: const.$white;
 	.home-page-search {
 		margin-top: 24px;
 	}
@@ -11,8 +13,8 @@
 	margin-top: 62px;
 
 	.home-page-box {
-		color: $primary;
-		background-color: $white;
+		color: const.$primary;
+		background-color: const.$white;
 		border-radius: 16px;
 		padding: 24px 32px;
 		width: calc(38% - 24px);
@@ -86,7 +88,7 @@
 }
 
 .home-page-table-header {
-	background-color: $whiteSolid;
+	background-color: const.$whiteSolid;
 	height: 72px;
 	color: #320a8d;
 	text-transform: uppercase;
@@ -110,7 +112,7 @@
 	}
 
 	.icon-table {
-		background-color: $groundwaterOpacity;
+		background-color: const.$groundwaterOpacity;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -127,22 +129,22 @@
 	}
 
 	.reputation-table-medium {
-		color: $medium;
-		border: 1px solid $mediumBorder;
+		color: const.$medium;
+		border: 1px solid const.$mediumBorder;
 	}
 
 	.reputation-table-low {
-		color: $low;
-		border: 1px solid $lowBorder;
+		color: const.$low;
+		border: 1px solid const.$lowBorder;
 	}
 
 	.reputation-table-high {
-		color: $high;
-		border: 1px solid $highBorder;
+		color: const.$high;
+		border: 1px solid const.$highBorder;
 	}
 	.reputation-table-soon {
-		color: $soon;
-		border: 1px solid $soonBorder;
+		color: const.$soon;
+		border: 1px solid const.$soonBorder;
 	}
 
 	&:hover {
@@ -164,7 +166,7 @@
 
 .mobile-select {
 	width: 270px;
-	background-color: $whiteSolid;
+	background-color: const.$whiteSolid;
 	padding: 10px;
 	display: none;
 	margin-bottom: 20px;

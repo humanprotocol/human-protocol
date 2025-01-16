@@ -1,3 +1,5 @@
+@use 'const';
+
 footer{
   min-height: 124px;
   margin-top: auto;
@@ -6,7 +8,7 @@ footer{
     flex-direction: column-reverse;
     justify-content: center;
     align-items: center;
-    background-color: $maWhite;
+    background-color: const.$maWhite;
   }
 
   .footer-wrapper {

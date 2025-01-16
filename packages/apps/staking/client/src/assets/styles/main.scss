@@ -1,10 +1,6 @@
-@import 'const';
-@import 'header';
-@import 'page-wrapper';
-@import 'footer';
-@import 'home-page';
-@import 'search';
-@import 'shadow-icon';
-@import 'breadcrumbs';
-@import 'nothing-found';
-@import "graph-swipper";
+@use 'const';
+@use 'header';
+@use 'page-wrapper';
+@use 'footer';
+@use 'home-page';
+@use 'breadcrumbs';
