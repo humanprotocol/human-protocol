@@ -18,7 +18,7 @@ export interface ShowNotifProps {
 }
 
 const widthStylesForDesktop = {
-  width: 'calc(100svw - 344px',
+  width: 'calc(100vw - 344px)',
 };
 
 const AUTO_HIDE_NOTIFICATION_MS = 6000;

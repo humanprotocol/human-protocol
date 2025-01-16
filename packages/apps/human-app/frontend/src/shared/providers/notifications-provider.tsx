@@ -38,7 +38,7 @@ export function NotificationProvider({
   return (
     <Stack
       sx={{
-        '@media (min-width: 800px) and (max-width: 899px)': {
+        '@media (min-width: 600px) and (max-width: 899px)': {
           '.notistack-SnackbarContainer': {
             width: '100%',
           },
