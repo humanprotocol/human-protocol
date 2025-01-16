@@ -45,6 +45,7 @@ describe('StakingClient', () => {
       getStaker: vi.fn(),
       getListOfStakers: vi.fn(),
       getAddress: vi.fn().mockResolvedValue(ethers.ZeroAddress),
+      stakes: vi.fn(),
     };
 
     mockEscrowFactoryContract = {
@@ -470,6 +471,81 @@ describe('StakingClient', () => {
         txOptions
       );
       expect(slashSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getStakerInfo', () => {
+    const stakerAddress = ethers.ZeroAddress;
+
+    test('should return staker info with locked amount and no withdrawable tokens', async () => {
+      const stakerInfo = {
+        tokensStaked: ethers.toBigInt(FAKE_AMOUNT),
+        tokensLocked: ethers.toBigInt(FAKE_AMOUNT),
+        tokensLockedUntil: 1234567890n,
+      };
+      const blockNumber = 1234567880n;
+
+      mockStakingContract.stakes.mockResolvedValueOnce(stakerInfo);
+      mockProvider.provider.getBlockNumber = vi
+        .fn()
+        .mockResolvedValue(blockNumber);
+
+      const result = await stakingClient.getStakerInfo(stakerAddress);
+
+      expect(result).toEqual({
+        stakedAmount: stakerInfo.tokensStaked,
+        lockedAmount: stakerInfo.tokensLocked,
+        lockedUntil: stakerInfo.tokensLockedUntil,
+        withdrawableAmount: 0n,
+      });
+      expect(mockStakingContract.stakes).toHaveBeenCalledWith(stakerAddress);
+      expect(mockStakingContract.stakes).toHaveBeenCalledTimes(1);
+      expect(mockProvider.provider.getBlockNumber).toHaveBeenCalledTimes(1);
+    });
+
+    test('should return staker info with locked amount 0 and withdrawable tokens', async () => {
+      const stakerInfo = {
+        tokensStaked: ethers.toBigInt(FAKE_AMOUNT),
+        tokensLocked: ethers.toBigInt(FAKE_AMOUNT),
+        tokensLockedUntil: 1234567890n,
+      };
+      const blockNumber = 1234567891n;
+
+      mockStakingContract.stakes.mockResolvedValueOnce(stakerInfo);
+      mockProvider.provider.getBlockNumber = vi
+        .fn()
+        .mockResolvedValue(blockNumber);
+
+      const result = await stakingClient.getStakerInfo(stakerAddress);
+
+      expect(result).toEqual({
+        stakedAmount: stakerInfo.tokensStaked,
+        lockedAmount: 0n,
+        lockedUntil: 0n,
+        withdrawableAmount: stakerInfo.tokensLocked,
+      });
+      expect(mockStakingContract.stakes).toHaveBeenCalledWith(stakerAddress);
+      expect(mockStakingContract.stakes).toHaveBeenCalledTimes(1);
+      expect(mockProvider.provider.getBlockNumber).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the staker address is invalid', async () => {
+      const invalidAddress = 'InvalidAddress';
+
+      await expect(stakingClient.getStakerInfo(invalidAddress)).rejects.toThrow(
+        ErrorInvalidStakerAddressProvided
+      );
+      expect(mockStakingContract.stakes).toHaveBeenCalledTimes(0);
+    });
+
+    test('should throw an error if getStaker method fails', async () => {
+      mockStakingContract.stakes.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.getStakerInfo(stakerAddress)
+      ).rejects.toThrow();
+      expect(mockStakingContract.stakes).toHaveBeenCalledWith(stakerAddress);
+      expect(mockStakingContract.stakes).toHaveBeenCalledTimes(1);
     });
   });
 });

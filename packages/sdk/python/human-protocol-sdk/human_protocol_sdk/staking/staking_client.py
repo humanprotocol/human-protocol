@@ -397,6 +397,58 @@ class StakingClient:
             tx_options,
         )
 
+    def get_staker_info(self, staker_address: str) -> dict:
+        """Retrieves comprehensive staking information for a staker.
+
+        :param staker_address: The address of the staker
+        :return: A dictionary containing staker information
+
+        :validate:
+            - Staker address must be valid
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.staking import StakingClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                staking_client = StakingClient(w3)
+
+                staking_info = staking_client.get_staker_info('0xYourStakerAddress')
+                print(staking_info['stakedAmount'])
+        """
+        if not Web3.is_address(staker_address):
+            raise StakingClientError(f"Invalid staker address: {staker_address}")
+
+        try:
+            staker_info = self.staking_contract.functions.stakes(staker_address).call()
+            current_block = self.w3.eth.block_number
+
+            tokens_withdrawable = (
+                staker_info[1]
+                if (staker_info[2] != 0 and current_block >= staker_info[2])
+                else 0
+            )
+
+            adjusted_locked_amount = (
+                0
+                if (staker_info[2] != 0 and current_block >= staker_info[2])
+                else staker_info[1]
+            )
+
+            return {
+                "stakedAmount": staker_info[0],
+                "lockedAmount": adjusted_locked_amount,
+                "lockedUntil": 0 if adjusted_locked_amount == 0 else staker_info[2],
+                "withdrawableAmount": tokens_withdrawable,
+            }
+        except Exception as e:
+            raise StakingClientError(f"Failed to get staker info: {str(e)}")
+
     def _is_valid_escrow(self, escrow_address: str) -> bool:
         """Checks if the escrow address is valid.
 
