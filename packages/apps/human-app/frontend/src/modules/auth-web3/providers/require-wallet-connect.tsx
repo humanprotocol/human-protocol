@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { routerPaths } from '@/router/router-paths';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { type WalletConnectContextConnectedAccount } from '@/shared/types/wallet-connect-context';
+import { type WalletConnectContextConnectedAccount } from '@/shared/types/wallet-connect';
 
 export const AuthWeb3Context =
   createContext<WalletConnectContextConnectedAccount | null>(null);
