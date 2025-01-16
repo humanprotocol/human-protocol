@@ -100,6 +100,33 @@ Approves HMT token for Staking.
   staking_client.approve_stake(amount)
   ```
 
+#### get_staker_info(staker_address)
+
+Retrieves comprehensive staking information for a staker.
+
+* **Parameters:**
+  **staker_address** (`str`) – The address of the staker
+* **Return type:**
+  `dict`
+* **Returns:**
+  A dictionary containing staker information
+* **Validate:**
+  - Staker address must be valid
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.staking import StakingClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  staking_client = StakingClient(w3)
+
+  staking_info = staking_client.get_staker_info('0xYourStakerAddress')
+  print(staking_info['stakedAmount'])
+  ```
+
 #### slash(slasher, staker, escrow_address, amount, tx_options=None)
 
 Slashes HMT token.

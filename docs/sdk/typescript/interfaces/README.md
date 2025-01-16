@@ -29,3 +29,4 @@
 - [IStatisticsFilter](interfaces/IStatisticsFilter.md)
 - [ITransaction](interfaces/ITransaction.md)
 - [ITransactionsFilter](interfaces/ITransactionsFilter.md)
+- [StakerInfo](interfaces/StakerInfo.md)
