@@ -24,6 +24,10 @@ export function RegistrationForm({
   const { t } = useTranslation();
   const methods = useRegistrationForm();
 
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    void methods.handleSubmit(onSubmit)(event);
+  };
+
   return (
     <>
       <Button onClick={onInstructionsClick} fullWidth variant="contained">
@@ -31,7 +35,7 @@ export function RegistrationForm({
       </Button>
       <Box>{t('worker.registrationInExchangeOracle.completeMessage')}</Box>
       <FormProvider {...methods}>
-        <form onSubmit={(event) => void methods.handleSubmit(onSubmit)(event)}>
+        <form onSubmit={handleSubmit}>
           <Stack alignItems="center" spacing={2}>
             <HCaptchaForm error={error} name="h_captcha_token" />
             <Button
