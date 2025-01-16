@@ -23,7 +23,7 @@ export function JobsDiscoveryPage() {
 
   useEffect(() => {
     if (oraclesQueryResult.error) {
-      void onErrorRef.current(oraclesQueryResult.error);
+      onErrorRef.current(oraclesQueryResult.error);
     }
   }, [oraclesQueryResult.error]);
 

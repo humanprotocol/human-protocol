@@ -8,7 +8,7 @@ import type { HCaptchaUserStatsSuccess } from '@/modules/worker/services/hcaptch
 import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 
 export interface UserStatsDrawerNavigationProps {
   isOpen: boolean;
@@ -78,7 +78,7 @@ export function UserStatsDrawer({ isOpen }: UserStatsDrawerNavigationProps) {
           ) : null}
           {hcaptchaUserStatsStatus === 'error' ? (
             <Alert color="error" severity="error">
-              {defaultErrorMessage(hcaptchaUserStatsError)}
+              {getErrorMessageForError(hcaptchaUserStatsError)}
             </Alert>
           ) : null}
           {hcaptchaUserStatsStatus === 'pending' ? (

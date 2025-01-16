@@ -18,6 +18,7 @@ export const SENDGRID_TEMPLATES = {
 
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
+export const DEFAULT_BULK_PAYOUT_TX_ID = 1;
 
 export const CVAT_JOB_TYPES = [
   JobRequestType.IMAGE_BOXES,

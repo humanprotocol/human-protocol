@@ -34,7 +34,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { add, div, eq, mul } from '../../common/utils/decimal';
+import { div, eq, mul } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
@@ -400,22 +400,30 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number, rate?: number): Promise<number> {
-    const paymentEntities = await this.paymentRepository.findByUserAndStatus(
-      userId,
-      PaymentStatus.SUCCEEDED,
-    );
-    if (!rate) {
-      rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
-    }
-    const totalAmount = paymentEntities.reduce((total, payment) => {
-      if (payment.currency === TokenId.HMT) {
-        return add(total, mul(payment.amount, rate));
-      }
-      return add(total, payment.amount);
-    }, 0);
+  public async getUserBalance(userId: number): Promise<number> {
+    const paymentEntities =
+      await this.paymentRepository.getUserBalancePayments(userId);
 
-    return totalAmount;
+    const uniqueTokens = Array.from(
+      new Set(paymentEntities.map((payment) => payment.currency)),
+    );
+
+    let totalBalance = 0;
+
+    for (const token of uniqueTokens) {
+      const tokenAmountSum = paymentEntities
+        .filter((payment) => payment.currency === token)
+        .reduce((sum, payment) => sum + Number(payment.amount), 0);
+
+      const rate =
+        token === Currency.USD
+          ? 1
+          : await this.rateService.getRate(token, Currency.USD);
+
+      totalBalance += tokenAmountSum * rate;
+    }
+
+    return totalBalance;
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {

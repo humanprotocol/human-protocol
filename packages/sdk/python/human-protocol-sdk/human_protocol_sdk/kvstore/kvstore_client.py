@@ -1,9 +1,9 @@
 """
-This client enables to perform actions on KVStore contract and
-obtain information from both the contracts and subgraph.
+This client enables performing actions on the KVStore contract and
+obtaining information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create Web3 instance, and configure default account,
+To use this client, you need to create a Web3 instance and configure the default account,
 as well as some middlewares.
 
 Code Example
@@ -87,6 +87,7 @@ class KVStoreClient:
         Initializes a KVStore instance.
 
         :param web3: The Web3 object
+        :param gas_limit: (Optional) Gas limit for transactions
         """
 
         # Initialize web3 instance
@@ -148,7 +149,7 @@ class KVStoreClient:
         """
 
         if not key:
-            raise KVStoreClientError("Key can not be empty")
+            raise KVStoreClientError("Key cannot be empty")
 
         handle_transaction(
             self.w3,
@@ -193,17 +194,17 @@ class KVStoreClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 kvstore_client = KVStoreClient(w3)
 
-                keys = ['Role', 'Webhook_url'];
-                values = ['RecordingOracle', 'http://localhost'];
+                keys = ['Role', 'Webhook_url']
+                values = ['RecordingOracle', 'http://localhost']
                 kvstore_client.set_bulk(keys, values)
         """
 
         if "" in keys:
-            raise KVStoreClientError("Key can not be empty")
+            raise KVStoreClientError("Key cannot be empty")
         if len(keys) == 0:
             raise KVStoreClientError("Arrays must have any value")
         if len(keys) != len(values):
-            raise KVStoreClientError("Arrays must have same length")
+            raise KVStoreClientError("Arrays must have the same length")
 
         handle_transaction(
             self.w3,

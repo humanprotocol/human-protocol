@@ -22,9 +22,9 @@ Downloads a file from the specified URL.
   [**StorageClientError**](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.StorageClientError) – If an error occurs while downloading the file.
 * **Example:**
   ```python
-  from human_protocol_sdk.storage import StorageClient
+  from human_protocol_sdk.storage import StorageUtils
 
-  result = StorageClient.download_file_from_url(
+  result = StorageUtils.download_file_from_url(
       "https://www.example.com/file.txt"
   )
   ```

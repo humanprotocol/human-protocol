@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid';
 import debounce from 'lodash/debounce';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { Input } from '@/shared/components/data-entry/input';
-import { addressSchemaOrEmptyString } from '@/shared/helpers/validate-address-schema';
+import { addressSchemaOrEmptyString } from '@/shared/schemas';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 interface SearchFormProps {

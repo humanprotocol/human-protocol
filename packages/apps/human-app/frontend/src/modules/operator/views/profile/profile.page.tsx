@@ -6,7 +6,7 @@ import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
 import { useWeb3AuthenticatedUser } from '@/modules/auth-web3/hooks/use-web3-authenticated-user';
 import { PageCardError } from '@/shared/components/ui/page-card-error';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { ProfileDisableButton } from '@/modules/operator/components/profile/profile-disable-button';
 import { ProfileListItem } from '@/shared/components/ui/profile-list-item';
 import { useGetOperatorStats } from '@/modules/operator/hooks/use-get-stats';
@@ -49,7 +49,7 @@ export function OperatorProfilePage() {
   if (isKeysError || isStatsError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(keysError ?? statsError)}
+        errorMessage={getErrorMessageForError(keysError ?? statsError)}
       />
     );
   }

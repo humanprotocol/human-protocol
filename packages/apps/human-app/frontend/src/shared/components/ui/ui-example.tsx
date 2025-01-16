@@ -3,7 +3,10 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/shared/components/ui/button';
 import { Loader } from '@/shared/components/ui/loader';
-import { useModalStore } from '@/shared/components/ui/modal/modal.store';
+import {
+  ModalType,
+  useModalStore,
+} from '@/shared/components/ui/modal/modal.store';
 import {
   HomepageLogoIcon,
   HomepageUserIcon,
@@ -233,7 +236,7 @@ export function UiExample() {
 
       <Button
         onClick={() => {
-          openModal({ modalState: 'MODAL_EXAMPLE' });
+          openModal({ modalType: ModalType.MODAL_EXAMPLE });
         }}
       >
         Open modal

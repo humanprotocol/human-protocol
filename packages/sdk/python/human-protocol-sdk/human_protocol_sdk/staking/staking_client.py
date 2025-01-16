@@ -1,9 +1,9 @@
 """
-This client enables to perform actions on staking contracts and
-obtain staking information from both the contracts and subgraph.
+This client enables performing actions on staking contracts and
+obtaining staking information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create Web3 instance, and configure default account,
+To use this client, you need to create a Web3 instance and configure the default account,
 as well as some middlewares.
 
 Code Example
@@ -216,10 +216,8 @@ class StakingClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 staking_client = StakingClient(w3)
 
-                amount = Web3.to_wei(5, 'ether')
-                    # convert from ETH to WEI
-                staking_client.approve_stake(amount)
-                    # if it was already approved before, this is not necessary
+                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
+                staking_client.approve_stake(amount) # if it was already approved before, this is not necessary
                 staking_client.stake(amount)
         """
 
@@ -398,6 +396,58 @@ class StakingClient:
             StakingClientError,
             tx_options,
         )
+
+    def get_staker_info(self, staker_address: str) -> dict:
+        """Retrieves comprehensive staking information for a staker.
+
+        :param staker_address: The address of the staker
+        :return: A dictionary containing staker information
+
+        :validate:
+            - Staker address must be valid
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.staking import StakingClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                staking_client = StakingClient(w3)
+
+                staking_info = staking_client.get_staker_info('0xYourStakerAddress')
+                print(staking_info['stakedAmount'])
+        """
+        if not Web3.is_address(staker_address):
+            raise StakingClientError(f"Invalid staker address: {staker_address}")
+
+        try:
+            staker_info = self.staking_contract.functions.stakes(staker_address).call()
+            current_block = self.w3.eth.block_number
+
+            tokens_withdrawable = (
+                staker_info[1]
+                if (staker_info[2] != 0 and current_block >= staker_info[2])
+                else 0
+            )
+
+            adjusted_locked_amount = (
+                0
+                if (staker_info[2] != 0 and current_block >= staker_info[2])
+                else staker_info[1]
+            )
+
+            return {
+                "stakedAmount": staker_info[0],
+                "lockedAmount": adjusted_locked_amount,
+                "lockedUntil": 0 if adjusted_locked_amount == 0 else staker_info[2],
+                "withdrawableAmount": tokens_withdrawable,
+            }
+        except Exception as e:
+            raise StakingClientError(f"Failed to get staker info: {str(e)}")
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:
         """Checks if the escrow address is valid.

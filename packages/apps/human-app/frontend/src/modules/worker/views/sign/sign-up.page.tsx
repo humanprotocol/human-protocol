@@ -17,7 +17,7 @@ import { Input } from '@/shared/components/data-entry/input';
 import { Password } from '@/shared/components/data-entry/password/password';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { env } from '@/shared/env';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
 import { FormCaptcha } from '@/shared/components/h-captcha';
@@ -65,7 +65,7 @@ export function SignUpWorkerPage() {
       alert={
         isSignUpWorkerError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {defaultErrorMessage(
+            {getErrorMessageForError(
               signUpWorkerError,
               formattedSignUpErrorMessage
             )}

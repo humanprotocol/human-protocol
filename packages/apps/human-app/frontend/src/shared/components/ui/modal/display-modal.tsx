@@ -4,12 +4,12 @@ import { Modal } from './modal';
 import { ModalHeader } from './modal-header';
 
 export function DisplayModal() {
-  const { isModalOpen, closeModal, modalState, displayCloseButton, maxWidth } =
+  const { isModalOpen, closeModal, modalType, displayCloseButton, maxWidth } =
     useModalStore();
 
   return (
     <>
-      {modalState ? (
+      {modalType ? (
         <Modal isOpen={isModalOpen} maxWidth={maxWidth}>
           <ModalHeader
             closeButton={{
@@ -17,7 +17,7 @@ export function DisplayModal() {
               onClick: closeModal,
             }}
           />
-          <ModalContent modalType={modalState} />
+          <ModalContent modalType={modalType} />
         </Modal>
       ) : null}
     </>

@@ -19,6 +19,7 @@ import { JWTExpirationCheck } from '@/shared/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/shared/contexts/color-mode-context';
 import { HomePageStateProvider } from '@/shared/contexts/homepage-state';
 import { RegisteredOraclesProvider } from '@/shared/contexts/registered-oracles';
+import { NotificationProvider } from '@/shared/providers/notifications-provider';
 
 const root = document.getElementById('root');
 if (!root) throw Error('root element is undefined');
@@ -35,23 +36,25 @@ createRoot(root).render(
     <ColorModeProvider>
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <WalletConnectProvider>
-            <HomePageStateProvider>
-              <Web3AuthProvider>
-                <AuthProvider>
-                  <DisplayModal />
-                  <JWTExpirationCheck>
-                    <RegisteredOraclesProvider>
-                      <Router />
-                    </RegisteredOraclesProvider>
-                  </JWTExpirationCheck>
-                </AuthProvider>
-              </Web3AuthProvider>
-            </HomePageStateProvider>
-            <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
-          </WalletConnectProvider>
-        </BrowserRouter>
+        <NotificationProvider>
+          <BrowserRouter>
+            <WalletConnectProvider>
+              <HomePageStateProvider>
+                <Web3AuthProvider>
+                  <AuthProvider>
+                    <DisplayModal />
+                    <JWTExpirationCheck>
+                      <RegisteredOraclesProvider>
+                        <Router />
+                      </RegisteredOraclesProvider>
+                    </JWTExpirationCheck>
+                  </AuthProvider>
+                </Web3AuthProvider>
+              </HomePageStateProvider>
+              <ReactQueryDevtools client={queryClient} initialIsOpen={false} />
+            </WalletConnectProvider>
+          </BrowserRouter>
+        </NotificationProvider>
       </QueryClientProvider>
     </ColorModeProvider>
   </StrictMode>

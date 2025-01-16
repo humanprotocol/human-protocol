@@ -5,7 +5,7 @@ import { t } from 'i18next';
 import { PageCardError } from '@/shared/components/ui/page-card-error';
 import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
 import { PageCard } from '@/shared/components/ui/page-card';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { Buttons } from '@/modules/operator/components/sign-up/add-stake/buttons';
 import { StakeForm } from '@/modules/operator/components/sign-up/add-stake/stake-form';
 import { Alert } from '@/shared/components/ui/alert';
@@ -39,7 +39,7 @@ export function AddStakeOperatorPage() {
       case Boolean(addStakeMutationState?.error):
         return (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(addStakeMutationState?.error)}
+            {getErrorMessageForError(addStakeMutationState?.error)}
           </Alert>
         );
       case addStakeMutationState?.status === 'success':
@@ -61,7 +61,7 @@ export function AddStakeOperatorPage() {
   if (isGetStakedAmountError || decimalsDataError) {
     return (
       <PageCardError
-        errorMessage={defaultErrorMessage(getStackedAmountError)}
+        errorMessage={getErrorMessageForError(getStackedAmountError)}
       />
     );
   }

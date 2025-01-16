@@ -3,36 +3,27 @@ import Paper from '@mui/material/Paper';
 import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
 import { Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useEnableHCaptchaLabelingMutation } from '@/modules/worker/services/enable-hcaptcha-labeling';
 import { Button } from '@/shared/components/ui/button';
 import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
 
 export function EnableLabeler() {
   const isMobile = useIsMobile();
-  const { closeNotification } = useProtectedLayoutNotification();
   const { user } = useAuthenticatedUser();
-  const { mutate, error, isError, isPending, status } =
+  const { mutate, error, isError, isPending } =
     useEnableHCaptchaLabelingMutation();
-
-  useEffect(() => {
-    if (status === 'success') {
-      closeNotification();
-    }
-  }, [closeNotification, status]);
 
   if (!user.wallet_address) {
     return <Navigate replace to={routerPaths.worker.profile} />;
   }
 
   if (isError) {
-    return <PageCardError errorMessage={defaultErrorMessage(error)} />;
+    return <PageCardError errorMessage={getErrorMessageForError(error)} />;
   }
 
   return (

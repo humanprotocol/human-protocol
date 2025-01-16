@@ -1,19 +1,19 @@
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
-import { wait } from '@/shared/helpers/wait';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
+import { getErrorMessageForError } from '@/shared/errors';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export function useGetOraclesNotifications() {
-  const { setTopNotification, closeNotification } =
-    useProtectedLayoutNotification();
+  const { showNotification } = useNotification();
 
-  const onError = async (error: ResponseError) => {
-    setTopNotification({
-      type: 'warning',
-      content: defaultErrorMessage(error),
+  const onError = (error: ResponseError) => {
+    showNotification({
+      type: TopNotificationType.WARNING,
+      message: getErrorMessageForError(error),
+      durationMs: 5000,
     });
-    await wait(5000);
-    closeNotification();
   };
 
   return { onError };

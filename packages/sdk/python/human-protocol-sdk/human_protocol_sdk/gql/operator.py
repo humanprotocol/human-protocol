@@ -18,6 +18,7 @@ fragment LeaderFields on Leader {
     publicKey
     webhookUrl
     url
+    website
     jobTypes
     registrationNeeded
     registrationInstructions

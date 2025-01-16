@@ -19,7 +19,6 @@ import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 import { RewardAmount } from '@/modules/worker/components/jobs/reward-amount';
 import { Button } from '@/shared/components/ui/button';
 import { Chip } from '@/shared/components/ui/chip';
-import { formatDate } from '@/shared/helpers/format-date';
 import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { MyJobsJobTypeFilter } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-job-type-filter';
 import { MyJobsRewardAmountSort } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-reward-amount-sort';
@@ -32,6 +31,7 @@ import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
 import { useRefreshTasksMutation } from '@/modules/worker/services/refresh-tasks';
 import { StatusChip } from '@/modules/worker/components/jobs/status-chip';
+import { formatDate } from '@/shared/helpers/date';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableProps {

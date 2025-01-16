@@ -14,7 +14,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:128](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L128)
+=======
+[interfaces.ts:126](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L126)
+>>>>>>> develop
 
 ***
 
@@ -24,7 +28,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:123](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L123)
+=======
+[interfaces.ts:121](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L121)
+>>>>>>> develop
 
 ***
 
@@ -34,7 +42,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:126](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L126)
+=======
+[interfaces.ts:124](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L124)
+>>>>>>> develop
 
 ***
 
@@ -44,7 +56,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:127](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L127)
+=======
+[interfaces.ts:125](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L125)
+>>>>>>> develop
 
 ***
 
@@ -54,7 +70,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:124](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L124)
+=======
+[interfaces.ts:122](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L122)
+>>>>>>> develop
 
 ***
 
@@ -64,7 +84,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:129](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L129)
+=======
+[interfaces.ts:127](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L127)
+>>>>>>> develop
 
 ***
 
@@ -74,4 +98,8 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [interfaces.ts:125](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L125)
+=======
+[interfaces.ts:123](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L123)
+>>>>>>> develop

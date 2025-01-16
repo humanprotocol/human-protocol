@@ -31,9 +31,9 @@ yarn install @human-protocol/sdk
 ```ts
 import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
-const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
+const KVStoreAddresses = await KVStoreUtils.getKVStoreData(
   ChainId.POLYGON_AMOY,
-  "0x1234567890123456789012345678901234567890",
+  "0x1234567890123456789012345678901234567890"
 );
 ```
 
@@ -108,7 +108,11 @@ console.log(value);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
+=======
+[kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
+>>>>>>> develop
 
 ***
 
@@ -158,7 +162,11 @@ console.log(url);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
+=======
+[kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
+>>>>>>> develop
 
 ***
 
@@ -207,7 +215,11 @@ console.log(kvStoreData);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
+=======
+[kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
+>>>>>>> develop
 
 ***
 
@@ -251,4 +263,8 @@ console.log(publicKey);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
+=======
+[kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
+>>>>>>> develop

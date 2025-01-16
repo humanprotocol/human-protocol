@@ -1,11 +1,11 @@
 # human_protocol_sdk.encryption.encryption module
 
-This class allows to sign, verify, encrypt and
-decrypt messages at all levels of escrow processing.
+This class allows signing, verifying, encrypting, and
+decrypting messages at all levels of escrow processing.
 
 The algorithm includes the implementation of the
 [PGP encryption algorithm]([https://github.com/openpgpjs/openpgpjs](https://github.com/openpgpjs/openpgpjs))
-multi-public key encryption on python.
+multi-public key encryption in Python.
 Using the vanilla [ed25519]([https://en.wikipedia.org/wiki/EdDSA#Ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519))
 implementation Schnorr signatures for signature and
 [curve25519]([https://en.wikipedia.org/wiki/Curve25519](https://en.wikipedia.org/wiki/Curve25519)) for encryption.
