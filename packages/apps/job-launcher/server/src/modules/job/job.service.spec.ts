@@ -676,10 +676,7 @@ describe('JobService', () => {
         fortuneJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userMock.id,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
         userId: userMock.id,
         jobId,
