@@ -1,6 +1,8 @@
-import { useRegisterAddressMutation } from './use-register-address-mutation';
+import {
+  type RegisterAddressCallbacks,
+  useRegisterAddressMutation,
+} from './use-register-address-mutation';
 import { useRegisterAddressValidation } from './use-register-address-validation';
-import type { RegisterAddressCallbacks } from './types';
 
 export function useRegisterAddress(callbacks?: RegisterAddressCallbacks) {
   const validation = useRegisterAddressValidation();
