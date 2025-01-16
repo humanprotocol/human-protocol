@@ -1,23 +1,27 @@
-import { useEffect, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { env } from '@/shared/env';
-import { FetchError } from '@/api/fetcher';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { type CustomHCaptchaRef } from './types';
 
 interface CustomHCaptchaProps {
   onVerify: (token: string) => void;
-  error?: unknown;
 }
 
-export function CustomHCaptcha({ onVerify, error }: CustomHCaptchaProps) {
+function InternalHCaptcha(
+  { onVerify }: CustomHCaptchaProps,
+  ref: React.Ref<unknown>
+) {
   const { isDarkMode } = useColorMode();
   const captchaRef = useRef<HCaptcha>(null);
 
-  useEffect(() => {
-    if (error instanceof FetchError) {
-      captchaRef.current?.resetCaptcha();
-    }
-  }, [error]);
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
+    },
+  }));
 
   return (
     <HCaptcha
@@ -30,3 +34,8 @@ export function CustomHCaptcha({ onVerify, error }: CustomHCaptchaProps) {
     />
   );
 }
+
+export const CustomHCaptcha = forwardRef<
+  CustomHCaptchaRef,
+  CustomHCaptchaProps
+>(InternalHCaptcha);
