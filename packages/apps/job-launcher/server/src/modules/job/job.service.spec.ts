@@ -117,6 +117,9 @@ import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { CronJobType } from '../../common/enums/cron-job';
 import { QualificationService } from '../qualification/qualification.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { SlackConfigService } from '../../common/config/slack-config.service';
+import { VisionConfigService } from '../../common/config/vision-config.service';
+import { JobModerationService } from './job-moderation.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -215,6 +218,8 @@ describe('JobService', () => {
         S3ConfigService,
         QualificationService,
         NetworkConfigService,
+        VisionConfigService,
+        SlackConfigService,
         {
           provide: Web3Service,
           useValue: {
@@ -260,6 +265,10 @@ describe('JobService', () => {
         {
           provide: CronJobService,
           useValue: createMock<CronJobService>(),
+        },
+        {
+          provide: JobModerationService,
+          useValue: createMock<JobModerationService>(),
         },
       ],
     }).compile();
@@ -338,7 +347,12 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+      await jobService.createJob(
+        userId,
+        true,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
 
       expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
         MOCK_CHAIN_ID,
@@ -388,7 +402,12 @@ describe('JobService', () => {
         recordingOracle: selectedOraclesMock.recordingOracle,
       });
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+      await jobService.createJob(
+        userId,
+        true,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
 
       expect(routingProtocolService.selectOracles).toHaveBeenCalledTimes(1);
 
@@ -429,7 +448,12 @@ describe('JobService', () => {
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+      await jobService.createJob(
+        userId,
+        true,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(
         userId,
@@ -498,6 +522,7 @@ describe('JobService', () => {
 
       await jobService.createJob(
         userId,
+        true,
         JobRequestType.HCAPTCHA,
         quickLaunchJobDto,
       );
@@ -552,7 +577,7 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, {
+      await jobService.createJob(userId, true, JobRequestType.FORTUNE, {
         ...fortuneJobDto,
         chainId: undefined,
       });
@@ -584,7 +609,12 @@ describe('JobService', () => {
       });
 
       await expect(
-        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
+        jobService.createJob(
+          userId,
+          true,
+          JobRequestType.FORTUNE,
+          fortuneJobDto,
+        ),
       ).rejects.toThrow(
         new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
       );
@@ -601,7 +631,12 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
-        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
+        jobService.createJob(
+          userId,
+          true,
+          JobRequestType.FORTUNE,
+          fortuneJobDto,
+        ),
       ).rejects.toThrow(
         new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
       );
@@ -1370,6 +1405,7 @@ describe('JobService', () => {
 
       await jobService.createJob(
         userId,
+        true,
         JobRequestType.IMAGE_POINTS,
         imageLabelBinaryJobDto,
       );
@@ -1440,6 +1476,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
+          true,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1494,6 +1531,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
+          true,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1543,6 +1581,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
+          true,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1592,6 +1631,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
+          true,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1633,7 +1673,7 @@ describe('JobService', () => {
         '5.jpg',
       ]);
 
-      await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
+      await jobService.createJob(userId, true, JobRequestType.IMAGE_POINTS, {
         ...imageLabelBinaryJobDto,
         chainId: undefined,
       });
@@ -1667,6 +1707,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
+          true,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1689,6 +1730,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
+          true,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1765,6 +1807,7 @@ describe('JobService', () => {
 
       await jobService.createJob(
         userId,
+        true,
         JobRequestType.HCAPTCHA,
         hCaptchaJobDto,
       );
@@ -1811,7 +1854,7 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      await jobService.createJob(userId, JobRequestType.HCAPTCHA, {
+      await jobService.createJob(userId, true, JobRequestType.HCAPTCHA, {
         ...hCaptchaJobDto,
         chainId: undefined,
       });
@@ -1844,7 +1887,12 @@ describe('JobService', () => {
 
       getUserBalanceMock.mockResolvedValue(userBalance);
       await expect(
-        jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
+        jobService.createJob(
+          userId,
+          true,
+          JobRequestType.HCAPTCHA,
+          hCaptchaJobDto,
+        ),
       ).rejects.toThrow(
         new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
       );

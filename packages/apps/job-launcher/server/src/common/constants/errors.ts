@@ -25,6 +25,15 @@ export enum ErrorJob {
 }
 
 /**
+ * Represents error messages associated with a job moderation.
+ */
+export enum ErrorJobModeration {
+  ErrorProcessingDataset = 'Error processing dataset',
+  InappropriateContent = 'Job cannot be processed due to inappropriate content',
+  ContentModerationFailed = 'Job cannot be processed due to failure in content moderation',
+}
+
+/**
  * Represents error messages associated to webhook.
  */
 export enum ErrorWebhook {

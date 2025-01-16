@@ -77,3 +77,17 @@ export const LOGOUT_PATH = '/auth/logout';
 export const E2E_TEST_ENV = 'test-e2e';
 
 export const MUTEX_TIMEOUT = 2000; //ms
+
+export const ContentModerationLevel = {
+  VERY_LIKELY: 'VERY_LIKELY',
+  LIKELY: 'LIKELY',
+  POSSIBLE: 'POSSIBLE',
+};
+
+export const ContentModerationFeature = {
+  SAFE_SEARCH_DETECTION: 'SAFE_SEARCH_DETECTION',
+};
+
+export const JOB_MODERATION_BATCH_SIZE = 16;
+export const JOB_MODERATION_MAX_REQUESTS_PER_MINUTE = 1800;
+export const ONE_MINUTE_IN_MS = 60000;

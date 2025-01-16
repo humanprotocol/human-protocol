@@ -773,6 +773,7 @@ export class JobService {
 
   public async createJob(
     userId: number,
+    userWhitelisted: boolean,
     jobRequestType: JobRequestType,
     dto: CreateJob,
   ): Promise<number> {
@@ -949,7 +950,12 @@ export class JobService {
 
     await this.paymentRepository.createUnique(paymentEntity);
 
-    jobEntity.status = JobStatus.PAID;
+    if (!userWhitelisted) {
+      jobEntity.status = JobStatus.PAID;
+    } else {
+      jobEntity.status = JobStatus.MODERATION_PASSED;
+    }
+
     await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;

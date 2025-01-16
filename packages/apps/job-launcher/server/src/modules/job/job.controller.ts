@@ -89,6 +89,7 @@ export class JobController {
       async () => {
         return await this.jobService.createJob(
           req.user.id,
+          req.user.whitelisted,
           data.requestType,
           data,
         );
@@ -133,6 +134,7 @@ export class JobController {
       async () => {
         return await this.jobService.createJob(
           req.user.id,
+          req.user.whitelisted,
           JobRequestType.FORTUNE,
           data,
         );
@@ -171,7 +173,12 @@ export class JobController {
       { id: `user${req.user.id}` },
       MUTEX_TIMEOUT,
       async () => {
-        return await this.jobService.createJob(req.user.id, data.type, data);
+        return await this.jobService.createJob(
+          req.user.id,
+          req.user.whitelisted,
+          data.type,
+          data,
+        );
       },
     );
   }
@@ -213,6 +220,7 @@ export class JobController {
       async () => {
         return await this.jobService.createJob(
           req.user.id,
+          req.user.whitelisted,
           JobRequestType.HCAPTCHA,
           data,
         );

@@ -29,6 +29,7 @@
     "generate-env-doc": "ts-node scripts/generate-env-doc.ts"
   },
   "dependencies": {
+    "@google-cloud/vision": "^4.3.2",
     "@human-protocol/sdk": "*",
     "@nestjs/axios": "^3.1.2",
     "@nestjs/common": "^10.2.7",

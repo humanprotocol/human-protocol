@@ -96,6 +96,7 @@ describe('JobController', () => {
 
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user.id,
+        mockRequest.user.whitelisted,
         jobDto.requestType,
         jobDto,
       );
@@ -197,6 +198,7 @@ describe('JobController', () => {
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user.id,
+        mockRequest.user.whitelisted,
         JobRequestType.FORTUNE,
         jobFortuneDto,
       );
@@ -300,6 +302,7 @@ describe('JobController', () => {
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
         mockRequest.user.id,
+        mockRequest.user.whitelisted,
         JobRequestType.IMAGE_BOXES,
         jobCvatDto,
       );
