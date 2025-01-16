@@ -54,11 +54,7 @@ const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62
 
 #### Defined in
 
-<<<<<<< HEAD
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
-=======
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
->>>>>>> develop
+[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 ***
 
@@ -131,8 +127,4 @@ const transactions = await TransactionUtils.getTransactions(filter);
 
 #### Defined in
 
-<<<<<<< HEAD
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
-=======
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
->>>>>>> develop
+[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)

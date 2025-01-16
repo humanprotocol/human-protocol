@@ -60,17 +60,11 @@ A class used to filter leaders.
 Initializes a LeaderFilter instance.
 
 * **Parameters:**
-<<<<<<< HEAD
-  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Id to request data
-  * **order_by** (`Optional`[`str`]) – Order by property, “role”
-  * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order of results, “asc” or “desc”
-=======
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to request data
   * **roles** (`Optional`[`str`]) – Roles to filter by
   * **min_amount_staked** (`Optional`[`int`]) – Minimum amount staked to filter by
   * **order_by** (`Optional`[`str`]) – Property to order by, e.g., “role”
   * **order_direction** ([`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)) – Order direction of results, “asc” or “desc”
->>>>>>> develop
   * **first** (`int`) – Number of items per page
   * **skip** (`int`) – Number of items to skip (for pagination)
 

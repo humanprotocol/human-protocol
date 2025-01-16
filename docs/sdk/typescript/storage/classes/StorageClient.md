@@ -81,11 +81,7 @@ Optional. Cloud storage access data. If credentials are not provided - use anony
 
 #### Defined in
 
-<<<<<<< HEAD
-[storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
-=======
-[storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
->>>>>>> develop
+[storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
 
 ## Methods
 
@@ -131,11 +127,7 @@ const exists = await storageClient.bucketExists('bucket-name');
 
 #### Defined in
 
-<<<<<<< HEAD
-[storage.ts:266](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L266)
-=======
-[storage.ts:262](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L262)
->>>>>>> develop
+[storage.ts:262](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L262)
 
 ***
 
@@ -185,11 +177,7 @@ const files = await storageClient.downloadFiles(keys, 'bucket-name');
 
 #### Defined in
 
-<<<<<<< HEAD
-[storage.ts:113](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L113)
-=======
-[storage.ts:112](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L112)
->>>>>>> develop
+[storage.ts:112](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L112)
 
 ***
 
@@ -235,11 +223,7 @@ const fileNames = await storageClient.listObjects('bucket-name');
 
 #### Defined in
 
-<<<<<<< HEAD
-[storage.ts:297](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L297)
-=======
-[storage.ts:292](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L292)
->>>>>>> develop
+[storage.ts:292](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L292)
 
 ***
 
@@ -294,11 +278,7 @@ const uploadedFiles = await storageClient.uploadFiles(files, 'bucket-name');
 
 #### Defined in
 
-<<<<<<< HEAD
-[storage.ts:201](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L201)
-=======
-[storage.ts:198](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L198)
->>>>>>> develop
+[storage.ts:198](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L198)
 
 ***
 
@@ -332,8 +312,4 @@ const file = await StorageClient.downloadFileFromUrl('http://localhost/file.json
 
 #### Defined in
 
-<<<<<<< HEAD
-[storage.ts:148](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L148)
-=======
-[storage.ts:146](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L146)
->>>>>>> develop
+[storage.ts:146](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L146)

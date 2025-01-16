@@ -133,11 +133,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Defined in
 
-<<<<<<< HEAD
-[escrow.ts:1782](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1782)
-=======
-[escrow.ts:1784](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1784)
->>>>>>> develop
+[escrow.ts:1784](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1784)
 
 ***
 
@@ -259,11 +255,7 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-<<<<<<< HEAD
-[escrow.ts:1656](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1656)
-=======
-[escrow.ts:1658](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1658)
->>>>>>> develop
+[escrow.ts:1658](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1658)
 
 ***
 
@@ -392,8 +384,4 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 
 #### Defined in
 
-<<<<<<< HEAD
-[escrow.ts:1880](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1880)
-=======
-[escrow.ts:1882](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1882)
->>>>>>> develop
+[escrow.ts:1882](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1882)

@@ -108,11 +108,7 @@ console.log(value);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
-=======
-[kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
->>>>>>> develop
+[kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
 
 ***
 
@@ -162,11 +158,7 @@ console.log(url);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
-=======
-[kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
->>>>>>> develop
+[kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
 
 ***
 
@@ -215,11 +207,7 @@ console.log(kvStoreData);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
-=======
-[kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
->>>>>>> develop
+[kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
 
 ***
 
@@ -263,8 +251,4 @@ console.log(publicKey);
 
 #### Defined in
 
-<<<<<<< HEAD
-[kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/3ed5fd393b562534f83a6f2f110eb4e3977deb72/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
-=======
-[kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
->>>>>>> develop
+[kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
