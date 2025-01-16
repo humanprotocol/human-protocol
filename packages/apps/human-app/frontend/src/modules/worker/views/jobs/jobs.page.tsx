@@ -68,7 +68,7 @@ export function JobsPage() {
 
   useEffect(() => {
     if (error) {
-      void onErrorRef.current(error);
+      onErrorRef.current(error);
     }
   }, [error]);
 

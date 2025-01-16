@@ -1,18 +1,25 @@
-import { useProtectedLayoutNotification } from '@/modules/worker/hooks/use-protected-layout-notifications';
+import { t } from 'i18next';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
 import type { ResponseError } from '@/shared/types/global.type';
 
 export function useRegisterAddressNotifications() {
-  const { setTopNotification, closeNotification } =
-    useProtectedLayoutNotification();
+  const { showNotification } = useNotification();
 
   const onSuccess = () => {
-    closeNotification();
+    showNotification({
+      type: TopNotificationType.SUCCESS,
+      message: t('worker.registerAddress.success'),
+    });
   };
   const onError = (error: ResponseError) => {
-    setTopNotification({
-      type: 'warning',
-      content: getErrorMessageForError(error),
+    showNotification({
+      type: TopNotificationType.WARNING,
+      message: getErrorMessageForError(error),
+      durationMs: 5000,
     });
   };
 
