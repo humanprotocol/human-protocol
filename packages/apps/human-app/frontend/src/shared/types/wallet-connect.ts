@@ -13,20 +13,19 @@ interface CommonWalletConnectContext {
     Eip1193Provider
   >;
   initializing: boolean;
+  signMessage: (message: string) => Promise<string | undefined>;
 }
 
 interface ConnectedAccount {
   isConnected: true;
   chainId: number;
   address: string;
-  signMessage: (message: string) => Promise<string | undefined>;
 }
 
 interface DisconnectedAccount {
   isConnected: false;
   chainId?: never;
   address?: never;
-  signMessage?: (message: string) => Promise<string | undefined>;
 }
 
 export type WalletConnectContextConnectedAccount = CommonWalletConnectContext &

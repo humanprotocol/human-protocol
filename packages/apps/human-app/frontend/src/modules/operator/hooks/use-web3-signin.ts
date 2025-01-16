@@ -2,7 +2,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
@@ -27,9 +26,7 @@ export function useWeb3SignIn() {
   return useMutation({
     mutationFn: async (body: PrepareSignatureBody) => {
       const dataToSign = await prepareSignature(body);
-      if (!signMessage) {
-        throw new Error(t('errors.unknown'));
-      }
+
       const signature = await signMessage(JSON.stringify(dataToSign));
 
       return apiClient(apiPaths.operator.web3Auth.signIn.path, {

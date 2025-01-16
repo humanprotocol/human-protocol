@@ -70,48 +70,41 @@ export function WalletConnectProvider({
     }
   }, [web3ProviderMutation]);
 
+  const signMessage = async (message: string) => {
+    if (web3ProviderMutation.data) {
+      try {
+        const signature =
+          await web3ProviderMutation.data.signer.signMessage(message);
+        return signature;
+      } catch (error) {
+        throw new JsonRpcError(error);
+      }
+    }
+    return Promise.resolve(undefined);
+  };
+
+  const isReady =
+    isConnected && address && chainId && web3ProviderMutation.data;
+
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <WalletConnectContext.Provider
         value={
-          isConnected && address && chainId && web3ProviderMutation.data
+          isReady
             ? {
                 isConnected: true,
                 address,
                 chainId: Number(chainId),
                 web3ProviderMutation,
                 openModal,
-                signMessage: async (message: string) => {
-                  try {
-                    const signature =
-                      await web3ProviderMutation.data.signer.signMessage(
-                        message
-                      );
-                    return signature;
-                  } catch (error) {
-                    throw new JsonRpcError(error);
-                  }
-                },
+                signMessage,
                 initializing,
               }
             : {
                 isConnected: false,
                 web3ProviderMutation,
                 openModal,
-                signMessage: async (message: string) => {
-                  if (web3ProviderMutation.data) {
-                    try {
-                      const signature =
-                        await web3ProviderMutation.data.signer.signMessage(
-                          message
-                        );
-                      return signature;
-                    } catch (error) {
-                      throw new JsonRpcError(error);
-                    }
-                  }
-                  return Promise.resolve(undefined);
-                },
+                signMessage,
                 initializing,
               }
         }
