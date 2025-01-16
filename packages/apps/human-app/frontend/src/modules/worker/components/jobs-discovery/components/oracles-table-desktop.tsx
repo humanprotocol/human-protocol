@@ -5,7 +5,7 @@ import {
 import type { Oracle } from '@/modules/worker/services/oracles';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { getOraclesTablesColumns } from '@/modules/worker/components/jobs-discovery/utils/get-oracles-table-columns';
+import { getOraclesTablesColumns } from '@/modules/worker/components/jobs-discovery/helpers/get-oracles-table-columns';
 
 interface OraclesTableDesktopProps {
   isOraclesDataPending: boolean;

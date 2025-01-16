@@ -6,7 +6,7 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { OraclesTableMobile } from '@/modules/worker/components/jobs-discovery/components/oracles-table-mobile';
 import { OraclesTableDesktop } from '@/modules/worker/components/jobs-discovery/components/oracles-table-desktop';
-import { handleOracleNavigation } from '@/modules/worker/components/jobs-discovery/utils/handle-oracle-navigation';
+import { handleOracleNavigation } from '@/modules/worker/components/jobs-discovery/helpers/handle-oracle-navigation';
 
 export function OraclesTable({
   oraclesQueryDataResult,
