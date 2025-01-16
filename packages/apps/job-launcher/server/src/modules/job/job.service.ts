@@ -848,10 +848,7 @@ export class JobService {
     const { calculateFundAmount, createManifest } =
       this.createJobSpecificActions[requestType];
 
-    const userBalance = await this.paymentService.getUserBalance(
-      user.id,
-      div(1, rate),
-    );
+    const userBalance = await this.paymentService.getUserBalance(user.id);
     const feePercentage = Number(
       await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
