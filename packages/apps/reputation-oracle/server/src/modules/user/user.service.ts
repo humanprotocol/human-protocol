@@ -364,7 +364,7 @@ export class UserService {
 
   public async registrationInExchangeOracle(
     user: UserEntity,
-    { oracleAddress }: RegistrationInExchangeOracleDto,
+    oracleAddress: string,
   ): Promise<SiteKeyEntity> {
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
       user,

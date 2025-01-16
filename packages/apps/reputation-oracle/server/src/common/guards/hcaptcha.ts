@@ -23,11 +23,10 @@ export class HCaptchaGuard implements CanActivate {
     const { body } = request;
     const hCaptchaToken = body['h_captcha_token'];
 
-    // TODO: Remove 27-46 lines once we figure out how to replace human app user
+    // TODO: Remove 27-45 lines once we figure out how to replace human app user
     if (request.path === '/auth/signin') {
       const email = body['email'];
-      // Need to validate email because guards being called before any interceptors or pipes
-      // Basically to avoid unnecessary db calls
+      // Checking email here to avoid unnecessary db calls
       if (email === this.authConfigSerice.humanAppEmail) {
         return true;
       }

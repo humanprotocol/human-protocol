@@ -199,7 +199,10 @@ export class UserController {
     @Req() request: RequestWithUser,
     @Body() data: RegistrationInExchangeOracleDto,
   ): Promise<RegistrationInExchangeOracleResponseDto> {
-    await this.userService.registrationInExchangeOracle(request.user, data);
+    await this.userService.registrationInExchangeOracle(
+      request.user,
+      data.oracleAddress,
+    );
 
     return { oracleAddress: data.oracleAddress };
   }

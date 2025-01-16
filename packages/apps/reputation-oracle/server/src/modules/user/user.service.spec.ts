@@ -834,7 +834,7 @@ describe('UserService', () => {
 
       const result = await userService.registrationInExchangeOracle(
         userEntity as UserEntity,
-        oracleRegistration,
+        oracleRegistration.oracleAddress,
       );
 
       expect(siteKeyRepository.createUnique).toHaveBeenCalledWith(
@@ -873,7 +873,7 @@ describe('UserService', () => {
 
       const result = await userService.registrationInExchangeOracle(
         userEntity as UserEntity,
-        oracleRegistration,
+        oracleRegistration.oracleAddress,
       );
 
       expect(siteKeyRepository.createUnique).not.toHaveBeenCalled();
