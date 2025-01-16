@@ -19,7 +19,7 @@ import { HttpStatus } from './constants';
  *
  * ## Introduction
  *
- * This client enables to interact with S3 cloud storage services like Amazon S3 Bucket, Google Cloud Storage and others.
+ * This client enables interacting with S3 cloud storage services like Amazon S3 Bucket, Google Cloud Storage, and others.
  *
  * The instance creation of `StorageClient` should be made using its constructor:
  *
@@ -27,7 +27,7 @@ import { HttpStatus } from './constants';
  * constructor(params: StorageParams, credentials?: StorageCredentials)
  * ```
  *
- * > If credentials is not provided, it uses an anonymous access to the bucket for downloading files.
+ * > If credentials are not provided, it uses anonymous access to the bucket for downloading files.
  *
  * ## Installation
  *
@@ -68,7 +68,7 @@ export class StorageClient {
    * **Storage client constructor**
    *
    * @param {StorageParams} params - Cloud storage params
-   * @param {StorageCredentials} credentials - Optional. Cloud storage access data. If credentials is not provided - use an anonymous access to the bucket
+   * @param {StorageCredentials} credentials - Optional. Cloud storage access data. If credentials are not provided - use anonymous access to the bucket
    */
   constructor(params: StorageParams, credentials?: StorageCredentials) {
     try {
@@ -89,8 +89,7 @@ export class StorageClient {
    *
    * @param {string[]} keys Array of filenames to download.
    * @param {string} bucket Bucket name.
-   * @returns {any[]} Returns an array of json files downloaded and parsed into objects.
-   *
+   * @returns {Promise<any[]>} Returns an array of JSON files downloaded and parsed into objects.
    *
    * **Code example**
    *
@@ -131,18 +130,17 @@ export class StorageClient {
   }
 
   /**
-   * This function downloads files from a Url.
+   * This function downloads files from a URL.
    *
-   * @param {string} url Url of the file to download.
-   * @returns {any} Returns the JSON file downloaded and parsed into object.
-   *
+   * @param {string} url URL of the file to download.
+   * @returns {Promise<any>} Returns the JSON file downloaded and parsed into an object.
    *
    * **Code example**
    *
    * ```ts
    * import { StorageClient } from '@human-protocol/sdk';
    *
-   * const file = await storageClient.downloadFileFromUrl('http://localhost/file.json');
+   * const file = await StorageClient.downloadFileFromUrl('http://localhost/file.json');
    * ```
    */
   public static async downloadFileFromUrl(url: string): Promise<any> {
@@ -170,10 +168,9 @@ export class StorageClient {
   /**
    * This function uploads files to a bucket.
    *
-   * @param {any[]} files Array of objects to upload serialized into json.
+   * @param {any[]} files Array of objects to upload serialized into JSON.
    * @param {string} bucket Bucket name.
-   * @returns {UploadFile[]} Returns an array of json files downloaded and parsed into objects.
-   *
+   * @returns {Promise<UploadFile[]>} Returns an array of uploaded file metadata.
    *
    * **Code example**
    *
@@ -240,8 +237,7 @@ export class StorageClient {
    * This function checks if a bucket exists.
    *
    * @param {string} bucket Bucket name.
-   * @returns {boolean} Returns `true` if exists, `false` if it doesn't.
-   *
+   * @returns {Promise<boolean>} Returns `true` if exists, `false` if it doesn't.
    *
    * **Code example**
    *
@@ -268,11 +264,10 @@ export class StorageClient {
   }
 
   /**
-   * This function list all file names contained in the bucket.
+   * This function lists all file names contained in the bucket.
    *
    * @param {string} bucket Bucket name.
-   * @returns {boolean} Returns the list of file names contained in the bucket.
-   *
+   * @returns {Promise<string[]>} Returns the list of file names contained in the bucket.
    *
    * **Code example**
    *

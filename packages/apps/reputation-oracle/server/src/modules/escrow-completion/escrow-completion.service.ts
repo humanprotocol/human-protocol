@@ -17,7 +17,10 @@ import {
   OperatorUtils,
 } from '@human-protocol/sdk';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
-import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
+import {
+  BACKOFF_INTERVAL_SECONDS,
+  DEFAULT_BULK_PAYOUT_TX_ID,
+} from '../../common/constants';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
@@ -388,6 +391,8 @@ export class EscrowCompletionService {
       Array.from(recipientToAmountMap.values()),
       escrowCompletionEntity.finalResultsUrl,
       escrowCompletionEntity.finalResultsHash,
+      DEFAULT_BULK_PAYOUT_TX_ID,
+      false,
       {
         gasPrice: await this.web3Service.calculateGasPrice(
           escrowCompletionEntity.chainId,

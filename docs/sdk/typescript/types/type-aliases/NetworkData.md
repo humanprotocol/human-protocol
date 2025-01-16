@@ -70,7 +70,7 @@ Subgraph URL
 
 > **subgraphUrlApiKey**: `string`
 
-Subgraph URL
+Subgraph URL API key
 
 ### title
 
@@ -80,4 +80,4 @@ Network title
 
 ## Defined in
 
-[types.ts:95](https://github.com/humanprotocol/human-protocol/blob/1e2737443dee3d34c362a98b621295e4e643d4b4/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)
+[types.ts:95](https://github.com/humanprotocol/human-protocol/blob/38a18ec1b58d03e9e1ad84ba013a1910011a6602/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)

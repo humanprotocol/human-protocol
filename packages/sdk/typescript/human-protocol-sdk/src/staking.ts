@@ -28,19 +28,19 @@ import { StakerInfo } from './interfaces';
 /**
  * ## Introduction
  *
- * This client enables to perform actions on staking contracts and obtain staking information from both the contracts and subgraph.
+ * This client enables performing actions on staking contracts and obtaining staking information from both the contracts and subgraph.
  *
  * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
  *
  * ```ts
- * static async build(runner: ContractRunner);
+ * static async build(runner: ContractRunner): Promise<StakingClient>;
  * ```
  *
  * A `Signer` or a `Provider` should be passed depending on the use case of this module:
  *
- * - **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
- * - **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+ * - **Signer**: when the user wants to use this model to send transactions calling the contract functions.
+ * - **Provider**: when the user wants to use this model to get information from the contracts or subgraph.
  *
  * ## Installation
  *
@@ -58,21 +58,21 @@ import { StakerInfo } from './interfaces';
  *
  * ### Signer
  *
- * **Using private key(backend)**
+ * **Using private key (backend)**
  *
  * ```ts
  * import { StakingClient } from '@human-protocol/sdk';
  * import { Wallet, providers } from 'ethers';
  *
  * const rpcUrl = 'YOUR_RPC_URL';
- * const privateKey = 'YOUR_PRIVATE_KEY'
+ * const privateKey = 'YOUR_PRIVATE_KEY';
  *
  * const provider = new providers.JsonRpcProvider(rpcUrl);
  * const signer = new Wallet(privateKey, provider);
  * const stakingClient = await StakingClient.build(signer);
  * ```
  *
- * **Using Wagmi(frontend)**
+ * **Using Wagmi (frontend)**
  *
  * ```ts
  * import { useSigner, useChainId } from 'wagmi';
@@ -133,7 +133,7 @@ export class StakingClient extends BaseEthersClient {
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(runner: ContractRunner) {
+  public static async build(runner: ContractRunner): Promise<StakingClient> {
     if (!runner.provider) {
       throw ErrorProviderDoesNotExist;
     }
@@ -172,7 +172,6 @@ export class StakingClient extends BaseEthersClient {
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
-   *
    * **Code example**
    *
    * ```ts
@@ -180,7 +179,7 @@ export class StakingClient extends BaseEthersClient {
    * import { StakingClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -226,7 +225,6 @@ export class StakingClient extends BaseEthersClient {
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
-   *
    * **Code example**
    *
    * ```ts
@@ -234,7 +232,7 @@ export class StakingClient extends BaseEthersClient {
    * import { StakingClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -242,7 +240,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await stakingClient.approveStake(amount); // if it was already approved before, this is not necessary
-   * await stakingClient.approveStake(amount);
+   * await stakingClient.stake(amount);
    * ```
    */
   @requiresSigner
@@ -272,7 +270,6 @@ export class StakingClient extends BaseEthersClient {
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
-   *
    * **Code example**
    *
    * ```ts
@@ -280,7 +277,7 @@ export class StakingClient extends BaseEthersClient {
    * import { StakingClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -312,13 +309,12 @@ export class StakingClient extends BaseEthersClient {
   }
 
   /**
-   * This function withdraws unstaked and non locked tokens form staking contract to the user wallet.
+   * This function withdraws unstaked and non-locked tokens from staking contract to the user wallet.
    *
    * > Must have tokens available to withdraw
    *
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
-   *
    *
    * **Code example**
    *
@@ -327,7 +323,7 @@ export class StakingClient extends BaseEthersClient {
    * import { StakingClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);
@@ -347,15 +343,14 @@ export class StakingClient extends BaseEthersClient {
   }
 
   /**
-   * This function reduces the allocated amount by an staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
+   * This function reduces the allocated amount by a staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
    *
    * @param {string} slasher Wallet address from who requested the slash
    * @param {string} staker Wallet address from who is going to be slashed
    * @param {string} escrowAddress Address of the escrow that the slash is made
+   * @param {bigint} amount Amount in WEI of tokens to slash.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
-   * @param {bigint} amount Amount in WEI of tokens to unstake.
    * @returns Returns void if successful. Throws error if any.
-   *
    *
    * **Code example**
    *
@@ -364,7 +359,7 @@ export class StakingClient extends BaseEthersClient {
    * import { StakingClient } from '@human-protocol/sdk';
    *
    * const rpcUrl = 'YOUR_RPC_URL';
-   * const privateKey = 'YOUR_PRIVATE_KEY'
+   * const privateKey = 'YOUR_PRIVATE_KEY';
    *
    * const provider = new providers.JsonRpcProvider(rpcUrl);
    * const signer = new Wallet(privateKey, provider);

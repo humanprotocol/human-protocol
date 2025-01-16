@@ -1,10 +1,10 @@
 # human_protocol_sdk.kvstore.kvstore_client module
 
-This client enables to perform actions on KVStore contract and
-obtain information from both the contracts and subgraph.
+This client enables performing actions on the KVStore contract and
+obtaining information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create Web3 instance, and configure default account,
+To use this client, you need to create a Web3 instance and configure the default account,
 as well as some middlewares.
 
 ## Code Example
@@ -59,7 +59,8 @@ A class used to manage kvstore on the HUMAN network.
 Initializes a KVStore instance.
 
 * **Parameters:**
-  **web3** (`Web3`) – The Web3 object
+  * **web3** (`Web3`) – The Web3 object
+  * **gas_limit** (`Optional`[`int`]) – (Optional) Gas limit for transactions
 
 #### set(key, value, tx_options=None)
 
@@ -131,8 +132,8 @@ Sets multiple key-value pairs in the contract.
   (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
   kvstore_client = KVStoreClient(w3)
 
-  keys = ['Role', 'Webhook_url'];
-  values = ['RecordingOracle', 'http://localhost'];
+  keys = ['Role', 'Webhook_url']
+  values = ['RecordingOracle', 'http://localhost']
   kvstore_client.set_bulk(keys, values)
   ```
 

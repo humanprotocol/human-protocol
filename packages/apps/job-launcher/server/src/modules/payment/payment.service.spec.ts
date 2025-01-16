@@ -101,11 +101,10 @@ describe('PaymentService', () => {
           },
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
-        { provide: RateService, useValue: createMock<RateService>() },
         {
           provide: RateService,
           useValue: {
-            getRate: jest.fn().mockResolvedValue(1.5),
+            getRate: jest.fn().mockResolvedValue(1),
           },
         },
         NetworkConfigService,
@@ -556,7 +555,7 @@ describe('PaymentService', () => {
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
         amount: 10,
-        rate: 1.5,
+        rate: 1,
         transaction: MOCK_TRANSACTION_HASH,
         chainId: ChainId.POLYGON_AMOY,
         status: PaymentStatus.SUCCEEDED,
@@ -816,46 +815,49 @@ describe('PaymentService', () => {
       const userId = 1;
       const expectedBalance = 20;
 
-      paymentRepository.findByUserAndStatus = jest.fn().mockResolvedValue([
+      paymentRepository.getUserBalancePayments = jest.fn().mockResolvedValue([
         {
           amount: 50,
           rate: 1,
           type: PaymentType.DEPOSIT,
           status: PaymentStatus.SUCCEEDED,
+          currency: Currency.USD,
         },
         {
           amount: 150,
           rate: 1,
           type: PaymentType.DEPOSIT,
           status: PaymentStatus.SUCCEEDED,
+          currency: Currency.USD,
         },
         {
           amount: -180,
           rate: 1,
           type: PaymentType.WITHDRAWAL,
           status: PaymentStatus.SUCCEEDED,
+          currency: Currency.USD,
         },
       ]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.findByUserAndStatus).toHaveBeenCalledWith(
+      expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
         userId,
-        PaymentStatus.SUCCEEDED,
       );
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
       const userId = 1;
-      paymentRepository.findByUserAndStatus = jest.fn().mockResolvedValue([]);
+      paymentRepository.getUserBalancePayments = jest
+        .fn()
+        .mockResolvedValue([]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(0);
-      expect(paymentRepository.findByUserAndStatus).toHaveBeenCalledWith(
+      expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
         userId,
-        PaymentStatus.SUCCEEDED,
       );
     });
   });
@@ -1351,7 +1353,7 @@ describe('PaymentService', () => {
       const mockEntities = [
         {
           amount: 100,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.DEPOSIT,
           source: PaymentSource.FIAT,
@@ -1362,7 +1364,7 @@ describe('PaymentService', () => {
         },
         {
           amount: -50,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.WITHDRAWAL,
           source: PaymentSource.CRYPTO,
@@ -1385,7 +1387,7 @@ describe('PaymentService', () => {
       const expectedPayments = [
         {
           amount: 100,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.DEPOSIT,
           source: PaymentSource.FIAT,
@@ -1396,7 +1398,7 @@ describe('PaymentService', () => {
         },
         {
           amount: -50,
-          rate: 1.5,
+          rate: 1,
           currency: 'usd',
           type: PaymentType.WITHDRAWAL,
           source: PaymentSource.CRYPTO,

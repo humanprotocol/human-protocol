@@ -9,7 +9,7 @@ from human_protocol_sdk.constants import ChainId
 from human_protocol_sdk.kvstore import KVStoreUtils
 
 print(
-    KVStoreUtils.get_data(
+    KVStoreUtils.get_kvstore_data(
         ChainId.POLYGON_AMOY,
         "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
     )
