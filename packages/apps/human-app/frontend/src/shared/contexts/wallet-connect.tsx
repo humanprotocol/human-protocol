@@ -15,7 +15,7 @@ import { JsonRpcError } from '@/modules/smart-contracts/json-rpc-error';
 import {
   type WalletConnectContextConnectedAccount,
   type WalletConnectContextDisconnectedAccount,
-} from '../types/wallet-connect-context';
+} from '../types/wallet-connect';
 
 const projectId = env.VITE_WALLET_CONNECT_PROJECT_ID;
 
