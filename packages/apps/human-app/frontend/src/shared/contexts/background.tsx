@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react';
-import { createContext, useCallback, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import type { ColorPalette } from '@/shared/styles/color-palette';
 
 export interface BackgroundContextProps {
@@ -22,7 +28,7 @@ export function BackgroundProvider({
   children,
   colorPalette,
   isDarkMode,
-}: BackgroundProviderProps) {
+}: Readonly<BackgroundProviderProps>) {
   const [backgroundColor, setBackgroundColor] = useState<string>(
     colorPalette.white
   );
@@ -39,13 +45,13 @@ export function BackgroundProvider({
     setBackgroundColor(colorPalette.white);
   }, [colorPalette.white]);
 
-  const setGrayBackground = () => {
+  const setGrayBackground = useCallback(() => {
     if (isDarkMode) {
       setBackgroundColor(colorPalette.backgroundColor);
     } else {
       setBackgroundColor(colorPalette.paper.main);
     }
-  };
+  }, [isDarkMode, colorPalette.backgroundColor, colorPalette.paper.main]);
 
   const setGrayBackgroundInternal = useCallback(
     (_isDarkMode: boolean) => {
@@ -69,10 +75,13 @@ export function BackgroundProvider({
     setGrayBackgroundInternal,
   ]);
 
+  const contextValue = useMemo(
+    () => ({ backgroundColor, setWhiteBackground, setGrayBackground }),
+    [backgroundColor, setWhiteBackground, setGrayBackground]
+  );
+
   return (
-    <BackgroundContext.Provider
-      value={{ backgroundColor, setWhiteBackground, setGrayBackground }}
-    >
+    <BackgroundContext.Provider value={contextValue}>
       {children}
     </BackgroundContext.Provider>
   );
