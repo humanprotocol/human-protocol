@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useMemo, useState } from 'react';
 
 interface RegisteredOraclesContextProps {
   registeredOracles: string[] | undefined;
@@ -8,37 +8,27 @@ interface RegisteredOraclesContextProps {
   >;
 }
 
-const RegisteredOraclesContext = createContext<
+export const RegisteredOraclesContext = createContext<
   RegisteredOraclesContextProps | undefined
 >(undefined);
 
 export function RegisteredOraclesProvider({
   children,
-}: {
+}: Readonly<{
   children: ReactNode;
-}) {
+}>) {
   const [registeredOracles, setRegisteredOracles] = useState<
     string[] | undefined
   >(undefined);
 
+  const oraclesContextValue = useMemo(
+    () => ({ registeredOracles, setRegisteredOracles }),
+    [registeredOracles, setRegisteredOracles]
+  );
+
   return (
-    <RegisteredOraclesContext.Provider
-      value={{
-        registeredOracles,
-        setRegisteredOracles,
-      }}
-    >
+    <RegisteredOraclesContext.Provider value={oraclesContextValue}>
       {children}
     </RegisteredOraclesContext.Provider>
   );
 }
-
-export const useRegisteredOracles = () => {
-  const context = useContext(RegisteredOraclesContext);
-  if (!context) {
-    throw new Error(
-      'useRegisteredOracles must be used within a RegisteredOraclesProvider'
-    );
-  }
-  return context;
-};
