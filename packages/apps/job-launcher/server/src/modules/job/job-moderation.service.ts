@@ -1,4 +1,5 @@
 import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
+import { Storage } from '@google-cloud/storage';
 import { VisionConfigService } from '../../common/config/vision-config.service';
 import { ErrorJobModeration } from '../../common/constants/errors';
 import { listObjectsInBucket } from '../../common/utils/storage';
@@ -60,19 +61,39 @@ export class JobModerationService {
       return jobEntity;
     }
 
-    // If there are possible moderation issues, send a Slack notification
+    // If there are possible moderation issues, save links to GCS and send a Slack notification
     if (dataModerationResults.possibleResults.length > 0) {
       const imageLinks = dataModerationResults.possibleResults
-        .map((result) => `- ${result.imageUrl}`)
+        .map((result) => result.imageUrl)
         .join('\n');
 
-      const message = `The following images have possible moderation issues:\n${imageLinks}`;
+      const storage = new Storage({
+        projectId: this.visionConfigService.projectId,
+        credentials: {
+          private_key: this.visionConfigService.privateKey,
+          client_email: this.visionConfigService.clientEmail,
+        },
+      });
+
+      const bucketName = this.visionConfigService.possibleResultsBucket;
+      const fileName = `moderation_results_${jobEntity.id}.txt`;
+
+      const file = storage.bucket(bucketName).file(fileName);
+      const stream = file.createWriteStream({ resumable: false });
+      stream.end(imageLinks);
+
+      const [signedUrl] = await file.getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 60 * 60 * 1000, // 1 hour
+      });
+
+      const message = `The following images have possible moderation issues for job id ${jobEntity.id}. The results are saved <${signedUrl}|here>.`;
 
       await sendSlackNotification(this.slackConfigService.webhookUrl, message);
 
       this.logger.log(
-        'Slack notification sent with possible image links:',
-        message,
+        'Slack notification sent with possible image links and signed URL:',
+        signedUrl,
       );
     }
 
@@ -219,11 +240,6 @@ export class JobModerationService {
           { type: ContentModerationFeature.SAFE_SEARCH_DETECTION as any },
         ],
       })),
-      outputConfig: {
-        gcsDestination: {
-          uri: `${this.visionConfigService.outputGcsUri}/`,
-        },
-      },
     };
 
     try {

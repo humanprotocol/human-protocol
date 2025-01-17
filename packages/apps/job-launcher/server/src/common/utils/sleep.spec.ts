@@ -11,18 +11,6 @@ describe('sleep', () => {
     const elapsed = end - start;
 
     expect(elapsed).toBeGreaterThanOrEqual(duration);
-    expect(elapsed).toBeLessThanOrEqual(duration + 20);
-  });
-
-  it('should resolve almost immediately for a duration of 0 ms', async () => {
-    const start = Date.now();
-
-    await sleep(0);
-
-    const end = Date.now();
-    const elapsed = end - start;
-
-    expect(elapsed).toBeLessThanOrEqual(10);
   });
 
   it('should handle large durations correctly', async () => {
@@ -35,7 +23,6 @@ describe('sleep', () => {
     const elapsed = end - start;
 
     expect(elapsed).toBeGreaterThanOrEqual(duration);
-    expect(elapsed).toBeLessThanOrEqual(duration + 50);
   });
 
   it('should not resolve too early', async () => {

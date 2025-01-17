@@ -17,8 +17,10 @@ import { DataModerationResultDto } from './job-moderation.dto';
 import { JobEntity } from './job.entity';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { listObjectsInBucket } from '../../common/utils/storage';
+import { Storage } from '@google-cloud/storage';
 
 jest.mock('@google-cloud/vision');
+jest.mock('@google-cloud/storage');
 jest.mock('fs');
 jest.mock('../../common/utils/storage', () => ({
   listObjectsInBucket: jest.fn(),
@@ -143,7 +145,7 @@ describe('JobModerationService', () => {
       expect(result.status).toBe(JobStatus.FAILED);
     });
 
-    it('should send a Slack notification when there are possible issues', async () => {
+    it('should send a Slack notification when there are possible issues and generate a signed URL', async () => {
       const jobEntity = {
         manifestUrl: 'http://example.com/manifest.json',
       } as JobEntity;
@@ -158,11 +160,25 @@ describe('JobModerationService', () => {
         .mockResolvedValue(manifest);
       mockDataModeration.mockResolvedValue(dataModerationResults);
 
+      const mockSignedUrl = 'http://signed-url.example.com/file.txt';
+      jest.spyOn(Storage.prototype, 'bucket').mockReturnValue({
+        file: jest.fn().mockReturnValue({
+          createWriteStream: jest.fn(() => ({
+            end: jest.fn().mockImplementation(() => {}),
+          })),
+          getSignedUrl: jest.fn().mockResolvedValue([mockSignedUrl]),
+        }),
+      } as any);
+
       await jobModerationService.jobModeration(jobEntity);
 
       expect(sendSlackNotification).toHaveBeenCalledWith(
         expect.any(String),
         expect.stringContaining('possible moderation issues'),
+      );
+      expect(sendSlackNotification).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.stringContaining(mockSignedUrl),
       );
       expect(jobRepository.updateOne).toHaveBeenCalledWith({
         ...jobEntity,
