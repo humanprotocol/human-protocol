@@ -1,4 +1,10 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   useAppKit,
   useAppKitAccount,
@@ -48,18 +54,14 @@ export const WalletConnectContext = createContext<
 
 export function WalletConnectProvider({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [initializing, setInitializing] = useState(true);
   const web3ProviderMutation = useWeb3Provider();
   const { open } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
-
-  const openModal = async () => {
-    await open();
-  };
 
   useEffect(() => {
     if (
@@ -70,45 +72,60 @@ export function WalletConnectProvider({
     }
   }, [web3ProviderMutation]);
 
-  const signMessage = async (message: string) => {
-    if (web3ProviderMutation.data) {
-      try {
-        const signature =
-          await web3ProviderMutation.data.signer.signMessage(message);
-        return signature;
-      } catch (error) {
-        throw new JsonRpcError(error);
+  const openModal = useCallback(async () => {
+    await open();
+  }, [open]);
+
+  const signMessage = useCallback(
+    async (message: string) => {
+      if (web3ProviderMutation.data) {
+        try {
+          const signature =
+            await web3ProviderMutation.data.signer.signMessage(message);
+          return signature;
+        } catch (error) {
+          throw new JsonRpcError(error);
+        }
       }
-    }
-    return Promise.resolve(undefined);
-  };
+      return Promise.resolve(undefined);
+    },
+    [web3ProviderMutation.data]
+  );
 
   const isReady =
     isConnected && address && chainId && web3ProviderMutation.data;
 
+  const contextValue = useMemo(() => {
+    return isReady
+      ? ({
+          isConnected: true,
+          address,
+          chainId: Number(chainId),
+          web3ProviderMutation,
+          openModal,
+          signMessage,
+          initializing,
+        } satisfies WalletConnectContextConnectedAccount)
+      : ({
+          isConnected: false,
+          web3ProviderMutation,
+          openModal,
+          signMessage,
+          initializing,
+        } satisfies WalletConnectContextDisconnectedAccount);
+  }, [
+    isReady,
+    address,
+    chainId,
+    web3ProviderMutation,
+    openModal,
+    signMessage,
+    initializing,
+  ]);
+
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <WalletConnectContext.Provider
-        value={
-          isReady
-            ? {
-                isConnected: true,
-                address,
-                chainId: Number(chainId),
-                web3ProviderMutation,
-                openModal,
-                signMessage,
-                initializing,
-              }
-            : {
-                isConnected: false,
-                web3ProviderMutation,
-                openModal,
-                signMessage,
-                initializing,
-              }
-        }
-      >
+      <WalletConnectContext.Provider value={contextValue}>
         {children}
       </WalletConnectContext.Provider>
     </WagmiProvider>
