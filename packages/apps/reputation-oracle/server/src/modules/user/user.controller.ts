@@ -27,6 +27,7 @@ import {
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
+import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { RequestWithUser } from '../../common/types';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
@@ -35,12 +36,12 @@ import { KycSignedAddressDto } from '../kyc/kyc.dto';
 @ApiTags('User')
 @Controller('/user')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/register-labeler')
   @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Register Labeler',
     description: 'Endpoint to register user as a labeler on hcaptcha services.',
@@ -72,6 +73,7 @@ export class UserController {
 
   @Post('/register-address')
   @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Register Blockchain Address',
     description: 'Endpoint to register blockchain address.',
@@ -103,6 +105,7 @@ export class UserController {
 
   @Post('/enable-operator')
   @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Enable an operator',
     description: 'Endpoint to enable an operator.',
@@ -125,6 +128,7 @@ export class UserController {
 
   @Post('/disable-operator')
   @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Disable an operator',
     description: 'Endpoint to disable an operator.',
@@ -147,6 +151,7 @@ export class UserController {
 
   @Public()
   @Post('/prepare-signature')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Web3 signature body',
     description:
@@ -170,6 +175,7 @@ export class UserController {
 
   @Post('/exchange-oracle-registration')
   @HttpCode(200)
+  @UseGuards(HCaptchaGuard, JwtAuthGuard)
   @ApiOperation({
     summary: 'Notifies registration in Exchange Oracle completed',
     description:
@@ -193,13 +199,17 @@ export class UserController {
     @Req() request: RequestWithUser,
     @Body() data: RegistrationInExchangeOracleDto,
   ): Promise<RegistrationInExchangeOracleResponseDto> {
-    await this.userService.registrationInExchangeOracle(request.user, data);
+    await this.userService.registrationInExchangeOracle(
+      request.user,
+      data.oracleAddress,
+    );
 
     return { oracleAddress: data.oracleAddress };
   }
 
   @Get('/exchange-oracle-registration')
   @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Retrieves Exchange Oracles the user is registered in',
     description:
