@@ -54,7 +54,6 @@ import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { QualificationService } from '../qualification/qualification.service';
-import { SlackConfigService } from '../../common/config/slack-config.service';
 import { JobModerationService } from '../job/job-moderation.service';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -81,7 +80,6 @@ describe('CronJobService', () => {
     webhookRepository: WebhookRepository,
     storageService: StorageService,
     jobService: JobService,
-    // paymentService: PaymentService,
     jobRepository: JobRepository;
 
   const signerMock = {
@@ -124,7 +122,6 @@ describe('CronJobService', () => {
         PGPConfigService,
         NetworkConfigService,
         QualificationService,
-        SlackConfigService,
         {
           provide: NetworkConfigService,
           useValue: {

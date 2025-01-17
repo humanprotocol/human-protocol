@@ -6,5 +6,5 @@ export enum CronJobType {
   CancelEscrow = 'cancel-escrow',
   ProcessPendingWebhook = 'process-pending-webhook',
   SyncJobStatuses = 'sync-job-statuses',
-  Abuse = 'abuse',
+  // Abuse = 'abuse',
 }

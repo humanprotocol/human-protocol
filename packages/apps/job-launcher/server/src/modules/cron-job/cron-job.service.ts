@@ -29,7 +29,6 @@ import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { JobEntity } from '../job/job.entity';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { SlackConfigService } from '../../common/config/slack-config.service';
 import { JobModerationService } from '../job/job-moderation.service';
 
 @Injectable()
@@ -44,7 +43,6 @@ export class CronJobService {
     private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
     private readonly jobModerationService: JobModerationService,
-    private readonly slackConfigService: SlackConfigService,
     private readonly webhookRepository: WebhookRepository,
     private readonly networkConfigService: NetworkConfigService,
   ) {}
@@ -84,7 +82,7 @@ export class CronJobService {
     return this.cronJobRepository.updateOne(cronJobEntity);
   }
 
-  @Cron('*/1 * * * *')
+  @Cron('*/2 * * * *')
   public async jobModerationCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.JobModeration,
