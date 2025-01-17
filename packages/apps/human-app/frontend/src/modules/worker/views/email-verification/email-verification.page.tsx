@@ -62,8 +62,8 @@ export function EmailVerificationWorker({ token }: { token: string }) {
 
   return (
     <PageCard
-      showArrowButton={false}
-      showCancelButton={false}
+      hiddenArrowButton
+      hiddenCancelButton
       title={<SuccessLabel>{t('worker.emailVerification.title')}</SuccessLabel>}
     >
       <Grid container gap="2rem">
