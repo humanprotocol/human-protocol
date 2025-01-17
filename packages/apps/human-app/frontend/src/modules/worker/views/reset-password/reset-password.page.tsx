@@ -59,8 +59,8 @@ export function ResetPasswordWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelButtonNavigationTarget={routerPaths.worker.profile}
-      hiddenArrowButton
+      cancelNavigation={routerPaths.worker.profile}
+      hideBackButton
       title={t('worker.resetPassword.title')}
     >
       <FormProvider {...methods}>

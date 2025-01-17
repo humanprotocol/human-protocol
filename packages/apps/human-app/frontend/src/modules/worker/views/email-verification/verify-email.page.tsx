@@ -75,7 +75,7 @@ export function VerifyEmailWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelButtonNavigationTarget={() => {
+      cancelNavigation={() => {
         signOut();
         navigate(routerPaths.homePage);
       }}

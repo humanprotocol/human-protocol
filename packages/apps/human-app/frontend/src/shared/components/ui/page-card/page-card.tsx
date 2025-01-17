@@ -32,10 +32,10 @@ interface PageCardProps {
   childrenMaxWidth?: string;
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
-  arrowButtonNavigationTarget?: NavigationTarget;
-  cancelButtonNavigationTarget?: NavigationTarget;
-  hiddenCancelButton?: boolean;
-  hiddenArrowButton?: boolean;
+  backNavigation?: NavigationTarget;
+  cancelNavigation?: NavigationTarget;
+  hideCancelButton?: boolean;
+  hideBackButton?: boolean;
   loader?: boolean;
 }
 
@@ -45,11 +45,11 @@ export function PageCard({
   alert,
   maxContentWidth = '376px',
   childrenMaxWidth = '486px',
-  arrowButtonNavigationTarget = -1,
-  cancelButtonNavigationTarget = routerPaths.homePage,
-  hiddenCancelButton = false,
-  hiddenArrowButton = false,
-}: PageCardProps) {
+  backNavigation = -1,
+  cancelNavigation = routerPaths.homePage,
+  hideCancelButton = false,
+  hideBackButton = false,
+}: Readonly<PageCardProps>) {
   const { isDarkMode, colorPalette } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
@@ -75,11 +75,11 @@ export function PageCard({
   };
 
   const handleArrowButton = () => {
-    goBack(arrowButtonNavigationTarget);
+    goBack(backNavigation);
   };
 
   const handleCancelButton = () => {
-    goBack(cancelButtonNavigationTarget);
+    goBack(cancelNavigation);
   };
 
   return (
@@ -90,7 +90,7 @@ export function PageCard({
         padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
-      {!hiddenCancelButton && (
+      {!hideCancelButton && (
         <Grid
           sx={{
             display: 'flex',
@@ -138,14 +138,12 @@ export function PageCard({
               [breakpoints.mobile]: {
                 display: 'flex',
                 width: '100%',
-                justifyContent: arrowButtonNavigationTarget
-                  ? 'space-between'
-                  : 'flex-end',
+                justifyContent: backNavigation ? 'space-between' : 'flex-end',
                 alignItems: 'center',
               },
             }}
           >
-            {arrowButtonNavigationTarget && !hiddenArrowButton && (
+            {backNavigation && !hideBackButton && (
               <IconWrapper
                 onClick={handleArrowButton}
                 sx={{
@@ -160,7 +158,7 @@ export function PageCard({
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
             )}
-            {!hiddenCancelButton && (
+            {!hideCancelButton && (
               <Button onClick={handleCancelButton}>
                 <Typography variant="buttonMedium">
                   {t('components.modal.header.closeBtn')}
@@ -199,7 +197,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            {arrowButtonNavigationTarget && !hiddenArrowButton && (
+            {backNavigation && !hideBackButton && (
               <IconWrapper
                 onClick={handleArrowButton}
                 sx={{
