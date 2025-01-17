@@ -663,4 +663,56 @@ describe('KVStore', () => {
       'https://validator.example.com'
     );
   });
+
+  test("Should properly update leader's name", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'name',
+      'Alice',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'name',
+      'Bob',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals('Leader', data1.params.sender.toHex(), 'name', 'Alice');
+    assert.fieldEquals('Leader', data2.params.sender.toHex(), 'name', 'Bob');
+  });
+
+  test("Should properly update leader's category", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'category',
+      'machine_learning',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'category',
+      'market_making',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHex(),
+      'category',
+      'machine_learning'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.sender.toHex(),
+      'category',
+      'market_making'
+    );
+  });
 });

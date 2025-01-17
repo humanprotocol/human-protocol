@@ -11,4 +11,5 @@
 ### Enumerations
 
 - [ChainId](enumerations/ChainId.md)
+- [LeaderCategory](enumerations/LeaderCategory.md)
 - [OrderDirection](enumerations/OrderDirection.md)

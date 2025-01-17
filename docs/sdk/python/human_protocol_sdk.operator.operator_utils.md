@@ -17,11 +17,11 @@ print(
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Bases: `object`
 
-#### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None)
+#### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Initializes a LeaderData instance.
 
@@ -46,6 +46,8 @@ Initializes a LeaderData instance.
   * **registration_needed** (`Optional`[`bool`]) – Whether registration is needed
   * **registration_instructions** (`Optional`[`str`]) – Registration instructions
   * **reputation_networks** (`Optional`[`List`[`str`]]) – List of reputation networks
+  * **name** (`Optional`[`str`]) – Name
+  * **category** (`Optional`[`str`]) – Category
 
 ### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 

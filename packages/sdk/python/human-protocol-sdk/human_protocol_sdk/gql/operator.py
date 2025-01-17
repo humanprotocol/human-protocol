@@ -25,6 +25,8 @@ fragment LeaderFields on Leader {
     reputationNetworks {
       address
     }
+    name
+    category
 }
 """
 

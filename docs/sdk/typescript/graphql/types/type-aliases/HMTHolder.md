@@ -20,4 +20,4 @@
 
 ## Defined in
 
-[graphql/types.ts:122](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L122)
+[graphql/types.ts:122](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L122)
