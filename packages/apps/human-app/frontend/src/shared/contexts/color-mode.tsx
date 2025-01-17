@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react';
-import { createContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { theme } from '@/shared/styles/theme';
 import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palette';
@@ -26,34 +32,12 @@ interface ColorModeProviderProps {
   children: ReactNode;
 }
 
-export function ColorModeProvider({ children }: ColorModeProviderProps) {
+export function ColorModeProvider({
+  children,
+}: Readonly<ColorModeProviderProps>) {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(
     isDarkColorModeEnabledInLocalStorage()
   );
-
-  const switchMode = () => {
-    setIsDarkMode((current) => {
-      const newMode = !current;
-      saveColorModeStateInLocalStorage(newMode ? 'dark' : 'light');
-      return newMode;
-    });
-  };
-
-  const runColorMode = (
-    fn: (matches: boolean) => void
-  ): (() => void) | undefined => {
-    const query = window.matchMedia('(prefers-color-scheme: dark)');
-    fn(query.matches);
-
-    const listener = (event: MediaQueryListEvent) => {
-      fn(event.matches);
-    };
-    query.addEventListener('change', listener);
-
-    return () => {
-      query.removeEventListener('change', listener);
-    };
-  };
 
   useEffect(() => {
     const handleColorModeChange = (matches: boolean) => {
@@ -74,6 +58,31 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  const switchMode = useCallback(() => {
+    setIsDarkMode((current) => {
+      const newMode = !current;
+      saveColorModeStateInLocalStorage(newMode ? 'dark' : 'light');
+      return newMode;
+    });
+  }, []);
+
+  const runColorMode = (
+    fn: (matches: boolean) => void
+  ): (() => void) | undefined => {
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    fn(query.matches);
+
+    const listener = (event: MediaQueryListEvent) => {
+      fn(event.matches);
+    };
+    query.addEventListener('change', listener);
+
+    return () => {
+      query.removeEventListener('change', listener);
+    };
+  };
+
   const themes = useMemo(
     () => (isDarkMode ? createTheme(darkTheme) : createTheme(theme)),
     [isDarkMode]
@@ -82,11 +91,14 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
     () => (isDarkMode ? darkColorPalette : defaultColorPalette),
     [isDarkMode]
   );
+  const contextValue = useMemo(
+    () => ({ isDarkMode, colorPalette, switchMode }),
+    [isDarkMode, colorPalette, switchMode]
+  );
+
   return (
     <ThemeProvider theme={themes}>
-      <ColorModeContext.Provider
-        value={{ isDarkMode, colorPalette, switchMode }}
-      >
+      <ColorModeContext.Provider value={contextValue}>
         <BackgroundProvider colorPalette={colorPalette} isDarkMode={isDarkMode}>
           {children}
         </BackgroundProvider>
