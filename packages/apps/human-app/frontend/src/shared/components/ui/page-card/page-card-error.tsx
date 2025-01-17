@@ -6,13 +6,12 @@ import { routerPaths } from '@/router/router-paths';
 import { Alert } from '@/shared/components/ui/alert';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
-import { type ChildErrorProps, type ErrorMessageProps } from './types';
+import { type ErrorMessageProps } from './types';
 
 export function PageCardError({
   errorMessage,
-  children,
   cardMaxWidth = '100%',
-}: ErrorMessageProps | ChildErrorProps) {
+}: Readonly<ErrorMessageProps>) {
   const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
 
@@ -26,26 +25,25 @@ export function PageCardError({
 
   return (
     <Grid container sx={{ ...sx, gap: '2rem' }}>
-      {children ? (
-        children
-      ) : (
-        <>
-          <Alert color="error" severity="error">
-            {errorMessage}
-          </Alert>
-          <Button onClick={navigate.bind(null, 0)} variant="contained">
-            {t('components.pageCardError.reload')}
-          </Button>
-          <Button
-            onClick={() => {
-              navigate(routerPaths.homePage);
-            }}
-            variant="outlined"
-          >
-            {t('components.pageCardError.goHome')}
-          </Button>
-        </>
-      )}
+      <Alert color="error" severity="error">
+        {errorMessage}
+      </Alert>
+      <Button
+        onClick={() => {
+          navigate(0);
+        }}
+        variant="contained"
+      >
+        {t('components.pageCardError.reload')}
+      </Button>
+      <Button
+        onClick={() => {
+          navigate(routerPaths.homePage);
+        }}
+        variant="outlined"
+      >
+        {t('components.pageCardError.goHome')}
+      </Button>
     </Grid>
   );
 }
