@@ -15,13 +15,14 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: docker-compose-operations
+  cancel-in-progress: false  # Ensure the workflow waits instead of canceling others
+
 jobs:
   pull-request-check:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
-    concurrency:
-      group: docker-compose-operations
-      cancel-in-progress: false  # Ensure the job waits instead of canceling others
     steps:
       - name: Checkout
         uses: actions/checkout@v4
