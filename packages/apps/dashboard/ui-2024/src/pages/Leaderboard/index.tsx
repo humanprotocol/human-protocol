@@ -16,11 +16,7 @@ export const LeaderBoard = () => {
         title="Leaderboard"
         img={<LeaderboardIcon />}
       />
-      <Leaderboard
-        data={data}
-        status={status}
-        error={error}
-      />
+      <Leaderboard data={data} status={status} error={error} />
     </PageWrapper>
   );
 };
