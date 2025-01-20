@@ -1,11 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { DoneLabel } from '@/modules/worker/components/profile/components/status-labels/done-label';
 import { ErrorLabel } from '@/modules/worker/components/profile/components/status-labels/error-label';
-import { StartKycButton } from '@/modules/worker/components/profile/components/buttons/start-kyc-btn';
-import type { ProfileStatus } from '@/modules/worker/components/profile/types/profile-types';
+import { StartKycBtn } from '@/modules/worker/components/profile/components/buttons/start-kyc-btn';
+import type { WorkerProfileStatus } from '@/modules/worker/components/profile/types/profile-types';
 
 interface KycStatusProps {
-  status: Pick<ProfileStatus, 'kycApproved' | 'kycDeclined' | 'kycToComplete'>;
+  status: Pick<
+    WorkerProfileStatus,
+    'kycApproved' | 'kycDeclined' | 'kycToComplete'
+  >;
 }
 
 export function KycStatus({ status }: KycStatusProps) {
@@ -19,5 +22,5 @@ export function KycStatus({ status }: KycStatusProps) {
     return <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>;
   }
 
-  return <StartKycButton />;
+  return <StartKycBtn />;
 }

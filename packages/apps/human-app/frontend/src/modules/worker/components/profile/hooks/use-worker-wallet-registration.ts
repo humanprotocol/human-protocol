@@ -3,9 +3,9 @@ import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { useRegisterAddressMutation } from '@/modules/worker/hooks/use-register-address';
 import { useRegisterAddressNotifications } from '@/modules/worker/hooks/use-register-address-notifications';
 
-export function useWalletActions() {
+export function useWorkerWalletRegistration() {
+  const modalWasOpened = useRef(false);
   const { isConnected, address, openModal } = useWalletConnect();
-
   const { onSuccess, onError } = useRegisterAddressNotifications();
   const {
     mutate: registerAddressMutation,
@@ -14,8 +14,6 @@ export function useWalletActions() {
     onError,
     onSuccess,
   });
-
-  const modalWasOpened = useRef(false);
 
   useEffect(() => {
     if (isConnected && modalWasOpened.current) {
