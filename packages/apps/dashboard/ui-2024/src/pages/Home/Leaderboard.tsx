@@ -3,11 +3,11 @@ import { Leaderboard as LeaderboardFeature } from '../../features/Leaderboard';
 
 export const Leaderboard = () => {
   const { data, status, error } = useLeaderboardDetails();
-  const isMoreThatFiveEntries = data?.length && data.length > 5;
+  const isMoreThatFourEntries = data?.length && data.length > 4;
 
   return (
     <LeaderboardFeature
-      data={isMoreThatFiveEntries ? data.slice(0, 5) : data}
+      data={isMoreThatFourEntries ? data.slice(0, 4) : data}
       status={status}
       error={error}
       viewAllBanner
