@@ -7,7 +7,7 @@ import { useRegistrationForm } from '@/modules/worker/hooks/use-registration-for
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 
 interface RegistrationFormProps {
-  hasClickedRegistrationLink: boolean;
+  hasViewedInstructions: boolean;
   isLoading: boolean;
   error: unknown;
   onInstructionsClick: () => void;
@@ -15,7 +15,7 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({
-  hasClickedRegistrationLink,
+  hasViewedInstructions,
   isLoading,
   error,
   onInstructionsClick,
@@ -39,7 +39,7 @@ export function RegistrationForm({
           <Stack alignItems="center" spacing={2}>
             <HCaptchaForm error={error} name="h_captcha_token" />
             <Button
-              disabled={!hasClickedRegistrationLink}
+              disabled={!hasViewedInstructions}
               fullWidth
               loading={isLoading}
               type="submit"
