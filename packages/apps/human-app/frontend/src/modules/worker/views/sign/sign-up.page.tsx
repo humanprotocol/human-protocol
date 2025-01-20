@@ -37,7 +37,7 @@ export function SignUpWorkerPage() {
   return (
     <PageCard
       alert={
-        isLoading ? (
+        isError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
             {getErrorMessageForError(isError, formattedSignUpErrorMessage)}
           </Alert>
