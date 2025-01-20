@@ -13,7 +13,7 @@ export const tokenSchema = z.string().transform((value, ctx) => {
   return token;
 });
 
-export function useVerificationToken() {
+export function useEmailVerificationToken() {
   const { field: token } = useLocationState({
     schema: tokenSchema,
     locationStorage: 'search',

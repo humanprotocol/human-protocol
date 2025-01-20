@@ -10,8 +10,8 @@ import { routerPaths } from '@/router/router-paths';
 export function EmailVerificationSuccessMessage() {
   return (
     <PageCard
-      hiddenArrowButton
-      hiddenCancelButton
+      showBackButton={false}
+      showCancelButton={false}
       title={<SuccessLabel>{t('worker.emailVerification.title')}</SuccessLabel>}
     >
       <Grid container gap="2rem">
