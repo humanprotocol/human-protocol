@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, type Dispatch, type SetStateAction } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon, RefreshIcon } from '@/shared/components/ui/icons';
@@ -24,6 +24,7 @@ import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-pal
 import { useRefreshTasksMutation } from '@/modules/worker/services/refresh-tasks';
 import { getChipStatusColor } from '@/modules/worker/utils/get-chip-status-color';
 import { formatDate } from '@/shared/helpers/date';
+import { useCombinePages } from '@/modules/worker/hooks/use-combine-pages';
 import { MyJobsTableActions } from '../../my-jobs-table-actions';
 
 interface MyJobsTableMobileProps {
@@ -32,9 +33,8 @@ interface MyJobsTableMobileProps {
 
 export function MyJobsTableMobile({
   setIsMobileFilterDrawerOpen,
-}: MyJobsTableMobileProps) {
+}: Readonly<MyJobsTableMobileProps>) {
   const { colorPalette } = useColorMode();
-  const [allPages, setAllPages] = useState<MyJob[]>([]);
   const { filterParams, setPageParams, resetFilterParams } =
     useMyJobsFilterStore();
 
@@ -53,15 +53,7 @@ export function MyJobsTableMobile({
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
-  useEffect(() => {
-    if (!tableData) return;
-    const pagesFromRes = tableData.pages.flatMap((pages) => pages.results);
-    if (filterParams.page === 0) {
-      setAllPages(pagesFromRes);
-    } else {
-      setAllPages((state) => [...state, ...pagesFromRes]);
-    }
-  }, [tableData, filterParams.page]);
+  const allPages = useCombinePages<MyJob>(tableData);
 
   useEffect(() => {
     return () => {
