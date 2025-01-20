@@ -24,6 +24,10 @@ export function AvailableJobsDrawerMobile({
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 
+  const handleCloseDrawer = () => {
+    setIsMobileFilterDrawerOpen(false);
+  };
+
   return (
     <Box>
       <CssBaseline />
@@ -58,19 +62,12 @@ export function AvailableJobsDrawerMobile({
             zIndex: '999999',
           }}
         >
-          <Stack
-            sx={{ cursor: 'pointer' }}
-            onClick={() => {
-              handleMainNavIconClick();
-            }}
-          >
+          <Stack sx={{ cursor: 'pointer' }} onClick={handleMainNavIconClick}>
             <HumanLogoIcon />
           </Stack>
 
           <IconButton
-            onClick={() => {
-              setIsMobileFilterDrawerOpen(false);
-            }}
+            onClick={handleCloseDrawer}
             sx={{
               zIndex: '99999999',
               marginRight: '15px',
@@ -105,11 +102,7 @@ export function AvailableJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.network')}
         </Typography>
-        <Stack
-          alignItems="center"
-          flexDirection="row"
-          key={crypto.randomUUID()}
-        >
+        <Stack alignItems="center" flexDirection="row">
           <AvailableJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
@@ -122,11 +115,7 @@ export function AvailableJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.jobType')}
         </Typography>
-        <Stack
-          alignItems="center"
-          flexDirection="row"
-          key={crypto.randomUUID()}
-        >
+        <Stack alignItems="center" flexDirection="row">
           <AvailableJobsJobTypeFilter />
         </Stack>
       </Drawer>

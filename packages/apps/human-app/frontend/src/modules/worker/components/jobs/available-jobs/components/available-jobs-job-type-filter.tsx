@@ -1,40 +1,33 @@
 /* eslint-disable camelcase --- ... */
 import { useTranslation } from 'react-i18next';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
-import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { JOB_TYPES } from '@/shared/consts';
+import { useFilterUpdates } from '@/modules/worker/hooks/use-filter-updates';
 
 export function AvailableJobsJobTypeFilter({ isMobile = false }) {
   const { t } = useTranslation();
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+  const { filterParams, updateFilterParams } = useFilterUpdates({ isMobile });
 
-  const updateFilterParams = (updates: Partial<typeof filterParams>) => {
-    const baseUpdate = {
-      ...filterParams,
-      ...updates,
-    };
+  const filteringOptions = JOB_TYPES.map((jobType) => ({
+    name: t(`jobTypeLabels.${jobType}`),
+    option: jobType,
+  }));
 
-    if (!isMobile) {
-      baseUpdate.page = 0;
-    }
+  const handleClear = () => {
+    updateFilterParams({ job_type: undefined });
+  };
 
-    setFilterParams(baseUpdate);
+  const handleFilterChange = (jobType: string) => {
+    updateFilterParams({ job_type: jobType });
   };
 
   return (
     <Filtering
-      clear={() => {
-        updateFilterParams({ job_type: undefined });
-      }}
-      filteringOptions={JOB_TYPES.map((jobType) => ({
-        name: t(`jobTypeLabels.${jobType}`),
-        option: jobType,
-      }))}
+      clear={handleClear}
+      filteringOptions={filteringOptions}
       isChecked={(option) => option === filterParams.job_type}
       isMobile={isMobile}
-      setFiltering={(jobType) => {
-        updateFilterParams({ job_type: jobType });
-      }}
+      setFiltering={handleFilterChange}
     />
   );
 }

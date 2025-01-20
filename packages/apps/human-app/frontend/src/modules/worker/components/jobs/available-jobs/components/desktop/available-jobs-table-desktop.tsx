@@ -6,10 +6,7 @@ import { t } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { usePagination } from '@/modules/worker/hooks/use-pagination';
-import {
-  useGetAvailableJobsData,
-  type AvailableJob,
-} from '@/modules/worker/services/available-jobs-data';
+import { useGetAvailableJobsData } from '@/modules/worker/services/available-jobs-data';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
@@ -18,13 +15,6 @@ import { getAvailableJobsColumns } from '@/modules/worker/components/jobs/availa
 interface AvailableJobsTableProps {
   chainIdsEnabled: number[];
 }
-
-export type AvailableJobsTableData = AvailableJob & {
-  rewardTokenInfo: {
-    reward_amount?: string;
-    reward_token?: string;
-  };
-};
 
 export function AvailableJobsTableDesktop({
   chainIdsEnabled,
