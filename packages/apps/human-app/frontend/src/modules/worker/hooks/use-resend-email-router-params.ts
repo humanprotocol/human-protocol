@@ -6,7 +6,7 @@ export const routerStateSchema = z.object({
   resendOnMount: z.boolean().optional(),
 });
 
-export function useRouterState() {
+export function useResendEmailRouterParams() {
   const { field: routerState } = useLocationState({
     keyInStorage: 'routerState',
     schema: routerStateSchema,

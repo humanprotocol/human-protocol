@@ -10,13 +10,14 @@ interface EmailVerificationProcessProps {
 export function EmailVerificationProcess({
   token,
 }: EmailVerificationProcessProps) {
-  const { error, isError, isPending } = useEmailVerification(token);
+  const { errorMsg, isEmailVerificationError, isEmailVerificationPending } =
+    useEmailVerification(token);
 
-  if (isError && error) {
-    return <PageCardError errorMessage={error} />;
+  if (isEmailVerificationError && errorMsg) {
+    return <PageCardError errorMessage={errorMsg} />;
   }
 
-  if (isPending) {
+  if (isEmailVerificationPending) {
     return <PageCardLoader />;
   }
 
