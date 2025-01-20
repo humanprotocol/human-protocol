@@ -1,7 +1,7 @@
 /* eslint-disable camelcase --- ... */
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
-import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { useGetAllNetworks } from '@/modules/worker/hooks/use-get-all-networks';
+import { useFilterUpdates } from '@/modules/worker/hooks/use-filter-updates';
 
 interface AvailableJobsNetworkFilterProps {
   chainIdsEnabled: number[];
@@ -12,33 +12,24 @@ export function AvailableJobsNetworkFilter({
   chainIdsEnabled,
   isMobile = false,
 }: AvailableJobsNetworkFilterProps) {
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+  const { filterParams, updateFilterParams } = useFilterUpdates({ isMobile });
   const { allNetworks } = useGetAllNetworks(chainIdsEnabled);
 
-  const updateFilterParams = (updates: Partial<typeof filterParams>) => {
-    const baseUpdate = {
-      ...filterParams,
-      ...updates,
-    };
+  const handleClear = () => {
+    updateFilterParams({ chain_id: undefined });
+  };
 
-    if (!isMobile) {
-      baseUpdate.page = 0;
-    }
-
-    setFilterParams(baseUpdate);
+  const handleFilterChange = (chainId: number) => {
+    updateFilterParams({ chain_id: chainId });
   };
 
   return (
     <Filtering
-      clear={() => {
-        updateFilterParams({ chain_id: undefined });
-      }}
+      clear={handleClear}
       filteringOptions={allNetworks}
       isChecked={(option) => option === filterParams.chain_id}
       isMobile={isMobile}
-      setFiltering={(chainId) => {
-        updateFilterParams({ chain_id: chainId });
-      }}
+      setFiltering={handleFilterChange}
     />
   );
 }

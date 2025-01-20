@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- ... */
 import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { Alert } from '@/shared/components/ui/alert';
@@ -17,11 +17,11 @@ import { ListItem } from '@/shared/components/ui/list-item';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { AvailableJobsAssignJobButtonMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-assign-job-button-mobile';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import { useCombinePages } from '@/modules/worker/hooks/use-combine-pages';
 
 export function AvailableJobsTableJobsListMobile() {
   const { t } = useTranslation();
   const { colorPalette } = useColorMode();
-  const [allPages, setAllPages] = useState<AvailableJob[]>([]);
   const { filterParams, setPageParams, resetFilterParams } =
     useJobsFilterStore();
   const {
@@ -33,14 +33,7 @@ export function AvailableJobsTableJobsListMobile() {
     hasNextPage,
   } = useInfiniteGetAvailableJobsData();
 
-  useEffect(() => {
-    if (!tableData) return;
-    const pagesFromRes = tableData.pages.flatMap((pages) => pages.results);
-
-    setAllPages((state) =>
-      filterParams.page === 0 ? pagesFromRes : [...state, ...pagesFromRes]
-    );
-  }, [tableData, filterParams.page]);
+  const allPages = useCombinePages<AvailableJob>(tableData);
 
   useEffect(() => {
     return () => {
@@ -63,7 +56,7 @@ export function AvailableJobsTableJobsListMobile() {
 
       {allPages.map((d) => (
         <Paper
-          key={crypto.randomUUID()}
+          key={`${d.escrow_address}-${d.chain_id}-${d.job_type}`}
           sx={{
             px: '16px',
             py: '32px',
