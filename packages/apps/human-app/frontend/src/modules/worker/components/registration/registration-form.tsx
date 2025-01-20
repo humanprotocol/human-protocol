@@ -7,7 +7,7 @@ import { type RegistrationInExchangeOracleDto } from '@/modules/worker/services/
 import { useRegistrationForm } from '@/modules/worker/hooks/use-registration-form';
 
 interface RegistrationFormProps {
-  hasClickedRegistrationLink: boolean;
+  hasViewedInstructions: boolean;
   isLoading: boolean;
   error: unknown;
   onInstructionsClick: () => void;
@@ -15,7 +15,7 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({
-  hasClickedRegistrationLink,
+  hasViewedInstructions,
   isLoading,
   error,
   onInstructionsClick,
@@ -39,7 +39,7 @@ export function RegistrationForm({
           <Stack alignItems="center" spacing={2}>
             <FormCaptcha error={error} name="h_captcha_token" />
             <Button
-              disabled={!hasClickedRegistrationLink}
+              disabled={!hasViewedInstructions}
               fullWidth
               loading={isLoading}
               type="submit"
