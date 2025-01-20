@@ -9,10 +9,10 @@ export function useEmailVerification(token: string) {
   } = useVerifyEmailQuery({ token });
 
   return {
-    error: emailVerificationError
+    errorMsg: emailVerificationError
       ? getErrorMessageForError(emailVerificationError)
       : null,
-    isError: isEmailVerificationError,
-    isPending: isEmailVerificationPending,
+    isEmailVerificationError,
+    isEmailVerificationPending,
   };
 }

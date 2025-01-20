@@ -9,17 +9,16 @@ import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors
 import type { ResendEmailVerificationDto } from '@/modules/worker/services/resend-email-verification';
 
 export function useResendEmail(email: string) {
+  const {
+    mutate: resendEmailVerificationMutation,
+    reset: resendEmailVerificationMutationReset,
+  } = useResendEmailVerificationWorkerMutation();
   const methods = useForm<Pick<ResendEmailVerificationDto, 'h_captcha_token'>>({
     defaultValues: {
       h_captcha_token: '',
     },
     resolver: zodResolver(resendEmailVerificationHcaptchaSchema),
   });
-
-  const {
-    mutate: resendEmailVerificationMutation,
-    reset: resendEmailVerificationMutationReset,
-  } = useResendEmailVerificationWorkerMutation();
 
   useResetMutationErrors(methods.watch, resendEmailVerificationMutationReset);
 

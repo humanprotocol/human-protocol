@@ -5,13 +5,13 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { useResendEmail } from '@/modules/worker/hooks/use-resend-email';
-import { useRouterState } from '@/modules/worker/hooks/use-router-state';
+import { useResendEmailRouterParams } from '@/modules/worker/hooks/use-resend-email-router-params';
 import { ResendVerificationEmailForm } from './resend-verification-email-form';
 
 export function EmailVerificationFormContainer() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const routerState = useRouterState();
+  const routerState = useResendEmailRouterParams();
   const { methods, handleResend } = useResendEmail(routerState?.email ?? '');
 
   const isAuthenticated = Boolean(user);
@@ -25,15 +25,15 @@ export function EmailVerificationFormContainer() {
     return <PageCardLoader />;
   }
 
+  const alertComponent = methods.formState.isSubmitSuccessful ? (
+    <Alert color="error" severity="error">
+      {getErrorMessageForError(methods.formState.errors)}
+    </Alert>
+  ) : undefined;
+
   return (
     <PageCard
-      alert={
-        methods.formState.isSubmitSuccessful ? (
-          <Alert color="error" severity="error">
-            {getErrorMessageForError(methods.formState.errors)}
-          </Alert>
-        ) : undefined
-      }
+      alert={alertComponent}
       cancelNavigation={handleCancel}
       title="Verify Email"
     >
