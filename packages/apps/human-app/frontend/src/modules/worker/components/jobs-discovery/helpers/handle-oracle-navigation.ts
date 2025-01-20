@@ -1,10 +1,10 @@
 import { type NavigateFunction } from 'react-router-dom';
 import { shouldNavigateToRegistration } from '@/modules/worker/components/jobs-discovery/helpers/should-navigate-to-registration';
-import { navigateToRegistration } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-registration';
+import { navigateToRegistrationPage } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-registration-page';
 import { isHCaptchaOracle } from '@/modules/worker/components/jobs-discovery/helpers/is-hcaptcha-oracle';
 import type { Oracle } from '@/modules/worker/services/oracles';
-import { handleHCaptchaNavigation } from '@/modules/worker/components/jobs-discovery/helpers/handle-hcaptcha-navigation';
-import { navigateToOracleJobs } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-oracle-jobs';
+import { navigateToHCaptchaPage } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-hcaptcha-page';
+import { navigateToOracleJobsPage } from '@/modules/worker/components/jobs-discovery/helpers/navigate-to-oracle-jobs-page';
 
 interface RegistrationResult {
   oracle_addresses: string[];
@@ -24,14 +24,14 @@ export const handleOracleNavigation = ({
   registrationData,
 }: NavigationConfig): void => {
   if (shouldNavigateToRegistration(oracle, registrationData)) {
-    navigateToRegistration(oracle.address, navigate);
+    navigateToRegistrationPage(oracle.address, navigate);
     return;
   }
 
   if (isHCaptchaOracle(oracle.address)) {
-    handleHCaptchaNavigation({ siteKey, navigate });
+    navigateToHCaptchaPage({ siteKey, navigate });
     return;
   }
 
-  navigateToOracleJobs(oracle, navigate);
+  navigateToOracleJobsPage(oracle, navigate);
 };

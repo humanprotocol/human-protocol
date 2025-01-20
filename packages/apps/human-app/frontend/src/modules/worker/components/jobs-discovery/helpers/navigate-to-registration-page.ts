@@ -1,7 +1,7 @@
 import { type NavigateFunction } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 
-export const navigateToRegistration = (
+export const navigateToRegistrationPage = (
   oracleAddress: string,
   navigate: NavigateFunction
 ): void => {
