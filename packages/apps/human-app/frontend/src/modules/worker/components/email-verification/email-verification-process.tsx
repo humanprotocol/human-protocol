@@ -3,6 +3,7 @@ import {
   PageCardError,
   PageCardLoader,
 } from '@/shared/components/ui/page-card';
+import { getErrorMessageForError } from '@/shared/errors';
 import { EmailVerificationSuccessMessage } from './email-verification-success-message';
 
 interface EmailVerificationProcessProps {
@@ -12,13 +13,14 @@ interface EmailVerificationProcessProps {
 export function EmailVerificationProcess({
   token,
 }: Readonly<EmailVerificationProcessProps>) {
-  const { error, isError, isPending } = useEmailVerification(token);
+  const { errorMsg, isEmailVerificationError, isEmailVerificationPending } =
+    useEmailVerification(token);
 
-  if (isError && error) {
-    return <PageCardError errorMessage={error} />;
+  if (isEmailVerificationError && errorMsg !== null) {
+    return <PageCardError errorMessage={getErrorMessageForError(errorMsg)} />;
   }
 
-  if (isPending) {
+  if (isEmailVerificationPending) {
     return <PageCardLoader />;
   }
 
