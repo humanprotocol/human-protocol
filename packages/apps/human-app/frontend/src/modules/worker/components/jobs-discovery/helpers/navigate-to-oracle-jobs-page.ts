@@ -2,7 +2,7 @@ import { type NavigateFunction } from 'react-router-dom';
 import type { Oracle } from '@/modules/worker/services/oracles';
 import { routerPaths } from '@/router/router-paths';
 
-export const navigateToOracleJobs = (
+export const navigateToOracleJobsPage = (
   oracle: Oracle,
   navigate: NavigateFunction
 ): void => {
