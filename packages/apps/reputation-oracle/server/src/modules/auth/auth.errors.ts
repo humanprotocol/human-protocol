@@ -1,4 +1,3 @@
-import { ErrorCapthca } from '../../common/constants/errors';
 import { BaseError } from '../../common/errors/base';
 
 export enum AuthErrorMessage {
@@ -9,7 +8,7 @@ export enum AuthErrorMessage {
 }
 
 export class AuthError extends BaseError {
-  constructor(message: AuthErrorMessage | ErrorCapthca) {
+  constructor(message: AuthErrorMessage) {
     super(message);
   }
 }

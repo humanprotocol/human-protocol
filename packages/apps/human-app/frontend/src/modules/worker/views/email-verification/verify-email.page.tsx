@@ -16,7 +16,7 @@ import {
   useResendEmailVerificationWorkerMutationState,
 } from '@/modules/worker/services/resend-email-verification';
 import { Alert } from '@/shared/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
@@ -72,7 +72,7 @@ export function VerifyEmailWorkerPage() {
       alert={
         mutationState?.status === 'error' ? (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(mutationState.error)}
+            {getErrorMessageForError(mutationState.error)}
           </Alert>
         ) : undefined
       }

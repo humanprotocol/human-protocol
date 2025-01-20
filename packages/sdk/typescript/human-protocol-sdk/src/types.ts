@@ -23,7 +23,7 @@ export enum EscrowStatus {
    */
   Paid,
   /**
-   * Escrow is finished..
+   * Escrow is finished.
    */
   Complete,
   /**
@@ -126,7 +126,7 @@ export type NetworkData = {
    */
   subgraphUrl: string;
   /**
-   * Subgraph URL
+   * Subgraph URL API key
    */
   subgraphUrlApiKey: string;
   /**

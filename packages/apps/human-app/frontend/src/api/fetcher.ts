@@ -4,7 +4,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { env } from '@/shared/env';
 import { type SignInSuccessResponse } from '@/modules/worker/services/sign-in/types';
-import { normalizeBaseUrl } from '@/shared/helpers/normalize-base-url';
+import { normalizeBaseUrl } from '@/shared/helpers/url';
 import { fetchTokenRefresh } from './fetch-refresh-token';
 
 const appendHeader = (

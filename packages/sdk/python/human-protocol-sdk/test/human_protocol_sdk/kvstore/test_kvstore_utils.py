@@ -127,7 +127,7 @@ class TestKVStoreUtils(unittest.TestCase):
         key = ""
         with self.assertRaises(KVStoreClientError) as cm:
             KVStoreUtils.get(ChainId.LOCALHOST, address, key)
-        self.assertEqual("Key can not be empty", str(cm.exception))
+        self.assertEqual("Key cannot be empty", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
     def test_get_invalid_address(self, mock_function):

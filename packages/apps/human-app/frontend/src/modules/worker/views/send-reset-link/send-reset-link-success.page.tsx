@@ -14,7 +14,7 @@ import {
   useSendResetLinkMutation,
 } from '@/modules/worker/services/send-reset-link';
 import { Alert } from '@/shared/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -49,7 +49,7 @@ export function SendResetLinkWorkerSuccessPage() {
       alert={
         isError ? (
           <Alert color="error" severity="error">
-            {defaultErrorMessage(error)}
+            {getErrorMessageForError(error)}
           </Alert>
         ) : undefined
       }

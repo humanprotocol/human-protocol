@@ -6,7 +6,7 @@ Utility class for escrow-related operations.
 
 ```python
 from human_protocol_sdk.constants import ChainId
-from human_protocol_sdk.escrow import EscrowUtils, EscorwFilter, Status
+from human_protocol_sdk.escrow import EscrowUtils, EscrowFilter, Status
 
 print(
     EscrowUtils.get_escrows(
@@ -133,7 +133,7 @@ Retrieve status events for specified networks and statuses within a date range.
 
   print(
       EscrowUtils.get_status_events(
-          networks=[ChainId.POLYGON_AMOY, ChainId.ETHEREUM],
+          chain_id=ChainId.POLYGON_AMOY,
           statuses=[Status.Pending, Status.Paid],
           date_from=datetime(2023, 1, 1),
           date_to=datetime(2023, 12, 31),

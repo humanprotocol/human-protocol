@@ -237,7 +237,7 @@ class StorageClient:
                 )
 
                 result = storage_client.upload_files(
-                    files = ["file content"],
+                    files = [{"file": "file content", "key": "file1.txt", "hash": "hash1"}],
                     bucket = "my-bucket"
                 )
         """

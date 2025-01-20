@@ -3,12 +3,12 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
-import HumanIcon from '@components/Icons/HumanIcon';
 import { useLeaderboardSearch } from '@utils/hooks/use-leaderboard-search';
 import { useFilteredNetworks } from '@utils/hooks/use-filtered-networks';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { NetworkIcon } from '@components/NetworkIcon';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useEffect } from 'react';
 
 export const SelectNetwork = () => {
   const {
@@ -17,6 +17,13 @@ export const SelectNetwork = () => {
   } = useLeaderboardSearch();
 
   const { filteredNetworks, isLoading } = useFilteredNetworks();
+
+  useEffect(() => {
+    if (chainId === -1 && filteredNetworks.length > 0) {
+      setChainId(filteredNetworks[0].id);
+    }
+  }, [chainId, filteredNetworks, setChainId]);
+
   const {
     mobile: { isMobile },
   } = useBreakPoints();
@@ -49,14 +56,10 @@ export const SelectNetwork = () => {
       <Select<number>
         labelId="network-select-label"
         id="network-select"
-        value={chainId}
+        value={chainId === -1 ? '' : chainId}
         label="By Network"
         onChange={handleChange}
       >
-        <MenuItem key="all-networks" className="select-item" value={-1}>
-          <HumanIcon />
-          All Networks
-        </MenuItem>
         {filteredNetworks.map((network) => (
           <MenuItem
             key={network.id}

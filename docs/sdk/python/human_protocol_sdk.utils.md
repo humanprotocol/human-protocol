@@ -11,6 +11,17 @@ Retrieve the contract interface of a given contract.
 
 ### human_protocol_sdk.utils.get_data_from_subgraph(network, query, params=None)
 
+Fetch data from the subgraph.
+
+* **Parameters:**
+  * **network** (`dict`) – Network configuration dictionary
+  * **query** (`str`) – GraphQL query string
+  * **params** (`Optional`[`dict`]) – Query parameters
+* **Returns:**
+  JSON response from the subgraph
+* **Raises:**
+  **Exception** – If the subgraph query fails
+
 ### human_protocol_sdk.utils.get_erc20_interface()
 
 Retrieve the ERC20 interface.
@@ -34,7 +45,7 @@ Retrieve the EscrowFactory interface.
 
 ### human_protocol_sdk.utils.get_hmt_balance(wallet_addr, token_addr, w3)
 
-Get hmt balance
+Get HMT balance
 
 * **Parameters:**
   * **wallet_addr** – wallet address
@@ -73,31 +84,40 @@ Executes the transaction and waits for the receipt.
   The transaction receipt
 * **Validate:**
   - There must be a default account
+* **Raises:**
+  **exception** – If the transaction fails
 
 ### human_protocol_sdk.utils.parse_transfer_transaction(hmtoken_contract, tx_receipt)
 
+Parse a transfer transaction receipt.
+
+* **Parameters:**
+  * **hmtoken_contract** (`Contract`) – The HMT token contract
+  * **tx_receipt** (`Optional`[`TxReceipt`]) – The transaction receipt
 * **Return type:**
   `Tuple`[`bool`, `Optional`[`int`]]
+* **Returns:**
+  A tuple indicating if HMT was transferred and the transaction balance
 
 ### human_protocol_sdk.utils.validate_url(url)
 
-Gets the url string.
+Validates the given URL.
 
 * **Parameters:**
-  **url** (`str`) – Public or private url address
+  **url** (`str`) – Public or private URL address
 * **Return type:**
   `bool`
 * **Returns:**
-  True if url is valid
+  True if URL is valid, False otherwise
 * **Raises:**
-  **ValidationFailure** – If the url is invalid
+  **ValidationFailure** – If the URL is invalid
 
 ### human_protocol_sdk.utils.with_retry(fn, retries=3, delay=5, backoff=2)
 
 Retry a function
 
 Mainly used with handle_transaction to retry on case of failure.
-Uses expnential backoff.
+Uses exponential backoff.
 
 * **Parameters:**
   * **fn** – <Partial> to run with retry logic.

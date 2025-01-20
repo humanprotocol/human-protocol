@@ -32,6 +32,13 @@ class OrderDirection(Enum):
     DESC = "desc"
 
 
+class LeaderCategory(Enum):
+    """Enum for leader categories"""
+
+    MACHINE_LEARNING = "machine_learning"
+    MARKET_MAKING = "market_making"
+
+
 NETWORKS = {
     ChainId.MAINNET: {
         "title": "Ethereum",
@@ -352,6 +359,8 @@ class KVStoreKeys(Enum):
     job_types = "job_types"
     registration_needed = "registration_needed"
     registration_instructions = "registration_instructions"
+    name = "name"
+    category = "category"
 
 
 ESCROW_BULK_PAYOUT_MAX_ITEMS = 99

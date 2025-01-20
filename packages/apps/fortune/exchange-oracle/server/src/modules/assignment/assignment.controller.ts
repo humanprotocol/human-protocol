@@ -68,7 +68,7 @@ export class AssignmentController {
       escrowAddress: body.escrowAddress,
       chainId: body.chainId,
       workerAddress: assignment.workerAddress,
-      rewardToken: assignment.job.rewardToken
+      rewardToken: assignment.job.rewardToken,
     };
     return response;
   }

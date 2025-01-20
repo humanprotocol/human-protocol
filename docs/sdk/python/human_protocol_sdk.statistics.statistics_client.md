@@ -173,7 +173,7 @@ Get escrow statistics data for the given date range.
   Escrow statistics data
 * **Example:**
   ```python
-  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient
   from human_protocol_sdk.filter import StatisticsFilter
 
@@ -192,7 +192,7 @@ Get escrow statistics data for the given date range.
 
 #### get_hmt_daily_data(filter=<human_protocol_sdk.filter.StatisticsFilter object>)
 
-Get HMT dailt statistics data for the given date range.
+Get HMT daily statistics data for the given date range.
 
 * **Parameters:**
   **filter** ([`StatisticsFilter`](human_protocol_sdk.filter.md#human_protocol_sdk.filter.StatisticsFilter)) – Object containing the date range
@@ -202,7 +202,7 @@ Get HMT dailt statistics data for the given date range.
   HMT statistics data
 * **Example:**
   ```python
-  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, StatisticsFilter
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
@@ -230,7 +230,7 @@ Get HMT holders data with optional filters and ordering.
   List of HMT holders
 * **Example:**
   ```python
-  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient, HMTHoldersParam
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
@@ -256,7 +256,7 @@ Get HMT statistics data.
   HMT statistics data
 * **Example:**
   ```python
-  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient
 
   statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
@@ -276,7 +276,7 @@ Get payment statistics data for the given date range.
   Payment statistics data
 * **Example:**
   ```python
-  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient
   from human_protocol_sdk.filter import StatisticsFilter
 
@@ -305,7 +305,7 @@ Get worker statistics data for the given date range.
   Worker statistics data
 * **Example:**
   ```python
-  from human_protocol_sdk.contants import ChainId
+  from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.statistics import StatisticsClient
   from human_protocol_sdk.filter import StatisticsFilter
 

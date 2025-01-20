@@ -5,7 +5,10 @@ import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
 import type { SignInSuccessResponse } from '@/modules/worker/services/sign-in/types';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { useModalStore } from '@/shared/components/ui/modal/modal.store';
+import {
+  ModalType,
+  useModalStore,
+} from '@/shared/components/ui/modal/modal.store';
 
 const extendableUserDataSchema = z.object({
   site_key: z.string().optional().nullable(),
@@ -58,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const displayExpirationModal = () => {
     queryClient.setDefaultOptions({ queries: { enabled: false } });
     openModal({
-      modalState: 'EXPIRATION_MODAL',
+      modalType: ModalType.EXPIRATION_MODAL,
       displayCloseButton: false,
       maxWidth: 'sm',
     });

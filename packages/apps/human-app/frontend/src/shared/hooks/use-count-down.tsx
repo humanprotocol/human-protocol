@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { ParsedDate } from '@/shared/helpers/counter-helpers';
-import { parseDate } from '@/shared/helpers/counter-helpers';
+import type { ParsedDate } from '@/shared/helpers/date';
+import { parseDate } from '@/shared/helpers/date';
 
 export function useCountDown(
   timeBetweenNowAndEndDateProp: number,

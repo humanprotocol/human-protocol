@@ -495,7 +495,7 @@ describe('ReputationService', () => {
     });
   });
 
-  describe('getAllReputations', () => {
+  describe('getReputations', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
 
@@ -511,7 +511,7 @@ describe('ReputationService', () => {
         .spyOn(reputationRepository, 'findByChainIdAndTypes')
         .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
 
-      const result = await reputationService.getAllReputations();
+      const result = await reputationService.getReputations();
 
       const resultReputation = {
         chainId,

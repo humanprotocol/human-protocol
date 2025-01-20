@@ -17,6 +17,7 @@ import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
+import { WhitelistModule } from '../whitelist/whitelist.module';
 import { JobModerationService } from './job-moderation.service';
 
 @Module({
@@ -30,6 +31,7 @@ import { JobModerationService } from './job-moderation.service';
     EncryptionModule,
     StorageModule,
     QualificationModule,
+    WhitelistModule,
   ],
   controllers: [JobController],
   providers: [

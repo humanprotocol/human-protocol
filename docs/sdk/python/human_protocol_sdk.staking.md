@@ -11,6 +11,7 @@ obtain staking information from both the contracts and subgraph.
   * [`StakingClient`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient)
     * [`StakingClient.__init__()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.__init__)
     * [`StakingClient.approve_stake()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.approve_stake)
+    * [`StakingClient.get_staker_info()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.get_staker_info)
     * [`StakingClient.slash()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.slash)
     * [`StakingClient.stake()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.stake)
     * [`StakingClient.unstake()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient.unstake)

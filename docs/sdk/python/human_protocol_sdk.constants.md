@@ -48,9 +48,13 @@ Bases: `Enum`
 
 Enum for KVStore keys
 
+#### category *= 'category'*
+
 #### fee *= 'fee'*
 
 #### job_types *= 'job_types'*
+
+#### name *= 'name'*
 
 #### public_key *= 'public_key'*
 
@@ -63,6 +67,16 @@ Enum for KVStore keys
 #### url *= 'url'*
 
 #### webhook_url *= 'webhook_url'*
+
+### *class* human_protocol_sdk.constants.LeaderCategory(value)
+
+Bases: `Enum`
+
+Enum for leader categories
+
+#### MACHINE_LEARNING *= 'machine_learning'*
+
+#### MARKET_MAKING *= 'market_making'*
 
 ### *class* human_protocol_sdk.constants.OrderDirection(value)
 

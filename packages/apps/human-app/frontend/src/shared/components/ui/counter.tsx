@@ -1,5 +1,5 @@
 import { useCountDown } from '@/shared/hooks/use-count-down';
-import { padZero } from '@/shared/helpers/counter-helpers';
+import { padZero } from '@/shared/helpers/string';
 
 export function Counter({
   date,

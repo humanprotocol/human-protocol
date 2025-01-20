@@ -3,7 +3,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, ILike, In } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { ReputationEntity } from './reputation.entity';
-import { ReputationEntityType } from '../../common/enums';
+import {
+  ReputationEntityType,
+  ReputationOrderBy,
+  SortDirection,
+} from '../../common/enums';
 
 @Injectable()
 export class ReputationRepository extends BaseRepository<ReputationEntity> {
@@ -32,7 +36,7 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     return this.find({
       where: chainId && { chainId },
       order: {
-        createdAt: 'DESC',
+        createdAt: SortDirection.DESC,
       },
     });
   }
@@ -40,15 +44,33 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
   public findByChainIdAndTypes(
     chainId?: ChainId,
     types?: ReputationEntityType[],
+    orderBy?: ReputationOrderBy,
+    orderDirection?: SortDirection,
+    first?: number,
+    skip?: number,
   ): Promise<ReputationEntity[]> {
+    const mapOrderBy = ReputationRepository.mapOrderBy(
+      orderBy || ReputationOrderBy.CREATED_AT,
+    );
+
     return this.find({
       where: {
         ...(chainId && { chainId }),
         ...(types && types.length > 0 && { type: In(types) }),
       },
       order: {
-        createdAt: 'DESC',
+        [mapOrderBy]: orderDirection || SortDirection.DESC,
       },
+      ...(skip && { skip }),
+      ...(first && { take: first }),
     });
+  }
+
+  private static mapOrderBy(orderBy: ReputationOrderBy): string {
+    const orderByMap = {
+      [ReputationOrderBy.CREATED_AT]: 'createdAt',
+      [ReputationOrderBy.REPUTATION_POINTS]: 'reputationPoints',
+    };
+    return orderByMap[orderBy] || orderByMap[ReputationOrderBy.CREATED_AT];
   }
 }

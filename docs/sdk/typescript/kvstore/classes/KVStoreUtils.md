@@ -31,9 +31,9 @@ yarn install @human-protocol/sdk
 ```ts
 import { ChainId, KVStoreUtils } from '@human-protocol/sdk';
 
-const KVStoreAddresses = new KVStoreUtils.getKVStoreData({
+const KVStoreAddresses = await KVStoreUtils.getKVStoreData(
   ChainId.POLYGON_AMOY,
-  "0x1234567890123456789012345678901234567890",
+  "0x1234567890123456789012345678901234567890"
 );
 ```
 
@@ -108,7 +108,7 @@ console.log(value);
 
 #### Defined in
 
-[kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
+[kvstore.ts:389](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L389)
 
 ***
 
@@ -158,7 +158,7 @@ console.log(url);
 
 #### Defined in
 
-[kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
+[kvstore.ts:436](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L436)
 
 ***
 
@@ -207,7 +207,7 @@ console.log(kvStoreData);
 
 #### Defined in
 
-[kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
+[kvstore.ts:337](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L337)
 
 ***
 
@@ -251,4 +251,4 @@ console.log(publicKey);
 
 #### Defined in
 
-[kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/90708c31f10beb8c39c0abd078b41cb6cae38b08/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)
+[kvstore.ts:496](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L496)

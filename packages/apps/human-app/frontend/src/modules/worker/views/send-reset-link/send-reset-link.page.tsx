@@ -12,7 +12,7 @@ import {
   useSendResetLinkMutation,
 } from '@/modules/worker/services/send-reset-link';
 import { Alert } from '@/shared/components/ui/alert';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
+import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { routerPaths } from '@/router/router-paths';
@@ -49,7 +49,7 @@ export function SendResetLinkWorkerPage() {
       alert={
         isSendResetLinkWorkerError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {defaultErrorMessage(sendResetLinkWorkerError)}
+            {getErrorMessageForError(sendResetLinkWorkerError)}
           </Alert>
         ) : undefined
       }

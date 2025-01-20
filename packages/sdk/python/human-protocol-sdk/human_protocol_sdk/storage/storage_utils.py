@@ -40,9 +40,9 @@ class StorageUtils:
         :example:
             .. code-block:: python
 
-                from human_protocol_sdk.storage import StorageClient
+                from human_protocol_sdk.storage import StorageUtils
 
-                result = StorageClient.download_file_from_url(
+                result = StorageUtils.download_file_from_url(
                     "https://www.example.com/file.txt"
                 )
         """

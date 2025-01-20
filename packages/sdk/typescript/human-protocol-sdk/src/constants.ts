@@ -11,8 +11,6 @@ export const DEFAULT_PORT = 9000;
 
 export const DEFAULT_USE_SSL = false;
 
-export const DEFAULT_TX_ID = 1;
-
 export enum HttpStatus {
   OK = 200,
   CREATED = 201,
@@ -310,6 +308,8 @@ export const KVStoreKeys = {
   jobTypes: 'job_types',
   registrationNeeded: 'registration_needed',
   registrationInstructions: 'registration_instructions',
+  name: 'name',
+  category: 'category',
 };
 
 export const Role = {
