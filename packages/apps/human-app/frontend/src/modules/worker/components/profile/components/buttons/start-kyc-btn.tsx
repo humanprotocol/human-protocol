@@ -3,7 +3,7 @@ import { Button } from '@/shared/components/ui/button';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useStartKyc } from '@/modules/worker/components/profile/hooks/use-start-kyc';
 
-export function StartKycButton() {
+export function StartKycBtn() {
   const { user } = useAuthenticatedUser();
   const { isKYCInProgress, kycStartIsPending, startKYC } = useStartKyc();
 
