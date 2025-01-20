@@ -7,8 +7,8 @@ interface RegistrationResult {
 export const shouldNavigateToRegistration = (
   oracle: Oracle,
   registrationData?: RegistrationResult
-): boolean => {
-  if (!oracle.registrationNeeded) return false;
-
-  return !registrationData?.oracle_addresses.includes(oracle.address);
-};
+): boolean =>
+  Boolean(
+    oracle.registrationNeeded &&
+      !registrationData?.oracle_addresses.includes(oracle.address)
+  );

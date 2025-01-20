@@ -5,7 +5,7 @@ import {
 import type { Oracle } from '@/modules/worker/services/oracles';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { getOraclesTablesColumns } from '@/modules/worker/components/jobs-discovery/helpers/get-oracles-table-columns';
+import { useOraclesTableColumns } from '@/modules/worker/components/jobs-discovery/hooks/use-oracles-table-columns';
 
 interface OraclesTableDesktopProps {
   isOraclesDataPending: boolean;
@@ -21,13 +21,13 @@ export function OraclesTableDesktop({
   oraclesData,
 }: OraclesTableDesktopProps) {
   const { colorPalette, isDarkMode } = useColorMode();
-
+  const tableColumns = useOraclesTableColumns(selectOracle);
   const table = useMaterialReactTable({
     state: {
       isLoading: isOraclesDataPending,
       showAlertBanner: isOraclesDataError,
     },
-    columns: getOraclesTablesColumns(selectOracle),
+    columns: tableColumns,
     data: oraclesData ?? [],
     enableColumnActions: false,
     enableColumnFilters: false,
