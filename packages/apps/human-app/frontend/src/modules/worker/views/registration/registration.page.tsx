@@ -1,17 +1,17 @@
 import { Box, Grid, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useRegistrationPageLogic } from '@/modules/worker/hooks/use-registration-page-logic';
 import { RegistrationForm } from '@/modules/worker/components/registration/registration-form';
+import { useOracleRegistrationFlow } from '@/modules/worker/hooks/use-oracle-registration-flow';
 
 export function RegistrationPage() {
   const { t } = useTranslation();
   const {
-    hasClickedRegistrationLink,
-    handleInstructionsLinkClick,
-    handleRegistrationComplete,
-    isRegistrationInExchangeOraclePending,
-    registrationInExchangeOracleError,
-  } = useRegistrationPageLogic();
+    hasViewedInstructions,
+    handleInstructionsView,
+    handleRegistration,
+    isRegistrationPending,
+    registrationError,
+  } = useOracleRegistrationFlow();
 
   return (
     <Grid alignItems="center" container justifyContent="center">
@@ -34,11 +34,11 @@ export function RegistrationPage() {
               {t('worker.registrationInExchangeOracle.requiredMessage')}
             </Box>
             <RegistrationForm
-              hasClickedRegistrationLink={hasClickedRegistrationLink}
-              isLoading={isRegistrationInExchangeOraclePending}
-              error={registrationInExchangeOracleError}
-              onInstructionsClick={handleInstructionsLinkClick}
-              onSubmit={handleRegistrationComplete}
+              hasViewedInstructions={hasViewedInstructions}
+              isLoading={isRegistrationPending}
+              error={registrationError}
+              onInstructionsClick={handleInstructionsView}
+              onSubmit={handleRegistration}
             />
           </Stack>
         </Paper>
