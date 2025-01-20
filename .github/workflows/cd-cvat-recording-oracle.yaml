@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: docker-compose-operations
+  group: docker-compose-oracles-${{ github.ref }}
   cancel-in-progress: false  # Ensure the workflow waits instead of canceling others
 
 jobs:
