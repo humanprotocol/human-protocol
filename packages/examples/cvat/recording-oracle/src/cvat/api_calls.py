@@ -161,8 +161,7 @@ def get_task_validation_layout(task_id: int) -> models.TaskValidationLayoutRead:
 def update_task_validation_layout(
     task_id: int,
     *,
-    disabled_frames: list[int],
-    honeypot_real_frames: list[int] | None,
+    honeypot_real_frames: list[int],
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -171,15 +170,8 @@ def update_task_validation_layout(
             validation_layout, _ = api_client.tasks_api.partial_update_validation_layout(
                 task_id,
                 patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
-                    disabled_frames=disabled_frames,
-                    **(
-                        {
-                            "honeypot_real_frames": honeypot_real_frames,
-                            "frame_selection_method": models.FrameSelectionMethod("manual"),
-                        }
-                        if honeypot_real_frames
-                        else {}
-                    ),
+                    honeypot_real_frames=honeypot_real_frames,
+                    frame_selection_method=models.FrameSelectionMethod("manual"),
                 ),
             )
         except exceptions.ApiException as ex:
