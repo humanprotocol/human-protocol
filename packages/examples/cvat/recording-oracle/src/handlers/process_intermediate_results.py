@@ -418,7 +418,7 @@ class _TaskHoneypotManager:
         self.rng = rng
 
     @cached_property
-    def _get_gt_frame_uses(self) -> dict[GtKey, int]:
+    def _gt_frame_uses(self) -> dict[GtKey, int]:
         return {gt_key: gt_stat.total_uses for gt_key, gt_stat in self.gt_stats.items()}
 
     def _select_random_least_used(
@@ -598,7 +598,7 @@ class _TaskHoneypotManager:
 
         self._check_warmup_annotation_speed()
 
-        gt_frame_uses = self._get_gt_frame_uses
+        gt_frame_uses = self._gt_frame_uses
 
         tasks_with_rejected_jobs = grouped(
             rejected_jobs, key=lambda jid: self._job_annotation_meta_by_job_id[jid].task_id
@@ -658,12 +658,6 @@ class _TaskHoneypotManager:
                 if task_validation_frame_to_gt_key[validation_frame] in task_available_gt_keys
             ]
 
-            task_updated_disabled_frames = [
-                validation_frame
-                for validation_frame in task_validation_layout.validation_frames
-                if validation_frame not in task_available_validation_frames
-            ]
-
             task_honeypot_to_index: dict[int, int] = {
                 honeypot: i for i, honeypot in enumerate(task_validation_layout.honeypot_frames)
             }  # honeypot -> honeypot list index
@@ -697,9 +691,11 @@ class _TaskHoneypotManager:
                     }
                 ) == len(job_honeypots)
 
+            # Don't use disabled frames to avoid request fails because of
+            # the already accepted jobs with (possibly newly) excluded frames.
+            # The updated honeypots will include unmodified jobs as well.
             cvat_api.update_task_validation_layout(
                 cvat_task_id,
-                disabled_frames=task_updated_disabled_frames,
                 honeypot_real_frames=task_updated_honeypot_real_frames,
             )
 
