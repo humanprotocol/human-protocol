@@ -12,8 +12,8 @@ import { RoleCell } from '../components/RoleCell';
 import { AddressCell } from '../components/AddressCell';
 import { ChainCell } from '../components/ChainCell';
 import { SelectNetwork } from '../components/SelectNetwork';
-import { ReputationLabel } from '../components/ReputationLabel';
 import { TextCell } from '../components/TextCell';
+import { CategoryCell } from '../components/CategoryCell';
 
 export const useDataGrid = (data: LeaderBoardData) => {
   const {
@@ -58,7 +58,11 @@ export const useDataGrid = (data: LeaderBoardData) => {
           </Typography>
         ),
         renderCell: (params: GridRenderCellParams) => (
-          <RoleCell role={params.value} websiteUrl={params.row.website} />
+          <RoleCell
+            role={params.value}
+            websiteUrl={params.row.website}
+            name={params.row.name}
+          />
         ),
       },
       {
@@ -136,31 +140,17 @@ export const useDataGrid = (data: LeaderBoardData) => {
         ),
       },
       {
-        field: 'reputation',
-        headerName: 'Reputation Score',
-        sortable: false,
-        flex: 1,
-        minWidth: 210,
+        field: 'category',
+        minWidth: 150,
+        headerName: 'Category',
         headerClassName: 'home-page-table-header',
         renderHeader: () => (
-          <Box display="flex" gap="8px" alignItems="center">
-            <CustomTooltip
-              title="Reputation of the role as per their activities "
-              arrow
-            >
-              <HelpOutlineIcon
-                style={{
-                  color: colorPalette.sky.main,
-                }}
-              />
-            </CustomTooltip>
-            <Typography component="span" variant="body3">
-              Reputation Score
-            </Typography>
-          </Box>
+          <Typography variant="body3" component="div">
+            Category
+          </Typography>
         ),
         renderCell: (params: GridRenderCellParams) => (
-          <ReputationLabel reputation={params.value} />
+          <CategoryCell value={params.value} />
         ),
       },
       {
