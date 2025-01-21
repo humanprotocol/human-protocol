@@ -3,7 +3,7 @@ import { NetworkData } from './types';
 
 export const DEFAULT_PUBLIC_BUCKET = 'escrow-public-results';
 
-export const DEFAULT_ENDPOINT = 'localhost';
+export const DEFAULT_ENDPOINT = 'SEPOLIA';
 
 export const DEFAULT_REGION = 'eu';
 
@@ -40,8 +40,8 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
-  [ChainId.LOCALHOST]: {
-    chainId: ChainId.LOCALHOST,
+  [ChainId.SEPOLIA]: {
+    chainId: ChainId.SEPOLIA,
     title: 'Ethereum Sepolia',
     scanUrl: 'https://sepolia.etherscan.io/',
     factoryAddress: '0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf',
@@ -114,6 +114,19 @@ export const NETWORKS: {
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
       'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmawobiPUYsGNK9chtb5PvicUtaa8Jsjpwvv8dNyMVXQ9r',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
+  [ChainId.LOCALHOST]: {
+    chainId: ChainId.LOCALHOST,
+    title: 'Localhost',
+    scanUrl: '',
+    factoryAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+    hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+    stakingAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+    kvstoreAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+    subgraphUrl: 'http://localhost:8000/subgraphs/name/humanprotocol/localhost',
+    subgraphUrlApiKey: '',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
