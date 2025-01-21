@@ -88,7 +88,7 @@ class TestKVStoreUtils(unittest.TestCase):
 
     def test_get_kvstore_data_invalid_address(self):
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get_kvstore_data(ChainId.SEPOLIA, "invalid_address")
+            KVStoreUtils.get_kvstore_data(ChainId.LOCALHOST, "invalid_address")
         self.assertEqual("Invalid KVStore address: invalid_address", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -112,10 +112,10 @@ class TestKVStoreUtils(unittest.TestCase):
             }
         }
 
-        result = KVStoreUtils.get(ChainId.SEPOLIA, address, key)
+        result = KVStoreUtils.get(ChainId.LOCALHOST, address, key)
 
         mock_function.assert_called_once_with(
-            NETWORKS[ChainId.SEPOLIA],
+            NETWORKS[ChainId.LOCALHOST],
             query=get_kvstore_by_address_and_key_query(),
             params={"address": address, "key": key},
         )
@@ -126,7 +126,7 @@ class TestKVStoreUtils(unittest.TestCase):
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = ""
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get(ChainId.SEPOLIA, address, key)
+            KVStoreUtils.get(ChainId.LOCALHOST, address, key)
         self.assertEqual("Key cannot be empty", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -134,7 +134,7 @@ class TestKVStoreUtils(unittest.TestCase):
         address = "invalid_address"
         key = "key"
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get(ChainId.SEPOLIA, address, key)
+            KVStoreUtils.get(ChainId.LOCALHOST, address, key)
         self.assertEqual(f"Invalid address: {address}", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -145,13 +145,13 @@ class TestKVStoreUtils(unittest.TestCase):
         key = "key"
 
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get(ChainId.SEPOLIA, address, key)
+            KVStoreUtils.get(ChainId.LOCALHOST, address, key)
         self.assertEqual(
             f"Key '{key}' not found for address {address}", str(cm.exception)
         )
 
         mock_function.assert_called_once_with(
-            NETWORKS[ChainId.SEPOLIA],
+            NETWORKS[ChainId.LOCALHOST],
             query=get_kvstore_by_address_and_key_query(),
             params={"address": address, "key": key},
         )
@@ -176,10 +176,10 @@ class TestKVStoreUtils(unittest.TestCase):
         address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = "key"
 
-        result = KVStoreUtils.get(ChainId.SEPOLIA, address, key)
+        result = KVStoreUtils.get(ChainId.LOCALHOST, address, key)
 
         mock_function.assert_called_once_with(
-            NETWORKS[ChainId.SEPOLIA],
+            NETWORKS[ChainId.LOCALHOST],
             query=get_kvstore_by_address_and_key_query(),
             params={"address": address, "key": key},
         )
@@ -198,7 +198,9 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response = mock_get.return_value
             mock_response.text = "example"
 
-            result = KVStoreUtils.get_file_url_and_verify_hash(ChainId.SEPOLIA, address)
+            result = KVStoreUtils.get_file_url_and_verify_hash(
+                ChainId.LOCALHOST, address
+            )
 
             self.assertEqual(result, "https://example.com")
 
@@ -216,7 +218,7 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response.text = "example"
 
             result = KVStoreUtils.get_file_url_and_verify_hash(
-                ChainId.SEPOLIA, address, "linkedin_url"
+                ChainId.LOCALHOST, address, "linkedin_url"
             )
 
             self.assertEqual(result, "https://example.com")
@@ -225,7 +227,7 @@ class TestKVStoreUtils(unittest.TestCase):
     def test_get_file_url_and_verify_hash_invalid_address(self, mock_function):
         address = "invalid_address"
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get_file_url_and_verify_hash(ChainId.SEPOLIA, address)
+            KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, address)
         self.assertEqual(f"Invalid address: {address}", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -236,7 +238,7 @@ class TestKVStoreUtils(unittest.TestCase):
         key = "url"
 
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get_file_url_and_verify_hash(ChainId.SEPOLIA, address)
+            KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, address)
         self.assertEqual(
             f"Key '{key}' not found for address {address}", str(cm.exception)
         )
@@ -254,7 +256,9 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response = mock_get.return_value
             mock_response.text = "example"
 
-            result = KVStoreUtils.get_file_url_and_verify_hash(ChainId.SEPOLIA, address)
+            result = KVStoreUtils.get_file_url_and_verify_hash(
+                ChainId.LOCALHOST, address
+            )
 
             self.assertEqual(result, "https://example.com")
 
@@ -272,7 +276,7 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response.text = "example"
 
             with self.assertRaises(KVStoreClientError) as cm:
-                KVStoreUtils.get_file_url_and_verify_hash(ChainId.SEPOLIA, address)
+                KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, address)
             self.assertEqual("Invalid hash", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -288,14 +292,14 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response = mock_get.return_value
             mock_response.text = "PUBLIC_KEY"
 
-            result = KVStoreUtils.get_public_key(ChainId.SEPOLIA, address)
+            result = KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
 
             self.assertEqual(result, "PUBLIC_KEY")
 
     def test_get_public_key_invalid_address(self):
         address = "invalid_address"
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get_public_key(ChainId.SEPOLIA, address)
+            KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
         self.assertEqual(f"Invalid address: {address}", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -307,7 +311,7 @@ class TestKVStoreUtils(unittest.TestCase):
         key = "public_key"
 
         with self.assertRaises(KVStoreClientError) as cm:
-            KVStoreUtils.get_public_key(ChainId.SEPOLIA, address)
+            KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
         self.assertEqual(
             f"Key '{key}' not found for address {address}", str(cm.exception)
         )
@@ -326,7 +330,7 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response.text = "PUBLIC_KEY"
 
             with self.assertRaises(KVStoreClientError) as cm:
-                KVStoreUtils.get_public_key(ChainId.SEPOLIA, address)
+                KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
             self.assertEqual("Invalid hash", str(cm.exception))
 
     @patch("human_protocol_sdk.kvstore.kvstore_utils.get_data_from_subgraph")
@@ -342,7 +346,7 @@ class TestKVStoreUtils(unittest.TestCase):
             mock_response = mock_get.return_value
             mock_response.text = "PUBLIC_KEY"
 
-            result = KVStoreUtils.get_public_key(ChainId.SEPOLIA, address)
+            result = KVStoreUtils.get_public_key(ChainId.LOCALHOST, address)
 
             self.assertEqual(result, "PUBLIC_KEY")
 

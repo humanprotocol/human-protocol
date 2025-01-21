@@ -26,7 +26,7 @@ class TestEscrowClient(unittest.TestCase):
         )
         self.w3.eth.default_account = self.gas_payer.address
 
-        self.mock_chain_id = ChainId.SEPOLIA.value
+        self.mock_chain_id = ChainId.LOCALHOST.value
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.escrow = EscrowClient(self.w3)
@@ -35,7 +35,7 @@ class TestEscrowClient(unittest.TestCase):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
 
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrow = EscrowClient(w3)
@@ -391,7 +391,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_create_escrow_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -501,7 +501,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_setup_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -656,7 +656,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_fund_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -744,7 +744,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_store_results_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -1096,7 +1096,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_bulk_payout_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -1468,7 +1468,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_complete_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -1613,7 +1613,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_cancel_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -1773,7 +1773,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_add_trusted_handlers_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -1927,7 +1927,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_withdraw_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2072,7 +2072,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_balance_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2155,7 +2155,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_manifest_url_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2204,7 +2204,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_results_url_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2253,7 +2253,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_intermediate_results_url_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2304,7 +2304,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_token_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2353,7 +2353,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_status_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2463,7 +2463,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_recording_oracle_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2514,7 +2514,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_reputation_oracle_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2565,7 +2565,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_exchange_oracle_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2616,7 +2616,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_job_launcher_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)
@@ -2667,7 +2667,7 @@ class TestEscrowClient(unittest.TestCase):
     def test_get_factory_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         escrowClient = EscrowClient(w3)

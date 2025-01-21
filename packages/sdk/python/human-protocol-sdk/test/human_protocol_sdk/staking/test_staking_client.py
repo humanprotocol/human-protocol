@@ -30,7 +30,7 @@ class TestStakingClient(unittest.TestCase):
         )
         self.w3.eth.default_account = self.gas_payer.address
 
-        self.mock_chain_id = ChainId.SEPOLIA.value
+        self.mock_chain_id = ChainId.LOCALHOST.value
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.staking_client = StakingClient(self.w3)
@@ -39,7 +39,7 @@ class TestStakingClient(unittest.TestCase):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
 
-        mock_chain_id = ChainId.SEPOLIA.value
+        mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         staking_client = StakingClient(w3)
@@ -89,7 +89,7 @@ class TestStakingClient(unittest.TestCase):
                 None,
             )
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.SEPOLIA]["staking_address"], 100
+                NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
             )
 
     def test_approve_stake_invalid_amount(self):
@@ -115,7 +115,7 @@ class TestStakingClient(unittest.TestCase):
                 tx_options,
             )
             mock_function.assert_called_once_with(
-                NETWORKS[ChainId.SEPOLIA]["staking_address"], 100
+                NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
             )
 
     def test_stake(self):

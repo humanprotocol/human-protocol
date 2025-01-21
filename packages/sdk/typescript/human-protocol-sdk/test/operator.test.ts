@@ -60,7 +60,7 @@ describe('OperatorUtils', () => {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
       reputationNetworks: ['0x01'],
-      chainId: ChainId.SEPOLIA,
+      chainId: ChainId.LOCALHOST,
     };
 
     test('should return staker information', async () => {
@@ -69,12 +69,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getLeader(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
@@ -89,7 +89,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: [],
         reputationNetworks: ['0x01'],
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -97,12 +97,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getLeader(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
@@ -117,7 +117,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
         reputationNetworks: ['0x01'],
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -125,12 +125,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getLeader(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
@@ -141,7 +141,7 @@ describe('OperatorUtils', () => {
 
     test('should throw an error for an invalid staker address', async () => {
       await expect(
-        OperatorUtils.getLeader(ChainId.SEPOLIA, invalidAddress)
+        OperatorUtils.getLeader(ChainId.LOCALHOST, invalidAddress)
       ).rejects.toThrow(ErrorInvalidStakerAddressProvided);
     });
 
@@ -151,7 +151,7 @@ describe('OperatorUtils', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        OperatorUtils.getLeader(ChainId.SEPOLIA, stakerAddress)
+        OperatorUtils.getLeader(ChainId.LOCALHOST, stakerAddress)
       ).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
@@ -162,12 +162,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getLeader(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADER_QUERY,
         {
           address: stakerAddress,
@@ -207,7 +207,7 @@ describe('OperatorUtils', () => {
       ...mockLeaderSubgraph,
       jobTypes: ['type1', 'type2'],
       reputationNetworks: ['0x01'],
-      chainId: ChainId.SEPOLIA,
+      chainId: ChainId.LOCALHOST,
     };
 
     test('should return an array of stakers', async () => {
@@ -215,13 +215,13 @@ describe('OperatorUtils', () => {
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
       const filter: ILeadersFilter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         roles: [Role.ExchangeOracle],
       };
       const result = await OperatorUtils.getLeaders(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
           minAmountStaked: filter?.minAmountStaked,
@@ -241,7 +241,7 @@ describe('OperatorUtils', () => {
       });
 
       const filter: ILeadersFilter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         first: -5, // Invalid value
         skip: 0,
       };
@@ -249,7 +249,7 @@ describe('OperatorUtils', () => {
       const result = await OperatorUtils.getLeaders(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
           minAmountStaked: filter?.minAmountStaked,
@@ -269,7 +269,7 @@ describe('OperatorUtils', () => {
       });
 
       const filter: ILeadersFilter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         first: 10,
         skip: -3, // Invalid value
       };
@@ -277,7 +277,7 @@ describe('OperatorUtils', () => {
       const result = await OperatorUtils.getLeaders(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
           minAmountStaked: filter?.minAmountStaked,
@@ -297,13 +297,13 @@ describe('OperatorUtils', () => {
       });
 
       const filter: ILeadersFilter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
       };
 
       const result = await OperatorUtils.getLeaders(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
           minAmountStaked: filter?.minAmountStaked,
@@ -323,20 +323,20 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: [],
         reputationNetworks: ['0x01'],
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         leaders: [mockLeaderSubgraph, mockLeaderSubgraph],
       });
       const filter: ILeadersFilter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         roles: [Role.ExchangeOracle],
       };
       const result = await OperatorUtils.getLeaders(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
           minAmountStaked: filter?.minAmountStaked,
@@ -357,7 +357,7 @@ describe('OperatorUtils', () => {
         ...mockLeaderSubgraph,
         jobTypes: ['type1', 'type2', 'type3'],
         reputationNetworks: ['0x01'],
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
       };
 
       const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
@@ -365,14 +365,14 @@ describe('OperatorUtils', () => {
       });
 
       const filter: ILeadersFilter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         roles: [Role.ExchangeOracle],
       };
 
       const result = await OperatorUtils.getLeaders(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_LEADERS_QUERY(filter),
         {
           minAmountStaked: filter?.minAmountStaked,
@@ -388,7 +388,7 @@ describe('OperatorUtils', () => {
 
     test('should throw an error if gql fetch fails', async () => {
       const filter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         roles: [Role.ExchangeOracle],
       };
 
@@ -402,7 +402,7 @@ describe('OperatorUtils', () => {
 
     test('should return empty data', async () => {
       const filter = {
-        chainId: ChainId.SEPOLIA,
+        chainId: ChainId.LOCALHOST,
         roles: [Role.ExchangeOracle],
       };
 
@@ -441,12 +441,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getReputationNetworkOperators(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_REPUTATION_NETWORK_QUERY(),
         {
           address: stakerAddress,
@@ -462,12 +462,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getReputationNetworkOperators(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_REPUTATION_NETWORK_QUERY(),
         {
           address: stakerAddress,
@@ -489,12 +489,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getReputationNetworkOperators(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_REPUTATION_NETWORK_QUERY(),
         {
           address: stakerAddress,
@@ -516,12 +516,12 @@ describe('OperatorUtils', () => {
       });
 
       const result = await OperatorUtils.getReputationNetworkOperators(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         stakerAddress
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
+        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
         GET_REPUTATION_NETWORK_QUERY(),
         {
           address: stakerAddress,
@@ -538,7 +538,7 @@ describe('OperatorUtils', () => {
 
       await expect(
         OperatorUtils.getReputationNetworkOperators(
-          ChainId.SEPOLIA,
+          ChainId.LOCALHOST,
           stakerAddress
         )
       ).rejects.toThrow();
@@ -556,7 +556,7 @@ describe('OperatorUtils', () => {
 
     test('should throw an error if an invalid slasher address is provided', async () => {
       await expect(
-        OperatorUtils.getRewards(ChainId.SEPOLIA, invalidAddress)
+        OperatorUtils.getRewards(ChainId.LOCALHOST, invalidAddress)
       ).rejects.toThrow(ErrorInvalidSlasherAddressProvided);
     });
 
@@ -566,7 +566,7 @@ describe('OperatorUtils', () => {
       );
 
       const results = await OperatorUtils.getRewards(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         ethers.ZeroAddress
       );
 
@@ -579,7 +579,7 @@ describe('OperatorUtils', () => {
       );
 
       const results = await OperatorUtils.getRewards(
-        ChainId.SEPOLIA,
+        ChainId.LOCALHOST,
         ethers.ZeroAddress
       );
 

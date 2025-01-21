@@ -40,8 +40,8 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
-  [ChainId.SEPOLIA]: {
-    chainId: ChainId.SEPOLIA,
+  [ChainId.LOCALHOST]: {
+    chainId: ChainId.LOCALHOST,
     title: 'Ethereum Sepolia',
     scanUrl: 'https://sepolia.etherscan.io/',
     factoryAddress: '0x5987A5558d961ee674efe4A8c8eB7B1b5495D3bf',

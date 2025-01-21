@@ -11,6 +11,7 @@ class ChainId(Enum):
     BSC_TESTNET = 97
     POLYGON = 137
     POLYGON_AMOY = 80002
+    LOCALHOST = 1338
 
 
 class OrderDirection(Enum):
@@ -44,7 +45,7 @@ NETWORKS = {
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
-    ChainId.SEPOLIA: {
+    ChainId.LOCALHOST: {
         "title": "Sepolia",
         "scan_url": "https://sepolia.etherscan.io",
         "subgraph_url": (
@@ -125,6 +126,18 @@ NETWORKS = {
         "factory_address": "0xAFf5a986A530ff839d49325A5dF69F96627E8D29",
         "staking_address": "0xffE496683F842a923110415b7278ded3F265f2C5",
         "kvstore_address": "0x724AeFC243EdacCA27EAB86D3ec5a76Af4436Fc7",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
+    ChainId.LOCALHOST: {
+        "title": "Localhost",
+        "scan_url": "",
+        "subgraph_url": "http://localhost:8000/subgraphs/name/humanprotocol/localhost",
+        "subgraph_url_api_key": "",
+        "hmt_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "factory_address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "staking_address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "kvstore_address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
