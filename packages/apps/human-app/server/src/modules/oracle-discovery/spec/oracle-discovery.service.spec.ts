@@ -30,7 +30,7 @@ jest.mock('@human-protocol/sdk', () => {
 
 describe('OracleDiscoveryService', () => {
   const EXCHANGE_ORACLE = 'Exchange Oracle';
-  const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY, ChainId.MOONBASE_ALPHA];
+  const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY, ChainId.BSC_TESTNET];
   const REPUTATION_ORACLE_ADDRESS = 'the_oracle';
   const TTL = '300';
   const JOB_TYPES = 'job-type-1,job-type-2,job-type-3';
