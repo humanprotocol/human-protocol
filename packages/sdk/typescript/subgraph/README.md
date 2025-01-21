@@ -66,8 +66,8 @@ yarn test
 Following networks are supported :
 
 - Polygon/matic
-- Goerli
-- Polygon Mumbai (testnet)
+- Sepolia
+- Polygon Amoy (testnet)
 
 # Add a new network
 

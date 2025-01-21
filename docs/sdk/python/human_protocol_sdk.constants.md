@@ -10,6 +10,8 @@ Enum for chain IDs.
 
 #### BSC_TESTNET *= 97*
 
+#### LOCALHOST *= 1338*
+
 #### MAINNET *= 1*
 
 #### POLYGON *= 137*

@@ -131,6 +131,7 @@
   * [`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)
     * [`ChainId.BSC_MAINNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.BSC_MAINNET)
     * [`ChainId.BSC_TESTNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.BSC_TESTNET)
+    * [`ChainId.LOCALHOST`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.LOCALHOST)
     * [`ChainId.MAINNET`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.MAINNET)
     * [`ChainId.POLYGON`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.POLYGON)
     * [`ChainId.POLYGON_AMOY`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId.POLYGON_AMOY)
