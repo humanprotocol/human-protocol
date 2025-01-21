@@ -103,7 +103,7 @@ const result = await EncryptionUtils.encrypt('message', publicKeys);
 
 #### Defined in
 
-[encryption.ts:444](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L444)
+[encryption.ts:444](https://github.com/humanprotocol/human-protocol/blob/d7a8db333eaccaefacbd3a71e666d3627570e9f6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L444)
 
 ***
 
@@ -152,7 +152,7 @@ const result = await EncryptionUtils.generateKeyPair(name, email, passphrase);
 
 #### Defined in
 
-[encryption.ts:382](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L382)
+[encryption.ts:382](https://github.com/humanprotocol/human-protocol/blob/d7a8db333eaccaefacbd3a71e666d3627570e9f6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L382)
 
 ***
 
@@ -186,7 +186,7 @@ const signedData = await EncryptionUtils.getSignedData('message');
 
 #### Defined in
 
-[encryption.ts:351](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L351)
+[encryption.ts:351](https://github.com/humanprotocol/human-protocol/blob/d7a8db333eaccaefacbd3a71e666d3627570e9f6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L351)
 
 ***
 
@@ -236,7 +236,7 @@ if (isEncrypted) {
 
 #### Defined in
 
-[encryption.ts:494](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L494)
+[encryption.ts:494](https://github.com/humanprotocol/human-protocol/blob/d7a8db333eaccaefacbd3a71e666d3627570e9f6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L494)
 
 ***
 
@@ -288,4 +288,4 @@ const result = await EncryptionUtils.verify('message', publicKey);
 
 #### Defined in
 
-[encryption.ts:318](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L318)
+[encryption.ts:318](https://github.com/humanprotocol/human-protocol/blob/d7a8db333eaccaefacbd3a71e666d3627570e9f6/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L318)

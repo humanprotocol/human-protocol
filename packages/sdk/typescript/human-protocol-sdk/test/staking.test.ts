@@ -29,7 +29,7 @@ describe('StakingClient', () => {
   beforeEach(async () => {
     mockProvider = {
       provider: {
-        getNetwork: vi.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
+        getNetwork: vi.fn().mockResolvedValue({ chainId: ChainId.SEPOLIA }),
       },
     };
     mockSigner = {

@@ -64,7 +64,7 @@ describe('EscrowClient', () => {
   beforeEach(async () => {
     mockProvider = {
       provider: {
-        getNetwork: vi.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
+        getNetwork: vi.fn().mockResolvedValue({ chainId: ChainId.SEPOLIA }),
       },
     };
     mockSigner = {
@@ -2867,7 +2867,7 @@ describe('EscrowUtils', () => {
     });
 
     test('should throw an error if escrow address is an invalid address', async () => {
-      const chainId = ChainId.LOCALHOST;
+      const chainId = ChainId.SEPOLIA;
       const escrowAddress = '0x0';
 
       await expect(
@@ -2876,7 +2876,7 @@ describe('EscrowUtils', () => {
     });
 
     test('should successfully getEscrow for the filter', async () => {
-      const chainId = ChainId.LOCALHOST;
+      const chainId = ChainId.SEPOLIA;
       const escrow = {
         id: '1',
         address: ethers.ZeroAddress,
@@ -2897,7 +2897,7 @@ describe('EscrowUtils', () => {
 
       expect(result).toEqual(escrow);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         GET_ESCROW_BY_ADDRESS_QUERY(),
         { escrowAddress: escrow.address }
       );
@@ -2933,13 +2933,13 @@ describe('EscrowUtils', () => {
           escrowAddress: '0x1',
           timestamp: '1234567890',
           status: 'Pending',
-          chainId: ChainId.LOCALHOST,
+          chainId: ChainId.SEPOLIA,
         },
         {
           escrowAddress: '0x2',
           timestamp: '1234567891',
           status: 'Pending',
-          chainId: ChainId.LOCALHOST,
+          chainId: ChainId.SEPOLIA,
         },
       ];
 
@@ -2947,7 +2947,7 @@ describe('EscrowUtils', () => {
         .spyOn(gqlFetch, 'default')
         .mockResolvedValueOnce({ escrowStatusEvents: pendingEvents });
 
-      const result = await EscrowUtils.getStatusEvents(ChainId.LOCALHOST);
+      const result = await EscrowUtils.getStatusEvents(ChainId.SEPOLIA);
       expect(result).toEqual(pendingEvents);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });

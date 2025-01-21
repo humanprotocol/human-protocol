@@ -24,7 +24,7 @@ class TestKVStoreClient(unittest.TestCase):
         )
         self.w3.eth.default_account = self.gas_payer.address
 
-        self.mock_chain_id = ChainId.LOCALHOST.value
+        self.mock_chain_id = ChainId.SEPOLIA.value
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.kvstore = KVStoreClient(self.w3)
@@ -33,7 +33,7 @@ class TestKVStoreClient(unittest.TestCase):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
 
-        mock_chain_id = ChainId.LOCALHOST.value
+        mock_chain_id = ChainId.SEPOLIA.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         kvstore = KVStoreClient(w3)
@@ -94,7 +94,7 @@ class TestKVStoreClient(unittest.TestCase):
     def test_set_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.LOCALHOST.value
+        mock_chain_id = ChainId.SEPOLIA.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         kvstore = KVStoreClient(w3)
@@ -170,7 +170,7 @@ class TestKVStoreClient(unittest.TestCase):
     def test_set_bulk_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.LOCALHOST.value
+        mock_chain_id = ChainId.SEPOLIA.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         kvstore = KVStoreClient(w3)
@@ -273,7 +273,7 @@ class TestKVStoreClient(unittest.TestCase):
     def test_set_file_url_and_hash_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
-        mock_chain_id = ChainId.LOCALHOST.value
+        mock_chain_id = ChainId.SEPOLIA.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         kvstore = KVStoreClient(w3)

@@ -47,12 +47,12 @@ describe('TransactionUtils', () => {
       });
 
       const result = await TransactionUtils.getTransaction(
-        ChainId.LOCALHOST,
+        ChainId.SEPOLIA,
         txHash
       );
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         GET_TRANSACTION_QUERY,
         {
           hash: txHash.toLowerCase(),
@@ -63,7 +63,7 @@ describe('TransactionUtils', () => {
 
     test('should throw an error for an invalid transaction hash', async () => {
       await expect(
-        TransactionUtils.getTransaction(ChainId.LOCALHOST, invalidHash)
+        TransactionUtils.getTransaction(ChainId.SEPOLIA, invalidHash)
       ).rejects.toThrow(ErrorInvalidHahsProvided);
     });
 
@@ -73,7 +73,7 @@ describe('TransactionUtils', () => {
         .mockRejectedValueOnce(new Error('Error'));
 
       await expect(
-        TransactionUtils.getTransaction(ChainId.LOCALHOST, txHash)
+        TransactionUtils.getTransaction(ChainId.SEPOLIA, txHash)
       ).rejects.toThrow();
       expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
@@ -103,7 +103,7 @@ describe('TransactionUtils', () => {
         transactions: [mockTransaction, mockTransaction],
       });
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         first: 10,
         skip: 0,
       };
@@ -111,7 +111,7 @@ describe('TransactionUtils', () => {
       const result = await TransactionUtils.getTransactions(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         expect.anything(),
         {
           fromAddress: undefined,
@@ -133,7 +133,7 @@ describe('TransactionUtils', () => {
         transactions: [mockTransaction, mockTransaction],
       });
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         startDate: new Date('2022-01-01'),
         endDate: new Date('2022-12-31'),
         first: 10,
@@ -143,7 +143,7 @@ describe('TransactionUtils', () => {
       const result = await TransactionUtils.getTransactions(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         expect.anything(),
         {
           fromAddress: undefined,
@@ -165,7 +165,7 @@ describe('TransactionUtils', () => {
         transactions: [mockTransaction, mockTransaction],
       });
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         fromAddress: '0x1234567890123456789012345678901234567890',
         first: 10,
         skip: 0,
@@ -174,7 +174,7 @@ describe('TransactionUtils', () => {
       const result = await TransactionUtils.getTransactions(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         expect.anything(),
         {
           fromAddress: filter.fromAddress,
@@ -193,7 +193,7 @@ describe('TransactionUtils', () => {
 
     test('should throw an error if both date and block filters are used', async () => {
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         startDate: new Date('2022-01-01'),
         endBlock: 100000,
         first: 10,
@@ -207,7 +207,7 @@ describe('TransactionUtils', () => {
 
     test('should throw an error if the gql fetch fails', async () => {
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         first: 10,
         skip: 0,
       };
@@ -225,7 +225,7 @@ describe('TransactionUtils', () => {
         transactions: [mockTransaction, mockTransaction],
       });
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         first: 10,
         skip: 10,
       };
@@ -233,7 +233,7 @@ describe('TransactionUtils', () => {
       const result = await TransactionUtils.getTransactions(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         expect.anything(),
         {
           fromAddress: undefined,
@@ -255,7 +255,7 @@ describe('TransactionUtils', () => {
         transactions: [mockTransaction, mockTransaction],
       });
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         first: 2000,
         skip: 10,
       };
@@ -263,7 +263,7 @@ describe('TransactionUtils', () => {
       const result = await TransactionUtils.getTransactions(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         expect.anything(),
         {
           fromAddress: undefined,
@@ -285,7 +285,7 @@ describe('TransactionUtils', () => {
         transactions: [mockTransaction, mockTransaction],
       });
       const filter: ITransactionsFilter = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.SEPOLIA,
         fromAddress: '0x1234567890123456789012345678901234567890',
         startDate: new Date('2022-01-01'),
         endDate: new Date('2022-12-31'),
@@ -296,7 +296,7 @@ describe('TransactionUtils', () => {
       const result = await TransactionUtils.getTransactions(filter);
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        NETWORKS[ChainId.LOCALHOST]?.subgraphUrl,
+        NETWORKS[ChainId.SEPOLIA]?.subgraphUrl,
         expect.anything(),
         {
           fromAddress: filter.fromAddress,

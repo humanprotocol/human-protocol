@@ -18,7 +18,7 @@ from human_protocol_sdk.statistics import (
 
 class TestStatisticsClient(unittest.TestCase):
     def setUp(self):
-        self.statistics = StatisticsClient(ChainId.LOCALHOST)
+        self.statistics = StatisticsClient(ChainId.SEPOLIA)
 
     def test_init_with_invalid_chain_id(self):
         with self.assertRaises(ValueError) as cm:
@@ -63,12 +63,12 @@ class TestStatisticsClient(unittest.TestCase):
             escrow_statistics = self.statistics.get_escrow_statistics(param)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_escrow_statistics_query,
             )
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -119,7 +119,7 @@ class TestStatisticsClient(unittest.TestCase):
             payment_statistics = self.statistics.get_worker_statistics(param)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -164,7 +164,7 @@ class TestStatisticsClient(unittest.TestCase):
             payment_statistics = self.statistics.get_payment_statistics(param)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
@@ -209,7 +209,7 @@ class TestStatisticsClient(unittest.TestCase):
             hmt_statistics = self.statistics.get_hmt_statistics()
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_hmtoken_statistics_query,
             )
 
@@ -241,7 +241,7 @@ class TestStatisticsClient(unittest.TestCase):
             holders = self.statistics.get_hmt_holders(param)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_holders_query(
                     address=param.address,
                 ),
@@ -287,7 +287,7 @@ class TestStatisticsClient(unittest.TestCase):
             hmt_statistics = self.statistics.get_hmt_daily_data(param)
 
             mock_function.assert_any_call(
-                NETWORKS[ChainId.LOCALHOST],
+                NETWORKS[ChainId.SEPOLIA],
                 query=get_event_day_data_query(param),
                 params={
                     "from": 1683811973,
