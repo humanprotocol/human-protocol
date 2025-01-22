@@ -36,13 +36,6 @@ if (SUPPORTED_CHAIN_IDS.length === 0) {
   );
 }
 
-export const CHAIN_ID_BY_NAME: Record<string, ChainId> = {
-  'Polygon Amoy': ChainId.POLYGON_AMOY,
-  'Binance Smart Chain': ChainId.BSC_MAINNET,
-  'Ethereum Sepolia': ChainId.SEPOLIA,
-  Localhost: ChainId.LOCALHOST,
-};
-
 export const LOCALHOST = {
   id: 1338,
   name: 'Localhost',

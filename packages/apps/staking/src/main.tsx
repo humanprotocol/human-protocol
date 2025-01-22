@@ -12,6 +12,7 @@ import { QueryClientProvider } from './providers/QueryClientProvider';
 import './assets/styles/main.scss';
 import 'simplebar-react/dist/simplebar.min.css';
 import { StakeProvider } from './contexts/stake';
+import { KVStoreProvider } from './contexts/kvstore';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -22,7 +23,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             <CssBaseline />
             <SnackbarProvider>
               <StakeProvider>
-                <App />
+                <KVStoreProvider>
+                  <App />
+                </KVStoreProvider>
               </StakeProvider>
             </SnackbarProvider>
           </Router>

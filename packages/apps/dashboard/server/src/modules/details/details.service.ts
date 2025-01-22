@@ -10,6 +10,8 @@ import {
   NETWORKS,
   ILeadersFilter,
   OrderDirection,
+  KVStoreUtils,
+  IKVStore,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
@@ -30,6 +32,7 @@ import {
   MIN_AMOUNT_STAKED,
 } from '../../common/constants/leader';
 import { GetLeadersPaginationOptions } from 'src/common/types';
+import { KVStoreDataDto } from './dto/details-response.dto';
 
 @Injectable()
 export class DetailsService {
@@ -338,5 +341,21 @@ export class DetailsService {
     }
 
     return sortedLeaders;
+  }
+
+  public async getKVStoreData(
+    chainId: ChainId,
+    address: string,
+  ): Promise<KVStoreDataDto[]> {
+    const kvStoreData = await KVStoreUtils.getKVStoreData(chainId, address);
+
+    const data: KVStoreDataDto[] = kvStoreData.map((data: any) => {
+      return plainToInstance(KVStoreDataDto, {
+        key: data.key,
+        value: data.value,
+      });
+    });
+
+    return data;
   }
 }

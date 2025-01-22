@@ -7,15 +7,15 @@ import {
 } from '@human-protocol/sdk';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
-import { useAccount, useChainId, useWalletClient } from 'wagmi';
+import { useAccount, useWalletClient } from 'wagmi';
 import { useSnackbar } from '../providers/SnackProvider';
 import { parseErrorMessage } from '../utils/string';
 import { formatAmount } from '../utils/units';
+import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 
 export const useStake = () => {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const chainId = useChainId();
   const { showError, openSnackbar } = useSnackbar();
 
   const [stakingClient, setStakingClient] = useState<StakingClient | null>(
@@ -27,25 +27,43 @@ export const useStake = () => {
   useEffect(() => {
     const initStakingClient = async () => {
       try {
+        checkSupportedChain();
         if (walletClient && address) {
           const provider = new ethers.BrowserProvider(window.ethereum);
           const signer = await provider.getSigner();
 
           const client = await StakingClient.build(signer);
           setStakingClient(client);
-
           await fetchStakingData(client);
           await fetchTokenBalance(provider, address, chainId);
         }
       } catch (error) {
-        showError('Invalid network');
+        showError(error);
+        resetData();
       }
     };
 
     initStakingClient();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletClient, address, chainId]);
 
+  const checkSupportedChain = () => {
+    const isSupportedChain = SUPPORTED_CHAIN_IDS.includes(chainId as ChainId);
+    if (!isSupportedChain) {
+      resetData();
+      throw new Error(
+        'Unsupported chain. Please switch to a supported network.'
+      );
+    }
+  };
+
+  const resetData = () => {
+    setStakingData(null);
+    setTokenBalance(0);
+  };
+
   const fetchStakingData = async (stakingClient: StakingClient) => {
+    checkSupportedChain();
     try {
       const stakingInfo = await stakingClient.getStakerInfo(address!);
       setStakingData(stakingInfo);
@@ -57,8 +75,9 @@ export const useStake = () => {
   const fetchTokenBalance = async (
     provider: ethers.BrowserProvider,
     address: string,
-    chainId: number
+    chainId?: number
   ) => {
+    checkSupportedChain();
     try {
       const tokenAddress = NETWORKS[chainId as ChainId]?.hmtAddress;
       if (!tokenAddress) {
@@ -81,6 +100,7 @@ export const useStake = () => {
 
   const handleStake = async (amount: string) => {
     try {
+      checkSupportedChain();
       if (stakingClient && amount) {
         const weiAmount = ethers.parseUnits(amount, 'ether');
         await stakingClient.approveStake(weiAmount);
@@ -100,6 +120,7 @@ export const useStake = () => {
 
   const handleUnstake = async (amount: string) => {
     try {
+      checkSupportedChain();
       if (stakingClient && amount) {
         const weiAmount = ethers.parseUnits(amount, 'ether');
         await stakingClient.unstake(weiAmount);
@@ -118,6 +139,7 @@ export const useStake = () => {
 
   const handleWithdraw = async () => {
     try {
+      checkSupportedChain();
       if (stakingClient) {
         await stakingClient.withdraw();
         await fetchStakingData(stakingClient);
