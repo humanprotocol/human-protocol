@@ -1,12 +1,10 @@
 # CHANGELOG
 
-## Changelog
-
-
-
 {% hint style="danger" %}
 Items marked with the ⚠️ icon indicate breaking changes.
 {% endhint %}
+
+## Changelog
 
 #### Added
 
