@@ -1,12 +1,12 @@
 import { Grid, Paper } from '@mui/material';
 import { useEffect } from 'react';
 import { t } from 'i18next';
-import { ProfileData } from '@/modules/worker/components/profile/profile-data';
-import { ProfileActions } from '@/modules/worker/components/profile/profile-actions';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
+import { ProfileData } from '@/modules/worker/components/profile/components/profile-data';
+import { ProfileActions } from '@/modules/worker/components/profile/components/profile-actions';
 import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
