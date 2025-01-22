@@ -11,16 +11,19 @@ interface KycStatusProps {
   >;
 }
 
-export function KycStatus({ status }: KycStatusProps) {
+export function KycVerificationControl({ status }: KycStatusProps) {
   const { t } = useTranslation();
+  const kycToComplete = !(status.kycApproved || status.kycDeclined);
 
-  if (status.kycApproved) {
-    return <DoneLabel>{t('worker.profile.kycCompleted')}</DoneLabel>;
-  }
-
-  if (status.kycDeclined) {
-    return <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>;
-  }
-
-  return <StartKycBtn />;
+  return (
+    <>
+      {status.kycApproved && (
+        <DoneLabel>{t('worker.profile.kycCompleted')}</DoneLabel>
+      )}
+      {status.kycDeclined && (
+        <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>
+      )}
+      {kycToComplete && <StartKycBtn />}
+    </>
+  );
 }
