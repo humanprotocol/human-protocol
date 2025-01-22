@@ -38,7 +38,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator',
+      'Job Launcher',
       BigInt.fromI32(11)
     );
 
@@ -102,7 +102,7 @@ describe('KVStore', () => {
       data2.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id2, 'key', 'role');
-    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Validator');
+    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Job Launcher');
   });
 
   test('Should properly create a transaction with set method', () => {
@@ -115,7 +115,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator',
+      'Job Launcher',
       BigInt.fromI32(11)
     );
 
@@ -275,7 +275,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator',
+      'Job Launcher',
       BigInt.fromI32(11)
     );
 
@@ -292,7 +292,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'role',
-      'Validator'
+      'Job Launcher'
     );
   });
 
@@ -378,7 +378,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'webhook_url',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -408,7 +408,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'webhookUrl',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
@@ -420,7 +420,7 @@ describe('KVStore', () => {
       'LeaderURL',
       data2.params.sender.concat(toBytes('webhook_url')).toHex(),
       'url',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
@@ -434,7 +434,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'website',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -452,7 +452,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'website',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
@@ -466,7 +466,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'URL',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -496,7 +496,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'url',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
@@ -508,7 +508,7 @@ describe('KVStore', () => {
       'LeaderURL',
       data2.params.sender.concat(toBytes('url')).toHex(),
       'url',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
@@ -636,13 +636,13 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'registration_instructions',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'registration_instructions',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -653,14 +653,14 @@ describe('KVStore', () => {
       'Leader',
       data1.params.sender.toHex(),
       'registrationInstructions',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
 
     assert.fieldEquals(
       'Leader',
       data2.params.sender.toHex(),
       'registrationInstructions',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
