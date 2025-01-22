@@ -6,6 +6,7 @@ import { SlackConfigService } from '../../common/config/slack-config.service';
 import { StorageService } from '../storage/storage.service';
 import { ConfigService } from '@nestjs/config';
 import { Encryption } from '@human-protocol/sdk';
+import { Storage } from '@google-cloud/storage';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { createMock } from '@golevelup/ts-jest';
 import { JobRepository } from './job.repository';
@@ -17,7 +18,6 @@ import { DataModerationResultDto } from './job-moderation.dto';
 import { JobEntity } from './job.entity';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { listObjectsInBucket } from '../../common/utils/storage';
-import { Storage } from '@google-cloud/storage';
 
 jest.mock('@google-cloud/vision');
 jest.mock('@google-cloud/storage');
@@ -81,17 +81,22 @@ describe('JobModerationService', () => {
 
   describe('jobModeration', () => {
     let mockDataModeration: jest.SpyInstance;
+    let mockHandleAbuseLinks: jest.SpyInstance;
 
     beforeEach(async () => {
       mockDataModeration = jest
         .spyOn(jobModerationService, 'dataModeration')
         .mockImplementation();
+      mockHandleAbuseLinks = jest
+        .spyOn(jobModerationService, 'handleAbuseLinks')
+        .mockImplementation();
     });
 
-    it('should update the job as passed when there are no abusive content', async () => {
+    it('should update the job as MODERATION_PASSED when there are no abusive content', async () => {
       const jobEntity = {
         manifestUrl: 'http://example.com/manifest.json',
       } as JobEntity;
+
       const manifest = { data: { data_url: 'http://example.com/data.json' } };
       const dataModerationResults = {
         positiveAbuseResults: [],
@@ -109,20 +114,23 @@ describe('JobModerationService', () => {
         jobEntity.manifestUrl,
       );
       expect(mockDataModeration).toHaveBeenCalledWith(manifest.data.data_url);
-      expect(jobRepository.updateOne).toHaveBeenCalledWith({
-        ...jobEntity,
-        status: JobStatus.MODERATION_PASSED,
-      });
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: JobStatus.MODERATION_PASSED,
+        }),
+      );
       expect(result.status).toBe(JobStatus.MODERATION_PASSED);
     });
 
-    it('should update the job as failed when there are abusive content', async () => {
+    it('should update the job as FAILED when abusive content is found', async () => {
       const jobEntity = {
         manifestUrl: 'http://example.com/manifest.json',
       } as JobEntity;
+
       const manifest = { data: { data_url: 'http://example.com/data.json' } };
       const dataModerationResults = {
         positiveAbuseResults: [{ imageUrl: 'http://example.com/image1.jpg' }],
+        possibleAbuseResults: [] as any,
       } as DataModerationResultDto;
 
       storageService.downloadJsonLikeData = jest
@@ -132,6 +140,11 @@ describe('JobModerationService', () => {
 
       const result = await jobModerationService.jobModeration(jobEntity);
 
+      expect(mockHandleAbuseLinks).toHaveBeenCalledWith(
+        ['http://example.com/image1.jpg'],
+        jobEntity.id,
+        true,
+      );
       expect(jobRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
           status: JobStatus.FAILED,
@@ -141,10 +154,11 @@ describe('JobModerationService', () => {
       expect(result.status).toBe(JobStatus.FAILED);
     });
 
-    it('should send a Slack notification when there are possible issues and generate a signed URL', async () => {
+    it('should update the job as POSSIBLE_ABUSE_IN_REVIEW when possible abusive content is found', async () => {
       const jobEntity = {
         manifestUrl: 'http://example.com/manifest.json',
       } as JobEntity;
+
       const manifest = { data: { data_url: 'http://example.com/data.json' } };
       const dataModerationResults = {
         positiveAbuseResults: [] as any,
@@ -156,43 +170,54 @@ describe('JobModerationService', () => {
         .mockResolvedValue(manifest);
       mockDataModeration.mockResolvedValue(dataModerationResults);
 
-      const mockSignedUrl = 'http://signed-url.example.com/file.txt';
-      jest.spyOn(Storage.prototype, 'bucket').mockReturnValue({
-        file: jest.fn().mockReturnValue({
-          createWriteStream: jest.fn(() => ({
-            end: jest.fn().mockImplementation(() => {}),
-          })),
-          getSignedUrl: jest.fn().mockResolvedValue([mockSignedUrl]),
+      const result = await jobModerationService.jobModeration(jobEntity);
+
+      expect(mockHandleAbuseLinks).toHaveBeenCalledWith(
+        ['http://example.com/image2.jpg'],
+        jobEntity.id,
+        false,
+      );
+      expect(jobRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: JobStatus.POSSIBLE_ABUSE_IN_REVIEW,
+          failedReason: expect.stringContaining(
+            'potentially containing abusive content',
+          ),
         }),
-      } as any);
-
-      await jobModerationService.jobModeration(jobEntity);
-
-      expect(sendSlackNotification).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.stringContaining('possible moderation issues'),
       );
-      expect(sendSlackNotification).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.stringContaining(mockSignedUrl),
-      );
-      expect(jobRepository.updateOne).toHaveBeenCalledWith({
-        ...jobEntity,
-        status: JobStatus.MODERATION_PASSED,
-      });
+      expect(result.status).toBe(JobStatus.POSSIBLE_ABUSE_IN_REVIEW);
     });
 
-    it('should handle errors from storage service and log them', async () => {
+    it('should throw an error if manifest download fails', async () => {
       const jobEntity = {
         manifestUrl: 'http://example.com/manifest.json',
       } as JobEntity;
+
       storageService.downloadJsonLikeData = jest
         .fn()
-        .mockRejectedValue(new Error('Storage error'));
+        .mockRejectedValue(new Error('Download error'));
 
       await expect(
         jobModerationService.jobModeration(jobEntity),
-      ).rejects.toThrow('Storage error');
+      ).rejects.toThrow('Download error');
+      expect(jobRepository.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should handle data moderation errors gracefully', async () => {
+      const jobEntity = {
+        manifestUrl: 'http://example.com/manifest.json',
+      } as JobEntity;
+
+      const manifest = { data: { data_url: 'http://example.com/data.json' } };
+
+      storageService.downloadJsonLikeData = jest
+        .fn()
+        .mockResolvedValue(manifest);
+      mockDataModeration.mockRejectedValue(new Error('Moderation error'));
+
+      await expect(
+        jobModerationService.jobModeration(jobEntity),
+      ).rejects.toThrow('Moderation error');
       expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
   });
@@ -281,6 +306,92 @@ describe('JobModerationService', () => {
           'http://test-image.com/image1.jpg',
         ]),
       ).rejects.toThrow(ErrorJobModeration.ContentModerationFailed);
+    });
+  });
+
+  describe('handleAbuseLinks', () => {
+    let mockSignedUrl: string;
+
+    beforeEach(() => {
+      mockSignedUrl = 'http://signed-url.example.com/file.txt';
+      jest.spyOn(Storage.prototype, 'bucket').mockReturnValue({
+        file: jest.fn().mockReturnValue({
+          createWriteStream: jest.fn(() => ({
+            end: jest.fn().mockImplementation(() => {}),
+          })),
+          getSignedUrl: jest.fn().mockResolvedValue([mockSignedUrl]),
+        }),
+      } as any);
+    });
+
+    it('should save abusive image links to GCS and send a Slack notification for confirmed abuse', async () => {
+      const imageLinks = [
+        'http://example.com/image1.jpg',
+        'http://example.com/image2.jpg',
+      ];
+      const jobId = 123;
+      const isConfirmedAbuse = true;
+
+      await jobModerationService.handleAbuseLinks(
+        imageLinks,
+        jobId,
+        isConfirmedAbuse,
+      );
+
+      expect(Storage.prototype.bucket).toHaveBeenCalledWith(
+        jobModerationService['visionConfigService'].positiveAbuseResultsBucket,
+      );
+      expect(sendSlackNotification).toHaveBeenCalledWith(
+        jobModerationService['slackConfigService'].abuseNotificationWebhookUrl,
+        expect.stringContaining(mockSignedUrl),
+      );
+    });
+
+    it('should save possible abusive image links to GCS and send a Slack notification for possible abuse', async () => {
+      const imageLinks = ['http://example.com/image3.jpg'];
+      const jobId = 456;
+      const isConfirmedAbuse = false;
+
+      await jobModerationService.handleAbuseLinks(
+        imageLinks,
+        jobId,
+        isConfirmedAbuse,
+      );
+
+      expect(Storage.prototype.bucket).toHaveBeenCalledWith(
+        jobModerationService['visionConfigService'].possibleAbuseResultsBucket,
+      );
+      expect(sendSlackNotification).toHaveBeenCalledWith(
+        jobModerationService['slackConfigService'].abuseNotificationWebhookUrl,
+        expect.stringContaining(mockSignedUrl),
+      );
+    });
+
+    it('should handle errors when saving image links to GCS', async () => {
+      const imageLinks = ['http://example.com/image4.jpg'];
+      const jobId = 789;
+      const isConfirmedAbuse = true;
+
+      jest.spyOn(Storage.prototype, 'bucket').mockReturnValue({
+        file: jest.fn().mockReturnValue({
+          createWriteStream: jest.fn(() => ({
+            end: jest.fn().mockImplementation(() => {
+              throw new Error('GCS Error');
+            }),
+          })),
+          getSignedUrl: jest.fn(),
+        }),
+      } as any);
+
+      await expect(
+        jobModerationService.handleAbuseLinks(
+          imageLinks,
+          jobId,
+          isConfirmedAbuse,
+        ),
+      ).rejects.toThrow('GCS Error');
+
+      expect(sendSlackNotification).not.toHaveBeenCalled();
     });
   });
 

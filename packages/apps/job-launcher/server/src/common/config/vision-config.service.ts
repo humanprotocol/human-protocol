@@ -14,6 +14,16 @@ export class VisionConfigService {
   }
 
   /**
+   * The Google Cloud Storage (GCS) bucket name where moderation results with positive issues will be saved.
+   * Required
+   */
+  get positiveAbuseResultsBucket(): string {
+    return this.configService.getOrThrow<string>(
+      'GOOGLE_CLOUD_STORAGE_POSITIVE_ABUSE_RESULTS_BUCKET',
+    );
+  }
+
+  /**
    * The Google Cloud Storage (GCS) bucket name where moderation results with possible issues will be saved.
    * Required
    */

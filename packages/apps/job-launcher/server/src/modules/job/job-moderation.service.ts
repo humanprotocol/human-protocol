@@ -46,11 +46,13 @@ export class JobModerationService {
       await this.dataModeration(manifest.data.data_url);
 
     if (dataModerationResults.positiveAbuseResults.length > 0) {
-      const abusiveImageLinks = dataModerationResults.positiveAbuseResults
-        .map((result) => `- ${result.imageUrl}`)
-        .join('\n');
+      const abusiveImageLinks = dataModerationResults.positiveAbuseResults.map(
+        (result) => result.imageUrl,
+      );
 
-      const message = `The following images contain abusive content and caused the job to fail:\n${abusiveImageLinks}`;
+      await this.handleAbuseLinks(abusiveImageLinks, jobEntity.id, true);
+
+      const message = `The following images contain abusive content and caused the job to fail:\n\n${abusiveImageLinks.join('\n')}`;
 
       this.logger.error(message);
 
@@ -63,41 +65,19 @@ export class JobModerationService {
 
     // If there are possible moderation issues, save links to GCS and send a Slack notification
     if (dataModerationResults.possibleAbuseResults.length > 0) {
-      const imageLinks = dataModerationResults.possibleAbuseResults
-        .map((result) => result.imageUrl)
-        .join('\n');
+      const possibleAbuseImageLinks =
+        dataModerationResults.possibleAbuseResults.map(
+          (result) => result.imageUrl,
+        );
 
-      const storage = new Storage({
-        projectId: this.visionConfigService.projectId,
-        credentials: {
-          private_key: this.visionConfigService.privateKey,
-          client_email: this.visionConfigService.clientEmail,
-        },
-      });
+      await this.handleAbuseLinks(possibleAbuseImageLinks, jobEntity.id, false);
+      const message = `The following images have been flagged as potentially containing abusive content. This has triggered a review process for the job:\n\n${possibleAbuseImageLinks.join('\n')}`;
+      this.logger.warn(message);
 
-      const bucketName = this.visionConfigService.possibleAbuseResultsBucket;
-      const fileName = `moderation_results_${jobEntity.id}.txt`;
-
-      const file = storage.bucket(bucketName).file(fileName);
-      const stream = file.createWriteStream({ resumable: false });
-      stream.end(imageLinks);
-
-      const [signedUrl] = await file.getSignedUrl({
-        action: 'read',
-        expires: Date.now() + 60 * 60 * 1000, // 1 hour
-      });
-
-      const message = `The following images have possible moderation issues for job id ${jobEntity.id}. The results are saved <${signedUrl}|here>.`;
-
-      await sendSlackNotification(
-        this.slackConfigService.abuseNotificationWebhookUrl,
-        message,
-      );
-
-      this.logger.log(
-        'Slack notification sent with possible image links and signed URL:',
-        signedUrl,
-      );
+      jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
+      jobEntity.failedReason = message;
+      await this.jobRepository.updateOne(jobEntity);
+      return jobEntity;
     }
 
     jobEntity.status = JobStatus.MODERATION_PASSED;
@@ -261,6 +241,49 @@ export class JobModerationService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  public async handleAbuseLinks(
+    imageLinks: string[],
+    jobId: number,
+    isConfirmedAbuse: boolean,
+  ): Promise<void> {
+    const storage = new Storage({
+      projectId: this.visionConfigService.projectId,
+      credentials: {
+        private_key: this.visionConfigService.privateKey,
+        client_email: this.visionConfigService.clientEmail,
+      },
+    });
+
+    const bucketName = isConfirmedAbuse
+      ? this.visionConfigService.positiveAbuseResultsBucket
+      : this.visionConfigService.possibleAbuseResultsBucket;
+
+    const fileName = `moderation_results_${jobId}.txt`;
+
+    const file = storage.bucket(bucketName).file(fileName);
+    const stream = file.createWriteStream({ resumable: false });
+    stream.end(imageLinks.join('\n'));
+
+    const [signedUrl] = await file.getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 60 * 60 * 24 * 1000, // 1 day
+    });
+
+    const message = isConfirmedAbuse
+      ? `The following images contain abusive content for job id ${jobId}. The results are saved <${signedUrl}|here>.`
+      : `The following images have possible moderation issues for job id ${jobId}. The results are saved <${signedUrl}|here>.`;
+
+    await sendSlackNotification(
+      this.slackConfigService.abuseNotificationWebhookUrl,
+      message,
+    );
+
+    this.logger.log(
+      'Slack notification sent with image links and signed URL:',
+      signedUrl,
+    );
   }
 
   private isVeryLikelyOrLikely(result: ModerationResultDto): boolean {
