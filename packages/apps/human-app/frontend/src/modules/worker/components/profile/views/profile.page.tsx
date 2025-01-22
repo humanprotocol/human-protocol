@@ -22,8 +22,8 @@ export function WorkerProfilePage() {
       return;
     }
     showNotification({
-      message: t('worker.profile.topNotifications.completeSteps'),
       type: TopNotificationType.WARNING,
+      message: t('worker.profile.topNotifications.completeSteps'),
     });
   };
 
