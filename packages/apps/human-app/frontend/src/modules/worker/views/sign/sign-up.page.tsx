@@ -1,10 +1,9 @@
-import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
-import { t } from 'i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import type { SignUpDto } from '@/modules/worker/services/sign-up';
 import { signUpDtoSchema } from '@/modules/worker/services/sign-up';
 import { Button } from '@/shared/components/ui/button';
@@ -20,6 +19,7 @@ import { formattedSignUpErrorMessage } from '@/modules/worker/utils/formatted-si
 import { useSignUp } from '@/modules/worker/hooks/use-sign-up';
 
 export function SignUpWorkerPage() {
+  const { t } = useTranslation();
   const { signUp, error, isError, isLoading, reset } = useSignUp();
   const methods = useForm<SignUpDto>({
     defaultValues: {
@@ -34,12 +34,16 @@ export function SignUpWorkerPage() {
 
   useResetMutationErrors(methods.watch, reset);
 
+  const handleSignupError = (unknownError: unknown) => {
+    return formattedSignUpErrorMessage(unknownError, t);
+  };
+
   return (
     <PageCard
       alert={
         isError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {getErrorMessageForError(isError, formattedSignUpErrorMessage)}
+            {getErrorMessageForError(isError, handleSignupError)}
           </Alert>
         ) : undefined
       }
