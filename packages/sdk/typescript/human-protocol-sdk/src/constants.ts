@@ -3,7 +3,7 @@ import { NetworkData } from './types';
 
 export const DEFAULT_PUBLIC_BUCKET = 'escrow-public-results';
 
-export const DEFAULT_ENDPOINT = 'SEPOLIA';
+export const DEFAULT_ENDPOINT = 'localhost';
 
 export const DEFAULT_REGION = 'eu';
 
