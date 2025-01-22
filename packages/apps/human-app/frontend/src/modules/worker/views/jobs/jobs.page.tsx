@@ -65,6 +65,10 @@ export function JobsPage() {
     }
   };
 
+  const handleOpenMobileFilterDrawer = () => {
+    setIsMobileFilterDrawerOpen(true);
+  };
+
   useEffect(() => {
     if (error) {
       onErrorRef.current(error);
@@ -153,8 +157,8 @@ export function JobsPage() {
                     ) : (
                       <AvailableJobsTable
                         chainIdsEnabled={uiConfigData.chainIdsEnabled}
-                        setIsMobileFilterDrawerOpen={
-                          setIsMobileFilterDrawerOpen
+                        handleOpenMobileFilterDrawer={
+                          handleOpenMobileFilterDrawer
                         }
                       />
                     )}

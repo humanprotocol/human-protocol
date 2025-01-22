@@ -3,19 +3,19 @@ import { AvailableJobsTableDesktop } from '@/modules/worker/components/jobs/avai
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 interface AvailableJobsTableProps {
-  setIsMobileFilterDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleOpenMobileFilterDrawer: () => void;
   chainIdsEnabled: number[];
 }
 
 export function AvailableJobsTable({
-  setIsMobileFilterDrawerOpen,
+  handleOpenMobileFilterDrawer,
   chainIdsEnabled,
 }: AvailableJobsTableProps) {
   const isMobile = useIsMobile();
 
   return isMobile ? (
     <AvailableJobsTableMobile
-      setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
+      handleOpenMobileFilterDrawer={handleOpenMobileFilterDrawer}
     />
   ) : (
     <AvailableJobsTableDesktop chainIdsEnabled={chainIdsEnabled} />
