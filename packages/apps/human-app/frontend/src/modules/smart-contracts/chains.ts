@@ -26,14 +26,7 @@ export type ChainWithAddresses = Chain & {
 export const TestnetChainsIds = [
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
-  ChainId.RINKEBY,
-  ChainId.GOERLI,
   ChainId.BSC_TESTNET,
-  ChainId.POLYGON_MUMBAI,
-  ChainId.MOONBASE_ALPHA,
-  ChainId.AVALANCHE_TESTNET,
-  ChainId.CELO_ALFAJORES,
-  ChainId.XLAYER_TESTNET,
   ChainId.LOCALHOST,
 ] as const;
 
@@ -41,10 +34,6 @@ export const MainnetChainsIds = [
   ChainId.POLYGON,
   ChainId.MAINNET,
   ChainId.BSC_MAINNET,
-  ChainId.MOONBEAM,
-  ChainId.AVALANCHE,
-  ChainId.CELO,
-  ChainId.XLAYER,
   ChainId.ALL,
 ] as const;
 

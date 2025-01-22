@@ -14,7 +14,7 @@
 
 #### Defined in
 
-[enums.ts:24](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L24)
+[enums.ts:13](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L13)
 
 ***
 
@@ -24,4 +24,4 @@
 
 #### Defined in
 
-[enums.ts:25](https://github.com/humanprotocol/human-protocol/blob/3ddf95c166a160d89d0a36078325a2fc8283f02c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L25)
+[enums.ts:14](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L14)
