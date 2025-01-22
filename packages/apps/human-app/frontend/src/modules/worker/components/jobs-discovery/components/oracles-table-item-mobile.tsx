@@ -19,10 +19,6 @@ export function OraclesTableItemMobile({
 }: OraclesTableItemMobileProps) {
   const { colorPalette } = useColorMode();
 
-  const handleSelectOracle = () => {
-    selectOracle(oracle);
-  };
-
   return (
     <Paper
       sx={{
@@ -52,7 +48,12 @@ export function OraclesTableItemMobile({
           />
         </ListItem>
       </Grid>
-      <TableButton fullWidth onClick={handleSelectOracle}>
+      <TableButton
+        fullWidth
+        onClick={() => {
+          selectOracle(oracle);
+        }}
+      >
         {t('worker.oraclesTable.seeJobs')}
       </TableButton>
     </Paper>
