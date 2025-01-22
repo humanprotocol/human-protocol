@@ -11,9 +11,9 @@ import {
   registrationInExchangeOracleDtoSchema,
   useExchangeOracleRegistrationMutation,
 } from '@/modules/worker/services/registration-in-exchange-oracles';
-import { useRegisteredOracles } from '@/shared/contexts/registered-oracles';
 import { useGetOracles } from '@/modules/worker/services/oracles';
 import { routerPaths } from '@/router/router-paths';
+import { useRegisteredOracles } from '@/shared/hooks/use-registered-oracles';
 
 export function RegistrationPage() {
   const navigate = useNavigate();
