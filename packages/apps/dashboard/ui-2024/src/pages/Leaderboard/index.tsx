@@ -7,7 +7,6 @@ import { LeaderboardIcon } from '@components/Icons/LeaderboardIcon';
 
 export const LeaderBoard = () => {
   const { data, status, error } = useLeaderboardDetails();
-  const isMoreThatFiveEntries = data?.length && data.length > 5;
 
   return (
     <PageWrapper className="standard-background">
@@ -17,11 +16,7 @@ export const LeaderBoard = () => {
         title="Leaderboard"
         img={<LeaderboardIcon />}
       />
-      <Leaderboard
-        data={isMoreThatFiveEntries ? data.slice(0, 5) : data}
-        status={status}
-        error={error}
-      />
+      <Leaderboard data={data} status={status} error={error} />
     </PageWrapper>
   );
 };
