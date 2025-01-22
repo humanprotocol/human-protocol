@@ -13,9 +13,9 @@ import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { BackgroundProvider } from '@/shared/contexts/background-color-store';
 import {
-  isDarkColorModeEnabledInLocalStorage,
-  saveColorModeStateInLocalStorage,
-  isColorModeStateSavedInLocalStorage,
+  isDarkColorMode,
+  saveColorMode,
+  hasColorMode,
 } from '../helpers/dark-mode';
 
 export interface ColorModeContextProps {
@@ -35,13 +35,11 @@ interface ColorModeProviderProps {
 export function ColorModeProvider({
   children,
 }: Readonly<ColorModeProviderProps>) {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(
-    isDarkColorModeEnabledInLocalStorage()
-  );
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(isDarkColorMode());
 
   useEffect(() => {
     const handleColorModeChange = (matches: boolean) => {
-      if (isColorModeStateSavedInLocalStorage()) {
+      if (hasColorMode()) {
         return;
       }
       setIsDarkMode(matches);
@@ -62,7 +60,7 @@ export function ColorModeProvider({
   const switchMode = useCallback(() => {
     setIsDarkMode((current) => {
       const newMode = !current;
-      saveColorModeStateInLocalStorage(newMode ? 'dark' : 'light');
+      saveColorMode(newMode ? 'dark' : 'light');
       return newMode;
     });
   }, []);

@@ -1,10 +1,10 @@
 const MODE_LOCAL_STORAGE_KEY = 'mode';
 
-export const saveColorModeStateInLocalStorage = (mode: 'dark' | 'light') => {
+export const saveColorMode = (mode: 'dark' | 'light') => {
   localStorage.setItem(MODE_LOCAL_STORAGE_KEY, mode);
 };
 
-export const isDarkColorModeEnabledInLocalStorage = () => {
+export const isDarkColorMode = () => {
   const mode = localStorage.getItem(MODE_LOCAL_STORAGE_KEY);
   if (mode === 'dark') {
     return true;
@@ -12,6 +12,6 @@ export const isDarkColorModeEnabledInLocalStorage = () => {
   return false;
 };
 
-export const isColorModeStateSavedInLocalStorage = () => {
+export const hasColorMode = () => {
   return Boolean(localStorage.getItem(MODE_LOCAL_STORAGE_KEY));
 };
