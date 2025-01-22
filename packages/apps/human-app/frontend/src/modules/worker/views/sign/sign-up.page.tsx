@@ -1,17 +1,11 @@
-import { Trans } from 'react-i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
-import { t } from 'i18next';
-import omit from 'lodash/omit';
-import { useEffect } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import type { SignUpDto } from '@/modules/worker/services/sign-up';
-import {
-  signUpDtoSchema,
-  useSignUpMutation,
-} from '@/modules/worker/services/sign-up';
+import { signUpDtoSchema } from '@/modules/worker/services/sign-up';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/data-entry/input';
 import { Password } from '@/shared/components/data-entry/password/password';
@@ -19,22 +13,14 @@ import { PageCard } from '@/shared/components/ui/page-card';
 import { env } from '@/shared/env';
 import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
-import { FetchError } from '@/api/fetcher';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-
-function formattedSignUpErrorMessage(unknownError: unknown) {
-  if (unknownError instanceof FetchError && unknownError.status === 409) {
-    return t('worker.signUpForm.errors.emailTaken');
-  }
-}
+import { formattedSignUpErrorMessage } from '@/modules/worker/utils/formatted-sign-up-error-message';
+import { useSignUp } from '@/modules/worker/hooks/use-sign-up';
 
 export function SignUpWorkerPage() {
-  useEffect(() => {
-    browserAuthProvider.signOut({ triggerSignOutSubscriptions: false });
-  }, []);
-
+  const { t } = useTranslation();
+  const { signUp, error, isError, isLoading, reset } = useSignUp();
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
@@ -46,29 +32,18 @@ export function SignUpWorkerPage() {
     resolver: zodResolver(signUpDtoSchema),
   });
 
-  const {
-    mutate: signUpWorkerMutate,
-    error: signUpWorkerError,
-    isError: isSignUpWorkerError,
-    isPending: isSignUpWorkerPending,
-    reset: signUpWorkerMutationReset,
-  } = useSignUpMutation();
+  useResetMutationErrors(methods.watch, reset);
 
-  useResetMutationErrors(methods.watch, signUpWorkerMutationReset);
-
-  const handleWorkerSignUp = (data: SignUpDto) => {
-    signUpWorkerMutate(omit(data, ['confirmPassword']));
+  const handleSignupError = (unknownError: unknown) => {
+    return formattedSignUpErrorMessage(unknownError, t);
   };
 
   return (
     <PageCard
       alert={
-        isSignUpWorkerError ? (
+        isError ? (
           <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {getErrorMessageForError(
-              signUpWorkerError,
-              formattedSignUpErrorMessage
-            )}
+            {getErrorMessageForError(isError, handleSignupError)}
           </Alert>
         ) : undefined
       }
@@ -77,7 +52,7 @@ export function SignUpWorkerPage() {
       <FormProvider {...methods}>
         <form
           onSubmit={(event) => {
-            void methods.handleSubmit(handleWorkerSignUp)(event);
+            void methods.handleSubmit(signUp)(event);
           }}
         >
           <Grid container gap="1.5rem">
@@ -113,10 +88,10 @@ export function SignUpWorkerPage() {
                 />
               </Typography>
             </Grid>
-            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
+            <FormCaptcha error={error} name="h_captcha_token" />
             <Button
               fullWidth
-              loading={isSignUpWorkerPending}
+              loading={isLoading}
               type="submit"
               variant="contained"
             >
