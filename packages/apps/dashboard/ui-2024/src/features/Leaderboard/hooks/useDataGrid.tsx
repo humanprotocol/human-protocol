@@ -141,7 +141,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
       },
       {
         field: 'category',
-        minWidth: 150,
+        minWidth: 200,
         headerName: 'Category',
         headerClassName: 'home-page-table-header',
         renderHeader: () => (
