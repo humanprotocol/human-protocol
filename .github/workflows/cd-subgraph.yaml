@@ -15,29 +15,25 @@ jobs:
       matrix:
         network:
           - name: amoy
-          - name: avalanche
           - name: bsc-testnet
           - name: bsc
-          - name: celo-alfajores
-          - name: celo
           - name: ethereum
-          - name: fuji
-          - name: moonbase-alpha
-          - name: moonbeam
           - name: polygon
           - name: sepolia
-          - name: xlayer-testnet
-          - name: xlayer
       fail-fast: true
       max-parallel: 3
     steps:
       - uses: actions/checkout@v4
-      - run: npm install --global yarn && yarn --ignore-scripts
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.20.1'
+      - run: npm install --global yarn && yarn
         name: Install dependencies
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
-      - run: yarn global add @graphprotocol/graph-cli
+      - run: yarn global add @graphprotocol/graph-cli@0.71.2
         name: Install Graph CLI
       - run: graph auth --studio ${API_KEY}
         name: Authenticate Graph CLI
