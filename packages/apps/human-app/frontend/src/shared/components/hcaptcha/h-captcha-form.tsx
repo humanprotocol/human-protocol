@@ -11,12 +11,12 @@ interface HCaptchaFormProps {
   error?: unknown;
 }
 
-export function HCaptchaForm({ name, error }: HCaptchaFormProps) {
+export function HCaptchaForm({ name, error }: Readonly<HCaptchaFormProps>) {
   const { colorPalette } = useColorMode();
   const { setValue, formState } = useFormContext<Record<string, unknown>>();
   const customCaptchaRef = useRef<CustomHCaptchaRef>(null);
 
-  function onVerify(token: string) {
+  function setCaptchaValue(token: string) {
     setValue(name, token);
   }
 
@@ -29,7 +29,7 @@ export function HCaptchaForm({ name, error }: HCaptchaFormProps) {
 
   return (
     <div>
-      <CustomHCaptcha onVerify={onVerify} ref={customCaptchaRef} />
+      <CustomHCaptcha onVerify={setCaptchaValue} ref={customCaptchaRef} />
       <Typography
         color={colorPalette.error.main}
         component="div"
