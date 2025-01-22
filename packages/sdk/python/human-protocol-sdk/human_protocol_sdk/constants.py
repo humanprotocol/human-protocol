@@ -338,7 +338,6 @@ class Status(Enum):
 class Role(Enum):
     """Enum for roles."""
 
-    validator = "Validator"
     job_launcher = "Job Launcher"
     exchange_oracle = "Exchange Oracle"
     reputation_oracle = "Reputation Oracle"
