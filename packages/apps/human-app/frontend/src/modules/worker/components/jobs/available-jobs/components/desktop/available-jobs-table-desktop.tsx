@@ -10,7 +10,7 @@ import { useGetAvailableJobsData } from '@/modules/worker/services/available-job
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
-import { getAvailableJobsColumns } from '@/modules/worker/components/jobs/available-jobs/utils/get-available-jobs-columns';
+import { useGetAvailableJobsColumns } from '@/modules/worker/components/jobs/available-jobs/hooks/use-get-available-jobs-columns';
 
 interface AvailableJobsTableProps {
   chainIdsEnabled: number[];
@@ -31,6 +31,7 @@ export function AvailableJobsTableDesktop({
     setPageParams,
     filterParams,
   });
+  const columns = useGetAvailableJobsColumns(chainIdsEnabled);
 
   const memoizedTableDataResults = useMemo(
     () => tableData?.results ?? [],
@@ -44,7 +45,7 @@ export function AvailableJobsTableDesktop({
   }, [resetFilterParams]);
 
   const table = useMaterialReactTable({
-    columns: getAvailableJobsColumns(chainIdsEnabled),
+    columns,
     data: memoizedTableDataResults,
     state: {
       isLoading: tableStatus === 'pending',
