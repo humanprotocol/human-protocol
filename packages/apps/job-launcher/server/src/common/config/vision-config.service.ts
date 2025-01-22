@@ -17,9 +17,9 @@ export class VisionConfigService {
    * The Google Cloud Storage (GCS) bucket name where moderation results with possible issues will be saved.
    * Required
    */
-  get possibleResultsBucket(): string {
+  get possibleAbuseResultsBucket(): string {
     return this.configService.getOrThrow<string>(
-      'GOOGLE_CLOUD_STORAGE_POSSIBLE_RESULTS_BUCKET',
+      'GOOGLE_CLOUD_STORAGE_POSSIBLE_ABUSE_RESULTS_BUCKET',
     );
   }
 

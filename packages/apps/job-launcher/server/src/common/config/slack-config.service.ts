@@ -6,10 +6,12 @@ export class SlackConfigService {
   constructor(private configService: ConfigService) {}
 
   /**
-   * The webhook URL for sending messages to a Slack channel.
+   * The abuse notification webhook URL for sending messages to a Slack channel.
    * Required
    */
-  get webhookUrl(): string {
-    return this.configService.getOrThrow<string>('SLACK_WEBHOOK_URL');
+  get abuseNotificationWebhookUrl(): string {
+    return this.configService.getOrThrow<string>(
+      'SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL',
+    );
   }
 }

@@ -63,7 +63,7 @@ describe('JobModerationService', () => {
         {
           provide: SlackConfigService,
           useValue: {
-            webhookUrl: 'http://example.com/webhook',
+            abuseNotificationWebhookUrl: 'http://example.com/webhook',
           },
         },
       ],
@@ -94,9 +94,8 @@ describe('JobModerationService', () => {
       } as JobEntity;
       const manifest = { data: { data_url: 'http://example.com/data.json' } };
       const dataModerationResults = {
-        containsAbuse: false,
-        veryLikelyOrLikelyResults: [],
-        possibleResults: [],
+        positiveAbuseResults: [],
+        possibleAbuseResults: [],
       } as DataModerationResultDto;
 
       storageService.downloadJsonLikeData = jest
@@ -123,10 +122,7 @@ describe('JobModerationService', () => {
       } as JobEntity;
       const manifest = { data: { data_url: 'http://example.com/data.json' } };
       const dataModerationResults = {
-        containsAbuse: true,
-        veryLikelyOrLikelyResults: [
-          { imageUrl: 'http://example.com/image1.jpg' },
-        ],
+        positiveAbuseResults: [{ imageUrl: 'http://example.com/image1.jpg' }],
       } as DataModerationResultDto;
 
       storageService.downloadJsonLikeData = jest
@@ -151,8 +147,8 @@ describe('JobModerationService', () => {
       } as JobEntity;
       const manifest = { data: { data_url: 'http://example.com/data.json' } };
       const dataModerationResults = {
-        containsAbuse: false,
-        possibleResults: [{ imageUrl: 'http://example.com/image2.jpg' }],
+        positiveAbuseResults: [] as any,
+        possibleAbuseResults: [{ imageUrl: 'http://example.com/image2.jpg' }],
       } as DataModerationResultDto;
 
       storageService.downloadJsonLikeData = jest
@@ -315,9 +311,8 @@ describe('JobModerationService', () => {
         'http://test-bucket.com',
       );
 
-      expect(result.containsAbuse).toBe(true);
-      expect(result.veryLikelyOrLikelyResults).toHaveLength(1);
-      expect(result.possibleResults).toHaveLength(0);
+      expect(result.positiveAbuseResults).toHaveLength(1);
+      expect(result.possibleAbuseResults).toHaveLength(0);
     });
 
     it('should handle errors and throw a dataset processing error', async () => {
@@ -357,9 +352,8 @@ describe('JobModerationService', () => {
         'http://test-bucket.com',
       );
 
-      expect(result.containsAbuse).toBe(false);
-      expect(result.veryLikelyOrLikelyResults).toHaveLength(0);
-      expect(result.possibleResults).toHaveLength(1);
+      expect(result.positiveAbuseResults).toHaveLength(0);
+      expect(result.possibleAbuseResults).toHaveLength(1);
     });
   });
 });

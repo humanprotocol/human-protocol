@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { sendSlackNotification } from './slack';
 
-export const MOCK_SLACK_WEBHOOK_URL = 'https://slack.com/webhook';
+export const MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL =
+  'https://slack.com/webhook';
 
 jest.mock('axios');
 
@@ -15,11 +16,17 @@ describe('sendSlackNotification', () => {
     (axios.post as jest.Mock).mockResolvedValue(mockResponse);
 
     const message = 'Test message';
-    await sendSlackNotification(MOCK_SLACK_WEBHOOK_URL, message);
+    await sendSlackNotification(
+      MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL,
+      message,
+    );
 
-    expect(axios.post).toHaveBeenCalledWith(MOCK_SLACK_WEBHOOK_URL, {
-      text: message,
-    });
+    expect(axios.post).toHaveBeenCalledWith(
+      MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL,
+      {
+        text: message,
+      },
+    );
   });
 
   it('should handle error when sending Slack notification', async () => {
@@ -27,10 +34,16 @@ describe('sendSlackNotification', () => {
     (axios.post as jest.Mock).mockRejectedValue(mockError);
 
     const message = 'Test message';
-    await sendSlackNotification(MOCK_SLACK_WEBHOOK_URL, message);
+    await sendSlackNotification(
+      MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL,
+      message,
+    );
 
-    expect(axios.post).toHaveBeenCalledWith(MOCK_SLACK_WEBHOOK_URL, {
-      text: message,
-    });
+    expect(axios.post).toHaveBeenCalledWith(
+      MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL,
+      {
+        text: message,
+      },
+    );
   });
 });

@@ -78,13 +78,13 @@ export const E2E_TEST_ENV = 'test-e2e';
 
 export const MUTEX_TIMEOUT = 2000; //ms
 
-export const ContentModerationLevel = {
+export const CONTENT_MODERATION_LEVEL = {
   VERY_LIKELY: 'VERY_LIKELY',
   LIKELY: 'LIKELY',
   POSSIBLE: 'POSSIBLE',
 };
 
-export const ContentModerationFeature = {
+export const CONTENT_MODERATION_FEATURE = {
   SAFE_SEARCH_DETECTION: 'SAFE_SEARCH_DETECTION',
 };
 

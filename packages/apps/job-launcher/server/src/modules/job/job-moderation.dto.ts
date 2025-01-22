@@ -12,7 +12,6 @@ export class ImageModerationResultDto {
 }
 
 export class DataModerationResultDto {
-  containsAbuse: boolean;
-  veryLikelyOrLikelyResults: ImageModerationResultDto[];
-  possibleResults: ImageModerationResultDto[];
+  positiveAbuseResults: ImageModerationResultDto[];
+  possibleAbuseResults: ImageModerationResultDto[];
 }

@@ -88,7 +88,7 @@ export const envValidator = Joi.object({
   GOOGLE_PROJECT_ID: Joi.string().required(),
   GOOGLE_PRIVATE_KEY: Joi.string().required(),
   GOOGLE_CLIENT_EMAIL: Joi.string().required(),
-  GOOGLE_CLOUD_STORAGE_POSSIBLE_RESULTS_BUCKET: Joi.string().required(),
+  GOOGLE_CLOUD_STORAGE_POSSIBLE_ABUSE_RESULTS_BUCKET: Joi.string().required(),
   // Slack
-  SLACK_WEBHOOK_URL: Joi.string().required(),
+  SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL: Joi.string().required(),
 });

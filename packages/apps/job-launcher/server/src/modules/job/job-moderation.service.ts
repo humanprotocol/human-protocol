@@ -5,8 +5,8 @@ import { ErrorJobModeration } from '../../common/constants/errors';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
-  ContentModerationFeature,
-  ContentModerationLevel,
+  CONTENT_MODERATION_FEATURE,
+  CONTENT_MODERATION_LEVEL,
   JOB_MODERATION_BATCH_SIZE,
   JOB_MODERATION_MAX_REQUESTS_PER_MINUTE,
   ONE_MINUTE_IN_MS,
@@ -45,8 +45,8 @@ export class JobModerationService {
     const dataModerationResults: DataModerationResultDto =
       await this.dataModeration(manifest.data.data_url);
 
-    if (dataModerationResults.containsAbuse) {
-      const abusiveImageLinks = dataModerationResults.veryLikelyOrLikelyResults
+    if (dataModerationResults.positiveAbuseResults.length > 0) {
+      const abusiveImageLinks = dataModerationResults.positiveAbuseResults
         .map((result) => `- ${result.imageUrl}`)
         .join('\n');
 
@@ -62,8 +62,8 @@ export class JobModerationService {
     }
 
     // If there are possible moderation issues, save links to GCS and send a Slack notification
-    if (dataModerationResults.possibleResults.length > 0) {
-      const imageLinks = dataModerationResults.possibleResults
+    if (dataModerationResults.possibleAbuseResults.length > 0) {
+      const imageLinks = dataModerationResults.possibleAbuseResults
         .map((result) => result.imageUrl)
         .join('\n');
 
@@ -75,7 +75,7 @@ export class JobModerationService {
         },
       });
 
-      const bucketName = this.visionConfigService.possibleResultsBucket;
+      const bucketName = this.visionConfigService.possibleAbuseResultsBucket;
       const fileName = `moderation_results_${jobEntity.id}.txt`;
 
       const file = storage.bucket(bucketName).file(fileName);
@@ -89,7 +89,10 @@ export class JobModerationService {
 
       const message = `The following images have possible moderation issues for job id ${jobEntity.id}. The results are saved <${signedUrl}|here>.`;
 
-      await sendSlackNotification(this.slackConfigService.webhookUrl, message);
+      await sendSlackNotification(
+        this.slackConfigService.abuseNotificationWebhookUrl,
+        message,
+      );
 
       this.logger.log(
         'Slack notification sent with possible image links and signed URL:',
@@ -123,22 +126,19 @@ export class JobModerationService {
         );
       }
 
-      const veryLikelyOrLikelyResults = moderationResults.filter((result) =>
+      const positiveAbuseResults = moderationResults.filter((result) =>
         this.isVeryLikelyOrLikely(result.moderationResult),
       );
 
-      const possibleResults = moderationResults.filter((result) =>
+      const possibleAbuseResults = moderationResults.filter((result) =>
         this.isPossible(result.moderationResult),
       );
-
-      const containsAbuse = veryLikelyOrLikelyResults.length > 0;
 
       this.logger.log('Processing completed.');
 
       return {
-        containsAbuse,
-        veryLikelyOrLikelyResults,
-        possibleResults,
+        positiveAbuseResults,
+        possibleAbuseResults,
       };
     } catch (error) {
       this.logger.error('Error processing dataset:', error);
@@ -170,7 +170,7 @@ export class JobModerationService {
         requests: batch.map((imageUrl) => ({
           image: { source: { imageUri: imageUrl } },
           features: [
-            { type: ContentModerationFeature.SAFE_SEARCH_DETECTION as any },
+            { type: CONTENT_MODERATION_FEATURE.SAFE_SEARCH_DETECTION as any },
           ],
         })),
       };
@@ -237,7 +237,7 @@ export class JobModerationService {
       requests: imageUrls.map((imageUrl) => ({
         image: { source: { imageUri: imageUrl } },
         features: [
-          { type: ContentModerationFeature.SAFE_SEARCH_DETECTION as any },
+          { type: CONTENT_MODERATION_FEATURE.SAFE_SEARCH_DETECTION as any },
         ],
       })),
     };
@@ -272,8 +272,8 @@ export class JobModerationService {
       result.medical,
     ].some(
       (level) =>
-        level === ContentModerationLevel.VERY_LIKELY ||
-        level === ContentModerationLevel.LIKELY,
+        level === CONTENT_MODERATION_LEVEL.VERY_LIKELY ||
+        level === CONTENT_MODERATION_LEVEL.LIKELY,
     );
   }
 
@@ -284,6 +284,6 @@ export class JobModerationService {
       result.violence,
       result.spoof,
       result.medical,
-    ].some((level) => level === ContentModerationLevel.POSSIBLE);
+    ].some((level) => level === CONTENT_MODERATION_LEVEL.POSSIBLE);
   }
 }
