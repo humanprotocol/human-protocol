@@ -2,6 +2,12 @@
 
 ## Changelog
 
+
+
+{% hint style="danger" %}
+Items marked with the ⚠️ icon indicate breaking changes.
+{% endhint %}
+
 #### Added
 
 * Add a withdraw function:
@@ -13,7 +19,7 @@
 #### Changed
 
 * Update subgraph IDs.
-* Update the leader entity:
+* ⚠️ Update the leader entity:
   * Remove amount allocated.
   * Remove reputation.
   * Add reputation networks.
@@ -24,12 +30,12 @@
 #### Removed
 
 * Remove reward pool address because the contract has been deleted.
-* Delete create and setup escrow functions. The new launching order is:
+* ⚠️ Delete create and setup escrow functions. The new launching order is:
   1. Create
   2. Fund
   3. Setup
-* Delete the escrow abort function.
-* Remove all allocation-related functions from the staking client.
+* ⚠️ Delete the escrow abort function.
+* ⚠️ Remove all allocation-related functions from the staking client.
 
 #### Fixed
 
