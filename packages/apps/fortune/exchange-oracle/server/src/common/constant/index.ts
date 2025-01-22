@@ -14,7 +14,6 @@ export const TESTNET_CHAIN_IDS = [
 export const MAINNET_CHAIN_IDS = [
   ChainId.POLYGON,
   ChainId.BSC_MAINNET,
-  ChainId.MOONBEAM,
 ];
 
 export const JWT_KVSTORE_KEY = 'jwt_public_key';

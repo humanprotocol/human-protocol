@@ -40,34 +40,6 @@ export const NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
-  [ChainId.RINKEBY]: {
-    chainId: ChainId.RINKEBY,
-    title: 'Ethereum Rinkeby',
-    scanUrl: 'https://rinkeby.etherscan.io',
-    factoryAddress: '0x925B24444511c86F4d4E63141D8Be0A025E2dca4',
-    hmtAddress: '0x4dCf5ac4509888714dd43A5cCc46d7ab389D9c23',
-    stakingAddress: '',
-    kvstoreAddress: '',
-    subgraphUrl: '',
-    subgraphUrlApiKey: '',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
-  [ChainId.GOERLI]: {
-    chainId: ChainId.GOERLI,
-    title: 'Ethereum Goerli',
-    scanUrl: 'https://goerli.etherscan.io',
-    factoryAddress: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
-    hmtAddress: '0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317',
-    stakingAddress: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
-    kvstoreAddress: '0x19Fc3e859C1813ac9427a7a78BeB9ae102CE96d3',
-    subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v2',
-    subgraphUrlApiKey: '',
-    oldSubgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
-    oldFactoryAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
-  },
   [ChainId.SEPOLIA]: {
     chainId: ChainId.SEPOLIA,
     title: 'Ethereum Sepolia',
@@ -130,21 +102,6 @@ export const NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
   },
-  [ChainId.POLYGON_MUMBAI]: {
-    chainId: ChainId.POLYGON_MUMBAI,
-    title: 'Polygon Mumbai',
-    scanUrl: 'https://mumbai.polygonscan.com',
-    factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
-    hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
-    stakingAddress: '0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac',
-    kvstoreAddress: '0xD96158c7267Ea658a4688F4aEf1c85659851625d',
-    subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2',
-    subgraphUrlApiKey: '',
-    oldSubgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
-    oldFactoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
-  },
   [ChainId.POLYGON_AMOY]: {
     chainId: ChainId.POLYGON_AMOY,
     title: 'Polygon Amoy',
@@ -157,129 +114,6 @@ export const NETWORKS: {
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
       'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmawobiPUYsGNK9chtb5PvicUtaa8Jsjpwvv8dNyMVXQ9r',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
-  [ChainId.MOONBEAM]: {
-    chainId: ChainId.MOONBEAM,
-    title: 'Moonbeam',
-    scanUrl: 'https://moonbeam.moonscan.io',
-    factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
-    hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
-    stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
-    kvstoreAddress: '0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/moonbeam/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYe9hsFYuVgQsH719AsqRNqgVM8YBYfCuhBNYjXtBqQru',
-    oldSubgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
-    oldFactoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
-  },
-  [ChainId.MOONBASE_ALPHA]: {
-    chainId: ChainId.MOONBASE_ALPHA,
-    title: 'Moonbase Alpha',
-    scanUrl: 'https://moonbase.moonscan.io/',
-    factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
-    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
-    stakingAddress: '0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940',
-    kvstoreAddress: '0xcC561f4482f4Ff051D2Dcc65c2cE1A0f291bbA46',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/moonbase-alpha/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmSDPbm5xxMvYVSJzHFVsRiMekvJVYSJ7UfZw17DhPMdaH',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
-  [ChainId.AVALANCHE_TESTNET]: {
-    chainId: ChainId.AVALANCHE_TESTNET,
-    title: 'Fuji C-Chain',
-    scanUrl: 'https://testnet.snowtrace.io',
-    factoryAddress: '0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92',
-    hmtAddress: '0x9406d5c635AD22b0d76c75E52De57A2177919ca3',
-    stakingAddress: '0xbA537fEF2442cD48f60686FE1Bbbe40F964a7940',
-    kvstoreAddress: '0x3aD4B091E054f192a822D1406f4535eAd38580e4',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/fuji/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYXwNPwC5DcitK1SLVUR6gPANmEn3UsVvGeTbjCv1tTb2',
-    oldSubgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji',
-    oldFactoryAddress: '0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88',
-  },
-  [ChainId.AVALANCHE]: {
-    chainId: ChainId.AVALANCHE,
-    title: 'Avalanche C-Chain Mainnet',
-    scanUrl: 'https://snowtrace.io',
-    factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
-    hmtAddress: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
-    stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
-    kvstoreAddress: '0x9Bc7bff35B2Be2413708d48c3B0aEF5c43646728',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/avalanche/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYR8NUuAQVoGmGSwKanUJLjX9iZxrEyGH39HjUuXLmsum',
-    oldSubgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche',
-    oldFactoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
-  },
-  [ChainId.CELO_ALFAJORES]: {
-    chainId: ChainId.CELO_ALFAJORES,
-    title: 'Celo Alfajores',
-    scanUrl: 'https://alfajores.celoscan.io/',
-    factoryAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
-    hmtAddress: '0x2736B33455A872dC478E1E004106D04c35472468',
-    stakingAddress: '0x003548Df34be8836cF0F9673403a1E40ba449a0F',
-    kvstoreAddress: '0x938335006ea6F9Eb0e8020969cFF94404425e298',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/celo-alfajores/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmb2WKCFFhT7REAjTuMd9pZvGw7rRpzeZSPJ3KRztD2pMM',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
-  [ChainId.CELO]: {
-    chainId: ChainId.CELO,
-    title: 'Celo',
-    scanUrl: 'https://celoscan.io/',
-    factoryAddress: '0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08',
-    hmtAddress: '0x19Ead835951493A763c96910255d5eeF147E914F',
-    stakingAddress: '0x34cD3Bd6B16c559f321799b516dE61E12017fFd1',
-    kvstoreAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/celo/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmeeb5zshw1z9Q38NNPun2Pd7P951Mkzz5ywK171tauNRY',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
-  [ChainId.XLAYER]: {
-    chainId: ChainId.XLAYER,
-    title: 'XLayer',
-    scanUrl: 'https://www.oklink.com/xlayer',
-    factoryAddress: '0x4949C9DFFD83F0D5Ab0AB24C57C4D403D5c20C15',
-    hmtAddress: '0x10acbe3b9e6a2ff7f341e5cbf4b6617741ff44aa',
-    stakingAddress: '0x01D115E9E8bF0C58318793624CC662a030D07F1D',
-    kvstoreAddress: '0x6512d894cc3d3FE93Da9d0420430136fA889FaB9',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/xlayer/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWTggMrB5sRSs2fePuqQG9WbLMk8HtnfLH3VbRhmVdF8s',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '',
-  },
-  [ChainId.XLAYER_TESTNET]: {
-    chainId: ChainId.XLAYER_TESTNET,
-    title: 'XLayer Testnet',
-    scanUrl: 'https://www.okx.com/explorer/xlayer-test',
-    factoryAddress: '0x6Cd3ecAD36ee88E9ef3665CF381D9dAE0FE0a32e',
-    hmtAddress: '0x792abbcC99c01dbDec49c9fa9A828a186Da45C33',
-    stakingAddress: '0xeF9849a904dF0d494D69ac0B0a6860a3A7936114',
-    kvstoreAddress: '0xdE8BE9E3C12E9F546309A429cd88d026a25EaF8C',
-    subgraphUrl:
-      'https://api.studio.thegraph.com/query/74256/xlayer-testnet/version/latest',
-    subgraphUrlApiKey:
-      'https://gateway-testnet-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNoRyqZtJTRrkbKAmWMZQUHuah7YSs8U9R3nzPu8WEhtY',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
