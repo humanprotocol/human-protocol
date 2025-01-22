@@ -4,7 +4,7 @@ import { DoneLabel } from '@/modules/worker/components/profile/components/status
 import { WalletConnectDone } from '@/modules/worker/components/profile/components/wallet-connect-done';
 import type { WorkerProfileStatus } from '@/modules/worker/components/profile/types/profile-types';
 
-interface WalletSectionProps {
+interface WalletConnectionControlProps {
   status: Pick<WorkerProfileStatus, 'kycApproved'>;
   isConnected: boolean;
   hasWalletAddress: boolean;
@@ -12,13 +12,13 @@ interface WalletSectionProps {
   onConnect: () => void;
 }
 
-export function WalletSection({
+export function WalletConnectionControl({
   status,
   isConnected,
   hasWalletAddress,
   isRegisterAddressPending,
   onConnect,
-}: WalletSectionProps) {
+}: WalletConnectionControlProps) {
   const { t } = useTranslation();
 
   if (!status.kycApproved) {
