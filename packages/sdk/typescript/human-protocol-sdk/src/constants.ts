@@ -113,7 +113,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmTdEpKGntDfxxNXddJ62dNpBSo8mBU4VihesVnqK6WLq4',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZnaSXpJodb2iSjDShkDPg33qEYbYmcMF3EVCdByzWgvd',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
