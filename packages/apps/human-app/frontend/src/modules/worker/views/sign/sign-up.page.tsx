@@ -20,7 +20,7 @@ import { env } from '@/shared/env';
 import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { FetchError } from '@/api/fetcher';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 
@@ -113,7 +113,7 @@ export function SignUpWorkerPage() {
                 />
               </Typography>
             </Grid>
-            <FormCaptcha error={signUpWorkerError} name="h_captcha_token" />
+            <HCaptchaForm error={signUpWorkerError} name="h_captcha_token" />
             <Button
               fullWidth
               loading={isSignUpWorkerPending}
