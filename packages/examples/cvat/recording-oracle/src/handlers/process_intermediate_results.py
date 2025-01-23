@@ -619,7 +619,7 @@ class _TaskHoneypotManager:
                     f"Validation for escrow_address={self.task.escrow_address}: "
                     f"Too many validation frames excluded in the task {cvat_task_id} "
                     f"(required: {Config.validation.min_available_gt_threshold * 100:.4f}%, "
-                    f"left: {(len(task_available_gt_keys) / len(task_gt_keys)):.4f}%), "
+                    f"left: {(len(task_available_gt_keys) / len(task_gt_keys) * 100):.4f}%), "
                     "stopping annotation"
                 )
                 return _HoneypotUpdateResult(

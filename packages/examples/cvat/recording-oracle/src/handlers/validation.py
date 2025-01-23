@@ -124,7 +124,7 @@ class _TaskValidator:
         if isinstance(validation_result, ValidationSuccess):
             logger.info(
                 f"Validation for escrow_address={escrow_address}: successful, "
-                f"average annotation quality is {validation_result.average_quality:.2f}"
+                f"average annotation quality is {validation_result.average_quality * 100:.2f}%"
             )
 
             recor_merged_annotations_path = self._compose_validation_results_bucket_filename(
