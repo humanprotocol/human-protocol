@@ -1,4 +1,5 @@
 export enum CronJobType {
+  JobModeration = 'job-moderation',
   CreateEscrow = 'create-escrow',
   SetupEscrow = 'setup-escrow',
   FundEscrow = 'fund-escrow',

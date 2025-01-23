@@ -963,7 +963,12 @@ export class JobService {
 
     await this.paymentRepository.createUnique(paymentEntity);
 
-    jobEntity.status = JobStatus.PAID;
+    if (!user.whitelist) {
+      jobEntity.status = JobStatus.PAID;
+    } else {
+      jobEntity.status = JobStatus.MODERATION_PASSED;
+    }
+
     await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
