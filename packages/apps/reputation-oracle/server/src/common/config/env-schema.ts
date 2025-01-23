@@ -69,4 +69,7 @@ export const envValidator = Joi.object({
   KYC_API_KEY: Joi.string(),
   KYC_API_PRIVATE_KEY: Joi.string().required(),
   KYC_BASE_URL: Joi.string(),
+
+  // Human App
+  HUMAN_APP_EMAIL: Joi.string().email().required(),
 });

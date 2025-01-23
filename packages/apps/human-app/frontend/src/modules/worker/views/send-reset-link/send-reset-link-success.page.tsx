@@ -15,7 +15,7 @@ import {
 } from '@/modules/worker/services/send-reset-link';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
@@ -90,7 +90,7 @@ export function SendResetLinkWorkerSuccessPage() {
                 values={{ email }}
               />
             </Typography>
-            <FormCaptcha error={error} name="h_captcha_token" />
+            <HCaptchaForm error={error} name="h_captcha_token" />
             <Button
               disabled={!email}
               fullWidth

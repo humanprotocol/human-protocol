@@ -9,7 +9,6 @@ export const TESTNET_CHAIN_IDS = [
 export const MAINNET_CHAIN_IDS = [
   ChainId.BSC_MAINNET,
   ChainId.POLYGON,
-  ChainId.MOONBEAM,
 ];
 
 export const LOCALHOST_CHAIN_IDS = [ChainId.LOCALHOST];

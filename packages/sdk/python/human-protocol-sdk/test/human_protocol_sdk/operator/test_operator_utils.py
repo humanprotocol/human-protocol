@@ -44,6 +44,8 @@ class TestOperatorUtils(unittest.TestCase):
                                 "registrationNeeded": True,
                                 "registrationInstructions": "www.google.com",
                                 "reputationNetworks": [{"address": "0x01"}],
+                                "name": "Alice",
+                                "category": "machine_learning",
                             }
                         ],
                     }
@@ -85,6 +87,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].registration_needed, True)
             self.assertEqual(leaders[0].registration_instructions, "www.google.com")
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
+            self.assertEqual(leaders[0].name, "Alice")
+            self.assertEqual(leaders[0].category, "machine_learning")
 
     def test_get_leaders_when_job_types_is_none(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
@@ -115,6 +119,8 @@ class TestOperatorUtils(unittest.TestCase):
                                 "url": None,
                                 "jobTypes": None,
                                 "reputationNetworks": [{"address": "0x01"}],
+                                "name": "Alice",
+                                "category": "machine_learning",
                             }
                         ],
                     }
@@ -156,6 +162,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leaders[0].registration_instructions, None)
             self.assertEqual(leaders[0].job_types, [])
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
+            self.assertEqual(leaders[0].name, "Alice")
+            self.assertEqual(leaders[0].category, "machine_learning")
 
     def test_get_leaders_when_job_types_is_array(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
@@ -186,6 +194,8 @@ class TestOperatorUtils(unittest.TestCase):
                                 "url": None,
                                 "jobTypes": ["type1", "type2", "type3"],
                                 "reputationNetworks": [{"address": "0x01"}],
+                                "name": "Alice",
+                                "category": "machine_learning",
                             }
                         ],
                     }
@@ -227,6 +237,8 @@ class TestOperatorUtils(unittest.TestCase):
                 leaders[0].job_types, ["type1", "type2", "type3"]
             )  # Should the same array
             self.assertEqual(leaders[0].reputation_networks, ["0x01"])
+            self.assertEqual(leaders[0].name, "Alice")
+            self.assertEqual(leaders[0].category, "machine_learning")
 
     def test_get_leaders_empty_data(self):
         filter = LeaderFilter(chain_id=ChainId.POLYGON, roles=[Role.exchange_oracle])
@@ -291,6 +303,8 @@ class TestOperatorUtils(unittest.TestCase):
                             "registrationNeeded": True,
                             "registrationInstructions": "www.google.com",
                             "reputationNetworks": [{"address": "0x01"}],
+                            "name": "Alice",
+                            "category": "machine_learning",
                         }
                     }
                 }
@@ -324,6 +338,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.registration_needed, True)
             self.assertEqual(leader.registration_instructions, "www.google.com")
             self.assertEqual(leader.reputation_networks, ["0x01"])
+            self.assertEqual(leader.name, "Alice")
+            self.assertEqual(leader.category, "machine_learning")
 
     def test_get_leader_when_job_types_is_none(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -354,6 +370,8 @@ class TestOperatorUtils(unittest.TestCase):
                             "url": None,
                             "jobTypes": None,
                             "reputationNetworks": [{"address": "0x01"}],
+                            "name": "Alice",
+                            "category": "machine_learning",
                         }
                     }
                 }
@@ -387,6 +405,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.registration_needed, None)
             self.assertEqual(leader.registration_instructions, None)
             self.assertEqual(leader.reputation_networks, ["0x01"])
+            self.assertEqual(leader.name, "Alice")
+            self.assertEqual(leader.category, "machine_learning")
 
     def test_get_leader_when_job_types_is_array(self):
         staker_address = "0x1234567890123456789012345678901234567891"
@@ -417,6 +437,8 @@ class TestOperatorUtils(unittest.TestCase):
                             "url": None,
                             "jobTypes": ["type1", "type2", "type3"],
                             "reputationNetworks": [{"address": "0x01"}],
+                            "name": "Alice",
+                            "category": "machine_learning",
                         }
                     }
                 }
@@ -448,6 +470,8 @@ class TestOperatorUtils(unittest.TestCase):
             self.assertEqual(leader.url, None)
             self.assertEqual(leader.job_types, ["type1", "type2", "type3"])
             self.assertEqual(leader.reputation_networks, ["0x01"])
+            self.assertEqual(leader.name, "Alice")
+            self.assertEqual(leader.category, "machine_learning")
 
     def test_get_leader_empty_data(self):
         staker_address = "0x1234567890123456789012345678901234567891"

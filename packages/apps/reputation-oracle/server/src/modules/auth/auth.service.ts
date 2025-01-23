@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { ErrorCapthca } from '../../common/constants/errors';
 import {
   OperatorStatus,
   Role as UserRole,
@@ -65,14 +64,9 @@ export class AuthService {
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
-    private readonly hCaptchaService: HCaptchaService,
   ) {}
 
-  public async signin({
-    email,
-    password,
-    hCaptchaToken,
-  }: SignInDto): Promise<AuthDto> {
+  public async signin({ email, password }: SignInDto): Promise<AuthDto> {
     const userEntity = await this.userRepository.findOneByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
@@ -82,33 +76,10 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
-    if (userEntity.role !== UserRole.HUMAN_APP) {
-      if (!hCaptchaToken) {
-        throw new AuthError(ErrorCapthca.InvalidToken);
-      }
-
-      const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-        token: hCaptchaToken,
-      });
-      if (!captchaVerificationResult.success) {
-        throw new AuthError(ErrorCapthca.VerificationFailed);
-      }
-    }
-
     return this.auth(userEntity);
   }
 
   public async signup(data: UserCreateDto): Promise<UserEntity> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new DuplicatedUserError(data.email);
@@ -237,16 +208,6 @@ export class AuthService {
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity) {
@@ -287,16 +248,6 @@ export class AuthService {
   }
 
   public async restorePassword(data: RestorePasswordDto): Promise<void> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
       TokenType.PASSWORD,
@@ -347,16 +298,6 @@ export class AuthService {
   public async resendEmailVerification(
     data: ResendEmailVerificationDto,
   ): Promise<void> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const userEntity = await this.userRepository.findOneByEmail(data.email);
     if (!userEntity || userEntity.status !== UserStatus.PENDING) {
       return;

@@ -30,7 +30,6 @@ import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.servi
 import { HttpService } from '@nestjs/axios';
 import { ControlledError } from '../../common/errors/controlled';
 import {
-  ErrorCapthca,
   ErrorOperator,
   ErrorSignature,
   ErrorUser,
@@ -835,7 +834,7 @@ describe('UserService', () => {
 
       const result = await userService.registrationInExchangeOracle(
         userEntity as UserEntity,
-        oracleRegistration,
+        oracleRegistration.oracleAddress,
       );
 
       expect(siteKeyRepository.createUnique).toHaveBeenCalledWith(
@@ -874,40 +873,12 @@ describe('UserService', () => {
 
       const result = await userService.registrationInExchangeOracle(
         userEntity as UserEntity,
-        oracleRegistration,
+        oracleRegistration.oracleAddress,
       );
 
       expect(siteKeyRepository.createUnique).not.toHaveBeenCalled();
 
       expect(result).toEqual(siteKeyMock);
-    });
-
-    it('should throw if captcha verification fails', async () => {
-      const userEntity: DeepPartial<UserEntity> = {
-        id: 1,
-        email: 'test@example.com',
-      };
-
-      const oracleRegistration: RegistrationInExchangeOracleDto = {
-        oracleAddress: '0xOracleAddress',
-        hCaptchaToken: 'hcaptcha-token',
-      };
-
-      jest
-        .spyOn(hcaptchaService, 'verifyToken')
-        .mockResolvedValueOnce({ success: false });
-
-      await expect(
-        userService.registrationInExchangeOracle(
-          userEntity as UserEntity,
-          oracleRegistration,
-        ),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorCapthca.VerificationFailed,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
     });
   });
 

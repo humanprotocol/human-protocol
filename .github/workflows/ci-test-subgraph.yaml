@@ -13,7 +13,8 @@ on:
 jobs:
   subgraph-test:
     name: Subgraph Test
-    runs-on: ubuntu-latest
+    # TODO: Use ubuntu-latest when graph binary is not failing on ubuntu 24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn

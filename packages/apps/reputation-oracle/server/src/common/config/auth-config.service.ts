@@ -61,4 +61,11 @@ export class AuthConfigService {
       86400,
     );
   }
+
+  /**
+   * Human APP email.
+   */
+  get humanAppEmail(): string {
+    return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
+  }
 }

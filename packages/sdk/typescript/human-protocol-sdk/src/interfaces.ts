@@ -27,6 +27,8 @@ export interface ILeader {
   registrationNeeded?: boolean;
   registrationInstructions?: string;
   reputationNetworks?: string[];
+  name?: string;
+  category?: string;
 }
 
 export interface ILeaderSubgraph

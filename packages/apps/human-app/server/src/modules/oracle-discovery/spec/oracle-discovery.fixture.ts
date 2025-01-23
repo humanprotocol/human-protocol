@@ -39,7 +39,7 @@ const response3: DiscoveredOracle = {
 };
 const response4: DiscoveredOracle = {
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
-  chainId: ChainId.MOONBASE_ALPHA,
+  chainId: ChainId.BSC_TESTNET,
   role: 'role3',
   url: 'common-url',
   jobTypes: ['job-type-1', 'job-type-3', 'job-type-4'],

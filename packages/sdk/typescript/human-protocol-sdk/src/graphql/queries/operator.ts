@@ -22,6 +22,8 @@ const LEADER_FRAGMENT = gql`
     registrationNeeded
     registrationInstructions
     reputationNetworks
+    name
+    category
   }
 `;
 

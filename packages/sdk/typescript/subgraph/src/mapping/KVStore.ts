@@ -128,6 +128,10 @@ export function handleDataSaved(event: DataSaved): void {
     leader.registrationNeeded = event.params.value.toLowerCase() == 'true';
   } else if (key == 'registration_instructions') {
     leader.registrationInstructions = event.params.value;
+  } else if (key == 'name') {
+    leader.name = event.params.value;
+  } else if (key == 'category') {
+    leader.category = event.params.value;
   }
 
   if (key.indexOf('url') > -1) {

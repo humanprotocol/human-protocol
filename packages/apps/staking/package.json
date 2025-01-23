@@ -11,7 +11,8 @@
     "test": "vitest run -u",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
-    "format": "yarn format:prettier && yarn format:lint"
+    "format": "yarn format:prettier && yarn format:lint",
+    "vercel-build": "yarn workspace @human-protocol/sdk build && yarn build"
   },
   "browserslist": {
     "production": [

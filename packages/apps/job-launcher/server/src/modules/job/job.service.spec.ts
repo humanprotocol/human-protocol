@@ -562,7 +562,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
-        .mockReturnValue(ChainId.MOONBEAM);
+        .mockReturnValue(ChainId.POLYGON);
 
       KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
       KVStoreUtils.getPublicKey = jest
@@ -576,7 +576,7 @@ describe('JobService', () => {
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
-        chainId: ChainId.MOONBEAM,
+        chainId: ChainId.POLYGON,
         userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
@@ -1696,7 +1696,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
-        .mockReturnValue(ChainId.MOONBEAM);
+        .mockReturnValue(ChainId.POLYGON);
 
       KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
       KVStoreUtils.getPublicKey = jest
@@ -1722,7 +1722,7 @@ describe('JobService', () => {
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
-        chainId: ChainId.MOONBEAM,
+        chainId: ChainId.POLYGON,
         userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
@@ -1888,7 +1888,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
-        .mockReturnValue(ChainId.MOONBEAM);
+        .mockReturnValue(ChainId.POLYGON);
 
       await jobService.createJob(userMock, JobRequestType.HCAPTCHA, {
         ...hCaptchaJobDto,
@@ -1897,7 +1897,7 @@ describe('JobService', () => {
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
-        chainId: ChainId.MOONBEAM,
+        chainId: ChainId.POLYGON,
         userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),

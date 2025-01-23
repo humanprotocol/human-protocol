@@ -6,41 +6,19 @@ Bases: `Enum`
 
 Enum for chain IDs.
 
-#### AVALANCHE *= 43114*
-
-#### AVALANCHE_TESTNET *= 43113*
-
 #### BSC_MAINNET *= 56*
 
 #### BSC_TESTNET *= 97*
-
-#### CELO *= 42220*
-
-#### CELO_ALFAJORES *= 44787*
-
-#### GOERLI *= 5*
 
 #### LOCALHOST *= 1338*
 
 #### MAINNET *= 1*
 
-#### MOONBASE_ALPHA *= 1287*
-
-#### MOONBEAM *= 1284*
-
 #### POLYGON *= 137*
 
 #### POLYGON_AMOY *= 80002*
 
-#### POLYGON_MUMBAI *= 80001*
-
-#### RINKEBY *= 4*
-
 #### SEPOLIA *= 11155111*
-
-#### XLAYER *= 196*
-
-#### XLAYER_TESTNET *= 195*
 
 ### *class* human_protocol_sdk.constants.KVStoreKeys(value)
 
@@ -48,9 +26,13 @@ Bases: `Enum`
 
 Enum for KVStore keys
 
+#### category *= 'category'*
+
 #### fee *= 'fee'*
 
 #### job_types *= 'job_types'*
+
+#### name *= 'name'*
 
 #### public_key *= 'public_key'*
 
@@ -63,6 +45,16 @@ Enum for KVStore keys
 #### url *= 'url'*
 
 #### webhook_url *= 'webhook_url'*
+
+### *class* human_protocol_sdk.constants.LeaderCategory(value)
+
+Bases: `Enum`
+
+Enum for leader categories
+
+#### MACHINE_LEARNING *= 'machine_learning'*
+
+#### MARKET_MAKING *= 'market_making'*
 
 ### *class* human_protocol_sdk.constants.OrderDirection(value)
 

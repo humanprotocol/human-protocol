@@ -5,11 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import {
-  ErrorCapthca,
-  ErrorOperator,
-  ErrorUser,
-} from '../../common/constants/errors';
+import { ErrorOperator, ErrorUser } from '../../common/constants/errors';
 import {
   KycStatus,
   OperatorStatus,
@@ -52,7 +48,6 @@ export class UserService {
     private readonly web3ConfigService: Web3ConfigService,
     private readonly hcaptchaConfigService: HCaptchaConfigService,
     private readonly networkConfigService: NetworkConfigService,
-    private readonly hCaptchaService: HCaptchaService,
   ) {}
 
   static checkPasswordMatchesHash(
@@ -369,24 +364,8 @@ export class UserService {
 
   public async registrationInExchangeOracle(
     user: UserEntity,
-    { hCaptchaToken, oracleAddress }: RegistrationInExchangeOracleDto,
+    oracleAddress: string,
   ): Promise<SiteKeyEntity> {
-    if (!hCaptchaToken) {
-      throw new ControlledError(
-        ErrorCapthca.InvalidToken,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new ControlledError(
-        ErrorCapthca.VerificationFailed,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
       user,
       oracleAddress,

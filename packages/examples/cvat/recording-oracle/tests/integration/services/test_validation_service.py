@@ -477,20 +477,20 @@ class TestValidationLogic:
             assert {j.job_id for j in annotation_meta.jobs} == set(vr.rejected_jobs)
 
             assert mock_update_task_validation_layout.call_count == 1
-
-            updated_disabled_frames = mock_update_task_validation_layout.call_args.kwargs[
-                "disabled_frames"
-            ]
-            assert all(v in task_validation_frames for v in updated_disabled_frames)
-            assert {
-                f
-                for f, c in Counter(task_honeypot_real_frames).items()
-                if c == max_validation_frame_uses
-            } == set(updated_disabled_frames), Counter(task_honeypot_real_frames)
+            assert mock_update_task_validation_layout.call_args.args == (cvat_task_id,)
+            assert len(mock_update_task_validation_layout.call_args.kwargs) == 1
 
             updated_honeypot_real_frames = mock_update_task_validation_layout.call_args.kwargs[
                 "honeypot_real_frames"
             ]
+
+            assert all(f in task_validation_frames for f in updated_honeypot_real_frames)
+
+            excluded_validation_frames = {
+                f
+                for f, c in Counter(task_honeypot_real_frames).items()
+                if c == max_validation_frame_uses
+            }
 
             for job_start, job_stop in job_frame_ranges:
                 job_honeypot_positions = [
@@ -504,7 +504,7 @@ class TestValidationLogic:
                 assert sorted(job_updated_honeypots) == sorted(set(job_updated_honeypots))
 
                 # Check that the new frames are not from the excluded set
-                assert set(job_updated_honeypots).isdisjoint(updated_disabled_frames)
+                assert set(job_updated_honeypots).isdisjoint(excluded_validation_frames)
 
     def _get_job_frame_ranges(self, jobs: Sequence[Sequence[str]]) -> list[tuple[int, int]]:
         job_frame_ranges = []
@@ -902,9 +902,11 @@ class TestValidationLogic:
             assert len(mock_update_task_validation_layout.mock_calls) == 2
             for call in mock_update_task_validation_layout.mock_calls:
                 if call.args[0] == cvat_task_id1:
-                    assert call.kwargs["disabled_frames"] == [2]
+                    assert "disabled_frames" not in call.kwargs
+                    assert 2 not in call.kwargs["honeypot_real_frames"]
                 elif call.args[0] == cvat_task_id2:
-                    assert call.kwargs["disabled_frames"] == [3]
+                    assert "disabled_frames" not in call.kwargs
+                    assert 3 not in call.kwargs["honeypot_real_frames"]
                 else:
                     raise AssertionError
 
@@ -922,7 +924,7 @@ class TestValidationLogic:
                 GtKey(filename="frame_5.jpg", labels=["label_0_node_1"]): (0, 0, 1),
             }
 
-    def test_can_complete_if_not_enough_gt_left_in_task(
+    def test_can_complete_if_not_enough_gt_left_in_task_with_several_jobs(
         self, session: Session, caplog: pytest.LogCaptureFixture
     ):
         escrow_address = ESCROW_ADDRESS
@@ -1059,7 +1061,7 @@ class TestValidationLogic:
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=task_id,
-                        summary=mock.Mock(accuracy=1),
+                        summary=mock.Mock(accuracy=1 / 3 if task_id == cvat_task_id1 else 1),
                     ),
                 ]
 
@@ -1100,7 +1102,7 @@ class TestValidationLogic:
 
             mock_update_task_validation_layout.assert_not_called()
 
-    def test_can_complete_if_not_enough_gt_left_in_task(
+    def test_can_complete_if_not_enough_gt_left_in_task_with_one_job(
         self, session: Session, caplog: pytest.LogCaptureFixture
     ):
         escrow_address = ESCROW_ADDRESS

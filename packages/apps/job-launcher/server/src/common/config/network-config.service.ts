@@ -90,42 +90,6 @@ export class NetworkConfigService {
           },
         },
       }),
-      ...(this.configService.get<string>('RPC_URL_MOONBEAM') && {
-        moonbeam: {
-          chainId: ChainId.MOONBEAM,
-          /**
-           * The RPC URL for the Moonbeam network.
-           */
-          rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
-          tokens: {
-            hmt: NETWORKS[ChainId.MOONBEAM]?.hmtAddress,
-          },
-        },
-      }),
-      ...(this.configService.get<string>('RPC_URL_XLAYER_TESTNET') && {
-        xlayertestnet: {
-          chainId: ChainId.XLAYER_TESTNET,
-          /**
-           * The RPC URL for the XLayer Testnet network.
-           */
-          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER_TESTNET'),
-          tokens: {
-            hmt: NETWORKS[ChainId.XLAYER_TESTNET]?.hmtAddress,
-          },
-        },
-      }),
-      ...(this.configService.get<string>('RPC_URL_XLAYER') && {
-        xlayer: {
-          chainId: ChainId.XLAYER,
-          /**
-           * The RPC URL for the XLayer network.
-           */
-          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER'),
-          tokens: {
-            hmt: NETWORKS[ChainId.XLAYER]?.hmtAddress,
-          },
-        },
-      }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
         localhost: {
           chainId: ChainId.LOCALHOST,

@@ -17,7 +17,7 @@ import {
 } from '@/modules/worker/services/resend-email-verification';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
@@ -118,7 +118,7 @@ export function VerifyEmailWorkerPage() {
             </Typography>
             {isAuthenticated ? (
               <>
-                <FormCaptcha
+                <HCaptchaForm
                   error={mutationState?.error}
                   name="h_captcha_token"
                 />

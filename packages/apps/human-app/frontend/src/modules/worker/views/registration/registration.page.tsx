@@ -4,7 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { Button } from '@/shared/components/ui/button';
 import {
   type RegistrationInExchangeOracleDto,
@@ -122,7 +122,7 @@ export function RegistrationPage() {
                 }
               >
                 <Stack alignItems="center" spacing={2}>
-                  <FormCaptcha
+                  <HCaptchaForm
                     error={registrationInExchangeOracleError}
                     name="h_captcha_token"
                   />

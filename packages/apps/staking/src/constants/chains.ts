@@ -14,7 +14,6 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
       ChainId.BSC_TESTNET,
       ChainId.POLYGON_AMOY,
       ChainId.SEPOLIA,
-      ChainId.XLAYER_TESTNET,
     ];
     break;
   case 'localhost':

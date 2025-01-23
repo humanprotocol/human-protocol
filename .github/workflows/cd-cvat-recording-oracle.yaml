@@ -15,6 +15,10 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: docker-compose-oracles-${{ github.ref }}
+  cancel-in-progress: false  # Ensure the workflow waits instead of canceling others
+
 jobs:
   pull-request-check:
     runs-on: ubuntu-latest
