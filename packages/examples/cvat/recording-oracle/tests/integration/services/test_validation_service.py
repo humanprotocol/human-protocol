@@ -924,7 +924,7 @@ class TestValidationLogic:
                 GtKey(filename="frame_5.jpg", labels=["label_0_node_1"]): (0, 0, 1),
             }
 
-    def test_can_complete_if_not_enough_gt_left_in_task(
+    def test_can_complete_if_not_enough_gt_left_in_task_with_several_jobs(
         self, session: Session, caplog: pytest.LogCaptureFixture
     ):
         escrow_address = ESCROW_ADDRESS
@@ -1061,7 +1061,7 @@ class TestValidationLogic:
                     mock.Mock(
                         cvat_api.models.IQualityReport,
                         job_id=task_id,
-                        summary=mock.Mock(accuracy=1),
+                        summary=mock.Mock(accuracy=1 / 3 if task_id == cvat_task_id1 else 1),
                     ),
                 ]
 
@@ -1102,7 +1102,7 @@ class TestValidationLogic:
 
             mock_update_task_validation_layout.assert_not_called()
 
-    def test_can_complete_if_not_enough_gt_left_in_task(
+    def test_can_complete_if_not_enough_gt_left_in_task_with_one_job(
         self, session: Session, caplog: pytest.LogCaptureFixture
     ):
         escrow_address = ESCROW_ADDRESS

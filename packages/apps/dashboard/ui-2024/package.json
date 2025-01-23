@@ -29,7 +29,7 @@
     "node-sass": "^9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-number-format": "^5.4.0",
+    "react-number-format": "^5.4.3",
     "react-router-dom": "^6.23.1",
     "recharts": "^2.13.0-alpha.4",
     "simplebar-react": "^3.2.5",

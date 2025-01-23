@@ -1578,19 +1578,11 @@ export class EscrowUtils {
    * enum ChainId {
    *   ALL = -1,
    *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
+   *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
    *   POLYGON_AMOY=80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1727,19 +1719,11 @@ export class EscrowUtils {
    * enum ChainId {
    *   ALL = -1,
    *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
+   *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
    *   POLYGON_AMOY = 80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1815,23 +1799,12 @@ export class EscrowUtils {
    * enum ChainId {
    *   ALL = -1,
    *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
    *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
    *   POLYGON_AMOY = 80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
    *   LOCALHOST = 1338,
-   *   XLAYER_TESTNET = 195,
-   *   XLAYER = 196,
    * }
    * ```
    *

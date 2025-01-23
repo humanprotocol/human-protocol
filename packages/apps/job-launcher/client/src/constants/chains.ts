@@ -15,7 +15,6 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
       ChainId.BSC_TESTNET,
       ChainId.POLYGON_AMOY,
       ChainId.SEPOLIA,
-      ChainId.XLAYER_TESTNET,
     ];
     break;
   case 'localhost':
@@ -77,28 +76,7 @@ export const NETWORK_TOKENS: Record<
   },
   [ChainId.ALL]: { hmt: NETWORKS[ChainId.ALL]?.hmtAddress },
   [ChainId.MAINNET]: { hmt: NETWORKS[ChainId.MAINNET]?.hmtAddress },
-  [ChainId.RINKEBY]: { hmt: NETWORKS[ChainId.RINKEBY]?.hmtAddress },
-  [ChainId.GOERLI]: { hmt: NETWORKS[ChainId.GOERLI]?.hmtAddress },
   [ChainId.BSC_MAINNET]: { hmt: NETWORKS[ChainId.BSC_MAINNET]?.hmtAddress },
   [ChainId.BSC_TESTNET]: { hmt: NETWORKS[ChainId.BSC_TESTNET]?.hmtAddress },
-  [ChainId.POLYGON_MUMBAI]: {
-    hmt: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress,
-  },
-  [ChainId.MOONBEAM]: { hmt: NETWORKS[ChainId.MOONBEAM]?.hmtAddress },
-  [ChainId.MOONBASE_ALPHA]: {
-    hmt: NETWORKS[ChainId.MOONBASE_ALPHA]?.hmtAddress,
-  },
-  [ChainId.AVALANCHE_TESTNET]: {
-    hmt: NETWORKS[ChainId.AVALANCHE_TESTNET]?.hmtAddress,
-  },
-  [ChainId.AVALANCHE]: { hmt: NETWORKS[ChainId.AVALANCHE]?.hmtAddress },
-  [ChainId.CELO]: { hmt: NETWORKS[ChainId.CELO]?.hmtAddress },
-  [ChainId.CELO_ALFAJORES]: {
-    hmt: NETWORKS[ChainId.CELO_ALFAJORES]?.hmtAddress,
-  },
-  [ChainId.XLAYER_TESTNET]: {
-    hmt: NETWORKS[ChainId.XLAYER_TESTNET]?.hmtAddress,
-  },
   [ChainId.LOCALHOST]: { hmt: NETWORKS[ChainId.LOCALHOST]?.hmtAddress },
-  [ChainId.XLAYER]: { hmt: NETWORKS[ChainId.XLAYER]?.hmtAddress },
 };

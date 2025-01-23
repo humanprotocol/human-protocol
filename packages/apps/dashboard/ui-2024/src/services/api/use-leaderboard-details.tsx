@@ -43,6 +43,8 @@ const leaderBoardEntity = z.object({
   url: z.string().nullable(),
   website: z.string().nullable(),
   chainId: z.number(),
+  name: z.string().nullable(),
+  category: z.string().nullable(),
 });
 
 export const leaderBoardSuccessResponseSchema = z.array(leaderBoardEntity);

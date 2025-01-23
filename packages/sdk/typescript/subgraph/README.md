@@ -65,9 +65,12 @@ yarn test
 
 Following networks are supported :
 
+- Ethereum Mainnet
+- Sepolia (testnet)
+- BSC Mainnet
+- BSC Testnet (testnet)
 - Polygon/matic
-- Goerli
-- Polygon Mumbai (testnet)
+- Polygon Amoy (testnet)
 
 # Add a new network
 
