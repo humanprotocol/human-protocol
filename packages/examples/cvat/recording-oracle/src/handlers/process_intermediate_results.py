@@ -619,7 +619,7 @@ class _TaskHoneypotManager:
                     f"Validation for escrow_address={self.task.escrow_address}: "
                     f"Too many validation frames excluded in the task {cvat_task_id} "
                     f"(required: {Config.validation.min_available_gt_threshold * 100:.4f}%, "
-                    f"left: {(len(task_available_gt_keys) / len(task_gt_keys)):.4f}%), "
+                    f"left: {(len(task_available_gt_keys) / len(task_gt_keys) * 100):.4f}%), "
                     "stopping annotation"
                 )
                 return _HoneypotUpdateResult(
@@ -808,7 +808,7 @@ def process_intermediate_results(  # noqa: PLR0912
 
         db_service.update_gt_stats(session, task.id, gt_stats)
 
-    job_final_result_ids: dict[int, str] = {}
+    job_final_result_ids: dict[str, str] = {}
 
     for job_meta in meta.jobs:
         job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
@@ -899,6 +899,14 @@ def process_intermediate_results(  # noqa: PLR0912
             for r in task_validation_results
         ],
     )
+
+    # Include final results for all jobs
+    job_results: _JobResults = {
+        job.cvat_id: task_validation_results[
+            validation_result_id_to_meta_id[job_final_result_ids[job.id]]
+        ].annotation_quality
+        for job in task_jobs
+    }
 
     return ValidationSuccess(
         job_results=job_results,
