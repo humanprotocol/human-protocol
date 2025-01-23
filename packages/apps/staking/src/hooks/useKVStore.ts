@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
-import {
-  ChainId,
-  IKVStore,
-  KVStoreClient,
-  KVStoreUtils,
-} from '@human-protocol/sdk';
-import { useAccount, useWalletClient } from 'wagmi';
-import { useSnackbar } from '../providers/SnackProvider';
-import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
+import { ChainId, IKVStore, KVStoreClient } from '@human-protocol/sdk';
 import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
+import { useAccount, useWalletClient } from 'wagmi';
+import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
+import { useSnackbar } from '../providers/SnackProvider';
+import { parseErrorMessage } from '../utils/string';
+import axios from 'axios';
+
+const DASHBOARD_API_URL = import.meta.env.VITE_APP_DASHBOARD_API_URL;
 
 export const useKVStore = () => {
   const { address, chainId } = useAccount();
@@ -17,7 +16,6 @@ export const useKVStore = () => {
 
   const [kvStore, setKVStore] = useState<IKVStore[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [kvstoreClient, setKVStoreClient] = useState<KVStoreClient | null>(
     null
   );
@@ -26,20 +24,23 @@ export const useKVStore = () => {
     setLoading(true);
     try {
       if (address && chainId) {
-        const data = await KVStoreUtils.getKVStoreData(chainId, address);
-        setKVStore(data);
+        const response = await axios.get(
+          `${DASHBOARD_API_URL}/details/kvstore/${address}`,
+          {
+            params: {
+              chain_id: chainId,
+            },
+          }
+        );
+        setKVStore(response.data);
       }
     } catch (err) {
-      setError('Failed to fetch KVStore data');
+      console.error(err);
+      showError('Failed to fetch KVStore data');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchKVStore();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, chainId]);
 
   useEffect(() => {
     const initStakingClient = async () => {
@@ -54,7 +55,7 @@ export const useKVStore = () => {
           await fetchKVStore();
         }
       } catch (error) {
-        showError(error);
+        showError(parseErrorMessage(error));
         resetData();
       }
     };
@@ -77,9 +78,10 @@ export const useKVStore = () => {
     setKVStore([]);
   };
 
-  const updateKVStore = async (key: string, value: string) => {
+  const set = async (key: string, value: string) => {
     setLoading(true);
     try {
+      checkSupportedChain();
       if (kvstoreClient && key) {
         await kvstoreClient.set(key, value);
         await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -87,8 +89,8 @@ export const useKVStore = () => {
         await fetchKVStore();
       }
     } catch (err) {
+      showError(parseErrorMessage(err));
       console.error(err);
-      showError('Failed to update KV Store');
     } finally {
       setLoading(false);
     }
@@ -97,18 +99,20 @@ export const useKVStore = () => {
   const setBulk = async (keys: string[], values: string[]) => {
     setLoading(true);
     try {
+      checkSupportedChain();
       if (kvstoreClient) {
         await kvstoreClient.setBulk(keys, values);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         openSnackbar('KVStore updated successfully!', 'success');
         await fetchKVStore();
       }
     } catch (err) {
+      showError(parseErrorMessage(err));
       console.error(err);
-      showError('Failed to update KV Store');
     } finally {
       setLoading(false);
     }
   };
 
-  return { kvStore, fetchKVStore, updateKVStore, setBulk, loading, error };
+  return { kvStore, fetchKVStore, set, setBulk, loading };
 };

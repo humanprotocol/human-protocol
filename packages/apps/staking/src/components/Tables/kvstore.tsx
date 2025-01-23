@@ -1,28 +1,38 @@
-import React, { useState } from 'react';
-import { Box, Button, Typography, useTheme } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import KVStoreModal from '../modals/KVStoreModal';
-import { useKVStoreContext } from '../../contexts/kvstore';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
+import { Box, Button, Typography, useTheme } from '@mui/material';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import React, { useState } from 'react';
+import { useAccount } from 'wagmi';
+import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
+import { useKVStoreContext } from '../../contexts/kvstore';
+import { useSnackbar } from '../../providers/SnackProvider';
+import KVStoreModal from '../modals/KVStoreModal';
+import { ChainId } from '@human-protocol/sdk';
 
 const KVStoreTable: React.FC = () => {
-  const { kvStore, setBulk } = useKVStoreContext();
+  const { kvStore, set, setBulk } = useKVStoreContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
+  const { chainId } = useAccount();
+  const { showError } = useSnackbar();
   const filteredData = kvStore.filter((item) => item.value !== '');
 
   const handleOpenModal = () => {
+    if (!SUPPORTED_CHAIN_IDS.includes(chainId as ChainId)) {
+      showError('Unsupported chain. Please switch to a supported network.');
+      return;
+    }
     setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
   };
 
   const handleSaveChanges = async (keys: string[], values: string[]) => {
     try {
-      await setBulk(keys, values);
+      if (keys.length === 1) {
+        await set(keys[0], values[0]);
+      } else {
+        await setBulk(keys, values);
+      }
     } catch (err) {
       console.error('Failed to update KVStore:', err);
     }
@@ -174,7 +184,7 @@ const KVStoreTable: React.FC = () => {
       </Button>
       <KVStoreModal
         open={isModalOpen}
-        onClose={handleCloseModal}
+        onClose={() => setIsModalOpen(false)}
         initialData={filteredData}
         onSave={handleSaveChanges}
       />

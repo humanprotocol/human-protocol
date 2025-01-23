@@ -1,4 +1,9 @@
-import { IKVStore, KVStoreKeys, Role } from '@human-protocol/sdk';
+import {
+  IKVStore,
+  KVStoreKeys,
+  LeaderCategory,
+  Role,
+} from '@human-protocol/sdk';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
@@ -22,7 +27,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   initialData: IKVStore[];
-  onSave: (keys: string[], values: string[]) => void;
+  onSave: (keys: string[], values: string[]) => Promise<void>;
 };
 
 const KVStoreModal: React.FC<Props> = ({
@@ -128,10 +133,14 @@ const KVStoreModal: React.FC<Props> = ({
       const customChanges = formData
         .filter((item) => item.isCustom)
         .map((item) => ({ key: item.key, value: item.value }));
-      const finalChanges = [...pendingChanges, ...customChanges];
+      const finalChanges = [...pendingChanges, ...customChanges].filter(
+        (item) => item.key !== ''
+      );
       const keys = finalChanges.map((item) => item.key);
       const values = finalChanges.map((item) => item.value);
-      await onSave(keys, values);
+      if (finalChanges.length > 0) {
+        await onSave(keys, values);
+      }
       onClose();
     } finally {
       setLoading(false);
@@ -228,6 +237,26 @@ const KVStoreModal: React.FC<Props> = ({
                         {roleValue}
                       </MenuItem>
                     ))}
+                  </Select>
+                </FormControl>
+              ) : item.key === 'category' ? (
+                <FormControl fullWidth>
+                  <InputLabel id={`value-select-label-${index}`}>
+                    Value
+                  </InputLabel>
+                  <Select
+                    labelId={`value-select-label-${index}`}
+                    label="Value"
+                    value={item.value}
+                    onChange={(e) => handleValueChange(index, e.target.value)}
+                  >
+                    {Object.entries(LeaderCategory).map(
+                      ([categoryKey, categoryValue]) => (
+                        <MenuItem key={categoryKey} value={categoryValue}>
+                          {categoryValue}
+                        </MenuItem>
+                      )
+                    )}
                   </Select>
                 </FormControl>
               ) : (

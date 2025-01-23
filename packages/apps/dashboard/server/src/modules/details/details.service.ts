@@ -11,7 +11,6 @@ import {
   ILeadersFilter,
   OrderDirection,
   KVStoreUtils,
-  IKVStore,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
