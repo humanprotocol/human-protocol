@@ -14,7 +14,7 @@ import { FetchError } from '@/api/fetcher';
 import { routerPaths } from '@/router/router-paths';
 import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { type SignInDto } from '@/modules/worker/services/sign-in/types';
@@ -102,7 +102,7 @@ export function SignInWorkerPage() {
                 </Link>
               </Typography>
             </Box>
-            <FormCaptcha error={signInWorkerError} name="h_captcha_token" />
+            <HCaptchaForm error={signInWorkerError} name="h_captcha_token" />
             <Button
               fullWidth
               loading={isSignInWorkerPending}
