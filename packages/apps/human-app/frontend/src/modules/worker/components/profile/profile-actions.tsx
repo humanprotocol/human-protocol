@@ -11,7 +11,7 @@ import { StartKycButton } from '@/modules/worker/components/profile/start-kyc-bt
 import { RegisterAddressBtn } from '@/modules/worker/components/profile/register-address-btn';
 import { DoneLabel } from '@/modules/worker/components/profile/done-label';
 import { useRegisterAddressNotifications } from '@/modules/worker/hooks/use-register-address-notifications';
-import { useRegisterAddressMutation } from '@/modules/worker/hooks/use-register-address';
+import { useRegisterAddress } from '@/modules/worker/hooks/use-register-address';
 import { ErrorLabel } from './error-label';
 
 export function ProfileActions() {
@@ -24,7 +24,7 @@ export function ProfileActions() {
   const {
     mutate: registerAddressMutation,
     isPending: isRegisterAddressMutationPending,
-  } = useRegisterAddressMutation({
+  } = useRegisterAddress({
     onError,
     onSuccess,
   });
