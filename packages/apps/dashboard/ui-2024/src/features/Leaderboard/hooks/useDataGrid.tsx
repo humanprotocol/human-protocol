@@ -47,7 +47,7 @@ export const useDataGrid = (data: LeaderBoardData) => {
         field: 'role',
         sortable: false,
         flex: isMobile ? 0.8 : 1.5,
-        minWidth: isMobile ? 100 : 240,
+        minWidth: isMobile ? 100 : 360,
         headerClassName: isMobile
           ? 'home-page-table-header pinned-column--header'
           : 'home-page-table-header',
