@@ -14,7 +14,7 @@ import {
   PageCardLoader,
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useDailyHmtSpent } from '@/modules/worker/services/daily-hmt-spent';
+import { useDailyHmtSpent } from '@/modules/worker/hooks/use-daily-hmt-spent';
 import { getTomorrowDate } from '@/shared/helpers/date';
 import { useSolveHCaptchaMutation } from '@/modules/worker/services/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
