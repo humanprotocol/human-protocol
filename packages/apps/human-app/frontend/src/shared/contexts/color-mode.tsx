@@ -1,35 +1,28 @@
 import type { ReactNode } from 'react';
-import { createContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { theme } from '@/shared/styles/theme';
 import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palette';
 import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { BackgroundProvider } from '@/shared/contexts/background-color-store';
+import {
+  isDarkColorMode,
+  saveColorMode,
+  hasColorMode,
+} from '../helpers/dark-mode';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;
   colorPalette: typeof defaultColorPalette;
   switchMode: () => void;
 }
-
-const MODE_LOCAL_STORAGE_KEY = 'mode';
-
-const setModeInLocalStorage = (mode: 'dark' | 'light') => {
-  localStorage.setItem(MODE_LOCAL_STORAGE_KEY, mode);
-};
-
-const isDarkInModeLocalStorage = () => {
-  const mode = localStorage.getItem(MODE_LOCAL_STORAGE_KEY);
-  if (mode === 'dark') {
-    return true;
-  }
-  return false;
-};
-
-const isModeSetILocalStorage = () => {
-  return Boolean(localStorage.getItem(MODE_LOCAL_STORAGE_KEY));
-};
 
 export const ColorModeContext = createContext<
   ColorModeContextProps | undefined
@@ -39,18 +32,38 @@ interface ColorModeProviderProps {
   children: ReactNode;
 }
 
-export function ColorModeProvider({ children }: ColorModeProviderProps) {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(
-    isDarkInModeLocalStorage()
-  );
+export function ColorModeProvider({
+  children,
+}: Readonly<ColorModeProviderProps>) {
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(isDarkColorMode());
 
-  const switchMode = () => {
+  useEffect(() => {
+    const handleColorModeChange = (matches: boolean) => {
+      if (hasColorMode()) {
+        return;
+      }
+      setIsDarkMode(matches);
+      if (matches) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    };
+
+    const unsubscribe = runColorMode(handleColorModeChange);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  const switchMode = useCallback(() => {
     setIsDarkMode((current) => {
       const newMode = !current;
-      setModeInLocalStorage(newMode ? 'dark' : 'light');
+      saveColorMode(newMode ? 'dark' : 'light');
       return newMode;
     });
-  };
+  }, []);
 
   const runColorMode = (
     fn: (matches: boolean) => void
@@ -68,25 +81,6 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
     };
   };
 
-  useEffect(() => {
-    const handleColorModeChange = (matches: boolean) => {
-      if (isModeSetILocalStorage()) {
-        return;
-      }
-      setIsDarkMode(matches);
-      if (matches) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-    };
-
-    const unsubscribe = runColorMode(handleColorModeChange);
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
   const themes = useMemo(
     () => (isDarkMode ? createTheme(darkTheme) : createTheme(theme)),
     [isDarkMode]
@@ -95,11 +89,14 @@ export function ColorModeProvider({ children }: ColorModeProviderProps) {
     () => (isDarkMode ? darkColorPalette : defaultColorPalette),
     [isDarkMode]
   );
+  const contextValue = useMemo(
+    () => ({ isDarkMode, colorPalette, switchMode }),
+    [isDarkMode, colorPalette, switchMode]
+  );
+
   return (
     <ThemeProvider theme={themes}>
-      <ColorModeContext.Provider
-        value={{ isDarkMode, colorPalette, switchMode }}
-      >
+      <ColorModeContext.Provider value={contextValue}>
         <BackgroundProvider colorPalette={colorPalette} isDarkMode={isDarkMode}>
           {children}
         </BackgroundProvider>
