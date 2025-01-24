@@ -74,7 +74,7 @@ export function PageCard({
     navigate(navigationTarget);
   };
 
-  const handleArrowButton = () => {
+  const handleBackButton = () => {
     goBack(backNavigation);
   };
 
@@ -145,7 +145,7 @@ export function PageCard({
           >
             {backNavigation && !hideBackButton && (
               <IconWrapper
-                onClick={handleArrowButton}
+                onClick={handleBackButton}
                 sx={{
                   width: '25px',
                   height: '25px',
@@ -199,7 +199,7 @@ export function PageCard({
           >
             {backNavigation && !hideBackButton && (
               <IconWrapper
-                onClick={handleArrowButton}
+                onClick={handleBackButton}
                 sx={{
                   backgroundColor: isDarkMode
                     ? onlyDarkModeColor.backArrowBg
