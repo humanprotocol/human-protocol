@@ -2,7 +2,7 @@ import { useLocation, Navigate } from 'react-router-dom';
 import { createContext } from 'react';
 import { routerPaths } from '@/router/router-paths';
 import type { Web3AuthenticatedUserContextType } from '@/modules/auth-web3/context/web3-auth-context';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 
 export const Web3AuthenticatedUserContext =

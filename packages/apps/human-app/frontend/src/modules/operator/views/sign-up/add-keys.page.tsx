@@ -2,9 +2,11 @@ import { Grid } from '@mui/material';
 import type { UseFormReturn } from 'react-hook-form';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
-import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { PageCard } from '@/shared/components/ui/page-card';
+import {
+  PageCardError,
+  PageCardLoader,
+  PageCard,
+} from '@/shared/components/ui/page-card';
 import { getErrorMessageForError, jsonRpcErrorHandler } from '@/shared/errors';
 import type { EditEthKVStoreValuesMutationData } from '@/modules/operator/hooks/use-edit-existing-keys';
 import { useEditExistingKeysMutationState } from '@/modules/operator/hooks/use-edit-existing-keys';

@@ -7,9 +7,11 @@ import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { useVerifyEmailQuery } from '@/modules/worker/services/email-verification';
 import { SuccessLabel } from '@/shared/components/ui/success-label';
-import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { PageCard } from '@/shared/components/ui/page-card';
+import {
+  PageCardError,
+  PageCardLoader,
+  PageCard,
+} from '@/shared/components/ui/page-card';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 import { getErrorMessageForError } from '@/shared/errors';
 
@@ -60,8 +62,8 @@ export function EmailVerificationWorker({ token }: { token: string }) {
 
   return (
     <PageCard
-      hiddenArrowButton
-      hiddenCancelButton
+      showBackButton={false}
+      showCancelButton={false}
       title={<SuccessLabel>{t('worker.emailVerification.title')}</SuccessLabel>}
     >
       <Grid container gap="2rem">
