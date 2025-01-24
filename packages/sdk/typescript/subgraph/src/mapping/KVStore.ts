@@ -79,7 +79,11 @@ export function handleDataSaved(event: DataSaved): void {
   if (key == 'role') {
     leader.role = event.params.value;
   } else if (key == 'fee') {
-    leader.fee = BigInt.fromString(event.params.value);
+    if (event.params.value !== '') {
+      leader.fee = BigInt.fromString(event.params.value);
+    } else {
+      leader.fee = BigInt.zero();
+    }
   } else if (key == 'publickey' || key == 'public_key') {
     leader.publicKey = event.params.value;
   } else if (key == 'webhookurl' || key == 'webhook_url') {
