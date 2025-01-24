@@ -1,13 +1,13 @@
 import { Container } from '@mui/material';
 import { useEffect } from 'react';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
+import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { Welcome } from './welcome';
 import { ChooseSignUpAccountType } from './choose-sign-up-account-type';
 
 export function HomeContainer() {
   const { pageView } = useHomePageState();
-  const { setWhiteBackground, setGrayBackground } = useBackgroundColorStore();
+  const { setWhiteBackground, setGrayBackground } = useBackgroundColorContext();
 
   useEffect(() => {
     if (pageView === 'chooseSignUpAccountType') {
