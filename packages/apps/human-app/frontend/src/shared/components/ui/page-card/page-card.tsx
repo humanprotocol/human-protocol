@@ -34,8 +34,8 @@ interface PageCardProps {
   alert?: React.JSX.Element;
   backNavigation?: NavigationTarget;
   cancelNavigation?: NavigationTarget;
-  hideCancelButton?: boolean;
-  hideBackButton?: boolean;
+  showCancelButton?: boolean;
+  showBackButton?: boolean;
   loader?: boolean;
 }
 
@@ -47,12 +47,13 @@ export function PageCard({
   childrenMaxWidth = '486px',
   backNavigation = -1,
   cancelNavigation = routerPaths.homePage,
-  hideCancelButton = false,
-  hideBackButton = false,
+  showCancelButton = false,
+  showBackButton = true,
 }: Readonly<PageCardProps>) {
   const { isDarkMode, colorPalette } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
+  const _showBackButton = backNavigation && showBackButton;
 
   const contentStyles = {
     maxWidth: maxContentWidth,
@@ -90,7 +91,7 @@ export function PageCard({
         padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
-      {!hideCancelButton && (
+      {showCancelButton && (
         <Grid
           sx={{
             display: 'flex',
@@ -143,7 +144,7 @@ export function PageCard({
               },
             }}
           >
-            {backNavigation && !hideBackButton && (
+            {_showBackButton && (
               <IconWrapper
                 onClick={handleBackButton}
                 sx={{
@@ -158,7 +159,7 @@ export function PageCard({
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
             )}
-            {!hideCancelButton && (
+            {showCancelButton && (
               <Button onClick={handleCancelButton}>
                 <Typography variant="buttonMedium">
                   {t('components.modal.header.closeBtn')}
@@ -197,7 +198,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            {backNavigation && !hideBackButton && (
+            {_showBackButton && (
               <IconWrapper
                 onClick={handleBackButton}
                 sx={{

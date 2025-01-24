@@ -19,7 +19,7 @@ export function ResetPasswordWorkerSuccessPage() {
   }, [signOut]);
   return (
     <PageCard
-      hideCancelButton
+      showCancelButton={false}
       title={
         <Grid
           container

@@ -30,7 +30,7 @@ export function ChooseSignUpAccountType() {
       backNavigation={backToWelcomeStage}
       cancelNavigation={backToWelcomeStage}
       childrenMaxWidth="876px"
-      hideCancelButton={!isMobileMd}
+      showCancelButton={isMobileMd}
       maxContentWidth="748px"
       title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >
