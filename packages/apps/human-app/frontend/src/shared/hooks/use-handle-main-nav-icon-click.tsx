@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { routerPaths } from '@/router/router-paths';
+import { useHomePageState } from './use-homepage-state';
 
 export const useHandleMainNavIconClick = () => {
   const navigate = useNavigate();

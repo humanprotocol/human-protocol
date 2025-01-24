@@ -11,9 +11,9 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { env } from '@/shared/env';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
+import { useHomePageState } from '@/shared/hooks/use-homepage-state';
 
 interface NavbarProps {
   withNavigation: boolean;

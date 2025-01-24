@@ -12,8 +12,8 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { OperatorSignIn } from '@/modules/homepage/hooks/use-operator-signin';
 import { WorkerSignIn } from '@/modules/homepage/components/worker-signin';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
+import { useHomePageState } from '@/shared/hooks/use-homepage-state';
 
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();
