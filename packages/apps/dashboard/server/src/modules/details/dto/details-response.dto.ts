@@ -41,3 +41,11 @@ export class DetailsPaginationResponseDto {
   @IsArray()
   public results: EscrowPaginationDto[] | TransactionPaginationDto[];
 }
+
+export class KVStoreDataDto {
+  @ApiProperty({ example: 'key' })
+  public key: string;
+
+  @ApiProperty({ example: 'value' })
+  public value: string;
+}

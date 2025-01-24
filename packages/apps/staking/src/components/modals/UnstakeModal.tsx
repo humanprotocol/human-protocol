@@ -15,11 +15,13 @@ type Props = {
 };
 
 const UnstakeModal: React.FC<Props> = ({ open, onClose }) => {
-  const { stakedAmount, lockedAmount, handleUnstake } = useStakeContext();
+  const { stakedAmount, lockedAmount, withdrawableAmount, handleUnstake } =
+    useStakeContext();
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const availableAmount = Number(stakedAmount) - Number(lockedAmount);
+  const availableAmount =
+    Number(stakedAmount) - Number(lockedAmount) - Number(withdrawableAmount);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

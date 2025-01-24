@@ -2,7 +2,7 @@ import axios from 'axios';
 import { CaseConverter } from './case-converter';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APP_DASHBOARD_SERVER_URL,
+  baseURL: import.meta.env.VITE_APP_DASHBOARD_API_URL,
 });
 
 axiosInstance.interceptors.request.use(

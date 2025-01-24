@@ -9,6 +9,7 @@ import {
   ChainId,
   ILeader,
   OperatorUtils,
+  KVStoreUtils,
   OrderDirection,
 } from '@human-protocol/sdk';
 import { LeadersOrderBy } from '../../common/enums/leader';
@@ -17,6 +18,9 @@ jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   OperatorUtils: {
     getLeaders: jest.fn(),
+  },
+  KVStoreUtils: {
+    getKVStoreData: jest.fn(),
   },
 }));
 
@@ -160,6 +164,24 @@ describe('DetailsService', () => {
         role: 'Recording Oracle',
         reputation: 'low',
       }),
+    ]);
+  });
+
+  it('should fetch and return KV store data', async () => {
+    const mockKVStoreData = [
+      { key: 'key1', value: 'value1' },
+      { key: 'key2', value: 'value2' },
+    ];
+
+    jest
+      .spyOn(KVStoreUtils, 'getKVStoreData')
+      .mockResolvedValue(mockKVStoreData);
+
+    const result = await service.getKVStoreData(ChainId.MAINNET, '0x123');
+
+    expect(result).toEqual([
+      expect.objectContaining({ key: 'key1', value: 'value1' }),
+      expect.objectContaining({ key: 'key2', value: 'value2' }),
     ]);
   });
 });

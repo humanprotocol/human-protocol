@@ -1,14 +1,15 @@
 import React from 'react';
-import { Modal, Box, IconButton } from '@mui/material';
+import { Modal, Box, IconButton, SxProps, Theme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  sx?: SxProps<Theme>;
 };
 
-const BaseModal: React.FC<Props> = ({ open, onClose, children }) => {
+const BaseModal: React.FC<Props> = ({ open, onClose, children, sx }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -20,6 +21,7 @@ const BaseModal: React.FC<Props> = ({ open, onClose, children }) => {
           backgroundColor: '#fff',
           borderRadius: 2,
           position: 'relative',
+          ...sx,
         }}
       >
         <IconButton
