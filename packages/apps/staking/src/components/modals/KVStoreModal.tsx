@@ -265,6 +265,8 @@ const KVStoreModal: React.FC<Props> = ({
                   label="Value"
                   value={item.value}
                   onChange={(e) => handleValueChange(index, e.target.value)}
+                  type={item.key === 'fee' ? 'number' : 'text'}
+                  inputProps={{ min: item.key === 'fee' ? '0' : undefined }}
                 />
               )}
             </Grid>
