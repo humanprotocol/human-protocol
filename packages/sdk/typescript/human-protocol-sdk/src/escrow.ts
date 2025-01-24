@@ -1692,8 +1692,10 @@ export class EscrowUtils {
                 ([, value]) => value === filter.status
               )?.[0]
             : undefined,
-        from: filter.from ? +filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? +filter.to.getTime() / 1000 : undefined,
+        from: filter.from
+          ? Math.floor(filter.from.getTime() / 1000)
+          : undefined,
+        to: filter.to ? Math.floor(filter.to.getTime() / 1000) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
