@@ -25,7 +25,7 @@ export const useKVStore = () => {
     try {
       if (address && chainId) {
         const response = await axios.get(
-          `${DASHBOARD_API_URL}/details/kvstore/${address}`,
+          `${DASHBOARD_API_URL}details/kvstore/${address}`,
           {
             params: {
               chain_id: chainId,
