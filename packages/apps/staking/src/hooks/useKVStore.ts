@@ -45,8 +45,8 @@ export const useKVStore = () => {
   useEffect(() => {
     const initStakingClient = async () => {
       try {
-        checkSupportedChain();
         if (walletClient && address) {
+          checkSupportedChain();
           const provider = new ethers.BrowserProvider(window.ethereum);
           const signer = await provider.getSigner();
 
