@@ -93,8 +93,9 @@ export class SignatureBodyDto {
   public contents: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  public nonce: string | undefined;
+  public nonce?: string | undefined;
 }
 
 export class PrepareSignatureDto {

@@ -57,3 +57,23 @@ export function recoverSigner(
 export function generateNonce(): string {
   return Buffer.from(ethers.randomBytes(16)).toString('hex');
 }
+
+type SignatureBody = {
+  from: string;
+  to: string;
+  contents: string;
+  nonce?: string;
+};
+export function prepareSignatureBody({
+  from,
+  to,
+  contents,
+  nonce,
+}: SignatureBody): SignatureBody {
+  return {
+    from: from.toLowerCase(),
+    to: to.toLowerCase(),
+    contents,
+    nonce: nonce ?? undefined,
+  };
+}
