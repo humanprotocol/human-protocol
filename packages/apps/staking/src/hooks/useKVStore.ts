@@ -5,9 +5,7 @@ import { useAccount, useWalletClient } from 'wagmi';
 import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import { useSnackbar } from '../providers/SnackProvider';
 import { parseErrorMessage } from '../utils/string';
-import axios from 'axios';
-
-const DASHBOARD_API_URL = import.meta.env.VITE_APP_DASHBOARD_API_URL;
+import { getKVStoreData } from '../services/dashboard';
 
 export const useKVStore = () => {
   const { address, chainId } = useAccount();
@@ -24,19 +22,13 @@ export const useKVStore = () => {
     setLoading(true);
     try {
       if (address && chainId) {
-        const response = await axios.get(
-          `${DASHBOARD_API_URL}details/kvstore/${address}`,
-          {
-            params: {
-              chain_id: chainId,
-            },
-          }
-        );
-        setKVStore(response.data);
+        const data = await getKVStoreData(address, chainId);
+        setKVStore(data);
       }
     } catch (err) {
       console.error(err);
       showError('Failed to fetch KVStore data');
+      setKVStore([]);
     } finally {
       setLoading(false);
     }
