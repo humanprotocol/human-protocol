@@ -5,21 +5,21 @@ import {
   IsPositive,
   IsString,
   IsUrl,
-  IsDateString,
+  // IsDateString,
   IsOptional,
   IsObject,
   IsNumberString,
   IsIn,
   Min,
-  Max,
+  // Max,
   IsNotEmpty,
   IsEthereumAddress,
   ValidateNested,
-  IsDefined,
-  IsNotEmptyObject,
+  // IsDefined,
+  // IsNotEmptyObject,
   ArrayMinSize,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+// import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
 import {
   JobCaptchaRequestType,
@@ -72,6 +72,10 @@ export class JobDto {
   @IsEthereumAddress()
   @IsOptional()
   public recordingOracle?: string;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnumCaseInsensitive(JobCurrency)
+  public currency: JobCurrency | undefined;
 }
 
 export class JobQuickLaunchDto extends JobDto {
@@ -117,10 +121,6 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-
-  @ApiProperty({ enum: JobCurrency })
-  @IsEnumCaseInsensitive(JobCurrency)
-  public currency: JobCurrency;
 }
 
 export class StorageDataDto {
@@ -209,10 +209,6 @@ export class JobCvatDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-
-  @ApiProperty({ enum: JobCurrency })
-  @IsEnumCaseInsensitive(JobCurrency)
-  public currency: JobCurrency;
 }
 
 export class JobCancelDto {
@@ -588,49 +584,49 @@ export class JobCaptchaAnnotationsDto {
   exampleImages?: string[];
 }
 
-export class JobCaptchaDto extends JobDto {
-  @ApiProperty()
-  @IsObject()
-  data: StorageDataDto;
+// export class JobCaptchaDto extends JobDto {
+//   @ApiProperty()
+//   @IsObject()
+//   data: StorageDataDto;
 
-  @ApiProperty({ name: 'accuracy_target' })
-  @IsNumber()
-  @IsPositive()
-  @Max(1)
-  accuracyTarget: number;
+//   @ApiProperty({ name: 'accuracy_target' })
+//   @IsNumber()
+//   @IsPositive()
+//   @Max(1)
+//   accuracyTarget: number;
 
-  @ApiProperty({ name: 'completion_date' })
-  @IsDateString()
-  @IsOptional()
-  completionDate: Date;
+//   @ApiProperty({ name: 'completion_date' })
+//   @IsDateString()
+//   @IsOptional()
+//   completionDate: Date;
 
-  @ApiProperty({ name: 'min_requests' })
-  @IsNumber()
-  @IsPositive()
-  @Max(100)
-  minRequests: number;
+//   @ApiProperty({ name: 'min_requests' })
+//   @IsNumber()
+//   @IsPositive()
+//   @Max(100)
+//   minRequests: number;
 
-  @ApiProperty({ name: 'max_requests' })
-  @IsNumber()
-  @IsPositive()
-  @Max(100)
-  maxRequests: number;
+//   @ApiProperty({ name: 'max_requests' })
+//   @IsNumber()
+//   @IsPositive()
+//   @Max(100)
+//   maxRequests: number;
 
-  @ApiProperty()
-  @IsDefined()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => JobCaptchaAdvancedDto)
-  advanced: JobCaptchaAdvancedDto;
+//   @ApiProperty()
+//   @IsDefined()
+//   @IsObject()
+//   @ValidateNested()
+//   @Type(() => JobCaptchaAdvancedDto)
+//   advanced: JobCaptchaAdvancedDto;
 
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmptyObject()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => JobCaptchaAnnotationsDto)
-  annotations: JobCaptchaAnnotationsDto;
-}
+//   @ApiProperty()
+//   @IsDefined()
+//   @IsNotEmptyObject()
+//   @IsObject()
+//   @ValidateNested()
+//   @Type(() => JobCaptchaAnnotationsDto)
+//   annotations: JobCaptchaAnnotationsDto;
+// }
 
 export class RestrictedAudience {
   @IsObject()
@@ -790,8 +786,5 @@ class TaskData {
   datapoint_text?: DatapointText;
 }
 
-export type CreateJob =
-  | JobQuickLaunchDto
-  | JobFortuneDto
-  | JobCvatDto
-  | JobCaptchaDto;
+export type CreateJob = JobQuickLaunchDto | JobFortuneDto | JobCvatDto;
+// | JobCaptchaDto;

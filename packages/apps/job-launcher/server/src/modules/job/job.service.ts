@@ -844,49 +844,25 @@ export class JobService {
       });
     }
 
-    const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
-    const { calculateFundAmount, createManifest } =
-      this.createJobSpecificActions[requestType];
+    const { createManifest } = this.createJobSpecificActions[requestType];
 
-    const userBalance = await this.paymentService.getUserBalance(user.id);
     const feePercentage = Number(
       await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
+    const currency = dto.currency ?? JobCurrency.HMT;
+    const rate = await this.rateService.getRate(currency, Currency.USD);
+    const tokenFee = max(
+      div(this.serverConfigService.minimunFeeUsd, rate),
+      mul(div(feePercentage, 100), dto.fundAmount),
+    );
+    const totalAmountToPay = add(dto.fundAmount, tokenFee);
 
-    let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
+    const userBalance = await this.paymentService.getUserBalanceByCurrency(
+      user.id,
+      currency,
+    );
 
-    if (dto instanceof JobQuickLaunchDto) {
-      tokenFee = mul(div(feePercentage, 100), dto.fundAmount);
-      tokenFundAmount = dto.fundAmount;
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = div(tokenTotalAmount, rate);
-    } else if (
-      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
-      dto.currency === JobCurrency.HMT
-    ) {
-      tokenFundAmount = dto.fundAmount;
-      const fundAmountInUSD = div(tokenFundAmount, rate);
-      const feeInUSD = max(
-        this.serverConfigService.minimunFeeUsd,
-        mul(div(feePercentage, 100), fundAmountInUSD),
-      );
-      tokenFee = mul(feeInUSD, rate);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = add(fundAmountInUSD, feeInUSD);
-    } else {
-      const fundAmount = await calculateFundAmount(dto, rate);
-      const fee = max(
-        this.serverConfigService.minimunFeeUsd,
-        mul(div(feePercentage, 100), fundAmount),
-      );
-
-      tokenFundAmount = mul(fundAmount, rate);
-      tokenFee = mul(fee, rate);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = add(fundAmount, fee);
-    }
-
-    if (lt(userBalance, usdTotalAmount)) {
+    if (lt(userBalance, totalAmountToPay)) {
       throw new ControlledError(
         ErrorJob.NotEnoughFunds,
         HttpStatus.BAD_REQUEST,

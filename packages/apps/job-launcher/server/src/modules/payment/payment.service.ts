@@ -400,7 +400,7 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number): Promise<number> {
+  public async getUserUSDBalance(userId: number): Promise<number> {
     const paymentEntities =
       await this.paymentRepository.getUserBalancePayments(userId);
 
@@ -424,6 +424,23 @@ export class PaymentService {
     }
 
     return totalBalance;
+  }
+
+  public async getUserBalanceByCurrency(
+    userId: number,
+    currency: string,
+  ): Promise<number> {
+    const paymentEntities = await this.paymentRepository.getUserBalancePayments(
+      userId,
+      currency,
+    );
+
+    const balance = paymentEntities.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
+
+    return balance;
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {
