@@ -16,8 +16,7 @@ const KVStoreTable: React.FC = () => {
   const theme = useTheme();
   const { chainId } = useAccount();
   const { showError } = useSnackbar();
-  // const filteredData = kvStore.filter((item) => item.value !== '');
-  const filteredData = kvStore;
+  const filteredData = kvStore.filter((item) => item.value !== '');
 
   const handleOpenModal = () => {
     if (!SUPPORTED_CHAIN_IDS.includes(chainId as ChainId)) {
