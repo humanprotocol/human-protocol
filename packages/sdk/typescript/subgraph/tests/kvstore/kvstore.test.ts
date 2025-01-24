@@ -317,6 +317,19 @@ describe('KVStore', () => {
     assert.fieldEquals('Leader', data2.params.sender.toHex(), 'fee', '11');
   });
 
+  test('Should properly handle empty string as fee value', () => {
+    const data = createDataSavedEvent(
+      kvStoreAddressString,
+      'fee',
+      '',
+      BigInt.fromI32(12)
+    );
+
+    handleDataSaved(data);
+
+    assert.fieldEquals('Leader', data.params.sender.toHex(), 'fee', '0');
+  });
+
   test("Should properly update leader's public key", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
