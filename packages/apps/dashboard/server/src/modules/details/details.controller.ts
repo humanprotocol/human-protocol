@@ -15,6 +15,7 @@ import { DetailsService } from './details.service';
 import {
   DetailsResponseDto,
   DetailsPaginationResponseDto,
+  KVStoreDataDto,
 } from './dto/details-response.dto';
 import {
   DetailsTransactionsPaginationDto,
@@ -158,5 +159,25 @@ export class DetailsController {
     };
 
     return response;
+  }
+
+  @Get('/kvstore/:address')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get KVStore data by address',
+    description: 'Returns all the data stored in KVStore for a given address.',
+  })
+  @ApiQuery({ name: 'chain_id', enum: ChainId, required: true })
+  @ApiResponse({
+    status: 200,
+    description: 'Data retrieved successfully',
+    type: KVStoreDataDto,
+    isArray: true,
+  })
+  public async KVStore(
+    @Param('address', AddressValidationPipe) address: string,
+    @Query('chain_id') chainId: ChainId,
+  ): Promise<KVStoreDataDto[]> {
+    return this.detailsService.getKVStoreData(chainId, address);
   }
 }

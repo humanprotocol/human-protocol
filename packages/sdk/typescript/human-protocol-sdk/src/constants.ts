@@ -136,6 +136,7 @@ export const KVStoreKeys = {
   role: 'role',
   fee: 'fee',
   publicKey: 'public_key',
+  publicKeyHash: 'public_key_hash',
   webhookUrl: 'webhook_url',
   website: 'website',
   url: 'url',
