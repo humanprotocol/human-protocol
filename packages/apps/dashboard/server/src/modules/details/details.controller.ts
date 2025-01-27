@@ -35,13 +35,12 @@ export class DetailsController {
   @Get('/leaders')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get the best leaders by role',
-    description:
-      'Returns the top leader for each role for a given chain or all chains.',
+    summary: 'Get leaders',
+    description: 'Returns leaders for the given filters.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Best leaders retrieved successfully',
+    description: 'Leaders retrieved successfully',
     type: LeaderDto,
     isArray: true,
   })

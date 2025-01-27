@@ -51,7 +51,7 @@ export const leaderBoardSuccessResponseSchema = z.array(leaderBoardEntity);
 export type LeaderBoardEntity = z.infer<typeof leaderBoardEntity>;
 export type LeaderBoardData = z.infer<typeof leaderBoardSuccessResponseSchema>;
 
-export function useLeaderboardDetails() {
+export function useLeaderboardDetails(first?: number) {
   const {
     filterParams: { chainId },
   } = useLeaderboardSearch();
@@ -61,8 +61,9 @@ export function useLeaderboardDetails() {
       if (chainId === -1) {
         return [];
       }
+
       const { data } = await httpService.get(apiPaths.leaderboardDetails.path, {
-        params: { chainId },
+        params: { chainId, first },
       });
 
       const validResponse = validateResponse(
@@ -72,6 +73,6 @@ export function useLeaderboardDetails() {
 
       return validResponse;
     },
-    queryKey: ['useLeaderboardDetails', chainId],
+    queryKey: ['useLeaderboardDetails', chainId, first],
   });
 }
