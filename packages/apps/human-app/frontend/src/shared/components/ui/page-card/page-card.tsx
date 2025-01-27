@@ -1,20 +1,14 @@
-import type { SxProps, Theme } from '@mui/material';
 import { Grid, Typography, styled } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
-import { colorPalette as constColorPalette } from '@/shared/styles/color-palette';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
-import {
-  darkColorPalette as constDarkColorPalette,
-  onlyDarkModeColor,
-} from '@/shared/styles/dark-color-palette';
+import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 
 const IconWrapper = styled('div')(() => ({
   width: '40px',
@@ -30,44 +24,18 @@ const IconWrapper = styled('div')(() => ({
   fontSize: '26px',
 }));
 
-const commonStyles: SxProps<Theme> = {
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  minHeight: '70vh',
-  maxWidth: '1600px',
-  width: '100%',
-  background: constColorPalette.white,
-};
+type NavigationTarget = string | (() => void);
 
-const commonStylesDark: SxProps<Theme> = {
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  minHeight: '70vh',
-  maxWidth: '1600px',
-  width: '100%',
-  background: constDarkColorPalette.paper.main,
-  [breakpoints.mobile]: {
-    background: constDarkColorPalette.backgroundColor,
-  },
-};
-
-type ButtonsProps = string | -1 | (() => void);
-
-interface FormCardProps {
+interface PageCardProps {
   children: React.JSX.Element;
   maxContentWidth?: string;
   childrenMaxWidth?: string;
   title?: React.JSX.Element | string;
   alert?: React.JSX.Element;
-  backArrowPath?: ButtonsProps;
-  cancelRouterPathOrCallback?: ButtonsProps;
-  hiddenCancelButton?: boolean;
-  hiddenArrowButton?: boolean;
-  withLayoutBackground?: boolean;
+  backNavigation?: NavigationTarget;
+  cancelNavigation?: NavigationTarget;
+  showCancelButton?: boolean;
+  showBackButton?: boolean;
   loader?: boolean;
 }
 
@@ -75,18 +43,17 @@ export function PageCard({
   children,
   title,
   alert,
+  backNavigation,
   maxContentWidth = '376px',
   childrenMaxWidth = '486px',
-  backArrowPath = -1,
-  cancelRouterPathOrCallback = routerPaths.homePage,
-  withLayoutBackground = true,
-  hiddenCancelButton = false,
-  hiddenArrowButton = false,
-}: FormCardProps) {
+  cancelNavigation = routerPaths.homePage,
+  showCancelButton = true,
+  showBackButton = true,
+}: Readonly<PageCardProps>) {
   const { isDarkMode, colorPalette } = useColorMode();
-  const { setGrayBackground } = useBackgroundColorStore();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
+
   const contentStyles = {
     maxWidth: maxContentWidth,
     width: '100%',
@@ -95,34 +62,35 @@ export function PageCard({
     },
   };
 
-  useEffect(() => {
-    if (withLayoutBackground && !isDarkMode) {
-      setGrayBackground();
+  const goBack = (navigationTarget: NavigationTarget | undefined) => {
+    if (navigationTarget instanceof Function) {
+      navigationTarget();
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this effect once
-  }, []);
+    if (typeof navigationTarget === 'string') {
+      navigate(navigationTarget);
+      return;
+    }
+    navigate(-1);
+  };
 
-  const goBack = (pathOrCallback: ButtonsProps) => {
-    if (pathOrCallback instanceof Function) {
-      pathOrCallback();
-      return;
-    }
-    if (typeof pathOrCallback === 'string') {
-      navigate(pathOrCallback);
-      return;
-    }
-    navigate(pathOrCallback);
+  const handleBackButton = () => {
+    goBack(backNavigation);
+  };
+
+  const handleCancelButton = () => {
+    goBack(cancelNavigation);
   };
 
   return (
     <Grid
       container
       sx={{
-        ...(isDarkMode ? commonStylesDark : commonStyles),
+        ...(isDarkMode ? commonDarkPageCardStyles : commonPageCardStyles),
         padding: isMobile ? '0 2rem 7.25rem 2rem' : '2rem 2rem 7.7rem 2rem',
       }}
     >
-      {!hiddenCancelButton && (
+      {showCancelButton && (
         <Grid
           sx={{
             display: 'flex',
@@ -133,15 +101,7 @@ export function PageCard({
             },
           }}
         >
-          <Button
-            onClick={() => {
-              if (cancelRouterPathOrCallback instanceof Function) {
-                cancelRouterPathOrCallback();
-                return;
-              }
-              goBack(cancelRouterPathOrCallback);
-            }}
-          >
+          <Button onClick={handleCancelButton}>
             <Typography variant="buttonMedium">
               {t('components.modal.header.closeBtn')}
             </Typography>
@@ -178,14 +138,14 @@ export function PageCard({
               [breakpoints.mobile]: {
                 display: 'flex',
                 width: '100%',
-                justifyContent: backArrowPath ? 'space-between' : 'flex-end',
+                justifyContent: backNavigation ? 'space-between' : 'flex-end',
                 alignItems: 'center',
               },
             }}
           >
-            {backArrowPath && !hiddenArrowButton ? (
+            {showBackButton && (
               <IconWrapper
-                onClick={goBack.bind(null, backArrowPath)}
+                onClick={handleBackButton}
                 sx={{
                   width: '25px',
                   height: '25px',
@@ -197,17 +157,9 @@ export function PageCard({
               >
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
-            ) : null}
-            {!hiddenCancelButton && (
-              <Button
-                onClick={() => {
-                  if (cancelRouterPathOrCallback instanceof Function) {
-                    cancelRouterPathOrCallback();
-                    return;
-                  }
-                  goBack(cancelRouterPathOrCallback);
-                }}
-              >
+            )}
+            {showCancelButton && (
+              <Button onClick={handleCancelButton}>
                 <Typography variant="buttonMedium">
                   {t('components.modal.header.closeBtn')}
                 </Typography>
@@ -229,7 +181,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            <Grid sx={contentStyles}>{alert ? <>{alert}</> : null}</Grid>
+            <Grid sx={contentStyles}>{alert && <>{alert}</>}</Grid>
           </Grid>
           <Grid
             item
@@ -245,9 +197,9 @@ export function PageCard({
             }}
             xs={12}
           >
-            {backArrowPath && !hiddenArrowButton ? (
+            {showBackButton && (
               <IconWrapper
-                onClick={goBack.bind(null, backArrowPath)}
+                onClick={handleBackButton}
                 sx={{
                   backgroundColor: isDarkMode
                     ? onlyDarkModeColor.backArrowBg
@@ -256,7 +208,7 @@ export function PageCard({
               >
                 <ArrowBackIcon fontSize="inherit" />
               </IconWrapper>
-            ) : null}
+            )}
           </Grid>
           <Grid
             item
