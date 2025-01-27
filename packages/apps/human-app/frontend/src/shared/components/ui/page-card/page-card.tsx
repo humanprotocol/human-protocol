@@ -47,7 +47,7 @@ export function PageCard({
   maxContentWidth = '376px',
   childrenMaxWidth = '486px',
   cancelNavigation = routerPaths.homePage,
-  showCancelButton = false,
+  showCancelButton = true,
   showBackButton = true,
 }: Readonly<PageCardProps>) {
   const { isDarkMode, colorPalette } = useColorMode();
