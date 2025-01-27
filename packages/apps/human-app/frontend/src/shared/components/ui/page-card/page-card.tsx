@@ -53,7 +53,6 @@ export function PageCard({
   const { isDarkMode, colorPalette } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile('md');
-  const _showBackButton = backNavigation && showBackButton;
 
   const contentStyles = {
     maxWidth: maxContentWidth,
@@ -144,7 +143,7 @@ export function PageCard({
               },
             }}
           >
-            {_showBackButton && (
+            {showBackButton && (
               <IconWrapper
                 onClick={handleBackButton}
                 sx={{
@@ -198,7 +197,7 @@ export function PageCard({
             }}
             xs={12}
           >
-            {_showBackButton && (
+            {showBackButton && (
               <IconWrapper
                 onClick={handleBackButton}
                 sx={{
