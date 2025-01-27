@@ -24,7 +24,7 @@ const IconWrapper = styled('div')(() => ({
   fontSize: '26px',
 }));
 
-type NavigationTarget = string | -1 | (() => void);
+type NavigationTarget = string | (() => void);
 
 interface PageCardProps {
   children: React.JSX.Element;
@@ -43,9 +43,9 @@ export function PageCard({
   children,
   title,
   alert,
+  backNavigation,
   maxContentWidth = '376px',
   childrenMaxWidth = '486px',
-  backNavigation = -1,
   cancelNavigation = routerPaths.homePage,
   showCancelButton = false,
   showBackButton = true,
@@ -63,7 +63,7 @@ export function PageCard({
     },
   };
 
-  const goBack = (navigationTarget: NavigationTarget) => {
+  const goBack = (navigationTarget: NavigationTarget | undefined) => {
     if (navigationTarget instanceof Function) {
       navigationTarget();
       return;
@@ -72,7 +72,7 @@ export function PageCard({
       navigate(navigationTarget);
       return;
     }
-    navigate(navigationTarget);
+    navigate(-1);
   };
 
   const handleBackButton = () => {
