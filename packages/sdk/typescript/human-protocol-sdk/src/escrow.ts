@@ -55,7 +55,12 @@ import {
   NetworkData,
   TransactionLikeWithNonce,
 } from './types';
-import { getSubgraphUrl, isValidUrl, throwError } from './utils';
+import {
+  getSubgraphUrl,
+  getUnixTimestamp,
+  isValidUrl,
+  throwError,
+} from './utils';
 
 /**
  * ## Introduction
@@ -1692,10 +1697,8 @@ export class EscrowUtils {
                 ([, value]) => value === filter.status
               )?.[0]
             : undefined,
-        from: filter.from
-          ? Math.floor(filter.from.getTime() / 1000)
-          : undefined,
-        to: filter.to ? Math.floor(filter.to.getTime() / 1000) : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -1896,8 +1899,8 @@ export class EscrowUtils {
       GET_STATUS_UPDATES_QUERY(from, to, launcher),
       {
         status: statusNames,
-        from: from ? Math.floor(from.getTime() / 1000) : undefined,
-        to: to ? Math.floor(to.getTime() / 1000) : undefined,
+        from: from ? getUnixTimestamp(from) : undefined,
+        to: to ? getUnixTimestamp(to) : undefined,
         launcher: launcher || undefined,
         orderDirection: orderDirection,
         first: first,
