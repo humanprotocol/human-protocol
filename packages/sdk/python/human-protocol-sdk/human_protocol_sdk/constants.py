@@ -178,7 +178,7 @@ class KVStoreKeys(Enum):
     public_key = "public_key"
     public_key_hash = "public_key_hash"
     webhook_url = "webhook_url"
-    website = ("website",)
+    website = "website"
     url = "url"
     job_types = "job_types"
     registration_needed = "registration_needed"
