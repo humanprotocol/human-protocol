@@ -131,8 +131,17 @@ const KVStoreModal: React.FC<Props> = ({
     setLoading(true);
     try {
       const customChanges = formData
-        .filter((item) => item.isCustom)
-        .map((item) => ({ key: item.key, value: item.value }));
+        .filter(
+          (item) =>
+            item.isCustom &&
+            !initialData.some(
+              (data) => data.key === item.key && data.value === item.value
+            )
+        )
+        .map((item) => ({
+          key: item.key,
+          value: item.value,
+        }));
       const finalChanges = [...pendingChanges, ...customChanges].filter(
         (item) => item.key !== ''
       );
