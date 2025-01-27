@@ -27,7 +27,7 @@
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.2.8",
     "@nestjs/mapped-types": "*",
-    "@nestjs/platform-express": "^10.3.10",
+    "@nestjs/platform-express": "^11.0.6",
     "cache-manager": "^5.4.0",
     "cache-manager-redis-yet": "^5.1.5",
     "dayjs": "^1.11.12",
