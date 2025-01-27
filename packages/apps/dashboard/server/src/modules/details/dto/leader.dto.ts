@@ -75,4 +75,18 @@ export class LeaderDto {
   @IsNumber()
   @Expose()
   public amountJobsProcessed: number;
+
+  @ApiProperty({ example: 'CVAT' })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Expose()
+  public name?: string;
+
+  @ApiProperty({ example: 'Machine Learning' })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Expose()
+  public category?: string;
 }

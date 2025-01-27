@@ -18,7 +18,7 @@ import {
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { routerPaths } from '@/router/router-paths';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 
 export function ResetPasswordWorkerPage() {
@@ -81,7 +81,7 @@ export function ResetPasswordWorkerPage() {
               label={t('worker.resetPassword.fields.confirm')}
               name="confirmPassword"
             />
-            <FormCaptcha
+            <HCaptchaForm
               error={resetPasswordWorkerError}
               name="h_captcha_token"
             />

@@ -157,10 +157,10 @@ KVStore is the simple key-value store.
 
 ### Deploy contracts with proxy to a live network
 
-1. Create a .env file in the root folder of core package, with the following variables(this is an example for Polygon Mumbai, for other networks `check hardhat.config.ts`):
+1. Create a .env file in the root folder of core package, with the following variables(this is an example for Polygon Amoy, for other networks `check hardhat.config.ts`):
 
 ```bash
-ETH_POLYGON_MUMBAI_URL=
+ETH_POLYGON_AMOY_URL=
 PRIVATE_KEY=
 HMT_ADDRESS=
 POLYGONSCAN_API_KEY=
@@ -184,11 +184,11 @@ npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 
 ### Upgrade contracts with proxy
 
-1. Create a .env file in the root folder of core package, with the following variables(this is an example to update EscrowFactory on Polygon Mumbai, if you want to upgrade
+1. Create a .env file in the root folder of core package, with the following variables(this is an example to update EscrowFactory on Polygon Amoy, if you want to upgrade
    more proxies you need to add the corresponding addresses. Also, for other networks `check hardhat.config.ts`):
 
 ```bash
-ETH_POLYGON_MUMBAI_URL=
+ETH_POLYGON_AMOY_URL=
 PRIVATE_KEY=
 POLYGONSCAN_API_KEY=
 ESCROW_FACTORY_ADDRESS=
