@@ -15,12 +15,12 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
 import { FormCaptcha } from '@/shared/components/h-captcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { formattedSignUpErrorMessage } from '@/modules/worker/utils/formatted-sign-up-error-message';
-import { useSignUp } from '@/modules/worker/hooks/use-sign-up';
+import { FetchError } from '@/api/fetcher';
+import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
 
 export function SignUpWorkerPage() {
   const { t } = useTranslation();
-  const { signUp, error, isError, isLoading, reset } = useSignUp();
+  const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
   const methods = useForm<SignUpDto>({
     defaultValues: {
       email: '',
@@ -35,7 +35,13 @@ export function SignUpWorkerPage() {
   useResetMutationErrors(methods.watch, reset);
 
   const handleSignupError = (unknownError: unknown) => {
-    return formattedSignUpErrorMessage(unknownError, t);
+    if (unknownError instanceof FetchError && unknownError.status === 409) {
+      return t('worker.signUpForm.errors.emailTaken');
+    }
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    void methods.handleSubmit(signUp)(event);
   };
 
   return (
@@ -50,11 +56,7 @@ export function SignUpWorkerPage() {
       title={t('worker.signUpForm.title')}
     >
       <FormProvider {...methods}>
-        <form
-          onSubmit={(event) => {
-            void methods.handleSubmit(signUp)(event);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <Grid container gap="1.5rem">
             <Input label={t('worker.signUpForm.fields.email')} name="email" />
             <Password

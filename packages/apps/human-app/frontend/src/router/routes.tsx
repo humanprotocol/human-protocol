@@ -2,7 +2,7 @@ import type { RouteProps } from 'react-router-dom';
 import { t } from 'i18next';
 import { ProtectedPage } from '@/modules/worker/views/protected/protected.page';
 import { SignInWorkerPage } from '@/modules/worker/views/sign/sign-in.page';
-import { SignUpWorkerPage } from '@/modules/worker/views/sign/sign-up.page';
+import { SignUpWorkerPage } from '@/modules/signup/worker/views/sign-up-worker.page';
 import { routerPaths } from '@/router/router-paths';
 import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-reset-link/send-reset-link-success.page';
 import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';

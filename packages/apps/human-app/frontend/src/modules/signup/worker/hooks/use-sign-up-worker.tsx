@@ -4,7 +4,7 @@ import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import type { SignUpDto } from '@/modules/worker/services/sign-up';
 import { useSignUpMutation } from '@/modules/worker/services/sign-up';
 
-export function useSignUp() {
+export function useSignUpWorker() {
   const {
     mutate: signUpWorkerMutate,
     error: signUpWorkerError,
