@@ -1106,27 +1106,22 @@ def process_intermediate_results(  # noqa: PLR0912
             ", ".join(f"{k}: {v:.2f}" for k, v in job_results.items()),
         )
 
-    if manifest.annotation.type == TaskTypes.audio_transcription:
-        if (Config.validation.max_escrow_iterations > 0) and (
-            Config.validation.max_escrow_iterations <= task.iteration
-        ):
-            logger.info(
-                f"Validation for escrow_address={escrow_address}:"
-                f" too many iterations, stopping annotation"
-            )
-            should_complete = True
+    if (Config.validation.max_escrow_iterations > 0) and (
+        Config.validation.max_escrow_iterations <= task.iteration
+    ):
+        logger.info(
+            f"Validation for escrow_address={escrow_address}:"
+            f" too many iterations, stopping annotation"
+        )
+        should_complete = True
     else:
-        gt_stats = validation_result.gt_stats
+        gt_stats = (
+            validation_result.gt_stats
+            if manifest.annotation.type != TaskTypes.audio_transcription
+            else None
+        )
 
-        if (Config.validation.max_escrow_iterations > 0) and (
-            Config.validation.max_escrow_iterations <= task.iteration
-        ):
-            logger.info(
-                f"Validation for escrow_address={escrow_address}:"
-                f" too many iterations, stopping annotation"
-            )
-            should_complete = True
-        elif rejected_jobs and gt_stats:
+        if rejected_jobs and gt_stats:
             honeypot_manager = _TaskHoneypotManager(
                 task,
                 manifest,
