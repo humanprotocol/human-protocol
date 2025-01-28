@@ -51,7 +51,7 @@ export const DefaultHeader: FC = () => {
         <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
           <MuiLink
             sx={{ fontSize: '14px', fontWeight: 600, mx: 2 }}
-            href="https://dashboard.humanprotocol.org"
+            href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
             underline="none"
           >
             Dashboard
@@ -108,7 +108,7 @@ export const DefaultHeader: FC = () => {
 
             <MuiLink
               sx={{ fontSize: '18px', fontWeight: 600, my: 2 }}
-              href="https://dashboard.humanprotocol.org"
+              href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
               underline="none"
               onClick={() => toggleDrawer(false)}
             >
