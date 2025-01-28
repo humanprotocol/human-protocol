@@ -99,12 +99,12 @@ describe('UserService', () => {
         currency: Currency.USD,
       };
 
-      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(10);
+      jest.spyOn(paymentService, 'getUserUSDBalance').mockResolvedValue(10);
 
-      const balance = await userService.getBalance(userId);
+      const balance = await userService.getTotalUSDBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserUSDBalance).toHaveBeenCalledWith(userId);
     });
   });
 });

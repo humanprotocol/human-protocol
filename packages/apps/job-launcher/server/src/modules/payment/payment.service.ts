@@ -41,7 +41,6 @@ import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from './rate.service';
 import { UserEntity } from '../user/user.entity';
 // import { JobEntity } from '../job/job.entity';
-import { ServerConfigService } from '../../common/config/server-config.service';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -59,7 +58,6 @@ export class PaymentService {
     private readonly jobRepository: JobRepository,
     private stripeConfigService: StripeConfigService,
     private rateService: RateService,
-    private serverConfigService: ServerConfigService,
   ) {
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,

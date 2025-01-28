@@ -48,9 +48,9 @@ export class UserService {
     return this.userRepository.updateOne(userEntity);
   }
 
-  public async getBalance(userId: number): Promise<UserBalanceDto> {
+  public async getTotalUSDBalance(userId: number): Promise<UserBalanceDto> {
     return {
-      amount: await this.paymentService.getUserBalance(userId),
+      amount: await this.paymentService.getUserUSDBalance(userId),
       currency: Currency.USD,
     };
   }
