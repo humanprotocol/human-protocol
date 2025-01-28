@@ -6,7 +6,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import type { PrepareSignatureBody } from '@/api/hooks/use-prepare-signature';
 import { prepareSignature } from '@/api/hooks/use-prepare-signature';
 
