@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { HomePageStateContext } from '../contexts/homepage-state';
+import { HomePageStateContext } from './homepage-state';
 
 export const useHomePageState = () => {
   const context = useContext(HomePageStateContext);

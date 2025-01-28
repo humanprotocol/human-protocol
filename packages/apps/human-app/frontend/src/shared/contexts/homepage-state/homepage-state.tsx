@@ -1,7 +1,8 @@
 import React, { createContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
-import { type HomePageStateType } from '../types/homepage-state';
+
+type HomePageStateType = 'welcome' | 'chooseSignUpAccountType';
 
 interface HomePageStageContextProps {
   pageView: HomePageStateType;

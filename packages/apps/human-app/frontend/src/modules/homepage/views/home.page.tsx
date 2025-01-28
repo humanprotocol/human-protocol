@@ -9,7 +9,7 @@ import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { HomeContainer } from '@/modules/homepage/components/home-container';
-import { useHomePageState } from '@/shared/hooks/use-homepage-state';
+import { useHomePageState } from '@/shared/contexts/homepage-state';
 
 export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';
 

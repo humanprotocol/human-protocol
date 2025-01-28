@@ -1,7 +1,7 @@
 import { Container } from '@mui/material';
 import { useEffect } from 'react';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
-import { useHomePageState } from '@/shared/hooks/use-homepage-state';
+import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { Welcome } from './welcome';
 import { ChooseSignUpAccountType } from './choose-sign-up-account-type';
 
