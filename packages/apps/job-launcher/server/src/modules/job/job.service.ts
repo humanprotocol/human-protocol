@@ -44,7 +44,6 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  TokenId,
 } from '../../common/enums/payment';
 import { parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
@@ -445,15 +444,9 @@ export class JobService {
 
   private createJobSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.HCAPTCHA]: {
-      calculateFundAmount: async (dto: JobCaptchaDto, rate: number) => {
-        const dataUrl = generateBucketUrl(dto.data, JobRequestType.HCAPTCHA);
-        const objectsInBucket = await listObjectsInBucket(dataUrl);
-        return div(dto.annotations.taskBidPrice * objectsInBucket.length, rate);
-      },
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
     },
     [JobRequestType.FORTUNE]: {
-      calculateFundAmount: async (dto: JobFortuneDto) => dto.fundAmount,
       createManifest: async (
         dto: JobFortuneDto,
         requestType: JobRequestType,
@@ -465,7 +458,6 @@ export class JobService {
       }),
     },
     [JobRequestType.IMAGE_POLYGONS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -473,7 +465,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -481,7 +472,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_POINTS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -489,7 +479,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -497,7 +486,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -844,49 +832,25 @@ export class JobService {
       });
     }
 
-    const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
-    const { calculateFundAmount, createManifest } =
-      this.createJobSpecificActions[requestType];
+    const { createManifest } = this.createJobSpecificActions[requestType];
 
-    const userBalance = await this.paymentService.getUserBalance(user.id);
     const feePercentage = Number(
       await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
+    const currency = dto.currency ?? JobCurrency.HMT;
+    const rate = await this.rateService.getRate(currency, Currency.USD);
+    const tokenFee = max(
+      div(this.serverConfigService.minimunFeeUsd, rate),
+      mul(div(feePercentage, 100), dto.fundAmount),
+    );
+    const totalAmountToPay = add(dto.fundAmount, tokenFee);
 
-    let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
+    const userBalance = await this.paymentService.getUserBalanceByCurrency(
+      user.id,
+      currency,
+    );
 
-    if (dto instanceof JobQuickLaunchDto) {
-      tokenFee = mul(div(feePercentage, 100), dto.fundAmount);
-      tokenFundAmount = dto.fundAmount;
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = div(tokenTotalAmount, rate);
-    } else if (
-      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
-      dto.currency === JobCurrency.HMT
-    ) {
-      tokenFundAmount = dto.fundAmount;
-      const fundAmountInUSD = div(tokenFundAmount, rate);
-      const feeInUSD = max(
-        this.serverConfigService.minimunFeeUsd,
-        mul(div(feePercentage, 100), fundAmountInUSD),
-      );
-      tokenFee = mul(feeInUSD, rate);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = add(fundAmountInUSD, feeInUSD);
-    } else {
-      const fundAmount = await calculateFundAmount(dto, rate);
-      const fee = max(
-        this.serverConfigService.minimunFeeUsd,
-        mul(div(feePercentage, 100), fundAmount),
-      );
-
-      tokenFundAmount = mul(fundAmount, rate);
-      tokenFee = mul(fee, rate);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = add(fundAmount, fee);
-    }
-
-    if (lt(userBalance, usdTotalAmount)) {
+    if (lt(userBalance, totalAmountToPay)) {
       throw new ControlledError(
         ErrorJob.NotEnoughFunds,
         HttpStatus.BAD_REQUEST,
@@ -916,7 +880,7 @@ export class JobService {
       const manifestOrigin = await createManifest(
         dto,
         requestType,
-        tokenFundAmount,
+        dto.fundAmount,
       );
 
       const { url, hash } = await this.uploadManifest(
@@ -936,7 +900,7 @@ export class JobService {
     jobEntity.userId = user.id;
     jobEntity.requestType = requestType;
     jobEntity.fee = tokenFee;
-    jobEntity.fundAmount = tokenFundAmount;
+    jobEntity.fundAmount = dto.fundAmount;
     jobEntity.status = JobStatus.PENDING;
     jobEntity.waitUntil = new Date();
 
@@ -947,18 +911,9 @@ export class JobService {
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
-    if (
-      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
-      dto.currency === JobCurrency.USD
-    ) {
-      paymentEntity.amount = -usdTotalAmount;
-      paymentEntity.currency = JobCurrency.USD;
-      paymentEntity.rate = 1;
-    } else {
-      paymentEntity.amount = -tokenTotalAmount;
-      paymentEntity.currency = TokenId.HMT;
-      paymentEntity.rate = div(1, rate);
-    }
+    paymentEntity.amount = -dto.fundAmount;
+    paymentEntity.currency = currency;
+    paymentEntity.rate = rate;
     paymentEntity.status = PaymentStatus.SUCCEEDED;
 
     await this.paymentRepository.createUnique(paymentEntity);

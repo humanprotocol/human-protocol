@@ -1,11 +1,10 @@
 import { JobRequestType } from '../../common/enums/job';
-import { CreateJob, CvatDataDto, StorageDataDto } from './job.dto';
+import { CvatDataDto, StorageDataDto } from './job.dto';
 import { JobEntity } from './job.entity';
 
 export interface RequestAction {
-  calculateFundAmount: (dto: CreateJob, rate: number) => Promise<number>;
   createManifest: (
-    dto: CreateJob,
+    dto: any,
     requestType: JobRequestType,
     fundAmount: number,
   ) => Promise<any>;

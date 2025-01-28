@@ -72,6 +72,10 @@ export class JobDto {
   @IsEthereumAddress()
   @IsOptional()
   public recordingOracle?: string;
+
+  @ApiProperty({ enum: JobCurrency })
+  @IsEnumCaseInsensitive(JobCurrency)
+  public currency: JobCurrency | undefined;
 }
 
 export class JobQuickLaunchDto extends JobDto {
@@ -117,10 +121,6 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-
-  @ApiProperty({ enum: JobCurrency })
-  @IsEnumCaseInsensitive(JobCurrency)
-  public currency: JobCurrency;
 }
 
 export class StorageDataDto {
@@ -209,10 +209,6 @@ export class JobCvatDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-
-  @ApiProperty({ enum: JobCurrency })
-  @IsEnumCaseInsensitive(JobCurrency)
-  public currency: JobCurrency;
 }
 
 export class JobCancelDto {
@@ -790,8 +786,5 @@ class TaskData {
   datapoint_text?: DatapointText;
 }
 
-export type CreateJob =
-  | JobQuickLaunchDto
-  | JobFortuneDto
-  | JobCvatDto
-  | JobCaptchaDto;
+export type CreateJob = JobQuickLaunchDto | JobFortuneDto | JobCvatDto;
+// | JobCaptchaDto;
