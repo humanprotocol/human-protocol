@@ -1,12 +1,7 @@
-import csv
 import io
-import json
 import os
-import zipfile
 from collections import Counter
 from logging import Logger
-from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from sqlalchemy.orm import Session
 
@@ -23,7 +18,7 @@ from src.core.oracle_events import (
 from src.core.storage import (
     compose_results_bucket_filename as compose_annotation_results_bucket_filename,
 )
-from src.core.types import OracleWebhookTypes, TaskTypes
+from src.core.types import OracleWebhookTypes
 from src.core.validation_errors import TooFewGtError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.handlers.process_intermediate_results import (
@@ -36,7 +31,6 @@ from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
 from src.utils.assignments import compute_resulting_annotations_hash
 from src.utils.logging import NullLogger, get_function_logger
-from src.utils.zip_archive import write_dir_to_zip_archive
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
@@ -74,79 +68,15 @@ class _TaskValidator:
         assert self.annotation_meta is not None
 
         data_bucket_client = make_cloud_client(self.data_bucket)
-
-        def convert_value(value: str):
-            """Converts a string value to int, float, or keeps it as string."""
-            try:
-                f = float(value)
-                if f.is_integer():
-                    return int(f)
-                return f
-            except ValueError:
-                return value
-
-        if self.manifest.annotation.type == TaskTypes.audio_transcription:
-            annotations = []
-
-            with TemporaryDirectory() as tempdir:
-                temp_path = Path(tempdir)
-
-                merged_annotations_path = temp_path / "merged_annotations"
-                merged_annotations_path.mkdir(parents=True, exist_ok=True)
-
-                clips_path = merged_annotations_path / "clips"
-                clips_path.mkdir(parents=True, exist_ok=True)
-
-                annotations_file = merged_annotations_path / "annotations.json"
-
-                for job_meta in self.annotation_meta.jobs:
-                    job_filename = compose_annotation_results_bucket_filename(
-                        self.escrow_address,
-                        self.chain_id,
-                        job_meta.annotation_filename,
-                    )
-                    downloaded_annotations = data_bucket_client.download_file(job_filename)
-
-                    with zipfile.ZipFile(io.BytesIO(downloaded_annotations)) as zip_file:
-                        clip_files = [f for f in zip_file.namelist() if f.startswith("clips/")]
-
-                        for clip_file in clip_files:
-                            with zip_file.open(clip_file) as audio_file:
-                                clip_name = os.path.basename(clip_file)
-                                if clip_name:
-                                    with (clips_path / clip_name).open("wb") as f:
-                                        f.write(audio_file.read())
-
-                        if "data.tsv" in zip_file.namelist():
-                            with zip_file.open("data.tsv") as tsv_file:
-                                reader = csv.DictReader(
-                                    io.StringIO(tsv_file.read().decode("utf-8")), delimiter="\t"
-                                )
-                                entries = [
-                                    {key: convert_value(value) for key, value in row.items()}
-                                    for row in reader
-                                ]
-
-                                annotations.extend(entries)
-
-                with annotations_file.open("w") as f:
-                    json.dump(annotations, f, indent=4)
-
-                merged_annotations_archive = io.BytesIO()
-                write_dir_to_zip_archive(merged_annotations_path, merged_annotations_archive)
-                merged_annotations_archive.seek(0)
-
-                self.merged_annotations = merged_annotations_archive.getvalue()
-        else:
-            exchange_oracle_merged_annotation_path = compose_annotation_results_bucket_filename(
-                self.escrow_address,
-                self.chain_id,
-                annotation.RESULTING_ANNOTATIONS_FILE,
-            )
-            merged_annotations = data_bucket_client.download_file(
-                exchange_oracle_merged_annotation_path
-            )
-            self.merged_annotations = merged_annotations
+        exchange_oracle_merged_annotation_path = compose_annotation_results_bucket_filename(
+            self.escrow_address,
+            self.chain_id,
+            annotation.RESULTING_ANNOTATIONS_FILE,
+        )
+        merged_annotations = data_bucket_client.download_file(
+            exchange_oracle_merged_annotation_path
+        )
+        self.merged_annotations = merged_annotations
 
     def _download_results(self):
         self._download_results_meta()
