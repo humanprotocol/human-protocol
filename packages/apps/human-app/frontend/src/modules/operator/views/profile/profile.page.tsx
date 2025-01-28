@@ -14,7 +14,7 @@ import { ProfileListItem } from '@/shared/components/ui/profile-list-item';
 import { useGetOperatorStats } from '@/modules/operator/hooks/use-get-stats';
 import { ProfileEnableButton } from '@/modules/operator/components/profile/profile-enable-button';
 import { CheckmarkIcon, LockerIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function OperatorProfilePage() {
   const { colorPalette } = useColorMode();

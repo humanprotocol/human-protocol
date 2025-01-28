@@ -13,10 +13,10 @@ import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { BackgroundProvider } from '@/shared/contexts/background-color-store';
 import {
+  hasColorMode,
   isDarkColorMode,
   saveColorMode,
-  hasColorMode,
-} from '../helpers/dark-mode';
+} from './color-mode-settings';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;

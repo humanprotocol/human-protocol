@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
 import { CheckmarkIcon, LockerIcon } from '@/shared/components/ui/icons';
 import { Chips } from '@/shared/components/ui/chips';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface ProfileListItemProps {
   header: string;

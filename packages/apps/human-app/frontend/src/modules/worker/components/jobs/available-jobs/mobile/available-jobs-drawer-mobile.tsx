@@ -10,7 +10,7 @@ import { AvailableJobsNetworkFilterMobile } from '@/modules/worker/components/jo
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 import { AvailableJobsJobTypeFilterMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-job-type-filter-mobile';
 import { AvailableJobsRewardAmountSortMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-reward-amount-sort-mobile';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;

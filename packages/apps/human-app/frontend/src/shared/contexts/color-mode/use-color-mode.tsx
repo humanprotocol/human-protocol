@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import type { ColorModeContextProps } from '@/shared/contexts/color-mode';
-import { ColorModeContext } from '@/shared/contexts/color-mode';
+import { type ColorModeContextProps, ColorModeContext } from './color-mode';
 
 export const useColorMode = (): ColorModeContextProps => {
   const context = useContext(ColorModeContext);
