@@ -1,6 +1,6 @@
 import { Container } from '@mui/material';
 import { useEffect } from 'react';
-import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
+import { useBackgroundColorContext } from '@/shared/contexts/background';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { Welcome } from './welcome';
 import { ChooseSignUpAccountType } from './choose-sign-up-account-type';

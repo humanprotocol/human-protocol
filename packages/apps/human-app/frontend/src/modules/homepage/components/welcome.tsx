@@ -13,7 +13,7 @@ import { OperatorSignIn } from '@/modules/homepage/hooks/use-operator-signin';
 import { WorkerSignIn } from '@/modules/homepage/components/worker-signin';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
-import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
+import { useBackgroundColorContext } from '@/shared/contexts/background';
 
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();

@@ -1,6 +1,6 @@
 import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
+import { useBackgroundColorContext } from '@/shared/contexts/background';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useColorMode } from '@/shared/contexts/color-mode';

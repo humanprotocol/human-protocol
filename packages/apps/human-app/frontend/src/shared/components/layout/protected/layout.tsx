@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useBackgroundColorContext } from '@/shared/hooks/use-background-color-context';
+import { useBackgroundColorContext } from '@/shared/contexts/background';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
 import { PageHeader } from '@/shared/components/layout/protected/page-header';
 import { breakpoints } from '@/shared/styles/breakpoints';
