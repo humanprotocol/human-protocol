@@ -34,7 +34,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { div, eq, mul } from '../../common/utils/decimal';
+import { div, eq, mul, add } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
@@ -411,14 +411,13 @@ export class PaymentService {
     for (const token of uniqueTokens) {
       const tokenAmountSum = paymentEntities
         .filter((payment) => payment.currency === token)
-        .reduce((sum, payment) => sum + Number(payment.amount), 0);
+        .reduce((sum, payment) => add(sum, Number(payment.amount)), 0);
 
       const rate =
         token === Currency.USD
           ? 1
           : await this.rateService.getRate(token, Currency.USD);
-
-      totalBalance += tokenAmountSum * rate;
+      totalBalance += mul(tokenAmountSum, rate);
     }
 
     return totalBalance;
@@ -434,7 +433,7 @@ export class PaymentService {
     );
 
     const balance = paymentEntities.reduce(
-      (sum, payment) => sum + Number(payment.amount),
+      (sum, payment) => add(sum, Number(payment.amount)),
       0,
     );
 
