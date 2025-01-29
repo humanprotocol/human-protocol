@@ -148,7 +148,7 @@ export class UserService {
     user: UserEntity,
     data: RegisterAddressRequestDto,
   ): Promise<KycSignedAddressDto> {
-    data.address = data.address.toLowerCase();
+    const lowercasedAddress = data.address.toLocaleLowerCase();
 
     if (user.evmAddress) {
       throw new UserError(UserErrorMessage.ADDRESS_EXISTS, user.id);
@@ -158,31 +158,32 @@ export class UserService {
       throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
-    const dbUser = await this.userRepository.findOneByAddress(data.address);
+    const dbUser =
+      await this.userRepository.findOneByAddress(lowercasedAddress);
     if (dbUser) {
-      throw new DuplicatedWalletAddressError(user.id, data.address);
+      throw new DuplicatedWalletAddressError(user.id, lowercasedAddress);
     }
 
     // Prepare signed data and verify the signature
     const signedData = prepareSignatureBody({
-      from: data.address,
+      from: lowercasedAddress,
       to: this.web3Service.getOperatorAddress(),
       contents: SignatureType.REGISTER_ADDRESS,
     });
     const verified = verifySignature(signedData, data.signature, [
-      data.address,
+      lowercasedAddress,
     ]);
 
     if (!verified) {
-      throw new InvalidWeb3SignatureError(user.id, data.address);
+      throw new InvalidWeb3SignatureError(user.id, lowercasedAddress);
     }
 
-    user.evmAddress = data.address.toLowerCase();
+    user.evmAddress = lowercasedAddress;
     await this.userRepository.updateOne(user);
 
     const signature = await this.web3Service
       .getSigner(this.networkConfigService.networks[0].chainId)
-      .signMessage(data.address);
+      .signMessage(lowercasedAddress);
 
     return {
       key: `KYC-${this.web3Service.getOperatorAddress()}`,

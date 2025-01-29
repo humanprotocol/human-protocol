@@ -9,6 +9,7 @@ import { Request, Response } from 'express';
 
 import {
   AuthError,
+  DuplicatedUserAddressError,
   DuplicatedUserEmailError,
   InvalidOperatorSignupDataError,
 } from './auth.error';
@@ -16,9 +17,15 @@ import {
 type AuthControllerError =
   | AuthError
   | DuplicatedUserEmailError
-  | InvalidOperatorSignupDataError;
+  | InvalidOperatorSignupDataError
+  | DuplicatedUserAddressError;
 
-@Catch(AuthError, DuplicatedUserEmailError, InvalidOperatorSignupDataError)
+@Catch(
+  AuthError,
+  DuplicatedUserEmailError,
+  DuplicatedUserAddressError,
+  InvalidOperatorSignupDataError,
+)
 export class AuthControllerErrorsFilter implements ExceptionFilter {
   private logger = new Logger(AuthControllerErrorsFilter.name);
   catch(exception: AuthControllerError, host: ArgumentsHost) {

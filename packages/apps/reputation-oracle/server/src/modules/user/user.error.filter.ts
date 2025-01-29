@@ -29,8 +29,6 @@ export class UserErrorFilter implements ExceptionFilter {
 
     if (exception instanceof DuplicatedWalletAddressError) {
       status = HttpStatus.CONFLICT;
-    } else if (exception instanceof InvalidWeb3SignatureError) {
-      status = HttpStatus.CONFLICT;
     }
 
     this.logger.error(exception.message, exception.stack, exception.userId);
