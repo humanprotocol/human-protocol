@@ -1,27 +1,5 @@
 import { verifySignature, recoverSigner, signMessage } from './signature';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { ErrorSignature } from '../constants/errors';
-import { ControlledError } from '../errors/controlled';
-import { HttpStatus } from '@nestjs/common';
-
-jest.doMock('ethers', () => {
-  return {
-    utils: {
-      get verifyMessage() {
-        return jest.fn((message, signature) => {
-          if (message === 'valid-message' && signature === 'valid-signature') {
-            return 'recovered-address';
-          } else {
-            throw new ControlledError(
-              ErrorSignature.InvalidSignature,
-              HttpStatus.UNAUTHORIZED,
-            );
-          }
-        });
-      },
-    },
-  };
-});
 
 describe('Signature utility', () => {
   describe('verifySignature', () => {

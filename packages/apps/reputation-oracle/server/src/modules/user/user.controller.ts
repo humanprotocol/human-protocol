@@ -35,7 +35,7 @@ import { Public } from '../../common/decorators';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { Web3Service } from '../web3/web3.service';
 import { UserRepository } from './user.repository';
-import { SignatureType } from 'src/common/enums/web3';
+import { SignatureType } from '../../common/enums/web3';
 
 @ApiTags('User')
 @Controller('/user')

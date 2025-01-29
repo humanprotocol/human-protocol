@@ -10,7 +10,6 @@ import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { AuthSignatureRole } from '../enums/role';
-import { ControlledError } from '../errors/controlled';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {

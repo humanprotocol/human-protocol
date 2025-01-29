@@ -5,7 +5,6 @@ import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { AuthSignatureRole } from '../enums/role';
-import { ControlledError } from '../errors/controlled';
 
 jest.mock('../../common/utils/signature');
 
