@@ -14,6 +14,7 @@ import {
   UseGuards,
   Request,
   Get,
+  UseFilters,
 } from '@nestjs/common';
 import {
   DisableOperatorDto,
@@ -29,15 +30,25 @@ import {
 import { JwtAuthGuard } from '../../common/guards';
 import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { RequestWithUser } from '../../common/types';
+import { prepareSignatureBody } from '../../common/utils/signature';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
+import { Web3Service } from '../web3/web3.service';
+import { UserRepository } from './user.repository';
+import { SignatureType } from '../../common/enums/web3';
+import { UserErrorFilter } from './user.error.filter';
 
 @ApiTags('User')
 @Controller('/user')
+@UseFilters(UserErrorFilter)
 @ApiBearerAuth()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly web3Service: Web3Service,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   @Post('/register-labeler')
   @HttpCode(200)
@@ -170,7 +181,16 @@ export class UserController {
   public async prepareSignature(
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
-    return await this.userService.prepareSignatureBody(data.type, data.address);
+    let nonce;
+    if (data.type === SignatureType.SIGNIN) {
+      nonce = (await this.userRepository.findOneByAddress(data.address))?.nonce;
+    }
+    return prepareSignatureBody({
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: data.type,
+      nonce,
+    });
   }
 
   @Post('/exchange-oracle-registration')

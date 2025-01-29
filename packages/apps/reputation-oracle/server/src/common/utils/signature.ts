@@ -1,7 +1,4 @@
-import { HttpStatus } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { ErrorSignature } from '../constants/errors';
-import { ControlledError } from '../errors/controlled';
 
 export function verifySignature(
   message: object | string,
@@ -10,16 +7,9 @@ export function verifySignature(
 ): boolean {
   const signer = recoverSigner(message, signature);
 
-  if (
-    !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
-  ) {
-    throw new ControlledError(
-      ErrorSignature.SignatureNotVerified,
-      HttpStatus.CONFLICT,
-    );
-  }
-
-  return true;
+  return addresses.some(
+    (address) => address.toLowerCase() === signer.toLowerCase(),
+  );
 }
 
 export async function signMessage(
@@ -47,13 +37,30 @@ export function recoverSigner(
   try {
     return ethers.verifyMessage(message, signature);
   } catch (e) {
-    throw new ControlledError(
-      ErrorSignature.InvalidSignature,
-      HttpStatus.CONFLICT,
-    );
+    return '';
   }
 }
 
 export function generateNonce(): string {
   return Buffer.from(ethers.randomBytes(16)).toString('hex');
+}
+
+type SignatureBody = {
+  from: string;
+  to: string;
+  contents: string;
+  nonce?: string;
+};
+export function prepareSignatureBody({
+  from,
+  to,
+  contents,
+  nonce,
+}: SignatureBody): SignatureBody {
+  return {
+    from: from.toLowerCase(),
+    to: to.toLowerCase(),
+    contents,
+    nonce: nonce ?? undefined,
+  };
 }

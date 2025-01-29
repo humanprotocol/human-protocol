@@ -9,16 +9,23 @@ import { Request, Response } from 'express';
 
 import {
   AuthError,
-  DuplicatedUserError,
+  DuplicatedUserAddressError,
+  DuplicatedUserEmailError,
   InvalidOperatorSignupDataError,
-} from './auth.errors';
+} from './auth.error';
 
 type AuthControllerError =
   | AuthError
-  | DuplicatedUserError
-  | InvalidOperatorSignupDataError;
+  | DuplicatedUserEmailError
+  | InvalidOperatorSignupDataError
+  | DuplicatedUserAddressError;
 
-@Catch(AuthError, DuplicatedUserError, InvalidOperatorSignupDataError)
+@Catch(
+  AuthError,
+  DuplicatedUserEmailError,
+  DuplicatedUserAddressError,
+  InvalidOperatorSignupDataError,
+)
 export class AuthControllerErrorsFilter implements ExceptionFilter {
   private logger = new Logger(AuthControllerErrorsFilter.name);
   catch(exception: AuthControllerError, host: ArgumentsHost) {
@@ -28,7 +35,7 @@ export class AuthControllerErrorsFilter implements ExceptionFilter {
     let status = HttpStatus.UNAUTHORIZED;
 
     let logContext: string | undefined;
-    if (exception instanceof DuplicatedUserError) {
+    if (exception instanceof DuplicatedUserEmailError) {
       status = HttpStatus.CONFLICT;
       logContext = exception.email;
     } else if (exception instanceof InvalidOperatorSignupDataError) {
