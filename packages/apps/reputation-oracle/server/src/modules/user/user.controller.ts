@@ -14,6 +14,7 @@ import {
   UseGuards,
   Request,
   Get,
+  UseFilters,
 } from '@nestjs/common';
 import {
   DisableOperatorDto,
@@ -36,9 +37,11 @@ import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { Web3Service } from '../web3/web3.service';
 import { UserRepository } from './user.repository';
 import { SignatureType } from '../../common/enums/web3';
+import { UserErrorFilter } from './user.error.filter';
 
 @ApiTags('User')
 @Controller('/user')
+@UseFilters(UserErrorFilter)
 @ApiBearerAuth()
 export class UserController {
   constructor(
