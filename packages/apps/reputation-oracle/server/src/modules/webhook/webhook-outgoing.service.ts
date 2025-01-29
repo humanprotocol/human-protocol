@@ -87,7 +87,7 @@ export class WebhookOutgoingService {
    * Converts payload to snake_case, signs it, and sends it to the specified URL.
    * @param {string} url - The target URL to which the webhook is sent.
    * @param {object} payload - The data payload to send.
-   * @throws {ControlledError} If the webhook request fails.
+   * @throws {OutgoingWebhookError} If the webhook request fails.
    */
   public async sendWebhook(
     outgoingWebhook: WebhookOutgoingEntity,

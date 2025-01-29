@@ -28,7 +28,7 @@ export class WebhookIncomingService {
    * Creates an incoming webhook entry in the repository.
    * Validates that the event type is 'JOB_COMPLETED' and sets initial status to 'PENDING'.
    * @param {IncomingWebhookDto} dto - Contains webhook details like chain ID and escrow address.
-   * @throws {ControlledError} If the event type is invalid or the webhook cannot be created.
+   * @throws {IncomingWebhookError} If the event type is invalid or the webhook cannot be created.
    */
   public async createIncomingWebhook(dto: IncomingWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.JOB_COMPLETED) {

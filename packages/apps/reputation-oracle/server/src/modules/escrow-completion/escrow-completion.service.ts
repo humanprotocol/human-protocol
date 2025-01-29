@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EscrowCompletionStatus, EventType } from '../../common/enums';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
@@ -26,7 +26,6 @@ import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { ErrorEscrowCompletion } from '../../common/constants/errors';
-import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/utils/database';
 import { CalculatedPayout } from '../payout/payout.interface';
@@ -211,54 +210,44 @@ export class EscrowCompletionService {
           );
         }
 
-        const callbackUrls = [
-          (
-            await OperatorUtils.getLeader(
-              chainId,
-              await escrowClient.getJobLauncherAddress(escrowAddress),
-            )
-          ).webhookUrl,
-          (
-            await OperatorUtils.getLeader(
-              chainId,
-              await escrowClient.getExchangeOracleAddress(escrowAddress),
-            )
-          ).webhookUrl,
-          /*(
-            await OperatorUtils.getLeader(
-              chainId,
-              await escrowClient.getRecordingOracleAddress(escrowAddress),
-            )
-          ).webhookUrl,*/
-        ];
+        const oracleAddresses = await Promise.all([
+          escrowClient.getJobLauncherAddress(escrowAddress),
+          escrowClient.getExchangeOracleAddress(escrowAddress),
+          // escrowClient.getRecordingOracleAddress(escrowAddress),
+        ]);
 
-        let allWebhooksCreated = true;
-
-        const payload = {
+        const webhookPayload = {
           chainId,
           escrowAddress,
           eventType: EventType.ESCROW_COMPLETED,
         };
 
-        for (const url of callbackUrls) {
-          if (!url) {
-            throw new ControlledError(
-              // This is a temporary solution during the refactoring phase.
-              'Webhook url not found',
-              HttpStatus.NOT_FOUND,
-            );
+        let allWebhooksCreated = true;
+
+        for (const oracleAddress of oracleAddresses) {
+          const oracleData = await OperatorUtils.getLeader(
+            chainId,
+            oracleAddress,
+          );
+          if (!oracleData) {
+            throw new Error('Oracle data is missing');
+          }
+
+          const { webhookUrl } = oracleData;
+          if (!webhookUrl) {
+            throw new Error('Webhook url is no set for oracle');
           }
 
           try {
             await this.webhookOutgoingService.createOutgoingWebhook(
-              payload,
-              url,
+              webhookPayload,
+              webhookUrl,
             );
           } catch (err) {
             if (isDuplicatedError(err)) {
-              this.logger.warn(
-                `Duplicate outgoing webhook for escrowAddress: ${escrowAddress}. Webhook creation skipped, but will not complete escrow until all URLs are successful.`,
-              );
+              /**
+               * Already created. Noop.
+               */
               continue;
             } else {
               const errorId = uuidv4();
