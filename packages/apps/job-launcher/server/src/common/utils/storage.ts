@@ -80,26 +80,32 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
       let nextContinuationToken: string | undefined;
       const baseUrl = `${url.protocol}//${url.host}`;
       do {
-        let requestOptions = `${baseUrl}`;
+        let requestUrl = `${baseUrl}`;
+        if (['localhost', 'minio'].includes(url.hostname)) {
+          const pathname = url.pathname.replace(/^\//, '');
+          const [bucketName, ...folderParts] = pathname.split('/');
 
-        if (url.hostname !== 'localhost') {
-          requestOptions += `?list-type=2${
-            nextContinuationToken
-              ? `&continuation-token=${encodeURIComponent(
-                  nextContinuationToken,
-                )}`
-              : ''
-          }${url.pathname ? `&prefix=${url.pathname.replace(/^\//, '')}` : ''}`;
+          requestUrl += `/${bucketName}?list-type=2`;
+
+          const folderPrefix = folderParts.join('/');
+          if (folderPrefix) {
+            requestUrl += `&prefix=${folderPrefix}`;
+          }
         } else {
-          requestOptions += `${url.pathname ? `${url.pathname.replace(/^\//, '')}` : ''}?list-type=2${
-            nextContinuationToken
-              ? `&continuation-token=${encodeURIComponent(
-                  nextContinuationToken,
-                )}`
-              : ''
-          }`;
+          requestUrl += `?list-type=2`;
+
+          if (url.pathname) {
+            requestUrl += `&prefix=${url.pathname.replace(/^\//, '')}`;
+          }
         }
-        const response = await axios.get(requestOptions);
+
+        if (nextContinuationToken) {
+          requestUrl += `&continuation-token=${encodeURIComponent(
+            nextContinuationToken,
+          )}`;
+        }
+
+        const response = await axios.get(requestUrl);
 
         if (response.status === HttpStatus.OK && response.data) {
           parseString(response.data, (err: any, result: any) => {

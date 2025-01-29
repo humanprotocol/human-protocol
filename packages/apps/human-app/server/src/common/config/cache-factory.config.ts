@@ -21,6 +21,7 @@ export const CacheFactoryConfig: CacheModuleAsyncOptions = {
         host: configService.cacheHost,
         port: configService.cachePort,
       },
+      database: configService.cacheDbNumber,
       disableOfflineQueue: true,
     });
 

@@ -1,17 +1,27 @@
-# Base image
-FROM node:18
+FROM node:18-slim
+ARG APP_PATH=packages/apps/reputation-oracle/server
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Bundle app source
-COPY . .
+# Copy expected yarn dist
+COPY .yarn ./.yarn
+COPY .yarnrc ./
+# Copy files for deps installation
+COPY package.json yarn.lock ./
+COPY ${APP_PATH}/package.json ./${APP_PATH}/package.json
+# Some deps are referenced as "*", so we need to build them
+COPY tsconfig.json ./
+COPY packages/core ./packages/core
+COPY packages/sdk ./packages/sdk
 
-# Install app dependencies
 RUN yarn install
 
-# Creates a "dist" folder with the production build
-RUN yarn workspace @human-protocol/reputation-oracle build
+# Copy everything else to ensure proper build process
+COPY . .
 
-# Start the server using the production build
-CMD [ "node", "packages/apps/reputation-oracle/server/dist/src/main.js" ]
+WORKDIR ./${APP_PATH}
+RUN yarn build
+
+# Start the server using the build
+CMD [ "yarn", "start:prod" ]

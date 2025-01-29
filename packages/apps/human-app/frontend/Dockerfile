@@ -1,5 +1,6 @@
-FROM node:18-slim
-ARG APP_PATH=packages/apps/job-launcher/server
+# Using bullseye instead of slim because it needs Python and build tools for node-gyp
+FROM node:18-bullseye
+ARG APP_PATH=packages/apps/human-app/frontend
 
 # Create app directory
 WORKDIR /usr/src/app

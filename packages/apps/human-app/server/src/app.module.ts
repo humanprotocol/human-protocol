@@ -58,6 +58,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
         REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
         REDIS_HOST: Joi.string().required(),
+        REDIS_DB: Joi.number(),
         RPC_URL: Joi.string().required(),
         HCAPTCHA_LABELING_STATS_API_URL: Joi.string().required(),
         HCAPTCHA_LABELING_VERIFY_API_URL: Joi.string().required(),
