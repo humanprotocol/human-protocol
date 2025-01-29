@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { httpService } from '../http-service';
 import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
-import { validateResponse } from '../../services/validate-response';
+import { validateResponse } from '../validate-response';
 import { reputationSchema } from '@services/api/use-leaderboard-details';
 
 const transformOptionalTokenAmount = (

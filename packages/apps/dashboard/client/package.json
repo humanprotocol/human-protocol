@@ -1,6 +1,6 @@
 {
   "private": "true",
-  "name": "@human-protocol/dashboard-ui-2024",
+  "name": "@human-protocol/dashboard-client",
   "version": "1.0.0",
   "description": "Human Protocol Dashboard",
   "license": "MIT",
