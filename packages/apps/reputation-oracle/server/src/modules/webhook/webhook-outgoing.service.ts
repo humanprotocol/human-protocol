@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
@@ -122,10 +121,9 @@ export class WebhookOutgoingService {
       try {
         await this.sendWebhook(webhookEntity);
       } catch (err) {
-        const errorId = uuidv4();
-        const failureDetail = `${WebhookErrorMessage.PENDING_PROCESSING_FAILED} (Error ID: ${errorId})`;
+        const failureDetail = `Error message: ${err.message}`;
         this.logger.error(
-          `Error processing pending outgoing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+          `Error processing outgoing webhook. Webhook ID: ${webhookEntity.id}. ${failureDetail}`,
         );
         await this.handleWebhookOutgoingError(webhookEntity, failureDetail);
         continue;
