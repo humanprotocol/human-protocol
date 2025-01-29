@@ -114,7 +114,7 @@ class BucketAccessInfo:
         elif Config.features.enable_custom_cloud_host:
             # Check if netloc is an ip address
             # or localhost with port (or its /etc/hosts aliast, e.g. minio:9000)
-            if is_ipv4(parsed_url.netloc) or re.match(r"^\w+:\d{4}$", parsed_url.netloc):
+            if is_ipv4(parsed_url.netloc) or re.fullmatch(r"\w+:\d{4}", parsed_url.netloc):
                 host = parsed_url.netloc
                 bucket_name, path = parsed_url.path.lstrip("/").split("/", maxsplit=1)
             else:
