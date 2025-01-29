@@ -38,7 +38,6 @@ import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,

@@ -7,7 +7,7 @@ import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { UserEntity } from '../user/user.entity';
-import { ErrorSignature, ErrorUser } from '../../common/constants/errors';
+import { ErrorSignature } from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
@@ -28,7 +28,12 @@ import { HttpStatus } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { generateNonce, signMessage } from '../../common/utils/signature';
 import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
+import {
+  ChainId,
+  KVStoreClient,
+  KVStoreUtils,
+  Role as SDKRole,
+} from '@human-protocol/sdk';
 import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
@@ -777,7 +782,7 @@ describe('AuthService', () => {
           }));
           KVStoreUtils.get = jest
             .fn()
-            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url')
             .mockResolvedValueOnce(1)
             .mockResolvedValueOnce(JobRequestType.FORTUNE);
@@ -839,7 +844,9 @@ describe('AuthService', () => {
           ).rejects.toThrow(new InvalidOperatorRoleError(''));
         });
         it('should throw if fee is not in KVStore', async () => {
-          KVStoreUtils.get = jest.fn().mockResolvedValueOnce('Job Launcher');
+          KVStoreUtils.get = jest
+            .fn()
+            .mockResolvedValueOnce(SDKRole.JobLauncher);
           const signature = await signMessage(
             preSignUpDataMock,
             MOCK_PRIVATE_KEY,
@@ -856,7 +863,7 @@ describe('AuthService', () => {
         it('should throw if url is not in KVStore', async () => {
           KVStoreUtils.get = jest
             .fn()
-            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url');
 
           const signature = await signMessage(
@@ -875,7 +882,7 @@ describe('AuthService', () => {
         it('should throw if job type is not in KVStore', async () => {
           KVStoreUtils.get = jest
             .fn()
-            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url')
             .mockResolvedValueOnce(1);
 
