@@ -6,31 +6,31 @@ export class VisionConfigService {
   constructor(private configService: ConfigService) {}
 
   /**
+   * The Google Cloud Storage (GCS) bucket name where temporary async moderation results will be saved.
+   * Required
+   */
+  get tempAsyncResultsBucket(): string {
+    return this.configService.getOrThrow<string>(
+      'GCS_TEMP_ASYNC_RESULTS_BUCKET',
+    );
+  }
+
+  /**
+   * The Google Cloud Storage (GCS) bucket name where moderation results will be saved.
+   * Required
+   */
+  get moderationResultsBucket(): string {
+    return this.configService.getOrThrow<string>(
+      'GCS_MODERATION_RESULTS_BUCKET',
+    );
+  }
+
+  /**
    * The project ID for connecting to the Google Cloud Vision API.
    * Required
    */
   get projectId(): string {
     return this.configService.getOrThrow<string>('GOOGLE_PROJECT_ID');
-  }
-
-  /**
-   * The Google Cloud Storage (GCS) bucket name where moderation results with positive issues will be saved.
-   * Required
-   */
-  get positiveAbuseResultsBucket(): string {
-    return this.configService.getOrThrow<string>(
-      'GOOGLE_CLOUD_STORAGE_POSITIVE_ABUSE_RESULTS_BUCKET',
-    );
-  }
-
-  /**
-   * The Google Cloud Storage (GCS) bucket name where moderation results with possible issues will be saved.
-   * Required
-   */
-  get possibleAbuseResultsBucket(): string {
-    return this.configService.getOrThrow<string>(
-      'GOOGLE_CLOUD_STORAGE_POSSIBLE_ABUSE_RESULTS_BUCKET',
-    );
   }
 
   /**

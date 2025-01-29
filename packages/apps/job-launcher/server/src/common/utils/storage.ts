@@ -127,3 +127,78 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
     }
   });
 }
+
+/**
+ * Validates if a given URL is a valid Google Cloud Storage URL.
+ *
+ * Supported formats:
+ * - HTTP/HTTPS: https://<bucket>.storage.googleapis.com[/<object_path>]
+ * - GCS URI: gs://<bucket>[/<object_path>]
+ *
+ *
+ * @param url - The URL to validate.
+ * @returns {boolean} - Returns true if the URL is valid, otherwise returns false.
+ */
+export function isGCSBucketUrl(url: string): boolean {
+  const gcsHttpRegex =
+    /^https:\/\/([a-zA-Z0-9\-]+)\.storage\.googleapis\.com(?:\/(.*))?$/;
+  const gcsGsRegex = /^gs:\/\/[a-zA-Z0-9\-]+(\/.*)?$/;
+
+  return gcsHttpRegex.test(url) || gcsGsRegex.test(url);
+}
+
+/**
+ * Converts a valid Google Cloud Storage HTTP URL to a GCS path.
+ *
+ * @param url - The HTTP URL to convert.
+ * @returns {string} - The converted GCS path.
+ * @throws Error - If the URL is not a valid GCS URL.
+ */
+export function convertToGCSPath(url: string): string {
+  if (!isGCSBucketUrl(url)) {
+    throw new ControlledError(
+      ErrorBucket.InvalidGCSUrl,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  const urlPattern =
+    /^https:\/\/([a-zA-Z0-9\-]+)\.storage\.googleapis\.com(?:\/(.*))?$/;
+  const match = url.match(urlPattern);
+
+  if (!match) {
+    throw new ControlledError(
+      ErrorBucket.UrlParsingError,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  const bucketName = match[1];
+  const objectPath = match[2] || '';
+
+  return `gs://${bucketName}/${objectPath}`;
+}
+
+/**
+ * Converts a GCS path to a valid Google Cloud Storage HTTP URL.
+ *
+ * @param gcsPath - The GCS path to convert (e.g., "gs://bucket-name/object-path").
+ * @returns {string} - The converted HTTP URL.
+ * @throws Error - If the GCS path is not valid.
+ */
+export function convertToHttpUrl(gcsPath: string): string {
+  const gcsPathPattern = /^gs:\/\/([a-zA-Z0-9\-]+)\/?(.*)?$/;
+  const match = gcsPath.match(gcsPathPattern);
+
+  if (!match) {
+    throw new ControlledError(
+      ErrorBucket.InvalidGCSUrl,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  const bucketName = match[1];
+  const objectPath = match[2] || '';
+
+  return `https://${bucketName}.storage.googleapis.com/${objectPath}`;
+}

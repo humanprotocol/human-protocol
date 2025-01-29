@@ -129,7 +129,16 @@ describe('CronJobService', () => {
         CvatConfigService,
         PGPConfigService,
         NetworkConfigService,
-        VisionConfigService,
+        {
+          provide: VisionConfigService,
+          useValue: {
+            projectId: 'test-project-id',
+            privateKey: 'test-private-key',
+            clientEmail: 'test-client-email',
+            tempAsyncResultsBucket: 'test-temp-bucket',
+            moderationResultsBucket: 'test-moderation-results-bucket',
+          },
+        },
         SlackConfigService,
         QualificationService,
         {
@@ -1056,6 +1065,112 @@ describe('CronJobService', () => {
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await service.jobModerationCronJob();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(cronJobEntityMock);
+    });
+  });
+
+  describe('parseJobModerationResultsCronJob', () => {
+    let parseJobModerationResultsMock: any;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntity1: Partial<JobEntity>, jobEntity2: Partial<JobEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.ParseJobModerationResults,
+        startedAt: new Date(),
+      };
+
+      jobEntity1 = {
+        id: 1,
+        status: JobStatus.ON_MODERATION,
+      };
+
+      jobEntity2 = {
+        id: 2,
+        status: JobStatus.ON_MODERATION,
+      };
+
+      jest
+        .spyOn(jobRepository, 'findByStatus')
+        .mockResolvedValue([jobEntity1 as any, jobEntity2 as any]);
+
+      parseJobModerationResultsMock = jest.spyOn(
+        jobModerationService,
+        'parseJobModerationResults',
+      );
+      parseJobModerationResultsMock.mockResolvedValue(true);
+
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
+
+      const startCronJobMock = jest.spyOn(service, 'startCronJob');
+
+      await service.parseJobModerationResultsCronJob();
+
+      expect(startCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should create a cron job entity to lock the process', async () => {
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.parseJobModerationResultsCronJob();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ParseJobModerationResults,
+      );
+    });
+
+    it('should process all jobs with status ON_MODERATION', async () => {
+      await service.parseJobModerationResultsCronJob();
+
+      expect(parseJobModerationResultsMock).toHaveBeenCalledTimes(2);
+      expect(parseJobModerationResultsMock).toHaveBeenCalledWith(jobEntity1);
+      expect(parseJobModerationResultsMock).toHaveBeenCalledWith(jobEntity2);
+    });
+
+    it('should handle failed parsing attempts', async () => {
+      const error = new Error('Parsing failed');
+      parseJobModerationResultsMock.mockRejectedValueOnce(error);
+
+      const handleFailureMock = jest.spyOn(
+        jobService,
+        'handleProcessJobFailure',
+      );
+
+      await service.parseJobModerationResultsCronJob();
+
+      expect(handleFailureMock).toHaveBeenCalledTimes(1);
+      expect(handleFailureMock).toHaveBeenCalledWith(
+        jobEntity1,
+        expect.stringContaining(ErrorJobModeration.InappropriateContent),
+      );
+      expect(handleFailureMock).not.toHaveBeenCalledWith(
+        jobEntity2,
+        expect.anything(),
+      );
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.parseJobModerationResultsCronJob();
 
       expect(service.completeCronJob).toHaveBeenCalledWith(cronJobEntityMock);
     });

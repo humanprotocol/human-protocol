@@ -32,6 +32,11 @@ export enum ErrorJobModeration {
   ErrorProcessingDataset = 'Error processing dataset',
   InappropriateContent = 'Job cannot be processed due to inappropriate content',
   ContentModerationFailed = 'Job cannot be processed due to failure in content moderation',
+  NoDestinationURIFound = 'No destination URI found in the response',
+  InvalidBucketUrl = 'Invalid bucket URL',
+  NoResultsFound = 'No results found',
+  ResultsParsingFailed = 'Results parsing failed',
+  JobModerationFailed = 'Job moderation failed',
 }
 
 /**
@@ -137,6 +142,8 @@ export enum ErrorBucket {
   InvalidRegion = 'Invalid region for the storage provider',
   EmptyBucket = 'bucketName cannot be empty',
   FailedToFetchBucketContents = 'Failed to fetch bucket contents',
+  InvalidGCSUrl = 'Invalid Google Cloud Storage URL',
+  UrlParsingError = 'URL format is valid but cannot be parsed',
 }
 
 /**

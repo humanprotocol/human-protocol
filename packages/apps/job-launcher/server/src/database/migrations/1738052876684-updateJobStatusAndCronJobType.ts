@@ -1,11 +1,35 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateJobStatusAndCronJobType1737533271671
+export class UpdateJobStatusAndCronJobType1738052876684
   implements MigrationInterface
 {
-  name = 'UpdateJobStatusAndCronJobType1737533271671';
+  name = 'UpdateJobStatusAndCronJobType1738052876684';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+            ALTER TYPE "hmt"."cron-jobs_cron_job_type_enum"
+            RENAME TO "cron-jobs_cron_job_type_enum_old"
+        `);
+    await queryRunner.query(`
+            CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum" AS ENUM(
+                'job-moderation',
+                'parse-job-moderation-results',
+                'create-escrow',
+                'setup-escrow',
+                'fund-escrow',
+                'cancel-escrow',
+                'process-pending-webhook',
+                'sync-job-statuses',
+                'abuse'
+            )
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "hmt"."cron-jobs"
+            ALTER COLUMN "cron_job_type" TYPE "hmt"."cron-jobs_cron_job_type_enum" USING "cron_job_type"::"text"::"hmt"."cron-jobs_cron_job_type_enum"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "hmt"."cron-jobs_cron_job_type_enum_old"
+        `);
     await queryRunner.query(`
             ALTER TYPE "hmt"."jobs_status_enum"
             RENAME TO "jobs_status_enum_old"
@@ -14,6 +38,7 @@ export class UpdateJobStatusAndCronJobType1737533271671
             CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
                 'pending',
                 'paid',
+                'on_moderation',
                 'moderation_passed',
                 'possible_abuse_in_review',
                 'created',
@@ -33,54 +58,9 @@ export class UpdateJobStatusAndCronJobType1737533271671
     await queryRunner.query(`
             DROP TYPE "hmt"."jobs_status_enum_old"
         `);
-    await queryRunner.query(`
-            ALTER TYPE "hmt"."cron-jobs_cron_job_type_enum"
-            RENAME TO "cron-jobs_cron_job_type_enum_old"
-        `);
-    await queryRunner.query(`
-            CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum" AS ENUM(
-                'job-moderation',
-                'create-escrow',
-                'setup-escrow',
-                'fund-escrow',
-                'cancel-escrow',
-                'process-pending-webhook',
-                'sync-job-statuses',
-                'abuse'
-            )
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "hmt"."cron-jobs"
-            ALTER COLUMN "cron_job_type" TYPE "hmt"."cron-jobs_cron_job_type_enum" USING "cron_job_type"::"text"::"hmt"."cron-jobs_cron_job_type_enum"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "hmt"."cron-jobs_cron_job_type_enum_old"
-        `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-            CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum_old" AS ENUM(
-                'create-escrow',
-                'setup-escrow',
-                'fund-escrow',
-                'cancel-escrow',
-                'process-pending-webhook',
-                'sync-job-statuses',
-                'abuse'
-            )
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "hmt"."cron-jobs"
-            ALTER COLUMN "cron_job_type" TYPE "hmt"."cron-jobs_cron_job_type_enum_old" USING "cron_job_type"::"text"::"hmt"."cron-jobs_cron_job_type_enum_old"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "hmt"."cron-jobs_cron_job_type_enum"
-        `);
-    await queryRunner.query(`
-            ALTER TYPE "hmt"."cron-jobs_cron_job_type_enum_old"
-            RENAME TO "cron-jobs_cron_job_type_enum"
-        `);
     await queryRunner.query(`
             CREATE TYPE "hmt"."jobs_status_enum_old" AS ENUM(
                 'pending',
@@ -105,6 +85,28 @@ export class UpdateJobStatusAndCronJobType1737533271671
     await queryRunner.query(`
             ALTER TYPE "hmt"."jobs_status_enum_old"
             RENAME TO "jobs_status_enum"
+        `);
+    await queryRunner.query(`
+            CREATE TYPE "hmt"."cron-jobs_cron_job_type_enum_old" AS ENUM(
+                'create-escrow',
+                'setup-escrow',
+                'fund-escrow',
+                'cancel-escrow',
+                'process-pending-webhook',
+                'sync-job-statuses',
+                'abuse'
+            )
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "hmt"."cron-jobs"
+            ALTER COLUMN "cron_job_type" TYPE "hmt"."cron-jobs_cron_job_type_enum_old" USING "cron_job_type"::"text"::"hmt"."cron-jobs_cron_job_type_enum_old"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "hmt"."cron-jobs_cron_job_type_enum"
+        `);
+    await queryRunner.query(`
+            ALTER TYPE "hmt"."cron-jobs_cron_job_type_enum_old"
+            RENAME TO "cron-jobs_cron_job_type_enum"
         `);
   }
 }
