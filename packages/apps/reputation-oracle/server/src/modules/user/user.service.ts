@@ -1,11 +1,5 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { ErrorOperator, ErrorUser } from '../../common/constants/errors';
 import {
   KycStatus,
   OperatorStatus,
@@ -14,12 +8,7 @@ import {
 } from '../../common/enums/user';
 import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
-import {
-  RegistrationInExchangeOracleDto,
-  RegisterAddressRequestDto,
-  SignatureBodyDto,
-  UserCreateDto,
-} from './user.dto';
+import { RegisterAddressRequestDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
@@ -30,11 +19,16 @@ import { SiteKeyEntity } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { prepareSignatureBody } from '../../common/utils/signature';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { ethers } from 'ethers';
+import {
+  UserError,
+  DuplicatedWalletAddressError,
+  UserErrorMessage,
+} from './user.error';
 
 @Injectable()
 export class UserService {
@@ -81,8 +75,6 @@ export class UserService {
   }
 
   public async createWeb3User(address: string): Promise<UserEntity> {
-    await this.checkEvmAddress(address);
-
     const newUser = new UserEntity();
     newUser.evmAddress = address.toLowerCase();
     newUser.nonce = generateNonce();
@@ -93,28 +85,6 @@ export class UserService {
     return newUser;
   }
 
-  public async checkEvmAddress(address: string): Promise<void> {
-    const userEntity = await this.userRepository.findOneByAddress(address);
-
-    if (userEntity) {
-      this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
-      throw new ControlledError(
-        ErrorUser.AccountCannotBeRegistered,
-        HttpStatus.CONFLICT,
-      );
-    }
-  }
-
-  public async getByAddress(address: string): Promise<UserEntity> {
-    const userEntity = await this.userRepository.findOneByAddress(address);
-
-    if (!userEntity) {
-      throw new ControlledError(ErrorUser.NotFound, HttpStatus.NOT_FOUND);
-    }
-
-    return userEntity;
-  }
-
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.nonce = generateNonce();
     return this.userRepository.updateOne(userEntity);
@@ -122,18 +92,15 @@ export class UserService {
 
   public async registerLabeler(user: UserEntity): Promise<string> {
     if (user.role !== Role.WORKER) {
-      throw new BadRequestException(ErrorUser.InvalidType);
+      throw new UserError(UserErrorMessage.INVALID_ROLE, user.id);
     }
 
     if (!user.evmAddress) {
-      throw new ControlledError(
-        ErrorUser.NoWalletAddresRegistered,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.MISSING_ADDRESS, user.id);
     }
 
     if (user.kyc?.status !== KycStatus.APPROVED) {
-      throw new BadRequestException(ErrorUser.KycNotApproved);
+      throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
     if (user.siteKeys && user.siteKeys.length > 0) {
@@ -154,10 +121,7 @@ export class UserService {
     });
 
     if (!registeredLabeler) {
-      throw new ControlledError(
-        ErrorUser.LabelingEnableFailed,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id);
     }
 
     // Retrieve labeler site key from hcaptcha foundation
@@ -165,10 +129,7 @@ export class UserService {
       email: user.email,
     });
     if (!labelerData || !labelerData.sitekeys.length) {
-      throw new ControlledError(
-        ErrorUser.LabelingEnableFailed,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id);
     }
     const siteKey = labelerData.sitekeys[0].sitekey;
 
@@ -189,32 +150,24 @@ export class UserService {
     data.address = data.address.toLowerCase();
 
     if (user.evmAddress) {
-      throw new ControlledError(
-        ErrorUser.AlreadyAssigned,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.ADDRESS_EXISTS, user.id);
     }
 
     if (user.kyc?.status !== KycStatus.APPROVED) {
-      throw new ControlledError(
-        ErrorUser.KycNotApproved,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
     const dbUser = await this.userRepository.findOneByAddress(data.address);
     if (dbUser) {
-      throw new ControlledError(
-        ErrorUser.DuplicatedAddress,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new DuplicatedWalletAddressError(user.id, data.address);
     }
 
     // Prepare signed data and verify the signature
-    const signedData = await this.prepareSignatureBody(
-      SignatureType.REGISTER_ADDRESS,
-      data.address,
-    );
+    const signedData = prepareSignatureBody({
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.REGISTER_ADDRESS,
+    });
     verifySignature(signedData, data.signature, [data.address]);
 
     user.evmAddress = data.address.toLowerCase();
@@ -234,10 +187,11 @@ export class UserService {
     user: UserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = await this.prepareSignatureBody(
-      SignatureType.ENABLE_OPERATOR,
-      user.evmAddress,
-    );
+    const signedData = prepareSignatureBody({
+      from: user.evmAddress,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.ENABLE_OPERATOR,
+    });
 
     verifySignature(signedData, signature, [user.evmAddress]);
 
@@ -260,10 +214,7 @@ export class UserService {
     } catch {}
 
     if (status === OperatorStatus.ACTIVE) {
-      throw new ControlledError(
-        ErrorOperator.OperatorAlreadyActive,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.OPERATOR_ALREADY_ACTIVE, user.id);
     }
 
     await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.ACTIVE);
@@ -273,10 +224,11 @@ export class UserService {
     user: UserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = await this.prepareSignatureBody(
-      SignatureType.DISABLE_OPERATOR,
-      user.evmAddress,
-    );
+    const signedData = prepareSignatureBody({
+      from: user.evmAddress,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.DISABLE_OPERATOR,
+    });
 
     verifySignature(signedData, signature, [user.evmAddress]);
 
@@ -301,65 +253,10 @@ export class UserService {
     );
 
     if (status === OperatorStatus.INACTIVE) {
-      throw new ControlledError(
-        ErrorOperator.OperatorNotActive,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UserError(UserErrorMessage.OPERATOR_NOT_ACTIVE, user.id);
     }
 
     await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.INACTIVE);
-  }
-
-  public async prepareSignatureBody(
-    type: SignatureType,
-    address: string,
-    additionalData?: { reference?: string; workerAddress?: string },
-  ): Promise<SignatureBodyDto> {
-    let content: string;
-    let nonce: string | undefined;
-    switch (type) {
-      case SignatureType.SIGNUP:
-        content = 'signup';
-        break;
-      case SignatureType.SIGNIN:
-        content = 'signin';
-        nonce = (await this.userRepository.findOneByAddress(address))?.nonce;
-        break;
-      case SignatureType.ENABLE_OPERATOR:
-        content = 'enable-operator';
-        break;
-      case SignatureType.DISABLE_OPERATOR:
-        content = 'disable-operator';
-        break;
-      case SignatureType.CERTIFICATE_AUTHENTICATION:
-        if (
-          !additionalData ||
-          !additionalData.reference ||
-          !additionalData.workerAddress
-        ) {
-          throw new ControlledError(
-            'Missing necessary credential data',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        content = JSON.stringify({
-          reference: additionalData.reference,
-          workerJson: additionalData.workerAddress.toLowerCase(),
-        });
-        break;
-      case SignatureType.REGISTER_ADDRESS:
-        content = 'register-address';
-        break;
-      default:
-        throw new ControlledError('Type not allowed', HttpStatus.BAD_REQUEST);
-    }
-
-    return {
-      from: address.toLowerCase(),
-      to: this.web3Service.getOperatorAddress().toLowerCase(),
-      contents: content,
-      nonce: nonce ?? undefined,
-    };
   }
 
   public async registrationInExchangeOracle(

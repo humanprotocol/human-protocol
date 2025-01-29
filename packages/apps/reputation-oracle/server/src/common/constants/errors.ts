@@ -37,22 +37,6 @@ export enum ErrorSignature {
 }
 
 /**
- * Represents error messages related to user.
- */
-export enum ErrorUser {
-  NotFound = 'User not found.',
-  AccountCannotBeRegistered = 'Account cannot be registered.',
-  BalanceCouldNotBeRetreived = 'User balance could not be retrieved.',
-  InvalidCredentials = 'Invalid credentials.',
-  AlreadyAssigned = 'User already has an address assigned.',
-  NoWalletAddresRegistered = 'No wallet address registered on your account.',
-  KycNotApproved = 'KYC not approved.',
-  LabelingEnableFailed = 'Failed to enable labeling for this account.',
-  InvalidType = 'User has invalid type.',
-  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address.',
-}
-
-/**
  * Represents error messages related to send grid.
  */
 export enum ErrorSendGrid {
@@ -76,12 +60,4 @@ export enum ErrorWeb3 {
   NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
-}
-
-/**
- * Represents error messages related to operator.
- */
-export enum ErrorOperator {
-  OperatorAlreadyActive = 'Operator is already active',
-  OperatorNotActive = 'Operator not active',
 }
