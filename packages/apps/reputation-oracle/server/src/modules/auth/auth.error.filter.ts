@@ -11,7 +11,7 @@ import {
   AuthError,
   DuplicatedUserEmailError,
   InvalidOperatorSignupDataError,
-} from './auth.errors';
+} from './auth.error';
 
 type AuthControllerError =
   | AuthError

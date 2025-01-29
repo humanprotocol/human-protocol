@@ -50,7 +50,7 @@ import {
   InvalidOperatorJobTypesError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
-} from './auth.errors';
+} from './auth.error';
 
 @Injectable()
 export class AuthService {

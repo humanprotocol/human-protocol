@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { SignatureAuthGuard } from './signature.auth';
 import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
@@ -79,18 +79,34 @@ describe('SignatureAuthGuard', () => {
     });
 
     it('should throw unauthorized exception if signature is not verified', async () => {
-      (verifySignature as jest.Mock).mockReturnValue(false);
+      (verifySignature as jest.Mock).mockReturnValueOnce(false);
 
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
-      );
+      try {
+        await guard.canActivate(context as any);
+      } catch (error) {
+        expect(error).toBeInstanceOf(HttpException);
+        expect(error.response).toHaveProperty(
+          'message',
+          'Invalid web3 signature',
+        );
+        expect(error.response).toHaveProperty('timestamp');
+        expect(error).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
+      }
     });
 
     it('should throw unauthorized exception for unrecognized oracle type', async () => {
       mockRequest.originalUrl = '/some/random/path';
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
-      );
+      try {
+        await guard.canActivate(context as any);
+      } catch (error) {
+        expect(error).toBeInstanceOf(HttpException);
+        expect(error.response).toHaveProperty(
+          'message',
+          'Invalid web3 signature',
+        );
+        expect(error.response).toHaveProperty('timestamp');
+        expect(error).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
+      }
     });
   });
 });

@@ -25,3 +25,11 @@ export class DuplicatedWalletAddressError extends BaseError {
     this.userId = userId;
   }
 }
+
+export class InvalidWeb3SignatureError extends BaseError {
+  userId: number;
+  constructor(userId: number, address: string) {
+    super(`Invalid web3 signature provided for: ${address}`);
+    this.userId = userId;
+  }
+}

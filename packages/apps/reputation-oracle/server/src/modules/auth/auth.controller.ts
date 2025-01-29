@@ -36,7 +36,7 @@ import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
-import { AuthControllerErrorsFilter } from './auth.error-filter';
+import { AuthControllerErrorsFilter } from './auth.error.filter';
 
 @ApiTags('Auth')
 @ApiResponse({

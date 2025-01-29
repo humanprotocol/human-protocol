@@ -47,7 +47,6 @@ describe('CredentialService', () => {
           useValue: {
             getSigner: jest.fn().mockReturnValue({ address: MOCK_ADDRESS }),
             signMessage: jest.fn(),
-            prepareSignatureBody: jest.fn(),
           },
         },
         {

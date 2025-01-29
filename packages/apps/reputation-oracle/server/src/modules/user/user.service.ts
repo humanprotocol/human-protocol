@@ -26,8 +26,9 @@ import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { ethers } from 'ethers';
 import {
   UserError,
-  DuplicatedWalletAddressError,
   UserErrorMessage,
+  DuplicatedWalletAddressError,
+  InvalidWeb3SignatureError,
 } from './user.error';
 
 @Injectable()
@@ -168,7 +169,13 @@ export class UserService {
       to: this.web3Service.getOperatorAddress(),
       contents: SignatureType.REGISTER_ADDRESS,
     });
-    verifySignature(signedData, data.signature, [data.address]);
+    const verified = verifySignature(signedData, data.signature, [
+      data.address,
+    ]);
+
+    if (!verified) {
+      throw new InvalidWeb3SignatureError(user.id, data.address);
+    }
 
     user.evmAddress = data.address.toLowerCase();
     await this.userRepository.updateOne(user);
@@ -193,7 +200,11 @@ export class UserService {
       contents: SignatureType.ENABLE_OPERATOR,
     });
 
-    verifySignature(signedData, signature, [user.evmAddress]);
+    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+
+    if (!verified) {
+      throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
+    }
 
     let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;
@@ -230,7 +241,11 @@ export class UserService {
       contents: SignatureType.DISABLE_OPERATOR,
     });
 
-    verifySignature(signedData, signature, [user.evmAddress]);
+    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+
+    if (!verified) {
+      throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
+    }
 
     let chainId: ChainId;
     const currentWeb3Env = this.web3ConfigService.env;

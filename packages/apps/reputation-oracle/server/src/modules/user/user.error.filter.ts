@@ -7,11 +7,18 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { UserError, DuplicatedWalletAddressError } from './user.error';
+import {
+  UserError,
+  DuplicatedWalletAddressError,
+  InvalidWeb3SignatureError,
+} from './user.error';
 
-type UserControllerError = UserError | DuplicatedWalletAddressError;
+type UserControllerError =
+  | UserError
+  | DuplicatedWalletAddressError
+  | InvalidWeb3SignatureError;
 
-@Catch(UserError, DuplicatedWalletAddressError)
+@Catch(UserError, DuplicatedWalletAddressError, InvalidWeb3SignatureError)
 export class UserErrorFilter implements ExceptionFilter {
   private logger = new Logger(UserErrorFilter.name);
   catch(exception: UserControllerError, host: ArgumentsHost) {
@@ -21,6 +28,8 @@ export class UserErrorFilter implements ExceptionFilter {
     let status = HttpStatus.BAD_REQUEST;
 
     if (exception instanceof DuplicatedWalletAddressError) {
+      status = HttpStatus.CONFLICT;
+    } else if (exception instanceof InvalidWeb3SignatureError) {
       status = HttpStatus.CONFLICT;
     }
 
