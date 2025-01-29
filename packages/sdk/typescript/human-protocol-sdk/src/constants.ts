@@ -148,10 +148,10 @@ export const KVStoreKeys = {
 };
 
 export const Role = {
-  JobLauncher: 'Job Launcher',
-  ExchangeOracle: 'Exchange Oracle',
-  ReputationOracle: 'Reputation Oracle',
-  RecordingOracle: 'Recording Oracle',
+  JobLauncher: 'job_launcher',
+  ExchangeOracle: 'exchange_oracle',
+  ReputationOracle: 'reputation_oracle',
+  RecordingOracle: 'recording_oracle',
 };
 
 export const SUBGRAPH_API_KEY_PLACEHOLDER = '[SUBGRAPH_API_KEY]';
