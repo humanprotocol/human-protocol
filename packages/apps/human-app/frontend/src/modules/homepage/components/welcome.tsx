@@ -13,11 +13,11 @@ import { OperatorSignIn } from '@/modules/homepage/hooks/use-operator-signin';
 import { WorkerSignIn } from '@/modules/homepage/components/worker-signin';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
-import { useBackgroundColorContext } from '@/shared/contexts/background';
+import { useBackgroundContext } from '@/shared/contexts/background';
 
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();
-  const { setWhiteBackground } = useBackgroundColorContext();
+  const { setWhiteBackground } = useBackgroundContext();
   const { setPageView } = useHomePageState();
   const { t } = useTranslation();
   const logoText: string = t('homepage.humanApp');
