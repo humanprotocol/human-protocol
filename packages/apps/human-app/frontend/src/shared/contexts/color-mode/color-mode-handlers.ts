@@ -1,23 +1,6 @@
-import { hasColorMode } from './color-mode-settings';
-
-export const handleColorModeChange = (
-  matches: boolean,
-  setIsDarkMode: (value: boolean) => void
-) => {
-  if (hasColorMode()) {
-    return;
-  }
-  setIsDarkMode(matches);
-  if (matches) {
-    document.body.classList.add('dark-mode');
-  } else {
-    document.body.classList.remove('dark-mode');
-  }
-};
-
-export const runColorMode = (
+export const addColorSchemePrefsListener = (
   fn: (matches: boolean) => void
-): (() => void) | undefined => {
+): (() => void) => {
   const query = window.matchMedia('(prefers-color-scheme: dark)');
   fn(query.matches);
 

@@ -14,10 +14,11 @@ import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { BackgroundProvider } from '@/shared/contexts/background-color-store';
 import {
   ColorMode,
+  hasColorMode,
   isDarkColorMode,
   saveColorMode,
 } from './color-mode-settings';
-import { handleColorModeChange, runColorMode } from './color-mode-handlers';
+import { addColorSchemePrefsListener } from './color-mode-handlers';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;
@@ -38,13 +39,25 @@ export function ColorModeProvider({
 }: Readonly<ColorModeProviderProps>) {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(isDarkColorMode());
 
+  const handleColorSchemePrefsChange = (prefersDarkScheme: boolean) => {
+    if (hasColorMode()) {
+      return;
+    }
+    setIsDarkMode(prefersDarkScheme);
+    if (prefersDarkScheme) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = runColorMode((matches) => {
-      handleColorModeChange(matches, setIsDarkMode);
-    });
+    const unsubscribe = addColorSchemePrefsListener(
+      handleColorSchemePrefsChange
+    );
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      unsubscribe();
     };
   }, []);
 
