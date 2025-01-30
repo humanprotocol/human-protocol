@@ -83,8 +83,12 @@ export class TransformEnumInterceptor implements NestInterceptor {
     instance: any,
     targetClass: ClassConstructor<any>,
   ): any {
+    if (!instance || typeof instance !== 'object') {
+      return bodyOrQuery;
+    }
+
     for (const property in bodyOrQuery) {
-      if (Object.prototype.hasOwnProperty.call(bodyOrQuery, property)) {
+      if (bodyOrQuery.hasOwnProperty(property)) {
         const instanceValue = instance[property];
 
         // Retrieve enum metadata if available
@@ -93,6 +97,10 @@ export class TransformEnumInterceptor implements NestInterceptor {
           targetClass.prototype,
           property,
         );
+
+        if (!enumType) {
+          continue; // Skip this property if no enum metadata is found
+        }
 
         if (enumType && typeof instanceValue === 'string') {
           // Check if it's an enum and convert to lowercase
