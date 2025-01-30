@@ -840,7 +840,7 @@ export class JobService {
     const currency = dto.currency ?? JobCurrency.HMT;
     const rate = await this.rateService.getRate(currency, Currency.USD);
     const tokenFee = max(
-      div(this.serverConfigService.minimunFeeUsd, rate),
+      mul(this.serverConfigService.minimunFeeUsd, rate),
       mul(div(feePercentage, 100), dto.fundAmount),
     );
     const totalAmountToPay = add(dto.fundAmount, tokenFee);
