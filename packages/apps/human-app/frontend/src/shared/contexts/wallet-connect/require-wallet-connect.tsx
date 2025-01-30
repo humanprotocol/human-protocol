@@ -5,7 +5,7 @@ import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { type WalletConnectContextConnectedAccount } from './types';
 import { useWalletConnect } from './use-wallet-connect';
 
-export const AuthWeb3Context =
+export const ConnectedWalletContext =
   createContext<WalletConnectContextConnectedAccount | null>(null);
 
 export function RequireWalletConnect({
@@ -29,8 +29,8 @@ export function RequireWalletConnect({
   }
 
   return (
-    <AuthWeb3Context.Provider value={walletConnect}>
+    <ConnectedWalletContext.Provider value={walletConnect}>
       {children}
-    </AuthWeb3Context.Provider>
+    </ConnectedWalletContext.Provider>
   );
 }

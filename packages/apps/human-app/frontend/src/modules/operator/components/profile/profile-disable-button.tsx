@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { Typography } from '@mui/material';
 import { useDisableWeb3Operator } from '@/modules/operator/hooks/use-disable-operator';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { Button } from '@/shared/components/ui/button';
 import type { SignatureData } from '@/api/hooks/use-prepare-signature';
 import {

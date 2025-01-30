@@ -1,8 +1,8 @@
 import { useContext } from 'react';
-import { AuthWeb3Context } from '@/shared/contexts/wallet-connect/require-wallet-connect';
+import { ConnectedWalletContext } from './require-wallet-connect';
 
 export const useConnectedWallet = () => {
-  const context = useContext(AuthWeb3Context);
+  const context = useContext(ConnectedWalletContext);
 
   if (!context) {
     throw new Error(

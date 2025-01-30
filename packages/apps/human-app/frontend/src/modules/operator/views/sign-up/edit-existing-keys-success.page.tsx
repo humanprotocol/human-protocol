@@ -14,7 +14,7 @@ import {
   usePrepareSignature,
 } from '@/api/hooks/use-prepare-signature';
 import { Alert } from '@/shared/components/ui/alert';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 
 export function EditExistingKeysSuccessPage() {
   const { address, signMessage } = useConnectedWallet();

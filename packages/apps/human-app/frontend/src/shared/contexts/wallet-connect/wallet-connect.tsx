@@ -87,7 +87,6 @@ export function WalletConnectProvider({
           throw new JsonRpcError(error);
         }
       }
-      return Promise.resolve(undefined);
     },
     [web3ProviderMutation.data]
   );
