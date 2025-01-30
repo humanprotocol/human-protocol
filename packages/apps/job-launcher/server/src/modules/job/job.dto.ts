@@ -191,6 +191,7 @@ export class JobCvatDto extends JobDto {
   @ApiProperty({ name: 'min_quality' })
   @IsNumber()
   @IsPositive()
+  @Max(1)
   public minQuality: number;
 
   @ApiProperty({ name: 'ground_truth' })

@@ -1,14 +1,15 @@
 import { BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
+  afterEach,
+  assert,
+  beforeAll,
+  clearStore,
+  dataSourceMock,
   describe,
   test,
-  assert,
-  clearStore,
-  afterEach,
-  dataSourceMock,
-  beforeAll,
 } from 'matchstick-as/assembly';
 
+import { Leader } from '../../generated/schema';
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { toEventId } from '../../src/mapping/utils/event';
 import { toBytes } from '../../src/mapping/utils/string';
@@ -262,6 +263,78 @@ describe('KVStore', () => {
       internalTransactionId,
       'method',
       'set'
+    );
+  });
+  test('Should properly remove KVStore entity when value is empty', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Operator',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      '',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+
+    assert.fieldEquals(
+      'KVStore',
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
+      'value',
+      'Operator'
+    );
+
+    handleDataSaved(data2);
+
+    assert.notInStore(
+      'KVStore',
+      data2.params.sender.concat(toBytes(data2.params.key)).toHex()
+    );
+  });
+
+  test("Should properly set leader's attribute to null when value is empty and remove KVStore entity", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Operator',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      '',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHex(),
+      'role',
+      'Operator'
+    );
+    assert.fieldEquals(
+      'KVStore',
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
+      'key',
+      'role'
+    );
+
+    handleDataSaved(data2);
+
+    const leader = Leader.load(data2.params.sender);
+    assert.assertNotNull(leader);
+    if (leader != null) {
+      assert.assertNull(leader.role);
+    }
+    assert.notInStore(
+      'KVStore',
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex()
     );
   });
 

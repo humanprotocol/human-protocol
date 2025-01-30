@@ -1,15 +1,4 @@
 /**
- * Represents error messages related to escrow completion.
- */
-export enum ErrorEscrowCompletion {
-  NotFound = 'Escrow completion not found',
-  NotCreated = 'Escrow completion has not been created',
-  PendingProcessingFailed = 'Failed to process pending escrow completion',
-  PaidProcessingFailed = 'Failed to process paid escrow completion',
-  AwaitingPayoutsProcessingFailed = 'Failed to process payouts for escrow completion',
-}
-
-/**
  * Represents error messages related to results.
  */
 export enum ErrorResults {
@@ -26,30 +15,6 @@ export enum ErrorResults {
 export enum ErrorManifest {
   ManifestUrlDoesNotExist = 'Manifest url does not exist',
   UnsupportedManifestType = 'Unsupported manifest type',
-}
-
-/**
- * Represents error messages related to signature.
- */
-export enum ErrorSignature {
-  SignatureNotVerified = 'Signature not verified',
-  InvalidSignature = 'Invalid signature',
-}
-
-/**
- * Represents error messages related to user.
- */
-export enum ErrorUser {
-  NotFound = 'User not found.',
-  AccountCannotBeRegistered = 'Account cannot be registered.',
-  BalanceCouldNotBeRetreived = 'User balance could not be retrieved.',
-  InvalidCredentials = 'Invalid credentials.',
-  AlreadyAssigned = 'User already has an address assigned.',
-  NoWalletAddresRegistered = 'No wallet address registered on your account.',
-  KycNotApproved = 'KYC not approved.',
-  LabelingEnableFailed = 'Failed to enable labeling for this account.',
-  InvalidType = 'User has invalid type.',
-  DuplicatedAddress = 'The address you are trying to use already exists. Please check that the address is correct or use a different address.',
 }
 
 /**
@@ -76,12 +41,4 @@ export enum ErrorWeb3 {
   NoValidNetworks = 'No valid networks found',
   InvalidChainId = 'Invalid chain id provided for the configured environment',
   GasPriceError = 'Error calculating gas price',
-}
-
-/**
- * Represents error messages related to operator.
- */
-export enum ErrorOperator {
-  OperatorAlreadyActive = 'Operator is already active',
-  OperatorNotActive = 'Operator not active',
 }

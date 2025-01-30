@@ -1,8 +1,8 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 
-export type HomePageStateType = 'welcome' | 'chooseSignUpAccountType';
+type HomePageStateType = 'welcome' | 'chooseSignUpAccountType';
 
 interface HomePageStageContextProps {
   pageView: HomePageStateType;
@@ -15,30 +15,23 @@ export const HomePageStateContext =
 
 export function HomePageStateProvider({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [pageView, setPageView] = useState<HomePageStateType>('welcome');
 
   const location = useLocation();
   const isMainPage =
     location.pathname === routerPaths.homePage && pageView === 'welcome';
 
+  const contextValue = useMemo(
+    () => ({ pageView, setPageView, isMainPage }),
+    [pageView, setPageView, isMainPage]
+  );
+
   return (
-    <HomePageStateContext.Provider
-      value={{ pageView, setPageView, isMainPage }}
-    >
+    <HomePageStateContext.Provider value={contextValue}>
       {children}
     </HomePageStateContext.Provider>
   );
 }
-
-export const useHomePageState = () => {
-  const context = useContext(HomePageStateContext);
-  if (!context) {
-    throw new Error(
-      'useHomePageState must be used within a HomePageStageProvider'
-    );
-  }
-  return context;
-};
