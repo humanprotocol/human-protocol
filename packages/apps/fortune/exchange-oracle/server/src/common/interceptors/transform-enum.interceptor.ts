@@ -98,10 +98,6 @@ export class TransformEnumInterceptor implements NestInterceptor {
           property,
         );
 
-        if (!enumType) {
-          continue; // Skip this property if no enum metadata is found
-        }
-
         if (enumType && typeof instanceValue === 'string') {
           // Check if it's an enum and convert to lowercase
           if (Object.values(enumType).includes(instanceValue.toLowerCase())) {

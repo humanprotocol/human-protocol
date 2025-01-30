@@ -171,7 +171,7 @@ describe('WebhookController', () => {
         });
 
       await expect(
-        webhookController.processWebhook(mockSignature, invalidDto),
+        webhookController.processWebhook(invalidDto, mockSignature),
       ).rejects.toThrow(
         new ControlledError('Invalid manifest URL', HttpStatus.BAD_REQUEST),
       );
@@ -198,8 +198,8 @@ describe('WebhookController', () => {
 
       await expect(
         webhookController.processWebhook(
-          mockSignature,
           manifestCannotBeDownloadedDto,
+          mockSignature,
         ),
       ).rejects.toThrow(BadRequestException);
 
