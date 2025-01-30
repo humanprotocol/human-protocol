@@ -5,7 +5,7 @@ export const useBackgroundContext = (): BackgroundContextProps => {
   const context = useContext(BackgroundContext);
   if (!context) {
     throw new Error(
-      'useBackgroundColor must be used within a BackgroundProvider'
+      'useBackgroundContext must be used within a BackgroundProvider'
     );
   }
   return context;
