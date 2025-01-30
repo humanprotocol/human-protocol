@@ -10,7 +10,7 @@ import {
 } from '@/api/hooks/use-prepare-signature';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 
 const RegisterAddressSuccessSchema = z.unknown();
 

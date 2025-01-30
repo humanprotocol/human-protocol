@@ -6,7 +6,7 @@ import styled from '@mui/material/styles/styled';
 import { CheckmarkIcon } from '@/shared/components/ui/icons';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useColorMode } from '@/shared/hooks/use-color-mode';
 import {
   darkColorPalette,
