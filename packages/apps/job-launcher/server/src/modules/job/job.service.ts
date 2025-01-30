@@ -911,7 +911,7 @@ export class JobService {
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -dto.fundAmount;
+    paymentEntity.amount = -add(dto.fundAmount, tokenFee);
     paymentEntity.currency = currency;
     paymentEntity.rate = rate;
     paymentEntity.status = PaymentStatus.SUCCEEDED;
