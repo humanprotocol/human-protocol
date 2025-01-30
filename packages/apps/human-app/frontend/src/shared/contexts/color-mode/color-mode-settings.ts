@@ -1,6 +1,11 @@
 const MODE_LOCAL_STORAGE_KEY = 'mode';
 
-export const saveColorMode = (mode: 'dark' | 'light') => {
+export enum ColorMode {
+  DARK = 'dark',
+  LIGHT = 'light',
+}
+
+export const saveColorMode = (mode: ColorMode) => {
   localStorage.setItem(MODE_LOCAL_STORAGE_KEY, mode);
 };
 

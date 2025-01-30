@@ -13,10 +13,11 @@ import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 import { BackgroundProvider } from '@/shared/contexts/background-color-store';
 import {
-  hasColorMode,
+  ColorMode,
   isDarkColorMode,
   saveColorMode,
 } from './color-mode-settings';
+import { handleColorModeChange, runColorMode } from './color-mode-handlers';
 
 export interface ColorModeContextProps {
   isDarkMode: boolean;
@@ -38,19 +39,9 @@ export function ColorModeProvider({
   const [isDarkMode, setIsDarkMode] = useState<boolean>(isDarkColorMode());
 
   useEffect(() => {
-    const handleColorModeChange = (matches: boolean) => {
-      if (hasColorMode()) {
-        return;
-      }
-      setIsDarkMode(matches);
-      if (matches) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-    };
-
-    const unsubscribe = runColorMode(handleColorModeChange);
+    const unsubscribe = runColorMode((matches) => {
+      handleColorModeChange(matches, setIsDarkMode);
+    });
 
     return () => {
       if (unsubscribe) unsubscribe();
@@ -60,26 +51,10 @@ export function ColorModeProvider({
   const switchMode = useCallback(() => {
     setIsDarkMode((current) => {
       const newMode = !current;
-      saveColorMode(newMode ? 'dark' : 'light');
+      saveColorMode(newMode ? ColorMode.DARK : ColorMode.LIGHT);
       return newMode;
     });
   }, []);
-
-  const runColorMode = (
-    fn: (matches: boolean) => void
-  ): (() => void) | undefined => {
-    const query = window.matchMedia('(prefers-color-scheme: dark)');
-    fn(query.matches);
-
-    const listener = (event: MediaQueryListEvent) => {
-      fn(event.matches);
-    };
-    query.addEventListener('change', listener);
-
-    return () => {
-      query.removeEventListener('change', listener);
-    };
-  };
 
   const themes = useMemo(
     () => (isDarkMode ? createTheme(darkTheme) : createTheme(theme)),
