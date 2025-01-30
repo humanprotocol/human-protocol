@@ -88,7 +88,7 @@ export class TransformEnumInterceptor implements NestInterceptor {
     }
 
     for (const property in bodyOrQuery) {
-      if (Object.prototype.hasOwnProperty.call(bodyOrQuery, property)) {
+      if (bodyOrQuery.hasOwnProperty(property)) {
         const instanceValue = instance[property];
 
         // Retrieve enum metadata if available
