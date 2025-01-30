@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { Sorting } from '@/modules/worker/components/jobs/sorting';
 

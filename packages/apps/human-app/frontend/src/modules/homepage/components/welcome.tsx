@@ -11,7 +11,7 @@ import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { OperatorSignIn } from '@/modules/homepage/hooks/use-operator-signin';
 import { WorkerSignIn } from '@/modules/homepage/components/worker-signin';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
 

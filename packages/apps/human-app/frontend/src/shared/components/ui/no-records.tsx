@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function NoRecords() {
   const { colorPalette } = useColorMode();

@@ -7,7 +7,7 @@ import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { HomeContainer } from '@/modules/homepage/components/home-container';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
 

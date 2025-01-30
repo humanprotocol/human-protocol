@@ -4,7 +4,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import MuiAlert from '@mui/material/Alert';
 import type { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import { Typography } from '@mui/material';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
 
 const getIcon = (severity: MuiAlertProps['severity'], isDarkMode: boolean) => {

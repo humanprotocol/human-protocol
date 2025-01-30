@@ -23,7 +23,7 @@ import { TableHeaderCell } from '@/shared/components/ui/table/table-header-cell'
 import { AvailableJobsNetworkFilter } from '@/modules/worker/components/jobs/available-jobs/desktop/available-jobs-network-filter';
 import { AvailableJobsRewardAmountSort } from '@/modules/worker/components/jobs/available-jobs/desktop/available-jobs-reward-amount-sort';
 import { AvailableJobsJobTypeFilter } from '@/modules/worker/components/jobs/available-jobs/desktop/available-jobs-job-type-filter';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
