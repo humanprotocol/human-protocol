@@ -847,7 +847,7 @@ export class JobService {
     );
 
     const paymentCurrencyFee = max(
-      mul(this.serverConfigService.minimunFeeUsd, paymentCurrencyRate),
+      div(this.serverConfigService.minimunFeeUsd, paymentCurrencyRate),
       mul(div(feePercentage, 100), dto.paymentAmount),
     );
     const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
@@ -864,14 +864,14 @@ export class JobService {
       );
     }
 
-    const fundTokenFee = mul(
-      div(paymentCurrencyFee, paymentCurrencyRate),
-      fundTokenRate,
-    );
-    const fundTokenAmount = mul(
-      div(dto.paymentAmount, paymentCurrencyRate),
-      fundTokenRate,
-    );
+    const fundTokenFee =
+      dto.paymentCurrency === dto.escrowFundToken
+        ? paymentCurrencyFee
+        : mul(mul(paymentCurrencyFee, paymentCurrencyRate), fundTokenRate);
+    const fundTokenAmount =
+      dto.paymentCurrency === dto.escrowFundToken
+        ? dto.paymentAmount
+        : mul(mul(dto.paymentAmount, paymentCurrencyRate), fundTokenRate);
 
     let jobEntity = new JobEntity();
 
