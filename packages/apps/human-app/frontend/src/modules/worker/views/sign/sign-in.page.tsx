@@ -1,12 +1,13 @@
 import { t } from 'i18next';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
-import { FetchError } from '@/api/fetcher';
-import { useSignIn } from '@/modules/worker/hooks/use-sign-in';
 import { getErrorMessageForError } from '@/shared/errors';
-import { SignInForm } from '@/modules/worker/components/sign-in/sign-in-form';
+import { SignInForm, useSignIn } from '@/modules/signin/worker';
+import { FetchError } from '@/api/fetcher';
 
-function formattedSignInErrorMessage(unknownError: unknown) {
+function formattedSignInErrorMessage(
+  unknownError: unknown
+): string | undefined {
   if (unknownError instanceof FetchError && unknownError.status === 400) {
     return t('worker.signInForm.errors.invalidCredentials');
   }
