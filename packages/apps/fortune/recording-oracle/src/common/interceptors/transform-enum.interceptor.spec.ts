@@ -203,34 +203,34 @@ describe('TransformEnumInterceptor', () => {
 
   it('should return bodyOrQuery if instance is not an object', () => {
     // Test with `null` as the instance
-    let result = interceptor['lowercaseEnumProperties']( 
-      { status: 'PENDING' }, 
+    let result = interceptor['lowercaseEnumProperties'](
+      { status: 'PENDING' },
       null,
-      MockDto
+      MockDto,
     );
     expect(result).toEqual({ status: 'PENDING' });
-  
+
     // Test with `undefined` as the instance
-    result = interceptor['lowercaseEnumProperties']( 
-      { status: 'PENDING' }, 
+    result = interceptor['lowercaseEnumProperties'](
+      { status: 'PENDING' },
       undefined,
-      MockDto
+      MockDto,
     );
     expect(result).toEqual({ status: 'PENDING' });
-  
+
     // Test with a primitive value (string) as the instance
-    result = interceptor['lowercaseEnumProperties']( 
-      { status: 'PENDING' }, 
+    result = interceptor['lowercaseEnumProperties'](
+      { status: 'PENDING' },
       'some string',
-      MockDto
+      MockDto,
     );
     expect(result).toEqual({ status: 'PENDING' });
-  
+
     // Test with a primitive value (number) as the instance
-    result = interceptor['lowercaseEnumProperties']( 
-      { status: 'PENDING' }, 
+    result = interceptor['lowercaseEnumProperties'](
+      { status: 'PENDING' },
       123,
-      MockDto
+      MockDto,
     );
     expect(result).toEqual({ status: 'PENDING' });
   });
