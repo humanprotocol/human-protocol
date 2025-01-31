@@ -62,8 +62,6 @@ describe('PayoutService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
-            calculateGasPrice: jest.fn().mockReturnValue(1000n),
           },
         },
         { provide: StorageService, useValue: createMock<StorageService>() },

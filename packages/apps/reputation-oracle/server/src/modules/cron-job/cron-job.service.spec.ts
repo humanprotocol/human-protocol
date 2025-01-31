@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CronJobService } from './cron-job.service';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobType } from '../../common/enums/cron-job';
-import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
