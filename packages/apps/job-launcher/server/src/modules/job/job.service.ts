@@ -842,8 +842,8 @@ export class JobService {
       FiatCurrency.USD,
     );
     const fundTokenRate = await this.rateService.getRate(
-      dto.escrowFundToken,
       FiatCurrency.USD,
+      dto.escrowFundToken,
     );
 
     const paymentCurrencyFee = max(
