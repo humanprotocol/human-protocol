@@ -1,10 +1,8 @@
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
-import { ErrorManifest } from '../constants/errors';
 import { CvatManifestDto, FortuneManifestDto } from '../dto/manifest';
 import { JobRequestType } from '../enums';
-import { ControlledError } from '../errors/controlled';
-import { HttpStatus } from '@nestjs/common';
+import { UnsupportedManifestTypeError } from '../errors/manifest';
 
 export function hashStream(stream: Readable): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -30,14 +28,10 @@ export function getRequestType(
   const requestType =
     (manifest as FortuneManifestDto).requestType ||
     ((manifest as CvatManifestDto).annotation &&
-      (manifest as CvatManifestDto).annotation.type) ||
-    null;
+      (manifest as CvatManifestDto).annotation.type);
 
   if (!requestType) {
-    throw new ControlledError(
-      ErrorManifest.UnsupportedManifestType,
-      HttpStatus.BAD_REQUEST,
-    );
+    throw new UnsupportedManifestTypeError(requestType);
   }
 
   return requestType;

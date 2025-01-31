@@ -10,14 +10,6 @@ export enum ErrorResults {
 }
 
 /**
- * Represents error messages related to manifest.
- */
-export enum ErrorManifest {
-  ManifestUrlDoesNotExist = 'Manifest url does not exist',
-  UnsupportedManifestType = 'Unsupported manifest type',
-}
-
-/**
  * Represents error messages related to send grid.
  */
 export enum ErrorSendGrid {

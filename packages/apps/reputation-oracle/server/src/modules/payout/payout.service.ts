@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
+import { ErrorResults } from '../../common/constants/errors';
 
 import {
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
@@ -27,6 +27,7 @@ import {
 } from './payout.interface';
 import { getRequestType, isValidJobRequestType } from '../../common/utils';
 import { ControlledError } from '../../common/errors/controlled';
+import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
@@ -54,10 +55,7 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
@@ -99,10 +97,7 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =

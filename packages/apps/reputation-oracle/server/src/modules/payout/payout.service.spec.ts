@@ -21,10 +21,11 @@ import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
 import { CvatManifestDto } from '../../common/dto/manifest';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
+import { ErrorResults } from '../../common/constants/errors';
 import { CvatAnnotationMeta } from '../../common/dto/result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
 import { ControlledError } from '../../common/errors/controlled';
+import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -193,12 +194,7 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.processResults(chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorManifest.ManifestUrlDoesNotExist,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new MissingManifestUrlError(MOCK_ADDRESS));
     });
 
     it('should throw an error for unsupported request types', async () => {
