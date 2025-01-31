@@ -3,11 +3,11 @@ import {
   CanActivate,
   ExecutionContext,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../enums/user';
 import { ROLES_KEY } from '../decorators';
-import { ControlledHttpError } from '../errors/controlled-http';
 
 @Injectable()
 export class RolesAuthGuard implements CanActivate {
@@ -30,6 +30,6 @@ export class RolesAuthGuard implements CanActivate {
       return true;
     }
 
-    throw new ControlledHttpError('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
   }
 }

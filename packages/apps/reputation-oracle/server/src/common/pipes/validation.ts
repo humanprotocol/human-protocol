@@ -1,11 +1,11 @@
 import {
+  HttpException,
   HttpStatus,
   Injectable,
   ValidationError,
   ValidationPipe,
   ValidationPipeOptions,
 } from '@nestjs/common';
-import { ControlledHttpError } from '../errors/controlled-http';
 
 // TODO: Revisit validation options
 @Injectable()
@@ -19,8 +19,13 @@ export class HttpValidationPipe extends ValidationPipe {
               Object.values((error as any).constraints) as unknown as string,
           )
           .flat();
-        throw new ControlledHttpError(
-          errorMessages.join(', '),
+
+        return new HttpException(
+          {
+            statusCode: HttpStatus.BAD_REQUEST,
+            timestamp: new Date().toISOString(),
+            message: errorMessages.join(', '),
+          },
           HttpStatus.BAD_REQUEST,
         );
       },
