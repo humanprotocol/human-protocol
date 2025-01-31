@@ -7,7 +7,7 @@ from human_protocol_sdk.statistics import (
     StatisticsClient,
     HMTHoldersParam,
 )
-from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
+from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 from human_protocol_sdk.agreement import agreement
 
 
@@ -105,28 +105,30 @@ def get_escrows():
     )
 
 
-def get_leaders():
-    leaders = OperatorUtils.get_leaders(LeaderFilter(chain_id=ChainId.POLYGON_AMOY))
-    print(leaders)
-    print(OperatorUtils.get_leader(ChainId.POLYGON_AMOY, leaders[0].address))
+def get_operators():
+    operators = OperatorUtils.get_operators(
+        OperatorFilter(chain_id=ChainId.POLYGON_AMOY)
+    )
+    print(operators)
+    print(OperatorUtils.get_operator(ChainId.POLYGON_AMOY, operators[0].address))
     print(
-        OperatorUtils.get_leaders(
-            LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
+        OperatorUtils.get_operators(
+            OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
         )
     )
-    leaders = OperatorUtils.get_leaders(
-        LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles="Job Launcher")
+    operators = OperatorUtils.get_operators(
+        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
     )
-    print(len(leaders))
+    print(len(operators))
 
-    leaders = OperatorUtils.get_leaders(
-        LeaderFilter(
+    operators = OperatorUtils.get_operators(
+        OperatorFilter(
             chain_id=ChainId.POLYGON_AMOY,
             min_amount_staked=1,
             roles=["Job Launcher", "Reputation Oracle"],
         )
     )
-    print(len(leaders))
+    print(len(operators))
 
 
 def agreement_example():
@@ -147,7 +149,7 @@ if __name__ == "__main__":
     # Run single example while testing, and remove comments before commit
 
     get_escrows()
-    get_leaders()
+    get_operators()
 
     statistics_client = StatisticsClient(ChainId.POLYGON_AMOY)
     get_hmt_holders(statistics_client)

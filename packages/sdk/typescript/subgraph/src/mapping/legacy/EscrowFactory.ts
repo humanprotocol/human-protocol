@@ -4,7 +4,7 @@ import { LegacyEscrow as EscrowTemplate } from '../../../generated/templates';
 import { ONE_BI, ZERO_BI } from '../utils/number';
 import { getEventDayData } from '../utils/dayUpdates';
 import { createOrLoadEscrowStatistics } from '../Escrow';
-import { createOrLoadLeader } from '../Staking';
+import { createOrLoadOperator } from '../Staking';
 import { createTransaction } from '../utils/transaction';
 import { dataSource } from '@graphprotocol/graph-ts';
 
@@ -50,8 +50,8 @@ export function handleLaunched(event: Launched): void {
   eventDayData.dailyEscrowCount = eventDayData.dailyEscrowCount.plus(ONE_BI);
   eventDayData.save();
 
-  // Increase amount of jobs launched by leader
-  const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
-  leader.save();
+  // Increase amount of jobs launched by operator
+  const operator = createOrLoadOperator(event.transaction.from);
+  operator.amountJobsProcessed = operator.amountJobsProcessed.plus(ONE_BI);
+  operator.save();
 }

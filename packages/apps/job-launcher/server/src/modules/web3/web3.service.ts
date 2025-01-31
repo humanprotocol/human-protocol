@@ -139,30 +139,33 @@ export class Web3Service {
     chainId: ChainId,
     jobType: string,
   ): Promise<string[]> {
-    const leader = await OperatorUtils.getLeader(
+    const operator = await OperatorUtils.getOperator(
       chainId,
       this.getOperatorAddress(),
     );
 
-    if (!leader || !leader.reputationNetworks) {
+    if (!operator || !operator.reputationNetworks) {
       this.logger.error(
-        `Leader or reputation networks not found for chain ${chainId}.`,
+        `Operator or reputation networks not found for chain ${chainId}.`,
       );
       return [];
     }
 
     const matchingOracles = await Promise.all(
-      leader.reputationNetworks.map(async (address) => {
+      operator.reputationNetworks.map(async (address) => {
         try {
-          const networkLeader = await OperatorUtils.getLeader(chainId, address);
+          const networkOperator = await OperatorUtils.getOperator(
+            chainId,
+            address,
+          );
 
-          return networkLeader?.jobTypes &&
-            this.matchesJobType(networkLeader.jobTypes, jobType)
-            ? networkLeader.address
+          return networkOperator?.jobTypes &&
+            this.matchesJobType(networkOperator.jobTypes, jobType)
+            ? networkOperator.address
             : null;
         } catch (error) {
           this.logger.error(
-            `Failed to fetch leader for address ${address} on chain ${chainId}:`,
+            `Failed to fetch operator for address ${address} on chain ${chainId}:`,
             error,
           );
           return null;

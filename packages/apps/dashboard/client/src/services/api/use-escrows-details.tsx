@@ -5,7 +5,7 @@ import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { validateResponse } from '@services/validate-response';
 import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
-import { AddressDetailsLeader } from '@services/api/use-address-details';
+import { AddressDetailsOperator } from '@services/api/use-address-details';
 
 const escrowDetailsSuccessResponseSchema = z.object({
   chainId: z.number(),
@@ -33,13 +33,13 @@ export interface PaginatedEscrowsDetailsDto {
   skip: number;
   first: number;
   chainId: number;
-  role: AddressDetailsLeader['role'];
+  role: AddressDetailsOperator['role'];
 }
 
 export function useEscrowDetails({
   role,
 }: {
-  role: AddressDetailsLeader['role'];
+  role: AddressDetailsOperator['role'];
 }) {
   const { filterParams } = useWalletSearch();
   const {

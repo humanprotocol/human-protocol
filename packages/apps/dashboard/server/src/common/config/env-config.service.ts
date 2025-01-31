@@ -45,7 +45,7 @@ export class EnvironmentConfigService {
     );
   }
   get subgraphApiKey(): string {
-    return this.configService.getOrThrow<string>('SUBGRAPH_API_KEY');
+    return this.configService.get<string>('SUBGRAPH_API_KEY', '');
   }
   get hmtPriceSource(): string {
     return this.configService.get<string>(

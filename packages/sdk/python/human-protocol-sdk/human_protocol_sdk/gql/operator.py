@@ -1,9 +1,9 @@
 from typing import Optional
 
-from human_protocol_sdk.operator import LeaderFilter
+from human_protocol_sdk.operator import OperatorFilter
 
-leader_fragment = """
-fragment LeaderFields on Leader {
+operator_fragment = """
+fragment OperatorFields on Operator {
     id
     address
     amountStaked
@@ -31,9 +31,9 @@ fragment LeaderFields on Leader {
 """
 
 
-def get_leaders_query(filter: LeaderFilter):
+def get_operators_query(filter: OperatorFilter):
     return """
-query GetLeaders(
+query GetOperators(
     $minAmountStaked: Int,
     $roles: [String!]
     $orderBy: String
@@ -41,7 +41,7 @@ query GetLeaders(
     $first: Int
     $skip: Int
 ) {{
-    leaders(
+    operators(
       where: {{
         {amount_staked_clause}
         {roles_clause}
@@ -51,12 +51,12 @@ query GetLeaders(
       first: $first
       skip: $skip
     ) {{
-      ...LeaderFields
+      ...OperatorFields
     }}
 }}
-{leader_fragment}
+{operator_fragment}
 """.format(
-        leader_fragment=leader_fragment,
+        operator_fragment=operator_fragment,
         amount_staked_clause=(
             "amountStaked_gte: $minAmountStaked" if filter.min_amount_staked else ""
         ),
@@ -64,15 +64,15 @@ query GetLeaders(
     )
 
 
-get_leader_query = """
-query getLeader($address: String!) {{
-    leader(id: $address) {{
-      ...LeaderFields
+get_operator_query = """
+query getOperator($address: String!) {{
+    operator(id: $address) {{
+      ...OperatorFields
     }}
 }}
-{leader_fragment}
+{operator_fragment}
 """.format(
-    leader_fragment=leader_fragment,
+    operator_fragment=operator_fragment,
 )
 
 
@@ -88,16 +88,12 @@ query getReputationNetwork(
         {role_clause}
       }} 
     ) {{
-      address,
-      role,
-      url,
-      jobTypes,
-      registrationNeeded,
-      registrationInstructions
-
+      ...OperatorFields
     }}
   }}
 }}
+{operator_fragment}
 """.format(
+        operator_fragment=operator_fragment,
         role_clause="role: $role" if role else "",
     )

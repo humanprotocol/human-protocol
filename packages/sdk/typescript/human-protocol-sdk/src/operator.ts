@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import gqlFetch from 'graphql-request';
 import {
-  ILeader,
-  ILeaderSubgraph,
-  ILeadersFilter,
   IOperator,
+  IOperatorSubgraph,
+  IOperatorsFilter,
   IReputationNetworkSubgraph,
   IReward,
 } from './interfaces';
@@ -27,24 +26,24 @@ import { NETWORKS } from './constants';
 
 export class OperatorUtils {
   /**
-   * This function returns the leader data for the given address.
+   * This function returns the operator data for the given address.
    *
-   * @param {ChainId} chainId Network in which the leader is deployed
-   * @param {string} address Leader address.
-   * @returns {Promise<ILeader>} Returns the leader details.
+   * @param {ChainId} chainId Network in which the operator is deployed
+   * @param {string} address Operator address.
+   * @returns {Promise<IOperator>} Returns the operator details.
    *
    * **Code example**
    *
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * const operator = await OperatorUtils.getOperator(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
-  public static async getLeader(
+  public static async getOperator(
     chainId: ChainId,
     address: string
-  ): Promise<ILeader> {
+  ): Promise<IOperator> {
     if (!ethers.isAddress(address)) {
       throw ErrorInvalidStakerAddressProvided;
     }
@@ -54,33 +53,36 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { leader } = await gqlFetch<{
-      leader: ILeaderSubgraph;
+    const { operator } = await gqlFetch<{
+      operator: IOperatorSubgraph;
     }>(getSubgraphUrl(networkData), GET_LEADER_QUERY, {
       address: address.toLowerCase(),
     });
 
-    if (!leader) {
-      return (leader as ILeader) || null;
+    if (!operator) {
+      return (operator as IOperator) || null;
     }
 
     let jobTypes: string[] = [];
     let reputationNetworks: string[] = [];
 
-    if (typeof leader.jobTypes === 'string') {
-      jobTypes = leader.jobTypes.split(',');
-    } else if (Array.isArray(leader.jobTypes)) {
-      jobTypes = leader.jobTypes;
+    if (typeof operator.jobTypes === 'string') {
+      jobTypes = operator.jobTypes.split(',');
+    } else if (Array.isArray(operator.jobTypes)) {
+      jobTypes = operator.jobTypes;
     }
 
-    if (leader.reputationNetworks && Array.isArray(leader.reputationNetworks)) {
-      reputationNetworks = leader.reputationNetworks.map(
+    if (
+      operator.reputationNetworks &&
+      Array.isArray(operator.reputationNetworks)
+    ) {
+      reputationNetworks = operator.reputationNetworks.map(
         (network) => network.address
       );
     }
 
     return {
-      ...leader,
+      ...operator,
       jobTypes,
       reputationNetworks,
       chainId,
@@ -88,24 +90,26 @@ export class OperatorUtils {
   }
 
   /**
-   * This function returns all the leader details of the protocol.
+   * This function returns all the operator details of the protocol.
    *
-   * @param {ILeadersFilter} filter Filter for the leaders.
-   * @returns {Promise<ILeader[]>} Returns an array with all the leader details.
+   * @param {IOperatorsFilter} filter Filter for the operators.
+   * @returns {Promise<IOperator[]>} Returns an array with all the operator details.
    *
    * **Code example**
    *
    * ```ts
    * import { OperatorUtils, ChainId } from '@human-protocol/sdk';
    *
-   * const filter: ILeadersFilter = {
+   * const filter: IOperatorsFilter = {
    *  chainId: ChainId.POLYGON
    * };
-   * const leaders = await OperatorUtils.getLeaders(filter);
+   * const operators = await OperatorUtils.getOperators(filter);
    * ```
    */
-  public static async getLeaders(filter: ILeadersFilter): Promise<ILeader[]> {
-    let leaders_data: ILeader[] = [];
+  public static async getOperators(
+    filter: IOperatorsFilter
+  ): Promise<IOperator[]> {
+    let operators_data: IOperator[] = [];
 
     const first =
       filter.first !== undefined && filter.first > 0
@@ -121,8 +125,8 @@ export class OperatorUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    const { leaders } = await gqlFetch<{
-      leaders: ILeaderSubgraph[];
+    const { operators } = await gqlFetch<{
+      operators: IOperatorSubgraph[];
     }>(getSubgraphUrl(networkData), GET_LEADERS_QUERY(filter), {
       minAmountStaked: filter?.minAmountStaked,
       roles: filter?.roles,
@@ -132,39 +136,39 @@ export class OperatorUtils {
       skip: skip,
     });
 
-    if (!leaders) {
+    if (!operators) {
       return [];
     }
 
-    leaders_data = leaders_data.concat(
-      leaders.map((leader) => {
+    operators_data = operators_data.concat(
+      operators.map((operator) => {
         let jobTypes: string[] = [];
         let reputationNetworks: string[] = [];
 
-        if (typeof leader.jobTypes === 'string') {
-          jobTypes = leader.jobTypes.split(',');
-        } else if (Array.isArray(leader.jobTypes)) {
-          jobTypes = leader.jobTypes;
+        if (typeof operator.jobTypes === 'string') {
+          jobTypes = operator.jobTypes.split(',');
+        } else if (Array.isArray(operator.jobTypes)) {
+          jobTypes = operator.jobTypes;
         }
 
         if (
-          leader.reputationNetworks &&
-          Array.isArray(leader.reputationNetworks)
+          operator.reputationNetworks &&
+          Array.isArray(operator.reputationNetworks)
         ) {
-          reputationNetworks = leader.reputationNetworks.map(
+          reputationNetworks = operator.reputationNetworks.map(
             (network) => network.address
           );
         }
 
         return {
-          ...leader,
+          ...operator,
           jobTypes,
           reputationNetworks,
           chainId: filter.chainId,
         };
       })
     );
-    return leaders_data;
+    return operators_data;
   }
 
   /**
@@ -212,8 +216,12 @@ export class OperatorUtils {
       }
 
       return {
+        chainId,
         ...operator,
         jobTypes,
+        reputationNetworks: operator.reputationNetworks?.map(
+          (network) => network.address
+        ),
       };
     });
   }

@@ -36,7 +36,7 @@ import { toEventDayId, toEventId } from './utils/event';
 import { getEventDayData } from './utils/dayUpdates';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
-import { createOrLoadLeader } from './Staking';
+import { createOrLoadOperator } from './Staking';
 
 export const HMT_ADDRESS = Address.fromString('{{ HMToken.address }}');
 export const STATISTICS_ENTITY_ID = toBytes('escrow-statistics-id');
@@ -159,32 +159,32 @@ function updateEscrowEntityForPending(
 
   escrowEntity.save();
 
-  // Increase amount of jobs processed by leader
+  // Increase amount of jobs processed by operator
   if (escrowEntity.reputationOracle) {
-    const reputationOracleLeader = createOrLoadLeader(
+    const reputationOracleOperator = createOrLoadOperator(
       Address.fromBytes(escrowEntity.reputationOracle!)
     );
-    reputationOracleLeader.amountJobsProcessed =
-      reputationOracleLeader.amountJobsProcessed.plus(ONE_BI);
-    reputationOracleLeader.save();
+    reputationOracleOperator.amountJobsProcessed =
+      reputationOracleOperator.amountJobsProcessed.plus(ONE_BI);
+    reputationOracleOperator.save();
   }
 
   if (escrowEntity.recordingOracle) {
-    const recordingOracleLeader = createOrLoadLeader(
+    const recordingOracleOperator = createOrLoadOperator(
       Address.fromBytes(escrowEntity.recordingOracle!)
     );
-    recordingOracleLeader.amountJobsProcessed =
-      recordingOracleLeader.amountJobsProcessed.plus(ONE_BI);
-    recordingOracleLeader.save();
+    recordingOracleOperator.amountJobsProcessed =
+      recordingOracleOperator.amountJobsProcessed.plus(ONE_BI);
+    recordingOracleOperator.save();
   }
 
   if (escrowEntity.exchangeOracle) {
-    const exchangeOracleLeader = createOrLoadLeader(
+    const exchangeOracleOperator = createOrLoadOperator(
       Address.fromBytes(escrowEntity.exchangeOracle!)
     );
-    exchangeOracleLeader.amountJobsProcessed =
-      exchangeOracleLeader.amountJobsProcessed.plus(ONE_BI);
-    exchangeOracleLeader.save();
+    exchangeOracleOperator.amountJobsProcessed =
+      exchangeOracleOperator.amountJobsProcessed.plus(ONE_BI);
+    exchangeOracleOperator.save();
   }
   escrowStatusEvent.launcher = escrowEntity.launcher;
   escrowStatusEvent.save();

@@ -80,20 +80,23 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_object
             mock_cvat_api.create_cloudstorage.return_value = mock_cvat_object
-            mock_cvat_api.get_task_upload_status.return_value = (UploadStatus.FINISHED, "Finished")
+            mock_cvat_api.get_task_upload_status.return_value = (
+                UploadStatus.FINISHED, "Finished")
 
             gt_filenames = ["image1.jpg", "image2.png"]
             gt_dataset = build_gt_dataset(gt_filenames).encode()
 
             mock_cloud_client = Mock()
             mock_cloud_client.download_file.return_value = gt_dataset
-            mock_cloud_client.list_files.return_value = gt_filenames + ["image3.jpg", "image4.png"]
+            mock_cloud_client.list_files.return_value = gt_filenames + \
+                ["image3.jpg", "image4.png"]
             mock_make_cloud_client.return_value = mock_cloud_client
 
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhook_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhook_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
@@ -140,7 +143,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        updated_webhook = self.session.query(Webhook).filter_by(id=webhok_id).first()
+        updated_webhook = self.session.query(
+            Webhook).filter_by(id=webhok_id).first()
 
         assert updated_webhook.status == OracleWebhookStatuses.pending.value
         assert updated_webhook.attempts == 1
@@ -167,7 +171,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         mock_storage_client = MagicMock(spec=StorageClient)
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
-            patch("src.services.cloud.make_client", return_value=mock_storage_client),
+            patch("src.services.cloud.make_client",
+                  return_value=mock_storage_client),
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
@@ -179,7 +184,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        updated_webhook = self.session.query(Webhook).filter_by(id=webhok_id).first()
+        updated_webhook = self.session.query(
+            Webhook).filter_by(id=webhok_id).first()
 
         assert updated_webhook.status == OracleWebhookStatuses.failed.value
         assert updated_webhook.attempts == 6
@@ -207,7 +213,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         outgoing_webhooks: list[Webhook] = list(
             self.session.scalars(
-                select(Webhook).where(Webhook.direction == OracleWebhookDirectionTags.outgoing)
+                select(Webhook).where(Webhook.direction ==
+                                      OracleWebhookDirectionTags.outgoing)
             )
         )
         assert len(outgoing_webhooks) == 1
@@ -268,13 +275,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             mock_cloud_client = Mock()
             mock_cloud_client.download_file.return_value = gt_dataset
-            mock_cloud_client.list_files.return_value = gt_filenames + ["image3.jpg", "image4.png"]
+            mock_cloud_client.list_files.return_value = gt_filenames + \
+                ["image3.jpg", "image4.png"]
             mock_make_cloud_client.return_value = mock_cloud_client
 
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.pending.value
@@ -319,7 +328,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         mock_storage_client = MagicMock(spec=StorageClient)
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
-            patch("src.services.cloud.make_client", return_value=mock_storage_client),
+            patch("src.services.cloud.make_client",
+                  return_value=mock_storage_client),
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
@@ -331,7 +341,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
@@ -356,7 +367,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         outgoing_webhooks: list[Webhook] = list(
             self.session.scalars(
-                select(Webhook).where(Webhook.direction == OracleWebhookDirectionTags.outgoing)
+                select(Webhook).where(Webhook.direction ==
+                                      OracleWebhookDirectionTags.outgoing)
             )
         )
         assert len(outgoing_webhooks) == 1
@@ -410,7 +422,8 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
-            patch("src.services.cloud.make_client", return_value=mock_storage_client),
+            patch("src.services.cloud.make_client",
+                  return_value=mock_storage_client),
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
@@ -422,7 +435,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
@@ -450,11 +464,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         ]
 
         assert delete_project_mock.mock_calls == [call(0), call(1), call(2)]
-        assert delete_cloudstorage_mock.mock_calls == [call(0), call(1), call(2)]
+        assert delete_cloudstorage_mock.mock_calls == [
+            call(0), call(1), call(2)]
 
         outgoing_webhooks: list[Webhook] = list(
             self.session.scalars(
-                select(Webhook).where(Webhook.direction == OracleWebhookDirectionTags.outgoing)
+                select(Webhook).where(Webhook.direction ==
+                                      OracleWebhookDirectionTags.outgoing)
             )
         )
         assert len(outgoing_webhooks) == 1
@@ -501,7 +517,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.pending.value
@@ -553,7 +570,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_incoming_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.pending.value
@@ -585,7 +603,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
         with (
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
             patch("httpx.Client.post") as mock_httpx_post,
         ):
             w3 = Mock()
@@ -593,7 +611,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_escrow_data = Mock()
             mock_escrow_data.launcher = JOB_LAUNCHER_ADDRESS
             mock_escrow.return_value = mock_escrow_data
-            mock_leader.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
+            mock_operator.return_value = MagicMock(
+                webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response
@@ -601,7 +620,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_outgoing_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
@@ -629,7 +649,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_outgoing_job_launcher_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(
+                Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.pending.value

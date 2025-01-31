@@ -3,35 +3,39 @@ import {
   BigInt,
   Bytes,
   dataSource,
+  log,
   Value,
 } from '@graphprotocol/graph-ts';
 import { DataSaved } from '../../generated/KVStore/KVStore';
 import {
   KVStore,
   KVStoreSetEvent,
-  Leader,
-  LeaderURL,
+  Operator,
+  OperatorURL,
   ReputationNetwork,
 } from '../../generated/schema';
-import { createOrLoadLeader } from './Staking';
+import { createOrLoadOperator } from './Staking';
 import { isValidEthAddress } from './utils/ethAdrress';
 import { toEventId } from './utils/event';
 import { toBytes } from './utils/string';
 import { createTransaction } from './utils/transaction';
 import { store } from '@graphprotocol/graph-ts';
 
-export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
-  const entityId = leader.address.concat(toBytes(key));
-  let leaderUrl = LeaderURL.load(entityId);
+export function createOrLoadOperatorURL(
+  operator: Operator,
+  key: string
+): OperatorURL {
+  const entityId = operator.address.concat(toBytes(key));
+  let operatorUrl = OperatorURL.load(entityId);
 
-  if (!leaderUrl) {
-    leaderUrl = new LeaderURL(entityId);
+  if (!operatorUrl) {
+    operatorUrl = new OperatorURL(entityId);
 
-    leaderUrl.key = key;
-    leaderUrl.leader = leader.id;
+    operatorUrl.key = key;
+    operatorUrl.operator = operator.id;
   }
 
-  return leaderUrl;
+  return operatorUrl;
 }
 
 export function createOrLoadReputationNetwork(
@@ -70,13 +74,19 @@ export function createOrUpdateKVStore(event: DataSaved): void {
 }
 
 export function handleDataSaved(event: DataSaved): void {
+  // Log the event details
+  log.info('DataSaved event received:', []);
+  log.info('Sender: {}', [event.params.sender.toHexString()]);
+  log.info('Key: {}', [event.params.key]);
+  log.info('Value: {}', [event.params.value]);
+
   createTransaction(event, 'set', event.transaction.from, dataSource.address());
   // Create KVStoreSetEvent entity
   const eventEntity = new KVStoreSetEvent(toEventId(event));
   eventEntity.block = event.block.number;
   eventEntity.timestamp = event.block.timestamp;
   eventEntity.txHash = event.transaction.hash;
-  eventEntity.leaderAddress = event.params.sender;
+  eventEntity.operatorAddress = event.params.sender;
   eventEntity.key = event.params.key;
   eventEntity.value = event.params.value;
   eventEntity.save();
@@ -84,32 +94,32 @@ export function handleDataSaved(event: DataSaved): void {
   // Update KVStore entity
   createOrUpdateKVStore(event);
 
-  // Update leader attribute, if necessary
-  const leader = createOrLoadLeader(event.params.sender);
+  // Update operator attribute, if necessary
+  const operator = createOrLoadOperator(event.params.sender);
 
   const key = event.params.key.toLowerCase();
   if (event.params.value == '') {
-    leader.set(key, Value.fromNull());
+    operator.set(key, Value.fromNull());
   } else {
     if (key == 'role') {
-      leader.role = event.params.value;
+      operator.role = event.params.value;
     } else if (key == 'fee') {
-      leader.fee = BigInt.fromString(event.params.value);
+      operator.fee = BigInt.fromString(event.params.value);
     } else if (key == 'publickey' || key == 'public_key') {
-      leader.publicKey = event.params.value;
+      operator.publicKey = event.params.value;
     } else if (key == 'webhookurl' || key == 'webhook_url') {
-      leader.webhookUrl = event.params.value;
+      operator.webhookUrl = event.params.value;
     } else if (key == 'website') {
-      leader.website = event.params.value;
+      operator.website = event.params.value;
     } else if (key == 'url') {
-      leader.url = event.params.value;
+      operator.url = event.params.value;
     } else if (key == 'jobtypes' || key == 'job_types') {
-      leader.jobTypes = event.params.value
+      operator.jobTypes = event.params.value
         .split(',')
         .map<string>((type) => type.trim());
     } else if (
       isValidEthAddress(event.params.key) &&
-      leader.role == 'Reputation Oracle'
+      operator.role == 'Reputation Oracle'
     ) {
       const ethAddress = Address.fromString(event.params.key);
 
@@ -117,7 +127,7 @@ export function handleDataSaved(event: DataSaved): void {
         event.params.sender
       );
 
-      const operator = createOrLoadLeader(ethAddress);
+      const operator = createOrLoadOperator(ethAddress);
 
       let reputationNetworks = operator.reputationNetworks;
       if (reputationNetworks === null) {
@@ -140,21 +150,21 @@ export function handleDataSaved(event: DataSaved): void {
 
       operator.save();
     } else if (key == 'registration_needed') {
-      leader.registrationNeeded = event.params.value.toLowerCase() == 'true';
+      operator.registrationNeeded = event.params.value.toLowerCase() == 'true';
     } else if (key == 'registration_instructions') {
-      leader.registrationInstructions = event.params.value;
+      operator.registrationInstructions = event.params.value;
     } else if (key == 'name') {
-      leader.name = event.params.value;
+      operator.name = event.params.value;
     } else if (key == 'category') {
-      leader.category = event.params.value;
+      operator.category = event.params.value;
     }
   }
 
   if (key.indexOf('url') > -1) {
-    const leaderUrl = createOrLoadLeaderURL(leader, key);
-    leaderUrl.url = event.params.value;
-    leaderUrl.save();
+    const operatorUrl = createOrLoadOperatorURL(operator, key);
+    operatorUrl.url = event.params.value;
+    operatorUrl.save();
   }
 
-  leader.save();
+  operator.save();
 }

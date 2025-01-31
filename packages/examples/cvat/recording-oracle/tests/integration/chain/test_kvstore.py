@@ -46,11 +46,13 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_reputation_oracle_url(self):
         with (
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
         ):
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = MagicMock(webhook_url=REPUTATION_ORACLE_WEBHOOK_URL)
-            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
+            mock_operator.return_value = MagicMock(
+                webhook_url=REPUTATION_ORACLE_WEBHOOK_URL)
+            reputation_url = get_reputation_oracle_url(
+                self.w3.eth.chain_id, escrow_address)
             assert reputation_url == REPUTATION_ORACLE_WEBHOOK_URL
 
     def test_get_reputation_oracle_url_invalid_escrow(self):
@@ -60,11 +62,12 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_reputation_oracle_url_invalid_address(self):
         with (
             patch("src.chain.kvstore.get_escrow") as mock_escrow,
-            patch("src.chain.kvstore.OperatorUtils.get_leader") as mock_leader,
+            patch("src.chain.kvstore.OperatorUtils.get_operator") as mock_operator,
         ):
             mock_escrow.return_value = self.escrow_data
-            mock_leader.return_value = MagicMock(webhook_url="")
-            recording_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
+            mock_operator.return_value = MagicMock(webhook_url="")
+            recording_url = get_reputation_oracle_url(
+                self.w3.eth.chain_id, escrow_address)
             assert recording_url == ""
 
     def test_store_public_key(self):
@@ -112,7 +115,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_web3.return_value = self.w3
 
             assert (
-                KVStoreUtils.get_file_url_and_verify_hash(ChainId.LOCALHOST, LocalhostConfig.addr)
+                KVStoreUtils.get_file_url_and_verify_hash(
+                    ChainId.LOCALHOST, LocalhostConfig.addr)
                 is None
             )
 

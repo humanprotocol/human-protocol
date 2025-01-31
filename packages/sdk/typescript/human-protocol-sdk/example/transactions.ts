@@ -9,7 +9,7 @@ dotenv.config({
 
 export const getTransactions = async () => {
   const response = await TransactionUtils.getTransactions({
-    networks: [ChainId.POLYGON_AMOY],
+    chainId: ChainId.POLYGON_AMOY,
     fromAddress: '0xF3D9a0ba9FA14273C515e519DFD0826Ff87d5164',
     startBlock: 6282708,
   });
