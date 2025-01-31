@@ -1,15 +1,4 @@
 /**
- * Represents error messages related to results.
- */
-export enum ErrorResults {
-  IntermediateResultsURLNotSet = 'Intermediate results URL is not set',
-  NoIntermediateResultsFound = 'No intermediate results found',
-  NoAnnotationsMetaFound = 'No annotations meta found',
-  NoResultsHaveBeenVerified = 'No results have been verified',
-  NotAllRequiredSolutionsHaveBeenSent = 'Not all required solutions have been sent',
-}
-
-/**
  * Represents error messages related to send grid.
  */
 export enum ErrorSendGrid {

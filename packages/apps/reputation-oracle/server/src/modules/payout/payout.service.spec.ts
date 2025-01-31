@@ -1,6 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ConfigModule, registerAs } from '@nestjs/config';
-import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import {
@@ -21,10 +20,8 @@ import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
 import { CvatManifestDto } from '../../common/dto/manifest';
-import { ErrorResults } from '../../common/constants/errors';
 import { CvatAnnotationMeta } from '../../common/dto/result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
-import { ControlledError } from '../../common/errors/controlled';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -375,12 +372,7 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.saveResultsFortune(manifest, chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorResults.NoIntermediateResultsFound,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new Error('No intermediate results found'));
     });
 
     it('should throw an error if the number of solutions is less than solutions required', async () => {
@@ -408,12 +400,7 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.saveResultsFortune(manifest, chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new Error('Not all required solutions have been sent'));
     });
   });
 
@@ -581,12 +568,7 @@ describe('PayoutService', () => {
           chainId,
           escrowAddress,
         ),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorResults.NoAnnotationsMetaFound,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new Error('No annotations meta found'));
     });
   });
 });

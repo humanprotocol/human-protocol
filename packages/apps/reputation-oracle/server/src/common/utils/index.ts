@@ -37,6 +37,14 @@ export function getRequestType(
   return requestType;
 }
 
-export function isValidJobRequestType(value: string): value is JobRequestType {
-  return Object.values(JobRequestType).includes(value as JobRequestType);
+export function assertValidJobRequestType(
+  value: string,
+): asserts value is JobRequestType {
+  const validValues = Object.values<string>(JobRequestType);
+
+  if (validValues.includes(value)) {
+    return;
+  }
+
+  throw new Error(`Unsupported request type: ${value}`);
 }
