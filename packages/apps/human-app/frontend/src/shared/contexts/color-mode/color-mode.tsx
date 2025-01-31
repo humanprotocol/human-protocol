@@ -7,11 +7,11 @@ import {
   useCallback,
 } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
+import { BackgroundProvider } from '@/shared/contexts/background';
 import { theme } from '@/shared/styles/theme';
 import { colorPalette as defaultColorPalette } from '@/shared/styles/color-palette';
 import { darkTheme } from '@/shared/styles/dark-theme';
 import { darkColorPalette } from '@/shared/styles/dark-color-palette';
-import { BackgroundProvider } from '@/shared/contexts/background-color-store';
 import {
   ColorMode,
   hasColorMode,
