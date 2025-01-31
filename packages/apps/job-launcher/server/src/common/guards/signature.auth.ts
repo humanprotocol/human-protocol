@@ -18,6 +18,7 @@ export class SignatureAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const data = request.body;
+    console.log(request.headers);
     const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses: string[] = [];
     try {

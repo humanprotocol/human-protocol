@@ -60,7 +60,6 @@ export class WebhookController {
   })
   public async createIncomingWebhook(
     @Body() data: IncomingWebhookDto,
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
   ): Promise<void> {
     await this.webhookIncomingService.createIncomingWebhook(data);
     return;

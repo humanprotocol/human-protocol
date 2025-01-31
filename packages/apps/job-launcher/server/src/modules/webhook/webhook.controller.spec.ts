@@ -159,7 +159,6 @@ describe('WebhookController', () => {
           reason: 'Invalid manifest URL',
         },
       };
-      const mockSignature = 'Human-Signature';
 
       jest
         .spyOn(jobService, 'escrowFailedWebhook')
@@ -171,7 +170,7 @@ describe('WebhookController', () => {
         });
 
       await expect(
-        webhookController.processWebhook(invalidDto, mockSignature),
+        webhookController.processWebhook(invalidDto),
       ).rejects.toThrow(
         new ControlledError('Invalid manifest URL', HttpStatus.BAD_REQUEST),
       );
@@ -188,7 +187,6 @@ describe('WebhookController', () => {
           reason: 'Manifest cannot be downloaded',
         },
       };
-      const mockSignature = 'Human-Signature';
 
       jest
         .spyOn(jobService, 'escrowFailedWebhook')
@@ -197,10 +195,7 @@ describe('WebhookController', () => {
         });
 
       await expect(
-        webhookController.processWebhook(
-          manifestCannotBeDownloadedDto,
-          mockSignature,
-        ),
+        webhookController.processWebhook(manifestCannotBeDownloadedDto),
       ).rejects.toThrow(BadRequestException);
 
       expect(jobService.escrowFailedWebhook).toHaveBeenCalledWith(

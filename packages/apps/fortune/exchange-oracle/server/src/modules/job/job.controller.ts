@@ -95,7 +95,6 @@ export class JobController {
   @AllowedRoles([AuthSignatureRole.Worker])
   async solveJob(
     @Body() solveJobDto: SolveJobDto,
-    @Headers(HEADER_SIGNATURE_KEY) signature: string,
   ): Promise<SolveJobResponseDto> {
     const { assignmentId, solution } = solveJobDto;
 
