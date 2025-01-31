@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { ControlledError } from '../errors/controlled';
+import { ControlledHttpError } from '../errors/controlled-http';
 import { JWT_STRATEGY_NAME } from '../constants';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class JwtAuthGuard
       }
 
       console.error(e);
-      throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throw new ControlledHttpError('Unauthorized', HttpStatus.UNAUTHORIZED);
     });
   }
 }

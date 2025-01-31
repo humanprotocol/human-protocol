@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from '../errors/database';
-import { ControlledError } from '../errors/controlled';
+import { ControlledHttpError } from '../errors/controlled-http';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -22,7 +22,7 @@ export class ExceptionFilter implements IExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
 
-    if (exception instanceof ControlledError) {
+    if (exception instanceof ControlledHttpError) {
       status = exception.status;
       message = exception.message;
 
