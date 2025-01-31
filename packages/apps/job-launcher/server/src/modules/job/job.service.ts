@@ -37,10 +37,9 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
-  JobCurrency,
 } from '../../common/enums/job';
 import {
-  Currency,
+  FiatCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
@@ -837,25 +836,42 @@ export class JobService {
     const feePercentage = Number(
       await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
     );
-    const currency = dto.currency ?? JobCurrency.HMT;
-    const rate = await this.rateService.getRate(currency, Currency.USD);
-    const tokenFee = max(
-      mul(this.serverConfigService.minimunFeeUsd, rate),
-      mul(div(feePercentage, 100), dto.fundAmount),
+
+    const paymentCurrencyRate = await this.rateService.getRate(
+      dto.paymentCurrency,
+      FiatCurrency.USD,
     );
-    const totalAmountToPay = add(dto.fundAmount, tokenFee);
+    const fundTokenRate = await this.rateService.getRate(
+      dto.escrowFundToken,
+      FiatCurrency.USD,
+    );
+
+    const paymentCurrencyFee = max(
+      mul(this.serverConfigService.minimunFeeUsd, paymentCurrencyRate),
+      mul(div(feePercentage, 100), dto.paymentAmount),
+    );
+    const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
 
     const userBalance = await this.paymentService.getUserBalanceByCurrency(
       user.id,
-      currency,
+      dto.paymentCurrency,
     );
 
-    if (lt(userBalance, totalAmountToPay)) {
+    if (lt(userBalance, totalPaymentAmount)) {
       throw new ControlledError(
         ErrorJob.NotEnoughFunds,
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    const fundTokenFee = mul(
+      div(paymentCurrencyFee, paymentCurrencyRate),
+      fundTokenRate,
+    );
+    const fundTokenAmount = mul(
+      div(dto.paymentAmount, paymentCurrencyRate),
+      fundTokenRate,
+    );
 
     let jobEntity = new JobEntity();
 
@@ -880,7 +896,7 @@ export class JobService {
       const manifestOrigin = await createManifest(
         dto,
         requestType,
-        dto.fundAmount,
+        fundTokenAmount,
       );
 
       const { url, hash } = await this.uploadManifest(
@@ -899,8 +915,8 @@ export class JobService {
     jobEntity.recordingOracle = recordingOracle;
     jobEntity.userId = user.id;
     jobEntity.requestType = requestType;
-    jobEntity.fee = tokenFee;
-    jobEntity.fundAmount = dto.fundAmount;
+    jobEntity.fee = fundTokenFee; // Fee in the token used to funding the escrow
+    jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
     jobEntity.status = JobStatus.PENDING;
     jobEntity.waitUntil = new Date();
 
@@ -911,9 +927,9 @@ export class JobService {
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -add(dto.fundAmount, tokenFee);
-    paymentEntity.currency = currency;
-    paymentEntity.rate = rate;
+    paymentEntity.amount = -totalPaymentAmount; // In the currency used for the payment.
+    paymentEntity.currency = dto.paymentCurrency;
+    paymentEntity.rate = paymentCurrencyRate;
     paymentEntity.status = PaymentStatus.SUCCEEDED;
 
     await this.paymentRepository.createUnique(paymentEntity);
@@ -1180,6 +1196,7 @@ export class JobService {
     if (status === JobStatus.CANCELED) {
       await this.paymentService.createRefundPayment({
         refundAmount: jobEntity.fundAmount,
+        refundCurrency: jobEntity.token,
         userId: jobEntity.userId,
         jobId: jobEntity.id,
       });

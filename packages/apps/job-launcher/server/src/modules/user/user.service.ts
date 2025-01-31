@@ -7,7 +7,7 @@ import { UserBalanceDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { PaymentService } from '../payment/payment.service';
-import { Currency } from '../../common/enums/payment';
+import { FiatCurrency } from '../../common/enums/payment';
 
 @Injectable()
 export class UserService {
@@ -51,7 +51,7 @@ export class UserService {
   public async getTotalUSDBalance(userId: number): Promise<UserBalanceDto> {
     return {
       amount: await this.paymentService.getUserUSDBalance(userId),
-      currency: Currency.USD,
+      currency: FiatCurrency.USD,
     };
   }
 }

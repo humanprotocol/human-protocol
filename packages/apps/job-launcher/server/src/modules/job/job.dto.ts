@@ -24,7 +24,7 @@ import { ChainId } from '@human-protocol/sdk';
 import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
-  JobCurrency,
+  EscrowFundToken,
   JobRequestType,
   JobSortField,
   JobStatus,
@@ -37,6 +37,7 @@ import { Transform } from 'class-transformer';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
+import { PaymentCurrency } from '../../common/enums/payment';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -73,9 +74,18 @@ export class JobDto {
   @IsOptional()
   public recordingOracle?: string;
 
-  @ApiProperty({ enum: JobCurrency })
-  @IsEnumCaseInsensitive(JobCurrency)
-  public currency: JobCurrency | undefined;
+  @ApiProperty({ enum: PaymentCurrency, name: 'payment_currency' })
+  @IsEnumCaseInsensitive(PaymentCurrency)
+  public paymentCurrency: PaymentCurrency;
+
+  @ApiProperty({ name: 'payment_amount' })
+  @IsNumber()
+  @IsPositive()
+  public paymentAmount: number;
+
+  @ApiProperty({ enum: EscrowFundToken, name: 'escrow_fund_token' })
+  @IsEnumCaseInsensitive(EscrowFundToken)
+  public escrowFundToken: EscrowFundToken;
 }
 
 export class JobQuickLaunchDto extends JobDto {
@@ -96,11 +106,6 @@ export class JobQuickLaunchDto extends JobDto {
   @IsString()
   @IsOptional()
   public manifestHash: string;
-
-  @ApiProperty({ name: 'fund_amount' })
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
 }
 
 export class JobFortuneDto extends JobDto {
@@ -116,11 +121,6 @@ export class JobFortuneDto extends JobDto {
   @IsNumber()
   @IsPositive()
   public submissionsRequired: number;
-
-  @ApiProperty({ name: 'fund_amount' })
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
 }
 
 export class StorageDataDto {
@@ -205,11 +205,6 @@ export class JobCvatDto extends JobDto {
   @ApiProperty({ enum: JobRequestType })
   @IsEnumCaseInsensitive(JobRequestType)
   public type: JobRequestType;
-
-  @ApiProperty({ name: 'fund_amount' })
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
 }
 
 export class JobCancelDto {

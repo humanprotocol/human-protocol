@@ -14,15 +14,14 @@ import {
   PaymentDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
-  PaymentRefundCreateDto,
+  PaymentRefund,
 } from './payment.dto';
 import {
-  Currency,
+  FiatCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
-  TokenId,
   VatType,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
@@ -224,7 +223,7 @@ export class PaymentService {
     }
 
     // Record the payment details in the system.
-    const rate = await this.rateService.getRate(currency, Currency.USD);
+    const rate = await this.rateService.getRate(currency, FiatCurrency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -379,7 +378,7 @@ export class PaymentService {
       );
     }
 
-    const rate = await this.rateService.getRate(tokenId, Currency.USD);
+    const rate = await this.rateService.getRate(tokenId, FiatCurrency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -414,9 +413,9 @@ export class PaymentService {
         .reduce((sum, payment) => add(sum, Number(payment.amount)), 0);
 
       const rate =
-        token === Currency.USD
+        token === FiatCurrency.USD
           ? 1
-          : await this.rateService.getRate(token, Currency.USD);
+          : await this.rateService.getRate(token, FiatCurrency.USD);
       totalBalance += mul(tokenAmountSum, rate);
     }
 
@@ -440,8 +439,11 @@ export class PaymentService {
     return balance;
   }
 
-  public async createRefundPayment(dto: PaymentRefundCreateDto) {
-    const rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
+  public async createRefundPayment(dto: PaymentRefund) {
+    const rate = await this.rateService.getRate(
+      dto.refundCurrency,
+      FiatCurrency.USD,
+    );
 
     const paymentEntity = new PaymentEntity();
     Object.assign(paymentEntity, {
@@ -450,7 +452,7 @@ export class PaymentService {
       source: PaymentSource.BALANCE,
       type: PaymentType.REFUND,
       amount: dto.refundAmount,
-      currency: TokenId.HMT,
+      currency: dto.refundCurrency,
       rate,
       status: PaymentStatus.SUCCEEDED,
     });

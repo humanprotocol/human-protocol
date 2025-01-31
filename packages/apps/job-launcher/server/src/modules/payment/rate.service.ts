@@ -4,12 +4,9 @@ import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { COINGECKO_API_URL } from '../../common/constants';
 import { ErrorCurrency } from '../../common/constants/errors';
-import {
-  //   CoinMarketCupTokenId,
-  CoingeckoTokenId,
-} from '../../common/constants/payment';
-import { TokenId } from '../../common/enums/payment';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 import { ControlledError } from '../../common/errors/controlled';
+import { EscrowFundToken } from '../../common/enums/job';
 
 @Injectable()
 export class RateService {
@@ -38,7 +35,7 @@ export class RateService {
     let coingeckoFrom = from;
     let coingeckoTo = to;
 
-    if (Object.values(TokenId).includes(to as TokenId)) {
+    if (Object.values(EscrowFundToken).includes(to as EscrowFundToken)) {
       coingeckoFrom = CoingeckoTokenId[to];
       coingeckoTo = from;
       reversed = true;
