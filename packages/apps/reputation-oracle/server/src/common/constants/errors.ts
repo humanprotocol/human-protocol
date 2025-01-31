@@ -26,15 +26,6 @@ export enum ErrorSendGrid {
 }
 
 /**
- * Represents error messages associated with a cron job.
- */
-export enum ErrorCronJob {
-  NotCreated = 'Cron job has not been created',
-  NotCompleted = 'Cron job is not completed',
-  Completed = 'Cron job is completed',
-}
-
-/**
  * Represents error messages related to web3.
  */
 export enum ErrorWeb3 {
