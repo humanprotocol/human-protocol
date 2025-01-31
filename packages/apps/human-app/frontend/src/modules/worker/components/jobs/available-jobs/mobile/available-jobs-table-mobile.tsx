@@ -15,7 +15,7 @@ import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { Chip } from '@/shared/components/ui/chip';
 import { RewardAmount } from '@/modules/worker/components/jobs/reward-amount';
 import { ListItem } from '@/shared/components/ui/list-item';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
 import { AvailableJobsAssignJobButton } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-assign-job-button';

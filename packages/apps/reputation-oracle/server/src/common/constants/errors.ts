@@ -1,15 +1,4 @@
 /**
- * Represents error messages related to escrow completion.
- */
-export enum ErrorEscrowCompletion {
-  NotFound = 'Escrow completion not found',
-  NotCreated = 'Escrow completion has not been created',
-  PendingProcessingFailed = 'Failed to process pending escrow completion',
-  PaidProcessingFailed = 'Failed to process paid escrow completion',
-  AwaitingPayoutsProcessingFailed = 'Failed to process payouts for escrow completion',
-}
-
-/**
  * Represents error messages related to results.
  */
 export enum ErrorResults {

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { WalletConnectDone } from '@/modules/worker/components/profile/wallet-connect-done';

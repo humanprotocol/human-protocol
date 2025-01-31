@@ -19,7 +19,7 @@ import { getTomorrowDate } from '@/shared/helpers/date';
 import { useSolveHCaptchaMutation } from '@/modules/worker/services/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { routerPaths } from '@/router/router-paths';
 

@@ -2,7 +2,7 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { RefreshIcon } from '@/shared/components/ui/icons';
 import type { HCaptchaUserStatsSuccess } from '@/modules/worker/services/hcaptcha-user-stats';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function UserStatsDetails({

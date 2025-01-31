@@ -270,7 +270,7 @@ describe('WebhookIncomingService', () => {
         }),
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Message: ${error.message}`),
+        expect.stringContaining(`Error message: ${error.message}`),
       );
     });
 

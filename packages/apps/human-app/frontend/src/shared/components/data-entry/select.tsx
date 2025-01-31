@@ -6,7 +6,7 @@ import { Controller } from 'react-hook-form';
 import InputLabel from '@mui/material/InputLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import { Chip } from '@/shared/components/ui/chip';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export interface OptionsProps {
   id: number;
