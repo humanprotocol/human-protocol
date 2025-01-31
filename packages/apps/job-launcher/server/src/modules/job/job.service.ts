@@ -917,6 +917,7 @@ export class JobService {
     jobEntity.requestType = requestType;
     jobEntity.fee = fundTokenFee; // Fee in the token used to funding the escrow
     jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
+    jobEntity.token = dto.escrowFundToken;
     jobEntity.status = JobStatus.PENDING;
     jobEntity.waitUntil = new Date();
 
