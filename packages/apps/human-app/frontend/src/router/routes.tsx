@@ -2,7 +2,6 @@ import type { RouteProps } from 'react-router-dom';
 import { t } from 'i18next';
 import { ProtectedPage } from '@/modules/worker/views/protected/protected.page';
 import { SignInWorkerPage } from '@/modules/worker/views/sign/sign-in.page';
-import { SignUpWorkerPage } from '@/modules/worker/views/sign/sign-up.page';
 import { routerPaths } from '@/router/router-paths';
 import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-reset-link/send-reset-link-success.page';
 import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
@@ -32,6 +31,7 @@ import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/conn
 import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.page';
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
+import { SignUpWorkerPage } from '@/modules/signup/worker';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
