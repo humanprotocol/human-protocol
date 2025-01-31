@@ -2,11 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { SendGridService } from './sendgrid.service';
 import { MailService } from '@sendgrid/mail';
-import { ErrorSendGrid } from '../../common/constants/errors';
 import { MOCK_SENDGRID_API_KEY, mockConfig } from '../../../test/constants';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { HttpStatus } from '@nestjs/common';
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
@@ -89,10 +86,7 @@ describe('SendGridService', () => {
 
     it("should throw error if email wasn't sent", async () => {
       jest.spyOn(mailService, 'send').mockImplementationOnce(async () => {
-        throw new ControlledError(
-          ErrorSendGrid.EmailNotSent,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new Error('Mail service error');
       });
 
       await expect(
@@ -102,7 +96,7 @@ describe('SendGridService', () => {
           text: 'and easy to do anywhere, even with Node.js',
           html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         }),
-      ).rejects.toThrowError(ErrorSendGrid.EmailNotSent);
+      ).rejects.toThrow('Failed to send email');
     });
   });
 
@@ -124,7 +118,7 @@ describe('SendGridService', () => {
           mailService,
           sendgridConfigService,
         );
-      }).toThrowError(ErrorSendGrid.InvalidApiKey);
+      }).toThrow('Invalid SendGrid API key');
     });
   });
 });
