@@ -97,6 +97,7 @@ class _AudinoValidationResult:
     job_results: _JobResults
     rejected_jobs: _RejectedJobs
     updated_merged_dataset: io.BytesIO
+    gt_stats: GtStats
 
 
 T = TypeVar("T")
@@ -435,7 +436,9 @@ class _AudinoTaskValidator:
         if self._merged_annotations is None:
             return {}
 
-        job_annotations: dict[int, list[dict[str, Any]]] = {}
+        job_annotations: dict[int, list[dict[str, Any]]] = {
+            job.job_id: [] for job in self._meta.jobs
+        }
 
         with zipfile.ZipFile(io.BytesIO(self._merged_annotations.getvalue())) as archive:
             if "annotations.json" not in archive.namelist():
@@ -493,8 +496,17 @@ class _AudinoTaskValidator:
         job_results: _JobResults = {}
         rejected_jobs: _RejectedJobs = {}
 
+        min_quality = manifest.validation.min_quality
+
+        # cvat_task_ids = {job_meta.task_id for job_meta in self._meta.jobs}
+        # task_id_to_labels: dict[int, list[str]] = {}
+
+        # for cvat_task_id in cvat_task_ids:
+        #     task_labels = cvat_api.get_task_labels(cvat_task_id)
+        #     task_id_to_labels[cvat_task_id] = task_labels
+
         comparator = AudinoDatasetComparator(
-            min_similarity_threshold=manifest.validation.min_quality,
+            min_similarity_threshold=min_quality,
         )
 
         self._job_annotations = self._parse_merged_annotations()
@@ -509,15 +521,24 @@ class _AudinoTaskValidator:
                     job_dataset,
                     self._base_job_id,  # 0 based indexing used for checking intersecting jobs
                 )
+
+                job_results[job_cvat_id] = job_mean_accuracy
+                if job_mean_accuracy > 0:
+                    non_zero_accuracies.append(job_mean_accuracy)
+
+                val_job_name = GtKey(filename=str(job_cvat_id))  # labels=task_labels
+                self._gt_stats.setdefault(val_job_name, ValidationFrameStats())
+                self._gt_stats[val_job_name].accumulated_quality += job_mean_accuracy
+
+                if job_mean_accuracy < min_quality:
+                    self._gt_stats[val_job_name].failed_attempts += 1
+                else:
+                    self._gt_stats[val_job_name].accepted_attempts += 1
+
             except TooFewGtError as e:
                 job_results[job_cvat_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
-
-            if job_mean_accuracy > 0:
-                non_zero_accuracies.append(job_mean_accuracy)
-
-            job_results[job_cvat_id] = job_mean_accuracy
 
         if non_zero_accuracies:
             average_accuracy = sum(non_zero_accuracies) / len(non_zero_accuracies)
@@ -530,8 +551,16 @@ class _AudinoTaskValidator:
             ):  # assign average accuracy for jobs which are not included in GT
                 job_results[job_cvat_id] = average_accuracy
 
-            if job_results[job_cvat_id] < manifest.validation.min_quality:
+            if job_results[job_cvat_id] < min_quality:
                 rejected_jobs[job_cvat_id] = TooFewGtError()
+
+        for gt_stat in self._gt_stats.values():
+            gt_stat.total_uses = max(
+                gt_stat.total_uses,
+                gt_stat.failed_attempts + gt_stat.accepted_attempts,
+                # at the first iteration we have no information on total uses
+                # from previous iterations, so we derive it from the validation results
+            )
 
         self._job_results = job_results
         self._rejected_jobs = rejected_jobs
@@ -594,6 +623,7 @@ class _AudinoTaskValidator:
             job_results=self._require_field(self._job_results),
             rejected_jobs=self._require_field(self._rejected_jobs),
             updated_merged_dataset=self._require_field(self._updated_merged_dataset_archive),
+            gt_stats=self._require_field(self._gt_stats),
         )
 
 
@@ -1114,34 +1144,30 @@ def process_intermediate_results(  # noqa: PLR0912
             f" too many iterations, stopping annotation"
         )
         should_complete = True
-    else:
-        gt_stats = (
-            validation_result.gt_stats
-            if manifest.annotation.type != TaskTypes.audio_transcription
-            else None
+
+    gt_stats = validation_result.gt_stats
+
+    if rejected_jobs and gt_stats and manifest.annotation.type != TaskTypes.audio_transcription:
+        honeypot_manager = _TaskHoneypotManager(
+            task,
+            manifest,
+            annotation_meta=meta,
+            gt_stats=gt_stats,
+            validation_result=validation_result,
+            logger=logger,
         )
 
-        if rejected_jobs and gt_stats:
-            honeypot_manager = _TaskHoneypotManager(
-                task,
-                manifest,
-                annotation_meta=meta,
-                gt_stats=gt_stats,
-                validation_result=validation_result,
-                logger=logger,
-            )
+        honeypot_update_result = honeypot_manager.update_honeypots()
+        if not honeypot_update_result.can_continue_annotation:
+            should_complete = True
 
-            honeypot_update_result = honeypot_manager.update_honeypots()
-            if not honeypot_update_result.can_continue_annotation:
-                should_complete = True
+        gt_stats = honeypot_update_result.updated_gt_stats
 
-            gt_stats = honeypot_update_result.updated_gt_stats
+    if gt_stats:
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Updating GT stats: %s", gt_stats)
 
-        if gt_stats:
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("Updating GT stats: %s", gt_stats)
-
-            db_service.update_gt_stats(session, task.id, gt_stats)
+        db_service.update_gt_stats(session, task.id, gt_stats)
 
     job_final_result_ids: dict[int, str] = {}
 
