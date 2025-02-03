@@ -29,7 +29,7 @@ export class OracleDiscoveryService {
 
     const selectedJobTypesSet = new Set(command.selectedJobTypes);
     return oracles.filter((oracle) =>
-      oracle.jobTypes.some((jobType) => selectedJobTypesSet.has(jobType)),
+      oracle.jobTypes?.some((jobType) => selectedJobTypesSet.has(jobType)),
     );
   }
 
@@ -88,6 +88,7 @@ export class OracleDiscoveryService {
         ) {
           discoveredOracles.push(
             new DiscoveredOracle({
+              id: exchangeOracle.id,
               address: exchangeOracle.address,
               role: exchangeOracle.role,
               url: exchangeOracle.url,
@@ -95,6 +96,13 @@ export class OracleDiscoveryService {
               registrationNeeded: exchangeOracle.registrationNeeded,
               registrationInstructions: exchangeOracle.registrationInstructions,
               chainId,
+              amountStaked: exchangeOracle.amountStaked,
+              amountLocked: exchangeOracle.amountLocked,
+              amountWithdrawn: exchangeOracle.amountWithdrawn,
+              amountSlashed: exchangeOracle.amountSlashed,
+              amountJobsProcessed: exchangeOracle.amountJobsProcessed,
+              reward: exchangeOracle.reward,
+              lockedUntilTimestamp: exchangeOracle.lockedUntilTimestamp,
             }),
           );
         }

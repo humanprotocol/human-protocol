@@ -4,7 +4,8 @@ import {
   DiscoveredOracle,
 } from '../model/oracle-discovery.model';
 
-const response1: DiscoveredOracle = {
+export const response1: DiscoveredOracle = {
+  id: '1',
   address: '0xd06eac24a0c47c776Ce6826A93162c4AfC029047',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role1',
@@ -14,8 +15,17 @@ const response1: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: true,
   registrationInstructions: 'https://instructions.com',
+  amountStaked: BigInt(0),
+  amountLocked: BigInt(0),
+  lockedUntilTimestamp: BigInt(0),
+  amountWithdrawn: BigInt(0),
+  amountSlashed: BigInt(0),
+  reward: BigInt(0),
+  amountJobsProcessed: BigInt(0),
 };
-const response2: DiscoveredOracle = {
+
+export const response2: DiscoveredOracle = {
+  id: '2',
   address: '0xd10c3402155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role2',
@@ -25,8 +35,17 @@ const response2: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
+  amountStaked: BigInt(0),
+  amountLocked: BigInt(0),
+  lockedUntilTimestamp: BigInt(0),
+  amountWithdrawn: BigInt(0),
+  amountSlashed: BigInt(0),
+  reward: BigInt(0),
+  amountJobsProcessed: BigInt(0),
 };
-const response3: DiscoveredOracle = {
+
+export const response3: DiscoveredOracle = {
+  id: '3',
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.POLYGON_AMOY,
   role: 'role3',
@@ -36,8 +55,17 @@ const response3: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
+  amountStaked: BigInt(0),
+  amountLocked: BigInt(0),
+  lockedUntilTimestamp: BigInt(0),
+  amountWithdrawn: BigInt(0),
+  amountSlashed: BigInt(0),
+  reward: BigInt(0),
+  amountJobsProcessed: BigInt(0),
 };
-const response4: DiscoveredOracle = {
+
+export const response4: DiscoveredOracle = {
+  id: '4',
   address: '0xd83422155c058D78e4D5fB5f50E125F06eb39d',
   chainId: ChainId.BSC_TESTNET,
   role: 'role3',
@@ -47,6 +75,13 @@ const response4: DiscoveredOracle = {
   executionsToSkip: 0,
   registrationNeeded: false,
   registrationInstructions: undefined,
+  amountStaked: BigInt(0),
+  amountLocked: BigInt(0),
+  lockedUntilTimestamp: BigInt(0),
+  amountWithdrawn: BigInt(0),
+  amountSlashed: BigInt(0),
+  reward: BigInt(0),
+  amountJobsProcessed: BigInt(0),
 };
 
 export function generateGetReputationNetworkOperatorsResponseByChainId(
