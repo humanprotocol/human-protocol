@@ -87,8 +87,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=str(uuid.uuid4()),
             created_at=project_creation_time + timedelta(minutes=5),
             updated_at=project_completion_time,
-            expires_at=project_creation_time +
-            timedelta(minutes=5) + timedelta(hours=1),
+            expires_at=project_creation_time + timedelta(minutes=5) + timedelta(hours=1),
             user_wallet_address=user.wallet_address,
             cvat_job_id=cvat_job.cvat_id,
             status=AssignmentStatuses.completed,
@@ -135,12 +134,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         db_job = self.session.query(Job).get(cvat_job.id)
         assert db_job.updated_at > project_completion_time
 
-        db_assignment1 = self.session.query(
-            Assignment).get(cvat_assignment1.id)
+        db_assignment1 = self.session.query(Assignment).get(cvat_assignment1.id)
         assert db_assignment1.updated_at < project_completion_time
 
-        db_assignment2 = self.session.query(
-            Assignment).get(cvat_assignment2.id)
+        db_assignment2 = self.session.query(Assignment).get(cvat_assignment2.id)
         assert db_assignment2.updated_at > project_completion_time
 
         db_validation = self.session.query(EscrowValidation).get(validation_id)
@@ -443,8 +440,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_escrow_data = Mock()
             mock_escrow_data.recording_oracle = RECORDING_ORACLE_ADDRESS
             mock_escrow.return_value = mock_escrow_data
-            mock_operator.return_value = MagicMock(
-                webhook_url=DEFAULT_MANIFEST_URL)
+            mock_operator.return_value = MagicMock(webhook_url=DEFAULT_MANIFEST_URL)
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_httpx_post.return_value = mock_response
@@ -452,8 +448,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_outgoing_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(
-                Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.completed.value
@@ -481,8 +476,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_outgoing_recording_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(
-                Webhook.id == webhok_id)).scalars().first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         assert updated_webhook.status == OracleWebhookStatuses.pending.value
