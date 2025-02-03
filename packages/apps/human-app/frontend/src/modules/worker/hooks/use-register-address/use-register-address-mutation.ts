@@ -69,10 +69,10 @@ export function useRegisterAddressMutation(
       throw new Error(t('errors.unknown'));
     }
 
-    await Promise.all([
-      registerAddressRequest({ address, signature }),
-      refreshAccessTokenAsync({ authType: 'web2' }),
-    ]);
+    // wallet address is part of the JWT payload
+    // so we need to refresh the token after the address is registered
+    await registerAddressRequest({ address, signature });
+    await refreshAccessTokenAsync({ authType: 'web2' });
   };
 
   const onSuccess = async () => {
