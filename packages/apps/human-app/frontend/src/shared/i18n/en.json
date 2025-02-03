@@ -40,7 +40,8 @@
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
     "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
     "invalidEscrowAddress": "Please enter a valid escrow address.",
-    "noAddress": "No wallet address found"
+    "noAddress": "No wallet address found.",
+    "cannotSignMessage": "Cannot sign message."
   },
   "components": {
     "multiSelect": {
