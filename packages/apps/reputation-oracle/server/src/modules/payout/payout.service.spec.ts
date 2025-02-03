@@ -1,6 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ConfigModule, registerAs } from '@nestjs/config';
-import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import {
@@ -21,10 +20,9 @@ import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
 import { CvatManifestDto } from '../../common/dto/manifest';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 import { CvatAnnotationMeta } from '../../common/dto/result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
-import { ControlledError } from '../../common/errors/controlled';
+import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -64,8 +62,6 @@ describe('PayoutService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
-            calculateGasPrice: jest.fn().mockReturnValue(1000n),
           },
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
@@ -193,12 +189,7 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.processResults(chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorManifest.ManifestUrlDoesNotExist,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new MissingManifestUrlError(MOCK_ADDRESS));
     });
 
     it('should throw an error for unsupported request types', async () => {
@@ -379,12 +370,7 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.saveResultsFortune(manifest, chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorResults.NoIntermediateResultsFound,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new Error('No intermediate results found'));
     });
 
     it('should throw an error if the number of solutions is less than solutions required', async () => {
@@ -412,12 +398,7 @@ describe('PayoutService', () => {
 
       await expect(
         payoutService.saveResultsFortune(manifest, chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new Error('Not all required solutions have been sent'));
     });
   });
 
@@ -585,12 +566,7 @@ describe('PayoutService', () => {
           chainId,
           escrowAddress,
         ),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorResults.NoAnnotationsMetaFound,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
+      ).rejects.toThrow(new Error('No annotations meta found'));
     });
   });
 });

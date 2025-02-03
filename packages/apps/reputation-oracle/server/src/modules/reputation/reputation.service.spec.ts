@@ -82,7 +82,6 @@ describe('ReputationService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },

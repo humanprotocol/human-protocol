@@ -26,6 +26,7 @@ export class KycWebhookAuthGuard implements CanActivate {
       this.logger.error(message, request.path);
       throw new HttpException(
         {
+          statusCode: HttpStatus.UNAUTHORIZED,
           message,
           timestamp: new Date().toISOString(),
         },
@@ -48,6 +49,7 @@ export class KycWebhookAuthGuard implements CanActivate {
       this.logger.error(message, request.path);
       throw new HttpException(
         {
+          statusCode: HttpStatus.UNAUTHORIZED,
           message,
           timestamp: new Date().toISOString(),
         },

@@ -51,8 +51,6 @@ describe('WebhookOutgoingService', () => {
   // Mock Web3Service
   const mockWeb3Service = {
     getSigner: jest.fn().mockReturnValue(signerMock),
-    validateChainId: jest.fn().mockReturnValue(new Error()),
-    calculateGasPrice: jest.fn().mockReturnValue(1000n),
     getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
   };
 
