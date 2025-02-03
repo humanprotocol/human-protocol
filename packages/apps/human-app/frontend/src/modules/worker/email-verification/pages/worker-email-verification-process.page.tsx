@@ -1,6 +1,6 @@
-import { EmailVerificationProcess } from '@/modules/worker/components/email-verification/email-verification-process';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
-import { useEmailVerificationToken } from '@/modules/worker/hooks/use-email-verification-token';
+import { EmailVerificationProcess } from '../components';
+import { useEmailVerificationToken } from '../hooks';
 
 export function WorkerEmailVerificationProcessPage() {
   const { token, isLoading } = useEmailVerificationToken();
