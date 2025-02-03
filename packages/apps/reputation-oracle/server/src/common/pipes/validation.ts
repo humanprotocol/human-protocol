@@ -23,8 +23,8 @@ export class HttpValidationPipe extends ValidationPipe {
         return new HttpException(
           {
             statusCode: HttpStatus.BAD_REQUEST,
-            timestamp: new Date().toISOString(),
             message: errorMessages.join(', '),
+            timestamp: new Date().toISOString(),
           },
           HttpStatus.BAD_REQUEST,
         );

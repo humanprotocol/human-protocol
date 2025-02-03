@@ -31,6 +31,10 @@ export class ExceptionFilter implements IExceptionFilter {
       );
       // Temp hack for the in progress exception handling refactoring
     } else if (exception instanceof HttpException) {
+      /**
+       * TODO: align this with common response schema
+       * to avoid missing properties
+       */
       return response
         .status(exception.getStatus())
         .json(exception.getResponse());

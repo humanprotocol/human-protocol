@@ -31,7 +31,14 @@ export class JwtAuthGuard
         return true;
       }
 
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: 'Unauthorized',
+          timestamp: new Date().toISOString(),
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     });
   }
 }
