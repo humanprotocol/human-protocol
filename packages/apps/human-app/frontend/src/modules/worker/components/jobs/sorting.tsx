@@ -5,7 +5,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import List from '@mui/material/List';
 import { Grid } from '@mui/material';
 import { SortArrow } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { Button } from '@/shared/components/ui/button';
 
 interface SortingProps {

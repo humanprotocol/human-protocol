@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 
 import {
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
@@ -25,8 +24,8 @@ import {
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
-import { getRequestType, isValidJobRequestType } from '../../common/utils';
-import { ControlledError } from '../../common/errors/controlled';
+import { assertValidJobRequestType, getRequestType } from '../../common/utils';
+import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
@@ -54,10 +53,7 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
@@ -65,12 +61,7 @@ export class PayoutService {
 
     const requestType = getRequestType(manifest).toLowerCase();
 
-    if (!isValidJobRequestType(requestType)) {
-      throw new ControlledError(
-        `Unsupported request type: ${requestType}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    assertValidJobRequestType(requestType);
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
@@ -99,10 +90,7 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
@@ -110,12 +98,7 @@ export class PayoutService {
 
     const requestType = getRequestType(manifest).toLowerCase();
 
-    if (!isValidJobRequestType(requestType)) {
-      throw new ControlledError(
-        `Unsupported request type: ${requestType}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    assertValidJobRequestType(requestType);
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
@@ -224,22 +207,12 @@ export class PayoutService {
     )) as FortuneFinalResult[];
 
     if (intermediateResults.length === 0) {
-      this.logger.log(
-        ErrorResults.NoIntermediateResultsFound,
-        PayoutService.name,
-      );
-      throw new ControlledError(
-        ErrorResults.NoIntermediateResultsFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('No intermediate results found');
     }
 
     const validResults = intermediateResults.filter((result) => !result.error);
     if (validResults.length < manifest.submissionsRequired) {
-      throw new ControlledError(
-        ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('Not all required solutions have been sent');
     }
 
     const { url, hash } = await this.storageService.uploadJobSolutions(
@@ -342,10 +315,7 @@ export class PayoutService {
       Array.isArray(annotations.jobs) &&
       annotations.jobs.length === 0
     ) {
-      throw new ControlledError(
-        ErrorResults.NoAnnotationsMetaFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new Error('No annotations meta found');
     }
 
     const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);

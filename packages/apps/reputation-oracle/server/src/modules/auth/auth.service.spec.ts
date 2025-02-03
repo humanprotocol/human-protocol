@@ -1,13 +1,15 @@
-import { Test } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { TokenRepository } from './token.repository';
-import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
-import { UserRepository } from '../user/user.repository';
+import {
+  ChainId,
+  KVStoreClient,
+  KVStoreUtils,
+  Role as SDKRole,
+} from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { UserEntity } from '../user/user.entity';
-import { ErrorSignature } from '../../common/constants/errors';
+import { Test } from '@nestjs/testing';
+import { v4 } from 'uuid';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
@@ -20,41 +22,40 @@ import {
   MOCK_REFRESH_TOKEN,
   mockConfig,
 } from '../../../test/constants';
-import { TokenEntity, TokenType } from './token.entity';
-import { v4 } from 'uuid';
-import { UserStatus, Role } from '../../common/enums/user';
-import { SendGridService } from '../sendgrid/sendgrid.service';
-import { HttpStatus } from '@nestjs/common';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { generateNonce, signMessage } from '../../common/utils/signature';
-import { Web3Service } from '../web3/web3.service';
-import {
-  ChainId,
-  KVStoreClient,
-  KVStoreUtils,
-  Role as SDKRole,
-} from '@human-protocol/sdk';
-import { PrepareSignatureDto, SignatureBodyDto } from '../user/user.dto';
-import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
+import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ConfigService } from '@nestjs/config';
-import { SiteKeyRepository } from '../user/site-key.repository';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { JobRequestType } from '../../common/enums';
+import { Role, UserStatus } from '../../common/enums/user';
+import { SignatureType } from '../../common/enums/web3';
+import {
+  generateNonce,
+  prepareSignatureBody,
+  signMessage,
+} from '../../common/utils/signature';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { SendGridService } from '../sendgrid/sendgrid.service';
+import { SiteKeyRepository } from '../user/site-key.repository';
+import { PrepareSignatureDto } from '../user/user.dto';
+import { UserEntity } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
+import { UserService } from '../user/user.service';
+import { Web3Service } from '../web3/web3.service';
 import {
   AuthError,
   AuthErrorMessage,
-  DuplicatedUserError,
+  DuplicatedUserEmailError,
   InvalidOperatorFeeError,
   InvalidOperatorJobTypesError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
-} from './auth.errors';
+} from './auth.error';
+import { AuthService } from './auth.service';
+import { TokenEntity, TokenType } from './token.entity';
+import { TokenRepository } from './token.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -134,9 +135,7 @@ describe('AuthService', () => {
         {
           provide: Web3Service,
           useValue: {
-            prepareSignatureBody: jest.fn(),
             getSigner: jest.fn().mockReturnValue(signerMock),
-            signMessage: jest.fn(),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
@@ -268,7 +267,7 @@ describe('AuthService', () => {
         .mockResolvedValue(userEntity as any);
 
       await expect(authService.signup(userCreateDto)).rejects.toThrow(
-        new DuplicatedUserError(userEntity.email),
+        new DuplicatedUserEmailError(userEntity.email),
       );
 
       expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
@@ -646,7 +645,7 @@ describe('AuthService', () => {
         let updateNonceMock: any;
 
         beforeEach(() => {
-          getByAddressMock = jest.spyOn(userService, 'getByAddress');
+          getByAddressMock = jest.spyOn(userRepository, 'findOneByAddress');
           updateNonceMock = jest.spyOn(userService, 'updateNonce');
 
           jest.spyOn(authService, 'auth').mockResolvedValue({
@@ -682,7 +681,9 @@ describe('AuthService', () => {
             signature,
           });
 
-          expect(userService.getByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
+          expect(userRepository.findOneByAddress).toHaveBeenCalledWith(
+            MOCK_ADDRESS,
+          );
           expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
 
           expect(authService.auth).toHaveBeenCalledWith(userEntity);
@@ -704,10 +705,7 @@ describe('AuthService', () => {
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
-            new ControlledError(
-              ErrorSignature.SignatureNotVerified,
-              HttpStatus.CONFLICT,
-            ),
+            new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE),
           );
         });
       });
@@ -726,12 +724,12 @@ describe('AuthService', () => {
           nonce,
         };
 
-        const preSignUpDataMock: SignatureBodyDto = {
-          from: MOCK_ADDRESS.toLowerCase(),
-          to: MOCK_ADDRESS.toLowerCase(),
-          contents: 'signup',
-          nonce: undefined,
-        };
+        const preSignUpData = prepareSignatureBody({
+          from: web3PreSignUpDto.address,
+          to: MOCK_ADDRESS,
+          contents: SignatureType.SIGNUP,
+        });
+
         let createUserMock: any;
 
         beforeEach(() => {
@@ -743,37 +741,13 @@ describe('AuthService', () => {
             accessToken: MOCK_ACCESS_TOKEN,
             refreshToken: MOCK_REFRESH_TOKEN,
           });
-
           jest
-            .spyOn(web3Service as any, 'prepareSignatureBody')
-            .mockReturnValue(preSignUpDataMock);
+            .spyOn(userRepository, 'findOneByAddress')
+            .mockResolvedValue(null);
         });
 
         afterEach(() => {
           jest.clearAllMocks();
-        });
-
-        it('should prepare the signature body and return it', async () => {
-          const signatureType = SignatureType.SIGNUP;
-          const address = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
-
-          const expectedResult = {
-            from: address,
-            to: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
-            contents: 'signup',
-            nonce: undefined,
-          };
-
-          jest
-            .spyOn(userService, 'prepareSignatureBody')
-            .mockResolvedValue(expectedResult);
-
-          const result = await userService.prepareSignatureBody(
-            signatureType,
-            address,
-          );
-
-          expect(result).toEqual(expectedResult);
         });
 
         it('should create a new web3 user and return the token', async () => {
@@ -787,10 +761,7 @@ describe('AuthService', () => {
             .mockResolvedValueOnce(1)
             .mockResolvedValueOnce(JobRequestType.FORTUNE);
 
-          const signature = await signMessage(
-            preSignUpDataMock,
-            MOCK_PRIVATE_KEY,
-          );
+          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
@@ -822,18 +793,13 @@ describe('AuthService', () => {
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
-            new ControlledError(
-              ErrorSignature.SignatureNotVerified,
-              HttpStatus.CONFLICT,
-            ),
+            new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE),
           );
         });
         it('should throw if role is not in KVStore', async () => {
           KVStoreUtils.get = jest.fn().mockResolvedValueOnce('');
-          const signature = await signMessage(
-            preSignUpDataMock,
-            MOCK_PRIVATE_KEY,
-          );
+
+          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
 
           await expect(
             authService.web3Signup({
@@ -847,10 +813,8 @@ describe('AuthService', () => {
           KVStoreUtils.get = jest
             .fn()
             .mockResolvedValueOnce(SDKRole.JobLauncher);
-          const signature = await signMessage(
-            preSignUpDataMock,
-            MOCK_PRIVATE_KEY,
-          );
+
+          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
 
           await expect(
             authService.web3Signup({
@@ -866,10 +830,7 @@ describe('AuthService', () => {
             .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url');
 
-          const signature = await signMessage(
-            preSignUpDataMock,
-            MOCK_PRIVATE_KEY,
-          );
+          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
 
           await expect(
             authService.web3Signup({
@@ -886,10 +847,7 @@ describe('AuthService', () => {
             .mockResolvedValueOnce('url')
             .mockResolvedValueOnce(1);
 
-          const signature = await signMessage(
-            preSignUpDataMock,
-            MOCK_PRIVATE_KEY,
-          );
+          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
 
           await expect(
             authService.web3Signup({

@@ -7,7 +7,7 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 

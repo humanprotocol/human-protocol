@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function ProfileData() {

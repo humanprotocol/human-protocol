@@ -1,6 +1,6 @@
 import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function EmptyPlaceholder() {
   const { colorPalette } = useColorMode();

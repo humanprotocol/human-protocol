@@ -15,8 +15,6 @@ import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ServerConfigService } from '../common/config/server-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
-import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
-import { CredentialEntity } from '../modules/credentials/credential.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
@@ -53,8 +51,6 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
             EscrowCompletionEntity,
             EscrowPayoutsBatchEntity,
             ReputationEntity,
-            CredentialEntity,
-            CredentialValidationEntity,
             TokenEntity,
             UserEntity,
             KycEntity,
