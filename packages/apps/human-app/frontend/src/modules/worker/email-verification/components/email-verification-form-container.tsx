@@ -4,8 +4,7 @@ import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
-import { useResendEmail } from '@/modules/worker/hooks/use-resend-email';
-import { useResendEmailRouterParams } from '@/modules/worker/hooks/use-resend-email-router-params';
+import { useResendEmailRouterParams, useResendEmail } from '../hooks';
 import { ResendVerificationEmailForm } from './resend-verification-email-form';
 
 export function EmailVerificationFormContainer() {
