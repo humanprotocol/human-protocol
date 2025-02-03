@@ -20,7 +20,6 @@ export class NetworksService {
   ) {}
 
   public async getOperatingNetworks(): Promise<ChainId[]> {
-    return [1338];
     const cachedNetworks = await this.cacheManager.get<ChainId[]>(
       OPERATING_NETWORKS_CACHE_KEY,
     );

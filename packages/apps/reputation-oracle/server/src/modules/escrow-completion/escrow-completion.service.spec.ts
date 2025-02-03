@@ -37,7 +37,7 @@ import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository'
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   OperatorUtils: {
-    getLeader: jest.fn().mockImplementation(() => {
+    getOperator: jest.fn().mockImplementation(() => {
       return { webhookUrl: MOCK_WEBHOOK_URL };
     }),
   },
