@@ -1,9 +1,9 @@
-import { useEmailVerification } from '@/modules/worker/hooks/use-email-verification';
 import {
   PageCardError,
   PageCardLoader,
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
+import { useEmailVerification } from '../hooks';
 import { EmailVerificationSuccessMessage } from './email-verification-success-message';
 
 interface EmailVerificationProcessProps {
