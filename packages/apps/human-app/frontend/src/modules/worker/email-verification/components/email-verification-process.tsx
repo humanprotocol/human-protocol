@@ -16,7 +16,7 @@ export function EmailVerificationProcess({
   const { errorMsg, isEmailVerificationError, isEmailVerificationPending } =
     useEmailVerification(token);
 
-  if (isEmailVerificationError && errorMsg !== null) {
+  if (isEmailVerificationError && errorMsg) {
     return <PageCardError errorMessage={getErrorMessageForError(errorMsg)} />;
   }
 
