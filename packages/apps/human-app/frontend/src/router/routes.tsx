@@ -24,14 +24,16 @@ import type { PageHeaderProps } from '@/shared/components/layout/protected/page-
 import { SetUpOperatorPage } from '@/modules/operator/views/sign-up/set-up-operator.page';
 import { EditExistingKeysSuccessPage } from '@/modules/operator/views/sign-up/edit-existing-keys-success.page';
 import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.page';
-import { WorkerVerifyEmailPage } from '@/modules/worker/views/email-verification/worker-verify-email.page';
-import { WorkerEmailVerificationProcessPage } from '@/modules/worker/views/email-verification/worker-email-verification-process.page';
 import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
 import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
 import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.page';
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
+import {
+  WorkerEmailVerificationProcessPage,
+  WorkerVerifyEmailPage,
+} from '@/modules/worker/email-verification';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
