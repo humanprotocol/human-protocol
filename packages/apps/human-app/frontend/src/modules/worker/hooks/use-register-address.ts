@@ -22,17 +22,11 @@ interface RegisterAddressParams {
   signature: string;
 }
 
-interface RegisterAddressResponse {
-  success: boolean;
-}
-
-const RegisterAddressSuccessSchema = z.object({
-  success: z.boolean(),
-});
+const RegisterAddressSuccessSchema = z.unknown();
 
 const registerAddressRequest = async (
   params: RegisterAddressParams
-): Promise<RegisterAddressResponse> => {
+): Promise<unknown> => {
   return apiClient(apiPaths.worker.registerAddress.path, {
     authenticated: true,
     withAuthRetry: apiPaths.worker.registerAddress.withAuthRetry,
