@@ -30,7 +30,8 @@ export const CVAT_JOB_TYPES = [
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
-export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+export const RESEND_EMAIL_VERIFICATION_PATH =
+  '/auth/web2/resend-verification-email';
 export const LOGOUT_PATH = '/auth/logout';
 
 export const BACKOFF_INTERVAL_SECONDS = 120;

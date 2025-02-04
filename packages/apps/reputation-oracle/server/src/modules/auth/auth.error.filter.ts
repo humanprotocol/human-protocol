@@ -38,6 +38,9 @@ export class AuthControllerErrorsFilter implements ExceptionFilter {
     if (exception instanceof DuplicatedUserEmailError) {
       status = HttpStatus.CONFLICT;
       logContext = exception.email;
+    } else if (exception instanceof DuplicatedUserAddressError) {
+      status = HttpStatus.CONFLICT;
+      logContext = exception.address;
     } else if (exception instanceof InvalidOperatorSignupDataError) {
       status = HttpStatus.BAD_REQUEST;
       logContext = exception.detail;

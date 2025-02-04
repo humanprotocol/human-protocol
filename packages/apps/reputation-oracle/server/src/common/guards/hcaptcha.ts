@@ -21,10 +21,13 @@ export class HCaptchaGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
 
     const { body } = request;
+    /**
+     * Guards called before interceptors,
+     * so we need to access body params as is
+     */
     const hCaptchaToken = body['h_captcha_token'];
-
     // TODO: Remove 27-45 lines once we figure out how to replace human app user
-    if (request.path === '/auth/signin') {
+    if (request.path === '/auth/web2/signin') {
       const email = body['email'];
       // Checking email here to avoid unnecessary db calls
       if (email === this.authConfigSerice.humanAppEmail) {
