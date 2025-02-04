@@ -34,7 +34,7 @@ export const PayJob = () => {
     }
   };
 
-  return !isPaying ? (
+  return isPaying ? (
     <Box
       sx={{
         mx: 'auto',

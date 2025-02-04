@@ -226,7 +226,10 @@ const Settings = () => {
 
       <BillingDetailsModal
         open={isEditBillingOpen}
-        onClose={() => setIsEditBillingOpen(false)}
+        onClose={() => {
+          setIsEditBillingOpen(false);
+          setOpenBillingAfterAddCard(false);
+        }}
         billingInfo={billingInfo}
         setBillingInfo={(info) => {
           setBillingInfo(info);
