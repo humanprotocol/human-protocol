@@ -7,10 +7,14 @@ import {
 } from 'class-validator';
 
 export class QualificationDto {
+  @ApiProperty()
   public reference: string;
+  @ApiProperty()
   public title: string;
+  @ApiProperty()
   public description: string;
-  public expiresAt?: Date | null;
+  @ApiProperty()
+  public expiresAt?: string;
 }
 
 export class CreateQualificationDto {
@@ -29,24 +33,16 @@ export class CreateQualificationDto {
   @ApiPropertyOptional({ name: 'expires_at' })
   @IsOptional()
   @IsDateString()
-  public expiresAt?: Date;
+  public expiresAt?: string;
 }
 
 export class AssignQualificationDto {
-  @ApiProperty()
-  @IsString()
-  public reference: string;
-
   @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
   public workerAddresses: string[];
 }
 
 export class UnassignQualificationDto {
-  @ApiProperty()
-  @IsString()
-  public reference: string;
-
   @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
   public workerAddresses: string[];
