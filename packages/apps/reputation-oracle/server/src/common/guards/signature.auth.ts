@@ -49,6 +49,7 @@ export class SignatureAuthGuard implements CanActivate {
       this.logger.error(message, request.path);
       throw new HttpException(
         {
+          statusCode: HttpStatus.UNAUTHORIZED,
           message,
           timestamp: new Date().toISOString(),
         },

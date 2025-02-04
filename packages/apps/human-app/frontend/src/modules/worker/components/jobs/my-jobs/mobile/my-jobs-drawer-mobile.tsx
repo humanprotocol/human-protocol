@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { MyJobsRewardAmountSortMobile } from '@/modules/worker/components/jobs/my-jobs/mobile/my-jobs-reward-amount-sort-mobile';
 import { MyJobsExpiresAtSortMobile } from '@/modules/worker/components/jobs/my-jobs/mobile/my-jobs-expires-at-sort-mobile';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';

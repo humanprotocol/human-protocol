@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { Alert } from '@/shared/components/ui/alert';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 import { type ErrorMessageProps } from './types';
 

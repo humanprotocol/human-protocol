@@ -1,11 +1,9 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
 
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
-import { ControlledError } from '../../common/errors/controlled';
 import { Cron } from '@nestjs/schedule';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
@@ -63,13 +61,12 @@ export class CronJobService {
    * Throws an error if the cron job entity is already marked as completed.
    * @param cronJobEntity The cron job entity to mark as completed.
    * @returns {Promise<CronJobEntity>} A Promise containing the updated cron job entity.
-   * @throws {ControlledError} if the cron job is already completed.
    */
   public async completeCronJob(
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      throw new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST);
+      throw new Error('Cron job is already completed');
     }
 
     cronJobEntity.completedAt = new Date();

@@ -14,7 +14,7 @@ import { routerPaths } from '@/router/router-paths';
 import type { OraclesDataQueryResult } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
 import { env } from '@/shared/env';
 import { useGetRegistrationInExchangeOracles } from '@/modules/worker/services/get-registration-in-exchange-oracles';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';

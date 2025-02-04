@@ -1,14 +1,16 @@
 import { useLocation, Navigate } from 'react-router-dom';
 import { createContext } from 'react';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
-import type { WalletConnectContextConnectedAccount } from '@/shared/contexts/wallet-connect';
 import { routerPaths } from '@/router/router-paths';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
+import { type WalletConnectContextConnectedAccount } from './types';
+import { useWalletConnect } from './use-wallet-connect';
 
-export const AuthWeb3Context =
+export const ConnectedWalletContext =
   createContext<WalletConnectContextConnectedAccount | null>(null);
 
-export function RequireWalletConnect({ children }: { children: JSX.Element }) {
+export function RequireWalletConnect({
+  children,
+}: Readonly<{ children: JSX.Element }>) {
   const walletConnect = useWalletConnect();
   const location = useLocation();
 
@@ -27,8 +29,8 @@ export function RequireWalletConnect({ children }: { children: JSX.Element }) {
   }
 
   return (
-    <AuthWeb3Context.Provider value={walletConnect}>
+    <ConnectedWalletContext.Provider value={walletConnect}>
       {children}
-    </AuthWeb3Context.Provider>
+    </ConnectedWalletContext.Provider>
   );
 }

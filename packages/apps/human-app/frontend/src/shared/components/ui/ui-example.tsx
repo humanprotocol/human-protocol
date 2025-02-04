@@ -28,7 +28,7 @@ import {
 import { TableExample } from '@/modules/playground/components/table-example/table-example';
 import { Alert } from '@/shared/components/ui/alert';
 import { ConnectWalletBtn } from '@/shared/components/ui/connect-wallet-btn';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function UiExample() {
   const { colorPalette } = useColorMode();

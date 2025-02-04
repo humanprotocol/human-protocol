@@ -8,7 +8,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { ChainId, OrderDirection } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import {
   ReputationEntityType,
   ReputationLevel,

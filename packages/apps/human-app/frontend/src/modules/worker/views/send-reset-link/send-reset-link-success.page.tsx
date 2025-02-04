@@ -18,7 +18,7 @@ import { getErrorMessageForError } from '@/shared/errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function SendResetLinkWorkerSuccessPage() {

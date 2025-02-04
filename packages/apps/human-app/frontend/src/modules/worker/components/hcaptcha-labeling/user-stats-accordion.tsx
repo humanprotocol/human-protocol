@@ -13,7 +13,7 @@ import {
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 const accordionWidth = { width: '284px' };
 

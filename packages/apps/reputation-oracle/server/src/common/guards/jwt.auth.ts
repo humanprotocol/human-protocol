@@ -1,12 +1,12 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { ControlledError } from '../errors/controlled';
 import { JWT_STRATEGY_NAME } from '../constants';
 
 @Injectable()
@@ -31,8 +31,14 @@ export class JwtAuthGuard
         return true;
       }
 
-      console.error(e);
-      throw new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: 'Unauthorized',
+          timestamp: new Date().toISOString(),
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     });
   }
 }

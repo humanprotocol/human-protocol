@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from '../errors/database';
-import { ControlledError } from '../errors/controlled';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -22,12 +21,7 @@ export class ExceptionFilter implements IExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
 
-    if (exception instanceof ControlledError) {
-      status = exception.status;
-      message = exception.message;
-
-      this.logger.error(`Reputation Oracle error: ${message}`, exception.stack);
-    } else if (exception instanceof DatabaseError) {
+    if (exception instanceof DatabaseError) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
       message = exception.message;
 
@@ -37,6 +31,10 @@ export class ExceptionFilter implements IExceptionFilter {
       );
       // Temp hack for the in progress exception handling refactoring
     } else if (exception instanceof HttpException) {
+      /**
+       * TODO: align this with common response schema
+       * to avoid missing properties
+       */
       return response
         .status(exception.getStatus())
         .json(exception.getResponse());

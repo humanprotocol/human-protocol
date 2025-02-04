@@ -4,7 +4,7 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { env } from '@/shared/env';
 import { Chat } from '@/modules/homepage/components/chat';
 import { breakpoints } from '@/shared/styles/breakpoints';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface FooterProps {
   displayChatIcon?: boolean;

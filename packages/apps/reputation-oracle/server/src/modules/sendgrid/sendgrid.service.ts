@@ -1,12 +1,10 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import {
   SENDGRID_API_KEY_DISABLED,
   SENDGRID_API_KEY_REGEX,
 } from '../../common/constants';
-import { ErrorSendGrid } from '../../common/constants/errors';
 import { SendgridConfigService } from '../../common/config/sendgrid-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 
 @Injectable()
 export class SendGridService {
@@ -21,10 +19,7 @@ export class SendGridService {
     }
 
     if (!SENDGRID_API_KEY_REGEX.test(this.sendgridConfigService.apiKey)) {
-      throw new ControlledError(
-        ErrorSendGrid.InvalidApiKey,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('Invalid SendGrid API key');
     }
 
     this.mailService.setApiKey(this.sendgridConfigService.apiKey);
@@ -54,11 +49,9 @@ export class SendGridService {
       this.logger.log('Email sent successfully');
       return;
     } catch (error) {
-      this.logger.error(error, SendGridService.name);
-      throw new ControlledError(
-        ErrorSendGrid.EmailNotSent,
-        HttpStatus.BAD_REQUEST,
-      );
+      const errorMessage = 'Failed to send email';
+      this.logger.error(errorMessage, error.messages, error.stack);
+      throw new Error(errorMessage);
     }
   }
 }

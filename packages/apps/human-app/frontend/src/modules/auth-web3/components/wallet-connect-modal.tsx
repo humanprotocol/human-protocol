@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { ConnectWalletBtn } from '@/shared/components/ui/connect-wallet-btn';
 import { useModalStore } from '@/shared/components/ui/modal/modal.store';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 
 export function WalletConnectModal() {
   const { closeModal } = useModalStore();
