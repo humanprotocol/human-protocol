@@ -13,7 +13,7 @@ export class QualificationDto {
   public title: string;
   @ApiProperty()
   public description: string;
-  @ApiProperty()
+  @ApiPropertyOptional({ name: 'expires_at' })
   public expiresAt?: string;
 }
 

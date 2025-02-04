@@ -79,9 +79,11 @@ export class RegistrationInExchangeOracleDto {
 }
 
 export class RegistrationInExchangeOracleResponseDto {
+  @ApiProperty({ name: 'oracle_address' })
   public oracleAddress: string;
 }
 
 export class RegistrationInExchangeOraclesDto {
+  @ApiProperty({ name: 'oracle_addresses' })
   public oracleAddresses: string[];
 }
