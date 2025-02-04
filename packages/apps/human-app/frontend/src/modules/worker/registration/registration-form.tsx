@@ -3,8 +3,8 @@ import { FormProvider } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
 import { type RegistrationInExchangeOracleDto } from '@/modules/worker/services/registration-in-exchange-oracles';
-import { useRegistrationForm } from '@/modules/worker/hooks/use-registration-form';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { useRegistrationForm } from './hooks';
 
 interface RegistrationFormProps {
   hasViewedInstructions: boolean;

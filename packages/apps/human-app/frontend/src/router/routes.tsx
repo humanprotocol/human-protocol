@@ -8,7 +8,7 @@ import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-pas
 import { JobsDiscoveryPage } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
 import { env } from '@/shared/env';
-import { RegistrationPage } from '@/modules/worker/views/registration/registration.page';
+import { RegistrationPage } from '@/modules/worker/registration';
 import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
 import {
   HandIcon,

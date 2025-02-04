@@ -1,9 +1,9 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useGetOracles } from '@/modules/worker/services/oracles';
-import { useOracleNavigation } from '@/modules/worker/hooks/use-oracle-navigation';
-import { useOracleRegistration } from '@/modules/worker/hooks/use-oracle-registration';
-import { useOracleInstructions } from '@/modules/worker/hooks/use-oracle-instructions';
+import { useOracleInstructions } from './use-oracle-instructions';
+import { useOracleNavigation } from './use-oracle-navigation';
+import { useOracleRegistration } from './use-oracle-registration';
 
 export function useOracleRegistrationFlow() {
   const { address: oracleAddress } = useParams<{ address: string }>();
