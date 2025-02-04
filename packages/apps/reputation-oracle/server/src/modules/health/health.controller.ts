@@ -44,12 +44,12 @@ export class HealthController {
     };
   }
 
-  @Get('/check')
-  @HealthCheck()
   @ApiOperation({
     summary: 'Health check',
     description: 'Endpoint to perform health checks for the application.',
   })
+  @HealthCheck()
+  @Get('/check')
   readiness(): Promise<HealthCheckResult> {
     return this.health.check([
       async (): Promise<HealthIndicatorResult> =>
