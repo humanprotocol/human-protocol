@@ -2,8 +2,9 @@ import { t } from 'i18next';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { SignInForm, useSignIn } from '@/modules/signin/worker';
 import { FetchError } from '@/api/fetcher';
+import { useSignIn } from './use-sign-in';
+import { SignInForm } from './sign-in-form';
 
 function formattedSignInErrorMessage(
   unknownError: unknown
