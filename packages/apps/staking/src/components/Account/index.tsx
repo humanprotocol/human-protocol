@@ -16,7 +16,7 @@ export function Account() {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down(1500));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down(1800));
 
   const formattedAddress = isMediumScreen ? formatAddress(address) : address;
 

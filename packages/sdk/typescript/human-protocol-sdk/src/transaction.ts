@@ -13,7 +13,7 @@ import {
   GET_TRANSACTION_QUERY,
 } from './graphql/queries/transaction';
 import { ITransaction, ITransactionsFilter } from './interfaces';
-import { getSubgraphUrl } from './utils';
+import { getSubgraphUrl, getUnixTimestamp } from './utils';
 
 export class TransactionUtils {
   /**
@@ -132,11 +132,9 @@ export class TransactionUtils {
       fromAddress: filter?.fromAddress,
       toAddress: filter?.toAddress,
       startDate: filter?.startDate
-        ? Math.floor(filter?.startDate.getTime() / 1000)
+        ? getUnixTimestamp(filter?.startDate)
         : undefined,
-      endDate: filter.endDate
-        ? Math.floor(filter.endDate.getTime() / 1000)
-        : undefined,
+      endDate: filter.endDate ? getUnixTimestamp(filter.endDate) : undefined,
       startBlock: filter.startBlock ? filter.startBlock : undefined,
       endBlock: filter.endBlock ? filter.endBlock : undefined,
       orderDirection: orderDirection,

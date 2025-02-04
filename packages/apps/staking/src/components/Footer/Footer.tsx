@@ -46,7 +46,7 @@ const Footer: FC = () => {
             </Typography>
           </div>
           <Typography variant="subtitle1" color="text.secondary">
-            © 2021 HPF. HUMAN Protocol® is a registered trademark
+            © 2025 HPF. HUMAN Protocol® is a registered trademark
           </Typography>
         </div>
         <div className="footer-icon">

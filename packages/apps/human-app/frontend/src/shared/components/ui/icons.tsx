@@ -36,7 +36,7 @@ import SunIconDark from '@/assets/icons-dark-mode/sun.svg';
 import SunIconLight from '@/assets/icons/sun.svg';
 import MoonIconDark from '@/assets/icons-dark-mode/moon.svg';
 import MoonIconLight from '@/assets/icons/moon.svg';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import WorkHeaderDark from '@/assets/icons-dark-mode/work-header.svg';
 import WorkHeaderLight from '@/assets/icons/work-header.svg';
 

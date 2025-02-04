@@ -37,6 +37,7 @@ export class HCaptchaGuard implements CanActivate {
       this.logger.error(message, request.path);
       throw new HttpException(
         {
+          statusCode: HttpStatus.BAD_REQUEST,
           message,
           timestamp: new Date().toISOString(),
         },
@@ -48,7 +49,14 @@ export class HCaptchaGuard implements CanActivate {
       token: hCaptchaToken,
     });
     if (!captchaVerificationResult.success) {
-      throw new HttpException('Invalid hCaptcha token', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Invalid hCaptcha token',
+          timestamp: new Date().toISOString(),
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return true;

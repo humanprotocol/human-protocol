@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
@@ -28,7 +27,7 @@ export class WebhookIncomingService {
    * Creates an incoming webhook entry in the repository.
    * Validates that the event type is 'JOB_COMPLETED' and sets initial status to 'PENDING'.
    * @param {IncomingWebhookDto} dto - Contains webhook details like chain ID and escrow address.
-   * @throws {ControlledError} If the event type is invalid or the webhook cannot be created.
+   * @throws {IncomingWebhookError} If the event type is invalid or the webhook cannot be created.
    */
   public async createIncomingWebhook(dto: IncomingWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.JOB_COMPLETED) {
@@ -91,20 +90,15 @@ export class WebhookIncomingService {
         webhookEntity.status = WebhookIncomingStatus.COMPLETED;
         await this.webhookIncomingRepository.updateOne(webhookEntity);
       } catch (err) {
-        const errorId = uuidv4();
-        const failureDetail = `${WebhookErrorMessage.PENDING_PROCESSING_FAILED} (Error ID: ${errorId})`;
-
         if (isDuplicatedError(err)) {
-          // Handle duplicated error: log and mark as completed
-          this.logger.warn(
-            `Duplicate tracking entity for escrowAddress: ${webhookEntity.escrowAddress}. Marking webhook as completed.`,
-          );
           webhookEntity.status = WebhookIncomingStatus.COMPLETED;
           await this.webhookIncomingRepository.updateOne(webhookEntity);
         } else {
           // Handle other errors (general failure)
+          const failureDetail = `Error message: ${err.message}`;
+
           this.logger.error(
-            `Error processing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+            `Error processing incoming webhook. Webhook ID: ${webhookEntity.id}. ${failureDetail}.`,
           );
           await this.handleWebhookIncomingError(webhookEntity, failureDetail);
         }

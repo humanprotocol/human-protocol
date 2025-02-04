@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { PageCard } from '@/shared/components/ui/page-card';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import { PageCard, PageCardLoader } from '@/shared/components/ui/page-card';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 import { env } from '@/shared/env';
 import type { ResendEmailVerificationDto } from '@/modules/worker/services/resend-email-verification';
@@ -23,7 +22,7 @@ import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function VerifyEmailWorkerPage() {
@@ -76,7 +75,7 @@ export function VerifyEmailWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelRouterPathOrCallback={() => {
+      cancelNavigation={() => {
         signOut();
         navigate(routerPaths.homePage);
       }}

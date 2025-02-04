@@ -34,21 +34,22 @@ import {
   Role,
 } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { prepareSignatureBody } from '../../common/utils/signature';
 import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,
   AuthErrorMessage,
-  DuplicatedUserError,
+  DuplicatedUserAddressError,
+  DuplicatedUserEmailError,
   InvalidOperatorFeeError,
   InvalidOperatorJobTypesError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
-} from './auth.errors';
+} from './auth.error';
 
 @Injectable()
 export class AuthService {
@@ -82,7 +83,7 @@ export class AuthService {
   public async signup(data: UserCreateDto): Promise<UserEntity> {
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
-      throw new DuplicatedUserError(data.email);
+      throw new DuplicatedUserEmailError(data.email);
     }
     const userEntity = await this.userService.create(data);
 
@@ -337,10 +338,11 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = await this.userService.prepareSignatureBody(
-      SignatureType.SIGNUP,
-      data.address,
-    );
+    const preSignUpData = prepareSignatureBody({
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.SIGNUP,
+    });
 
     const verified = verifySignature(preSignUpData, data.signature, [
       data.address,
@@ -409,6 +411,11 @@ export class AuthService {
       throw new InvalidOperatorJobTypesError(jobTypes);
     }
 
+    const user = await this.userRepository.findOneByAddress(data.address);
+
+    if (user) {
+      throw new DuplicatedUserAddressError(data.address);
+    }
     const userEntity = await this.userService.createWeb3User(data.address);
 
     await kvstore.set(data.address.toLowerCase(), OperatorStatus.ACTIVE);
@@ -417,16 +424,21 @@ export class AuthService {
   }
 
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
-    const userEntity = await this.userService.getByAddress(data.address);
+    const userEntity = await this.userRepository.findOneByAddress(data.address);
 
-    const verified = verifySignature(
-      await this.userService.prepareSignatureBody(
-        SignatureType.SIGNIN,
-        data.address,
-      ),
-      data.signature,
-      [data.address],
-    );
+    if (!userEntity) {
+      throw new AuthError(AuthErrorMessage.INVALID_ADDRESS);
+    }
+
+    const preSigninData = prepareSignatureBody({
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.SIGNIN,
+      nonce: (await this.userRepository.findOneByAddress(data.address))?.nonce,
+    });
+    const verified = verifySignature(preSigninData, data.signature, [
+      data.address,
+    ]);
 
     if (!verified) {
       throw new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE);

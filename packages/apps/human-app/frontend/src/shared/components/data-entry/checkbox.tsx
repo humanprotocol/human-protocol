@@ -4,7 +4,7 @@ import CheckboxMui from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface InputProps extends Omit<CheckboxProps, 'name' | 'error'> {
   name: string;

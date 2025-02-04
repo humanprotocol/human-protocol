@@ -4,15 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
 import { useWeb3AuthenticatedUser } from '@/modules/auth-web3/hooks/use-web3-authenticated-user';
-import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import {
+  PageCardError,
+  PageCardLoader,
+} from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import { ProfileDisableButton } from '@/modules/operator/components/profile/profile-disable-button';
 import { ProfileListItem } from '@/shared/components/ui/profile-list-item';
 import { useGetOperatorStats } from '@/modules/operator/hooks/use-get-stats';
 import { ProfileEnableButton } from '@/modules/operator/components/profile/profile-enable-button';
 import { CheckmarkIcon, LockerIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function OperatorProfilePage() {
   const { colorPalette } = useColorMode();

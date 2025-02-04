@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { type SnackbarKey, useSnackbar } from 'notistack';
 import CloseIcon from '@mui/icons-material/Close';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
 import { breakpoints } from '@/shared/styles/breakpoints';
 

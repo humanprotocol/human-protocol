@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { ethKVStoreGetKeys } from '@/modules/smart-contracts/EthKVStore/eth-kv-store-get-keys';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
 import { EthKVStoreKeys } from '@/modules/smart-contracts/EthKVStore/config';

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Typography } from '@mui/material';
 import { FetchError } from '@/api/fetcher';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { CustomHCaptcha } from './h-captcha';
 import { type CustomHCaptchaRef } from './types';
 
