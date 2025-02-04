@@ -49,7 +49,7 @@ export class ServerConfigService {
    * The minimum transaction fee in USD.
    * Default: 0.01
    */
-  get minimunFeeUsd(): number {
+  get minimumFeeUsd(): number {
     return +this.configService.get<number>('MINIMUM_FEE_USD', 0.01);
   }
 

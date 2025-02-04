@@ -847,7 +847,7 @@ export class JobService {
     );
 
     const paymentCurrencyFee = max(
-      div(this.serverConfigService.minimunFeeUsd, paymentCurrencyRate),
+      div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
       mul(div(feePercentage, 100), dto.paymentAmount),
     );
     const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
