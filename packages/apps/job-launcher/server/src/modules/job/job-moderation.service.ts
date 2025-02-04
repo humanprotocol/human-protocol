@@ -2,25 +2,22 @@ import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
 import { Storage } from '@google-cloud/storage';
 import { VisionConfigService } from '../../common/config/vision-config.service';
 import { ErrorJobModeration } from '../../common/constants/errors';
+import { listObjectsInBucket } from '../../common/utils/storage';
 import {
+  constructGcsPath,
   convertToGCSPath,
   convertToHttpUrl,
-  listObjectsInBucket,
-} from '../../common/utils/storage';
+  isGCSBucketUrl,
+} from '../../common/utils/gcstorage';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   CONTENT_MODERATION_FEATURE,
   CONTENT_MODERATION_LEVEL,
-  GS_PROTOCOL,
   JOB_MODERATION_ASYNC_BATCH_SIZE,
-  JOB_MODERATION_BATCH_SIZE,
-  JOB_MODERATION_MAX_REQUESTS_PER_MINUTE,
-  ONE_MINUTE_IN_MS,
 } from '../../common/constants';
 import {
   DataModerationResultDto,
   ImageModerationResultDto,
-  ModerationResultDto,
 } from './job-moderation.dto';
 import { ControlledError } from '../../common/errors/controlled';
 import { StorageService } from '../storage/storage.service';
@@ -30,7 +27,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobStatus } from '../../common/enums/job';
 import { hashString } from '../../common/utils';
-import { sleep } from '../../common/utils/sleep';
+import { checkModerationLevels } from '../../common/utils/job-moderation';
 
 @Injectable()
 export class JobModerationService {
@@ -66,57 +63,13 @@ export class JobModerationService {
       jobEntity.manifestUrl,
     );
 
+    if (!isGCSBucketUrl(manifest.data.data_url)) {
+      throw new Error(ErrorJobModeration.DataMustBeStoredInGCS);
+    }
+
     await this.asyncDataModeration(manifest.data.data_url);
 
-    jobEntity.status = JobStatus.ON_MODERATION;
-    await this.jobRepository.updateOne(jobEntity);
-    return jobEntity;
-  }
-
-  public async jobModerationSync(jobEntity: JobEntity): Promise<JobEntity> {
-    const manifest = (await this.storageService.downloadJsonLikeData(
-      jobEntity.manifestUrl,
-    )) as any;
-
-    const dataModerationResults: DataModerationResultDto =
-      await this.dataModeration(manifest.data.data_url);
-
-    if (dataModerationResults.positiveAbuseResults.length > 0) {
-      const abusiveImageLinks = dataModerationResults.positiveAbuseResults.map(
-        (result) => result.imageUrl,
-      );
-
-      await this.handleAbuseLinks(abusiveImageLinks, jobEntity.id, true);
-
-      const message = `The following images contain abusive content and caused the job to fail:\n\n${abusiveImageLinks.join('\n')}`;
-
-      this.logger.error(message);
-
-      jobEntity.failedReason = message;
-      jobEntity.status = JobStatus.FAILED;
-      await this.jobRepository.updateOne(jobEntity);
-
-      return jobEntity;
-    }
-
-    // If there are possible moderation issues, save links to GCS and send a Slack notification
-    if (dataModerationResults.possibleAbuseResults.length > 0) {
-      const possibleAbuseImageLinks =
-        dataModerationResults.possibleAbuseResults.map(
-          (result) => result.imageUrl,
-        );
-
-      await this.handleAbuseLinks(possibleAbuseImageLinks, jobEntity.id, false);
-      const message = `The following images have been flagged as potentially containing abusive content. This has triggered a review process for the job:\n\n${possibleAbuseImageLinks.join('\n')}`;
-      this.logger.warn(message);
-
-      jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
-      jobEntity.failedReason = message;
-      await this.jobRepository.updateOne(jobEntity);
-      return jobEntity;
-    }
-
-    jobEntity.status = JobStatus.MODERATION_PASSED;
+    jobEntity.status = JobStatus.UNDER_MODERATION;
     await this.jobRepository.updateOne(jobEntity);
     return jobEntity;
   }
@@ -138,74 +91,80 @@ export class JobModerationService {
         );
         await this.handleAbuseLinks(abusiveImageLinks, jobEntity.id, true);
 
-        const message = `The following images contain abusive content and caused the job to fail:\n\n${abusiveImageLinks.join('\n')}`;
-        this.logger.error(message);
+        this.logger.error(`Job ${jobEntity.id} failed due to abusive content.`);
 
-        jobEntity.failedReason = message;
+        jobEntity.failedReason = `Job failed due to detected abusive content. See the detailed report.`;
         jobEntity.status = JobStatus.FAILED;
-        await this.jobRepository.updateOne(jobEntity);
-        return jobEntity;
-      }
-
-      if (moderationResults.possibleAbuseResults.length > 0) {
+      } else if (moderationResults.possibleAbuseResults.length > 0) {
         const possibleAbuseLinks = moderationResults.possibleAbuseResults.map(
           (result) => result.imageUrl,
         );
         await this.handleAbuseLinks(possibleAbuseLinks, jobEntity.id, false);
 
-        const message = `The following images are flagged for review:\n\n${possibleAbuseLinks.join('\n')}`;
+        jobEntity.failedReason = `Job flagged for review due to possible moderation concerns. See the detailed report.`;
         jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
-        jobEntity.failedReason = message;
-        await this.jobRepository.updateOne(jobEntity);
-        return jobEntity;
+      } else {
+        jobEntity.status = JobStatus.MODERATION_PASSED;
       }
-
-      jobEntity.status = JobStatus.MODERATION_PASSED;
-      await this.jobRepository.updateOne(jobEntity);
-      return jobEntity;
     } catch (error) {
       this.logger.error('Error parsing job moderation results:', error);
-      throw new ControlledError(
-        ErrorJobModeration.ResultsParsingFailed,
-        HttpStatus.BAD_REQUEST,
-      );
+      jobEntity.status = JobStatus.FAILED;
+      jobEntity.failedReason =
+        'Moderation process failed due to an internal error.';
     }
+
+    await this.jobRepository.updateOne(jobEntity);
+    return jobEntity;
   }
 
   public async collectModerationResults(
     dataUrl: string,
   ): Promise<DataModerationResultDto> {
-    const hash = hashString(dataUrl);
-    const bucketPrefix = `${this.visionConfigService.tempAsyncResultsBucket}/${hash}`;
-    const bucketName = this.visionConfigService.moderationResultsBucket;
-    const bucket = this.storage.bucket(bucketName);
+    try {
+      const hash = hashString(dataUrl);
+      const bucketPrefix = `${this.visionConfigService.tempAsyncResultsBucket}/${hash}`;
+      const bucketName = this.visionConfigService.moderationResultsBucket;
+      const bucket = this.storage.bucket(bucketName);
 
-    const [files] = await bucket.getFiles({ prefix: `${bucketPrefix}` });
-    if (!files || files.length === 0) {
+      const [files] = await bucket.getFiles({ prefix: `${bucketPrefix}` });
+      if (!files || files.length === 0) {
+        throw new ControlledError(
+          ErrorJobModeration.NoResultsFound,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const moderationResults = await Promise.all(
+        files.map(async (file) => {
+          try {
+            const fileContent = await this.downloadFileContent(
+              file.name,
+              bucket,
+            );
+            if (Array.isArray(fileContent.responses)) {
+              return fileContent.responses;
+            }
+            this.logger.warn(`Invalid content in file ${file.name}`);
+            return [];
+          } catch (error) {
+            this.logger.error(`Error processing file ${file.name}:`, error);
+            throw new ControlledError(
+              ErrorJobModeration.ResultsParsingFailed,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          }
+        }),
+      );
+
+      const flatResults = moderationResults.flat();
+      return this.categorizeModerationResults(flatResults);
+    } catch (error) {
+      this.logger.error('Error collecting moderation results:', error);
       throw new ControlledError(
-        ErrorJobModeration.NoResultsFound,
-        HttpStatus.NOT_FOUND,
+        ErrorJobModeration.ResultsParsingFailed,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    const moderationResults = await Promise.all(
-      files.map(async (file) => {
-        try {
-          const fileContent = await this.downloadFileContent(file.name, bucket);
-          if (Array.isArray(fileContent.responses)) {
-            return fileContent.responses;
-          }
-          this.logger.warn(`Invalid content in file ${file.name}`);
-          return [];
-        } catch (error) {
-          this.logger.error(`Error processing file ${file.name}:`, error);
-          return [];
-        }
-      }),
-    );
-
-    const flatResults = moderationResults.flat();
-    return this.categorizeModerationResults(flatResults);
   }
 
   private categorizeModerationResults(
@@ -238,44 +197,22 @@ export class JobModerationService {
 
     return {
       positiveAbuseResults: results.filter((result) =>
-        this.isVeryLikelyOrLikely(result.moderationResult),
+        checkModerationLevels(result.moderationResult, [
+          CONTENT_MODERATION_LEVEL.VERY_LIKELY,
+          CONTENT_MODERATION_LEVEL.LIKELY,
+        ]),
       ),
       possibleAbuseResults: results.filter((result) =>
-        this.isPossible(result.moderationResult),
+        checkModerationLevels(result.moderationResult, [
+          CONTENT_MODERATION_LEVEL.POSSIBLE,
+        ]),
       ),
     };
   }
 
-  public async dataModeration(
-    dataUrl: string,
-  ): Promise<DataModerationResultDto> {
-    try {
-      const dataFiles = await listObjectsInBucket(new URL(dataUrl));
-      const imageUrls = dataFiles.map(
-        (fileName) => `${dataUrl}/${fileName.split('/').pop()}`,
-      );
-      const moderationResults = await this.batchAnnotateImages(imageUrls);
-
-      if (moderationResults.length === 0) {
-        throw new ControlledError(
-          ErrorJobModeration.ContentModerationFailed,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      return this.categorizeModerationResults(moderationResults);
-    } catch (error) {
-      this.logger.error('Error processing dataset:', error);
-      throw new ControlledError(
-        ErrorJobModeration.ErrorProcessingDataset,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   public async asyncDataModeration(dataUrl: string): Promise<void> {
     try {
-      const dataFiles = await listObjectsInBucket(new URL(dataUrl + '/'));
+      const dataFiles = await listObjectsInBucket(new URL(dataUrl));
 
       const gcDataUrl = convertToGCSPath(dataUrl);
       const validFiles = dataFiles.filter(
@@ -310,7 +247,11 @@ export class JobModerationService {
       requests,
       outputConfig: {
         gcsDestination: {
-          uri: `${GS_PROTOCOL}${this.visionConfigService.moderationResultsBucket}/${this.visionConfigService.tempAsyncResultsBucket}/${hashString(dataUrl)}`,
+          uri: constructGcsPath(
+            this.visionConfigService.moderationResultsBucket,
+            this.visionConfigService.tempAsyncResultsBucket,
+            hashString(dataUrl),
+          ),
         },
         batchSize: JOB_MODERATION_ASYNC_BATCH_SIZE,
       },
@@ -325,71 +266,9 @@ export class JobModerationService {
       this.logger.log('Async operation completed:', filesResponse);
 
       const destinationUri = filesResponse?.outputConfig?.gcsDestination?.uri;
-      if (!destinationUri) {
-        throw new ControlledError(
-          ErrorJobModeration.NoDestinationURIFound,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       this.logger.log(`Output written to GCS: ${destinationUri}`);
     } catch (error) {
       this.logger.error('Error analyzing images:', error);
-      throw new ControlledError(
-        ErrorJobModeration.ContentModerationFailed,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  public async batchAnnotateImages(
-    imageUrls: string[],
-  ): Promise<protos.google.cloud.vision.v1.IAnnotateImageResponse[]> {
-    try {
-      const batchSize = JOB_MODERATION_BATCH_SIZE;
-      const delayBetweenBatches =
-        ONE_MINUTE_IN_MS / JOB_MODERATION_MAX_REQUESTS_PER_MINUTE;
-
-      const allResults: protos.google.cloud.vision.v1.IAnnotateImageResponse[] =
-        [];
-
-      for (let i = 0; i < imageUrls.length; i += batchSize) {
-        const batch = imageUrls.slice(i, i + batchSize);
-        const requests = batch.map((url) => ({
-          image: { source: { imageUri: url } },
-          features: [
-            { type: CONTENT_MODERATION_FEATURE.SAFE_SEARCH_DETECTION as any },
-          ],
-        }));
-
-        this.logger.log(
-          `Processing batch ${i / batchSize + 1} with ${batch.length} images...`,
-        );
-
-        const [response] = await this.visionClient.batchAnnotateImages({
-          requests,
-        });
-
-        if (response.responses) {
-          const validResponses = response.responses.filter(
-            (res) => res.safeSearchAnnotation !== null,
-          );
-
-          allResults.push(...validResponses);
-        } else {
-          this.logger.warn(
-            `No responses received for batch ${i / batchSize + 1}.`,
-          );
-        }
-
-        if (i + batchSize < imageUrls.length) {
-          await sleep(delayBetweenBatches);
-        }
-      }
-
-      return allResults;
-    } catch (error) {
-      this.logger.error('Error in batchAnnotateImages:', error);
       throw new ControlledError(
         ErrorJobModeration.ContentModerationFailed,
         HttpStatus.BAD_REQUEST,
@@ -402,10 +281,7 @@ export class JobModerationService {
     jobId: number,
     isConfirmedAbuse: boolean,
   ): Promise<void> {
-    const bucketName = isConfirmedAbuse
-      ? this.visionConfigService.moderationResultsBucket
-      : this.visionConfigService.moderationResultsBucket;
-
+    const bucketName = this.visionConfigService.moderationResultsBucket;
     const fileName = `moderation_results_${jobId}.txt`;
 
     const file = this.storage.bucket(bucketName).file(fileName);
@@ -417,18 +293,15 @@ export class JobModerationService {
       expires: Date.now() + 60 * 60 * 24 * 1000, // 1 day
     });
 
+    const gcsConsoleUrl = `https://console.cloud.google.com/storage/browser/${bucketName}?prefix=${fileName}`;
+
     const message = isConfirmedAbuse
-      ? `The following images contain abusive content for job id ${jobId}. The results are saved <${signedUrl}|here>.`
-      : `The following images have possible moderation issues for job id ${jobId}. The results are saved <${signedUrl}|here>.`;
+      ? `The following images contain abusive content for job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`
+      : `The following images have possible moderation issues for job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`;
 
     await sendSlackNotification(
       this.slackConfigService.abuseNotificationWebhookUrl,
       message,
-    );
-
-    this.logger.log(
-      'Slack notification sent with image links and signed URL:',
-      signedUrl,
     );
   }
 
@@ -449,29 +322,5 @@ export class JobModerationService {
         HttpStatus.BAD_REQUEST,
       );
     }
-  }
-
-  private isVeryLikelyOrLikely(result: ModerationResultDto): boolean {
-    return [
-      result.adult,
-      result.racy,
-      result.violence,
-      result.spoof,
-      result.medical,
-    ].some(
-      (level) =>
-        level === CONTENT_MODERATION_LEVEL.VERY_LIKELY ||
-        level === CONTENT_MODERATION_LEVEL.LIKELY,
-    );
-  }
-
-  private isPossible(result: ModerationResultDto): boolean {
-    return [
-      result.adult,
-      result.racy,
-      result.violence,
-      result.spoof,
-      result.medical,
-    ].some((level) => level === CONTENT_MODERATION_LEVEL.POSSIBLE);
   }
 }

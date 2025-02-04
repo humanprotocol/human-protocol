@@ -1051,7 +1051,7 @@ describe('CronJobService', () => {
       expect(handleFailureMock).toHaveBeenCalledTimes(1);
       expect(handleFailureMock).toHaveBeenCalledWith(
         jobEntity1,
-        expect.stringContaining(ErrorJobModeration.InappropriateContent),
+        expect.stringContaining(ErrorJobModeration.JobModerationFailed),
       );
       expect(handleFailureMock).not.toHaveBeenCalledWith(
         jobEntity2,
@@ -1083,12 +1083,12 @@ describe('CronJobService', () => {
 
       jobEntity1 = {
         id: 1,
-        status: JobStatus.ON_MODERATION,
+        status: JobStatus.UNDER_MODERATION,
       };
 
       jobEntity2 = {
         id: 2,
-        status: JobStatus.ON_MODERATION,
+        status: JobStatus.UNDER_MODERATION,
       };
 
       jest
@@ -1135,7 +1135,7 @@ describe('CronJobService', () => {
       );
     });
 
-    it('should process all jobs with status ON_MODERATION', async () => {
+    it('should process all jobs with status UNDER_MODERATION', async () => {
       await service.parseJobModerationResultsCronJob();
 
       expect(parseJobModerationResultsMock).toHaveBeenCalledTimes(2);
@@ -1157,7 +1157,7 @@ describe('CronJobService', () => {
       expect(handleFailureMock).toHaveBeenCalledTimes(1);
       expect(handleFailureMock).toHaveBeenCalledWith(
         jobEntity1,
-        expect.stringContaining(ErrorJobModeration.InappropriateContent),
+        expect.stringContaining(ErrorJobModeration.ResultsParsingFailed),
       );
       expect(handleFailureMock).not.toHaveBeenCalledWith(
         jobEntity2,

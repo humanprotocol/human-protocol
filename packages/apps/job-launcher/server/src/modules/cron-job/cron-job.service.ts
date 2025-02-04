@@ -102,7 +102,7 @@ export class CronJobService {
           await this.jobModerationService.jobModeration(jobEntity);
         } catch (err) {
           const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.InappropriateContent} (Error ID: ${errorId})`;
+          const failedReason = `${ErrorJobModeration.JobModerationFailed} (Error ID: ${errorId})`;
           this.logger.error(
             `Error moderation job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
           );
@@ -137,14 +137,14 @@ export class CronJobService {
 
     try {
       const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.ON_MODERATION,
+        JobStatus.UNDER_MODERATION,
       );
       for (const jobEntity of jobEntities) {
         try {
           await this.jobModerationService.parseJobModerationResults(jobEntity);
         } catch (err) {
           const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.InappropriateContent} (Error ID: ${errorId})`;
+          const failedReason = `${ErrorJobModeration.ResultsParsingFailed} (Error ID: ${errorId})`;
           this.logger.error(
             `Error parse job moderation results job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
           );

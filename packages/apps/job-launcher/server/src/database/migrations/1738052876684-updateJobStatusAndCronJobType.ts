@@ -38,7 +38,7 @@ export class UpdateJobStatusAndCronJobType1738052876684
             CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
                 'pending',
                 'paid',
-                'on_moderation',
+                'under_moderation',
                 'moderation_passed',
                 'possible_abuse_in_review',
                 'created',

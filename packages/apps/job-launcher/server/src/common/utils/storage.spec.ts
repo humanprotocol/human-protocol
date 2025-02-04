@@ -2,16 +2,7 @@ import { AWSRegions, StorageProviders } from '../enums/storage';
 import { JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { StorageDataDto } from '../../modules/job/job.dto';
-import {
-  convertToGCSPath,
-  convertToHttpUrl,
-  generateBucketUrl,
-  isGCSBucketUrl,
-  listObjectsInBucket,
-} from './storage';
-import { ControlledError } from '../errors/controlled';
-import { ErrorBucket } from '../constants/errors';
-import { HttpStatus } from '@nestjs/common';
+import { generateBucketUrl, listObjectsInBucket } from './storage';
 
 jest.mock('axios');
 
@@ -149,82 +140,6 @@ describe('Storage utils', () => {
 
       await expect(listObjectsInBucket(url)).rejects.toEqual(
         'Failed to fetch bucket contents',
-      );
-    });
-  });
-});
-
-describe('GCS URL utils', () => {
-  describe('isGCSBucketUrl', () => {
-    it('should return true for a valid GCS HTTP URL', () => {
-      expect(
-        isGCSBucketUrl('https://my-bucket.storage.googleapis.com/object.jpg'),
-      ).toBe(true);
-    });
-
-    it('should return true for a valid GCS gs:// URL', () => {
-      expect(isGCSBucketUrl('gs://my-bucket/object.jpg')).toBe(true);
-    });
-
-    it('should return false for an invalid GCS HTTP URL', () => {
-      expect(isGCSBucketUrl('https://invalid-url.com/object.jpg')).toBe(false);
-    });
-
-    it('should return false for an invalid gs:// URL', () => {
-      expect(isGCSBucketUrl('gs:/invalid-bucket/object.jpg')).toBe(false);
-    });
-
-    it('should return false for a completely invalid URL', () => {
-      expect(isGCSBucketUrl('randomstring')).toBe(false);
-    });
-  });
-
-  describe('convertToGCSPath', () => {
-    it('should convert a valid GCS HTTP URL to a gs:// path', () => {
-      const result = convertToGCSPath(
-        'https://my-bucket.storage.googleapis.com/object.jpg',
-      );
-      expect(result).toBe('gs://my-bucket/object.jpg');
-    });
-
-    it('should convert a valid GCS HTTP URL without an object path to a gs:// bucket path', () => {
-      const result = convertToGCSPath(
-        'https://my-bucket.storage.googleapis.com',
-      );
-      expect(result).toBe('gs://my-bucket/');
-    });
-
-    it('should throw an error for an invalid GCS URL', () => {
-      expect(() =>
-        convertToGCSPath('https://invalid-url.com/object.jpg'),
-      ).toThrow(
-        new ControlledError(ErrorBucket.InvalidGCSUrl, HttpStatus.BAD_REQUEST),
-      );
-    });
-  });
-
-  describe('convertToHttpUrl', () => {
-    it('should convert a gs:// path to a valid HTTP URL', () => {
-      const result = convertToHttpUrl('gs://my-bucket/object.jpg');
-      expect(result).toBe(
-        'https://my-bucket.storage.googleapis.com/object.jpg',
-      );
-    });
-
-    it('should convert a gs:// bucket path without an object to an HTTP bucket URL', () => {
-      const result = convertToHttpUrl('gs://my-bucket/');
-      expect(result).toBe('https://my-bucket.storage.googleapis.com/');
-    });
-
-    it('should throw an error for an invalid gs:// path', () => {
-      expect(() => convertToHttpUrl('invalid-gcs-path')).toThrow(
-        new ControlledError(ErrorBucket.InvalidGCSUrl, HttpStatus.BAD_REQUEST),
-      );
-    });
-
-    it('should throw an error if the gs:// format is incorrect', () => {
-      expect(() => convertToHttpUrl('gs:/missing-slash/object.jpg')).toThrow(
-        new ControlledError(ErrorBucket.InvalidGCSUrl, HttpStatus.BAD_REQUEST),
       );
     });
   });

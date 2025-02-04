@@ -1,19 +1,27 @@
+import { Logger } from '@nestjs/common';
 import axios from 'axios';
 
-export function sendSlackNotification(
+export async function sendSlackNotification(
   webhookUrl: string,
   message: string,
-): void {
+): Promise<boolean> {
+  const logger = new Logger('Slack');
+
   const payload = {
     text: message,
   };
 
-  axios
-    .post(webhookUrl, payload)
-    .then(() => {
-      console.log('Slack notification sent:', payload);
-    })
-    .catch((error) => {
-      console.log('Error sending Slack notification:', error);
-    });
+  if (!webhookUrl || webhookUrl === 'disabled') {
+    logger.log('Slack notification (mocked):', payload);
+    return true; // Simulate success to avoid unnecessary errors
+  }
+
+  try {
+    await axios.post(webhookUrl, payload);
+    logger.log('Slack notification sent:', payload);
+    return true;
+  } catch (e) {
+    logger.error('Error sending Slack notification:', e);
+    return false;
+  }
 }
