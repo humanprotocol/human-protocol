@@ -18,6 +18,9 @@ VERIFY_EMAIL_TOKEN_EXPIRES_IN="86400"
 ### The expiration time (in seconds) for forgot password tokens. Default: 86400
 FORGOT_PASSWORD_TOKEN_EXPIRES_IN="86400"
 
+### Human APP email.
+HUMAN_APP_EMAIL=
+
 ### The URL for connecting to the PostgreSQL database.
 POSTGRES_URL=
 
@@ -83,15 +86,6 @@ RPC_URL_BSC_MAINNET=
 
 ### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
-
-### The RPC URL for the Moonbeam network.
-RPC_URL_MOONBEAM=
-
-### The RPC URL for the XLayer Testnet network.
-RPC_URL_XLAYER_TESTNET=
-
-### The RPC URL for the XLayer network.
-RPC_URL_XLAYER=
 
 ### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
