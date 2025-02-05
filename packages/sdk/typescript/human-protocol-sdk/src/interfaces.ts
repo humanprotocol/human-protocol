@@ -6,7 +6,7 @@ export interface IReward {
   amount: bigint;
 }
 
-export interface ILeader {
+export interface IOperator {
   id: string;
   chainId: ChainId;
   address: string;
@@ -31,13 +31,13 @@ export interface ILeader {
   category?: string;
 }
 
-export interface ILeaderSubgraph
-  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
+export interface IOperatorSubgraph
+  extends Omit<IOperator, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
   jobTypes?: string;
   reputationNetworks?: { address: string }[];
 }
 
-export interface ILeadersFilter extends IPagination {
+export interface IOperatorsFilter extends IPagination {
   chainId: ChainId;
   roles?: string[];
   minAmountStaked?: number;
@@ -62,10 +62,6 @@ export interface IOperator {
   jobTypes?: string[];
   registrationNeeded?: boolean;
   registrationInstructions?: string;
-}
-
-export interface IOperatorSubgraph extends Omit<IOperator, 'jobTypes'> {
-  jobTypes?: string;
 }
 
 export interface IEscrowsFilter extends IPagination {

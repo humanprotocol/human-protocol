@@ -65,33 +65,6 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
     ...hmtStatistics,
     totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
     totalTransferCount: hmtStatistics.totalTransferCount,
-    holders: hmtStatistics.holders.map((h) => ({
-      ...h,
-      balance: h.balance.toString(),
-    })),
-    dailyHMTData: hmtStatistics.dailyHMTData.map((d) => ({
-      ...d,
-      totalTransactionAmount: d.totalTransactionAmount.toString(),
-    })),
-  });
-
-  const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
-    from: new Date(2023, 4, 8),
-    to: new Date(2023, 5, 8),
-  });
-
-  console.log('HMT statistics from 5/8 - 6/8:', {
-    ...hmtStatisticsRange,
-    totalTransferAmount: hmtStatisticsRange.totalTransferAmount.toString(),
-    totalTransferCount: hmtStatistics.totalTransferCount,
-    holders: hmtStatisticsRange.holders.map((h) => ({
-      ...h,
-      balance: h.balance.toString(),
-    })),
-    dailyHMTData: hmtStatisticsRange.dailyHMTData.map((d) => ({
-      ...d,
-      totalTransactionAmount: d.totalTransactionAmount.toString(),
-    })),
   });
 };
 

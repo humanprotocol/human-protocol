@@ -9,7 +9,7 @@ import {
   test,
 } from 'matchstick-as/assembly';
 
-import { Leader } from '../../generated/schema';
+import { Operator } from '../../generated/schema';
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { toEventId } from '../../src/mapping/utils/event';
 import { toBytes } from '../../src/mapping/utils/string';
@@ -71,7 +71,7 @@ describe('KVStore', () => {
     assert.fieldEquals(
       'KVStoreSetEvent',
       id1,
-      'leaderAddress',
+      'operatorAddress',
       data1.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id1, 'key', 'role');
@@ -99,7 +99,7 @@ describe('KVStore', () => {
     assert.fieldEquals(
       'KVStoreSetEvent',
       id2,
-      'leaderAddress',
+      'operatorAddress',
       data2.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id2, 'key', 'role');
@@ -296,7 +296,7 @@ describe('KVStore', () => {
     );
   });
 
-  test("Should properly set leader's attribute to null when value is empty and remove KVStore entity", () => {
+  test("Should properly set operator's attribute to null when value is empty and remove KVStore entity", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
@@ -313,7 +313,7 @@ describe('KVStore', () => {
     handleDataSaved(data1);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'role',
       'Operator'
@@ -327,10 +327,10 @@ describe('KVStore', () => {
 
     handleDataSaved(data2);
 
-    const leader = Leader.load(data2.params.sender);
-    assert.assertNotNull(leader);
-    if (leader != null) {
-      assert.assertNull(leader.role);
+    const operator = Operator.load(data2.params.sender);
+    assert.assertNotNull(operator);
+    if (operator != null) {
+      assert.assertNull(operator.role);
     }
     assert.notInStore(
       'KVStore',
@@ -338,7 +338,7 @@ describe('KVStore', () => {
     );
   });
 
-  test('Should properly update leader role', () => {
+  test('Should properly update operator role', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
@@ -356,20 +356,20 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'role',
       'Operator'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'role',
       'Job Launcher'
     );
   });
 
-  test("Should properly update leader's fee", () => {
+  test("Should properly update operator's fee", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'fee',
@@ -386,11 +386,11 @@ describe('KVStore', () => {
     handleDataSaved(data1);
     handleDataSaved(data2);
 
-    assert.fieldEquals('Leader', data1.params.sender.toHex(), 'fee', '10');
-    assert.fieldEquals('Leader', data2.params.sender.toHex(), 'fee', '11');
+    assert.fieldEquals('Operator', data1.params.sender.toHex(), 'fee', '10');
+    assert.fieldEquals('Operator', data2.params.sender.toHex(), 'fee', '11');
   });
 
-  test("Should properly update leader's public key", () => {
+  test("Should properly update operator's public key", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'public_key',
@@ -418,7 +418,7 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'publicKey',
       `-----BEGIN PUBLIC KEY-----
@@ -429,7 +429,7 @@ describe('KVStore', () => {
       -----END PUBLIC KEY-----`
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'publicKey',
       `-----BEGIN PUBLIC KEY-----
@@ -441,7 +441,7 @@ describe('KVStore', () => {
     );
   });
 
-  test("Should properly update leader's webhook url", () => {
+  test("Should properly update operator's webhook url", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'webhook_url',
@@ -459,45 +459,45 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'webhookUrl',
       'https://operator.example.com'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data1.params.sender.concat(toBytes('webhook_url')).toHex(),
       'key',
       'webhook_url'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data1.params.sender.concat(toBytes('webhook_url')).toHex(),
       'url',
       'https://operator.example.com'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'webhookUrl',
       'https://job-launcher.example.com'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data2.params.sender.concat(toBytes('webhook_url')).toHex(),
       'key',
       'webhook_url'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data2.params.sender.concat(toBytes('webhook_url')).toHex(),
       'url',
       'https://job-launcher.example.com'
     );
   });
 
-  test("Should properly update leader's website", () => {
+  test("Should properly update operator's website", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'website',
@@ -515,21 +515,21 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'website',
       'https://operator.example.com'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'website',
       'https://job-launcher.example.com'
     );
   });
 
-  test("Should properly update leader's url", () => {
+  test("Should properly update operator's url", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'url',
@@ -547,38 +547,38 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'url',
       'https://operator.example.com'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data1.params.sender.concat(toBytes('url')).toHex(),
       'key',
       'url'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data1.params.sender.concat(toBytes('url')).toHex(),
       'url',
       'https://operator.example.com'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'url',
       'https://job-launcher.example.com'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data2.params.sender.concat(toBytes('url')).toHex(),
       'key',
       'url'
     );
     assert.fieldEquals(
-      'LeaderURL',
+      'OperatorURL',
       data2.params.sender.concat(toBytes('url')).toHex(),
       'url',
       'https://job-launcher.example.com'
@@ -609,20 +609,20 @@ describe('KVStore', () => {
     handleDataSaved(data3);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'role',
       'Reputation Oracle'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'role',
       'Job Launcher'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'reputationNetworks',
       `[${data1.params.sender.toHex()}]`
@@ -673,7 +673,7 @@ describe('KVStore', () => {
     );
   });
 
-  test("Should properly update leader's registration needed", () => {
+  test("Should properly update operator's registration needed", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'registration_needed',
@@ -691,21 +691,21 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'registrationNeeded',
       'true'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'registrationNeeded',
       'false'
     );
   });
 
-  test("Should properly update leader's registration instructions", () => {
+  test("Should properly update operator's registration instructions", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'registration_instructions',
@@ -723,21 +723,21 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'registrationInstructions',
       'https://job-launcher.example.com'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'registrationInstructions',
       'https://job-launcher.example.com'
     );
   });
 
-  test("Should properly update leader's name", () => {
+  test("Should properly update operator's name", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'name',
@@ -754,11 +754,16 @@ describe('KVStore', () => {
     handleDataSaved(data1);
     handleDataSaved(data2);
 
-    assert.fieldEquals('Leader', data1.params.sender.toHex(), 'name', 'Alice');
-    assert.fieldEquals('Leader', data2.params.sender.toHex(), 'name', 'Bob');
+    assert.fieldEquals(
+      'Operator',
+      data1.params.sender.toHex(),
+      'name',
+      'Alice'
+    );
+    assert.fieldEquals('Operator', data2.params.sender.toHex(), 'name', 'Bob');
   });
 
-  test("Should properly update leader's category", () => {
+  test("Should properly update operator's category", () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'category',
@@ -776,13 +781,13 @@ describe('KVStore', () => {
     handleDataSaved(data2);
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.sender.toHex(),
       'category',
       'machine_learning'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.sender.toHex(),
       'category',
       'market_making'

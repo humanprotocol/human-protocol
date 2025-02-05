@@ -71,7 +71,7 @@ export enum Roles {
   reputationOracle = 'Reputation Oracle',
 }
 
-const leaderSchema = z.object({
+const operatorSchema = z.object({
   chainId: z.number(),
   address: z.string(),
   balance: z.string().transform(transformOptionalTokenAmount),
@@ -87,12 +87,12 @@ const leaderSchema = z.object({
   amountJobsProcessed: z.string(),
 });
 
-export type AddressDetailsLeader = z.infer<typeof leaderSchema>;
+export type AddressDetailsOperator = z.infer<typeof operatorSchema>;
 
 const addressDetailsResponseSchema = z.object({
   wallet: z.optional(walletSchema),
   escrow: z.optional(escrowSchema),
-  leader: z.optional(leaderSchema),
+  operator: z.optional(operatorSchema),
 });
 
 export type AddressDetails = z.infer<typeof addressDetailsResponseSchema>;

@@ -8,14 +8,14 @@ import {
   IEscrowsFilter,
   Role,
   NETWORKS,
-  ILeadersFilter,
+  IOperatorsFilter,
   OrderDirection,
   KVStoreUtils,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
-import { LeaderDto } from './dto/leader.dto';
+import { OperatorDto } from './dto/operator.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
 import { EnvironmentConfigService } from '../../common/config/env-config.service';
 import { HttpService } from '@nestjs/axios';
@@ -24,13 +24,13 @@ import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { OracleRole, SubgraphOracleRole } from '../../common/enums/roles';
-import { LeadersOrderBy } from '../../common/enums/leader';
+import { OperatorsOrderBy } from '../../common/enums/operator';
 import { ReputationLevel } from '../../common/enums/reputation';
 import {
   MAX_LEADERS_COUNT,
   MIN_AMOUNT_STAKED,
-} from '../../common/constants/leader';
-import { GetLeadersPaginationOptions } from 'src/common/types';
+} from '../../common/constants/operator';
+import { GetOperatorsPaginationOptions } from 'src/common/types';
 import { KVStoreDataDto } from './dto/details-response.dto';
 
 @Injectable()
@@ -45,7 +45,7 @@ export class DetailsService {
   public async getDetails(
     chainId: ChainId,
     address: string,
-  ): Promise<WalletDto | EscrowDto | LeaderDto> {
+  ): Promise<WalletDto | EscrowDto | OperatorDto> {
     const escrowData = await EscrowUtils.getEscrow(chainId, address);
     if (escrowData) {
       const escrowDto: EscrowDto = plainToInstance(EscrowDto, escrowData, {
@@ -53,19 +53,23 @@ export class DetailsService {
       });
       return escrowDto;
     }
-    const leaderData = await OperatorUtils.getLeader(chainId, address);
-    if (leaderData) {
-      const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-        excludeExtraneousValues: true,
-      });
+    const operatorData = await OperatorUtils.getOperator(chainId, address);
+    if (operatorData) {
+      const operatorDto: OperatorDto = plainToInstance(
+        OperatorDto,
+        operatorData,
+        {
+          excludeExtraneousValues: true,
+        },
+      );
 
-      leaderDto.chainId = chainId;
-      leaderDto.balance = await this.getHmtBalance(chainId, address);
+      operatorDto.chainId = chainId;
+      operatorDto.balance = await this.getHmtBalance(chainId, address);
 
       const { reputation } = await this.fetchReputation(chainId, address);
-      leaderDto.reputation = reputation;
+      operatorDto.reputation = reputation;
 
-      return leaderDto;
+      return operatorDto;
     }
     const walletDto: WalletDto = plainToInstance(WalletDto, {
       chainId,
@@ -157,56 +161,58 @@ export class DetailsService {
     return result;
   }
 
-  public async getLeaders(
+  public async getOperators(
     chainId: ChainId,
-    { orderBy, orderDirection, first }: GetLeadersPaginationOptions = {},
-  ): Promise<LeaderDto[]> {
-    const filter = this.createLeadersFilter(
+    { orderBy, orderDirection, first }: GetOperatorsPaginationOptions = {},
+  ): Promise<OperatorDto[]> {
+    const filter = this.createOperatorsFilter(
       chainId,
       orderBy,
       orderDirection,
       first,
     );
 
-    const [rawLeaders, reputations] = await Promise.all([
-      OperatorUtils.getLeaders(filter),
+    const [rawOperators, reputations] = await Promise.all([
+      OperatorUtils.getOperators(filter),
       this.fetchReputations(
         chainId,
         orderBy,
         orderDirection,
-        orderBy === LeadersOrderBy.REPUTATION ? filter.first : undefined,
+        orderBy === OperatorsOrderBy.REPUTATION ? filter.first : undefined,
       ),
     ]);
 
-    const leaders = rawLeaders
-      .filter((leader) => leader.role)
-      .map((leader) =>
-        plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
+    const operators = rawOperators
+      .filter((operator) => operator.role)
+      .map((operator) =>
+        plainToInstance(OperatorDto, operator, {
+          excludeExtraneousValues: true,
+        }),
       );
 
-    const leadersWithReputation = this.assignReputationsToLeaders(
-      leaders,
+    const operatorsWithReputation = this.assignReputationsToOperators(
+      operators,
       reputations,
     );
 
-    if (orderBy === LeadersOrderBy.REPUTATION) {
-      return this.sortLeadersByReputation(
-        leadersWithReputation,
+    if (orderBy === OperatorsOrderBy.REPUTATION) {
+      return this.sortOperatorsByReputation(
+        operatorsWithReputation,
         orderDirection,
         first,
       );
     }
 
-    return leadersWithReputation;
+    return operatorsWithReputation;
   }
 
-  private createLeadersFilter(
+  private createOperatorsFilter(
     chainId: ChainId,
-    orderBy: LeadersOrderBy,
+    orderBy: OperatorsOrderBy,
     orderDirection: OrderDirection,
     first?: number,
-  ): ILeadersFilter {
-    const leadersFilter: ILeadersFilter = {
+  ): IOperatorsFilter {
+    const operatorsFilter: IOperatorsFilter = {
       chainId,
       minAmountStaked: MIN_AMOUNT_STAKED,
       roles: [
@@ -217,17 +223,17 @@ export class DetailsService {
       ],
     };
 
-    if (orderBy === LeadersOrderBy.REPUTATION) {
-      leadersFilter.first = MAX_LEADERS_COUNT;
+    if (orderBy === OperatorsOrderBy.REPUTATION) {
+      operatorsFilter.first = MAX_LEADERS_COUNT;
     } else {
-      Object.assign(leadersFilter, {
+      Object.assign(operatorsFilter, {
         orderBy,
         orderDirection,
         first,
       });
     }
 
-    return leadersFilter;
+    return operatorsFilter;
   }
 
   private async fetchReputation(
@@ -260,7 +266,7 @@ export class DetailsService {
 
   private async fetchReputations(
     chainId: ChainId,
-    orderBy?: LeadersOrderBy,
+    orderBy?: OperatorsOrderBy,
     orderDirection?: OrderDirection,
     first?: number,
   ): Promise<{ address: string; reputation: string }[]> {
@@ -278,7 +284,7 @@ export class DetailsService {
                 OracleRole.REPUTATION_ORACLE,
               ],
               ...(orderBy &&
-                orderBy === LeadersOrderBy.REPUTATION && {
+                orderBy === OperatorsOrderBy.REPUTATION && {
                   order_by: 'reputation_points',
                 }),
               ...(orderDirection && { order_direction: orderDirection }),
@@ -297,34 +303,34 @@ export class DetailsService {
     }
   }
 
-  private assignReputationsToLeaders(
-    leaders: LeaderDto[],
+  private assignReputationsToOperators(
+    operators: OperatorDto[],
     reputations: { address: string; reputation: string }[],
-  ): LeaderDto[] {
+  ): OperatorDto[] {
     const reputationMap = new Map(
       reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
     );
 
-    leaders.forEach((leader) => {
-      const reputation = reputationMap.get(leader.address.toLowerCase());
-      leader.reputation = reputation || ReputationLevel.LOW;
+    operators.forEach((operator) => {
+      const reputation = reputationMap.get(operator.address.toLowerCase());
+      operator.reputation = reputation || ReputationLevel.LOW;
     });
 
-    return leaders;
+    return operators;
   }
 
-  private sortLeadersByReputation(
-    leaders: LeaderDto[],
+  private sortOperatorsByReputation(
+    operators: OperatorDto[],
     orderDirection: OrderDirection,
     first?: number,
-  ): LeaderDto[] {
+  ): OperatorDto[] {
     const reputationOrder = {
       [ReputationLevel.LOW]: 1,
       [ReputationLevel.MEDIUM]: 2,
       [ReputationLevel.HIGH]: 3,
     };
 
-    const sortedLeaders = leaders.sort((a, b) => {
+    const sortedOperators = operators.sort((a, b) => {
       const reputationA = reputationOrder[a.reputation || ReputationLevel.LOW];
       const reputationB = reputationOrder[b.reputation || ReputationLevel.LOW];
 
@@ -336,10 +342,10 @@ export class DetailsService {
     });
 
     if (first) {
-      return sortedLeaders.slice(0, first);
+      return sortedOperators.slice(0, first);
     }
 
-    return sortedLeaders;
+    return sortedOperators;
   }
 
   public async getKVStoreData(

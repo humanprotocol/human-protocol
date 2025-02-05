@@ -26,4 +26,4 @@ The hash of the transaction associated with the escrow cancellation.
 
 ## Defined in
 
-[types.ts:145](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L145)
+[types.ts:145](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L145)

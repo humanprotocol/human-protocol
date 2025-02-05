@@ -21,8 +21,8 @@ class OrderDirection(Enum):
     DESC = "desc"
 
 
-class LeaderCategory(Enum):
-    """Enum for leader categories"""
+class OperatorCategory(Enum):
+    """Enum for operator categories"""
 
     MACHINE_LEARNING = "machine_learning"
     MARKET_MAKING = "market_making"

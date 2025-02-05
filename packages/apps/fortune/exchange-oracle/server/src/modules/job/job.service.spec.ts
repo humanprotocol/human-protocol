@@ -43,7 +43,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn(),
   },
   OperatorUtils: {
-    getLeader: jest.fn(),
+    getOperator: jest.fn(),
   },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
@@ -488,7 +488,7 @@ describe('JobService', () => {
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
 
-      OperatorUtils.getLeader = jest.fn().mockResolvedValue({
+      OperatorUtils.getOperator = jest.fn().mockResolvedValue({
         webhookUrl: recordingOracleURLMock,
       });
       storageService.uploadJobSolutions = jest

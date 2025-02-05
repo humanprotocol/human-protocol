@@ -2,7 +2,7 @@ import { ChainId, IOperator } from '@human-protocol/sdk';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class OracleDataDto implements IOperator {
+export class OracleDataDto implements Partial<IOperator> {
   address: string;
   role?: string;
   url?: string;

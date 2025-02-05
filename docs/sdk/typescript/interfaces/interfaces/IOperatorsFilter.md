@@ -2,9 +2,9 @@
 
 ***
 
-[@human-protocol/sdk](../../modules.md) / [interfaces](../README.md) / IHMTHoldersParams
+[@human-protocol/sdk](../../modules.md) / [interfaces](../README.md) / IOperatorsFilter
 
-# Interface: IHMTHoldersParams
+# Interface: IOperatorsFilter
 
 ## Extends
 
@@ -12,13 +12,13 @@
 
 ## Properties
 
-### address?
+### chainId
 
-> `optional` **address**: `string`
+> **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
 #### Defined in
 
-[interfaces.ts:103](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L103)
+[interfaces.ts:41](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L41)
 
 ***
 
@@ -36,6 +36,26 @@
 
 ***
 
+### minAmountStaked?
+
+> `optional` **minAmountStaked**: `number`
+
+#### Defined in
+
+[interfaces.ts:43](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L43)
+
+***
+
+### orderBy?
+
+> `optional` **orderBy**: `string`
+
+#### Defined in
+
+[interfaces.ts:44](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L44)
+
+***
+
 ### orderDirection?
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
@@ -47,6 +67,16 @@
 #### Defined in
 
 [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+
+***
+
+### roles?
+
+> `optional` **roles**: `string`[]
+
+#### Defined in
+
+[interfaces.ts:42](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L42)
 
 ***
 

@@ -372,16 +372,16 @@ describe('Escrow', () => {
       escrowAddressString
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       reputationOracleAddressString,
       'amountJobsProcessed',
       '2'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       recordingOracleAddressString,
       'amountJobsProcessed',
       '2'
@@ -523,23 +523,23 @@ describe('Escrow', () => {
       escrowAddressString
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       reputationOracleAddressString,
       'amountJobsProcessed',
       '3'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       recordingOracleAddressString,
       'amountJobsProcessed',
       '3'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       exchangeOracleAddressString,
       'amountJobsProcessed',
       '1'
@@ -728,23 +728,23 @@ describe('Escrow', () => {
       escrowAddressString
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       reputationOracleAddressString,
       'amountJobsProcessed',
       '4'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       recordingOracleAddressString,
       'amountJobsProcessed',
       '4'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       exchangeOracleAddressString,
       'amountJobsProcessed',
       '2'

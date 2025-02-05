@@ -1,20 +1,20 @@
+import { ChainId, OrderDirection } from '@human-protocol/sdk';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsEnum,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
-  Min,
   Max,
-  IsIn,
+  Min,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChainId, OrderDirection } from '@human-protocol/sdk';
 
+import { OperatorsOrderBy } from '../../../common/enums/operator';
 import { IsRoleValid } from './validation/role-validation';
-import { LeadersOrderBy } from 'src/common/enums/leader';
 
-export class LeadersPaginationDto {
+export class OperatorsPaginationDto {
   @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
   @IsIn(Object.values(ChainId).filter((id) => id !== ChainId.ALL))
@@ -22,13 +22,13 @@ export class LeadersPaginationDto {
   public chainId: ChainId;
 
   @ApiPropertyOptional({
-    enum: LeadersOrderBy,
-    default: LeadersOrderBy.AMOUNT_STAKED,
+    enum: OperatorsOrderBy,
+    default: OperatorsOrderBy.AMOUNT_STAKED,
   })
-  @IsEnum(LeadersOrderBy)
-  @IsIn(Object.values(LeadersOrderBy))
+  @IsEnum(OperatorsOrderBy)
+  @IsIn(Object.values(OperatorsOrderBy))
   @IsOptional()
-  public orderBy?: LeadersOrderBy = LeadersOrderBy.AMOUNT_STAKED;
+  public orderBy?: OperatorsOrderBy = OperatorsOrderBy.AMOUNT_STAKED;
 
   @ApiPropertyOptional({
     enum: OrderDirection,

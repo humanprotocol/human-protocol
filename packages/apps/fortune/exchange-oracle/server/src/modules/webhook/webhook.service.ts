@@ -164,7 +164,7 @@ export class WebhookService {
       default:
         throw new BadRequestException('Invalid outgoing event type');
     }
-    const oracle = await OperatorUtils.getLeader(chainId, oracleAddress);
+    const oracle = await OperatorUtils.getOperator(chainId, oracleAddress);
     const oracleWebhookUrl = oracle.webhookUrl;
 
     return oracleWebhookUrl;

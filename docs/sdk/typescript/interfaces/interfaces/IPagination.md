@@ -8,7 +8,7 @@
 
 ## Extended by
 
-- [`ILeadersFilter`](ILeadersFilter.md)
+- [`IOperatorsFilter`](IOperatorsFilter.md)
 - [`IEscrowsFilter`](IEscrowsFilter.md)
 - [`IStatisticsFilter`](IStatisticsFilter.md)
 - [`IHMTHoldersParams`](IHMTHoldersParams.md)
@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
+[interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
 
 ***
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
+[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
 
 ***
 
@@ -42,4 +42,4 @@
 
 #### Defined in
 
-[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
+[interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)

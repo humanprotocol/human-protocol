@@ -1,7 +1,7 @@
 import {
   IKVStore,
   KVStoreKeys,
-  LeaderCategory,
+  OperatorCategory,
   Role,
 } from '@human-protocol/sdk';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -259,7 +259,7 @@ const KVStoreModal: React.FC<Props> = ({
                     value={item.value}
                     onChange={(e) => handleValueChange(index, e.target.value)}
                   >
-                    {Object.entries(LeaderCategory).map(
+                    {Object.entries(OperatorCategory).map(
                       ([categoryKey, categoryValue]) => (
                         <MenuItem key={categoryKey} value={categoryValue}>
                           {categoryValue}

@@ -10,7 +10,10 @@ import HumanAppIcon from '@assets/icons/human-app.svg';
 import JobLauncherIcon from '@assets/icons/job-launcher.svg';
 import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { AddressDetailsLeader, Roles } from '@services/api/use-address-details';
+import {
+  AddressDetailsOperator,
+  Roles,
+} from '@services/api/use-address-details';
 import { getNetwork } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
@@ -48,7 +51,7 @@ const RoleInformation = ({ title, points }: RoleInfoProps) => {
 const RenderRoleDetailsInfo = ({
   role,
 }: {
-  role: AddressDetailsLeader['role'];
+  role: AddressDetailsOperator['role'];
 }) => {
   if (!role) {
     return null;
@@ -151,7 +154,7 @@ const renderReputationTitle = (reputation: Reputation) => {
   );
 };
 
-const renderRoleIcon = (role: AddressDetailsLeader['role']) => {
+const renderRoleIcon = (role: AddressDetailsOperator['role']) => {
   if (!role) return null;
   const roleIcons = {
     [Roles.reputationOracle]: <ReputationOracleIcon />,
@@ -174,7 +177,7 @@ const RoleDetails = ({
     amountLocked,
   },
 }: {
-  data: AddressDetailsLeader;
+  data: AddressDetailsOperator;
 }) => {
   const { filterParams } = useWalletSearch();
 

@@ -10,7 +10,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ChainId, Role } from '@human-protocol/sdk';
 
-export class LeaderDto {
+export class OperatorDto {
   @ApiProperty({ example: ChainId.POLYGON_AMOY })
   @IsEnum(ChainId)
   @Expose()

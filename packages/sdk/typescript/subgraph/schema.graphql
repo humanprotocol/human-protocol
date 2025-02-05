@@ -29,7 +29,7 @@ type UniqueReceiver @entity {
   timestamp: BigInt!
 }
 
-type Leader @entity {
+type Operator @entity {
   id: Bytes!
   address: Bytes!
   amountStaked: BigInt!
@@ -47,7 +47,7 @@ type Leader @entity {
   website: String
   jobTypes: [String!]
   url: String
-  urls: [LeaderURL!]! @derivedFrom(field: "leader")
+  urls: [OperatorURL!]! @derivedFrom(field: "operator")
   reputationNetworks: [ReputationNetwork!]
   registrationNeeded: Boolean
   registrationInstructions: String
@@ -56,17 +56,17 @@ type Leader @entity {
   category: String
 }
 
-type LeaderURL @entity {
+type OperatorURL @entity {
   id: Bytes!
   key: String
   url: String
-  leader: Leader!
+  operator: Operator!
 }
 
 type ReputationNetwork @entity {
   id: Bytes!
   address: Bytes!
-  operators: [Leader!]! @derivedFrom(field: "reputationNetworks")
+  operators: [Operator!]! @derivedFrom(field: "reputationNetworks")
 }
 
 type Escrow @entity {
@@ -231,7 +231,7 @@ type KVStoreSetEvent @entity(immutable: true) {
   timestamp: BigInt!
   txHash: Bytes!
 
-  leaderAddress: Bytes! # address
+  operatorAddress: Bytes! # address
   key: String!
   value: String!
 }
@@ -339,9 +339,9 @@ type EventDayData @entity {
   dailyUniqueReceivers: BigInt!
 }
 
-type LeaderStatistics @entity {
+type OperatorStatistics @entity {
   id: Bytes!
-  leaders: BigInt!
+  operators: BigInt!
 }
 
 type Transaction @entity {
