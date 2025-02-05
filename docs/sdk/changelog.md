@@ -1,34 +1,41 @@
-# Changelog
+# CHANGELOG
 
-### Added
+## Changelog
 
-### Changed
+#### Added
 
-### Deprecated
+#### Changed
 
-### Removed
+#### Deprecated
 
-### Fixed
+#### Removed
 
-### Security
+* Remove validator role.
+* Remove unused networks.
 
-# How to upgrade
+#### Fixed
 
-## Typescript
+* Fix date rounding issues.
 
-### yarn
+#### Security
+
+## How to upgrade
+
+### Typescript
+
+#### yarn
 
 ```
 yarn upgrade @human-protocol/sdk
 ```
 
-### npm
+#### npm
 
 ```
 npm update @human-protocol/sdk
 ```
 
-## Python
+### Python
 
 ```
 pip install --upgrade human-protocol-sdk

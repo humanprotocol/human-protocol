@@ -1,28 +1,32 @@
-[**@human-protocol/sdk**](../../README.md)
+# EncryptionUtils
+
+[**@human-protocol/sdk**](../../)
 
 ***
 
-[@human-protocol/sdk](../../modules.md) / [encryption](../README.md) / EncryptionUtils
+[@human-protocol/sdk](../../modules.md) / [encryption](../../../) / EncryptionUtils
 
-# Class: EncryptionUtils
+## Class: EncryptionUtils
 
-## Introduction
+### Introduction
 
 Utility class for encryption-related operations.
 
-## Installation
+### Installation
 
-### npm
+#### npm
+
 ```bash
 npm install @human-protocol/sdk
 ```
 
-### yarn
+#### yarn
+
 ```bash
 yarn install @human-protocol/sdk
 ```
 
-## Code example
+### Code example
 
 ```ts
 import { EncryptionUtils } from '@human-protocol/sdk';
@@ -30,41 +34,41 @@ import { EncryptionUtils } from '@human-protocol/sdk';
 const keyPair = await EncryptionUtils.generateKeyPair('Human', 'human@hmt.ai');
 ```
 
-## Constructors
+### Constructors
 
-### new EncryptionUtils()
+#### new EncryptionUtils()
 
 > **new EncryptionUtils**(): [`EncryptionUtils`](EncryptionUtils.md)
 
-#### Returns
+**Returns**
 
 [`EncryptionUtils`](EncryptionUtils.md)
 
-## Methods
+### Methods
 
-### encrypt()
+#### encrypt()
 
-> `static` **encrypt**(`message`, `publicKeys`): `Promise`\<`string`\>
+> `static` **encrypt**(`message`, `publicKeys`): `Promise`<`string`>
 
 This function encrypts a message using the specified public keys.
 
-#### Parameters
+**Parameters**
 
-##### message
+**message**
 
 `MessageDataType`
 
 Message to encrypt.
 
-##### publicKeys
+**publicKeys**
 
-`string`[]
+`string`\[]
 
 Array of public keys to use for encryption.
 
-#### Returns
+**Returns**
 
-`Promise`\<`string`\>
+`Promise`<`string`>
 
 Message encrypted.
 
@@ -101,41 +105,41 @@ const publicKeys = [publicKey1, publicKey2]
 const result = await EncryptionUtils.encrypt('message', publicKeys);
 ```
 
-#### Defined in
+**Defined in**
 
 [encryption.ts:444](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L444)
 
 ***
 
-### generateKeyPair()
+#### generateKeyPair()
 
-> `static` **generateKeyPair**(`name`, `email`, `passphrase`): `Promise`\<[`IKeyPair`](../../interfaces/interfaces/IKeyPair.md)\>
+> `static` **generateKeyPair**(`name`, `email`, `passphrase`): `Promise`<[`IKeyPair`](../../interfaces/interfaces/IKeyPair.md)>
 
 This function generates a key pair for encryption and decryption.
 
-#### Parameters
+**Parameters**
 
-##### name
+**name**
 
 `string`
 
 Name for the key pair.
 
-##### email
+**email**
 
 `string`
 
 Email for the key pair.
 
-##### passphrase
+**passphrase**
 
 `string` = `''`
 
 Passphrase to encrypt the private key. Optional.
 
-#### Returns
+**Returns**
 
-`Promise`\<[`IKeyPair`](../../interfaces/interfaces/IKeyPair.md)\>
+`Promise`<[`IKeyPair`](../../interfaces/interfaces/IKeyPair.md)>
 
 Key pair generated.
 
@@ -150,29 +154,29 @@ const passphrase = 'YOUR_PASSPHRASE';
 const result = await EncryptionUtils.generateKeyPair(name, email, passphrase);
 ```
 
-#### Defined in
+**Defined in**
 
 [encryption.ts:382](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L382)
 
 ***
 
-### getSignedData()
+#### getSignedData()
 
-> `static` **getSignedData**(`message`): `Promise`\<`string`\>
+> `static` **getSignedData**(`message`): `Promise`<`string`>
 
 This function gets signed data from a signed message.
 
-#### Parameters
+**Parameters**
 
-##### message
+**message**
 
 `string`
 
 Message.
 
-#### Returns
+**Returns**
 
-`Promise`\<`string`\>
+`Promise`<`string`>
 
 Signed data.
 
@@ -184,27 +188,27 @@ import { EncryptionUtils } from '@human-protocol/sdk';
 const signedData = await EncryptionUtils.getSignedData('message');
 ```
 
-#### Defined in
+**Defined in**
 
 [encryption.ts:351](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L351)
 
 ***
 
-### isEncrypted()
+#### isEncrypted()
 
 > `static` **isEncrypted**(`message`): `boolean`
 
 Verifies if a message appears to be encrypted with OpenPGP.
 
-#### Parameters
+**Parameters**
 
-##### message
+**message**
 
 `string`
 
 Message to verify.
 
-#### Returns
+**Returns**
 
 `boolean`
 
@@ -234,35 +238,35 @@ if (isEncrypted) {
 }
 ```
 
-#### Defined in
+**Defined in**
 
 [encryption.ts:494](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L494)
 
 ***
 
-### verify()
+#### verify()
 
-> `static` **verify**(`message`, `publicKey`): `Promise`\<`boolean`\>
+> `static` **verify**(`message`, `publicKey`): `Promise`<`boolean`>
 
 This function verifies the signature of a signed message using the public key.
 
-#### Parameters
+**Parameters**
 
-##### message
+**message**
 
 `string`
 
 Message to verify.
 
-##### publicKey
+**publicKey**
 
 `string`
 
 Public key to verify that the message was signed by a specific source.
 
-#### Returns
+**Returns**
 
-`Promise`\<`boolean`\>
+`Promise`<`boolean`>
 
 True if verified. False if not verified.
 
@@ -286,6 +290,6 @@ UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
 const result = await EncryptionUtils.verify('message', publicKey);
 ```
 
-#### Defined in
+**Defined in**
 
 [encryption.ts:318](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L318)
