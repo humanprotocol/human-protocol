@@ -17,7 +17,7 @@ class ValidationFrameStats:
 @frozen(kw_only=True)
 class GtKey:
     filename: str
-    labels: frozenset[str] = field(converter=frozenset)
+    labels: frozenset[str] = field(default=frozenset(["DEFAULT_LABEL"]), converter=frozenset)
 
 
 GtStats = dict[GtKey, ValidationFrameStats]
