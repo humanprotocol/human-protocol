@@ -39,7 +39,9 @@
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
     "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
-    "invalidEscrowAddress": "Please enter a valid escrow address."
+    "invalidEscrowAddress": "Please enter a valid escrow address.",
+    "noAddress": "No wallet address found.",
+    "cannotSignMessage": "Cannot sign message."
   },
   "components": {
     "multiSelect": {
@@ -394,7 +396,7 @@
   },
   "walletConnectModal": {
     "header": "Connect Wallet",
-    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains. <1>Learn more or FAQ link.</1>",
+    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains.",
     "connectBtn": "Connect Wallet",
     "cancelBtn": "Cancel"
   },

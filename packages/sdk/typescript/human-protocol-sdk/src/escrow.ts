@@ -55,7 +55,12 @@ import {
   NetworkData,
   TransactionLikeWithNonce,
 } from './types';
-import { getSubgraphUrl, isValidUrl, throwError } from './utils';
+import {
+  getSubgraphUrl,
+  getUnixTimestamp,
+  isValidUrl,
+  throwError,
+} from './utils';
 
 /**
  * ## Introduction
@@ -1578,19 +1583,11 @@ export class EscrowUtils {
    * enum ChainId {
    *   ALL = -1,
    *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
+   *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
    *   POLYGON_AMOY=80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1700,8 +1697,8 @@ export class EscrowUtils {
                 ([, value]) => value === filter.status
               )?.[0]
             : undefined,
-        from: filter.from ? +filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? +filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -1727,19 +1724,11 @@ export class EscrowUtils {
    * enum ChainId {
    *   ALL = -1,
    *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
+   *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
    *   POLYGON_AMOY = 80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
    *   LOCALHOST = 1338,
    * }
    * ```
@@ -1815,23 +1804,12 @@ export class EscrowUtils {
    * enum ChainId {
    *   ALL = -1,
    *   MAINNET = 1,
-   *   RINKEBY = 4,
-   *   GOERLI = 5,
    *   SEPOLIA = 11155111,
    *   BSC_MAINNET = 56,
    *   BSC_TESTNET = 97,
    *   POLYGON = 137,
-   *   POLYGON_MUMBAI = 80001,
    *   POLYGON_AMOY = 80002,
-   *   MOONBEAM = 1284,
-   *   MOONBASE_ALPHA = 1287,
-   *   AVALANCHE = 43114,
-   *   AVALANCHE_TESTNET = 43113,
-   *   CELO = 42220,
-   *   CELO_ALFAJORES = 44787,
    *   LOCALHOST = 1338,
-   *   XLAYER_TESTNET = 195,
-   *   XLAYER = 196,
    * }
    * ```
    *
@@ -1921,8 +1899,8 @@ export class EscrowUtils {
       GET_STATUS_UPDATES_QUERY(from, to, launcher),
       {
         status: statusNames,
-        from: from ? Math.floor(from.getTime() / 1000) : undefined,
-        to: to ? Math.floor(to.getTime() / 1000) : undefined,
+        from: from ? getUnixTimestamp(from) : undefined,
+        to: to ? getUnixTimestamp(to) : undefined,
         launcher: launcher || undefined,
         orderDirection: orderDirection,
         first: first,

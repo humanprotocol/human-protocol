@@ -40,7 +40,7 @@ describe('assignmentController', () => {
   describe('getAssignmentList', () => {
     it('should call assignmentService.getAssignmentList', async () => {
       const query: GetAssignmentsDto = {
-        chainId: 80001,
+        chainId: 80002,
         jobType: JobType.FORTUNE,
         escrowAddress: escrowAddress,
         status: AssignmentStatus.ACTIVE,
@@ -73,7 +73,7 @@ describe('assignmentController', () => {
   describe('createAssignment', () => {
     it('should call assignmentService.createAssignment', async () => {
       const body: CreateAssignmentDto = {
-        chainId: 80001,
+        chainId: 80002,
         escrowAddress: escrowAddress,
       };
       jest.spyOn(assignmentService, 'createAssignment').mockResolvedValue({

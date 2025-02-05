@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { ErrorCapthca } from '../../common/constants/errors';
 import {
   OperatorStatus,
   Role as UserRole,
@@ -35,21 +34,22 @@ import {
   Role,
 } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { prepareSignatureBody } from '../../common/utils/signature';
 import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,
   AuthErrorMessage,
-  DuplicatedUserError,
+  DuplicatedUserAddressError,
+  DuplicatedUserEmailError,
   InvalidOperatorFeeError,
   InvalidOperatorJobTypesError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
-} from './auth.errors';
+} from './auth.error';
 
 @Injectable()
 export class AuthService {
@@ -65,14 +65,9 @@ export class AuthService {
     private readonly sendgridService: SendGridService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
-    private readonly hCaptchaService: HCaptchaService,
   ) {}
 
-  public async signin({
-    email,
-    password,
-    hCaptchaToken,
-  }: SignInDto): Promise<AuthDto> {
+  public async signin({ email, password }: SignInDto): Promise<AuthDto> {
     const userEntity = await this.userRepository.findOneByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
@@ -82,36 +77,13 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
-    if (userEntity.role !== UserRole.HUMAN_APP) {
-      if (!hCaptchaToken) {
-        throw new AuthError(ErrorCapthca.InvalidToken);
-      }
-
-      const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-        token: hCaptchaToken,
-      });
-      if (!captchaVerificationResult.success) {
-        throw new AuthError(ErrorCapthca.VerificationFailed);
-      }
-    }
-
     return this.auth(userEntity);
   }
 
   public async signup(data: UserCreateDto): Promise<UserEntity> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
-      throw new DuplicatedUserError(data.email);
+      throw new DuplicatedUserEmailError(data.email);
     }
     const userEntity = await this.userService.create(data);
 
@@ -237,16 +209,6 @@ export class AuthService {
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const userEntity = await this.userRepository.findOneByEmail(data.email);
 
     if (!userEntity) {
@@ -287,16 +249,6 @@ export class AuthService {
   }
 
   public async restorePassword(data: RestorePasswordDto): Promise<void> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.token,
       TokenType.PASSWORD,
@@ -347,16 +299,6 @@ export class AuthService {
   public async resendEmailVerification(
     data: ResendEmailVerificationDto,
   ): Promise<void> {
-    if (!data.hCaptchaToken) {
-      throw new AuthError(ErrorCapthca.InvalidToken);
-    }
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
-      token: data.hCaptchaToken,
-    });
-    if (!captchaVerificationResult.success) {
-      throw new AuthError(ErrorCapthca.VerificationFailed);
-    }
-
     const userEntity = await this.userRepository.findOneByEmail(data.email);
     if (!userEntity || userEntity.status !== UserStatus.PENDING) {
       return;
@@ -396,10 +338,11 @@ export class AuthService {
   }
 
   public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
-    const preSignUpData = await this.userService.prepareSignatureBody(
-      SignatureType.SIGNUP,
-      data.address,
-    );
+    const preSignUpData = prepareSignatureBody({
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.SIGNUP,
+    });
 
     const verified = verifySignature(preSignUpData, data.signature, [
       data.address,
@@ -468,6 +411,11 @@ export class AuthService {
       throw new InvalidOperatorJobTypesError(jobTypes);
     }
 
+    const user = await this.userRepository.findOneByAddress(data.address);
+
+    if (user) {
+      throw new DuplicatedUserAddressError(data.address);
+    }
     const userEntity = await this.userService.createWeb3User(data.address);
 
     await kvstore.set(data.address.toLowerCase(), OperatorStatus.ACTIVE);
@@ -476,16 +424,21 @@ export class AuthService {
   }
 
   public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
-    const userEntity = await this.userService.getByAddress(data.address);
+    const userEntity = await this.userRepository.findOneByAddress(data.address);
 
-    const verified = verifySignature(
-      await this.userService.prepareSignatureBody(
-        SignatureType.SIGNIN,
-        data.address,
-      ),
-      data.signature,
-      [data.address],
-    );
+    if (!userEntity) {
+      throw new AuthError(AuthErrorMessage.INVALID_ADDRESS);
+    }
+
+    const preSigninData = prepareSignatureBody({
+      from: data.address,
+      to: this.web3Service.getOperatorAddress(),
+      contents: SignatureType.SIGNIN,
+      nonce: (await this.userRepository.findOneByAddress(data.address))?.nonce,
+    });
+    const verified = verifySignature(preSigninData, data.signature, [
+      data.address,
+    ]);
 
     if (!verified) {
       throw new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE);

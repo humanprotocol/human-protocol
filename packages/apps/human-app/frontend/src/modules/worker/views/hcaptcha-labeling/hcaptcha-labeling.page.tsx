@@ -9,15 +9,17 @@ import { env } from '@/shared/env';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { Counter } from '@/shared/components/ui/counter';
 import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
-import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import {
+  PageCardError,
+  PageCardLoader,
+} from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useDailyHmtSpent } from '@/modules/worker/services/daily-hmt-spent';
 import { getTomorrowDate } from '@/shared/helpers/date';
 import { useSolveHCaptchaMutation } from '@/modules/worker/services/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { routerPaths } from '@/router/router-paths';
 

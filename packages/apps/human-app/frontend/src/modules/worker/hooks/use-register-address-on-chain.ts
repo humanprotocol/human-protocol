@@ -5,7 +5,7 @@ import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-use
 import { ethKvStoreSetBulk } from '@/modules/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
 import type { SignedAddressSuccess } from '@/modules/worker/services/get-signed-address';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { checkNetwork } from '@/modules/smart-contracts/check-network';
 
 async function registerAddressInKVStore({

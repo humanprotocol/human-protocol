@@ -1,17 +1,23 @@
+import { Box, Container, Grid, Typography, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import React, { useState } from 'react';
-import { Box, Grid, Container, Typography } from '@mui/material';
+import { KVStoreIcon } from '../../assets/KVStoreIcon';
 import BalanceCard from '../../components/BalanceCard';
-import StakedAmountCard from '../../components/StakedAmountCard';
 import LockedAmountCard from '../../components/LockedAmountCard';
-import WithdrawableAmountCard from '../../components/WithdrawableAmountCard';
 import StakeModal from '../../components/modals/StakeModal';
 import UnstakeModal from '../../components/modals/UnstakeModal';
-import PageWrapper from '../../components/PageWrapper';
 import NetworkStatus from '../../components/NetworkStatus';
+import PageWrapper from '../../components/PageWrapper';
+import ShadowIcon from '../../components/ShadowIcon';
+import StakedAmountCard from '../../components/StakedAmountCard';
+import KVStoreTable from '../../components/Tables/kvstore';
+import WithdrawableAmountCard from '../../components/WithdrawableAmountCard';
 
 const Dashboard: React.FC = () => {
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <PageWrapper violetHeader>
@@ -22,11 +28,17 @@ const Dashboard: React.FC = () => {
               mt: 6,
               mb: 8,
               display: 'flex',
+              flexDirection: isSmallScreen ? 'column' : 'row',
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: isSmallScreen ? 'flex-start' : 'center',
+              gap: 2,
             }}
           >
-            <Typography variant="h4" fontWeight="bold" color="white">
+            <Typography
+              variant="h1"
+              fontWeight="bold"
+              color={theme.palette.white.main}
+            >
               Staking Overview
             </Typography>
             <NetworkStatus />
@@ -52,6 +64,15 @@ const Dashboard: React.FC = () => {
               <WithdrawableAmountCard />
             </Grid>
           </Grid>
+
+          <Box mt={8}>
+            <ShadowIcon
+              className="home-page-kvstore"
+              title="KV Store"
+              img={<KVStoreIcon />}
+            />
+            <KVStoreTable />
+          </Box>
         </Container>
       </Box>
 

@@ -8,7 +8,7 @@ import {
   web3ProtectedRoutes,
 } from '@/router/routes';
 import { RequireAuth } from '@/modules/auth/providers/require-auth';
-import { RequireWalletConnect } from '@/modules/auth-web3/providers/require-wallet-connect';
+import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
 import { DrawerNavigation } from '@/shared/components/layout/protected/drawer-navigation';
 import {

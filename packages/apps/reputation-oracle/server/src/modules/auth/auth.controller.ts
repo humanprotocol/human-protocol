@@ -32,10 +32,11 @@ import {
 } from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
+import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
-import { AuthControllerErrorsFilter } from './auth.error-filter';
+import { AuthControllerErrorsFilter } from './auth.error.filter';
 
 @ApiTags('Auth')
 @ApiResponse({
@@ -66,6 +67,7 @@ export class AuthJwtController {
 
   @Public()
   @Post('/signup')
+  @UseGuards(HCaptchaGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
     summary: 'User Signup',
@@ -87,6 +89,7 @@ export class AuthJwtController {
 
   @Public()
   @Post('/signin')
+  @UseGuards(HCaptchaGuard)
   @HttpCode(200)
   @ApiOperation({
     summary: 'User Signin',
@@ -188,6 +191,7 @@ export class AuthJwtController {
 
   @Public()
   @Post('/forgot-password')
+  @UseGuards(HCaptchaGuard)
   @HttpCode(204)
   @ApiOperation({
     summary: 'Forgot Password',
@@ -212,6 +216,7 @@ export class AuthJwtController {
 
   @Public()
   @Post('/restore-password')
+  @UseGuards(HCaptchaGuard)
   @HttpCode(204)
   @ApiOperation({
     summary: 'Restore Password',
@@ -251,7 +256,7 @@ export class AuthJwtController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(HCaptchaGuard, JwtAuthGuard)
   @HttpCode(204)
   @Post('/resend-email-verification')
   @ApiOperation({

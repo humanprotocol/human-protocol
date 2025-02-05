@@ -5,17 +5,15 @@ import {
   EscrowClient,
   KVStoreUtils,
 } from '@human-protocol/sdk';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as Minio from 'minio';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
-import { Logger } from '@nestjs/common';
 import { Web3Service } from '../web3/web3.service';
 import { FortuneFinalResult } from '../../common/dto/result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { ControlledError } from '../../common/errors/controlled';
 import { isNotFoundError } from '../../common/utils/minio';
 import {
   FileDownloadError,
@@ -25,6 +23,7 @@ import {
 
 @Injectable()
 export class StorageService {
+  private readonly logger = new Logger(StorageService.name);
   public readonly minioClient: Minio.Client;
 
   constructor(
@@ -72,7 +71,7 @@ export class StorageService {
     );
 
     if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
-      throw new ControlledError('Missing public key', HttpStatus.BAD_REQUEST);
+      throw new Error('Missing public key');
     }
 
     return await EncryptionUtils.encrypt(content, [
@@ -138,7 +137,11 @@ export class StorageService {
 
       return jsonLikeData;
     } catch (error) {
-      Logger.error(`Error downloading json like data ${url}:`, error);
+      this.logger.error(
+        `Error downloading json like data ${url}:`,
+        error.message,
+        error.stack,
+      );
       return [];
     }
   }
@@ -149,7 +152,7 @@ export class StorageService {
     solutions: FortuneFinalResult[],
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new ControlledError('Bucket not found', HttpStatus.BAD_REQUEST);
+      throw new Error('Bucket not found');
     }
 
     try {
@@ -165,15 +168,18 @@ export class StorageService {
       // Check if the file already exists in the bucket
       try {
         await this.minioClient.statObject(this.s3ConfigService.bucket, key);
-        Logger.log(`File with key ${key} already exists. Skipping upload.`);
+        this.logger.log(
+          `File with key ${key} already exists. Skipping upload.`,
+        );
         return { url: this.getUrl(key), hash };
-      } catch (err) {
-        if (!isNotFoundError(err)) {
-          Logger.error('Error checking if file exists:', err);
-          throw new ControlledError(
-            'Error accessing storage',
-            HttpStatus.INTERNAL_SERVER_ERROR,
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          this.logger.error(
+            'Error checking if file exists:',
+            error.message,
+            error.stack,
           );
+          throw new Error('Error accessing storage');
         }
       }
 
@@ -189,7 +195,7 @@ export class StorageService {
 
       return { url: this.getUrl(key), hash };
     } catch (error) {
-      throw new ControlledError('File not uploaded', HttpStatus.BAD_REQUEST);
+      throw new Error('File not uploaded');
     }
   }
 
@@ -221,15 +227,18 @@ export class StorageService {
       // Check if the file already exists in the bucket
       try {
         await this.minioClient.statObject(this.s3ConfigService.bucket, key);
-        Logger.log(`File with key ${key} already exists. Skipping upload.`);
+        this.logger.log(
+          `File with key ${key} already exists. Skipping upload.`,
+        );
         return { url: this.getUrl(key), hash };
-      } catch (err) {
-        if (!isNotFoundError(err)) {
-          Logger.error('Error checking if file exists:', err);
-          throw new ControlledError(
-            'Error accessing storage',
-            HttpStatus.INTERNAL_SERVER_ERROR,
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          this.logger.error(
+            'Error checking if file exists:',
+            error.message,
+            error.stack,
           );
+          throw new Error('Error accessing storage');
         }
       }
 
@@ -248,12 +257,8 @@ export class StorageService {
         hash,
       };
     } catch (error) {
-      Logger.error('Error copying file:', error);
-      throw new ControlledError(
-        'File not uploaded',
-        HttpStatus.CONFLICT,
-        error.stack,
-      );
+      this.logger.error('Error copying file:', error.message, error.stack);
+      throw new Error('File not uploaded');
     }
   }
 }

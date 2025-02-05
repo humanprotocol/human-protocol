@@ -62,19 +62,11 @@ This function returns the escrow data for a given address.
 enum ChainId {
   ALL = -1,
   MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
+  SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
   POLYGON_AMOY = 80002,
-  MOONBEAM = 1284,
-  MOONBASE_ALPHA = 1287,
-  AVALANCHE = 43114,
-  AVALANCHE_TESTNET = 43113,
-  CELO = 42220,
-  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
 }
 ```
@@ -133,7 +125,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Defined in
 
-[escrow.ts:1784](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1784)
+[escrow.ts:1773](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1773)
 
 ***
 
@@ -166,19 +158,11 @@ interface IEscrowsFilter {
 enum ChainId {
   ALL = -1,
   MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
+  SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
   POLYGON_AMOY=80002,
-  MOONBEAM = 1284,
-  MOONBASE_ALPHA = 1287,
-  AVALANCHE = 43114,
-  AVALANCHE_TESTNET = 43113,
-  CELO = 42220,
-  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
 }
 ```
@@ -255,7 +239,7 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1658](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1658)
+[escrow.ts:1655](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1655)
 
 ***
 
@@ -273,23 +257,12 @@ This function returns the status events for a given set of networks within an op
 enum ChainId {
   ALL = -1,
   MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
   SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
   POLYGON_AMOY = 80002,
-  MOONBEAM = 1284,
-  MOONBASE_ALPHA = 1287,
-  AVALANCHE = 43114,
-  AVALANCHE_TESTNET = 43113,
-  CELO = 42220,
-  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
-  XLAYER_TESTNET = 195,
-  XLAYER = 196,
 }
 ```
 
@@ -384,4 +357,4 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 
 #### Defined in
 
-[escrow.ts:1882](https://github.com/humanprotocol/human-protocol/blob/b190dc1831c2c96fe3d44fd63e915e54011e1ec8/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1882)
+[escrow.ts:1860](https://github.com/humanprotocol/human-protocol/blob/000ef2f7891c6788228277729f8de9c3a0456a70/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1860)

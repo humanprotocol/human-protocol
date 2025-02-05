@@ -3,7 +3,7 @@ import type { TextFieldProps } from '@mui/material/TextField';
 import TextField from '@mui/material/TextField';
 import { Typography } from '@mui/material';
 import { type InputMask } from '@/shared/components/data-entry/input-masks';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export interface InputProps
   extends Omit<TextFieldProps, 'name' | 'error' | 'helperText'> {

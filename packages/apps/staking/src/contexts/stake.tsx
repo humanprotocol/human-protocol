@@ -15,6 +15,7 @@ export const StakeProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useStakeContext = () => {
   const context = useContext(StakeContext);
   if (!context) {

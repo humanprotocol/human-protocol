@@ -6,12 +6,9 @@ import {
   MOCK_PRIVATE_KEY,
   mockConfig,
 } from '../../../test/constants';
-import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Service } from './web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { HttpStatus } from '@nestjs/common';
-import { ControlledError } from '../../common/errors/controlled';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
@@ -62,10 +59,10 @@ describe('Web3Service', () => {
     });
 
     it('should throw invalid chain id provided for the testnet environment', () => {
-      const invalidChainId = ChainId.POLYGON;
+      const invalidChainId = -42;
 
       expect(() => web3Service.getSigner(invalidChainId)).toThrow(
-        new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
+        `No signer for provided chain id: ${invalidChainId}`,
       );
     });
   });

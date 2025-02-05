@@ -1,14 +1,15 @@
 import { BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
+  afterEach,
+  assert,
+  beforeAll,
+  clearStore,
+  dataSourceMock,
   describe,
   test,
-  assert,
-  clearStore,
-  afterEach,
-  dataSourceMock,
-  beforeAll,
 } from 'matchstick-as/assembly';
 
+import { Leader } from '../../generated/schema';
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { toEventId } from '../../src/mapping/utils/event';
 import { toBytes } from '../../src/mapping/utils/string';
@@ -38,7 +39,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator',
+      'Job Launcher',
       BigInt.fromI32(11)
     );
 
@@ -102,7 +103,7 @@ describe('KVStore', () => {
       data2.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id2, 'key', 'role');
-    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Validator');
+    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Job Launcher');
   });
 
   test('Should properly create a transaction with set method', () => {
@@ -115,7 +116,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator',
+      'Job Launcher',
       BigInt.fromI32(11)
     );
 
@@ -264,6 +265,78 @@ describe('KVStore', () => {
       'set'
     );
   });
+  test('Should properly remove KVStore entity when value is empty', () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Operator',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      '',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+
+    assert.fieldEquals(
+      'KVStore',
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
+      'value',
+      'Operator'
+    );
+
+    handleDataSaved(data2);
+
+    assert.notInStore(
+      'KVStore',
+      data2.params.sender.concat(toBytes(data2.params.key)).toHex()
+    );
+  });
+
+  test("Should properly set leader's attribute to null when value is empty and remove KVStore entity", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      'Operator',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'role',
+      '',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHex(),
+      'role',
+      'Operator'
+    );
+    assert.fieldEquals(
+      'KVStore',
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
+      'key',
+      'role'
+    );
+
+    handleDataSaved(data2);
+
+    const leader = Leader.load(data2.params.sender);
+    assert.assertNotNull(leader);
+    if (leader != null) {
+      assert.assertNull(leader.role);
+    }
+    assert.notInStore(
+      'KVStore',
+      data1.params.sender.concat(toBytes(data1.params.key)).toHex()
+    );
+  });
 
   test('Should properly update leader role', () => {
     const data1 = createDataSavedEvent(
@@ -275,7 +348,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator',
+      'Job Launcher',
       BigInt.fromI32(11)
     );
 
@@ -292,7 +365,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'role',
-      'Validator'
+      'Job Launcher'
     );
   });
 
@@ -378,7 +451,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'webhook_url',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -408,7 +481,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'webhookUrl',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
@@ -420,7 +493,7 @@ describe('KVStore', () => {
       'LeaderURL',
       data2.params.sender.concat(toBytes('webhook_url')).toHex(),
       'url',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
@@ -434,7 +507,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'website',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -452,7 +525,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'website',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
@@ -466,7 +539,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'URL',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -496,7 +569,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHex(),
       'url',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
     assert.fieldEquals(
       'LeaderURL',
@@ -508,7 +581,7 @@ describe('KVStore', () => {
       'LeaderURL',
       data2.params.sender.concat(toBytes('url')).toHex(),
       'url',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
   });
 
@@ -636,13 +709,13 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'registration_instructions',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'registration_instructions',
-      'https://validator.example.com',
+      'https://job-launcher.example.com',
       BigInt.fromI32(11)
     );
 
@@ -653,14 +726,66 @@ describe('KVStore', () => {
       'Leader',
       data1.params.sender.toHex(),
       'registrationInstructions',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
     );
 
     assert.fieldEquals(
       'Leader',
       data2.params.sender.toHex(),
       'registrationInstructions',
-      'https://validator.example.com'
+      'https://job-launcher.example.com'
+    );
+  });
+
+  test("Should properly update leader's name", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'name',
+      'Alice',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'name',
+      'Bob',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals('Leader', data1.params.sender.toHex(), 'name', 'Alice');
+    assert.fieldEquals('Leader', data2.params.sender.toHex(), 'name', 'Bob');
+  });
+
+  test("Should properly update leader's category", () => {
+    const data1 = createDataSavedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      'category',
+      'machine_learning',
+      BigInt.fromI32(10)
+    );
+    const data2 = createDataSavedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      'category',
+      'market_making',
+      BigInt.fromI32(11)
+    );
+
+    handleDataSaved(data1);
+    handleDataSaved(data2);
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.sender.toHex(),
+      'category',
+      'machine_learning'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.sender.toHex(),
+      'category',
+      'market_making'
     );
   });
 });

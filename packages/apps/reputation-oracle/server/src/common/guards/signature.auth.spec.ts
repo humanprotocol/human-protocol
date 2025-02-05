@@ -1,22 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
+import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { SignatureAuthGuard } from './signature.auth';
-import { verifySignature } from '../utils/signature';
+import { signMessage } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
-import { MOCK_ADDRESS } from '../../../test/constants';
+import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { AuthSignatureRole } from '../enums/role';
-import { ControlledError } from '../errors/controlled';
-
-jest.mock('../../common/utils/signature');
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowUtils: {
-    getEscrow: jest.fn().mockResolvedValue({
-      launcher: '0x1234567890123456789012345678901234567890',
-      exchangeOracle: '0x1234567890123456789012345678901234567891',
-      reputationOracle: '0x1234567890123456789012345678901234567892',
-    }),
+    getEscrow: jest.fn(),
   },
 }));
 
@@ -38,6 +31,11 @@ describe('SignatureAuthGuard', () => {
     }).compile();
 
     guard = module.get<SignatureAuthGuard>(SignatureAuthGuard);
+    EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      launcher: MOCK_ADDRESS,
+      exchangeOracle: MOCK_ADDRESS,
+      reputationOracle: MOCK_ADDRESS,
+    });
   });
 
   it('should be defined', () => {
@@ -63,13 +61,13 @@ describe('SignatureAuthGuard', () => {
     });
 
     it('should return true if signature is verified', async () => {
-      mockRequest.headers['header-signature-key'] = 'validSignature';
-      mockRequest.body = {
+      const body = {
         escrow_address: MOCK_ADDRESS,
         chain_id: ChainId.LOCALHOST,
       };
-      (verifySignature as jest.Mock).mockReturnValue(true);
-
+      const signature = await signMessage(body, MOCK_PRIVATE_KEY);
+      mockRequest.headers['human-signature'] = signature;
+      mockRequest.body = body;
       const result = await guard.canActivate(context as any);
       expect(result).toBeTruthy();
       expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
@@ -79,18 +77,36 @@ describe('SignatureAuthGuard', () => {
     });
 
     it('should throw unauthorized exception if signature is not verified', async () => {
-      (verifySignature as jest.Mock).mockReturnValue(false);
-
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
+      let catchedError;
+      try {
+        await guard.canActivate(context as any);
+      } catch (error) {
+        catchedError = error;
+      }
+      expect(catchedError).toBeInstanceOf(HttpException);
+      expect(catchedError.response).toHaveProperty(
+        'message',
+        'Invalid web3 signature',
       );
+      expect(catchedError.response).toHaveProperty('timestamp');
+      expect(catchedError).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
 
     it('should throw unauthorized exception for unrecognized oracle type', async () => {
       mockRequest.originalUrl = '/some/random/path';
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
+      let catchedError;
+      try {
+        await guard.canActivate(context as any);
+      } catch (error) {
+        catchedError = error;
+      }
+      expect(catchedError).toBeInstanceOf(HttpException);
+      expect(catchedError.response).toHaveProperty(
+        'message',
+        'Invalid web3 signature',
       );
+      expect(catchedError.response).toHaveProperty('timestamp');
+      expect(catchedError).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
   });
 });

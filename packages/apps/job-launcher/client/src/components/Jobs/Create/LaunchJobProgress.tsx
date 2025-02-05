@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
 import { CheckFilledIcon } from '../../../components/Icons/CheckFilledIcon';
@@ -6,12 +6,17 @@ import { CheckFilledIcon } from '../../../components/Icons/CheckFilledIcon';
 const ProgressText = styled(Typography)({
   display: 'flex',
   alignItems: 'center',
-  width: '300px',
   position: 'relative',
   paddingLeft: '30px',
+  paddingTop: 10,
 });
 
 const CheckedIcon = styled(CheckFilledIcon)({
+  position: 'absolute',
+  left: '0px',
+});
+
+const ProgressIcon = styled(CircularProgress)({
   position: 'absolute',
   left: '0px',
 });
@@ -36,7 +41,9 @@ export const LaunchJobProgress = () => {
       <ProgressText>
         <CheckedIcon /> Setting Up Job
       </ProgressText>
-      <ProgressText>Paying Job</ProgressText>
+      <ProgressText>
+        <ProgressIcon size={20} /> Paying Job
+      </ProgressText>
     </Box>
   );
 };

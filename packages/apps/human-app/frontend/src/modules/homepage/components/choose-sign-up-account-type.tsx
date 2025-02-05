@@ -6,9 +6,9 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/shared/components/ui/page-card';
 import type { HomePageStageType } from '@/modules/homepage/views/home.page';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
-import { useHomePageState } from '@/shared/contexts/homepage-state';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
+import { useHomePageState } from '@/shared/contexts/homepage-state';
 
 interface ChooseSignUpAccountType {
   setStage: (step: HomePageStageType) => void;
@@ -27,10 +27,10 @@ export function ChooseSignUpAccountType() {
 
   return (
     <PageCard
-      backArrowPath={backToWelcomeStage}
-      cancelRouterPathOrCallback={backToWelcomeStage}
+      backNavigation={backToWelcomeStage}
+      cancelNavigation={backToWelcomeStage}
       childrenMaxWidth="876px"
-      hiddenCancelButton={!isMobileMd}
+      showCancelButton={isMobileMd}
       maxContentWidth="748px"
       title={<Typography variant="h4">{t('homepage.welcome')} 👋</Typography>}
     >

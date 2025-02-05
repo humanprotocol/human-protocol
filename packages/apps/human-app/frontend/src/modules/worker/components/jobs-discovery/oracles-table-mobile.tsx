@@ -6,7 +6,7 @@ import { Loader } from '@/shared/components/ui/loader';
 import type { OraclesDataQueryResult } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
 import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { ListItem } from '@/shared/components/ui/list-item';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import type { Oracle } from '@/modules/worker/services/oracles';
 import { NoRecords } from '@/shared/components/ui/no-records';

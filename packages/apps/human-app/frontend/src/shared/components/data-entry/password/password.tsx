@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { Input, type InputProps } from '@/shared/components/data-entry/input';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 type PasswordProps = InputProps & { type?: never };
 

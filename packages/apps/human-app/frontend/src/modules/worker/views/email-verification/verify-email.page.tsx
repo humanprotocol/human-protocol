@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { PageCard } from '@/shared/components/ui/page-card';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
+import { PageCard, PageCardLoader } from '@/shared/components/ui/page-card';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 import { env } from '@/shared/env';
 import type { ResendEmailVerificationDto } from '@/modules/worker/services/resend-email-verification';
@@ -17,13 +16,13 @@ import {
 } from '@/modules/worker/services/resend-email-verification';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function VerifyEmailWorkerPage() {
@@ -76,7 +75,7 @@ export function VerifyEmailWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelRouterPathOrCallback={() => {
+      cancelNavigation={() => {
         signOut();
         navigate(routerPaths.homePage);
       }}
@@ -118,7 +117,7 @@ export function VerifyEmailWorkerPage() {
             </Typography>
             {isAuthenticated ? (
               <>
-                <FormCaptcha
+                <HCaptchaForm
                   error={mutationState?.error}
                   name="h_captcha_token"
                 />

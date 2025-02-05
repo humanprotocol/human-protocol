@@ -3,8 +3,7 @@ import crypto from 'crypto';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EscrowCompletionStatus, EventType } from '../../common/enums';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
@@ -25,8 +24,6 @@ import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
-import { ErrorEscrowCompletion } from '../../common/constants/errors';
-import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { isDuplicatedError } from '../../common/utils/database';
 import { CalculatedPayout } from '../payout/payout.interface';
@@ -167,10 +164,9 @@ export class EscrowCompletionService {
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
       } catch (error) {
-        const errorId = uuidv4();
-        const failureDetail = `${ErrorEscrowCompletion.PendingProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `Error message: ${error.message})`;
         this.logger.error(
-          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${error.message}`,
+          `Failed to process pending escrow completion. Escrow completion ID: ${escrowCompletionEntity.id}. ${failureDetail}.`,
         );
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
@@ -211,60 +207,49 @@ export class EscrowCompletionService {
           );
         }
 
-        const callbackUrls = [
-          (
-            await OperatorUtils.getLeader(
-              chainId,
-              await escrowClient.getJobLauncherAddress(escrowAddress),
-            )
-          ).webhookUrl,
-          (
-            await OperatorUtils.getLeader(
-              chainId,
-              await escrowClient.getExchangeOracleAddress(escrowAddress),
-            )
-          ).webhookUrl,
-          /*(
-            await OperatorUtils.getLeader(
-              chainId,
-              await escrowClient.getRecordingOracleAddress(escrowAddress),
-            )
-          ).webhookUrl,*/
-        ];
+        const oracleAddresses = await Promise.all([
+          escrowClient.getJobLauncherAddress(escrowAddress),
+          escrowClient.getExchangeOracleAddress(escrowAddress),
+          // escrowClient.getRecordingOracleAddress(escrowAddress),
+        ]);
 
-        let allWebhooksCreated = true;
-
-        const payload = {
+        const webhookPayload = {
           chainId,
           escrowAddress,
           eventType: EventType.ESCROW_COMPLETED,
         };
 
-        for (const url of callbackUrls) {
-          if (!url) {
-            throw new ControlledError(
-              // This is a temporary solution during the refactoring phase.
-              'Webhook url not found',
-              HttpStatus.NOT_FOUND,
-            );
+        let allWebhooksCreated = true;
+
+        for (const oracleAddress of oracleAddresses) {
+          const oracleData = await OperatorUtils.getLeader(
+            chainId,
+            oracleAddress,
+          );
+          if (!oracleData) {
+            throw new Error('Oracle data is missing');
+          }
+
+          const { webhookUrl } = oracleData;
+          if (!webhookUrl) {
+            throw new Error('Webhook url is no set for oracle');
           }
 
           try {
             await this.webhookOutgoingService.createOutgoingWebhook(
-              payload,
-              url,
+              webhookPayload,
+              webhookUrl,
             );
           } catch (err) {
             if (isDuplicatedError(err)) {
-              this.logger.warn(
-                `Duplicate outgoing webhook for escrowAddress: ${escrowAddress}. Webhook creation skipped, but will not complete escrow until all URLs are successful.`,
-              );
+              /**
+               * Already created. Noop.
+               */
               continue;
             } else {
-              const errorId = uuidv4();
-              const failureDetail = `${ErrorEscrowCompletion.PaidProcessingFailed} (Error ID: ${errorId})`;
+              const failureDetail = `Failed to create outgoing webhook for oracle. Address: ${oracleAddress}. Error message: ${err.message}`;
               this.logger.error(
-                `Error creating outgoing webhook. Error ID: ${errorId}, Escrow Address: ${escrowAddress}, Reason: ${failureDetail}, Message: ${err.message}`,
+                `${failureDetail}. Escrow completion ID: ${escrowCompletionEntity.id}.`,
               );
               await this.handleEscrowCompletionError(
                 escrowCompletionEntity,
@@ -284,10 +269,9 @@ export class EscrowCompletionService {
           );
         }
       } catch (err) {
-        const errorId = uuidv4();
-        const failureDetail = `${ErrorEscrowCompletion.PaidProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `Error message: ${err.message}`;
         this.logger.error(
-          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+          `Failed to process paid escrow completion. Escrow completion ID: ${escrowCompletionEntity.id}. ${failureDetail}.`,
         );
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
@@ -343,8 +327,8 @@ export class EscrowCompletionService {
             );
           } catch (error) {
             this.logger.error(
-              `Failed to process payouts batch ${payoutsBatch.id}`,
-              error,
+              `Failed to process payouts batch. Batch ID: ${payoutsBatch.id}`,
+              error.message,
             );
             hasFailedPayouts = true;
           }
@@ -359,10 +343,9 @@ export class EscrowCompletionService {
           );
         }
       } catch (error) {
-        const errorId = uuidv4();
-        const failureDetail = `${ErrorEscrowCompletion.AwaitingPayoutsProcessingFailed} (Error ID: ${errorId})`;
+        const failureDetail = `Error message: ${error.message}`;
         this.logger.error(
-          `Error processing escrow completion. Error ID: ${errorId}, Escrow completion ID: ${escrowCompletionEntity.id}, Reason: ${failureDetail}, Message: ${error.message}`,
+          `Failed to process payouts. Escrow completion ID: ${escrowCompletionEntity.id}. ${failureDetail}.`,
         );
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,

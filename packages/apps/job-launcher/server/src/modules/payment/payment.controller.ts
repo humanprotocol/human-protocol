@@ -85,8 +85,8 @@ export class PaymentController {
   @UseGuards(WhitelistAuthGuard)
   @Post('/crypto')
   public async createCryptoPayment(
-    @Headers(HEADER_SIGNATURE_KEY) signature: string,
     @Body() data: PaymentCryptoCreateDto,
+    @Headers(HEADER_SIGNATURE_KEY) signature: string,
     @Request() req: RequestWithUser,
   ): Promise<boolean> {
     return this.paymentService.createCryptoPayment(

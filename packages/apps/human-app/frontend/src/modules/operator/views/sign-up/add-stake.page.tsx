@@ -2,9 +2,11 @@ import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import { useState } from 'react';
 import { t } from 'i18next';
-import { PageCardError } from '@/shared/components/ui/page-card-error';
-import { PageCardLoader } from '@/shared/components/ui/page-card-loader';
-import { PageCard } from '@/shared/components/ui/page-card';
+import {
+  PageCardError,
+  PageCardLoader,
+  PageCard,
+} from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import { Buttons } from '@/modules/operator/components/sign-up/add-stake/buttons';
 import { StakeForm } from '@/modules/operator/components/sign-up/add-stake/stake-form';
@@ -15,7 +17,7 @@ import {
 } from '@/modules/operator/hooks/use-get-stacked-amount';
 import { useAddStakeMutationState } from '@/modules/operator/hooks/use-add-stake-mutation-state';
 import { useHMTokenDecimals } from '@/modules/operator/hooks/use-human-token-decimals';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function AddStakeOperatorPage() {

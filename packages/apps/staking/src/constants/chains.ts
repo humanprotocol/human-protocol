@@ -14,7 +14,6 @@ switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
       ChainId.BSC_TESTNET,
       ChainId.POLYGON_AMOY,
       ChainId.SEPOLIA,
-      ChainId.XLAYER_TESTNET,
     ];
     break;
   case 'localhost':
@@ -35,13 +34,6 @@ if (SUPPORTED_CHAIN_IDS.length === 0) {
     'No valid RPC URL provided for the supported blockchain environment'
   );
 }
-
-export const CHAIN_ID_BY_NAME: Record<string, ChainId> = {
-  'Polygon Amoy': ChainId.POLYGON_AMOY,
-  'Binance Smart Chain': ChainId.BSC_MAINNET,
-  'Ethereum Sepolia': ChainId.SEPOLIA,
-  Localhost: ChainId.LOCALHOST,
-};
 
 export const LOCALHOST = {
   id: 1338,

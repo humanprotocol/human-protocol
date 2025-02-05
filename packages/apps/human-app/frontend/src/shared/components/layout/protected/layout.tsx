@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
+import { useBackgroundContext } from '@/shared/contexts/background';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
 import { PageHeader } from '@/shared/components/layout/protected/page-header';
 import { breakpoints } from '@/shared/styles/breakpoints';
@@ -50,7 +50,7 @@ export function Layout({
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
-  const { backgroundColor, setGrayBackground } = useBackgroundColorStore();
+  const { backgroundColor, setGrayBackground } = useBackgroundContext();
   const toggleUserStatsDrawer = isHCaptchaLabelingPage
     ? () => {
         setHcaptchaDrawerOpen((state) => !state);

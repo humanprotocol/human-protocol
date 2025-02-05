@@ -18,13 +18,8 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
-  ChainId.XLAYER_TESTNET,
 ];
-export const MAINNET_CHAIN_IDS = [
-  ChainId.BSC_MAINNET,
-  ChainId.POLYGON,
-  ChainId.MOONBEAM,
-];
+export const MAINNET_CHAIN_IDS = [ChainId.BSC_MAINNET, ChainId.POLYGON];
 
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;

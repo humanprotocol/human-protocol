@@ -14,7 +14,7 @@ import {
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { FormCaptcha } from '@/shared/components/h-captcha';
+import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 
@@ -53,7 +53,7 @@ export function SendResetLinkWorkerPage() {
           </Alert>
         ) : undefined
       }
-      cancelRouterPathOrCallback={routerPaths.worker.profile}
+      cancelNavigation={routerPaths.worker.profile}
       title={t('worker.sendResetLinkForm.title')}
     >
       <FormProvider {...methods}>
@@ -71,7 +71,7 @@ export function SendResetLinkWorkerPage() {
               label={t('worker.sendResetLinkForm.fields.email')}
               name="email"
             />
-            <FormCaptcha
+            <HCaptchaForm
               error={sendResetLinkWorkerError}
               name="h_captcha_token"
             />
