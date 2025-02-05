@@ -481,7 +481,10 @@ export const FiatPayForm = ({
 
             <BillingDetailsModal
               open={isBillingDetailsOpen}
-              onClose={() => setIsBillingDetailsOpen(false)}
+              onClose={() => {
+                setIsBillingDetailsOpen(false);
+                setOpenBillingAfterAddCard(false);
+              }}
               billingInfo={{
                 name: '',
                 email: '',
