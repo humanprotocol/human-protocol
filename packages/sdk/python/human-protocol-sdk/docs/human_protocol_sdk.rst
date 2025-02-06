@@ -16,7 +16,6 @@ Subpackages
    human_protocol_sdk.encryption
    human_protocol_sdk.escrow
    human_protocol_sdk.kvstore
-   human_protocol_sdk.kvstore.kvstore_utils
    human_protocol_sdk.operator
    human_protocol_sdk.staking
    human_protocol_sdk.statistics

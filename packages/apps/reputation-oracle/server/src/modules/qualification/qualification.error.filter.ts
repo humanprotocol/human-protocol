@@ -24,7 +24,10 @@ export class QualificationErrorFilter implements ExceptionFilter {
     if (exception.message === QualificationErrorMessage.NOT_FOUND) {
       status = HttpStatus.NOT_FOUND;
     } else if (
-      exception.message === QualificationErrorMessage.NO_WORKERS_FOUND
+      [
+        QualificationErrorMessage.NO_WORKERS_FOUND,
+        QualificationErrorMessage.CANNOT_DETELE_ASSIGNED_QUALIFICATION,
+      ].includes(exception.message as QualificationErrorMessage)
     ) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
     }

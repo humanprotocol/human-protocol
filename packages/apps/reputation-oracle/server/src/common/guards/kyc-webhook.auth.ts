@@ -24,14 +24,7 @@ export class KycWebhookAuthGuard implements CanActivate {
     if (!hmacSignature) {
       const message = 'HMAC Signature not provided';
       this.logger.error(message, request.path);
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message,
-          timestamp: new Date().toISOString(),
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException(message, HttpStatus.UNAUTHORIZED);
     }
 
     const signedPayload = createHmac(
@@ -47,14 +40,7 @@ export class KycWebhookAuthGuard implements CanActivate {
     ) {
       const message = 'HMAC Signature does not match';
       this.logger.error(message, request.path);
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message,
-          timestamp: new Date().toISOString(),
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException(message, HttpStatus.UNAUTHORIZED);
     }
 
     return true;

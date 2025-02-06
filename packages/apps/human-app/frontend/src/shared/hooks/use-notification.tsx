@@ -3,7 +3,6 @@ import { type SnackbarKey, useSnackbar } from 'notistack';
 import CloseIcon from '@mui/icons-material/Close';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { colorPalette as lightColorPalette } from '@/shared/styles/color-palette';
-import { breakpoints } from '@/shared/styles/breakpoints';
 
 export enum TopNotificationType {
   SUCCESS = 'success',
@@ -64,9 +63,6 @@ export const useNotification = () => {
           fontSize: 14,
           fontWeight: 600,
           letterSpacing: 0.1,
-          [breakpoints.mobile]: {
-            fontSize: 14,
-          },
         },
         action,
       });
