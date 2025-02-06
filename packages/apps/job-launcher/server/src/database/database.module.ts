@@ -8,6 +8,7 @@ import { UserEntity } from '../modules/user/user.entity';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
+import { JobModerationTaskEntity } from '../modules/job/job-moderation-task.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
 import { ServerConfigService } from '../common/config/server-config.service';
 import { DatabaseConfigService } from '../common/config/database-config.service';
@@ -15,7 +16,7 @@ import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { LoggerOptions } from 'typeorm';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
-import { WhitelistEntity } from 'src/modules/whitelist/whitelist.entity';
+import { WhitelistEntity } from '../modules/whitelist/whitelist.entity';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { WhitelistEntity } from 'src/modules/whitelist/whitelist.entity';
             ApiKeyEntity,
             UserEntity,
             JobEntity,
+            JobModerationTaskEntity,
             PaymentEntity,
             WebhookEntity,
             CronJobEntity,

@@ -12,11 +12,17 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
 import { ConfigModule } from '@nestjs/config';
+import { JobModerationTaskEntity } from '../job/job-moderation-task.entity';
+import { JobModerationTaskRepository } from '../job/job-moderation-task.repository';
 
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CronJobEntity, JobEntity]),
+    TypeOrmModule.forFeature([
+      CronJobEntity,
+      JobEntity,
+      JobModerationTaskEntity,
+    ]),
     ConfigModule,
     JobModule,
     PaymentModule,
@@ -28,6 +34,7 @@ import { ConfigModule } from '@nestjs/config';
     CronJobRepository,
     WebhookRepository,
     JobRepository,
+    JobModerationTaskRepository,
   ],
   exports: [CronJobService],
 })

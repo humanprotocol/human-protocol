@@ -38,6 +38,7 @@ export enum ErrorJobModeration {
   NoResultsFound = 'No results found',
   ResultsParsingFailed = 'Results parsing failed',
   JobModerationFailed = 'Job moderation failed',
+  ProcessJobModerationTaskFailed = 'Process job moderation task failed',
 }
 
 /**

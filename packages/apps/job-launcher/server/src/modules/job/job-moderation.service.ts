@@ -25,9 +25,14 @@ import { SlackConfigService } from '../../common/config/slack-config.service';
 import { sendSlackNotification } from '../../common/utils/slack';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
-import { JobStatus } from '../../common/enums/job';
+import { JobModerationTaskStatus, JobStatus } from '../../common/enums/job';
 import { hashString } from '../../common/utils';
-import { checkModerationLevels } from '../../common/utils/job-moderation';
+import {
+  checkModerationLevels,
+  getFileName,
+} from '../../common/utils/job-moderation';
+import { JobModerationTaskEntity } from './job-moderation-task.entity';
+import { JobModerationTaskRepository } from './job-moderation-task.repository';
 
 @Injectable()
 export class JobModerationService {
@@ -37,6 +42,7 @@ export class JobModerationService {
 
   constructor(
     private readonly jobRepository: JobRepository,
+    private readonly jobModerationTaskRepository: JobModerationTaskRepository,
     private readonly visionConfigService: VisionConfigService,
     private readonly slackConfigService: SlackConfigService,
     private readonly storageService: StorageService,
@@ -63,11 +69,42 @@ export class JobModerationService {
       jobEntity.manifestUrl,
     );
 
-    if (!isGCSBucketUrl(manifest.data.data_url)) {
+    const dataUrl = manifest.data.data_url;
+    if (!isGCSBucketUrl(dataUrl)) {
       throw new Error(ErrorJobModeration.DataMustBeStoredInGCS);
     }
 
-    await this.asyncDataModeration(manifest.data.data_url);
+    const dataFiles = await listObjectsInBucket(new URL(dataUrl));
+    const validFiles = dataFiles.filter(
+      (fileName) => fileName && !fileName.endsWith('/'),
+    );
+
+    const batchSize = JOB_MODERATION_ASYNC_BATCH_SIZE;
+    const batches = [];
+
+    // Split the files into batches of 2000
+    for (let i = 0; i < validFiles.length; i += batchSize) {
+      batches.push(validFiles.slice(i, i + batchSize));
+    }
+
+    // Create tasks for each batch
+    const tasksToCreate = [];
+    for (let i = 0; i < batches.length; i++) {
+      const jobModerationTaskEntity = new JobModerationTaskEntity();
+      jobModerationTaskEntity.jobId = jobEntity.id;
+      jobModerationTaskEntity.dataUrl = dataUrl;
+      jobModerationTaskEntity.from = i * batchSize + 1; // Start index for the batch
+      jobModerationTaskEntity.to = Math.min(
+        (i + 1) * batchSize,
+        validFiles.length,
+      ); // End index for the batch
+      jobModerationTaskEntity.status = JobModerationTaskStatus.PENDING;
+
+      tasksToCreate.push(jobModerationTaskEntity);
+    }
+
+    // Bulk insert tasks
+    await this.jobModerationTaskRepository.save(tasksToCreate);
 
     jobEntity.status = JobStatus.UNDER_MODERATION;
     await this.jobRepository.updateOne(jobEntity);
@@ -75,8 +112,118 @@ export class JobModerationService {
   }
 
   public async parseJobModerationResults(
+    jobModerationTask: JobModerationTaskEntity,
+  ): Promise<JobModerationTaskEntity> {
+    try {
+      const fileName = getFileName(
+        jobModerationTask.dataUrl,
+        jobModerationTask.jobId.toString(),
+        jobModerationTask.id.toString(),
+      );
+
+      const moderationResults = await this.collectModerationResults(fileName);
+
+      if (moderationResults.positiveAbuseResults.length > 0) {
+        const abusiveImageLinks = moderationResults.positiveAbuseResults.map(
+          (result) => result.imageUrl,
+        );
+        await this.handleAbuseLinks(
+          abusiveImageLinks,
+          jobModerationTask.id,
+          jobModerationTask.jobId,
+          true,
+        );
+
+        this.logger.error(
+          `Job ${jobModerationTask.jobId} failed due to abusive content.`,
+        );
+
+        jobModerationTask.abuseReason = `Job flagged for review due to detected abusive content. See the detailed report.`;
+        jobModerationTask.status = JobModerationTaskStatus.POSITIVE_ABUSE;
+      } else if (moderationResults.possibleAbuseResults.length > 0) {
+        const possibleAbuseLinks = moderationResults.possibleAbuseResults.map(
+          (result) => result.imageUrl,
+        );
+        await this.handleAbuseLinks(
+          possibleAbuseLinks,
+          jobModerationTask.id,
+          jobModerationTask.jobId,
+          false,
+        );
+
+        jobModerationTask.abuseReason = `Job flagged for review due to possible moderation concerns. See the detailed report.`;
+        jobModerationTask.status = JobModerationTaskStatus.POSSIBLE_ABUSE;
+      } else {
+        jobModerationTask.status = JobModerationTaskStatus.PASSED;
+      }
+    } catch (error) {
+      this.logger.error('Error parsing job moderation results:', error);
+      jobModerationTask.status = JobModerationTaskStatus.FAILED;
+    }
+
+    await this.jobModerationTaskRepository.updateOne(jobModerationTask);
+    return jobModerationTask;
+  }
+
+  public async completeJobModeration(jobEntity: JobEntity): Promise<JobEntity> {
+    // TODO: Check if all tasks have status PASSED then
+    //    Change status of the jobEntity to MODERATION_PASSED
+    // if one of the task has status FAILED then change status to POSSIBLE_ABUSE_IN_REVIEW send slack notification to check partucular task it
+    // if one of the task has status POSITIVE_ABUSE then change status to POSSIBLE_ABUSE_IN_REVIEW send slack notification to check partucular task it
+    // if one of the task has status POSSIBLE_ABUSE then change status to POSSIBLE_ABUSE_IN_REVIEW send slack notification to check partucular task it
+
+    jobEntity.jobModerationTasks;
+    const manifest: any = await this.storageService.downloadJsonLikeData(
+      jobEntity.manifestUrl,
+    );
+
+    const dataUrl = manifest.data.data_url;
+    if (!isGCSBucketUrl(dataUrl)) {
+      throw new Error(ErrorJobModeration.DataMustBeStoredInGCS);
+    }
+
+    const dataFiles = await listObjectsInBucket(new URL(dataUrl));
+    const validFiles = dataFiles.filter(
+      (fileName) => fileName && !fileName.endsWith('/'),
+    );
+
+    const batchSize = JOB_MODERATION_ASYNC_BATCH_SIZE;
+    const batches = [];
+
+    // Split the files into batches of 2000
+    for (let i = 0; i < validFiles.length; i += batchSize) {
+      batches.push(validFiles.slice(i, i + batchSize));
+    }
+
+    // Create tasks for each batch
+    const tasksToCreate = [];
+    for (let i = 0; i < batches.length; i++) {
+      const jobModerationTaskEntity = new JobModerationTaskEntity();
+      jobModerationTaskEntity.jobId = jobEntity.id;
+      jobModerationTaskEntity.dataUrl = dataUrl;
+      jobModerationTaskEntity.from = i * batchSize + 1; // Start index for the batch
+      jobModerationTaskEntity.to = Math.min(
+        (i + 1) * batchSize,
+        validFiles.length,
+      ); // End index for the batch
+      jobModerationTaskEntity.status = JobModerationTaskStatus.PENDING;
+
+      tasksToCreate.push(jobModerationTaskEntity);
+    }
+
+    // Bulk insert tasks
+    await this.jobModerationTaskRepository.save(tasksToCreate);
+
+    jobEntity.status = JobStatus.UNDER_MODERATION;
+    await this.jobRepository.updateOne(jobEntity);
+    return jobEntity;
+  }
+  /*public async parseJobModerationResults(
     jobEntity: JobEntity,
   ): Promise<JobEntity> {
+    // TODO: Check if all tasks are completed then do flow below 
+    // if one task are failed 
+    jobEntity.jobModerationTasks
     try {
       const manifest: any = await this.storageService.downloadJsonLikeData(
         jobEntity.manifestUrl,
@@ -115,13 +262,13 @@ export class JobModerationService {
 
     await this.jobRepository.updateOne(jobEntity);
     return jobEntity;
-  }
+  }*/
 
   public async collectModerationResults(
-    dataUrl: string,
+    fileName: string,
   ): Promise<DataModerationResultDto> {
     try {
-      const hash = hashString(dataUrl);
+      const hash = hashString(fileName);
       const bucketPrefix = `${this.visionConfigService.tempAsyncResultsBucket}/${hash}`;
       const bucketName = this.visionConfigService.moderationResultsBucket;
       const bucket = this.storage.bucket(bucketName);
@@ -210,31 +357,53 @@ export class JobModerationService {
     };
   }
 
-  public async asyncDataModeration(dataUrl: string): Promise<void> {
+  public async processJobModerationTask(
+    jobModerationTask: JobModerationTaskEntity,
+  ): Promise<void> {
     try {
-      const dataFiles = await listObjectsInBucket(new URL(dataUrl));
+      const dataFiles = await listObjectsInBucket(
+        new URL(jobModerationTask.dataUrl),
+      );
 
-      const gcDataUrl = convertToGCSPath(dataUrl);
+      const gcDataUrl = convertToGCSPath(jobModerationTask.dataUrl);
       const validFiles = dataFiles.filter(
         (fileName) => fileName && !fileName.endsWith('/'),
       );
 
-      const imageUrls = validFiles.map(
+      // Slice the files array based on the 'from' and 'to' indices
+      const filesToProcess = validFiles.slice(
+        jobModerationTask.from - 1,
+        jobModerationTask.to,
+      );
+
+      const imageUrls = filesToProcess.map(
         (fileName) => `${gcDataUrl}/${fileName.split('/').pop()}`,
       );
 
-      await this.asyncBatchAnnotateImages(imageUrls, dataUrl);
+      const fileName = getFileName(
+        jobModerationTask.dataUrl,
+        jobModerationTask.jobId.toString(),
+        jobModerationTask.id.toString(),
+      );
+      await this.asyncBatchAnnotateImages(imageUrls, fileName);
+
+      jobModerationTask.status = JobModerationTaskStatus.PROCESSED;
+      await this.jobModerationTaskRepository.updateOne(jobModerationTask);
 
       this.logger.log('Processing completed.');
     } catch (error) {
       this.logger.error('Error processing dataset:', error);
+
+      jobModerationTask.status = JobModerationTaskStatus.FAILED;
+      await this.jobModerationTaskRepository.updateOne(jobModerationTask);
+
       throw new Error(ErrorJobModeration.ErrorProcessingDataset);
     }
   }
 
   public async asyncBatchAnnotateImages(
     imageUrls: string[],
-    dataUrl: string,
+    fileName: string,
   ): Promise<void> {
     const requests = imageUrls.map((imageUrl) => ({
       image: { source: { imageUri: imageUrl } },
@@ -250,7 +419,7 @@ export class JobModerationService {
           uri: constructGcsPath(
             this.visionConfigService.moderationResultsBucket,
             this.visionConfigService.tempAsyncResultsBucket,
-            hashString(dataUrl),
+            hashString(fileName),
           ),
         },
         batchSize: JOB_MODERATION_ASYNC_BATCH_SIZE,
@@ -278,6 +447,7 @@ export class JobModerationService {
 
   public async handleAbuseLinks(
     imageLinks: string[],
+    jobModerationTaskId: number,
     jobId: number,
     isConfirmedAbuse: boolean,
   ): Promise<void> {
@@ -296,8 +466,8 @@ export class JobModerationService {
     const gcsConsoleUrl = `https://console.cloud.google.com/storage/browser/${bucketName}?prefix=${fileName}`;
 
     const message = isConfirmedAbuse
-      ? `The following images contain abusive content for job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`
-      : `The following images have possible moderation issues for job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`;
+      ? `The following images contain abusive content for job moderation task ID ${jobModerationTaskId} and job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`
+      : `The following images have possible moderation issues for job moderation task ID ${jobModerationTaskId} and job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`;
 
     await sendSlackNotification(
       this.slackConfigService.abuseNotificationWebhookUrl,
