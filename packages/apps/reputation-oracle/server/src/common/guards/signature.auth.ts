@@ -47,14 +47,7 @@ export class SignatureAuthGuard implements CanActivate {
     if (!isVerified) {
       const message = 'Invalid web3 signature';
       this.logger.error(message, request.path);
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message,
-          timestamp: new Date().toISOString(),
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException(message, HttpStatus.UNAUTHORIZED);
     }
     return true;
   }

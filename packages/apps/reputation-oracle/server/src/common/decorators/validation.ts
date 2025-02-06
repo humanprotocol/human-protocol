@@ -1,7 +1,11 @@
+/* eslint-disable prettier/prettier */
+import { applyDecorators } from '@nestjs/common';
+import { Transform } from 'class-transformer';
 import {
   registerDecorator,
   ValidationOptions,
   ValidationArguments,
+  IsEmail,
 } from 'class-validator';
 import 'reflect-metadata';
 
@@ -45,6 +49,37 @@ export function IsEnumCaseInsensitive(
           );
           const enumValues = Object.values(enumType).join(', ');
           return `${args.property} must be a valid enum value. Valid values: [${enumValues}]`;
+        },
+      },
+    });
+  };
+}
+
+export function LowercasedEmail() {
+  return applyDecorators(
+    IsEmail(),
+    Transform(({ value }: { value: string }) => value.toLowerCase()),
+  );
+}
+
+export function IsValidWeb3Signature(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isValidWeb3Signature',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any) {
+          if (typeof value !== 'string') {
+            return false;
+          }
+
+          const regex = /^0x[a-fA-F0-9]{130}$/;
+          return regex.test(value);
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a valid Ethereum Web3 signature in hex format starting with "0x"`;
         },
       },
     });

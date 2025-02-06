@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { RegistrationInExchangeOracleDto, UserCreateDto } from './user.dto';
+import { RegistrationInExchangeOracleDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import {
   KycStatus,
@@ -140,21 +140,20 @@ describe('UserService', () => {
 
   describe('create', () => {
     it('should create a new user and return the created user entity', async () => {
-      const dto: UserCreateDto = {
+      const createUserData = {
         email: 'test@example.com',
         password: 'password123',
-        hCaptchaToken: 'test',
       };
       const createdUser: Partial<UserEntity> = {
-        email: dto.email,
+        email: createUserData.email,
         password: expect.any(String),
         role: Role.WORKER,
         status: UserStatus.PENDING,
       };
 
-      const result = await userService.create(dto);
+      const result = await userService.create(createUserData);
       expect(userRepository.createUnique).toHaveBeenCalledWith({
-        email: dto.email,
+        email: createUserData.email,
         password: expect.any(String),
         role: Role.WORKER,
         status: UserStatus.PENDING,

@@ -23,8 +23,8 @@ def setup(app):
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "human_protocol_sdk"
-copyright = "2023, Author"
-author = "Author"
+copyright = "2025, HUMAN Protocol"
+author = "HUMAN Protocol"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
