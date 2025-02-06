@@ -6,20 +6,8 @@ import {
   Role as UserRole,
   UserStatus,
 } from '../../common/enums/user';
-import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
-import {
-  AuthDto,
-  ForgotPasswordDto,
-  RefreshDto,
-  ResendEmailVerificationDto,
-  RestorePasswordDto,
-  SignInDto,
-  VerifyEmailDto,
-  Web3SignInDto,
-  Web3SignUpDto,
-} from './auth.dto';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../common/utils/signature';
@@ -50,6 +38,18 @@ import {
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
+import {
+  ForgotPasswordDto,
+  SuccessAuthDto,
+  RefreshDto,
+  Web2SignUpDto,
+  Web2SignInDto,
+  Web3SignInDto,
+  Web3SignUpDto,
+  RestorePasswordDto,
+  VerifyEmailDto,
+  ResendVerificationEmailDto,
+} from './dto';
 
 @Injectable()
 export class AuthService {
@@ -67,7 +67,10 @@ export class AuthService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  public async signin({ email, password }: SignInDto): Promise<AuthDto> {
+  public async signin({
+    email,
+    password,
+  }: Web2SignInDto): Promise<SuccessAuthDto> {
     const userEntity = await this.userRepository.findOneByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
@@ -80,7 +83,7 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async signup(data: UserCreateDto): Promise<UserEntity> {
+  public async signup(data: Web2SignUpDto): Promise<UserEntity> {
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new DuplicatedUserEmailError(data.email);
@@ -113,7 +116,7 @@ export class AuthService {
     return userEntity;
   }
 
-  public async refresh(data: RefreshDto): Promise<AuthDto> {
+  public async refresh(data: RefreshDto): Promise<SuccessAuthDto> {
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.refreshToken,
       TokenType.REFRESH,
@@ -130,7 +133,7 @@ export class AuthService {
     return this.auth(tokenEntity.user);
   }
 
-  public async auth(userEntity: UserEntity): Promise<AuthDto> {
+  public async auth(userEntity: UserEntity): Promise<SuccessAuthDto> {
     const refreshTokenEntity =
       await this.tokenRepository.findOneByUserIdAndType(
         userEntity.id,
@@ -262,7 +265,7 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
-    await this.userService.updatePassword(tokenEntity.user, data);
+    await this.userService.updatePassword(tokenEntity.user, data.password);
     await this.sendgridService.sendEmail({
       personalizations: [
         {
@@ -297,7 +300,7 @@ export class AuthService {
   }
 
   public async resendEmailVerification(
-    data: ResendEmailVerificationDto,
+    data: ResendVerificationEmailDto,
   ): Promise<void> {
     const userEntity = await this.userRepository.findOneByEmail(data.email);
     if (!userEntity || userEntity.status !== UserStatus.PENDING) {
@@ -337,7 +340,7 @@ export class AuthService {
     });
   }
 
-  public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
+  public async web3Signup(data: Web3SignUpDto): Promise<SuccessAuthDto> {
     const preSignUpData = prepareSignatureBody({
       from: data.address,
       to: this.web3Service.getOperatorAddress(),
@@ -423,7 +426,7 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
+  public async web3Signin(data: Web3SignInDto): Promise<SuccessAuthDto> {
     const userEntity = await this.userRepository.findOneByAddress(data.address);
 
     if (!userEntity) {

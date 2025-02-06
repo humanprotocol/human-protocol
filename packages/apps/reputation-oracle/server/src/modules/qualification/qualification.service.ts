@@ -1,10 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  CreateQualificationDto,
-  AssignQualificationDto,
-  UnassignQualificationDto,
-  QualificationDto,
-} from './qualification.dto';
+import { CreateQualificationDto, QualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
@@ -67,7 +62,7 @@ export class QualificationService {
       reference: newQualification.reference,
       title: newQualification.title,
       description: newQualification.description,
-      expiresAt: newQualification.expiresAt || null,
+      expiresAt: newQualification.expiresAt?.toISOString(),
     };
   }
 
@@ -81,7 +76,7 @@ export class QualificationService {
           reference: qualificationEntity.reference,
           title: qualificationEntity.title,
           description: qualificationEntity.description,
-          expiresAt: qualificationEntity.expiresAt,
+          expiresAt: qualificationEntity.expiresAt?.toISOString(),
         };
       });
     } catch (error) {
@@ -108,12 +103,13 @@ export class QualificationService {
       );
     }
 
-    return this.qualificationRepository.deleteOne(qualificationEntity);
+    await this.qualificationRepository.deleteOne(qualificationEntity);
   }
 
-  public async assign(dto: AssignQualificationDto): Promise<void> {
-    const { reference, workerAddresses } = dto;
-
+  public async assign(
+    reference: string,
+    workerAddresses: string[],
+  ): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
@@ -152,9 +148,10 @@ export class QualificationService {
     );
   }
 
-  public async unassign(dto: UnassignQualificationDto): Promise<void> {
-    const { reference, workerAddresses } = dto;
-
+  public async unassign(
+    reference: string,
+    workerAddresses: string[],
+  ): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 

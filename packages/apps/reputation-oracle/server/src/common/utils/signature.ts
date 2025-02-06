@@ -36,7 +36,7 @@ export function recoverSigner(
 
   try {
     return ethers.verifyMessage(message, signature);
-  } catch (e) {
+  } catch (noop) {
     return '';
   }
 }

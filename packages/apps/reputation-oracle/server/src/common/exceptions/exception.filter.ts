@@ -19,11 +19,13 @@ export class ExceptionFilter implements IExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    const responseBody: { message: string; [x: string]: unknown } = {
+      message: 'Internal server error',
+    };
 
     if (exception instanceof DatabaseError) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
-      message = exception.message;
+      responseBody.message = exception.message;
 
       this.logger.error(
         `Database error: ${exception.message}`,
@@ -31,29 +33,29 @@ export class ExceptionFilter implements IExceptionFilter {
       );
       // Temp hack for the in progress exception handling refactoring
     } else if (exception instanceof HttpException) {
-      /**
-       * TODO: align this with common response schema
-       * to avoid missing properties
-       */
-      return response
-        .status(exception.getStatus())
-        .json(exception.getResponse());
-    } else {
-      if (exception.statusCode === HttpStatus.BAD_REQUEST) {
-        status = exception.statusCode;
-        message = exception.message;
+      status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'string') {
+        responseBody.message = exceptionResponse;
+      } else {
+        Object.assign(responseBody, exceptionResponse);
       }
+    } else {
       this.logger.error(
         `Unhandled exception: ${exception.message}`,
         exception.stack,
       );
     }
 
-    response.status(status).json({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      message: message,
-      path: request.url,
-    });
+    response.status(status).json(
+      Object.assign(
+        {
+          status_code: status,
+          path: request.url,
+          timestamp: new Date().toISOString(),
+        },
+        responseBody,
+      ),
+    );
   }
 }

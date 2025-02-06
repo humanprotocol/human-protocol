@@ -21,11 +21,7 @@ export class HttpValidationPipe extends ValidationPipe {
           .flat();
 
         return new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: errorMessages.join(', '),
-            timestamp: new Date().toISOString(),
-          },
+          errorMessages.join(', '),
           HttpStatus.BAD_REQUEST,
         );
       },
