@@ -3,6 +3,7 @@ import { Launch as LaunchIcon } from '@mui/icons-material';
 import { useBreakPoints } from '@utils/hooks/use-is-mobile';
 import { Link } from 'react-router-dom';
 import { EntityIcon } from './EntityIcon';
+import { CaseConverter } from '@utils/case-converter';
 
 const Wrapper = ({
   children,
@@ -40,7 +41,7 @@ export const RoleCell = ({
   const {
     mobile: { isMobile },
   } = useBreakPoints();
-
+  const humanReadableRole = CaseConverter.convertSnakeToHumanReadable(role);
   return (
     <Box display="flex" alignItems="center" gap={1} height="100%">
       <Wrapper websiteUrl={websiteUrl}>
@@ -56,7 +57,7 @@ export const RoleCell = ({
                   whiteSpace: isMobile ? 'wrap' : 'nowrap',
                 }}
               >
-                {name ?? role}
+                {name ?? humanReadableRole}
               </Typography>
               {websiteUrl ? <LaunchIcon fontSize="small" /> : null}
             </Box>
@@ -69,7 +70,7 @@ export const RoleCell = ({
                   whiteSpace: isMobile ? 'wrap' : 'nowrap',
                 }}
               >
-                {role}
+                {humanReadableRole}
               </Typography>
             ) : null}
           </Box>

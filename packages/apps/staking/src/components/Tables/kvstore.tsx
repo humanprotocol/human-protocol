@@ -1,3 +1,4 @@
+import { ChainId } from '@human-protocol/sdk';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
 import { Box, Button, Typography, useTheme } from '@mui/material';
@@ -8,7 +9,6 @@ import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useKVStoreContext } from '../../contexts/kvstore';
 import { useSnackbar } from '../../providers/SnackProvider';
 import KVStoreModal from '../modals/KVStoreModal';
-import { ChainId } from '@human-protocol/sdk';
 
 const KVStoreTable: React.FC = () => {
   const { kvStore, set, setBulk } = useKVStoreContext();

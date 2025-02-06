@@ -161,10 +161,10 @@ class Status(Enum):
 class Role(Enum):
     """Enum for roles."""
 
-    job_launcher = "Job Launcher"
-    exchange_oracle = "Exchange Oracle"
-    reputation_oracle = "Reputation Oracle"
-    recording_oracle = "Recording Oracle"
+    job_launcher = "job_launcher"
+    exchange_oracle = "exchange_oracle"
+    reputation_oracle = "reputation_oracle"
+    recording_oracle = "recording_oracle"
 
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")

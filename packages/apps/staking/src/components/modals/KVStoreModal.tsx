@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useSnackbar } from '../../providers/SnackProvider';
+import { CaseConverter } from '../../utils/case-converter';
 import BaseModal from './BaseModal';
 
 type Props = {
@@ -243,7 +244,7 @@ const KVStoreModal: React.FC<Props> = ({
                   >
                     {Object.entries(Role).map(([roleKey, roleValue]) => (
                       <MenuItem key={roleKey} value={roleValue}>
-                        {roleValue}
+                        {CaseConverter.convertSnakeToHumanReadable(roleValue)}
                       </MenuItem>
                     ))}
                   </Select>

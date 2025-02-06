@@ -1,12 +1,15 @@
-import { Test } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { TokenRepository } from './token.repository';
-import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
-import { UserRepository } from '../user/user.repository';
+import {
+  ChainId,
+  KVStoreClient,
+  KVStoreUtils,
+  Role as SDKRole,
+} from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { UserEntity } from '../user/user.entity';
+import { Test } from '@nestjs/testing';
+import { v4 } from 'uuid';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ADDRESS,
@@ -19,29 +22,28 @@ import {
   MOCK_REFRESH_TOKEN,
   mockConfig,
 } from '../../../test/constants';
-import { TokenEntity, TokenType } from './token.entity';
-import { v4 } from 'uuid';
-import { UserStatus, Role } from '../../common/enums/user';
-import { SendGridService } from '../sendgrid/sendgrid.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import {
-  generateNonce,
-  signMessage,
-  prepareSignatureBody,
-} from '../../common/utils/signature';
-import { Web3Service } from '../web3/web3.service';
-import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
-import { PrepareSignatureDto } from '../user/user.dto';
-import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../common/config/auth-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ConfigService } from '@nestjs/config';
-import { SiteKeyRepository } from '../user/site-key.repository';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { JobRequestType } from '../../common/enums';
+import { Role, UserStatus } from '../../common/enums/user';
+import { SignatureType } from '../../common/enums/web3';
+import {
+  generateNonce,
+  prepareSignatureBody,
+  signMessage,
+} from '../../common/utils/signature';
+import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { SendGridService } from '../sendgrid/sendgrid.service';
+import { SiteKeyRepository } from '../user/site-key.repository';
+import { PrepareSignatureDto } from '../user/user.dto';
+import { UserEntity } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
+import { UserService } from '../user/user.service';
+import { Web3Service } from '../web3/web3.service';
 import {
   AuthError,
   AuthErrorMessage,
@@ -51,6 +53,9 @@ import {
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
+import { AuthService } from './auth.service';
+import { TokenEntity, TokenType } from './token.entity';
+import { TokenRepository } from './token.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -751,7 +756,7 @@ describe('AuthService', () => {
           }));
           KVStoreUtils.get = jest
             .fn()
-            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url')
             .mockResolvedValueOnce(1)
             .mockResolvedValueOnce(JobRequestType.FORTUNE);
@@ -805,7 +810,9 @@ describe('AuthService', () => {
           ).rejects.toThrow(new InvalidOperatorRoleError(''));
         });
         it('should throw if fee is not in KVStore', async () => {
-          KVStoreUtils.get = jest.fn().mockResolvedValueOnce('Job Launcher');
+          KVStoreUtils.get = jest
+            .fn()
+            .mockResolvedValueOnce(SDKRole.JobLauncher);
 
           const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
 
@@ -820,7 +827,7 @@ describe('AuthService', () => {
         it('should throw if url is not in KVStore', async () => {
           KVStoreUtils.get = jest
             .fn()
-            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url');
 
           const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
@@ -836,7 +843,7 @@ describe('AuthService', () => {
         it('should throw if job type is not in KVStore', async () => {
           KVStoreUtils.get = jest
             .fn()
-            .mockResolvedValueOnce('Job Launcher')
+            .mockResolvedValueOnce(SDKRole.JobLauncher)
             .mockResolvedValueOnce('url')
             .mockResolvedValueOnce(1);
 
