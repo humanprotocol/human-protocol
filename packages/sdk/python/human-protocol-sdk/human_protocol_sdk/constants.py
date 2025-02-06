@@ -176,7 +176,7 @@ class KVStoreKeys(Enum):
     category = "category"
     fee = "fee"
     job_types = "job_types"
-    name = "name"
+    operator_name = "name"
     public_key = "public_key"
     public_key_hash = "public_key_hash"
     registration_instructions = "registration_instructions"
