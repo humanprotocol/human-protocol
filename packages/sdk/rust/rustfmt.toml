@@ -1,0 +1,6 @@
+hard_tabs = true
+newline_style = "Unix"
+
+# Comment formatting requires nightly which is not enforced by CI.
+comment_width = 100
+wrap_comments = true
