@@ -8,9 +8,8 @@ import {
 } from '../../common/enums/user';
 import { generateNonce, verifySignature } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
-import { RegisterAddressRequestDto, UserCreateDto } from './user.dto';
+import { RegisterAddressRequestDto } from './user.dto';
 import { UserRepository } from './user.repository';
-import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
@@ -52,10 +51,13 @@ export class UserService {
     return bcrypt.compareSync(password, passwordHash);
   }
 
-  public async create(dto: UserCreateDto): Promise<UserEntity> {
+  public async create({
+    email,
+    password,
+  }: Pick<UserEntity, 'email' | 'password'>): Promise<UserEntity> {
     const newUser = new UserEntity();
-    newUser.email = dto.email;
-    newUser.password = bcrypt.hashSync(dto.password, this.HASH_ROUNDS);
+    newUser.email = email;
+    newUser.password = bcrypt.hashSync(password, this.HASH_ROUNDS);
     newUser.role = Role.WORKER;
     newUser.status = UserStatus.PENDING;
     await this.userRepository.createUnique(newUser);
@@ -64,9 +66,9 @@ export class UserService {
 
   public updatePassword(
     userEntity: UserEntity,
-    data: ValidatePasswordDto,
+    newPassword: string,
   ): Promise<UserEntity> {
-    userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
+    userEntity.password = bcrypt.hashSync(newPassword, this.HASH_ROUNDS);
     return this.userRepository.updateOne(userEntity);
   }
 

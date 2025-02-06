@@ -13,6 +13,10 @@ export class ServerConfigService {
     return this.configService.get<string>('NODE_ENV', 'development');
   }
 
+  get gitHash(): string {
+    return this.configService.get<string>('GIT_HASH', '');
+  }
+
   /**
    * The hostname or IP address on which the server will run.
    * Default: 'localhost'

@@ -173,18 +173,18 @@ ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "art
 class KVStoreKeys(Enum):
     """Enum for KVStore keys"""
 
-    role = "role"
+    category = "category"
     fee = "fee"
+    job_types = "job_types"
+    name = "name"
     public_key = "public_key"
     public_key_hash = "public_key_hash"
-    webhook_url = "webhook_url"
-    website = "website"
-    url = "url"
-    job_types = "job_types"
-    registration_needed = "registration_needed"
     registration_instructions = "registration_instructions"
-    name = "name"
-    category = "category"
+    registration_needed = "registration_needed"
+    role = "role"
+    url = "url"
+    website = "website"
+    webhook_url = "webhook_url"
 
 
 ESCROW_BULK_PAYOUT_MAX_ITEMS = 99

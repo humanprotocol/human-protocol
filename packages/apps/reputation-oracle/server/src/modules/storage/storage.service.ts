@@ -194,7 +194,7 @@ export class StorageService {
       );
 
       return { url: this.getUrl(key), hash };
-    } catch (error) {
+    } catch (noop) {
       throw new Error('File not uploaded');
     }
   }
