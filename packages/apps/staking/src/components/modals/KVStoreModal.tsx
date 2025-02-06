@@ -19,7 +19,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react'; // <-- Importa useRef
 import { useSnackbar } from '../../providers/SnackProvider';
 import { CaseConverter } from '../../utils/case-converter';
 import BaseModal from './BaseModal';
@@ -45,6 +45,7 @@ const KVStoreModal: React.FC<Props> = ({
   >([]);
   const [loading, setLoading] = useState(false);
   const { showError } = useSnackbar();
+  const formContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -55,8 +56,7 @@ const KVStoreModal: React.FC<Props> = ({
       setFormData(preparedData);
       setPendingChanges([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, initialData]);
 
   const updatePendingChanges = (key: string, value: string) => {
     setPendingChanges((prev) => {
@@ -126,6 +126,12 @@ const KVStoreModal: React.FC<Props> = ({
 
   const handleAddField = () => {
     setFormData((prev) => [...prev, { key: '', value: '' }]);
+
+    setTimeout(() => {
+      formContainerRef.current?.lastElementChild?.scrollIntoView({
+        behavior: 'smooth',
+      });
+    }, 100);
   };
 
   const handleSave = async () => {
@@ -170,6 +176,7 @@ const KVStoreModal: React.FC<Props> = ({
         Edit KVStore
       </Typography>
       <Box
+        ref={formContainerRef}
         sx={{
           maxHeight: '400px',
           overflowY: 'auto',
