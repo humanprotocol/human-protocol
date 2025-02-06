@@ -231,12 +231,12 @@ export class CronJobService {
       );
       for (const jobEntity of jobEntities) {
         try {
-          await this.jobModerationService.jobModeration(jobEntity);
+          await this.jobModerationService.completeJobModeration(jobEntity);
         } catch (err) {
           const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.JobModerationFailed} (Error ID: ${errorId})`;
+          const failedReason = `${ErrorJobModeration.CompleteJobModerationFailed} (Error ID: ${errorId})`;
           this.logger.error(
-            `Error moderation job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+            `Error complete job moderation. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
           );
           await this.jobService.handleProcessJobFailure(
             jobEntity,

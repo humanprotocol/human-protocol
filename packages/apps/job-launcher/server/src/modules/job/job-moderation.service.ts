@@ -166,103 +166,61 @@ export class JobModerationService {
   }
 
   public async completeJobModeration(jobEntity: JobEntity): Promise<JobEntity> {
-    // TODO: Check if all tasks have status PASSED then
-    //    Change status of the jobEntity to MODERATION_PASSED
-    // if one of the task has status FAILED then change status to POSSIBLE_ABUSE_IN_REVIEW send slack notification to check partucular task it
-    // if one of the task has status POSITIVE_ABUSE then change status to POSSIBLE_ABUSE_IN_REVIEW send slack notification to check partucular task it
-    // if one of the task has status POSSIBLE_ABUSE then change status to POSSIBLE_ABUSE_IN_REVIEW send slack notification to check partucular task it
-
-    jobEntity.jobModerationTasks;
-    const manifest: any = await this.storageService.downloadJsonLikeData(
-      jobEntity.manifestUrl,
-    );
-
-    const dataUrl = manifest.data.data_url;
-    if (!isGCSBucketUrl(dataUrl)) {
-      throw new Error(ErrorJobModeration.DataMustBeStoredInGCS);
-    }
-
-    const dataFiles = await listObjectsInBucket(new URL(dataUrl));
-    const validFiles = dataFiles.filter(
-      (fileName) => fileName && !fileName.endsWith('/'),
-    );
-
-    const batchSize = JOB_MODERATION_ASYNC_BATCH_SIZE;
-    const batches = [];
-
-    // Split the files into batches of 2000
-    for (let i = 0; i < validFiles.length; i += batchSize) {
-      batches.push(validFiles.slice(i, i + batchSize));
-    }
-
-    // Create tasks for each batch
-    const tasksToCreate = [];
-    for (let i = 0; i < batches.length; i++) {
-      const jobModerationTaskEntity = new JobModerationTaskEntity();
-      jobModerationTaskEntity.jobId = jobEntity.id;
-      jobModerationTaskEntity.dataUrl = dataUrl;
-      jobModerationTaskEntity.from = i * batchSize + 1; // Start index for the batch
-      jobModerationTaskEntity.to = Math.min(
-        (i + 1) * batchSize,
-        validFiles.length,
-      ); // End index for the batch
-      jobModerationTaskEntity.status = JobModerationTaskStatus.PENDING;
-
-      tasksToCreate.push(jobModerationTaskEntity);
-    }
-
-    // Bulk insert tasks
-    await this.jobModerationTaskRepository.save(tasksToCreate);
-
-    jobEntity.status = JobStatus.UNDER_MODERATION;
-    await this.jobRepository.updateOne(jobEntity);
-    return jobEntity;
-  }
-  /*public async parseJobModerationResults(
-    jobEntity: JobEntity,
-  ): Promise<JobEntity> {
-    // TODO: Check if all tasks are completed then do flow below 
-    // if one task are failed 
-    jobEntity.jobModerationTasks
     try {
-      const manifest: any = await this.storageService.downloadJsonLikeData(
-        jobEntity.manifestUrl,
-      );
-      const moderationResults = await this.collectModerationResults(
-        manifest.data.data_url,
-      );
+      const jobModerationTasks = await this.jobModerationTaskRepository.find({
+        where: { jobId: jobEntity.id },
+      });
 
-      if (moderationResults.positiveAbuseResults.length > 0) {
-        const abusiveImageLinks = moderationResults.positiveAbuseResults.map(
-          (result) => result.imageUrl,
-        );
-        await this.handleAbuseLinks(abusiveImageLinks, jobEntity.id, true);
+      let allPassed = true;
+      let moderationInReview = false;
+      const notificationMessages: string[] = [];
 
-        this.logger.error(`Job ${jobEntity.id} failed due to abusive content.`);
+      for (const task of jobModerationTasks) {
+        if (task.status === JobModerationTaskStatus.FAILED) {
+          allPassed = false;
+          moderationInReview = true;
+          notificationMessages.push(
+            `Task ${task.id} failed. Please check the results.`,
+          );
+        } else if (task.status === JobModerationTaskStatus.POSITIVE_ABUSE) {
+          allPassed = false;
+          moderationInReview = true;
+          notificationMessages.push(
+            `Task ${task.id} flagged for abusive content. Immediate review required.`,
+          );
+        } else if (task.status === JobModerationTaskStatus.POSSIBLE_ABUSE) {
+          moderationInReview = true;
+          notificationMessages.push(
+            `Task ${task.id} flagged for possible abuse. Review required.`,
+          );
+        }
+      }
 
-        jobEntity.failedReason = `Job failed due to detected abusive content. See the detailed report.`;
-        jobEntity.status = JobStatus.FAILED;
-      } else if (moderationResults.possibleAbuseResults.length > 0) {
-        const possibleAbuseLinks = moderationResults.possibleAbuseResults.map(
-          (result) => result.imageUrl,
-        );
-        await this.handleAbuseLinks(possibleAbuseLinks, jobEntity.id, false);
-
-        jobEntity.failedReason = `Job flagged for review due to possible moderation concerns. See the detailed report.`;
-        jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
-      } else {
+      if (allPassed) {
         jobEntity.status = JobStatus.MODERATION_PASSED;
+      } else if (moderationInReview) {
+        jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
+      }
+
+      await this.jobRepository.updateOne(jobEntity);
+      this.logger.log(
+        `Job ${jobEntity.id} completed moderation with status: ${jobEntity.status}`,
+      );
+
+      if (notificationMessages.length > 0) {
+        const fullMessage = `Job ${jobEntity.id} requires review:\n- ${notificationMessages.join('\n- ')}`;
+        await sendSlackNotification(
+          this.slackConfigService.abuseNotificationWebhookUrl,
+          fullMessage,
+        );
       }
     } catch (error) {
-      this.logger.error('Error parsing job moderation results:', error);
-      jobEntity.status = JobStatus.FAILED;
-      jobEntity.failedReason =
-        'Moderation process failed due to an internal error.';
+      this.logger.error('Error completing job moderation:', error);
+      throw new Error('Failed to complete job moderation');
     }
 
-    await this.jobRepository.updateOne(jobEntity);
     return jobEntity;
-  }*/
+  }
 
   public async collectModerationResults(
     fileName: string,
