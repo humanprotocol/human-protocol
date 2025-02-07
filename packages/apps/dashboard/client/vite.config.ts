@@ -30,6 +30,11 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@human-protocol/sdk'],
   },
+  build: {
+    commonjsOptions: {
+      include: [/core/, /human-protocol-sdk/, /node_modules/],
+    },
+  },
   server: {
     port: 3001,
   },
