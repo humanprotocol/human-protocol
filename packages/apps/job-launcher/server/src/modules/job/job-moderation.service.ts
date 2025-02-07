@@ -14,6 +14,7 @@ import {
   CONTENT_MODERATION_FEATURE,
   CONTENT_MODERATION_LEVEL,
   JOB_MODERATION_ASYNC_BATCH_SIZE,
+  JOB_MODERATION_BATCH_SIZE_PER_TASK,
 } from '../../common/constants';
 import {
   DataModerationResultDto,
@@ -64,7 +65,7 @@ export class JobModerationService {
     });
   }
 
-  public async jobModeration(jobEntity: JobEntity): Promise<JobEntity> {
+  public async jobModeration(jobEntity: JobEntity): Promise<void> {
     const manifest: any = await this.storageService.downloadJsonLikeData(
       jobEntity.manifestUrl,
     );
@@ -78,8 +79,7 @@ export class JobModerationService {
     const validFiles = dataFiles.filter(
       (fileName) => fileName && !fileName.endsWith('/'),
     );
-
-    const batchSize = JOB_MODERATION_ASYNC_BATCH_SIZE;
+    const batchSize = JOB_MODERATION_BATCH_SIZE_PER_TASK;
     const batches = [];
 
     // Split the files into batches of 2000
@@ -91,7 +91,6 @@ export class JobModerationService {
     const tasksToCreate = [];
     for (let i = 0; i < batches.length; i++) {
       const jobModerationTaskEntity = new JobModerationTaskEntity();
-      jobModerationTaskEntity.jobId = jobEntity.id;
       jobModerationTaskEntity.dataUrl = dataUrl;
       jobModerationTaskEntity.from = i * batchSize + 1; // Start index for the batch
       jobModerationTaskEntity.to = Math.min(
@@ -100,15 +99,16 @@ export class JobModerationService {
       ); // End index for the batch
       jobModerationTaskEntity.status = JobModerationTaskStatus.PENDING;
 
+      jobModerationTaskEntity.job = jobEntity;
       tasksToCreate.push(jobModerationTaskEntity);
     }
 
     // Bulk insert tasks
     await this.jobModerationTaskRepository.save(tasksToCreate);
 
-    jobEntity.status = JobStatus.UNDER_MODERATION;
-    await this.jobRepository.updateOne(jobEntity);
-    return jobEntity;
+    await this.jobRepository.update(jobEntity.id, {
+      status: JobStatus.UNDER_MODERATION,
+    });
   }
 
   public async parseJobModerationResults(
@@ -117,7 +117,7 @@ export class JobModerationService {
     try {
       const fileName = getFileName(
         jobModerationTask.dataUrl,
-        jobModerationTask.jobId.toString(),
+        jobModerationTask.job.id.toString(),
         jobModerationTask.id.toString(),
       );
 
@@ -129,13 +129,14 @@ export class JobModerationService {
         );
         await this.handleAbuseLinks(
           abusiveImageLinks,
+          fileName,
           jobModerationTask.id,
-          jobModerationTask.jobId,
+          jobModerationTask.job.id,
           true,
         );
 
         this.logger.error(
-          `Job ${jobModerationTask.jobId} failed due to abusive content.`,
+          `Job ${jobModerationTask.job.id} failed due to abusive content.`,
         );
 
         jobModerationTask.abuseReason = `Job flagged for review due to detected abusive content. See the detailed report.`;
@@ -146,8 +147,9 @@ export class JobModerationService {
         );
         await this.handleAbuseLinks(
           possibleAbuseLinks,
+          fileName,
           jobModerationTask.id,
-          jobModerationTask.jobId,
+          jobModerationTask.job.id,
           false,
         );
 
@@ -165,42 +167,48 @@ export class JobModerationService {
     return jobModerationTask;
   }
 
-  public async completeJobModeration(jobEntity: JobEntity): Promise<JobEntity> {
+  public async completeJobModeration(jobEntity: JobEntity): Promise<void> {
     try {
       const jobModerationTasks = await this.jobModerationTaskRepository.find({
-        where: { jobId: jobEntity.id },
+        where: { job: { id: jobEntity.id } },
       });
 
+      // Check if there are any tasks still pending or in process
+      const hasIncompleteTasks = jobModerationTasks.some(
+        (task) =>
+          task.status === JobModerationTaskStatus.PENDING ||
+          task.status === JobModerationTaskStatus.PROCESSED,
+      );
+
+      if (hasIncompleteTasks) {
+        return;
+      }
+
       let allPassed = true;
-      let moderationInReview = false;
       const notificationMessages: string[] = [];
 
       for (const task of jobModerationTasks) {
         if (task.status === JobModerationTaskStatus.FAILED) {
           allPassed = false;
-          moderationInReview = true;
           notificationMessages.push(
             `Task ${task.id} failed. Please check the results.`,
           );
         } else if (task.status === JobModerationTaskStatus.POSITIVE_ABUSE) {
           allPassed = false;
-          moderationInReview = true;
           notificationMessages.push(
             `Task ${task.id} flagged for abusive content. Immediate review required.`,
           );
         } else if (task.status === JobModerationTaskStatus.POSSIBLE_ABUSE) {
-          moderationInReview = true;
+          allPassed = false;
           notificationMessages.push(
             `Task ${task.id} flagged for possible abuse. Review required.`,
           );
         }
       }
 
-      if (allPassed) {
-        jobEntity.status = JobStatus.MODERATION_PASSED;
-      } else if (moderationInReview) {
-        jobEntity.status = JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
-      }
+      jobEntity.status = allPassed
+        ? JobStatus.MODERATION_PASSED
+        : JobStatus.POSSIBLE_ABUSE_IN_REVIEW;
 
       await this.jobRepository.updateOne(jobEntity);
       this.logger.log(
@@ -218,8 +226,6 @@ export class JobModerationService {
       this.logger.error('Error completing job moderation:', error);
       throw new Error('Failed to complete job moderation');
     }
-
-    return jobEntity;
   }
 
   public async collectModerationResults(
@@ -340,7 +346,7 @@ export class JobModerationService {
 
       const fileName = getFileName(
         jobModerationTask.dataUrl,
-        jobModerationTask.jobId.toString(),
+        jobModerationTask.job.id.toString(),
         jobModerationTask.id.toString(),
       );
       await this.asyncBatchAnnotateImages(imageUrls, fileName);
@@ -390,7 +396,6 @@ export class JobModerationService {
       this.logger.log('Async operation started:', operation.name);
 
       const [filesResponse] = await operation.promise();
-      this.logger.log('Async operation completed:', filesResponse);
 
       const destinationUri = filesResponse?.outputConfig?.gcsDestination?.uri;
       this.logger.log(`Output written to GCS: ${destinationUri}`);
@@ -405,14 +410,15 @@ export class JobModerationService {
 
   public async handleAbuseLinks(
     imageLinks: string[],
+    fileName: string,
     jobModerationTaskId: number,
     jobId: number,
     isConfirmedAbuse: boolean,
   ): Promise<void> {
     const bucketName = this.visionConfigService.moderationResultsBucket;
-    const fileName = `moderation_results_${jobId}.txt`;
+    const resultsFileName = `moderation_results_${fileName}.txt`;
 
-    const file = this.storage.bucket(bucketName).file(fileName);
+    const file = this.storage.bucket(bucketName).file(resultsFileName);
     const stream = file.createWriteStream({ resumable: false });
     stream.end(imageLinks.join('\n'));
 
@@ -421,7 +427,7 @@ export class JobModerationService {
       expires: Date.now() + 60 * 60 * 24 * 1000, // 1 day
     });
 
-    const gcsConsoleUrl = `https://console.cloud.google.com/storage/browser/${bucketName}?prefix=${fileName}`;
+    const gcsConsoleUrl = `https://console.cloud.google.com/storage/browser/${bucketName}?prefix=${resultsFileName}`;
 
     const message = isConfirmedAbuse
       ? `The following images contain abusive content for job moderation task ID ${jobModerationTaskId} and job ID ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${gcsConsoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`

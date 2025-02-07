@@ -27,19 +27,4 @@ export class JobModerationTaskRepository extends BaseRepository<JobModerationTas
       },
     });
   }
-
-  public async findByJobIdAndStatus(
-    jobId: number,
-    status: JobModerationTaskStatus,
-  ): Promise<JobModerationTaskEntity[]> {
-    return this.find({
-      where: {
-        jobId,
-        status,
-      },
-      order: {
-        createdAt: SortDirection.DESC,
-      },
-    });
-  }
 }

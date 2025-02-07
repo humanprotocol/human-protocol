@@ -185,7 +185,7 @@ export class CronJobService {
     try {
       const jobModerationTaskEntities =
         await this.jobModerationTaskRepository.findByStatus(
-          JobModerationTaskStatus.PENDING,
+          JobModerationTaskStatus.PROCESSED,
         );
       for (const jobModerationTaskEntity of jobModerationTaskEntities) {
         try {
@@ -251,47 +251,6 @@ export class CronJobService {
     this.logger.log('Job moderation STOP');
     await this.completeCronJob(cronJob);
   }
-  //@Cron('*/3 * * * *')
-  /*public async parseJobModerationResultsCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.ParseJobModerationResults,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Parse job moderation results START');
-    const cronJob = await this.startCronJob(
-      CronJobType.ParseJobModerationResults,
-    );
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(
-        JobStatus.UNDER_MODERATION,
-      );
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.jobModerationService.parseJobModerationResults(jobEntity);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.ResultsParsingFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error parse job moderation results job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            failedReason,
-          );
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Parse job moderation results STOP');
-    await this.completeCronJob(cronJob);
-  }*/
 
   @Cron('*/2 * * * *')
   public async createEscrowCronJob() {

@@ -3,7 +3,7 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { JobEntity } from './job.entity';
-import { JobModerationTaskStatus } from 'src/common/enums/job';
+import { JobModerationTaskStatus } from '../../common/enums/job';
 
 @Entity({ schema: NS, name: 'job-moderation-tasks' })
 export class JobModerationTaskEntity extends BaseEntity {
@@ -24,9 +24,6 @@ export class JobModerationTaskEntity extends BaseEntity {
     enum: JobModerationTaskStatus,
   })
   public status: JobModerationTaskStatus;
-
-  @Column({ type: 'int' })
-  public jobId: number;
 
   @ManyToOne(() => JobEntity, (job) => job.jobModerationTasks, { eager: true })
   job: JobEntity;

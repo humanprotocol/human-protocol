@@ -80,7 +80,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
         waitUntil: SortDirection.ASC,
       },
       ...(take && { take }),
-      relations: ['job-moderation-tasks'],
+      relations: ['jobModerationTasks'],
     });
   }
 
