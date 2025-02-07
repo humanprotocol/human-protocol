@@ -19,10 +19,16 @@ import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
 import { JobModerationService } from './job-moderation.service';
+import { JobModerationTaskEntity } from './job-moderation-task.entity';
+import { JobModerationTaskRepository } from './job-moderation-task.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([JobEntity, WebhookEntity]),
+    TypeOrmModule.forFeature([
+      JobEntity,
+      JobModerationTaskEntity,
+      WebhookEntity,
+    ]),
     ConfigModule,
     HttpModule,
     AuthModule,
@@ -39,6 +45,7 @@ import { JobModerationService } from './job-moderation.service';
     JobService,
     JobRepository,
     JobModerationService,
+    JobModerationTaskRepository,
     RoutingProtocolService,
     WebhookRepository,
     MutexManagerService,

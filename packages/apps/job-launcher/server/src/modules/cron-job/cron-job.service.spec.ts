@@ -7,7 +7,11 @@ import { CronJobRepository } from './cron-job.repository';
 import { CronJobEntity } from './cron-job.entity';
 import { createMock } from '@golevelup/ts-jest';
 import { JobEntity } from '../job/job.entity';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobModerationTaskStatus,
+  JobRequestType,
+  JobStatus,
+} from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
@@ -61,6 +65,8 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { JobModerationService } from '../job/job-moderation.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
 import { SlackConfigService } from '../../common/config/slack-config.service';
+import { JobModerationTaskRepository } from '../job/job-moderation-task.repository';
+import { JobModerationTaskEntity } from '../job/job-moderation-task.entity';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -87,7 +93,8 @@ describe('CronJobService', () => {
     storageService: StorageService,
     jobService: JobService,
     jobModerationService: JobModerationService,
-    jobRepository: JobRepository;
+    jobRepository: JobRepository,
+    jobModerationTaskRepository: JobModerationTaskRepository;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -149,6 +156,10 @@ describe('CronJobService', () => {
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
+          provide: JobModerationTaskRepository,
+          useValue: createMock<JobModerationTaskRepository>(),
+        },
+        {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
         },
@@ -178,6 +189,9 @@ describe('CronJobService', () => {
       module.get<JobModerationService>(JobModerationService);
     jobService = module.get<JobService>(JobService);
     jobRepository = module.get<JobRepository>(JobRepository);
+    jobModerationTaskRepository = module.get<JobModerationTaskRepository>(
+      JobModerationTaskRepository,
+    );
     repository = module.get<CronJobRepository>(CronJobRepository);
     webhookService = module.get<WebhookService>(WebhookService);
     webhookRepository = module.get<WebhookRepository>(WebhookRepository);
@@ -1070,43 +1084,44 @@ describe('CronJobService', () => {
     });
   });
 
-  describe('parseJobModerationResultsCronJob', () => {
-    let parseJobModerationResultsMock: any;
+  describe('processJobModerationTasksCronJob', () => {
+    let processJobModerationTaskMock: jest.SpyInstance;
     let cronJobEntityMock: Partial<CronJobEntity>;
-    let jobEntity1: Partial<JobEntity>, jobEntity2: Partial<JobEntity>;
+    let taskEntity1: Partial<JobModerationTaskEntity>,
+      taskEntity2: Partial<JobModerationTaskEntity>;
 
     beforeEach(() => {
       cronJobEntityMock = {
-        cronJobType: CronJobType.ParseJobModerationResults,
+        cronJobType: CronJobType.ProcessJobModerationTasks,
         startedAt: new Date(),
       };
 
-      jobEntity1 = {
-        id: 1,
-        status: JobStatus.UNDER_MODERATION,
-      };
-
-      jobEntity2 = {
-        id: 2,
-        status: JobStatus.UNDER_MODERATION,
-      };
-
-      jest
-        .spyOn(jobRepository, 'findByStatus')
-        .mockResolvedValue([jobEntity1 as any, jobEntity2 as any]);
-
-      parseJobModerationResultsMock = jest.spyOn(
-        jobModerationService,
-        'parseJobModerationResults',
-      );
-      parseJobModerationResultsMock.mockResolvedValue(true);
+      taskEntity1 = {
+        id: 101,
+        status: JobModerationTaskStatus.PENDING,
+      } as JobModerationTaskEntity;
+      taskEntity2 = {
+        id: 102,
+        status: JobModerationTaskStatus.PENDING,
+      } as JobModerationTaskEntity;
 
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-
-      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
       jest
-        .spyOn(repository, 'createUnique')
+        .spyOn(jobModerationTaskRepository, 'findByStatus')
+        .mockResolvedValue([
+          taskEntity1 as JobModerationTaskEntity,
+          taskEntity2 as JobModerationTaskEntity,
+        ]);
+      jest
+        .spyOn(service, 'startCronJob')
         .mockResolvedValue(cronJobEntityMock as any);
+      jest.spyOn(service, 'completeCronJob');
+
+      processJobModerationTaskMock = jest.spyOn(
+        jobModerationService,
+        'processJobModerationTask',
+      );
+      processJobModerationTaskMock.mockResolvedValue(undefined);
     });
 
     afterEach(() => {
@@ -1116,6 +1131,97 @@ describe('CronJobService', () => {
     it('should not run if cron job is already running', async () => {
       jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
 
+      await service.processJobModerationTasksCronJob();
+
+      expect(service.startCronJob).not.toHaveBeenCalled();
+    });
+
+    it('should create a cron job entity to lock the process', async () => {
+      await service.processJobModerationTasksCronJob();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ProcessJobModerationTasks,
+      );
+    });
+
+    it('should process all pending job moderation tasks', async () => {
+      await service.processJobModerationTasksCronJob();
+
+      expect(processJobModerationTaskMock).toHaveBeenCalledTimes(2);
+      expect(processJobModerationTaskMock).toHaveBeenCalledWith(taskEntity1);
+      expect(processJobModerationTaskMock).toHaveBeenCalledWith(taskEntity2);
+    });
+
+    it('should mark a task as failed if an error occurs', async () => {
+      jest
+        .spyOn(jobModerationTaskRepository, 'updateOne')
+        .mockResolvedValue(taskEntity1 as JobModerationTaskEntity);
+
+      processJobModerationTaskMock.mockRejectedValueOnce(
+        new Error('Processing error'),
+      );
+
+      await service.processJobModerationTasksCronJob();
+
+      expect(jobModerationTaskRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({ status: JobModerationTaskStatus.FAILED }),
+      );
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      await service.processJobModerationTasksCronJob();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(cronJobEntityMock);
+    });
+  });
+
+  describe('parseJobModerationResultsCronJob', () => {
+    let parseJobModerationResultsMock: jest.SpyInstance;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntity1: Partial<JobEntity>, jobEntity2: Partial<JobEntity>;
+    let taskEntity1: Partial<JobModerationTaskEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.ParseJobModerationResults,
+        startedAt: new Date(),
+      };
+
+      jobEntity1 = { id: 1, status: JobStatus.UNDER_MODERATION };
+      jobEntity2 = { id: 2, status: JobStatus.UNDER_MODERATION };
+
+      taskEntity1 = {
+        id: 101,
+        job: jobEntity1 as JobEntity,
+        status: JobModerationTaskStatus.PROCESSED,
+      };
+
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
+
+      jest
+        .spyOn(jobRepository, 'findByStatus')
+        .mockResolvedValue([jobEntity1 as any, jobEntity2 as any]);
+      jest
+        .spyOn(jobModerationTaskRepository, 'findByStatus')
+        .mockResolvedValue([taskEntity1 as any]); // Only PROCESSED
+
+      parseJobModerationResultsMock = jest.spyOn(
+        jobModerationService,
+        'parseJobModerationResults',
+      );
+      parseJobModerationResultsMock.mockResolvedValue(true);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
       const startCronJobMock = jest.spyOn(service, 'startCronJob');
 
       await service.parseJobModerationResultsCronJob();
@@ -1135,33 +1241,32 @@ describe('CronJobService', () => {
       );
     });
 
-    it('should process all jobs with status UNDER_MODERATION', async () => {
+    it('should process jobs with all tasks in PROCESSED status', async () => {
+      jest
+        .spyOn(jobModerationTaskRepository, 'findByStatus')
+        .mockResolvedValue([
+          {
+            id: 101,
+            job: jobEntity1,
+            status: JobModerationTaskStatus.PROCESSED,
+          } as any,
+        ]);
+
       await service.parseJobModerationResultsCronJob();
 
-      expect(parseJobModerationResultsMock).toHaveBeenCalledTimes(2);
-      expect(parseJobModerationResultsMock).toHaveBeenCalledWith(jobEntity1);
-      expect(parseJobModerationResultsMock).toHaveBeenCalledWith(jobEntity2);
+      expect(parseJobModerationResultsMock).toHaveBeenCalledTimes(1);
+      expect(parseJobModerationResultsMock).toHaveBeenCalledWith(taskEntity1);
     });
 
     it('should handle failed parsing attempts', async () => {
       const error = new Error('Parsing failed');
       parseJobModerationResultsMock.mockRejectedValueOnce(error);
 
-      const handleFailureMock = jest.spyOn(
-        jobService,
-        'handleProcessJobFailure',
-      );
-
       await service.parseJobModerationResultsCronJob();
 
-      expect(handleFailureMock).toHaveBeenCalledTimes(1);
-      expect(handleFailureMock).toHaveBeenCalledWith(
-        jobEntity1,
-        expect.stringContaining(ErrorJobModeration.ResultsParsingFailed),
-      );
-      expect(handleFailureMock).not.toHaveBeenCalledWith(
-        jobEntity2,
-        expect.anything(),
+      expect(jobModerationTaskRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(jobModerationTaskRepository.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({ status: JobModerationTaskStatus.FAILED }),
       );
     });
 
@@ -1171,6 +1276,89 @@ describe('CronJobService', () => {
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await service.parseJobModerationResultsCronJob();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(cronJobEntityMock);
+    });
+  });
+
+  describe('completeJobModerationCronJob', () => {
+    let completeJobModerationMock: jest.SpyInstance;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntity1: Partial<JobEntity>, jobEntity2: Partial<JobEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.CompleteJobModeration,
+        startedAt: new Date(),
+      };
+
+      jobEntity1 = { id: 1, status: JobStatus.UNDER_MODERATION } as JobEntity;
+      jobEntity2 = { id: 2, status: JobStatus.UNDER_MODERATION } as JobEntity;
+
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+      jest
+        .spyOn(jobRepository, 'findByStatus')
+        .mockResolvedValue([jobEntity1 as JobEntity, jobEntity2 as JobEntity]);
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValue(cronJobEntityMock as any);
+      jest.spyOn(service, 'completeCronJob');
+
+      completeJobModerationMock = jest.spyOn(
+        jobModerationService,
+        'completeJobModeration',
+      );
+      completeJobModerationMock.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
+
+      await service.completeJobModerationCronJob();
+
+      expect(service.startCronJob).not.toHaveBeenCalled();
+    });
+
+    it('should create a cron job entity to lock the process', async () => {
+      await service.completeJobModerationCronJob();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.CompleteJobModeration,
+      );
+    });
+
+    it('should process all jobs under moderation', async () => {
+      await service.completeJobModerationCronJob();
+
+      expect(completeJobModerationMock).toHaveBeenCalledTimes(2);
+      expect(completeJobModerationMock).toHaveBeenCalledWith(jobEntity1);
+      expect(completeJobModerationMock).toHaveBeenCalledWith(jobEntity2);
+    });
+
+    it('should handle job moderation failures', async () => {
+      jest
+        .spyOn(jobService, 'handleProcessJobFailure')
+        .mockResolvedValue(undefined);
+
+      completeJobModerationMock.mockRejectedValueOnce(
+        new Error('Processing error'),
+      );
+
+      await service.completeJobModerationCronJob();
+
+      expect(jobService.handleProcessJobFailure).toHaveBeenCalledTimes(1);
+      expect(jobService.handleProcessJobFailure).toHaveBeenCalledWith(
+        jobEntity1,
+        expect.stringContaining(ErrorJobModeration.CompleteJobModerationFailed),
+      );
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      await service.completeJobModerationCronJob();
 
       expect(service.completeCronJob).toHaveBeenCalledWith(cronJobEntityMock);
     });

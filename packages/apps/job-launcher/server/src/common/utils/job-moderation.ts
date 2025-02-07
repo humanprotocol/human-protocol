@@ -12,3 +12,9 @@ export function checkModerationLevels(
     result.medical,
   ].some((level) => levels.includes(level));
 }
+
+export function getFileName(...parts: string[]): string {
+  const fullPath = parts.join('-');
+
+  return fullPath;
+}

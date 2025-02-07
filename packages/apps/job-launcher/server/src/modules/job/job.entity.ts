@@ -6,6 +6,7 @@ import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { PaymentEntity } from '../payment/payment.entity';
+import { JobModerationTaskEntity } from './job-moderation-task.entity';
 
 @Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
@@ -60,6 +61,12 @@ export class JobEntity extends BaseEntity implements IJob {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.job)
   public payment: PaymentEntity;
+
+  @OneToMany(
+    () => JobModerationTaskEntity,
+    (jobModerationTask) => jobModerationTask.job,
+  )
+  public jobModerationTasks: JobModerationTaskEntity[];
 
   @Column({ type: 'int', default: 0 })
   public retriesCount: number;
