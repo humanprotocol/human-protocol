@@ -1,6 +1,6 @@
 import { ChildBindings, Logger, LogLevel, LogMeta, LogRecord } from './types';
 
-function isPlainObject(maybeObj: unknown): boolean {
+function isPlainObject(maybeObj: unknown): maybeObj is LogMeta {
   return Object.prototype.toString.call(maybeObj) === '[object Object]';
 }
 
@@ -37,19 +37,19 @@ abstract class LoggerWrapper implements Logger {
     }
   }
 
-  debug(message: string, errorOrMeta?: Error | LogMeta): void {
+  debug(message: string, errorOrMeta?: unknown): void {
     this.log(LogLevel.DEBUG, message, errorOrMeta);
   }
 
-  info(message: string, errorOrMeta?: Error | LogMeta): void {
+  info(message: string, errorOrMeta?: unknown): void {
     this.log(LogLevel.INFO, message, errorOrMeta);
   }
 
-  warn(message: string, errorOrMeta?: Error | LogMeta): void {
+  warn(message: string, errorOrMeta?: unknown): void {
     this.log(LogLevel.WARN, message, errorOrMeta);
   }
 
-  error(message: string, errorOrMeta?: Error | LogMeta): void {
+  error(message: string, errorOrMeta?: unknown): void {
     this.log(LogLevel.ERROR, message, errorOrMeta);
   }
 
@@ -63,14 +63,8 @@ abstract class LoggerWrapper implements Logger {
 
   protected abstract createChild(bindings: LogMeta): Logger;
 
-  private log(
-    level: LogLevel,
-    message: string,
-    errorOrMeta?: Error | LogMeta,
-  ): void {
-    if (typeof message !== 'string') {
-      throw new Error('Log message must be a string');
-    }
+  private log(level: LogLevel, message: string, errorOrMeta?: unknown): void {
+    const logMessage = typeof message === 'string' ? message : `${message}`;
 
     let metaArgument: LogMeta;
     if (errorOrMeta === undefined) {
@@ -86,18 +80,23 @@ abstract class LoggerWrapper implements Logger {
         Object.assign(metaArgument, {
           error: serializeError(error),
         });
-      } else {
+      } else if (error !== undefined) {
         metaArgument.error = error;
       }
     } else {
-      throw new Error('Log meta should be either error or plain object');
+      /**
+       * Fallback in case somebody uses log in a wrong way
+       */
+      metaArgument = {
+        meta: errorOrMeta,
+      };
     }
 
     const enrichedMeta: LogRecord = {
       ...this.bindings,
       ...metaArgument,
       level,
-      message,
+      message: logMessage,
       timestamp: Date.now(),
     };
 

@@ -17,7 +17,7 @@ export type LogRecord = {
 type LogFn = {
   (message: string, meta?: LogMeta): void;
   (message: string, error: Error): void;
-  (message: string, errorOrMeta?: LogMeta | Error): void;
+  (message: string, errorOrMeta?: unknown): void;
 };
 
 export type ChildBindings = { name?: string } & LogMeta;
