@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
@@ -11,10 +11,13 @@ import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';
 import { IncomingWebhookDto } from './webhook.dto';
 import { IncomingWebhookError, WebhookErrorMessage } from './webhook.error';
+import logger from '../../logger';
 
 @Injectable()
 export class WebhookIncomingService {
-  private readonly logger = new Logger(WebhookIncomingService.name);
+  private readonly logger = logger.child({
+    context: WebhookIncomingService.name,
+  });
 
   constructor(
     private readonly webhookIncomingRepository: WebhookIncomingRepository,
@@ -89,18 +92,21 @@ export class WebhookIncomingService {
 
         webhookEntity.status = WebhookIncomingStatus.COMPLETED;
         await this.webhookIncomingRepository.updateOne(webhookEntity);
-      } catch (err) {
-        if (isDuplicatedError(err)) {
+      } catch (error) {
+        if (isDuplicatedError(error)) {
           webhookEntity.status = WebhookIncomingStatus.COMPLETED;
           await this.webhookIncomingRepository.updateOne(webhookEntity);
         } else {
           // Handle other errors (general failure)
-          const failureDetail = `Error message: ${err.message}`;
+          this.logger.error('Error processing incoming webhook', {
+            error,
+            webhookId: webhookEntity.id,
+          });
 
-          this.logger.error(
-            `Error processing incoming webhook. Webhook ID: ${webhookEntity.id}. ${failureDetail}.`,
+          await this.handleWebhookIncomingError(
+            webhookEntity,
+            `Error message: ${error.message}`,
           );
-          await this.handleWebhookIncomingError(webhookEntity, failureDetail);
         }
         continue;
       }

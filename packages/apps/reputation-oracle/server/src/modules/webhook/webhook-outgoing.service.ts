@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { WebhookOutgoingStatus } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
 import { signMessage } from '../../common/utils/signature';
@@ -17,10 +17,13 @@ import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
 import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
+import logger from '../../logger';
 
 @Injectable()
 export class WebhookOutgoingService {
-  private readonly logger = new Logger(WebhookOutgoingService.name);
+  private readonly logger = logger.child({
+    context: WebhookOutgoingService.name,
+  });
 
   constructor(
     private readonly httpService: HttpService,
@@ -120,12 +123,16 @@ export class WebhookOutgoingService {
     for (const webhookEntity of webhookEntities) {
       try {
         await this.sendWebhook(webhookEntity);
-      } catch (err) {
-        const failureDetail = `Error message: ${err.message}`;
-        this.logger.error(
-          `Error processing outgoing webhook. Webhook ID: ${webhookEntity.id}. ${failureDetail}`,
+      } catch (error) {
+        this.logger.error('Error processing outgoing webhook', {
+          error,
+          webhookId: webhookEntity.id,
+        });
+
+        await this.handleWebhookOutgoingError(
+          webhookEntity,
+          `Error message: ${error.message}`,
         );
-        await this.handleWebhookOutgoingError(webhookEntity, failureDetail);
         continue;
       }
       webhookEntity.status = WebhookOutgoingStatus.SENT;

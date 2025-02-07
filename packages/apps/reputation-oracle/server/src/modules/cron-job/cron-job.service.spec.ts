@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CronJobService } from './cron-job.service';
-import { Logger } from '@nestjs/common';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobType } from '../../common/enums/cron-job';
@@ -45,13 +44,6 @@ describe('CronJobService', () => {
             processPendingEscrowCompletion: jest.fn(),
             processPaidEscrowCompletion: jest.fn(),
             processAwaitingPayouts: jest.fn(),
-          },
-        },
-        {
-          provide: Logger,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
           },
         },
       ],

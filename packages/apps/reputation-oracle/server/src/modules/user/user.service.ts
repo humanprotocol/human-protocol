@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   KycStatus,
@@ -32,8 +32,8 @@ import {
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger(UserService.name);
-  private HASH_ROUNDS = 12;
+  private readonly HASH_ROUNDS = 12;
+
   constructor(
     private userRepository: UserRepository,
     private siteKeyRepository: SiteKeyRepository,

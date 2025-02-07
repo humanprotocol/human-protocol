@@ -3,7 +3,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -13,6 +12,8 @@ import {
   DuplicatedUserEmailError,
   InvalidOperatorSignupDataError,
 } from './auth.error';
+
+import logger from '../../logger';
 
 type AuthControllerError =
   | AuthError
@@ -27,26 +28,26 @@ type AuthControllerError =
   InvalidOperatorSignupDataError,
 )
 export class AuthControllerErrorsFilter implements ExceptionFilter {
-  private logger = new Logger(AuthControllerErrorsFilter.name);
+  private readonly logger = logger.child({
+    context: AuthControllerErrorsFilter.name,
+  });
+
   catch(exception: AuthControllerError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     let status = HttpStatus.UNAUTHORIZED;
 
-    let logContext: string | undefined;
-    if (exception instanceof DuplicatedUserEmailError) {
+    if (
+      exception instanceof DuplicatedUserEmailError ||
+      exception instanceof DuplicatedUserAddressError
+    ) {
       status = HttpStatus.CONFLICT;
-      logContext = exception.email;
-    } else if (exception instanceof DuplicatedUserAddressError) {
-      status = HttpStatus.CONFLICT;
-      logContext = exception.address;
     } else if (exception instanceof InvalidOperatorSignupDataError) {
       status = HttpStatus.BAD_REQUEST;
-      logContext = exception.detail;
     }
 
-    this.logger.error(exception.message, exception.stack, logContext);
+    this.logger.error('Auth error', exception);
 
     return response.status(status).json({
       message: exception.message,

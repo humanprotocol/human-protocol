@@ -4,15 +4,16 @@ import {
   ExecutionContext,
   HttpStatus,
   HttpException,
-  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { createHmac } from 'crypto';
 import { KycConfigService } from '../config/kyc-config.service';
+import logger from '../../logger';
 
 @Injectable()
 export class KycWebhookAuthGuard implements CanActivate {
-  logger = new Logger(KycWebhookAuthGuard.name);
+  private readonly logger = logger.child({ context: KycWebhookAuthGuard.name });
+
   constructor(private readonly kycConfigService: KycConfigService) {}
   canActivate(context: ExecutionContext): boolean {
     const request: Request = context.switchToHttp().getRequest();
@@ -23,7 +24,7 @@ export class KycWebhookAuthGuard implements CanActivate {
 
     if (!hmacSignature) {
       const message = 'HMAC Signature not provided';
-      this.logger.error(message, request.path);
+      this.logger.error(message, { requestPath: request.path });
       throw new HttpException(message, HttpStatus.UNAUTHORIZED);
     }
 
@@ -39,7 +40,7 @@ export class KycWebhookAuthGuard implements CanActivate {
       this.kycConfigService.apiKey !== apiKey
     ) {
       const message = 'HMAC Signature does not match';
-      this.logger.error(message, request.path);
+      this.logger.error(message, { requestPath: request.path });
       throw new HttpException(message, HttpStatus.UNAUTHORIZED);
     }
 

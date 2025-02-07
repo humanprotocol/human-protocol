@@ -3,15 +3,15 @@ import {
   Catch,
   ExceptionFilter as IExceptionFilter,
   HttpStatus,
-  Logger,
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from '../errors/database';
+import logger from '../../logger';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
-  private logger = new Logger(ExceptionFilter.name);
+  private readonly logger = logger.child({ context: ExceptionFilter.name });
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -27,10 +27,7 @@ export class ExceptionFilter implements IExceptionFilter {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
       responseBody.message = exception.message;
 
-      this.logger.error(
-        `Database error: ${exception.message}`,
-        exception.stack,
-      );
+      this.logger.error('Database error', exception);
       // Temp hack for the in progress exception handling refactoring
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -41,10 +38,7 @@ export class ExceptionFilter implements IExceptionFilter {
         Object.assign(responseBody, exceptionResponse);
       }
     } else {
-      this.logger.error(
-        `Unhandled exception: ${exception.message}`,
-        exception.stack,
-      );
+      this.logger.error('Unhandled exception', exception);
     }
 
     response.status(status).json(

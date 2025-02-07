@@ -4,16 +4,17 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  Logger,
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { AuthSignatureRole } from '../enums/role';
+import logger from '../../logger';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  logger = new Logger(SignatureAuthGuard.name);
+  private readonly logger = logger.child({ context: SignatureAuthGuard.name });
+
   constructor(private role: AuthSignatureRole[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,7 +47,7 @@ export class SignatureAuthGuard implements CanActivate {
 
     if (!isVerified) {
       const message = 'Invalid web3 signature';
-      this.logger.error(message, request.path);
+      this.logger.error(message, { requestPath: request.path });
       throw new HttpException(message, HttpStatus.UNAUTHORIZED);
     }
     return true;
