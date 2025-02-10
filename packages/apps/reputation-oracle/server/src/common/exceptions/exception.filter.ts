@@ -28,7 +28,6 @@ export class ExceptionFilter implements IExceptionFilter {
       responseBody.message = exception.message;
 
       this.logger.error('Database error', exception);
-      // Temp hack for the in progress exception handling refactoring
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
