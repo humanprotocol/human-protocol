@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionService } from './escrow-completion.service';
@@ -17,7 +17,6 @@ import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository'
     WebhookOutgoingModule,
   ],
   providers: [
-    Logger,
     EscrowCompletionService,
     EscrowCompletionRepository,
     EscrowPayoutsBatchRepository,

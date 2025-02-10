@@ -23,7 +23,6 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { OracleRole, SubgraphOracleRole } from '../../common/enums/roles';
 import { LeadersOrderBy } from '../../common/enums/leader';
 import { ReputationLevel } from '../../common/enums/reputation';
 import {
@@ -210,10 +209,10 @@ export class DetailsService {
       chainId,
       minAmountStaked: MIN_AMOUNT_STAKED,
       roles: [
-        SubgraphOracleRole.JOB_LAUNCHER,
-        SubgraphOracleRole.EXCHANGE_ORACLE,
-        SubgraphOracleRole.RECORDING_ORACLE,
-        SubgraphOracleRole.REPUTATION_ORACLE,
+        Role.JobLauncher,
+        Role.ExchangeOracle,
+        Role.RecordingOracle,
+        Role.ReputationOracle,
       ],
     };
 
@@ -242,10 +241,10 @@ export class DetailsService {
             params: {
               chain_id: chainId,
               roles: [
-                OracleRole.JOB_LAUNCHER,
-                OracleRole.EXCHANGE_ORACLE,
-                OracleRole.RECORDING_ORACLE,
-                OracleRole.REPUTATION_ORACLE,
+                Role.JobLauncher,
+                Role.ExchangeOracle,
+                Role.RecordingOracle,
+                Role.ReputationOracle,
               ],
             },
           },
@@ -272,10 +271,10 @@ export class DetailsService {
             params: {
               chain_id: chainId,
               roles: [
-                OracleRole.JOB_LAUNCHER,
-                OracleRole.EXCHANGE_ORACLE,
-                OracleRole.RECORDING_ORACLE,
-                OracleRole.REPUTATION_ORACLE,
+                Role.JobLauncher,
+                Role.ExchangeOracle,
+                Role.RecordingOracle,
+                Role.ReputationOracle,
               ],
               ...(orderBy &&
                 orderBy === LeadersOrderBy.REPUTATION && {

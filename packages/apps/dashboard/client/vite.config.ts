@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import * as path from 'path';
 import svgr from 'vite-plugin-svgr';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,6 +11,9 @@ export default defineConfig({
     svgr({
       include: '**/*.svg',
       exclude: 'src/assets/icons/excluded/**/*.svg',
+    }),
+    nodePolyfills({
+      protocolImports: true,
     }),
   ],
   resolve: {
@@ -21,6 +25,14 @@ export default defineConfig({
       '@api': path.resolve(__dirname, './src/api'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@services': path.resolve(__dirname, './src/services'),
+    },
+  },
+  optimizeDeps: {
+    include: ['@human-protocol/sdk'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/core/, /human-protocol-sdk/, /node_modules/],
     },
   },
   server: {

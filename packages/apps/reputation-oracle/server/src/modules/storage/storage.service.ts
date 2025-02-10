@@ -5,7 +5,7 @@ import {
   EscrowClient,
   KVStoreUtils,
 } from '@human-protocol/sdk';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as Minio from 'minio';
 import crypto from 'crypto';
@@ -20,10 +20,12 @@ import {
   FileNotFoundError,
   InvalidFileUrl,
 } from './storage.errors';
+import logger from '../../logger';
 
 @Injectable()
 export class StorageService {
-  private readonly logger = new Logger(StorageService.name);
+  private readonly logger = logger.child({ context: StorageService.name });
+
   public readonly minioClient: Minio.Client;
 
   constructor(
@@ -137,11 +139,10 @@ export class StorageService {
 
       return jsonLikeData;
     } catch (error) {
-      this.logger.error(
-        `Error downloading json like data ${url}:`,
-        error.message,
-        error.stack,
-      );
+      this.logger.error('Error downloading json like data', {
+        error,
+        url,
+      });
       return [];
     }
   }
@@ -168,17 +169,16 @@ export class StorageService {
       // Check if the file already exists in the bucket
       try {
         await this.minioClient.statObject(this.s3ConfigService.bucket, key);
-        this.logger.log(
-          `File with key ${key} already exists. Skipping upload.`,
-        );
+        this.logger.info('File already exist. Skipping upload', {
+          fileKey: key,
+        });
         return { url: this.getUrl(key), hash };
       } catch (error) {
         if (!isNotFoundError(error)) {
-          this.logger.error(
-            'Error checking if file exists:',
-            error.message,
-            error.stack,
-          );
+          this.logger.error('Error checking if file exists', {
+            error,
+            fileKey: key,
+          });
           throw new Error('Error accessing storage');
         }
       }
@@ -227,17 +227,16 @@ export class StorageService {
       // Check if the file already exists in the bucket
       try {
         await this.minioClient.statObject(this.s3ConfigService.bucket, key);
-        this.logger.log(
-          `File with key ${key} already exists. Skipping upload.`,
-        );
+        this.logger.info('File already exist. Skipping upload', {
+          fileKey: key,
+        });
         return { url: this.getUrl(key), hash };
       } catch (error) {
         if (!isNotFoundError(error)) {
-          this.logger.error(
-            'Error checking if file exists:',
-            error.message,
-            error.stack,
-          );
+          this.logger.error('Error checking if file exists', {
+            error,
+            fileKey: key,
+          });
           throw new Error('Error accessing storage');
         }
       }
@@ -257,7 +256,12 @@ export class StorageService {
         hash,
       };
     } catch (error) {
-      this.logger.error('Error copying file:', error.message, error.stack);
+      this.logger.error('Error copying file', {
+        error,
+        url,
+        escrowAddress,
+        chainId,
+      });
       throw new Error('File not uploaded');
     }
   }

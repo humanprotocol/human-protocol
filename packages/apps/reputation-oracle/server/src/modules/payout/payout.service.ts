@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 
 import {
@@ -29,7 +29,6 @@ import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
-  private readonly logger = new Logger(PayoutService.name);
   constructor(
     @Inject(StorageService)
     private readonly storageService: StorageService,

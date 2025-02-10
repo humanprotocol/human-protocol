@@ -13,7 +13,6 @@ import {
   Req,
   UseGuards,
   UseInterceptors,
-  Logger,
   UseFilters,
   HttpCode,
 } from '@nestjs/common';
@@ -42,8 +41,6 @@ import {
 @Controller('/auth')
 @UseFilters(AuthControllerErrorsFilter)
 export class AuthJwtController {
-  private readonly logger = new Logger(AuthJwtController.name);
-
   constructor(
     private readonly authService: AuthService,
     private readonly tokenRepository: TokenRepository,

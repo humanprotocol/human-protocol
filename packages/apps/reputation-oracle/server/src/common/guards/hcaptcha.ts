@@ -4,7 +4,6 @@ import {
   ExecutionContext,
   HttpStatus,
   HttpException,
-  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
@@ -12,7 +11,6 @@ import { AuthConfigService } from '../config/auth-config.service';
 
 @Injectable()
 export class HCaptchaGuard implements CanActivate {
-  logger = new Logger(HCaptchaGuard.name);
   constructor(
     private readonly hCaptchaService: HCaptchaService,
     private readonly authConfigSerice: AuthConfigService,
@@ -36,15 +34,16 @@ export class HCaptchaGuard implements CanActivate {
     }
 
     if (!hCaptchaToken) {
-      const message = 'hCaptcha token not provided';
-      this.logger.error(message, request.path);
-      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'hCaptcha token not provided',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    const captchaVerificationResult = await this.hCaptchaService.verifyToken({
+    const isTokenValid = await this.hCaptchaService.verifyToken({
       token: hCaptchaToken,
     });
-    if (!captchaVerificationResult.success) {
+    if (!isTokenValid) {
       throw new HttpException('Invalid hCaptcha token', HttpStatus.BAD_REQUEST);
     }
 

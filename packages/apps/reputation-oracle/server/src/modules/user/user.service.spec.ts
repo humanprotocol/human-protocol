@@ -754,9 +754,7 @@ describe('UserService', () => {
         type: SiteKeyType.REGISTRATION,
         user: userEntity,
       };
-      jest
-        .spyOn(hcaptchaService, 'verifyToken')
-        .mockResolvedValueOnce({ success: true });
+      jest.spyOn(hcaptchaService, 'verifyToken').mockResolvedValueOnce(true);
       jest
         .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
         .mockResolvedValueOnce(null);
@@ -796,9 +794,7 @@ describe('UserService', () => {
         type: SiteKeyType.REGISTRATION,
         user: userEntity,
       };
-      jest
-        .spyOn(hcaptchaService, 'verifyToken')
-        .mockResolvedValueOnce({ success: true });
+      jest.spyOn(hcaptchaService, 'verifyToken').mockResolvedValueOnce(true);
       jest
         .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
         .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);

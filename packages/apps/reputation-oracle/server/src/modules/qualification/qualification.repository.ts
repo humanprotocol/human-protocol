@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, In, IsNull, MoreThan } from 'typeorm';
 import { QualificationEntity } from './qualification.entity';
@@ -7,8 +7,6 @@ import { UserQualificationEntity } from './user-qualification.entity';
 
 @Injectable()
 export class QualificationRepository extends BaseRepository<QualificationEntity> {
-  private readonly logger = new Logger(QualificationRepository.name);
-
   constructor(private dataSource: DataSource) {
     super(QualificationEntity, dataSource);
   }

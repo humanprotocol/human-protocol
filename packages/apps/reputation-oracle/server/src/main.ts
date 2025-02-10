@@ -7,10 +7,12 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
 import { ServerConfigService } from './common/config/server-config.service';
+import { nestLoggerOverride } from './logger';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
+    logger: nestLoggerOverride,
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
