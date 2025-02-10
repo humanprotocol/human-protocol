@@ -367,7 +367,11 @@ describe('escrowCompletionService', () => {
         }),
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Error message: ${error.message}`),
+        'Failed to process pending escrow completion',
+        {
+          error,
+          escrowCompletionEntityId: expect.any(Number),
+        },
       );
     });
 
@@ -513,7 +517,11 @@ describe('escrowCompletionService', () => {
         }),
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Error message: ${error.message}`),
+        'Failed to process paid escrow completion',
+        {
+          error,
+          escrowCompletionEntityId: expect.any(Number),
+        },
       );
     });
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateQualificationDto, QualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { QualificationRepository } from './qualification.repository';
@@ -11,10 +11,13 @@ import {
   QualificationError,
   QualificationErrorMessage,
 } from './qualification.error';
+import logger from '../../logger';
 
 @Injectable()
 export class QualificationService {
-  private readonly logger = new Logger(QualificationService.name);
+  private readonly logger = logger.child({
+    context: QualificationService.name,
+  });
 
   constructor(
     private readonly qualificationRepository: QualificationRepository,
@@ -80,7 +83,7 @@ export class QualificationService {
         };
       });
     } catch (error) {
-      this.logger.log(`Failed to fetch qualifications: ${error.message}`);
+      this.logger.warn('Failed to fetch qualifications', error);
       return [];
     }
   }

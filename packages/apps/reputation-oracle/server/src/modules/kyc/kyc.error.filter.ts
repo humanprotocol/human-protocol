@@ -3,22 +3,23 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { KycError } from './kyc.error';
+import logger from '../../logger';
 
 @Catch(KycError)
 export class KycErrorFilter implements ExceptionFilter {
-  private logger = new Logger(KycErrorFilter.name);
+  private readonly logger = logger.child({ context: KycErrorFilter.name });
+
   catch(exception: KycError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = HttpStatus.BAD_REQUEST;
 
-    this.logger.error(exception.message, exception.stack, exception.userId);
+    this.logger.error('KYC error', exception);
 
     return response.status(status).json({
       message: exception.message,

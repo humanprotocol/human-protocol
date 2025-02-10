@@ -83,7 +83,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
@@ -116,7 +116,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
@@ -147,7 +147,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
@@ -180,7 +180,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},

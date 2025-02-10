@@ -268,7 +268,11 @@ describe('WebhookIncomingService', () => {
         }),
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Error message: ${error.message}`),
+        'Error processing incoming webhook',
+        {
+          error,
+          webhookId: expect.any(Number),
+        },
       );
     });
 

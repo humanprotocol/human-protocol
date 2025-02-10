@@ -3,7 +3,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -12,6 +11,7 @@ import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from './user.error';
+import logger from '../../logger';
 
 type UserControllerError =
   | UserError
@@ -20,7 +20,8 @@ type UserControllerError =
 
 @Catch(UserError, DuplicatedWalletAddressError, InvalidWeb3SignatureError)
 export class UserErrorFilter implements ExceptionFilter {
-  private logger = new Logger(UserErrorFilter.name);
+  private readonly logger = logger.child({ context: UserErrorFilter.name });
+
   catch(exception: UserControllerError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -31,7 +32,7 @@ export class UserErrorFilter implements ExceptionFilter {
       status = HttpStatus.CONFLICT;
     }
 
-    this.logger.error(exception.message, exception.stack, exception.userId);
+    this.logger.error('User error', exception);
 
     return response.status(status).json({
       message: exception.message,
