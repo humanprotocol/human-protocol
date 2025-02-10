@@ -23,6 +23,7 @@ import { QualificationModule } from './modules/qualification/qualification.modul
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   providers: [
@@ -68,6 +69,7 @@ import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module
     HCaptchaModule,
     QualificationModule,
     EscrowCompletionModule,
+    EmailModule,
   ],
   controllers: [AppController],
 })
