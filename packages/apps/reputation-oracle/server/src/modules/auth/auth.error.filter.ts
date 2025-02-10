@@ -43,11 +43,10 @@ export class AuthControllerErrorsFilter implements ExceptionFilter {
       exception instanceof DuplicatedUserAddressError
     ) {
       status = HttpStatus.CONFLICT;
+      this.logger.error('Auth conflict', exception);
     } else if (exception instanceof InvalidOperatorSignupDataError) {
       status = HttpStatus.BAD_REQUEST;
     }
-
-    this.logger.error('Auth error', exception);
 
     return response.status(status).json({
       message: exception.message,

@@ -18,12 +18,7 @@ export class HCaptchaService {
     private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {}
 
-  /**
-   * Verifies the hCaptcha token.
-   * @param {hCaptchaVerifyToken} data - The data required for token verification.
-   * @returns {Promise<any>} - The verification result.
-   */
-  public async verifyToken(data: hCaptchaVerifyToken): Promise<any> {
+  public async verifyToken(data: hCaptchaVerifyToken): Promise<boolean> {
     try {
       const { ip, token } = data;
 
@@ -45,14 +40,14 @@ export class HCaptchaService {
         ),
       );
 
-      if (
-        response &&
-        response.data.success === true &&
-        response.status === 200
-      ) {
-        return response.data;
-      } else if (response && response.data.success === false) {
-        this.logger.error('Error occurred during token verification', {
+      /**
+       * WARN: Only this case is considered as "valid token"
+       * since anything can change on hCaptcha side
+       */
+      if (response?.status === 200 && response.data.success === true) {
+        return true;
+      } else if (response?.data.success === false) {
+        this.logger.warn('Error occurred during token verification', {
           errorCodes: response.data['error-codes'],
         });
       }
@@ -73,7 +68,7 @@ export class HCaptchaService {
       const { ip, email, language, country, address } = data;
 
       if (!country) {
-        this.logger.error(`Country is not set for the user`);
+        this.logger.warn(`Country is not set for the user`);
       }
 
       const queryParams: any = {

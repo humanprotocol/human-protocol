@@ -53,7 +53,7 @@ export class CronJobService {
       return false;
     }
 
-    this.logger.info('Previous cron job is not completed yet');
+    this.logger.info('Previous cron job is not completed yet', { cronJobType });
     return true;
   }
 
@@ -204,7 +204,7 @@ export class CronJobService {
       return;
     }
 
-    this.logger.info('Awaiting payouts escrow completion tracking START');
+    this.logger.info('Awaiting payouts processing START');
     const cronJob = await this.startCronJob(
       CronJobType.ProcessAwaitingEscrowPayouts,
     );
@@ -215,7 +215,7 @@ export class CronJobService {
       this.logger.error('Error processing awaiting payouts', error);
     }
 
-    this.logger.info('Awaiting payouts escrow completion tracking STOP');
+    this.logger.info('Awaiting payouts processing STOP');
     await this.completeCronJob(cronJob);
   }
 }

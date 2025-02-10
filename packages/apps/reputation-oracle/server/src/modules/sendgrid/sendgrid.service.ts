@@ -37,6 +37,10 @@ export class SendGridService {
   }: Partial<MailDataRequired>): Promise<void> {
     try {
       if (this.sendgridConfigService.apiKey === SENDGRID_API_KEY_DISABLED) {
+        /**
+         * Logging email data upon local development due
+         */
+        this.logger.debug('Email sent', personalizations);
         return;
       }
 
@@ -46,11 +50,15 @@ export class SendGridService {
         personalizations,
         ...emailData,
       });
-      this.logger.info('Email sent successfully');
-      return;
     } catch (error) {
       const errorMessage = 'Failed to send email';
-      this.logger.error(errorMessage, error);
+
+      this.logger.error(errorMessage, {
+        error,
+        templateId,
+        to: personalizations?.map(({ to }) => to),
+      });
+
       throw new Error(errorMessage);
     }
   }

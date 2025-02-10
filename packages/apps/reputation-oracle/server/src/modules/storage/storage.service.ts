@@ -175,7 +175,10 @@ export class StorageService {
         return { url: this.getUrl(key), hash };
       } catch (error) {
         if (!isNotFoundError(error)) {
-          this.logger.error('Error checking if file exists:', error);
+          this.logger.error('Error checking if file exists', {
+            error,
+            fileKey: key,
+          });
           throw new Error('Error accessing storage');
         }
       }
@@ -230,7 +233,10 @@ export class StorageService {
         return { url: this.getUrl(key), hash };
       } catch (error) {
         if (!isNotFoundError(error)) {
-          this.logger.error('Error checking if file exists:', error);
+          this.logger.error('Error checking if file exists', {
+            error,
+            fileKey: key,
+          });
           throw new Error('Error accessing storage');
         }
       }
@@ -250,7 +256,12 @@ export class StorageService {
         hash,
       };
     } catch (error) {
-      this.logger.error('Error copying file', error);
+      this.logger.error('Error copying file', {
+        error,
+        url,
+        escrowAddress,
+        chainId,
+      });
       throw new Error('File not uploaded');
     }
   }

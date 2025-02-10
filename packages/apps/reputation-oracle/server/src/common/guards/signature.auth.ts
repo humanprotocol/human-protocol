@@ -9,12 +9,9 @@ import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { AuthSignatureRole } from '../enums/role';
-import logger from '../../logger';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  private readonly logger = logger.child({ context: SignatureAuthGuard.name });
-
   constructor(private role: AuthSignatureRole[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,9 +43,10 @@ export class SignatureAuthGuard implements CanActivate {
     const isVerified = verifySignature(data, signature, oracleAdresses);
 
     if (!isVerified) {
-      const message = 'Invalid web3 signature';
-      this.logger.error(message, { requestPath: request.path });
-      throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        'Invalid web3 signature',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     return true;
   }
