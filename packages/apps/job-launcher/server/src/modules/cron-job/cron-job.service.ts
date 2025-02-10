@@ -4,6 +4,7 @@ import { CronJobType } from '../../common/enums/cron-job';
 import {
   ErrorCronJob,
   ErrorEscrow,
+  ErrorJobModeration,
   // ErrorJob,
 } from '../../common/constants/errors';
 
@@ -28,6 +29,7 @@ import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
 import { Web3Service } from '../web3/web3.service';
 import { JobEntity } from '../job/job.entity';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { JobModerationService } from '../job/job-moderation.service';
 
 @Injectable()
 export class CronJobService {
@@ -40,6 +42,7 @@ export class CronJobService {
     private readonly webhookService: WebhookService,
     private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
+    private readonly jobModerationService: JobModerationService,
     private readonly webhookRepository: WebhookRepository,
     private readonly networkConfigService: NetworkConfigService,
   ) {}
@@ -80,6 +83,86 @@ export class CronJobService {
   }
 
   @Cron('*/2 * * * *')
+  public async jobModerationCronJob() {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.JobModeration,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Job moderation START');
+    const cronJob = await this.startCronJob(CronJobType.JobModeration);
+
+    try {
+      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.jobModerationService.jobModeration(jobEntity);
+        } catch (err) {
+          const errorId = uuidv4();
+          const failedReason = `${ErrorJobModeration.JobModerationFailed} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error moderation job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Job moderation STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/3 * * * *')
+  public async parseJobModerationResultsCronJob() {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ParseJobModerationResults,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Parse job moderation results START');
+    const cronJob = await this.startCronJob(
+      CronJobType.ParseJobModerationResults,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.findByStatus(
+        JobStatus.UNDER_MODERATION,
+      );
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.jobModerationService.parseJobModerationResults(jobEntity);
+        } catch (err) {
+          const errorId = uuidv4();
+          const failedReason = `${ErrorJobModeration.ResultsParsingFailed} (Error ID: ${errorId})`;
+          this.logger.error(
+            `Error parse job moderation results job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+          );
+          await this.jobService.handleProcessJobFailure(
+            jobEntity,
+            failedReason,
+          );
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Parse job moderation results STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  @Cron('*/2 * * * *')
   public async createEscrowCronJob() {
     const isCronJobRunning = await this.isCronJobRunning(
       CronJobType.CreateEscrow,
@@ -93,7 +176,9 @@ export class CronJobService {
     const cronJob = await this.startCronJob(CronJobType.CreateEscrow);
 
     try {
-      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
+      const jobEntities = await this.jobRepository.findByStatus(
+        JobStatus.MODERATION_PASSED,
+      );
       for (const jobEntity of jobEntities) {
         try {
           await this.jobService.createEscrow(jobEntity);
