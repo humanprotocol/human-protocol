@@ -5,7 +5,7 @@ export class AddTokenToJob1738321689843 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-            CREATE TYPE "hmt"."jobs_token_enum" AS ENUM('hmt')
+            CREATE TYPE "hmt"."jobs_token_enum" AS ENUM('hmt', 'usdt')
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."jobs"

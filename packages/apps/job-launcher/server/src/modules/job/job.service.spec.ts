@@ -135,8 +135,8 @@ describe('JobService', () => {
 
         it('should create a Fortune job successfully paid and funded with the same currency', async () => {
           const fortuneJobDto: JobFortuneDto = {
-            chainId: Math.floor(Math.random() * 100),
-            submissionsRequired: Math.floor(Math.random() * 10),
+            chainId: Math.ceil(Math.random() * 100),
+            submissionsRequired: Math.ceil(Math.random() * 10),
             requesterTitle: `Title ${Math.random().toString(36).substring(7)}`,
             requesterDescription: `Description ${Math.random().toString(36).substring(7)}`,
             paymentAmount: Math.random() * 100,
@@ -196,8 +196,8 @@ describe('JobService', () => {
 
         it('should create a Fortune job successfully paid and funded with different currencies', async () => {
           const fortuneJobDto: JobFortuneDto = {
-            chainId: Math.floor(Math.random() * 100),
-            submissionsRequired: Math.floor(Math.random() * 10),
+            chainId: Math.ceil(Math.random() * 100),
+            submissionsRequired: Math.ceil(Math.random() * 10),
             requesterTitle: `Title ${Math.random().toString(36).substring(7)}`,
             requesterDescription: `Description ${Math.random().toString(36).substring(7)}`,
             paymentAmount: Math.random() * 100,

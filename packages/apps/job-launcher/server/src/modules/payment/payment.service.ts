@@ -39,7 +39,6 @@ import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from './rate.service';
 import { UserEntity } from '../user/user.entity';
-// import { JobEntity } from '../job/job.entity';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -222,9 +221,6 @@ export class PaymentService {
       );
     }
 
-    // Record the payment details in the system.
-    const rate = await this.rateService.getRate(currency, FiatCurrency.USD);
-
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
       userId: user.id,
@@ -232,7 +228,7 @@ export class PaymentService {
       type: PaymentType.DEPOSIT,
       amount: div(amountInCents, 100),
       currency,
-      rate,
+      rate: 1,
       transaction: paymentIntent.id,
       status: PaymentStatus.PENDING,
     });

@@ -792,6 +792,46 @@ export class JobService {
         );
     }
 
+    const feePercentage = Number(
+      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
+    );
+
+    const paymentCurrencyRate = await this.rateService.getRate(
+      dto.paymentCurrency,
+      FiatCurrency.USD,
+    );
+    const fundTokenRate = await this.rateService.getRate(
+      FiatCurrency.USD,
+      dto.escrowFundToken,
+    );
+
+    const paymentCurrencyFee = max(
+      div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
+      mul(div(feePercentage, 100), dto.paymentAmount),
+    );
+    const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
+
+    const userBalance = await this.paymentService.getUserBalanceByCurrency(
+      user.id,
+      dto.paymentCurrency,
+    );
+
+    if (lt(userBalance, totalPaymentAmount)) {
+      throw new ControlledError(
+        ErrorJob.NotEnoughFunds,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const fundTokenFee =
+      dto.paymentCurrency === dto.escrowFundToken
+        ? paymentCurrencyFee
+        : mul(mul(paymentCurrencyFee, paymentCurrencyRate), fundTokenRate);
+    const fundTokenAmount =
+      dto.paymentCurrency === dto.escrowFundToken
+        ? dto.paymentAmount
+        : mul(mul(dto.paymentAmount, paymentCurrencyRate), fundTokenRate);
+
     // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
       const selectedOracles = await this.routingProtocolService.selectOracles(
@@ -832,46 +872,6 @@ export class JobService {
     }
 
     const { createManifest } = this.createJobSpecificActions[requestType];
-
-    const feePercentage = Number(
-      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
-    );
-
-    const paymentCurrencyRate = await this.rateService.getRate(
-      dto.paymentCurrency,
-      FiatCurrency.USD,
-    );
-    const fundTokenRate = await this.rateService.getRate(
-      FiatCurrency.USD,
-      dto.escrowFundToken,
-    );
-
-    const paymentCurrencyFee = max(
-      div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
-      mul(div(feePercentage, 100), dto.paymentAmount),
-    );
-    const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
-
-    const userBalance = await this.paymentService.getUserBalanceByCurrency(
-      user.id,
-      dto.paymentCurrency,
-    );
-
-    if (lt(userBalance, totalPaymentAmount)) {
-      throw new ControlledError(
-        ErrorJob.NotEnoughFunds,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const fundTokenFee =
-      dto.paymentCurrency === dto.escrowFundToken
-        ? paymentCurrencyFee
-        : mul(mul(paymentCurrencyFee, paymentCurrencyRate), fundTokenRate);
-    const fundTokenAmount =
-      dto.paymentCurrency === dto.escrowFundToken
-        ? dto.paymentAmount
-        : mul(mul(dto.paymentAmount, paymentCurrencyRate), fundTokenRate);
 
     let jobEntity = new JobEntity();
 
