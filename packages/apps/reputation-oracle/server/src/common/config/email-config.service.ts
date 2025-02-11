@@ -7,6 +7,7 @@ export class EmailConfigService {
 
   /**
    * The API key used for authenticating requests to the email provider API.
+   * Should be overridden in stagin/production environments.
    * Default: 'disabled'
    */
   get apiKey(): string {
