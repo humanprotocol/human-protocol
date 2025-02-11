@@ -1,6 +1,6 @@
 import { Box, Grid, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { RegistrationForm } from '@/modules/worker/registration/registration-form';
+import { RegistrationForm } from '@/modules/worker/oracle-registration/registration-form';
 import { useOracleRegistrationFlow } from './hooks';
 
 export function RegistrationPage() {

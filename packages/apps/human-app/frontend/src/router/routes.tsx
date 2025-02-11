@@ -13,7 +13,7 @@ import { EnableLabeler } from '@/modules/worker/views/hcaptcha-labeling/enable-l
 import { HcaptchaLabelingPage } from '@/modules/worker/views/hcaptcha-labeling/hcaptcha-labeling.page';
 import { UserStatsAccordion } from '@/modules/worker/components/hcaptcha-labeling/user-stats-accordion';
 import { env } from '@/shared/env';
-import { RegistrationPage } from '@/modules/worker/registration';
+import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
 import {
   HandIcon,
