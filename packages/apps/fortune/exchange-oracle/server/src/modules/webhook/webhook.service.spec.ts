@@ -171,10 +171,10 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_FAILED,
       };
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: task_creation_failed',
+        'Invalid webhook event type: escrow_failed',
       );
     });
   });
@@ -253,7 +253,7 @@ describe('WebhookService', () => {
       const result = await (webhookService as any).getOracleWebhookUrl(
         JOB_LAUNCHER_WEBHOOK_URL,
         ChainId.LOCALHOST,
-        EventType.TASK_CREATION_FAILED,
+        EventType.ESCROW_FAILED,
       );
 
       expect(result).toBe(JOB_LAUNCHER_WEBHOOK_URL);
