@@ -6,7 +6,7 @@ interface DoneLabelProps {
   children: string | React.ReactElement;
 }
 
-export function DoneLabel({ children }: DoneLabelProps) {
+export function DoneLabel({ children }: Readonly<DoneLabelProps>) {
   if (typeof children === 'string') {
     return (
       <Grid alignItems="center" container gap="0.5rem" padding="0.5rem 0">

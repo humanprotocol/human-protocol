@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
-import { useRegisterAddressMutation } from '@/modules/worker/hooks/use-register-address';
 import { useRegisterAddressNotifications } from '@/modules/worker/hooks/use-register-address-notifications';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
+import { useRegisterAddress } from '@/modules/worker/hooks/use-register-address';
 
 export function useWorkerWalletRegistration() {
   const modalWasOpened = useRef(false);
@@ -10,7 +10,7 @@ export function useWorkerWalletRegistration() {
   const {
     mutate: registerAddressMutation,
     isPending: isRegisterAddressPending,
-  } = useRegisterAddressMutation({
+  } = useRegisterAddress({
     onError,
     onSuccess,
   });
