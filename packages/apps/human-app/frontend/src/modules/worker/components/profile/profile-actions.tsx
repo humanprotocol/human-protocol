@@ -6,13 +6,11 @@ import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-use
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
-import { WalletConnectDone } from '@/modules/worker/components/profile/wallet-connect-done';
-import { StartKycButton } from '@/modules/worker/components/profile/start-kyc-btn';
-import { RegisterAddressBtn } from '@/modules/worker/components/profile/register-address-btn';
-import { DoneLabel } from '@/modules/worker/components/profile/done-label';
 import { useRegisterAddressNotifications } from '@/modules/worker/hooks/use-register-address-notifications';
 import { useRegisterAddress } from '@/modules/worker/hooks/use-register-address';
-import { ErrorLabel } from './error-label';
+import { DoneLabel, ErrorLabel } from './components/status-labels';
+import { RegisterAddressBtn, StartKycBtn } from './components/buttons';
+import { WalletConnectDone } from './components';
 
 export function ProfileActions() {
   const {
@@ -95,7 +93,7 @@ export function ProfileActions() {
         {kycDeclined && (
           <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>
         )}
-        {kycToComplete && <StartKycButton />}
+        {kycToComplete && <StartKycBtn />}
       </Grid>
       <Grid>{getConnectWalletBtn()}</Grid>
       {kycApproved && !user.wallet_address && isWalletConnected ? (
