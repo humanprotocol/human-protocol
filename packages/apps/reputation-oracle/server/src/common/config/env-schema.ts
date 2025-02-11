@@ -55,7 +55,7 @@ export const envValidator = Joi.object({
   S3_BUCKET: Joi.string(),
   S3_USE_SSL: Joi.string(),
   // Email
-  EMAIL_API_KEY: Joi.string(),
+  SENDGRID_API_KEY: Joi.string(),
   EMAIL_FROM: Joi.string(),
   EMAIL_FROM_NAME: Joi.string(),
   // Reputation Level

@@ -11,7 +11,7 @@ export class EmailConfigService {
    * Default: 'disabled'
    */
   get apiKey(): string {
-    return this.configService.get<string>('EMAIL_API_KEY', 'disabled');
+    return this.configService.get<string>('SENDGRID_API_KEY', 'disabled');
   }
 
   /**
