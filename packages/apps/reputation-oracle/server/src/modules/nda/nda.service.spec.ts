@@ -1,14 +1,12 @@
 import { Test } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
 import { NDAService } from './nda.service';
 import { NDARepository } from './nda.repository';
 import { NDAVersionRepository } from './nda-version.repository';
 import { NDASignatureEntity } from './nda-signature.entity';
 import { UserEntity } from '../user/user.entity';
-import { ControlledError } from '../../common/errors/controlled';
-import { ErrorNda } from '../../common/constants/errors';
 import { NDAVersionEntity } from './nda-version.entity';
 import { NdaSignatureStatus } from '../../common/enums';
+import { NdaError, NdaErrorMessage } from './nda.error';
 
 describe.only('NDAService', () => {
   let ndaService: NDAService;
@@ -69,9 +67,10 @@ describe.only('NDAService', () => {
 
     it('should throw ControlledError with NOT_FOUND status if last NDA version is not found', async () => {
       const user: Partial<UserEntity> = {
+        id: 1,
         email: 'test@example.com',
         password: 'password123',
-        ndas: [],
+        ndaSignatures: [],
       };
 
       jest
@@ -80,9 +79,7 @@ describe.only('NDAService', () => {
 
       await expect(
         ndaService.getLastNDAVersion(user as UserEntity),
-      ).rejects.toThrow(
-        new ControlledError(ErrorNda.NotFound, HttpStatus.NOT_FOUND),
-      );
+      ).rejects.toThrow(new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id!));
 
       expect(ndaVersionRepository.getLastNDAVersion).toHaveBeenCalled();
     });
@@ -95,7 +92,7 @@ describe.only('NDAService', () => {
       const user: Partial<UserEntity> = {
         email: 'test@example.com',
         password: 'password123',
-        ndas: [nda as any],
+        ndaSignatures: [nda as any],
       };
 
       const mockLastNDAVersion: Partial<NDAVersionEntity> = {
@@ -164,7 +161,7 @@ describe.only('NDAService', () => {
         .mockResolvedValueOnce(null);
 
       await expect(ndaService.signNDA(mockUser, mockIpAddress)).rejects.toThrow(
-        new ControlledError(ErrorNda.NotFound, HttpStatus.NOT_FOUND),
+        new NdaError(NdaErrorMessage.NDA_NOT_FOUND, mockUser.id),
       );
     });
   });
