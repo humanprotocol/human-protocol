@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
-import { type WorkerProfileStatus } from '../types/profile-types';
+import { type WorkerProfileStatus } from '../types';
 import { DoneLabel } from './status-labels';
 import { WalletConnectDone } from './wallet-connect-done';
 

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
-import { useRegisterAddressNotifications } from '@/modules/worker/hooks/use-register-address-notifications';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useRegisterAddress } from '@/modules/worker/hooks/use-register-address';
+import { useRegisterAddressNotifications } from '../../hooks/use-register-address-notifications';
 
 export function useWorkerWalletRegistration() {
   const modalWasOpened = useRef(false);
