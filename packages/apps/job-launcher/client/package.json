@@ -36,7 +36,7 @@
     "wagmi": "^2.14.6",
     "web-vitals": "^4.2.2",
     "xml2js": "^0.6.2",
-    "yup": "^1.2.0"
+    "yup": "^1.6.1"
   },
   "scripts": {
     "lint": "eslint \"**/*.{ts,tsx}\"",
