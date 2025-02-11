@@ -5,8 +5,8 @@ import { TableButton } from '@/shared/components/ui/table-button';
 import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { ListItem } from '@/shared/components/ui/list-item';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { type Oracle } from '@/modules/worker/services/oracles';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface OraclesTableItemMobileProps {
   oracle: Oracle;
@@ -16,7 +16,7 @@ interface OraclesTableItemMobileProps {
 export function OraclesTableItemMobile({
   oracle,
   selectOracle,
-}: OraclesTableItemMobileProps) {
+}: Readonly<OraclesTableItemMobileProps>) {
   const { colorPalette } = useColorMode();
 
   return (
