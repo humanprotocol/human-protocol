@@ -2,27 +2,19 @@ import { Box, Stack } from '@mui/material';
 import { FormProvider } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
-import { type RegistrationInExchangeOracleDto } from '@/modules/worker/services/registration-in-exchange-oracles';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
-import { useRegistrationForm } from './hooks';
+import { useOracleRegistrationFlow, useRegistrationForm } from './hooks';
 
-interface RegistrationFormProps {
-  hasViewedInstructions: boolean;
-  isLoading: boolean;
-  error: unknown;
-  onInstructionsClick: () => void;
-  onSubmit: (data: RegistrationInExchangeOracleDto) => void;
-}
-
-export function RegistrationForm({
-  hasViewedInstructions,
-  isLoading,
-  error,
-  onInstructionsClick,
-  onSubmit,
-}: Readonly<RegistrationFormProps>) {
+export function RegistrationForm() {
   const { t } = useTranslation();
   const methods = useRegistrationForm();
+  const {
+    hasViewedInstructions,
+    handleInstructionsView: onInstructionsClick,
+    handleRegistration: onSubmit,
+    isRegistrationPending: isLoading,
+    registrationError: error,
+  } = useOracleRegistrationFlow();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     void methods.handleSubmit(onSubmit)(event);
