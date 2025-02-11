@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useGetOracles } from '@/modules/worker/services/oracles';
 import { useOracleInstructions } from './use-oracle-instructions';
 import { useOracleNavigation } from './use-oracle-navigation';
@@ -35,12 +35,11 @@ export function useOracleRegistrationFlow() {
     }
   }, [isAlreadyRegistered, navigateToJobs]);
 
-  const handleInstructionsViewWithData = () => {
+  const handleInstructionsViewWithData = useCallback(() => {
     handleInstructionsView(oracleData?.registrationInstructions ?? '');
-  };
+  }, [oracleData, handleInstructionsView]);
 
   return {
-    oracleData,
     hasViewedInstructions,
     handleInstructionsView: handleInstructionsViewWithData,
     handleRegistration,
