@@ -13,7 +13,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async findById(id: number): Promise<UserEntity | null> {
     return this.findOne({
       where: { id },
-      relations: { kyc: true, siteKeys: true, ndas: true },
+      relations: { kyc: true, siteKeys: true, ndaSignatures: true },
     });
   }
 
@@ -23,7 +23,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
       relations: {
         kyc: true,
         siteKeys: true,
-        ndas: true,
+        ndaSignatures: true,
         userQualifications: {
           qualification: true,
         },
@@ -34,7 +34,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
   async findOneByAddress(address: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { evmAddress: address.toLowerCase() },
-      relations: { kyc: true, siteKeys: true, ndas: true },
+      relations: { kyc: true, siteKeys: true, ndaSignatures: true },
     });
   }
 

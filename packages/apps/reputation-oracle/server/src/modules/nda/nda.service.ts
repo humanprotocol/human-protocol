@@ -1,12 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NDARepository } from './nda.repository';
 import { NDASignatureEntity } from './nda-signature.entity';
 import { UserEntity } from '../user/user.entity';
 import { NDAVersionRepository } from './nda-version.repository';
-import { ControlledError } from '../../common/errors/controlled';
-import { ErrorNda } from '../../common/constants/errors';
 import { NdaVersionDto } from './nda.dto';
+import { NdaError, NdaErrorMessage } from './nda.error';
 
 @Injectable()
 export class NDAService {
@@ -23,7 +22,7 @@ export class NDAService {
     const lastNDAVersion = await this.ndaVersionRepository.getLastNDAVersion();
 
     if (!lastNDAVersion) {
-      throw new ControlledError(ErrorNda.NotFound, HttpStatus.NOT_FOUND);
+      throw new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id);
     }
 
     const existingNDA = await this.ndaRepository.findSignedNDAByUserAndVersion(
@@ -47,7 +46,7 @@ export class NDAService {
     const lastNDAVersion = await this.ndaVersionRepository.getLastNDAVersion();
 
     if (!lastNDAVersion) {
-      throw new ControlledError(ErrorNda.NotFound, HttpStatus.NOT_FOUND);
+      throw new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id);
     }
 
     const existingNDA = await this.ndaRepository.findSignedNDAByUserAndVersion(
