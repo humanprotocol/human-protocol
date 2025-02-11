@@ -17,7 +17,7 @@ import {
 import { JwtAuthGuard } from '../../common/guards';
 import { NDAService } from './nda.service';
 import { RequestWithUser } from '../../common/types';
-import { NDAEntity } from './nda.entity';
+import { NDASignatureEntity } from './nda-signature.entity';
 import { NdaVersionDto } from './nda.dto';
 
 @ApiTags('NDA')
@@ -61,7 +61,7 @@ export class NDAController {
   @ApiResponse({
     status: 200,
     description: 'NDA signed successfully',
-    type: NDAEntity,
+    type: NDASignatureEntity,
   })
   @ApiResponse({
     status: 401,

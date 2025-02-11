@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NDARepository } from './nda.repository';
-import { NDAEntity } from './nda.entity';
+import { NDASignatureEntity } from './nda-signature.entity';
 import { UserEntity } from '../user/user.entity';
 import { NDAVersionRepository } from './nda-version.repository';
 import { ControlledError } from '../../common/errors/controlled';
@@ -58,7 +58,7 @@ export class NDAService {
       return null;
     }
 
-    const newNda = new NDAEntity();
+    const newNda = new NDASignatureEntity();
     newNda.user = user;
     newNda.ipAddress = ipAddress;
     newNda.ndaVersion = lastNDAVersion;

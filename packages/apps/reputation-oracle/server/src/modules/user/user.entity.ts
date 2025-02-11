@@ -9,7 +9,7 @@ import { TokenEntity } from '../auth/token.entity';
 import { KycEntity } from '../kyc/kyc.entity';
 import { SiteKeyEntity } from './site-key.entity';
 import { UserQualificationEntity } from '../qualification/user-qualification.entity';
-import { NDAEntity } from '../nda/nda.entity';
+import { NDASignatureEntity } from '../nda/nda-signature.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -52,6 +52,6 @@ export class UserEntity extends BaseEntity implements IUser {
   @OneToOne(() => SiteKeyEntity, (siteKey) => siteKey.user)
   public siteKey?: SiteKeyEntity;
 
-  @OneToMany(() => NDAEntity, (nda) => nda.user)
-  public ndas: NDAEntity[];
+  @OneToMany(() => NDASignatureEntity, (nda) => nda.user)
+  public ndaSignature: NDASignatureEntity[];
 }

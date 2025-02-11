@@ -22,7 +22,7 @@ import { UserQualificationEntity } from '../modules/qualification/user-qualifica
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionTrackingEntity } from 'src/modules/escrow-completion-tracking/escrow-completion-tracking.entity';
-import { NDAEntity } from '../modules/nda/nda.entity';
+import { NDASignatureEntity } from '../modules/nda/nda-signature.entity';
 import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
 
 @Module({
@@ -62,7 +62,7 @@ import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
             SiteKeyEntity,
             QualificationEntity,
             UserQualificationEntity,
-            NDAEntity,
+            NDASignatureEntity,
             NDAVersionEntity,
           ],
           // We are using migrations, synchronize should be set to false.

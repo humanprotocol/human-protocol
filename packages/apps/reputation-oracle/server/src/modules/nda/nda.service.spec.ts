@@ -3,12 +3,12 @@ import { HttpStatus } from '@nestjs/common';
 import { NDAService } from './nda.service';
 import { NDARepository } from './nda.repository';
 import { NDAVersionRepository } from './nda-version.repository';
-import { NDAEntity } from './nda.entity';
+import { NDASignatureEntity } from './nda-signature.entity';
 import { UserEntity } from '../user/user.entity';
 import { ControlledError } from '../../common/errors/controlled';
 import { ErrorNda } from '../../common/constants/errors';
 import { NDAVersionEntity } from './nda-version.entity';
-import { NdaStatus } from '../../common/enums';
+import { NdaSignatureStatus } from '../../common/enums';
 
 describe.only('NDAService', () => {
   let ndaService: NDAService;
@@ -88,8 +88,8 @@ describe.only('NDAService', () => {
     });
 
     it('should return null if last NDA is found', async () => {
-      const nda: Partial<NDAEntity> = {
-        status: NdaStatus.SIGNED,
+      const nda: Partial<NDASignatureEntity> = {
+        status: NdaSignatureStatus.SIGNED,
       };
 
       const user: Partial<UserEntity> = {
@@ -108,7 +108,7 @@ describe.only('NDAService', () => {
         .mockResolvedValueOnce(mockLastNDAVersion as any);
       jest
         .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
-        .mockResolvedValueOnce(nda as NDAEntity);
+        .mockResolvedValueOnce(nda as NDASignatureEntity);
 
       const result = await ndaService.getLastNDAVersion(user as UserEntity);
 
@@ -131,7 +131,7 @@ describe.only('NDAService', () => {
         .mockResolvedValueOnce(null);
       jest
         .spyOn(ndaRepository, 'createUnique')
-        .mockResolvedValueOnce({} as NDAEntity);
+        .mockResolvedValueOnce({} as NDASignatureEntity);
 
       const result = await ndaService.signNDA(mockUser, mockIpAddress);
 
@@ -151,7 +151,7 @@ describe.only('NDAService', () => {
         .mockResolvedValueOnce(mockLastNDAVersion);
       jest
         .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
-        .mockResolvedValueOnce({} as NDAEntity);
+        .mockResolvedValueOnce({} as NDASignatureEntity);
 
       const result = await ndaService.signNDA(mockUser, mockIpAddress);
 

@@ -2,7 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-import { NDAEntity } from './nda.entity';
+import { NDASignatureEntity } from './nda-signature.entity';
 import { UserModule } from '../user/user.module';
 import { NDAVersionEntity } from './nda-version.entity';
 import { NDARepository } from './nda.repository';
@@ -12,7 +12,7 @@ import { NDAService } from './nda.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NDAVersionEntity, NDAEntity]),
+    TypeOrmModule.forFeature([NDAVersionEntity, NDASignatureEntity]),
     ConfigModule,
     UserModule,
   ],

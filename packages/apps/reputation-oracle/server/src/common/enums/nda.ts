@@ -1,4 +1,4 @@
-export enum NdaStatus {
-  SIGNED = 'SIGNED',
-  REJECTED = 'REJECTED',
+export enum NdaSignatureStatus {
+  SIGNED = 'signed',
+  REJECTED = 'rejected',
 }
