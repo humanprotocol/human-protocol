@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { type WorkerProfileStatus } from '../types/profile-types';
+import { type WorkerProfileStatus } from '../types';
 import { StartKycBtn } from './buttons';
 import { DoneLabel, ErrorLabel } from './status-labels';
 

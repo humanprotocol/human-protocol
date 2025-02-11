@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useWorkerProfileStatus } from '../hooks/use-worker-profile-status';
+import { useWorkerProfileStatus } from '../hooks';
 import { useWorkerWalletRegistration } from '../hooks/use-worker-wallet-registration';
 import { RegisterAddressBtn } from './buttons';
 import { KycVerificationControl } from './kyc-verification-control';
