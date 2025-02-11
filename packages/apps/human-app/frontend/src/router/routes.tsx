@@ -14,7 +14,6 @@ import { HcaptchaLabelingPage } from '@/modules/worker/views/hcaptcha-labeling/h
 import { UserStatsAccordion } from '@/modules/worker/components/hcaptcha-labeling/user-stats-accordion';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/views/registration/registration.page';
-import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
 import {
   HandIcon,
   ProfileIcon,
@@ -32,6 +31,7 @@ import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.pa
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
+import { WorkerProfilePage } from '@/modules/worker/profile';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
