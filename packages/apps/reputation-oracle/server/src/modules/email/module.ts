@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MailService } from '@sendgrid/mail';
-import { SendgridEmailService } from './sendgrid.email.service';
+import { SendgridEmailService } from './sendgrid.service';
 import { EmailService } from './email.service';
 
 @Module({

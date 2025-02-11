@@ -7,12 +7,23 @@ import logger from '../../logger';
 import { EmailConfigService } from '../../common/config/email-config.service';
 import { isDevelopmentEnv } from '../../common/utils/environment';
 
-const SENDGRID_TEMPLATES = {
+export const SENDGRID_TEMPLATES = {
   signup: 'd-ca99cc7410aa4e6dab3e6042d5ecb9a3',
   resetPassword: 'd-3ac74546352a4e1abdd1689947632c22',
   passwordChanged: 'd-ca0ac7e6fff845829cd0167af09f25cf',
 };
-const SERVICE_NAME = 'App';
+export const SERVICE_NAME = 'App';
+
+export function getTemplateId(action: EmailAction): string {
+  switch (action) {
+    case EmailAction.SIGNUP:
+      return SENDGRID_TEMPLATES.signup;
+    case EmailAction.RESET_PASSWORD:
+      return SENDGRID_TEMPLATES.resetPassword;
+    case EmailAction.PASSWORD_CHANGED:
+      return SENDGRID_TEMPLATES.passwordChanged;
+  }
+}
 
 @Injectable()
 export class SendgridEmailService extends EmailService {
@@ -53,7 +64,7 @@ export class SendgridEmailService extends EmailService {
       name: this.emailConfigService.fromName,
     };
 
-    const templateId = this.getTemplateId(action);
+    const templateId = getTemplateId(action);
     const dynamicTemplateData = {
       service_name: SERVICE_NAME,
       ...payload,
@@ -76,17 +87,6 @@ export class SendgridEmailService extends EmailService {
       });
 
       throw new Error(errorMessage);
-    }
-  }
-
-  private getTemplateId(action: EmailAction): string {
-    switch (action) {
-      case EmailAction.SIGNUP:
-        return SENDGRID_TEMPLATES.signup;
-      case EmailAction.RESET_PASSWORD:
-        return SENDGRID_TEMPLATES.resetPassword;
-      case EmailAction.PASSWORD_CHANGED:
-        return SENDGRID_TEMPLATES.passwordChanged;
     }
   }
 }

@@ -10,7 +10,7 @@ import { UserRepository } from '../user/user.repository';
 import { Web3Module } from '../web3/web3.module';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
-import { EmailModule } from '../email/email.module';
+import { EmailModule } from '../email/module';
 
 @Module({
   imports: [
