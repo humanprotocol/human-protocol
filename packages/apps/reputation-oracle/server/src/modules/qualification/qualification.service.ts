@@ -1,23 +1,23 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import {
-  CreateQualificationDto,
-  AssignQualificationDto,
-  UnassignQualificationDto,
-  QualificationDto,
-} from './qualification.dto';
+import { Injectable } from '@nestjs/common';
+import { CreateQualificationDto, QualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
-import { ErrorQualification } from '../../common/constants/errors';
-import { ControlledError } from '../../common/errors/controlled';
 import { QualificationRepository } from './qualification.repository';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { UserStatus, Role } from '../../common/enums/user';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { ServerConfigService } from '../../common/config/server-config.service';
+import {
+  QualificationError,
+  QualificationErrorMessage,
+} from './qualification.error';
+import logger from '../../logger';
 
 @Injectable()
 export class QualificationService {
-  private readonly logger = new Logger(QualificationService.name);
+  private readonly logger = logger.child({
+    context: QualificationService.name,
+  });
 
   constructor(
     private readonly qualificationRepository: QualificationRepository,
@@ -34,25 +34,29 @@ export class QualificationService {
     newQualification.description = createQualificationDto.description;
 
     if (createQualificationDto.expiresAt) {
-      const providedExpiresAt = new Date(createQualificationDto.expiresAt);
+      const providedExpirationTime = new Date(createQualificationDto.expiresAt);
       const now = new Date();
       const minimumValidUntil = new Date(
         now.getTime() +
-          this.serverConfigService.qualificationMinValidity * 60 * 60 * 1000, // Convert hours to milliseconds,
+          this.serverConfigService.qualificationMinValidity *
+            24 *
+            60 *
+            60 *
+            1000, // Convert days to milliseconds,
       );
 
-      if (providedExpiresAt <= minimumValidUntil) {
-        const minValidityHours =
-          this.serverConfigService.qualificationMinValidity;
-        const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
-          '%minValidity%',
-          minValidityHours.toString(),
+      if (providedExpirationTime <= minimumValidUntil) {
+        const errorMessage =
+          QualificationErrorMessage.INVALID_EXPIRATION_TIME.replace(
+            '%minValidity%',
+            this.serverConfigService.qualificationMinValidity.toString(),
+          );
+        throw new QualificationError(
+          errorMessage as QualificationErrorMessage,
+          createQualificationDto.reference,
         );
-
-        this.logger.log(errorMessage, QualificationService.name);
-        throw new ControlledError(errorMessage, HttpStatus.BAD_REQUEST);
       } else {
-        newQualification.expiresAt = providedExpiresAt;
+        newQualification.expiresAt = providedExpirationTime;
       }
     }
 
@@ -61,7 +65,7 @@ export class QualificationService {
       reference: newQualification.reference,
       title: newQualification.title,
       description: newQualification.description,
-      expiresAt: newQualification.expiresAt || null,
+      expiresAt: newQualification.expiresAt?.toISOString(),
     };
   }
 
@@ -75,11 +79,11 @@ export class QualificationService {
           reference: qualificationEntity.reference,
           title: qualificationEntity.title,
           description: qualificationEntity.description,
-          expiresAt: qualificationEntity.expiresAt,
+          expiresAt: qualificationEntity.expiresAt?.toISOString(),
         };
       });
     } catch (error) {
-      this.logger.log(`Failed to fetch qualifications: ${error.message}`);
+      this.logger.warn('Failed to fetch qualifications', error);
       return [];
     }
   }
@@ -89,37 +93,44 @@ export class QualificationService {
       await this.qualificationRepository.findByReference(reference);
 
     if (!qualificationEntity) {
-      throw new ControlledError(
-        ErrorQualification.NotFound,
-        HttpStatus.NOT_FOUND,
+      throw new QualificationError(
+        QualificationErrorMessage.NOT_FOUND,
+        reference,
       );
     }
 
     if (qualificationEntity.userQualifications.length > 0) {
-      throw new ControlledError(
-        ErrorQualification.CannotDeleteAssignedQualification,
-        HttpStatus.BAD_REQUEST,
+      throw new QualificationError(
+        QualificationErrorMessage.CANNOT_DETELE_ASSIGNED_QUALIFICATION,
+        reference,
       );
     }
 
-    return this.qualificationRepository.deleteOne(qualificationEntity);
+    await this.qualificationRepository.deleteOne(qualificationEntity);
   }
 
-  public async assign(dto: AssignQualificationDto): Promise<void> {
-    const { reference, workerAddresses, workerEmails } = dto;
-
+  public async assign(
+    reference: string,
+    workerAddresses: string[],
+  ): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
     if (!qualificationEntity) {
-      this.logger.log(`Qualification with reference "${reference}" not found`);
-      throw new ControlledError(
-        ErrorQualification.NotFound,
-        HttpStatus.NOT_FOUND,
+      throw new QualificationError(
+        QualificationErrorMessage.NOT_FOUND,
+        reference,
       );
     }
 
-    const users = await this.getWorkers(workerAddresses, workerEmails);
+    const users = await this.getWorkers(workerAddresses);
+
+    if (users.length === 0) {
+      throw new QualificationError(
+        QualificationErrorMessage.NO_WORKERS_FOUND,
+        reference,
+      );
+    }
 
     const newUserQualifications = users
       .filter(
@@ -140,65 +151,42 @@ export class QualificationService {
     );
   }
 
-  public async unassign(dto: UnassignQualificationDto): Promise<void> {
-    const { reference, workerAddresses, workerEmails } = dto;
-
+  public async unassign(
+    reference: string,
+    workerAddresses: string[],
+  ): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
     if (!qualificationEntity) {
-      this.logger.log(`Qualification with reference "${reference}" not found`);
-      throw new ControlledError(
-        ErrorQualification.NotFound,
-        HttpStatus.NOT_FOUND,
+      throw new QualificationError(
+        QualificationErrorMessage.NOT_FOUND,
+        reference,
       );
     }
 
-    const users = await this.getWorkers(workerAddresses, workerEmails);
+    const users = await this.getWorkers(workerAddresses);
+
+    if (users.length === 0) {
+      throw new QualificationError(
+        QualificationErrorMessage.NO_WORKERS_FOUND,
+        reference,
+      );
+    }
+
     await this.qualificationRepository.removeUserQualifications(
       users,
       qualificationEntity,
     );
   }
 
-  public async getWorkers(
-    addresses?: string[],
-    emails?: string[],
-  ): Promise<UserEntity[]> {
-    if (
-      (!addresses || addresses.length === 0) ===
-      (!emails || emails.length === 0)
-    ) {
-      throw new ControlledError(
-        ErrorQualification.AddressesOrEmailsMustBeProvided,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const users: UserEntity[] = [];
-
-    if (addresses && addresses.length > 0) {
-      const addressUsers = await this.userRepository.findByAddress(
-        addresses,
-        Role.WORKER,
-        UserStatus.ACTIVE,
-      );
-      users.push(...addressUsers);
-    } else if (emails && emails.length > 0) {
-      const emailUsers = await this.userRepository.findByEmail(
-        emails,
-        Role.WORKER,
-        UserStatus.ACTIVE,
-      );
-      users.push(...emailUsers);
-    }
-
-    if (users.length === 0) {
-      throw new ControlledError(
-        ErrorQualification.NoWorkersFound,
-        HttpStatus.NOT_FOUND,
-      );
-    }
+  // TODO: Move this method to the `user` module.
+  public async getWorkers(addresses: string[]): Promise<UserEntity[]> {
+    const users = await this.userRepository.findByAddress(
+      addresses,
+      Role.WORKER,
+      UserStatus.ACTIVE,
+    );
 
     return users;
   }

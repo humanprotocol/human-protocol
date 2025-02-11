@@ -4,14 +4,17 @@ import {
   IsOptional,
   IsDateString,
   IsEthereumAddress,
-  IsEmail,
 } from 'class-validator';
 
 export class QualificationDto {
+  @ApiProperty()
   public reference: string;
+  @ApiProperty()
   public title: string;
+  @ApiProperty()
   public description: string;
-  public expiresAt?: Date | null;
+  @ApiPropertyOptional({ name: 'expires_at' })
+  public expiresAt?: string;
 }
 
 export class CreateQualificationDto {
@@ -30,37 +33,17 @@ export class CreateQualificationDto {
   @ApiPropertyOptional({ name: 'expires_at' })
   @IsOptional()
   @IsDateString()
-  public expiresAt?: Date;
+  public expiresAt?: string;
 }
 
 export class AssignQualificationDto {
-  @ApiProperty()
-  @IsString()
-  public reference: string;
-
-  @ApiPropertyOptional({ name: 'worker_addresses' })
-  @IsOptional()
+  @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
-  public workerAddresses?: string[];
-
-  @ApiPropertyOptional({ name: 'worker_emails' })
-  @IsOptional()
-  @IsEmail({}, { each: true })
-  public workerEmails?: string[];
+  public workerAddresses: string[];
 }
 
 export class UnassignQualificationDto {
-  @ApiProperty()
-  @IsString()
-  public reference: string;
-
-  @ApiPropertyOptional({ name: 'worker_addresses' })
-  @IsOptional()
+  @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
-  public workerAddresses?: string[];
-
-  @ApiPropertyOptional({ name: 'worker_emails' })
-  @IsOptional()
-  @IsEmail({}, { each: true })
-  public workerEmails?: string[];
+  public workerAddresses: string[];
 }

@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -8,6 +8,7 @@
 
 ## Extended by
 
+- [`ILeadersFilter`](ILeadersFilter.md)
 - [`IEscrowsFilter`](IEscrowsFilter.md)
 - [`IStatisticsFilter`](IStatisticsFilter.md)
 - [`IHMTHoldersParams`](IHMTHoldersParams.md)
@@ -21,7 +22,7 @@
 
 #### Defined in
 
-[interfaces.ts:152](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L152)
+[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -31,7 +32,7 @@
 
 #### Defined in
 
-[interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
 
 ***
 
@@ -41,4 +42,4 @@
 
 #### Defined in
 
-[interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)

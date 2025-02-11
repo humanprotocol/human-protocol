@@ -1,27 +1,5 @@
 import { verifySignature, recoverSigner, signMessage } from './signature';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { ErrorAuth, ErrorSignature } from '../constants/errors';
-import { ControlledError } from '../errors/controlled';
-import { HttpStatus } from '@nestjs/common';
-
-jest.doMock('ethers', () => {
-  return {
-    utils: {
-      get verifyMessage() {
-        return jest.fn((message, signature) => {
-          if (message === 'valid-message' && signature === 'valid-signature') {
-            return 'recovered-address';
-          } else {
-            throw new ControlledError(
-              ErrorAuth.InvalidSignature,
-              HttpStatus.UNAUTHORIZED,
-            );
-          }
-        });
-      },
-    },
-  };
-});
 
 describe('Signature utility', () => {
   describe('verifySignature', () => {
@@ -34,24 +12,24 @@ describe('Signature utility', () => {
       expect(result).toBe(true);
     });
 
-    it('should throw conflict exception for signature not verified', async () => {
+    it('should return false for signature not verified', async () => {
       const message = 'Hello, this is a signed message!';
 
       const invalidSignature = await signMessage(message, MOCK_PRIVATE_KEY);
       const invalidAddress = '0x1234567890123456789012345678901234567892';
 
-      expect(() => {
-        verifySignature(message, invalidSignature, [invalidAddress]);
-      }).toThrow(ErrorSignature.SignatureNotVerified);
+      const result = verifySignature(message, invalidSignature, [
+        invalidAddress,
+      ]);
+      expect(result).toBe(false);
     });
 
-    it('should throw conflict exception for invalid signature', () => {
+    it('should return false in case of invalid signature', () => {
       const message = 'Hello, this is a signed message!';
       const invalidSignature = '0xInvalidSignature';
 
-      expect(() => {
-        verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
-      }).toThrow(ErrorSignature.InvalidSignature);
+      const result = verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
+      expect(result).toBe(false);
     });
   });
 
@@ -69,9 +47,8 @@ describe('Signature utility', () => {
       const message = 'Hello, this is a signed message!';
       const invalidSignature = '0xInvalidSignature';
 
-      expect(() => {
-        recoverSigner(message, invalidSignature);
-      }).toThrow(ErrorSignature.InvalidSignature);
+      const signer = recoverSigner(message, invalidSignature);
+      expect(signer).toBe('');
     });
 
     it('should stringify message object if it is not already a string', async () => {

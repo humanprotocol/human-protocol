@@ -1,16 +1,13 @@
 import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { HttpStatus } from '@nestjs/common';
 import { QualificationService } from './qualification.service';
 import { QualificationRepository } from './qualification.repository';
 import { UserRepository } from '../user/user.repository';
-import { ControlledError } from '../../common/errors/controlled';
-import { ErrorQualification } from '../../common/constants/errors';
 import {
-  CreateQualificationDto,
-  AssignQualificationDto,
-  UnassignQualificationDto,
-} from './qualification.dto';
+  QualificationError,
+  QualificationErrorMessage,
+} from './qualification.error';
+import { CreateQualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
@@ -62,7 +59,7 @@ describe('QualificationService', () => {
         reference: 'ref1',
         title: 'title1',
         description: 'desc1',
-        expiresAt: new Date('2025-12-31'),
+        expiresAt: '2025-12-31T00:00:00.000Z',
       };
 
       const qualificationEntity = new QualificationEntity();
@@ -85,7 +82,7 @@ describe('QualificationService', () => {
         reference: createQualificationDto.reference,
         title: createQualificationDto.title,
         description: createQualificationDto.description,
-        expiresAt: new Date(createQualificationDto.expiresAt!),
+        expiresAt: createQualificationDto.expiresAt,
       });
     });
 
@@ -114,7 +111,6 @@ describe('QualificationService', () => {
         reference: createQualificationDto.reference,
         title: createQualificationDto.title,
         description: createQualificationDto.description,
-        expiresAt: null,
       });
     });
 
@@ -123,18 +119,22 @@ describe('QualificationService', () => {
         reference: 'ref1',
         title: 'title1',
         description: 'desc1',
-        expiresAt: new Date('2000-01-01'),
+        expiresAt: '2000-01-01T00:00:00.000Z',
       };
 
-      const errorMessage = ErrorQualification.InvalidExpiresAt.replace(
-        '%minValidity%',
-        '1',
-      );
+      const errorMessage =
+        QualificationErrorMessage.INVALID_EXPIRATION_TIME.replace(
+          '%minValidity%',
+          '1',
+        );
 
       await expect(
         qualificationService.createQualification(createQualificationDto),
       ).rejects.toThrow(
-        new ControlledError(errorMessage, HttpStatus.BAD_REQUEST),
+        new QualificationError(
+          errorMessage as QualificationErrorMessage,
+          'ref1',
+        ),
       );
     });
 
@@ -143,7 +143,7 @@ describe('QualificationService', () => {
         reference: 'ref1',
         title: 'title1',
         description: 'desc1',
-        expiresAt: new Date('2025-12-31'),
+        expiresAt: '2025-12-31T00:00:00.000Z',
       };
 
       qualificationRepository.createUnique = jest
@@ -163,7 +163,6 @@ describe('QualificationService', () => {
           reference: 'ref1',
           title: 'title1',
           description: 'desc1',
-          expiresAt: null,
         },
       ];
       qualificationRepository.getQualifications = jest
@@ -181,7 +180,6 @@ describe('QualificationService', () => {
           reference: 'ref1',
           title: 'title1',
           description: 'desc1',
-          expiresAt: null,
         },
       ];
       qualificationRepository.getQualifications = jest
@@ -219,7 +217,7 @@ describe('QualificationService', () => {
         .mockResolvedValue(undefined);
 
       await expect(qualificationService.delete('ref1')).rejects.toThrow(
-        new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
     });
   });
@@ -230,14 +228,11 @@ describe('QualificationService', () => {
     });
 
     it('should assign users to a qualification', async () => {
-      const assignQualificationDto: AssignQualificationDto = {
-        reference: 'ref1',
-        workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
-      };
+      const reference = 'ref1';
+      const workerAddresses = ['address1'];
 
       const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = 'ref1';
+      qualificationEntity.reference = reference;
       qualificationEntity.userQualifications = [];
 
       qualificationRepository.findByReference = jest
@@ -247,7 +242,7 @@ describe('QualificationService', () => {
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
-      await qualificationService.assign(assignQualificationDto);
+      await qualificationService.assign(reference, workerAddresses);
 
       expect(
         qualificationRepository.saveUserQualifications,
@@ -255,14 +250,11 @@ describe('QualificationService', () => {
     });
 
     it('should assign users to a qualification with null expiresAt', async () => {
-      const assignQualificationDto: AssignQualificationDto = {
-        reference: 'ref1',
-        workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
-      };
+      const reference = 'ref1';
+      const workerAddresses = ['address1'];
 
       const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = 'ref1';
+      qualificationEntity.reference = reference;
       qualificationEntity.expiresAt = null;
       qualificationEntity.userQualifications = [];
 
@@ -273,7 +265,7 @@ describe('QualificationService', () => {
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
-      await qualificationService.assign(assignQualificationDto);
+      await qualificationService.assign(reference, workerAddresses);
 
       expect(
         qualificationRepository.saveUserQualifications,
@@ -285,14 +277,8 @@ describe('QualificationService', () => {
         .fn()
         .mockResolvedValue(null);
 
-      await expect(
-        qualificationService.assign({
-          reference: 'ref1',
-          workerAddresses: [],
-          workerEmails: [],
-        }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
+      await expect(qualificationService.assign('ref1', [])).rejects.toThrow(
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
     });
   });
@@ -303,14 +289,11 @@ describe('QualificationService', () => {
     });
 
     it('should unassign users from a qualification', async () => {
-      const unassignQualificationDto: UnassignQualificationDto = {
-        reference: 'ref1',
-        workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
-      };
+      const reference = 'ref1';
+      const workerAddresses = ['address1'];
 
       const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = 'ref1';
+      qualificationEntity.reference = reference;
       qualificationEntity.userQualifications = [
         { id: 1 } as UserQualificationEntity,
       ];
@@ -322,7 +305,7 @@ describe('QualificationService', () => {
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
-      await qualificationService.unassign(unassignQualificationDto);
+      await qualificationService.unassign(reference, workerAddresses);
 
       expect(
         qualificationRepository.saveUserQualifications,
@@ -330,14 +313,11 @@ describe('QualificationService', () => {
     });
 
     it('should unassign users from a qualification with null expiresAt', async () => {
-      const unassignQualificationDto: UnassignQualificationDto = {
-        reference: 'ref1',
-        workerAddresses: ['address1'],
-        workerEmails: ['email1@example.com'],
-      };
+      const reference = 'ref1';
+      const workerAddresses = ['address1'];
 
       const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = 'ref1';
+      qualificationEntity.reference = reference;
       qualificationEntity.expiresAt = null;
       qualificationEntity.userQualifications = [
         { id: 1 } as UserQualificationEntity,
@@ -350,7 +330,7 @@ describe('QualificationService', () => {
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
-      await qualificationService.unassign(unassignQualificationDto);
+      await qualificationService.unassign(reference, workerAddresses);
 
       expect(
         qualificationRepository.saveUserQualifications,
@@ -362,61 +342,22 @@ describe('QualificationService', () => {
         .fn()
         .mockResolvedValue(null);
 
-      await expect(
-        qualificationService.unassign({
-          reference: 'ref1',
-          workerAddresses: [],
-          workerEmails: [],
-        }),
-      ).rejects.toThrow(
-        new ControlledError(ErrorQualification.NotFound, HttpStatus.NOT_FOUND),
+      await expect(qualificationService.unassign('ref1', [])).rejects.toThrow(
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
     });
   });
 
   describe('getWorkers', () => {
-    it('should throw an error if neither addresses nor emails are provided', async () => {
-      await expect(qualificationService.getWorkers([], [])).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.AddressesOrEmailsMustBeProvided,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
-    });
-
     it('should return workers by addresses', async () => {
       const addresses = ['address1'];
       const users = [{ id: 1 } as UserEntity];
 
       userRepository.findByAddress = jest.fn().mockResolvedValue(users);
 
-      const result = await qualificationService.getWorkers(addresses, []);
+      const result = await qualificationService.getWorkers(addresses);
 
       expect(result).toEqual(users);
-    });
-
-    it('should return workers by emails', async () => {
-      const emails = ['email1@example.com'];
-      const users = [{ id: 1 } as UserEntity];
-
-      userRepository.findByEmail = jest.fn().mockResolvedValue(users);
-
-      const result = await qualificationService.getWorkers([], emails);
-
-      expect(result).toEqual(users);
-    });
-
-    it('should throw an error if no workers are found', async () => {
-      userRepository.find = jest.fn().mockResolvedValue([]);
-
-      await expect(
-        qualificationService.getWorkers(['address1'], []),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorQualification.NoWorkersFound,
-          HttpStatus.NOT_FOUND,
-        ),
-      );
     });
   });
 });

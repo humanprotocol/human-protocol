@@ -1,12 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { QualificationController } from './qualification.controller';
 import { QualificationService } from './qualification.service';
-import {
-  CreateQualificationDto,
-  AssignQualificationDto,
-  UnassignQualificationDto,
-  QualificationDto,
-} from './qualification.dto';
+import { CreateQualificationDto, QualificationDto } from './qualification.dto';
 
 describe('QualificationController', () => {
   let qualificationController: QualificationController;
@@ -42,13 +37,13 @@ describe('QualificationController', () => {
         reference: 'test-ref',
         title: 'Test Title',
         description: 'Test Description',
-        expiresAt: new Date(),
+        expiresAt: new Date().toISOString(),
       };
       const result: QualificationDto = {
         reference: 'test-ref',
         title: 'Test Title',
         description: 'Test Description',
-        expiresAt: new Date(createQualificationDto.expiresAt!),
+        expiresAt: createQualificationDto.expiresAt,
       };
 
       jest
@@ -73,7 +68,6 @@ describe('QualificationController', () => {
         reference: 'test-ref',
         title: 'Test Title',
         description: 'Test Description',
-        expiresAt: null,
       };
 
       jest
@@ -96,7 +90,7 @@ describe('QualificationController', () => {
           reference: 'test-ref',
           title: 'Test Title',
           description: 'Test Description',
-          expiresAt: new Date(),
+          expiresAt: new Date().toISOString(),
         },
       ];
 
@@ -111,34 +105,30 @@ describe('QualificationController', () => {
 
   describe('assign', () => {
     it('should assign a qualification to users', async () => {
-      const assignQualificationDto: AssignQualificationDto = {
-        reference: 'test-ref',
-        workerAddresses: ['0x123'],
-        workerEmails: ['test@example.com'],
-      };
+      const reference = 'test-ref';
+      const workerAddresses = ['0x123'];
 
       jest.spyOn(qualificationService, 'assign').mockResolvedValue();
 
-      await qualificationController.assign(assignQualificationDto);
+      await qualificationController.assign(reference, { workerAddresses });
       expect(qualificationService.assign).toHaveBeenCalledWith(
-        assignQualificationDto,
+        reference,
+        workerAddresses,
       );
     });
   });
 
   describe('unassign', () => {
     it('should unassign a qualification from users', async () => {
-      const unassignQualificationDto: UnassignQualificationDto = {
-        reference: 'test-ref',
-        workerAddresses: ['0x123'],
-        workerEmails: ['test@example.com'],
-      };
+      const reference = 'test-ref';
+      const workerAddresses = ['0x123'];
 
       jest.spyOn(qualificationService, 'unassign').mockResolvedValue();
 
-      await qualificationController.unassign(unassignQualificationDto);
+      await qualificationController.unassign(reference, { workerAddresses });
       expect(qualificationService.unassign).toHaveBeenCalledWith(
-        unassignQualificationDto,
+        reference,
+        workerAddresses,
       );
     });
   });
@@ -149,7 +139,7 @@ describe('QualificationController', () => {
 
       jest.spyOn(qualificationService, 'delete').mockResolvedValue();
 
-      await qualificationController.delete(reference);
+      await qualificationController.deleteQualification(reference);
       expect(qualificationService.delete).toHaveBeenCalledWith(reference);
     });
   });

@@ -1,4 +1,4 @@
-from attrs import define
+from attrs import define, field, frozen
 
 
 @define(kw_only=True)
@@ -6,12 +6,18 @@ class ValidationFrameStats:
     accumulated_quality: float = 0.0
     failed_attempts: int = 0
     accepted_attempts: int = 0
+    total_uses: int = 0
+    enabled: bool = True
 
     @property
-    def average_quality(self) -> float:
-        return self.accumulated_quality / ((self.failed_attempts + self.accepted_attempts) or 1)
+    def rating(self) -> float:
+        return (self.accepted_attempts + 1) / (self.total_uses + 1)
 
 
-_TaskIdValFrameIdPair = tuple[int, int]
+@frozen(kw_only=True)
+class GtKey:
+    filename: str
+    labels: frozenset[str] = field(converter=frozenset)
 
-GtStats = dict[_TaskIdValFrameIdPair, ValidationFrameStats]
+
+GtStats = dict[GtKey, ValidationFrameStats]

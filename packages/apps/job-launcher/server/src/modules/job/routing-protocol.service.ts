@@ -4,6 +4,7 @@ import { Web3Service } from '../web3/web3.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { hashString } from '../../common/utils';
 import { ErrorRoutingProtocol } from '../../common/constants/errors';
+import { JobRequestType } from '../../common/enums/job';
 import { ControlledError } from '../../common/errors/controlled';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import {
@@ -148,7 +149,7 @@ export class RoutingProtocolService {
 
   public async selectOracles(
     chainId: ChainId,
-    jobType: string,
+    jobType: JobRequestType,
   ): Promise<{
     reputationOracle: string;
     exchangeOracle: string;
@@ -181,7 +182,7 @@ export class RoutingProtocolService {
 
   public async validateOracles(
     chainId: ChainId,
-    jobType: string,
+    jobType: JobRequestType,
     reputationOracle: string,
     exchangeOracle?: string | null,
     recordingOracle?: string | null,

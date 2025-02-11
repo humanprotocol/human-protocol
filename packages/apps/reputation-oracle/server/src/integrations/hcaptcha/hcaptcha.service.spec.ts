@@ -23,7 +23,6 @@ jest.mock('rxjs', () => {
 describe('hCaptchaService', () => {
   let hcaptchaService: HCaptchaService;
   let httpService: HttpService;
-  let configService: ConfigService;
 
   beforeAll(async () => {
     const mockHttpService: DeepPartial<HttpService> = {
@@ -57,7 +56,6 @@ describe('hCaptchaService', () => {
     }).compile();
 
     httpService = moduleRef.get<HttpService>(HttpService);
-    configService = moduleRef.get<ConfigService>(ConfigService);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
   });
 
@@ -85,7 +83,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
@@ -118,7 +116,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
@@ -149,7 +147,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},
@@ -182,7 +180,7 @@ describe('hCaptchaService', () => {
 
       const result = await hcaptchaService.verifyToken(mockData);
 
-      expect(result).toEqual(mockResponseData);
+      expect(result).toEqual(true);
       expect(httpService.post).toHaveBeenCalledWith(
         `${MOCK_HCAPTCHA_PROTECTION_URL}/siteverify`,
         {},

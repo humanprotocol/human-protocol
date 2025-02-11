@@ -1,3 +1,5 @@
+import { TransactionLike } from 'ethers';
+
 /**
  * Enum for escrow statuses.
  * @readonly
@@ -21,7 +23,7 @@ export enum EscrowStatus {
    */
   Paid,
   /**
-   * Escrow is finished..
+   * Escrow is finished.
    */
   Complete,
   /**
@@ -124,7 +126,7 @@ export type NetworkData = {
    */
   subgraphUrl: string;
   /**
-   * Subgraph URL
+   * Subgraph URL API key
    */
   subgraphUrlApiKey: string;
   /**
@@ -168,3 +170,5 @@ export type EscrowWithdraw = {
    */
   amountWithdrawn: bigint;
 };
+
+export type TransactionLikeWithNonce = TransactionLike & { nonce: number };

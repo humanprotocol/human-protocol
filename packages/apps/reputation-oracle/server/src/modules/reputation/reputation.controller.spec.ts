@@ -33,7 +33,6 @@ describe('ReputationController', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
           },
         },
         StorageService,
@@ -78,7 +77,7 @@ describe('ReputationController', () => {
       ];
 
       jest
-        .spyOn(reputationService, 'getAllReputations')
+        .spyOn(reputationService, 'getReputations')
         .mockResolvedValueOnce(results as ReputationDto[]);
 
       jest

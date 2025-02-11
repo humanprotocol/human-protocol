@@ -1,10 +1,10 @@
 # human_protocol_sdk.staking.staking_client module
 
-This client enables to perform actions on staking contracts and
-obtain staking information from both the contracts and subgraph.
+This client enables performing actions on staking contracts and
+obtaining staking information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
-To use this client, you need to create Web3 instance, and configure default account,
+To use this client, you need to create a Web3 instance and configure the default account,
 as well as some middlewares.
 
 ## Code Example
@@ -100,6 +100,33 @@ Approves HMT token for Staking.
   staking_client.approve_stake(amount)
   ```
 
+#### get_staker_info(staker_address)
+
+Retrieves comprehensive staking information for a staker.
+
+* **Parameters:**
+  **staker_address** (`str`) – The address of the staker
+* **Return type:**
+  `dict`
+* **Returns:**
+  A dictionary containing staker information
+* **Validate:**
+  - Staker address must be valid
+* **Example:**
+  ```python
+  from eth_typing import URI
+  from web3 import Web3
+  from web3.providers.auto import load_provider_from_uri
+
+  from human_protocol_sdk.staking import StakingClient
+
+  w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+  staking_client = StakingClient(w3)
+
+  staking_info = staking_client.get_staker_info('0xYourStakerAddress')
+  print(staking_info['stakedAmount'])
+  ```
+
 #### slash(slasher, staker, escrow_address, amount, tx_options=None)
 
 Slashes HMT token.
@@ -186,10 +213,8 @@ Stakes HMT token.
   (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
   staking_client = StakingClient(w3)
 
-  amount = Web3.to_wei(5, 'ether')
-      # convert from ETH to WEI
-  staking_client.approve_stake(amount)
-      # if it was already approved before, this is not necessary
+  amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
+  staking_client.approve_stake(amount) # if it was already approved before, this is not necessary
   staking_client.stake(amount)
   ```
 

@@ -22,26 +22,36 @@ const LEADER_FRAGMENT = gql`
     registrationNeeded
     registrationInstructions
     reputationNetworks
+    name
+    category
   }
 `;
 
 export const GET_LEADERS_QUERY = (filter: ILeadersFilter) => {
-  const { role } = filter;
+  const { roles, minAmountStaked } = filter;
 
   const WHERE_CLAUSE = `
     where: {
-      ${role ? `role: $role` : ''}
+      ${minAmountStaked ? `amountStaked_gte: $minAmountStaked` : ''}
+      ${roles ? `role_in: $roles` : ''}
     }
   `;
 
   return gql`
     query getLeaders(
-      $role: String
+      $minAmountStaked: Int,
+      $roles: [String!]
+      $first: Int
+      $skip: Int
+      $orderBy: String
+      $orderDirection: String
     ) {
       leaders(
         ${WHERE_CLAUSE}
-        orderBy: amountStaked,
-        orderDirection: desc,
+        first: $first
+        skip: $skip
+        orderBy: $orderBy
+        orderDirection: $orderDirection
       ) {
         ...LeaderFields
       }

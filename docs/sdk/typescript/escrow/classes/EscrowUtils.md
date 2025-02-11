@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -32,7 +32,7 @@ yarn install @human-protocol/sdk
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 
 const escrowAddresses = new EscrowUtils.getEscrows({
-  network: ChainId.POLYGON_AMOY
+  chainId: ChainId.POLYGON_AMOY
 });
 ```
 
@@ -62,19 +62,11 @@ This function returns the escrow data for a given address.
 enum ChainId {
   ALL = -1,
   MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
+  SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
   POLYGON_AMOY = 80002,
-  MOONBEAM = 1284,
-  MOONBASE_ALPHA = 1287,
-  AVALANCHE = 43114,
-  AVALANCHE_TESTNET = 43113,
-  CELO = 42220,
-  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
 }
 ```
@@ -105,11 +97,15 @@ type EscrowData = {
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
+
+[`ChainId`](../../enums/enumerations/ChainId.md)
 
 Network in which the escrow has been deployed
 
-• **escrowAddress**: `string`
+##### escrowAddress
+
+`string`
 
 Address of the escrow
 
@@ -129,7 +125,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_AMOY, "0x1234567890
 
 #### Defined in
 
-[escrow.ts:1656](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1656)
+[escrow.ts:1773](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1773)
 
 ***
 
@@ -162,20 +158,11 @@ interface IEscrowsFilter {
 enum ChainId {
   ALL = -1,
   MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
+  SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
   POLYGON_AMOY=80002,
-  MOONBEAM = 1284,
-  MOONBASE_ALPHA = 1287,
-  AVALANCHE = 43114,
-  AVALANCHE_TESTNET = 43113,
-  CELO = 42220,
-  CELO_ALFAJORES = 44787,
-   = 1273227453,
   LOCALHOST = 1338,
 }
 ```
@@ -224,7 +211,9 @@ type EscrowData = {
 
 #### Parameters
 
-• **filter**: [`IEscrowsFilter`](../../interfaces/interfaces/IEscrowsFilter.md)
+##### filter
+
+[`IEscrowsFilter`](../../interfaces/interfaces/IEscrowsFilter.md)
 
 Filter parameters.
 
@@ -250,7 +239,7 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1530](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1530)
+[escrow.ts:1655](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1655)
 
 ***
 
@@ -268,23 +257,12 @@ This function returns the status events for a given set of networks within an op
 enum ChainId {
   ALL = -1,
   MAINNET = 1,
-  RINKEBY = 4,
-  GOERLI = 5,
   SEPOLIA = 11155111,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
   POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
   POLYGON_AMOY = 80002,
-  MOONBEAM = 1284,
-  MOONBASE_ALPHA = 1287,
-  AVALANCHE = 43114,
-  AVALANCHE_TESTNET = 43113,
-  CELO = 42220,
-  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
-  XLAYER_TESTNET = 195,
-  XLAYER = 196,
 }
 ```
 
@@ -305,35 +283,51 @@ type Status = {
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
+
+[`ChainId`](../../enums/enumerations/ChainId.md)
 
 List of network IDs to query for status events.
 
-• **statuses?**: [`EscrowStatus`](../../types/enumerations/EscrowStatus.md)[]
+##### statuses?
+
+[`EscrowStatus`](../../types/enumerations/EscrowStatus.md)[]
 
 Optional array of statuses to query for. If not provided, queries for all statuses.
 
-• **from?**: `Date`
+##### from?
+
+`Date`
 
 Optional start date to filter events.
 
-• **to?**: `Date`
+##### to?
+
+`Date`
 
 Optional end date to filter events.
 
-• **launcher?**: `string`
+##### launcher?
+
+`string`
 
 Optional launcher address to filter events. Must be a valid Ethereum address.
 
-• **first?**: `number`
+##### first?
+
+`number`
 
 Optional number of transactions per page. Default is 10.
 
-• **skip?**: `number`
+##### skip?
+
+`number`
 
 Optional number of transactions to skip. Default is 0.
 
-• **orderDirection?**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
+##### orderDirection?
+
+[`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
 Optional order of the results. Default is DESC.
 
@@ -363,4 +357,4 @@ import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
 
 #### Defined in
 
-[escrow.ts:1754](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1754)
+[escrow.ts:1860](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1860)

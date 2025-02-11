@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -14,7 +14,7 @@
 
 #### Defined in
 
-[enums.ts:24](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L24)
+[enums.ts:13](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L13)
 
 ***
 
@@ -24,4 +24,4 @@
 
 #### Defined in
 
-[enums.ts:25](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L25)
+[enums.ts:14](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L14)

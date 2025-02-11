@@ -1,9 +1,10 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import fundCryptoImg from '../../assets/fund-crypto.png';
 import fundFiatImg from '../../assets/fund-fiat.png';
-import { IS_MAINNET, IS_TESTNET } from '../../constants/chains';
+import { IS_MAINNET } from '../../constants/chains';
+import { useAppSelector } from '../../state';
 import { PayMethod } from '../../types';
 import WalletModal from '../WalletModal';
 
@@ -14,6 +15,7 @@ export const TopUpMethod = ({
 }) => {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const { isConnected } = useAccount();
+  const { user } = useAppSelector((state) => state.auth);
 
   const handleClickCrypto = () => {
     if (isConnected) {
@@ -43,41 +45,43 @@ export const TopUpMethod = ({
         }}
       >
         <Grid container spacing={4}>
-          <Grid item xs={12} md={IS_MAINNET ? 12 : 6}>
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                boxSizing: 'border-box',
-                background: '#fbfbfe',
-                borderRadius: '10px',
-                textAlign: 'center',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                flexDirection: 'column',
-                py: 8,
-              }}
-            >
-              <img
-                src={fundCryptoImg}
-                alt="crypto"
-                style={{ width: 135, height: 'auto' }}
-              />
-              <Typography variant="body2" color="primary" mt={8}>
-                Click to connect your wallet
-              </Typography>
-              <Button
-                variant="outlined"
-                sx={{ mt: 2.5, minWidth: '200px' }}
-                onClick={handleClickCrypto}
+          {user?.whitelisted && (
+            <Grid item xs={12} md={IS_MAINNET ? 12 : 6}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  boxSizing: 'border-box',
+                  background: '#fbfbfe',
+                  borderRadius: '10px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  py: 8,
+                }}
               >
-                Crypto
-              </Button>
-            </Box>
-          </Grid>
-          {IS_TESTNET && (
-            <Grid item xs={12} md={6}>
+                <img
+                  src={fundCryptoImg}
+                  alt="crypto"
+                  style={{ width: 135, height: 'auto' }}
+                />
+                <Typography variant="body2" color="primary" mt={8}>
+                  Click to connect your wallet
+                </Typography>
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 2.5, minWidth: '200px' }}
+                  onClick={handleClickCrypto}
+                >
+                  Crypto
+                </Button>
+              </Box>
+            </Grid>
+          )}
+          {!IS_MAINNET && (
+            <Grid item xs={12} md={user?.whitelisted ? 6 : 12}>
               <Box
                 sx={{
                   width: '100%',

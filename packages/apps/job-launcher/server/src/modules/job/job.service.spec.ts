@@ -117,9 +117,9 @@ import { CronJobRepository } from '../cron-job/cron-job.repository';
 import { CronJobType } from '../../common/enums/cron-job';
 import { QualificationService } from '../qualification/qualification.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { WhitelistService } from '../whitelist/whitelist.service';
 
 const rate = 1.5;
-const mappedJobType = 'mappedType';
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -154,7 +154,6 @@ jest.mock('../../common/utils', () => ({
       bucket: MOCK_BUCKET_NAME,
     };
   }),
-  mapJobType: jest.fn().mockImplementation(() => 'mappedType'),
 }));
 
 jest.mock('../../common/utils/storage', () => ({
@@ -170,6 +169,7 @@ describe('JobService', () => {
     createPaymentMock: any,
     routingProtocolService: RoutingProtocolService,
     web3Service: Web3Service,
+    whitelistService: WhitelistService,
     encryption: Encryption,
     storageService: StorageService,
     webhookRepository: WebhookRepository,
@@ -251,6 +251,7 @@ describe('JobService', () => {
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: StorageService, useValue: createMock<StorageService>() },
         { provide: WebhookService, useValue: createMock<WebhookService>() },
+        { provide: WhitelistService, useValue: createMock<WhitelistService>() },
         {
           provide: RoutingProtocolService,
           useValue: {
@@ -259,6 +260,7 @@ describe('JobService', () => {
             validateOracles: jest.fn(),
           },
         },
+
         {
           provide: CronJobService,
           useValue: createMock<CronJobService>(),
@@ -276,6 +278,7 @@ describe('JobService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     webhookRepository = moduleRef.get<WebhookRepository>(WebhookRepository);
     storageService = moduleRef.get<StorageService>(StorageService);
+    whitelistService = moduleRef.get<WhitelistService>(WhitelistService);
 
     (jobService as any).cronJobRepository = cronJobRepository;
 
@@ -291,7 +294,6 @@ describe('JobService', () => {
   });
 
   describe('createJob', () => {
-    const userId = 1;
     const jobId = 123;
     const fortuneJobDto: JobFortuneDto = {
       chainId: MOCK_CHAIN_ID,
@@ -302,11 +304,20 @@ describe('JobService', () => {
       currency: JobCurrency.HMT,
     };
 
+    const userMock: any = {
+      id: 1,
+      stripeCustomerId: 'stripeTest',
+    };
+
     let getUserBalanceMock: any;
 
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
+      jest.spyOn(whitelistService, 'isUserWhitelisted').mockResolvedValue(true);
+      jest
+        .spyOn(paymentService, 'getDefaultPaymentMethod')
+        .mockResolvedValue('test_card_id');
     });
 
     afterEach(() => {
@@ -317,7 +328,6 @@ describe('JobService', () => {
       const fundAmount = 10;
       const userBalance = 25;
 
-      const userId = 1;
       const providedReputationOracle = '0xProvidedReputationOracle';
       const providedExchangeOracle = '0xProvidedExchangeOracle';
       const providedRecordingOracle = '0xProvidedRecordingOracle';
@@ -340,11 +350,15 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+      await jobService.createJob(
+        userMock,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
 
       expect(routingProtocolService.validateOracles).toHaveBeenCalledWith(
         MOCK_CHAIN_ID,
-        mappedJobType,
+        JobRequestType.FORTUNE,
         providedReputationOracle,
         providedExchangeOracle,
         providedRecordingOracle,
@@ -366,7 +380,6 @@ describe('JobService', () => {
       const providedReputationOracle = '0xProvidedReputationOracle';
       const providedExchangeOracle = '0xProvidedExchangeOracle';
 
-      const userId = 1;
       const fortuneJobDto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
         submissionsRequired: MOCK_SUBMISSION_REQUIRED,
@@ -390,7 +403,11 @@ describe('JobService', () => {
         recordingOracle: selectedOraclesMock.recordingOracle,
       });
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
+      await jobService.createJob(
+        userMock,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
 
       expect(routingProtocolService.selectOracles).toHaveBeenCalledTimes(1);
 
@@ -403,7 +420,7 @@ describe('JobService', () => {
       );
     });
 
-    it('should create a job successfully', async () => {
+    it('should create a job successfully if user is whitelisted', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -412,7 +429,7 @@ describe('JobService', () => {
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
-        userId: userId,
+        userId: userMock.id,
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -431,14 +448,15 @@ describe('JobService', () => {
 
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
-
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
+      await jobService.createJob(
+        userMock,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
       );
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-        userId,
+        userId: userMock.id,
         jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
@@ -449,7 +467,7 @@ describe('JobService', () => {
       });
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: fortuneJobDto.chainId,
-        userId,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.FORTUNE,
@@ -471,7 +489,7 @@ describe('JobService', () => {
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
-        userId: userId,
+        userId: userMock.id,
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -499,7 +517,7 @@ describe('JobService', () => {
       quickLaunchJobDto.fundAmount = tokenFundAmount;
 
       await jobService.createJob(
-        userId,
+        userMock,
         JobRequestType.HCAPTCHA,
         quickLaunchJobDto,
       );
@@ -510,12 +528,9 @@ describe('JobService', () => {
       expect(jobService.createHCaptchaManifest).toHaveBeenCalledTimes(0);
       expect(jobService.uploadManifest).toHaveBeenCalledTimes(0);
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-        userId,
+        userId: userMock.id,
         jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
@@ -526,7 +541,7 @@ describe('JobService', () => {
       });
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: quickLaunchJobDto.chainId,
-        userId,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.HCAPTCHA,
@@ -547,25 +562,22 @@ describe('JobService', () => {
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
-        .mockReturnValue(ChainId.MOONBEAM);
+        .mockReturnValue(ChainId.POLYGON);
 
       KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
       KVStoreUtils.getPublicKey = jest
         .fn()
         .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
 
-      await jobService.createJob(userId, JobRequestType.FORTUNE, {
+      await jobService.createJob(userMock, JobRequestType.FORTUNE, {
         ...fortuneJobDto,
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
-        chainId: ChainId.MOONBEAM,
-        userId,
+        chainId: ChainId.POLYGON,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.FORTUNE,
@@ -586,7 +598,7 @@ describe('JobService', () => {
       });
 
       await expect(
-        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
+        jobService.createJob(userMock, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrow(
         new ControlledError(ErrorWeb3.InvalidChainId, HttpStatus.BAD_REQUEST),
       );
@@ -603,10 +615,90 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
-        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
+        jobService.createJob(userMock, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrow(
         new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
       );
+    });
+
+    it('should throw an exception if user is not whitelisted and does not have any active card', async () => {
+      jest
+        .spyOn(whitelistService, 'isUserWhitelisted')
+        .mockResolvedValueOnce(false);
+      jest
+        .spyOn(paymentService, 'getDefaultPaymentMethod')
+        .mockResolvedValueOnce(null);
+
+      await expect(
+        jobService.createJob(userMock, JobRequestType.FORTUNE, fortuneJobDto),
+      ).rejects.toThrow(
+        new ControlledError(ErrorJob.NotActiveCard, HttpStatus.BAD_REQUEST),
+      );
+    });
+
+    it('should create a job successfully if user is not whitelisted but has an active card', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userMock.id,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        requestType: JobRequestType.FORTUNE,
+        escrowAddress: MOCK_ADDRESS,
+        fee,
+        fundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
+      KVStoreUtils.getPublicKey = jest
+        .fn()
+        .mockResolvedValue(MOCK_PGP_PUBLIC_KEY);
+
+      jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
+      jest
+        .spyOn(whitelistService, 'isUserWhitelisted')
+        .mockResolvedValueOnce(false);
+      jest
+        .spyOn(paymentService, 'getDefaultPaymentMethod')
+        .mockResolvedValueOnce('test_card_id');
+
+      await jobService.createJob(
+        userMock,
+        JobRequestType.FORTUNE,
+        fortuneJobDto,
+      );
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
+        userId: userMock.id,
+        jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: -mul(fundAmount + fee, rate),
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
+      expect(jobRepository.createUnique).toHaveBeenCalledWith({
+        chainId: fortuneJobDto.chainId,
+        userId: userMock.id,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        requestType: JobRequestType.FORTUNE,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+        ...selectedOraclesMock,
+      });
     });
   });
 
@@ -1303,8 +1395,11 @@ describe('JobService', () => {
   });
 
   describe('createJob with image label binary type', () => {
-    const userId = 1;
     const jobId = 123;
+    const userMock: any = {
+      id: 1,
+      stripeCustomerId: 'stripeTest',
+    };
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
@@ -1339,7 +1434,7 @@ describe('JobService', () => {
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
-        userId: userId,
+        userId: userMock.id,
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -1371,17 +1466,14 @@ describe('JobService', () => {
       ]);
 
       await jobService.createJob(
-        userId,
+        userMock,
         JobRequestType.IMAGE_POINTS,
         imageLabelBinaryJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-        userId,
+        userId: userMock.id,
         jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
@@ -1392,7 +1484,7 @@ describe('JobService', () => {
       });
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: imageLabelBinaryJobDto.chainId,
-        userId,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.IMAGE_POINTS,
@@ -1441,7 +1533,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(
-          userId,
+          userMock,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1452,10 +1544,7 @@ describe('JobService', () => {
         ),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
     });
 
     it('should throw an error for invalid region', async () => {
@@ -1495,7 +1584,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(
-          userId,
+          userMock,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1503,10 +1592,7 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.InvalidRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
     });
 
     it('should throw an error for empty region', async () => {
@@ -1544,7 +1630,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(
-          userId,
+          userMock,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1552,10 +1638,7 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyRegion, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
     });
 
     it('should throw an error for empty bucket', async () => {
@@ -1593,7 +1676,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(
-          userId,
+          userMock,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1601,10 +1684,7 @@ describe('JobService', () => {
         new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST),
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
     });
 
     it('should create a image label job successfully on network selected from round robin logic', async () => {
@@ -1616,7 +1696,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
-        .mockReturnValue(ChainId.MOONBEAM);
+        .mockReturnValue(ChainId.POLYGON);
 
       KVStoreUtils.get = jest.fn().mockResolvedValue(MOCK_ORACLE_FEE);
       KVStoreUtils.getPublicKey = jest
@@ -1635,18 +1715,15 @@ describe('JobService', () => {
         '5.jpg',
       ]);
 
-      await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
+      await jobService.createJob(userMock, JobRequestType.IMAGE_POINTS, {
         ...imageLabelBinaryJobDto,
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
-        chainId: ChainId.MOONBEAM,
-        userId,
+        chainId: ChainId.POLYGON,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.IMAGE_POINTS,
@@ -1668,7 +1745,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(
-          userId,
+          userMock,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1690,7 +1767,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.createJob(
-          userId,
+          userMock,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
@@ -1701,8 +1778,11 @@ describe('JobService', () => {
   });
 
   describe('createJob with hCaptcha type', () => {
-    const userId = 1;
     const jobId = 123;
+    const userMock: any = {
+      id: 1,
+      stripeCustomerId: 'stripeTest',
+    };
 
     const hCaptchaJobDto: JobCaptchaDto = {
       data: MOCK_STORAGE_DATA,
@@ -1751,7 +1831,7 @@ describe('JobService', () => {
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
-        userId: userId,
+        userId: userMock.id,
         chainId: ChainId.LOCALHOST,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
@@ -1766,17 +1846,14 @@ describe('JobService', () => {
       jobRepository.createUnique = jest.fn().mockResolvedValue(mockJobEntity);
 
       await jobService.createJob(
-        userId,
+        userMock,
         JobRequestType.HCAPTCHA,
         hCaptchaJobDto,
       );
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-        userId,
+        userId: userMock.id,
         jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
@@ -1787,7 +1864,7 @@ describe('JobService', () => {
       });
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
         chainId: hCaptchaJobDto.chainId,
-        userId,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.HCAPTCHA,
@@ -1811,20 +1888,17 @@ describe('JobService', () => {
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
-        .mockReturnValue(ChainId.MOONBEAM);
+        .mockReturnValue(ChainId.POLYGON);
 
-      await jobService.createJob(userId, JobRequestType.HCAPTCHA, {
+      await jobService.createJob(userMock, JobRequestType.HCAPTCHA, {
         ...hCaptchaJobDto,
         chainId: undefined,
       });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(
-        userId,
-        div(1, rate),
-      );
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userMock.id);
       expect(jobRepository.createUnique).toHaveBeenCalledWith({
-        chainId: ChainId.MOONBEAM,
-        userId,
+        chainId: ChainId.POLYGON,
+        userId: userMock.id,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         requestType: JobRequestType.HCAPTCHA,
@@ -1846,7 +1920,7 @@ describe('JobService', () => {
 
       getUserBalanceMock.mockResolvedValue(userBalance);
       await expect(
-        jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
+        jobService.createJob(userMock, JobRequestType.HCAPTCHA, hCaptchaJobDto),
       ).rejects.toThrow(
         new ControlledError(ErrorJob.NotEnoughFunds, HttpStatus.BAD_REQUEST),
       );

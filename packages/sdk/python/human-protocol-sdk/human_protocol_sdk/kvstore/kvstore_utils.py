@@ -10,7 +10,7 @@ Code Example
     from human_protocol_sdk.kvstore import KVStoreUtils
 
     print(
-        KVStoreUtils.get_data(
+        KVStoreUtils.get_kvstore_data(
             ChainId.POLYGON_AMOY,
             "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65"
         )
@@ -136,7 +136,7 @@ class KVStoreUtils:
         from human_protocol_sdk.gql.kvstore import get_kvstore_by_address_and_key_query
 
         if not key:
-            raise KVStoreClientError("Key can not be empty")
+            raise KVStoreClientError("Key cannot be empty")
         if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid address: {address}")
 

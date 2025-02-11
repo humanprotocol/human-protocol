@@ -1,11 +1,11 @@
 # human_protocol_sdk.encryption.encryption module
 
-This class allows to sign, verify, encrypt and
-decrypt messages at all levels of escrow processing.
+This class allows signing, verifying, encrypting, and
+decrypting messages at all levels of escrow processing.
 
 The algorithm includes the implementation of the
 [PGP encryption algorithm]([https://github.com/openpgpjs/openpgpjs](https://github.com/openpgpjs/openpgpjs))
-multi-public key encryption on python.
+multi-public key encryption in Python.
 Using the vanilla [ed25519]([https://en.wikipedia.org/wiki/EdDSA#Ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519))
 implementation Schnorr signatures for signature and
 [curve25519]([https://en.wikipedia.org/wiki/Curve25519](https://en.wikipedia.org/wiki/Curve25519)) for encryption.
@@ -60,7 +60,7 @@ Decrypts a message using the private key.
   * **message** (`str`) – Armored message to decrypt
   * **public_key** (`Optional`[`str`]) – Armored public key used for signature verification. Defaults to None.
 * **Return type:**
-  `str`
+  `bytes`
 * **Returns:**
   Decrypted message
 * **Example:**
@@ -94,7 +94,7 @@ Decrypts a message using the private key.
 Signs a message using the private key.
 
 * **Parameters:**
-  **message** (`str`) – Message to sign
+  **message** (`Union`[`str`, `bytes`]) – Message to sign
 * **Return type:**
   `str`
 * **Returns:**
@@ -130,7 +130,7 @@ Signs a message using the private key.
 Signs and encrypts a message using the private key and recipient’s public keys.
 
 * **Parameters:**
-  * **message** (`str`) – Message to sign and encrypt
+  * **message** (`Union`[`str`, `bytes`]) – Message to sign and encrypt
   * **public_keys** (`List`[`str`]) – List of armored public keys of the recipients
 * **Return type:**
   `str`

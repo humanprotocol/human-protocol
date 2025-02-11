@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -26,9 +26,15 @@ This function returns the leader data for the given address.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
 
-• **address**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+Network in which the leader is deployed
+
+##### address
+
+`string`
 
 Leader address.
 
@@ -48,7 +54,7 @@ const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A
 
 #### Defined in
 
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ***
 
@@ -60,7 +66,9 @@ This function returns all the leader details of the protocol.
 
 #### Parameters
 
-• **filter**: [`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
+##### filter
+
+[`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
 
 Filter for the leaders.
 
@@ -73,7 +81,7 @@ Returns an array with all the leader details.
 **Code example**
 
 ```ts
-import { OperatorUtils } from '@human-protocol/sdk';
+import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
 const filter: ILeadersFilter = {
  chainId: ChainId.POLYGON
@@ -83,7 +91,7 @@ const leaders = await OperatorUtils.getLeaders(filter);
 
 #### Defined in
 
-[operator.ts:107](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L107)
+[operator.ts:107](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L107)
 
 ***
 
@@ -95,13 +103,21 @@ Retrieves the reputation network operators of the specified address.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
 
-• **address**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+Network in which the reputation network is deployed
+
+##### address
+
+`string`
 
 Address of the reputation oracle.
 
-• **role?**: `string`
+##### role?
+
+`string`
 
 (Optional) Role of the operator.
 
@@ -111,9 +127,9 @@ Address of the reputation oracle.
 
 - Returns an array of operator details.
 
-#### Example
+**Code example**
 
-```typescript
+```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
 const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
@@ -121,7 +137,7 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
-[operator.ts:170](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L170)
+[operator.ts:186](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L186)
 
 ***
 
@@ -133,9 +149,15 @@ This function returns information about the rewards for a given slasher address.
 
 #### Parameters
 
-• **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
+##### chainId
 
-• **slasherAddress**: `string`
+[`ChainId`](../../enums/enumerations/ChainId.md)
+
+Network in which the rewards are deployed
+
+##### slasherAddress
+
+`string`
 
 Slasher address.
 
@@ -155,4 +177,4 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
-[operator.ts:220](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L220)
+[operator.ts:236](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L236)

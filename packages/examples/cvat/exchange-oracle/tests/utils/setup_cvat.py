@@ -18,7 +18,7 @@ def generate_cvat_signature(data: dict):
     return (
         "sha256="
         + hmac.new(
-            CvatConfig.cvat_webhook_secret.encode("utf-8"),
+            CvatConfig.webhook_secret.encode("utf-8"),
             b_data,
             digestmod=sha256,
         ).hexdigest()

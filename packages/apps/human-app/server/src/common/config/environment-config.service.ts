@@ -93,6 +93,13 @@ export class EnvironmentConfigService {
   }
 
   /**
+   * The DB number of the Redis cache server
+   */
+  get cacheDbNumber(): number {
+    return this.configService.get<number>('REDIS_DB', 0);
+  }
+
+  /**
    * The cache time-to-live (TTL) for oracle statistics.
    * Default: 12 hours
    */
@@ -223,9 +230,11 @@ export class EnvironmentConfigService {
    * Default: 24 hours
    */
   get cacheTtlJobTypes(): number {
-    return this.configService.get<number>(
-      'CACHE_TTL_JOB_TYPES',
-      DEFAULT_CACHE_TTL_JOB_TYPES,
+    return (
+      this.configService.get<number>(
+        'CACHE_TTL_JOB_TYPES',
+        DEFAULT_CACHE_TTL_JOB_TYPES,
+      ) * 1000
     );
   }
 

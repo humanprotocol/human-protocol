@@ -25,27 +25,29 @@ describe('EnvironmentConfigService', () => {
   });
 
   it('should return an array of valid ChainIds when CHAIN_IDS_ENABLED is valid', () => {
-    (configService.getOrThrow as jest.Mock).mockReturnValue('1, 4, 80002');
-
-    const result = service.chainIdsEnabled;
-
-    expect(result).toEqual([
-      ChainId.MAINNET,
-      ChainId.RINKEBY,
-      ChainId.POLYGON_AMOY,
-    ]);
-  });
-
-  it('should ignore invalid chain IDs and only return valid ChainIds', () => {
     (configService.getOrThrow as jest.Mock).mockReturnValue(
-      '1, 4, 99999, 80002',
+      '1, 11155111, 80002',
     );
 
     const result = service.chainIdsEnabled;
 
     expect(result).toEqual([
       ChainId.MAINNET,
-      ChainId.RINKEBY,
+      ChainId.SEPOLIA,
+      ChainId.POLYGON_AMOY,
+    ]);
+  });
+
+  it('should ignore invalid chain IDs and only return valid ChainIds', () => {
+    (configService.getOrThrow as jest.Mock).mockReturnValue(
+      '1, 11155111, 99999, 80002',
+    );
+
+    const result = service.chainIdsEnabled;
+
+    expect(result).toEqual([
+      ChainId.MAINNET,
+      ChainId.SEPOLIA,
       ChainId.POLYGON_AMOY,
     ]);
   });

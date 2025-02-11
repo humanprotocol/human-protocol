@@ -16,7 +16,7 @@ export class NDASignatureEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   ipAddress: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.ndaSignature)
+  @ManyToOne(() => UserEntity, (user) => user.ndaSignatures)
   user: UserEntity;
 
   @ManyToOne(() => NDAVersionEntity, (ndaVersion) => ndaVersion.ndas)

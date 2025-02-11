@@ -257,7 +257,7 @@ describe('Encryption', async () => {
         Buffer.from(JSON.stringify(BINARY_MESSAGE_CONTENT)),
         [KEYPAIR2.publicKey, KEYPAIR3.publicKey]
       );
-      console.log('en', encryptedMessage);
+
       const expectedMessageHeader = '-----BEGIN PGP MESSAGE-----\n';
       const expectedMessageFooter = '-----END PGP MESSAGE-----\n';
 

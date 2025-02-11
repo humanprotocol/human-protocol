@@ -6,6 +6,9 @@ on:
       label:
         description: 'New version label'
         required: true
+      networks:
+        description: 'Comma-separated list of networks to deploy'
+        required: true
 
 jobs:
   subgraph:
@@ -15,41 +18,59 @@ jobs:
       matrix:
         network:
           - name: amoy
-          - name: avalanche
           - name: bsc-testnet
           - name: bsc
-          - name: celo-alfajores
-          - name: celo
           - name: ethereum
-          - name: fuji
-          - name: moonbase-alpha
-          - name: moonbeam
           - name: polygon
           - name: sepolia
-          - name: xlayer-testnet
-          - name: xlayer
       fail-fast: true
       max-parallel: 3
     steps:
       - uses: actions/checkout@v4
-      - run: npm install --global yarn && yarn --ignore-scripts
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.1'
+      - name: Filter Networks
+        id: filter_networks
+        run: |
+          INPUT_NETWORKS="${{ github.event.inputs.networks }}"
+          IFS=',' read -ra NETWORK_LIST <<< "$INPUT_NETWORKS"
+          echo "Input networks: $INPUT_NETWORKS"
+          echo "Current matrix network: ${{ matrix.network.name }}"
+          MATCH=false
+          for network in "${NETWORK_LIST[@]}"; do
+            if [[ "${network}" == "${{ matrix.network.name }}" ]]; then
+              MATCH=true
+              break
+            fi
+          done
+          echo "Match found: $MATCH"
+          echo "::set-output name=continue::$MATCH"
+      - run: npm install --global yarn && yarn
         name: Install dependencies
+        if: steps.filter_networks.outputs.continue == 'true'
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
-      - run: yarn global add @graphprotocol/graph-cli
+        if: steps.filter_networks.outputs.continue == 'true'
+      - run: yarn global add @graphprotocol/graph-cli@0.71.2
         name: Install Graph CLI
+        if: steps.filter_networks.outputs.continue == 'true'
       - run: graph auth --studio ${API_KEY}
         name: Authenticate Graph CLI
         env:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
+        if: steps.filter_networks.outputs.continue == 'true'
       - run: yarn generate && yarn build
         name: Generate and build Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network.name }}
+        if: steps.filter_networks.outputs.continue == 'true'
       - run: graph deploy --studio ${NETWORK} -l ${{ github.event.inputs.label }}
         name: Deploy Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network.name }}
+        if: steps.filter_networks.outputs.continue == 'true'

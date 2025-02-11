@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -42,7 +42,7 @@ import { Encryption } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 ```
 
 ## Constructors
@@ -55,7 +55,9 @@ Constructor for the Encryption class.
 
 #### Parameters
 
-• **privateKey**: `PrivateKey`
+##### privateKey
+
+`PrivateKey`
 
 The private key.
 
@@ -65,29 +67,33 @@ The private key.
 
 #### Defined in
 
-[encryption.ts:52](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L52)
+[encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
 
 ## Methods
 
 ### decrypt()
 
-> **decrypt**(`message`, `publicKey`?): `Promise`\<`string`\>
+> **decrypt**(`message`, `publicKey`?): `Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
 This function decrypts messages using the private key. In addition, the public key can be added for signature verification.
 
 #### Parameters
 
-• **message**: `string`
+##### message
+
+`string`
 
 Message to decrypt.
 
-• **publicKey?**: `string`
+##### publicKey?
+
+`string`
 
 Public key used to verify signature if needed. This is optional.
 
 #### Returns
 
-`Promise`\<`string`\>
+`Promise`\<`Uint8Array`\<`ArrayBufferLike`\>\>
 
 Message decrypted.
 
@@ -98,7 +104,7 @@ import { Encryption } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 
 const publicKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
@@ -112,12 +118,12 @@ XdYkEU+66G1CjgAA0xgBAK4AIahFFnmWR2Mp6A3q021cZXpGklc0Xw1Hfswc
 UYLqAQDfdym4kiUvKO1+REKASt0Gwykndl7hra9txqlUL5DXBQ===Vwgv
 -----END PGP PUBLIC KEY BLOCK-----`;
 
-const resultMessage = await encription.decrypt('message');
+const resultMessage = await encryption.decrypt('message');
 ```
 
 #### Defined in
 
-[encryption.ts:179](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L179)
+[encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
 
 ***
 
@@ -129,7 +135,9 @@ This function signs a message using the private key used to initialize the clien
 
 #### Parameters
 
-• **message**: `string`
+##### message
+
+`string`
 
 Message to sign.
 
@@ -146,14 +154,14 @@ import { Encryption } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 
-const resultMessage = await encription.sign('message');
+const resultMessage = await encryption.sign('message');
 ```
 
 #### Defined in
 
-[encryption.ts:216](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L216)
+[encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
 
 ***
 
@@ -165,11 +173,15 @@ This function signs and encrypts a message using the private key used to initial
 
 #### Parameters
 
-• **message**: `string`
+##### message
+
+`MessageDataType`
 
 Message to sign and encrypt.
 
-• **publicKeys**: `string`[]
+##### publicKeys
+
+`string`[]
 
 Array of public keys to use for encryption.
 
@@ -187,7 +199,7 @@ import { EscrowClient } from '@human-protocol/sdk';
 
 const privateKey = 'Armored_priv_key';
 const passphrase = 'example_passphrase';
-const encription = await Encryption.build(privateKey, passphrase);
+const encryption = await Encryption.build(privateKey, passphrase);
 const publicKey1 = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 xjMEZKQEMxYJKwYBBAHaRw8BAQdA5oZTq4UPlS0IXn4kEaSqQdAa9+Cq522v
 WYxJQn3vo1/NFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSkBDME
@@ -213,12 +225,12 @@ s/88AQCDErzvn+SOX4s3gvZcM3Vr4wh4Q2syHV8Okgx8STYPDg===DsVk
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 const publicKeys = [publicKey1, publicKey2];
-const resultMessage = await encription.signAndEncrypt('message', publicKeys);
+const resultMessage = await encryption.signAndEncrypt('message', publicKeys);
 ```
 
 #### Defined in
 
-[encryption.ts:128](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L128)
+[encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
 
 ***
 
@@ -230,11 +242,15 @@ Builds an Encryption instance by decrypting the private key from an encrypted pr
 
 #### Parameters
 
-• **privateKeyArmored**: `string`
+##### privateKeyArmored
+
+`string`
 
 The encrypted private key in armored format.
 
-• **passphrase?**: `string`
+##### passphrase?
+
+`string`
 
 Optional: The passphrase for the private key.
 
@@ -246,4 +262,4 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
-[encryption.ts:63](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L63)
+[encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)

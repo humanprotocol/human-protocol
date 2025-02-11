@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
 import { useState } from 'react';
 import { StyledTab, StyledTabs } from '../../../components/Tabs';
-import { IS_TESTNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';
+import { useAppSelector } from '../../../state';
 import { PayMethod } from '../../../types';
 import { CryptoPayForm } from './CryptoPayForm';
 import { FiatPayForm } from './FiatPayForm';
@@ -13,6 +13,7 @@ export const PayJob = () => {
   const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
   const [isPaying, setIsPaying] = useState(false);
   const { showError } = useSnackbar();
+  const { user } = useAppSelector((state) => state.auth);
 
   const handleStart = () => {
     setIsPaying(true);
@@ -56,8 +57,10 @@ export const PayJob = () => {
           marginBottom: '-2px',
         }}
       >
-        <StyledTab value={PayMethod.Crypto} label="Crypto" />
-        {IS_TESTNET && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
+        {user?.whitelisted && (
+          <StyledTab value={PayMethod.Crypto} label="Crypto" />
+        )}
+        <StyledTab value={PayMethod.Fiat} label="Fiat" />
       </StyledTabs>
       <Box
         display="flex"
@@ -69,8 +72,11 @@ export const PayJob = () => {
           background: '#fff',
           border: '1px solid #dbe1f6',
           borderRadius: '20px',
-          borderTopLeftRadius: payMethod === 0 ? '0px' : '20px',
-          borderTopRightRadius: payMethod === 1 ? '0px' : '20px',
+          borderTopLeftRadius:
+            payMethod === PayMethod.Crypto || !user?.whitelisted
+              ? '0px'
+              : '20px',
+          borderTopRightRadius: '20px',
           px: '10%',
           pt: 10,
           pb: 5,

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 
 import {
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
@@ -19,16 +18,17 @@ import {
 import {
   CvatAnnotationMeta,
   FortuneFinalResult,
-  PayoutsDataDto,
-  SaveResultDto,
 } from '../../common/dto/result';
-import { RequestAction } from './payout.interface';
-import { getRequestType } from '../../common/utils';
-import { ControlledError } from '../../common/errors/controlled';
+import {
+  CalculatedPayout,
+  RequestAction,
+  SaveResultDto,
+} from './payout.interface';
+import { assertValidJobRequestType, getRequestType } from '../../common/utils';
+import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
-  private readonly logger = new Logger(PayoutService.name);
   constructor(
     @Inject(StorageService)
     private readonly storageService: StorageService,
@@ -43,33 +43,28 @@ export class PayoutService {
    * @param escrowAddress The escrow contract address.
    * @returns {Promise<SaveResultDto>} The URL and hash for the stored results.
    */
-  public async saveResults(
+  public async processResults(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<SaveResultDto> {
-    this.logger.log('Save results START');
-
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
       await this.storageService.downloadJsonLikeData(manifestUrl);
 
-    const requestType = getRequestType(manifest);
+    const requestType = getRequestType(manifest).toLowerCase();
+
+    assertValidJobRequestType(requestType);
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
     const results = await saveResults(chainId, escrowAddress, manifest);
-
-    this.logger.log('Save results STOP');
 
     return results;
   }
@@ -84,52 +79,35 @@ export class PayoutService {
    * @param hash The hash of the final results.
    * @returns {Promise<void>}
    */
-  public async executePayouts(
+  public async calculatePayouts(
     chainId: ChainId,
     escrowAddress: string,
-    url: string,
-    hash: string,
-  ): Promise<void> {
-    this.logger.log('Payouts START');
-
+    finalResultsUrl: string,
+  ): Promise<CalculatedPayout[]> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
       await this.storageService.downloadJsonLikeData(manifestUrl);
 
-    const requestType = getRequestType(manifest);
+    const requestType = getRequestType(manifest).toLowerCase();
+
+    assertValidJobRequestType(requestType);
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
     const data: CalculatePayoutsDto = {
       chainId,
       escrowAddress,
-      finalResultsUrl: url,
+      finalResultsUrl,
     };
-    const results = await calculatePayouts(manifest, data);
 
-    await escrowClient.bulkPayOut(
-      escrowAddress,
-      results.recipients,
-      results.amounts,
-      url,
-      hash,
-      true, // TODO: Temporary value; it should be made dynamic in the future when the system supports batch processing.
-      {
-        gasPrice: await this.web3Service.calculateGasPrice(chainId),
-      },
-    );
-
-    this.logger.log('Payouts STOP');
+    return await calculatePayouts(manifest, data);
   }
 
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
@@ -137,7 +115,7 @@ export class PayoutService {
       calculatePayouts: async (
         manifest: FortuneManifestDto,
         data: CalculatePayoutsDto,
-      ): Promise<PayoutsDataDto> =>
+      ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsFortune(manifest, data.finalResultsUrl),
       saveResults: async (
         chainId: ChainId,
@@ -150,7 +128,7 @@ export class PayoutService {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,
-      ): Promise<PayoutsDataDto> =>
+      ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
@@ -161,7 +139,7 @@ export class PayoutService {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,
-      ): Promise<PayoutsDataDto> =>
+      ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
@@ -172,7 +150,7 @@ export class PayoutService {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,
-      ): Promise<PayoutsDataDto> =>
+      ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
@@ -183,7 +161,7 @@ export class PayoutService {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,
-      ): Promise<PayoutsDataDto> =>
+      ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
@@ -194,7 +172,7 @@ export class PayoutService {
       calculatePayouts: async (
         manifest: CvatManifestDto,
         data: CalculatePayoutsDto,
-      ): Promise<PayoutsDataDto> =>
+      ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
         chainId: ChainId,
@@ -228,22 +206,12 @@ export class PayoutService {
     )) as FortuneFinalResult[];
 
     if (intermediateResults.length === 0) {
-      this.logger.log(
-        ErrorResults.NoIntermediateResultsFound,
-        PayoutService.name,
-      );
-      throw new ControlledError(
-        ErrorResults.NoIntermediateResultsFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('No intermediate results found');
     }
 
     const validResults = intermediateResults.filter((result) => !result.error);
     if (validResults.length < manifest.submissionsRequired) {
-      throw new ControlledError(
-        ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('Not all required solutions have been sent');
     }
 
     const { url, hash } = await this.storageService.uploadJobSolutions(
@@ -287,12 +255,12 @@ export class PayoutService {
    * and final results. Distributes rewards proportionally to qualified recipients.
    * @param manifest The Fortune manifest data.
    * @param finalResultsUrl URL of the final results for this job.
-   * @returns {Promise<PayoutsDataDto>} Recipients, amounts, and relevant storage data.
+   * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
    */
   public async calculatePayoutsFortune(
     manifest: FortuneManifestDto,
     finalResultsUrl: string,
-  ): Promise<PayoutsDataDto> {
+  ): Promise<CalculatedPayout[]> {
     const finalResults = (await this.storageService.downloadJsonLikeData(
       finalResultsUrl,
     )) as FortuneFinalResult[];
@@ -304,9 +272,11 @@ export class PayoutService {
     const payoutAmount =
       BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
       BigInt(recipients.length);
-    const amounts = new Array(recipients.length).fill(payoutAmount);
 
-    return { recipients, amounts };
+    return recipients.map((recipient) => ({
+      address: recipient,
+      amount: payoutAmount,
+    }));
   }
 
   /**
@@ -315,13 +285,13 @@ export class PayoutService {
    * @param manifest The CVAT manifest data.
    * @param chainId The blockchain chain ID.
    * @param escrowAddress The escrow contract address.
-   * @returns {Promise<PayoutsDataDto>} Recipients, amounts, and relevant storage data.
+   * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
    */
   public async calculatePayoutsCvat(
     manifest: CvatManifestDto,
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<PayoutsDataDto> {
+  ): Promise<CalculatedPayout[]> {
     const signer = this.web3Service.getSigner(chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -344,34 +314,36 @@ export class PayoutService {
       Array.isArray(annotations.jobs) &&
       annotations.jobs.length === 0
     ) {
-      throw new ControlledError(
-        ErrorResults.NoAnnotationsMetaFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new Error('No annotations meta found');
     }
 
-    const bountyValue = ethers.parseUnits(manifest.job_bounty, 18);
-    const accumulatedBounties = annotations.jobs.reduce((accMap, job) => {
-      const finalResult = annotations.results.find(
+    const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);
+    const workersBounties = new Map<string, typeof jobBountyValue>();
+
+    for (const job of annotations.jobs) {
+      const jobFinalResult = annotations.results.find(
         (result) => result.id === job.final_result_id,
       );
       if (
-        finalResult
-        // && finalResult.annotation_quality >= manifest.validation.min_quality
+        jobFinalResult
+        // && jobFinalResult.annotation_quality >= manifest.validation.min_quality
       ) {
-        const existingValue =
-          accMap.get(finalResult.annotator_wallet_address) || 0n;
-        accMap.set(
-          finalResult.annotator_wallet_address,
-          existingValue + bountyValue,
+        const workerAddress = jobFinalResult.annotator_wallet_address;
+
+        const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;
+
+        workersBounties.set(
+          workerAddress,
+          currentWorkerBounty + jobBountyValue,
         );
       }
-      return accMap;
-    }, new Map<string, typeof bountyValue>());
+    }
 
-    const recipients = [...accumulatedBounties.keys()];
-    const amounts = [...accumulatedBounties.values()];
-
-    return { recipients, amounts };
+    return Array.from(workersBounties.entries()).map(
+      ([workerAddress, bountyAmount]) => ({
+        address: workerAddress,
+        amount: bountyAmount,
+      }),
+    );
   }
 }

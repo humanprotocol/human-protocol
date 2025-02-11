@@ -53,9 +53,14 @@ Module
 import logging
 import os
 from decimal import Decimal
-from typing import List, Optional
+from typing import Dict, List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.constants import (
+    ESCROW_BULK_PAYOUT_MAX_ITEMS,
+    NETWORKS,
+    ChainId,
+    Status,
+)
 from human_protocol_sdk.utils import (
     get_escrow_interface,
     get_factory_interface,
@@ -171,7 +176,7 @@ class EscrowConfig:
 
 class EscrowClient:
     """
-    A class used to manage escrow on the HUMAN network.
+    A client class to interact with the escrow smart contract.
     """
 
     def __init__(self, web3: Web3):
@@ -211,16 +216,14 @@ class EscrowClient:
         tx_options: Optional[TxParams] = None,
     ) -> str:
         """
-        Creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
+        Creates a new escrow contract.
 
-        :param tokenAddress: The address of the token to use for payouts
-        :param trusted_handlers: Array of addresses that can perform actions on the contract
-        :param job_requester_id: The id of the job requester
-        :param tx_options: (Optional) Additional transaction parameters
+        :param token_address: Address of the token to be used in the escrow
+        :param trusted_handlers: List of trusted handler addresses
+        :param job_requester_id: ID of the job requester
+        :param tx_options: (Optional) Transaction options
 
-        :return: The address of the escrow created
-
-        :raise EscrowClientError: If an error occurs while checking the parameters
+        :return: Address of the created escrow contract
 
         :example:
             .. code-block:: python
@@ -233,7 +236,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -245,10 +249,10 @@ class EscrowClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 escrow_client = EscrowClient(w3)
 
-                token_address = '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4'
+                token_address = '0x1234567890abcdef1234567890abcdef12345678'
                 trusted_handlers = [
-                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+                    '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef'
                 ]
                 job_requester_id = 'job-requester'
                 escrow_address = escrow_client.create_escrow(
@@ -291,13 +295,9 @@ class EscrowClient:
         """
         Sets up the parameters of the escrow.
 
-        :param escrow_address: Address of the escrow to setup
-        :param escrow_config: Object containing all the necessary information to setup an escrow
-        :param tx_options: (Optional) Additional transaction parameters
-
-        :return: None
-
-        :raise EscrowClientError: If an error occurs while checking the parameters
+        :param escrow_address: Address of the escrow contract
+        :param escrow_config: Configuration parameters for the escrow
+        :param tx_options: (Optional) Transaction options
 
         :example:
             .. code-block:: python
@@ -310,7 +310,8 @@ class EscrowClient:
                 from human_protocol_sdk.escrow import EscrowClient
 
                 def get_w3_with_priv_key(priv_key: str):
-                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    w3 = Web3(load_provider_from_uri(
+                        URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
                     w3.middleware_onion.add(
@@ -322,20 +323,25 @@ class EscrowClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 escrow_client = EscrowClient(w3)
 
-                escrow_address = "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                escrow_address = "0x1234567890abcdef1234567890abcdef12345678"
                 escrow_config = EscrowConfig(
-                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                    10,
-                    10,
-                    10,
-                    "htttp://localhost/manifest.json",
-                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
+                    recording_oracle_address='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    reputation_oracle_address='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    exchange_oracle_address='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+                    recording_oracle_fee=100,
+                    reputation_oracle_fee=100,
+                    exchange_oracle_fee=100,
+                    recording_oracle_url='https://example.com/recording',
+                    reputation_oracle_url='https://example.com/reputation',
+                    exchange_oracle_url='https://example.com/exchange',
+                    manifest_url='https://example.com/manifest',
+                    manifest_hash='0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef'
                 )
-                escrow_client.setup(escrow_address, escrow_config)
+                escrow_client.setup(
+                    escrow_address,
+                    escrow_config
+                )
         """
-
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
@@ -365,7 +371,7 @@ class EscrowClient:
         """
         Adds funds to the escrow.
 
-        :param escrow_address: Address of the escrow to setup
+        :param escrow_address: Address of the escrow to fund
         :param amount: Amount to be added as funds
         :param tx_options: (Optional) Additional transaction parameters
 
@@ -396,13 +402,14 @@ class EscrowClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 escrow_client = EscrowClient(w3)
 
-                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
-                escrow_client.fund("0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount)
+                amount = Web3.to_wei(5, 'ether')  # convert from ETH to WEI
+                escrow_client.fund(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount
+                )
         """
-
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-        if 0 >= amount:
+        if amount <= 0:
             raise EscrowClientError("Amount must be positive")
 
         token_address = self.get_token_address(escrow_address)
@@ -425,10 +432,11 @@ class EscrowClient:
         hash: str,
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """Stores the results url.
+        """
+        Stores the results URL.
 
         :param escrow_address: Address of the escrow
-        :param url: Results file url
+        :param url: Results file URL
         :param hash: Results file hash
         :param tx_options: (Optional) Additional transaction parameters
 
@@ -465,7 +473,6 @@ class EscrowClient:
                     "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079"
                 )
         """
-
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         if not hash:
@@ -486,7 +493,8 @@ class EscrowClient:
     def complete(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
     ) -> None:
-        """Sets the status of an escrow to completed.
+        """
+        Sets the status of an escrow to completed.
 
         :param escrow_address: Address of the escrow to complete
         :param tx_options: (Optional) Additional transaction parameters
@@ -520,7 +528,6 @@ class EscrowClient:
 
                 escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
         """
-
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
@@ -543,12 +550,13 @@ class EscrowClient:
         force_complete: Optional[bool] = False,
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """Pays out the amounts specified to the workers and sets the URL of the final results file.
+        """
+        Pays out the amounts specified to the workers and sets the URL of the final results file.
 
         :param escrow_address: Address of the escrow
         :param recipients: Array of recipient addresses
         :param amounts: Array of amounts the recipients will receive
-        :param final_results_url: Final results file url
+        :param final_results_url: Final results file URL
         :param final_results_hash: Final results file hash
         :param txId: Serial number of the bulks
         :param force_complete: (Optional) Indicates if remaining balance should be transferred to the escrow creator
@@ -601,30 +609,9 @@ class EscrowClient:
                     1
                 )
         """
-
-        if not Web3.is_address(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-        for recipient in recipients:
-            if not Web3.is_address(recipient):
-                raise EscrowClientError(f"Invalid recipient address: {recipient}")
-        if len(recipients) == 0:
-            raise EscrowClientError("Arrays must have any value")
-        if len(recipients) != len(amounts):
-            raise EscrowClientError("Arrays must have same length")
-        if 0 in amounts:
-            raise EscrowClientError("Amounts cannot be empty")
-        if any(amount < 0 for amount in amounts):
-            raise EscrowClientError("Amounts cannot be negative")
-        balance = self.get_balance(escrow_address)
-        total_amount = sum(amounts)
-        if total_amount > balance:
-            raise EscrowClientError(
-                f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
-            )
-        if not validate_url(final_results_url):
-            raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
-        if not final_results_hash:
-            raise EscrowClientError("Invalid empty final results hash")
+        self.ensure_correct_bulk_payout_input(
+            escrow_address, recipients, amounts, final_results_url, final_results_hash
+        )
 
         if force_complete:
             handle_transaction(
@@ -652,10 +639,180 @@ class EscrowClient:
                 tx_options,
             )
 
+    def create_bulk_payout_transaction(
+        self,
+        escrow_address: str,
+        recipients: List[str],
+        amounts: List[Decimal],
+        final_results_url: str,
+        final_results_hash: str,
+        txId: Decimal,
+        force_complete: Optional[bool] = False,
+        tx_options: Optional[TxParams] = None,
+    ) -> TxParams:
+        """
+        Creates a prepared transaction for bulk payout without signing or sending it.
+
+        :param escrow_address: Address of the escrow
+        :param recipients: Array of recipient addresses
+        :param amounts: Array of amounts the recipients will receive
+        :param final_results_url: Final results file URL
+        :param final_results_hash: Final results file hash
+        :param txId: Serial number of the bulks
+        :param tx_options: (Optional) Additional transaction parameters
+
+        :return: A dictionary containing the prepared transaction
+
+        :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                recipients = [
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92267'
+                ]
+                amounts = [
+                    Web3.to_wei(5, 'ether'),
+                    Web3.to_wei(10, 'ether')
+                ]
+                results_url = 'http://localhost/results.json'
+                results_hash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079'
+
+                transaction = escrow_client.create_bulk_payout_transaction(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                    recipients,
+                    amounts,
+                    results_url,
+                    results_hash,
+                    1,
+                    false
+                )
+
+                print(f"Transaction: {transaction}")
+
+                signed_transaction = w3.eth.account.sign_transaction(
+                    transaction, private_key
+                )
+                tx_hash = w3.eth.send_raw_transaction(
+                    signed_transaction.raw_transaction
+                )
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                print(f"Transaction sent with hash: {tx_hash.hex()}")
+                print(f"Transaction receipt: {tx_receipt}")
+        """
+        self.ensure_correct_bulk_payout_input(
+            escrow_address, recipients, amounts, final_results_url, final_results_hash
+        )
+
+        transaction = (
+            self._get_escrow_contract(escrow_address)
+            .functions.bulkPayOut(
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+                force_complete,
+            )
+            .build_transaction(tx_options or {})
+        )
+
+        # Add nonce if not provided
+        if "nonce" not in transaction:
+            transaction["nonce"] = self.w3.eth.get_transaction_count(
+                self.w3.eth.default_account
+            )
+
+        # Add estimated gas
+        if "gas" not in transaction:
+            transaction["gas"] = self.w3.eth.estimate_gas(transaction)
+
+        # Handle gas price and EIP-1559 fee fields
+        if "maxFeePerGas" in transaction or "maxPriorityFeePerGas" in transaction:
+            # Remove `gasPrice` if EIP-1559 fields are present
+            transaction.pop("gasPrice", None)
+        else:
+            # Use `gasPrice` if not provided
+            transaction.setdefault("gasPrice", self.w3.eth.gas_price)
+
+        # Add chain ID
+        transaction["chainId"] = self.w3.eth.chain_id
+
+        return transaction
+
+    def ensure_correct_bulk_payout_input(
+        self,
+        escrow_address: str,
+        recipients: List[str],
+        amounts: List[Decimal],
+        final_results_url: str,
+        final_results_hash: str,
+    ) -> None:
+        """
+        Validates input parameters for bulk payout operations.
+
+        :param escrow_address: Address of the escrow
+        :param recipients: Array of recipient addresses
+        :param amounts: Array of amounts the recipients will receive
+        :param final_results_url: Final results file URL
+        :param final_results_hash: Final results file hash
+
+        :return: None
+
+        :raise EscrowClientError: If validation fails
+        """
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+        for recipient in recipients:
+            if not Web3.is_address(recipient):
+                raise EscrowClientError(f"Invalid recipient address: {recipient}")
+        if len(recipients) == 0:
+            raise EscrowClientError("Arrays must have any value")
+        if len(recipients) > ESCROW_BULK_PAYOUT_MAX_ITEMS:
+            raise EscrowClientError("Too many recipients")
+        if len(recipients) != len(amounts):
+            raise EscrowClientError("Arrays must have same length")
+        if 0 in amounts:
+            raise EscrowClientError("Amounts cannot be empty")
+        if any(amount < 0 for amount in amounts):
+            raise EscrowClientError("Amounts cannot be negative")
+        balance = self.get_balance(escrow_address)
+        total_amount = sum(amounts)
+        if total_amount > balance:
+            raise EscrowClientError(
+                f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
+            )
+        if not validate_url(final_results_url):
+            raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
+        if not final_results_hash:
+            raise EscrowClientError("Invalid empty final results hash")
+
     def cancel(
         self, escrow_address: str, tx_options: Optional[TxParams] = None
     ) -> EscrowCancel:
-        """Cancels the specified escrow and sends the balance to the canceler.
+        """
+        Cancels the specified escrow and sends the balance to the canceler.
 
         :param escrow_address: Address of the escrow to cancel
         :param tx_options: (Optional) Additional transaction parameters
@@ -666,8 +823,7 @@ class EscrowClient:
 
         :raise EscrowClientError: If an error occurs while checking the parameters
         :raise EscrowClientError: If the transfer event associated with the cancellation
-                                is not found in the transaction logs
-
+                                  is not found in the transaction logs
 
         :example:
             .. code-block:: python
@@ -696,7 +852,6 @@ class EscrowClient:
                     "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
                 )
         """
-
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
@@ -741,7 +896,8 @@ class EscrowClient:
         handlers: List[str],
         tx_options: Optional[TxParams] = None,
     ) -> None:
-        """Adds an array of addresses to the trusted handlers list.
+        """
+        Adds an array of addresses to the trusted handlers list.
 
         :param escrow_address: Address of the escrow
         :param handlers: Array of trusted handler addresses
@@ -805,7 +961,8 @@ class EscrowClient:
         token_address: str,
         tx_options: Optional[TxParams] = None,
     ) -> EscrowWithdraw:
-        """Withdraws additional tokens in the escrow to the canceler.
+        """
+        Withdraws additional tokens in the escrow to the canceler.
 
         :param escrow_address: Address of the escrow to withdraw
         :param token_address: Address of the token to withdraw
@@ -817,8 +974,7 @@ class EscrowClient:
 
         :raise EscrowClientError: If an error occurs while checking the parameters
         :raise EscrowClientError: If the transfer event associated with the withdrawal
-                                is not found in the transaction logs
-
+                                  is not found in the transaction logs
 
         :example:
             .. code-block:: python
@@ -891,7 +1047,8 @@ class EscrowClient:
         return escrow_withdraw_data
 
     def get_balance(self, escrow_address: str) -> Decimal:
-        """Gets the balance for a specified escrow address.
+        """
+        Gets the balance for a specified escrow address.
 
         :param escrow_address: Address of the escrow
 
@@ -932,7 +1089,8 @@ class EscrowClient:
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
     def get_manifest_hash(self, escrow_address: str) -> str:
-        """Gets the manifest file hash.
+        """
+        Gets the manifest file hash.
 
         :param escrow_address: Address of the escrow
 
@@ -963,7 +1121,8 @@ class EscrowClient:
         return self._get_escrow_contract(escrow_address).functions.manifestHash().call()
 
     def get_manifest_url(self, escrow_address: str) -> str:
-        """Gets the manifest file URL.
+        """
+        Gets the manifest file URL.
 
         :param escrow_address: Address of the escrow
 
@@ -994,7 +1153,8 @@ class EscrowClient:
         return self._get_escrow_contract(escrow_address).functions.manifestUrl().call()
 
     def get_results_url(self, escrow_address: str) -> str:
-        """Gets the results file URL.
+        """
+        Gets the results file URL.
 
         :param escrow_address: Address of the escrow
 
@@ -1027,7 +1187,8 @@ class EscrowClient:
         )
 
     def get_intermediate_results_url(self, escrow_address: str) -> str:
-        """Gets the intermediate results file URL.
+        """
+        Gets the intermediate results file URL.
 
         :param escrow_address: Address of the escrow
 
@@ -1062,7 +1223,8 @@ class EscrowClient:
         )
 
     def get_token_address(self, escrow_address: str) -> str:
-        """Gets the address of the token used to fund the escrow.
+        """
+        Gets the address of the token used to fund the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1093,7 +1255,8 @@ class EscrowClient:
         return self._get_escrow_contract(escrow_address).functions.token().call()
 
     def get_status(self, escrow_address: str) -> Status:
-        """Gets the current status of the escrow.
+        """
+        Gets the current status of the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1126,7 +1289,8 @@ class EscrowClient:
         )
 
     def get_recording_oracle_address(self, escrow_address: str) -> str:
-        """Gets the recording oracle address of the escrow.
+        """
+        Gets the recording oracle address of the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1159,7 +1323,8 @@ class EscrowClient:
         )
 
     def get_reputation_oracle_address(self, escrow_address: str) -> str:
-        """Gets the reputation oracle address of the escrow.
+        """
+        Gets the reputation oracle address of the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1194,7 +1359,8 @@ class EscrowClient:
         )
 
     def get_exchange_oracle_address(self, escrow_address: str) -> str:
-        """Gets the exchange oracle address of the escrow.
+        """
+        Gets the exchange oracle address of the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1227,7 +1393,8 @@ class EscrowClient:
         )
 
     def get_job_launcher_address(self, escrow_address: str) -> str:
-        """Gets the job launcher address of the escrow.
+        """
+        Gets the job launcher address of the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1258,7 +1425,8 @@ class EscrowClient:
         return self._get_escrow_contract(escrow_address).functions.launcher().call()
 
     def get_factory_address(self, escrow_address: str) -> str:
-        """Gets the escrow factory address of the escrow.
+        """
+        Gets the escrow factory address of the escrow.
 
         :param escrow_address: Address of the escrow
 
@@ -1291,7 +1459,8 @@ class EscrowClient:
         )
 
     def _get_escrow_contract(self, address: str) -> contract.Contract:
-        """Returns the escrow contract instance.
+        """
+        Returns the escrow contract instance.
 
         :param escrow_address: Address of the deployed escrow
 

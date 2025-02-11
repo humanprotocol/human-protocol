@@ -1,24 +1,26 @@
 import {
+  HttpException,
   HttpStatus,
   Injectable,
   ValidationError,
   ValidationPipe,
   ValidationPipeOptions,
 } from '@nestjs/common';
-import { ControlledError } from '../errors/controlled';
 
+// TODO: Revisit validation options
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
   constructor(options?: ValidationPipeOptions) {
     super({
-      exceptionFactory: (errors: ValidationError[]): ControlledError => {
+      exceptionFactory: (errors: ValidationError[]) => {
         const errorMessages = errors
           .map(
             (error) =>
               Object.values((error as any).constraints) as unknown as string,
           )
           .flat();
-        throw new ControlledError(
+
+        return new HttpException(
           errorMessages.join(', '),
           HttpStatus.BAD_REQUEST,
         );

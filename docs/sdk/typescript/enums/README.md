@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../README.md) • **Docs**
+[**@human-protocol/sdk**](../README.md)
 
 ***
 
@@ -11,4 +11,5 @@
 ### Enumerations
 
 - [ChainId](enumerations/ChainId.md)
+- [LeaderCategory](enumerations/LeaderCategory.md)
 - [OrderDirection](enumerations/OrderDirection.md)

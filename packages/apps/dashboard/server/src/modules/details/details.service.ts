@@ -8,6 +8,9 @@ import {
   IEscrowsFilter,
   Role,
   NETWORKS,
+  ILeadersFilter,
+  OrderDirection,
+  KVStoreUtils,
 } from '@human-protocol/sdk';
 
 import { WalletDto } from './dto/wallet.dto';
@@ -20,6 +23,14 @@ import { firstValueFrom } from 'rxjs';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';
+import { LeadersOrderBy } from '../../common/enums/leader';
+import { ReputationLevel } from '../../common/enums/reputation';
+import {
+  MAX_LEADERS_COUNT,
+  MIN_AMOUNT_STAKED,
+} from '../../common/constants/leader';
+import { GetLeadersPaginationOptions } from 'src/common/types';
+import { KVStoreDataDto } from './dto/details-response.dto';
 
 @Injectable()
 export class DetailsService {
@@ -83,7 +94,6 @@ export class DetailsService {
     first: number,
     skip: number,
   ): Promise<TransactionPaginationDto[]> {
-    // TODO: Switch to fetch all transactions related to this wallet address once SDK is changed
     const transactions = await TransactionUtils.getTransactions({
       chainId,
       fromAddress: address,
@@ -146,68 +156,77 @@ export class DetailsService {
     return result;
   }
 
-  public async getBestLeadersByRole(chainId?: ChainId): Promise<LeaderDto[]> {
-    const chainIds = !chainId
-      ? await this.networkConfig.getAvailableNetworks()
-      : [chainId];
+  public async getLeaders(
+    chainId: ChainId,
+    { orderBy, orderDirection, first }: GetLeadersPaginationOptions = {},
+  ): Promise<LeaderDto[]> {
+    const filter = this.createLeadersFilter(
+      chainId,
+      orderBy,
+      orderDirection,
+      first,
+    );
 
-    const leadersByRole: { [role: string]: LeaderDto } = {};
+    const [rawLeaders, reputations] = await Promise.all([
+      OperatorUtils.getLeaders(filter),
+      this.fetchReputations(
+        chainId,
+        orderBy,
+        orderDirection,
+        orderBy === LeadersOrderBy.REPUTATION ? filter.first : undefined,
+      ),
+    ]);
 
-    for (const id of chainIds) {
-      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
+    const leaders = rawLeaders
+      .filter((leader) => leader.role)
+      .map((leader) =>
+        plainToInstance(LeaderDto, leader, { excludeExtraneousValues: true }),
+      );
 
-      for (const leaderData of leadersData) {
-        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-          excludeExtraneousValues: true,
-        });
-        leaderDto.chainId = id;
+    const leadersWithReputation = this.assignReputationsToLeaders(
+      leaders,
+      reputations,
+    );
 
-        const role = leaderDto.role;
-
-        if (Object.values(Role).includes(role)) {
-          if (
-            !leadersByRole[role] ||
-            BigInt(leaderDto.amountStaked) >
-              BigInt(leadersByRole[role].amountStaked)
-          ) {
-            leadersByRole[role] = leaderDto;
-          }
-        }
-      }
+    if (orderBy === LeadersOrderBy.REPUTATION) {
+      return this.sortLeadersByReputation(
+        leadersWithReputation,
+        orderDirection,
+        first,
+      );
     }
 
-    const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(Object.values(leadersByRole), reputations);
-
-    return Object.values(leadersByRole);
+    return leadersWithReputation;
   }
 
-  public async getAllLeaders(chainId?: ChainId): Promise<LeaderDto[]> {
-    const chainIds = !chainId
-      ? await this.networkConfig.getAvailableNetworks()
-      : [chainId];
+  private createLeadersFilter(
+    chainId: ChainId,
+    orderBy: LeadersOrderBy,
+    orderDirection: OrderDirection,
+    first?: number,
+  ): ILeadersFilter {
+    const leadersFilter: ILeadersFilter = {
+      chainId,
+      minAmountStaked: MIN_AMOUNT_STAKED,
+      roles: [
+        Role.JobLauncher,
+        Role.ExchangeOracle,
+        Role.RecordingOracle,
+        Role.ReputationOracle,
+      ],
+    };
 
-    const allLeaders: LeaderDto[] = [];
-
-    for (const id of chainIds) {
-      const leadersData = await OperatorUtils.getLeaders({ chainId: id });
-
-      for (const leaderData of leadersData) {
-        const leaderDto: LeaderDto = plainToInstance(LeaderDto, leaderData, {
-          excludeExtraneousValues: true,
-        });
-        leaderDto.chainId = id;
-
-        if (leaderDto.role) {
-          allLeaders.push(leaderDto);
-        }
-      }
+    if (orderBy === LeadersOrderBy.REPUTATION) {
+      leadersFilter.first = MAX_LEADERS_COUNT;
+    } else {
+      Object.assign(leadersFilter, {
+        orderBy,
+        orderDirection,
+        first,
+      });
     }
 
-    const reputations = await this.fetchReputations();
-    this.assignReputationsToLeaders(allLeaders, reputations);
-
-    return allLeaders;
+    return leadersFilter;
   }
 
   private async fetchReputation(
@@ -217,10 +236,16 @@ export class DetailsService {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
-          this.configService.reputationSource + `/reputation/${address}`,
+          `${this.configService.reputationSource}/reputation/${address}`,
           {
             params: {
               chain_id: chainId,
+              roles: [
+                Role.JobLauncher,
+                Role.ExchangeOracle,
+                Role.RecordingOracle,
+                Role.ReputationOracle,
+              ],
             },
           },
         ),
@@ -232,29 +257,41 @@ export class DetailsService {
     }
   }
 
-  private async fetchReputations(): Promise<
-    { address: string; reputation: string }[]
-  > {
+  private async fetchReputations(
+    chainId: ChainId,
+    orderBy?: LeadersOrderBy,
+    orderDirection?: OrderDirection,
+    first?: number,
+  ): Promise<{ address: string; reputation: string }[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
-          this.configService.reputationSource + '/reputation',
+          `${this.configService.reputationSource}/reputation`,
           {
             params: {
-              chain_id: ChainId.POLYGON,
+              chain_id: chainId,
               roles: [
-                'JOB_LAUNCHER',
-                'EXCHANGE_ORACLE',
-                'RECORDING_ORACLE',
-                'REPUTATION_ORACLE',
+                Role.JobLauncher,
+                Role.ExchangeOracle,
+                Role.RecordingOracle,
+                Role.ReputationOracle,
               ],
+              ...(orderBy &&
+                orderBy === LeadersOrderBy.REPUTATION && {
+                  order_by: 'reputation_points',
+                }),
+              ...(orderDirection && { order_direction: orderDirection }),
+              ...(first && { first }),
             },
           },
         ),
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Error fetching reputations:', error);
+      this.logger.error(
+        `Error fetching reputations for chain id ${chainId}`,
+        error,
+      );
       return [];
     }
   }
@@ -262,15 +299,61 @@ export class DetailsService {
   private assignReputationsToLeaders(
     leaders: LeaderDto[],
     reputations: { address: string; reputation: string }[],
-  ) {
+  ): LeaderDto[] {
     const reputationMap = new Map(
       reputations.map((rep) => [rep.address.toLowerCase(), rep.reputation]),
     );
+
     leaders.forEach((leader) => {
       const reputation = reputationMap.get(leader.address.toLowerCase());
-      if (reputation) {
-        leader.reputation = reputation;
+      leader.reputation = reputation || ReputationLevel.LOW;
+    });
+
+    return leaders;
+  }
+
+  private sortLeadersByReputation(
+    leaders: LeaderDto[],
+    orderDirection: OrderDirection,
+    first?: number,
+  ): LeaderDto[] {
+    const reputationOrder = {
+      [ReputationLevel.LOW]: 1,
+      [ReputationLevel.MEDIUM]: 2,
+      [ReputationLevel.HIGH]: 3,
+    };
+
+    const sortedLeaders = leaders.sort((a, b) => {
+      const reputationA = reputationOrder[a.reputation || ReputationLevel.LOW];
+      const reputationB = reputationOrder[b.reputation || ReputationLevel.LOW];
+
+      if (orderDirection === OrderDirection.ASC) {
+        return reputationA - reputationB;
+      } else {
+        return reputationB - reputationA;
       }
     });
+
+    if (first) {
+      return sortedLeaders.slice(0, first);
+    }
+
+    return sortedLeaders;
+  }
+
+  public async getKVStoreData(
+    chainId: ChainId,
+    address: string,
+  ): Promise<KVStoreDataDto[]> {
+    const kvStoreData = await KVStoreUtils.getKVStoreData(chainId, address);
+
+    const data: KVStoreDataDto[] = kvStoreData.map((data: any) => {
+      return plainToInstance(KVStoreDataDto, {
+        key: data.key,
+        value: data.value,
+      });
+    });
+
+    return data;
   }
 }

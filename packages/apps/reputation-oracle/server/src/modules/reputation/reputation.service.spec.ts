@@ -24,11 +24,9 @@ import {
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 import { EscrowClient } from '@human-protocol/sdk';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
-import { ControlledError } from '../../common/errors/controlled';
-import { HttpStatus } from '@nestjs/common';
+import { ReputationError, ReputationErrorMessage } from './reputation.error';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -84,7 +82,6 @@ describe('ReputationService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
@@ -107,54 +104,7 @@ describe('ReputationService', () => {
     const chainId = ChainId.LOCALHOST;
     const escrowAddress = 'mockEscrowAddress';
 
-    it('should handle manifest URL not found', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest.fn().mockResolvedValue(null),
-      }));
-
-      await expect(
-        reputationService.assessReputationScores(chainId, escrowAddress),
-      ).rejects.toThrow(
-        new ControlledError(
-          ErrorManifest.ManifestUrlDoesNotExist,
-          HttpStatus.BAD_REQUEST,
-        ),
-      );
-    });
-
     describe('fortune', () => {
-      it('should handle no verified results', async () => {
-        (EscrowClient.build as any).mockImplementation(() => ({
-          getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-          getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-          getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-          getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-          getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        }));
-
-        const manifest = {
-          requestType: JobRequestType.FORTUNE,
-        };
-
-        jest
-          .spyOn(storageService, 'downloadJsonLikeData')
-          .mockResolvedValueOnce(manifest) // Mock manifest
-          .mockResolvedValueOnce([]); // Mock final results
-
-        jest
-          .spyOn(reputationService, 'increaseReputation')
-          .mockResolvedValueOnce();
-
-        await expect(
-          reputationService.assessReputationScores(chainId, escrowAddress),
-        ).rejects.toThrow(
-          new ControlledError(
-            ErrorResults.NoResultsHaveBeenVerified,
-            HttpStatus.BAD_REQUEST,
-          ),
-        );
-      });
-
       it('should assess reputation scores', async () => {
         const manifest = {
           requestType: JobRequestType.FORTUNE,
@@ -227,34 +177,14 @@ describe('ReputationService', () => {
         job_bounty: '10',
       };
 
-      it('should handle annotation meta does not exist', async () => {
-        (EscrowClient.build as any).mockImplementation(() => ({
-          getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-          getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-          getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-          getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-          getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
-          getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        }));
-
-        jest
-          .spyOn(storageService, 'downloadJsonLikeData')
-          .mockResolvedValueOnce(manifest) // Mock manifest
-          .mockResolvedValueOnce([]); // Mock final results
-
-        jest
-          .spyOn(reputationService, 'increaseReputation')
-          .mockResolvedValueOnce();
-
-        await expect(
-          reputationService.assessReputationScores(chainId, escrowAddress),
-        ).rejects.toThrow(
-          new ControlledError(
-            ErrorResults.NoAnnotationsMetaFound,
-            HttpStatus.BAD_REQUEST,
-          ),
-        );
-      });
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getJobLauncherAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getExchangeOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      }));
 
       it('should assess reputation scores', async () => {
         const annotationMeta = {
@@ -382,6 +312,7 @@ describe('ReputationService', () => {
       const reputationEntity: Partial<ReputationEntity> = {
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
         save: jest.fn(),
       };
 
@@ -427,6 +358,7 @@ describe('ReputationService', () => {
       const reputationEntity: Partial<ReputationEntity> = {
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
         save: jest.fn(),
       };
 
@@ -447,6 +379,7 @@ describe('ReputationService', () => {
       const reputationEntity: Partial<ReputationEntity> = {
         address,
         reputationPoints: 701,
+        type: ReputationEntityType.RECORDING_ORACLE,
         save: jest.fn(),
       };
 
@@ -496,6 +429,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
       };
 
       jest
@@ -508,6 +442,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputation: ReputationLevel.HIGH,
+        role: ReputationEntityType.REPUTATION_ORACLE,
       };
 
       expect(result).toEqual(resultReputation);
@@ -519,6 +454,7 @@ describe('ReputationService', () => {
         chainId,
         address: NOT_ORACLE_ADDRESS,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
       };
 
       jest
@@ -534,6 +470,7 @@ describe('ReputationService', () => {
         chainId,
         address: NOT_ORACLE_ADDRESS,
         reputation: ReputationLevel.LOW,
+        role: ReputationEntityType.RECORDING_ORACLE,
       };
 
       expect(
@@ -542,9 +479,22 @@ describe('ReputationService', () => {
 
       expect(result).toEqual(resultReputation);
     });
+
+    it('should handle reputation not found', async () => {
+      const NOT_ORACLE_ADDRESS = '0x0000000000000000000000000000000000000000';
+      jest
+        .spyOn(reputationRepository, 'findOneByAddressAndChainId')
+        .mockResolvedValueOnce(null);
+
+      await expect(
+        reputationService.getReputation(chainId, NOT_ORACLE_ADDRESS),
+      ).rejects.toThrow(
+        new ReputationError(ReputationErrorMessage.NOT_FOUND, chainId, address),
+      );
+    });
   });
 
-  describe('getAllReputations', () => {
+  describe('getReputations', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
 
@@ -553,18 +503,20 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputationPoints: 1,
+        type: ReputationEntityType.RECORDING_ORACLE,
       };
 
       jest
         .spyOn(reputationRepository, 'findByChainIdAndTypes')
         .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
 
-      const result = await reputationService.getAllReputations();
+      const result = await reputationService.getReputations();
 
       const resultReputation = {
         chainId,
         address,
         reputation: ReputationLevel.LOW,
+        role: ReputationEntityType.RECORDING_ORACLE,
       };
 
       expect(reputationRepository.findByChainIdAndTypes).toHaveBeenCalled();

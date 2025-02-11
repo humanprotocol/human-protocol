@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, In, LessThan, MoreThan } from 'typeorm';
 import { PaymentStatus } from '../../common/enums/payment';
 import { BaseRepository } from '../../database/base.repository';
 import { PaymentEntity } from './payment.entity';
@@ -23,19 +23,28 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
     return this.findOne({ where: whereOptions });
   }
 
-  public findByUserAndStatus(
+  public async getUserBalancePayments(
     userId: number,
-    status: PaymentStatus,
   ): Promise<PaymentEntity[]> {
-    return this.find({
+    // Find negative amounts with status 'PENDING' or 'SUCCEEDED'
+    const negativePayments = await this.find({
       where: {
         userId,
-        status,
-      },
-      order: {
-        createdAt: 'DESC',
+        amount: LessThan(0),
+        status: In([PaymentStatus.PENDING, PaymentStatus.SUCCEEDED]),
       },
     });
+
+    // Find positive amounts with status 'SUCCEEDED'
+    const positivePayments = await this.find({
+      where: {
+        userId,
+        amount: MoreThan(0),
+        status: PaymentStatus.SUCCEEDED,
+      },
+    });
+
+    return [...negativePayments, ...positivePayments];
   }
 
   public async fetchFiltered(

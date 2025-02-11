@@ -57,7 +57,6 @@ export const isValidUrl = (url: string) => {
  * **Get the subgraph URL.*
  *
  * @param {NetworkData} networkData
- * @param {string} apiKey
  * @returns
  */
 export const getSubgraphUrl = (networkData: NetworkData) => {
@@ -73,4 +72,14 @@ export const getSubgraphUrl = (networkData: NetworkData) => {
   }
 
   return subgraphUrl;
+};
+
+/**
+ * **Convert a date to Unix timestamp (seconds since epoch).*
+ *
+ * @param {Date} date
+ * @returns {number}
+ */
+export const getUnixTimestamp = (date: Date): number => {
+  return Math.floor(date.getTime() / 1000);
 };

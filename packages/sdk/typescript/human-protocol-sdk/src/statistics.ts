@@ -20,25 +20,20 @@ import {
 } from './graphql';
 import { IHMTHoldersParams, IStatisticsFilter } from './interfaces';
 import { NetworkData } from './types';
-import { getSubgraphUrl, throwError } from './utils';
+import { getSubgraphUrl, getUnixTimestamp, throwError } from './utils';
 import { OrderDirection } from './enums';
 
 /**
  * ## Introduction
  *
- * This client enables to obtain statistical information from the subgraph.
+ * This client enables obtaining statistical information from the subgraph.
  *
- * Unlikely from the other SDK clients, `StatisticsClient` does not require `signer` or `provider` to be provided.
- * We just need to create client object using relevant network data.
+ * Unlike other SDK clients, `StatisticsClient` does not require `signer` or `provider` to be provided.
+ * We just need to create a client object using relevant network data.
  *
  * ```ts
  * constructor(network: NetworkData)
  * ```
- *
- * A `Signer` or a `Provider` should be passed depending on the use case of this module:
- *
- * - **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
- * - **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
  *
  * ## Installation
  *
@@ -77,7 +72,6 @@ export class StatisticsClient {
   /**
    * This function returns the statistical data of escrows.
    *
-   *
    * **Input parameters**
    *
    * ```ts
@@ -106,10 +100,8 @@ export class StatisticsClient {
    * };
    * ```
    *
-   *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {EscrowStatistics} Escrow statistics data.
-   *
+   * @returns {Promise<EscrowStatistics>} Escrow statistics data.
    *
    * **Code example**
    *
@@ -141,8 +133,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -169,7 +161,6 @@ export class StatisticsClient {
   /**
    * This function returns the statistical data of workers.
    *
-   *
    * **Input parameters**
    *
    * ```ts
@@ -193,10 +184,8 @@ export class StatisticsClient {
    * };
    * ```
    *
-   *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {WorkerStatistics} Worker statistics data.
-   *
+   * @returns {Promise<WorkerStatistics>} Worker statistics data.
    *
    * **Code example**
    *
@@ -224,8 +213,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -244,7 +233,6 @@ export class StatisticsClient {
 
   /**
    * This function returns the statistical data of payments.
-   *
    *
    * **Input parameters**
    *
@@ -271,10 +259,8 @@ export class StatisticsClient {
    * };
    * ```
    *
-   *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {PaymentStatistics} Payment statistics data.
-   *
+   * @returns {Promise<PaymentStatistics>} Payment statistics data.
    *
    * **Code example**
    *
@@ -323,8 +309,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -350,7 +336,7 @@ export class StatisticsClient {
   /**
    * This function returns the statistical data of HMToken.
    *
-   *
+   * ```ts
    * type HMTStatistics = {
    *   totalTransferAmount: BigNumber;
    *   totalTransferCount: BigNumber;
@@ -358,9 +344,7 @@ export class StatisticsClient {
    * };
    * ```
    *
-   *
-   * @returns {HMTStatistics} HMToken statistics data.
-   *
+   * @returns {Promise<HMTStatistics>} HMToken statistics data.
    *
    * **Code example**
    *
@@ -401,7 +385,7 @@ export class StatisticsClient {
    * **Input parameters**
    *
    * @param {IHMTHoldersParams} params HMT Holders params with filters and ordering
-   * @returns {HMTHolder[]} List of HMToken holders.
+   * @returns {Promise<HMTHolder[]>} List of HMToken holders.
    *
    * **Code example**
    *
@@ -447,7 +431,6 @@ export class StatisticsClient {
   /**
    * This function returns the statistical data of HMToken day by day.
    *
-   *
    * **Input parameters**
    *
    * ```ts
@@ -470,10 +453,8 @@ export class StatisticsClient {
    * }
    * ```
    *
-   *
    * @param {IStatisticsFilter} filter Statistics params with duration data
-   * @returns {DailyHMTData[]} Daily HMToken statistics data.
-   *
+   * @returns {Promise<DailyHMTData[]>} Daily HMToken statistics data.
    *
    * **Code example**
    *
@@ -506,8 +487,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,

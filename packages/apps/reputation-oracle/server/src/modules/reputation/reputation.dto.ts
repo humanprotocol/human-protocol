@@ -1,12 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsEnum,
   IsEthereumAddress,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { ReputationEntityType, ReputationLevel } from '../../common/enums';
+import {
+  ReputationEntityType,
+  ReputationLevel,
+  ReputationOrderBy,
+  SortDirection,
+} from '../../common/enums';
 import { Transform } from 'class-transformer';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 
@@ -35,10 +43,7 @@ export class ReputationUpdateDto {
 }
 
 export class ReputationGetAllQueryDto {
-  @ApiPropertyOptional({
-    enum: ChainId,
-    name: 'chain_id',
-  })
+  @ApiPropertyOptional({ enum: ChainId, name: 'chain_id' })
   @IsEnumCaseInsensitive(ChainId)
   @IsOptional()
   @Transform(({ value }) => Number(value))
@@ -53,6 +58,36 @@ export class ReputationGetAllQueryDto {
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   public roles?: ReputationEntityType[];
+
+  @ApiPropertyOptional({
+    enum: ReputationOrderBy,
+    default: ReputationOrderBy.CREATED_AT,
+  })
+  @IsEnum(ReputationOrderBy)
+  @IsIn(Object.values(ReputationOrderBy))
+  @IsOptional()
+  public orderBy?: ReputationOrderBy;
+
+  @ApiPropertyOptional({
+    enum: SortDirection,
+    default: SortDirection.DESC,
+  })
+  @IsEnum(SortDirection)
+  @IsIn(Object.values(SortDirection))
+  @IsOptional()
+  public orderDirection?: SortDirection;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @Min(1)
+  @Transform(({ value }) => Number(value))
+  public first?: number;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @Min(0)
+  @Transform(({ value }) => Number(value))
+  public skip?: number;
 }
 
 export class ReputationGetParamsDto {
@@ -84,4 +119,8 @@ export class ReputationDto {
   @IsEnumCaseInsensitive(ReputationLevel)
   @Transform(({ value }) => Number(value))
   reputation: ReputationLevel;
+
+  @ApiProperty({ enum: ReputationEntityType })
+  @IsEnumCaseInsensitive(ReputationEntityType)
+  role: ReputationEntityType;
 }

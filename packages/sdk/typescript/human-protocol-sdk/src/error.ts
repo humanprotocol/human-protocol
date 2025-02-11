@@ -4,24 +4,24 @@
 export const ErrorStakingMissing = new Error('Staking contract is missing');
 
 /**
- * @constant {Error} - The Storage client not initialised.
+ * @constant {Error} - The Storage client not initialized.
  */
 export const ErrorStorageClientNotInitialized = new Error(
   'Storage client not initialized'
 );
 
 /**
- * @constant {Error} - The Storage does not exists.
+ * @constant {Error} - The Storage client does not exist.
  */
 export const ErrorStorageClientNotExists = new Error(
-  'Storage client does not exists'
+  'Storage client does not exist'
 );
 
 /**
- * @constant {Error} - The Storage credentials is missing.
+ * @constant {Error} - The Storage credentials are missing.
  */
 export const ErrorStorageCredentialsMissing = new Error(
-  'Storage credentials is missing'
+  'Storage credentials are missing'
 );
 
 /**
@@ -40,9 +40,9 @@ export const ErrorStorageFileNotFound = new Error('File not found');
 export const ErrorStorageFileNotUploaded = new Error('File not uploaded');
 
 /**
- * @constant {Error} - The KVStore key can not be empty.
+ * @constant {Error} - The KVStore key cannot be empty.
  */
-export const ErrorKVStoreEmptyKey = new Error('Key can not be empty');
+export const ErrorKVStoreEmptyKey = new Error('Key cannot be empty');
 
 /**
  * @constant {Error} - The KVStore arrays must have the same length.
@@ -52,12 +52,12 @@ export const ErrorKVStoreArrayLength = new Error(
 );
 
 /**
- * @constant {Error} - The Address sent is invalid.
+ * @constant {Error} - The address provided is invalid.
  */
 export const ErrorInvalidAddress = new Error('Invalid address');
 
 /**
- * @constant {Error} - The token address sent is invalid.
+ * @constant {Error} - The token address provided is invalid.
  */
 export const ErrorInvalidTokenAddress = new Error('Invalid token address');
 
@@ -76,14 +76,14 @@ export const ErrorInvalidReputationOracleAddressProvided = new Error(
 );
 
 /**
- * @constant {Error} - Invalid reputation oracle address provided.
+ * @constant {Error} - Invalid exchange oracle address provided.
  */
 export const ErrorInvalidExchangeOracleAddressProvided = new Error(
   'Invalid exchange oracle address provided'
 );
 
 /**
- * @constant {Error} - The Staking value must be positive.
+ * @constant {Error} - The staking value must be positive.
  */
 export const ErrorStakingValueMustBePositive = new Error(
   'Value must be positive'
@@ -120,7 +120,7 @@ export const ErrorInvalidStakerAddressProvided = new Error(
 /**
  * @constant {Error} - Invalid hash provided.
  */
-export const ErrorInvalidHahsProvided = new Error('Invalid hash provided');
+export const ErrorInvalidHashProvided = new Error('Invalid hash provided');
 
 /**
  * @constant {Error} - Cannot use both date and block filters simultaneously.
@@ -148,6 +148,9 @@ export const ErrorFailedToApproveStakingAmountSignerDoesNotExist = new Error(
   'Failed to approve staking amount: signerOrProvider is not a Signer instance'
 );
 
+/**
+ * @constant {Error} - Failed to check allowance.
+ */
 export const ErrorFailedToCheckAllowance = new Error(
   'Failed to check allowance'
 );
@@ -158,12 +161,12 @@ export const ErrorFailedToCheckAllowance = new Error(
 export const ErrorHMTokenAmountNotApproved = new Error('Amount not approved');
 
 /**
- * @constant {Error} - Init provider does not exists.
+ * @constant {Error} - Provider does not exist.
  */
 export const ErrorProviderDoesNotExist = new Error('Provider does not exist');
 
 /**
- * @constant {Error} - Init with unsupported chain ID.
+ * @constant {Error} - Unsupported chain ID.
  */
 export const ErrorUnsupportedChainID = new Error('Unsupported chain ID');
 
@@ -191,13 +194,6 @@ export const ErrorTransferEventNotFoundInTransactionLogs = new Error(
  */
 export const ErrorManifestFileDoesNotExist = new Error(
   'Manifest file does not exist'
-);
-
-/**
- * @constant {Error} - Storage client does not exist.
- */
-export const ErrorStorageClientDoesNotExist = new Error(
-  'Storage client does not exist'
 );
 
 /**
@@ -244,7 +240,12 @@ export const ErrorRecipientCannotBeEmptyArray = new Error(
 );
 
 /**
- * @constant {Error} - Amount must be greater than zero..
+ * @constant {Error} - Too many recipients.
+ */
+export const ErrorTooManyRecipients = new Error('Too many recipients');
+
+/**
+ * @constant {Error} - Amount must be greater than zero.
  */
 export const ErrorAmountMustBeGreaterThanZero = new Error(
   'Amount must be greater than zero'
@@ -282,6 +283,22 @@ export const ErrorLaunchedEventIsNotEmitted = new Error(
  * @constant {Error} - Hash is an empty string.
  */
 export const ErrorHashIsEmptyString = new Error('Hash is an empty string');
+
+/**
+ * @constant {Error} - The hash does not match.
+ */
+export const ErrorInvalidHash = new Error('Invalid hash');
+
+/**
+ * @constant {Error} - The status is not supported.
+ */
+export const ErrorUnsupportedStatus = new Error('Unsupported status for query');
+
+/**
+ * @constant {Warning} - The SUBGRAPH_API_KEY is not being provided.
+ */
+export const WarnSubgraphApiKeyNotProvided =
+  '"SUBGRAPH_API_KEY" is not being provided. It might cause issues with the subgraph.';
 
 export class EthereumError extends Error {
   constructor(message: string) {
@@ -330,21 +347,6 @@ export class InvalidEthereumAddressError extends Error {
     super(`Invalid ethereum address error: ${address}`);
   }
 }
-/**
- * @constant {Error} - The Hash does not match
- */
-export const ErrorInvalidHash = new Error('Invalid hash');
-
-/**
- * @constant {Error} - The Status is not supported
- */
-export const ErrorUnsupportedStatus = new Error('Unsupported status for query');
-
-/**
- * @constant {Error} - The SUBGRAPH_API_KEY is not being provided
- */
-export const WarnSubgraphApiKeyNotProvided =
-  '"SUBGRAPH_API_KEY" is not being provided. It might cause issues with the subgraph.';
 
 export class InvalidKeyError extends Error {
   constructor(key: string, address: string) {

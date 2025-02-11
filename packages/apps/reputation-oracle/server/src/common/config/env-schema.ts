@@ -54,10 +54,10 @@ export const envValidator = Joi.object({
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string(),
   S3_USE_SSL: Joi.string(),
-  // SendGrid
-  SENDGRID_API_KEY: Joi.string().required(),
-  SENDGRID_FROM_EMAIL: Joi.string(),
-  SENDGRID_FROM_NAME: Joi.string(),
+  // Email
+  SENDGRID_API_KEY: Joi.string(),
+  EMAIL_FROM: Joi.string(),
+  EMAIL_FROM_NAME: Joi.string(),
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number(),
   REPUTATION_LEVEL_HIGH: Joi.number(),
@@ -69,4 +69,7 @@ export const envValidator = Joi.object({
   KYC_API_KEY: Joi.string(),
   KYC_API_PRIVATE_KEY: Joi.string().required(),
   KYC_BASE_URL: Joi.string(),
+
+  // Human App
+  HUMAN_APP_EMAIL: Joi.string().email().required(),
 });

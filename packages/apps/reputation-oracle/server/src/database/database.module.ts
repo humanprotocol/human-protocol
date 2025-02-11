@@ -15,15 +15,14 @@ import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
 import { ServerConfigService } from '../common/config/server-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
-import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
-import { CredentialEntity } from '../modules/credentials/credential.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
-import { EscrowCompletionTrackingEntity } from 'src/modules/escrow-completion-tracking/escrow-completion-tracking.entity';
 import { NDASignatureEntity } from '../modules/nda/nda-signature.entity';
 import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
+import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
+import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
 
 @Module({
   imports: [
@@ -51,10 +50,9 @@ import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
           entities: [
             WebhookIncomingEntity,
             WebhookOutgoingEntity,
-            EscrowCompletionTrackingEntity,
+            EscrowCompletionEntity,
+            EscrowPayoutsBatchEntity,
             ReputationEntity,
-            CredentialEntity,
-            CredentialValidationEntity,
             TokenEntity,
             UserEntity,
             KycEntity,

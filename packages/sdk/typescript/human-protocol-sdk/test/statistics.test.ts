@@ -69,8 +69,8 @@ describe('StatisticsClient', () => {
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
-          from: from.getTime() / 1000,
-          to: to.getTime() / 1000,
+          from: Math.floor(from.getTime() / 1000),
+          to: Math.floor(to.getTime() / 1000),
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
@@ -131,8 +131,8 @@ describe('StatisticsClient', () => {
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
-          from: from.getTime() / 1000,
-          to: to.getTime() / 1000,
+          from: Math.floor(from.getTime() / 1000),
+          to: Math.floor(to.getTime() / 1000),
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
@@ -190,8 +190,8 @@ describe('StatisticsClient', () => {
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
-          from: from.getTime() / 1000,
-          to: to.getTime() / 1000,
+          from: Math.floor(from.getTime() / 1000),
+          to: Math.floor(to.getTime() / 1000),
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,
@@ -228,7 +228,7 @@ describe('StatisticsClient', () => {
 
   describe('getHMTStatistics', () => {
     test('should successfully get HMT statistics', async () => {
-      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+      vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
         hmtokenStatistics: {
           totalValueTransfered: '100',
           totalTransferEventCount: '4',
@@ -444,8 +444,8 @@ describe('StatisticsClient', () => {
         'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
-          from: from.getTime() / 1000,
-          to: to.getTime() / 1000,
+          from: Math.floor(from.getTime() / 1000),
+          to: Math.floor(to.getTime() / 1000),
           orderDirection: OrderDirection.ASC,
           first: 10,
           skip: 0,

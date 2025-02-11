@@ -1,4 +1,4 @@
-[**@human-protocol/sdk**](../../README.md) • **Docs**
+[**@human-protocol/sdk**](../../README.md)
 
 ***
 
@@ -8,19 +8,14 @@
 
 ## Introduction
 
-This client enables to obtain statistical information from the subgraph.
+This client enables obtaining statistical information from the subgraph.
 
-Unlikely from the other SDK clients, `StatisticsClient` does not require `signer` or `provider` to be provided.
-We just need to create client object using relevant network data.
+Unlike other SDK clients, `StatisticsClient` does not require `signer` or `provider` to be provided.
+We just need to create a client object using relevant network data.
 
 ```ts
 constructor(network: NetworkData)
 ```
-
-A `Signer` or a `Provider` should be passed depending on the use case of this module:
-
-- **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
-- **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
 
 ## Installation
 
@@ -52,7 +47,9 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 #### Parameters
 
-• **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
+##### networkData
+
+[`NetworkData`](../../types/type-aliases/NetworkData.md)
 
 The network information required to connect to the Statistics contract
 
@@ -62,7 +59,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:72](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L72)
+[statistics.ts:67](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L67)
 
 ## Properties
 
@@ -72,7 +69,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:64](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L64)
+[statistics.ts:59](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L59)
 
 ***
 
@@ -82,7 +79,7 @@ The network information required to connect to the Statistics contract
 
 #### Defined in
 
-[statistics.ts:65](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L65)
+[statistics.ts:60](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L60)
 
 ## Methods
 
@@ -122,7 +119,9 @@ type EscrowStatistics = {
 
 #### Parameters
 
-• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
+##### filter
+
+[`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
@@ -148,7 +147,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:128](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L128)
+[statistics.ts:120](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L120)
 
 ***
 
@@ -182,7 +181,9 @@ type DailyHMTData = {
 
 #### Parameters
 
-• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
+##### filter
+
+[`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
@@ -213,7 +214,7 @@ console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
 
 #### Defined in
 
-[statistics.ts:495](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L495)
+[statistics.ts:478](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L478)
 
 ***
 
@@ -227,7 +228,9 @@ This function returns the holders of the HMToken with optional filters and order
 
 #### Parameters
 
-• **params**: [`IHMTHoldersParams`](../../interfaces/interfaces/IHMTHoldersParams.md) = `{}`
+##### params
+
+[`IHMTHoldersParams`](../../interfaces/interfaces/IHMTHoldersParams.md) = `{}`
 
 HMT Holders params with filters and ordering
 
@@ -256,7 +259,7 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 #### Defined in
 
-[statistics.ts:421](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L421)
+[statistics.ts:407](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L407)
 
 ***
 
@@ -266,6 +269,7 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 
 This function returns the statistical data of HMToken.
 
+```ts
 type HMTStatistics = {
   totalTransferAmount: BigNumber;
   totalTransferCount: BigNumber;
@@ -273,7 +277,11 @@ type HMTStatistics = {
 };
 ```
 
-@returns {HMTStatistics} HMToken statistics data.
+#### Returns
+
+`Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
+
+HMToken statistics data.
 
 **Code example**
 
@@ -290,13 +298,9 @@ console.log('HMT statistics:', {
 });
 ```
 
-#### Returns
-
-`Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
-
 #### Defined in
 
-[statistics.ts:378](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L378)
+[statistics.ts:364](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L364)
 
 ***
 
@@ -333,7 +337,9 @@ type PaymentStatistics = {
 
 #### Parameters
 
-• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
+##### filter
+
+[`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
@@ -380,7 +386,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:312](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L312)
+[statistics.ts:300](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L300)
 
 ***
 
@@ -415,7 +421,9 @@ type WorkerStatistics = {
 
 #### Parameters
 
-• **filter**: [`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
+##### filter
+
+[`IStatisticsFilter`](../../interfaces/interfaces/IStatisticsFilter.md) = `{}`
 
 Statistics params with duration data
 
@@ -441,4 +449,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:213](https://github.com/humanprotocol/human-protocol/blob/2adb3114c920b5264832199f17e9531ba585c005/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L213)
+[statistics.ts:204](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L204)

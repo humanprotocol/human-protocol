@@ -13,10 +13,11 @@ const DEFAULT_HCAPTCHA_STATS_SOURCE =
 const DEFAULT_HCAPTCHA_STATS_FILE = 'hcaptchaStats.json';
 export const HCAPTCHA_STATS_START_DATE = '2022-07-01';
 export const HCAPTCHA_STATS_API_START_DATE = '2024-09-14';
+export const DEFAULT_HCAPTCHA_STATS_ENABLED = true;
 export const HMT_STATS_START_DATE = '2021-04-06';
 export const MINIMUM_HMT_TRANSFERS = 5;
 export const DEFAULT_NETWORK_USAGE_FILTER_MONTHS = 1;
-export const DEFAULT_NETWORKS_AVAILABLE_CACHE_TTL = 2 * 60;
+export const DEFAULT_NETWORKS_OPERATING_CACHE_TTL = 2 * 60;
 export const MINIMUM_ESCROWS_COUNT = 1;
 
 @Injectable()
@@ -82,6 +83,14 @@ export class EnvironmentConfigService {
       DEFAULT_HCAPTCHA_STATS_FILE,
     );
   }
+
+  get hCaptchaStatsEnabled(): boolean {
+    return this.configService.get<boolean>(
+      'HCAPTCHA_STATS_ENABLED',
+      DEFAULT_HCAPTCHA_STATS_ENABLED,
+    );
+  }
+
   get reputationSource(): string {
     return this.configService.getOrThrow<string>('REPUTATION_SOURCE_URL');
   }
@@ -93,10 +102,12 @@ export class EnvironmentConfigService {
     );
   }
 
-  get networkAvailableCacheTtl(): number {
-    return this.configService.get<number>(
-      'NETWORKS_AVAILABLE_CACHE_TTL',
-      DEFAULT_NETWORKS_AVAILABLE_CACHE_TTL,
+  get networkOperatingCacheTtl(): number {
+    return (
+      this.configService.get<number>(
+        'NETWORKS_OPERATING_CACHE_TTL',
+        DEFAULT_NETWORKS_OPERATING_CACHE_TTL,
+      ) * 1000
     );
   }
 }

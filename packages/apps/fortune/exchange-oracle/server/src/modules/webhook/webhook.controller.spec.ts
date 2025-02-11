@@ -1,6 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { MOCK_SIGNATURE } from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
 import { WebhookController } from './webhook.controller';
 import { WebhookDto } from './webhook.dto';
@@ -41,7 +40,7 @@ describe('webhookController', () => {
       };
       jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();
 
-      await webhookController.processWebhook(webhook, MOCK_SIGNATURE);
+      await webhookController.processWebhook(webhook);
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });

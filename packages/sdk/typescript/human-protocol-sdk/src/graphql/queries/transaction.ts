@@ -29,25 +29,26 @@ const TRANSACTION_FRAGMENT = gql`
 export const GET_TRANSACTIONS_QUERY = (filter: ITransactionsFilter) => {
   const { startDate, endDate, startBlock, endBlock, fromAddress, toAddress } =
     filter;
-
   const addressCondition =
     fromAddress === toAddress
       ? `
         ${fromAddress ? `{ from: $fromAddress }` : ''}
-        ${toAddress ? `{ or: [{ or: [{ to: $toAddress }, { receiver: $toAddress }] }, {internalTransactions_: { or: [{ to: $toAddress }, { receiver: $toAddress }] } ]}` : ''}
+        ${toAddress ? `{ or: [{ or: [{ to: $toAddress }, { receiver: $toAddress }] }, {internalTransactions_: { or: [{ to: $toAddress }, { receiver: $toAddress }] } }] }` : ''}
       `
       : `
-        ${fromAddress ? `from: $fromAddress` : ''}
-        ${toAddress ? `or: [{ or: [{ to: $toAddress }, { receiver: $toAddress }] }, { internalTransactions_: { or: [{ to: $toAddress }, { receiver: $toAddress }] } }]` : ''}
+        ${fromAddress ? `{ from: $fromAddress }` : ''}
+        ${toAddress ? `{ or: [{ or: [{ to: $toAddress }, { receiver: $toAddress }] }, { internalTransactions_: { or: [{ to: $toAddress }, { receiver: $toAddress }] } }] }` : ''}
       `;
 
   const WHERE_CLAUSE = `
       where: {
-        ${fromAddress && fromAddress === toAddress ? `or: [ ${addressCondition} ],` : addressCondition}
-        ${startDate ? `timestamp_gte: $startDate,` : ''}
-        ${endDate ? `timestamp_lte: $endDate,` : ''}
-        ${startBlock ? `block_gte: $startBlock,` : ''}
-        ${endBlock ? `block_lte: $endBlock,` : ''}
+      and: [
+        ${fromAddress && fromAddress === toAddress ? `{or: [ ${addressCondition} ]},` : `${addressCondition}`}
+        ${startDate ? `{timestamp_gte: $startDate},` : ''}
+        ${endDate ? `{timestamp_lte: $endDate},` : ''}
+        ${startBlock ? `{block_gte: $startBlock},` : ''}
+        ${endBlock ? `{block_lte: $endBlock},` : ''}
+      ]
       }
     `;
 

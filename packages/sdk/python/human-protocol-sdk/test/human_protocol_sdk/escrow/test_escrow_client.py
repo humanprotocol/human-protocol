@@ -973,6 +973,25 @@ class TestEscrowClient(unittest.TestCase):
             )
         self.assertEqual("Arrays must have any value", str(cm.exception))
 
+    def test_bulk_payout_exceed_max_count(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"] * 100
+        amounts = [100] * 100
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.bulk_payout(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual("Too many recipients", str(cm.exception))
+
     def test_bulk_payout_zero_amount(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -1124,34 +1143,6 @@ class TestEscrowClient(unittest.TestCase):
             "Escrow address is not provided by the factory", str(cm.exception)
         )
 
-    def test_bulk_payout_exceed_max_count(self):
-        mock_contract = MagicMock()
-        mock_contract.functions.bulkPayOut = MagicMock()
-        mock_contract.functions.bulkPayOut.return_value.transact.side_effect = Exception(
-            "Error: VM Exception while processing transaction: reverted with reason string 'Too many recipients'."
-        )
-        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        self.escrow.get_balance = MagicMock(return_value=100)
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        recipients = ["0x1234567890123456789012345678901234567890"]
-        amounts = [100]
-        final_results_url = "https://www.example.com/result"
-        final_results_hash = "test"
-        txId = 1
-
-        with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.bulk_payout(
-                escrow_address,
-                recipients,
-                amounts,
-                final_results_url,
-                final_results_hash,
-                txId,
-            )
-        self.assertEqual(
-            "Bulk Payout transaction failed: Too many recipients", str(cm.exception)
-        )
-
     def test_bulk_payout_exceed_max_value(self):
         mock_contract = MagicMock()
         mock_contract.functions.bulkPayOut = MagicMock()
@@ -1275,6 +1266,176 @@ class TestEscrowClient(unittest.TestCase):
                 EscrowClientError,
                 tx_options,
             )
+
+    def test_create_bulk_payout_transaction(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.bulkPayOut = MagicMock()
+        mock_contract.functions.bulkPayOut.return_value.build_transaction = MagicMock(
+            return_value={
+                "to": "0x1234567890123456789012345678901234567890",
+                "data": "0x1234",
+            }
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.get_balance = MagicMock(return_value=100)
+        self.w3.eth.estimate_gas = MagicMock(return_value=100)
+
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        result = self.escrow.create_bulk_payout_transaction(
+            escrow_address,
+            recipients,
+            amounts,
+            final_results_url,
+            final_results_hash,
+            txId,
+        )
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.bulkPayOut.assert_called_once_with(
+            recipients,
+            amounts,
+            final_results_url,
+            final_results_hash,
+            txId,
+            False,
+        )
+        mock_contract.functions.bulkPayOut.return_value.build_transaction.assert_called_once()
+
+        self.assertIn("to", result)
+        self.assertIn("data", result)
+        self.assertEqual(result["to"], "0x1234567890123456789012345678901234567890")
+        self.assertEqual(result["data"], "0x1234")
+
+    def test_create_bulk_payout_transaction_invalid_escrow_address(self):
+        invalid_escrow_address = "invalid_address"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_bulk_payout_transaction(
+                invalid_escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual(
+            f"Invalid escrow address: {invalid_escrow_address}", str(cm.exception)
+        )
+
+    def test_create_bulk_payout_transaction_empty_recipients(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = []
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_bulk_payout_transaction(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual("Arrays must have any value", str(cm.exception))
+
+    def test_create_bulk_payout_transaction_mismatched_lengths(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100, 200]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_bulk_payout_transaction(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual("Arrays must have same length", str(cm.exception))
+
+    def test_create_bulk_payout_transaction_insufficient_balance(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [200]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+
+        self.escrow.get_balance = MagicMock(return_value=100)
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_bulk_payout_transaction(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual(
+            "Escrow does not have enough balance. Current balance: 100. Amounts: 200",
+            str(cm.exception),
+        )
+
+    def test_create_bulk_payout_transaction_invalid_url(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "invalid_url"
+        final_results_hash = "test"
+        txId = 1
+        self.escrow.get_balance = MagicMock(return_value=100)
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_bulk_payout_transaction(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual(
+            f"Invalid final results URL: {final_results_url}", str(cm.exception)
+        )
+
+    def test_create_bulk_payout_transaction_empty_hash(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = ""
+        txId = 1
+        self.escrow.get_balance = MagicMock(return_value=100)
+
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.create_bulk_payout_transaction(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+            )
+        self.assertEqual("Invalid empty final results hash", str(cm.exception))
 
     def test_complete(self):
         mock_contract = MagicMock()

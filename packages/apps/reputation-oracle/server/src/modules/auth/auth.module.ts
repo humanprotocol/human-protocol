@@ -1,20 +1,17 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserModule } from '../user/user.module';
 import { JwtHttpStrategy } from './strategy';
 import { AuthService } from './auth.service';
 import { AuthJwtController } from './auth.controller';
-import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { SendGridModule } from '../sendgrid/sendgrid.module';
-import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { Web3Module } from '../web3/web3.module';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
 import { NDAModule } from '../nda/nda.module';
+import { EmailModule } from '../email/module';
 
 @Module({
   imports: [
@@ -29,11 +26,10 @@ import { NDAModule } from '../nda/nda.module';
         },
       }),
     }),
-    TypeOrmModule.forFeature([TokenEntity, UserEntity]),
-    SendGridModule,
     Web3Module,
     HCaptchaModule,
     NDAModule,
+    EmailModule,
   ],
   providers: [JwtHttpStrategy, AuthService, TokenRepository, UserRepository],
   controllers: [AuthJwtController],

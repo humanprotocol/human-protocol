@@ -1,3 +1,5 @@
+import { ChainId } from '@human-protocol/sdk';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { JobsDiscoveryService } from '../jobs-discovery.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -7,7 +9,7 @@ import {
   responseItemFixture1,
   responseItemFixture3,
 } from './jobs-discovery.fixtures';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 
 describe('JobsDiscoveryService', () => {
   let service: JobsDiscoveryService;
@@ -29,6 +31,12 @@ describe('JobsDiscoveryService', () => {
         JobsDiscoveryService,
         { provide: ExchangeOracleGateway, useValue: exchangeOracleGatewayMock },
         { provide: CACHE_MANAGER, useValue: cacheManagerMock },
+        {
+          provide: EnvironmentConfigService,
+          useValue: {
+            chainIdsEnabled: [ChainId.MAINNET],
+          },
+        },
       ],
     }).compile();
 

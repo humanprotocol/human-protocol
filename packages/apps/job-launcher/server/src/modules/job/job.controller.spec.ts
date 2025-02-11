@@ -20,6 +20,8 @@ import {
   MOCK_REQUESTER_TITLE,
 } from '../../../test/constants';
 import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -48,6 +50,8 @@ describe('JobController', () => {
           provide: MutexManagerService,
           useValue: mockMutexManagerService,
         },
+        Web3ConfigService,
+        ConfigService,
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -91,7 +95,7 @@ describe('JobController', () => {
       const result = await jobController.quickLaunch(jobDto, mockRequest);
 
       expect(mockJobService.createJob).toHaveBeenCalledWith(
-        mockRequest.user.id,
+        mockRequest.user,
         jobDto.requestType,
         jobDto,
       );
@@ -192,7 +196,7 @@ describe('JobController', () => {
         expect.any(Function),
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
-        mockRequest.user.id,
+        mockRequest.user,
         JobRequestType.FORTUNE,
         jobFortuneDto,
       );
@@ -295,7 +299,7 @@ describe('JobController', () => {
         expect.any(Function),
       );
       expect(mockJobService.createJob).toHaveBeenCalledWith(
-        mockRequest.user.id,
+        mockRequest.user,
         JobRequestType.IMAGE_BOXES,
         jobCvatDto,
       );

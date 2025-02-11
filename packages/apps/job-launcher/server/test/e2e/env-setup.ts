@@ -59,9 +59,6 @@ t86lkzfAep9bfBxbaCBbUhJ1s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
   process.env.S3_BUCKET = 'bucket';
   process.env.S3_USE_SSL = 'false';
 
-  process.env.MINIO_ROOT_USER = 'access-key';
-  process.env.MINIO_ROOT_PASSWORD = 'secrets-key';
-
   process.env.STRIPE_API_VERSION = '2022-11-15';
   process.env.STRIPE_APP_NAME = 'Staging Launcher Server';
   process.env.STRIPE_APP_VERSION = '1.0.0';
@@ -69,6 +66,4 @@ t86lkzfAep9bfBxbaCBbUhJ1s9+9eeLMG/nUMAaGxWeOwJ92L/KvzN6RFw==
     'https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/job-launcher/server';
 
   process.env.SENDGRID_API_KEY = 'sendgrid-disabled';
-
-  process.env.CRON_SECRET = 'test';
 }

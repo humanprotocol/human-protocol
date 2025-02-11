@@ -53,5 +53,5 @@ export class UserEntity extends BaseEntity implements IUser {
   public siteKey?: SiteKeyEntity;
 
   @OneToMany(() => NDASignatureEntity, (nda) => nda.user)
-  public ndaSignature: NDASignatureEntity[];
+  public ndaSignatures: NDASignatureEntity[];
 }

@@ -15,16 +15,17 @@ import { DetailsService } from './details.service';
 import {
   DetailsResponseDto,
   DetailsPaginationResponseDto,
+  KVStoreDataDto,
 } from './dto/details-response.dto';
 import {
   DetailsTransactionsPaginationDto,
   DetailsEscrowsPaginationDto,
+  LeadersPaginationDto,
 } from './dto/details-pagination.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
 import { LeaderDto } from './dto/leader.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
-import { MainnetsId } from '../../common/utils/constants';
 
 @ApiTags('Details')
 @Controller('/details')
@@ -33,46 +34,29 @@ export class DetailsController {
   constructor(private readonly detailsService: DetailsService) {}
 
   @Get('/leaders')
-  @ApiQuery({ name: 'chainId', enum: MainnetsId, required: false })
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get the best leaders by role',
-    description:
-      'Returns the top leader for each role for a given chain or all chains.',
+    summary: 'Get leaders',
+    description: 'Returns leaders for the given filters.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Best leaders retrieved successfully',
+    description: 'Leaders retrieved successfully',
     type: LeaderDto,
     isArray: true,
   })
   public async leaders(
-    @Query('chainId') chainId?: ChainId,
+    @Query() query: LeadersPaginationDto,
   ): Promise<LeaderDto[]> {
-    return this.detailsService.getBestLeadersByRole(chainId);
-  }
-
-  @Get('/leaders/all')
-  @ApiQuery({ name: 'chainId', enum: MainnetsId, required: false })
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get all leaders',
-    description: 'Returns all leaders for a given chain or all chains.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'All leaders retrieved successfully',
-    type: LeaderDto,
-    isArray: true,
-  })
-  public async allLeaders(
-    @Query('chainId') chainId?: ChainId,
-  ): Promise<LeaderDto[]> {
-    return this.detailsService.getAllLeaders(chainId);
+    return this.detailsService.getLeaders(query.chainId, {
+      orderBy: query.orderBy,
+      orderDirection: query.orderDirection,
+      first: query.first,
+    });
   }
 
   @Get('/:address')
-  @ApiQuery({ name: 'chainId', enum: MainnetsId })
+  @ApiQuery({ name: 'chainId', enum: ChainId })
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get address details',
@@ -175,5 +159,25 @@ export class DetailsController {
     };
 
     return response;
+  }
+
+  @Get('/kvstore/:address')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get KVStore data by address',
+    description: 'Returns all the data stored in KVStore for a given address.',
+  })
+  @ApiQuery({ name: 'chain_id', enum: ChainId, required: true })
+  @ApiResponse({
+    status: 200,
+    description: 'Data retrieved successfully',
+    type: KVStoreDataDto,
+    isArray: true,
+  })
+  public async KVStore(
+    @Param('address', AddressValidationPipe) address: string,
+    @Query('chain_id') chainId: ChainId,
+  ): Promise<KVStoreDataDto[]> {
+    return this.detailsService.getKVStoreData(chainId, address);
   }
 }

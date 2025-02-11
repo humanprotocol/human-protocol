@@ -10,7 +10,6 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 import datumaro as dm
-import pytest
 from sqlalchemy import select
 
 from src.core.types import (
@@ -384,7 +383,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             patch("src.handlers.completed_escrows.validate_escrow"),
             patch(
                 "src.handlers.completed_escrows.cvat_api.request_job_annotations"
-            ) as mock_annotations,
+            ) as mock_request_job_annotations,
             patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
             manifest = json.load(data)
@@ -395,9 +394,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.create_file = mock_create_file
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            mock_annotations.side_effect = _TestException()
-            with pytest.raises(_TestException):
-                track_escrow_validations()
+            mock_request_job_annotations.side_effect = _TestException()
+
+            track_escrow_validations()
+
+            mock_request_job_annotations.assert_called()
 
         webhook = (
             self.session.query(Webhook)
@@ -527,8 +528,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_cvat_api.get_project_annotations.return_value = dummy_zip_file
             mock_cloud_service.make_client.return_value.create_file.side_effect = _TestException()
 
-            with pytest.raises(_TestException):
-                track_escrow_validations()
+            track_escrow_validations()
+
+            mock_cloud_service.make_client.return_value.create_file.assert_called()
 
         webhook = (
             self.session.query(Webhook)

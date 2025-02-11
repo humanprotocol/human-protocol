@@ -23,12 +23,25 @@ const BillingDetailsModal = ({
 }: {
   open: boolean;
   onClose: () => void;
-  billingInfo: BillingInfo;
+  billingInfo: BillingInfo | null;
   setBillingInfo: (value: BillingInfo) => void;
 }) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<BillingInfo>(billingInfo);
+  const [formData, setFormData] = useState<BillingInfo>(
+    billingInfo ?? {
+      name: '',
+      email: '',
+      address: {
+        city: '',
+        country: '',
+        postalCode: '',
+        line: '',
+      },
+      vat: '',
+      vatType: '',
+    },
+  );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { showError } = useSnackbar();
 
@@ -60,21 +73,21 @@ const BillingDetailsModal = ({
   const validateForm = () => {
     let newErrors: { [key: string]: string } = {};
 
-    if (!formData.name) {
+    if (!formData?.name) {
       newErrors.name = 'name required';
     }
 
     const addressFields = ['line', 'postalCode', 'city', 'country'];
     addressFields.forEach((field) => {
-      if (!formData.address[field as keyof typeof formData.address]) {
+      if (!formData?.address[field as keyof typeof formData.address]) {
         newErrors[field] = `${field} required`;
       }
     });
 
-    if (!formData.vat) {
+    if (!formData?.vat) {
       newErrors.vat = 'Tax ID required';
     }
-    if (!formData.vatType) {
+    if (!formData?.vatType) {
       newErrors.vatType = 'Tax ID type required';
     }
 
@@ -87,9 +100,10 @@ const BillingDetailsModal = ({
     if (validateForm()) {
       setIsLoading(true);
       try {
-        delete formData.email;
+        const email = formData?.email;
+        delete formData?.email;
         await editUserBillingInfo(formData);
-        setBillingInfo(formData);
+        setBillingInfo({ ...formData, email });
       } catch (err: any) {
         showError(
           err.message || 'An error occurred while saving billing details.',
@@ -141,7 +155,7 @@ const BillingDetailsModal = ({
             <TextField
               label="Name"
               name="name"
-              value={formData.name}
+              value={formData?.name}
               onChange={handleInputChange}
               fullWidth
               error={!!errors.name}
@@ -150,7 +164,7 @@ const BillingDetailsModal = ({
             <TextField
               label="Address Line"
               name="line"
-              value={formData.address.line}
+              value={formData?.address?.line}
               onChange={handleInputChange}
               fullWidth
               error={!!errors.line}
@@ -159,7 +173,7 @@ const BillingDetailsModal = ({
             <TextField
               label="Postal Code"
               name="postalCode"
-              value={formData.address.postalCode}
+              value={formData?.address?.postalCode}
               onChange={handleInputChange}
               fullWidth
               error={!!errors.postalCode}
@@ -168,7 +182,7 @@ const BillingDetailsModal = ({
             <TextField
               label="City"
               name="city"
-              value={formData.address.city}
+              value={formData?.address?.city}
               onChange={handleInputChange}
               fullWidth
               error={!!errors.city}
@@ -178,7 +192,7 @@ const BillingDetailsModal = ({
               select
               label="Country"
               name="country"
-              value={formData.address.country}
+              value={formData?.address?.country}
               onChange={handleInputChange}
               fullWidth
               error={!!errors.country}
@@ -197,7 +211,7 @@ const BillingDetailsModal = ({
                 select
                 label="Tax ID Type"
                 name="vatType"
-                value={formData.vatType || ''}
+                value={formData?.vatType || ''}
                 onChange={handleInputChange}
                 fullWidth
                 error={!!errors.vatType}
@@ -213,7 +227,7 @@ const BillingDetailsModal = ({
               <TextField
                 label="Tax ID Number"
                 name="vat"
-                value={formData.vat || ''}
+                value={formData?.vat || ''}
                 onChange={handleInputChange}
                 fullWidth
                 error={!!errors.vat}
@@ -228,7 +242,7 @@ const BillingDetailsModal = ({
               onClick={handleSubmit}
               loading={isLoading}
             >
-              {billingInfo ? 'Save Changes' : 'Add Billing Details'}
+              {billingInfo?.name ? 'Save Changes' : 'Add Billing Details'}
             </LoadingButton>
           </Box>
         </Box>

@@ -27,17 +27,21 @@ export interface ILeader {
   registrationNeeded?: boolean;
   registrationInstructions?: string;
   reputationNetworks?: string[];
+  name?: string;
+  category?: string;
 }
 
 export interface ILeaderSubgraph
-  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks'> {
+  extends Omit<ILeader, 'jobTypes' | 'reputationNetworks' | 'chainId'> {
   jobTypes?: string;
   reputationNetworks?: { address: string }[];
 }
 
-export interface ILeadersFilter {
+export interface ILeadersFilter extends IPagination {
   chainId: ChainId;
-  role?: string;
+  roles?: string[];
+  minAmountStaked?: number;
+  orderBy?: string;
 }
 
 export interface IReputationNetwork {
@@ -153,4 +157,11 @@ export interface IPagination {
   first?: number;
   skip?: number;
   orderDirection?: OrderDirection;
+}
+
+export interface StakerInfo {
+  stakedAmount: bigint;
+  lockedAmount: bigint;
+  lockedUntil: bigint;
+  withdrawableAmount: bigint;
 }

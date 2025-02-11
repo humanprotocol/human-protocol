@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 from http import HTTPStatus
 from time import sleep
+from typing import cast
 
 from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.core.helpers import get_paginated_collection
@@ -14,13 +15,13 @@ from src.utils.time import utcnow
 
 def get_api_client() -> ApiClient:
     configuration = Configuration(
-        host=Config.cvat_config.cvat_url,
-        username=Config.cvat_config.cvat_admin,
-        password=Config.cvat_config.cvat_admin_pass,
+        host=Config.cvat_config.host_url,
+        username=Config.cvat_config.admin_login,
+        password=Config.cvat_config.admin_pass,
     )
 
     api_client = ApiClient(configuration=configuration)
-    api_client.set_default_header("X-organization", Config.cvat_config.cvat_org_slug)
+    api_client.set_default_header("X-organization", Config.cvat_config.org_slug)
 
     return api_client
 
@@ -40,8 +41,8 @@ def get_last_task_quality_report(task_id: int) -> models.QualityReport | None:
 def compute_task_quality_report(
     task_id: int,
     *,
-    timeout: int = Config.cvat_config.cvat_quality_retrieval_timeout,
-    check_interval: float = Config.cvat_config.cvat_quality_check_interval,
+    timeout: int = Config.cvat_config.quality_retrieval_timeout,
+    check_interval: float = Config.cvat_config.quality_check_interval,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
     start_time = utcnow()
@@ -91,8 +92,8 @@ def get_task(task_id: int) -> models.TaskRead:
 def get_task_quality_report(
     task_id: int,
     *,
-    timeout: int = Config.cvat_config.cvat_quality_retrieval_timeout,
-    check_interval: float = Config.cvat_config.cvat_quality_check_interval,
+    timeout: int = Config.cvat_config.quality_retrieval_timeout,
+    check_interval: float = Config.cvat_config.quality_check_interval,
 ) -> models.QualityReport:
     logger = logging.getLogger("app")
 
@@ -160,8 +161,7 @@ def get_task_validation_layout(task_id: int) -> models.TaskValidationLayoutRead:
 def update_task_validation_layout(
     task_id: int,
     *,
-    disabled_frames: list[int],
-    honeypot_real_frames: list[int] | None,
+    honeypot_real_frames: list[int],
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -170,15 +170,8 @@ def update_task_validation_layout(
             validation_layout, _ = api_client.tasks_api.partial_update_validation_layout(
                 task_id,
                 patched_task_validation_layout_write_request=models.PatchedTaskValidationLayoutWriteRequest(
-                    disabled_frames=disabled_frames,
-                    **(
-                        {
-                            "honeypot_real_frames": honeypot_real_frames,
-                            "frame_selection_method": models.FrameSelectionMethod("manual"),
-                        }
-                        if honeypot_real_frames
-                        else {}
-                    ),
+                    honeypot_real_frames=honeypot_real_frames,
+                    frame_selection_method=models.FrameSelectionMethod("manual"),
                 ),
             )
         except exceptions.ApiException as ex:
@@ -202,4 +195,24 @@ def get_task_data_meta(task_id: int) -> models.DataMetaRead:
 
         except exceptions.ApiException as ex:
             logger.exception(f"Exception when calling TaskApi.retrieve_data_meta: {ex}\n")
+            raise
+
+
+def get_task_labels(task_id: int) -> list[str]:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            task, _ = api_client.tasks_api.retrieve(task_id)
+            project_id = task.project_id
+
+            return [
+                cast(models.ILabel, label).name
+                for label in get_paginated_collection(
+                    api_client.labels_api.list_endpoint,
+                    **({"project_id": project_id} if project_id else {"task_id": task_id}),
+                )
+            ]
+
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling QualityApi.list_reports: {e}\n")
             raise

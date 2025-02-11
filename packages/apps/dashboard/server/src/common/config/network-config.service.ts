@@ -1,20 +1,12 @@
-import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ChainId } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Web3Env } from '../enums/web3';
 import {
   LOCALHOST_CHAIN_IDS,
   MAINNET_CHAIN_IDS,
-  MainnetsId,
   TESTNET_CHAIN_IDS,
 } from '../utils/constants';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { AVAILABLE_NETWORKS_CACHE_KEY } from './redis-config.service';
-import {
-  EnvironmentConfigService,
-  MINIMUM_ESCROWS_COUNT,
-  MINIMUM_HMT_TRANSFERS,
-} from './env-config.service';
 
 export interface TokensList {
   [key: string]: string | undefined;
@@ -31,13 +23,8 @@ interface NetworkMapDto {
 @Injectable()
 export class NetworkConfigService {
   private readonly networkMap: NetworkMapDto;
-  private readonly logger = new Logger(NetworkConfigService.name);
 
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private readonly envConfigService: EnvironmentConfigService,
-    private configService: ConfigService,
-  ) {
+  constructor(private configService: ConfigService) {
     this.networkMap = {
       ...(this.configService.get<string>('RPC_URL_ETHEREUM') && {
         ethereum: {
@@ -75,24 +62,6 @@ export class NetworkConfigService {
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
         },
       }),
-      ...(this.configService.get<string>('RPC_URL_MOONBEAM') && {
-        moonbeam: {
-          chainId: ChainId.MOONBEAM,
-          rpcUrl: this.configService.get<string>('RPC_URL_MOONBEAM'),
-        },
-      }),
-      ...(this.configService.get<string>('RPC_URL_XLAYER_TESTNET') && {
-        xlayertestnet: {
-          chainId: ChainId.XLAYER_TESTNET,
-          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER_TESTNET'),
-        },
-      }),
-      ...(this.configService.get<string>('RPC_URL_XLAYER') && {
-        xlayer: {
-          chainId: ChainId.XLAYER,
-          rpcUrl: this.configService.get<string>('RPC_URL_XLAYER'),
-        },
-      }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
         localhost: {
           chainId: ChainId.LOCALHOST,
@@ -127,75 +96,5 @@ export class NetworkConfigService {
 
   get networks(): NetworkDto[] {
     return Object.values(this.networkMap).map((network) => network);
-  }
-
-  public async getAvailableNetworks(): Promise<ChainId[]> {
-    const cachedNetworks = await this.cacheManager.get<ChainId[]>(
-      AVAILABLE_NETWORKS_CACHE_KEY,
-    );
-
-    if (cachedNetworks) {
-      return cachedNetworks;
-    }
-
-    const currentMonth = new Date();
-    const oneMonthAgo = new Date(currentMonth);
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-    const filterDate = new Date(currentMonth);
-    filterDate.setMonth(
-      filterDate.getMonth() - this.envConfigService.networkUsageFilterMonths,
-    );
-
-    const availableNetworks = [];
-
-    for (const networkKey of Object.values(MainnetsId)) {
-      const chainId = MainnetsId[networkKey as keyof typeof MainnetsId];
-
-      const networkConfig = NETWORKS[chainId];
-
-      if (!networkConfig) {
-        continue;
-      }
-
-      const statisticsClient = new StatisticsClient(networkConfig);
-
-      try {
-        const hmtData = await statisticsClient.getHMTDailyData({
-          from: new Date(Math.floor(filterDate.getTime() / 1000) * 1000),
-        });
-        const escrowStats = await statisticsClient.getEscrowStatistics({
-          from: new Date(Math.floor(oneMonthAgo.getTime() / 1000) * 1000),
-        });
-
-        // Calculate total HMT transaction count across the period
-        const totalTransactionCount = hmtData.reduce(
-          (sum, day) => sum + day.totalTransactionCount,
-          0,
-        );
-
-        // At least 1 escrow created in the last month
-        const recentEscrowsCreated =
-          escrowStats.totalEscrows >= MINIMUM_ESCROWS_COUNT;
-        // Total HMT transactions > MINIMUM_HMT_TRANSFERS in the last X months
-        const sufficientHMTTransfers =
-          totalTransactionCount > MINIMUM_HMT_TRANSFERS;
-
-        if (recentEscrowsCreated && sufficientHMTTransfers) {
-          availableNetworks.push(chainId);
-        }
-      } catch (error) {
-        this.logger.error(
-          `Error processing network ${networkKey} (Chain ID: ${chainId}): ${error.message}`,
-        );
-      }
-    }
-
-    await this.cacheManager.set(
-      AVAILABLE_NETWORKS_CACHE_KEY,
-      availableNetworks,
-      this.envConfigService.networkAvailableCacheTtl,
-    );
-    return availableNetworks;
   }
 }
