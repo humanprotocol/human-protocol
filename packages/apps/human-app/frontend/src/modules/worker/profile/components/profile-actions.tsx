@@ -1,11 +1,11 @@
 import Grid from '@mui/material/Grid';
 import { useTranslation } from 'react-i18next';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { KycVerificationControl } from '@/modules/worker/components/profile/components/kyc-verification-control';
-import { WalletConnectionControl } from '@/modules/worker/components/profile/components/wallet-connection-control';
-import { useWorkerProfileStatus } from '@/modules/worker/components/profile/hooks/use-worker-profile-status';
-import { useWorkerWalletRegistration } from '@/modules/worker/components/profile/hooks/use-worker-wallet-registration';
-import { RegisterAddressBtn } from '@/modules/worker/components/profile/components/buttons/register-address-btn';
+import { useWorkerProfileStatus } from '../hooks/use-worker-profile-status';
+import { useWorkerWalletRegistration } from '../hooks/use-worker-wallet-registration';
+import { RegisterAddressBtn } from './buttons';
+import { KycVerificationControl } from './kyc-verification-control';
+import { WalletConnectionControl } from './wallet-connection-control';
 
 export function ProfileActions() {
   const { t } = useTranslation();

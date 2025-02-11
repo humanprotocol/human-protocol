@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
-import type { WorkerProfileStatus } from '@/modules/worker/components/profile/types/profile-types';
+import { type WorkerProfileStatus } from '../types/profile-types';
 
 export function useWorkerProfileStatus(): WorkerProfileStatus {
   const { user } = useAuthenticatedUser();

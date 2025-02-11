@@ -32,7 +32,7 @@ import {
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { SignInWorkerPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
-import { WorkerProfilePage } from '@/modules/worker/components/profile/views/profile.page';
+import { WorkerProfilePage } from '@/modules/worker/profile';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
