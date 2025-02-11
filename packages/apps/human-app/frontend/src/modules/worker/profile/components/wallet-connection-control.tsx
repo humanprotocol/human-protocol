@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
-import { DoneLabel } from '@/modules/worker/components/profile/components/status-labels/done-label';
-import { WalletConnectDone } from '@/modules/worker/components/profile/components/wallet-connect-done';
-import type { WorkerProfileStatus } from '@/modules/worker/components/profile/types/profile-types';
+import { type WorkerProfileStatus } from '../types/profile-types';
+import { DoneLabel } from './status-labels';
+import { WalletConnectDone } from './wallet-connect-done';
 
 interface WalletConnectionControlProps {
   status: Pick<WorkerProfileStatus, 'kycApproved'>;
@@ -18,7 +18,7 @@ export function WalletConnectionControl({
   hasWalletAddress,
   isRegisterAddressPending,
   onConnect,
-}: WalletConnectionControlProps) {
+}: Readonly<WalletConnectionControlProps>) {
   const { t } = useTranslation();
 
   if (!status.kycApproved) {

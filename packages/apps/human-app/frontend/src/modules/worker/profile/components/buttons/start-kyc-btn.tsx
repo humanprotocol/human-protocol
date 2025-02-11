@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useStartKyc } from '@/modules/worker/components/profile/hooks/use-start-kyc';
+import { useStartKyc } from '../../hooks/use-start-kyc';
 
 export function StartKycBtn() {
   const { user } = useAuthenticatedUser();
