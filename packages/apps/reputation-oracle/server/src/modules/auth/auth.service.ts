@@ -11,8 +11,6 @@ import { UserService } from '../user/user.service';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../common/utils/signature';
-import { SendGridService } from '../sendgrid/sendgrid.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
 import {
   ChainId,
@@ -51,6 +49,9 @@ import {
   ResendVerificationEmailDto,
 } from './dto';
 
+import { EmailService } from '../email/email.service';
+import { EmailAction } from '../email/constants';
+
 @Injectable()
 export class AuthService {
   private readonly salt: string;
@@ -62,7 +63,7 @@ export class AuthService {
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly sendgridService: SendGridService,
+    private readonly emailService: EmailService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
   ) {}
@@ -99,18 +100,8 @@ export class AuthService {
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: data.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.signup,
+    await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
+      url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
 
     return userEntity;
@@ -236,18 +227,8 @@ export class AuthService {
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: data.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-            url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.resetPassword,
+    await this.emailService.sendEmail(data.email, EmailAction.RESET_PASSWORD, {
+      url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
     });
   }
 
@@ -266,17 +247,10 @@ export class AuthService {
     }
 
     await this.userService.updatePassword(tokenEntity.user, data.password);
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: tokenEntity.user.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.passwordChanged,
-    });
+    await this.emailService.sendEmail(
+      tokenEntity.user.email,
+      EmailAction.PASSWORD_CHANGED,
+    );
 
     await this.tokenRepository.deleteOne(tokenEntity);
   }
@@ -325,18 +299,8 @@ export class AuthService {
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: data.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.signup,
+    await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
+      url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
   }
 
