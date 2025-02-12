@@ -12,7 +12,7 @@ import { envValidator } from './common/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
@@ -33,7 +33,7 @@ import { EmailModule } from './modules/email/module';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SnakeCaseInterceptor,
+      useClass: TransformInterceptor,
     },
     {
       provide: APP_FILTER,
