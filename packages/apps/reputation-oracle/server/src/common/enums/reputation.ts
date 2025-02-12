@@ -4,7 +4,6 @@ export enum ReputationEntityType {
   EXCHANGE_ORACLE = 'exchange_oracle',
   RECORDING_ORACLE = 'recording_oracle',
   REPUTATION_ORACLE = 'reputation_oracle',
-  CREDENTIAL_VALIDATOR = 'credential_validator',
 }
 
 export enum ReputationLevel {
