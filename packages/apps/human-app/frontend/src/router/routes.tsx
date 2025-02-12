@@ -1,7 +1,5 @@
 import type { RouteProps } from 'react-router-dom';
 import { t } from 'i18next';
-import { ProtectedPage } from '@/modules/worker/views/protected/protected.page';
-import { SignInWorkerPage } from '@/modules/signin/worker';
 import { routerPaths } from '@/router/router-paths';
 import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-reset-link/send-reset-link-success.page';
 import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
@@ -32,6 +30,7 @@ import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.pa
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
+import { SignInWorkerPage } from '@/modules/signin/worker';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -84,16 +83,6 @@ export const protectedRoutes: {
   routerProps: RouteProps;
   pageHeaderProps: PageHeaderProps;
 }[] = [
-  {
-    routerProps: {
-      path: '/protected',
-      element: <ProtectedPage />,
-    },
-    pageHeaderProps: {
-      headerIcon: <ProfileIcon />,
-      headerText: t('protectedPagesHeaders.profile'),
-    },
-  },
   {
     routerProps: {
       path: routerPaths.worker.jobsDiscovery,
