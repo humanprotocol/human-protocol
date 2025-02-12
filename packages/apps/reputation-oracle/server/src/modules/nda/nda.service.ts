@@ -25,14 +25,6 @@ export class NDAService {
       throw new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id);
     }
 
-    const existingNDA = await this.ndaRepository.findSignedNDAByUserAndVersion(
-      user,
-      lastNDAVersion,
-    );
-    if (existingNDA) {
-      return null;
-    }
-
     return {
       version: lastNDAVersion.version,
       documentText: lastNDAVersion.documentText,
@@ -51,10 +43,10 @@ export class NDAService {
 
     const existingNDA = await this.ndaRepository.findSignedNDAByUserAndVersion(
       user,
-      lastNDAVersion,
+      lastNDAVersion.id,
     );
     if (existingNDA) {
-      return null;
+      throw new NdaError(NdaErrorMessage.NDA_ALREADY_SIGNED, user.id);
     }
 
     const newNda = new NDASignatureEntity();
@@ -76,7 +68,7 @@ export class NDAService {
 
     const ndaEntity = await this.ndaRepository.findSignedNDAByUserAndVersion(
       user,
-      lastNDAVersion,
+      lastNDAVersion.id,
     );
     if (!ndaEntity) {
       return false;

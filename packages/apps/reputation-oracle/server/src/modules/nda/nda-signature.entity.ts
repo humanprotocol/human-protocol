@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { NDAVersionEntity } from './nda-version.entity';
@@ -20,5 +20,9 @@ export class NDASignatureEntity extends BaseEntity {
   user: UserEntity;
 
   @ManyToOne(() => NDAVersionEntity, (ndaVersion) => ndaVersion.ndas)
+  @JoinColumn({ name: 'ndaVersionId' })
   ndaVersion: NDAVersionEntity;
+
+  @Column()
+  ndaVersionId: number;
 }

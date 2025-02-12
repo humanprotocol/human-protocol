@@ -2,6 +2,7 @@ import { BaseError } from '../../common/errors/base';
 
 export enum NdaErrorMessage {
   NDA_NOT_FOUND = 'NDA not found',
+  NDA_ALREADY_SIGNED = 'NDA already signed',
 }
 
 export class NdaError extends BaseError {

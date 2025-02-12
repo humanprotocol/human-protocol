@@ -1,3 +1,4 @@
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { NDAService } from './nda.service';
 import { NDARepository } from './nda.repository';
@@ -7,29 +8,40 @@ import { UserEntity } from '../user/user.entity';
 import { NDAVersionEntity } from './nda-version.entity';
 import { NdaSignatureStatus } from '../../common/enums';
 import { NdaError, NdaErrorMessage } from './nda.error';
+import { faker } from '@faker-js/faker/.';
+
+const user: Partial<UserEntity> = {
+  id: faker.number.int(),
+  email: faker.internet.email(),
+  password: faker.internet.password(),
+  ndaSignatures: [
+    {
+      id: faker.number.int(),
+      status: NdaSignatureStatus.SIGNED,
+      ipAddress: faker.internet.ip(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ndaVersion: {} as NDAVersionEntity,
+    } as NDASignatureEntity,
+  ],
+};
 
 describe.only('NDAService', () => {
   let ndaService: NDAService;
   let ndaRepository: NDARepository;
   let ndaVersionRepository: NDAVersionRepository;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         NDAService,
         {
           provide: NDARepository,
-          useValue: {
-            getLastNDA: jest.fn(),
-            findSignedNDAByUserAndVersion: jest.fn(),
-            createUnique: jest.fn(),
-          },
+          useValue: createMock<NDARepository>(),
         },
         {
           provide: NDAVersionRepository,
-          useValue: {
-            getLastNDAVersion: jest.fn(),
-          },
+          useValue: createMock<NDAVersionRepository>(),
         },
       ],
     }).compile();
@@ -40,25 +52,24 @@ describe.only('NDAService', () => {
       moduleRef.get<NDAVersionRepository>(NDAVersionRepository);
   });
 
-  describe.only('getLastNDAVersion', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getLastNDAVersion', () => {
     it('should return last NDA version DTO if last NDA exists', async () => {
-      const user: UserEntity = {} as UserEntity;
       const mockLastNDAVersion: Partial<NDAVersionEntity> = {
-        version: '0.1.0',
-        documentText: 'Sample NDA document',
+        version: faker.string.alphanumeric(3),
+        documentText: faker.string.alphanumeric(60),
       };
 
       jest
         .spyOn(ndaVersionRepository, 'getLastNDAVersion')
         .mockResolvedValueOnce(mockLastNDAVersion as any);
-      jest
-        .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
-        .mockResolvedValueOnce(null);
 
-      const result = await ndaService.getLastNDAVersion(user);
+      const result = await ndaService.getLastNDAVersion(user as UserEntity);
 
       expect(ndaVersionRepository.getLastNDAVersion).toHaveBeenCalled();
-      expect(ndaRepository.findSignedNDAByUserAndVersion).toHaveBeenCalled();
       expect(result).toEqual({
         version: mockLastNDAVersion.version,
         documentText: mockLastNDAVersion.documentText,
@@ -66,13 +77,6 @@ describe.only('NDAService', () => {
     });
 
     it('should throw ControlledError with NOT_FOUND status if last NDA version is not found', async () => {
-      const user: Partial<UserEntity> = {
-        id: 1,
-        email: 'test@example.com',
-        password: 'password123',
-        ndaSignatures: [],
-      };
-
       jest
         .spyOn(ndaVersionRepository, 'getLastNDAVersion')
         .mockResolvedValueOnce(null);
@@ -83,46 +87,19 @@ describe.only('NDAService', () => {
 
       expect(ndaVersionRepository.getLastNDAVersion).toHaveBeenCalled();
     });
-
-    it('should return null if last NDA is found', async () => {
-      const nda: Partial<NDASignatureEntity> = {
-        status: NdaSignatureStatus.SIGNED,
-      };
-
-      const user: Partial<UserEntity> = {
-        email: 'test@example.com',
-        password: 'password123',
-        ndaSignatures: [nda as any],
-      };
-
-      const mockLastNDAVersion: Partial<NDAVersionEntity> = {
-        version: '0.1.0',
-        documentText: 'Sample NDA document',
-      };
-
-      jest
-        .spyOn(ndaVersionRepository, 'getLastNDAVersion')
-        .mockResolvedValueOnce(mockLastNDAVersion as any);
-      jest
-        .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
-        .mockResolvedValueOnce(nda as NDASignatureEntity);
-
-      const result = await ndaService.getLastNDAVersion(user as UserEntity);
-
-      expect(ndaRepository.findSignedNDAByUserAndVersion).toHaveBeenCalled();
-      expect(result).toBeNull();
-    });
   });
 
   describe('signNDA', () => {
-    const mockUser: UserEntity = {} as UserEntity;
-    const mockIpAddress = '127.0.0.1';
-
+    const mockIpAddress = faker.internet.ip();
     it('should return true and create a new NDA if not signed before', async () => {
-      const mockLastNDAVersion = {} as any;
+      const mockLastNDAVersion: Partial<NDAVersionEntity> = {
+        version: faker.string.alphanumeric(3),
+        documentText: faker.string.alphanumeric(60),
+        id: faker.number.int(),
+      };
       jest
         .spyOn(ndaVersionRepository, 'getLastNDAVersion')
-        .mockResolvedValueOnce(mockLastNDAVersion);
+        .mockResolvedValueOnce(mockLastNDAVersion as NDAVersionEntity);
       jest
         .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
         .mockResolvedValueOnce(null);
@@ -130,39 +107,96 @@ describe.only('NDAService', () => {
         .spyOn(ndaRepository, 'createUnique')
         .mockResolvedValueOnce({} as NDASignatureEntity);
 
-      const result = await ndaService.signNDA(mockUser, mockIpAddress);
+      const result = await ndaService.signNDA(
+        user as UserEntity,
+        mockIpAddress,
+      );
 
       expect(ndaVersionRepository.getLastNDAVersion).toHaveBeenCalled();
       expect(ndaRepository.findSignedNDAByUserAndVersion).toHaveBeenCalledWith(
-        mockUser,
-        mockLastNDAVersion,
+        user,
+        mockLastNDAVersion.id,
       );
       expect(ndaRepository.createUnique).toHaveBeenCalled();
       expect(result).toBe(true);
     });
 
-    it('should return null if NDA is already signed by the user', async () => {
-      const mockLastNDAVersion = {} as any;
+    it('should throw an error if last NDA is already signed', async () => {
+      const mockLastNDAVersion: Partial<NDAVersionEntity> = {
+        id: user!.ndaSignatures![0].ndaVersionId,
+      };
       jest
         .spyOn(ndaVersionRepository, 'getLastNDAVersion')
-        .mockResolvedValueOnce(mockLastNDAVersion);
+        .mockResolvedValueOnce(mockLastNDAVersion as NDAVersionEntity);
       jest
         .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
         .mockResolvedValueOnce({} as NDASignatureEntity);
 
-      const result = await ndaService.signNDA(mockUser, mockIpAddress);
+      await expect(
+        ndaService.signNDA(user as UserEntity, mockIpAddress),
+      ).rejects.toThrow(
+        new NdaError(NdaErrorMessage.NDA_ALREADY_SIGNED, user.id!),
+      );
 
-      expect(result).toBe(null);
+      expect(ndaVersionRepository.getLastNDAVersion).toHaveBeenCalled();
+      expect(ndaRepository.findSignedNDAByUserAndVersion).toHaveBeenCalledWith(
+        user,
+        mockLastNDAVersion.id,
+      );
     });
 
-    it('should throw ControlledError with NOT_FOUND status if last NDA version is not found', async () => {
+    it('should throw an error if last NDA version is not found', async () => {
       jest
         .spyOn(ndaVersionRepository, 'getLastNDAVersion')
         .mockResolvedValueOnce(null);
 
-      await expect(ndaService.signNDA(mockUser, mockIpAddress)).rejects.toThrow(
-        new NdaError(NdaErrorMessage.NDA_NOT_FOUND, mockUser.id),
-      );
+      await expect(
+        ndaService.signNDA(user as UserEntity, mockIpAddress),
+      ).rejects.toThrow(new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id!));
+    });
+  });
+
+  describe('isLatestSigned', () => {
+    it('should return true if the latest NDA version is signed', async () => {
+      const mockLastNDAVersion: Partial<NDAVersionEntity> = {
+        id: faker.number.int(),
+      };
+      jest
+        .spyOn(ndaVersionRepository, 'getLastNDAVersion')
+        .mockResolvedValueOnce(mockLastNDAVersion as NDAVersionEntity);
+      jest
+        .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
+        .mockResolvedValueOnce({} as NDASignatureEntity);
+
+      const result = await ndaService.isLatestSigned(user as UserEntity);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if the latest NDA version is not signed', async () => {
+      const mockLastNDAVersion: Partial<NDAVersionEntity> = {
+        id: faker.number.int(),
+      };
+      jest
+        .spyOn(ndaVersionRepository, 'getLastNDAVersion')
+        .mockResolvedValueOnce(mockLastNDAVersion as NDAVersionEntity);
+      jest
+        .spyOn(ndaRepository, 'findSignedNDAByUserAndVersion')
+        .mockResolvedValueOnce(null);
+
+      const result = await ndaService.isLatestSigned(user as UserEntity);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false if the latest NDA version is not found', async () => {
+      jest
+        .spyOn(ndaVersionRepository, 'getLastNDAVersion')
+        .mockResolvedValueOnce(null);
+
+      const result = await ndaService.isLatestSigned(user as UserEntity);
+
+      expect(result).toBe(false);
     });
   });
 });
