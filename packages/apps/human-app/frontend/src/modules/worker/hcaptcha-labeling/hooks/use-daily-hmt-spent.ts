@@ -1,15 +1,15 @@
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { apiPaths } from '@/api/api-paths';
 import { apiClient } from '@/api/api-client';
+import { apiPaths } from '@/api/api-paths';
 
 const dailyHmtSpentSchema = z.object({
   spend: z.number(),
 });
 
-export type DailyHmtSpentSchemaSuccess = z.infer<typeof dailyHmtSpentSchema>;
+type DailyHmtSpentResponse = z.infer<typeof dailyHmtSpentSchema>;
 
-export async function getDailyHmtSpent() {
+async function fetchDailyHmtSpent(): Promise<DailyHmtSpentResponse> {
   return apiClient(apiPaths.worker.dailyHmtSpend.path, {
     successSchema: dailyHmtSpentSchema,
     authenticated: true,
@@ -18,8 +18,8 @@ export async function getDailyHmtSpent() {
 }
 
 export function useDailyHmtSpent() {
-  return useQuery({
-    queryFn: getDailyHmtSpent,
-    queryKey: ['getDailyHmtSpent'],
+  return useQuery<DailyHmtSpentResponse>({
+    queryKey: ['dailyHmtSpent'],
+    queryFn: fetchDailyHmtSpent,
   });
 }

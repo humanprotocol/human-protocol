@@ -6,14 +6,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Grid from '@mui/material/Grid';
 import { useEffect } from 'react';
 import { t } from 'i18next';
-import { UserStatsDetails } from '@/modules/worker/components/hcaptcha-labeling/user-stats-details';
-import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
 import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { useHCaptchaUserStats } from '../hooks';
+import { UserStatsDetails } from './user-stats-details';
 
 const accordionWidth = { width: '284px' };
 

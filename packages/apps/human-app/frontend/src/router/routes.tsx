@@ -7,9 +7,6 @@ import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/
 import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-password/reset-password-success.page';
 import { JobsDiscoveryPage } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
-import { EnableLabeler } from '@/modules/worker/views/hcaptcha-labeling/enable-labeler.page';
-import { HcaptchaLabelingPage } from '@/modules/worker/views/hcaptcha-labeling/hcaptcha-labeling.page';
-import { UserStatsAccordion } from '@/modules/worker/components/hcaptcha-labeling/user-stats-accordion';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/views/registration/registration.page';
 import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
@@ -29,6 +26,11 @@ import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/conn
 import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.page';
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
+import {
+  HcaptchaLabelingPage,
+  UserStatsAccordion,
+  EnableLabelerPage,
+} from '@/modules/worker/hcaptcha-labeling';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { SignInWorkerPage } from '@/modules/signin/worker';
 
@@ -141,7 +143,7 @@ export const protectedRoutes: {
   {
     routerProps: {
       path: routerPaths.worker.enableLabeler,
-      element: <EnableLabeler />,
+      element: <EnableLabelerPage />,
     },
     pageHeaderProps: {
       headerIcon: <HandIcon />,
