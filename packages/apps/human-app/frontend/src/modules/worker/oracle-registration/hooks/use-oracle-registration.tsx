@@ -6,7 +6,7 @@ import {
 import { useRegisteredOracles } from '@/shared/contexts/registered-oracles';
 
 export function useOracleRegistration(oracleAddress: string | undefined) {
-  const { registeredOracles, setRegisteredOracles } = useRegisteredOracles();
+  const { setRegisteredOracles } = useRegisteredOracles();
   const {
     mutate: registerInOracle,
     isPending: isRegistrationPending,
@@ -32,8 +32,5 @@ export function useOracleRegistration(oracleAddress: string | undefined) {
     handleRegistration,
     isRegistrationPending,
     registrationError,
-    isAlreadyRegistered: Boolean(
-      oracleAddress && registeredOracles?.includes(oracleAddress)
-    ),
   };
 }
