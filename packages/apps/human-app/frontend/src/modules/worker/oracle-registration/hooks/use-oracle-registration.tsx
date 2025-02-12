@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import {
   type RegistrationInExchangeOracleDto,
   useExchangeOracleRegistrationMutation,
-} from '@/modules/worker/services/registration-in-exchange-oracles';
+} from '@/modules/worker/oracle-registration/sevices';
 import { useRegisteredOracles } from '@/shared/contexts/registered-oracles';
 
 export function useOracleRegistration(oracleAddress: string | undefined) {
