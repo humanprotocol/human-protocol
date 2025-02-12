@@ -1,8 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useGetOracles } from '@/modules/worker/services/oracles';
 import { useOracleInstructions } from './use-oracle-instructions';
-import { useOracleNavigation } from './use-oracle-navigation';
 import { useOracleRegistration } from './use-oracle-registration';
 
 export function useOracleRegistrationFlow() {
@@ -12,28 +11,11 @@ export function useOracleRegistrationFlow() {
     (oracle) => oracle.address === oracleAddress
   );
 
-  const { navigateToJobs, navigateToDiscovery } =
-    useOracleNavigation(oracleAddress);
-  const {
-    handleRegistration,
-    isRegistrationPending,
-    registrationError,
-    isAlreadyRegistered,
-  } = useOracleRegistration(oracleAddress);
+  const { handleRegistration, isRegistrationPending, registrationError } =
+    useOracleRegistration(oracleAddress);
+
   const { hasViewedInstructions, handleInstructionsView } =
     useOracleInstructions();
-
-  useEffect(() => {
-    if (oracleData === undefined) {
-      navigateToDiscovery();
-    }
-  }, [oracleData, navigateToDiscovery]);
-
-  useEffect(() => {
-    if (isAlreadyRegistered) {
-      navigateToJobs();
-    }
-  }, [isAlreadyRegistered, navigateToJobs]);
 
   const handleInstructionsViewWithData = useCallback(() => {
     handleInstructionsView(oracleData?.registrationInstructions ?? '');
