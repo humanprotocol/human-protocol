@@ -3,12 +3,11 @@ import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Grid, Typography } from '@mui/material';
 import { t } from 'i18next';
-import { UserStatsDetails } from '@/modules/worker/components/hcaptcha-labeling/user-stats-details';
-import type { HCaptchaUserStatsSuccess } from '@/modules/worker/services/hcaptcha-user-stats';
-import { useHCaptchaUserStats } from '@/modules/worker/services/hcaptcha-user-stats';
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
+import { type HCaptchaUserStatsSuccess, useHCaptchaUserStats } from '../hooks';
+import { UserStatsDetails } from './user-stats-details';
 
 export interface UserStatsDrawerNavigationProps {
   isOpen: boolean;
@@ -17,10 +16,10 @@ export interface UserStatsDrawerNavigationProps {
 function UserStatsDrawerContent({
   stats,
   refetch,
-}: {
+}: Readonly<{
   stats: HCaptchaUserStatsSuccess;
   refetch: () => void;
-}) {
+}>) {
   return (
     <>
       <Typography variant="mobileHeaderLarge">
@@ -31,7 +30,9 @@ function UserStatsDrawerContent({
   );
 }
 
-export function UserStatsDrawer({ isOpen }: UserStatsDrawerNavigationProps) {
+export function UserStatsDrawer({
+  isOpen,
+}: Readonly<UserStatsDrawerNavigationProps>) {
   const {
     data: hcaptchaUserStats,
     error: hcaptchaUserStatsError,
