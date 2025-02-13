@@ -10,7 +10,7 @@ import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { verifySignature } from '../../common/utils/signature';
+import { verifySignature } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
 import {
   ChainId,
@@ -20,7 +20,7 @@ import {
   Role,
 } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { prepareSignatureBody } from '../../utils/web3';
 import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';

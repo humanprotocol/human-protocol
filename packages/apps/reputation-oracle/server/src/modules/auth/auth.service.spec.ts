@@ -35,7 +35,7 @@ import {
   generateNonce,
   prepareSignatureBody,
   signMessage,
-} from '../../common/utils/signature';
+} from '../../utils/web3';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyRepository } from '../user/site-key.repository';
 import { PrepareSignatureDto } from '../user/user.dto';

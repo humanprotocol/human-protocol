@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { SignatureAuthGuard } from './signature.auth';
-import { signMessage } from '../utils/signature';
+import { signMessage } from '../../utils/web3';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { AuthSignatureRole } from '../enums/role';

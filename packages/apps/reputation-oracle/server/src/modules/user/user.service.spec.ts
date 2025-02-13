@@ -10,10 +10,7 @@ import {
   UserStatus,
   Role,
 } from '../../common/enums/user';
-import {
-  signMessage,
-  prepareSignatureBody,
-} from '../../common/utils/signature';
+import { signMessage, prepareSignatureBody } from '../../utils/web3';
 import {
   MOCK_ADDRESS,
   MOCK_EMAIL,

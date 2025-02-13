@@ -6,7 +6,7 @@ import {
   UserStatus,
   Role,
 } from '../../common/enums/user';
-import { generateNonce, verifySignature } from '../../common/utils/signature';
+import { generateNonce, verifySignature } from '../../utils/web3';
 import { UserEntity } from './user.entity';
 import { RegisterAddressRequestDto } from './user.dto';
 import { UserRepository } from './user.repository';
@@ -20,7 +20,7 @@ import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { prepareSignatureBody } from '../../utils/web3';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { ethers } from 'ethers';
 import {

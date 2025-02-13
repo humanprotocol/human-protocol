@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import * as CaseConverter from './case-converters';
 
-describe('case-converters', () => {
+describe('Case converting utilities', () => {
   describe('transformKeysFromSnakeToCamel', () => {
     it.each([
       'string',

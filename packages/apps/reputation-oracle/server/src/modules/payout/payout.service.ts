@@ -21,7 +21,8 @@ import {
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
-import { assertValidJobRequestType, getRequestType } from '../../common/utils';
+import { getRequestType } from '../../utils/manifest';
+import { assertValidJobRequestType } from '../../utils/type-guards';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()

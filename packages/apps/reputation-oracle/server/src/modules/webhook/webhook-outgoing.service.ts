@@ -4,7 +4,7 @@ import stringify from 'json-stable-stringify';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { WebhookOutgoingStatus } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
-import { signMessage } from '../../common/utils/signature';
+import { signMessage } from '../../utils/web3';
 import {
   BACKOFF_INTERVAL_SECONDS,
   HEADER_SIGNATURE_KEY,

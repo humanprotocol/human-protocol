@@ -6,7 +6,7 @@ type CaseTransformer = (input: string) => string;
  * TODO: check if replacing it with lodash.camelCase
  * won't break anything
  */
-export const snakeToCamel: CaseTransformer = (input) => {
+const snakeToCamel: CaseTransformer = (input) => {
   return input.replace(/_([a-z])/g, (_match, letter) => letter.toUpperCase());
 };
 
@@ -14,7 +14,7 @@ export const snakeToCamel: CaseTransformer = (input) => {
  * TODO: check if replacing it with lodash.snakeCase
  * won't break anything
  */
-export const camelToSnake: CaseTransformer = (input) => {
+const camelToSnake: CaseTransformer = (input) => {
   return input.replace(/([A-Z])/g, '_$1').toLowerCase();
 };
 

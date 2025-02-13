@@ -23,7 +23,7 @@ import {
   FortuneFinalResult,
 } from '../../common/dto/result';
 import { RequestAction } from './reputation.interface';
-import { getRequestType } from '../../common/utils';
+import { getRequestType } from '../../utils/manifest';
 import { CvatManifestDto } from '../../common/dto/manifest';
 import { ReputationConfigService } from '../../common/config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
