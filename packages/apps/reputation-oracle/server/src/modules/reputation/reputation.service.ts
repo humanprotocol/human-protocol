@@ -25,7 +25,7 @@ import {
 import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../utils/manifest';
 import { CvatManifest } from '../../common/interfaces/manifest';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ReputationConfigService } from '../../config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationError, ReputationErrorMessage } from './reputation.error';
 

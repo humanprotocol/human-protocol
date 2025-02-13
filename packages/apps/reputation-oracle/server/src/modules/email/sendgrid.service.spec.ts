@@ -9,7 +9,7 @@ import { SENDGRID_TEMPLATES, SERVICE_NAME } from './sendgrid.service';
 import logger from '../../logger';
 import { getTemplateId } from './sendgrid.service';
 import { EmailAction } from './constants';
-import { EmailConfigService } from '../../common/config/email-config.service';
+import { EmailConfigService } from '../../config/email-config.service';
 import { SendgridEmailService } from './sendgrid.service';
 
 const mockMailService = {

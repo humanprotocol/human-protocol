@@ -22,9 +22,9 @@ import {
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { prepareSignatureBody } from '../../utils/web3';
 import { UserRepository } from '../user/user.repository';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { AuthConfigService } from '../../config/auth-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,

@@ -11,8 +11,8 @@ import {
 } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';

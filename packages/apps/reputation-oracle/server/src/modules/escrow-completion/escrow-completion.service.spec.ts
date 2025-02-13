@@ -18,8 +18,8 @@ import { EscrowCompletionStatus } from '../../common/enums/webhook';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionService } from './escrow-completion.service';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
@@ -29,9 +29,9 @@ import { DatabaseError } from '../../common/errors/database';
 import { WebhookOutgoingRepository } from '../webhook/webhook-outgoing.repository';
 import { StorageService } from '../storage/storage.service';
 import { ReputationRepository } from '../reputation/reputation.repository';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
+import { ReputationConfigService } from '../../config/reputation-config.service';
+import { PGPConfigService } from '../../config/pgp-config.service';
+import { S3ConfigService } from '../../config/s3-config.service';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
 
 jest.mock('@human-protocol/sdk', () => ({

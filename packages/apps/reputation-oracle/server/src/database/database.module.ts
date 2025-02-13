@@ -12,7 +12,7 @@ import { UserEntity } from '../modules/user/user.entity';
 import { KycEntity } from '../modules/kyc/kyc.entity';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
-import { DatabaseConfigService } from '../common/config/database-config.service';
+import { DatabaseConfigService } from '../config/database-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';

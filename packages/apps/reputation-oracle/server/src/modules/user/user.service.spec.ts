@@ -22,11 +22,11 @@ import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyEntity } from './site-key.entity';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { HttpService } from '@nestjs/axios';
 import {
   UserError,
@@ -34,7 +34,7 @@ import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from '../../modules/user/user.error';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
 import { SiteKeyType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({

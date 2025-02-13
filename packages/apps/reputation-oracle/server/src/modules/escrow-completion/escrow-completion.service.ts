@@ -5,7 +5,7 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { EscrowCompletionStatus, EventType } from '../../common/enums';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {

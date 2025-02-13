@@ -4,7 +4,7 @@ import { MailService } from '@sendgrid/mail';
 import { EmailService } from './email.service';
 import { EmailAction, SENDGRID_API_KEY_REGEX } from './constants';
 import logger from '../../logger';
-import { EmailConfigService } from '../../common/config/email-config.service';
+import { EmailConfigService } from '../../config/email-config.service';
 import Environment from '../../utils/environment';
 
 export const SENDGRID_TEMPLATES = {
