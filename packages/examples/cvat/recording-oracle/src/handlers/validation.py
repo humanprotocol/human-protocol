@@ -68,7 +68,6 @@ class _TaskValidator:
         assert self.annotation_meta is not None
 
         data_bucket_client = make_cloud_client(self.data_bucket)
-
         exchange_oracle_merged_annotation_path = compose_annotation_results_bucket_filename(
             self.escrow_address,
             self.chain_id,
@@ -77,7 +76,6 @@ class _TaskValidator:
         merged_annotations = data_bucket_client.download_file(
             exchange_oracle_merged_annotation_path
         )
-
         self.merged_annotations = merged_annotations
 
     def _download_results(self):

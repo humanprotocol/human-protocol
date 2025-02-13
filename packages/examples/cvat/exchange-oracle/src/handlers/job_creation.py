@@ -57,6 +57,7 @@ LABEL_TYPE_MAPPING = {
     TaskTypes.image_polygons: CvatLabelTypes.polygon,
     TaskTypes.image_boxes_from_points: CvatLabelTypes.rectangle,
     TaskTypes.image_skeletons_from_boxes: CvatLabelTypes.points,
+    TaskTypes.audio_transcription: CvatLabelTypes.rectangle,
 }
 
 DM_DATASET_FORMAT_MAPPING = {
@@ -66,6 +67,7 @@ DM_DATASET_FORMAT_MAPPING = {
     TaskTypes.image_polygons: "coco_instances",
     TaskTypes.image_boxes_from_points: "coco_instances",
     TaskTypes.image_skeletons_from_boxes: "coco_person_keypoints",
+    TaskTypes.audio_transcription: "audino",
 }
 
 DM_GT_DATASET_FORMAT_MAPPING = {
@@ -2796,6 +2798,179 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
         self._create_on_cvat()
 
 
+class AudinoTaskBuilder:
+    """
+    Handles task creation for audio_transcription task types
+    """
+
+    def __init__(self, manifest: TaskManifest, escrow_address: str, chain_id: int) -> None:
+        self.exit_stack = ExitStack()
+        self.manifest = manifest
+        self.escrow_address = escrow_address
+        self.chain_id = chain_id
+
+        self.logger: Logger = NullLogger()
+
+        self._oracle_data_bucket = BucketAccessInfo.parse_obj(Config.storage_config)
+
+        self.list_display_threshold = 5
+        "The maximum number of rendered list items in a message"
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.close()
+
+    def close(self):
+        self.exit_stack.close()
+
+    def set_logger(self, logger: Logger):
+        # TODO: add escrow info into messages
+        self.logger = logger
+        return self
+
+    def _format_list(
+        self, items: Sequence[str], *, max_items: int | None = None, separator: str = ", "
+    ) -> str:
+        if max_items is None:
+            max_items = self.list_display_threshold
+
+        remainder_count = len(items) - max_items
+        return "{}{}".format(
+            separator.join(items[:max_items]),
+            f" (and {remainder_count} more)" if remainder_count > 0 else "",
+        )
+
+    def _upload_task_meta(self, gt_dataset: bytes):
+        layout = simple_task.TaskMetaLayout()
+
+        file_list = []
+        file_list.append(
+            (
+                gt_dataset,
+                layout.AUDINO_GT_FILENAME,
+            )
+        )
+
+        storage_client = self._make_cloud_storage_client(self._oracle_data_bucket)
+        for file_data, filename in file_list:
+            storage_client.create_file(
+                compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
+                file_data,
+            )
+
+    @classmethod
+    def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
+        return cloud_service.make_client(bucket_info)
+
+    def build(self):
+        manifest = self.manifest
+        escrow_address = self.escrow_address
+        chain_id = self.chain_id
+
+        data_bucket = BucketAccessInfo.parse_obj(manifest.data.data_url)
+        gt_bucket = BucketAccessInfo.parse_obj(manifest.validation.gt_url)
+
+        data_bucket_client = cloud_service.make_client(data_bucket)
+        gt_bucket_client = cloud_service.make_client(gt_bucket)
+
+        # Task configuration creation
+        data_filenames = data_bucket_client.list_files(prefix=data_bucket.path)
+        data_filenames = filter_audio_files(data_filenames)
+
+        gt_file_data = gt_bucket_client.download_file(gt_bucket.path)
+
+        # Validate and parse GT
+        # gt_dataset = self._parse_gt_dataset(gt_file_data, add_prefix=data_bucket.path)
+
+        # Create task configuration
+        # gt_filenames = self._get_gt_filenames(gt_dataset, data_filenames, manifest=manifest)
+        # job_configuration = self._make_job_configuration(
+        #     data_filenames, gt_filenames, manifest=manifest
+        # )
+        label_configuration = make_label_configuration(manifest)
+
+        self._upload_task_meta(gt_file_data)
+
+        # Register cloud storage on CVAT to pass user dataset
+        cloud_storage = cvat_api.create_cloudstorage(**_make_cvat_cloud_storage_params(data_bucket))
+
+        # Create a project
+        cvat_project = cvat_api.create_project(
+            escrow_address,
+            labels=label_configuration,
+            user_guide=manifest.annotation.user_guide,
+        )
+
+        # Setup webhooks for a project (update:task, update:job)
+        cvat_webhook = cvat_api.create_cvat_webhook(cvat_project.id)
+
+        with SessionLocal.begin() as session:
+            # total_jobs = len(job_configuration)
+            # self.logger.info(
+            #     "Task creation for escrow '%s': will create %s assignments",
+            #     escrow_address,
+            #     total_jobs,
+            # )
+            db_service.create_escrow_creation(
+                session, escrow_address=escrow_address, chain_id=chain_id, total_jobs=1
+            )
+
+            project_id = db_service.create_project(
+                session,
+                cvat_project.id,
+                cloud_storage.id,
+                manifest.annotation.type,
+                escrow_address,
+                chain_id,
+                compose_bucket_url(
+                    data_bucket.bucket_name,
+                    bucket_host=data_bucket.host_url,
+                    provider=data_bucket.provider,
+                ),
+                cvat_webhook_id=cvat_webhook.id,
+            )
+
+            db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
+            db_service.add_project_images(session, cvat_project.id, data_filenames)
+
+            for job_filenames in data_filenames:
+                cvat_task = cvat_api.create_audino_task(
+                    cvat_project.id,
+                    escrow_address,
+                    segment_duration=manifest.annotation.segment_duration,
+                )
+
+                task_id = db_service.create_task(
+                    session, cvat_task.id, cvat_project.id, TaskStatuses[cvat_task.status]
+                )
+                db_service.get_task_by_id(session, task_id, for_update=True)  # lock the row
+
+                # Actual task creation in CVAT takes some time, so it's done in an async process.
+                # The task is fully created once 'update:task' or 'update:job' webhook is received.
+                cvat_api.put_task_data(
+                    cvat_task.id,
+                    cloud_storage.id,
+                    filenames=[job_filenames],
+                    chunk_size=150,
+                    sort_images=False,
+                    use_cache=False,
+                    use_zip_chunks=False,
+                )
+
+                db_service.create_data_upload(session, cvat_task.id)
+
+
+def is_audio(path: str) -> bool:
+    trunk, ext = os.path.splitext(os.path.basename(path))
+    return trunk and ext.lower() in {".mp3", ".wav"}
+
+
+def filter_audio_files(data_filenames: list[str]) -> list[str]:
+    return [fn for fn in data_filenames if is_audio(fn)]
+
+
 def is_image(path: str) -> bool:
     trunk, ext = os.path.splitext(os.path.basename(path))
     return trunk and ext.lower() in IMAGE_EXTENSIONS
@@ -2829,6 +3004,11 @@ def _make_cvat_cloud_storage_params(bucket_info: BucketAccessInfo) -> dict:
         "provider": CLOUD_PROVIDER_TO_CVAT_CLOUD_PROVIDER[bucket_info.provider],
         "bucket_name": bucket_info.bucket_name,
         "bucket_host": bucket_info.host_url,
+        # "bucket_host": bucket_info.host_url.replace(
+        #     # TODO: remove mock
+        #     "127.0.0.1",
+        #     "172.18.0.1",
+        # )
     }
 
     if bucket_info.credentials:
@@ -2852,6 +3032,8 @@ def create_task(escrow_address: str, chain_id: int) -> None:
         builder_type = BoxesFromPointsTaskBuilder
     elif manifest.annotation.type in [TaskTypes.image_skeletons_from_boxes]:
         builder_type = SkeletonsFromBoxesTaskBuilder
+    elif manifest.annotation.type in [TaskTypes.audio_transcription]:
+        builder_type = AudinoTaskBuilder
     else:
         raise Exception(f"Unsupported task type {manifest.annotation.type}")
 

@@ -136,6 +136,9 @@ class AnnotationInfo(BaseModel):
     job_size: int = 10
     "Frames per job, validation frames are not included"
 
+    segment_duration: int = 60000
+    "Segment duration of a job (audio length in milliseconds)"
+
     @model_validator(mode="before")
     @classmethod
     def validate_label_type(cls, values: dict[str, Any]) -> dict[str, Any]:

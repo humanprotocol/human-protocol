@@ -29,11 +29,13 @@ CVAT_EXPORT_FORMAT_MAPPING = {
     TaskTypes.image_polygons: "COCO 1.0",
     TaskTypes.image_boxes_from_points: "COCO 1.0",
     TaskTypes.image_skeletons_from_boxes: "CVAT for images 1.1",
+    TaskTypes.audio_transcription: "Common Voice",
 }
 
 CVAT_EXPORT_FORMAT_TO_DM_MAPPING = {
     "CVAT for images 1.1": "cvat",
     "COCO 1.0": "coco_instances",
+    "Common Voice": "audino",
 }
 
 
@@ -579,6 +581,11 @@ class _SkeletonsFromBoxesTaskProcessor(_TaskProcessor):
             self.merged_annotation_file.file = converted_dataset_archive
 
 
+class _AudioTaskProcessor(_TaskProcessor):
+    def process(self):
+        pass
+
+
 def postprocess_annotations(
     escrow_address: str,
     chain_id: int,
@@ -598,6 +605,7 @@ def postprocess_annotations(
         TaskTypes.image_points: _PointsTaskProcessor,
         TaskTypes.image_boxes_from_points: _BoxesFromPointsTaskProcessor,
         TaskTypes.image_skeletons_from_boxes: _SkeletonsFromBoxesTaskProcessor,
+        TaskTypes.audio_transcription: _AudioTaskProcessor,
     }
 
     task_type = manifest.annotation.type
