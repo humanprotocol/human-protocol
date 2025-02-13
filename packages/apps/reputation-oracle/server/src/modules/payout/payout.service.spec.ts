@@ -20,7 +20,7 @@ import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
 import { CvatManifest } from '../../common/interfaces/manifest';
-import { CvatAnnotationMeta } from '../../common/dto/result';
+import { CvatAnnotationMeta } from '../../common/interfaces/job-result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 

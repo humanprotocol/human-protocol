@@ -21,7 +21,7 @@ import {
   CvatAnnotationMeta,
   CvatAnnotationMetaResults,
   FortuneFinalResult,
-} from '../../common/dto/result';
+} from '../../common/interfaces/job-result';
 import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../utils/manifest';
 import { CvatManifest } from '../../common/interfaces/manifest';

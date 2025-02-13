@@ -17,7 +17,7 @@ import {
 import {
   CvatAnnotationMeta,
   FortuneFinalResult,
-} from '../../common/dto/result';
+} from '../../common/interfaces/job-result';
 import {
   CalculatedPayout,
   CalculatePayoutsInput,
