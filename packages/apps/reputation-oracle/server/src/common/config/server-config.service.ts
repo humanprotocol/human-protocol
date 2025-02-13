@@ -5,14 +5,6 @@ import { ConfigService } from '@nestjs/config';
 export class ServerConfigService {
   constructor(private configService: ConfigService) {}
 
-  /**
-   * The environment in which the server is running (e.g., 'development', 'production').
-   * Default: 'development'
-   */
-  get nodeEnv(): string {
-    return this.configService.get<string>('NODE_ENV', 'development');
-  }
-
   get gitHash(): string {
     return this.configService.get<string>('GIT_HASH', '');
   }

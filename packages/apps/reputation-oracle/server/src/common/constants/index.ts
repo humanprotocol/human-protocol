@@ -1,11 +1,5 @@
 import { JobRequestType } from '../enums';
 
-export enum Environment {
-  DEVELOPMENT = 'development',
-  TEST = 'test',
-  STAGING = 'staging',
-  PRODUCTION = 'production',
-}
 export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;

@@ -13,7 +13,6 @@ import { KycEntity } from '../modules/kyc/kyc.entity';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../common/config/database-config.service';
-import { ServerConfigService } from '../common/config/server-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
@@ -21,20 +20,16 @@ import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entit
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
+import Environment from '../utils/environment';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [TypeOrmLoggerModule, ConfigModule],
-      inject: [
-        TypeOrmLoggerService,
-        DatabaseConfigService,
-        ServerConfigService,
-      ],
+      inject: [TypeOrmLoggerService, DatabaseConfigService],
       useFactory: (
         typeOrmLoggerService: TypeOrmLoggerService,
         databaseConfigService: DatabaseConfigService,
-        serverConfigService: ServerConfigService,
       ) => {
         const loggerOptions = databaseConfigService.logging?.split(', ');
         typeOrmLoggerService.setOptions(
@@ -79,7 +74,7 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
           username: databaseConfigService.user,
           password: databaseConfigService.password,
           database: databaseConfigService.database,
-          keepConnectionAlive: serverConfigService.nodeEnv === 'test',
+          keepConnectionAlive: Environment.isTest(),
           migrationsRun: false,
           ssl: databaseConfigService.ssl,
         };

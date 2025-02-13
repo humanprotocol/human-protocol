@@ -11,6 +11,7 @@ import packageJson from '../../../package.json';
 import { Public } from '../../common/decorators';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { PingResponseDto } from './dto/ping-response.dto';
+import Environment from '../../utils/environment';
 
 @Public()
 @ApiTags('Health')
@@ -40,6 +41,7 @@ export class HealthController {
   async ping(): Promise<PingResponseDto> {
     return {
       appName: packageJson.name,
+      nodeEnv: Environment.name,
       gitHash: this.serverConfigService.gitHash,
     };
   }

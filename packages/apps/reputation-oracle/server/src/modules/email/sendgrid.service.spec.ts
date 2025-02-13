@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
 
-import * as environmentUtils from '../../common/utils/environment';
+import Environment from '../../utils/environment';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from './sendgrid.service';
 import logger from '../../logger';
 import { getTemplateId } from './sendgrid.service';
@@ -24,7 +24,7 @@ const mockEmailConfigService = {
 };
 
 const spyOnIsDevelopmentEnv = jest
-  .spyOn(environmentUtils, 'isDevelopmentEnv')
+  .spyOn(Environment, 'isDevelopment')
   .mockReturnValue(false);
 
 describe('SendgridEmailService', () => {

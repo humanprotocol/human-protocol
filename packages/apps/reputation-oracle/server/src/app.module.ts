@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { DatabaseModule } from './database/database.module';
 import { HttpValidationPipe } from './common/pipes';
 import { HealthModule } from './modules/health/health.module';
@@ -9,8 +11,6 @@ import { ReputationModule } from './modules/reputation/reputation.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
 import { AuthModule } from './modules/auth/auth.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
@@ -23,6 +23,7 @@ import { EscrowCompletionModule } from './modules/escrow-completion/escrow-compl
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
 import { EmailModule } from './modules/email/module';
+import Environment from './utils/environment';
 
 @Module({
   providers: [
@@ -42,9 +43,10 @@ import { EmailModule } from './modules/email/module';
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${Environment.name}`, '.env'],
       validationSchema: envValidator,
     }),
     DatabaseModule,
