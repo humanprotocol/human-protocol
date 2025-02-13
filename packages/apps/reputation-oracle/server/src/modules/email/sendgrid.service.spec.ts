@@ -30,7 +30,7 @@ const spyOnIsDevelopmentEnv = jest
 describe('SendgridEmailService', () => {
   let service: SendgridEmailService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SendgridEmailService,
