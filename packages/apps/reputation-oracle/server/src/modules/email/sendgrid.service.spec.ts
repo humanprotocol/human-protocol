@@ -43,7 +43,7 @@ describe('SendgridEmailService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('Initialization', () => {
