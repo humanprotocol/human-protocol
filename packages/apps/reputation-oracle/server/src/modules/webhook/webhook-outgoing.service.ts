@@ -10,7 +10,7 @@ import {
   HEADER_SIGNATURE_KEY,
 } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
-import { CaseConverter } from '../../common/utils/case-converter';
+import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
@@ -94,9 +94,9 @@ export class WebhookOutgoingService {
   public async sendWebhook(
     outgoingWebhook: WebhookOutgoingEntity,
   ): Promise<void> {
-    const snake_case_body = CaseConverter.transformToSnakeCase(
+    const snake_case_body = transformKeysFromCamelToSnake(
       outgoingWebhook.payload,
-    );
+    ) as object;
     const signedBody = await signMessage(
       snake_case_body,
       this.web3ConfigService.privateKey,

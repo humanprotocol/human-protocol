@@ -8,7 +8,6 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as CaseConverter from '../../utils/case-converters';
-import { isObject } from '../../utils/type-guards';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
@@ -16,59 +15,25 @@ export class TransformInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
 
     if (request.body) {
-      request.body = TransformInterceptor.transformRequestData(request.body);
+      request.body = this.transformRequestData(request.body);
     }
 
     if (request.query) {
-      request.query = TransformInterceptor.transformRequestData(request.query);
+      request.query = this.transformRequestData(request.query);
     }
 
-    return next
-      .handle()
-      .pipe(map((data) => TransformInterceptor.transformResponseData(data)));
+    return next.handle().pipe(map((data) => this.transformResponseData(data)));
   }
 
-  static transformRequestData(input: unknown): unknown {
-    /**
-     * If primitive value - no need to transform
-     */
-    if (!isObject(input)) {
+  private transformRequestData(input: unknown): unknown {
+    return CaseConverter.transformKeysFromSnakeToCamel(input);
+  }
+
+  private transformResponseData(input: unknown): unknown {
+    if (input instanceof StreamableFile) {
       return input;
     }
 
-    if (Array.isArray(input)) {
-      return input.map(TransformInterceptor.transformRequestData);
-    }
-
-    const transformedObject: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(input)) {
-      transformedObject[CaseConverter.snakeToCamel(key)] =
-        TransformInterceptor.transformRequestData(value);
-    }
-    return transformedObject;
-  }
-
-  static transformResponseData(input: unknown): unknown {
-    /**
-     * If primitive value or file - return as is
-     */
-    if (!isObject(input) || input instanceof StreamableFile) {
-      return input;
-    }
-
-    if (input instanceof Date) {
-      return input.toISOString();
-    }
-
-    if (Array.isArray(input)) {
-      return input.map(TransformInterceptor.transformResponseData);
-    }
-
-    const transformedObject: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(input)) {
-      transformedObject[CaseConverter.camelToSnake(key)] =
-        TransformInterceptor.transformResponseData(value);
-    }
-    return transformedObject;
+    return CaseConverter.transformKeysFromCamelToSnake(input);
   }
 }
