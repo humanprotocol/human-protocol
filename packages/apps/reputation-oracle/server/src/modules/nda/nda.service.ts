@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NDARepository } from './nda.repository';
-import { NDASignatureEntity } from './nda-signature.entity';
 import { UserEntity } from '../user/user.entity';
 import { NDAVersionRepository } from './nda-version.repository';
 import { NdaVersionDto } from './nda.dto';
-import { NdaError, NdaErrorMessage } from './nda.error';
+import { NdaNotFoundError, NdaSignedError } from './nda.error';
+import { NdaSignatureStatus } from '../../common/enums';
 
 @Injectable()
 export class NDAService {
@@ -16,13 +16,11 @@ export class NDAService {
     private readonly ndaVersionRepository: NDAVersionRepository,
   ) {}
 
-  public async getLastNDAVersion(
-    user: UserEntity,
-  ): Promise<NdaVersionDto | null> {
+  public async getLastNDAVersion(): Promise<NdaVersionDto | null> {
     const lastNDAVersion = await this.ndaVersionRepository.getLastNDAVersion();
 
     if (!lastNDAVersion) {
-      throw new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id);
+      throw new NdaNotFoundError(undefined);
     }
 
     return {
@@ -38,28 +36,32 @@ export class NDAService {
     const lastNDAVersion = await this.ndaVersionRepository.getLastNDAVersion();
 
     if (!lastNDAVersion) {
-      throw new NdaError(NdaErrorMessage.NDA_NOT_FOUND, user.id);
+      throw new NdaNotFoundError(`user id: ${user.id}`);
     }
 
     const existingNDA = await this.ndaRepository.findSignedNDAByUserAndVersion(
-      user,
+      user.id,
       lastNDAVersion.id,
     );
     if (existingNDA) {
-      throw new NdaError(NdaErrorMessage.NDA_ALREADY_SIGNED, user.id);
+      throw new NdaSignedError(user.id, lastNDAVersion.version);
     }
 
-    const newNda = new NDASignatureEntity();
-    newNda.user = user;
-    newNda.ipAddress = ipAddress;
-    newNda.ndaVersion = lastNDAVersion;
+    const newNda = this.ndaRepository.create({
+      user,
+      ipAddress,
+      ndaVersion: lastNDAVersion,
+      status: NdaSignatureStatus.SIGNED,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     await this.ndaRepository.createUnique(newNda);
 
     return true;
   }
 
-  public async isLatestSigned(user: UserEntity): Promise<boolean> {
+  public async isLatestSigned(userId: number): Promise<boolean> {
     const lastNDAVersion = await this.ndaVersionRepository.getLastNDAVersion();
 
     if (!lastNDAVersion) {
@@ -67,7 +69,7 @@ export class NDAService {
     }
 
     const ndaEntity = await this.ndaRepository.findSignedNDAByUserAndVersion(
-      user,
+      userId,
       lastNDAVersion.id,
     );
     if (!ndaEntity) {

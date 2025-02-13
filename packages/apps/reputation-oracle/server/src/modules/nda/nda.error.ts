@@ -6,9 +6,25 @@ export enum NdaErrorMessage {
 }
 
 export class NdaError extends BaseError {
-  userId: number;
-  constructor(message: NdaErrorMessage, userId: number) {
+  constructor(message: NdaErrorMessage) {
     super(message);
-    this.userId = userId;
+  }
+}
+
+export class NdaNotFoundError extends BaseError {
+  constructor(public readonly detail: string | undefined) {
+    detail = detail ? `- ${detail}` : '';
+    super(`${NdaErrorMessage.NDA_NOT_FOUND}${detail}`);
+  }
+}
+
+export class NdaSignedError extends BaseError {
+  constructor(
+    public readonly userId: number,
+    public readonly version: string,
+  ) {
+    super(
+      `${NdaErrorMessage.NDA_ALREADY_SIGNED} - userId: ${userId} version: ${version}`,
+    );
   }
 }

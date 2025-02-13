@@ -7,6 +7,7 @@ import {
   HttpCode,
   Logger,
   Ip,
+  UseFilters,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -19,10 +20,12 @@ import { NDAService } from './nda.service';
 import { RequestWithUser } from '../../common/types';
 import { NDASignatureEntity } from './nda-signature.entity';
 import { NdaVersionDto } from './nda.dto';
+import { NdaErrorFilter } from './nda.error.filter';
 
 @ApiTags('NDA')
 @Controller('/nda')
 @ApiBearerAuth()
+@UseFilters(NdaErrorFilter)
 @UseGuards(JwtAuthGuard)
 export class NDAController {
   constructor(
@@ -46,10 +49,8 @@ export class NDAController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async getLastNDAVersion(
-    @Req() request: RequestWithUser,
-  ): Promise<NdaVersionDto | null> {
-    return this.ndaService.getLastNDAVersion(request.user);
+  public async getLastNDAVersion(): Promise<NdaVersionDto | null> {
+    return this.ndaService.getLastNDAVersion();
   }
 
   @Post('/sign')

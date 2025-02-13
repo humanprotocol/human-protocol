@@ -109,7 +109,7 @@ describe('WebhookOutgoingService', () => {
 
     const hash = crypto
       .createHash('sha1')
-      .update(stringify({ payload, url }))
+      .update(stringify({ payload, url })!)
       .digest('hex');
 
     const webhookEntity: Partial<WebhookOutgoingEntity> = {

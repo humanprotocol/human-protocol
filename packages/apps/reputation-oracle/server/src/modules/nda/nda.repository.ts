@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { NDASignatureEntity } from './nda-signature.entity';
-import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class NDARepository extends BaseRepository<NDASignatureEntity> {
@@ -11,11 +10,11 @@ export class NDARepository extends BaseRepository<NDASignatureEntity> {
   }
 
   async findSignedNDAByUserAndVersion(
-    user: UserEntity,
+    userId: number,
     ndaVersionId: number,
   ): Promise<NDASignatureEntity | null> {
     return this.findOne({
-      where: { user, ndaVersionId },
+      where: { userId, ndaVersionId },
     });
   }
 }
