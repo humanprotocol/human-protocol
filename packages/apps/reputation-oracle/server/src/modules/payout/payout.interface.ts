@@ -1,5 +1,8 @@
 import { ChainId } from '@human-protocol/sdk';
-import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
+import {
+  CvatManifest,
+  FortuneManifest,
+} from '../../common/interfaces/manifest';
 
 export class CalculatePayoutsInput {
   chainId: ChainId;
@@ -28,12 +31,12 @@ export type CalculatedPayout = {
 
 export interface RequestAction {
   calculatePayouts: (
-    manifest: FortuneManifestDto | CvatManifestDto,
+    manifest: FortuneManifest | CvatManifest,
     data: CalculatePayoutsInput,
   ) => Promise<CalculatedPayout[]>;
   saveResults: (
     chainId: ChainId,
     escrowAddress: string,
-    manifest?: FortuneManifestDto,
+    manifest?: FortuneManifest,
   ) => Promise<SaveResultDto>;
 }

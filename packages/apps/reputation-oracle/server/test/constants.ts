@@ -1,7 +1,5 @@
 import { Web3Env } from '../src/common/enums/web3';
 import { ImageLabelBinaryJobResults } from '../src/common/dto/result';
-import { JobRequestType } from '../src/common/enums';
-import { IFortuneManifest } from '../src/common/interfaces/manifest';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -22,14 +20,6 @@ export const MOCK_RECORDING_ORACLE_ADDRESS =
   '0xCf88b3f1992458C2f5a229573c768D0E9F70C442';
 export const MOCK_REPUTATION_ORACLE_ADDRESS =
   '0xCf88b3f1992458C2f5a229573c768D0E9F70C443';
-export const MOCK_MANIFEST: IFortuneManifest = {
-  submissionsRequired: 2,
-  requesterTitle: 'Fortune',
-  requesterDescription: 'Some desc',
-  fee: '20',
-  fundAmount: '8',
-  requestType: JobRequestType.FORTUNE,
-};
 export const MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS: ImageLabelBinaryJobResults = {
   dataset: {
     dataset_scores: {
