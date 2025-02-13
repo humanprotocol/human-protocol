@@ -13,6 +13,10 @@ export class ServerConfigService {
     return this.configService.get<string>('NODE_ENV', 'development');
   }
 
+  /**
+   * The Git hash of the current build.
+   * Default: ''
+   */
   get gitHash(): string {
     return this.configService.get<string>('GIT_HASH', '');
   }
@@ -59,7 +63,7 @@ export class ServerConfigService {
 
   /**
    * The minimum validity period (in days) for a qualification.
-   * Default: 1 day
+   * Default: 1
    */
   get qualificationMinValidity(): number {
     return +this.configService.get<number>('QUALIFICATION_MIN_VALIDITY', 1);

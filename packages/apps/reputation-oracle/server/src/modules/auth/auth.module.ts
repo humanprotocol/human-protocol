@@ -10,6 +10,7 @@ import { UserRepository } from '../user/user.repository';
 import { Web3Module } from '../web3/web3.module';
 import { AuthConfigService } from '../../common/config/auth-config.service';
 import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
+import { NDAModule } from '../nda/nda.module';
 import { EmailModule } from '../email/module';
 
 @Module({
@@ -27,6 +28,7 @@ import { EmailModule } from '../email/module';
     }),
     Web3Module,
     HCaptchaModule,
+    NDAModule,
     EmailModule,
   ],
   providers: [JwtHttpStrategy, AuthService, TokenRepository, UserRepository],

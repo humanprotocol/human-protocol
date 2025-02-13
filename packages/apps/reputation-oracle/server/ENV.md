@@ -45,6 +45,15 @@ POSTGRES_SSL="false"
 ### The logging level for PostgreSQL operations (e.g., 'debug', 'info'). Default: 'log,info,warn,error'
 POSTGRES_LOGGING="log,info,warn,error"
 
+### The API key used for authenticating requests to the email provider API. Should be overridden in stagin/production environments. Default: 'disabled'
+SENDGRID_API_KEY="disabled"
+
+### The email address that will be used as the sender's address in emails. Default: 'app@humanprotocol.org'
+EMAIL_FROM="app@humanprotocol.org"
+
+### The name that will be used as the sender's name in emails. Default: 'Human Protocol'
+EMAIL_FROM_NAME="Human Protocol"
+
 ### The site key for the hCaptcha service, used for client-side verification. Required
 HCAPTCHA_SITE_KEY=
 
@@ -123,17 +132,11 @@ S3_BUCKET="reputation"
 ### Indicates whether to use SSL (HTTPS) for connections to the S3 service. Default: false
 S3_USE_SSL="false"
 
-### The API key used for authenticating requests to the SendGrid API. Default: 'sendgrid-disabled'
-SENDGRID_API_KEY="sendgrid-disabled"
-
-### The email address that will be used as the sender's address in emails sent via SendGrid. Default: 'app@humanprotocol.org'
-SENDGRID_FROM_EMAIL="app@humanprotocol.org"
-
-### The name that will be used as the sender's name in emails sent via SendGrid. Default: 'Human Protocol'
-SENDGRID_FROM_NAME="Human Protocol"
-
 ### The environment in which the server is running (e.g., 'development', 'production'). Default: 'development'
 NODE_ENV="development"
+
+### The Git hash of the current build. Default: ''
+GIT_HASH=" "
 
 ### The hostname or IP address on which the server will run. Default: 'localhost'
 HOST="localhost"
@@ -150,8 +153,8 @@ SESSION_SECRET="session_key"
 ### The maximum number of retry attempts for certain operations. Default: 5
 MAX_RETRY_COUNT="5"
 
-### The minimum validity period (in days) for a qualification. Default: 1 day
-QUALIFICATION_MIN_VALIDITY="1 day"
+### The minimum validity period (in days) for a qualification. Default: 1
+QUALIFICATION_MIN_VALIDITY="1"
 
 ### The environment in which the Web3 application is running. Default: 'testnet'
 WEB3_ENV="testnet"

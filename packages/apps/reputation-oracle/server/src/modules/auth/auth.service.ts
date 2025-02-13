@@ -26,6 +26,7 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { SiteKeyType } from '../../common/enums';
+import { NDAService } from '../nda/nda.service';
 import {
   AuthError,
   AuthErrorMessage,
@@ -66,6 +67,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
+    private readonly ndaService: NDAService,
   ) {}
 
   public async signin({
@@ -164,6 +166,7 @@ export class AuthService {
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
+      nda: await this.ndaService.isLatestSigned(userEntity.id),
       reputation_network: this.web3Service.getOperatorAddress(),
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(

@@ -177,7 +177,7 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValueOnce(true);
 
-      const hash = hashString(stringify(MOCK_MANIFEST));
+      const hash = hashString(stringify(MOCK_MANIFEST)!);
 
       const fileData = await storageService.uploadJsonLikeData(MOCK_MANIFEST);
       expect(fileData).toEqual({

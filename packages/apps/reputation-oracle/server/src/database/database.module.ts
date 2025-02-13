@@ -19,6 +19,8 @@ import { QualificationEntity } from '../modules/qualification/qualification.enti
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
+import { NDASignatureEntity } from '../modules/nda/nda-signature.entity';
+import { NDAVersionEntity } from '../modules/nda/nda-version.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
 
@@ -58,6 +60,8 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
             SiteKeyEntity,
             QualificationEntity,
             UserQualificationEntity,
+            NDASignatureEntity,
+            NDAVersionEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
