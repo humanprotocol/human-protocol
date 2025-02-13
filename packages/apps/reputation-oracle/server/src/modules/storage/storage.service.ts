@@ -14,7 +14,7 @@ import { Web3Service } from '../web3/web3.service';
 import { FortuneFinalResult } from '../../common/interfaces/job-result';
 import { S3ConfigService } from '../../common/config/s3-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { isNotFoundError } from '../../common/utils/minio';
+import { isNotFoundError } from '../../common/errors/minio';
 import {
   FileDownloadError,
   FileNotFoundError,

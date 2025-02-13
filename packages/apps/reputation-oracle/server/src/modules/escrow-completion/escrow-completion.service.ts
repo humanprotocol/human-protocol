@@ -25,7 +25,7 @@ import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { isDuplicatedError } from '../../common/utils/database';
+import { isDuplicatedError } from '../../common/errors/database';
 import { CalculatedPayout } from '../payout/payout.interface';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';

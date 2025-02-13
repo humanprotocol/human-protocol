@@ -17,7 +17,7 @@ import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './common/config/config.module';
 import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
-import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { ExceptionFilter } from './common/filters/exception.filter';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
