@@ -10,17 +10,14 @@ import { ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
-import {
-  CalculatePayoutsDto,
-  CvatManifestDto,
-  FortuneManifestDto,
-} from '../../common/dto/manifest';
+import { CvatManifestDto, FortuneManifestDto } from '../../common/dto/manifest';
 import {
   CvatAnnotationMeta,
   FortuneFinalResult,
 } from '../../common/dto/result';
 import {
   CalculatedPayout,
+  CalculatePayoutsInput,
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
@@ -101,7 +98,7 @@ export class PayoutService {
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
-    const data: CalculatePayoutsDto = {
+    const data: CalculatePayoutsInput = {
       chainId,
       escrowAddress,
       finalResultsUrl,
@@ -114,7 +111,7 @@ export class PayoutService {
     [JobRequestType.FORTUNE]: {
       calculatePayouts: async (
         manifest: FortuneManifestDto,
-        data: CalculatePayoutsDto,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsFortune(manifest, data.finalResultsUrl),
       saveResults: async (
@@ -127,7 +124,7 @@ export class PayoutService {
     [JobRequestType.IMAGE_BOXES]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -138,7 +135,7 @@ export class PayoutService {
     [JobRequestType.IMAGE_POINTS]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -149,7 +146,7 @@ export class PayoutService {
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -160,7 +157,7 @@ export class PayoutService {
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -171,7 +168,7 @@ export class PayoutService {
     [JobRequestType.IMAGE_POLYGONS]: {
       calculatePayouts: async (
         manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
