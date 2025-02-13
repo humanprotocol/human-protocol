@@ -46,8 +46,8 @@ jest.mock('@human-protocol/sdk', () => ({
   },
 }));
 
-jest.mock('../../common/utils/backoff', () => ({
-  ...jest.requireActual('../../common/utils/backoff'),
+jest.mock('../../utils/backoff', () => ({
+  ...jest.requireActual('../../utils/backoff'),
   calculateExponentialBackoffMs: jest
     .fn()
     .mockReturnValue(MOCK_BACKOFF_INTERVAL_SECONDS * 1000),

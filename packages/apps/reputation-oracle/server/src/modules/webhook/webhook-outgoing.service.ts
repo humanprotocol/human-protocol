@@ -15,7 +15,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
 import logger from '../../logger';
 

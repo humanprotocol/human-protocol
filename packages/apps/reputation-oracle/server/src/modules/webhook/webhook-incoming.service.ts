@@ -4,7 +4,7 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { EventType, WebhookIncomingStatus } from '../../common/enums';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import { isDuplicatedError } from '../../common/utils/database';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';

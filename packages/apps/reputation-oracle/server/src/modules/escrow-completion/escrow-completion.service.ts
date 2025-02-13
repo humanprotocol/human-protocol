@@ -15,7 +15,7 @@ import {
   EscrowStatus,
   OperatorUtils,
 } from '@human-protocol/sdk';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import {
   BACKOFF_INTERVAL_SECONDS,
   DEFAULT_BULK_PAYOUT_TX_ID,
