@@ -23,13 +23,23 @@ export class RejectionEventData {
   public assignments: AssignmentRejection[];
 }
 
+export class FailedEventData {
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  reason?: string;
+}
+
 export class SolutionEventData {
   @ApiProperty({ name: 'solutions_url' })
   @IsString()
   solutionsUrl: string;
 }
 
-export type EventData = RejectionEventData | SolutionEventData;
+export type EventData =
+  | FailedEventData
+  | RejectionEventData
+  | SolutionEventData;
 
 export class WebhookDto {
   @ApiProperty({

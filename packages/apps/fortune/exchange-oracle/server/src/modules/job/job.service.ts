@@ -343,45 +343,43 @@ export class JobService {
     escrowAddress: string,
     manifestUrl: string,
   ): Promise<ManifestDto> {
-    const manifestEncrypted =
-      await StorageClient.downloadFileFromUrl(manifestUrl);
+    let manifest: ManifestDto | null = null;
 
-    let manifest: ManifestDto | null;
-    if (
-      typeof manifestEncrypted === 'string' &&
-      EncryptionUtils.isEncrypted(manifestEncrypted)
-    ) {
-      try {
+    try {
+      const manifestEncrypted =
+        await StorageClient.downloadFileFromUrl(manifestUrl);
+
+      if (
+        typeof manifestEncrypted === 'string' &&
+        EncryptionUtils.isEncrypted(manifestEncrypted)
+      ) {
         const encryption = await Encryption.build(
           this.pgpConfigService.privateKey!,
           this.pgpConfigService.passphrase,
         );
-
         const decryptedData = await encryption.decrypt(manifestEncrypted);
         manifest = JSON.parse(Buffer.from(decryptedData).toString());
-      } catch {
-        throw new Error(ErrorJob.ManifestDecryptionFailed);
-      }
-    } else {
-      try {
+      } else {
         manifest =
           typeof manifestEncrypted === 'string'
             ? JSON.parse(manifestEncrypted)
             : manifestEncrypted;
-      } catch {
-        manifest = null;
       }
+    } catch {
+      manifest = null;
     }
 
     if (!manifest) {
       const webhook = new WebhookEntity();
       webhook.escrowAddress = escrowAddress;
       webhook.chainId = chainId;
-      webhook.eventType = EventType.TASK_CREATION_FAILED;
+      webhook.eventType = EventType.ESCROW_FAILED;
+      webhook.failureDetail = ErrorJob.ManifestNotFound;
 
       await this.webhookRepository.createUnique(webhook);
-
       throw new NotFoundException(ErrorJob.ManifestNotFound);
-    } else return manifest;
+    }
+
+    return manifest;
   }
 }
