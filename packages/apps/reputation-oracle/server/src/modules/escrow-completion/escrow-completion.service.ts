@@ -302,7 +302,7 @@ export class EscrowCompletionService {
 
     const batchHash = crypto
       .createHash('sha1')
-      .update(stringify(formattedPayouts))
+      .update(stringify(formattedPayouts) as string)
       .digest('hex');
 
     const escrowPayoutsBatchEntity = new EscrowPayoutsBatchEntity();
