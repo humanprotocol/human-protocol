@@ -1,4 +1,4 @@
-import { BACKOFF_INTERVAL_SECONDS } from '../constants';
+import { BACKOFF_INTERVAL_SECONDS } from '../common/constants';
 
 export function calculateExponentialBackoffMs(
   retriesCount: number,

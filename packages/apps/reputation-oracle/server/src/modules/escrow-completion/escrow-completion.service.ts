@@ -5,7 +5,7 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { EscrowCompletionStatus, EventType } from '../../common/enums';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {
@@ -15,7 +15,7 @@ import {
   EscrowStatus,
   OperatorUtils,
 } from '@human-protocol/sdk';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import {
   BACKOFF_INTERVAL_SECONDS,
   DEFAULT_BULK_PAYOUT_TX_ID,
@@ -25,7 +25,7 @@ import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { isDuplicatedError } from '../../common/utils/database';
+import { isDuplicatedError } from '../../common/errors/database';
 import { CalculatedPayout } from '../payout/payout.interface';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';

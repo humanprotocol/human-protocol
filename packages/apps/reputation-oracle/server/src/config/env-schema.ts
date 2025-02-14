@@ -2,7 +2,6 @@ import * as Joi from 'joi';
 
 export const envValidator = Joi.object({
   // General
-  NODE_ENV: Joi.string(),
   HOST: Joi.string(),
   PORT: Joi.string(),
   FE_URL: Joi.string(),
