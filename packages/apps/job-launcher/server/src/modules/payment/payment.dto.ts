@@ -9,7 +9,8 @@ import {
   Min,
 } from 'class-validator';
 import {
-  Currency,
+  FiatCurrency,
+  PaymentCurrency,
   PaymentSortField,
   PaymentSource,
   PaymentStatus,
@@ -34,10 +35,10 @@ export class PaymentFiatCreateDto {
   public amount: number;
 
   @ApiProperty({
-    enum: Currency,
+    enum: FiatCurrency,
   })
-  @IsEnumCaseInsensitive(Currency)
-  public currency: Currency;
+  @IsEnumCaseInsensitive(FiatCurrency)
+  public currency: FiatCurrency;
 
   @ApiProperty({
     name: 'payment_method_id',
@@ -79,17 +80,10 @@ export class GetRateDto {
   public to: string;
 }
 
-export class PaymentRefundCreateDto {
-  @ApiPropertyOptional({ name: 'refund_amount' })
-  @IsNumber()
+export class PaymentRefund {
   public refundAmount: number;
-
-  @ApiPropertyOptional({ name: 'user_id' })
-  @IsNumber()
+  public refundCurrency: PaymentCurrency;
   public userId: number;
-
-  @ApiPropertyOptional({ name: 'job_id' })
-  @IsNumber()
   public jobId: number;
 }
 
