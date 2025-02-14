@@ -27,12 +27,6 @@ export class ReputationController {
     summary: 'Get All Reputations',
     description: 'Endpoint to get all reputations.',
   })
-  @ApiQuery({
-    name: 'chain_id',
-    description: 'Chain ID for filtering reputations.',
-    type: Number,
-    required: true,
-  })
   @ApiResponse({
     status: 200,
     description: 'Reputations retrieved successfully',

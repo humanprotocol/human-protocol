@@ -29,8 +29,8 @@ import {
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { HCaptchaGuard } from '../../common/guards/hcaptcha';
-import { RequestWithUser } from '../../common/types';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { RequestWithUser } from '../../common/interfaces/request';
+import { prepareSignatureBody } from '../../utils/web3';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';

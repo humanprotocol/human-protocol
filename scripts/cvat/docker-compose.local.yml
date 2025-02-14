@@ -16,7 +16,7 @@ x-hardcoded-vars:
   redis_host: &redis_host redis
   redis_port: &redis_port 6379
   minio_host: &minio_host minio
-  node_env: &node_env local
+  node_env: &node_env development
   cvat_lb_url: &cvat_lb_url 'http://cvat-lb:8080'
   cvat_oracle_storage_provider: &cvat_oracle_storage_provider aws
 

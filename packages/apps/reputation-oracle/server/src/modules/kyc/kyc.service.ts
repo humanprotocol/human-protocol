@@ -6,10 +6,10 @@ import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
-import { KycConfigService } from '../../common/config/kyc-config.service';
+import { KycConfigService } from '../../config/kyc-config.service';
 import { KycEntity } from './kyc.entity';
 import { Web3Service } from '../web3/web3.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
 
 import { KycErrorMessage, KycError } from './kyc.error';
 

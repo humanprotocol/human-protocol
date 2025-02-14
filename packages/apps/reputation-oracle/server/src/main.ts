@@ -6,7 +6,7 @@ import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
-import { ServerConfigService } from './common/config/server-config.service';
+import { ServerConfigService } from './config/server-config.service';
 import { nestLoggerOverride } from './logger';
 
 async function bootstrap() {

@@ -69,7 +69,7 @@ export const NETWORK_TOKENS: Record<
   },
   [ChainId.SEPOLIA]: {
     hmt: NETWORKS[ChainId.SEPOLIA]?.hmtAddress,
-    usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+    // usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
   },
   [ChainId.POLYGON_AMOY]: {
     hmt: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress,

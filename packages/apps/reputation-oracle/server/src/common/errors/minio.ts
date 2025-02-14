@@ -1,4 +1,6 @@
-import { MinioErrorCodes } from '../enums/minio';
+enum MinioErrorCodes {
+  NotFound = 'NotFound',
+}
 
 export function isNotFoundError(error: any): boolean {
   return error?.code === MinioErrorCodes.NotFound;

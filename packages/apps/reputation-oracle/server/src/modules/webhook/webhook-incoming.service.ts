@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@nestjs/common';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { BACKOFF_INTERVAL_SECONDS } from '../../common/constants';
 import { EventType, WebhookIncomingStatus } from '../../common/enums';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
-import { isDuplicatedError } from '../../common/utils/database';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
+import { isDuplicatedError } from '../../common/errors/database';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookIncomingRepository } from './webhook-incoming.repository';

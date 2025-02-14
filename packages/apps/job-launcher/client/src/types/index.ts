@@ -39,8 +39,9 @@ export type CreateFortuneJobRequest = {
   submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
-  currency: string;
-  fundAmount: number;
+  paymentCurrency: string;
+  paymentAmount: number;
+  escrowFundToken: string;
   qualifications?: string[];
 };
 
@@ -48,8 +49,9 @@ export type CreateCvatJobRequest = {
   chainId: number;
   requesterDescription: string;
   qualifications?: string[];
-  fundAmount: number;
-  currency: string;
+  paymentCurrency: string;
+  paymentAmount: number;
+  escrowFundToken: string;
   data: CvatDataSource;
   labels: string[];
   minQuality: number;

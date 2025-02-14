@@ -17,7 +17,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards';
-import { RequestWithUser } from '../../common/types';
+import { RequestWithUser } from '../../common/interfaces/request';
 import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from '../../common/guards/kyc-webhook.auth';

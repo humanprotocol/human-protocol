@@ -1,16 +1,11 @@
 import { QueryFailedError } from 'typeorm';
 import { PostgresErrorCodes } from '../enums/database';
+import { BaseError } from './base';
 
-export class DatabaseError extends Error {
-  constructor(message: string, stack: string) {
-    super(message);
-    this.stack = stack;
-  }
-}
+export class DatabaseError extends BaseError {}
 
 export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
-  const stack = error.stack || '';
-  let message = error.message;
+  let message: string;
 
   switch ((error.driverError as any).code) {
     case PostgresErrorCodes.Duplicated:
@@ -20,7 +15,16 @@ export function handleQueryFailedError(error: QueryFailedError): DatabaseError {
       message = 'Incorrect amount';
       break;
     default:
+      message = error.message;
       break;
   }
-  return new DatabaseError(message, stack);
+
+  return new DatabaseError(message, error);
+}
+
+export function isDuplicatedError(error: unknown): boolean {
+  return (
+    error instanceof DatabaseError &&
+    error.message.includes(PostgresErrorCodes.Duplicated)
+  );
 }

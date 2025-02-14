@@ -6,7 +6,7 @@ import {
   hCaptchaRegisterLabeler,
   hCaptchaVerifyToken,
 } from './hcaptcha.dto';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import logger from '../../logger';
 
 @Injectable()

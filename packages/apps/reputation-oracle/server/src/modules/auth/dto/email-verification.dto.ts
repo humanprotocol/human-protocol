@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUUID } from 'class-validator';
-import { LowercasedEmail } from '../../../common/decorators';
+import { IsLowercasedEmail } from '../../../common/validators';
 
 export class ResendVerificationEmailDto {
   @ApiProperty()
-  @LowercasedEmail()
+  @IsLowercasedEmail()
   public email: string;
 
   @ApiProperty({ name: 'h_captcha_token' })

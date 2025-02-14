@@ -4,12 +4,9 @@ import { firstValueFrom } from 'rxjs';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { COINGECKO_API_URL } from '../../common/constants';
 import { ErrorCurrency } from '../../common/constants/errors';
-import {
-  //   CoinMarketCupTokenId,
-  CoingeckoTokenId,
-} from '../../common/constants/payment';
-import { TokenId } from '../../common/enums/payment';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 import { ControlledError } from '../../common/errors/controlled';
+import { EscrowFundToken } from '../../common/enums/job';
 
 @Injectable()
 export class RateService {
@@ -38,7 +35,7 @@ export class RateService {
     let coingeckoFrom = from;
     let coingeckoTo = to;
 
-    if (Object.values(TokenId).includes(to as TokenId)) {
+    if (Object.values(EscrowFundToken).includes(to as EscrowFundToken)) {
       coingeckoFrom = CoingeckoTokenId[to];
       coingeckoTo = from;
       reversed = true;
@@ -83,40 +80,10 @@ export class RateService {
       return finalRate;
     } catch (error) {
       this.logger.error(error);
-
-      //   try {
-      //     const coinMarketCapFrom = CoinMarketCupTokenId[from];
-      //     const coinMarketCapTo = to;
-      //     const { data } = (await firstValueFrom(
-      //       this.httpService.get(
-      //         `${COINMARKETCAP_API_URL}?symbol=${coinMarketCapFrom}`,
-      //         {
-      //           headers: {
-      //             'X-CMC_PRO_API_KEY':
-      //               this.serverConfigService.coinmarketcapApiKey,
-      //           },
-      //         },
-      //       ),
-      //     )) as any;
-      //     if (
-      //       !data.data[coinMarketCapFrom] ||
-      //       !data.data[coinMarketCapFrom].quote[coinMarketCapTo]
-      //     ) {
-      //       throw new ControlledError(
-      //         ErrorCurrency.PairNotFound,
-      //         HttpStatus.NOT_FOUND,
-      //       );
-      //     }
-      //     const rate = data.data[coinMarketCapFrom].quote[coinMarketCapTo].price;
-      //     const finalRate = reversed ? 1 / rate : rate;
-      //     this.cache.set(cacheKey, { rate: finalRate, timestamp: Date.now() });
-      //     return finalRate;
-      //   } catch (cmcError) {
       throw new ControlledError(
         ErrorCurrency.PairNotFound,
         HttpStatus.NOT_FOUND,
       );
-      //   }
     }
   }
 }

@@ -14,15 +14,14 @@ import {
   PaymentDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
-  PaymentRefundCreateDto,
+  PaymentRefund,
 } from './payment.dto';
 import {
-  Currency,
+  FiatCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
-  TokenId,
   VatType,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
@@ -34,14 +33,12 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { div, eq, mul } from '../../common/utils/decimal';
+import { div, eq, mul, add } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from './rate.service';
 import { UserEntity } from '../user/user.entity';
-// import { JobEntity } from '../job/job.entity';
-import { ServerConfigService } from '../../common/config/server-config.service';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -59,7 +56,6 @@ export class PaymentService {
     private readonly jobRepository: JobRepository,
     private stripeConfigService: StripeConfigService,
     private rateService: RateService,
-    private serverConfigService: ServerConfigService,
   ) {
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
       apiVersion: this.stripeConfigService.apiVersion as any,
@@ -225,9 +221,6 @@ export class PaymentService {
       );
     }
 
-    // Record the payment details in the system.
-    const rate = await this.rateService.getRate(currency, Currency.USD);
-
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
       userId: user.id,
@@ -235,7 +228,7 @@ export class PaymentService {
       type: PaymentType.DEPOSIT,
       amount: div(amountInCents, 100),
       currency,
-      rate,
+      rate: 1,
       transaction: paymentIntent.id,
       status: PaymentStatus.PENDING,
     });
@@ -381,7 +374,7 @@ export class PaymentService {
       );
     }
 
-    const rate = await this.rateService.getRate(tokenId, Currency.USD);
+    const rate = await this.rateService.getRate(tokenId, FiatCurrency.USD);
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
@@ -400,7 +393,7 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number): Promise<number> {
+  public async getUserUSDBalance(userId: number): Promise<number> {
     const paymentEntities =
       await this.paymentRepository.getUserBalancePayments(userId);
 
@@ -413,21 +406,40 @@ export class PaymentService {
     for (const token of uniqueTokens) {
       const tokenAmountSum = paymentEntities
         .filter((payment) => payment.currency === token)
-        .reduce((sum, payment) => sum + Number(payment.amount), 0);
+        .reduce((sum, payment) => add(sum, Number(payment.amount)), 0);
 
       const rate =
-        token === Currency.USD
+        token === FiatCurrency.USD
           ? 1
-          : await this.rateService.getRate(token, Currency.USD);
-
-      totalBalance += tokenAmountSum * rate;
+          : await this.rateService.getRate(token, FiatCurrency.USD);
+      totalBalance += mul(tokenAmountSum, rate);
     }
 
     return totalBalance;
   }
 
-  public async createRefundPayment(dto: PaymentRefundCreateDto) {
-    const rate = await this.rateService.getRate(TokenId.HMT, Currency.USD);
+  public async getUserBalanceByCurrency(
+    userId: number,
+    currency: string,
+  ): Promise<number> {
+    const paymentEntities = await this.paymentRepository.getUserBalancePayments(
+      userId,
+      currency,
+    );
+
+    const balance = paymentEntities.reduce(
+      (sum, payment) => add(sum, Number(payment.amount)),
+      0,
+    );
+
+    return balance;
+  }
+
+  public async createRefundPayment(dto: PaymentRefund) {
+    const rate = await this.rateService.getRate(
+      dto.refundCurrency,
+      FiatCurrency.USD,
+    );
 
     const paymentEntity = new PaymentEntity();
     Object.assign(paymentEntity, {
@@ -436,7 +448,7 @@ export class PaymentService {
       source: PaymentSource.BALANCE,
       type: PaymentType.REFUND,
       amount: dto.refundAmount,
-      currency: TokenId.HMT,
+      currency: dto.refundCurrency,
       rate,
       status: PaymentStatus.SUCCEEDED,
     });

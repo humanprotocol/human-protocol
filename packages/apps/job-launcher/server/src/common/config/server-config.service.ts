@@ -49,7 +49,7 @@ export class ServerConfigService {
    * The minimum transaction fee in USD.
    * Default: 0.01
    */
-  get minimunFeeUsd(): number {
+  get minimumFeeUsd(): number {
     return +this.configService.get<number>('MINIMUM_FEE_USD', 0.01);
   }
 
@@ -59,13 +59,6 @@ export class ServerConfigService {
    */
   get rateCacheTime(): number {
     return +this.configService.get<number>('RATE_CACHE_TIME', 30);
-  }
-
-  /**
-   * The API key for accessing CoinMarketCap data.
-   */
-  get coinmarketcapApiKey(): string | undefined {
-    return this.configService.get<string>('COINMARKETCAP_API_KEY');
   }
 
   /**

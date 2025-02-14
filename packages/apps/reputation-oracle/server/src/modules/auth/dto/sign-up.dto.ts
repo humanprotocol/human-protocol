@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsString } from 'class-validator';
-import {
-  IsEnumCaseInsensitive,
-  IsValidWeb3Signature,
-  LowercasedEmail,
-} from '../../../common/decorators';
-import { Role } from '../../../common/enums/user';
 import { ValidPassword } from './password.dto';
+import {
+  IsLowercasedEmail,
+  IsLowercasedEnum,
+  IsValidWeb3Signature,
+} from '../../../common/validators';
+import { Role } from '../../../common/enums/user';
 
 export class Web2SignUpDto {
   @ApiProperty()
-  @LowercasedEmail()
+  @IsLowercasedEmail()
   public email: string;
 
   @ApiProperty()
@@ -30,7 +30,7 @@ export class Web3SignUpDto {
   @ApiProperty({
     enum: Role,
   })
-  @IsEnumCaseInsensitive(Role)
+  @IsLowercasedEnum(Role)
   public type: Role;
 
   @ApiProperty()

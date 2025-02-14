@@ -1,12 +1,12 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Web3Env } from '../enums/web3';
+import { Web3Env } from '../common/enums/web3';
 import {
   LOCALHOST_CHAIN_IDS,
   MAINNET_CHAIN_IDS,
   TESTNET_CHAIN_IDS,
-} from '../constants/networks';
+} from '../common/constants/networks';
 
 export interface TokensList {
   [key: string]: string | undefined;

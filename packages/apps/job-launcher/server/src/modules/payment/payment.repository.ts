@@ -25,6 +25,7 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
 
   public async getUserBalancePayments(
     userId: number,
+    currency?: string,
   ): Promise<PaymentEntity[]> {
     // Find negative amounts with status 'PENDING' or 'SUCCEEDED'
     const negativePayments = await this.find({
@@ -32,6 +33,7 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
         userId,
         amount: LessThan(0),
         status: In([PaymentStatus.PENDING, PaymentStatus.SUCCEEDED]),
+        ...(currency && { currency }),
       },
     });
 
@@ -41,6 +43,7 @@ export class PaymentRepository extends BaseRepository<PaymentEntity> {
         userId,
         amount: MoreThan(0),
         status: PaymentStatus.SUCCEEDED,
+        ...(currency && { currency }),
       },
     });
 

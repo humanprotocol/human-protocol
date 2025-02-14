@@ -1,19 +1,19 @@
 import { createLogger } from './pino-logger';
 import NestLogger from './nest-logger';
 import { LogLevel } from './types';
+import Environment from '../utils/environment';
 
-const environment = process.env.NODE_ENV || 'local';
-const isDevEnvironment = ['development', 'local'].includes(environment);
+const isDevelopment = Environment.isDevelopment();
 
 const defaultLogger = createLogger(
   {
     name: 'DefaultLogger',
-    level: isDevEnvironment ? LogLevel.DEBUG : LogLevel.INFO,
-    pretty: isDevEnvironment,
-    disabled: environment === 'test',
+    level: isDevelopment ? LogLevel.DEBUG : LogLevel.INFO,
+    pretty: isDevelopment,
+    disabled: Environment.isTest(),
   },
   {
-    environment,
+    environment: Environment.name,
     service: 'reputation-oracle',
   },
 );

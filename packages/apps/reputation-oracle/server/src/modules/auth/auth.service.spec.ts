@@ -23,11 +23,11 @@ import {
   MOCK_REFRESH_TOKEN,
   mockConfig,
 } from '../../../test/constants';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { AuthConfigService } from '../../config/auth-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { JobRequestType } from '../../common/enums';
 import { Role, UserStatus } from '../../common/enums/user';
 import { SignatureType } from '../../common/enums/web3';
@@ -35,7 +35,7 @@ import {
   generateNonce,
   prepareSignatureBody,
   signMessage,
-} from '../../common/utils/signature';
+} from '../../utils/web3';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyRepository } from '../user/site-key.repository';
 import { PrepareSignatureDto } from '../user/user.dto';
