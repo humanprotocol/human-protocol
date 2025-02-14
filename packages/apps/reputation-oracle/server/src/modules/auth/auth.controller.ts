@@ -9,27 +9,14 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  HttpCode,
   Post,
   Req,
   UseGuards,
   UseInterceptors,
-  Logger,
   UseFilters,
+  HttpCode,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
-import { UserCreateDto } from '../user/user.dto';
-import {
-  AuthDto,
-  ForgotPasswordDto,
-  ResendEmailVerificationDto,
-  RestorePasswordDto,
-  SignInDto,
-  VerifyEmailDto,
-  Web3SignUpDto,
-  Web3SignInDto,
-  RefreshDto,
-} from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { HCaptchaGuard } from '../../common/guards/hcaptcha';
@@ -37,244 +24,212 @@ import { RequestWithUser } from '../../common/types';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
 import { AuthControllerErrorsFilter } from './auth.error.filter';
+import {
+  ForgotPasswordDto,
+  SuccessAuthDto,
+  RefreshDto,
+  ResendVerificationEmailDto,
+  RestorePasswordDto,
+  VerifyEmailDto,
+  Web2SignUpDto,
+  Web2SignInDto,
+  Web3SignInDto,
+  Web3SignUpDto,
+} from './dto';
 
 @ApiTags('Auth')
-@ApiResponse({
-  status: 400,
-  description: 'Bad Request. Invalid input parameters.',
-})
-@ApiResponse({
-  status: 401,
-  description: 'Unauthorized. Missing or invalid credentials.',
-})
-@ApiResponse({
-  status: 404,
-  description: 'Not Found. Could not find the requested content.',
-})
-@ApiResponse({
-  status: 422,
-  description: 'Unprocessable entity.',
-})
 @Controller('/auth')
 @UseFilters(AuthControllerErrorsFilter)
 export class AuthJwtController {
-  private readonly logger = new Logger(AuthJwtController.name);
-
   constructor(
     private readonly authService: AuthService,
     private readonly tokenRepository: TokenRepository,
   ) {}
 
-  @Public()
-  @Post('/signup')
-  @UseGuards(HCaptchaGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
-    summary: 'User Signup',
-    description: 'Endpoint to register a new user.',
+    summary: 'User signup',
+    description: 'Endpoint to register a new user',
   })
-  @ApiBody({ type: UserCreateDto })
+  @ApiBody({ type: Web2SignUpDto })
   @ApiResponse({
     status: 200,
     description: 'User registered successfully',
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
+    status: 409,
+    description: 'User with provided email already registered',
   })
-  public async signup(@Body() data: UserCreateDto): Promise<void> {
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post('/web2/signup')
+  @HttpCode(200)
+  async signup(@Body() data: Web2SignUpDto): Promise<void> {
     await this.authService.signup(data);
-    return;
   }
 
-  @Public()
-  @Post('/signin')
-  @UseGuards(HCaptchaGuard)
-  @HttpCode(200)
   @ApiOperation({
-    summary: 'User Signin',
-    description: 'Endpoint for user authentication.',
+    summary: 'User signin',
+    description: 'Endpoint for user authentication',
   })
-  @ApiBody({ type: SignInDto })
+  @ApiBody({ type: Web2SignInDto })
   @ApiResponse({
     status: 200,
     description: 'User authenticated successfully',
-    type: AuthDto,
+    type: SuccessAuthDto,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public signin(@Body() data: SignInDto): Promise<AuthDto> {
-    return this.authService.signin(data);
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/signin')
+  @HttpCode(200)
+  async signin(@Body() data: Web2SignInDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.signin(data);
+    return authTokens;
   }
 
-  @Public()
-  @Post('/web3/signup')
   @ApiOperation({
-    summary: 'Web3 User Signup',
-    description: 'Endpoint for Web3 user registration.',
+    summary: 'Forgot password',
+    description: 'Endpoint to initiate the password reset process',
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent successfully',
+  })
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
+    await this.authService.forgotPassword(data);
+  }
+
+  @ApiOperation({
+    summary: 'Restore password',
+    description: 'Endpoint to restore the user password after reset',
+  })
+  @ApiBody({ type: RestorePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password restored successfully',
+  })
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/restore-password')
+  @HttpCode(200)
+  async restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
+    await this.authService.restorePassword(data);
+  }
+
+  @ApiOperation({
+    summary: 'Email verification',
+    description: 'Endpoint to verify the user email address',
+  })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email successfully verified',
+  })
+  @Public()
+  @Post('/web2/verify-email')
+  @HttpCode(200)
+  async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
+    await this.authService.emailVerification(data);
+  }
+
+  @ApiOperation({
+    summary: 'Resend verification email',
+    description: 'Endpoint to resend the verification email',
+  })
+  @ApiBody({ type: ResendVerificationEmailDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification email resent successfully',
+  })
+  @ApiBearerAuth()
+  @UseGuards(HCaptchaGuard, JwtAuthGuard)
+  @Post('/web2/resend-verification-email')
+  @HttpCode(200)
+  async resendEmailVerification(
+    @Body() data: ResendVerificationEmailDto,
+  ): Promise<void> {
+    await this.authService.resendEmailVerification(data);
+  }
+
+  @ApiOperation({
+    summary: 'Web3 user signup',
+    description: 'Endpoint for Web3 user registration',
   })
   @ApiBody({ type: Web3SignUpDto })
   @ApiResponse({
     status: 200,
     description: 'User registered successfully',
-    type: AuthDto,
+    type: SuccessAuthDto,
   })
   @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
+    status: 409,
+    description: 'User with provided address already registered',
   })
-  public async web3SignUp(@Body() data: Web3SignUpDto): Promise<AuthDto> {
-    return this.authService.web3Signup(data);
+  @Public()
+  @Post('/web3/signup')
+  @HttpCode(200)
+  async web3SignUp(@Body() data: Web3SignUpDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.web3Signup(data);
+    return authTokens;
   }
 
-  @Public()
-  @Post('/web3/signin')
-  @HttpCode(200)
   @ApiOperation({
-    summary: 'Web3 User Signin',
-    description: 'Endpoint for Web3 user authentication.',
+    summary: 'Web3 user signin',
+    description: 'Endpoint for Web3 user authentication',
   })
   @ApiBody({ type: Web3SignInDto })
   @ApiResponse({
     status: 200,
     description: 'User authenticated successfully',
-    type: AuthDto,
+    type: SuccessAuthDto,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  public async web3SignIn(@Body() data: Web3SignInDto): Promise<AuthDto> {
-    return this.authService.web3Signin(data);
-  }
   @Public()
+  @Post('/web3/signin')
   @HttpCode(200)
-  @Post('/refresh')
+  async web3SignIn(@Body() data: Web3SignInDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.web3Signin(data);
+    return authTokens;
+  }
+
   @ApiBody({ type: RefreshDto })
   @ApiOperation({
-    summary: 'Refresh Token',
+    summary: 'Refresh token',
     description: 'Endpoint to refresh the authentication token.',
   })
   @ApiResponse({
     status: 200,
     description: 'Token refreshed successfully',
-    type: AuthDto,
+    type: SuccessAuthDto,
   })
-  async refreshToken(@Body() data: RefreshDto): Promise<AuthDto> {
-    return this.authService.refresh(data);
+  @Public()
+  @Post('/refresh')
+  @HttpCode(200)
+  async refreshToken(@Body() data: RefreshDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.refresh(data);
+    return authTokens;
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(204)
-  @Post('/logout')
   @ApiOperation({
-    summary: 'User Logout',
-    description: 'Endpoint to log out the user.',
+    summary: 'User logout',
+    description: 'Endpoint to log out the user',
   })
   @ApiResponse({
-    status: 204,
+    status: 200,
     description: 'User logged out successfully',
   })
-  public async logout(@Req() request: RequestWithUser): Promise<void> {
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  @HttpCode(200)
+  async logout(@Req() request: RequestWithUser): Promise<void> {
     await this.tokenRepository.deleteOneByTypeAndUserId(
       TokenType.REFRESH,
       request.user.id,
     );
-  }
-
-  @Public()
-  @Post('/forgot-password')
-  @UseGuards(HCaptchaGuard)
-  @HttpCode(204)
-  @ApiOperation({
-    summary: 'Forgot Password',
-    description: 'Endpoint to initiate the password reset process.',
-  })
-  @ApiBody({ type: ForgotPasswordDto })
-  @ApiResponse({
-    status: 204,
-    description: 'Password reset email sent successfully',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
-    return this.authService.forgotPassword(data);
-  }
-
-  @Public()
-  @Post('/restore-password')
-  @UseGuards(HCaptchaGuard)
-  @HttpCode(204)
-  @ApiOperation({
-    summary: 'Restore Password',
-    description: 'Endpoint to restore the user password after reset.',
-  })
-  @ApiBody({ type: RestorePasswordDto })
-  @ApiResponse({
-    status: 204,
-    description: 'Password restored successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
-    return this.authService.restorePassword(data);
-  }
-
-  @Public()
-  @HttpCode(200)
-  @Post('/email-verification')
-  @ApiOperation({
-    summary: 'Email Verification',
-    description: 'Endpoint to verify the user email address.',
-  })
-  @ApiBody({ type: VerifyEmailDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Email verification successful',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
-    await this.authService.emailVerification(data);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(HCaptchaGuard, JwtAuthGuard)
-  @HttpCode(204)
-  @Post('/resend-email-verification')
-  @ApiOperation({
-    summary: 'Resend Email Verification',
-    description: 'Endpoint to resend the email verification link.',
-  })
-  @ApiBody({ type: ResendEmailVerificationDto })
-  @ApiResponse({
-    status: 204,
-    description: 'Email verification resent successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public resendEmailVerification(
-    @Body() data: ResendEmailVerificationDto,
-  ): Promise<void> {
-    return this.authService.resendEmailVerification(data);
   }
 }

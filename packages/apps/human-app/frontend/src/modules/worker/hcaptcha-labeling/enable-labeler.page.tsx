@@ -12,7 +12,7 @@ import { breakpoints } from '@/shared/styles/breakpoints';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 
-export function EnableLabeler() {
+export function EnableLabelerPage() {
   const isMobile = useIsMobile();
   const { user } = useAuthenticatedUser();
   const { mutate, error, isError, isPending } =

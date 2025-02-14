@@ -3,15 +3,15 @@ import {
   Catch,
   ExceptionFilter as IExceptionFilter,
   HttpStatus,
-  Logger,
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from '../errors/database';
+import logger from '../../logger';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
-  private logger = new Logger(ExceptionFilter.name);
+  private readonly logger = logger.child({ context: ExceptionFilter.name });
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -19,41 +19,36 @@ export class ExceptionFilter implements IExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    const responseBody: { message: string; [x: string]: unknown } = {
+      message: 'Internal server error',
+    };
 
     if (exception instanceof DatabaseError) {
       status = HttpStatus.UNPROCESSABLE_ENTITY;
-      message = exception.message;
+      responseBody.message = exception.message;
 
-      this.logger.error(
-        `Database error: ${exception.message}`,
-        exception.stack,
-      );
-      // Temp hack for the in progress exception handling refactoring
+      this.logger.error('Database error', exception);
     } else if (exception instanceof HttpException) {
-      /**
-       * TODO: align this with common response schema
-       * to avoid missing properties
-       */
-      return response
-        .status(exception.getStatus())
-        .json(exception.getResponse());
-    } else {
-      if (exception.statusCode === HttpStatus.BAD_REQUEST) {
-        status = exception.statusCode;
-        message = exception.message;
+      status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'string') {
+        responseBody.message = exceptionResponse;
+      } else {
+        Object.assign(responseBody, exceptionResponse);
       }
-      this.logger.error(
-        `Unhandled exception: ${exception.message}`,
-        exception.stack,
-      );
+    } else {
+      this.logger.error('Unhandled exception', exception);
     }
 
-    response.status(status).json({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      message: message,
-      path: request.url,
-    });
+    response.status(status).json(
+      Object.assign(
+        {
+          status_code: status,
+          path: request.url,
+          timestamp: new Date().toISOString(),
+        },
+        responseBody,
+      ),
+    );
   }
 }

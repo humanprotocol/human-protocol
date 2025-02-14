@@ -84,11 +84,7 @@ describe('SignatureAuthGuard', () => {
         catchedError = error;
       }
       expect(catchedError).toBeInstanceOf(HttpException);
-      expect(catchedError.response).toHaveProperty(
-        'message',
-        'Invalid web3 signature',
-      );
-      expect(catchedError.response).toHaveProperty('timestamp');
+      expect(catchedError).toHaveProperty('message', 'Invalid web3 signature');
       expect(catchedError).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
 
@@ -101,11 +97,7 @@ describe('SignatureAuthGuard', () => {
         catchedError = error;
       }
       expect(catchedError).toBeInstanceOf(HttpException);
-      expect(catchedError.response).toHaveProperty(
-        'message',
-        'Invalid web3 signature',
-      );
-      expect(catchedError.response).toHaveProperty('timestamp');
+      expect(catchedError).toHaveProperty('message', 'Invalid web3 signature');
       expect(catchedError).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
   });

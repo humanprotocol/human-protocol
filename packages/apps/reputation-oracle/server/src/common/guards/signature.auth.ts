@@ -4,7 +4,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  Logger,
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
@@ -13,7 +12,6 @@ import { AuthSignatureRole } from '../enums/role';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  logger = new Logger(SignatureAuthGuard.name);
   constructor(private role: AuthSignatureRole[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,14 +43,8 @@ export class SignatureAuthGuard implements CanActivate {
     const isVerified = verifySignature(data, signature, oracleAdresses);
 
     if (!isVerified) {
-      const message = 'Invalid web3 signature';
-      this.logger.error(message, request.path);
       throw new HttpException(
-        {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message,
-          timestamp: new Date().toISOString(),
-        },
+        'Invalid web3 signature',
         HttpStatus.UNAUTHORIZED,
       );
     }

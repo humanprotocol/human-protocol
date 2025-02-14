@@ -62,7 +62,7 @@ describe('TransformEnumInterceptor', () => {
     };
 
     // Mock Reflect.getMetadata to return DTO and Enum types
-    Reflect.getMetadata = jest.fn((metadataKey, target, propertyKey) => {
+    Reflect.getMetadata = jest.fn((metadataKey, _target, propertyKey) => {
       // Mock design:paramtypes to return MockDto as the parameter type
       if (metadataKey === 'design:paramtypes') {
         return [MockDto];

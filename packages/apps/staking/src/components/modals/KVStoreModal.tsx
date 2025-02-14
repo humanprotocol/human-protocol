@@ -207,12 +207,12 @@ const KVStoreModal: React.FC<Props> = ({
                     <MenuItem value="" disabled>
                       Select Key
                     </MenuItem>
-                    {Object.entries(KVStoreKeys).map(([label, kvKey]) => (
+                    {Object.entries(KVStoreKeys).map(([, kvKey]) => (
                       <MenuItem key={kvKey} value={kvKey}>
-                        {label[0].toUpperCase() + label.slice(1)}
+                        {kvKey}
                       </MenuItem>
                     ))}
-                    <MenuItem value="custom">Custom</MenuItem>
+                    <MenuItem value="custom">custom</MenuItem>
                   </Select>
                 </FormControl>
                 {item.isCustom && (

@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { UserService } from './user.service';
@@ -10,7 +10,7 @@ import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
 
 @Module({
   imports: [ConfigModule, Web3Module, HCaptchaModule],
-  providers: [Logger, UserService, UserRepository, SiteKeyRepository],
+  providers: [UserService, UserRepository, SiteKeyRepository],
   controllers: [UserController],
   exports: [UserService],
 })

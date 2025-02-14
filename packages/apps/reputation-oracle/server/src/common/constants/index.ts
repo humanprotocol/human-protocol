@@ -1,20 +1,16 @@
 import { JobRequestType } from '../enums';
 
-export const SERVICE_NAME = 'App';
+export enum Environment {
+  DEVELOPMENT = 'development',
+  TEST = 'test',
+  STAGING = 'staging',
+  PRODUCTION = 'production',
+}
 export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
 export const JWT_PREFIX = 'bearer ';
 export const JWT_STRATEGY_NAME = 'jwt-http';
-export const SENDGRID_API_KEY_REGEX =
-  /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
-export const SENDGRID_API_KEY_DISABLED = 'sendgrid-disabled';
-
-export const SENDGRID_TEMPLATES = {
-  signup: 'd-ca99cc7410aa4e6dab3e6042d5ecb9a3',
-  resetPassword: 'd-3ac74546352a4e1abdd1689947632c22',
-  passwordChanged: 'd-ca0ac7e6fff845829cd0167af09f25cf',
-};
 
 export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
 export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
@@ -30,7 +26,8 @@ export const CVAT_JOB_TYPES = [
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
-export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
+export const RESEND_EMAIL_VERIFICATION_PATH =
+  '/auth/web2/resend-verification-email';
 export const LOGOUT_PATH = '/auth/logout';
 
 export const BACKOFF_INTERVAL_SECONDS = 120;
