@@ -117,7 +117,7 @@ export class StorageService {
       contentType = ContentType.TEXT_PLAIN;
       extension = '';
     } else {
-      fileContents = stringify(data) || '';
+      fileContents = stringify(data) as string;
       contentType = ContentType.APPLICATION_JSON;
       extension = Extension.JSON;
     }
