@@ -1487,10 +1487,7 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
-    if (
-      dto.eventType !== EventType.ESCROW_FAILED &&
-      dto.eventType !== EventType.TASK_CREATION_FAILED
-    ) {
+    if (dto.eventType !== EventType.ESCROW_FAILED) {
       throw new ControlledError(
         ErrorJob.InvalidEventType,
         HttpStatus.BAD_REQUEST,
