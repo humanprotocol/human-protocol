@@ -12,6 +12,7 @@ COPY package.json yarn.lock ./
 COPY tsconfig.json ./
 COPY packages/core ./packages/core
 RUN yarn workspace @human-protocol/core install --ignore-scripts
-EXPOSE 8545
+RUN yarn workspace @human-protocol/core build
 
+EXPOSE 8545
 CMD yarn workspace @human-protocol/core local
