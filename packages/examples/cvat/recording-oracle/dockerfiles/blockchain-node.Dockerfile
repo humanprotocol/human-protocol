@@ -1,12 +1,17 @@
-FROM node:18-alpine
+# TODO: make this shared and part of local setup
+FROM node:18-slim
 
-RUN apk add git
+WORKDIR /usr/src/app
 
-RUN git clone https://github.com/humanprotocol/human-protocol.git
+# Copy expected yarn dist
+COPY .yarn ./.yarn
+COPY .yarnrc ./
+# Copy files for deps installation
+COPY package.json yarn.lock ./
 
-WORKDIR /human-protocol
-
+COPY tsconfig.json ./
+COPY packages/core ./packages/core
+RUN yarn workspace @human-protocol/core install --ignore-scripts
 EXPOSE 8545
 
-RUN yarn workspace @human-protocol/core install --ignore-scripts
 CMD yarn workspace @human-protocol/core local
