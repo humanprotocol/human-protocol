@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: 'test'
       POSTGRES_DB: 'recording_oracle_test'
       PGDATA: '/var/lib/postgresql/data/pgdata'
-    ports:
-      - 5434:5432
     command: ["postgres", "-c", "log_statement=all"]
     networks:
       - test-network
@@ -19,19 +17,16 @@ services:
       dockerfile: packages/examples/cvat/recording-oracle/dockerfiles/blockchain-node.Dockerfile
     healthcheck:
       # Using a magic nubmer of 23 here because this is a block number when blockchain-node container is ready to use
-      test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://blockchain-node:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 23 ]; then exit 0; else exit 1; fi
+      test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://localhost:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 23 ]; then exit 0; else exit 1; fi
       interval: 15s
       timeout: 5s
-      retries: 15
+      retries: 5
     networks:
       - test-network
 
   minio:
     container_name: minio
     image: minio/minio:RELEASE.2022-05-26T05-48-41Z
-    ports:
-      - 9001:9001
-      - 9000:9000
     environment:
       MINIO_ROOT_USER: dev
       MINIO_ROOT_PASSWORD: devdevdev
@@ -63,7 +58,6 @@ services:
       "
     networks:
       - test-network
-
 
   test:
     build:

@@ -1,6 +1,9 @@
 # TODO: make this shared and part of local setup
 FROM node:18-slim
 
+# wget is needed for healthcheck
+RUN apt-get update && apt-get install -y wget
+
 WORKDIR /usr/src/app
 
 # Copy expected yarn dist
