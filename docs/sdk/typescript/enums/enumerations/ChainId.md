@@ -14,7 +14,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L2)
+=======
+[enums.ts:2](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L2)
+>>>>>>> develop
 
 ***
 
@@ -24,7 +28,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L5)
+=======
+[enums.ts:5](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L5)
+>>>>>>> develop
 
 ***
 
@@ -34,7 +42,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L6)
+=======
+[enums.ts:6](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L6)
+>>>>>>> develop
 
 ***
 
@@ -44,7 +56,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L9)
+=======
+[enums.ts:9](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L9)
+>>>>>>> develop
 
 ***
 
@@ -54,7 +70,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L3)
+=======
+[enums.ts:3](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L3)
+>>>>>>> develop
 
 ***
 
@@ -64,7 +84,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L7)
+=======
+[enums.ts:7](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L7)
+>>>>>>> develop
 
 ***
 
@@ -74,7 +98,11 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L8)
+=======
+[enums.ts:8](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L8)
+>>>>>>> develop
 
 ***
 
@@ -84,4 +112,8 @@
 
 #### Defined in
 
+<<<<<<< HEAD
 [enums.ts:4](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L4)
+=======
+[enums.ts:4](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/enums.ts#L4)
+>>>>>>> develop

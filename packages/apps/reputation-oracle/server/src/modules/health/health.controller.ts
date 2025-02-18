@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckResult,
@@ -6,24 +7,51 @@ import {
   HealthIndicatorResult,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
+import packageJson from '../../../package.json';
 import { Public } from '../../common/decorators';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ServerConfigService } from '../../config/server-config.service';
+import { PingResponseDto } from './dto/ping-response.dto';
+import Environment from '../../utils/environment';
 
 @Public()
 @ApiTags('Health')
-@Controller('/health')
+@Controller('health')
 export class HealthController {
   constructor(
+    private readonly serverConfigService: ServerConfigService,
     private readonly health: HealthCheckService,
     private readonly db: TypeOrmHealthIndicator,
   ) {}
 
-  @Get()
-  @HealthCheck()
   @ApiOperation({
-    summary: 'Health Check',
+    summary: 'Service ping',
+    description:
+      'Endpoint to ping service via HTTP in order to make sure it is accesible and serves proper version',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Service is reachable',
+    type: PingResponseDto,
+  })
+  @ApiResponse({
+    status: '5XX',
+    description: 'Service is not reachable/running',
+  })
+  @Get('/ping')
+  async ping(): Promise<PingResponseDto> {
+    return {
+      appName: packageJson.name,
+      nodeEnv: Environment.name,
+      gitHash: this.serverConfigService.gitHash,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Health check',
     description: 'Endpoint to perform health checks for the application.',
   })
+  @HealthCheck()
+  @Get('/check')
   readiness(): Promise<HealthCheckResult> {
     return this.health.check([
       async (): Promise<HealthIndicatorResult> =>

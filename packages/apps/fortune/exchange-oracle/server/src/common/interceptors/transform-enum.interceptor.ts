@@ -83,6 +83,10 @@ export class TransformEnumInterceptor implements NestInterceptor {
     instance: any,
     targetClass: ClassConstructor<any>,
   ): any {
+    if (!instance || typeof instance !== 'object') {
+      return bodyOrQuery;
+    }
+
     for (const property in bodyOrQuery) {
       if (bodyOrQuery.hasOwnProperty(property)) {
         const instanceValue = instance[property];

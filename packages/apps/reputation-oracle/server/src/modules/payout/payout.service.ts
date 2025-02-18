@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { ErrorManifest, ErrorResults } from '../../common/constants/errors';
 
 import {
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
@@ -12,25 +11,25 @@ import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
-  CalculatePayoutsDto,
-  CvatManifestDto,
-  FortuneManifestDto,
-} from '../../common/dto/manifest';
+  CvatManifest,
+  FortuneManifest,
+} from '../../common/interfaces/manifest';
 import {
   CvatAnnotationMeta,
   FortuneFinalResult,
-} from '../../common/dto/result';
+} from '../../common/interfaces/job-result';
 import {
   CalculatedPayout,
+  CalculatePayoutsInput,
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
-import { getRequestType, isValidJobRequestType } from '../../common/utils';
-import { ControlledError } from '../../common/errors/controlled';
+import { getRequestType } from '../../utils/manifest';
+import { assertValidJobRequestType } from '../../utils/type-guards';
+import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
-  private readonly logger = new Logger(PayoutService.name);
   constructor(
     @Inject(StorageService)
     private readonly storageService: StorageService,
@@ -54,10 +53,7 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
@@ -65,12 +61,7 @@ export class PayoutService {
 
     const requestType = getRequestType(manifest).toLowerCase();
 
-    if (!isValidJobRequestType(requestType)) {
-      throw new ControlledError(
-        `Unsupported request type: ${requestType}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    assertValidJobRequestType(requestType);
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
@@ -99,10 +90,7 @@ export class PayoutService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     if (!manifestUrl) {
-      throw new ControlledError(
-        ErrorManifest.ManifestUrlDoesNotExist,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new MissingManifestUrlError(escrowAddress);
     }
 
     const manifest =
@@ -110,16 +98,11 @@ export class PayoutService {
 
     const requestType = getRequestType(manifest).toLowerCase();
 
-    if (!isValidJobRequestType(requestType)) {
-      throw new ControlledError(
-        `Unsupported request type: ${requestType}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    assertValidJobRequestType(requestType);
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
-    const data: CalculatePayoutsDto = {
+    const data: CalculatePayoutsInput = {
       chainId,
       escrowAddress,
       finalResultsUrl,
@@ -131,21 +114,21 @@ export class PayoutService {
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.FORTUNE]: {
       calculatePayouts: async (
-        manifest: FortuneManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: FortuneManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsFortune(manifest, data.finalResultsUrl),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: FortuneManifestDto,
+        manifest: FortuneManifest,
       ): Promise<SaveResultDto> =>
         this.saveResultsFortune(manifest, chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -155,8 +138,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_POINTS]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -166,8 +149,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -177,8 +160,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -188,8 +171,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_POLYGONS]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -208,7 +191,7 @@ export class PayoutService {
    * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
    */
   public async saveResultsFortune(
-    manifest: FortuneManifestDto,
+    manifest: FortuneManifest,
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<SaveResultDto> {
@@ -224,22 +207,12 @@ export class PayoutService {
     )) as FortuneFinalResult[];
 
     if (intermediateResults.length === 0) {
-      this.logger.log(
-        ErrorResults.NoIntermediateResultsFound,
-        PayoutService.name,
-      );
-      throw new ControlledError(
-        ErrorResults.NoIntermediateResultsFound,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('No intermediate results found');
     }
 
     const validResults = intermediateResults.filter((result) => !result.error);
     if (validResults.length < manifest.submissionsRequired) {
-      throw new ControlledError(
-        ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Error('Not all required solutions have been sent');
     }
 
     const { url, hash } = await this.storageService.uploadJobSolutions(
@@ -286,7 +259,7 @@ export class PayoutService {
    * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
    */
   public async calculatePayoutsFortune(
-    manifest: FortuneManifestDto,
+    manifest: FortuneManifest,
     finalResultsUrl: string,
   ): Promise<CalculatedPayout[]> {
     const finalResults = (await this.storageService.downloadJsonLikeData(
@@ -316,7 +289,7 @@ export class PayoutService {
    * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
    */
   public async calculatePayoutsCvat(
-    manifest: CvatManifestDto,
+    manifest: CvatManifest,
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<CalculatedPayout[]> {
@@ -342,10 +315,7 @@ export class PayoutService {
       Array.isArray(annotations.jobs) &&
       annotations.jobs.length === 0
     ) {
-      throw new ControlledError(
-        ErrorResults.NoAnnotationsMetaFound,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new Error('No annotations meta found');
     }
 
     const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);

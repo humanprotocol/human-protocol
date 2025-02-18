@@ -6,25 +6,11 @@ import {
   Role as UserRole,
   UserStatus,
 } from '../../common/enums/user';
-import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
-import {
-  AuthDto,
-  ForgotPasswordDto,
-  RefreshDto,
-  ResendEmailVerificationDto,
-  RestorePasswordDto,
-  SignInDto,
-  VerifyEmailDto,
-  Web3SignInDto,
-  Web3SignUpDto,
-} from './auth.dto';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { verifySignature } from '../../common/utils/signature';
-import { SendGridService } from '../sendgrid/sendgrid.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { verifySignature } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
 import {
   ChainId,
@@ -34,12 +20,11 @@ import {
   Role,
 } from '@human-protocol/sdk';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { prepareSignatureBody } from '../../utils/web3';
 import { UserRepository } from '../user/user.repository';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import { AuthConfigService } from '../../config/auth-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,
@@ -51,6 +36,21 @@ import {
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
+import {
+  ForgotPasswordDto,
+  SuccessAuthDto,
+  RefreshDto,
+  Web2SignUpDto,
+  Web2SignInDto,
+  Web3SignInDto,
+  Web3SignUpDto,
+  RestorePasswordDto,
+  VerifyEmailDto,
+  ResendVerificationEmailDto,
+} from './dto';
+
+import { EmailService } from '../email/email.service';
+import { EmailAction } from '../email/constants';
 
 @Injectable()
 export class AuthService {
@@ -63,12 +63,15 @@ export class AuthService {
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly sendgridService: SendGridService,
+    private readonly emailService: EmailService,
     private readonly web3Service: Web3Service,
     private readonly userRepository: UserRepository,
   ) {}
 
-  public async signin({ email, password }: SignInDto): Promise<AuthDto> {
+  public async signin({
+    email,
+    password,
+  }: Web2SignInDto): Promise<SuccessAuthDto> {
     const userEntity = await this.userRepository.findOneByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
@@ -81,7 +84,7 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async signup(data: UserCreateDto): Promise<UserEntity> {
+  public async signup(data: Web2SignUpDto): Promise<UserEntity> {
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new DuplicatedUserEmailError(data.email);
@@ -97,24 +100,14 @@ export class AuthService {
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: data.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.signup,
+    await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
+      url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
 
     return userEntity;
   }
 
-  public async refresh(data: RefreshDto): Promise<AuthDto> {
+  public async refresh(data: RefreshDto): Promise<SuccessAuthDto> {
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
       data.refreshToken,
       TokenType.REFRESH,
@@ -131,7 +124,7 @@ export class AuthService {
     return this.auth(tokenEntity.user);
   }
 
-  public async auth(userEntity: UserEntity): Promise<AuthDto> {
+  public async auth(userEntity: UserEntity): Promise<SuccessAuthDto> {
     const refreshTokenEntity =
       await this.tokenRepository.findOneByUserIdAndType(
         userEntity.id,
@@ -234,18 +227,8 @@ export class AuthService {
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: data.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-            url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.resetPassword,
+    await this.emailService.sendEmail(data.email, EmailAction.RESET_PASSWORD, {
+      url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
     });
   }
 
@@ -263,18 +246,11 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
-    await this.userService.updatePassword(tokenEntity.user, data);
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: tokenEntity.user.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.passwordChanged,
-    });
+    await this.userService.updatePassword(tokenEntity.user, data.password);
+    await this.emailService.sendEmail(
+      tokenEntity.user.email,
+      EmailAction.PASSWORD_CHANGED,
+    );
 
     await this.tokenRepository.deleteOne(tokenEntity);
   }
@@ -298,7 +274,7 @@ export class AuthService {
   }
 
   public async resendEmailVerification(
-    data: ResendEmailVerificationDto,
+    data: ResendVerificationEmailDto,
   ): Promise<void> {
     const userEntity = await this.userRepository.findOneByEmail(data.email);
     if (!userEntity || userEntity.status !== UserStatus.PENDING) {
@@ -323,22 +299,12 @@ export class AuthService {
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-
-    await this.sendgridService.sendEmail({
-      personalizations: [
-        {
-          to: data.email,
-          dynamicTemplateData: {
-            service_name: SERVICE_NAME,
-            url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
-          },
-        },
-      ],
-      templateId: SENDGRID_TEMPLATES.signup,
+    await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
+      url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
   }
 
-  public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
+  public async web3Signup(data: Web3SignUpDto): Promise<SuccessAuthDto> {
     const preSignUpData = prepareSignatureBody({
       from: data.address,
       to: this.web3Service.getOperatorAddress(),
@@ -424,7 +390,7 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
+  public async web3Signin(data: Web3SignInDto): Promise<SuccessAuthDto> {
     const userEntity = await this.userRepository.findOneByAddress(data.address);
 
     if (!userEntity) {

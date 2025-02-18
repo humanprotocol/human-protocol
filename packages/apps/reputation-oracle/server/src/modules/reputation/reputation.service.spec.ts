@@ -25,7 +25,7 @@ import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { EscrowClient } from '@human-protocol/sdk';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ReputationConfigService } from '../../config/reputation-config.service';
 import { ReputationError, ReputationErrorMessage } from './reputation.error';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -82,7 +82,6 @@ describe('ReputationService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
             getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },

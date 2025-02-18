@@ -29,8 +29,8 @@ import {
 } from './user.dto';
 import { JwtAuthGuard } from '../../common/guards';
 import { HCaptchaGuard } from '../../common/guards/hcaptcha';
-import { RequestWithUser } from '../../common/types';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { RequestWithUser } from '../../common/interfaces/request';
+import { prepareSignatureBody } from '../../utils/web3';
 import { UserService } from './user.service';
 import { Public } from '../../common/decorators';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
@@ -39,6 +39,14 @@ import { UserRepository } from './user.repository';
 import { SignatureType } from '../../common/enums/web3';
 import { UserErrorFilter } from './user.error.filter';
 
+/**
+ * TODO:
+ * 1) Refactor this module to have separate 'workers` and `operators` sub-resources
+ *  - use `/:userId` for worker sub-resources;
+ *  - use `/:evmAddress` for operator sub-resources
+ *  - move all "controller" resources to be accessible by user ref, e.g. /workers/:userId/register-labeler
+ * 2) Move "prepare-signature" out of this module
+ */
 @ApiTags('User')
 @Controller('/user')
 @UseFilters(UserErrorFilter)
@@ -50,31 +58,19 @@ export class UserController {
     private readonly userRepository: UserRepository,
   ) {}
 
-  @Post('/register-labeler')
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Register Labeler',
-    description: 'Endpoint to register user as a labeler on hcaptcha services.',
+    summary: 'Register labeler',
+    description: 'Endpoint to register user as a labeler on hCaptcha services',
   })
   @ApiResponse({
     status: 200,
     description: 'Labeler registered successfully',
     type: RegisterLabelerResponseDto,
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public async registerLabeler(
+  @UseGuards(JwtAuthGuard)
+  @Post('/register-labeler')
+  @HttpCode(200)
+  async registerLabeler(
     @Req() request: RequestWithUser,
   ): Promise<RegisterLabelerResponseDto> {
     const siteKey = await this.userService.registerLabeler(request.user);
@@ -82,12 +78,9 @@ export class UserController {
     return { siteKey };
   }
 
-  @Post('/register-address')
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Register Blockchain Address',
-    description: 'Endpoint to register blockchain address.',
+    summary: 'Register worker address',
+    description: 'Endpoint to register blockchain address for worker',
   })
   @ApiBody({ type: RegisterAddressRequestDto })
   @ApiResponse({
@@ -96,77 +89,65 @@ export class UserController {
     type: KycSignedAddressDto,
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
+    status: 409,
+    description: 'Provided address already registered',
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public async registerAddress(
+  @UseGuards(JwtAuthGuard)
+  @Post('/register-address')
+  @HttpCode(200)
+  async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
   ): Promise<KycSignedAddressDto> {
-    return this.userService.registerAddress(request.user, data);
+    const registrationResult = await this.userService.registerAddress(
+      request.user,
+      data,
+    );
+    return registrationResult;
   }
 
-  @Post('/enable-operator')
-  @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Enable an operator',
-    description: 'Endpoint to enable an operator.',
+    description: 'Endpoint to enable an operator',
   })
   @ApiBody({ type: EnableOperatorDto })
   @ApiResponse({
-    status: 204,
+    status: 200,
     description: 'Operator enabled succesfully',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public enableOperator(
+  @UseGuards(JwtAuthGuard)
+  @Post('/enable-operator')
+  @HttpCode(200)
+  async enableOperator(
     @Body() data: EnableOperatorDto,
     @Request() req: RequestWithUser,
   ): Promise<void> {
-    return this.userService.enableOperator(req.user, data.signature);
+    await this.userService.enableOperator(req.user, data.signature);
   }
 
-  @Post('/disable-operator')
-  @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Disable an operator',
-    description: 'Endpoint to disable an operator.',
+    summary: 'Disable operator',
+    description: 'Endpoint to disable operator',
   })
   @ApiBody({ type: DisableOperatorDto })
   @ApiResponse({
-    status: 204,
+    status: 200,
     description: 'Operator disabled succesfully',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
-  public disableOperator(
+  @UseGuards(JwtAuthGuard)
+  @Post('/disable-operator')
+  @HttpCode(200)
+  async disableOperator(
     @Body() data: DisableOperatorDto,
     @Request() req: RequestWithUser,
   ): Promise<void> {
-    return this.userService.disableOperator(req.user, data.signature);
+    await this.userService.disableOperator(req.user, data.signature);
   }
 
-  @Public()
-  @Post('/prepare-signature')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Web3 signature body',
     description:
-      'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms.',
+      'Endpoint for generating typed structured data objects compliant with EIP-712. The generated object should be convertible to a string format to ensure compatibility with signature mechanisms',
   })
   @ApiBody({ type: PrepareSignatureDto })
   @ApiResponse({
@@ -174,32 +155,31 @@ export class UserController {
     description: 'Typed structured data object generated successfully',
     type: SignatureBodyDto,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  public async prepareSignature(
+  @Public()
+  @Post('/prepare-signature')
+  @HttpCode(200)
+  async prepareSignature(
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
     let nonce;
     if (data.type === SignatureType.SIGNIN) {
       nonce = (await this.userRepository.findOneByAddress(data.address))?.nonce;
     }
-    return prepareSignatureBody({
+
+    const preparedSignatureBody = await prepareSignatureBody({
       from: data.address,
       to: this.web3Service.getOperatorAddress(),
       contents: data.type,
       nonce,
     });
+
+    return preparedSignatureBody;
   }
 
-  @Post('/exchange-oracle-registration')
-  @HttpCode(200)
-  @UseGuards(HCaptchaGuard, JwtAuthGuard)
   @ApiOperation({
     summary: 'Notifies registration in Exchange Oracle completed',
     description:
-      'Notifies that the registration process in a Exchange Oracle has been completed by the user.',
+      'Notifies that the registration process in a Exchange Oracle has been completed by the user',
   })
   @ApiBody({ type: RegistrationInExchangeOracleDto })
   @ApiResponse({
@@ -207,15 +187,10 @@ export class UserController {
     description: 'Oracle registered successfully',
     type: RegistrationInExchangeOracleDto,
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  public async registrationInExchangeOracle(
+  @UseGuards(HCaptchaGuard, JwtAuthGuard)
+  @Post('/exchange-oracle-registration')
+  @HttpCode(200)
+  async registrationInExchangeOracle(
     @Req() request: RequestWithUser,
     @Body() data: RegistrationInExchangeOracleDto,
   ): Promise<RegistrationInExchangeOracleResponseDto> {
@@ -227,9 +202,6 @@ export class UserController {
     return { oracleAddress: data.oracleAddress };
   }
 
-  @Get('/exchange-oracle-registration')
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Retrieves Exchange Oracles the user is registered in',
     description:
@@ -244,11 +216,14 @@ export class UserController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  public async getRegistrationInExchangeOracles(
+  @UseGuards(JwtAuthGuard)
+  @Get('/exchange-oracle-registration')
+  async getRegistrationInExchangeOracles(
     @Req() request: RequestWithUser,
   ): Promise<RegistrationInExchangeOraclesDto> {
     const oracleAddresses =
       await this.userService.getRegistrationInExchangeOracles(request.user);
+
     return { oracleAddresses };
   }
 }

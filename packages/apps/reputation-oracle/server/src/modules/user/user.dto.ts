@@ -1,53 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsEthereumAddress,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
-import { UserStatus, Role } from '../../common/enums/user';
-import { ValidatePasswordDto } from '../auth/auth.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 import { SignatureType } from '../../common/enums/web3';
-import { IsEnumCaseInsensitive } from '../../common/decorators';
-
-export class UserCreateDto extends ValidatePasswordDto {
-  @ApiProperty()
-  @IsEmail()
-  @Transform(({ value }: { value: string }) => value.toLowerCase())
-  public email: string;
-
-  @ApiProperty({ name: 'h_captcha_token' })
-  @IsString()
-  public hCaptchaToken: string;
-}
-
-export class UserDto extends UserCreateDto {
-  public type: Role;
-  public status: UserStatus;
-}
-
-export class Web3UserDto {
-  public evmAddress: string;
-  public nonce: string;
-  public type: Role;
-  public status: UserStatus;
-}
-
-export class UserUpdateDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsEmail()
-  @Transform(({ value }: { value: string }) => value.toLowerCase())
-  public email?: string;
-
-  @ApiPropertyOptional({
-    enum: UserStatus,
-  })
-  @IsOptional()
-  @IsEnumCaseInsensitive(UserStatus)
-  public status?: UserStatus;
-}
+import { IsLowercasedEnum } from '../../common/validators';
 
 export class RegisterLabelerResponseDto {
   @ApiProperty({ name: 'site_key' })
@@ -107,7 +61,7 @@ export class PrepareSignatureDto {
   @ApiProperty({
     enum: SignatureType,
   })
-  @IsEnumCaseInsensitive(SignatureType)
+  @IsLowercasedEnum(SignatureType)
   public type: SignatureType;
 }
 
@@ -125,9 +79,11 @@ export class RegistrationInExchangeOracleDto {
 }
 
 export class RegistrationInExchangeOracleResponseDto {
+  @ApiProperty({ name: 'oracle_address' })
   public oracleAddress: string;
 }
 
 export class RegistrationInExchangeOraclesDto {
+  @ApiProperty({ name: 'oracle_addresses' })
   public oracleAddresses: string[];
 }

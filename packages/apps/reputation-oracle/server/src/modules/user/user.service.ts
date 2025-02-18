@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   KycStatus,
@@ -6,22 +6,21 @@ import {
   UserStatus,
   Role,
 } from '../../common/enums/user';
-import { generateNonce, verifySignature } from '../../common/utils/signature';
+import { generateNonce, verifySignature } from '../../utils/web3';
 import { UserEntity } from './user.entity';
-import { RegisterAddressRequestDto, UserCreateDto } from './user.dto';
+import { RegisterAddressRequestDto } from './user.dto';
 import { UserRepository } from './user.repository';
-import { ValidatePasswordDto } from '../auth/auth.dto';
 import { Web3Service } from '../web3/web3.service';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyEntity } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
+import { prepareSignatureBody } from '../../utils/web3';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { ethers } from 'ethers';
 import {
@@ -33,8 +32,8 @@ import {
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger(UserService.name);
-  private HASH_ROUNDS = 12;
+  private readonly HASH_ROUNDS = 12;
+
   constructor(
     private userRepository: UserRepository,
     private siteKeyRepository: SiteKeyRepository,
@@ -52,10 +51,13 @@ export class UserService {
     return bcrypt.compareSync(password, passwordHash);
   }
 
-  public async create(dto: UserCreateDto): Promise<UserEntity> {
+  public async create({
+    email,
+    password,
+  }: Pick<UserEntity, 'email' | 'password'>): Promise<UserEntity> {
     const newUser = new UserEntity();
-    newUser.email = dto.email;
-    newUser.password = bcrypt.hashSync(dto.password, this.HASH_ROUNDS);
+    newUser.email = email;
+    newUser.password = bcrypt.hashSync(password, this.HASH_ROUNDS);
     newUser.role = Role.WORKER;
     newUser.status = UserStatus.PENDING;
     await this.userRepository.createUnique(newUser);
@@ -64,9 +66,9 @@ export class UserService {
 
   public updatePassword(
     userEntity: UserEntity,
-    data: ValidatePasswordDto,
+    newPassword: string,
   ): Promise<UserEntity> {
-    userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
+    userEntity.password = bcrypt.hashSync(newPassword, this.HASH_ROUNDS);
     return this.userRepository.updateOne(userEntity);
   }
 

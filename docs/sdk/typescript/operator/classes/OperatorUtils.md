@@ -54,7 +54,11 @@ const operator = await OperatorUtils.getOperator(ChainId.POLYGON_AMOY, '0x62dD51
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+=======
+[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+>>>>>>> develop
 
 ***
 
@@ -91,7 +95,11 @@ const operators = await OperatorUtils.getOperators(filter);
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:109](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L109)
+=======
+[operator.ts:107](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L107)
+>>>>>>> develop
 
 ***
 
@@ -137,7 +145,11 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:190](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L190)
+=======
+[operator.ts:186](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L186)
+>>>>>>> develop
 
 ***
 
@@ -177,4 +189,8 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
+<<<<<<< HEAD
 [operator.ts:244](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L244)
+=======
+[operator.ts:236](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L236)
+>>>>>>> develop

@@ -6,14 +6,10 @@ import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import ReputationOracleIcon from '@assets/icons/reputation-oracle.svg';
 import ExchangeOracleIcon from '@assets/icons/exchange-oracle.svg';
-import HumanAppIcon from '@assets/icons/human-app.svg';
 import JobLauncherIcon from '@assets/icons/job-launcher.svg';
 import RecordingOracleIcon from '@assets/icons/recording-oracle.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import {
-  AddressDetailsOperator,
-  Roles,
-} from '@services/api/use-address-details';
+import { AddressDetailsOperator } from '@services/api/use-address-details';
 import { getNetwork } from '@utils/config/networks';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { RoleDetailsEscrowsTable } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/RoleDetailsEscrowsTable';
@@ -21,6 +17,7 @@ import { Reputation } from '@services/api/use-leaderboard-details';
 import { env } from '@helpers/env';
 import { FormatNumberWithDecimals } from '@components/Home/FormatNumber';
 import CustomTooltip from '@components/CustomTooltip';
+import { Role } from '@human-protocol/sdk';
 
 interface RoleInfoProps {
   title: string;
@@ -58,9 +55,9 @@ const RenderRoleDetailsInfo = ({
   }
 
   const roleDetailsInfo: Partial<
-    Record<Roles, { title: string; points: string[] }>
+    Record<string, { title: string; points: string[] }>
   > = {
-    [Roles.reputationOracle]: {
+    [Role.ReputationOracle]: {
       title: 'Reputation Oracle',
       points: [
         'The Reputation Oracle is the trust engine of HUMAN Protocol.',
@@ -68,7 +65,7 @@ const RenderRoleDetailsInfo = ({
         "It's the final seal of quality and trust within the ecosystem.",
       ],
     },
-    [Roles.recordingOracle]: {
+    [Role.RecordingOracle]: {
       title: 'Recording Oracle',
       points: [
         'The Recording Oracle is where task solutions get the green light.',
@@ -76,14 +73,14 @@ const RenderRoleDetailsInfo = ({
         "From quality checks to reputation adjustments, it's the assurance you need for dependable results.",
       ],
     },
-    [Roles.exchangeOracle]: {
+    [Role.ExchangeOracle]: {
       title: 'Exchange Oracle',
       points: [
         "The Exchange Oracle is the HUMAN Protocol's powerhouse, directing tasks to skilled workers and ensuring smooth communication.",
         'It validates solutions, provides job updates, and handles cancellations, streamlining the job lifecycle.',
       ],
     },
-    [Roles.jobLauncher]: {
+    [Role.JobLauncher]: {
       title: 'Job Launcher',
       points: [
         'The Job Launcher is a tool that allows anybody to create and launch jobs, to be distributed as tasks through the HUMAN App.',
@@ -157,11 +154,10 @@ const renderReputationTitle = (reputation: Reputation) => {
 const renderRoleIcon = (role: AddressDetailsOperator['role']) => {
   if (!role) return null;
   const roleIcons = {
-    [Roles.reputationOracle]: <ReputationOracleIcon />,
-    [Roles.exchangeOracle]: <ExchangeOracleIcon />,
-    [Roles.humanApp]: <HumanAppIcon />,
-    [Roles.jobLauncher]: <JobLauncherIcon />,
-    [Roles.recordingOracle]: <RecordingOracleIcon />,
+    [Role.ReputationOracle]: <ReputationOracleIcon />,
+    [Role.ExchangeOracle]: <ExchangeOracleIcon />,
+    [Role.JobLauncher]: <JobLauncherIcon />,
+    [Role.RecordingOracle]: <RecordingOracleIcon />,
   };
 
   return roleIcons[role];

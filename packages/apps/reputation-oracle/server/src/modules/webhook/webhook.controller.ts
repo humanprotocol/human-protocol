@@ -1,11 +1,12 @@
 import {
   Body,
   Controller,
-  Headers,
+  HttpCode,
   Post,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+
 import {
   ApiTags,
   ApiOperation,
@@ -30,11 +31,9 @@ export class WebhookController {
     private readonly webhookIncomingService: WebhookIncomingService,
   ) {}
 
-  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.Recording]))
-  @Post('/')
   @ApiOperation({
-    summary: 'Create Incoming Webhook',
-    description: 'Endpoint to create an incoming webhook.',
+    summary: 'Accept incoming webhook',
+    description: 'Endpoint to accept incoming webhooks',
   })
   @ApiHeader({
     name: HEADER_SIGNATURE_KEY,
@@ -43,26 +42,15 @@ export class WebhookController {
   })
   @ApiBody({ type: IncomingWebhookDto })
   @ApiResponse({
-    status: 200,
-    description: 'Incoming webhook created successfully',
+    status: 202,
+    description: 'Incoming webhook accepted successfully',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
+  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.Recording]))
+  @Post('/')
+  @HttpCode(202)
   public async createIncomingWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: IncomingWebhookDto,
   ): Promise<void> {
     await this.webhookIncomingService.createIncomingWebhook(data);
-    return;
   }
 }

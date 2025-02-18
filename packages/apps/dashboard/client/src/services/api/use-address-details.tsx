@@ -5,6 +5,7 @@ import { apiPaths } from '../api-paths';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { validateResponse } from '../validate-response';
 import { reputationSchema } from '@services/api/use-leaderboard-details';
+import { Role } from '@human-protocol/sdk';
 
 const transformOptionalTokenAmount = (
   value: string | undefined | null,
@@ -63,19 +64,18 @@ const escrowSchema = z.object({
 
 export type AddressDetailsEscrowSchema = z.infer<typeof escrowSchema>;
 
-export enum Roles {
-  jobLauncher = 'Job Launcher',
-  exchangeOracle = 'Exchange Oracle',
-  humanApp = 'Human App',
-  recordingOracle = 'Recording Oracle',
-  reputationOracle = 'Reputation Oracle',
-}
-
 const operatorSchema = z.object({
   chainId: z.number(),
   address: z.string(),
   balance: z.string().transform(transformOptionalTokenAmount),
-  role: z.nativeEnum(Roles).nullable(),
+  role: z
+    .enum([
+      Role.JobLauncher,
+      Role.ExchangeOracle,
+      Role.RecordingOracle,
+      Role.ReputationOracle,
+    ])
+    .nullable(),
   amountStaked: z.string().optional().transform(transformOptionalTokenAmount),
   amountLocked: z.string().optional().transform(transformOptionalTokenAmount),
   lockedUntilTimestamp: z.string().optional(),

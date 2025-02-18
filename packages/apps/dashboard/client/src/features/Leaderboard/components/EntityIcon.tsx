@@ -3,19 +3,18 @@ import HumanIcon from '@components/Icons/HumanIcon';
 import { JobLauncher } from '@components/Icons/JobLauncher';
 import { RecordingOracle } from '@components/Icons/RecordingOracle';
 import { ReputationOracle } from '@components/Icons/ReputationOracle';
+import { Role } from '@human-protocol/sdk';
 
 export const EntityIcon: React.FC<{ role: string }> = ({ role }) => {
   switch (role) {
-    case 'Job Launcher':
+    case Role.JobLauncher:
       return <JobLauncher />;
-    case 'Recording Oracle':
+    case Role.RecordingOracle:
       return <RecordingOracle />;
-    case 'Reputation Oracle':
+    case Role.ReputationOracle:
       return <ReputationOracle />;
-    case 'Exchange Oracle':
+    case Role.ExchangeOracle:
       return <ExchangeOracleIcon />;
-    case 'HUMAN App':
-      return <HumanIcon />;
     default:
       return <HumanIcon />;
   }

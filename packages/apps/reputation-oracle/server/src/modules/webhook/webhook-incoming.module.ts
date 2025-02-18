@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { HttpModule } from '@nestjs/axios';
@@ -11,7 +11,7 @@ import { WebhookIncomingService } from './webhook-incoming.service';
 @Module({
   imports: [ConfigModule, Web3Module, HttpModule, EscrowCompletionModule],
   controllers: [WebhookController],
-  providers: [Logger, WebhookIncomingService, WebhookIncomingRepository],
+  providers: [WebhookIncomingService, WebhookIncomingRepository],
   exports: [WebhookIncomingService],
 })
 export class WebhookIncomingModule {}

@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { RegistrationInExchangeOracleDto, UserCreateDto } from './user.dto';
+import { RegistrationInExchangeOracleDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import {
   KycStatus,
@@ -10,10 +10,7 @@ import {
   UserStatus,
   Role,
 } from '../../common/enums/user';
-import {
-  signMessage,
-  prepareSignatureBody,
-} from '../../common/utils/signature';
+import { signMessage, prepareSignatureBody } from '../../utils/web3';
 import {
   MOCK_ADDRESS,
   MOCK_EMAIL,
@@ -25,11 +22,11 @@ import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyEntity } from './site-key.entity';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { HttpService } from '@nestjs/axios';
 import {
   UserError,
@@ -37,7 +34,7 @@ import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from '../../modules/user/user.error';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
 import { SiteKeyType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -91,11 +88,9 @@ describe('UserService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            signMessage: jest.fn(),
             getOperatorAddress: jest
               .fn()
               .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
-            getValidChains: jest.fn().mockReturnValue([ChainId.LOCALHOST]),
           },
         },
         {
@@ -142,21 +137,20 @@ describe('UserService', () => {
 
   describe('create', () => {
     it('should create a new user and return the created user entity', async () => {
-      const dto: UserCreateDto = {
+      const createUserData = {
         email: 'test@example.com',
         password: 'password123',
-        hCaptchaToken: 'test',
       };
       const createdUser: Partial<UserEntity> = {
-        email: dto.email,
+        email: createUserData.email,
         password: expect.any(String),
         role: Role.WORKER,
         status: UserStatus.PENDING,
       };
 
-      const result = await userService.create(dto);
+      const result = await userService.create(createUserData);
       expect(userRepository.createUnique).toHaveBeenCalledWith({
-        email: dto.email,
+        email: createUserData.email,
         password: expect.any(String),
         role: Role.WORKER,
         status: UserStatus.PENDING,
@@ -757,9 +751,7 @@ describe('UserService', () => {
         type: SiteKeyType.REGISTRATION,
         user: userEntity,
       };
-      jest
-        .spyOn(hcaptchaService, 'verifyToken')
-        .mockResolvedValueOnce({ success: true });
+      jest.spyOn(hcaptchaService, 'verifyToken').mockResolvedValueOnce(true);
       jest
         .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
         .mockResolvedValueOnce(null);
@@ -799,9 +791,7 @@ describe('UserService', () => {
         type: SiteKeyType.REGISTRATION,
         user: userEntity,
       };
-      jest
-        .spyOn(hcaptchaService, 'verifyToken')
-        .mockResolvedValueOnce({ success: true });
+      jest.spyOn(hcaptchaService, 'verifyToken').mockResolvedValueOnce(true);
       jest
         .spyOn(siteKeyRepository, 'findByUserSiteKeyAndType')
         .mockResolvedValueOnce(siteKeyMock as SiteKeyEntity);

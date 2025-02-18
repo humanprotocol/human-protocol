@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBody,
   ApiHeader,
@@ -50,10 +50,7 @@ export class WebhookController {
     new SignatureAuthGuard([Role.Exchange, Role.Reputation, Role.JobLauncher]),
   )
   @Post()
-  processWebhook(
-    @Body() body: WebhookDto,
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
-  ): Promise<any> {
+  processWebhook(@Body() body: WebhookDto): Promise<any> {
     return this.webhookService.handleWebhook(body);
   }
 }

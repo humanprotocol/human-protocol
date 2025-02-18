@@ -161,10 +161,10 @@ class Status(Enum):
 class Role(Enum):
     """Enum for roles."""
 
-    job_launcher = "Job Launcher"
-    exchange_oracle = "Exchange Oracle"
-    reputation_oracle = "Reputation Oracle"
-    recording_oracle = "Recording Oracle"
+    job_launcher = "job_launcher"
+    exchange_oracle = "exchange_oracle"
+    reputation_oracle = "reputation_oracle"
+    recording_oracle = "recording_oracle"
 
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
@@ -173,18 +173,18 @@ ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "art
 class KVStoreKeys(Enum):
     """Enum for KVStore keys"""
 
-    role = "role"
+    category = "category"
     fee = "fee"
+    job_types = "job_types"
+    operator_name = "name"
     public_key = "public_key"
     public_key_hash = "public_key_hash"
-    webhook_url = "webhook_url"
-    website = "website"
-    url = "url"
-    job_types = "job_types"
-    registration_needed = "registration_needed"
     registration_instructions = "registration_instructions"
-    name = "name"
-    category = "category"
+    registration_needed = "registration_needed"
+    role = "role"
+    url = "url"
+    website = "website"
+    webhook_url = "webhook_url"
 
 
 ESCROW_BULK_PAYOUT_MAX_ITEMS = 99

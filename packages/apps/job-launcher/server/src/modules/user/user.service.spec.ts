@@ -2,7 +2,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { Currency } from '../../common/enums/payment';
+import { FiatCurrency } from '../../common/enums/payment';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentService } from '../payment/payment.service';
 import { UserBalanceDto, UserCreateDto } from './user.dto';
@@ -96,15 +96,15 @@ describe('UserService', () => {
       const userId = 1;
       const expectedBalance: UserBalanceDto = {
         amount: 10,
-        currency: Currency.USD,
+        currency: FiatCurrency.USD,
       };
 
-      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(10);
+      jest.spyOn(paymentService, 'getUserUSDBalance').mockResolvedValue(10);
 
-      const balance = await userService.getBalance(userId);
+      const balance = await userService.getTotalUSDBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.getUserUSDBalance).toHaveBeenCalledWith(userId);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { SignatureAuthGuard } from './signature.auth';
-import { signMessage } from '../utils/signature';
+import { signMessage } from '../../utils/web3';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { AuthSignatureRole } from '../enums/role';
@@ -84,11 +84,7 @@ describe('SignatureAuthGuard', () => {
         catchedError = error;
       }
       expect(catchedError).toBeInstanceOf(HttpException);
-      expect(catchedError.response).toHaveProperty(
-        'message',
-        'Invalid web3 signature',
-      );
-      expect(catchedError.response).toHaveProperty('timestamp');
+      expect(catchedError).toHaveProperty('message', 'Invalid web3 signature');
       expect(catchedError).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
 
@@ -101,11 +97,7 @@ describe('SignatureAuthGuard', () => {
         catchedError = error;
       }
       expect(catchedError).toBeInstanceOf(HttpException);
-      expect(catchedError.response).toHaveProperty(
-        'message',
-        'Invalid web3 signature',
-      );
-      expect(catchedError.response).toHaveProperty('timestamp');
+      expect(catchedError).toHaveProperty('message', 'Invalid web3 signature');
       expect(catchedError).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
   });

@@ -16,8 +16,8 @@ import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
 import { WebhookIncomingService } from './webhook-incoming.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { IncomingWebhookDto } from './webhook.dto';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { EscrowCompletionRepository } from '../escrow-completion/escrow-completion.repository';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
@@ -27,9 +27,9 @@ import { WebhookOutgoingService } from './webhook-outgoing.service';
 import { PayoutService } from '../payout/payout.service';
 import { StorageService } from '../storage/storage.service';
 import { ReputationRepository } from '../reputation/reputation.repository';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ReputationConfigService } from '../../config/reputation-config.service';
+import { S3ConfigService } from '../../config/s3-config.service';
+import { PGPConfigService } from '../../config/pgp-config.service';
 import { IncomingWebhookError, WebhookErrorMessage } from './webhook.error';
 import { EscrowPayoutsBatchRepository } from '../escrow-completion/escrow-payouts-batch.repository';
 
@@ -57,8 +57,6 @@ describe('WebhookIncomingService', () => {
   // Mock Web3Service
   const mockWeb3Service = {
     getSigner: jest.fn().mockReturnValue(signerMock),
-    validateChainId: jest.fn().mockReturnValue(new Error()),
-    calculateGasPrice: jest.fn().mockReturnValue(1000n),
     getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
   };
 
@@ -270,7 +268,11 @@ describe('WebhookIncomingService', () => {
         }),
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Error message: ${error.message}`),
+        'Error processing incoming webhook',
+        {
+          error,
+          webhookId: expect.any(Number),
+        },
       );
     });
 

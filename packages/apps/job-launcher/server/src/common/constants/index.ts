@@ -5,8 +5,6 @@ export const SERVICE_NAME = 'Job Launcher';
 export const NS = 'hmt';
 export const COINGECKO_API_URL =
   'https://api.coingecko.com/api/v3/simple/price';
-export const COINMARKETCAP_API_URL =
-  'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 export const DEFAULT_MAX_RETRY_COUNT = 3;
 export const TX_CONFIRMATION_TRESHOLD = 1;
 
@@ -19,10 +17,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.POLYGON_AMOY,
   ChainId.SEPOLIA,
 ];
-export const MAINNET_CHAIN_IDS = [
-  ChainId.BSC_MAINNET,
-  ChainId.POLYGON,
-];
+export const MAINNET_CHAIN_IDS = [ChainId.BSC_MAINNET, ChainId.POLYGON];
 
 export const SENDGRID_API_KEY_REGEX =
   /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;

@@ -9,9 +9,9 @@ import { ReputationDto } from './reputation.dto';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ReputationConfigService } from '../../config/reputation-config.service';
+import { S3ConfigService } from '../../config/s3-config.service';
+import { PGPConfigService } from '../../config/pgp-config.service';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -33,7 +33,6 @@ describe('ReputationController', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
           },
         },
         StorageService,

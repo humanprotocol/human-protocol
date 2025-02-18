@@ -103,7 +103,11 @@ const result = await EncryptionUtils.encrypt('message', publicKeys);
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:444](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L444)
+=======
+[encryption.ts:444](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L444)
+>>>>>>> develop
 
 ***
 
@@ -152,7 +156,11 @@ const result = await EncryptionUtils.generateKeyPair(name, email, passphrase);
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:382](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L382)
+=======
+[encryption.ts:382](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L382)
+>>>>>>> develop
 
 ***
 
@@ -186,7 +194,11 @@ const signedData = await EncryptionUtils.getSignedData('message');
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:351](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L351)
+=======
+[encryption.ts:351](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L351)
+>>>>>>> develop
 
 ***
 
@@ -236,7 +248,11 @@ if (isEncrypted) {
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:494](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L494)
+=======
+[encryption.ts:494](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L494)
+>>>>>>> develop
 
 ***
 
@@ -288,4 +304,8 @@ const result = await EncryptionUtils.verify('message', publicKey);
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:318](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L318)
+=======
+[encryption.ts:318](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L318)
+>>>>>>> develop

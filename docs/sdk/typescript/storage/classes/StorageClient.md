@@ -81,7 +81,11 @@ Optional. Cloud storage access data. If credentials are not provided - use anony
 
 #### Defined in
 
+<<<<<<< HEAD
 [storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
+=======
+[storage.ts:73](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L73)
+>>>>>>> develop
 
 ## Methods
 
@@ -127,7 +131,11 @@ const exists = await storageClient.bucketExists('bucket-name');
 
 #### Defined in
 
+<<<<<<< HEAD
 [storage.ts:262](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L262)
+=======
+[storage.ts:262](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L262)
+>>>>>>> develop
 
 ***
 
@@ -177,7 +185,11 @@ const files = await storageClient.downloadFiles(keys, 'bucket-name');
 
 #### Defined in
 
+<<<<<<< HEAD
 [storage.ts:112](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L112)
+=======
+[storage.ts:112](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L112)
+>>>>>>> develop
 
 ***
 
@@ -223,7 +235,11 @@ const fileNames = await storageClient.listObjects('bucket-name');
 
 #### Defined in
 
+<<<<<<< HEAD
 [storage.ts:292](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L292)
+=======
+[storage.ts:292](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L292)
+>>>>>>> develop
 
 ***
 
@@ -278,7 +294,11 @@ const uploadedFiles = await storageClient.uploadFiles(files, 'bucket-name');
 
 #### Defined in
 
+<<<<<<< HEAD
 [storage.ts:198](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L198)
+=======
+[storage.ts:198](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L198)
+>>>>>>> develop
 
 ***
 
@@ -312,4 +332,8 @@ const file = await StorageClient.downloadFileFromUrl('http://localhost/file.json
 
 #### Defined in
 
+<<<<<<< HEAD
 [storage.ts:146](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L146)
+=======
+[storage.ts:146](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/storage.ts#L146)
+>>>>>>> develop

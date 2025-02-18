@@ -67,7 +67,11 @@ The private key.
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
+=======
+[encryption.ts:66](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L66)
+>>>>>>> develop
 
 ## Methods
 
@@ -123,7 +127,11 @@ const resultMessage = await encryption.decrypt('message');
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
+=======
+[encryption.ts:194](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L194)
+>>>>>>> develop
 
 ***
 
@@ -161,7 +169,11 @@ const resultMessage = await encryption.sign('message');
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
+=======
+[encryption.ts:251](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L251)
+>>>>>>> develop
 
 ***
 
@@ -230,7 +242,11 @@ const resultMessage = await encryption.signAndEncrypt('message', publicKeys);
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
+=======
+[encryption.ts:142](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L142)
+>>>>>>> develop
 
 ***
 
@@ -262,4 +278,8 @@ Optional: The passphrase for the private key.
 
 #### Defined in
 
+<<<<<<< HEAD
 [encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)
+=======
+[encryption.ts:77](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/encryption.ts#L77)
+>>>>>>> develop

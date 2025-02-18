@@ -110,7 +110,11 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+=======
+[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+>>>>>>> develop
 
 ## Properties
 
@@ -124,7 +128,11 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
+<<<<<<< HEAD
 [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+=======
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+>>>>>>> develop
 
 ***
 
@@ -138,7 +146,11 @@ The network information required to connect to the KVStore contract
 
 #### Defined in
 
+<<<<<<< HEAD
 [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+=======
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+>>>>>>> develop
 
 ## Methods
 
@@ -194,7 +206,11 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+=======
+[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+>>>>>>> develop
 
 ***
 
@@ -252,7 +268,11 @@ await kvstoreClient.setBulk(keys, values);
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
+=======
+[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
+>>>>>>> develop
 
 ***
 
@@ -307,7 +327,11 @@ await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url');
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
+=======
+[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
+>>>>>>> develop
 
 ***
 
@@ -341,4 +365,8 @@ The Runner object to interact with the Ethereum network
 
 #### Defined in
 
+<<<<<<< HEAD
 [kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
+=======
+[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
+>>>>>>> develop

@@ -32,6 +32,11 @@ Enum for KVStore keys
 
 #### job_types *= 'job_types'*
 
+<<<<<<< HEAD
+=======
+#### operator_name *= 'name'*
+
+>>>>>>> develop
 #### public_key *= 'public_key'*
 
 #### public_key_hash *= 'public_key_hash'*
@@ -48,7 +53,11 @@ Enum for KVStore keys
 
 #### website *= 'website'*
 
+<<<<<<< HEAD
 ### *class* human_protocol_sdk.constants.OperatorCategory(value)
+=======
+### *class* human_protocol_sdk.constants.LeaderCategory(value)
+>>>>>>> develop
 
 Bases: `Enum`
 
