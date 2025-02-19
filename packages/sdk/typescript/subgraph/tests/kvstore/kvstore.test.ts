@@ -39,7 +39,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Job Launcher',
+      'job_launcher',
       BigInt.fromI32(11)
     );
 
@@ -103,7 +103,7 @@ describe('KVStore', () => {
       data2.params.sender.toHex()
     );
     assert.fieldEquals('KVStoreSetEvent', id2, 'key', 'role');
-    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'Job Launcher');
+    assert.fieldEquals('KVStoreSetEvent', id2, 'value', 'job_launcher');
   });
 
   test('Should properly create a transaction with set method', () => {
@@ -116,7 +116,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Job Launcher',
+      'job_launcher',
       BigInt.fromI32(11)
     );
 
@@ -348,7 +348,7 @@ describe('KVStore', () => {
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Job Launcher',
+      'job_launcher',
       BigInt.fromI32(11)
     );
 
@@ -365,7 +365,7 @@ describe('KVStore', () => {
       'Operator',
       data2.params.sender.toHex(),
       'role',
-      'Job Launcher'
+      'job_launcher'
     );
   });
 
@@ -589,13 +589,13 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
-      'Reputation Oracle',
+      'reputation_oracle',
       BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Job Launcher',
+      'job_launcher',
       BigInt.fromI32(11)
     );
     const data3 = createDataSavedEvent(
@@ -612,13 +612,13 @@ describe('KVStore', () => {
       'Operator',
       data1.params.sender.toHex(),
       'role',
-      'Reputation Oracle'
+      'reputation_oracle'
     );
     assert.fieldEquals(
       'Operator',
       data2.params.sender.toHex(),
       'role',
-      'Job Launcher'
+      'job_launcher'
     );
 
     assert.fieldEquals(
@@ -633,13 +633,13 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
-      'Reputation Oracle',
+      'reputation_oracle',
       BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
-      'Job Launcher',
+      'job_launcher',
       BigInt.fromI32(11)
     );
     handleDataSaved(data1);
@@ -654,7 +654,7 @@ describe('KVStore', () => {
       'KVStore',
       data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'value',
-      'Reputation Oracle'
+      'reputation_oracle'
     );
 
     handleDataSaved(data2);
@@ -669,7 +669,7 @@ describe('KVStore', () => {
       'KVStore',
       data1.params.sender.concat(toBytes(data1.params.key)).toHex(),
       'value',
-      'Job Launcher'
+      'job_launcher'
     );
   });
 

@@ -119,7 +119,7 @@ export function handleDataSaved(event: DataSaved): void {
         .map<string>((type) => type.trim());
     } else if (
       isValidEthAddress(event.params.key) &&
-      operator.role == 'Reputation Oracle'
+      operator.role == 'reputation_oracle'
     ) {
       const ethAddress = Address.fromString(event.params.key);
 
