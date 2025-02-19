@@ -47,7 +47,6 @@
   "resolutions": {
     "**/@graphprotocol/graph-cli/gluegun/ejs": "^3.1.10",
     "semver": "^7.5.2",
-    "undici": "^6.11.1",
     "ws": "^8.17.1"
   }
 }
