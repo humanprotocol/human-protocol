@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.1'
+          node-version-file: .nvmrc
       - name: Filter Networks
         id: filter_networks
         run: |
