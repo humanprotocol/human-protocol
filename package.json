@@ -48,7 +48,6 @@
     "**/@graphprotocol/graph-cli/gluegun/ejs": "^3.1.10",
     "**/@ethersproject/providers/ws": "^7.5.10",
     "**/@graphql-tools/**/ws": "^8.17.1",
-    "**/hardhat-gas-reporter/viem": "^2.15.1",
-    "semver": "^7.5.2"
+    "**/hardhat-gas-reporter/viem": "^2.15.1"
   }
 }
