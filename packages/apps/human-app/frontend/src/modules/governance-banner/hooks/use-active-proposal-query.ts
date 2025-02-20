@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { ethers } from 'ethers';
+import * as wagmiChains from 'wagmi/chains';
 import GovernorABI from '@/modules/smart-contracts/abi/MetaHumanGovernor.json';
-
-const GOVERNOR_ADDRESS = '0x7F508283c1d335b3EdC41B12001Ae584391EFAf4';
-const RPC_URL = 'https://polygon-rpc.com';
+import { env } from '@/shared/env';
 
 enum ProposalState {
   PENDING,
@@ -17,8 +16,16 @@ enum ProposalState {
 }
 
 async function fetchActiveProposalFn() {
-  const provider = new ethers.JsonRpcProvider(RPC_URL);
-  const contract = new ethers.Contract(GOVERNOR_ADDRESS, GovernorABI, provider);
+  const provider = new ethers.JsonRpcProvider(
+    env.VITE_NETWORK === 'mainnet'
+      ? wagmiChains.polygon.rpcUrls.default.http[0]
+      : wagmiChains.goerli.rpcUrls.default.http[0]
+  );
+  const contract = new ethers.Contract(
+    env.VITE_GOVERNOR_ADDRESS,
+    GovernorABI,
+    provider
+  );
   const filter = contract.filters.ProposalCreated();
   const logs = await contract.queryFilter(filter, 68058296, 'latest');
 

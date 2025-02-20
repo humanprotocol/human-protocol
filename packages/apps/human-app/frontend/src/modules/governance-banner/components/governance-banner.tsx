@@ -2,6 +2,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { Grid, Link as MuiLink, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useActiveProposalQuery } from '../hooks/use-active-proposal-query';
@@ -117,7 +118,7 @@ export function GovernanceBanner() {
         }}
       >
         <MuiLink
-          href="https://governance-client.vercel.app/"
+          href={env.VITE_GOVERNANCE_URL}
           underline="none"
           target="_blank"
           rel="noopener noreferrer"
