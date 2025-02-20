@@ -1,36 +1,30 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { ErrorCronJob, ErrorEscrow } from '../../common/constants/errors';
 import { CronJobType } from '../../common/enums/cron-job';
-import {
-  ErrorCronJob,
-  ErrorEscrow,
-  ErrorJobModeration,
-  // ErrorJob,
-} from '../../common/constants/errors';
 
-import { CronJobEntity } from './cron-job.entity';
-import { CronJobRepository } from './cron-job.repository';
-import { JobService } from '../job/job.service';
-import { JobModerationTaskStatus, JobStatus } from '../../common/enums/job';
-import { WebhookService } from '../webhook/webhook.service';
+import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
+import { Cron } from '@nestjs/schedule';
+import { ethers } from 'ethers';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { JobStatus } from '../../common/enums/job';
 import {
   EventType,
   OracleType,
   WebhookStatus,
 } from '../../common/enums/webhook';
-import { PaymentService } from '../payment/payment.service';
-import { ethers } from 'ethers';
-import { WebhookRepository } from '../webhook/webhook.repository';
-import { WebhookEntity } from '../webhook/webhook.entity';
-import { JobRepository } from '../job/job.repository';
 import { ControlledError } from '../../common/errors/controlled';
-import { Cron } from '@nestjs/schedule';
-import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
-import { Web3Service } from '../web3/web3.service';
+import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { JobEntity } from '../job/job.entity';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { JobModerationService } from '../job/job-moderation.service';
-import { JobModerationTaskRepository } from '../job/job-moderation-task.repository';
+import { JobRepository } from '../job/job.repository';
+import { JobService } from '../job/job.service';
+import { PaymentService } from '../payment/payment.service';
+import { Web3Service } from '../web3/web3.service';
+import { WebhookEntity } from '../webhook/webhook.entity';
+import { WebhookRepository } from '../webhook/webhook.repository';
+import { WebhookService } from '../webhook/webhook.service';
+import { CronJobEntity } from './cron-job.entity';
+import { CronJobRepository } from './cron-job.repository';
 
 @Injectable()
 export class CronJobService {
@@ -40,11 +34,10 @@ export class CronJobService {
     private readonly cronJobRepository: CronJobRepository,
     private readonly jobService: JobService,
     private readonly jobRepository: JobRepository,
-    private readonly jobModerationTaskRepository: JobModerationTaskRepository,
+    private readonly contentModerationService: GCVContentModerationService,
     private readonly webhookService: WebhookService,
     private readonly web3Service: Web3Service,
     private readonly paymentService: PaymentService,
-    private readonly jobModerationService: JobModerationService,
     private readonly webhookRepository: WebhookRepository,
     private readonly networkConfigService: NetworkConfigService,
   ) {}
@@ -85,171 +78,40 @@ export class CronJobService {
   }
 
   @Cron('*/2 * * * *')
-  public async jobModerationCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.JobModeration,
-    );
-
-    if (isCronJobRunning) {
+  public async moderateContentCronJob() {
+    if (await this.isCronJobRunning(CronJobType.ContentModeration)) {
       return;
     }
 
-    this.logger.log('Job moderation START');
-    const cronJob = await this.startCronJob(CronJobType.JobModeration);
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(JobStatus.PAID);
-      for (const jobEntity of jobEntities) {
-        try {
-          await this.jobModerationService.jobModeration(jobEntity);
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.JobModerationFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error moderation job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            failedReason,
-          );
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Job moderation STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('*/2 * * * *')
-  public async processJobModerationTasksCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.ProcessJobModerationTasks,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Process job moderation tasks START');
-    const cronJob = await this.startCronJob(
-      CronJobType.ProcessJobModerationTasks,
+    const cronJobEntity = await this.startCronJob(
+      CronJobType.ContentModeration,
     );
 
     try {
-      const jobModerationTaskEntities =
-        await this.jobModerationTaskRepository.findByStatus(
-          JobModerationTaskStatus.PENDING,
-        );
-      for (const jobModerationTaskEntity of jobModerationTaskEntities) {
-        try {
-          await this.jobModerationService.processJobModerationTask(
-            jobModerationTaskEntity,
-          );
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.ProcessJobModerationTaskFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error process job moderation task. Error ID: ${errorId}, Job ID: ${jobModerationTaskEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
-          jobModerationTaskEntity.status = JobModerationTaskStatus.FAILED;
-          await this.jobModerationTaskRepository.updateOne(
-            jobModerationTaskEntity,
-          );
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Process job moderation tasks STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('*/2 * * * *')
-  public async parseJobModerationResultsCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.ParseJobModerationResults,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Process job moderation tasks START');
-    const cronJob = await this.startCronJob(
-      CronJobType.ParseJobModerationResults,
-    );
-
-    try {
-      const jobModerationTaskEntities =
-        await this.jobModerationTaskRepository.findByStatus(
-          JobModerationTaskStatus.PROCESSED,
-        );
-      for (const jobModerationTaskEntity of jobModerationTaskEntities) {
-        try {
-          await this.jobModerationService.parseJobModerationResults(
-            jobModerationTaskEntity,
-          );
-        } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.ProcessJobModerationTaskFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error process job moderation task. Error ID: ${errorId}, Job ID: ${jobModerationTaskEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
-          jobModerationTaskEntity.status = JobModerationTaskStatus.FAILED;
-          await this.jobModerationTaskRepository.updateOne(
-            jobModerationTaskEntity,
-          );
-        }
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    this.logger.log('Process job moderation tasks STOP');
-    await this.completeCronJob(cronJob);
-  }
-
-  @Cron('*/2 * * * *')
-  public async completeJobModerationCronJob() {
-    const isCronJobRunning = await this.isCronJobRunning(
-      CronJobType.CompleteJobModeration,
-    );
-
-    if (isCronJobRunning) {
-      return;
-    }
-
-    this.logger.log('Job moderation START');
-    const cronJob = await this.startCronJob(CronJobType.CompleteJobModeration);
-
-    try {
-      const jobEntities = await this.jobRepository.findByStatus(
+      const jobs = await this.jobRepository.findByStatus([
+        JobStatus.PAID,
         JobStatus.UNDER_MODERATION,
-      );
-      for (const jobEntity of jobEntities) {
+      ]);
+      console.log(jobs);
+
+      for (const jobEntity of jobs) {
         try {
-          await this.jobModerationService.completeJobModeration(jobEntity);
+          await this.contentModerationService.moderateJob(jobEntity);
         } catch (err) {
-          const errorId = uuidv4();
-          const failedReason = `${ErrorJobModeration.CompleteJobModerationFailed} (Error ID: ${errorId})`;
-          this.logger.error(
-            `Error complete job moderation. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
-          );
+          console.log(err);
+          const failedReason = `Content moderation error: ${err.message}`;
+          this.logger.error(`Job ${jobEntity.id} failed: ${failedReason}`);
           await this.jobService.handleProcessJobFailure(
             jobEntity,
             failedReason,
           );
         }
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (err) {
+      this.logger.error(`Error in moderateContentCronJob: ${err.message}`);
     }
 
-    this.logger.log('Job moderation STOP');
-    await this.completeCronJob(cronJob);
+    await this.completeCronJob(cronJobEntity);
   }
 
   @Cron('*/2 * * * *')

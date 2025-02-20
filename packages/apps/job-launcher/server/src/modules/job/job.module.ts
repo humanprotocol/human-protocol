@@ -18,17 +18,10 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
-import { JobModerationService } from './job-moderation.service';
-import { JobModerationTaskEntity } from './job-moderation-task.entity';
-import { JobModerationTaskRepository } from './job-moderation-task.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      JobEntity,
-      JobModerationTaskEntity,
-      WebhookEntity,
-    ]),
+    TypeOrmModule.forFeature([JobEntity, WebhookEntity]),
     ConfigModule,
     HttpModule,
     AuthModule,
@@ -44,12 +37,10 @@ import { JobModerationTaskRepository } from './job-moderation-task.repository';
     Logger,
     JobService,
     JobRepository,
-    JobModerationService,
-    JobModerationTaskRepository,
     RoutingProtocolService,
     WebhookRepository,
     MutexManagerService,
   ],
-  exports: [JobService, JobModerationService, RoutingProtocolService],
+  exports: [JobService, RoutingProtocolService],
 })
 export class JobModule {}

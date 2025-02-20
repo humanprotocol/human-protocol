@@ -6,12 +6,12 @@ export class VisionConfigService {
   constructor(private configService: ConfigService) {}
 
   /**
-   * The Google Cloud Storage (GCS) bucket name where temporary async moderation results will be saved.
+   * The Google Cloud Storage (GCS) path name where temporary async moderation results will be saved.
    * Required
    */
-  get tempAsyncResultsBucket(): string {
+  get moderationResultsFilesPath(): string {
     return this.configService.getOrThrow<string>(
-      'GCS_TEMP_ASYNC_RESULTS_BUCKET',
+      'GCV_MODERATION_RESULTS_FILES_PATH',
     );
   }
 
@@ -21,7 +21,7 @@ export class VisionConfigService {
    */
   get moderationResultsBucket(): string {
     return this.configService.getOrThrow<string>(
-      'GCS_MODERATION_RESULTS_BUCKET',
+      'GCV_MODERATION_RESULTS_BUCKET',
     );
   }
 

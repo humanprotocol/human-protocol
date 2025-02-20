@@ -1,8 +1,5 @@
 export enum CronJobType {
-  JobModeration = 'job-moderation',
-  ProcessJobModerationTasks = 'process-job-moderation-tasks',
-  ParseJobModerationResults = 'parse-job-moderation-results',
-  CompleteJobModeration = 'complete-job-moderation',
+  ContentModeration = 'content-moderation',
   CreateEscrow = 'create-escrow',
   SetupEscrow = 'setup-escrow',
   FundEscrow = 'fund-escrow',

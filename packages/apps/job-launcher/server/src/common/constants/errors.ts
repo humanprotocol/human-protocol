@@ -28,7 +28,7 @@ export enum ErrorJob {
 /**
  * Represents error messages associated with a job moderation.
  */
-export enum ErrorJobModeration {
+export enum ErrorContentModeration {
   ErrorProcessingDataset = 'Error processing dataset',
   InappropriateContent = 'Job cannot be processed due to inappropriate content',
   ContentModerationFailed = 'Job cannot be processed due to failure in content moderation',
@@ -38,8 +38,8 @@ export enum ErrorJobModeration {
   NoResultsFound = 'No results found',
   ResultsParsingFailed = 'Results parsing failed',
   JobModerationFailed = 'Job moderation failed',
-  ProcessJobModerationTaskFailed = 'Process job moderation task failed',
-  CompleteJobModerationFailed = 'Complete job moderation failed',
+  ProcessContentModerationRequestFailed = 'Process content moderation request failed',
+  CompleteContentModerationFailed = 'Complete content moderation failed',
 }
 
 /**

@@ -66,12 +66,13 @@ export class JobRepository extends BaseRepository<JobEntity> {
   }
 
   public async findByStatus(
-    status: JobStatus,
+    status: JobStatus | JobStatus[],
     take?: number,
   ): Promise<JobEntity[]> {
+    const statusCondition = Array.isArray(status) ? In(status) : status;
     return this.find({
       where: {
-        status: status,
+        status: statusCondition,
         retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },
@@ -80,7 +81,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
         waitUntil: SortDirection.ASC,
       },
       ...(take && { take }),
-      relations: ['jobModerationTasks'],
+      relations: ['contentModerationRequests'],
     });
   }
 
@@ -110,6 +111,9 @@ export class JobRepository extends BaseRepository<JobEntity> {
         statusFilter = [
           JobStatus.PENDING,
           JobStatus.PAID,
+          JobStatus.UNDER_MODERATION,
+          JobStatus.MODERATION_PASSED,
+          JobStatus.POSSIBLE_ABUSE_IN_REVIEW,
           JobStatus.CREATED,
           JobStatus.FUNDED,
         ];

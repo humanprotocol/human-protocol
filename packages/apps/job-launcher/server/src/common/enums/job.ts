@@ -14,15 +14,6 @@ export enum JobStatus {
   CANCELED = 'canceled',
 }
 
-export enum JobModerationTaskStatus {
-  PENDING = 'pending',
-  PROCESSED = 'processed',
-  POSSIBLE_ABUSE = 'possible_abuse',
-  POSITIVE_ABUSE = 'positive_abuse',
-  PASSED = 'passed',
-  FAILED = 'failed',
-}
-
 export enum JobStatusFilter {
   PENDING = 'pending',
   LAUNCHED = 'launched',

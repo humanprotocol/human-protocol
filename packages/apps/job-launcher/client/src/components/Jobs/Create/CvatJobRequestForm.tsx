@@ -199,6 +199,9 @@ export const CvatJobRequestForm = () => {
   const dataRegions =
     values.dataProvider === StorageProviders.AWS ? AWSRegions : GCSRegions;
 
+  const bpRegions =
+    values.bpProvider === StorageProviders.AWS ? AWSRegions : GCSRegions;
+
   const gtRegions =
     values.gtProvider === StorageProviders.AWS ? AWSRegions : GCSRegions;
 
@@ -469,7 +472,11 @@ export const CvatJobRequestForm = () => {
                       }
                       onBlur={handleBlur}
                     >
-                      <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
+                      {Object.values(StorageProviders).map((provider) => (
+                        <MenuItem key={provider} value={provider}>
+                          {provider.toUpperCase()}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -577,7 +584,11 @@ export const CvatJobRequestForm = () => {
                         error={touched.bpProvider && Boolean(errors.bpProvider)}
                         onBlur={handleBlur}
                       >
-                        <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
+                        {Object.values(StorageProviders).map((provider) => (
+                          <MenuItem key={provider} value={provider}>
+                            {provider.toUpperCase()}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -597,7 +608,7 @@ export const CvatJobRequestForm = () => {
                         error={touched.bpRegion && Boolean(errors.bpRegion)}
                         onBlur={handleBlur}
                       >
-                        {Object.values(dataRegions).map((region) => (
+                        {Object.values(bpRegions).map((region) => (
                           <MenuItem key={`bpset-${region}`} value={region}>
                             {region}
                           </MenuItem>
@@ -688,7 +699,11 @@ export const CvatJobRequestForm = () => {
                       error={touched.gtProvider && Boolean(errors.gtProvider)}
                       onBlur={handleBlur}
                     >
-                      <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
+                      {Object.values(StorageProviders).map((provider) => (
+                        <MenuItem key={provider} value={provider}>
+                          {provider.toUpperCase()}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>

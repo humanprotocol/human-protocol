@@ -1,34 +1,35 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { VisionConfigService } from '../../common/config/vision-config.service';
-import { ImageAnnotatorClient } from '@google-cloud/vision';
-import { JobModerationService } from './job-moderation.service';
-import { SlackConfigService } from '../../common/config/slack-config.service';
-import { StorageService } from '../storage/storage.service';
-import { ConfigService } from '@nestjs/config';
-import { Encryption } from '@human-protocol/sdk';
-import { Storage } from '@google-cloud/storage';
-import { S3ConfigService } from '../../common/config/s3-config.service';
 import { createMock } from '@golevelup/ts-jest';
-import { JobRepository } from './job.repository';
-import { ErrorJobModeration } from '../../common/constants/errors';
+import { Storage } from '@google-cloud/storage';
+import { ImageAnnotatorClient } from '@google-cloud/vision';
+import { Encryption } from '@human-protocol/sdk';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { S3ConfigService } from '../../common/config/s3-config.service';
+import { SlackConfigService } from '../../common/config/slack-config.service';
+import { VisionConfigService } from '../../common/config/vision-config.service';
+import { ErrorContentModeration } from '../../common/constants/errors';
+import { JobStatus } from '../../common/enums/job';
 import { sendSlackNotification } from '../../common/utils/slack';
-import { JobModerationTaskStatus, JobStatus } from '../../common/enums/job';
-import { JobEntity } from './job.entity';
+import { JobEntity } from '../job/job.entity';
+import { JobRepository } from '../job/job.repository';
+import { StorageService } from '../storage/storage.service';
+import { ContentModerationService } from './content-moderation.service';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { listObjectsInBucket } from '../../common/utils/storage';
+import { GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK } from '../../common/constants';
+import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
+import { ControlledError } from '../../common/errors/controlled';
 import {
   convertToGCSPath,
   convertToHttpUrl,
   isGCSBucketUrl,
 } from '../../common/utils/gcstorage';
-import { ControlledError } from '../../common/errors/controlled';
-import { JobModerationTaskEntity } from './job-moderation-task.entity';
-import { JobModerationTaskRepository } from './job-moderation-task.repository';
 import {
   checkModerationLevels,
   getFileName,
 } from '../../common/utils/job-moderation';
-import { JOB_MODERATION_BATCH_SIZE_PER_TASK } from '../../common/constants';
+import { listObjectsInBucket } from '../../common/utils/storage';
+import { ContentModerationRequestEntity } from './content-moderation-request.entity';
+import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 
 jest.mock('@google-cloud/vision');
 jest.mock('@google-cloud/storage');
@@ -50,12 +51,12 @@ jest.mock('../../common/utils/job-moderation', () => ({
   getFileName: jest.fn(),
 }));
 
-describe('JobModerationService', () => {
-  let jobModerationService: JobModerationService;
+describe('ContentModerationService', () => {
+  let jobModerationService: ContentModerationService;
   let mockBatchAnnotateImages: jest.Mock;
   let mockAsyncBatchAnnotateImages: jest.Mock;
   let storageService: StorageService;
-  let jobModerationTaskRepository: JobModerationTaskRepository;
+  let jobModerationTaskRepository: ContentModerationRequestRepository;
   let jobRepository: JobRepository;
 
   beforeEach(async () => {
@@ -68,15 +69,15 @@ describe('JobModerationService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        JobModerationService,
+        ContentModerationService,
         { provide: StorageService, useValue: createMock<StorageService>() },
         ConfigService,
         S3ConfigService,
         Encryption,
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         {
-          provide: JobModerationTaskRepository,
-          useValue: createMock<JobModerationTaskRepository>(),
+          provide: ContentModerationRequestRepository,
+          useValue: createMock<ContentModerationRequestRepository>(),
         },
         {
           provide: VisionConfigService,
@@ -97,13 +98,15 @@ describe('JobModerationService', () => {
       ],
     }).compile();
 
-    jobModerationService =
-      module.get<JobModerationService>(JobModerationService);
+    jobModerationService = module.get<ContentModerationService>(
+      ContentModerationService,
+    );
 
     jobRepository = module.get<JobRepository>(JobRepository);
-    jobModerationTaskRepository = module.get<JobModerationTaskRepository>(
-      JobModerationTaskRepository,
-    );
+    jobModerationTaskRepository =
+      module.get<ContentModerationRequestRepository>(
+        ContentModerationRequestRepository,
+      );
     storageService = module.get<StorageService>(StorageService);
   });
 
@@ -140,7 +143,7 @@ describe('JobModerationService', () => {
 
       jest
         .spyOn(jobModerationTaskRepository, 'save')
-        .mockResolvedValue(JobModerationTaskEntity as any);
+        .mockResolvedValue(ContentModerationRequestEntity as any);
       jest.spyOn(jobRepository, 'update').mockResolvedValue(jobEntity as any);
     });
 
@@ -149,7 +152,7 @@ describe('JobModerationService', () => {
     });
 
     it('should download the manifest JSON', async () => {
-      await jobModerationService.jobModeration(jobEntity);
+      await jobModerationService.createContentModerationRequests(jobEntity);
 
       expect(storageService.downloadJsonLikeData).toHaveBeenCalledWith(
         jobEntity.manifestUrl,
@@ -160,12 +163,12 @@ describe('JobModerationService', () => {
       (isGCSBucketUrl as jest.Mock).mockReturnValue(false);
 
       await expect(
-        jobModerationService.jobModeration(jobEntity),
-      ).rejects.toThrow(ErrorJobModeration.DataMustBeStoredInGCS);
+        jobModerationService.createContentModerationRequests(jobEntity),
+      ).rejects.toThrow(ErrorContentModeration.DataMustBeStoredInGCS);
     });
 
     it('should list objects in the GCS bucket', async () => {
-      await jobModerationService.jobModeration(jobEntity);
+      await jobModerationService.createContentModerationRequests(jobEntity);
 
       expect(listObjectsInBucket).toHaveBeenCalledWith(
         new URL('gs://bucket-name/data'),
@@ -173,13 +176,13 @@ describe('JobModerationService', () => {
     });
 
     it('should create job moderation tasks in batches', async () => {
-      const batchSize = JOB_MODERATION_BATCH_SIZE_PER_TASK;
+      const batchSize = GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK;
       const testFiles = new Array(batchSize * 2 + 1)
         .fill(null)
         .map((_, i) => `file${i + 1}.jpg`);
       (listObjectsInBucket as jest.Mock).mockResolvedValue(testFiles);
 
-      await jobModerationService.jobModeration(jobEntity);
+      await jobModerationService.createContentModerationRequests(jobEntity);
 
       // Expect 3 batches (2 full + 1 remaining)
       expect(jobModerationTaskRepository.save).toHaveBeenCalledTimes(1);
@@ -188,24 +191,24 @@ describe('JobModerationService', () => {
           expect.objectContaining({
             from: 1,
             to: batchSize,
-            status: JobModerationTaskStatus.PENDING,
+            status: ContentModerationRequestStatus.PENDING,
           }),
           expect.objectContaining({
             from: batchSize + 1,
             to: batchSize * 2,
-            status: JobModerationTaskStatus.PENDING,
+            status: ContentModerationRequestStatus.PENDING,
           }),
           expect.objectContaining({
             from: batchSize * 2 + 1,
             to: testFiles.length,
-            status: JobModerationTaskStatus.PENDING,
+            status: ContentModerationRequestStatus.PENDING,
           }),
         ]),
       );
     });
 
     it('should update the job status to UNDER_MODERATION', async () => {
-      await jobModerationService.jobModeration(jobEntity);
+      await jobModerationService.createContentModerationRequests(jobEntity);
 
       expect(jobRepository.update).toHaveBeenCalledWith(jobEntity.id, {
         status: JobStatus.UNDER_MODERATION,
@@ -213,14 +216,14 @@ describe('JobModerationService', () => {
     });
   });
 
-  describe('processJobModerationTask', () => {
+  describe('processContentModerationRequest', () => {
     let mockUpdateOne: jest.SpyInstance;
     let mockAsyncBatchAnnotateImages: jest.SpyInstance;
 
     beforeEach(() => {
       mockUpdateOne = jest
         .spyOn(jobModerationTaskRepository, 'updateOne')
-        .mockResolvedValue({ id: 123 } as JobModerationTaskEntity);
+        .mockResolvedValue({ id: 123 } as ContentModerationRequestEntity);
       mockAsyncBatchAnnotateImages = jest
         .spyOn(jobModerationService, 'asyncBatchAnnotateImages')
         .mockResolvedValue();
@@ -231,10 +234,10 @@ describe('JobModerationService', () => {
       id: 123,
       job: { id: 456 } as JobEntity,
       dataUrl: 'https://storage.googleapis.com/bucket-name',
-      status: JobModerationTaskStatus.PENDING,
+      status: ContentModerationRequestStatus.PENDING,
       from: 1,
       to: 2,
-    } as JobModerationTaskEntity;
+    } as ContentModerationRequestEntity;
 
     it('should process dataset and call asyncBatchAnnotateImages', async () => {
       // Mock resolved values
@@ -246,7 +249,9 @@ describe('JobModerationService', () => {
       ]);
       (convertToGCSPath as jest.Mock).mockReturnValue('gs://bucket-name');
 
-      await jobModerationService.processJobModerationTask(jobModerationTask);
+      await jobModerationService.processContentModerationRequest(
+        jobModerationTask,
+      );
 
       expect(listObjectsInBucket).toHaveBeenCalledWith(
         new URL(jobModerationTask.dataUrl),
@@ -261,7 +266,9 @@ describe('JobModerationService', () => {
 
       // Ensure status is updated to PROCESSED
       expect(mockUpdateOne).toHaveBeenCalledWith(
-        expect.objectContaining({ status: JobModerationTaskStatus.PROCESSED }),
+        expect.objectContaining({
+          status: ContentModerationRequestStatus.PROCESSED,
+        }),
       );
     });
 
@@ -271,12 +278,14 @@ describe('JobModerationService', () => {
       );
 
       await expect(
-        jobModerationService.processJobModerationTask(jobModerationTask),
-      ).rejects.toThrow(ErrorJobModeration.ErrorProcessingDataset);
+        jobModerationService.processContentModerationRequest(jobModerationTask),
+      ).rejects.toThrow(ErrorContentModeration.ErrorProcessingDataset);
 
       // Ensure status is updated to FAILED
       expect(mockUpdateOne).toHaveBeenCalledWith(
-        expect.objectContaining({ status: JobModerationTaskStatus.FAILED }),
+        expect.objectContaining({
+          status: ContentModerationRequestStatus.FAILED,
+        }),
       );
     });
   });
@@ -307,7 +316,7 @@ describe('JobModerationService', () => {
     });
   });
 
-  describe('parseJobModerationResults', () => {
+  describe('parseContentModerationResults', () => {
     let mockCollectModerationResults: jest.Mock;
     let mockHandleAbuseLinks: jest.Mock;
     let mockUpdateOne: jest.SpyInstance;
@@ -322,7 +331,7 @@ describe('JobModerationService', () => {
 
       mockUpdateOne = jest
         .spyOn(jobModerationTaskRepository, 'updateOne')
-        .mockResolvedValue({ id: 123 } as JobModerationTaskEntity);
+        .mockResolvedValue({ id: 123 } as ContentModerationRequestEntity);
       (getFileName as jest.Mock).mockReturnValue('mocked-file-path');
     });
 
@@ -330,9 +339,9 @@ describe('JobModerationService', () => {
       id: 123,
       job: { id: 456 } as JobEntity,
       dataUrl: 'http://test-bucket.com/data.json',
-      status: JobModerationTaskStatus.PROCESSED,
+      status: ContentModerationRequestStatus.PROCESSED,
       abuseReason: '',
-    } as JobModerationTaskEntity;
+    } as ContentModerationRequestEntity;
 
     it('should mark task as POSITIVE_ABUSE when positive abuse results are found', async () => {
       const mockModerationResults = {
@@ -346,9 +355,11 @@ describe('JobModerationService', () => {
       mockCollectModerationResults.mockResolvedValue(mockModerationResults);
 
       const result =
-        await jobModerationService.parseJobModerationResults(jobModerationTask);
+        await jobModerationService.parseContentModerationResults(
+          jobModerationTask,
+        );
 
-      expect(result.status).toBe(JobModerationTaskStatus.POSITIVE_ABUSE);
+      expect(result.status).toBe(ContentModerationRequestStatus.POSITIVE_ABUSE);
       expect(result.abuseReason).toContain(
         'Job flagged for review due to detected abusive content',
       );
@@ -374,9 +385,11 @@ describe('JobModerationService', () => {
       mockCollectModerationResults.mockResolvedValue(mockModerationResults);
 
       const result =
-        await jobModerationService.parseJobModerationResults(jobModerationTask);
+        await jobModerationService.parseContentModerationResults(
+          jobModerationTask,
+        );
 
-      expect(result.status).toBe(JobModerationTaskStatus.POSSIBLE_ABUSE);
+      expect(result.status).toBe(ContentModerationRequestStatus.POSSIBLE_ABUSE);
       expect(result.abuseReason).toContain(
         'Job flagged for review due to possible moderation concerns',
       );
@@ -399,9 +412,11 @@ describe('JobModerationService', () => {
       mockCollectModerationResults.mockResolvedValue(mockModerationResults);
 
       const result =
-        await jobModerationService.parseJobModerationResults(jobModerationTask);
+        await jobModerationService.parseContentModerationResults(
+          jobModerationTask,
+        );
 
-      expect(result.status).toBe(JobModerationTaskStatus.PASSED);
+      expect(result.status).toBe(ContentModerationRequestStatus.PASSED);
       expect(mockHandleAbuseLinks).not.toHaveBeenCalled();
       expect(mockUpdateOne).toHaveBeenCalledWith(result);
     });
@@ -412,16 +427,18 @@ describe('JobModerationService', () => {
       );
 
       const result =
-        await jobModerationService.parseJobModerationResults(jobModerationTask);
+        await jobModerationService.parseContentModerationResults(
+          jobModerationTask,
+        );
 
-      expect(result.status).toBe(JobModerationTaskStatus.FAILED);
+      expect(result.status).toBe(ContentModerationRequestStatus.FAILED);
       expect(mockUpdateOne).toHaveBeenCalledWith(result);
     });
   });
 
-  describe('completeJobModeration', () => {
+  describe('completeContentModeration', () => {
     let jobEntity: JobEntity;
-    let jobModerationTasks: JobModerationTaskEntity[];
+    let jobModerationTasks: ContentModerationRequestEntity[];
 
     beforeEach(() => {
       jobEntity = { id: 1, status: JobStatus.UNDER_MODERATION } as JobEntity;
@@ -438,18 +455,18 @@ describe('JobModerationService', () => {
       jobModerationTasks = [
         {
           id: 101,
-          status: JobModerationTaskStatus.PENDING,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.PENDING,
+        } as ContentModerationRequestEntity,
         {
           id: 102,
-          status: JobModerationTaskStatus.PROCESSED,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.PROCESSED,
+        } as ContentModerationRequestEntity,
       ];
       jest
         .spyOn(jobModerationTaskRepository, 'find')
         .mockResolvedValue(jobModerationTasks);
 
-      await jobModerationService.completeJobModeration(jobEntity);
+      await jobModerationService.completeContentModeration(jobEntity);
 
       expect(jobRepository.updateOne).not.toHaveBeenCalled();
       expect(sendSlackNotification).not.toHaveBeenCalled();
@@ -459,18 +476,18 @@ describe('JobModerationService', () => {
       jobModerationTasks = [
         {
           id: 101,
-          status: JobModerationTaskStatus.PASSED,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.PASSED,
+        } as ContentModerationRequestEntity,
         {
           id: 102,
-          status: JobModerationTaskStatus.PASSED,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.PASSED,
+        } as ContentModerationRequestEntity,
       ];
       jest
         .spyOn(jobModerationTaskRepository, 'find')
         .mockResolvedValue(jobModerationTasks);
 
-      await jobModerationService.completeJobModeration(jobEntity);
+      await jobModerationService.completeContentModeration(jobEntity);
 
       expect(jobRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({ status: JobStatus.MODERATION_PASSED }),
@@ -482,18 +499,18 @@ describe('JobModerationService', () => {
       jobModerationTasks = [
         {
           id: 101,
-          status: JobModerationTaskStatus.FAILED,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.FAILED,
+        } as ContentModerationRequestEntity,
         {
           id: 102,
-          status: JobModerationTaskStatus.PASSED,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.PASSED,
+        } as ContentModerationRequestEntity,
       ];
       jest
         .spyOn(jobModerationTaskRepository, 'find')
         .mockResolvedValue(jobModerationTasks);
 
-      await jobModerationService.completeJobModeration(jobEntity);
+      await jobModerationService.completeContentModeration(jobEntity);
 
       expect(jobRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({ status: JobStatus.POSSIBLE_ABUSE_IN_REVIEW }),
@@ -504,18 +521,18 @@ describe('JobModerationService', () => {
       jobModerationTasks = [
         {
           id: 101,
-          status: JobModerationTaskStatus.POSITIVE_ABUSE,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.POSITIVE_ABUSE,
+        } as ContentModerationRequestEntity,
         {
           id: 102,
-          status: JobModerationTaskStatus.POSSIBLE_ABUSE,
-        } as JobModerationTaskEntity,
+          status: ContentModerationRequestStatus.POSSIBLE_ABUSE,
+        } as ContentModerationRequestEntity,
       ];
       jest
         .spyOn(jobModerationTaskRepository, 'find')
         .mockResolvedValue(jobModerationTasks);
 
-      await jobModerationService.completeJobModeration(jobEntity);
+      await jobModerationService.completeContentModeration(jobEntity);
 
       expect(sendSlackNotification).toHaveBeenCalledWith(
         expect.any(String),
@@ -529,7 +546,7 @@ describe('JobModerationService', () => {
       const loggerErrorMock = jest.spyOn(jobModerationService.logger, 'error');
 
       await expect(
-        jobModerationService.completeJobModeration(jobEntity),
+        jobModerationService.completeContentModeration(jobEntity),
       ).rejects.toThrow('Failed to complete job moderation');
 
       expect(loggerErrorMock).toHaveBeenCalledWith(
