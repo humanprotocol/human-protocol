@@ -45,8 +45,13 @@ export const colorPalette = {
   button: {
     disabled: '#E6E7EF',
   },
-  // for 'warning', 'info' native colors from MUI were pointed as expected
-  // 'info' native colors from MUI were pointed as expected
+  banner: {
+    background: { primary: '#320A8D', secondary: '#1C133F' },
+    text: {
+      primary: '#CDC7FF',
+      secondary: '#FFFFFF',
+    },
+  },
 };
 
 export type ColorPalette = typeof colorPalette;

@@ -8,6 +8,7 @@ import type { PageHeaderProps } from '@/shared/components/layout/protected/page-
 import { PageHeader } from '@/shared/components/layout/protected/page-header';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
+import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -90,6 +91,7 @@ export function Layout({
         backgroundColor,
       }}
     >
+      <GovernanceBanner />
       <Navbar
         open={drawerOpen}
         setOpen={setDrawerOpen}
