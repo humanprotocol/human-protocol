@@ -337,6 +337,27 @@ def create_task(
             raise
 
 
+def create_audino_task(project_id: int, name: str, *, segment_duration: int) -> models.TaskRead:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        task_write_request = models.TaskWriteRequest(
+            name=name,
+            project_id=project_id,
+            overlap=0,
+            segment_duration=segment_duration,
+            flags={
+                "is_commonvoice": True,
+            },
+        )
+        try:
+            (task_info, _) = api_client.tasks_api.create(task_write_request)
+            return task_info
+
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling tasks_api.create: {e}\n")
+            raise
+
+
 def get_cloudstorage_contents(cloudstorage_id: int) -> list[str]:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
@@ -359,6 +380,8 @@ def put_task_data(
     filenames: list[str] | None = None,
     sort_images: bool | None = None,
     validation_params: dict[str, str | float | list[str]] | None = None,
+    use_cache: bool = True,
+    use_zip_chunks: bool = True,
 ) -> None:
     logger = logging.getLogger("app")
 
@@ -404,8 +427,8 @@ def put_task_data(
             chunk_size=chunk_size,
             cloud_storage_id=cloudstorage_id,
             image_quality=Config.cvat_config.image_quality,
-            use_cache=True,
-            use_zip_chunks=True,
+            use_cache=use_cache,
+            use_zip_chunks=use_zip_chunks,
             sorting_method=sorting_method,
             **kwargs,
         )

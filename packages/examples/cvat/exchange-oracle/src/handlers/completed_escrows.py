@@ -1,7 +1,13 @@
+import csv
 import io
+import json
 import logging
+import os
+import zipfile
 from collections.abc import Callable, Sequence
 from functools import partial
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 from datumaro.util import take_by
@@ -28,6 +34,7 @@ from src.handlers.job_export import (
 from src.models.cvat import Job, Project
 from src.services.cloud.types import BucketAccessInfo
 from src.utils.assignments import parse_manifest
+from src.utils.zip_archive import write_dir_to_zip_archive
 
 
 def _download_with_retries(
@@ -81,6 +88,9 @@ def _export_escrow_annotations(
         # we'll have to merge annotations ourselves for skeletons
         # might want to make this the only behaviour in the future
         project_annotations_file = None
+        project_images = None
+    elif manifest.annotation.type == TaskTypes.audio_transcription:
+        project_annotations_file = _make_project_annotation(job_annotations)
         project_images = None
     else:
         # escrows with simple task types must have only one project
@@ -160,6 +170,9 @@ def _upload_annotations(
         if file_descriptor.filename in existing_storage_files:
             continue
 
+        if file_descriptor.file == None:
+            continue
+
         storage_client.create_file(
             compose_results_bucket_filename(
                 escrow_address,
@@ -187,6 +200,64 @@ def _download_project_annotations(
             format_name=annotation_format,
         ),
     )
+
+
+def convert_value(value: str):
+    """Converts a string value to int, float, or keeps it as string."""
+    try:
+        f = float(value)
+        if f.is_integer():
+            return int(f)
+        return f
+    except ValueError:
+        return value
+
+
+def _make_project_annotation(job_annotations: dict[int, FileDescriptor]):
+    annotations = []
+
+    with TemporaryDirectory() as tempdir:
+        temp_path = Path(tempdir)
+
+        merged_annotations_path = temp_path / "merged_annotations"
+        merged_annotations_path.mkdir(parents=True, exist_ok=True)
+
+        clips_path = merged_annotations_path / "clips"
+        clips_path.mkdir(parents=True, exist_ok=True)
+
+        annotations_file = merged_annotations_path / "annotations.json"
+
+        for downloaded_annotations in job_annotations.values():
+            with zipfile.ZipFile(io.BytesIO(downloaded_annotations.file.getvalue())) as zip_file:
+                clip_files = [f for f in zip_file.namelist() if f.startswith("clips/")]
+
+                for clip_file in clip_files:
+                    with zip_file.open(clip_file) as audio_file:
+                        clip_name = os.path.basename(clip_file)
+                        if clip_name:
+                            with (clips_path / clip_name).open("wb") as f:
+                                f.write(audio_file.read())
+
+                if "data.tsv" in zip_file.namelist():
+                    with zip_file.open("data.tsv") as tsv_file:
+                        reader = csv.DictReader(
+                            io.StringIO(tsv_file.read().decode("utf-8")), delimiter="\t"
+                        )
+                        entries = [
+                            {key: convert_value(value) for key, value in row.items()}
+                            for row in reader
+                        ]
+
+                        annotations.extend(entries)
+
+        with annotations_file.open("w") as f:
+            json.dump(annotations, f, indent=4)
+
+        merged_annotations_archive = io.BytesIO()
+        write_dir_to_zip_archive(merged_annotations_path, merged_annotations_archive)
+        merged_annotations_archive.seek(0)
+
+        return merged_annotations_archive
 
 
 def _download_job_annotations(
