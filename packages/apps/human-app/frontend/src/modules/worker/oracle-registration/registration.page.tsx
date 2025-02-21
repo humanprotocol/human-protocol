@@ -3,24 +3,31 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { RegistrationForm } from '@/modules/worker/oracle-registration/registration-form';
+import { Loader } from '@/shared/components/ui/loader';
 import { useGetOracles } from '../services/oracles';
 import { useOracleNavigation } from './hooks/use-oracle-navigation';
 import { useIsAlreadyRegistered } from './hooks';
 
 export function RegistrationPage() {
   const { t } = useTranslation();
-
-  const { data } = useGetOracles();
   const { address } = useParams<{ address: string }>();
+  const { data, isLoading } = useGetOracles();
   const isAlreadyRegistered = useIsAlreadyRegistered(address);
-
   const { navigateToJobs, navigateToDiscovery } = useOracleNavigation(address);
 
+  const oracleData = data?.find((o) => o.address === address);
+
   useEffect(() => {
-    if (data === undefined) {
+    if (!address || address === '') {
       navigateToDiscovery();
     }
-  }, [data, navigateToDiscovery]);
+  }, [address, navigateToDiscovery]);
+
+  useEffect(() => {
+    if (oracleData === undefined) {
+      navigateToDiscovery();
+    }
+  }, [oracleData, address, navigateToDiscovery]);
 
   useEffect(() => {
     if (isAlreadyRegistered) {
@@ -45,10 +52,19 @@ export function RegistrationPage() {
           }}
         >
           <Stack maxWidth="350px" spacing={2}>
-            <Box>
-              {t('worker.registrationInExchangeOracle.requiredMessage')}
-            </Box>
-            <RegistrationForm />
+            {isLoading ? (
+              <Loader />
+            ) : (
+              <>
+                <Box>
+                  {t('worker.registrationInExchangeOracle.requiredMessage')}
+                </Box>
+                <RegistrationForm
+                  address={address}
+                  oracleInstructions={oracleData?.registrationInstructions}
+                />
+              </>
+            )}
           </Stack>
         </Paper>
       </Grid>

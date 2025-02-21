@@ -2,7 +2,6 @@ import { Box, Stack } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useParams } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import {
@@ -11,13 +10,11 @@ import {
 } from './sevices';
 import { useOracleRegistrationFlow } from './hooks';
 
-function useRegistrationForm() {
-  const { address: oracleAddress } = useParams<{ address: string }>();
-
+function useRegistrationForm(address: string | undefined) {
   return useForm<RegistrationInExchangeOracleDto>({
     defaultValues: {
       // eslint-disable-next-line camelcase
-      oracle_address: oracleAddress,
+      oracle_address: address,
       // eslint-disable-next-line camelcase
       h_captcha_token: '',
     },
@@ -25,16 +22,23 @@ function useRegistrationForm() {
   });
 }
 
-export function RegistrationForm() {
+export function RegistrationForm({
+  address,
+  oracleInstructions,
+}: Readonly<{
+  address: string | undefined;
+  oracleInstructions: string | URL | null | undefined;
+}>) {
   const { t } = useTranslation();
-  const methods = useRegistrationForm();
+  const methods = useRegistrationForm(address);
+
   const {
     hasViewedInstructions,
     handleInstructionsView,
     handleRegistration,
     isRegistrationPending: isLoading,
     registrationError: error,
-  } = useOracleRegistrationFlow();
+  } = useOracleRegistrationFlow(address, oracleInstructions);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     void methods.handleSubmit(handleRegistration)(event);

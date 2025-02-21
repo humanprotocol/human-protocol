@@ -1,17 +1,14 @@
 import { useState, useCallback } from 'react';
-import { useGetOracles } from '../../services/oracles';
 
-export function useOracleInstructions(oracleAddress?: string) {
+export function useOracleInstructions(
+  instructions?: string | URL | null | undefined
+) {
   const [hasViewedInstructions, setHasViewedInstructions] = useState(false);
-  const { data: oraclesData } = useGetOracles();
-  const oracleData = oraclesData?.find(
-    (oracle) => oracle.address === oracleAddress
-  );
 
   const handleInstructionsView = useCallback(() => {
-    window.open(oracleData?.registrationInstructions ?? '', '_blank');
+    window.open(instructions ?? '', '_blank');
     setHasViewedInstructions(true);
-  }, [oracleData]);
+  }, [instructions]);
 
   return { hasViewedInstructions, handleInstructionsView };
 }
