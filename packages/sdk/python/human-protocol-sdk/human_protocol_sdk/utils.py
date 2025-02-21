@@ -12,6 +12,7 @@ from web3.contract import Contract
 from web3.types import TxReceipt
 from web3.exceptions import ContractLogicError
 from web3.types import TxParams
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 
 from human_protocol_sdk.constants import ARTIFACTS_FOLDER, SUBGRAPH_API_KEY_PLACEHOLDER
 
@@ -241,10 +242,11 @@ def handle_transaction(
     """
     if not w3.eth.default_account:
         raise exception("You must add an account to Web3 instance")
-    if not w3.middleware_onion.get("construct_sign_and_send_raw_middleware"):
+    if not w3.middleware_onion.get("SignAndSendRawMiddlewareBuilder"):
         raise exception(
-            "You must add construct_sign_and_send_raw_middleware middleware to Web3 instance"
+            "You must add SignAndSendRawMiddlewareBuilder middleware to Web3 instance"
         )
+    # Removed check for the middleware since there is no pretty way of validating it in web3 v7
     try:
         if tx_options and tx_options.get("gas") is None:
             tx_options["gas"] = tx.estimate_gas()
