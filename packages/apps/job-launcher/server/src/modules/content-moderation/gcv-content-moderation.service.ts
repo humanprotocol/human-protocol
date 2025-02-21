@@ -25,7 +25,7 @@ import {
 import {
   checkModerationLevels,
   getFileName,
-} from '../../common/utils/job-moderation';
+} from '../../common/utils/content-moderation';
 import { sendSlackNotification } from '../../common/utils/slack';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { JobEntity } from '../job/job.entity';
@@ -396,12 +396,15 @@ export class GCVContentModerationService implements IContentModeratorService {
       }
       return this.categorizeModerationResults(allResponses);
     } catch (err) {
-      console.log(err);
       this.logger.error('Error collecting moderation results:', err);
-      throw new ControlledError(
-        ErrorContentModeration.ResultsParsingFailed,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (err instanceof ControlledError) {
+        throw err;
+      } else {
+        throw new ControlledError(
+          ErrorContentModeration.ResultsParsingFailed,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
