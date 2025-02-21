@@ -27,7 +27,11 @@ async function fetchActiveProposalFn() {
     provider
   );
   const filter = contract.filters.ProposalCreated();
-  const logs = await contract.queryFilter(filter, 68058296, 'latest');
+  const logs = await contract.queryFilter(
+    filter,
+    env.VITE_NETWORK === 'mainnet' ? 68058296 : 7696279,
+    'latest'
+  );
 
   for (const log of logs) {
     const parsed = contract.interface.parseLog(log);
