@@ -14,10 +14,11 @@ import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-use
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
   const isMobile = useIsMobile();
-  const { isConnected, initializing } = useWalletConnect();
+  const { isConnected, initializing, web3ProviderMutation } =
+    useWalletConnect();
   const { showNotification } = useNotification();
 
-  const setNotifications = () => {
+  useEffect(() => {
     if (initializing) return;
 
     if (!isConnected || !user.wallet_address) {
@@ -26,12 +27,21 @@ export function WorkerProfilePage() {
         message: t('worker.profile.topNotifications.completeSteps'),
       });
     }
-  };
 
-  useEffect(() => {
-    setNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- call this once
-  }, [isConnected, initializing]);
+    if (web3ProviderMutation.isError && web3ProviderMutation.failureReason) {
+      showNotification({
+        type: TopNotificationType.WARNING,
+        message: web3ProviderMutation.failureReason.message,
+      });
+    }
+  }, [
+    isConnected,
+    initializing,
+    web3ProviderMutation.failureReason,
+    web3ProviderMutation.isError,
+    user.wallet_address,
+    showNotification,
+  ]);
 
   return (
     <Paper
