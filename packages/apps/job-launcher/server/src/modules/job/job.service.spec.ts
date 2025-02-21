@@ -120,7 +120,6 @@ import { NetworkConfigService } from '../../common/config/network-config.service
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
-import { JobModerationService } from './job-moderation.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -269,10 +268,6 @@ describe('JobService', () => {
         {
           provide: CronJobService,
           useValue: createMock<CronJobService>(),
-        },
-        {
-          provide: JobModerationService,
-          useValue: createMock<JobModerationService>(),
         },
       ],
     }).compile();
@@ -1549,7 +1544,7 @@ describe('JobService', () => {
         ),
       ).rejects.toThrow(
         new ControlledError(
-          ErrorBucket.InvalidProvider,
+          ErrorJob.GroundThuthValidationFailed,
           HttpStatus.BAD_REQUEST,
         ),
       );

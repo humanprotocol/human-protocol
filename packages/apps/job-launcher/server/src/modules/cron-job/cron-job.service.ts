@@ -92,13 +92,11 @@ export class CronJobService {
         JobStatus.PAID,
         JobStatus.UNDER_MODERATION,
       ]);
-      console.log(jobs);
 
       for (const jobEntity of jobs) {
         try {
           await this.contentModerationService.moderateJob(jobEntity);
         } catch (err) {
-          console.log(err);
           const failedReason = `Content moderation error: ${err.message}`;
           this.logger.error(`Job ${jobEntity.id} failed: ${failedReason}`);
           await this.jobService.handleProcessJobFailure(

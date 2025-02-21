@@ -396,6 +396,7 @@ export class GCVContentModerationService implements IContentModeratorService {
       }
       return this.categorizeModerationResults(allResponses);
     } catch (err) {
+      console.log(err);
       this.logger.error('Error collecting moderation results:', err);
       throw new ControlledError(
         ErrorContentModeration.ResultsParsingFailed,

@@ -68,6 +68,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.5.0",
     "@golevelup/ts-jest": "^0.6.1",
     "@nestjs/cli": "^10.3.2",
     "@nestjs/schematics": "^10.1.3",
