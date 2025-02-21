@@ -1,11 +1,13 @@
 import { DataSource } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import * as dotenv from 'dotenv';
+import Environment from './src/utils/environment';
 
 dotenv.config({
-  path: process.env.NODE_ENV
-    ? `.env.${process.env.NODE_ENV as string}`
-    : '.env',
+  /**
+   * First value wins if "override" option is not set
+   */
+  path: [`.env.${Environment.name}`, '.env'],
 });
 
 export default new DataSource({

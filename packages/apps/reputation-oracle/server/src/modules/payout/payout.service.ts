@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 
 import {
@@ -11,25 +11,25 @@ import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
-  CalculatePayoutsDto,
-  CvatManifestDto,
-  FortuneManifestDto,
-} from '../../common/dto/manifest';
+  CvatManifest,
+  FortuneManifest,
+} from '../../common/interfaces/manifest';
 import {
   CvatAnnotationMeta,
   FortuneFinalResult,
-} from '../../common/dto/result';
+} from '../../common/interfaces/job-result';
 import {
   CalculatedPayout,
+  CalculatePayoutsInput,
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
-import { assertValidJobRequestType, getRequestType } from '../../common/utils';
+import { getRequestType } from '../../utils/manifest';
+import { assertValidJobRequestType } from '../../utils/type-guards';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 
 @Injectable()
 export class PayoutService {
-  private readonly logger = new Logger(PayoutService.name);
   constructor(
     @Inject(StorageService)
     private readonly storageService: StorageService,
@@ -102,7 +102,7 @@ export class PayoutService {
 
     const { calculatePayouts } = this.createPayoutSpecificActions[requestType];
 
-    const data: CalculatePayoutsDto = {
+    const data: CalculatePayoutsInput = {
       chainId,
       escrowAddress,
       finalResultsUrl,
@@ -114,21 +114,21 @@ export class PayoutService {
   public createPayoutSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.FORTUNE]: {
       calculatePayouts: async (
-        manifest: FortuneManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: FortuneManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsFortune(manifest, data.finalResultsUrl),
       saveResults: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: FortuneManifestDto,
+        manifest: FortuneManifest,
       ): Promise<SaveResultDto> =>
         this.saveResultsFortune(manifest, chainId, escrowAddress),
     },
     [JobRequestType.IMAGE_BOXES]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -138,8 +138,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_POINTS]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -149,8 +149,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -160,8 +160,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -171,8 +171,8 @@ export class PayoutService {
     },
     [JobRequestType.IMAGE_POLYGONS]: {
       calculatePayouts: async (
-        manifest: CvatManifestDto,
-        data: CalculatePayoutsDto,
+        manifest: CvatManifest,
+        data: CalculatePayoutsInput,
       ): Promise<CalculatedPayout[]> =>
         this.calculatePayoutsCvat(manifest, data.chainId, data.escrowAddress),
       saveResults: async (
@@ -191,7 +191,7 @@ export class PayoutService {
    * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
    */
   public async saveResultsFortune(
-    manifest: FortuneManifestDto,
+    manifest: FortuneManifest,
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<SaveResultDto> {
@@ -259,7 +259,7 @@ export class PayoutService {
    * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
    */
   public async calculatePayoutsFortune(
-    manifest: FortuneManifestDto,
+    manifest: FortuneManifest,
     finalResultsUrl: string,
   ): Promise<CalculatedPayout[]> {
     const finalResults = (await this.storageService.downloadJsonLikeData(
@@ -289,7 +289,7 @@ export class PayoutService {
    * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
    */
   public async calculatePayoutsCvat(
-    manifest: CvatManifestDto,
+    manifest: CvatManifest,
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<CalculatedPayout[]> {

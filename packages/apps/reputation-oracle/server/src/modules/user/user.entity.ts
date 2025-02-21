@@ -3,7 +3,7 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { UserStatus, Role } from '../../common/enums/user';
-import { IUser } from '../../common/interfaces';
+import { IUser } from '../../common/interfaces/user';
 import { BaseEntity } from '../../database/base.entity';
 import { TokenEntity } from '../auth/token.entity';
 import { KycEntity } from '../kyc/kyc.entity';

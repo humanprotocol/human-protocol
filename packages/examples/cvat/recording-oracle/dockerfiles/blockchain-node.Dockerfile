@@ -1,12 +1,21 @@
-FROM node:18-alpine
+# TODO: make this shared and part of local setup
+FROM node:18-slim
 
-RUN apk add git
+# wget is needed for healthcheck
+RUN apt-get update && apt-get install -y wget
 
-RUN git clone https://github.com/humanprotocol/human-protocol.git
+WORKDIR /usr/src/app
 
-WORKDIR /human-protocol
+# Copy expected yarn dist
+COPY .yarn ./.yarn
+COPY .yarnrc ./
+# Copy files for deps installation
+COPY package.json yarn.lock ./
+
+COPY tsconfig.json ./
+COPY packages/core ./packages/core
+RUN yarn workspace @human-protocol/core install --ignore-scripts
+RUN yarn workspace @human-protocol/core build
 
 EXPOSE 8545
-
-RUN yarn workspace @human-protocol/core install --ignore-scripts
 CMD yarn workspace @human-protocol/core local

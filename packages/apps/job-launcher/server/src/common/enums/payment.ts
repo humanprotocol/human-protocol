@@ -1,52 +1,17 @@
-export enum Currency {
+import { EscrowFundToken } from './job';
+
+export enum FiatCurrency {
   USD = 'usd',
-  AED = 'aed',
-  ARS = 'ars',
-  AUD = 'aud',
-  BDT = 'bdt',
-  BMD = 'bmd',
-  BRL = 'brl',
-  CAD = 'cad',
-  CHF = 'chf',
-  CLP = 'clp',
-  CNY = 'cny',
-  CZK = 'czk',
-  DKK = 'dkk',
-  EUR = 'eur',
-  GBP = 'gbp',
-  HKD = 'hkd',
-  HUF = 'huf',
-  IDR = 'idr',
-  ILS = 'ils',
-  INR = 'inr',
-  JPY = 'jpy',
-  KRW = 'krw',
-  LKR = 'lkr',
-  MMK = 'mmk',
-  MXN = 'mxn',
-  MYR = 'myr',
-  NGN = 'ngn',
-  NOK = 'nok',
-  NZD = 'nzd',
-  PHP = 'php',
-  PKR = 'pkr',
-  PLN = 'pln',
-  RUB = 'rub',
-  SAR = 'sar',
-  SEK = 'sek',
-  SGD = 'sgd',
-  THB = 'thb',
-  TRY = 'try',
-  TWD = 'twd',
-  UAH = 'uah',
-  VND = 'vnd',
-  ZAR = 'zar',
 }
 
-export enum TokenId {
-  HMT = 'hmt',
-  USDT = 'usdt',
-}
+// Allowed currencies for payments
+export const PaymentCurrency = {
+  ...FiatCurrency,
+  ...EscrowFundToken,
+};
+
+export type PaymentCurrency =
+  (typeof PaymentCurrency)[keyof typeof PaymentCurrency];
 
 export enum PaymentSource {
   FIAT = 'fiat',

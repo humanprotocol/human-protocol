@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { PayoutService } from './payout.service';
@@ -8,7 +8,7 @@ import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [ConfigModule, ReputationModule, Web3Module, StorageModule],
-  providers: [Logger, PayoutService],
+  providers: [PayoutService],
   exports: [PayoutService],
 })
 export class PayoutModule {}

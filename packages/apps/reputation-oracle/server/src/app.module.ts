@@ -2,27 +2,28 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AppController } from './app.controller';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { DatabaseModule } from './database/database.module';
 import { HttpValidationPipe } from './common/pipes';
 import { HealthModule } from './modules/health/health.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { Web3Module } from './modules/web3/web3.module';
-import { envValidator } from './common/config';
+import { envValidator } from './config';
 import { AuthModule } from './modules/auth/auth.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { SnakeCaseInterceptor } from './common/interceptors/snake-case';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
-import { EnvConfigModule } from './common/config/config.module';
+import { EnvConfigModule } from './config/config.module';
 import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
-import { ExceptionFilter } from './common/exceptions/exception.filter';
+import { ExceptionFilter } from './common/filters/exception.filter';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
+import { EmailModule } from './modules/email/module';
+import Environment from './utils/environment';
 
 @Module({
   providers: [
@@ -32,7 +33,7 @@ import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SnakeCaseInterceptor,
+      useClass: TransformInterceptor,
     },
     {
       provide: APP_FILTER,
@@ -42,9 +43,10 @@ import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${Environment.name}`, '.env'],
       validationSchema: envValidator,
     }),
     DatabaseModule,
@@ -68,7 +70,7 @@ import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module
     HCaptchaModule,
     QualificationModule,
     EscrowCompletionModule,
+    EmailModule,
   ],
-  controllers: [AppController],
 })
 export class AppModule {}

@@ -9,6 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
+import { faker } from '@faker-js/faker';
 import { v4 } from 'uuid';
 import {
   MOCK_ACCESS_TOKEN,
@@ -22,12 +23,11 @@ import {
   MOCK_REFRESH_TOKEN,
   mockConfig,
 } from '../../../test/constants';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { AuthConfigService } from '../../config/auth-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { JobRequestType } from '../../common/enums';
 import { Role, UserStatus } from '../../common/enums/user';
 import { SignatureType } from '../../common/enums/web3';
@@ -35,9 +35,8 @@ import {
   generateNonce,
   prepareSignatureBody,
   signMessage,
-} from '../../common/utils/signature';
+} from '../../utils/web3';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SiteKeyRepository } from '../user/site-key.repository';
 import { PrepareSignatureDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
@@ -56,6 +55,8 @@ import {
 import { AuthService } from './auth.service';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
+import { EmailService } from '../email/email.service';
+import { EmailAction } from '../email/constants';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -86,7 +87,7 @@ describe('AuthService', () => {
   let userService: UserService;
   let userRepository: UserRepository;
   let jwtService: JwtService;
-  let sendGridService: SendGridService;
+  let emailService: EmailService;
   let web3Service: Web3Service;
   let authConfigService: AuthConfigService;
   let hcaptchaService: HCaptchaService;
@@ -131,7 +132,7 @@ describe('AuthService', () => {
           useValue: createMock<SiteKeyRepository>(),
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
-        { provide: SendGridService, useValue: createMock<SendGridService>() },
+        { provide: EmailService, useValue: createMock<EmailService>() },
         {
           provide: Web3Service,
           useValue: {
@@ -148,7 +149,7 @@ describe('AuthService', () => {
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get<UserRepository>(UserRepository);
     jwtService = moduleRef.get<JwtService>(JwtService);
-    sendGridService = moduleRef.get<SendGridService>(SendGridService);
+    emailService = moduleRef.get<EmailService>(EmailService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
@@ -253,12 +254,12 @@ describe('AuthService', () => {
       expect(result).toBe(userEntity);
     });
 
-    it("should call sendGridService sendEmail if user's email is valid", async () => {
-      sendGridService.sendEmail = jest.fn();
+    it("should call emailService sendEmail if user's email is valid", async () => {
+      emailService.sendEmail = jest.fn();
 
       await authService.signup(userCreateDto);
 
-      expect(sendGridService.sendEmail).toHaveBeenCalled();
+      expect(emailService.sendEmail).toHaveBeenCalled();
     });
 
     it('should fail if the user already exists', async () => {
@@ -364,7 +365,7 @@ describe('AuthService', () => {
           }),
         ).resolves.toBeUndefined();
 
-        expect(sendGridService.sendEmail).not.toHaveBeenCalledWith();
+        expect(emailService.sendEmail).not.toHaveBeenCalledWith();
       });
 
       it('should remove existing token if it exists', async () => {
@@ -378,51 +379,37 @@ describe('AuthService', () => {
       });
 
       it('should create a new token and send email', async () => {
-        sendGridService.sendEmail = jest.fn();
-        const email = 'user@example.com';
+        emailService.sendEmail = jest.fn();
+        const email = faker.internet.email();
 
         await authService.forgotPassword({ email, hCaptchaToken: 'token' });
 
-        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
-          expect.objectContaining({
-            personalizations: [
-              {
-                dynamicTemplateData: {
-                  service_name: SERVICE_NAME,
-                  url: expect.stringContaining(
-                    `${MOCK_FE_URL}/reset-password?token=`,
-                  ),
-                },
-                to: email,
-              },
-            ],
-            templateId: SENDGRID_TEMPLATES.resetPassword,
-          }),
+        expect(emailService.sendEmail).toHaveBeenCalledWith(
+          email,
+          EmailAction.RESET_PASSWORD,
+          {
+            url: expect.stringContaining(
+              `${MOCK_FE_URL}/reset-password?token=`,
+            ),
+          },
         );
       });
 
       it('should create a new token and send email if user is not active', async () => {
-        sendGridService.sendEmail = jest.fn();
+        emailService.sendEmail = jest.fn();
         userEntity.status = UserStatus.PENDING;
-        const email = 'user@example.com';
+        const email = faker.internet.email();
 
         await authService.forgotPassword({ email, hCaptchaToken: 'token' });
 
-        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
-          expect.objectContaining({
-            personalizations: [
-              {
-                dynamicTemplateData: {
-                  service_name: SERVICE_NAME,
-                  url: expect.stringContaining(
-                    `${MOCK_FE_URL}/reset-password?token=`,
-                  ),
-                },
-                to: email,
-              },
-            ],
-            templateId: SENDGRID_TEMPLATES.resetPassword,
-          }),
+        expect(emailService.sendEmail).toHaveBeenCalledWith(
+          email,
+          EmailAction.RESET_PASSWORD,
+          {
+            url: expect.stringContaining(
+              `${MOCK_FE_URL}/reset-password?token=`,
+            ),
+          },
         );
       });
     });
@@ -443,7 +430,7 @@ describe('AuthService', () => {
 
       beforeEach(() => {
         findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
-        sendGridService.sendEmail = jest.fn();
+        emailService.sendEmail = jest.fn();
       });
 
       afterEach(() => {
@@ -485,7 +472,7 @@ describe('AuthService', () => {
         );
         findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
         userService.updatePassword = jest.fn();
-        sendGridService.sendEmail = jest.fn();
+        emailService.sendEmail = jest.fn();
 
         const updatePasswordMock = jest.spyOn(userService, 'updatePassword');
 
@@ -496,7 +483,7 @@ describe('AuthService', () => {
         });
 
         expect(updatePasswordMock).toHaveBeenCalled();
-        expect(sendGridService.sendEmail).toHaveBeenCalled();
+        expect(emailService.sendEmail).toHaveBeenCalled();
         expect(tokenRepository.deleteOne).toHaveBeenCalled();
       });
     });
@@ -585,7 +572,7 @@ describe('AuthService', () => {
           }),
         ).resolves.toBeUndefined();
 
-        expect(sendGridService.sendEmail).not.toHaveBeenCalledWith();
+        expect(emailService.sendEmail).not.toHaveBeenCalledWith();
       });
 
       it('should exit early w/o action if user is not pending', () => {
@@ -598,34 +585,27 @@ describe('AuthService', () => {
           }),
         ).resolves.toBeUndefined();
 
-        expect(sendGridService.sendEmail).not.toHaveBeenCalledWith();
+        expect(emailService.sendEmail).not.toHaveBeenCalledWith();
       });
 
       it('should create token and send email', async () => {
         findOneByEmailMock.mockResolvedValue(userEntity);
         findTokenMock.mockResolvedValueOnce(null);
-        sendGridService.sendEmail = jest.fn();
-        const email = 'user@example.com';
+        emailService.sendEmail = jest.fn();
+        const email = faker.internet.email();
 
         await authService.resendEmailVerification({
           email,
-          hCaptchaToken: 'token',
+          hCaptchaToken: faker.string.alphanumeric(),
         });
 
         expect(createTokenMock).toHaveBeenCalled();
-        expect(sendGridService.sendEmail).toHaveBeenCalledWith(
-          expect.objectContaining({
-            personalizations: [
-              {
-                dynamicTemplateData: {
-                  service_name: SERVICE_NAME,
-                  url: expect.stringContaining('/verify?token='),
-                },
-                to: email,
-              },
-            ],
-            templateId: SENDGRID_TEMPLATES.signup,
-          }),
+        expect(emailService.sendEmail).toHaveBeenCalledWith(
+          email,
+          EmailAction.SIGNUP,
+          {
+            url: expect.stringContaining(`${MOCK_FE_URL}/verify?token=`),
+          },
         );
       });
     });

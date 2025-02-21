@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { ReputationService } from './reputation.service';
@@ -11,7 +11,7 @@ import { Web3Module } from '../web3/web3.module';
 @Module({
   imports: [ConfigModule, HttpModule, StorageModule, Web3Module],
   controllers: [ReputationController],
-  providers: [Logger, ReputationService, ReputationRepository],
+  providers: [ReputationService, ReputationRepository],
   exports: [ReputationService],
 })
 export class ReputationModule {}
