@@ -1,0 +1,59 @@
+---
+source: src/graphql/escrow_query.rs
+expression: result.data
+---
+Some(
+    GetEscrowByAddressQuery {
+        escrow: Some(
+            EscrowData {
+                id: "0x01fc22166dbf5743472ea56e2a1bc8372377e402",
+                address: "0x01fc22166dbf5743472ea56e2a1bc8372377e402",
+                amount_paid: Id(
+                    "0",
+                ),
+                balance: Id(
+                    "0",
+                ),
+                count: Id(
+                    "752",
+                ),
+                factory_address: "0xa8d927c4da17a6b71675d2d49dfda4e9ebe58f2d",
+                launcher: "0x9d1f5d4c4aa1764bf63583c3392f626e2ffbe5f7",
+                status: Some(
+                    "Pending",
+                ),
+                token: "0x0376d26246eb35ff4f9924cf13e6c05fd0bd7fb4",
+                total_funded_amount: Id(
+                    "0",
+                ),
+                created_at: "1692770548",
+                final_results_url: None,
+                intermediate_results_url: None,
+                manifest_hash: Some(
+                    "031a70ecd7a0a50f1c58b1e30cdb145dd1869886",
+                ),
+                manifest_url: Some(
+                    "http://localhost:9000/manifests/s3031a70ecd7a0a50f1c58b1e30cdb145dd1869886.json",
+                ),
+                recording_oracle: Some(
+                    "0xa0ee7a142d267c1f36714e4a8f75612f20a79720",
+                ),
+                recording_oracle_fee: Some(
+                    Id(
+                        "1",
+                    ),
+                ),
+                reputation_oracle: Some(
+                    "0xbcd4042de499d14e55001ccbb24a551f3b954096",
+                ),
+                reputation_oracle_fee: Some(
+                    Id(
+                        "1",
+                    ),
+                ),
+                exchange_oracle: None,
+                exchange_oracle_fee: None,
+            },
+        ),
+    },
+)
