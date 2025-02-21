@@ -14,7 +14,7 @@ import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-use
 export function WorkerProfilePage() {
   const { user } = useAuthenticatedUser();
   const isMobile = useIsMobile();
-  const { isConnected } = useWalletConnect();
+  const { isConnected, initializing } = useWalletConnect();
   const { showNotification } = useNotification();
 
   const setNotifications = () => {
@@ -28,9 +28,9 @@ export function WorkerProfilePage() {
   };
 
   useEffect(() => {
-    setNotifications();
+    if (!initializing) setNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this once
-  }, [isConnected]);
+  }, [isConnected, initializing]);
 
   return (
     <Paper
