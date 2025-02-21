@@ -91,8 +91,7 @@ export function WalletConnectProvider({
     [web3ProviderMutation.data]
   );
 
-  const isReady =
-    isConnected && address && chainId && web3ProviderMutation.data;
+  const isReady = isConnected && address && chainId;
 
   const contextValue = useMemo(() => {
     return isReady
