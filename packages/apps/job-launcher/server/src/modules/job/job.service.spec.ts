@@ -105,6 +105,10 @@ describe('JobService', () => {
           provide: RoutingProtocolService,
           useValue: createMock<RoutingProtocolService>(),
         },
+        {
+          provide: JobModerationService,
+          useValue: createMock<JobModerationService>(),
+        },
       ],
     }).compile();
 
@@ -118,6 +122,7 @@ describe('JobService', () => {
   describe('createJob', () => {
     const userMock: any = {
       id: 1,
+      whitlisted: true,
       stripeCustomerId: 'stripeTest',
     };
 
