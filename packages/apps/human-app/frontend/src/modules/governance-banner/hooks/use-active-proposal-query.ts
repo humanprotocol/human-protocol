@@ -19,7 +19,7 @@ async function fetchActiveProposalFn() {
   const provider = new ethers.JsonRpcProvider(
     env.VITE_NETWORK === 'mainnet'
       ? wagmiChains.polygon.rpcUrls.default.http[0]
-      : wagmiChains.goerli.rpcUrls.default.http[0]
+      : wagmiChains.sepolia.rpcUrls.default.http[0]
   );
   const contract = new ethers.Contract(
     env.VITE_GOVERNOR_ADDRESS,

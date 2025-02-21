@@ -45,7 +45,6 @@ export function GovernanceBanner() {
     return null;
   }
 
-  // 3) Calculate total votes (for + against + abstain)
   const forVotes = parseFloat(data.forVotes) || 0;
   const againstVotes = parseFloat(data.againstVotes) || 0;
   const abstainVotes = parseFloat(data.abstainVotes) || 0;
