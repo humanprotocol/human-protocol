@@ -1,28 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 import {
   hCaptchaGetLabeler,
   hCaptchaRegisterLabeler,
   hCaptchaVerifyToken,
 } from './hcaptcha.dto';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import logger from '../../logger';
 
 @Injectable()
 export class HCaptchaService {
-  private readonly logger = new Logger(HCaptchaService.name);
+  private readonly logger = logger.child({ context: HCaptchaService.name });
 
   constructor(
     private httpService: HttpService,
     private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {}
 
-  /**
-   * Verifies the hCaptcha token.
-   * @param {hCaptchaVerifyToken} data - The data required for token verification.
-   * @returns {Promise<any>} - The verification result.
-   */
-  public async verifyToken(data: hCaptchaVerifyToken): Promise<any> {
+  public async verifyToken(data: hCaptchaVerifyToken): Promise<boolean> {
     try {
       const { ip, token } = data;
 
@@ -44,19 +40,19 @@ export class HCaptchaService {
         ),
       );
 
-      if (
-        response &&
-        response.data.success === true &&
-        response.status === 200
-      ) {
-        return response.data;
-      } else if (response && response.data.success === false) {
-        this.logger.error(
-          `Error occurred during token verification: ${response.data['error-codes']}`,
-        );
+      /**
+       * WARN: Only this case is considered as "valid token"
+       * since anything can change on hCaptcha side
+       */
+      if (response?.status === 200 && response.data.success === true) {
+        return true;
+      } else if (response?.data.success === false) {
+        this.logger.warn('Error occurred during token verification', {
+          errorCodes: response.data['error-codes'],
+        });
       }
     } catch (error) {
-      this.logger.error(`Error occurred during token verification: ${error}`);
+      this.logger.error('Error occurred during token verification', error);
     }
 
     return false;
@@ -72,7 +68,7 @@ export class HCaptchaService {
       const { ip, email, language, country, address } = data;
 
       if (!country) {
-        this.logger.error(`Country is not set for the user`);
+        this.logger.warn(`Country is not set for the user`);
       }
 
       const queryParams: any = {
@@ -99,10 +95,10 @@ export class HCaptchaService {
         return true;
       }
     } catch (error) {
-      this.logger.error(
-        `Error occurred during labeling registration. User: ${data.email}`,
+      this.logger.error('Error occurred during labeling registration', {
         error,
-      );
+        userEmail: data.email,
+      });
     }
 
     return false;
@@ -130,10 +126,10 @@ export class HCaptchaService {
         return response.data;
       }
     } catch (error) {
-      this.logger.error(
-        `Error occurred while retrieving labeler data. User: ${data.email}`,
+      this.logger.error(`Error occurred while retrieving labeler data`, {
         error,
-      );
+        userEmail: data.email,
+      });
     }
 
     return null;

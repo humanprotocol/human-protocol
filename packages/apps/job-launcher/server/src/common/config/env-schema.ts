@@ -82,7 +82,6 @@ export const envValidator = Joi.object({
   APIKEY_KEY_LENGTH: Joi.number(),
   //COIN API KEYS
   RATE_CACHE_TIME: Joi.number().optional(),
-  COINMARKETCAP_API_KEY: Joi.string().optional(),
   COINGECKO_API_KEY: Joi.string().optional(),
   // Google
   GOOGLE_PROJECT_ID: Joi.string().required(),

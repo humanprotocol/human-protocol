@@ -17,8 +17,8 @@ import {
 } from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { UserStatsDrawer } from '@/modules/worker/components/hcaptcha-labeling/user-stats-drawer';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
 import { routerPaths } from './router-paths';
 
 export function Router() {
