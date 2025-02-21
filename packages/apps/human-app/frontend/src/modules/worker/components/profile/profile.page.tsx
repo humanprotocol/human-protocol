@@ -18,17 +18,18 @@ export function WorkerProfilePage() {
   const { showNotification } = useNotification();
 
   const setNotifications = () => {
-    if (user.wallet_address) {
-      return;
+    if (initializing) return;
+
+    if (!isConnected || !user.wallet_address) {
+      showNotification({
+        type: TopNotificationType.WARNING,
+        message: t('worker.profile.topNotifications.completeSteps'),
+      });
     }
-    showNotification({
-      type: TopNotificationType.WARNING,
-      message: t('worker.profile.topNotifications.completeSteps'),
-    });
   };
 
   useEffect(() => {
-    if (!initializing) setNotifications();
+    setNotifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- call this once
   }, [isConnected, initializing]);
 
