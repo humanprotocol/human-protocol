@@ -45,7 +45,8 @@
     "typescript": "^5.6.3"
   },
   "resolutions": {
-    "**/@graphprotocol/graph-cli/gluegun/ejs": "^3.1.10",
+    "**/gluegun/ejs": "^3.1.10",
+    "**/gluegun/semver": "^7.5.2",
     "**/@ethersproject/providers/ws": "^7.5.10",
     "**/@graphql-tools/**/ws": "^8.17.1",
     "**/hardhat-gas-reporter/viem": "^2.15.1"
