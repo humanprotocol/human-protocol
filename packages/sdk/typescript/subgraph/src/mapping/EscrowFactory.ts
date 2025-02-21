@@ -5,7 +5,7 @@ import {
 import { Escrow, EscrowStatusEvent } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
-import { createOrLoadLeader } from './Staking';
+import { createOrLoadOperator } from './Staking';
 import { createTransaction } from './utils/transaction';
 import { getEventDayData } from './utils/dayUpdates';
 import { toEventId } from './utils/event';
@@ -64,10 +64,10 @@ export function handleLaunched(event: Launched): void {
   eventDayData.dailyEscrowCount = eventDayData.dailyEscrowCount.plus(ONE_BI);
   eventDayData.save();
 
-  // Increase amount of jobs launched by leader
-  const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
-  leader.save();
+  // Increase amount of jobs launched by operator
+  const operator = createOrLoadOperator(event.transaction.from);
+  operator.amountJobsProcessed = operator.amountJobsProcessed.plus(ONE_BI);
+  operator.save();
 }
 
 export function handleLaunchedV2(event: LaunchedV2): void {
@@ -112,8 +112,8 @@ export function handleLaunchedV2(event: LaunchedV2): void {
   eventDayData.dailyEscrowCount = eventDayData.dailyEscrowCount.plus(ONE_BI);
   eventDayData.save();
 
-  // Increase amount of jobs launched by leader
-  const leader = createOrLoadLeader(event.transaction.from);
-  leader.amountJobsProcessed = leader.amountJobsProcessed.plus(ONE_BI);
-  leader.save();
+  // Increase amount of jobs launched by operator
+  const operator = createOrLoadOperator(event.transaction.from);
+  operator.amountJobsProcessed = operator.amountJobsProcessed.plus(ONE_BI);
+  operator.save();
 }

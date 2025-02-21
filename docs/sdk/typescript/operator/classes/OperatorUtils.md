@@ -18,11 +18,11 @@
 
 ## Methods
 
-### getLeader()
+### getOperator()
 
-> `static` **getLeader**(`chainId`, `address`): `Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)\>
+> `static` **getOperator**(`chainId`, `address`): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)\>
 
-This function returns the leader data for the given address.
+This function returns the operator data for the given address.
 
 #### Parameters
 
@@ -30,68 +30,76 @@ This function returns the leader data for the given address.
 
 [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Network in which the leader is deployed
+Network in which the operator is deployed
 
 ##### address
 
 `string`
 
-Leader address.
+Operator address.
 
 #### Returns
 
-`Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)\>
+`Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)\>
 
-Returns the leader details.
+Returns the operator details.
 
 **Code example**
 
 ```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+const operator = await OperatorUtils.getOperator(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+=======
 [operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
+>>>>>>> develop
 
 ***
 
-### getLeaders()
+### getOperators()
 
-> `static` **getLeaders**(`filter`): `Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)[]\>
+> `static` **getOperators**(`filter`): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
-This function returns all the leader details of the protocol.
+This function returns all the operator details of the protocol.
 
 #### Parameters
 
 ##### filter
 
-[`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
+[`IOperatorsFilter`](../../interfaces/interfaces/IOperatorsFilter.md)
 
-Filter for the leaders.
+Filter for the operators.
 
 #### Returns
 
-`Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)[]\>
+`Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
-Returns an array with all the leader details.
+Returns an array with all the operator details.
 
 **Code example**
 
 ```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const filter: ILeadersFilter = {
+const filter: IOperatorsFilter = {
  chainId: ChainId.POLYGON
 };
-const leaders = await OperatorUtils.getLeaders(filter);
+const operators = await OperatorUtils.getOperators(filter);
 ```
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:109](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L109)
+=======
 [operator.ts:107](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L107)
+>>>>>>> develop
 
 ***
 
@@ -137,7 +145,11 @@ const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLY
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:190](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L190)
+=======
 [operator.ts:186](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L186)
+>>>>>>> develop
 
 ***
 
@@ -177,4 +189,8 @@ const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD5123
 
 #### Defined in
 
+<<<<<<< HEAD
+[operator.ts:244](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L244)
+=======
 [operator.ts:236](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L236)
+>>>>>>> develop

@@ -14,7 +14,7 @@ export enum OrderDirection {
   DESC = 'desc',
 }
 
-export enum LeaderCategory {
+export enum OperatorCategory {
   MACHINE_LEARNING = 'machine_learning',
   MARKET_MAKING = 'market_making',
 }
