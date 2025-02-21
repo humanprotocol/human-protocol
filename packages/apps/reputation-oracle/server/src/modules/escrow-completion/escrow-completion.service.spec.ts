@@ -110,7 +110,6 @@ describe('escrowCompletionService', () => {
   const mockWeb3Service = {
     getSigner: jest.fn().mockReturnValue(signerMock),
     calculateGasPrice: jest.fn().mockReturnValue(1000n),
-    getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
   };
 
   beforeEach(async () => {

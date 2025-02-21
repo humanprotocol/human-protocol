@@ -7,9 +7,9 @@ import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
 import { KycConfigService } from '../../config/kyc-config.service';
+import { Web3ConfigService } from '../..//config/web3-config.service';
 import { KycEntity } from './kyc.entity';
 import { Web3Service } from '../web3/web3.service';
-import { NetworkConfigService } from '../../config/network-config.service';
 
 import { KycErrorMessage, KycError } from './kyc.error';
 
@@ -20,7 +20,7 @@ export class KycService {
     private readonly httpService: HttpService,
     private readonly kycConfigService: KycConfigService,
     private readonly web3Service: Web3Service,
-    private readonly networkConfigService: NetworkConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
@@ -117,11 +117,11 @@ export class KycService {
 
     const address = user.evmAddress.toLowerCase();
     const signature = await this.web3Service
-      .getSigner(this.networkConfigService.networks[0].chainId)
+      .getSigner(this.web3ConfigService.reputationNetworkChainId)
       .signMessage(address);
 
     return {
-      key: `KYC-${this.web3Service.getOperatorAddress()}`,
+      key: `KYC-${this.web3ConfigService.operatorAddress}`,
       value: signature,
     };
   }
