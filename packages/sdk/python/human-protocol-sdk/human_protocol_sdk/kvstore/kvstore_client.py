@@ -15,7 +15,7 @@ Code Example
 
     from eth_typing import URI
     from web3 import Web3
-    from web3.middleware import construct_sign_and_send_raw_middleware
+    from web3.middleware import SignAndSendRawMiddlewareBuilder
     from web3.providers.auto import load_provider_from_uri
 
     from human_protocol_sdk.kvstore import KVStoreClient
@@ -24,9 +24,10 @@ Code Example
         w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
         gas_payer = w3.eth.account.from_key(priv_key)
         w3.eth.default_account = gas_payer.address
-        w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(gas_payer),
-            "construct_sign_and_send_raw_middleware",
+        w3.middleware_onion.inject(
+            SignAndSendRawMiddlewareBuilder.build(priv_key),
+            'SignAndSendRawMiddlewareBuilder',
+            layer=0,
         )
         return (w3, gas_payer)
 
@@ -63,7 +64,7 @@ from human_protocol_sdk.utils import (
     validate_url,
 )
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3.middleware import ExtraDataToPOAMiddleware
 from web3.types import TxParams
 
 LOG = logging.getLogger("human_protocol_sdk.kvstore")
@@ -92,8 +93,10 @@ class KVStoreClient:
 
         # Initialize web3 instance
         self.w3 = web3
-        if not self.w3.middleware_onion.get("geth_poa"):
-            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
+        if not self.w3.middleware_onion.get("ExtraDataToPOA"):
+            self.w3.middleware_onion.inject(
+                ExtraDataToPOAMiddleware, "ExtraDataToPOA", layer=0
+            )
 
         chain_id = None
         # Load network configuration based on chainId
@@ -128,7 +131,7 @@ class KVStoreClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.kvstore import KVStoreClient
@@ -137,9 +140,10 @@ class KVStoreClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
@@ -176,7 +180,7 @@ class KVStoreClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.kvstore import KVStoreClient
@@ -185,9 +189,10 @@ class KVStoreClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
@@ -236,7 +241,7 @@ class KVStoreClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.kvstore import KVStoreClient
@@ -245,9 +250,10 @@ class KVStoreClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 

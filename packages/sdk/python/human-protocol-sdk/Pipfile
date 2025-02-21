@@ -18,11 +18,11 @@ sphinx-autodoc-typehints = "*"
 [packages]
 cryptography = "*"
 minio = "*"
-validators = "==0.20.0"
-web3 = "==6.8.*"
+validators = "*"
+web3 = "*"
 aiohttp = "<4.0.0"  # broken freeze in one of dependencies
 pgpy = "*"
-eth-typing = "==4.1.0"
+eth-typing = "*"
 
 [requires]
 python_version = "3.10"
