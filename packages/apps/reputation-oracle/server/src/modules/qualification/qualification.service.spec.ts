@@ -11,7 +11,7 @@ import { CreateQualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { UserEntity } from '../user/user.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { ConfigService } from '@nestjs/config';
 import { mockConfig } from '../../../test/constants';
 

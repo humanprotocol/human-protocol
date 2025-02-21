@@ -1,4 +1,4 @@
-FROM node:18-slim
+FROM node:22.14-slim
 ARG APP_PATH=packages/apps/human-app/server
 
 # Create app directory

@@ -3,7 +3,7 @@ import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
 import { WebhookIncomingStatus } from '../../common/enums/webhook';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 
 @Injectable()
 export class WebhookIncomingRepository extends BaseRepository<WebhookIncomingEntity> {

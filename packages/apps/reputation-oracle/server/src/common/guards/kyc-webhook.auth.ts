@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { createHmac } from 'crypto';
-import { KycConfigService } from '../config/kyc-config.service';
+import { KycConfigService } from '../../config/kyc-config.service';
 
 @Injectable()
 export class KycWebhookAuthGuard implements CanActivate {

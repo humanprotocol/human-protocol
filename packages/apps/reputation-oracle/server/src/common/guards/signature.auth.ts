@@ -5,7 +5,7 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { verifySignature } from '../utils/signature';
+import { verifySignature } from '../../utils/web3';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { EscrowUtils } from '@human-protocol/sdk';
 import { AuthSignatureRole } from '../enums/role';

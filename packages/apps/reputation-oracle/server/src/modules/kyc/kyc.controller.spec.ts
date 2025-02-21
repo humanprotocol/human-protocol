@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { KycController } from './kyc.controller';
 import { KycSessionDto } from './kyc.dto';
 import { KycService } from './kyc.service';
-import { EnvConfigModule } from '../../common/config/config.module';
+import { EnvConfigModule } from '../../config/config.module';
 
 describe('KycController', () => {
   let kycController: KycController;

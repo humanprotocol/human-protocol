@@ -1,7 +1,7 @@
-import { verifySignature, recoverSigner, signMessage } from './signature';
-import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
+import { verifySignature, recoverSignerAddress, signMessage } from './web3';
+import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../test/constants';
 
-describe('Signature utility', () => {
+describe('Web3 utilities', () => {
   describe('verifySignature', () => {
     it('should return true for valid signature', async () => {
       const message = 'Hello, this is a signed message!';
@@ -33,12 +33,12 @@ describe('Signature utility', () => {
     });
   });
 
-  describe('recoverSigner', () => {
+  describe('recoverSignerAddress', () => {
     it('should recover the correct signer', async () => {
       const message = 'value';
       const signature = await signMessage(message, MOCK_PRIVATE_KEY);
 
-      const result = recoverSigner(message, signature);
+      const result = recoverSignerAddress(message, signature);
 
       expect(result).toBe(MOCK_ADDRESS);
     });
@@ -47,15 +47,15 @@ describe('Signature utility', () => {
       const message = 'Hello, this is a signed message!';
       const invalidSignature = '0xInvalidSignature';
 
-      const signer = recoverSigner(message, invalidSignature);
-      expect(signer).toBe('');
+      const signer = recoverSignerAddress(message, invalidSignature);
+      expect(signer).toBe(null);
     });
 
     it('should stringify message object if it is not already a string', async () => {
       const message = { key: 'value' };
       const signature = await signMessage(message, MOCK_PRIVATE_KEY);
 
-      const recoveredAddress = recoverSigner(message, signature);
+      const recoveredAddress = recoverSignerAddress(message, signature);
 
       expect(recoveredAddress).toBe(MOCK_ADDRESS);
     });
@@ -64,7 +64,7 @@ describe('Signature utility', () => {
       const message = 'valid message';
       const signature = await signMessage(message, MOCK_PRIVATE_KEY);
 
-      const recoveredAddress = recoverSigner(message, signature);
+      const recoveredAddress = recoverSignerAddress(message, signature);
 
       expect(recoveredAddress).toBe(MOCK_ADDRESS);
     });

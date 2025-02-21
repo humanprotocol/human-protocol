@@ -25,7 +25,7 @@ import {
   usePublicClient,
 } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
-import { CURRENCY } from '../../../constants/payment';
+import { NETWORK_TOKENS } from '../../../constants/chains';
 import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
@@ -46,6 +46,7 @@ export const CryptoPayForm = ({
   const { chain } = useAccount();
   const { jobRequest, goToPrevStep } = useCreateJobPageUI();
   const [tokenAddress, setTokenAddress] = useState<string>();
+  const [tokenSymbol, setTokenSymbol] = useState<string>();
   const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
@@ -103,7 +104,7 @@ export const CryptoPayForm = ({
   }, [payWithAccountBalance, totalAmount, accountAmount]);
 
   const handlePay = async () => {
-    if (signer && tokenAddress && amount && jobRequest.chainId) {
+    if (signer && tokenAddress && amount && jobRequest.chainId && tokenSymbol) {
       setIsLoading(true);
       try {
         if (walletPayAmount > 0) {
@@ -145,15 +146,17 @@ export const CryptoPayForm = ({
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,
+            tokenSymbol,
             Number(amount),
-            CURRENCY.hmt,
+            tokenSymbol,
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(
             chainId,
             cvatRequest,
+            tokenSymbol,
             Number(amount),
-            CURRENCY.hmt,
+            tokenSymbol,
           );
         } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
           await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
@@ -223,7 +226,15 @@ export const CryptoPayForm = ({
             <TokenSelect
               chainId={chain?.id}
               value={tokenAddress}
-              onChange={(e) => setTokenAddress(e.target.value as string)}
+              onChange={(e) => {
+                const symbol = e.target.value as string;
+                setTokenSymbol(symbol);
+                setTokenAddress(
+                  NETWORK_TOKENS[
+                    jobRequest.chainId! as keyof typeof NETWORK_TOKENS
+                  ]?.[symbol.toLowerCase()],
+                );
+              }}
             />
             <FormControl fullWidth>
               <TextField
@@ -250,7 +261,7 @@ export const CryptoPayForm = ({
             >
               <Typography>Account Balance</Typography>
               <Typography color="text.secondary">
-                {user?.balance?.amount?.toFixed(2) ?? '0'}{' '}
+                ~ {user?.balance?.amount?.toFixed(2) ?? '0'}{' '}
                 {user?.balance?.currency?.toUpperCase() ?? 'USD'}
               </Typography>
             </Box>
@@ -265,7 +276,7 @@ export const CryptoPayForm = ({
             >
               <Typography>Fund Amount</Typography>
               <Typography color="text.secondary">
-                {fundAmount?.toFixed(2)} USD
+                ~ {fundAmount?.toFixed(2)} USD
               </Typography>
             </Box>
             <Box
@@ -344,6 +355,7 @@ export const CryptoPayForm = ({
             disabled={
               !isConnected ||
               !tokenAddress ||
+              !tokenSymbol ||
               !amount ||
               jobRequest.chainId !== chain?.id
             }

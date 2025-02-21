@@ -4,8 +4,8 @@ import { MailService } from '@sendgrid/mail';
 import { EmailService } from './email.service';
 import { EmailAction, SENDGRID_API_KEY_REGEX } from './constants';
 import logger from '../../logger';
-import { EmailConfigService } from '../../common/config/email-config.service';
-import { isDevelopmentEnv } from '../../common/utils/environment';
+import { EmailConfigService } from '../../config/email-config.service';
+import Environment from '../../utils/environment';
 
 export const SENDGRID_TEMPLATES = {
   signup: 'd-ca99cc7410aa4e6dab3e6042d5ecb9a3',
@@ -35,7 +35,7 @@ export class SendgridEmailService extends EmailService {
     private readonly emailConfigService: EmailConfigService,
   ) {
     super();
-    if (!isDevelopmentEnv()) {
+    if (!Environment.isDevelopment()) {
       if (!SENDGRID_API_KEY_REGEX.test(this.emailConfigService.apiKey)) {
         throw new Error('Invalid SendGrid API key');
       }
@@ -48,7 +48,7 @@ export class SendgridEmailService extends EmailService {
     action: EmailAction,
     payload?: Record<string, any>,
   ): Promise<void> {
-    if (isDevelopmentEnv()) {
+    if (Environment.isDevelopment()) {
       /**
        * Logging email data upon local development
        */

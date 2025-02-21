@@ -30,4 +30,7 @@ export class WebhookEntity extends BaseEntity {
     enum: WebhookStatus,
   })
   public status: WebhookStatus = WebhookStatus.PENDING;
+
+  @Column({ type: 'varchar', nullable: true })
+  public failureDetail: string;
 }

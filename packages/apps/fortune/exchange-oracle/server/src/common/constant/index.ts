@@ -11,10 +11,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.SEPOLIA,
 ];
-export const MAINNET_CHAIN_IDS = [
-  ChainId.POLYGON,
-  ChainId.BSC_MAINNET,
-];
+export const MAINNET_CHAIN_IDS = [ChainId.POLYGON, ChainId.BSC_MAINNET];
 
 export const JWT_KVSTORE_KEY = 'jwt_public_key';
 export const KYC_APPROVED = 'approved';
