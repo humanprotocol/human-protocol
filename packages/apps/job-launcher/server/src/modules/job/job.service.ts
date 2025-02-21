@@ -37,14 +37,12 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
-  JobCurrency,
 } from '../../common/enums/job';
 import {
-  Currency,
+  FiatCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  TokenId,
 } from '../../common/enums/payment';
 import { parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
@@ -445,15 +443,9 @@ export class JobService {
 
   private createJobSpecificActions: Record<JobRequestType, RequestAction> = {
     [JobRequestType.HCAPTCHA]: {
-      calculateFundAmount: async (dto: JobCaptchaDto, rate: number) => {
-        const dataUrl = generateBucketUrl(dto.data, JobRequestType.HCAPTCHA);
-        const objectsInBucket = await listObjectsInBucket(dataUrl);
-        return div(dto.annotations.taskBidPrice * objectsInBucket.length, rate);
-      },
       createManifest: (dto: JobCaptchaDto) => this.createHCaptchaManifest(dto),
     },
     [JobRequestType.FORTUNE]: {
-      calculateFundAmount: async (dto: JobFortuneDto) => dto.fundAmount,
       createManifest: async (
         dto: JobFortuneDto,
         requestType: JobRequestType,
@@ -465,7 +457,6 @@ export class JobService {
       }),
     },
     [JobRequestType.IMAGE_POLYGONS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -473,7 +464,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_BOXES]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -481,7 +471,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_POINTS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -489,7 +478,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -497,7 +485,6 @@ export class JobService {
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
-      calculateFundAmount: async (dto: JobCvatDto) => dto.fundAmount,
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
@@ -805,6 +792,46 @@ export class JobService {
         );
     }
 
+    const feePercentage = Number(
+      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
+    );
+
+    const paymentCurrencyRate = await this.rateService.getRate(
+      dto.paymentCurrency,
+      FiatCurrency.USD,
+    );
+    const fundTokenRate = await this.rateService.getRate(
+      FiatCurrency.USD,
+      dto.escrowFundToken,
+    );
+
+    const paymentCurrencyFee = max(
+      div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
+      mul(div(feePercentage, 100), dto.paymentAmount),
+    );
+    const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
+
+    const userBalance = await this.paymentService.getUserBalanceByCurrency(
+      user.id,
+      dto.paymentCurrency,
+    );
+
+    if (lt(userBalance, totalPaymentAmount)) {
+      throw new ControlledError(
+        ErrorJob.NotEnoughFunds,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const fundTokenFee =
+      dto.paymentCurrency === dto.escrowFundToken
+        ? paymentCurrencyFee
+        : mul(mul(paymentCurrencyFee, paymentCurrencyRate), fundTokenRate);
+    const fundTokenAmount =
+      dto.paymentCurrency === dto.escrowFundToken
+        ? dto.paymentAmount
+        : mul(mul(dto.paymentAmount, paymentCurrencyRate), fundTokenRate);
+
     // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
       const selectedOracles = await this.routingProtocolService.selectOracles(
@@ -844,54 +871,7 @@ export class JobService {
       });
     }
 
-    const rate = await this.rateService.getRate(Currency.USD, TokenId.HMT);
-    const { calculateFundAmount, createManifest } =
-      this.createJobSpecificActions[requestType];
-
-    const userBalance = await this.paymentService.getUserBalance(user.id);
-    const feePercentage = Number(
-      await this.getOracleFee(this.web3Service.getOperatorAddress(), chainId),
-    );
-
-    let tokenFee, tokenTotalAmount, tokenFundAmount, usdTotalAmount;
-
-    if (dto instanceof JobQuickLaunchDto) {
-      tokenFee = mul(div(feePercentage, 100), dto.fundAmount);
-      tokenFundAmount = dto.fundAmount;
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = div(tokenTotalAmount, rate);
-    } else if (
-      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
-      dto.currency === JobCurrency.HMT
-    ) {
-      tokenFundAmount = dto.fundAmount;
-      const fundAmountInUSD = div(tokenFundAmount, rate);
-      const feeInUSD = max(
-        this.serverConfigService.minimunFeeUsd,
-        mul(div(feePercentage, 100), fundAmountInUSD),
-      );
-      tokenFee = mul(feeInUSD, rate);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = add(fundAmountInUSD, feeInUSD);
-    } else {
-      const fundAmount = await calculateFundAmount(dto, rate);
-      const fee = max(
-        this.serverConfigService.minimunFeeUsd,
-        mul(div(feePercentage, 100), fundAmount),
-      );
-
-      tokenFundAmount = mul(fundAmount, rate);
-      tokenFee = mul(fee, rate);
-      tokenTotalAmount = add(tokenFundAmount, tokenFee);
-      usdTotalAmount = add(fundAmount, fee);
-    }
-
-    if (lt(userBalance, usdTotalAmount)) {
-      throw new ControlledError(
-        ErrorJob.NotEnoughFunds,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const { createManifest } = this.createJobSpecificActions[requestType];
 
     let jobEntity = new JobEntity();
 
@@ -916,7 +896,7 @@ export class JobService {
       const manifestOrigin = await createManifest(
         dto,
         requestType,
-        tokenFundAmount,
+        fundTokenAmount,
       );
 
       const { url, hash } = await this.uploadManifest(
@@ -935,8 +915,9 @@ export class JobService {
     jobEntity.recordingOracle = recordingOracle;
     jobEntity.userId = user.id;
     jobEntity.requestType = requestType;
-    jobEntity.fee = tokenFee;
-    jobEntity.fundAmount = tokenFundAmount;
+    jobEntity.fee = fundTokenFee; // Fee in the token used to funding the escrow
+    jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
+    jobEntity.token = dto.escrowFundToken;
     jobEntity.status = JobStatus.PENDING;
     jobEntity.waitUntil = new Date();
 
@@ -947,18 +928,9 @@ export class JobService {
     paymentEntity.jobId = jobEntity.id;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
-    if (
-      (dto instanceof JobFortuneDto || dto instanceof JobCvatDto) &&
-      dto.currency === JobCurrency.USD
-    ) {
-      paymentEntity.amount = -usdTotalAmount;
-      paymentEntity.currency = JobCurrency.USD;
-      paymentEntity.rate = 1;
-    } else {
-      paymentEntity.amount = -tokenTotalAmount;
-      paymentEntity.currency = TokenId.HMT;
-      paymentEntity.rate = div(1, rate);
-    }
+    paymentEntity.amount = -totalPaymentAmount; // In the currency used for the payment.
+    paymentEntity.currency = dto.paymentCurrency;
+    paymentEntity.rate = paymentCurrencyRate;
     paymentEntity.status = PaymentStatus.SUCCEEDED;
 
     await this.paymentRepository.createUnique(paymentEntity);
@@ -1230,6 +1202,7 @@ export class JobService {
     if (status === JobStatus.CANCELED) {
       await this.paymentService.createRefundPayment({
         refundAmount: jobEntity.fundAmount,
+        refundCurrency: jobEntity.token,
         userId: jobEntity.userId,
         jobId: jobEntity.id,
       });
@@ -1519,10 +1492,7 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: WebhookDataDto): Promise<void> {
-    if (
-      dto.eventType !== EventType.ESCROW_FAILED &&
-      dto.eventType !== EventType.TASK_CREATION_FAILED
-    ) {
+    if (dto.eventType !== EventType.ESCROW_FAILED) {
       throw new ControlledError(
         ErrorJob.InvalidEventType,
         HttpStatus.BAD_REQUEST,

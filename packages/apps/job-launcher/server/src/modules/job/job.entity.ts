@@ -2,7 +2,11 @@ import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  EscrowFundToken,
+  JobRequestType,
+  JobStatus,
+} from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { PaymentEntity } from '../payment/payment.entity';
@@ -31,6 +35,12 @@ export class JobEntity extends BaseEntity implements IJob {
 
   @Column({ type: 'decimal', precision: 30, scale: 18 })
   public fundAmount: number;
+
+  @Column({
+    type: 'enum',
+    enum: EscrowFundToken,
+  })
+  public token: EscrowFundToken;
 
   @Column({ type: 'varchar' })
   public manifestUrl: string;

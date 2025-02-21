@@ -264,12 +264,14 @@ export class CronJobService {
               await this.jobService.processEscrowCancellation(jobEntity);
             await this.paymentService.createRefundPayment({
               refundAmount: Number(ethers.formatEther(amountRefunded)),
+              refundCurrency: jobEntity.token,
               userId: jobEntity.userId,
               jobId: jobEntity.id,
             });
           } else {
             await this.paymentService.createRefundPayment({
               refundAmount: jobEntity.fundAmount,
+              refundCurrency: jobEntity.token,
               userId: jobEntity.userId,
               jobId: jobEntity.id,
             });

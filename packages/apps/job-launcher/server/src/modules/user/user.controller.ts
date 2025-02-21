@@ -47,7 +47,7 @@ export class UserController {
     @Request() req: RequestWithUser,
   ): Promise<UserBalanceDto> {
     try {
-      return this.userService.getBalance(req.user.id);
+      return this.userService.getTotalUSDBalance(req.user.id);
     } catch (e) {
       this.logger.log(
         e.message,

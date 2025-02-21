@@ -133,25 +133,25 @@ export const NETWORKS: {
 };
 
 export const KVStoreKeys = {
-  role: 'role',
+  category: 'category',
   fee: 'fee',
+  jobTypes: 'job_types',
+  operatorName: 'name',
   publicKey: 'public_key',
   publicKeyHash: 'public_key_hash',
-  webhookUrl: 'webhook_url',
-  website: 'website',
-  url: 'url',
-  jobTypes: 'job_types',
-  registrationNeeded: 'registration_needed',
   registrationInstructions: 'registration_instructions',
-  name: 'name',
-  category: 'category',
+  registrationNeeded: 'registration_needed',
+  role: 'role',
+  url: 'url',
+  website: 'website',
+  webhookUrl: 'webhook_url',
 };
 
 export const Role = {
-  JobLauncher: 'Job Launcher',
-  ExchangeOracle: 'Exchange Oracle',
-  ReputationOracle: 'Reputation Oracle',
-  RecordingOracle: 'Recording Oracle',
+  JobLauncher: 'job_launcher',
+  ExchangeOracle: 'exchange_oracle',
+  ReputationOracle: 'reputation_oracle',
+  RecordingOracle: 'recording_oracle',
 };
 
 export const SUBGRAPH_API_KEY_PLACEHOLDER = '[SUBGRAPH_API_KEY]';

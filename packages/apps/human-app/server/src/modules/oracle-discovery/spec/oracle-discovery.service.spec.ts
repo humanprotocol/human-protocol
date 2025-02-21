@@ -1,4 +1,4 @@
-import { ChainId, OperatorUtils } from '@human-protocol/sdk';
+import { ChainId, OperatorUtils, Role } from '@human-protocol/sdk';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
@@ -29,7 +29,7 @@ jest.mock('@human-protocol/sdk', () => {
 });
 
 describe('OracleDiscoveryService', () => {
-  const EXCHANGE_ORACLE = 'Exchange Oracle';
+  const EXCHANGE_ORACLE = Role.ExchangeOracle;
   const EXPECTED_CHAIN_IDS = [ChainId.POLYGON_AMOY, ChainId.BSC_TESTNET];
   const REPUTATION_ORACLE_ADDRESS = 'the_oracle';
   const TTL = '300';

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   KycStatus,
@@ -6,21 +6,21 @@ import {
   UserStatus,
   Role,
 } from '../../common/enums/user';
-import { generateNonce, verifySignature } from '../../common/utils/signature';
+import { generateNonce, verifySignature } from '../../utils/web3';
 import { UserEntity } from './user.entity';
 import { RegisterAddressRequestDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { Web3Service } from '../web3/web3.service';
 import { SignatureType, Web3Env } from '../../common/enums/web3';
 import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyEntity } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { prepareSignatureBody } from '../../common/utils/signature';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
+import { prepareSignatureBody } from '../../utils/web3';
 import { KycSignedAddressDto } from '../kyc/kyc.dto';
 import { ethers } from 'ethers';
 import {
@@ -32,8 +32,8 @@ import {
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger(UserService.name);
-  private HASH_ROUNDS = 12;
+  private readonly HASH_ROUNDS = 12;
+
   constructor(
     private userRepository: UserRepository,
     private siteKeyRepository: SiteKeyRepository,

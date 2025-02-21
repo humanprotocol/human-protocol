@@ -3,9 +3,9 @@ import crypto from 'crypto';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EscrowCompletionStatus, EventType } from '../../common/enums';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionRepository } from './escrow-completion.repository';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {
@@ -15,7 +15,7 @@ import {
   EscrowStatus,
   OperatorUtils,
 } from '@human-protocol/sdk';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import {
   BACKOFF_INTERVAL_SECONDS,
   DEFAULT_BULK_PAYOUT_TX_ID,
@@ -25,14 +25,17 @@ import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { isDuplicatedError } from '../../common/utils/database';
+import { isDuplicatedError } from '../../common/errors/database';
 import { CalculatedPayout } from '../payout/payout.interface';
 import { EscrowPayoutsBatchEntity } from './escrow-payouts-batch.entity';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
+import logger from '../../logger';
 
 @Injectable()
 export class EscrowCompletionService {
-  private readonly logger = new Logger(WebhookIncomingService.name);
+  private readonly logger = logger.child({
+    context: WebhookIncomingService.name,
+  });
 
   constructor(
     private readonly escrowCompletionRepository: EscrowCompletionRepository,
@@ -164,13 +167,14 @@ export class EscrowCompletionService {
         escrowCompletionEntity.status = EscrowCompletionStatus.AWAITING_PAYOUTS;
         await this.escrowCompletionRepository.updateOne(escrowCompletionEntity);
       } catch (error) {
-        const failureDetail = `Error message: ${error.message})`;
-        this.logger.error(
-          `Failed to process pending escrow completion. Escrow completion ID: ${escrowCompletionEntity.id}. ${failureDetail}.`,
-        );
+        this.logger.error('Failed to process pending escrow completion', {
+          error,
+          escrowCompletionEntityId: escrowCompletionEntity.id,
+        });
+
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
-          failureDetail,
+          `Error message: ${error.message})`,
         );
         continue;
       }
@@ -240,20 +244,25 @@ export class EscrowCompletionService {
               webhookPayload,
               webhookUrl,
             );
-          } catch (err) {
-            if (isDuplicatedError(err)) {
+          } catch (error) {
+            if (isDuplicatedError(error)) {
               /**
                * Already created. Noop.
                */
               continue;
             } else {
-              const failureDetail = `Failed to create outgoing webhook for oracle. Address: ${oracleAddress}. Error message: ${err.message}`;
               this.logger.error(
-                `${failureDetail}. Escrow completion ID: ${escrowCompletionEntity.id}.`,
+                'Failed to create outgoing webhook for oracle',
+                {
+                  error,
+                  escrowCompletionEntityId: escrowCompletionEntity.id,
+                  oracleAddress,
+                },
               );
+
               await this.handleEscrowCompletionError(
                 escrowCompletionEntity,
-                failureDetail,
+                `Failed to create outgoing webhook for oracle. Address: ${oracleAddress}.`,
               );
               allWebhooksCreated = false;
               break;
@@ -268,14 +277,15 @@ export class EscrowCompletionService {
             escrowCompletionEntity,
           );
         }
-      } catch (err) {
-        const failureDetail = `Error message: ${err.message}`;
-        this.logger.error(
-          `Failed to process paid escrow completion. Escrow completion ID: ${escrowCompletionEntity.id}. ${failureDetail}.`,
-        );
+      } catch (error) {
+        this.logger.error('Failed to process paid escrow completion', {
+          error,
+          escrowCompletionEntityId: escrowCompletionEntity.id,
+        });
+
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
-          failureDetail,
+          `Error message: ${error.message}`,
         );
       }
     }
@@ -292,7 +302,7 @@ export class EscrowCompletionService {
 
     const batchHash = crypto
       .createHash('sha1')
-      .update(stringify(formattedPayouts))
+      .update(stringify(formattedPayouts) as string)
       .digest('hex');
 
     const escrowPayoutsBatchEntity = new EscrowPayoutsBatchEntity();
@@ -326,10 +336,10 @@ export class EscrowCompletionService {
               payoutsBatch,
             );
           } catch (error) {
-            this.logger.error(
-              `Failed to process payouts batch. Batch ID: ${payoutsBatch.id}`,
-              error.message,
-            );
+            this.logger.error(`Failed to process payouts batch`, {
+              error,
+              payoutsBatchId: payoutsBatch.id,
+            });
             hasFailedPayouts = true;
           }
         }
@@ -343,13 +353,14 @@ export class EscrowCompletionService {
           );
         }
       } catch (error) {
-        const failureDetail = `Error message: ${error.message}`;
-        this.logger.error(
-          `Failed to process payouts. Escrow completion ID: ${escrowCompletionEntity.id}. ${failureDetail}.`,
-        );
+        this.logger.error('Failed to process payouts', {
+          error,
+          escrowCompletionEntityId: escrowCompletionEntity.id,
+        });
+
         await this.handleEscrowCompletionError(
           escrowCompletionEntity,
-          failureDetail,
+          `Error message: ${error.message}`,
         );
         continue;
       }

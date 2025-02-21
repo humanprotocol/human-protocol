@@ -16,8 +16,8 @@ import {
 import { StorageService } from './storage.service';
 import crypto from 'crypto';
 import { Web3Service } from '../web3/web3.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { S3ConfigService } from '../../common/config/s3-config.service';
+import { PGPConfigService } from '../../config/pgp-config.service';
+import { S3ConfigService } from '../../config/s3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),

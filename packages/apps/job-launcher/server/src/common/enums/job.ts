@@ -429,7 +429,7 @@ export enum WorkerBrowser {
   MODERN_BROWSER = 'modern_browser',
 }
 
-export enum JobCurrency {
+export enum EscrowFundToken {
   HMT = 'hmt',
-  USD = 'usd',
+  USDT = 'usdt',
 }
