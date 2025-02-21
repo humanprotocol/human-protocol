@@ -1,9 +1,12 @@
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
+import { KycConfigService } from '../../config/kyc-config.service';
 import { KycController } from './kyc.controller';
 import { KycSessionDto } from './kyc.dto';
 import { KycService } from './kyc.service';
-import { EnvConfigModule } from '../../config/config.module';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 
 describe('KycController', () => {
   let kycController: KycController;
@@ -19,9 +22,27 @@ describe('KycController', () => {
             updateKycStatus: jest.fn(),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => mockConfig[key]),
+            getOrThrow: jest.fn((key: string) => {
+              if (!mockConfig[key]) {
+                throw new Error(`Configuration key "${key}" does not exist`);
+              }
+              return mockConfig[key];
+            }),
+          },
+        },
+        {
+          provide: Web3ConfigService,
+          useValue: {
+            operatorAddress: MOCK_ADDRESS,
+          },
+        },
+        KycConfigService,
       ],
       controllers: [KycController],
-      imports: [EnvConfigModule],
     }).compile();
 
     kycService = moduleRef.get<KycService>(KycService);

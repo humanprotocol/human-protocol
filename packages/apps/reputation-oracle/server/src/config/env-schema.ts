@@ -1,4 +1,5 @@
 import * as Joi from 'joi';
+import { Web3Network } from './web3-config.service';
 
 export const envValidator = Joi.object({
   // General
@@ -34,7 +35,7 @@ export const envValidator = Joi.object({
   POSTGRES_URL: Joi.string(),
   POSTGRES_LOGGING: Joi.string(),
   // Web3
-  WEB3_ENV: Joi.string(),
+  WEB3_ENV: Joi.string().valid(...Object.values(Web3Network)),
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number(),
   RPC_URL_SEPOLIA: Joi.string(),

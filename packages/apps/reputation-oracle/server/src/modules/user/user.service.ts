@@ -1,34 +1,35 @@
+import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { ethers } from 'ethers';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import {
   KycStatus,
   OperatorStatus,
   UserStatus,
   Role,
 } from '../../common/enums/user';
-import { generateNonce, verifySignature } from '../../utils/web3';
-import { UserEntity } from './user.entity';
-import { RegisterAddressRequestDto } from './user.dto';
-import { UserRepository } from './user.repository';
-import { Web3Service } from '../web3/web3.service';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
-import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
-import { Web3ConfigService } from '../../config/web3-config.service';
-import { SiteKeyEntity } from './site-key.entity';
-import { SiteKeyRepository } from './site-key.repository';
+import { SignatureType } from '../../common/enums/web3';
 import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../config/network-config.service';
-import { prepareSignatureBody } from '../../utils/web3';
-import { KycSignedAddressDto } from '../kyc/kyc.dto';
-import { ethers } from 'ethers';
+import {
+  generateNonce,
+  verifySignature,
+  prepareSignatureBody,
+} from '../../utils/web3';
+import { Web3Service } from '../web3/web3.service';
+import { SiteKeyEntity } from './site-key.entity';
+import { SiteKeyRepository } from './site-key.repository';
+import { RegisterAddressRequestDto } from './user.dto';
+import { UserEntity } from './user.entity';
 import {
   UserError,
   UserErrorMessage,
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from './user.error';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
@@ -41,7 +42,6 @@ export class UserService {
     private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly hcaptchaConfigService: HCaptchaConfigService,
-    private readonly networkConfigService: NetworkConfigService,
   ) {}
 
   static checkPasswordMatchesHash(
@@ -149,7 +149,7 @@ export class UserService {
   public async registerAddress(
     user: UserEntity,
     data: RegisterAddressRequestDto,
-  ): Promise<KycSignedAddressDto> {
+  ): Promise<void> {
     const lowercasedAddress = data.address.toLocaleLowerCase();
 
     if (user.evmAddress) {
@@ -169,7 +169,7 @@ export class UserService {
     // Prepare signed data and verify the signature
     const signedData = prepareSignatureBody({
       from: lowercasedAddress,
-      to: this.web3Service.getOperatorAddress(),
+      to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.REGISTER_ADDRESS,
     });
     const verified = verifySignature(signedData, data.signature, [
@@ -182,15 +182,6 @@ export class UserService {
 
     user.evmAddress = lowercasedAddress;
     await this.userRepository.updateOne(user);
-
-    const signature = await this.web3Service
-      .getSigner(this.networkConfigService.networks[0].chainId)
-      .signMessage(lowercasedAddress);
-
-    return {
-      key: `KYC-${this.web3Service.getOperatorAddress()}`,
-      value: signature,
-    };
   }
 
   public async enableOperator(
@@ -199,7 +190,7 @@ export class UserService {
   ): Promise<void> {
     const signedData = prepareSignatureBody({
       from: user.evmAddress,
-      to: this.web3Service.getOperatorAddress(),
+      to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.ENABLE_OPERATOR,
     });
 
@@ -209,16 +200,7 @@ export class UserService {
       throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
     }
 
-    let chainId: ChainId;
-    const currentWeb3Env = this.web3ConfigService.env;
-    if (currentWeb3Env === Web3Env.MAINNET) {
-      chainId = ChainId.POLYGON;
-    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
-      chainId = ChainId.LOCALHOST;
-    } else {
-      chainId = ChainId.POLYGON_AMOY;
-    }
-
+    const chainId = this.web3ConfigService.reputationNetworkChainId;
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
 
@@ -240,7 +222,7 @@ export class UserService {
   ): Promise<void> {
     const signedData = prepareSignatureBody({
       from: user.evmAddress,
-      to: this.web3Service.getOperatorAddress(),
+      to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.DISABLE_OPERATOR,
     });
 
@@ -250,18 +232,8 @@ export class UserService {
       throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
     }
 
-    let chainId: ChainId;
-    const currentWeb3Env = this.web3ConfigService.env;
-    if (currentWeb3Env === Web3Env.MAINNET) {
-      chainId = ChainId.POLYGON;
-    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
-      chainId = ChainId.LOCALHOST;
-    } else {
-      chainId = ChainId.POLYGON_AMOY;
-    }
-
+    const chainId = this.web3ConfigService.reputationNetworkChainId;
     const signer = this.web3Service.getSigner(chainId);
-
     const kvstore = await KVStoreClient.build(signer);
 
     const status = await KVStoreUtils.get(

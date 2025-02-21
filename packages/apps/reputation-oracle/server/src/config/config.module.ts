@@ -10,7 +10,6 @@ import { EmailConfigService } from './email-config.service';
 import { Web3ConfigService } from './web3-config.service';
 import { ReputationConfigService } from './reputation-config.service';
 import { KycConfigService } from './kyc-config.service';
-import { NetworkConfigService } from './network-config.service';
 import { HCaptchaConfigService } from './hcaptcha-config.service';
 
 @Global()
@@ -26,7 +25,6 @@ import { HCaptchaConfigService } from './hcaptcha-config.service';
     EmailConfigService,
     KycConfigService,
     PGPConfigService,
-    NetworkConfigService,
     HCaptchaConfigService,
   ],
   exports: [
@@ -40,7 +38,6 @@ import { HCaptchaConfigService } from './hcaptcha-config.service';
     EmailConfigService,
     KycConfigService,
     PGPConfigService,
-    NetworkConfigService,
     HCaptchaConfigService,
   ],
 })

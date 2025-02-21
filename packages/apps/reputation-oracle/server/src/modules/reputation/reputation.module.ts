@@ -1,8 +1,8 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { ReputationService } from './reputation.service';
-import { HttpModule } from '@nestjs/axios';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationController } from './reputation.controller';
 import { StorageModule } from '../storage/storage.module';
