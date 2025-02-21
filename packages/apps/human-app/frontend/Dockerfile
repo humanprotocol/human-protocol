@@ -1,5 +1,5 @@
 # Using bullseye instead of slim because it needs Python and build tools for node-gyp
-FROM node:18-bullseye
+FROM node:22.14-bullseye
 ARG APP_PATH=packages/apps/human-app/frontend
 
 # Create app directory
