@@ -12,7 +12,7 @@ interface RegistrationResult {
 
 interface NavigationConfig {
   oracle: Oracle;
-  siteKey?: string | null | undefined;
+  siteKey: string | null | undefined;
   navigate: NavigateFunction;
   registrationData?: RegistrationResult;
 }
