@@ -246,7 +246,6 @@ def handle_transaction(
         raise exception(
             "You must add SignAndSendRawMiddlewareBuilder middleware to Web3 instance"
         )
-    # Removed check for the middleware since there is no pretty way of validating it in web3 v7
     try:
         if tx_options and tx_options.get("gas") is None:
             tx_options["gas"] = tx.estimate_gas()
