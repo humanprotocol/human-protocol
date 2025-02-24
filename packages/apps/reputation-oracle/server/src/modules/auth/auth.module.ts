@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
+import { AuthConfigService } from '../../config/auth-config.service';
+import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
+import { EmailModule } from '../email/module';
 import { UserModule } from '../user/user.module';
+import { UserRepository } from '../user/user.repository';
+import { Web3Module } from '../web3/web3.module';
+
 import { JwtHttpStrategy } from './strategy';
 import { AuthService } from './auth.service';
 import { AuthJwtController } from './auth.controller';
 import { TokenRepository } from './token.repository';
-import { UserRepository } from '../user/user.repository';
-import { Web3Module } from '../web3/web3.module';
-import { AuthConfigService } from '../../config/auth-config.service';
-import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
-import { EmailModule } from '../email/module';
 
 @Module({
   imports: [

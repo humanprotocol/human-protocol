@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+
 import { Web3Service } from './web3.service';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [],
   providers: [Web3Service],
   exports: [Web3Service],
 })

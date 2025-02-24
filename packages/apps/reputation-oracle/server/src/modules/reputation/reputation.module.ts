@@ -1,15 +1,15 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+
+import { StorageModule } from '../storage/storage.module';
+import { Web3Module } from '../web3/web3.module';
 
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationController } from './reputation.controller';
-import { StorageModule } from '../storage/storage.module';
-import { Web3Module } from '../web3/web3.module';
 
 @Module({
-  imports: [ConfigModule, HttpModule, StorageModule, Web3Module],
+  imports: [HttpModule, StorageModule, Web3Module],
   controllers: [ReputationController],
   providers: [ReputationService, ReputationRepository],
   exports: [ReputationService],
