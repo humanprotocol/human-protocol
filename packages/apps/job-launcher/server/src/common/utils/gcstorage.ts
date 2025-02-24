@@ -1,39 +1,69 @@
 import { GS_PROTOCOL } from '../constants';
 import { ErrorBucket } from '../constants/errors';
 
-const GCS_HTTP_REGEX =
-  /^https:\/\/([a-zA-Z0-9\-\.]+)\.storage\.googleapis\.com\/?(.*)$/;
+// Step 1: Define your regular expressions, bucket validation, and URL validation helpers
 
-const GCS_GS_REGEX = /^gs:\/\/([a-zA-Z0-9\-\.]+)\/?(.*)$/;
+/**
+ * Regex for GCS URL in subdomain format: https://<bucket>.storage.googleapis.com/<object_path>
+ */
+export const GCS_HTTP_REGEX_SUBDOMAIN =
+  /^https:\/\/([a-zA-Z0-9\-.]+)\.storage\.googleapis\.com\/?(.*)$/;
+
+/**
+ * Regex for GCS URL in path-based format: https://storage.googleapis.com/<bucket>/<object_path>
+ */
+export const GCS_HTTP_REGEX_PATH_BASED =
+  /^https:\/\/storage\.googleapis\.com\/([^/]+)\/?(.*)$/;
+
+/**
+ * Regex for GCS URI format: gs://<bucket>/<object_path>
+ */
+export const GCS_GS_REGEX = /^gs:\/\/([a-zA-Z0-9\-.]+)\/?(.*)$/;
+
+/**
+ * Regex that ensures the bucket name follows Google Cloud Storage (GCS) naming rules:
+ * - Must be between 3 and 63 characters long.
+ * - Can contain lowercase letters, numbers, dashes (`-`), and dots (`.`).
+ * - Cannot begin or end with a dash (`-`).
+ * - Cannot have consecutive periods (`..`).
+ * - Cannot resemble an IP address (e.g., "192.168.1.1").
+ */
 const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
+
+// Step 2: Implement the main validation function
 
 /**
  * Validates if a given URL is a valid Google Cloud Storage URL.
  *
  * Supports:
- * - HTTP/HTTPS: https://<bucket>.storage.googleapis.com[/<object_path>]
- * - GCS URI: gs://<bucket>[/<object_path>]
+ * - Subdomain format: https://<bucket>.storage.googleapis.com[/<object_path>]
+ * - Path-based format: https://storage.googleapis.com/<bucket>[/<object_path>]
+ * - GCS URI format: gs://<bucket>[/<object_path>]
  *
  * @param url - The URL to validate.
  * @returns {boolean} - Returns true if the URL is valid, otherwise false.
  */
 export function isGCSBucketUrl(url: string): boolean {
+  // 1) Quickly check if it's a valid URL in general
   if (!isValidUrl(url)) {
     return false;
   }
 
-  const httpMatch = url.match(GCS_HTTP_REGEX);
+  // 2) Try subdomain-based regex first
+  let httpMatch = url.match(GCS_HTTP_REGEX_SUBDOMAIN);
+
+  // 3) If that fails, try path-based regex
+  if (!httpMatch) {
+    httpMatch = url.match(GCS_HTTP_REGEX_PATH_BASED);
+  }
+
+  // 4) Also check if it matches the gs:// scheme
   const gsMatch = url.match(GCS_GS_REGEX);
 
-  /**
-   * Ensures the bucket name follows Google Cloud Storage (GCS) naming rules (https://cloud.google.com/storage/docs/buckets#naming):
-   * - Must be between 3 and 63 characters long.
-   * - Can contain lowercase letters, numbers, dashes (`-`), and dots (`.`).
-   * - Cannot begin or end with a dash (`-`).
-   * - Cannot have consecutive periods (`..`).
-   * - Cannot resemble an IP address (e.g., "192.168.1.1").
-   */
+  // 5) If any HTTP or GS regex matched
   if (httpMatch || gsMatch) {
+    // For HTTP matches, the bucket is captured in group [1].
+    // For GS matches, it's also in group [1].
     const bucketName = httpMatch ? httpMatch[1] : gsMatch ? gsMatch[1] : null;
 
     if (!bucketName || !isValidBucketName(bucketName)) {
@@ -88,10 +118,24 @@ export function convertToGCSPath(url: string): string {
     throw new Error(ErrorBucket.InvalidGCSUrl);
   }
 
-  const match = url.match(GCS_HTTP_REGEX);
+  let match = url.match(GCS_HTTP_REGEX_SUBDOMAIN);
+  let bucketName: string | null = null;
+  let objectPath: string | null = null;
 
-  const bucketName = match![1];
-  const objectPath = match![2] || '';
+  if (match) {
+    bucketName = match[1];
+    objectPath = match[2] || '';
+  } else {
+    match = url.match(GCS_HTTP_REGEX_PATH_BASED);
+    if (match) {
+      bucketName = match[1];
+      objectPath = match[2] || '';
+    }
+  }
+
+  if (!bucketName) {
+    throw new Error(ErrorBucket.InvalidGCSUrl);
+  }
 
   return `gs://${bucketName}/${objectPath}`;
 }
