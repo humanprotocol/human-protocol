@@ -8,7 +8,7 @@ const RegisteredOraclesSuccessResponseSchema = z.object({
   oracle_addresses: z.array(z.string()),
 });
 
-export async function getRegistrationInExchangeOracles() {
+async function getRegistrationInExchangeOracles() {
   return apiClient(apiPaths.worker.registrationInExchangeOracle.path, {
     authenticated: true,
     successSchema: RegisteredOraclesSuccessResponseSchema,
@@ -16,7 +16,7 @@ export async function getRegistrationInExchangeOracles() {
   });
 }
 
-export function useGetRegistrationInExchangeOracles() {
+export function useGetRegistrationDataInOracles() {
   return useQuery({
     queryFn: () => getRegistrationInExchangeOracles(),
     queryKey: ['getRegistrationInExchangeOracles'],
