@@ -6,9 +6,7 @@
 
 # graphql/types
 
-## Index
-
-### Type Aliases
+## Type Aliases
 
 - [DailyEscrowData](type-aliases/DailyEscrowData.md)
 - [DailyHMTData](type-aliases/DailyHMTData.md)

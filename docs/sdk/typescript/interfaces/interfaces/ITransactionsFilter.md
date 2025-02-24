@@ -6,6 +6,8 @@
 
 # Interface: ITransactionsFilter
 
+Defined in: [interfaces.ts:142](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L142)
+
 ## Extends
 
 - [`IPagination`](IPagination.md)
@@ -16,9 +18,7 @@
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-#### Defined in
-
-[interfaces.ts:147](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L147)
+Defined in: [interfaces.ts:143](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L143)
 
 ***
 
@@ -26,9 +26,7 @@
 
 > `optional` **endBlock**: `number`
 
-#### Defined in
-
-[interfaces.ts:149](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L149)
+Defined in: [interfaces.ts:145](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L145)
 
 ***
 
@@ -36,9 +34,7 @@
 
 > `optional` **endDate**: `Date`
 
-#### Defined in
-
-[interfaces.ts:151](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L151)
+Defined in: [interfaces.ts:147](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L147)
 
 ***
 
@@ -46,13 +42,11 @@
 
 > `optional` **first**: `number`
 
+Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`first`](IPagination.md#first)
-
-#### Defined in
-
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -60,9 +54,7 @@
 
 > `optional` **fromAddress**: `string`
 
-#### Defined in
-
-[interfaces.ts:152](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L152)
+Defined in: [interfaces.ts:148](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L148)
 
 ***
 
@@ -70,13 +62,11 @@
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
+Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`orderDirection`](IPagination.md#orderdirection)
-
-#### Defined in
-
-[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
 
 ***
 
@@ -84,13 +74,11 @@
 
 > `optional` **skip**: `number`
 
+Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`skip`](IPagination.md#skip)
-
-#### Defined in
-
-[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
 
 ***
 
@@ -98,9 +86,7 @@
 
 > `optional` **startBlock**: `number`
 
-#### Defined in
-
-[interfaces.ts:148](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L148)
+Defined in: [interfaces.ts:144](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L144)
 
 ***
 
@@ -108,9 +94,7 @@
 
 > `optional` **startDate**: `Date`
 
-#### Defined in
-
-[interfaces.ts:150](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L150)
+Defined in: [interfaces.ts:146](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L146)
 
 ***
 
@@ -118,6 +102,4 @@
 
 > `optional` **toAddress**: `string`
 
-#### Defined in
-
-[interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+Defined in: [interfaces.ts:149](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L149)

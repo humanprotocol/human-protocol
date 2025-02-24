@@ -147,23 +147,23 @@ describe('Staking', () => {
     );
     assert.fieldEquals('StakeDepositedEvent', id2, 'amount', '200');
 
-    // Leader statistics
+    // Operator statistics
     assert.fieldEquals(
-      'LeaderStatistics',
+      'OperatorStatistics',
       STATISTICS_ENTITY_ID.toHex(),
-      'leaders',
+      'operators',
       '2'
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountStaked',
       '100'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountStaked',
       '200'
@@ -284,48 +284,48 @@ describe('Staking', () => {
     assert.fieldEquals('StakeLockedEvent', id2, 'amount', '100');
     assert.fieldEquals('StakeLockedEvent', id2, 'lockedUntilTimestamp', '31');
 
-    // Leader statistics
+    // Operator statistics
     assert.fieldEquals(
-      'LeaderStatistics',
+      'OperatorStatistics',
       STATISTICS_ENTITY_ID.toHex(),
-      'leaders',
+      'operators',
       '2'
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountStaked',
       '100'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountLocked',
       '50'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'lockedUntilTimestamp',
       '30'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountStaked',
       '200'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountLocked',
       '100'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '31'
@@ -442,60 +442,60 @@ describe('Staking', () => {
     );
     assert.fieldEquals('StakeWithdrawnEvent', id2, 'amount', '100');
 
-    // Leader statistics
+    // Operator statistics
     assert.fieldEquals(
-      'LeaderStatistics',
+      'OperatorStatistics',
       STATISTICS_ENTITY_ID.toHex(),
-      'leaders',
+      'operators',
       '2'
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountStaked',
       '70'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountLocked',
       '20'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'lockedUntilTimestamp',
       '30'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountWithdrawn',
       '30'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountStaked',
       '100'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountLocked',
       '0'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '0'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountWithdrawn',
       '100'
@@ -640,72 +640,72 @@ describe('Staking', () => {
       data2.params.slashRequester.toHex()
     );
 
-    // Leader statistics
+    // Operator statistics
     assert.fieldEquals(
-      'LeaderStatistics',
+      'OperatorStatistics',
       STATISTICS_ENTITY_ID.toHex(),
-      'leaders',
+      'operators',
       '2'
     );
 
-    // Leader
+    // Operator
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountStaked',
       '60'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountLocked',
       '20'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'lockedUntilTimestamp',
       '30'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountWithdrawn',
       '30'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data1.params.staker.toHex(),
       'amountSlashed',
       '10'
     );
 
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountStaked',
       '90'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountLocked',
       '0'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'lockedUntilTimestamp',
       '0'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountWithdrawn',
       '100'
     );
     assert.fieldEquals(
-      'Leader',
+      'Operator',
       data2.params.staker.toHex(),
       'amountSlashed',
       '10'

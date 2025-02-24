@@ -6,8 +6,6 @@
 
 # statistics
 
-## Index
-
-### Classes
+## Classes
 
 - [StatisticsClient](classes/StatisticsClient.md)

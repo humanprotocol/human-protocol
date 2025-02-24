@@ -20,11 +20,11 @@ import {
 import {
   DetailsTransactionsPaginationDto,
   DetailsEscrowsPaginationDto,
-  LeadersPaginationDto,
+  OperatorsPaginationDto,
 } from './dto/details-pagination.dto';
 import { WalletDto } from './dto/wallet.dto';
 import { EscrowDto, EscrowPaginationDto } from './dto/escrow.dto';
-import { LeaderDto } from './dto/leader.dto';
+import { OperatorDto } from './dto/operator.dto';
 import { TransactionPaginationDto } from './dto/transaction.dto';
 
 @ApiTags('Details')
@@ -33,22 +33,22 @@ import { TransactionPaginationDto } from './dto/transaction.dto';
 export class DetailsController {
   constructor(private readonly detailsService: DetailsService) {}
 
-  @Get('/leaders')
+  @Get('/operators')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get leaders',
-    description: 'Returns leaders for the given filters.',
+    summary: 'Get operators',
+    description: 'Returns operators for the given filters.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Leaders retrieved successfully',
-    type: LeaderDto,
+    description: 'Operators retrieved successfully',
+    type: OperatorDto,
     isArray: true,
   })
-  public async leaders(
-    @Query() query: LeadersPaginationDto,
-  ): Promise<LeaderDto[]> {
-    return this.detailsService.getLeaders(query.chainId, {
+  public async operators(
+    @Query() query: OperatorsPaginationDto,
+  ): Promise<OperatorDto[]> {
+    return this.detailsService.getOperators(query.chainId, {
       orderBy: query.orderBy,
       orderDirection: query.orderDirection,
       first: query.first,
@@ -71,7 +71,7 @@ export class DetailsController {
     @Param('address', AddressValidationPipe) address: string,
     @Query('chainId') chainId: ChainId,
   ): Promise<DetailsResponseDto> {
-    const details: WalletDto | EscrowDto | LeaderDto =
+    const details: WalletDto | EscrowDto | OperatorDto =
       await this.detailsService.getDetails(chainId, address);
     if (details instanceof WalletDto) {
       const response: DetailsResponseDto = {
@@ -85,9 +85,9 @@ export class DetailsController {
       };
       return response;
     }
-    if (details instanceof LeaderDto) {
+    if (details instanceof OperatorDto) {
       const response: DetailsResponseDto = {
-        leader: details,
+        operator: details,
       };
       return response;
     }

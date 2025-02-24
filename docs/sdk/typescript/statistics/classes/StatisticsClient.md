@@ -6,6 +6,8 @@
 
 # Class: StatisticsClient
 
+Defined in: [statistics.ts:58](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L58)
+
 ## Introduction
 
 This client enables obtaining statistical information from the subgraph.
@@ -43,6 +45,8 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_AMOY]);
 
 > **new StatisticsClient**(`networkData`): [`StatisticsClient`](StatisticsClient.md)
 
+Defined in: [statistics.ts:67](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L67)
+
 **StatisticsClient constructor**
 
 #### Parameters
@@ -57,19 +61,13 @@ The network information required to connect to the Statistics contract
 
 [`StatisticsClient`](StatisticsClient.md)
 
-#### Defined in
-
-[statistics.ts:67](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L67)
-
 ## Properties
 
 ### networkData
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-#### Defined in
-
-[statistics.ts:59](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L59)
+Defined in: [statistics.ts:59](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L59)
 
 ***
 
@@ -77,15 +75,15 @@ The network information required to connect to the Statistics contract
 
 > **subgraphUrl**: `string`
 
-#### Defined in
-
-[statistics.ts:60](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L60)
+Defined in: [statistics.ts:60](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L60)
 
 ## Methods
 
 ### getEscrowStatistics()
 
 > **getEscrowStatistics**(`filter`): `Promise`\<[`EscrowStatistics`](../../graphql/types/type-aliases/EscrowStatistics.md)\>
+
+Defined in: [statistics.ts:120](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L120)
 
 This function returns the statistical data of escrows.
 
@@ -145,15 +143,13 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 });
 ```
 
-#### Defined in
-
-[statistics.ts:120](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L120)
-
 ***
 
 ### getHMTDailyData()
 
 > **getHMTDailyData**(`filter`): `Promise`\<[`DailyHMTData`](../../graphql/types/type-aliases/DailyHMTData.md)[]\>
+
+Defined in: [statistics.ts:478](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L478)
 
 This function returns the statistical data of HMToken day by day.
 
@@ -212,15 +208,13 @@ const hmtStatisticsRange = await statisticsClient.getHMTStatistics({
 console.log('HMT statistics from 5/8 - 6/8:', hmtStatisticsRange);
 ```
 
-#### Defined in
-
-[statistics.ts:478](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L478)
-
 ***
 
 ### getHMTHolders()
 
 > **getHMTHolders**(`params`): `Promise`\<[`HMTHolder`](../../graphql/types/type-aliases/HMTHolder.md)[]\>
+
+Defined in: [statistics.ts:407](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L407)
 
 This function returns the holders of the HMToken with optional filters and ordering.
 
@@ -257,15 +251,13 @@ console.log('HMT holders:', hmtHolders.map((h) => ({
 })));
 ```
 
-#### Defined in
-
-[statistics.ts:407](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L407)
-
 ***
 
 ### getHMTStatistics()
 
 > **getHMTStatistics**(): `Promise`\<[`HMTStatistics`](../../graphql/types/type-aliases/HMTStatistics.md)\>
+
+Defined in: [statistics.ts:364](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L364)
 
 This function returns the statistical data of HMToken.
 
@@ -298,15 +290,13 @@ console.log('HMT statistics:', {
 });
 ```
 
-#### Defined in
-
-[statistics.ts:364](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L364)
-
 ***
 
 ### getPaymentStatistics()
 
 > **getPaymentStatistics**(`filter`): `Promise`\<[`PaymentStatistics`](../../graphql/types/type-aliases/PaymentStatistics.md)\>
+
+Defined in: [statistics.ts:300](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L300)
 
 This function returns the statistical data of payments.
 
@@ -384,15 +374,13 @@ console.log(
 );
 ```
 
-#### Defined in
-
-[statistics.ts:300](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L300)
-
 ***
 
 ### getWorkerStatistics()
 
 > **getWorkerStatistics**(`filter`): `Promise`\<[`WorkerStatistics`](../../graphql/types/type-aliases/WorkerStatistics.md)\>
+
+Defined in: [statistics.ts:204](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L204)
 
 This function returns the statistical data of workers.
 
@@ -446,7 +434,3 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
    to: new Date('2021-04-30'),
 });
 ```
-
-#### Defined in
-
-[statistics.ts:204](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L204)

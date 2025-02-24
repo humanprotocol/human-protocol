@@ -6,8 +6,6 @@
 
 # storage
 
-## Index
+## Classes
 
-### Classes
-
-- [StorageClient](classes/StorageClient.md)
+- [~~StorageClient~~](classes/StorageClient.md)

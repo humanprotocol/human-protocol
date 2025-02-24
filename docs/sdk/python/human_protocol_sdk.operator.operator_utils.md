@@ -6,24 +6,24 @@ Utility class for operator-related operations.
 
 ```python
 from human_protocol_sdk.constants import ChainId
-from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
+from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 
 print(
-    OperatorUtils.get_leaders(
-        LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+    OperatorUtils.get_operators(
+        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
     )
 )
 ```
 
 ## Module
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
+### *class* human_protocol_sdk.operator.operator_utils.OperatorData(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
 Bases: `object`
 
 #### \_\_init_\_(chain_id, id, address, amount_staked, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reward, amount_jobs_processed, role=None, fee=None, public_key=None, webhook_url=None, website=None, url=None, job_types=None, registration_needed=None, registration_instructions=None, reputation_networks=None, name=None, category=None)
 
-Initializes a LeaderData instance.
+Initializes a OperatorData instance.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain Identifier
@@ -49,15 +49,15 @@ Initializes a LeaderData instance.
   * **name** (`Optional`[`str`]) – Name
   * **category** (`Optional`[`str`]) – Category
 
-### *class* human_protocol_sdk.operator.operator_utils.LeaderFilter(chain_id, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
+### *class* human_protocol_sdk.operator.operator_utils.OperatorFilter(chain_id, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 
 Bases: `object`
 
-A class used to filter leaders.
+A class used to filter operators.
 
 #### \_\_init_\_(chain_id, roles=[], min_amount_staked=None, order_by=None, order_direction=OrderDirection.DESC, first=10, skip=0)
 
-Initializes a LeaderFilter instance.
+Initializes a OperatorFilter instance.
 
 * **Parameters:**
   * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Chain ID to request data
@@ -68,69 +68,53 @@ Initializes a LeaderFilter instance.
   * **first** (`int`) – Number of items per page
   * **skip** (`int`) – Number of items to skip (for pagination)
 
-### *class* human_protocol_sdk.operator.operator_utils.Operator(address, role, url='', job_types=[], registration_needed=None, registration_instructions=None)
-
-Bases: `object`
-
-#### \_\_init_\_(address, role, url='', job_types=[], registration_needed=None, registration_instructions=None)
-
-Initializes an Operator instance.
-
-* **Parameters:**
-  * **address** (`str`) – Operator address
-  * **role** (`str`) – Role of the operator
-  * **url** (`str`) – URL of the operator
-  * **job_types** (`List`[`str`]) – List of job types
-  * **registration_needed** (`Optional`[`bool`]) – Whether registration is needed
-  * **registration_instructions** (`Optional`[`str`]) – Registration instructions
-
 ### *class* human_protocol_sdk.operator.operator_utils.OperatorUtils
 
 Bases: `object`
 
 A utility class that provides additional operator-related functionalities.
 
-#### *static* get_leader(chain_id, leader_address)
+#### *static* get_operator(chain_id, operator_address)
 
-Gets the leader details.
+Gets the operator details.
 
 * **Parameters:**
-  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the leader exists
-  * **leader_address** (`str`) – Address of the leader
+  * **chain_id** ([`ChainId`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.ChainId)) – Network in which the operator exists
+  * **operator_address** (`str`) – Address of the operator
 * **Return type:**
-  `Optional`[[`LeaderData`](#human_protocol_sdk.operator.operator_utils.LeaderData)]
+  `Optional`[[`OperatorData`](#human_protocol_sdk.operator.operator_utils.OperatorData)]
 * **Returns:**
-  Leader data if exists, otherwise None
+  Operator data if exists, otherwise None
 * **Example:**
   ```python
   from human_protocol_sdk.constants import ChainId
   from human_protocol_sdk.operator import OperatorUtils
 
   chain_id = ChainId.POLYGON_AMOY
-  leader_address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+  operator_address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
-  leader_data = OperatorUtils.get_leader(chain_id, leader_address)
-  print(leader_data)
+  operator_data = OperatorUtils.get_operator(chain_id, operator_address)
+  print(operator_data)
   ```
 
-#### *static* get_leaders(filter)
+#### *static* get_operators(filter)
 
-Get leaders data of the protocol.
+Get operators data of the protocol.
 
 * **Parameters:**
-  **filter** ([`LeaderFilter`](#human_protocol_sdk.operator.operator_utils.LeaderFilter)) – Leader filter
+  **filter** ([`OperatorFilter`](#human_protocol_sdk.operator.operator_utils.OperatorFilter)) – Operator filter
 * **Return type:**
-  `List`[[`LeaderData`](#human_protocol_sdk.operator.operator_utils.LeaderData)]
+  `List`[[`OperatorData`](#human_protocol_sdk.operator.operator_utils.OperatorData)]
 * **Returns:**
-  List of leaders data
+  List of operators data
 * **Example:**
   ```python
   from human_protocol_sdk.constants import ChainId
-  from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
+  from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 
   print(
-      OperatorUtils.get_leaders(
-          LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+      OperatorUtils.get_operators(
+          OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
       )
   )
   ```
@@ -144,7 +128,7 @@ Get the reputation network operators of the specified address.
   * **address** (`str`) – Address of the reputation oracle
   * **role** (`Optional`[`str`]) – (Optional) Role of the operator
 * **Return type:**
-  `List`[[`Operator`](#human_protocol_sdk.operator.operator_utils.Operator)]
+  `List`[[`OperatorData`](#human_protocol_sdk.operator.operator_utils.OperatorData)]
 * **Returns:**
   Returns an array of operator details
 * **Example:**

@@ -6,9 +6,7 @@
 
 # kvstore
 
-## Index
-
-### Classes
+## Classes
 
 - [KVStoreClient](classes/KVStoreClient.md)
 - [KVStoreUtils](classes/KVStoreUtils.md)
