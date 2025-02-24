@@ -19,8 +19,8 @@ import { JobRequestType } from '../../common/enums';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
 import { PayoutService } from './payout.service';
-import { CvatManifestDto } from '../../common/dto/manifest';
-import { CvatAnnotationMeta } from '../../common/dto/result';
+import { CvatManifest } from '../../common/interfaces/manifest';
+import { CvatAnnotationMeta } from '../../common/interfaces/job-result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
 
@@ -120,7 +120,7 @@ describe('PayoutService', () => {
     });
 
     it('should successfully save results for CVAT', async () => {
-      const manifest: CvatManifestDto = {
+      const manifest: CvatManifest = {
         data: {
           data_url: MOCK_FILE_URL,
         },
@@ -232,7 +232,7 @@ describe('PayoutService', () => {
     });
 
     it('should successfully calculate payouts for CVAT', async () => {
-      const manifest: CvatManifestDto = {
+      const manifest: CvatManifest = {
         data: {
           data_url: MOCK_FILE_URL,
         },

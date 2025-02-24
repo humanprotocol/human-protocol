@@ -10,7 +10,7 @@ import {
 } from '../../../common/constants';
 import { UserStatus } from '../../../common/enums/user';
 import { UserRepository } from '../../user/user.repository';
-import { AuthConfigService } from '../../../common/config/auth-config.service';
+import { AuthConfigService } from '../../../config/auth-config.service';
 import { TokenRepository } from '../token.repository';
 import { TokenType } from '../token.entity';
 

@@ -14,7 +14,7 @@ as well as some middlewares.
 ```python
 from eth_typing import URI
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.auto import load_provider_from_uri
 
 from human_protocol_sdk.staking import StakingClient
@@ -23,9 +23,10 @@ def get_w3_with_priv_key(priv_key: str):
     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
     gas_payer = w3.eth.account.from_key(priv_key)
     w3.eth.default_account = gas_payer.address
-    w3.middleware_onion.add(
-        construct_sign_and_send_raw_middleware(gas_payer),
-        "construct_sign_and_send_raw_middleware",
+    w3.middleware_onion.inject(
+        SignAndSendRawMiddlewareBuilder.build(priv_key),
+        'SignAndSendRawMiddlewareBuilder',
+        layer=0,
     )
     return (w3, gas_payer)
 
@@ -78,7 +79,7 @@ Approves HMT token for Staking.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.staking import StakingClient
@@ -87,9 +88,10 @@ Approves HMT token for Staking.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -149,7 +151,7 @@ Slashes HMT token.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.staking import StakingClient
@@ -158,9 +160,10 @@ Slashes HMT token.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -195,7 +198,7 @@ Stakes HMT token.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.staking import StakingClient
@@ -204,9 +207,10 @@ Stakes HMT token.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -236,7 +240,7 @@ Unstakes HMT token.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.staking import StakingClient
@@ -245,9 +249,10 @@ Unstakes HMT token.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -274,7 +279,7 @@ Withdraws HMT token.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.staking import StakingClient
@@ -283,9 +288,10 @@ Withdraws HMT token.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 

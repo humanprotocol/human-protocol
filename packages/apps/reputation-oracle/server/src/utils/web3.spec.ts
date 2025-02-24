@@ -1,0 +1,95 @@
+import { verifySignature, recoverSignerAddress, signMessage } from './web3';
+import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../test/constants';
+
+describe('Web3 utilities', () => {
+  describe('verifySignature', () => {
+    it('should return true for valid signature', async () => {
+      const message = 'Hello, this is a signed message!';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      const result = verifySignature(message, signature, [MOCK_ADDRESS]);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false for signature not verified', async () => {
+      const message = 'Hello, this is a signed message!';
+
+      const invalidSignature = await signMessage(message, MOCK_PRIVATE_KEY);
+      const invalidAddress = '0x1234567890123456789012345678901234567892';
+
+      const result = verifySignature(message, invalidSignature, [
+        invalidAddress,
+      ]);
+      expect(result).toBe(false);
+    });
+
+    it('should return false in case of invalid signature', () => {
+      const message = 'Hello, this is a signed message!';
+      const invalidSignature = '0xInvalidSignature';
+
+      const result = verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('recoverSignerAddress', () => {
+    it('should recover the correct signer', async () => {
+      const message = 'value';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      const result = recoverSignerAddress(message, signature);
+
+      expect(result).toBe(MOCK_ADDRESS);
+    });
+
+    it('should throw conflict exception for invalid signature', () => {
+      const message = 'Hello, this is a signed message!';
+      const invalidSignature = '0xInvalidSignature';
+
+      const signer = recoverSignerAddress(message, invalidSignature);
+      expect(signer).toBe(null);
+    });
+
+    it('should stringify message object if it is not already a string', async () => {
+      const message = { key: 'value' };
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      const recoveredAddress = recoverSignerAddress(message, signature);
+
+      expect(recoveredAddress).toBe(MOCK_ADDRESS);
+    });
+
+    it('should not stringify message if it is already a string', async () => {
+      const message = 'valid message';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      const recoveredAddress = recoverSignerAddress(message, signature);
+
+      expect(recoveredAddress).toBe(MOCK_ADDRESS);
+    });
+  });
+
+  describe('signMessage', () => {
+    it('should return a valid signature', async () => {
+      const message = 'Hello, this is a test message';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      expect(signature).toBeDefined();
+    });
+
+    it('should stringify message object if it is not already a string', async () => {
+      const message = { key: 'value' };
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      expect(signature).toBeDefined();
+    });
+
+    it('should not stringify message if it is already a string', async () => {
+      const message = 'valid message';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+
+      expect(signature).toBeDefined();
+    });
+  });
+});

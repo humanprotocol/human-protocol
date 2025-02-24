@@ -12,16 +12,17 @@ import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { RequestWithUser } from '../../common/types';
 import { JwtAuthGuard } from '../../common/guards';
 import { JobCvatDto, JobFortuneDto, JobQuickLaunchDto } from './job.dto';
-import { JobCurrency, JobRequestType } from '../../common/enums/job';
+import { EscrowFundToken, JobRequestType } from '../../common/enums/job';
 import {
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
 } from '../../../test/constants';
-import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
+import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ConfigService } from '@nestjs/config';
+import { PaymentCurrency } from '../../common/enums/payment';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -81,7 +82,9 @@ describe('JobController', () => {
         requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        fundAmount: 500,
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: 500,
+        escrowFundToken: EscrowFundToken.HMT,
       };
 
       mockMutexManagerService.runExclusive.mockImplementationOnce(
@@ -114,7 +117,9 @@ describe('JobController', () => {
         requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        fundAmount: 500,
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: 500,
+        escrowFundToken: EscrowFundToken.HMT,
       };
 
       mockMutexManagerService.runExclusive.mockRejectedValueOnce(
@@ -132,7 +137,9 @@ describe('JobController', () => {
         requestType: '', // Invalid input
         manifestUrl: '',
         manifestHash: '',
-        fundAmount: 500,
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: 500,
+        escrowFundToken: EscrowFundToken.HMT,
       };
 
       mockMutexManagerService.runExclusive.mockRejectedValueOnce(
@@ -150,7 +157,9 @@ describe('JobController', () => {
         requestType: 'type_a' as JobRequestType,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        fundAmount: 500,
+        paymentCurrency: PaymentCurrency.USD,
+        paymentAmount: 500,
+        escrowFundToken: EscrowFundToken.HMT,
       };
 
       mockMutexManagerService.runExclusive.mockRejectedValueOnce(
@@ -174,8 +183,9 @@ describe('JobController', () => {
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       submissionsRequired: 10,
-      fundAmount: 1000,
-      currency: 'USD' as JobCurrency,
+      paymentCurrency: PaymentCurrency.HMT,
+      paymentAmount: 500,
+      escrowFundToken: EscrowFundToken.HMT,
     };
 
     it('should create a fortune job successfully', async () => {
@@ -280,8 +290,9 @@ describe('JobController', () => {
       },
       userGuide: 'https://example.com/user-guide',
       type: JobRequestType.IMAGE_BOXES,
-      fundAmount: 1000,
-      currency: 'usd' as JobCurrency,
+      paymentCurrency: PaymentCurrency.HMT,
+      paymentAmount: 500,
+      escrowFundToken: EscrowFundToken.HMT,
     };
 
     it('should create a CVAT job successfully', async () => {

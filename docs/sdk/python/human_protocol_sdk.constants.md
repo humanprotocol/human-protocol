@@ -76,13 +76,13 @@ Bases: `Enum`
 
 Enum for roles.
 
-#### exchange_oracle *= 'Exchange Oracle'*
+#### exchange_oracle *= 'exchange_oracle'*
 
-#### job_launcher *= 'Job Launcher'*
+#### job_launcher *= 'job_launcher'*
 
-#### recording_oracle *= 'Recording Oracle'*
+#### recording_oracle *= 'recording_oracle'*
 
-#### reputation_oracle *= 'Reputation Oracle'*
+#### reputation_oracle *= 'reputation_oracle'*
 
 ### *class* human_protocol_sdk.constants.Status(value)
 

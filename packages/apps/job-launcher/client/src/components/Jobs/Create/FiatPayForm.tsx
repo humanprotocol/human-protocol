@@ -24,6 +24,7 @@ import AddCardModal from '../../../components/CreditCard/AddCardModal';
 import SelectCardModal from '../../../components/CreditCard/SelectCardModal';
 import { CardIcon } from '../../../components/Icons/CardIcon';
 import SuccessModal from '../../../components/SuccessModal';
+import { TokenSelect } from '../../../components/TokenSelect';
 import { CURRENCY } from '../../../constants/payment';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';
@@ -83,6 +84,7 @@ export const FiatPayForm = ({
   const [accountAmount] = useState(
     user?.balance ? Number(user?.balance?.amount) : 0,
   );
+  const [tokenAddress, setTokenAddress] = useState<string>();
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -181,6 +183,11 @@ export const FiatPayForm = ({
       return;
     }
 
+    if (!tokenAddress) {
+      onError('Please select a token.');
+      return;
+    }
+
     onStart();
     setIsLoading(true);
 
@@ -215,11 +222,18 @@ export const FiatPayForm = ({
         await createFortuneJob(
           chainId,
           fortuneRequest,
-          fundAmount,
           CURRENCY.usd,
+          fundAmount,
+          tokenAddress,
         );
       } else if (jobType === JobType.CVAT && cvatRequest) {
-        await createCvatJob(chainId, cvatRequest, fundAmount, CURRENCY.usd);
+        await createCvatJob(
+          chainId,
+          cvatRequest,
+          CURRENCY.usd,
+          fundAmount,
+          tokenAddress,
+        );
       } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
         await createHCaptchaJob(chainId, hCaptchaRequest);
       }
@@ -321,6 +335,13 @@ export const FiatPayForm = ({
                         Add Payment Method
                       </Button>
                     )}
+                    <TokenSelect
+                      chainId={jobRequest.chainId!}
+                      value={tokenAddress}
+                      onChange={(e) =>
+                        setTokenAddress(e.target.value as string)
+                      }
+                    />
                   </FormControl>
                 </Grid>
               </Grid>
@@ -348,7 +369,7 @@ export const FiatPayForm = ({
                   <Typography>Account Balance</Typography>
                   {user?.balance && (
                     <Typography color="text.secondary">
-                      {user?.balance?.amount?.toFixed(2)} USD
+                      ~ {user?.balance?.amount?.toFixed(2)} USD
                     </Typography>
                   )}
                 </Box>
@@ -427,7 +448,8 @@ export const FiatPayForm = ({
                 disabled={
                   !amount ||
                   (!payWithAccountBalance && !selectedCard) ||
-                  hasError
+                  hasError ||
+                  !tokenAddress
                 }
               >
                 Pay now

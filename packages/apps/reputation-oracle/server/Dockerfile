@@ -1,4 +1,4 @@
-FROM node:18-slim
+FROM node:22.14-slim
 ARG APP_PATH=packages/apps/reputation-oracle/server
 
 # Create app directory

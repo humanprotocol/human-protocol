@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 import { SignatureType } from '../../common/enums/web3';
-import { IsEnumCaseInsensitive } from '../../common/decorators';
+import { IsLowercasedEnum } from '../../common/validators';
 
 export class RegisterLabelerResponseDto {
   @ApiProperty({ name: 'site_key' })
@@ -61,7 +61,7 @@ export class PrepareSignatureDto {
   @ApiProperty({
     enum: SignatureType,
   })
-  @IsEnumCaseInsensitive(SignatureType)
+  @IsLowercasedEnum(SignatureType)
   public type: SignatureType;
 }
 

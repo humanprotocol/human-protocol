@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Provider, Wallet, ethers } from 'ethers';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
 
 type WalletWithProvider = Wallet & { provider: Provider };
 

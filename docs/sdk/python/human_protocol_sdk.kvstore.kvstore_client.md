@@ -14,7 +14,7 @@ as well as some middlewares.
 ```python
 from eth_typing import URI
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.auto import load_provider_from_uri
 
 from human_protocol_sdk.kvstore import KVStoreClient
@@ -23,9 +23,10 @@ def get_w3_with_priv_key(priv_key: str):
     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
     gas_payer = w3.eth.account.from_key(priv_key)
     w3.eth.default_account = gas_payer.address
-    w3.middleware_onion.add(
-        construct_sign_and_send_raw_middleware(gas_payer),
-        "construct_sign_and_send_raw_middleware",
+    w3.middleware_onion.inject(
+        SignAndSendRawMiddlewareBuilder.build(priv_key),
+        'SignAndSendRawMiddlewareBuilder',
+        layer=0,
     )
     return (w3, gas_payer)
 
@@ -78,7 +79,7 @@ Sets the value of a key-value pair in the contract.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.kvstore import KVStoreClient
@@ -87,9 +88,10 @@ Sets the value of a key-value pair in the contract.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -114,7 +116,7 @@ Sets multiple key-value pairs in the contract.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.kvstore import KVStoreClient
@@ -123,9 +125,10 @@ Sets multiple key-value pairs in the contract.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -155,7 +158,7 @@ Sets a URL value for the address that submits the transaction, and its hash.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.kvstore import KVStoreClient
@@ -164,9 +167,10 @@ Sets a URL value for the address that submits the transaction, and its hash.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 

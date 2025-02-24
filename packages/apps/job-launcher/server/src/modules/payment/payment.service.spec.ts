@@ -12,14 +12,13 @@ import {
   ErrorSignature,
 } from '../../common/constants/errors';
 import {
-  Currency,
   PaymentSortField,
   PaymentSource,
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
-  TokenId,
   VatType,
+  PaymentCurrency,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
@@ -58,6 +57,7 @@ describe('PaymentService', () => {
   let paymentService: PaymentService;
   let paymentRepository: PaymentRepository;
   let userRepository: UserRepository;
+  let rateService: RateService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -115,6 +115,7 @@ describe('PaymentService', () => {
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     paymentRepository = moduleRef.get(PaymentRepository);
     userRepository = moduleRef.get(UserRepository);
+    rateService = moduleRef.get(RateService);
 
     stripe = {
       customers: {
@@ -186,7 +187,7 @@ describe('PaymentService', () => {
     it('should create a fiat payment successfully', async () => {
       const dto = {
         amount: 100,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
         paymentMethodId: 'pm_123',
       };
 
@@ -222,7 +223,7 @@ describe('PaymentService', () => {
 
       expect(result).toEqual(paymentIntent.client_secret);
       expect(stripe.invoices.create).toHaveBeenCalledWith({
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
         customer: 'cus_123',
         auto_advance: false,
         payment_settings: {
@@ -244,7 +245,7 @@ describe('PaymentService', () => {
       0;
       const dto = {
         amount: 100,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
         paymentMethodId: 'pm_123',
       };
 
@@ -291,7 +292,7 @@ describe('PaymentService', () => {
       0;
       const dto = {
         amount: 100,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
         paymentMethodId: 'pm_123',
       };
 
@@ -349,7 +350,7 @@ describe('PaymentService', () => {
         status: StripePaymentStatus.SUCCEEDED,
         amount: 100,
         amount_received: 100,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -358,7 +359,7 @@ describe('PaymentService', () => {
         userId: userId,
         status: PaymentStatus.PENDING,
         amount: 1,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
       findOneMock.mockResolvedValue(paymentEntity);
 
@@ -377,7 +378,7 @@ describe('PaymentService', () => {
         status: StripePaymentStatus.CANCELED,
         amount: 100,
         amount_received: 0,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -386,7 +387,7 @@ describe('PaymentService', () => {
         userId: userId,
         status: PaymentStatus.PENDING,
         amount: 0,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
       findOneMock.mockResolvedValue(paymentEntity);
 
@@ -407,7 +408,7 @@ describe('PaymentService', () => {
         status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
         amount: 100,
         amount_received: 0,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -416,7 +417,7 @@ describe('PaymentService', () => {
         userId: userId,
         status: PaymentStatus.PENDING,
         amount: 0,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
       findOneMock.mockResolvedValue(paymentEntity);
 
@@ -437,7 +438,7 @@ describe('PaymentService', () => {
         status: 'unknown_status',
         amount: 100,
         amount_received: 0,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -446,7 +447,7 @@ describe('PaymentService', () => {
         userId: userId,
         status: PaymentStatus.PENDING,
         amount: 0,
-        currency: Currency.USD,
+        currency: PaymentCurrency.USD,
       };
       findOneMock.mockResolvedValue(paymentEntity);
 
@@ -510,8 +511,6 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const token = 'hmt';
-
       const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
@@ -535,7 +534,7 @@ describe('PaymentService', () => {
         transactionReceipt,
       );
 
-      mockTokenContract.symbol.mockResolvedValue(token);
+      mockTokenContract.symbol.mockResolvedValue(PaymentCurrency.HMT);
       findOneMock.mockResolvedValue(null);
       createPaymentMock.mockResolvedValue(true);
 
@@ -553,7 +552,7 @@ describe('PaymentService', () => {
         userId,
         source: PaymentSource.CRYPTO,
         type: PaymentType.DEPOSIT,
-        currency: TokenId.HMT,
+        currency: PaymentCurrency.HMT,
         amount: 10,
         rate: 1,
         transaction: MOCK_TRANSACTION_HASH,
@@ -770,8 +769,6 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const token = 'hmt';
-
       const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
@@ -795,7 +792,7 @@ describe('PaymentService', () => {
         transactionReceipt,
       );
 
-      mockTokenContract.symbol.mockResolvedValue(token);
+      mockTokenContract.symbol.mockResolvedValue(PaymentCurrency.HMT);
 
       findOneMock.mockResolvedValue({} as any);
 
@@ -810,36 +807,39 @@ describe('PaymentService', () => {
     });
   });
 
-  describe('getUserBalance', () => {
+  describe('getUserUSDBalance', () => {
     it('should return the correct balance for a user', async () => {
       const userId = 1;
-      const expectedBalance = 20;
-
-      paymentRepository.getUserBalancePayments = jest.fn().mockResolvedValue([
+      const expectedBalance = 220;
+      const paymentsMock: Partial<PaymentEntity>[] = [
         {
-          amount: 50,
+          amount: 500,
           rate: 1,
           type: PaymentType.DEPOSIT,
           status: PaymentStatus.SUCCEEDED,
-          currency: Currency.USD,
+          currency: PaymentCurrency.HMT,
         },
         {
           amount: 150,
           rate: 1,
           type: PaymentType.DEPOSIT,
           status: PaymentStatus.SUCCEEDED,
-          currency: Currency.USD,
+          currency: PaymentCurrency.USD,
         },
         {
           amount: -180,
           rate: 1,
           type: PaymentType.WITHDRAWAL,
           status: PaymentStatus.SUCCEEDED,
-          currency: Currency.USD,
+          currency: PaymentCurrency.USD,
         },
-      ]);
+      ];
+      jest
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue(paymentsMock as PaymentEntity[]);
+      jest.spyOn(rateService, 'getRate').mockResolvedValue(0.5);
 
-      const balance = await paymentService.getUserBalance(userId);
+      const balance = await paymentService.getUserUSDBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
       expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
@@ -849,11 +849,12 @@ describe('PaymentService', () => {
 
     it('should return 0 balance for a user with no payment entities', async () => {
       const userId = 1;
-      paymentRepository.getUserBalancePayments = jest
-        .fn()
+
+      jest
+        .spyOn(paymentRepository, 'getUserBalancePayments')
         .mockResolvedValue([]);
 
-      const balance = await paymentService.getUserBalance(userId);
+      const balance = await paymentService.getUserUSDBalance(userId);
 
       expect(balance).toEqual(0);
       expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
@@ -867,6 +868,7 @@ describe('PaymentService', () => {
       userId: 1,
       jobId: 2,
       refundAmount: 100,
+      refundCurrency: PaymentCurrency.HMT,
     };
 
     it('should successfully create a refund payment', async () => {

@@ -145,7 +145,7 @@ export class PaymentController {
   })
   @Get('/min-fee')
   public async getMinFee(): Promise<number> {
-    return this.serverConfigService.minimunFeeUsd;
+    return this.serverConfigService.minimumFeeUsd;
   }
 
   @ApiOperation({
