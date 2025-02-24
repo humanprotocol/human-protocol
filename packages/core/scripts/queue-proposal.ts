@@ -20,17 +20,18 @@ async function main() {
   );
 
   const proposal = await getProposal();
-  // Create proposal
-  const transactionResponse = await governanceContract.crossChainPropose(
+
+  const transactionResponse = await governanceContract.cancel(
     proposal.targets,
     proposal.values,
     proposal.calldatas,
-    proposal.description,
-    { value: ethers.parseEther('0.01') }
+    proposal.descriptionHash
   );
 
+  console.log(transactionResponse);
+
   await transactionResponse.wait();
-  console.log('Proposal created:');
+  console.log('Proposal queued:');
 }
 
 main()

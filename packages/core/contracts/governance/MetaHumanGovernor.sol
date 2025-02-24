@@ -299,6 +299,12 @@ contract MetaHumanGovernor is
 
         uint256 spokeContractsLength = spokeContractsSnapshots[proposalId]
             .length;
+
+        // If there are no spoke contracts, finish the collection phase
+        if (spokeContractsLength == 0) {
+            _finishCollectionPhase(proposalId);
+        }
+
         // Get a price of sending the message back to hub
         uint256 sendMessageToHubCost = quoteCrossChainMessage(chainId, 0);
 
