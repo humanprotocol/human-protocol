@@ -7,10 +7,11 @@ import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { type Oracle } from './use-get-oracles';
+import { useSelectOracleNavigation } from './use-select-oracle-navigation';
 
-export const useOraclesTableColumns = (
-  selectOracle: (oracle: Oracle) => void
-): MRT_ColumnDef<Oracle>[] => {
+export const useOraclesTableColumns = (): MRT_ColumnDef<Oracle>[] => {
+  const { selectOracle } = useSelectOracleNavigation();
+
   return useMemo(
     () => [
       {

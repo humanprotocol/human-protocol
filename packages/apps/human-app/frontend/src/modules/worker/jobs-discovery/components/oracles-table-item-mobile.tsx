@@ -7,10 +7,10 @@ import { ListItem } from '@/shared/components/ui/list-item';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { type Oracle } from '../hooks';
+import { useSelectOracleNavigation } from '../hooks/use-select-oracle-navigation';
 
 interface OraclesTableItemMobileProps {
   oracle: Oracle;
-  selectOracle: (oracle: Oracle) => void;
 }
 
 const styles: SxProps = {
@@ -26,9 +26,9 @@ const styles: SxProps = {
 
 export function OraclesTableItemMobile({
   oracle,
-  selectOracle,
 }: Readonly<OraclesTableItemMobileProps>) {
   const { colorPalette } = useColorMode();
+  const { selectOracle } = useSelectOracleNavigation();
 
   return (
     <Paper sx={{ ...styles, backgroundColor: colorPalette.white }}>

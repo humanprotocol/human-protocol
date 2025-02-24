@@ -1,0 +1,46 @@
+import { useNavigate } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
+import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
+import { routerPaths } from '@/router/router-paths';
+import { useGetRegistrationInExchangeOracles } from '../../services/get-registration-in-exchange-oracles';
+import { shouldNavigateToRegistration, isHCaptchaOracle } from '../helpers';
+import { type Oracle } from './use-get-oracles';
+
+const getHCaptchaPagePath = (siteKey: string | null | undefined): string =>
+  siteKey
+    ? routerPaths.worker.HcaptchaLabeling
+    : routerPaths.worker.enableLabeler;
+
+export const useSelectOracleNavigation = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthenticatedUser();
+  const { data: registrationData } = useGetRegistrationInExchangeOracles();
+
+  const hCaptchaPagePath = useMemo(
+    () => getHCaptchaPagePath(user.site_key),
+    [user.site_key]
+  );
+
+  const selectOracle = useCallback(
+    (oracle: Oracle) => {
+      if (shouldNavigateToRegistration(oracle, registrationData)) {
+        navigate(
+          `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
+        );
+        return;
+      }
+
+      if (isHCaptchaOracle(oracle.address)) {
+        navigate(hCaptchaPagePath);
+        return;
+      }
+
+      navigate(`${routerPaths.worker.jobs}/${oracle.address}`, {
+        state: { oracle },
+      });
+    },
+    [registrationData, navigate, hCaptchaPagePath]
+  );
+
+  return { selectOracle };
+};

@@ -10,18 +10,16 @@ import { type Oracle } from '../hooks';
 interface OraclesTableDesktopProps {
   isOraclesDataPending: boolean;
   isOraclesDataError: boolean;
-  selectOracle: (oracle: Oracle) => void;
   oraclesData: Oracle[] | undefined;
 }
 
 export function OraclesTableDesktop({
   isOraclesDataPending,
   isOraclesDataError,
-  selectOracle,
   oraclesData,
 }: Readonly<OraclesTableDesktopProps>) {
   const { colorPalette, isDarkMode } = useColorMode();
-  const tableColumns = useOraclesTableColumns(selectOracle);
+  const tableColumns = useOraclesTableColumns();
   const table = useMaterialReactTable({
     state: {
       isLoading: isOraclesDataPending,
