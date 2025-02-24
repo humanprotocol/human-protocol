@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo } from 'react';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
-import { useGetRegistrationInExchangeOracles } from '../../services/get-registration-in-exchange-oracles';
 import { shouldNavigateToRegistration, isHCaptchaOracle } from '../helpers';
+import { useGetRegistrationDataInOracles } from './get-registration-in-exchange-oracles';
 import { type Oracle } from './use-get-oracles';
 
 const getHCaptchaPagePath = (siteKey: string | null | undefined): string =>
@@ -14,7 +14,7 @@ const getHCaptchaPagePath = (siteKey: string | null | undefined): string =>
 export const useSelectOracleNavigation = () => {
   const navigate = useNavigate();
   const { user } = useAuthenticatedUser();
-  const { data: registrationData } = useGetRegistrationInExchangeOracles();
+  const { data } = useGetRegistrationDataInOracles();
 
   const hCaptchaPagePath = useMemo(
     () => getHCaptchaPagePath(user.site_key),
@@ -23,7 +23,7 @@ export const useSelectOracleNavigation = () => {
 
   const selectOracle = useCallback(
     (oracle: Oracle) => {
-      if (shouldNavigateToRegistration(oracle, registrationData)) {
+      if (shouldNavigateToRegistration(oracle, data)) {
         navigate(
           `${routerPaths.worker.registrationInExchangeOracle}/${oracle.address}`
         );
@@ -39,7 +39,7 @@ export const useSelectOracleNavigation = () => {
         state: { oracle },
       });
     },
-    [registrationData, navigate, hCaptchaPagePath]
+    [data, navigate, hCaptchaPagePath]
   );
 
   return { selectOracle };
