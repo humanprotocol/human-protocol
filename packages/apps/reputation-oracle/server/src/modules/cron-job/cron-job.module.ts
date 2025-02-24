@@ -14,6 +14,6 @@ import { CronJobRepository } from './cron-job.repository';
     EscrowCompletionModule,
   ],
   providers: [CronJobService, CronJobRepository],
-  exports: [CronJobService],
+  exports: [],
 })
 export class CronJobModule {}

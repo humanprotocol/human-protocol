@@ -12,6 +12,6 @@ import { KycRepository } from './kyc.repository';
   imports: [UserModule, HttpModule, Web3Module],
   providers: [KycService, KycRepository],
   controllers: [KycController],
-  exports: [KycService],
+  exports: [],
 })
 export class KycModule {}

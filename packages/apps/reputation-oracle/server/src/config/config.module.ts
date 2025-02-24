@@ -1,5 +1,5 @@
 import { Module, Global } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
 import { AuthConfigService } from './auth-config.service';
 import { ServerConfigService } from './server-config.service';
@@ -14,8 +14,8 @@ import { HCaptchaConfigService } from './hcaptcha-config.service';
 
 @Global()
 @Module({
+  imports: [ConfigModule],
   providers: [
-    ConfigService,
     ServerConfigService,
     AuthConfigService,
     DatabaseConfigService,

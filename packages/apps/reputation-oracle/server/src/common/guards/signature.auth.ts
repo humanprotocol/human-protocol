@@ -1,3 +1,4 @@
+import { EscrowUtils } from '@human-protocol/sdk';
 import {
   CanActivate,
   ExecutionContext,
@@ -7,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { verifySignature } from '../../utils/web3';
 import { HEADER_SIGNATURE_KEY } from '../constants';
-import { EscrowUtils } from '@human-protocol/sdk';
 import { AuthSignatureRole } from '../enums/role';
 
 @Injectable()

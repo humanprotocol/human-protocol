@@ -12,6 +12,6 @@ import { SiteKeyRepository } from './site-key.repository';
   imports: [Web3Module, HCaptchaModule],
   providers: [UserService, UserRepository, SiteKeyRepository],
   controllers: [UserController],
-  exports: [UserService],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}

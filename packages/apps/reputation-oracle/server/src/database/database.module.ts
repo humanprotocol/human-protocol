@@ -1,17 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
+import { LoggerOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { NS } from '../common/constants';
 
-import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
+import { NS } from '../common/constants';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
 import { KycEntity } from '../modules/kyc/kyc.entity';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
-import { LoggerOptions } from 'typeorm';
 import { DatabaseConfigService } from '../config/database-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
@@ -22,10 +20,12 @@ import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-comp
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
 import Environment from '../utils/environment';
 
+import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [TypeOrmLoggerModule, ConfigModule],
+      imports: [TypeOrmLoggerModule],
       inject: [TypeOrmLoggerService, DatabaseConfigService],
       useFactory: (
         typeOrmLoggerService: TypeOrmLoggerService,
