@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
 import type { MRT_ColumnDef } from 'material-react-table';
-import type { Oracle } from '@/modules/worker/services/oracles';
 import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import { type Oracle } from './use-get-oracles';
 
 export const useOraclesTableColumns = (
   selectOracle: (oracle: Oracle) => void

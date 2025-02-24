@@ -1,17 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { Stack, Grid } from '@mui/material';
 import { useEffect } from 'react';
-import type { Oracle } from '@/modules/worker/services/oracles';
 import { useGetRegistrationInExchangeOracles } from '@/modules/worker/services/get-registration-in-exchange-oracles';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { OraclesTableDesktop } from '@/modules/worker/components/jobs-discovery/components/oracles-table-desktop';
-import { handleOracleNavigation } from '@/modules/worker/components/jobs-discovery/helpers/handle-oracle-navigation';
 import { Loader } from '@/shared/components/ui/loader';
 import { NoRecords } from '@/shared/components/ui/no-records';
-import { OraclesTableItemMobile } from '@/modules/worker/components/jobs-discovery/components/oracles-table-item-mobile';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
-import { useGetOracles } from '@/modules/worker/services/oracles';
+import { handleOracleNavigation } from '../helpers';
+import { type Oracle, useGetOracles } from '../hooks';
+import { OraclesTableItemMobile } from './oracles-table-item-mobile';
+import { OraclesTableDesktop } from './oracles-table-desktop';
 
 export function OraclesTable() {
   const navigate = useNavigate();
