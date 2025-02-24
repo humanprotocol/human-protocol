@@ -1,11 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
-import { SignatureAuthGuard } from './signature.auth';
-import { signMessage } from '../../utils/web3';
-import { ChainId, EscrowUtils } from '@human-protocol/sdk';
-import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
-import { AuthSignatureRole } from '../enums/role';
-
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowUtils: {
@@ -13,73 +5,106 @@ jest.mock('@human-protocol/sdk', () => ({
   },
 }));
 
+import { EscrowUtils } from '@human-protocol/sdk';
+import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+
+import {
+  generateContractAddress,
+  generateEthWallet,
+  generateTestnetChainId,
+} from '../../../test/fixtures/web3';
+import {
+  createExecutionContextMock,
+  ExecutionContextMock,
+} from '../../../test/mock-creators/nest';
+import { signMessage } from '../../utils/web3';
+import { AuthSignatureRole } from '../enums/role';
+
+import { SignatureAuthGuard } from './signature.auth';
+
 describe('SignatureAuthGuard', () => {
-  let guard: SignatureAuthGuard;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        {
-          provide: SignatureAuthGuard,
-          useValue: new SignatureAuthGuard([
-            AuthSignatureRole.JobLauncher,
-            AuthSignatureRole.Exchange,
-            AuthSignatureRole.Recording,
-          ]),
-        },
-      ],
-    }).compile();
-
-    guard = module.get<SignatureAuthGuard>(SignatureAuthGuard);
-    EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
-      launcher: MOCK_ADDRESS,
-      exchangeOracle: MOCK_ADDRESS,
-      reputationOracle: MOCK_ADDRESS,
-    });
-  });
-
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
-  });
-
   describe('canActivate', () => {
-    let context: ExecutionContext;
-    let mockRequest: any;
+    let executionContextMock: ExecutionContextMock;
+    let body: {
+      chain_id: number;
+      escrow_address: string;
+    };
 
     beforeEach(() => {
-      mockRequest = {
-        switchToHttp: jest.fn().mockReturnThis(),
-        getRequest: jest.fn().mockReturnThis(),
-        headers: {},
-        body: {},
-        originalUrl: '',
+      executionContextMock = createExecutionContextMock();
+      body = {
+        chain_id: generateTestnetChainId(),
+        escrow_address: generateContractAddress(),
       };
-      context = {
-        switchToHttp: jest.fn().mockReturnThis(),
-        getRequest: jest.fn(() => mockRequest),
-      } as any as ExecutionContext;
     });
 
-    it('should return true if signature is verified', async () => {
-      const body = {
-        escrow_address: MOCK_ADDRESS,
-        chain_id: ChainId.LOCALHOST,
-      };
-      const signature = await signMessage(body, MOCK_PRIVATE_KEY);
-      mockRequest.headers['human-signature'] = signature;
-      mockRequest.body = body;
-      const result = await guard.canActivate(context as any);
-      expect(result).toBeTruthy();
-      expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
-        ChainId.LOCALHOST,
-        MOCK_ADDRESS,
-      );
-    });
+    it.each([
+      {
+        name: 'launcher',
+        role: AuthSignatureRole.JobLauncher,
+      },
+      {
+        name: 'exchangeOracle',
+        role: AuthSignatureRole.Exchange,
+      },
+      {
+        name: 'recordingOracle',
+        role: AuthSignatureRole.Recording,
+      },
+    ])(
+      'should return true if signature is verified for "$role" role',
+      async ({ name, role }) => {
+        const guard = new SignatureAuthGuard([role]);
+
+        const { privateKey, address } = generateEthWallet();
+        EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+          [name]: address,
+        });
+
+        const signature = await signMessage(body, privateKey);
+
+        const request = {
+          headers: {
+            'human-signature': signature,
+          },
+          body,
+        };
+        executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+        const result = await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+
+        expect(result).toBeTruthy();
+        expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
+          body.chain_id,
+          body.escrow_address,
+        );
+      },
+    );
 
     it('should throw unauthorized exception if signature is not verified', async () => {
+      const guard = new SignatureAuthGuard([AuthSignatureRole.JobLauncher]);
+
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+        launcher: generateEthWallet().address,
+      });
+
+      const signature = await signMessage(body, generateEthWallet().privateKey);
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
       let catchedError;
       try {
-        await guard.canActivate(context as any);
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
       } catch (error) {
         catchedError = error;
       }
@@ -89,10 +114,30 @@ describe('SignatureAuthGuard', () => {
     });
 
     it('should throw unauthorized exception for unrecognized oracle type', async () => {
-      mockRequest.originalUrl = '/some/random/path';
+      const guard = new SignatureAuthGuard([]);
+
+      const { privateKey, address } = generateEthWallet();
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+        launcher: address,
+        exachangeOracle: address,
+        recordingOracle: address,
+      });
+
+      const signature = await signMessage(body, privateKey);
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
       let catchedError;
       try {
-        await guard.canActivate(context as any);
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
       } catch (error) {
         catchedError = error;
       }

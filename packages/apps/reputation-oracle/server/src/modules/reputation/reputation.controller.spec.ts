@@ -12,6 +12,7 @@ import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { ReputationConfigService } from '../../config/reputation-config.service';
 import { S3ConfigService } from '../../config/s3-config.service';
 import { PGPConfigService } from '../../config/pgp-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -29,6 +30,7 @@ describe('ReputationController', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [ConfigModule.forFeature(registerAs('s3', () => mockConfig))],
       providers: [
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {

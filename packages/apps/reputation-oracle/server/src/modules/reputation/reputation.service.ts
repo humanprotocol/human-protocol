@@ -26,6 +26,7 @@ import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../utils/manifest';
 import { CvatManifest } from '../../common/interfaces/manifest';
 import { ReputationConfigService } from '../../config/reputation-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationError, ReputationErrorMessage } from './reputation.error';
 
@@ -36,6 +37,7 @@ export class ReputationService {
     private readonly storageService: StorageService,
     private readonly reputationRepository: ReputationRepository,
     private readonly reputationConfigService: ReputationConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly web3Service: Web3Service,
   ) {}
 
@@ -96,7 +98,7 @@ export class ReputationService {
       ReputationEntityType.RECORDING_ORACLE,
     );
 
-    const reputationOracleAddress = this.web3Service.getOperatorAddress();
+    const reputationOracleAddress = this.web3ConfigService.operatorAddress;
     await this.increaseReputation(
       chainId,
       reputationOracleAddress,
@@ -246,7 +248,7 @@ export class ReputationService {
 
       if (
         type === ReputationEntityType.REPUTATION_ORACLE &&
-        address === this.web3Service.getOperatorAddress()
+        address === this.web3ConfigService.operatorAddress
       ) {
         reputationEntity.reputationPoints =
           this.reputationConfigService.highLevel;
@@ -290,7 +292,7 @@ export class ReputationService {
 
     if (
       type === ReputationEntityType.REPUTATION_ORACLE &&
-      address === this.web3Service.getOperatorAddress()
+      address === this.web3ConfigService.operatorAddress
     ) {
       return;
     }
@@ -317,7 +319,7 @@ export class ReputationService {
     address: string,
   ): Promise<ReputationDto> {
     // https://github.com/humanprotocol/human-protocol/issues/1047
-    if (address === this.web3Service.getOperatorAddress()) {
+    if (address === this.web3ConfigService.operatorAddress) {
       return {
         chainId,
         address,
