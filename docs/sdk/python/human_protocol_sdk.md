@@ -129,10 +129,7 @@
     * [`KVStoreKeys.category`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.category)
     * [`KVStoreKeys.fee`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.fee)
     * [`KVStoreKeys.job_types`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.job_types)
-<<<<<<< HEAD
-=======
     * [`KVStoreKeys.operator_name`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.operator_name)
->>>>>>> develop
     * [`KVStoreKeys.public_key`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.public_key)
     * [`KVStoreKeys.public_key_hash`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.public_key_hash)
     * [`KVStoreKeys.registration_instructions`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.registration_instructions)
@@ -141,15 +138,9 @@
     * [`KVStoreKeys.url`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.url)
     * [`KVStoreKeys.webhook_url`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.webhook_url)
     * [`KVStoreKeys.website`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.KVStoreKeys.website)
-<<<<<<< HEAD
   * [`OperatorCategory`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OperatorCategory)
     * [`OperatorCategory.MACHINE_LEARNING`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OperatorCategory.MACHINE_LEARNING)
     * [`OperatorCategory.MARKET_MAKING`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OperatorCategory.MARKET_MAKING)
-=======
-  * [`LeaderCategory`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.LeaderCategory)
-    * [`LeaderCategory.MACHINE_LEARNING`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.LeaderCategory.MACHINE_LEARNING)
-    * [`LeaderCategory.MARKET_MAKING`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.LeaderCategory.MARKET_MAKING)
->>>>>>> develop
   * [`OrderDirection`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection)
     * [`OrderDirection.ASC`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection.ASC)
     * [`OrderDirection.DESC`](human_protocol_sdk.constants.md#human_protocol_sdk.constants.OrderDirection.DESC)

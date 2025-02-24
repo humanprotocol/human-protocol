@@ -6,6 +6,8 @@
 
 # Interface: IOperatorsFilter
 
+Defined in: [interfaces.ts:40](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L40)
+
 ## Extends
 
 - [`IPagination`](IPagination.md)
@@ -16,13 +18,7 @@
 
 > **chainId**: [`ChainId`](../../enums/enumerations/ChainId.md)
 
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:41](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L41)
-=======
-[interfaces.ts:41](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L41)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md
+Defined in: [interfaces.ts:41](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L41)
 
 ***
 
@@ -30,17 +26,11 @@
 
 > `optional` **first**: `number`
 
+Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`first`](IPagination.md#first)
-
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
-=======
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md
 
 ***
 
@@ -48,13 +38,7 @@
 
 > `optional` **minAmountStaked**: `number`
 
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:43](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L43)
-=======
-[interfaces.ts:43](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L43)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md
+Defined in: [interfaces.ts:43](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L43)
 
 ***
 
@@ -62,13 +46,7 @@
 
 > `optional` **orderBy**: `string`
 
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:44](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L44)
-=======
-[interfaces.ts:44](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L44)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md
+Defined in: [interfaces.ts:44](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L44)
 
 ***
 
@@ -76,17 +54,11 @@
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
+Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`orderDirection`](IPagination.md#orderdirection)
-
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
-=======
-[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md
 
 ***
 
@@ -94,13 +66,7 @@
 
 > `optional` **roles**: `string`[]
 
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:42](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L42)
-=======
-[interfaces.ts:42](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L42)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md
+Defined in: [interfaces.ts:42](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L42)
 
 ***
 
@@ -108,14 +74,8 @@
 
 > `optional` **skip**: `number`
 
+Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`skip`](IPagination.md#skip)
-
-#### Defined in
-
-<<<<<<< HEAD:docs/sdk/typescript/interfaces/interfaces/IOperatorsFilter.md
-[interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
-=======
-[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
->>>>>>> develop:docs/sdk/typescript/interfaces/interfaces/ILeadersFilter.md

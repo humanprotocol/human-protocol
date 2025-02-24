@@ -6,6 +6,8 @@
 
 # Class: StakingClient
 
+Defined in: [staking.ts:97](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L97)
+
 ## Introduction
 
 This client enables performing actions on staking contracts and obtaining staking information from both the contracts and subgraph.
@@ -84,6 +86,8 @@ const stakingClient = await StakingClient.build(provider);
 
 > **new StakingClient**(`runner`, `networkData`): [`StakingClient`](StakingClient.md)
 
+Defined in: [staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
+
 **StakingClient constructor**
 
 #### Parameters
@@ -108,27 +112,13 @@ The network information required to connect to the Staking contract
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`constructor`](../../base/classes/BaseEthersClient.md#constructors)
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
-=======
-[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
->>>>>>> develop
-
 ## Properties
 
 ### escrowFactoryContract
 
 > **escrowFactoryContract**: `EscrowFactory`
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
-=======
-[staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
->>>>>>> develop
+Defined in: [staking.ts:100](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L100)
 
 ***
 
@@ -136,17 +126,11 @@ The network information required to connect to the Staking contract
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+
 #### Inherited from
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata)
-
-#### Defined in
-
-<<<<<<< HEAD
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
-=======
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
->>>>>>> develop
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata-1)
 
 ***
 
@@ -154,17 +138,11 @@ The network information required to connect to the Staking contract
 
 > `protected` **runner**: `ContractRunner`
 
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+
 #### Inherited from
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner)
-
-#### Defined in
-
-<<<<<<< HEAD
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
-=======
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
->>>>>>> develop
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner-1)
 
 ***
 
@@ -172,13 +150,7 @@ The network information required to connect to the Staking contract
 
 > **stakingContract**: `Staking`
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:99](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L99)
-=======
-[staking.ts:99](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L99)
->>>>>>> develop
+Defined in: [staking.ts:99](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L99)
 
 ***
 
@@ -186,19 +158,15 @@ The network information required to connect to the Staking contract
 
 > **tokenContract**: `HMToken`
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:98](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L98)
-=======
-[staking.ts:98](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L98)
->>>>>>> develop
+Defined in: [staking.ts:98](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L98)
 
 ## Methods
 
 ### approveStake()
 
 > **approveStake**(`amount`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [staking.ts:193](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L193)
 
 This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
 
@@ -239,19 +207,13 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.approveStake(amount);
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:193](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L193)
-=======
-[staking.ts:193](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L193)
->>>>>>> develop
-
 ***
 
 ### getStakerInfo()
 
 > **getStakerInfo**(`stakerAddress`): `Promise`\<[`StakerInfo`](../../interfaces/interfaces/StakerInfo.md)\>
+
+Defined in: [staking.ts:435](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L435)
 
 Retrieves comprehensive staking information for a staker.
 
@@ -281,19 +243,13 @@ const stakingInfo = await stakingClient.getStakerInfo('0xYourStakerAddress');
 console.log(stakingInfo.tokensStaked);
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:435](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L435)
-=======
-[staking.ts:435](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L435)
->>>>>>> develop
-
 ***
 
 ### slash()
 
 > **slash**(`slasher`, `staker`, `escrowAddress`, `amount`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [staking.ts:373](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L373)
 
 This function reduces the allocated amount by a staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
 
@@ -352,19 +308,13 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:373](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L373)
-=======
-[staking.ts:373](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L373)
->>>>>>> develop
-
 ***
 
 ### stake()
 
 > **stake**(`amount`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [staking.ts:247](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L247)
 
 This function stakes a specified amount of tokens on a specific network.
 
@@ -408,19 +358,13 @@ await stakingClient.approveStake(amount); // if it was already approved before, 
 await stakingClient.stake(amount);
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:247](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L247)
-=======
-[staking.ts:247](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L247)
->>>>>>> develop
-
 ***
 
 ### unstake()
 
 > **unstake**(`amount`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [staking.ts:291](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L291)
 
 This function unstakes tokens from staking contract. The unstaked tokens stay locked for a period of time.
 
@@ -463,19 +407,13 @@ const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.unstake(amount);
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:291](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L291)
-=======
-[staking.ts:291](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L291)
->>>>>>> develop
-
 ***
 
 ### withdraw()
 
 > **withdraw**(`txOptions`?): `Promise`\<`void`\>
+
+Defined in: [staking.ts:336](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L336)
 
 This function withdraws unstaked and non-locked tokens from staking contract to the user wallet.
 
@@ -511,19 +449,13 @@ const stakingClient = await StakingClient.build(signer);
 await stakingClient.withdraw();
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:336](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L336)
-=======
-[staking.ts:336](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L336)
->>>>>>> develop
-
 ***
 
 ### build()
 
 > `static` **build**(`runner`): `Promise`\<[`StakingClient`](StakingClient.md)\>
+
+Defined in: [staking.ts:136](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L136)
 
 Creates an instance of StakingClient from a Runner.
 
@@ -548,11 +480,3 @@ The Runner object to interact with the Ethereum network
 #### Throws
 
 - Thrown if the network's chainId is not supported
-
-#### Defined in
-
-<<<<<<< HEAD
-[staking.ts:136](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L136)
-=======
-[staking.ts:136](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L136)
->>>>>>> develop

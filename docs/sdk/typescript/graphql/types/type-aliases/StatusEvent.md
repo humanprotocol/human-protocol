@@ -8,6 +8,8 @@
 
 > **StatusEvent**: `object`
 
+Defined in: [graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
+
 ## Type declaration
 
 ### chainId
@@ -25,11 +27,3 @@
 ### timestamp
 
 > **timestamp**: `number`
-
-## Defined in
-
-<<<<<<< HEAD
-[graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
-=======
-[graphql/types.ts:158](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L158)
->>>>>>> develop

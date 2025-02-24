@@ -6,6 +6,8 @@
 
 # Class: TransactionUtils
 
+Defined in: [transaction.ts:18](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L18)
+
 ## Constructors
 
 ### new TransactionUtils()
@@ -21,6 +23,8 @@
 ### getTransaction()
 
 > `static` **getTransaction**(`chainId`, `hash`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)\>
+
+Defined in: [transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
 
 This function returns the transaction data for the given hash.
 
@@ -52,19 +56,13 @@ import { TransactionUtils, ChainId } from '@human-protocol/sdk';
 const transaction = await TransactionUtils.getTransaction(ChainId.POLYGON, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Defined in
-
-<<<<<<< HEAD
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
-=======
-[transaction.ts:34](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L34)
->>>>>>> develop
-
 ***
 
 ### getTransactions()
 
 > `static` **getTransactions**(`filter`): `Promise`\<[`ITransaction`](../../interfaces/interfaces/ITransaction.md)[]\>
+
+Defined in: [transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
 
 This function returns all transaction details based on the provided filter.
 
@@ -128,11 +126,3 @@ const filter: ITransactionsFilter = {
 };
 const transactions = await TransactionUtils.getTransactions(filter);
 ```
-
-#### Defined in
-
-<<<<<<< HEAD
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
-=======
-[transaction.ts:109](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/transaction.ts#L109)
->>>>>>> develop

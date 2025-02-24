@@ -6,6 +6,8 @@
 
 # Interface: IOperatorSubgraph
 
+Defined in: [interfaces.ts:34](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L34)
+
 ## Extends
 
 - `Omit`\<[`IOperator`](IOperator.md), `"jobTypes"` \| `"reputationNetworks"` \| `"chainId"`\>
@@ -16,14 +18,11 @@
 
 > **address**: `string`
 
+Defined in: [interfaces.ts:12](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L12)
+
 #### Inherited from
 
 `Omit.address`
-
-#### Defined in
-
-<<<<<<< HEAD
-[interfaces.ts:12](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L12)
 
 ***
 
@@ -31,13 +30,11 @@
 
 > **amountJobsProcessed**: `bigint`
 
+Defined in: [interfaces.ts:19](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L19)
+
 #### Inherited from
 
 `Omit.amountJobsProcessed`
-
-#### Defined in
-
-[interfaces.ts:19](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L19)
 
 ***
 
@@ -45,13 +42,11 @@
 
 > **amountLocked**: `bigint`
 
+Defined in: [interfaces.ts:14](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L14)
+
 #### Inherited from
 
 `Omit.amountLocked`
-
-#### Defined in
-
-[interfaces.ts:14](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L14)
 
 ***
 
@@ -59,13 +54,11 @@
 
 > **amountSlashed**: `bigint`
 
+Defined in: [interfaces.ts:17](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L17)
+
 #### Inherited from
 
 `Omit.amountSlashed`
-
-#### Defined in
-
-[interfaces.ts:17](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L17)
 
 ***
 
@@ -73,13 +66,11 @@
 
 > **amountStaked**: `bigint`
 
+Defined in: [interfaces.ts:13](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L13)
+
 #### Inherited from
 
 `Omit.amountStaked`
-
-#### Defined in
-
-[interfaces.ts:13](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L13)
 
 ***
 
@@ -87,13 +78,11 @@
 
 > **amountWithdrawn**: `bigint`
 
+Defined in: [interfaces.ts:16](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L16)
+
 #### Inherited from
 
 `Omit.amountWithdrawn`
-
-#### Defined in
-
-[interfaces.ts:16](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L16)
 
 ***
 
@@ -101,13 +90,11 @@
 
 > `optional` **category**: `string`
 
+Defined in: [interfaces.ts:31](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L31)
+
 #### Inherited from
 
 `Omit.category`
-
-#### Defined in
-
-[interfaces.ts:31](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L31)
 
 ***
 
@@ -115,13 +102,11 @@
 
 > `optional` **fee**: `bigint`
 
+Defined in: [interfaces.ts:21](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L21)
+
 #### Inherited from
 
 `Omit.fee`
-
-#### Defined in
-
-[interfaces.ts:21](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L21)
 
 ***
 
@@ -129,16 +114,11 @@
 
 > **id**: `string`
 
+Defined in: [interfaces.ts:10](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L10)
+
 #### Inherited from
 
 `Omit.id`
-
-#### Defined in
-
-[interfaces.ts:10](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L10)
-=======
-[interfaces.ts:59](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L59)
->>>>>>> develop
 
 ***
 
@@ -146,10 +126,7 @@
 
 > `optional` **jobTypes**: `string`
 
-#### Defined in
-
-<<<<<<< HEAD
-[interfaces.ts:36](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L36)
+Defined in: [interfaces.ts:36](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L36)
 
 ***
 
@@ -157,13 +134,11 @@
 
 > **lockedUntilTimestamp**: `bigint`
 
+Defined in: [interfaces.ts:15](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L15)
+
 #### Inherited from
 
 `Omit.lockedUntilTimestamp`
-
-#### Defined in
-
-[interfaces.ts:15](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L15)
 
 ***
 
@@ -171,13 +146,11 @@
 
 > `optional` **name**: `string`
 
+Defined in: [interfaces.ts:30](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L30)
+
 #### Inherited from
 
 `Omit.name`
-
-#### Defined in
-
-[interfaces.ts:30](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L30)
 
 ***
 
@@ -185,16 +158,11 @@
 
 > `optional` **publicKey**: `string`
 
+Defined in: [interfaces.ts:22](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L22)
+
 #### Inherited from
 
 `Omit.publicKey`
-
-#### Defined in
-
-[interfaces.ts:22](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L22)
-=======
-[interfaces.ts:68](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L68)
->>>>>>> develop
 
 ***
 
@@ -202,17 +170,11 @@
 
 > `optional` **registrationInstructions**: `string`
 
+Defined in: [interfaces.ts:28](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L28)
+
 #### Inherited from
 
 `Omit.registrationInstructions`
-
-#### Defined in
-
-<<<<<<< HEAD
-[interfaces.ts:28](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L28)
-=======
-[interfaces.ts:64](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L64)
->>>>>>> develop
 
 ***
 
@@ -220,14 +182,11 @@
 
 > `optional` **registrationNeeded**: `boolean`
 
+Defined in: [interfaces.ts:27](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L27)
+
 #### Inherited from
 
 `Omit.registrationNeeded`
-
-#### Defined in
-
-<<<<<<< HEAD
-[interfaces.ts:27](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L27)
 
 ***
 
@@ -235,9 +194,11 @@
 
 > `optional` **reputationNetworks**: `object`[]
 
-#### Defined in
+Defined in: [interfaces.ts:37](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L37)
 
-[interfaces.ts:37](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L37)
+#### address
+
+> **address**: `string`
 
 ***
 
@@ -245,16 +206,11 @@
 
 > **reward**: `bigint`
 
+Defined in: [interfaces.ts:18](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L18)
+
 #### Inherited from
 
 `Omit.reward`
-
-#### Defined in
-
-[interfaces.ts:18](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L18)
-=======
-[interfaces.ts:63](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L63)
->>>>>>> develop
 
 ***
 
@@ -262,17 +218,11 @@
 
 > `optional` **role**: `string`
 
+Defined in: [interfaces.ts:20](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L20)
+
 #### Inherited from
 
 `Omit.role`
-
-#### Defined in
-
-<<<<<<< HEAD
-[interfaces.ts:20](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L20)
-=======
-[interfaces.ts:60](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L60)
->>>>>>> develop
 
 ***
 
@@ -280,14 +230,11 @@
 
 > `optional` **url**: `string`
 
+Defined in: [interfaces.ts:25](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L25)
+
 #### Inherited from
 
 `Omit.url`
-
-#### Defined in
-
-<<<<<<< HEAD
-[interfaces.ts:25](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L25)
 
 ***
 
@@ -295,13 +242,11 @@
 
 > `optional` **webhookUrl**: `string`
 
+Defined in: [interfaces.ts:23](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L23)
+
 #### Inherited from
 
 `Omit.webhookUrl`
-
-#### Defined in
-
-[interfaces.ts:23](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L23)
 
 ***
 
@@ -309,13 +254,8 @@
 
 > `optional` **website**: `string`
 
+Defined in: [interfaces.ts:24](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L24)
+
 #### Inherited from
 
 `Omit.website`
-
-#### Defined in
-
-[interfaces.ts:24](https://github.com/humanprotocol/human-protocol/blob/9a36dcc76397ebaf05988194a5c5bf379999302c/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L24)
-=======
-[interfaces.ts:61](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L61)
->>>>>>> develop

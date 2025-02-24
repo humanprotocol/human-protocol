@@ -6,8 +6,6 @@
 
 # base
 
-## Index
-
-### Classes
+## Classes
 
 - [BaseEthersClient](classes/BaseEthersClient.md)

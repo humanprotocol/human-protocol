@@ -6,9 +6,7 @@
 
 # interfaces
 
-## Index
-
-### Interfaces
+## Interfaces
 
 - [IEscrowConfig](interfaces/IEscrowConfig.md)
 - [IEscrowsFilter](interfaces/IEscrowsFilter.md)

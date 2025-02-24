@@ -6,9 +6,7 @@
 
 # enums
 
-## Index
-
-### Enumerations
+## Enumerations
 
 - [ChainId](enumerations/ChainId.md)
 - [OperatorCategory](enumerations/OperatorCategory.md)
