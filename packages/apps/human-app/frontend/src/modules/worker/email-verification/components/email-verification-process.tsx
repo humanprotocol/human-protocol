@@ -3,24 +3,33 @@ import {
   PageCardLoader,
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useEmailVerification } from '../hooks';
+import { useVerifyEmailQuery } from '../hooks';
 import { EmailVerificationSuccessMessage } from './email-verification-success-message';
 
 interface EmailVerificationProcessProps {
   token: string;
 }
 
+function useEmailVerification(token: string) {
+  const { error, isError, isPending } = useVerifyEmailQuery({ token });
+
+  return {
+    error,
+    isError,
+    isPending,
+  };
+}
+
 export function EmailVerificationProcess({
   token,
 }: Readonly<EmailVerificationProcessProps>) {
-  const { errorMsg, isEmailVerificationError, isEmailVerificationPending } =
-    useEmailVerification(token);
+  const { error, isError, isPending } = useEmailVerification(token);
 
-  if (isEmailVerificationError && errorMsg) {
-    return <PageCardError errorMessage={getErrorMessageForError(errorMsg)} />;
+  if (isError) {
+    return <PageCardError errorMessage={getErrorMessageForError(error)} />;
   }
 
-  if (isEmailVerificationPending) {
+  if (isPending) {
     return <PageCardLoader />;
   }
 
