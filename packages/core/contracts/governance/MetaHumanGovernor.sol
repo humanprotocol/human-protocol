@@ -7,7 +7,6 @@ import '@openzeppelin/contracts/governance/extensions/GovernorVotes.sol';
 import '@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol';
 import '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
-import 'hardhat/console.sol';
 import './CrossChainGovernorCountingSimple.sol';
 import './DAOSpokeContract.sol';
 import './wormhole/IWormholeRelayer.sol';
