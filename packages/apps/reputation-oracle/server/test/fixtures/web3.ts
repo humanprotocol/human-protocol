@@ -15,6 +15,13 @@ export function generateEthWallet() {
   };
 }
 
+export function generateContractAddress() {
+  return ethers.getCreateAddress({
+    from: generateEthWallet().address,
+    nonce: faker.number.bigInt(),
+  });
+}
+
 export function generateTestnetChainId() {
   return faker.helpers.arrayElement([
     ChainId.BSC_TESTNET,
