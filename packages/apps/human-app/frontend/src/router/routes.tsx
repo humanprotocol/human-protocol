@@ -7,7 +7,6 @@ import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-rese
 import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
 import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/send-reset-link.page';
 import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-password/reset-password-success.page';
-import { JobsDiscoveryPage } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
 import { EnableLabeler } from '@/modules/worker/views/hcaptcha-labeling/enable-labeler.page';
 import { HcaptchaLabelingPage } from '@/modules/worker/views/hcaptcha-labeling/hcaptcha-labeling.page';
@@ -32,6 +31,7 @@ import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.pa
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
+import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 
 export const unprotectedRoutes: RouteProps[] = [
   {

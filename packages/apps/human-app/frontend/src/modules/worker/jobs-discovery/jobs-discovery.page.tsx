@@ -3,9 +3,8 @@ import Grid from '@mui/material/Grid';
 import { Navigate } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { OraclesTableJobTypesSelect } from '@/modules/worker/components/jobs-discovery/components/oracles-table-job-types-select';
-import { OraclesTable } from '@/modules/worker/components/jobs-discovery/oracles-table';
 import { routerPaths } from '@/router/router-paths';
+import { OraclesTableJobTypesSelect, OraclesTable } from './components';
 
 export function JobsDiscoveryPage() {
   const isMobile = useIsMobile();

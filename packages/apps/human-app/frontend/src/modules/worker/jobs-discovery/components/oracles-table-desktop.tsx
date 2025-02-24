@@ -2,10 +2,10 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
-import type { Oracle } from '@/modules/worker/services/oracles';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { useOraclesTableColumns } from '@/modules/worker/components/jobs-discovery/hooks/use-oracles-table-columns';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { useOraclesTableColumns } from '../hooks/use-oracles-table-columns';
+import { type Oracle } from '../hooks';
 
 interface OraclesTableDesktopProps {
   isOraclesDataPending: boolean;

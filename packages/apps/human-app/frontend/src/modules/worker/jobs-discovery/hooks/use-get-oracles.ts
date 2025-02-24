@@ -46,7 +46,7 @@ const H_CAPTCHA_ORACLE: Oracle = {
   registrationNeeded: false,
 };
 
-export async function getOracles({
+async function getOracles({
   selected_job_types,
   signal,
 }: {
