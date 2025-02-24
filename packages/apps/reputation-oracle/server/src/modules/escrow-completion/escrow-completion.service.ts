@@ -20,7 +20,6 @@ import {
   BACKOFF_INTERVAL_SECONDS,
   DEFAULT_BULK_PAYOUT_TX_ID,
 } from '../../common/constants';
-import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
@@ -34,7 +33,7 @@ import logger from '../../logger';
 @Injectable()
 export class EscrowCompletionService {
   private readonly logger = logger.child({
-    context: WebhookIncomingService.name,
+    context: EscrowCompletionService.name,
   });
 
   constructor(
