@@ -10,7 +10,7 @@ import {
 } from './sevices';
 import { useOracleRegistrationFlow } from './hooks';
 
-function useRegistrationForm(address: string | undefined) {
+function useRegistrationForm(address: string) {
   return useForm<RegistrationInExchangeOracleDto>({
     defaultValues: {
       // eslint-disable-next-line camelcase
@@ -26,12 +26,11 @@ export function RegistrationForm({
   address,
   oracleInstructions,
 }: Readonly<{
-  address: string | undefined;
+  address: string;
   oracleInstructions: string | URL | null | undefined;
 }>) {
   const { t } = useTranslation();
   const methods = useRegistrationForm(address);
-
   const {
     hasViewedInstructions,
     handleInstructionsView,
