@@ -2,7 +2,7 @@ import { type NavigateFunction } from 'react-router-dom';
 import { routerPaths } from '@/router/router-paths';
 
 interface NavigateToHCaptchaPageProps {
-  siteKey?: string | null | undefined;
+  siteKey: string | null | undefined;
   navigate: NavigateFunction;
 }
 
