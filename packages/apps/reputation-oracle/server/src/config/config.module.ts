@@ -28,7 +28,6 @@ import { HCaptchaConfigService } from './hcaptcha-config.service';
     HCaptchaConfigService,
   ],
   exports: [
-    ConfigService,
     ServerConfigService,
     AuthConfigService,
     DatabaseConfigService,
