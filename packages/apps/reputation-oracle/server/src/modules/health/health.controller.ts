@@ -52,7 +52,7 @@ export class HealthController {
   })
   @HealthCheck()
   @Get('/check')
-  readiness(): Promise<HealthCheckResult> {
+  check(): Promise<HealthCheckResult> {
     return this.health.check([
       async (): Promise<HealthIndicatorResult> =>
         this.db.pingCheck('database', {
