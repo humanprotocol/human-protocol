@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-import { PageCard, PageCardLoader } from '@/shared/components/ui/page-card';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
@@ -21,7 +21,7 @@ export function EmailVerificationFormContainer() {
   };
 
   if (!routerState?.email) {
-    return <PageCardLoader />;
+    return <Navigate to={routerPaths.homePage} />;
   }
 
   const alertComponent = methods.formState.isSubmitSuccessful ? (
