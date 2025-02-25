@@ -59,8 +59,8 @@ export function GovernanceBanner() {
         color: colorPalette.banner.text.secondary,
         borderRadius: '8px',
         padding: '16px',
-        my: '12px',
         gap: '16px',
+        mt: -8,
       }}
       direction={isMobile ? 'column' : 'row'}
     >

@@ -91,7 +91,6 @@ export function Layout({
         backgroundColor,
       }}
     >
-      <GovernanceBanner />
       <Navbar
         open={drawerOpen}
         setOpen={setDrawerOpen}
@@ -119,6 +118,7 @@ export function Layout({
             },
           }}
         >
+          <GovernanceBanner />
           <Grid item>
             <PageHeader {...pageHeaderProps} />
           </Grid>
