@@ -10,7 +10,7 @@ import { type Oracle } from '../hooks';
 interface OraclesTableDesktopProps {
   isOraclesDataPending: boolean;
   isOraclesDataError: boolean;
-  oraclesData: Oracle[] | undefined;
+  oraclesData: Oracle[];
 }
 
 export function OraclesTableDesktop({
@@ -26,7 +26,7 @@ export function OraclesTableDesktop({
       showAlertBanner: isOraclesDataError,
     },
     columns: tableColumns,
-    data: oraclesData ?? [],
+    data: oraclesData,
     enableColumnActions: false,
     enableColumnFilters: false,
     enableSorting: false,
