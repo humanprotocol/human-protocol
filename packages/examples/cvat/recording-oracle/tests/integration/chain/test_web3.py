@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from human_protocol_sdk.constants import ChainId
 from web3 import HTTPProvider, Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 
 from src.chain.web3 import get_web3, recover_signer, sign_message, validate_address
 from src.core.config import LocalhostConfig
@@ -18,9 +18,10 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         # Set default gas payer
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer),
-            "construct_sign_and_send_raw_middleware",
+        self.w3.middleware_onion.inject(
+            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),
+            "SignAndSendRawMiddlewareBuilder",
+            layer=0,
         )
         self.w3.eth.default_account = self.gas_payer.address
 
