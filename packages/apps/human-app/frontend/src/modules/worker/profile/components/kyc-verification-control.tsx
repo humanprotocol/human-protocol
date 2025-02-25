@@ -12,7 +12,6 @@ interface KycStatusProps {
 
 export function KycVerificationControl({ status }: Readonly<KycStatusProps>) {
   const { t } = useTranslation();
-  const kycToComplete = !(status.kycApproved || status.kycDeclined);
 
   return (
     <>
@@ -22,7 +21,7 @@ export function KycVerificationControl({ status }: Readonly<KycStatusProps>) {
       {status.kycDeclined && (
         <ErrorLabel>{t('worker.profile.kycDeclined')}</ErrorLabel>
       )}
-      {kycToComplete && <StartKycBtn />}
+      {status.kycToComplete && <StartKycBtn />}
     </>
   );
 }

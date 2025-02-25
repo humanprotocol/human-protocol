@@ -1,10 +1,8 @@
 import { t } from 'i18next';
 import { Button } from '@/shared/components/ui/button';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useStartKyc } from '../../hooks';
 
 export function StartKycBtn() {
-  const { user } = useAuthenticatedUser();
   const { isKYCInProgress, kycStartIsPending, startKYC } = useStartKyc();
 
   if (isKYCInProgress) {
@@ -17,7 +15,6 @@ export function StartKycBtn() {
 
   return (
     <Button
-      disabled={user.status !== 'active'}
       fullWidth
       loading={kycStartIsPending}
       onClick={startKYC}
