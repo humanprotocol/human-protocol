@@ -18,14 +18,6 @@ import { StorageService } from '../storage/storage.service';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { GCVContentModerationService } from './gcv-content-moderation.service';
-
-import { hashString } from '../../common/utils';
-import {
-  constructGcsPath,
-  convertToGCSPath,
-  convertToHttpUrl,
-  isGCSBucketUrl,
-} from '../../common/utils/gcstorage';
 import { sendSlackNotification } from '../../common/utils/slack';
 import { listObjectsInBucket } from '../../common/utils/storage';
 
@@ -37,16 +29,6 @@ jest.mock('../../common/utils/slack', () => ({
 jest.mock('../../common/utils/storage', () => ({
   ...jest.requireActual('../../common/utils/storage'),
   listObjectsInBucket: jest.fn(),
-}));
-jest.mock('../../common/utils/gcstorage', () => ({
-  convertToHttpUrl: jest.fn(),
-  convertToGCSPath: jest.fn(),
-  constructGcsPath: jest.fn(),
-  isGCSBucketUrl: jest.fn(),
-}));
-jest.mock('../../common/utils', () => ({
-  ...jest.requireActual('../../common/utils'),
-  hashString: jest.fn(),
 }));
 
 describe('GCVContentModerationService', () => {
@@ -76,9 +58,7 @@ describe('GCVContentModerationService', () => {
     (ImageAnnotatorClient as unknown as jest.Mock).mockImplementation(
       () => mockVisionClient,
     );
-  });
 
-  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GCVContentModerationService,
@@ -166,7 +146,7 @@ describe('GCVContentModerationService', () => {
 
       jest
         .spyOn<any, any>(service, 'ensureRequests')
-        .mockRejectedValue(new Error('Simulated ensureRequests error'));
+        .mockRejectedValueOnce(new Error('Simulated ensureRequests error'));
 
       await expect(service.moderateJob(jobEntity)).rejects.toThrow(
         'Simulated ensureRequests error',
@@ -214,7 +194,6 @@ describe('GCVContentModerationService', () => {
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
         data: { data_url: null },
       });
-      (isGCSBucketUrl as jest.Mock).mockReturnValue(false);
 
       await (service as any).ensureRequests(jobEntity);
       expect(jobEntity.status).toBe(JobStatus.MODERATION_PASSED);
@@ -234,7 +213,6 @@ describe('GCVContentModerationService', () => {
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
         data: { data_url: `gs://${faker.word.sample()}` },
       });
-      (isGCSBucketUrl as jest.Mock).mockReturnValue(true);
 
       (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([]);
       await (service as any).ensureRequests(jobEntity);
@@ -255,7 +233,6 @@ describe('GCVContentModerationService', () => {
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
         data: { data_url: `gs://${faker.word.sample()}` },
       });
-      (isGCSBucketUrl as jest.Mock).mockReturnValue(true);
 
       (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([
         `${faker.word.sample()}.jpg`,
@@ -277,7 +254,7 @@ describe('GCVContentModerationService', () => {
 
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockRejectedValue(new Error('DB error'));
+      ).mockRejectedValueOnce(new Error('DB error'));
 
       await expect((service as any).ensureRequests(jobEntity)).rejects.toThrow(
         'DB error',
@@ -314,7 +291,7 @@ describe('GCVContentModerationService', () => {
         .mockResolvedValueOnce([pendingRequest]);
       jest
         .spyOn<any, any>(service, 'processSingleRequest')
-        .mockRejectedValue(new Error('Processing error'));
+        .mockRejectedValueOnce(new Error('Processing error'));
 
       await (service as any).processRequests(jobEntity);
 
@@ -330,7 +307,7 @@ describe('GCVContentModerationService', () => {
       const jobEntity = { id: faker.number.int() } as JobEntity;
       jest
         .spyOn<any, any>(service, 'getRequests')
-        .mockRejectedValue(new Error('getRequests error'));
+        .mockRejectedValueOnce(new Error('getRequests error'));
 
       await expect((service as any).processRequests(jobEntity)).rejects.toThrow(
         'getRequests error',
@@ -367,7 +344,7 @@ describe('GCVContentModerationService', () => {
         .mockResolvedValueOnce([processedRequest]);
       jest
         .spyOn<any, any>(service, 'parseSingleRequest')
-        .mockRejectedValue(new Error('Parsing error'));
+        .mockRejectedValueOnce(new Error('Parsing error'));
 
       await (service as any).parseRequests(jobEntity);
       expect(contentModerationRequestRepository.updateOne).toHaveBeenCalledWith(
@@ -382,7 +359,7 @@ describe('GCVContentModerationService', () => {
       const jobEntity = { id: faker.number.int() } as JobEntity;
       jest
         .spyOn<any, any>(service, 'getRequests')
-        .mockRejectedValue(new Error('getRequests error'));
+        .mockRejectedValueOnce(new Error('getRequests error'));
 
       await expect((service as any).parseRequests(jobEntity)).rejects.toThrow(
         'getRequests error',
@@ -434,7 +411,7 @@ describe('GCVContentModerationService', () => {
       const jobEntity = { id: faker.number.int() } as JobEntity;
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockRejectedValue(new Error('DB error'));
+      ).mockRejectedValueOnce(new Error('DB error'));
 
       await expect((service as any).finalizeJob(jobEntity)).rejects.toThrow(
         'DB error',
@@ -444,9 +421,10 @@ describe('GCVContentModerationService', () => {
 
   describe('processSingleRequest', () => {
     it('should slice valid files, call asyncBatchAnnotateImages, set status PROCESSED', async () => {
+      const fakerPath = faker.word.sample();
       const requestEntity: ContentModerationRequestEntity = {
         id: faker.number.int(),
-        dataUrl: `gs://${faker.word.sample()}`,
+        dataUrl: `gs://${fakerPath}`,
         from: 1,
         to: 2,
         job: { id: faker.number.int() } as JobEntity,
@@ -458,8 +436,6 @@ describe('GCVContentModerationService', () => {
       jest
         .spyOn<any, any>(service, 'getValidFiles')
         .mockResolvedValueOnce([file1, file2, file3]);
-      const fakerPath = faker.word.sample();
-      (convertToGCSPath as jest.Mock).mockReturnValue(`gs://${fakerPath}`);
       const asyncBatchSpy = jest
         .spyOn<any, any>(service, 'asyncBatchAnnotateImages')
         .mockResolvedValueOnce(undefined);
@@ -492,7 +468,7 @@ describe('GCVContentModerationService', () => {
         .mockResolvedValueOnce([`${faker.word.sample()}.jpg`]);
       jest
         .spyOn<any, any>(service, 'asyncBatchAnnotateImages')
-        .mockRejectedValue(new Error('Vision error'));
+        .mockRejectedValueOnce(new Error('Vision error'));
 
       await expect(
         (service as any).processSingleRequest(requestEntity),
@@ -512,7 +488,6 @@ describe('GCVContentModerationService', () => {
       mockVisionClient.asyncBatchAnnotateImages.mockResolvedValueOnce([
         mockOperation,
       ]);
-      (constructGcsPath as jest.Mock).mockReturnValue('gs://somewhere/dest');
 
       await (service as any).asyncBatchAnnotateImages(
         ['img1', 'img2'],
@@ -524,7 +499,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw ControlledError if vision call fails', async () => {
-      mockVisionClient.asyncBatchAnnotateImages.mockRejectedValue(
+      mockVisionClient.asyncBatchAnnotateImages.mockRejectedValueOnce(
         new Error('Vision failure'),
       );
 
@@ -612,7 +587,7 @@ describe('GCVContentModerationService', () => {
       } as ContentModerationRequestEntity;
       jest
         .spyOn<any, any>(service, 'collectModerationResults')
-        .mockRejectedValue(new Error('Collect error'));
+        .mockRejectedValueOnce(new Error('Collect error'));
 
       await expect(
         (service as any).parseSingleRequest(requestEntity),
@@ -623,8 +598,7 @@ describe('GCVContentModerationService', () => {
 
   describe('collectModerationResults', () => {
     it('should throw ControlledError if no GCS files found', async () => {
-      (hashString as jest.Mock).mockReturnValue('abc123');
-      (mockStorage.bucket as any).mockReturnValue({
+      (mockStorage.bucket as any).mockReturnValueOnce({
         getFiles: jest.fn().mockResolvedValueOnce([]),
       });
 
@@ -634,8 +608,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should parse each file and accumulate responses, then categorize', async () => {
-      (hashString as jest.Mock).mockReturnValue('xyz789');
-      (mockStorage.bucket as any).mockReturnValue({
+      (mockStorage.bucket as any).mockReturnValueOnce({
         getFiles: jest.fn().mockResolvedValueOnce([
           [
             {
@@ -674,7 +647,7 @@ describe('GCVContentModerationService', () => {
         ]),
       });
 
-      service['categorizeModerationResults'] = jest.fn().mockReturnValue({
+      service['categorizeModerationResults'] = jest.fn().mockReturnValueOnce({
         positiveAbuseResults: [],
         possibleAbuseResults: [],
       });
@@ -695,9 +668,9 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw ControlledError if an error occurs', async () => {
-      (hashString as jest.Mock).mockReturnValue(faker.word.sample());
-      (mockStorage.bucket as any).mockReturnValue({
-        getFiles: jest.fn().mockRejectedValue(new Error('GCS error')),
+      (hashString as jest.Mock).mockReturnValueOnce(faker.word.sample());
+      (mockStorage.bucket as any).mockReturnValueOnce({
+        getFiles: jest.fn().mockRejectedValueOnce(new Error('GCS error')),
       });
 
       await expect(
@@ -708,8 +681,6 @@ describe('GCVContentModerationService', () => {
 
   describe('categorizeModerationResults', () => {
     it('should split results into positiveAbuse and possibleAbuse', () => {
-      (convertToHttpUrl as jest.Mock).mockReturnValue(faker.internet.url());
-
       const responses = [
         {
           safeSearchAnnotation: { adult: ContentModerationLevel.LIKELY },
@@ -738,8 +709,8 @@ describe('GCVContentModerationService', () => {
   describe('handleAbuseLinks', () => {
     it('should upload text file and send Slack message for confirmed abuse', async () => {
       const mockSignedUrl = faker.internet.url();
-      (mockStorage.bucket as any).mockReturnValue({
-        file: jest.fn().mockReturnValue({
+      (mockStorage.bucket as any).mockReturnValueOnce({
+        file: jest.fn().mockReturnValueOnce({
           createWriteStream: jest.fn(() => ({ end: jest.fn() })),
           getSignedUrl: jest.fn().mockResolvedValueOnce([mockSignedUrl]),
         }),
@@ -760,8 +731,8 @@ describe('GCVContentModerationService', () => {
 
     it('should handle possible abuse similarly', async () => {
       const mockSignedUrl = faker.internet.url();
-      (mockStorage.bucket as any).mockReturnValue({
-        file: jest.fn().mockReturnValue({
+      (mockStorage.bucket as any).mockReturnValueOnce({
+        file: jest.fn().mockReturnValueOnce({
           createWriteStream: jest.fn(() => ({ end: jest.fn() })),
           getSignedUrl: jest.fn().mockResolvedValueOnce([mockSignedUrl]),
         }),
@@ -781,12 +752,12 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw if getSignedUrl fails', async () => {
-      (mockStorage.bucket as any).mockReturnValue({
-        file: jest.fn().mockReturnValue({
+      (mockStorage.bucket as any).mockReturnValueOnce({
+        file: jest.fn().mockReturnValueOnce({
           createWriteStream: jest.fn(() => ({ end: jest.fn() })),
           getSignedUrl: jest
             .fn()
-            .mockRejectedValue(new Error('Signed URL error')),
+            .mockRejectedValueOnce(new Error('Signed URL error')),
         }),
       });
 
@@ -871,7 +842,7 @@ describe('GCVContentModerationService', () => {
 
     it('should throw if listObjectsInBucket fails', async () => {
       const dataUrl = `gs://${faker.word.sample()}/fail`;
-      (listObjectsInBucket as jest.Mock).mockRejectedValue(
+      (listObjectsInBucket as jest.Mock).mockRejectedValueOnce(
         new Error('List objects error'),
       );
 
