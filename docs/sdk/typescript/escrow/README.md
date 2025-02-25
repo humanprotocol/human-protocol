@@ -6,9 +6,7 @@
 
 # escrow
 
-## Index
-
-### Classes
+## Classes
 
 - [EscrowClient](classes/EscrowClient.md)
 - [EscrowUtils](classes/EscrowUtils.md)

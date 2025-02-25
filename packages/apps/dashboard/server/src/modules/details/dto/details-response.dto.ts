@@ -4,7 +4,7 @@ import { ChainId } from '@human-protocol/sdk';
 
 import { EscrowDto, EscrowPaginationDto } from './escrow.dto';
 import { TransactionPaginationDto } from './transaction.dto';
-import { LeaderDto } from './leader.dto';
+import { OperatorDto } from './operator.dto';
 import { WalletDto } from './wallet.dto';
 
 export class DetailsResponseDto {
@@ -21,7 +21,7 @@ export class DetailsResponseDto {
   @ApiProperty()
   @ApiPropertyOptional()
   @IsOptional()
-  public leader?: LeaderDto;
+  public operator?: OperatorDto;
 }
 
 export class DetailsPaginationResponseDto {

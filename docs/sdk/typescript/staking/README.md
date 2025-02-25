@@ -6,8 +6,6 @@
 
 # staking
 
-## Index
-
-### Classes
+## Classes
 
 - [StakingClient](classes/StakingClient.md)

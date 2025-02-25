@@ -50,11 +50,11 @@ Enum for KVStore keys
 
 #### website *= 'website'*
 
-### *class* human_protocol_sdk.constants.LeaderCategory(value)
+### *class* human_protocol_sdk.constants.OperatorCategory(value)
 
 Bases: `Enum`
 
-Enum for leader categories
+Enum for operator categories
 
 #### MACHINE_LEARNING *= 'machine_learning'*
 

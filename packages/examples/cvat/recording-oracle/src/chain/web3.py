@@ -3,7 +3,7 @@ from typing import Any
 
 from eth_account.messages import encode_defunct
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.rpc import HTTPProvider
 
 from src.core.config import Config
@@ -15,27 +15,30 @@ def get_web3(chain_id: Networks):
         case Config.polygon_mainnet.chain_id:
             w3 = Web3(HTTPProvider(Config.polygon_mainnet.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.polygon_mainnet.private_key)
-            w3.middleware_onion.add(
-                construct_sign_and_send_raw_middleware(gas_payer),
-                "construct_sign_and_send_raw_middleware",
+            w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build(Config.polygon_mainnet.private_key),
+                "SignAndSendRawMiddlewareBuilder",
+                layer=0,
             )
             w3.eth.default_account = gas_payer.address
             return w3
         case Config.polygon_amoy.chain_id:
             w3 = Web3(HTTPProvider(Config.polygon_amoy.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.polygon_amoy.private_key)
-            w3.middleware_onion.add(
-                construct_sign_and_send_raw_middleware(gas_payer),
-                "construct_sign_and_send_raw_middleware",
+            w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build(Config.polygon_amoy.private_key),
+                "SignAndSendRawMiddlewareBuilder",
+                layer=0,
             )
             w3.eth.default_account = gas_payer.address
             return w3
         case Config.localhost.chain_id:
             w3 = Web3(HTTPProvider(Config.localhost.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.localhost.private_key)
-            w3.middleware_onion.add(
-                construct_sign_and_send_raw_middleware(gas_payer),
-                "construct_sign_and_send_raw_middleware",
+            w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build(Config.localhost.private_key),
+                "SignAndSendRawMiddlewareBuilder",
+                layer=0,
             )
             w3.eth.default_account = gas_payer.address
             return w3
@@ -47,7 +50,7 @@ def serialize_message(message: Any) -> str:
     return json.dumps(message, separators=(",", ":"))
 
 
-def sign_message(chain_id: Networks, message) -> str:
+def sign_message(chain_id: Networks, message) -> tuple:
     w3 = get_web3(chain_id)
     private_key = ""
     match chain_id:

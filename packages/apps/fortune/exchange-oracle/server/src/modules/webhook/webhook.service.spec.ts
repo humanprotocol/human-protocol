@@ -35,7 +35,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn(),
   },
   OperatorUtils: {
-    getLeader: jest.fn(),
+    getOperator: jest.fn(),
   },
   KVStoreUtils: {
     get: jest.fn(),
@@ -246,7 +246,7 @@ describe('WebhookService', () => {
           .mockResolvedValue(JOB_LAUNCHER_WEBHOOK_URL),
       }));
 
-      (OperatorUtils.getLeader as any).mockResolvedValue({
+      (OperatorUtils.getOperator as any).mockResolvedValue({
         webhookUrl: JOB_LAUNCHER_WEBHOOK_URL,
       });
 
@@ -266,7 +266,7 @@ describe('WebhookService', () => {
           .mockResolvedValue(MOCK_RECORDING_ORACLE_WEBHOOK_URL),
       }));
 
-      (OperatorUtils.getLeader as any).mockResolvedValue({
+      (OperatorUtils.getOperator as any).mockResolvedValue({
         webhookUrl: MOCK_RECORDING_ORACLE_WEBHOOK_URL,
       });
 

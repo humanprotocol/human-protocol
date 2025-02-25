@@ -23,7 +23,7 @@ jest.mock('@human-protocol/sdk', () => {
     ...actualSdk,
     OperatorUtils: {
       getReputationNetworkOperators: jest.fn(),
-      getLeader: jest.fn(),
+      getOperator: jest.fn(),
     },
   };
 });
@@ -323,7 +323,7 @@ describe('Web3Service', () => {
     });
 
     it('should return matching oracle addresses based on job type', async () => {
-      const mockLeader = {
+      const mockOperator = {
         address: '0x0000000000000000000000000000000000000000',
         reputationNetworks: [
           '0x0000000000000000000000000000000000000001',
@@ -332,24 +332,24 @@ describe('Web3Service', () => {
         ],
       };
 
-      const mockLeader1 = {
+      const mockOperator1 = {
         address: '0x0000000000000000000000000000000000000001',
         jobTypes: ['Points'],
       };
-      const mockLeader2 = {
+      const mockOperator2 = {
         address: '0x0000000000000000000000000000000000000002',
         jobTypes: ['Fortune'],
       };
-      const mockLeader3 = {
+      const mockOperator3 = {
         address: '0x0000000000000000000000000000000000000003',
         jobTypes: ['Points', 'Fortune'],
       };
 
-      (OperatorUtils.getLeader as jest.Mock)
-        .mockResolvedValueOnce(mockLeader)
-        .mockResolvedValueOnce(mockLeader1)
-        .mockResolvedValueOnce(mockLeader2)
-        .mockResolvedValueOnce(mockLeader3);
+      (OperatorUtils.getOperator as jest.Mock)
+        .mockResolvedValueOnce(mockOperator)
+        .mockResolvedValueOnce(mockOperator1)
+        .mockResolvedValueOnce(mockOperator2)
+        .mockResolvedValueOnce(mockOperator3);
 
       const result = await web3Service.getReputationOraclesByJobType(
         ChainId.POLYGON_AMOY,
@@ -360,32 +360,32 @@ describe('Web3Service', () => {
         '0x0000000000000000000000000000000000000001',
         '0x0000000000000000000000000000000000000003',
       ]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(4);
+      expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(4);
     });
 
     it('should return an empty array if reputation networks not found for chain', async () => {
-      const mockLeader = {
+      const mockOperator = {
         address: '0x0000000000000000000000000000000000000000',
       };
 
-      const mockLeader1 = {
+      const mockOperator1 = {
         address: '0x0000000000000000000000000000000000000001',
         jobTypes: ['NewJobType1'],
       };
-      const mockLeader2 = {
+      const mockOperator2 = {
         address: '0x0000000000000000000000000000000000000002',
         jobTypes: ['NewJobType2'],
       };
-      const mockLeader3 = {
+      const mockOperator3 = {
         address: '0x0000000000000000000000000000000000000003',
         jobTypes: ['NewJobType3'],
       };
 
-      (OperatorUtils.getLeader as jest.Mock)
-        .mockResolvedValueOnce(mockLeader)
-        .mockResolvedValueOnce(mockLeader1)
-        .mockResolvedValueOnce(mockLeader2)
-        .mockResolvedValueOnce(mockLeader3);
+      (OperatorUtils.getOperator as jest.Mock)
+        .mockResolvedValueOnce(mockOperator)
+        .mockResolvedValueOnce(mockOperator1)
+        .mockResolvedValueOnce(mockOperator2)
+        .mockResolvedValueOnce(mockOperator3);
 
       const result = await web3Service.getReputationOraclesByJobType(
         ChainId.POLYGON_AMOY,
@@ -393,11 +393,11 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
+      expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
     });
 
     it('should return an empty array if no oracles match the job type', async () => {
-      const mockLeader = {
+      const mockOperator = {
         address: '0x0000000000000000000000000000000000000000',
         reputationNetworks: [
           '0x0000000000000000000000000000000000000001',
@@ -406,24 +406,24 @@ describe('Web3Service', () => {
         ],
       };
 
-      const mockLeader1 = {
+      const mockOperator1 = {
         address: '0x0000000000000000000000000000000000000001',
         jobTypes: ['NewJobType1'],
       };
-      const mockLeader2 = {
+      const mockOperator2 = {
         address: '0x0000000000000000000000000000000000000002',
         jobTypes: ['NewJobType2'],
       };
-      const mockLeader3 = {
+      const mockOperator3 = {
         address: '0x0000000000000000000000000000000000000003',
         jobTypes: ['NewJobType3'],
       };
 
-      (OperatorUtils.getLeader as jest.Mock)
-        .mockResolvedValueOnce(mockLeader)
-        .mockResolvedValueOnce(mockLeader1)
-        .mockResolvedValueOnce(mockLeader2)
-        .mockResolvedValueOnce(mockLeader3);
+      (OperatorUtils.getOperator as jest.Mock)
+        .mockResolvedValueOnce(mockOperator)
+        .mockResolvedValueOnce(mockOperator1)
+        .mockResolvedValueOnce(mockOperator2)
+        .mockResolvedValueOnce(mockOperator3);
 
       const result = await web3Service.getReputationOraclesByJobType(
         ChainId.POLYGON_AMOY,
@@ -431,12 +431,12 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
+      expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle errors from getLeader and return an empty array', async () => {
-      (OperatorUtils.getLeader as jest.Mock).mockRejectedValueOnce(
-        new Error('Failed to fetch leader'),
+    it('should handle errors from getOperator and return an empty array', async () => {
+      (OperatorUtils.getOperator as jest.Mock).mockRejectedValueOnce(
+        new Error('Failed to fetch operator'),
       );
 
       const result = await web3Service.getReputationOraclesByJobType(
@@ -445,7 +445,7 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
+      expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
     });
 
     it('should return an empty array if no reputation oracles are configured', async () => {
@@ -459,7 +459,7 @@ describe('Web3Service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(OperatorUtils.getLeader).toHaveBeenCalledTimes(1);
+      expect(OperatorUtils.getOperator).toHaveBeenCalledTimes(1);
     });
   });
 });

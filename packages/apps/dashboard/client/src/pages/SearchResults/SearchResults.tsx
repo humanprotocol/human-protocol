@@ -35,7 +35,7 @@ const renderCurrentResultType = (
     keyof AddressDetails,
     { title: string; icon: JSX.Element }
   > = {
-    leader: {
+    operator: {
       title: 'Wallet Address',
       icon: <WalletIcon />,
     },
@@ -86,7 +86,7 @@ const Results = () => {
 
   const selectedWalletData: AddressDetailsWallet | undefined =
     data.wallet ||
-    (data.leader && data.leader.role === null ? data.leader : undefined);
+    (data.operator && data.operator.role === null ? data.operator : undefined);
 
   return (
     <>
@@ -99,8 +99,8 @@ const Results = () => {
         {renderCurrentResultType(data, filterParams.address)}
       </Stack>
 
-      {data.leader && data.leader.role ? (
-        <RoleDetails data={data.leader} />
+      {data.operator && data.operator.role ? (
+        <RoleDetails data={data.operator} />
       ) : null}
       {selectedWalletData ? <WalletAddress data={selectedWalletData} /> : null}
       {data.escrow ? <EscrowAddress data={data.escrow} /> : null}
