@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- api response*/
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
@@ -27,22 +27,22 @@ export type AvailableJobsSuccessResponse = z.infer<
   typeof availableJobsSuccessResponseSchema
 >;
 
-type GetJobTableDataDto = JobsFilterStoreProps['filterParams'] & {
+type JobTableQueryParams = JobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
 };
 
 const getAvailableJobsTableData = async (
-  dto: GetJobTableDataDto,
+  params: JobTableQueryParams,
   abortSignal: AbortSignal
 ) => {
+  const endpoint = `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject(params)}`;
+
   return apiClient(
-    `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
+    endpoint,
     {
       authenticated: true,
       successSchema: availableJobsSuccessResponseSchema,
-      options: {
-        method: 'GET',
-      },
+      options: { method: 'GET' },
     },
     abortSignal
   );
@@ -56,5 +56,23 @@ export function useGetAvailableJobsData() {
   return useQuery({
     queryKey: ['availableJobs', dto],
     queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
+  });
+}
+
+export function useInfiniteAvailableJobsQuery() {
+  const { filterParams } = useJobsFilterStore();
+  const { address: oracleAddress } = useParams<{ address: string }>();
+
+  const queryParams = {
+    ...filterParams,
+    oracle_address: oracleAddress ?? '',
+  };
+
+  return useInfiniteQuery<AvailableJobsSuccessResponse>({
+    queryKey: ['availableJobsInfinite', queryParams],
+    queryFn: ({ signal }) => getAvailableJobsTableData(queryParams, signal),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =>
+      lastPage.total_pages - 1 <= lastPage.page ? undefined : lastPage.page,
   });
 }
