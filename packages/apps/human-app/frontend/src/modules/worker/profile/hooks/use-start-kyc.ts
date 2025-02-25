@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useKycStartMutation } from '@/modules/worker/services/get-kyc-session-id';
 import { useKycErrorNotifications } from '@/modules/worker/hooks/use-kyc-notification';
 import { FetchError } from '@/api/fetcher';
@@ -14,9 +14,9 @@ export function useStartKyc() {
     error: kycStartMutationError,
   } = useKycStartMutation();
 
-  const startKYC = () => {
+  const startKYC = useCallback(() => {
     kycStartMutation();
-  };
+  }, [kycStartMutation]);
 
   useEffect(() => {
     if (kycStartMutationStatus === 'error') {

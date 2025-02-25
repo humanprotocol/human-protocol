@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
-import { type WorkerProfileStatus } from '../types';
 import { DoneLabel } from './status-labels';
 import { WalletConnectDone } from './wallet-connect-done';
 
 interface WalletConnectionControlProps {
-  status: Pick<WorkerProfileStatus, 'kycApproved'>;
+  kycApproved: boolean;
   isConnected: boolean;
   hasWalletAddress: boolean;
   isRegisterAddressPending: boolean;
@@ -13,21 +12,13 @@ interface WalletConnectionControlProps {
 }
 
 export function WalletConnectionControl({
-  status,
+  kycApproved,
   isConnected,
   hasWalletAddress,
   isRegisterAddressPending,
   onConnect,
 }: Readonly<WalletConnectionControlProps>) {
   const { t } = useTranslation();
-
-  if (!status.kycApproved) {
-    return (
-      <Button disabled fullWidth variant="contained">
-        {t('components.wallet.connectBtn.connect')}
-      </Button>
-    );
-  }
 
   if (isConnected || hasWalletAddress) {
     return (
@@ -39,7 +30,7 @@ export function WalletConnectionControl({
 
   return (
     <Button
-      disabled={!status.kycApproved}
+      disabled={kycApproved}
       fullWidth
       loading={isRegisterAddressPending}
       onClick={onConnect}

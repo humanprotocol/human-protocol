@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useRegisterAddress } from '@/modules/worker/hooks/use-register-address';
 import { useRegisterAddressNotifications } from '../../hooks/use-register-address-notifications';
@@ -21,10 +21,10 @@ export function useWorkerWalletRegistration() {
     }
   }, [address, isConnected, registerAddressMutation]);
 
-  const handleConnectWallet = () => {
+  const handleConnectWallet = useCallback(() => {
     modalWasOpened.current = true;
     void openModal();
-  };
+  }, [openModal]);
 
   return {
     isConnected,

@@ -64,8 +64,6 @@ export function WorkerProfilePage() {
       >
         <ProfileData />
         <ProfileActions />
-        {/* TODO add email notifications toggling */}
-        {/* <ProfileEmailNotification /> */}
       </Grid>
     </Paper>
   );

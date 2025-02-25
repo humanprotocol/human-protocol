@@ -22,7 +22,7 @@ export function ProfileActions() {
 
       <Grid>
         <WalletConnectionControl
-          status={status}
+          kycApproved={status.kycApproved}
           isConnected={isConnected}
           hasWalletAddress={Boolean(user.wallet_address)}
           isRegisterAddressPending={isRegisterAddressPending}

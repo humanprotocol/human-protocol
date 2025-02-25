@@ -7,7 +7,11 @@ import { type WorkerProfileStatus } from '../types';
 export function useWorkerProfileStatus(): WorkerProfileStatus {
   const { user } = useAuthenticatedUser();
   const navigate = useNavigate();
+
   const emailVerified = user.status === 'active';
+  const kycApproved = user.kyc_status === 'approved';
+  const kycDeclined = user.kyc_status === 'declined';
+  const kycToComplete = !(kycApproved || kycDeclined);
 
   useEffect(() => {
     if (!emailVerified) {
@@ -20,10 +24,8 @@ export function useWorkerProfileStatus(): WorkerProfileStatus {
 
   return {
     emailVerified,
-    kycApproved: user.kyc_status === 'approved',
-    kycDeclined: user.kyc_status === 'declined',
-    kycToComplete: !(
-      user.kyc_status === 'approved' || user.kyc_status === 'declined'
-    ),
+    kycApproved,
+    kycDeclined,
+    kycToComplete,
   };
 }
