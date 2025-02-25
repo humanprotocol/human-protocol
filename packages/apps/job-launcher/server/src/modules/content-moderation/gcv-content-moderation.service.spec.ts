@@ -211,7 +211,9 @@ describe('GCVContentModerationService', () => {
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockResolvedValueOnce([]);
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
-        data: { data_url: `gs://${faker.word.sample()}` },
+        data: {
+          data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
+        },
       });
 
       (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([]);
@@ -231,7 +233,9 @@ describe('GCVContentModerationService', () => {
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockResolvedValueOnce([]);
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
-        data: { data_url: `gs://${faker.word.sample()}` },
+        data: {
+          data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
+        },
       });
 
       (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([
@@ -421,10 +425,10 @@ describe('GCVContentModerationService', () => {
 
   describe('processSingleRequest', () => {
     it('should slice valid files, call asyncBatchAnnotateImages, set status PROCESSED', async () => {
-      const fakerPath = faker.word.sample();
+      const fakerBucket = faker.word.sample();
       const requestEntity: ContentModerationRequestEntity = {
         id: faker.number.int(),
-        dataUrl: `gs://${fakerPath}`,
+        dataUrl: `https://${fakerBucket}.storage.googleapis.com`,
         from: 1,
         to: 2,
         job: { id: faker.number.int() } as JobEntity,
@@ -443,7 +447,7 @@ describe('GCVContentModerationService', () => {
       await (service as any).processSingleRequest(requestEntity);
 
       expect(asyncBatchSpy).toHaveBeenCalledWith(
-        [`gs://${fakerPath}/${file1}`, `gs://${fakerPath}/${file2}`],
+        [`gs://${fakerBucket}/${file1}`, `gs://${fakerBucket}/${file2}`],
         `moderation-results-${requestEntity.job.id}-${requestEntity.id}`,
       );
       expect(contentModerationRequestRepository.updateOne).toHaveBeenCalledWith(
@@ -457,7 +461,7 @@ describe('GCVContentModerationService', () => {
     it('should throw if asyncBatchAnnotateImages fails', async () => {
       const requestEntity: ContentModerationRequestEntity = {
         id: faker.number.int(),
-        dataUrl: `gs://${faker.word.sample()}`,
+        dataUrl: `https://${faker.word.sample()}.storage.googleapis.com`,
         from: 1,
         to: 2,
         job: { id: faker.number.int() } as JobEntity,
@@ -647,15 +651,17 @@ describe('GCVContentModerationService', () => {
         ]),
       });
 
-      service['categorizeModerationResults'] = jest.fn().mockReturnValueOnce({
-        positiveAbuseResults: [],
-        possibleAbuseResults: [],
-      });
+      jest
+        .spyOn<any, any>(service, 'categorizeModerationResults')
+        .mockReturnValueOnce({
+          positiveAbuseResults: [],
+          possibleAbuseResults: [],
+        });
 
       const result = await (service as any).collectModerationResults(
         faker.word.sample(),
       );
-      expect(service['categorizeModerationResults']).toHaveBeenCalledWith(
+      expect((service as any).categorizeModerationResults).toHaveBeenCalledWith(
         expect.arrayContaining([
           { safeSearchAnnotation: { adult: ContentModerationLevel.LIKELY } },
           {
@@ -668,7 +674,6 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw ControlledError if an error occurs', async () => {
-      (hashString as jest.Mock).mockReturnValueOnce(faker.word.sample());
       (mockStorage.bucket as any).mockReturnValueOnce({
         getFiles: jest.fn().mockRejectedValueOnce(new Error('GCS error')),
       });
@@ -684,11 +689,15 @@ describe('GCVContentModerationService', () => {
       const responses = [
         {
           safeSearchAnnotation: { adult: ContentModerationLevel.LIKELY },
-          context: { uri: faker.internet.url() },
+          context: {
+            uri: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}/${faker.word.sample()}`,
+          },
         },
         {
           safeSearchAnnotation: { violence: ContentModerationLevel.POSSIBLE },
-          context: { uri: faker.internet.url() },
+          context: {
+            uri: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}/${faker.word.sample()}`,
+          },
         },
       ];
       const result = (service as any).categorizeModerationResults(responses);
@@ -698,7 +707,12 @@ describe('GCVContentModerationService', () => {
 
     it('should ignore entries with no safeSearchAnnotation', () => {
       const responses = [
-        { safeSearchAnnotation: null, context: { uri: faker.internet.url() } },
+        {
+          safeSearchAnnotation: null,
+          context: {
+            uri: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}/${faker.word.sample()}`,
+          },
+        },
       ];
       const result = (service as any).categorizeModerationResults(responses);
       expect(result.positiveAbuseResults).toHaveLength(0);
@@ -814,7 +828,7 @@ describe('GCVContentModerationService', () => {
 
   describe('getValidFiles', () => {
     it('should return cached files if present', async () => {
-      const dataUrl = `gs://${faker.word.sample()}/data`;
+      const dataUrl = `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}/data`;
       const file1 = `${faker.word.sample()}.jpg`;
       const file2 = `${faker.word.sample()}.png`;
       (service as any).bucketListCache.set(dataUrl, [file1, file2]);
@@ -825,7 +839,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should fetch from GCS if not cached, filter out directories, and cache', async () => {
-      const dataUrl = `gs://${faker.word.sample()}/data`;
+      const dataUrl = `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}/data`;
       const file1 = `${faker.word.sample()}.jpg`;
       const file2 = `${faker.word.sample()}.png`;
       (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([
@@ -841,7 +855,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw if listObjectsInBucket fails', async () => {
-      const dataUrl = `gs://${faker.word.sample()}/fail`;
+      const dataUrl = `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}/fail`;
       (listObjectsInBucket as jest.Mock).mockRejectedValueOnce(
         new Error('List objects error'),
       );
