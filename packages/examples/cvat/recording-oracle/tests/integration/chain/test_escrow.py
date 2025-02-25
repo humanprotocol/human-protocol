@@ -6,7 +6,7 @@ import pytest
 from human_protocol_sdk.encryption import EncryptionUtils
 from human_protocol_sdk.escrow import EscrowClientError
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.rpc import HTTPProvider
 
 from src.chain.escrow import (
@@ -42,10 +42,11 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         # Set default gas payer
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer),
-            "construct_sign_and_send_raw_middleware",
-        )
+        self.w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV), # type: ignore
+                'SignAndSendRawMiddlewareBuilder',
+                layer=0,
+            )
         self.w3.eth.default_account = self.gas_payer.address
         self.network_config = Config.localhost
 

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from sqlalchemy.sql import select
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.rpc import HTTPProvider
 
 from src.core.types import (
@@ -29,10 +29,11 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.w3 = Web3(HTTPProvider())
 
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer),
-            "construct_sign_and_send_raw_middleware",
-        )
+        self.w3.middleware_onion.inject(
+                SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV), # type: ignore
+                'SignAndSendRawMiddlewareBuilder',
+                layer=0,
+            )
         self.w3.eth.default_account = self.gas_payer.address
 
     def tearDown(self):

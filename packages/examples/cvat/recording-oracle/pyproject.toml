@@ -22,11 +22,11 @@ numpy = "^1.25.2"
 boto3 = "^1.28.40"
 google-cloud-storage = "^2.14.0"
 datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
-human-protocol-sdk = "^4.0.3b0"
 hexbytes = ">=1.2.0" # required for to_0x_hex() function
 starlette = ">=0.40.0" # avoid the vulnerability with multipart/form-data
 cvat-sdk = "2.25.0"
 cryptography = "<44.0.0" # human-protocol-sdk -> pgpy dep requires cryptography < 45
+human-protocol-sdk = "^4.0.3"
 
 [tool.poetry.group.dev.dependencies]
 hypothesis = "^6.82.6"
