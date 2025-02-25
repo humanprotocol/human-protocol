@@ -33,7 +33,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
         self.w3.middleware_onion.inject(
-            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),  # type: ignore
+            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),
             "SignAndSendRawMiddlewareBuilder",
             layer=0,
         )
