@@ -9,7 +9,7 @@ import type { JobsFilterStoreProps } from '@/modules/worker/hooks/use-jobs-filte
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
 
-export const availableJobSchema = z.object({
+const availableJobSchema = z.object({
   escrow_address: z.string(),
   chain_id: z.number(),
   job_type: z.string(),
@@ -19,7 +19,7 @@ export const availableJobSchema = z.object({
   reward_token: z.string().optional(),
 });
 
-export const availableJobsSuccessResponseSchema =
+const availableJobsSuccessResponseSchema =
   createPaginationSchema(availableJobSchema);
 
 export type AvailableJob = z.infer<typeof availableJobSchema>;
