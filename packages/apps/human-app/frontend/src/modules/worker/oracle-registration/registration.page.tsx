@@ -1,11 +1,10 @@
 import { Box, Grid, Paper, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 import { RegistrationForm } from '@/modules/worker/oracle-registration/registration-form';
 import { Loader } from '@/shared/components/ui/loader';
+import { routerPaths } from '@/router/router-paths';
 import { useGetOracles } from '../services/oracles';
-import { useOracleNavigation } from './hooks/use-oracle-navigation';
 import { useIsAlreadyRegistered } from './hooks';
 
 function isAddress(address: string | undefined): address is string {
@@ -14,27 +13,23 @@ function isAddress(address: string | undefined): address is string {
 
 export function RegistrationPage() {
   const { t } = useTranslation();
-  const { address } = useParams<{ address: string }>();
+  const { address: oracleAddress } = useParams<{ address: string }>();
   const { data, isLoading } = useGetOracles();
-  const isAlreadyRegistered = useIsAlreadyRegistered(address);
-  const { navigateToJobs, navigateToDiscovery } = useOracleNavigation(address);
+  const isAlreadyRegistered = useIsAlreadyRegistered(oracleAddress);
 
-  const oracleData = data?.find((o) => o.address === address);
+  const oracleData = data?.find((o) => o.address === oracleAddress);
 
-  useEffect(() => {
-    if (oracleData === undefined || !isAddress(address)) {
-      navigateToDiscovery();
-    }
-  }, [oracleData, address, navigateToDiscovery]);
+  if (oracleData === undefined || !isAddress(oracleAddress)) {
+    return <Navigate to={routerPaths.worker.jobsDiscovery} />;
+  }
 
-  useEffect(() => {
-    if (isAlreadyRegistered) {
-      navigateToJobs();
-    }
-  }, [isAlreadyRegistered, navigateToJobs]);
-
-  if (!isAddress(address)) {
-    return null;
+  if (isAlreadyRegistered) {
+    return (
+      <Navigate
+        to={`${routerPaths.worker.jobs}/${oracleAddress}`}
+        state={oracleAddress}
+      />
+    );
   }
 
   return (
@@ -62,8 +57,8 @@ export function RegistrationPage() {
                   {t('worker.registrationInExchangeOracle.requiredMessage')}
                 </Box>
                 <RegistrationForm
-                  address={address}
-                  oracleInstructions={oracleData?.registrationInstructions}
+                  address={oracleAddress}
+                  oracleInstructions={oracleData.registrationInstructions}
                 />
               </>
             )}
