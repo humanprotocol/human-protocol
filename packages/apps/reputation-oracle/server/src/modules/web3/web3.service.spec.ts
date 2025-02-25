@@ -7,8 +7,8 @@ import {
   mockConfig,
 } from '../../../test/constants';
 import { Web3Service } from './web3.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { NetworkConfigService } from '../../config/network-config.service';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;

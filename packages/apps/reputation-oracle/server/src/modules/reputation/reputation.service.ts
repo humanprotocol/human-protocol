@@ -21,11 +21,11 @@ import {
   CvatAnnotationMeta,
   CvatAnnotationMetaResults,
   FortuneFinalResult,
-} from '../../common/dto/result';
+} from '../../common/interfaces/job-result';
 import { RequestAction } from './reputation.interface';
-import { getRequestType } from '../../common/utils';
-import { CvatManifestDto } from '../../common/dto/manifest';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { getRequestType } from '../../utils/manifest';
+import { CvatManifest } from '../../common/interfaces/manifest';
+import { ReputationConfigService } from '../../config/reputation-config.service';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationError, ReputationErrorMessage } from './reputation.error';
 
@@ -118,35 +118,35 @@ export class ReputationService {
       assessWorkerReputationScores: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: CvatManifestDto,
+        manifest: CvatManifest,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
     [JobRequestType.IMAGE_POINTS]: {
       assessWorkerReputationScores: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: CvatManifestDto,
+        manifest: CvatManifest,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       assessWorkerReputationScores: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: CvatManifestDto,
+        manifest: CvatManifest,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       assessWorkerReputationScores: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: CvatManifestDto,
+        manifest: CvatManifest,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
     [JobRequestType.IMAGE_POLYGONS]: {
       assessWorkerReputationScores: async (
         chainId: ChainId,
         escrowAddress: string,
-        manifest: CvatManifestDto,
+        manifest: CvatManifest,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
   };
@@ -187,7 +187,7 @@ export class ReputationService {
   private async processCvat(
     chainId: ChainId,
     escrowAddress: string,
-    manifest: CvatManifestDto,
+    manifest: CvatManifest,
   ): Promise<void> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);

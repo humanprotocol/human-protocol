@@ -6,7 +6,7 @@ import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { UserStatus, Role } from '../../common/enums/user';
 import { UserQualificationEntity } from './user-qualification.entity';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import {
   QualificationError,
   QualificationErrorMessage,

@@ -15,16 +15,18 @@ import { getFilenameFromContentDisposition } from '../utils/string';
 export const createFortuneJob = async (
   chainId: number,
   data: FortuneRequest,
-  amount: number | string,
-  currency: string,
+  paymentCurrency: string,
+  paymentAmount: number | string,
+  escrowFundToken: string,
 ) => {
   const body: CreateFortuneJobRequest = {
     chainId,
     submissionsRequired: Number(data.fortunesRequested),
     requesterTitle: data.title,
     requesterDescription: data.description,
-    currency: currency,
-    fundAmount: Number(amount),
+    paymentCurrency,
+    paymentAmount: Number(paymentAmount),
+    escrowFundToken,
     qualifications: data.qualifications,
   };
   await api.post('/job/fortune', body);
@@ -33,14 +35,16 @@ export const createFortuneJob = async (
 export const createCvatJob = async (
   chainId: number,
   data: CvatRequest,
-  amount: number | string,
-  currency: string,
+  paymentCurrency: string,
+  paymentAmount: number | string,
+  escrowFundToken: string,
 ) => {
   const body: CreateCvatJobRequest = {
     chainId,
     requesterDescription: data.description,
-    fundAmount: Number(amount),
-    currency: currency,
+    paymentCurrency,
+    paymentAmount: Number(paymentAmount),
+    escrowFundToken,
     data: data.data,
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,

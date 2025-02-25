@@ -4,9 +4,8 @@ obtain staking information from both the contracts and subgraph.
 """
 
 from .operator_utils import (
-    LeaderData,
-    LeaderFilter,
-    Operator,
+    OperatorData,
+    OperatorFilter,
     OperatorUtils,
     RewardData,
     OperatorUtilsError,

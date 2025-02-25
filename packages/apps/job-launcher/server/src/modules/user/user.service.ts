@@ -7,7 +7,7 @@ import { UserBalanceDto, UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { PaymentService } from '../payment/payment.service';
-import { Currency } from '../../common/enums/payment';
+import { FiatCurrency } from '../../common/enums/payment';
 
 @Injectable()
 export class UserService {
@@ -48,10 +48,10 @@ export class UserService {
     return this.userRepository.updateOne(userEntity);
   }
 
-  public async getBalance(userId: number): Promise<UserBalanceDto> {
+  public async getTotalUSDBalance(userId: number): Promise<UserBalanceDto> {
     return {
-      amount: await this.paymentService.getUserBalance(userId),
-      currency: Currency.USD,
+      amount: await this.paymentService.getUserUSDBalance(userId),
+      currency: FiatCurrency.USD,
     };
   }
 }

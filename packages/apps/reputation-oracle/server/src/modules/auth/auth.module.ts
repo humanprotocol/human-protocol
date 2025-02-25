@@ -8,7 +8,7 @@ import { AuthJwtController } from './auth.controller';
 import { TokenRepository } from './token.repository';
 import { UserRepository } from '../user/user.repository';
 import { Web3Module } from '../web3/web3.module';
-import { AuthConfigService } from '../../common/config/auth-config.service';
+import { AuthConfigService } from '../../config/auth-config.service';
 import { HCaptchaModule } from '../../integrations/hcaptcha/hcaptcha.module';
 import { EmailModule } from '../email/module';
 

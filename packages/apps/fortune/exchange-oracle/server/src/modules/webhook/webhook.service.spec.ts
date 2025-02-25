@@ -35,7 +35,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn(),
   },
   OperatorUtils: {
-    getLeader: jest.fn(),
+    getOperator: jest.fn(),
   },
   KVStoreUtils: {
     get: jest.fn(),
@@ -171,10 +171,10 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.TASK_CREATION_FAILED,
+        eventType: EventType.ESCROW_FAILED,
       };
       await expect(webhookService.handleWebhook(webhook)).rejects.toThrow(
-        'Invalid webhook event type: task_creation_failed',
+        'Invalid webhook event type: escrow_failed',
       );
     });
   });
@@ -246,14 +246,14 @@ describe('WebhookService', () => {
           .mockResolvedValue(JOB_LAUNCHER_WEBHOOK_URL),
       }));
 
-      (OperatorUtils.getLeader as any).mockResolvedValue({
+      (OperatorUtils.getOperator as any).mockResolvedValue({
         webhookUrl: JOB_LAUNCHER_WEBHOOK_URL,
       });
 
       const result = await (webhookService as any).getOracleWebhookUrl(
         JOB_LAUNCHER_WEBHOOK_URL,
         ChainId.LOCALHOST,
-        EventType.TASK_CREATION_FAILED,
+        EventType.ESCROW_FAILED,
       );
 
       expect(result).toBe(JOB_LAUNCHER_WEBHOOK_URL);
@@ -266,7 +266,7 @@ describe('WebhookService', () => {
           .mockResolvedValue(MOCK_RECORDING_ORACLE_WEBHOOK_URL),
       }));
 
-      (OperatorUtils.getLeader as any).mockResolvedValue({
+      (OperatorUtils.getOperator as any).mockResolvedValue({
         webhookUrl: MOCK_RECORDING_ORACLE_WEBHOOK_URL,
       });
 

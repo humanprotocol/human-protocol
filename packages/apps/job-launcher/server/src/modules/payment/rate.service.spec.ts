@@ -93,49 +93,4 @@ describe('RateService', () => {
       new ControlledError(ErrorCurrency.PairNotFound, HttpStatus.NOT_FOUND),
     );
   });
-
-  /*
-  it('should fetch rate from CoinMarketCap when Coingecko fails', async () => {
-    const from = 'hmt';
-    const to = 'usd';
-    const rate = 50000;
-
-    jest.spyOn(httpService, 'get')
-      .mockImplementationOnce(() => { throw new Error(); }) // Coingecko fails
-      .mockImplementationOnce(() =>
-        of({
-          data: {
-            hmt: {
-              quote: {
-                usd: {
-                  price: rate,
-                },
-              },
-            },
-          },
-        }) as any,
-      );
-
-    const fetchedRate = await service.getRate(from, to);
-    expect(fetchedRate).toBe(rate);
-  });
-  */
-
-  it('should throw an error if rate not found on both Coingecko and CoinMarketCap', async () => {
-    const from = 'hmt';
-    const to = 'usd';
-
-    jest
-      .spyOn(httpService, 'get')
-      .mockImplementationOnce(() => {
-        throw new Error();
-      }) // Coingecko fails
-      .mockImplementationOnce(() => {
-        throw new Error();
-      }); // CoinMarketCap fails
-
-    await expect(service.getRate(from, to)).rejects.toThrowError(
-      new ControlledError(ErrorCurrency.PairNotFound, HttpStatus.NOT_FOUND),
-    );
-  });
 });

@@ -20,7 +20,7 @@ import { Public } from '../../common/decorators';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { HCaptchaGuard } from '../../common/guards/hcaptcha';
-import { RequestWithUser } from '../../common/types';
+import { RequestWithUser } from '../../common/interfaces/request';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
 import { AuthControllerErrorsFilter } from './auth.error.filter';

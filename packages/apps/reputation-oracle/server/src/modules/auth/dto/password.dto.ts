@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength } from 'class-validator';
-import { LowercasedEmail } from '../../../common/decorators';
+import { IsLowercasedEmail } from '../../../common/validators';
 
 export function ValidPassword() {
   return applyDecorators(
@@ -14,7 +14,7 @@ export function ValidPassword() {
 
 export class ForgotPasswordDto {
   @ApiProperty()
-  @LowercasedEmail()
+  @IsLowercasedEmail()
   public email: string;
 
   @ApiProperty({ name: 'h_captcha_token' })

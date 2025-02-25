@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'packages/examples/cvat/recording-oracle/**'
-      - 'packages/sdk/python/human-protocol-sdk/**'
+      - 'packages/core/**'
 
 jobs:
   cvat-exo-test:

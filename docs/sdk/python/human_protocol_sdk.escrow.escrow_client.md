@@ -14,7 +14,7 @@ as well as some middlewares.
 ```python
 from eth_typing import URI
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.auto import load_provider_from_uri
 
 from human_protocol_sdk.escrow import EscrowClient
@@ -23,9 +23,10 @@ def get_w3_with_priv_key(priv_key: str):
     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
     gas_payer = w3.eth.account.from_key(priv_key)
     w3.eth.default_account = gas_payer.address
-    w3.middleware_onion.add(
-        construct_sign_and_send_raw_middleware(gas_payer),
-        "construct_sign_and_send_raw_middleware",
+    w3.middleware_onion.inject(
+        SignAndSendRawMiddlewareBuilder.build(priv_key),
+        'SignAndSendRawMiddlewareBuilder',
+        layer=0,
     )
     return (w3, gas_payer)
 
@@ -91,7 +92,7 @@ Adds an array of addresses to the trusted handlers list.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -100,9 +101,10 @@ Adds an array of addresses to the trusted handlers list.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -142,7 +144,7 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -151,9 +153,10 @@ Pays out the amounts specified to the workers and sets the URL of the final resu
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -202,7 +205,7 @@ Cancels the specified escrow and sends the balance to the canceler.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -211,9 +214,10 @@ Cancels the specified escrow and sends the balance to the canceler.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -242,7 +246,7 @@ Sets the status of an escrow to completed.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -251,9 +255,10 @@ Sets the status of an escrow to completed.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -285,7 +290,7 @@ Creates a prepared transaction for bulk payout without signing or sending it.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -294,9 +299,10 @@ Creates a prepared transaction for bulk payout without signing or sending it.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -354,7 +360,7 @@ Creates a new escrow contract.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -364,9 +370,10 @@ Creates a new escrow contract.
           URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -421,7 +428,7 @@ Adds funds to the escrow.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -430,9 +437,10 @@ Adds funds to the escrow.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -793,7 +801,7 @@ Sets up the parameters of the escrow.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -803,9 +811,10 @@ Sets up the parameters of the escrow.
           URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -853,7 +862,7 @@ Stores the results URL.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -862,9 +871,10 @@ Stores the results URL.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 
@@ -900,7 +910,7 @@ Withdraws additional tokens in the escrow to the canceler.
   ```python
   from eth_typing import URI
   from web3 import Web3
-  from web3.middleware import construct_sign_and_send_raw_middleware
+  from web3.middleware import SignAndSendRawMiddlewareBuilder
   from web3.providers.auto import load_provider_from_uri
 
   from human_protocol_sdk.escrow import EscrowClient
@@ -909,9 +919,10 @@ Withdraws additional tokens in the escrow to the canceler.
       w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
       gas_payer = w3.eth.account.from_key(priv_key)
       w3.eth.default_account = gas_payer.address
-      w3.middleware_onion.add(
-          construct_sign_and_send_raw_middleware(gas_payer),
-          "construct_sign_and_send_raw_middleware",
+      w3.middleware_onion.inject(
+          SignAndSendRawMiddlewareBuilder.build(priv_key),
+          'SignAndSendRawMiddlewareBuilder',
+          layer=0,
       )
       return (w3, gas_payer)
 

@@ -6,15 +6,15 @@
 
 # Interface: StakerInfo
 
+Defined in: [interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)
+
 ## Properties
 
 ### lockedAmount
 
 > **lockedAmount**: `bigint`
 
-#### Defined in
-
-[interfaces.ts:164](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L164)
+Defined in: [interfaces.ts:160](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L160)
 
 ***
 
@@ -22,9 +22,7 @@
 
 > **lockedUntil**: `bigint`
 
-#### Defined in
-
-[interfaces.ts:165](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L165)
+Defined in: [interfaces.ts:161](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L161)
 
 ***
 
@@ -32,9 +30,7 @@
 
 > **stakedAmount**: `bigint`
 
-#### Defined in
-
-[interfaces.ts:163](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L163)
+Defined in: [interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
 
 ***
 
@@ -42,6 +38,4 @@
 
 > **withdrawableAmount**: `bigint`
 
-#### Defined in
-
-[interfaces.ts:166](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L166)
+Defined in: [interfaces.ts:162](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L162)

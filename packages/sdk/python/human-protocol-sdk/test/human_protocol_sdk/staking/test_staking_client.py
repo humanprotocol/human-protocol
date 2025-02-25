@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import web3
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
+from web3.middleware import SignAndSendRawMiddlewareBuilder
 from web3.providers.rpc import HTTPProvider
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
@@ -24,9 +24,10 @@ class TestStakingClient(unittest.TestCase):
 
         # Set default gas payer
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer),
-            "construct_sign_and_send_raw_middleware",
+        self.w3.middleware_onion.inject(
+            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),
+            "SignAndSendRawMiddlewareBuilder",
+            layer=0,
         )
         self.w3.eth.default_account = self.gas_payer.address
 

@@ -427,3 +427,112 @@ export async function updateVotingDelay(
     newDelay.toString()
   );
 }
+
+export async function createBasicProposalOnHub(
+  voteToken: VHMToken,
+  governor: MetaHumanGovernor,
+  owner: Signer
+): Promise<string> {
+  const encodedCall = voteToken.interface.encodeFunctionData('transfer', [
+    await owner.getAddress(),
+    ethers.parseEther('1'),
+  ]);
+  const targets = [await voteToken.getAddress()];
+  const values = [0];
+  const calldatas = [encodedCall];
+
+  const txResponse = await governor.crossChainPropose(
+    targets,
+    values,
+    calldatas,
+    '',
+    {
+      value: 100,
+    }
+  );
+  const receipt = await txResponse.wait();
+  const eventSignature = ethers.id(
+    'ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)'
+  );
+
+  const event = receipt?.logs?.find((log) => log.topics[0] === eventSignature);
+
+  if (!event) throw new Error('ProposalCreated event not found');
+
+  const decodedData = governor.interface.decodeEventLog(
+    'ProposalCreated',
+    event.data,
+    event.topics
+  );
+
+  const proposalId = decodedData[0];
+
+  return proposalId;
+}
+
+export async function updateVotingDelayOnHub(
+  voteToken: VHMToken,
+  governor: MetaHumanGovernor,
+  newDelay: number,
+  executer: Signer
+): Promise<void> {
+  // mock account with voting power
+  await voteToken.transfer(await executer.getAddress(), ethers.parseEther('5'));
+  await voteToken.connect(executer).delegate(await executer.getAddress());
+
+  const encodedCall = governor.interface.encodeFunctionData('setVotingDelay', [
+    newDelay,
+  ]);
+  const targets = [await governor.getAddress()];
+  const values = [0];
+  const calldatas = [encodedCall];
+
+  const txResponse = await governor.crossChainPropose(
+    targets,
+    values,
+    calldatas,
+    'setVotingDelay',
+    {
+      value: 100,
+    }
+  );
+  const receipt = await txResponse.wait();
+  const eventSignature = ethers.id(
+    'ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)'
+  );
+
+  const event = receipt?.logs?.find((log) => log.topics[0] === eventSignature);
+
+  if (!event) throw new Error('ProposalCreated event not found');
+
+  const decodedData = governor.interface.decodeEventLog(
+    'ProposalCreated',
+    event.data,
+    event.topics
+  );
+
+  const proposalId = decodedData[0];
+
+  // wait for next block
+  await mineNBlocks(2);
+
+  //cast vote
+  await governor.connect(executer).castVote(proposalId, 1);
+
+  // wait for voting block to end
+  await mineNBlocks(50410);
+
+  await governor.requestCollections(proposalId, { value: 100 });
+
+  await governor.queue(targets, values, calldatas, ethers.id('setVotingDelay'));
+  await governor.execute(
+    targets,
+    values,
+    calldatas,
+    ethers.id('setVotingDelay')
+  );
+
+  expect((await governor.votingDelay()).toString()).to.equal(
+    newDelay.toString()
+  );
+}

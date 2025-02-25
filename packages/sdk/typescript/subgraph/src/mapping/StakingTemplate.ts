@@ -6,8 +6,8 @@ import {
   StakeWithdrawn,
 } from '../../generated/Staking/Staking';
 import {
-  Leader,
-  LeaderStatistics,
+  Operator,
+  OperatorStatistics,
   StakeDepositedEvent,
   StakeLockedEvent,
   StakeSlashedEvent,
@@ -19,19 +19,19 @@ import { toEventId } from './utils/event';
 import { createTransaction } from './utils/transaction';
 import { toBytes } from './utils/string';
 
-export const STATISTICS_ENTITY_ID = toBytes('leader-statistics-id');
+export const STATISTICS_ENTITY_ID = toBytes('operator-statistics-id');
 export const TOKEN_ADDRESS = Address.fromString('{{ HMToken.address }}');
 
-function constructStatsEntity(): LeaderStatistics {
-  const entity = new LeaderStatistics(STATISTICS_ENTITY_ID);
+function constructStatsEntity(): OperatorStatistics {
+  const entity = new OperatorStatistics(STATISTICS_ENTITY_ID);
 
-  entity.leaders = ZERO_BI;
+  entity.operators = ZERO_BI;
 
   return entity;
 }
 
-export function createOrLoadLeaderStatistics(): LeaderStatistics {
-  let statsEntity = LeaderStatistics.load(STATISTICS_ENTITY_ID);
+export function createOrLoadOperatorStatistics(): OperatorStatistics {
+  let statsEntity = OperatorStatistics.load(STATISTICS_ENTITY_ID);
 
   if (!statsEntity) {
     statsEntity = constructStatsEntity();
@@ -40,23 +40,23 @@ export function createOrLoadLeaderStatistics(): LeaderStatistics {
   return statsEntity;
 }
 
-export function createOrLoadLeader(address: Address): Leader {
-  let leader = Leader.load(address);
+export function createOrLoadOperator(address: Address): Operator {
+  let operator = Operator.load(address);
 
-  if (!leader) {
-    leader = new Leader(address);
+  if (!operator) {
+    operator = new Operator(address);
 
-    leader.address = address;
-    leader.amountStaked = ZERO_BI;
-    leader.amountLocked = ZERO_BI;
-    leader.lockedUntilTimestamp = ZERO_BI;
-    leader.amountSlashed = ZERO_BI;
-    leader.amountWithdrawn = ZERO_BI;
-    leader.reward = ZERO_BI;
-    leader.amountJobsProcessed = ZERO_BI;
+    operator.address = address;
+    operator.amountStaked = ZERO_BI;
+    operator.amountLocked = ZERO_BI;
+    operator.lockedUntilTimestamp = ZERO_BI;
+    operator.amountSlashed = ZERO_BI;
+    operator.amountWithdrawn = ZERO_BI;
+    operator.reward = ZERO_BI;
+    operator.amountJobsProcessed = ZERO_BI;
   }
 
-  return leader;
+  return operator;
 }
 
 export function handleStakeDeposited(event: StakeDeposited): void {
@@ -79,23 +79,23 @@ export function handleStakeDeposited(event: StakeDeposited): void {
   eventEntity.amount = event.params.tokens;
   eventEntity.save();
 
-  // Update leader
-  const leader = createOrLoadLeader(event.params.staker);
+  // Update operator
+  const operator = createOrLoadOperator(event.params.staker);
 
-  // Increase leader count for new leader
+  // Increase operator count for new operator
   if (
-    leader.amountStaked.equals(ZERO_BI) &&
-    leader.amountLocked.equals(ZERO_BI) &&
-    leader.amountWithdrawn.equals(ZERO_BI)
+    operator.amountStaked.equals(ZERO_BI) &&
+    operator.amountLocked.equals(ZERO_BI) &&
+    operator.amountWithdrawn.equals(ZERO_BI)
   ) {
-    // Update Leader Statistics
-    const statsEntity = createOrLoadLeaderStatistics();
-    statsEntity.leaders = statsEntity.leaders.plus(ONE_BI);
+    // Update Operator Statistics
+    const statsEntity = createOrLoadOperatorStatistics();
+    statsEntity.operators = statsEntity.operators.plus(ONE_BI);
     statsEntity.save();
   }
 
-  leader.amountStaked = leader.amountStaked.plus(eventEntity.amount);
-  leader.save();
+  operator.amountStaked = operator.amountStaked.plus(eventEntity.amount);
+  operator.save();
 }
 
 export function handleStakeLocked(event: StakeLocked): void {
@@ -119,11 +119,11 @@ export function handleStakeLocked(event: StakeLocked): void {
   eventEntity.lockedUntilTimestamp = event.params.until;
   eventEntity.save();
 
-  // Update leader
-  const leader = createOrLoadLeader(event.params.staker);
-  leader.amountLocked = eventEntity.amount;
-  leader.lockedUntilTimestamp = eventEntity.lockedUntilTimestamp;
-  leader.save();
+  // Update operator
+  const operator = createOrLoadOperator(event.params.staker);
+  operator.amountLocked = eventEntity.amount;
+  operator.lockedUntilTimestamp = eventEntity.lockedUntilTimestamp;
+  operator.save();
 }
 
 export function handleStakeWithdrawn(event: StakeWithdrawn): void {
@@ -146,15 +146,15 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   eventEntity.amount = event.params.tokens;
   eventEntity.save();
 
-  // Update leader
-  const leader = createOrLoadLeader(event.params.staker);
-  leader.amountLocked = leader.amountLocked.minus(eventEntity.amount);
-  if (leader.amountLocked.equals(ZERO_BI)) {
-    leader.lockedUntilTimestamp = ZERO_BI;
+  // Update operator
+  const operator = createOrLoadOperator(event.params.staker);
+  operator.amountLocked = operator.amountLocked.minus(eventEntity.amount);
+  if (operator.amountLocked.equals(ZERO_BI)) {
+    operator.lockedUntilTimestamp = ZERO_BI;
   }
-  leader.amountStaked = leader.amountStaked.minus(eventEntity.amount);
-  leader.amountWithdrawn = leader.amountWithdrawn.plus(eventEntity.amount);
-  leader.save();
+  operator.amountStaked = operator.amountStaked.minus(eventEntity.amount);
+  operator.amountWithdrawn = operator.amountWithdrawn.plus(eventEntity.amount);
+  operator.save();
 }
 
 export function handleStakeSlashed(event: StakeSlashed): void {
@@ -179,11 +179,11 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   eventEntity.slashRequester = event.params.slashRequester;
   eventEntity.save();
 
-  // Update leader
-  const leader = createOrLoadLeader(event.params.staker);
-  leader.amountSlashed = leader.amountSlashed.plus(eventEntity.amount);
-  leader.amountStaked = leader.amountStaked.minus(eventEntity.amount);
-  leader.save();
+  // Update operator
+  const operator = createOrLoadOperator(event.params.staker);
+  operator.amountSlashed = operator.amountSlashed.plus(eventEntity.amount);
+  operator.amountStaked = operator.amountStaked.minus(eventEntity.amount);
+  operator.save();
 }
 
 export function handleFeeWithdrawn(event: FeeWithdrawn): void {

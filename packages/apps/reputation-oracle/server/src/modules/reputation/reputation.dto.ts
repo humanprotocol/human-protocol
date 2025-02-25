@@ -1,26 +1,24 @@
+import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsEthereumAddress,
-  IsIn,
   IsNumber,
   IsOptional,
   IsString,
   Min,
 } from 'class-validator';
-import { ChainId } from '@human-protocol/sdk';
+import { Transform } from 'class-transformer';
 import {
   ReputationEntityType,
   ReputationLevel,
   ReputationOrderBy,
   SortDirection,
 } from '../../common/enums';
-import { Transform } from 'class-transformer';
-import { IsEnumCaseInsensitive } from '../../common/decorators';
+import { IsChainId, IsLowercasedEnum } from '../../common/validators';
 
 export class ReputationCreateDto {
   @ApiProperty({ name: 'chain_id' })
-  @IsEnumCaseInsensitive(ChainId)
+  @IsChainId()
   public chainId: ChainId;
 
   @ApiProperty()
@@ -32,7 +30,7 @@ export class ReputationCreateDto {
   public reputationPoints: number;
 
   @ApiProperty()
-  @IsEnumCaseInsensitive(ReputationEntityType)
+  @IsLowercasedEnum(ReputationEntityType)
   public type: ReputationEntityType;
 }
 
@@ -43,10 +41,12 @@ export class ReputationUpdateDto {
 }
 
 export class ReputationGetAllQueryDto {
-  @ApiPropertyOptional({ enum: ChainId, name: 'chain_id' })
-  @IsEnumCaseInsensitive(ChainId)
+  @ApiPropertyOptional({
+    enum: ChainId,
+    name: 'chain_id',
+  })
+  @IsChainId()
   @IsOptional()
-  @Transform(({ value }) => Number(value))
   public chainId?: ChainId;
 
   @ApiPropertyOptional({
@@ -54,17 +54,21 @@ export class ReputationGetAllQueryDto {
     enum: ReputationEntityType,
     name: 'roles',
   })
-  @IsEnumCaseInsensitive(ReputationEntityType, { each: true })
-  @IsOptional()
+  /**
+   * NOTE: Order here matters
+   *
+   * Query param is string if single value and array if multiple
+   */
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  @IsLowercasedEnum(ReputationEntityType, { each: true })
+  @IsOptional()
   public roles?: ReputationEntityType[];
 
   @ApiPropertyOptional({
     enum: ReputationOrderBy,
     default: ReputationOrderBy.CREATED_AT,
   })
-  @IsEnum(ReputationOrderBy)
-  @IsIn(Object.values(ReputationOrderBy))
+  @IsLowercasedEnum(ReputationOrderBy)
   @IsOptional()
   public orderBy?: ReputationOrderBy;
 
@@ -72,8 +76,7 @@ export class ReputationGetAllQueryDto {
     enum: SortDirection,
     default: SortDirection.DESC,
   })
-  @IsEnum(SortDirection)
-  @IsIn(Object.values(SortDirection))
+  @IsLowercasedEnum(SortDirection)
   @IsOptional()
   public orderDirection?: SortDirection;
 
@@ -99,15 +102,13 @@ export class ReputationGetParamsDto {
 
 export class ReputationGetQueryDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsEnumCaseInsensitive(ChainId)
-  @Transform(({ value }) => Number(value))
+  @IsChainId()
   public chainId: ChainId;
 }
 
 export class ReputationDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsEnumCaseInsensitive(ChainId)
-  @Transform(({ value }) => Number(value))
+  @IsChainId()
   chainId: ChainId;
 
   @ApiProperty()
@@ -116,11 +117,10 @@ export class ReputationDto {
   address: string;
 
   @ApiProperty({ enum: ReputationLevel })
-  @IsEnumCaseInsensitive(ReputationLevel)
-  @Transform(({ value }) => Number(value))
+  @IsLowercasedEnum(ReputationLevel)
   reputation: ReputationLevel;
 
   @ApiProperty({ enum: ReputationEntityType })
-  @IsEnumCaseInsensitive(ReputationEntityType)
+  @IsLowercasedEnum(ReputationEntityType)
   role: ReputationEntityType;
 }

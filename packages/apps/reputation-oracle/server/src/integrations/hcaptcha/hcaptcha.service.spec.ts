@@ -1,7 +1,7 @@
 import { HCaptchaService } from './hcaptcha.service';
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { DeepPartial } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { of, firstValueFrom } from 'rxjs';
