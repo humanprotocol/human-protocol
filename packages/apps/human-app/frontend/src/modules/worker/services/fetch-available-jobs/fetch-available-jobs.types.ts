@@ -3,7 +3,7 @@ import type { JobsFilterStoreProps } from '@/modules/worker/hooks/use-jobs-filte
 import {
   type availableJobSchema,
   type availableJobsSuccessResponseSchema,
-} from '@/modules/worker/services/fetch-available-jobs/fetch-available-jobs.schema';
+} from '../available-jobs-data';
 
 export type AvailableJob = z.infer<typeof availableJobSchema>;
 export type AvailableJobsSuccessResponse = z.infer<

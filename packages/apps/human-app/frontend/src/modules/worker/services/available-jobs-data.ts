@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- api response*/
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
@@ -9,7 +9,7 @@ import type { JobsFilterStoreProps } from '@/modules/worker/hooks/use-jobs-filte
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
 
-const availableJobSchema = z.object({
+export const availableJobSchema = z.object({
   escrow_address: z.string(),
   chain_id: z.number(),
   job_type: z.string(),
@@ -19,7 +19,7 @@ const availableJobSchema = z.object({
   reward_token: z.string().optional(),
 });
 
-const availableJobsSuccessResponseSchema =
+export const availableJobsSuccessResponseSchema =
   createPaginationSchema(availableJobSchema);
 
 export type AvailableJob = z.infer<typeof availableJobSchema>;
@@ -56,22 +56,5 @@ export function useGetAvailableJobsData() {
   return useQuery({
     queryKey: ['availableJobs', dto],
     queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
-  });
-}
-
-export function useInfiniteGetAvailableJobsData() {
-  const { filterParams } = useJobsFilterStore();
-  const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
-
-  return useInfiniteQuery({
-    initialPageParam: 0,
-    queryKey: ['availableJobsInfinite', dto],
-    queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
-    getNextPageParam: (pageParams) => {
-      return pageParams.total_pages - 1 <= pageParams.page
-        ? undefined
-        : pageParams.page;
-    },
   });
 }

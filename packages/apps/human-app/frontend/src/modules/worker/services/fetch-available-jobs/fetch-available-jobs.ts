@@ -5,7 +5,7 @@ import type {
   AvailableJobsSuccessResponse,
   JobTableQueryParams,
 } from '@/modules/worker/services/fetch-available-jobs/fetch-available-jobs.types';
-import { availableJobsSuccessResponseSchema } from '@/modules/worker/services/fetch-available-jobs/fetch-available-jobs.schema';
+import { availableJobsSuccessResponseSchema } from '../available-jobs-data';
 
 export async function fetchAvailableJobs(
   params: JobTableQueryParams,

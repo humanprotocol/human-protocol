@@ -26,7 +26,7 @@ interface AvailableJobsTableMobileProps {
 
 export function AvailableJobsTableMobile({
   setIsMobileFilterDrawerOpen,
-}: AvailableJobsTableMobileProps) {
+}: Readonly<AvailableJobsTableMobileProps>) {
   const { colorPalette } = useColorMode();
   const [allPages, setAllPages] = useState<AvailableJob[]>([]);
 
