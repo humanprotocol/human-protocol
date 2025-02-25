@@ -44,7 +44,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "start:prod": "serve -s dist",
-    "test": "vitest run -u",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "format:lint": "eslint --fix \"**/*.{ts,tsx,js,jsx}\"",
     "format": "yarn format:prettier && yarn format:lint",
@@ -63,12 +62,9 @@
     ]
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/react": "^15.0.7",
     "@types/file-saver": "^2.0.7",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.2.25",
-    "@types/react-test-renderer": "^19.0.0",
     "@types/xml2js": "^0.4.14",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint-config-react-app": "^7.0.1",
@@ -76,13 +72,9 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-react-hooks": "^5.1.0",
-    "happy-dom": "^12.9.1",
-    "identity-obj-proxy": "^3.0.0",
-    "jsdom": "^25.0.1",
     "resize-observer-polyfill": "^1.5.1",
     "vite": "^5.4.7",
-    "vite-plugin-node-polyfills": "^0.22.0",
-    "vitest": "^1.6.0"
+    "vite-plugin-node-polyfills": "^0.22.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
