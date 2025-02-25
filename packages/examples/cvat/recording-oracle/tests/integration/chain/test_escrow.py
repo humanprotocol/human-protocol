@@ -43,10 +43,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         # Set default gas payer
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
         self.w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV), # type: ignore
-                'SignAndSendRawMiddlewareBuilder',
-                layer=0,
-            )
+            SignAndSendRawMiddlewareBuilder.build(DEFAULT_GAS_PAYER_PRIV),  # type: ignore
+            "SignAndSendRawMiddlewareBuilder",
+            layer=0,
+        )
         self.w3.eth.default_account = self.gas_payer.address
         self.network_config = Config.localhost
 

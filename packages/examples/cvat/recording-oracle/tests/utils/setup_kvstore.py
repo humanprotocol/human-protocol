@@ -13,10 +13,10 @@ def store_kvstore_value(key: str, value: str):
     # Set default gas payer
     reputation_oracle = w3.eth.account.from_key(REPUTATION_ORACLE_PRIV)
     w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(REPUTATION_ORACLE_PRIV), # type: ignore
-                'SignAndSendRawMiddlewareBuilder',
-                layer=0,
-            )
+        SignAndSendRawMiddlewareBuilder.build(REPUTATION_ORACLE_PRIV),  # type: ignore
+        "SignAndSendRawMiddlewareBuilder",
+        layer=0,
+    )
     w3.eth.default_account = reputation_oracle.address
     kvstore_client = KVStoreClient(w3)
     kvstore_client.set(key, value)

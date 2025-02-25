@@ -16,8 +16,8 @@ def get_web3(chain_id: Networks):
             w3 = Web3(HTTPProvider(Config.polygon_mainnet.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.polygon_mainnet.private_key)
             w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.polygon_mainnet.private_key), # type: ignore
-                'SignAndSendRawMiddlewareBuilder',
+                SignAndSendRawMiddlewareBuilder.build(Config.polygon_mainnet.private_key),  # type: ignore
+                "SignAndSendRawMiddlewareBuilder",
                 layer=0,
             )
             w3.eth.default_account = gas_payer.address
@@ -26,8 +26,8 @@ def get_web3(chain_id: Networks):
             w3 = Web3(HTTPProvider(Config.polygon_amoy.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.polygon_amoy.private_key)
             w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.polygon_amoy.private_key), # type: ignore
-                'SignAndSendRawMiddlewareBuilder',
+                SignAndSendRawMiddlewareBuilder.build(Config.polygon_amoy.private_key),  # type: ignore
+                "SignAndSendRawMiddlewareBuilder",
                 layer=0,
             )
             w3.eth.default_account = gas_payer.address
@@ -36,8 +36,8 @@ def get_web3(chain_id: Networks):
             w3 = Web3(HTTPProvider(Config.localhost.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.localhost.private_key)
             w3.middleware_onion.inject(
-                SignAndSendRawMiddlewareBuilder.build(Config.localhost.private_key), # type: ignore
-                'SignAndSendRawMiddlewareBuilder',
+                SignAndSendRawMiddlewareBuilder.build(Config.localhost.private_key),  # type: ignore
+                "SignAndSendRawMiddlewareBuilder",
                 layer=0,
             )
             w3.eth.default_account = gas_payer.address
