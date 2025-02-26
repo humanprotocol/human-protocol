@@ -25,21 +25,7 @@ export function WalletConnectionControl() {
     );
   }
 
-  if (!isConnected) {
-    return (
-      <Button
-        disabled={!kycApproved}
-        fullWidth
-        loading={isRegisterAddressPending}
-        onClick={handleConnectWallet}
-        variant="contained"
-      >
-        {t('components.wallet.connectBtn.connect')}
-      </Button>
-    );
-  }
-
-  if (kycApproved) {
+  if (kycApproved && isConnected) {
     return (
       <Grid>
         <RegisterAddressBtn />
@@ -47,4 +33,16 @@ export function WalletConnectionControl() {
       </Grid>
     );
   }
+
+  return (
+    <Button
+      disabled={!kycApproved}
+      fullWidth
+      loading={isRegisterAddressPending}
+      onClick={handleConnectWallet}
+      variant="contained"
+    >
+      {t('components.wallet.connectBtn.connect')}
+    </Button>
+  );
 }
