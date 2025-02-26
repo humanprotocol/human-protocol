@@ -67,6 +67,4 @@ export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';
 export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
 export const LOGOUT_PATH = '/auth/logout';
 
-export const E2E_TEST_ENV = 'test-e2e';
-
 export const MUTEX_TIMEOUT = 2000; //ms
