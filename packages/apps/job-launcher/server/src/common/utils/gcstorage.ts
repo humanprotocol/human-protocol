@@ -45,8 +45,6 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
  */
 export function isGCSBucketUrl(url: string): boolean {
   // 1) Quickly check if it's a valid URL in general
-  console.log(url);
-  console.log(isValidUrl(url));
   if (!isValidUrl(url)) {
     return false;
   }
@@ -61,8 +59,6 @@ export function isGCSBucketUrl(url: string): boolean {
 
   // 4) Also check if it matches the gs:// scheme
   const gsMatch = url.match(GCS_GS_REGEX);
-  console.log(httpMatch);
-  console.log(gsMatch);
 
   // 5) If any HTTP or GS regex matched
   if (httpMatch || gsMatch) {
