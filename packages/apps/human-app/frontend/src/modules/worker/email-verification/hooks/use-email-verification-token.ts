@@ -21,6 +21,5 @@ export function useEmailVerificationToken() {
 
   return {
     token,
-    isLoading: token === undefined,
   };
 }

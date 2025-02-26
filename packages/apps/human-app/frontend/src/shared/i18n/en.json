@@ -154,7 +154,10 @@
     "emailVerification": {
       "title": "Email Verified",
       "description": "You are ready to go. Your email has been successfully verified!",
-      "btn": "Sign In"
+      "btn": "Sign In",
+      "errors": {
+        "noToken": "No token provided."
+      }
     },
     "sendResetLinkForm": {
       "fields": {

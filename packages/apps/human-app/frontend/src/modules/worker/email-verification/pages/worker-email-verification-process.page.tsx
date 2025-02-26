@@ -1,12 +1,18 @@
-import { PageCardLoader } from '@/shared/components/ui/page-card';
+import { useTranslation } from 'react-i18next';
+import { PageCardError } from '@/shared/components/ui/page-card';
 import { EmailVerificationProcess } from '../components';
 import { useEmailVerificationToken } from '../hooks';
 
 export function WorkerEmailVerificationProcessPage() {
-  const { token, isLoading } = useEmailVerificationToken();
+  const { t } = useTranslation();
+  const { token } = useEmailVerificationToken();
 
-  if (isLoading || !token) {
-    return <PageCardLoader />;
+  if (!token) {
+    return (
+      <PageCardError
+        errorMessage={t('worker.emailVerification.errors.noToken')}
+      />
+    );
   }
 
   return <EmailVerificationProcess token={token} />;
