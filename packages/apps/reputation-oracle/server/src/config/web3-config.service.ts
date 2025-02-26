@@ -35,8 +35,7 @@ export class Web3ConfigService {
   }
 
   /**
-   * Returns chain id of the reputation network
-   * where this oracle operates on (e.g. KVStore)
+   * Returns chain id reputation oracle operates on
    */
   get reputationNetworkChainId(): ChainId {
     switch (this.network) {
