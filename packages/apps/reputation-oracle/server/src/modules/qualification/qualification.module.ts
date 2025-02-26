@@ -10,6 +10,5 @@ import { QualificationController } from './qualification.controller';
   imports: [UserModule],
   providers: [QualificationService, QualificationRepository],
   controllers: [QualificationController],
-  exports: [],
 })
 export class QualificationModule {}

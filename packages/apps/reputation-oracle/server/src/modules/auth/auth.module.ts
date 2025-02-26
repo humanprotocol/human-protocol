@@ -31,6 +31,5 @@ import { TokenRepository } from './token.repository';
   ],
   providers: [JwtHttpStrategy, AuthService, TokenRepository],
   controllers: [AuthController],
-  exports: [],
 })
 export class AuthModule {}
