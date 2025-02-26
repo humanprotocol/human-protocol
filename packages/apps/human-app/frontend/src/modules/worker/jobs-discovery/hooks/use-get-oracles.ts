@@ -6,9 +6,11 @@ import { apiPaths } from '@/api/api-paths';
 import { useJobsTypesOraclesFilter } from '@/modules/worker/hooks/use-job-types-oracles-table';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { env } from '@/shared/env';
+import { MainnetChains, TestnetChains } from '@/modules/smart-contracts/chains';
 
 const OracleSchema = z.object({
   address: z.string(),
+  chainId: z.number(),
   role: z.string(),
   url: z.string(),
   jobTypes: z.array(z.string()),
@@ -37,8 +39,11 @@ for (const [oracleName, oracleUrls] of Object.entries(OracleNameToUrls)) {
   }
 }
 
+const isTestnet = env.VITE_NETWORK === 'testnet';
+
 const H_CAPTCHA_ORACLE: Oracle = {
   address: env.VITE_H_CAPTCHA_ORACLE_ADDRESS,
+  chainId: isTestnet ? TestnetChains[0].chainId : MainnetChains[0].chainId,
   jobTypes: env.VITE_H_CAPTCHA_ORACLE_TASK_TYPES,
   role: env.VITE_H_CAPTCHA_ORACLE_ROLE,
   url: env.VITE_H_CAPTCHA_ORACLE_ANNOTATION_TOOL,
