@@ -16,7 +16,7 @@ import {
 } from '@/modules/worker/services/resend-email-verification';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
