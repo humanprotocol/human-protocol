@@ -8,9 +8,9 @@ import {
   GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK,
 } from '../../common/constants';
 import { ErrorContentModeration } from '../../common/constants/errors';
+import { ContentModerationLevel } from '../../common/enums/gcv';
 import {
   ContentModerationFeature,
-  ContentModerationLevel,
   ContentModerationRequestStatus,
 } from '../../common/enums/content-moderation';
 import { JobStatus } from '../../common/enums/job';

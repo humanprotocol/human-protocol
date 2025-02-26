@@ -6,10 +6,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
 import { ErrorContentModeration } from '../../common/constants/errors';
-import {
-  ContentModerationLevel,
-  ContentModerationRequestStatus,
-} from '../../common/enums/content-moderation';
+import { ContentModerationLevel } from '../../common/enums/gcv';
+import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
 import { JobStatus } from '../../common/enums/job';
 import { ControlledError } from '../../common/errors/controlled';
 import { JobEntity } from '../job/job.entity';
