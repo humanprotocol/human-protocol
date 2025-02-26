@@ -6,7 +6,7 @@ import { Wallet } from 'ethers';
 export enum Web3Network {
   MAINNET = 'mainnet',
   TESTNET = 'testnet',
-  LOCAL = 'localost',
+  LOCAL = 'localhost',
 }
 
 @Injectable()
