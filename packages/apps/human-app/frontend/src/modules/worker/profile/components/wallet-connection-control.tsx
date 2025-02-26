@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Grid } from '@mui/material';
 import { Button } from '@/shared/components/ui/button';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useWorkerProfileStatus, useWorkerWalletRegistration } from '../hooks';
+import { useWorkerKycStatus, useWorkerWalletRegistration } from '../hooks';
 import { DoneLabel } from './status-labels';
 import { WalletConnectDone } from './wallet-connect-done';
 import { RegisterAddressBtn } from './buttons';
@@ -10,7 +10,7 @@ import { RegisterAddressBtn } from './buttons';
 export function WalletConnectionControl() {
   const { t } = useTranslation();
   const { user } = useAuthenticatedUser();
-  const { kycApproved } = useWorkerProfileStatus();
+  const { kycApproved } = useWorkerKycStatus();
   const { isConnected, isRegisterAddressPending, handleConnectWallet } =
     useWorkerWalletRegistration();
 

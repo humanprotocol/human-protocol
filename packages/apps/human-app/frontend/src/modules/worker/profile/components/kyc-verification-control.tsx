@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { useWorkerProfileStatus } from '../hooks';
+import { useWorkerKycStatus } from '../hooks';
 import { StartKycBtn } from './buttons';
 import { DoneLabel, ErrorLabel } from './status-labels';
 
 export function KycVerificationControl() {
   const { t } = useTranslation();
-  const { kycApproved, kycDeclined, kycToComplete } = useWorkerProfileStatus();
+  const { kycApproved, kycDeclined, kycToComplete } = useWorkerKycStatus();
 
   return (
     <>
