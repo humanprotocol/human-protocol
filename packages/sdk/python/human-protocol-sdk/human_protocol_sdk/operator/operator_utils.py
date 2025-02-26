@@ -7,11 +7,11 @@ Code Example
 .. code-block:: python
 
     from human_protocol_sdk.constants import ChainId
-    from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
+    from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 
     print(
-        OperatorUtils.get_leaders(
-            LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+        OperatorUtils.get_operators(
+            OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
         )
     )
 
@@ -39,9 +39,9 @@ class OperatorUtilsError(Exception):
     pass
 
 
-class LeaderFilter:
+class OperatorFilter:
     """
-    A class used to filter leaders.
+    A class used to filter operators.
     """
 
     def __init__(
@@ -55,7 +55,7 @@ class LeaderFilter:
         skip: int = 0,
     ):
         """
-        Initializes a LeaderFilter instance.
+        Initializes a OperatorFilter instance.
 
         :param chain_id: Chain ID to request data
         :param roles: Roles to filter by
@@ -83,7 +83,7 @@ class LeaderFilter:
         self.skip = max(skip, 0)
 
 
-class LeaderData:
+class OperatorData:
     def __init__(
         self,
         chain_id: ChainId,
@@ -110,7 +110,7 @@ class LeaderData:
         category: Optional[str] = None,
     ):
         """
-        Initializes a LeaderData instance.
+        Initializes a OperatorData instance.
 
         :param chain_id: Chain Identifier
         :param id: Identifier
@@ -177,72 +177,43 @@ class RewardData:
         self.amount = amount
 
 
-class Operator:
-    def __init__(
-        self,
-        address: str,
-        role: str,
-        url: str = "",
-        job_types: List[str] = [],
-        registration_needed: Optional[bool] = None,
-        registration_instructions: Optional[str] = None,
-    ):
-        """
-        Initializes an Operator instance.
-
-        :param address: Operator address
-        :param role: Role of the operator
-        :param url: URL of the operator
-        :param job_types: List of job types
-        :param registration_needed: Whether registration is needed
-        :param registration_instructions: Registration instructions
-        """
-
-        self.address = address
-        self.role = role
-        self.url = url
-        self.job_types = job_types
-        self.registration_needed = registration_needed
-        self.registration_instructions = registration_instructions
-
-
 class OperatorUtils:
     """
     A utility class that provides additional operator-related functionalities.
     """
 
     @staticmethod
-    def get_leaders(filter: LeaderFilter) -> List[LeaderData]:
-        """Get leaders data of the protocol.
+    def get_operators(filter: OperatorFilter) -> List[OperatorData]:
+        """Get operators data of the protocol.
 
-        :param filter: Leader filter
+        :param filter: Operator filter
 
-        :return: List of leaders data
+        :return: List of operators data
 
         :example:
             .. code-block:: python
 
                 from human_protocol_sdk.constants import ChainId
-                from human_protocol_sdk.operator import OperatorUtils, LeaderFilter
+                from human_protocol_sdk.operator import OperatorUtils, OperatorFilter
 
                 print(
-                    OperatorUtils.get_leaders(
-                        LeaderFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
+                    OperatorUtils.get_operators(
+                        OperatorFilter(chain_id=ChainId.POLYGON_AMOY, roles=["Job Launcher"])
                     )
                 )
         """
 
-        from human_protocol_sdk.gql.operator import get_leaders_query
+        from human_protocol_sdk.gql.operator import get_operators_query
 
-        leaders = []
+        operators = []
         network = NETWORKS[filter.chain_id]
 
         if not network.get("subgraph_url"):
             return []
 
-        leaders_data = get_data_from_subgraph(
+        operators_data = get_data_from_subgraph(
             network,
-            query=get_leaders_query(filter),
+            query=get_operators_query(filter),
             params={
                 "minAmountStaked": filter.min_amount_staked,
                 "roles": filter.roles,
@@ -254,81 +225,81 @@ class OperatorUtils:
         )
 
         if (
-            not leaders_data
-            or "data" not in leaders_data
-            or "leaders" not in leaders_data["data"]
-            or not leaders_data["data"]["leaders"]
+            not operators_data
+            or "data" not in operators_data
+            or "operators" not in operators_data["data"]
+            or not operators_data["data"]["operators"]
         ):
             return []
 
-        leaders_raw = leaders_data["data"]["leaders"]
+        operators_raw = operators_data["data"]["operators"]
 
-        for leader in leaders_raw:
+        for operator in operators_raw:
             job_types = []
             reputation_networks = []
 
-            if isinstance(leader.get("jobTypes"), str):
-                job_types = leader["jobTypes"].split(",")
-            elif isinstance(leader.get("jobTypes"), list):
-                job_types = leader["jobTypes"]
+            if isinstance(operator.get("jobTypes"), str):
+                job_types = operator["jobTypes"].split(",")
+            elif isinstance(operator.get("jobTypes"), list):
+                job_types = operator["jobTypes"]
 
-            if leader.get("reputationNetworks") and isinstance(
-                leader.get("reputationNetworks"), list
+            if operator.get("reputationNetworks") and isinstance(
+                operator.get("reputationNetworks"), list
             ):
                 reputation_networks = [
-                    network["address"] for network in leader["reputationNetworks"]
+                    network["address"] for network in operator["reputationNetworks"]
                 ]
 
-            leaders.append(
-                LeaderData(
+            operators.append(
+                OperatorData(
                     chain_id=filter.chain_id,
-                    id=leader.get("id", ""),
-                    address=leader.get("address", ""),
-                    amount_staked=int(leader.get("amountStaked", 0)),
-                    amount_locked=int(leader.get("amountLocked", 0)),
-                    locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
-                    amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
-                    amount_slashed=int(leader.get("amountSlashed", 0)),
-                    reward=int(leader.get("reward", 0)),
-                    amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
-                    role=leader.get("role", None),
-                    fee=int(leader.get("fee")) if leader.get("fee", None) else None,
-                    public_key=leader.get("publicKey", None),
-                    webhook_url=leader.get("webhookUrl", None),
-                    website=leader.get("website", None),
-                    url=leader.get("url", None),
+                    id=operator.get("id", ""),
+                    address=operator.get("address", ""),
+                    amount_staked=int(operator.get("amountStaked", 0)),
+                    amount_locked=int(operator.get("amountLocked", 0)),
+                    locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
+                    amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
+                    amount_slashed=int(operator.get("amountSlashed", 0)),
+                    reward=int(operator.get("reward", 0)),
+                    amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
+                    role=operator.get("role", None),
+                    fee=int(operator.get("fee")) if operator.get("fee", None) else None,
+                    public_key=operator.get("publicKey", None),
+                    webhook_url=operator.get("webhookUrl", None),
+                    website=operator.get("website", None),
+                    url=operator.get("url", None),
                     job_types=(
-                        leader.get("jobTypes").split(",")
-                        if isinstance(leader.get("jobTypes"), str)
+                        operator.get("jobTypes").split(",")
+                        if isinstance(operator.get("jobTypes"), str)
                         else (
-                            leader.get("jobTypes", [])
-                            if isinstance(leader.get("jobTypes"), list)
+                            operator.get("jobTypes", [])
+                            if isinstance(operator.get("jobTypes"), list)
                             else []
                         )
                     ),
-                    registration_needed=leader.get("registrationNeeded", None),
-                    registration_instructions=leader.get(
+                    registration_needed=operator.get("registrationNeeded", None),
+                    registration_instructions=operator.get(
                         "registrationInstructions", None
                     ),
                     reputation_networks=reputation_networks,
-                    name=leader.get("name", None),
-                    category=leader.get("category", None),
+                    name=operator.get("name", None),
+                    category=operator.get("category", None),
                 )
             )
 
-        return leaders
+        return operators
 
     @staticmethod
-    def get_leader(
+    def get_operator(
         chain_id: ChainId,
-        leader_address: str,
-    ) -> Optional[LeaderData]:
-        """Gets the leader details.
+        operator_address: str,
+    ) -> Optional[OperatorData]:
+        """Gets the operator details.
 
-        :param chain_id: Network in which the leader exists
-        :param leader_address: Address of the leader
+        :param chain_id: Network in which the operator exists
+        :param operator_address: Address of the operator
 
-        :return: Leader data if exists, otherwise None
+        :return: Operator data if exists, otherwise None
 
         :example:
             .. code-block:: python
@@ -337,84 +308,84 @@ class OperatorUtils:
                 from human_protocol_sdk.operator import OperatorUtils
 
                 chain_id = ChainId.POLYGON_AMOY
-                leader_address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
+                operator_address = '0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
-                leader_data = OperatorUtils.get_leader(chain_id, leader_address)
-                print(leader_data)
+                operator_data = OperatorUtils.get_operator(chain_id, operator_address)
+                print(operator_data)
         """
 
-        from human_protocol_sdk.gql.operator import get_leader_query
+        from human_protocol_sdk.gql.operator import get_operator_query
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
             raise OperatorUtilsError(f"Invalid ChainId")
 
-        if not Web3.is_address(leader_address):
-            raise OperatorUtilsError(f"Invalid leader address: {leader_address}")
+        if not Web3.is_address(operator_address):
+            raise OperatorUtilsError(f"Invalid operator address: {operator_address}")
 
         network = NETWORKS[chain_id]
 
-        leader_data = get_data_from_subgraph(
+        operator_data = get_data_from_subgraph(
             network,
-            query=get_leader_query,
-            params={"address": leader_address.lower()},
+            query=get_operator_query,
+            params={"address": operator_address.lower()},
         )
 
         if (
-            not leader_data
-            or "data" not in leader_data
-            or "leader" not in leader_data["data"]
-            or not leader_data["data"]["leader"]
+            not operator_data
+            or "data" not in operator_data
+            or "operator" not in operator_data["data"]
+            or not operator_data["data"]["operator"]
         ):
             return None
 
-        leader = leader_data["data"]["leader"]
+        operator = operator_data["data"]["operator"]
 
         job_types = []
         reputation_networks = []
 
-        if isinstance(leader.get("jobTypes"), str):
-            job_types = leader["jobTypes"].split(",")
-        elif isinstance(leader.get("jobTypes"), list):
-            job_types = leader["jobTypes"]
+        if isinstance(operator.get("jobTypes"), str):
+            job_types = operator["jobTypes"].split(",")
+        elif isinstance(operator.get("jobTypes"), list):
+            job_types = operator["jobTypes"]
 
-        if leader.get("reputationNetworks") and isinstance(
-            leader.get("reputationNetworks"), list
+        if operator.get("reputationNetworks") and isinstance(
+            operator.get("reputationNetworks"), list
         ):
             reputation_networks = [
-                network["address"] for network in leader["reputationNetworks"]
+                network["address"] for network in operator["reputationNetworks"]
             ]
 
-        return LeaderData(
+        return OperatorData(
             chain_id=chain_id,
-            id=leader.get("id", ""),
-            address=leader.get("address", ""),
-            amount_staked=int(leader.get("amountStaked", 0)),
-            amount_locked=int(leader.get("amountLocked", 0)),
-            locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
-            amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
-            amount_slashed=int(leader.get("amountSlashed", 0)),
-            reward=int(leader.get("reward", 0)),
-            amount_jobs_processed=int(leader.get("amountJobsProcessed", 0)),
-            role=leader.get("role", None),
-            fee=int(leader.get("fee")) if leader.get("fee", None) else None,
-            public_key=leader.get("publicKey", None),
-            webhook_url=leader.get("webhookUrl", None),
-            website=leader.get("website", None),
-            url=leader.get("url", None),
+            id=operator.get("id", ""),
+            address=operator.get("address", ""),
+            amount_staked=int(operator.get("amountStaked", 0)),
+            amount_locked=int(operator.get("amountLocked", 0)),
+            locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
+            amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
+            amount_slashed=int(operator.get("amountSlashed", 0)),
+            reward=int(operator.get("reward", 0)),
+            amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
+            role=operator.get("role", None),
+            fee=int(operator.get("fee")) if operator.get("fee", None) else None,
+            public_key=operator.get("publicKey", None),
+            webhook_url=operator.get("webhookUrl", None),
+            website=operator.get("website", None),
+            url=operator.get("url", None),
             job_types=(
-                leader.get("jobTypes").split(",")
-                if isinstance(leader.get("jobTypes"), str)
+                operator.get("jobTypes").split(",")
+                if isinstance(operator.get("jobTypes"), str)
                 else (
-                    leader.get("jobTypes", [])
-                    if isinstance(leader.get("jobTypes"), list)
+                    operator.get("jobTypes", [])
+                    if isinstance(operator.get("jobTypes"), list)
                     else []
                 )
             ),
-            registration_needed=leader.get("registrationNeeded", None),
-            registration_instructions=leader.get("registrationInstructions", None),
+            registration_needed=operator.get("registrationNeeded", None),
+            registration_instructions=operator.get("registrationInstructions", None),
             reputation_networks=reputation_networks,
-            name=leader.get("name", None),
-            category=leader.get("category", None),
+            name=operator.get("name", None),
+            category=operator.get("category", None),
         )
 
     @staticmethod
@@ -422,7 +393,7 @@ class OperatorUtils:
         chain_id: ChainId,
         address: str,
         role: Optional[str] = None,
-    ) -> List[Operator]:
+    ) -> List[OperatorData]:
         """Get the reputation network operators of the specified address.
 
         :param chain_id: Network in which the reputation network exists
@@ -469,12 +440,24 @@ class OperatorUtils:
             return []
 
         operators = reputation_network_data["data"]["reputationNetwork"]["operators"]
-
         return [
-            Operator(
+            OperatorData(
+                chain_id=chain_id,
+                id=operator.get("id", ""),
                 address=operator.get("address", ""),
-                role=operator.get("role", ""),
-                url=operator.get("url", ""),
+                amount_staked=int(operator.get("amountStaked", 0)),
+                amount_locked=int(operator.get("amountLocked", 0)),
+                locked_until_timestamp=int(operator.get("lockedUntilTimestamp", 0)),
+                amount_withdrawn=int(operator.get("amountWithdrawn", 0)),
+                amount_slashed=int(operator.get("amountSlashed", 0)),
+                reward=int(operator.get("reward", 0)),
+                amount_jobs_processed=int(operator.get("amountJobsProcessed", 0)),
+                role=operator.get("role", None),
+                fee=int(operator.get("fee")) if operator.get("fee", None) else None,
+                public_key=operator.get("publicKey", None),
+                webhook_url=operator.get("webhookUrl", None),
+                website=operator.get("website", None),
+                url=operator.get("url", None),
                 job_types=(
                     operator.get("jobTypes").split(",")
                     if isinstance(operator.get("jobTypes"), str)
@@ -484,8 +467,18 @@ class OperatorUtils:
                         else []
                     )
                 ),
-                registration_needed=operator.get("registrationNeeded", ""),
-                registration_instructions=operator.get("registrationInstructions", ""),
+                registration_needed=operator.get("registrationNeeded", None),
+                registration_instructions=operator.get(
+                    "registrationInstructions", None
+                ),
+                reputation_networks=(
+                    [network["address"] for network in operator["reputationNetworks"]]
+                    if operator.get("reputationNetworks")
+                    and isinstance(operator.get("reputationNetworks"), list)
+                    else []
+                ),
+                name=operator.get("name", None),
+                category=operator.get("category", None),
             )
             for operator in operators
         ]

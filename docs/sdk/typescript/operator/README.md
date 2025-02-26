@@ -6,8 +6,6 @@
 
 # operator
 
-## Index
-
-### Classes
+## Classes
 
 - [OperatorUtils](classes/OperatorUtils.md)

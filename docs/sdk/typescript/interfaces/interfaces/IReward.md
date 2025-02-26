@@ -6,15 +6,15 @@
 
 # Interface: IReward
 
+Defined in: [interfaces.ts:4](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L4)
+
 ## Properties
 
 ### amount
 
 > **amount**: `bigint`
 
-#### Defined in
-
-[interfaces.ts:6](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L6)
+Defined in: [interfaces.ts:6](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L6)
 
 ***
 
@@ -22,6 +22,4 @@
 
 > **escrowAddress**: `string`
 
-#### Defined in
-
-[interfaces.ts:5](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L5)
+Defined in: [interfaces.ts:5](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L5)

@@ -226,7 +226,7 @@ export class EscrowCompletionService {
         let allWebhooksCreated = true;
 
         for (const oracleAddress of oracleAddresses) {
-          const oracleData = await OperatorUtils.getLeader(
+          const oracleData = await OperatorUtils.getOperator(
             chainId,
             oracleAddress,
           );

@@ -1,7 +1,7 @@
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { AddressDetailsLeader } from '@services/api/use-address-details';
+import { AddressDetailsOperator } from '@services/api/use-address-details';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import { EscrowsTableBody } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBody';
@@ -15,7 +15,7 @@ import { Stack } from '@mui/material';
 export const RoleDetailsEscrowsTable = ({
   role,
 }: {
-  role: AddressDetailsLeader['role'];
+  role: AddressDetailsOperator['role'];
 }) => {
   const { data } = useEscrowDetails({ role });
   const {

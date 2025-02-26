@@ -6,9 +6,7 @@
 
 # encryption
 
-## Index
-
-### Classes
+## Classes
 
 - [Encryption](classes/Encryption.md)
 - [EncryptionUtils](classes/EncryptionUtils.md)

@@ -6,6 +6,8 @@
 
 # Class: `abstract` BaseEthersClient
 
+Defined in: [base.ts:10](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L10)
+
 ## Introduction
 
 This class is used as a base class for other clients making on-chain calls.
@@ -21,6 +23,8 @@ This class is used as a base class for other clients making on-chain calls.
 ### new BaseEthersClient()
 
 > **new BaseEthersClient**(`runner`, `networkData`): [`BaseEthersClient`](BaseEthersClient.md)
+
+Defined in: [base.ts:20](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 **BaseClient constructor**
 
@@ -42,19 +46,13 @@ The network information required to connect to the contracts
 
 [`BaseEthersClient`](BaseEthersClient.md)
 
-#### Defined in
-
-[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
-
 ## Properties
 
 ### networkData
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
-#### Defined in
-
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ***
 
@@ -62,6 +60,4 @@ The network information required to connect to the contracts
 
 > `protected` **runner**: `ContractRunner`
 
-#### Defined in
-
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
