@@ -19,8 +19,7 @@ export function useEnableHCaptchaLabelingMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
-
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async () => {
       const result = await apiClient(
         apiPaths.worker.enableHCaptchaLabeling.path,
@@ -41,4 +40,6 @@ export function useEnableHCaptchaLabelingMutation() {
       await queryClient.invalidateQueries();
     },
   });
+
+  return mutation;
 }
