@@ -2,7 +2,10 @@ import { forwardRef, useImperativeHandle, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { type CustomHCaptchaRef } from './types';
+
+export interface CustomHCaptchaRef {
+  reset: () => void;
+}
 
 interface CustomHCaptchaProps {
   onVerify: (token: string) => void;
