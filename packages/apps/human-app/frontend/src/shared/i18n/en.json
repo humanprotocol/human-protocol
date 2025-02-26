@@ -217,7 +217,10 @@
       "oracleAddress": "Oracle address",
       "jobTypes": "Task types",
       "seeJobs": "See Tasks",
-      "allJobs": "All tasks"
+      "allJobs": "All tasks",
+      "error": {
+        "gettingOracles": "There was an error while fetching oracles, please try again later."
+      }
     },
     "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
