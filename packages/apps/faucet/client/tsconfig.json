@@ -18,7 +18,7 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "baseUrl": "./",
-    "types": ["node", "jest", "@testing-library/jest-dom"]
+    "types": ["node"]
   },
-  "include": ["src", "tests"]
+  "include": ["src"]
 }

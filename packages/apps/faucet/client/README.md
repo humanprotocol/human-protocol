@@ -5,12 +5,6 @@
 <h1 align="center">HUMAN Faucet</h1>
 <p align="center">The HUMAN Faucet allows users to claim small amounts of HMT tokens to test and explore functionalities within the HUMAN Protocol ecosystem.</p>
 
-<p align="center">
-  <a href="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-ui.yaml">
-    <img src="https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-ui.yaml/badge.svg?branch=main" alt="Faucet Check">
-  </a>
-</p>
-
 ## ✨ Demo
 
 First, install the dependencies using `yarn` as the package manager:
