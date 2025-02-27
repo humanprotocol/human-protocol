@@ -1,6 +1,5 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
-  ChainId,
   KVStoreClient,
   KVStoreUtils,
   Role as SDKRole,
@@ -25,7 +24,6 @@ import {
 } from '../../../test/constants';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../config/network-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { JobRequestType } from '../../common/enums';
@@ -74,13 +72,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
 }));
 
-jest.spyOn(NetworkConfigService.prototype, 'networks', 'get').mockReturnValue([
-  {
-    chainId: ChainId.POLYGON_AMOY,
-    rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
-  },
-]);
-
 describe('AuthService', () => {
   let authService: AuthService;
   let tokenRepository: TokenRepository;
@@ -88,7 +79,6 @@ describe('AuthService', () => {
   let userRepository: UserRepository;
   let jwtService: JwtService;
   let emailService: EmailService;
-  let web3Service: Web3Service;
   let authConfigService: AuthConfigService;
   let hcaptchaService: HCaptchaService;
 
@@ -137,10 +127,8 @@ describe('AuthService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
-        NetworkConfigService,
       ],
     }).compile();
 
@@ -150,7 +138,6 @@ describe('AuthService', () => {
     userRepository = moduleRef.get<UserRepository>(UserRepository);
     jwtService = moduleRef.get<JwtService>(JwtService);
     emailService = moduleRef.get<EmailService>(EmailService);
-    web3Service = moduleRef.get<Web3Service>(Web3Service);
     authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
     hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
 
@@ -301,9 +288,6 @@ describe('AuthService', () => {
       findTokenMock = jest
         .spyOn(tokenRepository, 'findOneByUserIdAndType')
         .mockResolvedValueOnce(null);
-      jest
-        .spyOn(web3Service, 'getOperatorAddress')
-        .mockReturnValueOnce(MOCK_ADDRESS);
 
       const result = await authService.auth(userEntity as UserEntity);
       expect(findTokenMock).toHaveBeenCalledWith(
@@ -651,7 +635,7 @@ describe('AuthService', () => {
 
           const data = {
             from: MOCK_ADDRESS.toLowerCase(),
-            to: web3Service.getOperatorAddress().toLowerCase(),
+            to: MOCK_ADDRESS.toLowerCase(),
             contents: 'signin',
             nonce: nonce,
           };
