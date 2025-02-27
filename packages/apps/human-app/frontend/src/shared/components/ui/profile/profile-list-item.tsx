@@ -15,7 +15,7 @@ export function ProfileListItem({
   header,
   paragraph,
   isStatusListItem,
-}: ProfileListItemProps) {
+}: Readonly<ProfileListItemProps>) {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
 

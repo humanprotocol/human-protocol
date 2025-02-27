@@ -19,7 +19,6 @@ import { EditExistingKeysSuccessPage } from '@/modules/operator/views/sign-up/ed
 import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.page';
 import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
 import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
-import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.page';
 import { Playground } from '@/modules/playground/views/playground.page';
 import { HomePage } from '@/modules/homepage/views/home.page';
 import {
@@ -35,6 +34,7 @@ import { SignInWorkerPage } from '@/modules/signin/worker';
 import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 import { WorkerProfilePage } from '@/modules/worker/profile';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
+import { OperatorProfilePage } from '@/modules/operator/profile';
 
 export const unprotectedRoutes: RouteProps[] = [
   {

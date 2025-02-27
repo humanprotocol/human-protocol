@@ -9,12 +9,11 @@ import {
   PageCardLoader,
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
-import { ProfileDisableButton } from '@/modules/operator/components/profile/profile-disable-button';
-import { ProfileListItem } from '@/shared/components/ui/profile-list-item';
-import { useGetOperatorStats } from '@/modules/operator/hooks/use-get-stats';
-import { ProfileEnableButton } from '@/modules/operator/components/profile/profile-enable-button';
 import { CheckmarkIcon, LockerIcon } from '@/shared/components/ui/icons';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { ProfileListItem } from '@/shared/components/ui/profile';
+import { useGetOperatorStats } from './hooks';
+import { ProfileDisableButton, ProfileEnableButton } from './components';
 
 export function OperatorProfilePage() {
   const { colorPalette } = useColorMode();
