@@ -1,3 +1,9 @@
+import {
+  KVStoreClient,
+  KVStoreKeys,
+  KVStoreUtils,
+  Role,
+} from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
@@ -12,14 +18,7 @@ import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
-import {
-  ChainId,
-  KVStoreClient,
-  KVStoreKeys,
-  KVStoreUtils,
-  Role,
-} from '@human-protocol/sdk';
-import { SignatureType, Web3Env } from '../../common/enums/web3';
+import { SignatureType } from '../../common/enums/web3';
 import { prepareSignatureBody } from '../../utils/web3';
 import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../config/auth-config.service';
@@ -131,23 +130,15 @@ export class AuthService {
         TokenType.REFRESH,
       );
 
-    let chainId: ChainId;
-    const currentWeb3Env = this.web3ConfigService.env;
-    if (currentWeb3Env === Web3Env.MAINNET) {
-      chainId = ChainId.POLYGON;
-    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
-      chainId = ChainId.LOCALHOST;
-    } else {
-      chainId = ChainId.POLYGON_AMOY;
-    }
+    const operatorAddress = this.web3ConfigService.operatorAddress;
 
     let status = userEntity.status.toString();
     if (userEntity.role === UserRole.OPERATOR && userEntity.evmAddress) {
       let operatorStatus: string | undefined;
       try {
         operatorStatus = await KVStoreUtils.get(
-          chainId,
-          this.web3Service.getOperatorAddress(),
+          this.web3ConfigService.reputationNetworkChainId,
+          operatorAddress,
           userEntity.evmAddress.toLowerCase(),
         );
       } catch {}
@@ -164,7 +155,7 @@ export class AuthService {
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
-      reputation_network: this.web3Service.getOperatorAddress(),
+      reputation_network: operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
             (userQualification) => userQualification.qualification.reference,
@@ -307,7 +298,7 @@ export class AuthService {
   public async web3Signup(data: Web3SignUpDto): Promise<SuccessAuthDto> {
     const preSignUpData = prepareSignatureBody({
       from: data.address,
-      to: this.web3Service.getOperatorAddress(),
+      to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.SIGNUP,
     });
 
@@ -319,15 +310,7 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE);
     }
 
-    let chainId: ChainId;
-    const currentWeb3Env = this.web3ConfigService.env;
-    if (currentWeb3Env === Web3Env.MAINNET) {
-      chainId = ChainId.POLYGON;
-    } else if (currentWeb3Env === Web3Env.LOCALHOST) {
-      chainId = ChainId.LOCALHOST;
-    } else {
-      chainId = ChainId.POLYGON_AMOY;
-    }
+    const chainId = this.web3ConfigService.reputationNetworkChainId;
 
     const signer = this.web3Service.getSigner(chainId);
     const kvstore = await KVStoreClient.build(signer);
@@ -399,7 +382,7 @@ export class AuthService {
 
     const preSigninData = prepareSignatureBody({
       from: data.address,
-      to: this.web3Service.getOperatorAddress(),
+      to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.SIGNIN,
       nonce: (await this.userRepository.findOneByAddress(data.address))?.nonce,
     });
