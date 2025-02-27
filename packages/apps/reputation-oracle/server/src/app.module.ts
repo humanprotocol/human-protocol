@@ -23,6 +23,8 @@ import { EscrowCompletionModule } from './modules/escrow-completion/escrow-compl
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
 import { EmailModule } from './modules/email/module';
+import { UserModule } from './modules/user/user.module';
+import { NDAModule } from './modules/nda/nda.module';
 import Environment from './utils/environment';
 
 @Module({
@@ -71,6 +73,8 @@ import Environment from './utils/environment';
     QualificationModule,
     EscrowCompletionModule,
     EmailModule,
+    UserModule,
+    NDAModule,
   ],
 })
 export class AppModule {}

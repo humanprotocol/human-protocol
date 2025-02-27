@@ -318,6 +318,7 @@ describe('AuthService', () => {
           wallet_address: userEntity.evmAddress,
           kyc_status: userEntity.kyc?.status,
           reputation_network: MOCK_ADDRESS,
+          nda_signed: false,
           qualifications: [],
           role: userEntity.role,
         },

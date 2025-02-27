@@ -48,4 +48,7 @@ export class UserEntity extends BaseEntity implements IUser {
     (userQualification) => userQualification.user,
   )
   public userQualifications: UserQualificationEntity[];
+
+  @Column({ type: 'varchar', nullable: true })
+  public ndaSigned?: string;
 }

@@ -68,4 +68,11 @@ export class AuthConfigService {
   get humanAppEmail(): string {
     return this.configService.getOrThrow<string>('HUMAN_APP_EMAIL');
   }
+
+  /**
+   * Latest NDA Url.
+   */
+  get latestNdaUrl(): string {
+    return this.configService.getOrThrow<string>('NDA_URL');
+  }
 }

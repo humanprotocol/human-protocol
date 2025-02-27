@@ -164,6 +164,7 @@ export class AuthService {
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
+      nda_signed: userEntity.ndaSigned === this.authConfigService.latestNdaUrl,
       reputation_network: this.web3Service.getOperatorAddress(),
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(

@@ -98,6 +98,7 @@ export const MOCK_WEB3_RPC_URL = 'http://localhost:8545';
 export const MOCK_QUALIFICATION_MIN_VALIDITY = 100;
 export const MOCK_FE_URL = 'http://localhost:3001';
 export const MOCK_KYC_API_PRIVATE_KEY = 'api-private-key';
+export const MOCK_NDA_URL = 'https://staging.humanprotocol.org/nda';
 
 export const mockConfig: any = {
   S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
@@ -128,6 +129,7 @@ export const mockConfig: any = {
   HCAPTCHA_LABELING_URL: MOCK_HCAPTCHA_LABELING_URL,
   HCAPTCHA_DEFAULT_LABELER_LANG: MOCK_HCAPTCHA_DEFAULT_LABELER_LANG,
   KYC_API_PRIVATE_KEY: MOCK_KYC_API_PRIVATE_KEY,
+  NDA_URL: MOCK_NDA_URL,
 };
 
 export const MOCK_BACKOFF_INTERVAL_SECONDS = 120;
