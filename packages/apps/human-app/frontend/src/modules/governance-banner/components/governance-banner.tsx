@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { env } from '@/shared/env';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { useWorkerKycStatus } from '@/modules/worker/profile/hooks';
 import { useActiveProposalQuery } from '../hooks/use-active-proposal-query';
 
 export function GovernanceBanner() {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useActiveProposalQuery();
+  const { kycApproved } = useWorkerKycStatus();
   const { colorPalette } = useColorMode();
   const [timeRemaining, setTimeRemaining] = useState('00:00:00');
   const isMobile = useIsMobile('lg');
@@ -41,7 +43,7 @@ export function GovernanceBanner() {
     };
   }, [data?.deadline]);
 
-  if (isLoading || isError || !data) {
+  if (!kycApproved || isLoading || isError || !data) {
     return null;
   }
 
