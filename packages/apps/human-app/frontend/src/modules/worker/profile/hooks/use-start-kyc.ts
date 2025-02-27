@@ -1,14 +1,10 @@
-import { t } from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useKycStartMutation } from '@/modules/worker/services/get-kyc-session-id';
-import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { Button } from '@/shared/components/ui/button';
 import { useKycErrorNotifications } from '@/modules/worker/hooks/use-kyc-notification';
 import { FetchError } from '@/api/fetcher';
 
-export function StartKycButton() {
+export function useStartKyc() {
   const [isKYCInProgress, setIsKYCInProgress] = useState(false);
-  const { user } = useAuthenticatedUser();
   const onError = useKycErrorNotifications();
   const {
     data: kycStartData,
@@ -18,9 +14,9 @@ export function StartKycButton() {
     error: kycStartMutationError,
   } = useKycStartMutation();
 
-  const startKYC = () => {
+  const startKYC = useCallback(() => {
     kycStartMutation();
-  };
+  }, [kycStartMutation]);
 
   useEffect(() => {
     if (kycStartMutationStatus === 'error') {
@@ -44,23 +40,9 @@ export function StartKycButton() {
     onError,
   ]);
 
-  if (isKYCInProgress) {
-    return (
-      <Button disabled fullWidth variant="contained">
-        {t('worker.profile.KYCInProgress')}
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      disabled={user.status !== 'active'}
-      fullWidth
-      loading={kycStartIsPending}
-      onClick={startKYC}
-      variant="contained"
-    >
-      {t('worker.profile.completeKYC')}
-    </Button>
-  );
+  return {
+    isKYCInProgress,
+    kycStartIsPending,
+    startKYC,
+  };
 }
