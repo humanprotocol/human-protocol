@@ -69,6 +69,7 @@ export function Router() {
                   renderHCaptchaStatisticsDrawer={(isOpen) => (
                     <UserStatsDrawer isOpen={isOpen} />
                   )}
+                  renderGovernanceBanner
                 />
               </RequireAuth>
             }
