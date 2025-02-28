@@ -176,7 +176,8 @@
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Resend Email",
       "btnAfterSend": "Resend Email",
-      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent."
     },
     "resetPassword": {
       "fields": {

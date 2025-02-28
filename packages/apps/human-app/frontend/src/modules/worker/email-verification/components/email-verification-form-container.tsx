@@ -1,9 +1,14 @@
-import { Navigate, useNavigate } from 'react-router-dom';
-import { PageCard } from '@/shared/components/ui/page-card';
-import { Alert } from '@/shared/components/ui/alert';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PageCard, PageCardLoader } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
+import {
+  TopNotificationType,
+  useNotification,
+} from '@/shared/hooks/use-notification';
 import { useResendEmailRouterParams, useResendEmail } from '../hooks';
 import { ResendVerificationEmailForm } from './resend-verification-email-form';
 
@@ -11,9 +16,30 @@ export function EmailVerificationFormContainer() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const routerState = useResendEmailRouterParams();
-  const { methods, handleResend } = useResendEmail(routerState?.email ?? '');
-
+  const { methods, handleResend, isError, error, isSuccess } = useResendEmail(
+    routerState?.email ?? ''
+  );
+  const { showNotification } = useNotification();
+  const { t } = useTranslation();
   const isAuthenticated = Boolean(user);
+
+  useEffect(() => {
+    if (isError) {
+      showNotification({
+        message: getErrorMessageForError(error),
+        type: TopNotificationType.WARNING,
+      });
+    }
+  }, [isError, error, showNotification]);
+
+  useEffect(() => {
+    if (isSuccess && methods.formState.isSubmitSuccessful) {
+      showNotification({
+        message: t('worker.sendResetLinkSuccess.successResent'),
+        type: TopNotificationType.SUCCESS,
+      });
+    }
+  }, [isSuccess, methods.formState.isSubmitSuccessful, showNotification, t]);
 
   const handleCancel = () => {
     signOut();
@@ -21,21 +47,11 @@ export function EmailVerificationFormContainer() {
   };
 
   if (!routerState?.email) {
-    return <Navigate to={routerPaths.homePage} />;
+    return <PageCardLoader />;
   }
 
-  const alertComponent = methods.formState.isSubmitSuccessful ? (
-    <Alert color="error" severity="error">
-      {getErrorMessageForError(methods.formState.errors)}
-    </Alert>
-  ) : undefined;
-
   return (
-    <PageCard
-      alert={alertComponent}
-      cancelNavigation={handleCancel}
-      title="Verify Email"
-    >
+    <PageCard cancelNavigation={handleCancel} title="Verify Email">
       <ResendVerificationEmailForm
         methods={methods}
         handleResend={handleResend}

@@ -10,6 +10,9 @@ import type { ResendEmailVerificationDto } from '@/modules/worker/services/resen
 
 export function useResendEmail(email: string) {
   const {
+    isError,
+    error,
+    isSuccess,
     mutate: resendEmailVerificationMutation,
     reset: resendEmailVerificationMutationReset,
   } = useResendEmailVerificationWorkerMutation();
@@ -36,6 +39,9 @@ export function useResendEmail(email: string) {
   };
 
   return {
+    isError,
+    isSuccess,
+    error,
     methods,
     handleResend,
   };
