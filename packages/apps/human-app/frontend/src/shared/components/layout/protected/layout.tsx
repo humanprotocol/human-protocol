@@ -38,6 +38,7 @@ export function Layout({
   pageHeaderProps,
   renderDrawer,
   renderHCaptchaStatisticsDrawer,
+  renderGovernanceBanner,
 }: {
   pageHeaderProps: PageHeaderProps;
   renderDrawer: (
@@ -45,6 +46,7 @@ export function Layout({
     setDrawerOpen: Dispatch<SetStateAction<boolean>>
   ) => JSX.Element;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
+  renderGovernanceBanner?: boolean;
 }) {
   const layoutElementRef = useRef<HTMLDivElement>();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
@@ -118,7 +120,7 @@ export function Layout({
             },
           }}
         >
-          <GovernanceBanner />
+          {renderGovernanceBanner && <GovernanceBanner />}
           <Grid item>
             <PageHeader {...pageHeaderProps} />
           </Grid>
