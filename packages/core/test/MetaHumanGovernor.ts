@@ -1039,7 +1039,7 @@ describe('MetaHumanGovernor', function () {
     ).to.be.revertedWithCustomError(governor, 'MessageAlreadyProcessed');
   });
 
-  it('should reverts to receive message when intended receipient is not different', async function () {
+  it('should reverts to receive message when intended recipient is not different', async function () {
     const proposalId = await createBasicProposal(
       daoSpoke,
       wormholeMockForDaoSpoke,
