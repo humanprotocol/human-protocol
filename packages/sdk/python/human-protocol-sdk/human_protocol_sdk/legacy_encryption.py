@@ -50,7 +50,7 @@ class Encryption:
     """ ECIES using AES256 and HMAC-SHA-256-32 """
 
     CIPHER = AES
-    """ Cipher algorithm defintion. """
+    """ Cipher algorithm definition. """
 
     MODE = CTR
     """ Cipher mode definition. """
