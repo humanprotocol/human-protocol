@@ -1,16 +1,15 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddContentModerationRequests1739982323904
+export class AddContentModerationRequests1740742340179
   implements MigrationInterface
 {
-  name = 'AddContentModerationRequests1739982323904';
+  name = 'AddContentModerationRequests1740742340179';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             CREATE TYPE "hmt"."content-moderation-requests_status_enum" AS ENUM(
                 'pending',
                 'processed',
-                'possible_abuse',
                 'positive_abuse',
                 'passed',
                 'failed'
@@ -24,7 +23,6 @@ export class AddContentModerationRequests1739982323904
                 "data_url" character varying NOT NULL,
                 "from" integer NOT NULL,
                 "to" integer NOT NULL,
-                "abuse_reason" character varying,
                 "status" "hmt"."content-moderation-requests_status_enum" NOT NULL,
                 "job_id" integer NOT NULL,
                 CONSTRAINT "PK_e81154211cbfb9f8dcd56158313" PRIMARY KEY ("id")

@@ -15,9 +15,6 @@ export class ContentModerationRequestEntity extends BaseEntity {
   @Column({ type: 'int', nullable: false })
   public to: number;
 
-  @Column({ type: 'varchar', nullable: true })
-  public abuseReason: string;
-
   @Column({
     type: 'enum',
     enum: ContentModerationRequestStatus,

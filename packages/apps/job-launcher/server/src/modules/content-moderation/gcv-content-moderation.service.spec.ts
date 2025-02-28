@@ -36,6 +36,7 @@ describe('GCVContentModerationService', () => {
   let contentModerationRequestRepository: ContentModerationRequestRepository;
   let slackConfigService: SlackConfigService;
   let storageService: StorageService;
+  let jobEntity: JobEntity;
 
   const mockStorage = {
     bucket: jest.fn().mockReturnValue({
@@ -108,6 +109,12 @@ describe('GCVContentModerationService', () => {
       );
     slackConfigService = module.get<SlackConfigService>(SlackConfigService);
     storageService = module.get<StorageService>(StorageService);
+
+    jobEntity = {
+      id: faker.number.int(),
+      status: JobStatus.PAID,
+      manifestUrl: faker.internet.url(),
+    } as JobEntity;
   });
 
   afterEach(() => {
@@ -115,17 +122,15 @@ describe('GCVContentModerationService', () => {
   });
 
   describe('moderateJob (public)', () => {
-    it('should call ensureRequests, processRequests, parseRequests, finalizeJob in order', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
-
-      const ensureRequestsSpy = jest
-        .spyOn<any, any>(service, 'ensureRequests')
+    it('should call createModerationRequests, processModerationRequests, parseModerationRequests, finalizeJob in order', async () => {
+      const createModerationRequestsSpy = jest
+        .spyOn<any, any>(service, 'createModerationRequests')
         .mockResolvedValueOnce(undefined);
-      const processRequestsSpy = jest
-        .spyOn<any, any>(service, 'processRequests')
+      const processModerationRequestsSpy = jest
+        .spyOn<any, any>(service, 'processModerationRequests')
         .mockResolvedValueOnce(undefined);
-      const parseRequestsSpy = jest
-        .spyOn<any, any>(service, 'parseRequests')
+      const parseModerationRequestsSpy = jest
+        .spyOn<any, any>(service, 'parseModerationRequests')
         .mockResolvedValueOnce(undefined);
       const finalizeJobSpy = jest
         .spyOn<any, any>(service, 'finalizeJob')
@@ -133,81 +138,46 @@ describe('GCVContentModerationService', () => {
 
       await service.moderateJob(jobEntity);
 
-      expect(ensureRequestsSpy).toHaveBeenCalledWith(jobEntity);
-      expect(processRequestsSpy).toHaveBeenCalledWith(jobEntity);
-      expect(parseRequestsSpy).toHaveBeenCalledWith(jobEntity);
+      expect(createModerationRequestsSpy).toHaveBeenCalledWith(jobEntity);
+      expect(processModerationRequestsSpy).toHaveBeenCalledWith(jobEntity);
+      expect(parseModerationRequestsSpy).toHaveBeenCalledWith(jobEntity);
       expect(finalizeJobSpy).toHaveBeenCalledWith(jobEntity);
     });
 
-    it('should propagate an error if ensureRequests fails', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
-
+    it('should propagate an error if createModerationRequests fails', async () => {
       jest
-        .spyOn<any, any>(service, 'ensureRequests')
-        .mockRejectedValueOnce(new Error('Simulated ensureRequests error'));
+        .spyOn<any, any>(service, 'createModerationRequests')
+        .mockRejectedValueOnce(
+          new Error('Simulated createModerationRequests error'),
+        );
 
       await expect(service.moderateJob(jobEntity)).rejects.toThrow(
-        'Simulated ensureRequests error',
+        'Simulated createModerationRequests error',
       );
     });
   });
 
-  describe('ensureRequests', () => {
-    it('should do nothing if requests already exist', async () => {
-      const jobEntity = {
-        id: faker.number.int(),
-        status: JobStatus.PAID,
-      } as JobEntity;
-      (
-        contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockResolvedValueOnce([{} as ContentModerationRequestEntity]);
-
-      await (service as any).ensureRequests(jobEntity);
-      expect(jobRepository.updateOne).not.toHaveBeenCalled();
-    });
-
+  describe('createModerationRequests', () => {
     it('should return if job status not PAID or UNDER_MODERATION', async () => {
-      const jobEntity = {
-        id: faker.number.int(),
-        status: JobStatus.CANCELED,
-      } as JobEntity;
-      (
-        contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockResolvedValueOnce([]);
+      jobEntity.status = JobStatus.CANCELED;
 
-      await (service as any).ensureRequests(jobEntity);
+      await (service as any).createModerationRequests(jobEntity);
       expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
 
     it('should set job to MODERATION_PASSED if data_url is missing or invalid', async () => {
-      const jobEntity = {
-        id: faker.number.int(),
-        status: JobStatus.PAID,
-        manifestUrl: faker.internet.url(),
-      } as JobEntity;
-
-      (
-        contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockResolvedValueOnce([]);
+      jobEntity.status = JobStatus.PAID;
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
         data: { data_url: null },
       });
 
-      await (service as any).ensureRequests(jobEntity);
+      await (service as any).createModerationRequests(jobEntity);
       expect(jobEntity.status).toBe(JobStatus.MODERATION_PASSED);
       expect(jobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
     });
 
     it('should do nothing if no valid files found in GCS', async () => {
-      const jobEntity = {
-        id: faker.number.int(),
-        status: JobStatus.PAID,
-        manifestUrl: faker.internet.url(),
-      } as JobEntity;
-
-      (
-        contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockResolvedValueOnce([]);
+      jobEntity.status = JobStatus.PAID;
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
         data: {
           data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
@@ -215,21 +185,13 @@ describe('GCVContentModerationService', () => {
       });
 
       (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([]);
-      await (service as any).ensureRequests(jobEntity);
+      await (service as any).createModerationRequests(jobEntity);
 
       expect(jobRepository.updateOne).not.toHaveBeenCalled();
     });
 
     it('should create new requests in PENDING and set job to UNDER_MODERATION', async () => {
-      const jobEntity = {
-        id: faker.number.int(),
-        status: JobStatus.PAID,
-        manifestUrl: faker.internet.url(),
-      } as JobEntity;
-
-      (
-        contentModerationRequestRepository.findByJobId as jest.Mock
-      ).mockResolvedValueOnce([]);
+      jobEntity.status = JobStatus.PAID;
       (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
         data: {
           data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
@@ -241,32 +203,40 @@ describe('GCVContentModerationService', () => {
         `${faker.word.sample()}.jpg`,
         `${faker.word.sample()}.jpg`,
       ]);
+      (
+        contentModerationRequestRepository.findByJobId as jest.Mock
+      ).mockResolvedValueOnce([]);
 
-      await (service as any).ensureRequests(jobEntity);
+      await (service as any).createModerationRequests(jobEntity);
 
       expect(jobEntity.status).toBe(JobStatus.UNDER_MODERATION);
       expect(jobRepository.updateOne).toHaveBeenCalledWith(jobEntity);
     });
 
     it('should throw if an error occurs in creation logic', async () => {
-      const jobEntity = {
-        id: faker.number.int(),
-        status: JobStatus.PAID,
-      } as JobEntity;
-
+      jobEntity.status = JobStatus.PAID;
+      (storageService.downloadJsonLikeData as jest.Mock).mockResolvedValueOnce({
+        data: {
+          data_url: `gs://${faker.word.sample({ length: { min: 5, max: 10 } })}`,
+        },
+      });
+      (listObjectsInBucket as jest.Mock).mockResolvedValueOnce([
+        `${faker.word.sample()}.jpg`,
+        `${faker.word.sample()}.jpg`,
+        `${faker.word.sample()}.jpg`,
+      ]);
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockRejectedValueOnce(new Error('DB error'));
 
-      await expect((service as any).ensureRequests(jobEntity)).rejects.toThrow(
-        'DB error',
-      );
+      await expect(
+        (service as any).createModerationRequests(jobEntity),
+      ).rejects.toThrow('DB error');
     });
   });
 
-  describe('processRequests', () => {
+  describe('processModerationRequests', () => {
     it('should process all PENDING requests (success)', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
       const pendingRequest = {
         id: faker.number.int(),
       } as ContentModerationRequestEntity;
@@ -278,12 +248,11 @@ describe('GCVContentModerationService', () => {
         .spyOn<any, any>(service, 'processSingleRequest')
         .mockResolvedValueOnce(undefined);
 
-      await (service as any).processRequests(jobEntity);
+      await (service as any).processModerationRequests(jobEntity);
       expect(processSingleRequestSpy).toHaveBeenCalledWith(pendingRequest);
     });
 
     it('should mark request as FAILED if processSingleRequest throws', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
       const pendingRequest = {
         id: faker.number.int(),
       } as ContentModerationRequestEntity;
@@ -295,7 +264,7 @@ describe('GCVContentModerationService', () => {
         .spyOn<any, any>(service, 'processSingleRequest')
         .mockRejectedValueOnce(new Error('Processing error'));
 
-      await (service as any).processRequests(jobEntity);
+      await (service as any).processModerationRequests(jobEntity);
 
       expect(contentModerationRequestRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -306,20 +275,18 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw if getRequests fails', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
       jest
         .spyOn<any, any>(service, 'getRequests')
         .mockRejectedValueOnce(new Error('getRequests error'));
 
-      await expect((service as any).processRequests(jobEntity)).rejects.toThrow(
-        'getRequests error',
-      );
+      await expect(
+        (service as any).processModerationRequests(jobEntity),
+      ).rejects.toThrow('getRequests error');
     });
   });
 
-  describe('parseRequests', () => {
+  describe('parseModerationRequests', () => {
     it('should parse all PROCESSED requests (success)', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
       const processedRequest = {
         id: faker.number.int(),
       } as ContentModerationRequestEntity;
@@ -331,12 +298,11 @@ describe('GCVContentModerationService', () => {
         .spyOn<any, any>(service, 'parseSingleRequest')
         .mockResolvedValueOnce(undefined);
 
-      await (service as any).parseRequests(jobEntity);
+      await (service as any).parseModerationRequests(jobEntity);
       expect(parseSingleRequestSpy).toHaveBeenCalledWith(processedRequest);
     });
 
     it('should mark request as FAILED if parseSingleRequest throws', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
       const processedRequest = {
         id: faker.number.int(),
       } as ContentModerationRequestEntity;
@@ -348,7 +314,7 @@ describe('GCVContentModerationService', () => {
         .spyOn<any, any>(service, 'parseSingleRequest')
         .mockRejectedValueOnce(new Error('Parsing error'));
 
-      await (service as any).parseRequests(jobEntity);
+      await (service as any).parseModerationRequests(jobEntity);
       expect(contentModerationRequestRepository.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
           id: processedRequest.id,
@@ -358,20 +324,19 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw if getRequests fails', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
       jest
         .spyOn<any, any>(service, 'getRequests')
         .mockRejectedValueOnce(new Error('getRequests error'));
 
-      await expect((service as any).parseRequests(jobEntity)).rejects.toThrow(
-        'getRequests error',
-      );
+      await expect(
+        (service as any).parseModerationRequests(jobEntity),
+      ).rejects.toThrow('getRequests error');
     });
   });
 
   describe('finalizeJob', () => {
     it('should do nothing if any requests are still PENDING or PROCESSED', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
+      jobEntity.contentModerationRequests = [];
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockResolvedValueOnce([
@@ -383,7 +348,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should set job to MODERATION_PASSED if all requests passed', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
+      jobEntity.contentModerationRequests = [];
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockResolvedValueOnce([
@@ -397,7 +362,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should set job to POSSIBLE_ABUSE_IN_REVIEW if any request is flagged', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
+      jobEntity.contentModerationRequests = [];
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockResolvedValueOnce([
@@ -410,7 +375,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should throw if DB call fails', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
+      jobEntity.contentModerationRequests = [];
       (
         contentModerationRequestRepository.findByJobId as jest.Mock
       ).mockRejectedValueOnce(new Error('DB error'));
@@ -423,13 +388,13 @@ describe('GCVContentModerationService', () => {
 
   describe('processSingleRequest', () => {
     it('should slice valid files, call asyncBatchAnnotateImages, set status PROCESSED', async () => {
-      const fakerBucket = faker.word.sample();
+      const fakerBucket = faker.word.sample({ length: { min: 5, max: 10 } });
       const requestEntity: ContentModerationRequestEntity = {
         id: faker.number.int(),
         dataUrl: `https://${fakerBucket}.storage.googleapis.com`,
         from: 1,
         to: 2,
-        job: { id: faker.number.int() } as JobEntity,
+        job: jobEntity,
       } as any;
 
       const file1 = `${faker.word.sample()}.jpg`;
@@ -459,10 +424,10 @@ describe('GCVContentModerationService', () => {
     it('should throw if asyncBatchAnnotateImages fails', async () => {
       const requestEntity: ContentModerationRequestEntity = {
         id: faker.number.int(),
-        dataUrl: `https://${faker.word.sample()}.storage.googleapis.com`,
+        dataUrl: `https://${faker.word.sample({ length: { min: 5, max: 10 } })}.storage.googleapis.com`,
         from: 1,
         to: 2,
-        job: { id: faker.number.int() } as JobEntity,
+        job: jobEntity,
       } as any;
 
       jest
@@ -515,14 +480,13 @@ describe('GCVContentModerationService', () => {
     it('should set POSITIVE_ABUSE if positiveAbuseResults found', async () => {
       const requestEntity: ContentModerationRequestEntity = {
         id: faker.number.int(),
-        job: { id: faker.number.int() } as JobEntity,
+        job: jobEntity,
       } as any;
       jest
         .spyOn<any, any>(service, 'collectModerationResults')
-        .mockResolvedValueOnce({
-          positiveAbuseResults: [{ imageUrl: 'abuse.jpg' }],
-          possibleAbuseResults: [],
-        });
+        .mockResolvedValueOnce([
+          { imageUrl: 'abuse.jpg', moderationResult: 'adult' },
+        ]);
       jest
         .spyOn<any, any>(service, 'handleAbuseLinks')
         .mockResolvedValueOnce(undefined);
@@ -539,32 +503,10 @@ describe('GCVContentModerationService', () => {
       );
     });
 
-    it('should set POSSIBLE_ABUSE if possibleAbuseResults found', async () => {
-      const requestEntity: ContentModerationRequestEntity = {
-        id: faker.number.int(),
-        job: { id: faker.number.int() } as JobEntity,
-      } as any;
-      jest
-        .spyOn<any, any>(service, 'collectModerationResults')
-        .mockResolvedValueOnce({
-          positiveAbuseResults: [],
-          possibleAbuseResults: [{ imageUrl: faker.internet.url() }],
-        });
-      jest
-        .spyOn<any, any>(service, 'handleAbuseLinks')
-        .mockResolvedValueOnce(undefined);
-
-      await (service as any).parseSingleRequest(requestEntity);
-      expect(service['handleAbuseLinks']).toHaveBeenCalled();
-      expect(requestEntity.status).toBe(
-        ContentModerationRequestStatus.POSSIBLE_ABUSE,
-      );
-    });
-
     it('should set PASSED if no abuse found', async () => {
       const requestEntity = {
         id: faker.number.int(),
-        job: { id: faker.number.int() } as JobEntity,
+        job: jobEntity,
       } as ContentModerationRequestEntity;
       jest
         .spyOn<any, any>(service, 'collectModerationResults')
@@ -585,7 +527,7 @@ describe('GCVContentModerationService', () => {
     it('should set FAILED if collectModerationResults throws', async () => {
       const requestEntity = {
         id: faker.number.int(),
-        job: { id: faker.number.int() } as JobEntity,
+        job: jobEntity,
       } as ContentModerationRequestEntity;
       jest
         .spyOn<any, any>(service, 'collectModerationResults')
@@ -698,9 +640,14 @@ describe('GCVContentModerationService', () => {
           },
         },
       ];
-      const result = (service as any).categorizeModerationResults(responses);
-      expect(result.positiveAbuseResults).toHaveLength(1);
-      expect(result.possibleAbuseResults).toHaveLength(1);
+      const results = (service as any).categorizeModerationResults(responses);
+      expect(results).toHaveLength(2);
+      expect(results[0]).toHaveProperty('imageUrl');
+      expect(results[0]).toHaveProperty('moderationResult');
+      expect(results[1]).toHaveProperty('imageUrl');
+      expect(results[1]).toHaveProperty('moderationResult');
+      expect(results[0].moderationResult).toBe('adult');
+      expect(results[1].moderationResult).toBe('violence');
     });
 
     it('should ignore entries with no safeSearchAnnotation', () => {
@@ -712,9 +659,8 @@ describe('GCVContentModerationService', () => {
           },
         },
       ];
-      const result = (service as any).categorizeModerationResults(responses);
-      expect(result.positiveAbuseResults).toHaveLength(0);
-      expect(result.possibleAbuseResults).toHaveLength(0);
+      const results = (service as any).categorizeModerationResults(responses);
+      expect(results).toHaveLength(0);
     });
   });
 
@@ -803,7 +749,7 @@ describe('GCVContentModerationService', () => {
     });
 
     it('should fallback to DB if not in memory', async () => {
-      const jobEntity = { id: faker.number.int() } as JobEntity;
+      jobEntity.status = JobStatus.PAID;
       (
         contentModerationRequestRepository.findByJobIdAndStatus as jest.Mock
       ).mockResolvedValueOnce([

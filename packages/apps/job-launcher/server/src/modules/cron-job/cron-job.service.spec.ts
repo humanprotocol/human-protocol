@@ -35,7 +35,10 @@ import { ServerConfigService } from '../../common/config/server-config.service';
 import { SlackConfigService } from '../../common/config/slack-config.service';
 import { VisionConfigService } from '../../common/config/vision-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ErrorCronJob } from '../../common/constants/errors';
+import {
+  ErrorContentModeration,
+  ErrorCronJob,
+} from '../../common/constants/errors';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { ControlledError } from '../../common/errors/controlled';
@@ -1057,7 +1060,7 @@ describe('CronJobService', () => {
       expect(handleFailureMock).toHaveBeenCalledTimes(1);
       expect(handleFailureMock).toHaveBeenCalledWith(
         jobEntity1,
-        expect.stringContaining(error.message),
+        expect.stringContaining(ErrorContentModeration.ResultsParsingFailed),
       );
       expect(handleFailureMock).not.toHaveBeenCalledWith(
         jobEntity2,

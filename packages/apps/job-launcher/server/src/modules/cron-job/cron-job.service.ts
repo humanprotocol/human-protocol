@@ -1,6 +1,10 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { ErrorCronJob, ErrorEscrow } from '../../common/constants/errors';
+import {
+  ErrorContentModeration,
+  ErrorCronJob,
+  ErrorEscrow,
+} from '../../common/constants/errors';
 import { CronJobType } from '../../common/enums/cron-job';
 
 import { EscrowStatus, EscrowUtils } from '@human-protocol/sdk';
@@ -93,18 +97,23 @@ export class CronJobService {
         JobStatus.UNDER_MODERATION,
       ]);
 
-      for (const jobEntity of jobs) {
-        try {
-          await this.contentModerationService.moderateJob(jobEntity);
-        } catch (err) {
-          const failedReason = `Content moderation error: ${err.message}`;
-          this.logger.error(`Job ${jobEntity.id} failed: ${failedReason}`);
-          await this.jobService.handleProcessJobFailure(
-            jobEntity,
-            failedReason,
-          );
-        }
-      }
+      await Promise.all(
+        jobs.map(async (jobEntity) => {
+          try {
+            await this.contentModerationService.moderateJob(jobEntity);
+          } catch (err) {
+            const errorId = uuidv4();
+            const failedReason = `${ErrorContentModeration.ResultsParsingFailed} (Error ID: ${errorId})`;
+            this.logger.error(
+              `Error parse job moderation results job. Error ID: ${errorId}, Job ID: ${jobEntity.id}, Reason: ${failedReason}, Message: ${err.message}`,
+            );
+            await this.jobService.handleProcessJobFailure(
+              jobEntity,
+              failedReason,
+            );
+          }
+        }),
+      );
     } catch (err) {
       this.logger.error(`Error in moderateContentCronJob: ${err.message}`);
     }

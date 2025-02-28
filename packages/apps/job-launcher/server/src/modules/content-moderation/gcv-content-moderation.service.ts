@@ -8,24 +8,19 @@ import {
   GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK,
 } from '../../common/constants';
 import { ErrorContentModeration } from '../../common/constants/errors';
-import { ContentModerationLevel } from '../../common/enums/gcv';
 import {
   ContentModerationFeature,
-  ContentModerationRequestStatus,
-} from '../../common/enums/content-moderation';
+  ContentModerationLevel,
+} from '../../common/enums/gcv';
+import { ContentModerationRequestStatus } from '../../common/enums/content-moderation';
 import { JobStatus } from '../../common/enums/job';
 import { ControlledError } from '../../common/errors/controlled';
-import { hashString } from '../../common/utils';
 import {
   constructGcsPath,
   convertToGCSPath,
   convertToHttpUrl,
   isGCSBucketUrl,
 } from '../../common/utils/gcstorage';
-import {
-  checkModerationLevels,
-  getFileName,
-} from '../../common/utils/content-moderation';
 import { sendSlackNotification } from '../../common/utils/slack';
 import { listObjectsInBucket } from '../../common/utils/storage';
 import { JobEntity } from '../job/job.entity';
@@ -34,6 +29,7 @@ import { StorageService } from '../storage/storage.service';
 import { ContentModerationRequestEntity } from './content-moderation-request.entity';
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { IContentModeratorService } from './content-moderation.interface';
+import { ModerationResultDto } from './content-moderation.dto';
 
 @Injectable()
 export class GCVContentModerationService implements IContentModeratorService {
@@ -76,21 +72,16 @@ export class GCVContentModerationService implements IContentModeratorService {
    * Single public method orchestrating all steps in order
    */
   public async moderateJob(jobEntity: JobEntity): Promise<void> {
-    await this.ensureRequests(jobEntity);
-    await this.processRequests(jobEntity);
-    await this.parseRequests(jobEntity);
+    await this.createModerationRequests(jobEntity);
+    await this.processModerationRequests(jobEntity);
+    await this.parseModerationRequests(jobEntity);
     await this.finalizeJob(jobEntity);
   }
 
   /**
    * 1) If no requests exist for this job, create them in PENDING.
    */
-  private async ensureRequests(jobEntity: JobEntity): Promise<void> {
-    const existing = await this.contentModerationRequestRepository.findByJobId(
-      jobEntity.id,
-    );
-    if (existing.length > 0) return;
-
+  private async createModerationRequests(jobEntity: JobEntity): Promise<void> {
     if (
       jobEntity.status !== JobStatus.PAID &&
       jobEntity.status !== JobStatus.UNDER_MODERATION
@@ -113,27 +104,47 @@ export class GCVContentModerationService implements IContentModeratorService {
       const validFiles = await this.getValidFiles(dataUrl);
       if (validFiles.length === 0) return;
 
-      const batchSize = GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK;
+      const existingRequests =
+        await this.contentModerationRequestRepository.findByJobId(jobEntity.id);
+
       const newRequests: ContentModerationRequestEntity[] = [];
 
-      for (let i = 0; i < validFiles.length; i += batchSize) {
-        newRequests.push(
-          Object.assign(new ContentModerationRequestEntity(), {
-            dataUrl,
-            from: i + 1,
-            to: Math.min(i + batchSize, validFiles.length),
-            status: ContentModerationRequestStatus.PENDING,
-            job: jobEntity,
-          }),
+      for (
+        let i = 0;
+        i < validFiles.length;
+        i += GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK
+      ) {
+        const from = i + 1;
+        const to = Math.min(
+          i + GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK,
+          validFiles.length,
         );
+
+        const request = existingRequests.some(
+          (req) => req.from === from && req.to === to,
+        );
+
+        if (!request) {
+          newRequests.push(
+            Object.assign(new ContentModerationRequestEntity(), {
+              dataUrl,
+              from,
+              to,
+              status: ContentModerationRequestStatus.PENDING,
+              job: jobEntity,
+            }),
+          );
+        }
       }
 
-      jobEntity.contentModerationRequests = [
-        ...(jobEntity.contentModerationRequests || []),
-        ...newRequests,
-      ];
-      jobEntity.status = JobStatus.UNDER_MODERATION;
-      await this.jobRepository.updateOne(jobEntity);
+      if (newRequests.length > 0) {
+        jobEntity.contentModerationRequests = [
+          ...(jobEntity.contentModerationRequests || []),
+          ...newRequests,
+        ];
+        jobEntity.status = JobStatus.UNDER_MODERATION;
+        await this.jobRepository.updateOne(jobEntity);
+      }
     } catch (err) {
       this.logger.error(
         `Error creating requests for job ${jobEntity.id}: ${err.message}`,
@@ -146,7 +157,7 @@ export class GCVContentModerationService implements IContentModeratorService {
    * 2) Process all PENDING requests -> call GCV. Mark them PROCESSED if success.
    *    Parallelized with Promise.all for performance.
    */
-  private async processRequests(jobEntity: JobEntity): Promise<void> {
+  private async processModerationRequests(jobEntity: JobEntity): Promise<void> {
     try {
       const requests = await this.getRequests(
         jobEntity,
@@ -179,7 +190,7 @@ export class GCVContentModerationService implements IContentModeratorService {
    * 3) Parse results for requests in PROCESSED -> set to PASSED, POSSIBLE_ABUSE, or POSITIVE_ABUSE
    *    Also parallelized with Promise.all.
    */
-  private async parseRequests(jobEntity: JobEntity): Promise<void> {
+  private async parseModerationRequests(jobEntity: JobEntity): Promise<void> {
     try {
       const requests = await this.getRequests(
         jobEntity,
@@ -232,8 +243,7 @@ export class GCVContentModerationService implements IContentModeratorService {
       for (const req of allRequests) {
         if (
           req.status === ContentModerationRequestStatus.FAILED ||
-          req.status === ContentModerationRequestStatus.POSITIVE_ABUSE ||
-          req.status === ContentModerationRequestStatus.POSSIBLE_ABUSE
+          req.status === ContentModerationRequestStatus.POSITIVE_ABUSE
         ) {
           allPassed = false;
         }
@@ -268,11 +278,7 @@ export class GCVContentModerationService implements IContentModeratorService {
       (fileName) => `${gcDataUrl}/${fileName.split('/').pop()}`,
     );
 
-    const fileName = getFileName(
-      'moderation-results',
-      requestEntity.job.id.toString(),
-      requestEntity.id.toString(),
-    );
+    const fileName = `moderation-results-${requestEntity.job.id}-${requestEntity.id}`;
 
     await this.asyncBatchAnnotateImages(imageUrls, fileName);
 
@@ -287,7 +293,7 @@ export class GCVContentModerationService implements IContentModeratorService {
     imageUrls: string[],
     fileName: string,
   ): Promise<void> {
-    const requests = imageUrls.map((url) => ({
+    const request = imageUrls.map((url) => ({
       image: { source: { imageUri: url } },
       features: [{ type: ContentModerationFeature.SAFE_SEARCH_DETECTION }],
     }));
@@ -295,16 +301,17 @@ export class GCVContentModerationService implements IContentModeratorService {
     const outputUri = constructGcsPath(
       this.visionConfigService.moderationResultsBucket,
       this.visionConfigService.moderationResultsFilesPath,
-      hashString(fileName),
+      fileName + '-',
     );
 
-    const requestPayload = {
-      requests,
-      outputConfig: {
-        gcsDestination: { uri: outputUri },
-        batchSize: GCV_CONTENT_MODERATION_ASYNC_BATCH_SIZE,
-      },
-    };
+    const requestPayload: protos.google.cloud.vision.v1.IAsyncBatchAnnotateImagesRequest =
+      {
+        requests: request,
+        outputConfig: {
+          gcsDestination: { uri: outputUri },
+          batchSize: GCV_CONTENT_MODERATION_ASYNC_BATCH_SIZE,
+        },
+      };
 
     try {
       const [operation] =
@@ -323,39 +330,23 @@ export class GCVContentModerationService implements IContentModeratorService {
   }
 
   /**
-   * Parse a single PROCESSED request => sets it to PASSED, POSSIBLE_ABUSE, or POSITIVE_ABUSE
+   * Parse a single PROCESSED request => sets it to PASSED or POSITIVE_ABUSE
    */
   private async parseSingleRequest(
     requestEntity: ContentModerationRequestEntity,
   ): Promise<void> {
     try {
-      const fileName = getFileName(
-        'moderation-results',
-        requestEntity.job.id.toString(),
-        requestEntity.id.toString(),
-      );
+      const fileName = `moderation-results-${requestEntity.job.id}-${requestEntity.id}`;
       const moderationResults = await this.collectModerationResults(fileName);
 
-      if (moderationResults.positiveAbuseResults.length > 0) {
+      if (moderationResults.length > 0) {
         await this.handleAbuseLinks(
-          moderationResults.positiveAbuseResults.map((r) => r.imageUrl),
+          moderationResults,
           fileName,
           requestEntity.id,
           requestEntity.job.id,
-          true,
         );
-        requestEntity.abuseReason = 'Flagged for abusive content.';
         requestEntity.status = ContentModerationRequestStatus.POSITIVE_ABUSE;
-      } else if (moderationResults.possibleAbuseResults.length > 0) {
-        await this.handleAbuseLinks(
-          moderationResults.possibleAbuseResults.map((r) => r.imageUrl),
-          fileName,
-          requestEntity.id,
-          requestEntity.job.id,
-          false,
-        );
-        requestEntity.abuseReason = 'Flagged for possible abuse.';
-        requestEntity.status = ContentModerationRequestStatus.POSSIBLE_ABUSE;
       } else {
         requestEntity.status = ContentModerationRequestStatus.PASSED;
       }
@@ -371,8 +362,7 @@ export class GCVContentModerationService implements IContentModeratorService {
    */
   private async collectModerationResults(fileName: string) {
     try {
-      const hash = hashString(fileName);
-      const bucketPrefix = `${this.visionConfigService.moderationResultsFilesPath}/${hash}`;
+      const bucketPrefix = `${this.visionConfigService.moderationResultsFilesPath}/${fileName}`;
       const bucketName = this.visionConfigService.moderationResultsBucket;
       const bucket = this.storage.bucket(bucketName);
 
@@ -409,69 +399,73 @@ export class GCVContentModerationService implements IContentModeratorService {
   }
 
   /**
-   * Splits the annotated results into "positiveAbuse" and "possibleAbuse"
+   * Processes the results from the Google Cloud Vision API and categorizes them based on moderation levels
    */
   private categorizeModerationResults(
     results: protos.google.cloud.vision.v1.IAnnotateImageResponse[],
   ) {
-    const finalResults = results.reduce(
-      (acc, response) => {
-        const safeSearch = response.safeSearchAnnotation;
-        if (!safeSearch) return acc;
-        const imageUrl = convertToHttpUrl(response.context?.uri ?? '');
-        acc.push({
-          imageUrl,
-          moderationResult: {
-            adult: safeSearch.adult,
-            violence: safeSearch.violence,
-            racy: safeSearch.racy,
-            spoof: safeSearch.spoof,
-            medical: safeSearch.medical,
-          },
-        });
-        return acc;
-      },
-      [] as Array<{ imageUrl: string; moderationResult: any }>,
-    );
+    const relevantLevels = [
+      ContentModerationLevel.VERY_LIKELY,
+      ContentModerationLevel.LIKELY,
+      ContentModerationLevel.POSSIBLE,
+    ];
 
-    const positiveAbuseResults = finalResults.filter((r) =>
-      checkModerationLevels(r.moderationResult, [
-        ContentModerationLevel.VERY_LIKELY,
-        ContentModerationLevel.LIKELY,
-      ]),
-    );
-    const possibleAbuseResults = finalResults.filter((r) =>
-      checkModerationLevels(r.moderationResult, [
-        ContentModerationLevel.POSSIBLE,
-      ]),
-    );
-    return { positiveAbuseResults, possibleAbuseResults };
+    return results
+      .map((response) => {
+        const safeSearch = response.safeSearchAnnotation as ModerationResultDto;
+        if (!safeSearch) return null;
+
+        const imageUrl = convertToHttpUrl(response.context?.uri ?? '');
+
+        const flaggedCategory = Object.keys(new ModerationResultDto()).find(
+          (field) =>
+            relevantLevels.includes(
+              safeSearch[
+                field as keyof ModerationResultDto
+              ] as ContentModerationLevel,
+            ),
+        );
+
+        if (!flaggedCategory) {
+          return null;
+        }
+
+        return {
+          imageUrl,
+          moderationResult: flaggedCategory,
+        };
+      })
+
+      .filter(
+        (item): item is { imageUrl: string; moderationResult: string } =>
+          !!item,
+      );
   }
 
   /**
    * Uploads a small text file listing the abuse-related images, then sends Slack notification
    */
   private async handleAbuseLinks(
-    imageLinks: string[],
+    images: {
+      imageUrl: string;
+      moderationResult: string;
+    }[],
     fileName: string,
     requestId: number,
     jobId: number,
-    isConfirmedAbuse: boolean,
   ): Promise<void> {
     const bucketName = this.visionConfigService.moderationResultsBucket;
     const resultsFileName = `${fileName}.txt`;
     const file = this.storage.bucket(bucketName).file(resultsFileName);
     const stream = file.createWriteStream({ resumable: false });
-    stream.end(imageLinks.join('\n'));
+    stream.end(JSON.stringify(images));
 
     const [signedUrl] = await file.getSignedUrl({
       action: 'read',
       expires: Date.now() + 60 * 60 * 24 * 1000,
     });
     const consoleUrl = `https://console.cloud.google.com/storage/browser/${bucketName}?prefix=${resultsFileName}`;
-    const message = isConfirmedAbuse
-      ? `Images contain abusive content. Request ${requestId}, job ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${consoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`
-      : `Images have possible abuse. Request ${requestId}, job ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${consoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`;
+    const message = `Images may contain abusive content. Request ${requestId}, job ${jobId}.\n\n**Results File:** <${signedUrl}|Download Here>\n**Google Cloud Console:** <${consoleUrl}|View in Console>\n\nEnsure you download the file before the link expires, or access it directly via GCS.`;
 
     await sendSlackNotification(
       this.slackConfigService.abuseNotificationWebhookUrl,

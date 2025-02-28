@@ -3,3 +3,7 @@ export enum ContentModerationLevel {
   LIKELY = 'LIKELY',
   POSSIBLE = 'POSSIBLE',
 }
+
+export enum ContentModerationFeature {
+  SAFE_SEARCH_DETECTION = 'SAFE_SEARCH_DETECTION',
+}
