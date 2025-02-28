@@ -34,7 +34,6 @@ import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from '../../modules/user/user.error';
-import { NetworkConfigService } from '../../config/network-config.service';
 import { SiteKeyType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
@@ -55,15 +54,6 @@ describe('UserService', () => {
   let web3Service: Web3Service;
   let hcaptchaService: HCaptchaService;
   let siteKeyRepository: SiteKeyRepository;
-
-  jest
-    .spyOn(NetworkConfigService.prototype, 'networks', 'get')
-    .mockReturnValue([
-      {
-        chainId: ChainId.POLYGON_AMOY,
-        rpcUrl: 'https://polygon-amoy.g.alchemy.com/v2/1234567890',
-      },
-    ]);
 
   beforeEach(async () => {
     const signerMock = {
@@ -88,9 +78,6 @@ describe('UserService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            getOperatorAddress: jest
-              .fn()
-              .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
           },
         },
         {
@@ -98,9 +85,14 @@ describe('UserService', () => {
           useValue: createMock<HttpService>(),
         },
         ConfigService,
-        Web3ConfigService,
+        {
+          provide: Web3ConfigService,
+          useValue: {
+            operatorAddress: MOCK_ADDRESS,
+            reputationNetworkChainId: ChainId.POLYGON_AMOY,
+          },
+        },
         HCaptchaConfigService,
-        NetworkConfigService,
       ],
     }).compile();
 
@@ -374,16 +366,12 @@ describe('UserService', () => {
         signMessage: jest.fn().mockResolvedValue(signature),
       });
 
-      const result = await userService.registerAddress(
-        userEntity as UserEntity,
-        { address: MOCK_ADDRESS, signature },
-      );
+      await userService.registerAddress(userEntity as UserEntity, {
+        address: MOCK_ADDRESS,
+        signature,
+      });
 
       expect(userRepository.updateOne).toHaveBeenCalledWith(userEntity);
-      expect(result).toEqual({
-        key: `KYC-${MOCK_ADDRESS.toLowerCase()}`,
-        value: signature,
-      });
     });
 
     it('should fail if user already have a wallet address', async () => {

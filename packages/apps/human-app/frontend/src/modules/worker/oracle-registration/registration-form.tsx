@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
-import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import {
   registrationInExchangeOracleDtoSchema,
   type RegistrationInExchangeOracleDto,

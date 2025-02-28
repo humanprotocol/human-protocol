@@ -15,7 +15,7 @@ import {
 } from '@/modules/worker/services/send-reset-link';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useColorMode } from '@/shared/contexts/color-mode';

@@ -1,3 +1,4 @@
+import { EscrowUtils } from '@human-protocol/sdk';
 import {
   CanActivate,
   ExecutionContext,
@@ -7,12 +8,24 @@ import {
 } from '@nestjs/common';
 import { verifySignature } from '../../utils/web3';
 import { HEADER_SIGNATURE_KEY } from '../constants';
-import { EscrowUtils } from '@human-protocol/sdk';
-import { AuthSignatureRole } from '../enums/role';
+
+export enum AuthSignatureRole {
+  JOB_LAUNCHER = 'job_launcher',
+  EXCHANGE_ORACLE = 'exchange',
+  RECORDING_ORACLE = 'recording',
+}
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  constructor(private role: AuthSignatureRole[]) {}
+  private readonly authorizedSignerRoles: AuthSignatureRole[];
+
+  constructor(roles: AuthSignatureRole[]) {
+    if (roles.length === 0) {
+      throw new Error('At least one auth signature role should be provided');
+    }
+
+    this.authorizedSignerRoles = roles;
+  }
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -25,20 +38,23 @@ export class SignatureAuthGuard implements CanActivate {
       data.escrow_address,
     );
     if (
-      this.role.includes(AuthSignatureRole.JobLauncher) &&
+      this.authorizedSignerRoles.includes(AuthSignatureRole.JOB_LAUNCHER) &&
       escrowData.launcher.length
-    )
+    ) {
       oracleAdresses.push(escrowData.launcher);
+    }
     if (
-      this.role.includes(AuthSignatureRole.Exchange) &&
+      this.authorizedSignerRoles.includes(AuthSignatureRole.EXCHANGE_ORACLE) &&
       escrowData.exchangeOracle?.length
-    )
+    ) {
       oracleAdresses.push(escrowData.exchangeOracle);
+    }
     if (
-      this.role.includes(AuthSignatureRole.Recording) &&
+      this.authorizedSignerRoles.includes(AuthSignatureRole.RECORDING_ORACLE) &&
       escrowData.recordingOracle?.length
-    )
+    ) {
       oracleAdresses.push(escrowData.recordingOracle);
+    }
 
     const isVerified = verifySignature(data, signature, oracleAdresses);
 

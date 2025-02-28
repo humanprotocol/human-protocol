@@ -48,75 +48,66 @@ export function Router() {
         return (
           <Route
             element={
-              <LayoutProtected
-                pageHeaderProps={pageHeaderProps}
-                renderDrawer={(open, setDrawerOpen) => (
-                  <DrawerNavigation
-                    bottomMenuItems={workerDrawerBottomMenuItems}
-                    open={open}
-                    setDrawerOpen={setDrawerOpen}
-                    signOut={() => {
-                      browserAuthProvider.signOut({
-                        callback: () => {
-                          window.location.reload();
-                        },
-                      });
-                    }}
-                    topMenuItems={workerDrawerTopMenuItems(user)}
-                  />
-                )}
-                renderHCaptchaStatisticsDrawer={(isOpen) => (
-                  <UserStatsDrawer isOpen={isOpen} />
-                )}
-              />
+              <RequireAuth>
+                <LayoutProtected
+                  pageHeaderProps={pageHeaderProps}
+                  renderDrawer={(open, setDrawerOpen) => (
+                    <DrawerNavigation
+                      bottomMenuItems={workerDrawerBottomMenuItems}
+                      open={open}
+                      setDrawerOpen={setDrawerOpen}
+                      signOut={() => {
+                        browserAuthProvider.signOut({
+                          callback: () => {
+                            window.location.reload();
+                          },
+                        });
+                      }}
+                      topMenuItems={workerDrawerTopMenuItems(user)}
+                    />
+                  )}
+                  renderHCaptchaStatisticsDrawer={(isOpen) => (
+                    <UserStatsDrawer isOpen={isOpen} />
+                  )}
+                />
+              </RequireAuth>
             }
             key={routerProps.path}
             path={routerProps.path}
           >
-            <Route
-              element={
-                <RequireAuth>
-                  <>{routerProps.element}</>
-                </RequireAuth>
-              }
-              path={routerProps.path}
-            />
+            <Route element={routerProps.element} path={routerProps.path} />
           </Route>
         );
       })}
       {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
         <Route
           element={
-            <LayoutProtected
-              pageHeaderProps={pageHeaderProps}
-              renderDrawer={(open, setDrawerOpen) => (
-                <DrawerNavigation
-                  bottomMenuItems={operatorDrawerBottomMenuItems}
-                  open={open}
-                  setDrawerOpen={setDrawerOpen}
-                  signOut={() => {
-                    browserAuthProvider.signOut({
-                      callback: () => {
-                        window.location.reload();
-                      },
-                    });
-                  }}
+            <RequireWalletConnect>
+              <RequireWeb3Auth>
+                <LayoutProtected
+                  pageHeaderProps={pageHeaderProps}
+                  renderDrawer={(open, setDrawerOpen) => (
+                    <DrawerNavigation
+                      bottomMenuItems={operatorDrawerBottomMenuItems}
+                      open={open}
+                      setDrawerOpen={setDrawerOpen}
+                      signOut={() => {
+                        browserAuthProvider.signOut({
+                          callback: () => {
+                            window.location.reload();
+                          },
+                        });
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
+              </RequireWeb3Auth>
+            </RequireWalletConnect>
           }
           key={routerProps.path}
+          path={routerProps.path}
         >
-          <Route
-            element={
-              <RequireWalletConnect>
-                <RequireWeb3Auth>
-                  <>{routerProps.element}</>
-                </RequireWeb3Auth>
-              </RequireWalletConnect>
-            }
-            path={routerProps.path}
-          />
+          <Route element={routerProps.element} path={routerProps.path} />
         </Route>
       ))}
 

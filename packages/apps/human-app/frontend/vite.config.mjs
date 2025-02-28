@@ -16,12 +16,6 @@ const config = defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    includeSource: ['./src/**/*.{ts,tsx}'],
-    setupFiles: ['./src/setup-tests.ts/'],
-  },
   build: {
     target: 'esnext',
   },

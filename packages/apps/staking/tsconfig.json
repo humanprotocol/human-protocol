@@ -2,12 +2,7 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "target": "es2020",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "es2015.promise"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "es2015.promise"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -23,14 +18,7 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "baseUrl": ".",
-    "types": [
-      "node",
-      "jest",
-      "@testing-library/jest-dom"
-    ]
+    "types": ["node", "jest"]
   },
-  "include": [
-    "src",
-    "tests"
-  ]
+  "include": ["src"]
 }

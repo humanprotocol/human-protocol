@@ -4,7 +4,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { RegistrationForm } from '@/modules/worker/oracle-registration/registration-form';
 import { Loader } from '@/shared/components/ui/loader';
 import { routerPaths } from '@/router/router-paths';
-import { useGetOracles } from '../services/oracles';
+import { useGetOracles } from '../jobs-discovery';
 import { useIsAlreadyRegistered } from './hooks';
 
 function isAddress(address: string | undefined): address is string {

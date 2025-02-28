@@ -40,7 +40,7 @@ import {
 @ApiTags('Auth')
 @Controller('/auth')
 @UseFilters(AuthControllerErrorsFilter)
-export class AuthJwtController {
+export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenRepository: TokenRepository,

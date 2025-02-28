@@ -22,18 +22,7 @@ export default defineConfig(({ mode }) => {
       plugins: () => react(),
     },
     resolve: {
-      alias: [
-        { find: 'src', replacement: path.resolve(__dirname, 'src') },
-        { find: 'tests', replacement: path.resolve(__dirname, 'tests') },
-      ],
-    },
-    test: {
-      globals: true,
-      environment: 'happy-dom',
-      setupFiles: './tests/setup.ts',
-      coverage: {
-        reporter: ['text', 'json', 'html'],
-      },
+      alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
     },
     optimizeDeps: {
       include: ['@human-protocol/sdk'],
