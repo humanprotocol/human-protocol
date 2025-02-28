@@ -166,7 +166,7 @@ const getColumns = (
 
 export function AvailableJobsTable({
   chainIdsEnabled,
-}: AvailableJobsTableProps) {
+}: Readonly<AvailableJobsTableProps>) {
   const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,

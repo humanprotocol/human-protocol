@@ -27,22 +27,22 @@ export type AvailableJobsSuccessResponse = z.infer<
   typeof availableJobsSuccessResponseSchema
 >;
 
-type GetJobTableDataDto = JobsFilterStoreProps['filterParams'] & {
+type JobTableQueryParams = JobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
 };
 
 const getAvailableJobsTableData = async (
-  dto: GetJobTableDataDto,
+  params: JobTableQueryParams,
   abortSignal: AbortSignal
 ) => {
+  const endpoint = `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject(params)}`;
+
   return apiClient(
-    `${apiPaths.worker.jobs.path}?${stringifyUrlQueryObject({ ...dto })}`,
+    endpoint,
     {
       authenticated: true,
       successSchema: availableJobsSuccessResponseSchema,
-      options: {
-        method: 'GET',
-      },
+      options: { method: 'GET' },
     },
     abortSignal
   );
@@ -59,19 +59,20 @@ export function useGetAvailableJobsData() {
   });
 }
 
-export function useInfiniteGetAvailableJobsData() {
+export function useInfiniteAvailableJobsQuery() {
   const { filterParams } = useJobsFilterStore();
-  const { address: oracle_address } = useParams<{ address: string }>();
-  const dto = { ...filterParams, oracle_address: oracle_address ?? '' };
+  const { address: oracleAddress } = useParams<{ address: string }>();
 
-  return useInfiniteQuery({
+  const queryParams = {
+    ...filterParams,
+    oracle_address: oracleAddress ?? '',
+  };
+
+  return useInfiniteQuery<AvailableJobsSuccessResponse>({
+    queryKey: ['availableJobsInfinite', queryParams],
+    queryFn: ({ signal }) => getAvailableJobsTableData(queryParams, signal),
     initialPageParam: 0,
-    queryKey: ['availableJobsInfinite', dto],
-    queryFn: ({ signal }) => getAvailableJobsTableData(dto, signal),
-    getNextPageParam: (pageParams) => {
-      return pageParams.total_pages - 1 <= pageParams.page
-        ? undefined
-        : pageParams.page;
-    },
+    getNextPageParam: (lastPage) =>
+      lastPage.total_pages - 1 <= lastPage.page ? undefined : lastPage.page,
   });
 }
