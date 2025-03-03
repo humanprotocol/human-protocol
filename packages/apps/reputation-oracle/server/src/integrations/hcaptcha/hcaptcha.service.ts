@@ -38,7 +38,7 @@ export class HCaptchaService {
       }
 
       const response = await firstValueFrom(
-        this.httpService.post<SiteverifyResponse>(
+        this.httpService.post<SiteverifyResponse | undefined>(
           `${this.hcaptchaConfigService.protectionURL}/siteverify`,
           {},
           { params: queryParams },
@@ -49,9 +49,9 @@ export class HCaptchaService {
        * WARN: Only this case is considered as "valid token"
        * since anything can change on hCaptcha side
        */
-      if (response.status === 200 && response.data.success === true) {
+      if (response.status === 200 && response.data?.success === true) {
         return true;
-      } else if (response.data.success === false) {
+      } else if (response.data?.success === false) {
         this.logger.warn('Error occurred during hCaptcha token verification', {
           errorCodes: response.data['error-codes'],
           token,
