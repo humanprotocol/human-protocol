@@ -18,10 +18,10 @@ import {
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { JwtAuthGuard } from '../../common/guards';
-import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { SignatureType } from '../../common/enums/web3';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Web3ConfigService } from '../../config/web3-config.service';
+import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 import { prepareSignatureBody } from '../../utils/web3';
 import {
   DisableOperatorDto,

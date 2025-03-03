@@ -6,8 +6,8 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { AuthConfigService } from '../../config/auth-config.service';
+import { HCaptchaService } from './hcaptcha.service';
 
 @Injectable()
 export class HCaptchaGuard implements CanActivate {
