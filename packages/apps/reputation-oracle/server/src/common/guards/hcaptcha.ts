@@ -40,9 +40,7 @@ export class HCaptchaGuard implements CanActivate {
       );
     }
 
-    const isTokenValid = await this.hCaptchaService.verifyToken({
-      token: hCaptchaToken,
-    });
+    const isTokenValid = await this.hCaptchaService.verifyToken(hCaptchaToken);
     if (!isTokenValid) {
       throw new HttpException('Invalid hCaptcha token', HttpStatus.BAD_REQUEST);
     }

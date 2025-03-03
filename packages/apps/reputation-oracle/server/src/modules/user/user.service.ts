@@ -1,7 +1,6 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { ethers } from 'ethers';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import {
@@ -118,22 +117,20 @@ export class UserService {
     // Register user as a labeler at hcaptcha foundation
     const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
-      language: this.hcaptchaConfigService.defaultLabelerLang,
+      evmAddress: user.evmAddress,
       country: user.kyc.country,
-      address: ethers.getAddress(user.evmAddress),
     });
 
     if (!registeredLabeler) {
       throw new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id);
     }
 
-    // Retrieve labeler site key from hcaptcha foundation
-    const labelerData = await this.hcaptchaService.getLabelerData({
-      email: user.email,
-    });
-    if (!labelerData || !labelerData.sitekeys.length) {
+    // Retrieve labeler sitekeys from hCaptcha foundation
+    const labelerData = await this.hcaptchaService.getLabelerData(user.email);
+    if (!labelerData?.sitekeys.length) {
       throw new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id);
     }
+
     const siteKey = labelerData.sitekeys[0].sitekey;
 
     const newSiteKey = new SiteKeyEntity();
