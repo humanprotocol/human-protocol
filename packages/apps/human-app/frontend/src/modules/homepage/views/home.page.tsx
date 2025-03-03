@@ -8,7 +8,7 @@ import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { HomeContainer } from '@/modules/homepage/components/home-container';
+import { HomeContainer } from '@/modules/homepage/components';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
 
 export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';

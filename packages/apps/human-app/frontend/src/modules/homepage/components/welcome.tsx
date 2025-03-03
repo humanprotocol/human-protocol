@@ -9,11 +9,11 @@ import {
 } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { OperatorSignIn } from '@/modules/homepage/hooks/use-operator-signin';
-import { WorkerSignIn } from '@/modules/homepage/components/worker-signin';
+import { WorkerSignIn } from '@/modules/homepage/components/worker-sign-in';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { useBackgroundContext } from '@/shared/contexts/background';
+import { OperatorSignIn } from './operator-sign-in';
 
 export function Welcome() {
   const { colorPalette, isDarkMode } = useColorMode();
