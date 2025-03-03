@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon } from '@/shared/components/ui/icons';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
-import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
-import { AvailableJobsTableJobsListMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-table-jobs-list-mobile';
+import { EscrowAddressSearchForm } from '@/modules/worker/jobs/escrow-address-search-form';
+import { AvailableJobsTableJobsListMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-table-jobs-list-mobile';
 
 interface AvailableJobsTableMobileProps {
   handleOpenMobileFilterDrawer: () => void;
@@ -11,7 +11,7 @@ interface AvailableJobsTableMobileProps {
 
 export function AvailableJobsTableMobile({
   handleOpenMobileFilterDrawer,
-}: AvailableJobsTableMobileProps) {
+}: Readonly<AvailableJobsTableMobileProps>) {
   const { t } = useTranslation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
 

@@ -6,18 +6,18 @@ import { Button } from '@/shared/components/ui/button';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { Alert } from '@/shared/components/ui/alert';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
-import { defaultErrorMessage } from '@/shared/helpers/default-error-message';
 import type { AvailableJob } from '@/modules/worker/services/available-jobs-data';
-import { useInfiniteGetAvailableJobsData } from '@/modules/worker/services/available-jobs-data';
+import { useInfiniteAvailableJobsQuery } from '@/modules/worker/services/available-jobs-data';
 import { Loader } from '@/shared/components/ui/loader';
-import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
+import { EvmAddress } from '@/modules/worker/jobs/evm-address';
 import { Chip } from '@/shared/components/ui/chip';
-import { RewardAmount } from '@/modules/worker/components/jobs/reward-amount';
+import { RewardAmount } from '@/modules/worker/jobs/reward-amount';
 import { ListItem } from '@/shared/components/ui/list-item';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
-import { AvailableJobsAssignJobButtonMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-assign-job-button-mobile';
+import { AvailableJobsAssignJobButtonMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-assign-job-button-mobile';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useCombinePages } from '@/modules/worker/hooks/use-combine-pages';
+import { useColorMode } from '@/shared/contexts/color-mode';
+import { getErrorMessageForError } from '@/shared/errors';
 
 export function AvailableJobsTableJobsListMobile() {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export function AvailableJobsTableJobsListMobile() {
     error: tableError,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteGetAvailableJobsData();
+  } = useInfiniteAvailableJobsQuery();
 
   const allPages = useCombinePages<AvailableJob>(tableData);
 
@@ -45,7 +45,7 @@ export function AvailableJobsTableJobsListMobile() {
     <Stack flexDirection="column">
       {isTableError && (
         <Alert color="error" severity="error">
-          {defaultErrorMessage(tableError)}
+          {getErrorMessageForError(tableError)}
         </Alert>
       )}
       {tableStatus === 'pending' && (

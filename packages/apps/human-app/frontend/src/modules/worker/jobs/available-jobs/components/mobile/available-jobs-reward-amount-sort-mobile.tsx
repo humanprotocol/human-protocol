@@ -1,12 +1,12 @@
 /* eslint-disable camelcase */
-import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
+import Typography from '@mui/material/Typography';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
-import { Sorting } from '@/modules/worker/components/jobs/sorting';
+import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
+import { Sorting } from '@/modules/worker/jobs/sorting';
 
-export function MyJobsRewardAmountSortMobile() {
-  const { setFilterParams, filterParams } = useMyJobsFilterStore();
+export function AvailableJobsRewardAmountSortMobile() {
+  const { setFilterParams, filterParams } = useJobsFilterStore();
   const { colorPalette } = useColorMode();
 
   return (

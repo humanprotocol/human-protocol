@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRejectTaskMutation } from '@/modules/worker/services/reject-task';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { RejectButton } from '@/modules/worker/components/jobs/reject-button';
+import { RejectButton } from '@/modules/worker/jobs/reject-button';
 import {
   MyJobStatus,
   type MyJob,

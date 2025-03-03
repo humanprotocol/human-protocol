@@ -14,12 +14,12 @@ import { useInfiniteGetMyJobsData } from '@/modules/worker/services/my-jobs-data
 import { getErrorMessageForError } from '@/shared/errors';
 import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { ListItem } from '@/shared/components/ui/list-item';
-import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
-import { RewardAmount } from '@/modules/worker/components/jobs/reward-amount';
+import { EvmAddress } from '@/modules/worker/jobs/evm-address';
+import { RewardAmount } from '@/modules/worker/jobs/reward-amount';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
+import { EscrowAddressSearchForm } from '@/modules/worker/jobs/escrow-address-search-form';
 import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { useRefreshTasksMutation } from '@/modules/worker/services/refresh-tasks';
 import { getChipStatusColor } from '@/modules/worker/utils/get-chip-status-color';

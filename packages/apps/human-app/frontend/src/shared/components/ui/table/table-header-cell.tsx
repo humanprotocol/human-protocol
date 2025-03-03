@@ -1,8 +1,8 @@
 import React, { forwardRef, useState } from 'react';
 import Popover from '@mui/material/Popover';
 import type { TableCellBaseProps } from '@mui/material/TableCell/TableCell';
-import type { IconType } from '@/modules/worker/components/jobs/text-header-with-icon';
-import { TextHeaderWithIcon } from '@/modules/worker/components/jobs/text-header-with-icon';
+import type { IconType } from '@/modules/worker/jobs/text-header-with-icon';
+import { TextHeaderWithIcon } from '@/modules/worker/jobs/text-header-with-icon';
 
 type CommonProps = TableCellBaseProps & {
   popoverContent: React.ReactElement;
