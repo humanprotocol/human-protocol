@@ -518,6 +518,26 @@ export class PaymentService {
   //   return;
   // }
 
+  public async createWithdrawalPayment(
+    userId: number,
+    jobId: number,
+    amount: number,
+    currency: string,
+    rate: number,
+  ): Promise<void> {
+    const paymentEntity = new PaymentEntity();
+    paymentEntity.userId = userId;
+    paymentEntity.jobId = jobId;
+    paymentEntity.source = PaymentSource.BALANCE;
+    paymentEntity.type = PaymentType.WITHDRAWAL;
+    paymentEntity.amount = -amount; // In the currency used for the payment.
+    paymentEntity.currency = currency;
+    paymentEntity.rate = rate;
+    paymentEntity.status = PaymentStatus.SUCCEEDED;
+
+    await this.paymentRepository.createUnique(paymentEntity);
+  }
+
   async listUserPaymentMethods(user: UserEntity): Promise<CardDto[]> {
     const cards: CardDto[] = [];
     if (!user.stripeCustomerId) {

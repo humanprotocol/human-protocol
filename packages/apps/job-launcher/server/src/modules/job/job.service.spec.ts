@@ -3,12 +3,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { Encryption } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import {
-  PaymentCurrency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-} from '../../common/enums/payment';
+import { PaymentCurrency } from '../../common/enums/payment';
 import {
   JobRequestType,
   JobStatus,
@@ -39,7 +34,6 @@ import { mul } from '../../common/utils/decimal';
 describe('JobService', () => {
   let jobService: JobService,
     paymentService: PaymentService,
-    paymentRepository: PaymentRepository,
     jobRepository: JobRepository,
     rateService: RateService;
 
@@ -110,7 +104,6 @@ describe('JobService', () => {
 
     jobService = moduleRef.get<JobService>(JobService);
     paymentService = moduleRef.get<PaymentService>(PaymentService);
-    paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
     rateService = moduleRef.get<RateService>(RateService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
   });
@@ -163,19 +156,16 @@ describe('JobService', () => {
             fortuneJobDto,
           );
 
-          expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-            userId: userMock.id,
-            jobId: jobEntityMock.id,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.WITHDRAWAL,
-            currency: fortuneJobDto.paymentCurrency,
-            amount: expect.any(Number),
-            rate: await rateService.getRate(
+          expect(paymentService.createWithdrawalPayment).toHaveBeenCalledWith(
+            userMock.id,
+            jobEntityMock.id,
+            expect.any(Number),
+            fortuneJobDto.paymentCurrency,
+            await rateService.getRate(
               fortuneJobDto.paymentCurrency,
               PaymentCurrency.USD,
             ),
-            status: PaymentStatus.SUCCEEDED,
-          });
+          );
           expect(jobRepository.createUnique).toHaveBeenCalledWith({
             chainId: fortuneJobDto.chainId,
             userId: userMock.id,
@@ -234,16 +224,13 @@ describe('JobService', () => {
             fortuneJobDto,
           );
 
-          expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-            userId: userMock.id,
-            jobId: jobEntityMock.id,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.WITHDRAWAL,
-            currency: fortuneJobDto.paymentCurrency,
-            amount: expect.any(Number),
-            rate: paymentToUsdRate,
-            status: PaymentStatus.SUCCEEDED,
-          });
+          expect(paymentService.createWithdrawalPayment).toHaveBeenCalledWith(
+            userMock.id,
+            jobEntityMock.id,
+            expect.any(Number),
+            fortuneJobDto.paymentCurrency,
+            paymentToUsdRate,
+          );
           expect(jobRepository.createUnique).toHaveBeenCalledWith({
             chainId: fortuneJobDto.chainId,
             userId: userMock.id,

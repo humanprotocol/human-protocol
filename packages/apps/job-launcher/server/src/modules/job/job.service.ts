@@ -38,15 +38,9 @@ import {
   JobCaptchaRequestType,
   JobCaptchaShapeType,
 } from '../../common/enums/job';
-import {
-  FiatCurrency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-} from '../../common/enums/payment';
+import { FiatCurrency } from '../../common/enums/payment';
 import { parseUrl } from '../../common/utils';
 import { add, div, lt, mul, max } from '../../common/utils/decimal';
-import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -99,7 +93,6 @@ import {
   listObjectsInBucket,
 } from '../../common/utils/storage';
 import { WebhookDataDto } from '../webhook/webhook.dto';
-import { PaymentEntity } from '../payment/payment.entity';
 import {
   ManifestAction,
   EscrowAction,
@@ -135,7 +128,6 @@ export class JobService {
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
-    private readonly paymentRepository: PaymentRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,
@@ -923,17 +915,13 @@ export class JobService {
 
     jobEntity = await this.jobRepository.createUnique(jobEntity);
 
-    const paymentEntity = new PaymentEntity();
-    paymentEntity.userId = user.id;
-    paymentEntity.jobId = jobEntity.id;
-    paymentEntity.source = PaymentSource.BALANCE;
-    paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -totalPaymentAmount; // In the currency used for the payment.
-    paymentEntity.currency = dto.paymentCurrency;
-    paymentEntity.rate = paymentCurrencyRate;
-    paymentEntity.status = PaymentStatus.SUCCEEDED;
-
-    await this.paymentRepository.createUnique(paymentEntity);
+    await this.paymentService.createWithdrawalPayment(
+      user.id,
+      jobEntity.id,
+      totalPaymentAmount,
+      dto.paymentCurrency,
+      paymentCurrencyRate,
+    );
 
     jobEntity.status = JobStatus.PAID;
     await this.jobRepository.updateOne(jobEntity);
