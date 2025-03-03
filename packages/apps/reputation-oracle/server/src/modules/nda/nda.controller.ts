@@ -6,6 +6,7 @@ import {
   Req,
   UseFilters,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { NDAService } from './nda.service';
 import {
@@ -42,10 +43,6 @@ export class NDAController {
     description: 'URL retrieved successfully',
     type: String,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
   @Get('latest')
   getLatestNDA() {
     return this.authConfigService.latestNdaUrl;
@@ -62,10 +59,7 @@ export class NDAController {
     description: 'NDA signed successfully',
     type: String,
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
+  @HttpCode(200)
   @ApiResponse({
     status: 400,
     description: 'Bad Request. User has already signed the NDA.',

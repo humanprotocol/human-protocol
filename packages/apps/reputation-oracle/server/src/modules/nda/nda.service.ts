@@ -17,11 +17,11 @@ export class NDAService {
     if (nda.url !== ndaUrl) {
       throw new NDAError(NDAErrorMessage.INVALID_NDA, user.id);
     }
-    if (user.ndaSigned === ndaUrl) {
-      throw new NDAError(NDAErrorMessage.NDA_EXISTS, user.id);
+    if (user.ndaSignedUrl === ndaUrl) {
+      return;
     }
 
-    user.ndaSigned = nda.url;
+    user.ndaSignedUrl = nda.url;
 
     await this.userRepository.updateOne(user);
   }

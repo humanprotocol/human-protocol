@@ -50,5 +50,5 @@ export class UserEntity extends BaseEntity implements IUser {
   public userQualifications: UserQualificationEntity[];
 
   @Column({ type: 'varchar', nullable: true })
-  public ndaSigned?: string;
+  public ndaSignedUrl?: string;
 }
