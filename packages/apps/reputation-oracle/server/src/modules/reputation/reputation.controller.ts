@@ -23,16 +23,9 @@ import { ReputationErrorFilter } from './reputation.error.filter';
 export class ReputationController {
   constructor(private readonly reputationService: ReputationService) {}
 
-  @Get()
   @ApiOperation({
     summary: 'Get All Reputations',
     description: 'Endpoint to get all reputations.',
-  })
-  @ApiQuery({
-    name: 'chain_id',
-    description: 'Chain ID for filtering reputations.',
-    type: Number,
-    required: true,
   })
   @ApiResponse({
     status: 200,
@@ -40,11 +33,12 @@ export class ReputationController {
     type: ReputationDto,
     isArray: true,
   })
-  public async getReputations(
+  @Get()
+  async getReputations(
     @Query() query: ReputationGetAllQueryDto,
   ): Promise<ReputationDto[]> {
     const { chainId, roles, orderBy, orderDirection, first, skip } = query;
-    return this.reputationService.getReputations(
+    const reputations = await this.reputationService.getReputations(
       chainId,
       roles,
       orderBy,
@@ -52,22 +46,22 @@ export class ReputationController {
       first,
       skip,
     );
+    return reputations;
   }
 
-  @Get('/:address')
   @ApiOperation({
-    summary: 'Get Reputation by Address',
-    description: 'Endpoint to get reputation by address.',
+    summary: 'Get reputation by address',
+    description: 'Endpoint to get reputation by address',
   })
   @ApiParam({
     name: 'address',
-    description: 'Address for the reputation query.',
+    description: 'Address for the reputation query',
     type: String,
     required: true,
   })
   @ApiQuery({
     name: 'chain_id',
-    description: 'Chain ID for filtering the reputation.',
+    description: 'Chain ID for filtering the reputation',
     type: Number,
     required: true,
   })
@@ -78,15 +72,24 @@ export class ReputationController {
   })
   @ApiResponse({
     status: 404,
-    description: 'Not Found. Could not find the requested content.',
+    description: 'Not Found. Could not find the requested content',
   })
-  public async getReputation(
+  /**
+   * TODO: Refactor its usages to be part of getAll endpoint
+   * where you pass single address and delete this route
+   */
+  @Get('/:address')
+  async getReputation(
     @Param() params: ReputationGetParamsDto,
     @Query() query: ReputationGetQueryDto,
   ): Promise<ReputationDto> {
     const { chainId } = query;
     const { address } = params;
 
-    return this.reputationService.getReputation(chainId, address);
+    const reputation = await this.reputationService.getReputation(
+      chainId,
+      address,
+    );
+    return reputation;
   }
 }

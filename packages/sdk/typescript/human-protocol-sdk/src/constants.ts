@@ -36,7 +36,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/ethereum/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmWeaETaRqxX2eiFpPPpdn3q75fUKPzXzq32HR1MQPHsQh',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmawHPbwEhAvmWgHQUH9Qgx5AqrXmq1uhfj69CGv9LLzNb',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -51,7 +51,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/sepolia/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qme5eCUKPuLbEoYTj7QKXWgkFLebc9BePe8QFtT7VBu1az',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYx4iD24iBTBgxhK95WV4u4o4QSFQFJxuvSNwwSEvCMsE',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -66,7 +66,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmafB8bJn2FRPT8d8HoB7ENy9pckSon8cKxfc5hJUsCz6r',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/Qmai26kHVvYnn59QzGyBAfVWTQ98utfA2bJxQTMV2NeU8K',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -81,7 +81,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/bsc-testnet/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZcWc6hKUHvV12kggKcDXkNpe1LXvHoeU2fo26HU1VjAm',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmbPzZWJMqCzdc6ZJir1Z2Va5mpLo8haGxAkfMySwfGxqs',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -97,7 +97,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/polygon/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmNkup687LE9KS85cGGaBLu7FmwP73RVqqY2NKeHUaEYjz',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmSyLqu2injQHCrMg68Wvp6n39J5piCDQkwHGWhKBqxhvV',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -113,7 +113,7 @@ export const NETWORKS: {
     subgraphUrl:
       'https://api.studio.thegraph.com/query/74256/amoy/version/latest',
     subgraphUrlApiKey:
-      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmZnaSXpJodb2iSjDShkDPg33qEYbYmcMF3EVCdByzWgvd',
+      'https://gateway-arbitrum.network.thegraph.com/api/[SUBGRAPH_API_KEY]/deployments/id/QmYtZEaay5cX5XwGmoN8NpwfpFMbyqiKvtA1ub4GvavH2P',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -133,25 +133,25 @@ export const NETWORKS: {
 };
 
 export const KVStoreKeys = {
-  role: 'role',
+  category: 'category',
   fee: 'fee',
+  jobTypes: 'job_types',
+  operatorName: 'name',
   publicKey: 'public_key',
   publicKeyHash: 'public_key_hash',
-  webhookUrl: 'webhook_url',
-  website: 'website',
-  url: 'url',
-  jobTypes: 'job_types',
-  registrationNeeded: 'registration_needed',
   registrationInstructions: 'registration_instructions',
-  name: 'name',
-  category: 'category',
+  registrationNeeded: 'registration_needed',
+  role: 'role',
+  url: 'url',
+  website: 'website',
+  webhookUrl: 'webhook_url',
 };
 
 export const Role = {
-  JobLauncher: 'Job Launcher',
-  ExchangeOracle: 'Exchange Oracle',
-  ReputationOracle: 'Reputation Oracle',
-  RecordingOracle: 'Recording Oracle',
+  JobLauncher: 'job_launcher',
+  ExchangeOracle: 'exchange_oracle',
+  ReputationOracle: 'reputation_oracle',
+  RecordingOracle: 'recording_oracle',
 };
 
 export const SUBGRAPH_API_KEY_PLACEHOLDER = '[SUBGRAPH_API_KEY]';

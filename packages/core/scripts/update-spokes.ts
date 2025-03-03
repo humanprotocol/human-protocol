@@ -24,7 +24,7 @@ async function main() {
   );
 
   const spokeContracts = spokeAddresses.map((address, index) => ({
-    contractAddress: ethers.zeroPadBytes(governorAddress, 32),
+    contractAddress: ethers.zeroPadBytes(address, 32),
     chainId: spokeChainIds[index],
   }));
 

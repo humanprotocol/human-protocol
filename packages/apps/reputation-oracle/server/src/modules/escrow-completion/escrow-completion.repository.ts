@@ -1,13 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, LessThanOrEqual } from 'typeorm';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { EscrowCompletionEntity } from './escrow-completion.entity';
 import { EscrowCompletionStatus } from '../../common/enums';
 
 @Injectable()
 export class EscrowCompletionRepository extends BaseRepository<EscrowCompletionEntity> {
-  private readonly logger = new Logger(EscrowCompletionRepository.name);
   constructor(
     private dataSource: DataSource,
     public readonly serverConfigService: ServerConfigService,

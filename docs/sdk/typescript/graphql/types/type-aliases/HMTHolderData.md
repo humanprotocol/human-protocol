@@ -8,6 +8,8 @@
 
 > **HMTHolderData**: `object`
 
+Defined in: [graphql/types.ts:117](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L117)
+
 ## Type declaration
 
 ### address
@@ -17,7 +19,3 @@
 ### balance
 
 > **balance**: `string`
-
-## Defined in
-
-[graphql/types.ts:117](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/graphql/types.ts#L117)

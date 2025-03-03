@@ -5,7 +5,7 @@ import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
 import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 
 export function SetUpOperatorPage() {
   const { t } = useTranslation();

@@ -6,11 +6,13 @@ import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
-import { ServerConfigService } from './common/config/server-config.service';
+import { ServerConfigService } from './config/server-config.service';
+import logger, { nestLoggerOverride } from './logger';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
+    logger: nestLoggerOverride,
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -35,7 +37,7 @@ async function bootstrap() {
   const port = serverConfigService.port;
 
   await app.listen(port, host, async () => {
-    console.info(`API server is running on http://${host}:${port}`);
+    logger.info(`API server is running on http://${host}:${port}`);
   });
 }
 

@@ -1,20 +1,19 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { DeepPartial } from 'typeorm';
 import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
-import { HCaptchaConfigService } from '../../common/config/hcaptcha-config.service';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { KycConfigService } from '../../common/config/kyc-config.service';
+import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
+import { KycConfigService } from '../../config/kyc-config.service';
 import { KycStatus } from '../../common/enums/user';
 import { Web3Service } from '../web3/web3.service';
 import { KycEntity } from './kyc.entity';
 import { KycRepository } from './kyc.repository';
 import { KycService } from './kyc.service';
 import { KycError, KycErrorMessage } from './kyc.error';
+import { Web3ConfigService } from '../../config/web3-config.service';
 
 describe('Kyc Service', () => {
   let kycService: KycService;
@@ -58,20 +57,11 @@ describe('Kyc Service', () => {
           useValue: mockHttpService,
         },
         { provide: KycRepository, useValue: createMock<KycRepository>() },
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            getOperatorAddress: jest
-              .fn()
-              .mockReturnValue(MOCK_ADDRESS.toLowerCase()),
-          },
-        },
-        ConfigService,
-        {
-          provide: NetworkConfigService,
-          useValue: {
-            networks: [{ chainId: ChainId.LOCALHOST }],
           },
         },
       ],
@@ -311,7 +301,7 @@ describe('Kyc Service', () => {
       const result = await kycService.getSignedAddress(mockUserEntity as any);
 
       expect(result).toEqual({
-        key: `KYC-${MOCK_ADDRESS.toLowerCase()}`,
+        key: `KYC-${MOCK_ADDRESS}`,
         value: 'signature',
       });
     });

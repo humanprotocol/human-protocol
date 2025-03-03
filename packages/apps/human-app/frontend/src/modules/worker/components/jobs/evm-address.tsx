@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import { shortenEscrowAddress } from '@/shared/helpers/evm';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function EvmAddress({ address }: { address: string }) {
   const { colorPalette } = useColorMode();

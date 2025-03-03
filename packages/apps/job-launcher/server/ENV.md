@@ -84,15 +84,6 @@ RPC_URL_BSC_MAINNET=
 ### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
 
-### The RPC URL for the Moonbeam network.
-RPC_URL_MOONBEAM=
-
-### The RPC URL for the XLayer Testnet network.
-RPC_URL_XLAYER_TESTNET=
-
-### The RPC URL for the XLayer network.
-RPC_URL_XLAYER=
-
 ### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
 
@@ -158,6 +149,9 @@ COINMARKETCAP_API_KEY=
 
 ### The API key for accessing CoinGecko data.
 COINGECKO_API_KEY=
+
+### The amount to charge abusive users.
+ABUSE_AMOUNT=
 
 ### The secret key used for authenticating requests to the Stripe API. Required
 STRIPE_SECRET_KEY=

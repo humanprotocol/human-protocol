@@ -1,27 +1,29 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import stringify from 'json-stable-stringify';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { WebhookOutgoingStatus } from '../../common/enums';
 import { firstValueFrom } from 'rxjs';
-import { signMessage } from '../../common/utils/signature';
+import { signMessage } from '../../utils/web3';
 import {
   BACKOFF_INTERVAL_SECONDS,
   HEADER_SIGNATURE_KEY,
 } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
-import { CaseConverter } from '../../common/utils/case-converter';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
+import { ServerConfigService } from '../../config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { WebhookOutgoingRepository } from './webhook-outgoing.repository';
-import { calculateExponentialBackoffMs } from '../../common/utils/backoff';
+import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
+import logger from '../../logger';
 
 @Injectable()
 export class WebhookOutgoingService {
-  private readonly logger = new Logger(WebhookOutgoingService.name);
+  private readonly logger = logger.child({
+    context: WebhookOutgoingService.name,
+  });
 
   constructor(
     private readonly httpService: HttpService,
@@ -43,7 +45,7 @@ export class WebhookOutgoingService {
   ): Promise<void> {
     const hash = crypto
       .createHash('sha1')
-      .update(stringify({ payload, url }))
+      .update(stringify({ payload, url }) as string)
       .digest('hex');
 
     let webhookEntity = new WebhookOutgoingEntity();
@@ -87,14 +89,14 @@ export class WebhookOutgoingService {
    * Converts payload to snake_case, signs it, and sends it to the specified URL.
    * @param {string} url - The target URL to which the webhook is sent.
    * @param {object} payload - The data payload to send.
-   * @throws {ControlledError} If the webhook request fails.
+   * @throws {OutgoingWebhookError} If the webhook request fails.
    */
   public async sendWebhook(
     outgoingWebhook: WebhookOutgoingEntity,
   ): Promise<void> {
-    const snake_case_body = CaseConverter.transformToSnakeCase(
+    const snake_case_body = transformKeysFromCamelToSnake(
       outgoingWebhook.payload,
-    );
+    ) as object;
     const signedBody = await signMessage(
       snake_case_body,
       this.web3ConfigService.privateKey,
@@ -121,13 +123,16 @@ export class WebhookOutgoingService {
     for (const webhookEntity of webhookEntities) {
       try {
         await this.sendWebhook(webhookEntity);
-      } catch (err) {
-        const errorId = uuidv4();
-        const failureDetail = `${WebhookErrorMessage.PENDING_PROCESSING_FAILED} (Error ID: ${errorId})`;
-        this.logger.error(
-          `Error processing pending outgoing webhook. Error ID: ${errorId}, Webhook ID: ${webhookEntity.id}, Reason: ${failureDetail}, Message: ${err.message}`,
+      } catch (error) {
+        this.logger.error('Error processing outgoing webhook', {
+          error,
+          webhookId: webhookEntity.id,
+        });
+
+        await this.handleWebhookOutgoingError(
+          webhookEntity,
+          `Error message: ${error.message}`,
         );
-        await this.handleWebhookOutgoingError(webhookEntity, failureDetail);
         continue;
       }
       webhookEntity.status = WebhookOutgoingStatus.SENT;

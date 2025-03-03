@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function SuccessLabel({ children }: { children: string }) {
   const { colorPalette } = useColorMode();

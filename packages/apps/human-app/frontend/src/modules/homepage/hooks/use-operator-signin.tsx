@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Snackbar from '@mui/material/Snackbar';
 import { Button } from '@/shared/components/ui/button';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { useWeb3SignIn } from '@/modules/operator/hooks/use-web3-signin';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';

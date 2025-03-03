@@ -13,7 +13,7 @@ import { Select } from '@/shared/components/data-entry/select';
 import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import {
   order,
   sortFormKeys,

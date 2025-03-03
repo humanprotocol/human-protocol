@@ -3,11 +3,12 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useBackgroundColorStore } from '@/shared/hooks/use-background-store';
+import { useBackgroundContext } from '@/shared/contexts/background';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
 import { PageHeader } from '@/shared/components/layout/protected/page-header';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
+import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
 import { Footer } from '../footer';
 import { Navbar } from './navbar';
 
@@ -37,6 +38,7 @@ export function Layout({
   pageHeaderProps,
   renderDrawer,
   renderHCaptchaStatisticsDrawer,
+  renderGovernanceBanner,
 }: {
   pageHeaderProps: PageHeaderProps;
   renderDrawer: (
@@ -44,13 +46,14 @@ export function Layout({
     setDrawerOpen: Dispatch<SetStateAction<boolean>>
   ) => JSX.Element;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
+  renderGovernanceBanner?: boolean;
 }) {
   const layoutElementRef = useRef<HTMLDivElement>();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [hcaptchaDrawerOpen, setHcaptchaDrawerOpen] = useState(false);
-  const { backgroundColor, setGrayBackground } = useBackgroundColorStore();
+  const { backgroundColor, setGrayBackground } = useBackgroundContext();
   const toggleUserStatsDrawer = isHCaptchaLabelingPage
     ? () => {
         setHcaptchaDrawerOpen((state) => !state);
@@ -117,6 +120,7 @@ export function Layout({
             },
           }}
         >
+          {renderGovernanceBanner && <GovernanceBanner />}
           <Grid item>
             <PageHeader {...pageHeaderProps} />
           </Grid>

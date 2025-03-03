@@ -202,6 +202,15 @@ const config: HardhatUserConfig = {
       spacing: 2,
       format: 'json',
     },
+    {
+      path: './abis/governance',
+      runOnCompile: true,
+      clear: true,
+      flat: true,
+      only: ['contracts/governance/[a-zA-Z]*.sol'],
+      spacing: 2,
+      format: 'json',
+    },
   ],
   etherscan: {
     apiKey: {

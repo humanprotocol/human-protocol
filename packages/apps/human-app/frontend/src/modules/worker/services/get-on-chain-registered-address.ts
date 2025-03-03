@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { ethKVStoreGetKycData } from '@/modules/smart-contracts/EthKVStore/eth-kv-store-get-kyc-data';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 
 export interface RegisterAddressPayload {
   address: string;

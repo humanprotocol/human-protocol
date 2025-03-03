@@ -1,11 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CronJobService } from './cron-job.service';
-import { HttpStatus, Logger } from '@nestjs/common';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobType } from '../../common/enums/cron-job';
-import { ErrorCronJob } from '../../common/constants/errors';
-import { ControlledError } from '../../common/errors/controlled';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
@@ -47,13 +44,6 @@ describe('CronJobService', () => {
             processPendingEscrowCompletion: jest.fn(),
             processPaidEscrowCompletion: jest.fn(),
             processAwaitingPayouts: jest.fn(),
-          },
-        },
-        {
-          provide: Logger,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
           },
         },
       ],
@@ -198,7 +188,7 @@ describe('CronJobService', () => {
       cronJobEntity.completedAt = new Date();
 
       await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow(
-        new ControlledError(ErrorCronJob.Completed, HttpStatus.BAD_REQUEST),
+        new Error('Cron job is already completed'),
       );
     });
   });

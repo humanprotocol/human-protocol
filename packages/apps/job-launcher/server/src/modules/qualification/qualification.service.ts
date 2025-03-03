@@ -43,7 +43,7 @@ export class QualificationService {
 
       const { data } = await firstValueFrom(
         this.httpService.get<QualificationDto[]>(
-          `${reputationOracleUrl}/qualification`,
+          `${reputationOracleUrl}/qualifications`,
         ),
       );
 

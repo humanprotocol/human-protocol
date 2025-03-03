@@ -75,7 +75,7 @@ describe('JobController', () => {
         solution: 'job-solution',
       };
 
-      await jobController.solveJob(solveJobDto, 'signature');
+      await jobController.solveJob(solveJobDto);
 
       expect(jobService.solveJob).toHaveBeenCalledWith(
         Number(solveJobDto.assignmentId),

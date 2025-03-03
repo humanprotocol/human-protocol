@@ -1,0 +1,24 @@
+# Common file for apps that rely on root context
+.git
+.github
+.husky
+audits
+docs
+scripts
+**/node_modules
+**/build
+**/dist
+
+# Core package artifacts
+# Hardhat files
+**/abis
+**/artifacts
+**/cache
+**/.deps
+# TypeScript bindings output directory
+**/typechain-types
+
+# Docker-related
+.dockerignore
+**/Dockerfile*
+**/docker-compose*

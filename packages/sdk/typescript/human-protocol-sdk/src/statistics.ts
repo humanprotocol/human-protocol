@@ -20,7 +20,7 @@ import {
 } from './graphql';
 import { IHMTHoldersParams, IStatisticsFilter } from './interfaces';
 import { NetworkData } from './types';
-import { getSubgraphUrl, throwError } from './utils';
+import { getSubgraphUrl, getUnixTimestamp, throwError } from './utils';
 import { OrderDirection } from './enums';
 
 /**
@@ -133,8 +133,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -213,8 +213,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -309,8 +309,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,
@@ -487,8 +487,8 @@ export class StatisticsClient {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
       }>(this.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(filter), {
-        from: filter.from ? filter.from.getTime() / 1000 : undefined,
-        to: filter.to ? filter.to.getTime() / 1000 : undefined,
+        from: filter.from ? getUnixTimestamp(filter.from) : undefined,
+        to: filter.to ? getUnixTimestamp(filter.to) : undefined,
         orderDirection: orderDirection,
         first: first,
         skip: skip,

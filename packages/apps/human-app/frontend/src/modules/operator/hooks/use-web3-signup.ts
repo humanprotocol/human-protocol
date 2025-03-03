@@ -2,7 +2,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';

@@ -1,96 +1,204 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, HttpStatus } from '@nestjs/common';
-import { SignatureAuthGuard } from './signature.auth';
-import { verifySignature } from '../utils/signature';
-import { ChainId, EscrowUtils } from '@human-protocol/sdk';
-import { MOCK_ADDRESS } from '../../../test/constants';
-import { AuthSignatureRole } from '../enums/role';
-import { ControlledError } from '../errors/controlled';
-
-jest.mock('../../common/utils/signature');
-
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowUtils: {
-    getEscrow: jest.fn().mockResolvedValue({
-      launcher: '0x1234567890123456789012345678901234567890',
-      exchangeOracle: '0x1234567890123456789012345678901234567891',
-      reputationOracle: '0x1234567890123456789012345678901234567892',
-    }),
+    getEscrow: jest.fn(),
   },
 }));
 
+import { EscrowUtils } from '@human-protocol/sdk';
+import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+
+import {
+  generateContractAddress,
+  generateEthWallet,
+  generateTestnetChainId,
+} from '../../../test/fixtures/web3';
+import {
+  createExecutionContextMock,
+  ExecutionContextMock,
+} from '../../../test/mock-creators/nest';
+import { signMessage } from '../../utils/web3';
+
+import { AuthSignatureRole, SignatureAuthGuard } from './signature.auth';
+
 describe('SignatureAuthGuard', () => {
-  let guard: SignatureAuthGuard;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        {
-          provide: SignatureAuthGuard,
-          useValue: new SignatureAuthGuard([
-            AuthSignatureRole.JobLauncher,
-            AuthSignatureRole.Exchange,
-            AuthSignatureRole.Recording,
-          ]),
-        },
-      ],
-    }).compile();
-
-    guard = module.get<SignatureAuthGuard>(SignatureAuthGuard);
-  });
-
-  it('should be defined', () => {
-    expect(guard).toBeDefined();
+  it('should throw if empty roles provided in constructor', async () => {
+    let thrownError;
+    try {
+      new SignatureAuthGuard([]);
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+    expect(thrownError.message).toBe(
+      'At least one auth signature role should be provided',
+    );
   });
 
   describe('canActivate', () => {
-    let context: ExecutionContext;
-    let mockRequest: any;
+    let executionContextMock: ExecutionContextMock;
+    let body: {
+      chain_id: number;
+      escrow_address: string;
+    };
 
     beforeEach(() => {
-      mockRequest = {
-        switchToHttp: jest.fn().mockReturnThis(),
-        getRequest: jest.fn().mockReturnThis(),
-        headers: {},
-        body: {},
-        originalUrl: '',
+      executionContextMock = createExecutionContextMock();
+      body = {
+        chain_id: generateTestnetChainId(),
+        escrow_address: generateContractAddress(),
       };
-      context = {
-        switchToHttp: jest.fn().mockReturnThis(),
-        getRequest: jest.fn(() => mockRequest),
-      } as any as ExecutionContext;
     });
 
-    it('should return true if signature is verified', async () => {
-      mockRequest.headers['header-signature-key'] = 'validSignature';
-      mockRequest.body = {
-        escrow_address: MOCK_ADDRESS,
-        chain_id: ChainId.LOCALHOST,
-      };
-      (verifySignature as jest.Mock).mockReturnValue(true);
+    it.each([
+      {
+        name: 'launcher',
+        role: AuthSignatureRole.JOB_LAUNCHER,
+      },
+      {
+        name: 'exchangeOracle',
+        role: AuthSignatureRole.EXCHANGE_ORACLE,
+      },
+      {
+        name: 'recordingOracle',
+        role: AuthSignatureRole.RECORDING_ORACLE,
+      },
+    ])(
+      'should return true if signature is verified for "$role" role',
+      async ({ name, role }) => {
+        const guard = new SignatureAuthGuard([role]);
 
-      const result = await guard.canActivate(context as any);
-      expect(result).toBeTruthy();
-      expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
-        ChainId.LOCALHOST,
-        MOCK_ADDRESS,
-      );
-    });
+        const { privateKey, address } = generateEthWallet();
+        EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+          [name]: address,
+        });
+
+        const signature = await signMessage(body, privateKey);
+
+        const request = {
+          headers: {
+            'human-signature': signature,
+          },
+          body,
+        };
+        executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+        const result = await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+
+        expect(result).toBeTruthy();
+        expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
+          body.chain_id,
+          body.escrow_address,
+        );
+      },
+    );
 
     it('should throw unauthorized exception if signature is not verified', async () => {
-      (verifySignature as jest.Mock).mockReturnValue(false);
+      const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
 
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
+      const { privateKey, address } = generateEthWallet();
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+        launcher: address,
+      });
+      const signature = await signMessage(
+        {
+          'same-signer': 'different-message',
+        },
+        privateKey,
       );
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+      let thrownError;
+      try {
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).toBeInstanceOf(HttpException);
+      expect(thrownError.message).toBe('Invalid web3 signature');
+      expect(thrownError.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
-    it('should throw unauthorized exception for unrecognized oracle type', async () => {
-      mockRequest.originalUrl = '/some/random/path';
-      await expect(guard.canActivate(context as any)).rejects.toThrow(
-        new ControlledError('Unauthorized', HttpStatus.UNAUTHORIZED),
-      );
+    it('should throw unauthorized exception if not initialized for signer role', async () => {
+      const guard = new SignatureAuthGuard([
+        AuthSignatureRole.RECORDING_ORACLE,
+      ]);
+
+      const { privateKey, address } = generateEthWallet();
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+        launcher: address,
+        exchangeOracle: address,
+      });
+
+      const signature = await signMessage(body, privateKey);
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+      let thrownError;
+      try {
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).toBeInstanceOf(HttpException);
+      expect(thrownError.message).toBe('Invalid web3 signature');
+      expect(thrownError.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should throw unauthorized exception if escrow lacks oracle addresses', async () => {
+      const guard = new SignatureAuthGuard([
+        AuthSignatureRole.JOB_LAUNCHER,
+        AuthSignatureRole.EXCHANGE_ORACLE,
+        AuthSignatureRole.RECORDING_ORACLE,
+      ]);
+
+      const { privateKey } = generateEthWallet();
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+        launcher: '',
+        exchangeOracle: '',
+        recordingOracle: '',
+      });
+
+      const signature = await signMessage(body, privateKey);
+
+      const request = {
+        headers: {
+          'human-signature': signature,
+        },
+        body,
+      };
+      executionContextMock.__getRequest.mockReturnValueOnce(request);
+
+      let thrownError;
+      try {
+        await guard.canActivate(
+          executionContextMock as unknown as ExecutionContext,
+        );
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).toBeInstanceOf(HttpException);
+      expect(thrownError.message).toBe('Invalid web3 signature');
+      expect(thrownError.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 });

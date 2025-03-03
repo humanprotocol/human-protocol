@@ -6,6 +6,8 @@
 
 # Enumeration: EscrowStatus
 
+Defined in: [types.ts:8](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L8)
+
 Enum for escrow statuses.
 
 ## Enumeration Members
@@ -14,11 +16,9 @@ Enum for escrow statuses.
 
 > **Cancelled**: `5`
 
+Defined in: [types.ts:32](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L32)
+
 Escrow is cancelled.
-
-#### Defined in
-
-[types.ts:32](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L32)
 
 ***
 
@@ -26,11 +26,9 @@ Escrow is cancelled.
 
 > **Complete**: `4`
 
+Defined in: [types.ts:28](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L28)
+
 Escrow is finished.
-
-#### Defined in
-
-[types.ts:28](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L28)
 
 ***
 
@@ -38,11 +36,9 @@ Escrow is finished.
 
 > **Launched**: `0`
 
+Defined in: [types.ts:12](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L12)
+
 Escrow is launched.
-
-#### Defined in
-
-[types.ts:12](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L12)
 
 ***
 
@@ -50,11 +46,9 @@ Escrow is launched.
 
 > **Paid**: `3`
 
+Defined in: [types.ts:24](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L24)
+
 Escrow is fully paid.
-
-#### Defined in
-
-[types.ts:24](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L24)
 
 ***
 
@@ -62,11 +56,9 @@ Escrow is fully paid.
 
 > **Partial**: `2`
 
+Defined in: [types.ts:20](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L20)
+
 Escrow is partially paid out.
-
-#### Defined in
-
-[types.ts:20](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L20)
 
 ***
 
@@ -74,8 +66,6 @@ Escrow is partially paid out.
 
 > **Pending**: `1`
 
+Defined in: [types.ts:16](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L16)
+
 Escrow is funded, and waiting for the results to be submitted.
-
-#### Defined in
-
-[types.ts:16](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L16)

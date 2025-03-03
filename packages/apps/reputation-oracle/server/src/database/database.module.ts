@@ -1,42 +1,35 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
+import { LoggerOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { NS } from '../common/constants';
 
-import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
+import { NS } from '../common/constants';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
 import { KycEntity } from '../modules/kyc/kyc.entity';
 import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
-import { LoggerOptions } from 'typeorm';
-import { DatabaseConfigService } from '../common/config/database-config.service';
-import { ServerConfigService } from '../common/config/server-config.service';
+import { DatabaseConfigService } from '../config/database-config.service';
 import { SiteKeyEntity } from '../modules/user/site-key.entity';
-import { CredentialValidationEntity } from '../modules/credentials/credential.entity';
-import { CredentialEntity } from '../modules/credentials/credential.entity';
 import { QualificationEntity } from '../modules/qualification/qualification.entity';
 import { UserQualificationEntity } from '../modules/qualification/user-qualification.entity';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
+import Environment from '../utils/environment';
+
+import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [TypeOrmLoggerModule, ConfigModule],
-      inject: [
-        TypeOrmLoggerService,
-        DatabaseConfigService,
-        ServerConfigService,
-      ],
+      imports: [TypeOrmLoggerModule],
+      inject: [TypeOrmLoggerService, DatabaseConfigService],
       useFactory: (
         typeOrmLoggerService: TypeOrmLoggerService,
         databaseConfigService: DatabaseConfigService,
-        serverConfigService: ServerConfigService,
       ) => {
         const loggerOptions = databaseConfigService.logging?.split(', ');
         typeOrmLoggerService.setOptions(
@@ -53,8 +46,6 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
             EscrowCompletionEntity,
             EscrowPayoutsBatchEntity,
             ReputationEntity,
-            CredentialEntity,
-            CredentialValidationEntity,
             TokenEntity,
             UserEntity,
             KycEntity,
@@ -83,7 +74,7 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
           username: databaseConfigService.user,
           password: databaseConfigService.password,
           database: databaseConfigService.database,
-          keepConnectionAlive: serverConfigService.nodeEnv === 'test',
+          keepConnectionAlive: Environment.isTest(),
           migrationsRun: false,
           ssl: databaseConfigService.ssl,
         };

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const CONFIG_FOLDER_PATH = path.join(__dirname, '../src/common/config');
+const CONFIG_FOLDER_PATH = path.join(__dirname, '../src/config');
 const OUTPUT_FILE_PATH = path.join(__dirname, '../ENV.md');
 
 const envVarRegex =

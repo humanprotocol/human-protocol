@@ -32,9 +32,11 @@ Enum for KVStore keys
 
 #### job_types *= 'job_types'*
 
-#### name *= 'name'*
+#### operator_name *= 'name'*
 
 #### public_key *= 'public_key'*
+
+#### public_key_hash *= 'public_key_hash'*
 
 #### registration_instructions *= 'registration_instructions'*
 
@@ -46,11 +48,13 @@ Enum for KVStore keys
 
 #### webhook_url *= 'webhook_url'*
 
-### *class* human_protocol_sdk.constants.LeaderCategory(value)
+#### website *= 'website'*
+
+### *class* human_protocol_sdk.constants.OperatorCategory(value)
 
 Bases: `Enum`
 
-Enum for leader categories
+Enum for operator categories
 
 #### MACHINE_LEARNING *= 'machine_learning'*
 
@@ -72,15 +76,13 @@ Bases: `Enum`
 
 Enum for roles.
 
-#### exchange_oracle *= 'Exchange Oracle'*
+#### exchange_oracle *= 'exchange_oracle'*
 
-#### job_launcher *= 'Job Launcher'*
+#### job_launcher *= 'job_launcher'*
 
-#### recording_oracle *= 'Recording Oracle'*
+#### recording_oracle *= 'recording_oracle'*
 
-#### reputation_oracle *= 'Reputation Oracle'*
-
-#### validator *= 'Validator'*
+#### reputation_oracle *= 'reputation_oracle'*
 
 ### *class* human_protocol_sdk.constants.Status(value)
 

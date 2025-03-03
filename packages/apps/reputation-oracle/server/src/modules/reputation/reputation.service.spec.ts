@@ -1,7 +1,9 @@
+import { createMock } from '@golevelup/ts-jest';
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
-import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntity } from './reputation.entity';
 import {
   MOCK_ADDRESS,
@@ -14,19 +16,17 @@ import {
   MOCK_S3_USE_SSL,
   mockConfig,
 } from '../../../test/constants';
-import { createMock } from '@golevelup/ts-jest';
 import {
   JobRequestType,
   ReputationEntityType,
   ReputationLevel,
   SolutionError,
 } from '../../common/enums';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Web3Service } from '../web3/web3.service';
 import { StorageService } from '../storage/storage.service';
-import { EscrowClient } from '@human-protocol/sdk';
-import { ReputationConfigService } from '../../common/config/reputation-config.service';
+import { ReputationConfigService } from '../../config/reputation-config.service';
 import { ReputationError, ReputationErrorMessage } from './reputation.error';
+import { Web3ConfigService } from '../../config/web3-config.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -78,12 +78,11 @@ describe('ReputationService', () => {
             }),
           },
         },
+        Web3ConfigService,
         {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn().mockReturnValue(new Error()),
-            getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
           },
         },
         { provide: StorageService, useValue: createMock<StorageService>() },

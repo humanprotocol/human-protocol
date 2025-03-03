@@ -6,6 +6,8 @@
 
 # Class: KVStoreClient
 
+Defined in: [kvstore.ts:99](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L99)
+
 ## Introduction
 
 This client enables performing actions on KVStore contract and obtaining information from both the contracts and subgraph.
@@ -84,6 +86,8 @@ const kvstoreClient = await KVStoreClient.build(provider);
 
 > **new KVStoreClient**(`runner`, `networkData`): [`KVStoreClient`](KVStoreClient.md)
 
+Defined in: [kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
+
 **KVStoreClient constructor**
 
 #### Parameters
@@ -108,23 +112,17 @@ The network information required to connect to the KVStore contract
 
 [`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`constructor`](../../base/classes/BaseEthersClient.md#constructors)
 
-#### Defined in
-
-[kvstore.ts:108](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L108)
-
 ## Properties
 
 ### networkData
 
 > **networkData**: [`NetworkData`](../../types/type-aliases/NetworkData.md)
 
+Defined in: [base.ts:12](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+
 #### Inherited from
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata)
-
-#### Defined in
-
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`networkData`](../../base/classes/BaseEthersClient.md#networkdata-1)
 
 ***
 
@@ -132,19 +130,19 @@ The network information required to connect to the KVStore contract
 
 > `protected` **runner**: `ContractRunner`
 
+Defined in: [base.ts:11](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+
 #### Inherited from
 
-[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner)
-
-#### Defined in
-
-[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
+[`BaseEthersClient`](../../base/classes/BaseEthersClient.md).[`runner`](../../base/classes/BaseEthersClient.md#runner-1)
 
 ## Methods
 
 ### set()
 
 > **set**(`key`, `value`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
 
 This function sets a key-value pair associated with the address that submits the transaction.
 
@@ -192,15 +190,13 @@ const kvstoreClient = await KVStoreClient.build(signer);
 await kvstoreClient.set('Role', 'RecordingOracle');
 ```
 
-#### Defined in
-
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
-
 ***
 
 ### setBulk()
 
 > **setBulk**(`keys`, `values`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
 
 This function sets key-value pairs in bulk associated with the address that submits the transaction.
 
@@ -250,15 +246,13 @@ const values = ['RecordingOracle', 'http://localhost'];
 await kvstoreClient.setBulk(keys, values);
 ```
 
-#### Defined in
-
-[kvstore.ts:214](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L214)
-
 ***
 
 ### setFileUrlAndHash()
 
 > **setFileUrlAndHash**(`url`, `urlKey`, `txOptions`?): `Promise`\<`void`\>
+
+Defined in: [kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
 
 Sets a URL value for the address that submits the transaction, and its hash.
 
@@ -305,15 +299,13 @@ await kvstoreClient.setFileUrlAndHash('example.com');
 await kvstoreClient.setFileUrlAndHash('linkedin.com/example', 'linkedin_url');
 ```
 
-#### Defined in
-
-[kvstore.ts:257](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L257)
-
 ***
 
 ### build()
 
 > `static` **build**(`runner`): `Promise`\<[`KVStoreClient`](KVStoreClient.md)\>
+
+Defined in: [kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)
 
 Creates an instance of KVStoreClient from a runner.
 
@@ -338,7 +330,3 @@ The Runner object to interact with the Ethereum network
 #### Throws
 
 - Thrown if the network's chainId is not supported
-
-#### Defined in
-
-[kvstore.ts:126](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L126)

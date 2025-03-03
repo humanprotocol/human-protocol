@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface ChipProps {
   label: string | React.ReactElement;

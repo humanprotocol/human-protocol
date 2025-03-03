@@ -44,5 +44,5 @@ export const restorePasswordCommandFixture: RestorePasswordCommand = {
 export const restorePasswordDataFixture: RestorePasswordData = {
   password: PASSWORD,
   token: TOKEN,
-  hCaptchaToken: H_CAPTCHA_TOKEN,
+  h_captcha_token: H_CAPTCHA_TOKEN,
 };

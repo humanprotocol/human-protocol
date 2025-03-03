@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material';
 import { Loader } from '@/shared/components/ui/loader';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 import { type CommonProps } from './types';
 

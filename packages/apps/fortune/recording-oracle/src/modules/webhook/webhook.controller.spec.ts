@@ -6,11 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
-import {
-  MOCK_FILE_URL,
-  MOCK_SIGNATURE,
-  mockConfig,
-} from '../../../test/constants';
+import { MOCK_FILE_URL, mockConfig } from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
 import { verifySignature } from '../../common/utils/signature';
 import { JobService } from '../job/job.service';
@@ -100,7 +96,7 @@ describe('webhookController', () => {
 
       (verifySignature as jest.Mock).mockReturnValue(true);
 
-      await webhookController.processWebhook(webhook, MOCK_SIGNATURE);
+      await webhookController.processWebhook(webhook);
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
@@ -121,7 +117,7 @@ describe('webhookController', () => {
 
       jest.spyOn(webhookService, 'handleWebhook').mockResolvedValue();
 
-      await webhookController.processWebhook(webhook, MOCK_SIGNATURE);
+      await webhookController.processWebhook(webhook);
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });
@@ -136,9 +132,9 @@ describe('webhookController', () => {
 
       (verifySignature as jest.Mock).mockReturnValue(true);
 
-      await expect(
-        webhookController.processWebhook(webhook, MOCK_SIGNATURE),
-      ).rejects.toThrow('Invalid webhook event type: job_completed');
+      await expect(webhookController.processWebhook(webhook)).rejects.toThrow(
+        'Invalid webhook event type: job_completed',
+      );
 
       expect(webhookService.handleWebhook).toHaveBeenCalledWith(webhook);
     });

@@ -16,7 +16,7 @@ import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-
 import { ListItem } from '@/shared/components/ui/list-item';
 import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { RewardAmount } from '@/modules/worker/components/jobs/reward-amount';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';

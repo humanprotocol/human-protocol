@@ -8,6 +8,8 @@
 
 > **EscrowWithdraw**: `object`
 
+Defined in: [types.ts:159](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L159)
+
 Represents the response data for an escrow withdrawal.
 
 ## Type declaration
@@ -29,7 +31,3 @@ The address of the token used for the withdrawal.
 > **txHash**: `string`
 
 The hash of the transaction associated with the escrow withdrawal.
-
-## Defined in
-
-[types.ts:159](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L159)

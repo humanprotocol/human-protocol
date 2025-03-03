@@ -6,7 +6,7 @@ import { Button } from '@/shared/components/ui/button';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { routerPaths } from '@/router/router-paths';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { commonDarkPageCardStyles, commonPageCardStyles } from './styles';
 

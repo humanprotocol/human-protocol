@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { stakingStake } from '@/modules/smart-contracts/Staking/staking-stake';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
 import { hmTokenApprove } from '@/modules/smart-contracts/HMToken/hm-token-approve';
 import type { ContractCallArguments } from '@/modules/smart-contracts/types';

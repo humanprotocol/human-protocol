@@ -97,6 +97,11 @@ export class WebhookService {
         ),
       };
     }
+    if (webhook.eventType === EventType.ESCROW_FAILED) {
+      webhookData.eventData = {
+        reason: webhook.failureDetail,
+      };
+    }
     const transformedWebhook = CaseConverter.transformToSnakeCase(webhookData);
 
     const signedBody = await signMessage(
@@ -154,7 +159,7 @@ export class WebhookService {
     const escrowClient = await EscrowClient.build(signer);
     let oracleAddress: string;
     switch (eventType) {
-      case EventType.TASK_CREATION_FAILED:
+      case EventType.ESCROW_FAILED:
         oracleAddress = await escrowClient.getJobLauncherAddress(escrowAddress);
         break;
       case EventType.SUBMISSION_IN_REVIEW:
@@ -164,7 +169,7 @@ export class WebhookService {
       default:
         throw new BadRequestException('Invalid outgoing event type');
     }
-    const oracle = await OperatorUtils.getLeader(chainId, oracleAddress);
+    const oracle = await OperatorUtils.getOperator(chainId, oracleAddress);
     const oracleWebhookUrl = oracle.webhookUrl;
 
     return oracleWebhookUrl;

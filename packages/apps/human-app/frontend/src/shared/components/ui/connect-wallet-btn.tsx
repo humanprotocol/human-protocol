@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { CustomButtonProps } from '@/shared/components/ui/button';
 import { Button } from '@/shared/components/ui/button';
-import { useWalletConnect } from '@/shared/hooks/use-wallet-connect';
+import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 
 export function ConnectWalletBtn(props: CustomButtonProps) {
   const { openModal, isConnected } = useWalletConnect();

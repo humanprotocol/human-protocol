@@ -6,10 +6,8 @@
 
 # enums
 
-## Index
-
-### Enumerations
+## Enumerations
 
 - [ChainId](enumerations/ChainId.md)
-- [LeaderCategory](enumerations/LeaderCategory.md)
+- [OperatorCategory](enumerations/OperatorCategory.md)
 - [OrderDirection](enumerations/OrderDirection.md)

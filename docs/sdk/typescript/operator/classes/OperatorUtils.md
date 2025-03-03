@@ -6,6 +6,8 @@
 
 # Class: OperatorUtils
 
+Defined in: [operator.ts:27](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L27)
+
 ## Constructors
 
 ### new OperatorUtils()
@@ -18,11 +20,13 @@
 
 ## Methods
 
-### getLeader()
+### getOperator()
 
-> `static` **getLeader**(`chainId`, `address`): `Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)\>
+> `static` **getOperator**(`chainId`, `address`): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)\>
 
-This function returns the leader data for the given address.
+Defined in: [operator.ts:43](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L43)
+
+This function returns the operator data for the given address.
 
 #### Parameters
 
@@ -30,74 +34,70 @@ This function returns the leader data for the given address.
 
 [`ChainId`](../../enums/enumerations/ChainId.md)
 
-Network in which the leader is deployed
+Network in which the operator is deployed
 
 ##### address
 
 `string`
 
-Leader address.
+Operator address.
 
 #### Returns
 
-`Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)\>
+`Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)\>
 
-Returns the leader details.
+Returns the operator details.
 
 **Code example**
 
 ```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const leader = await OperatorUtils.getLeader(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+const operator = await OperatorUtils.getOperator(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
-
-#### Defined in
-
-[operator.ts:44](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L44)
 
 ***
 
-### getLeaders()
+### getOperators()
 
-> `static` **getLeaders**(`filter`): `Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)[]\>
+> `static` **getOperators**(`filter`): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
-This function returns all the leader details of the protocol.
+Defined in: [operator.ts:109](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L109)
+
+This function returns all the operator details of the protocol.
 
 #### Parameters
 
 ##### filter
 
-[`ILeadersFilter`](../../interfaces/interfaces/ILeadersFilter.md)
+[`IOperatorsFilter`](../../interfaces/interfaces/IOperatorsFilter.md)
 
-Filter for the leaders.
+Filter for the operators.
 
 #### Returns
 
-`Promise`\<[`ILeader`](../../interfaces/interfaces/ILeader.md)[]\>
+`Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
 
-Returns an array with all the leader details.
+Returns an array with all the operator details.
 
 **Code example**
 
 ```ts
 import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
-const filter: ILeadersFilter = {
+const filter: IOperatorsFilter = {
  chainId: ChainId.POLYGON
 };
-const leaders = await OperatorUtils.getLeaders(filter);
+const operators = await OperatorUtils.getOperators(filter);
 ```
-
-#### Defined in
-
-[operator.ts:107](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L107)
 
 ***
 
 ### getReputationNetworkOperators()
 
 > `static` **getReputationNetworkOperators**(`chainId`, `address`, `role`?): `Promise`\<[`IOperator`](../../interfaces/interfaces/IOperator.md)[]\>
+
+Defined in: [operator.ts:190](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L190)
 
 Retrieves the reputation network operators of the specified address.
 
@@ -135,15 +135,13 @@ import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 const operators = await OperatorUtils.getReputationNetworkOperators(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
-#### Defined in
-
-[operator.ts:186](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L186)
-
 ***
 
 ### getRewards()
 
 > `static` **getRewards**(`chainId`, `slasherAddress`): `Promise`\<[`IReward`](../../interfaces/interfaces/IReward.md)[]\>
+
+Defined in: [operator.ts:244](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L244)
 
 This function returns information about the rewards for a given slasher address.
 
@@ -174,7 +172,3 @@ import { OperatorUtils, ChainId } from '@human-protocol/sdk';
 
 const rewards = await OperatorUtils.getRewards(ChainId.POLYGON_AMOY, '0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
-
-#### Defined in
-
-[operator.ts:236](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/operator.ts#L236)

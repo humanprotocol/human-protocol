@@ -170,9 +170,9 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     const result = await queryBuilder.getRawOne();
     return {
-      average: parseFloat(result.average),
-      maximum: parseFloat(result.maximum),
-      minimum: parseFloat(result.minimum),
+      average: parseFloat(result.average) || 0,
+      maximum: parseFloat(result.maximum) || 0,
+      minimum: parseFloat(result.minimum) || 0,
     };
   }
 
@@ -199,11 +199,11 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     const result = await queryBuilder.getRawOne();
     return {
-      totalJobs: parseInt(result.totalJobs, 10),
-      launched: parseInt(result.totalJobs, 10),
-      partial: parseInt(result.partial, 10),
-      completed: parseInt(result.completed, 10),
-      canceled: parseInt(result.canceled, 10),
+      totalJobs: parseInt(result.totalJobs, 10) || 0,
+      launched: parseInt(result.totalJobs, 10) || 0,
+      partial: parseInt(result.partial, 10) || 0,
+      completed: parseInt(result.completed, 10) || 0,
+      canceled: parseInt(result.canceled, 10) || 0,
     };
   }
 

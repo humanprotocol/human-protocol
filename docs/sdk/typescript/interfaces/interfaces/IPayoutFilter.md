@@ -6,15 +6,15 @@
 
 # Interface: IPayoutFilter
 
+Defined in: [interfaces.ts:106](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L106)
+
 ## Properties
 
 ### escrowAddress?
 
 > `optional` **escrowAddress**: `string`
 
-#### Defined in
-
-[interfaces.ts:111](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L111)
+Defined in: [interfaces.ts:107](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L107)
 
 ***
 
@@ -22,9 +22,7 @@
 
 > `optional` **from**: `Date`
 
-#### Defined in
-
-[interfaces.ts:113](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L113)
+Defined in: [interfaces.ts:109](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L109)
 
 ***
 
@@ -32,9 +30,7 @@
 
 > `optional` **recipient**: `string`
 
-#### Defined in
-
-[interfaces.ts:112](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L112)
+Defined in: [interfaces.ts:108](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L108)
 
 ***
 
@@ -42,6 +38,4 @@
 
 > `optional` **to**: `Date`
 
-#### Defined in
-
-[interfaces.ts:114](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L114)
+Defined in: [interfaces.ts:110](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L110)

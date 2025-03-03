@@ -9,7 +9,7 @@ import type { JsonRpcSigner } from 'ethers';
 import { z, ZodError } from 'zod';
 import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import {
   EthKVStoreKeys,
   JobType,

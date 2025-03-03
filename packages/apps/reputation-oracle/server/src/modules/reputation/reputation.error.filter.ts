@@ -3,15 +3,18 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { ReputationError, ReputationErrorMessage } from './reputation.error';
+import logger from '../../logger';
 
 @Catch(ReputationError)
 export class ReputationErrorFilter implements ExceptionFilter {
-  private logger = new Logger(ReputationErrorFilter.name);
+  private readonly logger = logger.child({
+    context: ReputationErrorFilter.name,
+  });
+
   catch(exception: ReputationError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -22,11 +25,7 @@ export class ReputationErrorFilter implements ExceptionFilter {
       status = HttpStatus.NOT_FOUND;
     }
 
-    this.logger.error(
-      exception.message,
-      exception.stack,
-      `${exception.chainId} - ${exception.address}`,
-    );
+    this.logger.error('Reputation error', exception);
 
     return response.status(status).json({
       message: exception.message,

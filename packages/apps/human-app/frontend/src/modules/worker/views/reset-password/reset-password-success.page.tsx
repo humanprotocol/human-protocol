@@ -8,7 +8,7 @@ import { Button } from '@/shared/components/ui/button';
 import { routerPaths } from '@/router/router-paths';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function ResetPasswordWorkerSuccessPage() {
   const { colorPalette } = useColorMode();

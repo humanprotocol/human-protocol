@@ -1,11 +1,12 @@
 import {
   Body,
   Controller,
-  Headers,
+  HttpCode,
   Post,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+
 import {
   ApiTags,
   ApiOperation,
@@ -14,10 +15,10 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
+import { AuthSignatureRole, SignatureAuthGuard } from '../../common/guards';
+
 import { WebhookIncomingService } from './webhook-incoming.service';
-import { AuthSignatureRole } from '../../common/enums/role';
 import { IncomingWebhookDto } from './webhook.dto';
 import { IncomingWebhookErrorFilter } from './webhook.error.filter';
 
@@ -30,11 +31,9 @@ export class WebhookController {
     private readonly webhookIncomingService: WebhookIncomingService,
   ) {}
 
-  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.Recording]))
-  @Post('/')
   @ApiOperation({
-    summary: 'Create Incoming Webhook',
-    description: 'Endpoint to create an incoming webhook.',
+    summary: 'Accept incoming webhook',
+    description: 'Endpoint to accept incoming webhooks',
   })
   @ApiHeader({
     name: HEADER_SIGNATURE_KEY,
@@ -43,26 +42,15 @@ export class WebhookController {
   })
   @ApiBody({ type: IncomingWebhookDto })
   @ApiResponse({
-    status: 200,
-    description: 'Incoming webhook created successfully',
+    status: 202,
+    description: 'Incoming webhook accepted successfully',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request. Invalid input parameters.',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized. Missing or invalid credentials.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not Found. Could not find the requested content.',
-  })
+  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.RECORDING_ORACLE]))
+  @Post('/')
+  @HttpCode(202)
   public async createIncomingWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: IncomingWebhookDto,
   ): Promise<void> {
     await this.webhookIncomingService.createIncomingWebhook(data);
-    return;
   }
 }

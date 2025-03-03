@@ -1,7 +1,7 @@
 import last from 'lodash/last';
 import { useMutationState } from '@tanstack/react-query';
 import type { MutationState } from '@tanstack/react-query';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import type { ResponseError } from '@/shared/types/global.type';
 import { type AddStakeCallArguments } from '@/modules/operator/hooks/use-add-stake';
 

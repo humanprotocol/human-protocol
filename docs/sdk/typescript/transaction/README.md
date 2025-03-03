@@ -6,8 +6,6 @@
 
 # transaction
 
-## Index
-
-### Classes
+## Classes
 
 - [TransactionUtils](classes/TransactionUtils.md)

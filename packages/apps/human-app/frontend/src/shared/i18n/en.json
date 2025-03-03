@@ -39,7 +39,9 @@
     "jsonRpcError": "JSON-RPC error",
     "unsupportedNetwork": "Network selected in wallet is unsupported.",
     "unsupportedNetworkWithName": "Network '{{networkName}}' is unsupported.",
-    "invalidEscrowAddress": "Please enter a valid escrow address."
+    "invalidEscrowAddress": "Please enter a valid escrow address.",
+    "noAddress": "No wallet address found.",
+    "cannotSignMessage": "Cannot sign message."
   },
   "components": {
     "multiSelect": {
@@ -152,7 +154,10 @@
     "emailVerification": {
       "title": "Email Verified",
       "description": "You are ready to go. Your email has been successfully verified!",
-      "btn": "Sign In"
+      "btn": "Sign In",
+      "errors": {
+        "noToken": "No token provided."
+      }
     },
     "sendResetLinkForm": {
       "fields": {
@@ -171,7 +176,8 @@
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Resend Email",
       "btnAfterSend": "Resend Email",
-      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent."
     },
     "resetPassword": {
       "fields": {
@@ -215,7 +221,10 @@
       "oracleAddress": "Oracle address",
       "jobTypes": "Task types",
       "seeJobs": "See Tasks",
-      "allJobs": "All tasks"
+      "allJobs": "All tasks",
+      "error": {
+        "gettingOracles": "There was an error while fetching oracles, please try again later."
+      }
     },
     "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
@@ -394,7 +403,7 @@
   },
   "walletConnectModal": {
     "header": "Connect Wallet",
-    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains. <1>Learn more or FAQ link.</1>",
+    "paragraph": "HUMAN App is a multichain platform, please provide a wallet address which will be compatible with different chains.",
     "connectBtn": "Connect Wallet",
     "cancelBtn": "Cancel"
   },

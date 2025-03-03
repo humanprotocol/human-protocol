@@ -8,6 +8,8 @@
 
 > **NetworkData**: `object`
 
+Defined in: [types.ts:95](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)
+
 Network data
 
 ## Type declaration
@@ -77,7 +79,3 @@ Subgraph URL API key
 > **title**: `string`
 
 Network title
-
-## Defined in
-
-[types.ts:95](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L95)

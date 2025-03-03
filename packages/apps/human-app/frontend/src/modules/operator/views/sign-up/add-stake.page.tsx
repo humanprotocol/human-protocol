@@ -17,7 +17,7 @@ import {
 } from '@/modules/operator/hooks/use-get-stacked-amount';
 import { useAddStakeMutationState } from '@/modules/operator/hooks/use-add-stake-mutation-state';
 import { useHMTokenDecimals } from '@/modules/operator/hooks/use-human-token-decimals';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 
 export function AddStakeOperatorPage() {

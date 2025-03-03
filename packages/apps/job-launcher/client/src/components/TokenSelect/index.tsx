@@ -28,11 +28,11 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
 
   return (
     <FormControl fullWidth>
-      <InputLabel id="token-select-label">Token</InputLabel>
+      <InputLabel id="token-select-label">Funding token</InputLabel>
       <Select
         labelId="token-select-label"
         id="token-select"
-        label={props?.label ?? 'Token'}
+        label={props?.label ?? 'Funding token'}
         sx={{
           '.MuiSelect-select': {
             display: 'flex',
@@ -47,12 +47,8 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
       >
         {availableTokens.map((symbol) => {
           const IconComponent = TOKEN_ICONS[symbol];
-          const tokenAddress =
-            NETWORK_TOKENS[props.chainId as keyof typeof NETWORK_TOKENS]?.[
-              symbol.toLowerCase()
-            ];
           return (
-            <MenuItem value={tokenAddress} key={symbol}>
+            <MenuItem value={symbol} key={symbol}>
               {IconComponent && (
                 <ListItemIcon sx={{ color: '#320a8d' }}>
                   {IconComponent}

@@ -1,5 +1,5 @@
 import unittest
-from validators.utils import ValidationFailure
+from validators import ValidationError
 
 from human_protocol_sdk.utils import validate_url
 
@@ -12,4 +12,4 @@ class TestStorageClient(unittest.TestCase):
         self.assertTrue(validate_url("http://test:8000/valid"))
 
     def test_validate_url_with_invalid_url(self):
-        assert isinstance(validate_url("htt://test:8000/valid"), ValidationFailure)
+        assert isinstance(validate_url("htt://test:8000/valid"), ValidationError)

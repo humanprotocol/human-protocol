@@ -3,26 +3,25 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { IncomingWebhookError } from './webhook.error';
+import logger from '../../logger';
 
 @Catch(IncomingWebhookError)
 export class IncomingWebhookErrorFilter implements ExceptionFilter {
-  private logger = new Logger(IncomingWebhookErrorFilter.name);
+  private readonly logger = logger.child({
+    context: IncomingWebhookErrorFilter.name,
+  });
+
   catch(exception: IncomingWebhookError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = HttpStatus.BAD_REQUEST;
 
-    this.logger.error(
-      exception.message,
-      exception.stack,
-      `${exception.chainId} - ${exception.address}`,
-    );
+    this.logger.error('Incoming webhook error', exception);
 
     return response.status(status).json({
       message: exception.message,

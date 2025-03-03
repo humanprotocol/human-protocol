@@ -8,6 +8,8 @@
 
 > **EscrowCancel**: `object`
 
+Defined in: [types.ts:145](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L145)
+
 Represents the response data for an escrow cancellation.
 
 ## Type declaration
@@ -23,7 +25,3 @@ The amount refunded in the escrow cancellation.
 > **txHash**: `string`
 
 The hash of the transaction associated with the escrow cancellation.
-
-## Defined in
-
-[types.ts:145](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L145)

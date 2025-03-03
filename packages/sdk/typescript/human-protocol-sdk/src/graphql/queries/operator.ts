@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
-import { ILeadersFilter } from 'src/interfaces';
+import { IOperatorsFilter } from 'src/interfaces';
 
 const LEADER_FRAGMENT = gql`
-  fragment LeaderFields on Leader {
+  fragment OperatorFields on Operator {
     id
     address
     amountStaked
@@ -27,7 +27,7 @@ const LEADER_FRAGMENT = gql`
   }
 `;
 
-export const GET_LEADERS_QUERY = (filter: ILeadersFilter) => {
+export const GET_LEADERS_QUERY = (filter: IOperatorsFilter) => {
   const { roles, minAmountStaked } = filter;
 
   const WHERE_CLAUSE = `
@@ -38,7 +38,7 @@ export const GET_LEADERS_QUERY = (filter: ILeadersFilter) => {
   `;
 
   return gql`
-    query getLeaders(
+    query getOperators(
       $minAmountStaked: Int,
       $roles: [String!]
       $first: Int
@@ -46,14 +46,14 @@ export const GET_LEADERS_QUERY = (filter: ILeadersFilter) => {
       $orderBy: String
       $orderDirection: String
     ) {
-      leaders(
+      operators(
         ${WHERE_CLAUSE}
         first: $first
         skip: $skip
         orderBy: $orderBy
         orderDirection: $orderDirection
       ) {
-        ...LeaderFields
+        ...OperatorFields
       }
     }
     ${LEADER_FRAGMENT}
@@ -76,22 +76,18 @@ export const GET_REPUTATION_NETWORK_QUERY = (role?: string) => {
         operators(
           ${WHERE_CLAUSE}
         ) {
-          address,
-          role,
-          url,
-          jobTypes,
-          registrationNeeded,
-          registrationInstructions
+          ...OperatorFields
         }
       }
     }
+    ${LEADER_FRAGMENT}
   `;
 };
 
 export const GET_LEADER_QUERY = gql`
-  query getLeader($address: String!) {
-    leader(id: $address) {
-      ...LeaderFields
+  query getOperator($address: String!) {
+    operator(id: $address) {
+      ...OperatorFields
     }
   }
   ${LEADER_FRAGMENT}

@@ -25,7 +25,9 @@ describe('EnvironmentConfigService', () => {
   });
 
   it('should return an array of valid ChainIds when CHAIN_IDS_ENABLED is valid', () => {
-    (configService.getOrThrow as jest.Mock).mockReturnValue('1, 11155111, 80002');
+    (configService.getOrThrow as jest.Mock).mockReturnValue(
+      '1, 11155111, 80002',
+    );
 
     const result = service.chainIdsEnabled;
 

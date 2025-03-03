@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useConnectedWallet } from '@/modules/auth-web3/hooks/use-connected-wallet';
+import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { hmTokenDecimals } from '@/modules/smart-contracts/HMToken/hm-token-decimals';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
 

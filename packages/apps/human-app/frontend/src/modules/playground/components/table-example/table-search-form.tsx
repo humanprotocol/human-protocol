@@ -2,7 +2,7 @@ import Search from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Input } from '@/shared/components/data-entry/input';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface SearchFormProps {
   label: string;

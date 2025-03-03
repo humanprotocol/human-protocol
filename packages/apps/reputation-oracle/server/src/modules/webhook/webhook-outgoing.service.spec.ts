@@ -21,10 +21,10 @@ import { WebhookOutgoingService } from './webhook-outgoing.service';
 import { WebhookOutgoingEntity } from './webhook-outgoing.entity';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { signMessage } from '../../common/utils/signature';
+import { signMessage } from '../../utils/web3';
 import { HttpStatus } from '@nestjs/common';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { ServerConfigService } from '../../config/server-config.service';
 import { OutgoingWebhookError, WebhookErrorMessage } from './webhook.error';
 
 describe('WebhookOutgoingService', () => {
@@ -51,9 +51,6 @@ describe('WebhookOutgoingService', () => {
   // Mock Web3Service
   const mockWeb3Service = {
     getSigner: jest.fn().mockReturnValue(signerMock),
-    validateChainId: jest.fn().mockReturnValue(new Error()),
-    calculateGasPrice: jest.fn().mockReturnValue(1000n),
-    getOperatorAddress: jest.fn().mockReturnValue(MOCK_ADDRESS),
   };
 
   beforeEach(async () => {
@@ -111,7 +108,7 @@ describe('WebhookOutgoingService', () => {
 
     const hash = crypto
       .createHash('sha1')
-      .update(stringify({ payload, url }))
+      .update(stringify({ payload, url }) as string)
       .digest('hex');
 
     const webhookEntity: Partial<WebhookOutgoingEntity> = {
@@ -284,7 +281,11 @@ describe('WebhookOutgoingService', () => {
         }),
       );
       expect(loggerErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Message: ${error.message}`),
+        'Error processing outgoing webhook',
+        {
+          error,
+          webhookId: expect.any(Number),
+        },
       );
     });
   });

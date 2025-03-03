@@ -15,7 +15,7 @@ import {
   order,
   sortFormKeys,
 } from '@/modules/operator/components/sign-up/add-keys/sort-form';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 const existingKeysConfig: Record<
   EthKVStoreKeyValues,

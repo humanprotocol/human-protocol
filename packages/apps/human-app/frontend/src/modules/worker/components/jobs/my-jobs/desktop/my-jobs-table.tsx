@@ -25,7 +25,7 @@ import { MyJobsRewardAmountSort } from '@/modules/worker/components/jobs/my-jobs
 import { MyJobsStatusFilter } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-status-filter';
 import { MyJobsExpiresAtSort } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-expires-at-sort';
 import { MyJobsNetworkFilter } from '@/modules/worker/components/jobs/my-jobs/desktop/my-jobs-network-filter';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';

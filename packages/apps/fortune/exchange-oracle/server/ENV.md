@@ -39,12 +39,6 @@ RPC_URL_BSC_MAINNET=
 ### The RPC URL for the BSC Testnet network.
 RPC_URL_BSC_TESTNET=
 
-### The RPC URL for the Moonbeam network.
-RPC_URL_MOONBEAM=
-
-### The RPC URL for the XLayer network.
-RPC_URL_XLAYER=
-
 ### The RPC URL for the Localhost network.
 RPC_URL_LOCALHOST=
 

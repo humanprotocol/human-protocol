@@ -1,5 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource, ILike, In } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { ReputationEntity } from './reputation.entity';
@@ -11,8 +11,6 @@ import {
 
 @Injectable()
 export class ReputationRepository extends BaseRepository<ReputationEntity> {
-  private readonly logger = new Logger(ReputationRepository.name);
-
   constructor(private dataSource: DataSource) {
     super(ReputationEntity, dataSource);
   }

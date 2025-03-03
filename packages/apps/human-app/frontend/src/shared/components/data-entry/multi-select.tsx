@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface MultiSelectProps extends Omit<SelectProps, 'name'> {
   options: { label: string; value: string }[];

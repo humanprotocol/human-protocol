@@ -104,6 +104,7 @@ class IStorageConfig:
     data_bucket_name: ClassVar[str]
     secure: ClassVar[bool]
     endpoint_url: ClassVar[str]  # TODO: probably should be optional
+    use_path_style: ClassVar[bool]
     # AWS S3 specific attributes
     access_key: ClassVar[str | None]
     secret_key: ClassVar[str | None]
@@ -120,7 +121,7 @@ class IStorageConfig:
 
     @classmethod
     def bucket_url(cls) -> str:
-        if is_ipv4(cls.endpoint_url):
+        if is_ipv4(cls.endpoint_url) or cls.use_path_style:
             return f"{cls.get_scheme()}{cls.endpoint_url}/{cls.data_bucket_name}/"
         return f"{cls.get_scheme()}{cls.data_bucket_name}.{cls.endpoint_url}/"
 
@@ -130,6 +131,7 @@ class StorageConfig(IStorageConfig):
     endpoint_url = os.environ["STORAGE_ENDPOINT_URL"]  # TODO: probably should be optional
     data_bucket_name = os.environ["STORAGE_RESULTS_BUCKET_NAME"]
     secure = to_bool(getenv("STORAGE_USE_SSL", "true"))
+    use_path_style = to_bool(getenv("STORAGE_USE_PATH_STYLE", "false"))
 
     # AWS S3 specific attributes
     access_key = getenv("STORAGE_ACCESS_KEY")
@@ -148,6 +150,7 @@ class ExchangeOracleStorageConfig(IStorageConfig):
     data_bucket_name = os.environ["EXCHANGE_ORACLE_STORAGE_RESULTS_BUCKET_NAME"]
     results_dir_suffix = getenv("STORAGE_RESULTS_DIR_SUFFIX", "-results")
     secure = to_bool(getenv("EXCHANGE_ORACLE_STORAGE_USE_SSL", "true"))
+    use_path_style = to_bool(getenv("EXCHANGE_ORACLE_STORAGE_USE_PATH_STYLE", "false"))
     # AWS S3 specific attributes
     access_key = getenv("EXCHANGE_ORACLE_STORAGE_ACCESS_KEY")
     secret_key = getenv("EXCHANGE_ORACLE_STORAGE_SECRET_KEY")

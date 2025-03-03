@@ -27,7 +27,7 @@ export class GatewayConfigService {
           url: this.envConfig.reputationOracleUrl,
           endpoints: {
             [ReputationOracleEndpoints.WORKER_SIGNUP]: {
-              endpoint: '/auth/signup',
+              endpoint: '/auth/web2/signup',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
@@ -37,7 +37,7 @@ export class GatewayConfigService {
               headers: this.JSON_HEADER,
             },
             [ReputationOracleEndpoints.WORKER_SIGNIN]: {
-              endpoint: '/auth/signin',
+              endpoint: '/auth/web2/signin',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
@@ -47,22 +47,22 @@ export class GatewayConfigService {
               headers: this.JSON_HEADER,
             },
             [ReputationOracleEndpoints.EMAIL_VERIFICATION]: {
-              endpoint: '/auth/email-verification',
+              endpoint: '/auth/web2/verify-email',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
             [ReputationOracleEndpoints.RESEND_EMAIL_VERIFICATION]: {
-              endpoint: '/auth/resend-email-verification',
+              endpoint: '/auth/web2/resend-verification-email',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
             [ReputationOracleEndpoints.FORGOT_PASSWORD]: {
-              endpoint: '/auth/forgot-password',
+              endpoint: '/auth/web2/forgot-password',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
             [ReputationOracleEndpoints.RESTORE_PASSWORD]: {
-              endpoint: '/auth/restore-password',
+              endpoint: '/auth/web2/restore-password',
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },

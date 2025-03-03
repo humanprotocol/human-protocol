@@ -1,6 +1,6 @@
 import { Grid, Switch } from '@mui/material';
 import { MoonIcon, SunIcon } from '@/shared/components/ui/icons';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 export function DarkModeSwitch() {
   const { switchMode, isDarkMode } = useColorMode();

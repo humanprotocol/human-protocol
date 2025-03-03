@@ -12,15 +12,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  job-launcher-client-test:
-    name: Job Launcher Client Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
-      - run: yarn workspace @human-protocol/job-launcher-client test
-        name: Run Job Launcher Client test
   job-launcher-server-test:
     name: Job Launcher Server Test
     runs-on: ubuntu-latest

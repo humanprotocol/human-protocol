@@ -6,7 +6,7 @@ import { HumanLogoIcon } from '@/shared/components/ui/icons';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { Button } from '@/shared/components/ui/button';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
+import { useColorMode } from '@/shared/contexts/color-mode';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 
 export const NAVBAR_PADDING = '16px';

@@ -10,103 +10,131 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import {
-  CreateQualificationDto,
-  AssignQualificationDto,
-  UnassignQualificationDto,
-} from './qualification.dto';
-
-import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
+
+import {
+  CreateQualificationDto,
+  AssignQualificationDto,
+  UnassignQualificationDto,
+  QualificationDto,
+} from './qualification.dto';
 import { QualificationErrorFilter } from './qualification.error.filter';
 import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
 import { Roles } from '../../common/decorators';
 import { Role } from '../../common/enums/user';
 
-// TODO: Revisit methods and status codes.
-
 @ApiTags('Qualification')
-@Controller('qualification')
+@Controller('qualifications')
 @ApiBearerAuth()
 @UseFilters(QualificationErrorFilter)
 export class QualificationController {
   constructor(private readonly qualificationService: QualificationService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard, RolesAuthGuard)
-  @Roles(Role.ADMIN)
-  @HttpCode(201)
   @ApiOperation({ summary: 'Create a new qualification' })
   @ApiBody({ type: CreateQualificationDto })
   @ApiResponse({
     status: 201,
     description: 'Qualification created successfully',
+    type: QualificationDto,
   })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  create(@Body() createQualificationDto: CreateQualificationDto) {
-    return this.qualificationService.createQualification(
-      createQualificationDto,
-    );
-  }
-
-  @Get()
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Get list of qualifications' })
-  @ApiResponse({ status: 200, description: 'List of qualifications' })
-  getQualifications() {
-    return this.qualificationService.getQualifications();
-  }
-
-  @Post('/assign')
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
+  @Post()
   @HttpCode(201)
+  /**
+   * TODO: revisit DTO validation when
+   * refactoring business logic
+   */
+  async create(
+    @Body() createQualificationDto: CreateQualificationDto,
+  ): Promise<QualificationDto> {
+    const qualification = await this.qualificationService.createQualification(
+      createQualificationDto,
+    );
+    return qualification;
+  }
+
+  @ApiOperation({ summary: 'Get list of qualifications' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of qualifications',
+    type: QualificationDto,
+    isArray: true,
+  })
+  @Get()
+  @HttpCode(200)
+  async getQualifications(): Promise<QualificationDto[]> {
+    /**
+     * TODO: Refactor this endpoint to support pagination
+     */
+    const qualifications = await this.qualificationService.getQualifications();
+    return qualifications;
+  }
+
+  @ApiOperation({ summary: 'Delete a qualification' })
+  @ApiResponse({
+    status: 204,
+    description: 'Qualification deleted successfully',
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Cannot delete qualification',
+  })
+  @UseGuards(JwtAuthGuard, RolesAuthGuard)
+  @Roles(Role.ADMIN)
+  @Delete('/:reference')
+  @HttpCode(204)
+  async deleteQualification(
+    @Param('reference') reference: string,
+  ): Promise<void> {
+    await this.qualificationService.delete(reference);
+  }
+
   @ApiOperation({ summary: 'Assign a qualification to users' })
   @ApiBody({ type: AssignQualificationDto })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'Qualification assigned successfully',
   })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 422, description: 'Unprocessable entity' })
-  assign(@Body() assignQualificationDto: AssignQualificationDto) {
-    return this.qualificationService.assign(assignQualificationDto);
-  }
-
-  @Delete('/unassign')
+  @ApiResponse({ status: 422, description: 'No users found for operation' })
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
+  @Post('/:reference/assign')
   @HttpCode(200)
+  async assign(
+    @Param('reference') reference: string,
+    @Body() assignQualificationDto: AssignQualificationDto,
+  ): Promise<void> {
+    await this.qualificationService.assign(
+      reference,
+      assignQualificationDto.workerAddresses,
+    );
+  }
+
   @ApiOperation({ summary: 'Unassign a qualification from users' })
   @ApiBody({ type: UnassignQualificationDto })
   @ApiResponse({
     status: 200,
     description: 'Qualification unassigned successfully',
   })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
-  @ApiResponse({ status: 422, description: 'Unprocessable entity' })
-  unassign(@Body() unassignQualificationDto: UnassignQualificationDto) {
-    return this.qualificationService.unassign(unassignQualificationDto);
-  }
-
-  @Delete('/:reference')
+  @ApiResponse({ status: 422, description: 'No users found for operation' })
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
   @Roles(Role.ADMIN)
+  @Post('/:reference/unassign')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Delete a qualification' })
-  @ApiResponse({
-    status: 200,
-    description: 'Qualification deleted successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Qualification not found' })
-  delete(@Param('reference') reference: string) {
-    return this.qualificationService.delete(reference);
+  async unassign(
+    @Param('reference') reference: string,
+    @Body() unassignQualificationDto: UnassignQualificationDto,
+  ): Promise<void> {
+    await this.qualificationService.unassign(
+      reference,
+      unassignQualificationDto.workerAddresses,
+    );
   }
 }

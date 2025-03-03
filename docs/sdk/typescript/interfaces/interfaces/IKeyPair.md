@@ -6,15 +6,15 @@
 
 # Interface: IKeyPair
 
+Defined in: [interfaces.ts:90](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L90)
+
 ## Properties
 
 ### passphrase
 
 > **passphrase**: `string`
 
-#### Defined in
-
-[interfaces.ts:97](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L97)
+Defined in: [interfaces.ts:93](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L93)
 
 ***
 
@@ -22,9 +22,7 @@
 
 > **privateKey**: `string`
 
-#### Defined in
-
-[interfaces.ts:95](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L95)
+Defined in: [interfaces.ts:91](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L91)
 
 ***
 
@@ -32,9 +30,7 @@
 
 > **publicKey**: `string`
 
-#### Defined in
-
-[interfaces.ts:96](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L96)
+Defined in: [interfaces.ts:92](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L92)
 
 ***
 
@@ -42,6 +38,4 @@
 
 > `optional` **revocationCertificate**: `string`
 
-#### Defined in
-
-[interfaces.ts:98](https://github.com/humanprotocol/human-protocol/blob/5cc1fc18f66f3a8dae9736516ee7c87001f230bc/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L98)
+Defined in: [interfaces.ts:94](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L94)

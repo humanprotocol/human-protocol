@@ -15,7 +15,7 @@ import React, { useMemo, useState } from 'react';
 import { Address } from 'viem';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
-import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
+import { NETWORK_TOKENS, SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
@@ -116,7 +116,14 @@ export const CryptoTopUpForm = () => {
             <TokenSelect
               chainId={chain?.id}
               value={tokenAddress}
-              onChange={(e) => setTokenAddress(e.target.value as string)}
+              onChange={(e) => {
+                const symbol = e.target.value as string;
+                setTokenAddress(
+                  NETWORK_TOKENS[chain?.id as keyof typeof NETWORK_TOKENS]?.[
+                    symbol.toLowerCase()
+                  ],
+                );
+              }}
             />
             <FormControl fullWidth>
               <TextField

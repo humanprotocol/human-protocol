@@ -8,7 +8,7 @@ import {
   web3ProtectedRoutes,
 } from '@/router/routes';
 import { RequireAuth } from '@/modules/auth/providers/require-auth';
-import { RequireWalletConnect } from '@/modules/auth-web3/providers/require-wallet-connect';
+import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
 import { DrawerNavigation } from '@/shared/components/layout/protected/drawer-navigation';
 import {
@@ -17,8 +17,8 @@ import {
 } from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { UserStatsDrawer } from '@/modules/worker/components/hcaptcha-labeling/user-stats-drawer';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
+import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
 import { routerPaths } from './router-paths';
 
 export function Router() {
@@ -48,75 +48,67 @@ export function Router() {
         return (
           <Route
             element={
-              <LayoutProtected
-                pageHeaderProps={pageHeaderProps}
-                renderDrawer={(open, setDrawerOpen) => (
-                  <DrawerNavigation
-                    bottomMenuItems={workerDrawerBottomMenuItems}
-                    open={open}
-                    setDrawerOpen={setDrawerOpen}
-                    signOut={() => {
-                      browserAuthProvider.signOut({
-                        callback: () => {
-                          window.location.reload();
-                        },
-                      });
-                    }}
-                    topMenuItems={workerDrawerTopMenuItems(user)}
-                  />
-                )}
-                renderHCaptchaStatisticsDrawer={(isOpen) => (
-                  <UserStatsDrawer isOpen={isOpen} />
-                )}
-              />
+              <RequireAuth>
+                <LayoutProtected
+                  pageHeaderProps={pageHeaderProps}
+                  renderDrawer={(open, setDrawerOpen) => (
+                    <DrawerNavigation
+                      bottomMenuItems={workerDrawerBottomMenuItems}
+                      open={open}
+                      setDrawerOpen={setDrawerOpen}
+                      signOut={() => {
+                        browserAuthProvider.signOut({
+                          callback: () => {
+                            window.location.reload();
+                          },
+                        });
+                      }}
+                      topMenuItems={workerDrawerTopMenuItems(user)}
+                    />
+                  )}
+                  renderHCaptchaStatisticsDrawer={(isOpen) => (
+                    <UserStatsDrawer isOpen={isOpen} />
+                  )}
+                  renderGovernanceBanner
+                />
+              </RequireAuth>
             }
             key={routerProps.path}
             path={routerProps.path}
           >
-            <Route
-              element={
-                <RequireAuth>
-                  <>{routerProps.element}</>
-                </RequireAuth>
-              }
-              path={routerProps.path}
-            />
+            <Route element={routerProps.element} path={routerProps.path} />
           </Route>
         );
       })}
       {web3ProtectedRoutes.map(({ routerProps, pageHeaderProps }) => (
         <Route
           element={
-            <LayoutProtected
-              pageHeaderProps={pageHeaderProps}
-              renderDrawer={(open, setDrawerOpen) => (
-                <DrawerNavigation
-                  bottomMenuItems={operatorDrawerBottomMenuItems}
-                  open={open}
-                  setDrawerOpen={setDrawerOpen}
-                  signOut={() => {
-                    browserAuthProvider.signOut({
-                      callback: () => {
-                        window.location.reload();
-                      },
-                    });
-                  }}
+            <RequireWalletConnect>
+              <RequireWeb3Auth>
+                <LayoutProtected
+                  pageHeaderProps={pageHeaderProps}
+                  renderDrawer={(open, setDrawerOpen) => (
+                    <DrawerNavigation
+                      bottomMenuItems={operatorDrawerBottomMenuItems}
+                      open={open}
+                      setDrawerOpen={setDrawerOpen}
+                      signOut={() => {
+                        browserAuthProvider.signOut({
+                          callback: () => {
+                            window.location.reload();
+                          },
+                        });
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
+              </RequireWeb3Auth>
+            </RequireWalletConnect>
           }
           key={routerProps.path}
+          path={routerProps.path}
         >
-          <Route
-            element={
-              <RequireWalletConnect>
-                <RequireWeb3Auth>
-                  <>{routerProps.element}</>
-                </RequireWeb3Auth>
-              </RequireWalletConnect>
-            }
-            path={routerProps.path}
-          />
+          <Route element={routerProps.element} path={routerProps.path} />
         </Route>
       ))}
 

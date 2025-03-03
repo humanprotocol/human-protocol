@@ -15,7 +15,7 @@ Code Example
 
     from eth_typing import URI
     from web3 import Web3
-    from web3.middleware import construct_sign_and_send_raw_middleware
+    from web3.middleware import SignAndSendRawMiddlewareBuilder
     from web3.providers.auto import load_provider_from_uri
 
     from human_protocol_sdk.staking import StakingClient
@@ -24,9 +24,10 @@ Code Example
         w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
         gas_payer = w3.eth.account.from_key(priv_key)
         w3.eth.default_account = gas_payer.address
-        w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(gas_payer),
-            "construct_sign_and_send_raw_middleware",
+        w3.middleware_onion.inject(
+            SignAndSendRawMiddlewareBuilder.build(priv_key),
+            'SignAndSendRawMiddlewareBuilder',
+            layer=0,
         )
         return (w3, gas_payer)
 
@@ -58,7 +59,7 @@ from typing import Optional
 
 import web3
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3.middleware import ExtraDataToPOAMiddleware
 from web3.types import TxParams
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
@@ -94,8 +95,10 @@ class StakingClient:
 
         # Initialize web3 instance
         self.w3 = w3
-        if not self.w3.middleware_onion.get("geth_poa"):
-            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
+        if not self.w3.middleware_onion.get("ExtraDataToPOA"):
+            self.w3.middleware_onion.inject(
+                ExtraDataToPOAMiddleware, "ExtraDataToPOA", layer=0
+            )
 
         chain_id = None
         # Load network configuration based on chain_id
@@ -145,7 +148,7 @@ class StakingClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.staking import StakingClient
@@ -154,9 +157,10 @@ class StakingClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
@@ -198,7 +202,7 @@ class StakingClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.staking import StakingClient
@@ -207,9 +211,10 @@ class StakingClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
@@ -249,7 +254,7 @@ class StakingClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.staking import StakingClient
@@ -258,9 +263,10 @@ class StakingClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
@@ -297,7 +303,7 @@ class StakingClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.staking import StakingClient
@@ -306,9 +312,10 @@ class StakingClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
@@ -354,7 +361,7 @@ class StakingClient:
 
                 from eth_typing import URI
                 from web3 import Web3
-                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.middleware import SignAndSendRawMiddlewareBuilder
                 from web3.providers.auto import load_provider_from_uri
 
                 from human_protocol_sdk.staking import StakingClient
@@ -363,9 +370,10 @@ class StakingClient:
                     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
                     gas_payer = w3.eth.account.from_key(priv_key)
                     w3.eth.default_account = gas_payer.address
-                    w3.middleware_onion.add(
-                        construct_sign_and_send_raw_middleware(gas_payer),
-                        "construct_sign_and_send_raw_middleware",
+                    w3.middleware_onion.inject(
+                        SignAndSendRawMiddlewareBuilder.build(priv_key),
+                        'SignAndSendRawMiddlewareBuilder',
+                        layer=0,
                     )
                     return (w3, gas_payer)
 
