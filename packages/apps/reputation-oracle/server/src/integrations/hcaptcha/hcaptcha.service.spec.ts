@@ -13,16 +13,9 @@ import {
 } from '../../../test/mock-creators/nest';
 import { generateEthWallet } from '../../../test/fixtures/web3';
 
+import { mockHCaptchaConfigService } from './fixtures';
 import { LabelerData, SiteverifyResponse } from './types';
 
-const mockHCaptchaConfigService: Partial<HCaptchaConfigService> = {
-  siteKey: faker.string.uuid(),
-  apiKey: faker.string.uuid(),
-  secret: `E0_${faker.string.alphanumeric()}`,
-  protectionURL: faker.internet.url(),
-  labelingURL: faker.internet.url(),
-  defaultLabelerLang: faker.location.language().alpha2,
-};
 const mockHttpService = createHttpServiceMock();
 
 describe('hCaptchaService', () => {
