@@ -15,7 +15,8 @@ export class HCaptchaGuard implements CanActivate {
     private readonly hCaptchaService: HCaptchaService,
     private readonly authConfigSerice: AuthConfigService,
   ) {}
-  public async canActivate(context: ExecutionContext): Promise<boolean> {
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
     const { body } = request;
