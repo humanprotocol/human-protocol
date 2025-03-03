@@ -7,9 +7,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
-import { AvailableJobsNetworkFilter } from '@/modules/worker/components/jobs/available-jobs/components/available-jobs-network-filter';
-import { AvailableJobsJobTypeFilter } from '@/modules/worker/components/jobs/available-jobs/components/available-jobs-job-type-filter';
-import { AvailableJobsRewardAmountSortMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-reward-amount-sort-mobile';
+import { AvailableJobsNetworkFilter } from '@/modules/worker/jobs/available-jobs/components/available-jobs-network-filter';
+import { AvailableJobsJobTypeFilter } from '@/modules/worker/jobs/available-jobs/components/available-jobs-job-type-filter';
+import { AvailableJobsRewardAmountSortMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-reward-amount-sort-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface DrawerMobileProps {

@@ -7,10 +7,10 @@ import { useEffect, useMemo } from 'react';
 import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { usePagination } from '@/modules/worker/hooks/use-pagination';
 import { useGetAvailableJobsData } from '@/modules/worker/services/available-jobs-data';
-import { useColorMode } from '@/shared/hooks/use-color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { EscrowAddressSearchForm } from '@/modules/worker/components/jobs/escrow-address-search-form';
-import { useGetAvailableJobsColumns } from '@/modules/worker/components/jobs/available-jobs/hooks/use-get-available-jobs-columns';
+import { EscrowAddressSearchForm } from '@/modules/worker/jobs/escrow-address-search-form';
+import { useGetAvailableJobsColumns } from '@/modules/worker/jobs/available-jobs/hooks/use-get-available-jobs-columns';
+import { useColorMode } from '@/shared/contexts/color-mode';
 
 interface AvailableJobsTableProps {
   chainIdsEnabled: number[];
@@ -18,7 +18,7 @@ interface AvailableJobsTableProps {
 
 export function AvailableJobsTableDesktop({
   chainIdsEnabled,
-}: AvailableJobsTableProps) {
+}: Readonly<AvailableJobsTableProps>) {
   const { colorPalette, isDarkMode } = useColorMode();
   const { data: tableData, status: tableStatus } = useGetAvailableJobsData();
   const {

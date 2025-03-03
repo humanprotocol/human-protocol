@@ -1,41 +1,39 @@
 /* eslint-disable camelcase */
-import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
+import { t } from 'i18next';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
-import { Sorting } from '@/modules/worker/components/jobs/sorting';
+import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
+import { Sorting } from '@/modules/worker/jobs/sorting';
 
-export function AvailableJobsRewardAmountSortMobile() {
-  const { setFilterParams, filterParams } = useJobsFilterStore();
+export function MyJobsExpiresAtSortMobile() {
+  const { setFilterParams, filterParams } = useMyJobsFilterStore();
   const { colorPalette } = useColorMode();
 
   return (
     <Sorting
       label={
         <Typography color={colorPalette.text.secondary} variant="body2">
-          {t('worker.jobs.rewardAmount')}
+          {t('worker.jobs.expiresAt')}
         </Typography>
       }
       fromHighestSelected={
-        filterParams.sort_field === 'reward_amount' &&
-        filterParams.sort === 'desc'
+        filterParams.sort_field === 'expires_at' && filterParams.sort === 'desc'
       }
       sortFromHighest={() => {
         setFilterParams({
           ...filterParams,
           sort: 'desc',
-          sort_field: 'reward_amount',
+          sort_field: 'expires_at',
         });
       }}
       fromLowestSelected={
-        filterParams.sort_field === 'reward_amount' &&
-        filterParams.sort === 'asc'
+        filterParams.sort_field === 'expires_at' && filterParams.sort === 'asc'
       }
       sortFromLowest={() => {
         setFilterParams({
           ...filterParams,
           sort: 'asc',
-          sort_field: 'reward_amount',
+          sort_field: 'expires_at',
         });
       }}
       clear={() => {

@@ -1,5 +1,5 @@
-import { AvailableJobsTableMobile } from '@/modules/worker/components/jobs/available-jobs/components/mobile/available-jobs-table-mobile';
-import { AvailableJobsTableDesktop } from '@/modules/worker/components/jobs/available-jobs/components/desktop/available-jobs-table-desktop';
+import { AvailableJobsTableMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-table-mobile';
+import { AvailableJobsTableDesktop } from '@/modules/worker/jobs/available-jobs/components/desktop/available-jobs-table-desktop';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 
 interface AvailableJobsTableProps {
