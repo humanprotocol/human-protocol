@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
   UsePipes,
   ValidationPipe,
@@ -44,6 +45,7 @@ export class NDAController {
     description:
       'Signs the NDA with the provided URL. The URL must match the latest NDA URL.',
   })
+  @HttpCode(200)
   @Post('sign')
   async signNDA(@Body() dto: SignNDADto, @Authorization() token: string) {
     const command = this.mapper.map(dto, SignNDADto, SignNDACommand);

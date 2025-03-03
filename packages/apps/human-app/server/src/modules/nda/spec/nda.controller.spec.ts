@@ -14,7 +14,6 @@ import { SignNDAProfile } from '../nda.mapper.profile';
 
 describe('NDAController', () => {
   let controller: NDAController;
-  let service: NDAService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,7 +30,6 @@ describe('NDAController', () => {
       .compile();
 
     controller = module.get<NDAController>(NDAController);
-    service = module.get<NDAService>(NDAService);
   });
 
   it('should be defined', () => {
@@ -43,13 +41,13 @@ describe('NDAController', () => {
       const dto = signNDADtoFixture;
       const command = signNDACommandFixture;
       await controller.signNDA(dto, NDA_TOKEN);
-      expect(service.signNDA).toHaveBeenCalledWith(command);
+      expect(ndaServiceMock.signNDA).toHaveBeenCalledWith(command);
     });
 
     it('should call service getLatestNDA method with proper fields set', async () => {
       const token = NDA_TOKEN;
       await controller.getLatestNDA(token);
-      expect(service.getLatestNDA).toHaveBeenCalledWith({ token });
+      expect(ndaServiceMock.getLatestNDA).toHaveBeenCalledWith({ token });
     });
   });
 });
