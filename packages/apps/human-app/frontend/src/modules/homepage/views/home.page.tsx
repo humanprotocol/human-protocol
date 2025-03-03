@@ -1,12 +1,10 @@
 import Box from '@mui/material/Box';
 import { Paper } from '@mui/material';
 import { Navigate } from 'react-router-dom';
-import { t } from 'i18next';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { routerPaths } from '@/router/router-paths';
-import { Button } from '@/shared/components/ui/button';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { HomeContainer } from '@/modules/homepage/components';
 import { useHomePageState } from '@/shared/contexts/homepage-state';
@@ -15,9 +13,8 @@ export type HomePageStageType = 'welcome' | 'chooseSignUpAccountType';
 
 export function HomePage() {
   const { colorPalette, isDarkMode } = useColorMode();
-  const { pageView, setPageView } = useHomePageState();
+  const { pageView } = useHomePageState();
   const isMobile = useIsMobile();
-  const isMobileMd = useIsMobile('md');
   const { user: worker } = useAuth();
   const { user: operator } = useWeb3Auth();
 
@@ -54,16 +51,6 @@ export function HomePage() {
         }}
       >
         <HomeContainer />
-        {pageView === 'chooseSignUpAccountType' && !isMobileMd ? (
-          <Button
-            onClick={() => {
-              setPageView('welcome');
-            }}
-            sx={{ position: 'absolute', top: '24px', right: '24px' }}
-          >
-            {t('homepage.cancel')}
-          </Button>
-        ) : null}
       </Paper>
     </Box>
   );
