@@ -37,7 +37,7 @@ import { div, eq, mul, add } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
-import { RateService } from './rate.service';
+import { RateService } from '../rate/rate.service';
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';

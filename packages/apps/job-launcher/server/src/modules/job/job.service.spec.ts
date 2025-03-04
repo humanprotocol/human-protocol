@@ -30,7 +30,7 @@ import { AuthConfigService } from '../../common/config/auth-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { CvatConfigService } from '../../common/config/cvat-config.service';
 import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { RateService } from '../payment/rate.service';
+import { RateService } from '../rate/rate.service';
 import { QualificationService } from '../qualification/qualification.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { generateRandomEthAddress } from '../../../test/utils/address';
