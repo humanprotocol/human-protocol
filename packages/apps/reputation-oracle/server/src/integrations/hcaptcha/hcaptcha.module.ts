@@ -3,7 +3,11 @@ import { Module } from '@nestjs/common';
 import { HCaptchaService } from './hcaptcha.service';
 
 @Module({
-  imports: [HttpModule],
+  imports: [
+    HttpModule.register({
+      validateStatus: () => true,
+    }),
+  ],
   providers: [HCaptchaService],
   exports: [HCaptchaService],
 })

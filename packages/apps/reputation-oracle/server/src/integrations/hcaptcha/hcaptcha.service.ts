@@ -65,12 +65,9 @@ export class HCaptchaService {
     return false;
   }
 
-  async registerLabeler({
-    email,
-    evmAddress,
-    country,
-    ip,
-  }: RegisterLabelerData): Promise<boolean> {
+  async registerLabeler(data: RegisterLabelerData): Promise<boolean> {
+    const { email, evmAddress, country, ip } = data;
+
     try {
       if (!country) {
         this.logger.warn(`Country is not set for the user`, {
@@ -105,14 +102,19 @@ export class HCaptchaService {
 
       if (response.status === 200) {
         return true;
+      } else {
+        this.logger.warn('Non 200 response from labeling API', {
+          response: {
+            status: response.status,
+            data: response.data,
+          },
+          ...data,
+        });
       }
     } catch (error) {
       this.logger.error('Error occurred during labeling registration', {
         error,
-        email,
-        evmAddress,
-        country,
-        ip,
+        ...data,
       });
     }
 
