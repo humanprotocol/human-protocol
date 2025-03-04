@@ -20,7 +20,6 @@ import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.p
 import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
 import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
 import { Playground } from '@/modules/playground/views/playground.page';
-import { HomePage } from '@/modules/homepage/views/home.page';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
@@ -35,6 +34,7 @@ import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
 import { WorkerProfilePage } from '@/modules/worker/profile';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { OperatorProfilePage } from '@/modules/operator/profile';
+import { HomePage } from '@/modules/homepage';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
