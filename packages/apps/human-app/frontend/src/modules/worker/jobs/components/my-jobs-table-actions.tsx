@@ -1,19 +1,19 @@
 /* eslint-disable camelcase -- ...*/
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useRejectTaskMutation } from '@/modules/worker/services/reject-task';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { RejectButton } from '@/modules/worker/jobs/reject-button';
-import {
-  MyJobStatus,
-  type MyJob,
-} from '@/modules/worker/services/my-jobs-data';
+import { useRejectTaskMutation } from '../my-jobs/hooks';
+import { MyJobStatus } from '../types';
+import { type MyJob } from './my-jobs-data';
+import { RejectButton } from './reject-button';
 
 interface MyJobsTableRejectActionProps {
   job: MyJob;
 }
 
-export function MyJobsTableActions({ job }: MyJobsTableRejectActionProps) {
+export function MyJobsTableActions({
+  job,
+}: Readonly<MyJobsTableRejectActionProps>) {
   const { t } = useTranslation();
   const { mutate: rejectTaskMutation, isPending: isRejectPending } =
     useRejectTaskMutation();

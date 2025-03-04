@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
 import { JOB_TYPES } from '@/shared/consts';
-import { useFilterUpdates } from '@/modules/worker/hooks/use-filter-updates';
+import { useFilterUpdates } from '../../hooks';
 
 export function AvailableJobsJobTypeFilter({ isMobile = false }) {
   const { t } = useTranslation();

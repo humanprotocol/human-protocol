@@ -8,24 +8,28 @@ import { FiltersButtonIcon, RefreshIcon } from '@/shared/components/ui/icons';
 import { Loader } from '@/shared/components/ui/loader';
 import { Alert } from '@/shared/components/ui/alert';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
-import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
-import type { MyJob } from '@/modules/worker/services/my-jobs-data';
-import { useInfiniteGetMyJobsData } from '@/modules/worker/services/my-jobs-data';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { ListItem } from '@/shared/components/ui/list-item';
-import { EvmAddress } from '@/modules/worker/jobs/evm-address';
-import { RewardAmount } from '@/modules/worker/jobs/reward-amount';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { EscrowAddressSearchForm } from '@/modules/worker/jobs/escrow-address-search-form';
 import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
-import { useRefreshTasksMutation } from '@/modules/worker/services/refresh-tasks';
-import { getChipStatusColor } from '@/modules/worker/utils/get-chip-status-color';
 import { formatDate } from '@/shared/helpers/date';
-import { useCombinePages } from '@/modules/worker/hooks/use-combine-pages';
-import { MyJobsTableActions } from '../../my-jobs-table-actions';
+import {
+  useCombinePages,
+  useJobsFilterStore,
+  useMyJobsFilterStore,
+} from '../../hooks';
+import { getChipStatusColor } from '../utils/get-chip-status-color';
+import { useRefreshTasksMutation } from '../hooks';
+import {
+  useInfiniteGetMyJobsData,
+  type MyJob,
+  EscrowAddressSearchForm,
+  EvmAddress,
+  RewardAmount,
+  MyJobsTableActions,
+} from '../../components';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;

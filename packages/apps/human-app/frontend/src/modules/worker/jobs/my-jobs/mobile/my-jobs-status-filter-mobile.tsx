@@ -1,7 +1,7 @@
 import capitalize from 'lodash/capitalize';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
-import { MyJobStatus } from '@/modules/worker/services/my-jobs-data';
+import { useMyJobsFilterStore } from '../../hooks';
+import { MyJobStatus } from '../../types';
 
 export function MyJobsStatusFilterMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();

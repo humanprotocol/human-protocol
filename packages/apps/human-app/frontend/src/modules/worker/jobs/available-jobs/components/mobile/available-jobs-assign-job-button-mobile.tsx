@@ -2,9 +2,9 @@ import { t } from 'i18next';
 import {
   type AssignJobBody,
   useAssignJobMutation,
-} from '@/modules/worker/services/use-assign-job';
+} from '@/modules/worker/jobs/available-jobs/hooks/use-assign-job';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { useJobsNotifications } from '@/modules/worker/hooks/use-jobs-notifications';
+import { useJobsNotifications } from '../../../hooks';
 
 export function AvailableJobsAssignJobButtonMobile({
   assignJobPayload,

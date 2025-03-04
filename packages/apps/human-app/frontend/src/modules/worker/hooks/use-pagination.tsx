@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { PageSize } from '@/shared/types/entity.type';
-import type { JobsFilterStoreProps } from '@/modules/worker/hooks/use-jobs-filter-store';
+import { type JobsFilterStoreProps } from '../jobs/hooks';
 
 interface PaginationProps {
   setPageParams: (pageIndex: number, pageSize: PageSize) => void;

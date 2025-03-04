@@ -6,19 +6,8 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
-import type { MyJobsFilterStoreProps } from '@/modules/worker/hooks/use-my-jobs-filter-store';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
-
-export enum MyJobStatus {
-  ACTIVE = 'ACTIVE',
-  CANCELED = 'CANCELED',
-  COMPLETED = 'COMPLETED',
-  VALIDATION = 'VALIDATION',
-  EXPIRED = 'EXPIRED',
-  REJECTED = 'REJECTED',
-}
-
-export const UNKNOWN_JOB_STATUS = 'UNKNOWN';
+import { MyJobStatus, UNKNOWN_JOB_STATUS } from '../types';
+import { type MyJobsFilterStoreProps, useMyJobsFilterStore } from '../hooks';
 
 const myJobSchema = z.object({
   assignment_id: z.string(),

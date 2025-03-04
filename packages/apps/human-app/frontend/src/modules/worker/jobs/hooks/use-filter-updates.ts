@@ -1,4 +1,4 @@
-import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
+import { useJobsFilterStore } from './use-jobs-filter-store';
 
 interface UseFilterUpdatesOptions {
   isMobile?: boolean;

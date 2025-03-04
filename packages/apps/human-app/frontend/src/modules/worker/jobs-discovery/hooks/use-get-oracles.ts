@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import { useJobsTypesOraclesFilter } from '@/modules/worker/hooks/use-job-types-oracles-table';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { env } from '@/shared/env';
 import { MainnetChains, TestnetChains } from '@/modules/smart-contracts/chains';
+import { useJobsTypesOraclesFilter } from '../../jobs/hooks';
 
 const OracleSchema = z.object({
   address: z.string(),

@@ -1,8 +1,5 @@
-import {
-  MyJobStatus,
-  type UNKNOWN_JOB_STATUS,
-} from '@/modules/worker/services/my-jobs-data';
 import { type ColorPalette } from '@/shared/styles/color-palette';
+import { MyJobStatus, type UNKNOWN_JOB_STATUS } from '../../types';
 
 export function getChipStatusColor(
   status: MyJobStatus | typeof UNKNOWN_JOB_STATUS,

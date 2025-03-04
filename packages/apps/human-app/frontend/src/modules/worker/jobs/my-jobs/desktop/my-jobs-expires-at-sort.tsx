@@ -1,7 +1,7 @@
 /* eslint-disable camelcase --- ... */
 import { t } from 'i18next';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { Sorting } from '@/shared/components/ui/table/table-header-menu.tsx/sorting';
+import { useMyJobsFilterStore } from '../../hooks';
 
 export function MyJobsExpiresAtSort() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
