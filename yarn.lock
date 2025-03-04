@@ -6044,6 +6044,11 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.66.4.tgz#44b87bff289466adbfa0de8daa5756cbd2d61c61"
   integrity sha512-skM/gzNX4shPkqmdTCSoHtJAPMTtmIJNS0hE+xwTTUVYwezArCT34NMermABmBVUg5Ls5aiUXEDXfqwR1oVkcA==
 
+"@tanstack/query-core@5.67.1":
+  version "5.67.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.67.1.tgz#419e8a94acd773d63cf4746d3df842c3329f56c2"
+  integrity sha512-AkFmuukVejyqVIjEQoFhLb3q+xHl7JG8G9cANWTMe3s8iKzD9j1VBSYXgCjy6vm6xM8cUCR9zP2yqWxY9pTWOA==
+
 "@tanstack/query-devtools@5.65.0":
   version "5.65.0"
   resolved "https://registry.yarnpkg.com/@tanstack/query-devtools/-/query-devtools-5.65.0.tgz#37da5e911543b4f6d98b9a04369eab0de6044ba1"
@@ -6085,12 +6090,12 @@
   dependencies:
     "@tanstack/query-persist-client-core" "5.66.4"
 
-"@tanstack/react-query@^5.48.0", "@tanstack/react-query@^5.60.5", "@tanstack/react-query@^5.61.0":
-  version "5.66.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.66.0.tgz#9f7aa1b3e844ea6a0ad2ee61fccaed76e614b865"
-  integrity sha512-z3sYixFQJe8hndFnXgWu7C79ctL+pI0KAelYyW+khaNJ1m22lWrhJU2QrsTcRKMuVPtoZvfBYrTStIdKo+x0Xw==
+"@tanstack/react-query@^5.67.1":
+  version "5.67.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.67.1.tgz#040b2e2fe60681f8c1f69f2378f0d43d9533af51"
+  integrity sha512-fH5u4JLwB6A+wLFdi8wWBWAYoJV5deYif2OveJ26ktAWjU499uvVFS1wPWnyEyq5LvZX1MZInvv9QRaIZANRaQ==
   dependencies:
-    "@tanstack/query-core" "5.66.0"
+    "@tanstack/query-core" "5.67.1"
 
 "@tanstack/react-table@8.20.5":
   version "8.20.5"
@@ -19805,9 +19810,9 @@ victory-vendor@^36.6.8:
     d3-timer "^3.0.1"
 
 viem@2.7.14, viem@^2.15.1:
-  version "2.23.5"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.23.5.tgz#50fb9ea0701d58e6a7a1714ecaa5edfa100bb391"
-  integrity sha512-cUfBHdFQHmBlPW0loFXda0uZcoU+uJw3NRYQRwYgkrpH6PgovH8iuVqDn6t1jZk82zny4wQL54c9dCX2W9kLMg==
+  version "2.23.6"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.23.6.tgz#05d9b49cc0b5130707ecdcd1b5c141f72b68606c"
+  integrity sha512-+yUeK8rktbGFQaLIvY4Tki22HUjian9Z4eKGAUT72RF9bcfkYgK8CJZz9P83tgoeLpiTyX3xcBM4xJZrJyKmsA==
   dependencies:
     "@noble/curves" "1.8.1"
     "@noble/hashes" "1.7.1"
