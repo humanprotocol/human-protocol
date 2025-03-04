@@ -35,13 +35,16 @@ describe('NDAService', () => {
   });
 
   describe('signNDA', () => {
+    let user: Pick<UserEntity, 'id' | 'email' | 'ndaSignedUrl'>;
+    beforeEach(async () => {
+      user = {
+        id: faker.number.int(),
+        email: faker.internet.email(),
+        ndaSignedUrl: undefined,
+      };
+    });
     const nda: NDASignatureDto = {
       url: validNdaUrl,
-    };
-    const user: Pick<UserEntity, 'id' | 'email' | 'ndaSignedUrl'> = {
-      id: faker.number.int(),
-      email: faker.internet.email(),
-      ndaSignedUrl: undefined,
     };
 
     it('should sign the NDA if the URL is valid and the user has not signed it yet', async () => {
