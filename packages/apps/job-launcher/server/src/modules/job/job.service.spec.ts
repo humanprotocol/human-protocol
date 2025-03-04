@@ -23,7 +23,7 @@ import { JobRepository } from './job.repository';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { JobService } from './job.service';
 import { PaymentRepository } from '../payment/payment.repository';
-import { RoutingProtocolService } from './routing-protocol.service';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { StorageService } from '../storage/storage.service';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { AuthConfigService } from '../../common/config/auth-config.service';

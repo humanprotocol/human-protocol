@@ -36,7 +36,7 @@ import { PaymentService } from '../payment/payment.service';
 import { JobRepository } from '../job/job.repository';
 import { PaymentRepository } from '../payment/payment.repository';
 import { ConfigService } from '@nestjs/config';
-import { RoutingProtocolService } from '../job/routing-protocol.service';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';

@@ -9,7 +9,6 @@ import { HttpModule } from '@nestjs/axios';
 import { PaymentModule } from '../payment/payment.module';
 import { JobRepository } from './job.repository';
 import { Web3Module } from '../web3/web3.module';
-import { RoutingProtocolService } from './routing-protocol.service';
 import { EncryptionModule } from '../encryption/encryption.module';
 import { StorageModule } from '../storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
@@ -18,6 +17,7 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
+import { RoutingProtocolModule } from '../routing-protocol/routing-protocol.module';
 
 @Module({
   imports: [
@@ -31,16 +31,16 @@ import { WhitelistModule } from '../whitelist/whitelist.module';
     StorageModule,
     QualificationModule,
     WhitelistModule,
+    RoutingProtocolModule,
   ],
   controllers: [JobController],
   providers: [
     Logger,
     JobService,
     JobRepository,
-    RoutingProtocolService,
     WebhookRepository,
     MutexManagerService,
   ],
-  exports: [JobService, RoutingProtocolService],
+  exports: [JobService],
 })
 export class JobModule {}
