@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon } from '@/shared/components/ui/icons';
-import { AvailableJobsTableJobsListMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-table-jobs-list-mobile';
 import { useJobsFilterStore } from '../../../hooks';
 import { EscrowAddressSearchForm } from '../../../components';
+import { AvailableJobsTableJobsListMobile } from './available-jobs-table-jobs-list-mobile';
 
 interface AvailableJobsTableMobileProps {
   handleOpenMobileFilterDrawer: () => void;

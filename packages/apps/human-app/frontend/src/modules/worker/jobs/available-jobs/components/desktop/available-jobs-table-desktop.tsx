@@ -4,13 +4,13 @@ import {
 } from 'material-react-table';
 import { t } from 'i18next';
 import { useEffect, useMemo } from 'react';
-import { usePagination } from '@/modules/worker/hooks/use-pagination';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { useGetAvailableJobsColumns } from '@/modules/worker/jobs/available-jobs/hooks/use-get-available-jobs-columns';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useJobsFilterStore } from '../../../hooks';
-import { useGetAvailableJobsData } from '../../available-jobs-data';
 import { EscrowAddressSearchForm } from '../../../components';
+import { useGetAvailableJobsData } from '../../hooks/use-get-available-jobs-data';
+import { useGetAvailableJobsColumns } from '../../hooks';
+import { useAvailableJobsPagination } from '../../hooks/use-available-jobs-pagination';
 
 interface AvailableJobsTableProps {
   chainIdsEnabled: number[];
@@ -27,7 +27,7 @@ export function AvailableJobsTableDesktop({
     filterParams,
     resetFilterParams,
   } = useJobsFilterStore();
-  const { paginationState, setPaginationState } = usePagination({
+  const { paginationState, setPaginationState } = useAvailableJobsPagination({
     setPageParams,
     filterParams,
   });

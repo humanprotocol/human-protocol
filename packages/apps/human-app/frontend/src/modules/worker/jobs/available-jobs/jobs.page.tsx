@@ -13,11 +13,11 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/shared/components/ui/no-records';
 import { MyJobsTable } from '@/modules/worker/jobs/my-jobs/desktop/my-jobs-table';
-import { AvailableJobsDrawerMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-drawer-mobile';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { useGetOracles } from '../../jobs-discovery';
 import { useGetUiConfig } from '../hooks';
 import { TabPanel } from '../components';
+import { AvailableJobsDrawerMobile } from './components/mobile';
 
 function generateTabA11yProps(index: number) {
   return {
