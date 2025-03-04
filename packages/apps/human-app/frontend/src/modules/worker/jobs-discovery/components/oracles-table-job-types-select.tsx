@@ -2,10 +2,10 @@ import { t } from 'i18next';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { Grid } from '@mui/material';
-import { useJobsTypesOraclesFilter } from '@/modules/worker/hooks/use-job-types-oracles-table';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
+import { useJobsTypesOraclesFilter } from '../../jobs/hooks';
 
 export function OraclesTableJobTypesSelect() {
   const isMobile = useIsMobile();

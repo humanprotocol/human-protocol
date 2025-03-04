@@ -2,8 +2,8 @@
 import Typography from '@mui/material/Typography';
 import { t } from 'i18next';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
-import { Sorting } from '@/modules/worker/jobs/sorting';
+import { useMyJobsFilterStore } from '../../hooks';
+import { Sorting } from '../../components';
 
 export function MyJobsExpiresAtSortMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();

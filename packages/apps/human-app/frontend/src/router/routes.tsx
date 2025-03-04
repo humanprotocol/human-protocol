@@ -5,7 +5,6 @@ import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-rese
 import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
 import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/send-reset-link.page';
 import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-password/reset-password-success.page';
-import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import {
@@ -36,6 +35,7 @@ import {
   EditExistingKeysSuccessPage,
   SetUpOperatorPage,
 } from '@/modules/signup/operator';
+import { JobsPage } from '@/modules/worker/jobs/available-jobs';
 
 export const unprotectedRoutes: RouteProps[] = [
   {

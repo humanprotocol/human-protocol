@@ -3,21 +3,21 @@ import { Grid, List, Paper, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
-import { useJobsFilterStore } from '@/modules/worker/hooks/use-jobs-filter-store';
 import { Alert } from '@/shared/components/ui/alert';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
-import type { AvailableJob } from '@/modules/worker/services/available-jobs-data';
-import { useInfiniteAvailableJobsQuery } from '@/modules/worker/services/available-jobs-data';
 import { Loader } from '@/shared/components/ui/loader';
-import { EvmAddress } from '@/modules/worker/jobs/evm-address';
 import { Chip } from '@/shared/components/ui/chip';
-import { RewardAmount } from '@/modules/worker/jobs/reward-amount';
 import { ListItem } from '@/shared/components/ui/list-item';
 import { AvailableJobsAssignJobButtonMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-assign-job-button-mobile';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { useCombinePages } from '@/modules/worker/hooks/use-combine-pages';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { getErrorMessageForError } from '@/shared/errors';
+import { useCombinePages, useJobsFilterStore } from '../../../hooks';
+import {
+  useInfiniteAvailableJobsQuery,
+  type AvailableJob,
+} from '../../available-jobs-data';
+import { EvmAddress, RewardAmount } from '../../../components';
 
 export function AvailableJobsTableJobsListMobile() {
   const { t } = useTranslation();

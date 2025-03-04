@@ -9,15 +9,15 @@ import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { MyJobsTableMobile } from '@/modules/worker/jobs/my-jobs/mobile/my-jobs-table-mobile';
 import { AvailableJobsTable } from '@/modules/worker/jobs/available-jobs/available-jobs-table';
 import { MyJobsDrawerMobile } from '@/modules/worker/jobs/my-jobs/mobile/my-jobs-drawer-mobile';
-import { useGetUiConfig } from '@/modules/worker/services/get-ui-config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/shared/components/ui/no-records';
-import { TabPanel } from '@/modules/worker/jobs/jobs-tab-panel';
 import { MyJobsTable } from '@/modules/worker/jobs/my-jobs/desktop/my-jobs-table';
 import { AvailableJobsDrawerMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-drawer-mobile';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { useGetOracles } from '../../jobs-discovery';
+import { useGetUiConfig } from '../hooks';
+import { TabPanel } from '../components';
 
 function generateTabA11yProps(index: number) {
   return {

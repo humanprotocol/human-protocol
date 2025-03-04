@@ -1,48 +1,51 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-import { type MyJobStatus } from '@/modules/worker/services/my-jobs-data';
+import { MyJobStatus } from '../types';
 
-export interface MyJobsFilterStoreProps {
+export interface JobsFilterStoreProps {
   filterParams: {
     sort?: 'asc' | 'desc';
     sort_field?:
       | 'chain_id'
       | 'job_type'
       | 'reward_amount'
-      | 'expires_at'
-      | 'created_at';
+      | 'created_at'
+      | 'escrow_address';
+    network?: 'MATIC' | 'POLYGON';
+    // TODO add allowed job types
     job_type?: string;
     status?: MyJobStatus;
     escrow_address?: string;
     page: number;
     page_size: PageSize;
+    fields: string[];
     chain_id?: number;
   };
-  availableJobTypes: string[];
   setFilterParams: (
-    partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
+    partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => void;
   resetFilterParams: () => void;
   setSearchEscrowAddress: (escrow_address: string) => void;
   setOracleAddress: (oracleAddress: string) => void;
-  setAvailableJobTypes: (jobTypes: string[]) => void;
   setPageParams: (pageIndex: number, pageSize: PageSize) => void;
 }
 
 const initialFiltersState = {
-  escrow_address: '',
   page: 0,
   page_size: 5,
-  sort_field: 'created_at',
-  sort: 'desc',
-} as const;
+  fields: ['reward_amount', 'job_description', 'reward_token'],
+  status: MyJobStatus.ACTIVE,
+  escrow_address: '',
+} satisfies Pick<
+  JobsFilterStoreProps['filterParams'],
+  'page_size' | 'page' | 'fields' | 'status' | 'escrow_address'
+>;
 
-export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
+export const useJobsFilterStore = create<JobsFilterStoreProps>((set) => ({
   filterParams: initialFiltersState,
-  availableJobTypes: [],
   setFilterParams: (
-    partialParams: Partial<MyJobsFilterStoreProps['filterParams']>
+    partialParams: Partial<JobsFilterStoreProps['filterParams']>
   ) => {
     set((state) => ({
       ...state,
@@ -80,14 +83,8 @@ export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({
       ...state,
       filterParams: {
         ...state.filterParams,
-        address: oracleAddress,
+        oracle_address: oracleAddress,
       },
-    }));
-  },
-  setAvailableJobTypes: (jobTypes: string[]) => {
-    set((state) => ({
-      ...state,
-      jobTypes,
     }));
   },
 }));

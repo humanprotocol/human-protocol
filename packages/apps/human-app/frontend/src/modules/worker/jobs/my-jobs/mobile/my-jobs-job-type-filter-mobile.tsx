@@ -1,8 +1,8 @@
 /* eslint-disable camelcase --- ... */
 import { useTranslation } from 'react-i18next';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
 import { JOB_TYPES } from '@/shared/consts';
+import { useMyJobsFilterStore } from '../../hooks';
 
 export function MyJobsJobTypeFilterMobile() {
   const { t } = useTranslation();

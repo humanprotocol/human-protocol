@@ -10,16 +10,9 @@ import {
 } from 'material-react-table';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { TableHeaderCell } from '@/shared/components/ui/table/table-header-cell';
-import {
-  useGetMyJobsData,
-  type MyJob,
-} from '@/modules/worker/services/my-jobs-data';
-import { useMyJobsFilterStore } from '@/modules/worker/hooks/use-my-jobs-filter-store';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
-import { RewardAmount } from '@/modules/worker/jobs/reward-amount';
 import { Button } from '@/shared/components/ui/button';
 import { Chip } from '@/shared/components/ui/chip';
-import { EvmAddress } from '@/modules/worker/jobs/evm-address';
 import { MyJobsJobTypeFilter } from '@/modules/worker/jobs/my-jobs/desktop/my-jobs-job-type-filter';
 import { MyJobsRewardAmountSort } from '@/modules/worker/jobs/my-jobs/desktop/my-jobs-reward-amount-sort';
 import { MyJobsStatusFilter } from '@/modules/worker/jobs/my-jobs/desktop/my-jobs-status-filter';
@@ -28,11 +21,18 @@ import { MyJobsNetworkFilter } from '@/modules/worker/jobs/my-jobs/desktop/my-jo
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
-import { EscrowAddressSearchForm } from '@/modules/worker/jobs/escrow-address-search-form';
-import { useRefreshTasksMutation } from '@/modules/worker/services/refresh-tasks';
-import { StatusChip } from '@/modules/worker/jobs/status-chip';
 import { formatDate } from '@/shared/helpers/date';
-import { MyJobsTableActions } from '../../my-jobs-table-actions';
+import { useMyJobsFilterStore } from '../../hooks';
+import { StatusChip } from '../status-chip';
+import { useRefreshTasksMutation } from '../hooks';
+import {
+  EscrowAddressSearchForm,
+  EvmAddress,
+  type MyJob,
+  MyJobsTableActions,
+  RewardAmount,
+  useGetMyJobsData,
+} from '../../components';
 
 interface MyJobsTableProps {
   chainIdsEnabled: number[];
@@ -213,7 +213,7 @@ const getColumnsDefinition = ({
   },
 ];
 
-export function MyJobsTable({ chainIdsEnabled }: MyJobsTableProps) {
+export function MyJobsTable({ chainIdsEnabled }: Readonly<MyJobsTableProps>) {
   const { colorPalette, isDarkMode } = useColorMode();
   const {
     setSearchEscrowAddress,

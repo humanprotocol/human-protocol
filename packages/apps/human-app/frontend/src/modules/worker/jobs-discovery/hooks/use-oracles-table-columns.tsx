@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
 import type { MRT_ColumnDef } from 'material-react-table';
-import { EvmAddress } from '@/modules/worker/jobs/evm-address';
 import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
+import { EvmAddress } from '../../jobs/components';
 import { type Oracle } from './use-get-oracles';
 import { useSelectOracleNavigation } from './use-select-oracle-navigation';
 
