@@ -278,7 +278,7 @@ export class AuthService {
     );
 
     if (existingToken) {
-      await existingToken.remove();
+      await this.tokenRepository.deleteOne(existingToken);
     }
 
     const tokenEntity = new TokenEntity();
