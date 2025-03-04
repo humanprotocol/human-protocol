@@ -1,7 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
-import { NS } from '../../common/constants';
 import { UserStatus, Role } from '../../common/enums/user';
 import { IUser } from '../../common/interfaces/user';
 import { BaseEntity } from '../../database/base.entity';
@@ -10,7 +9,7 @@ import { KycEntity } from '../kyc/kyc.entity';
 import { SiteKeyEntity } from './site-key.entity';
 import { UserQualificationEntity } from '../qualification/user-qualification.entity';
 
-@Entity({ schema: NS, name: 'users' })
+@Entity({ name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
   @Exclude()
   @Column({ type: 'varchar', nullable: true })

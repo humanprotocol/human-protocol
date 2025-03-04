@@ -1,11 +1,11 @@
-import { NS } from '../../common/constants';
 import { MigrationInterface, QueryRunner } from 'typeorm';
+import { DATABASE_SCHEMA_NAME } from '../database.module';
 
 export class InitialMigration1694776006387 implements MigrationInterface {
   name = 'InitialMigration1694776006387';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.createSchema(NS, true);
+    await queryRunner.createSchema(DATABASE_SCHEMA_NAME, true);
     await queryRunner.query(
       `CREATE TYPE "hmt"."tokens_token_type_enum" AS ENUM('EMAIL', 'PASSWORD')`,
     );
@@ -61,6 +61,6 @@ export class InitialMigration1694776006387 implements MigrationInterface {
     await queryRunner.query(`DROP TYPE "hmt"."users_type_enum"`);
     await queryRunner.query(`DROP TABLE "hmt"."tokens"`);
     await queryRunner.query(`DROP TYPE "hmt"."tokens_token_type_enum"`);
-    await queryRunner.dropSchema(NS);
+    await queryRunner.dropSchema(DATABASE_SCHEMA_NAME);
   }
 }

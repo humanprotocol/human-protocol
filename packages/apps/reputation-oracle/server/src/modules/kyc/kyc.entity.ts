@@ -1,11 +1,10 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
-import { NS } from '../../common/constants';
 import { KycStatus } from '../../common/enums/user';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 
-@Entity({ schema: NS, name: 'kycs' })
+@Entity({ name: 'kycs' })
 export class KycEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true, primary: true })
   public sessionId: string;

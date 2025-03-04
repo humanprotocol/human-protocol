@@ -1,6 +1,5 @@
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
 
-import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import type { EscrowCompletionEntity } from './escrow-completion.entity';
 
@@ -9,7 +8,7 @@ export type EscrowPayout = {
   amount: string;
 };
 
-@Entity({ schema: NS, name: 'escrow_payouts_batch' })
+@Entity({ name: 'escrow_payouts_batch' })
 @Index(['escrowCompletionTrackingId', 'payoutsHash'], { unique: true })
 export class EscrowPayoutsBatchEntity extends BaseEntity {
   @ManyToOne('EscrowCompletionEntity', { onDelete: 'CASCADE' })

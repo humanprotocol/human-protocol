@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as path from 'path';
 import { LoggerOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-import { NS } from '../common/constants';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
 import { TokenEntity } from '../modules/auth/token.entity';
 import { UserEntity } from '../modules/user/user.entity';
@@ -18,9 +16,10 @@ import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entit
 import { WebhookOutgoingEntity } from '../modules/webhook/webhook-outgoing.entity';
 import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-completion.entity';
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
-import Environment from '../utils/environment';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
+
+export const DATABASE_SCHEMA_NAME = 'hmt';
 
 @Module({
   imports: [
@@ -37,9 +36,32 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
             ? 'all'
             : ((loggerOptions as LoggerOptions) ?? false),
         );
+
         return {
-          name: 'default',
+          name: 'default-connection',
           type: 'postgres',
+
+          ...(databaseConfigService.url
+            ? {
+                url: databaseConfigService.url,
+              }
+            : {
+                host: databaseConfigService.host,
+                port: databaseConfigService.port,
+                username: databaseConfigService.user,
+                password: databaseConfigService.password,
+                database: databaseConfigService.database,
+              }),
+          ssl: databaseConfigService.ssl,
+
+          schema: DATABASE_SCHEMA_NAME,
+          namingStrategy: new SnakeNamingStrategy(),
+          /**
+           * Schema synchronization should be done
+           * via manually running migrations
+           */
+          synchronize: false,
+          migrationsRun: false,
           entities: [
             WebhookIncomingEntity,
             WebhookOutgoingEntity,
@@ -54,29 +76,9 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
             QualificationEntity,
             UserQualificationEntity,
           ],
-          // We are using migrations, synchronize should be set to false.
-          synchronize: false,
-          // Run migrations automatically,
-          // you can disable this if you prefer running migration manually.
-          migrationsTableName: NS,
-          migrationsTransactionMode: 'each',
-          namingStrategy: new SnakeNamingStrategy(),
+
           logging: true,
-          // Allow both start:prod and start:dev to use migrations
-          // __dirname is either dist or server folder, meaning either
-          // the compiled js in prod or the ts in dev.
-          migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
-          //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
-          url: databaseConfigService.url,
-          host: databaseConfigService.host,
-          port: databaseConfigService.port,
-          username: databaseConfigService.user,
-          password: databaseConfigService.password,
-          database: databaseConfigService.database,
-          keepConnectionAlive: Environment.isTest(),
-          migrationsRun: false,
-          ssl: databaseConfigService.ssl,
         };
       },
     }),

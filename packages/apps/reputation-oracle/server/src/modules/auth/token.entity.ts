@@ -9,7 +9,6 @@ import {
 
 import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
-import { NS } from '../../common/constants';
 import { IBase } from '../../common/interfaces/base';
 
 export enum TokenType {
@@ -23,7 +22,7 @@ export interface IToken extends IBase {
   type: TokenType;
 }
 
-@Entity({ schema: NS, name: 'tokens' })
+@Entity({ name: 'tokens' })
 @Index(['type', 'userId'], { unique: true })
 export class TokenEntity extends BaseEntity implements IToken {
   @Column({ type: 'uuid', unique: true })
