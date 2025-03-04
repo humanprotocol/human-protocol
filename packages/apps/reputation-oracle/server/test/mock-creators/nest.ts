@@ -1,5 +1,7 @@
+import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from 'axios';
 import { CallHandler, ExecutionContext } from '@nestjs/common';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 class MockClassOfExecutionContext {}
 
@@ -34,5 +36,30 @@ export type CallHandlerMock = jest.Mocked<CallHandler>;
 export function createCallHandlerMock(): CallHandlerMock {
   return {
     handle: jest.fn().mockReturnValue(of({})),
+  };
+}
+
+export function createHttpServiceResponse<T>(statusCode: number, body?: T) {
+  return of({
+    status: statusCode,
+    data: body,
+  } as AxiosResponse<T>);
+}
+
+export function createHttpServiceRequestError(error: Error) {
+  return throwError(() => error);
+}
+
+export type HttpServiceMock = jest.Mocked<Pick<HttpService, 'get' | 'post'>>;
+export function createHttpServiceMock(
+  defaultStatusCode = 501,
+): HttpServiceMock {
+  return {
+    get: jest
+      .fn()
+      .mockReturnValue(createHttpServiceResponse(defaultStatusCode)),
+    post: jest
+      .fn()
+      .mockReturnValue(createHttpServiceResponse(defaultStatusCode)),
   };
 }

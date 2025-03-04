@@ -6,8 +6,8 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { AuthConfigService } from '../../config/auth-config.service';
+import { HCaptchaService } from './hcaptcha.service';
 
 @Injectable()
 export class HCaptchaGuard implements CanActivate {
@@ -15,7 +15,8 @@ export class HCaptchaGuard implements CanActivate {
     private readonly hCaptchaService: HCaptchaService,
     private readonly authConfigSerice: AuthConfigService,
   ) {}
-  public async canActivate(context: ExecutionContext): Promise<boolean> {
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
     const { body } = request;
@@ -40,9 +41,7 @@ export class HCaptchaGuard implements CanActivate {
       );
     }
 
-    const isTokenValid = await this.hCaptchaService.verifyToken({
-      token: hCaptchaToken,
-    });
+    const isTokenValid = await this.hCaptchaService.verifyToken(hCaptchaToken);
     if (!isTokenValid) {
       throw new HttpException('Invalid hCaptcha token', HttpStatus.BAD_REQUEST);
     }

@@ -16,7 +16,6 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './config/config.module';
-import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/filters/exception.filter';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
@@ -60,7 +59,6 @@ import Environment from './utils/environment';
     }),
     EnvConfigModule,
     DatabaseModule,
-    HCaptchaModule,
     AuthModule,
     CronJobModule,
     EmailModule,

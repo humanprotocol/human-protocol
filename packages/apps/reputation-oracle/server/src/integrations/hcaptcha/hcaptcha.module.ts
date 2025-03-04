@@ -1,9 +1,13 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { HCaptchaService } from './hcaptcha.service';
-import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [HttpModule],
+  imports: [
+    HttpModule.register({
+      validateStatus: () => true,
+    }),
+  ],
   providers: [HCaptchaService],
   exports: [HCaptchaService],
 })
