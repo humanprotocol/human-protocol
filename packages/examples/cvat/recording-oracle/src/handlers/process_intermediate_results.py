@@ -424,6 +424,7 @@ class _AudinoTaskValidator:
         self._input_gt_dataset = None
         self._meta: AnnotationMeta = meta
         self._base_job_id: int
+        self._time_stamps: list[float]
 
     def _require_field(self, field: T | None) -> T:
         assert field is not None
@@ -454,7 +455,7 @@ class _AudinoTaskValidator:
                         job_annotations[job_id] = []
                     job_annotations[job_id].append(annotation)
 
-        return job_annotations
+        return dict(sorted(job_annotations.items()))
 
     def _parse_audino_gt_annotations(self, gt_dataset_data: bytes, path: str):
         _, ext = os.path.splitext(path)
@@ -474,8 +475,9 @@ class _AudinoTaskValidator:
                 return value
 
         if ext == ".json":
-            decoded_data = gt_dataset_data.decode("utf-8")
-            return json.loads(decoded_data)
+            data = json.loads(gt_dataset_data.decode("utf-8"))
+            self._time_stamps = data["time_stamps"]
+            return data["annotations"]
         if ext == ".tsv":
             decoded_data = gt_dataset_data.decode("utf-8")
             data_io = StringIO(decoded_data)
@@ -498,13 +500,6 @@ class _AudinoTaskValidator:
 
         min_quality = manifest.validation.min_quality
 
-        # cvat_task_ids = {job_meta.task_id for job_meta in self._meta.jobs}
-        # task_id_to_labels: dict[int, list[str]] = {}
-
-        # for cvat_task_id in cvat_task_ids:
-        #     task_labels = cvat_api.get_task_labels(cvat_task_id)
-        #     task_id_to_labels[cvat_task_id] = task_labels
-
         comparator = AudinoDatasetComparator(
             min_similarity_threshold=min_quality,
         )
@@ -512,19 +507,15 @@ class _AudinoTaskValidator:
         self._job_annotations = self._parse_merged_annotations()
 
         self._base_job_id = min(self._job_annotations.keys(), default=0)
-        non_zero_accuracies = []
+        offset = 0.0
 
-        for job_cvat_id, job_dataset in self._job_annotations.items():
+        for idx, (job_cvat_id, job_dataset) in enumerate(self._job_annotations.items()):
             try:
                 job_mean_accuracy = comparator.compare(
-                    gt_dataset,
-                    job_dataset,
-                    self._base_job_id,  # 0 based indexing used for checking intersecting jobs
+                    gt_dataset, job_dataset, offset, (self._time_stamps[2 * idx + 1] / 1000)
                 )
 
                 job_results[job_cvat_id] = job_mean_accuracy
-                if job_mean_accuracy > 0:
-                    non_zero_accuracies.append(job_mean_accuracy)
 
                 val_job_name = GtKey(filename=str(job_cvat_id))  # labels=task_labels
                 self._gt_stats.setdefault(val_job_name, ValidationFrameStats())
@@ -532,27 +523,16 @@ class _AudinoTaskValidator:
 
                 if job_mean_accuracy < min_quality:
                     self._gt_stats[val_job_name].failed_attempts += 1
+                    rejected_jobs[job_cvat_id] = TooFewGtError()
                 else:
                     self._gt_stats[val_job_name].accepted_attempts += 1
+
+                offset += self._time_stamps[2 * idx + 1] / 1000
 
             except TooFewGtError as e:
                 job_results[job_cvat_id] = self.UNKNOWN_QUALITY
                 rejected_jobs[job_cvat_id] = e
                 continue
-
-        if non_zero_accuracies:
-            average_accuracy = sum(non_zero_accuracies) / len(non_zero_accuracies)
-        else:
-            average_accuracy = 0
-
-        for job_cvat_id in self._job_annotations:
-            if (
-                job_results.get(job_cvat_id, 0) == 0
-            ):  # assign average accuracy for jobs which are not included in GT
-                job_results[job_cvat_id] = average_accuracy
-
-            if job_results[job_cvat_id] < min_quality:
-                rejected_jobs[job_cvat_id] = TooFewGtError()
 
         for gt_stat in self._gt_stats.values():
             gt_stat.total_uses = max(
@@ -569,8 +549,8 @@ class _AudinoTaskValidator:
         tempdir = self._require_field(self._temp_dir)
         gt_dataset = deepcopy(self._require_field(self._input_gt_dataset))
 
-        for gt_sample in gt_dataset:
-            gt_sample["job_id"] = int(gt_sample["job_id"]) + self._base_job_id
+        # for gt_sample in gt_dataset:
+        #     gt_sample["job_id"] = int(gt_sample["job_id"]) + self._base_job_id
 
         gt_annotations_json = json.dumps(gt_dataset, indent=4).encode("utf-8")
 
@@ -587,17 +567,18 @@ class _AudinoTaskValidator:
                     annotations_data = json.load(annotations_file)
 
                     # Modify start and end for each annotation to make time stamps absolute
-                    for annotation in annotations_data:
-                        job_id = annotation.get("job_id")
-                        if job_id is not None:
-                            job_time_offset = (
-                                (int(job_id) - self._base_job_id)
-                                * self.manifest.annotation.segment_duration
-                                / 1000
-                            )
+                    # FIXME: Need to be changed
+                    # for annotation in annotations_data:
+                    #     job_id = annotation.get("job_id")
+                    #     if job_id is not None:
+                    #         job_time_offset = (
+                    #             (int(job_id) - self._base_job_id)
+                    #             * self.manifest.annotation.segment_duration
+                    #             / 1000
+                    #         )
 
-                            annotation["start"] += job_time_offset
-                            annotation["end"] += job_time_offset
+                    #         annotation["start"] += job_time_offset
+                    #         annotation["end"] += job_time_offset
 
                 archive.writestr("annotations.json", json.dumps(annotations_data, indent=4))
 
@@ -630,7 +611,6 @@ class _AudinoTaskValidator:
 class AudinoDatasetComparator:
     def __init__(self, min_similarity_threshold: float):
         self._min_similarity_threshold = min_similarity_threshold
-        self.failed_gts = set()
 
     def iou(self, start1: float, end1: float, start2: float, end2: float) -> float:
         """Calculate IoU for time intervals."""
@@ -664,7 +644,8 @@ class AudinoDatasetComparator:
         self,
         gt_dataset: list[dict[str, str]],
         ds_dataset: list[dict[str, str]],
-        base_index: int,
+        offset: float,
+        job_duration: float,
     ) -> float:
         """
         Compare ground truth (gt_dataset) and dataset (ds_dataset) annotations and return accuracy.
@@ -677,33 +658,38 @@ class AudinoDatasetComparator:
         Args:
         - gt_dataset: List of ground truth annotations (job_id is 0-based index).
         - ds_dataset: List of dataset annotations (job_id is actual index).
-        - base_index: Base index used to map gt job_id to ds job_id.
+        - offset: The cumulative length (in seconds) of gt job processed before the current job.
+        - job_duration: The duration (in seconds) of the current job that overlaps with the gt job.
         """
         matched_annotations = 0
         matched_wers = []
-        dataset_failed_gts = set()
 
-        ds_job_ids = {sample["job_id"] for sample in ds_dataset}
+        start_time = offset
+        end_time = start_time + job_duration
+
+        # Filter gt_dataset to include only those within the job's time bounds
         gt_samples_filtered = [
-            gt for gt in gt_dataset if (base_index + int(gt["job_id"])) in ds_job_ids
+            gt_ann
+            for gt_ann in gt_dataset
+            if start_time <= gt_ann["start"] and gt_ann["end"] <= end_time
         ]
+
+        # Filtering ds_dataset to include only those within intersecting region of GT
+        ds_dataset = [ds_ann for ds_ann in ds_dataset if ds_ann["end"] <= job_duration]
 
         # if gt_samples_filtered is None:
         #     raise TooFewGtError
 
-        used_ds_indices = set()
-
         for gt in gt_samples_filtered:
-            mapped_job_id = base_index + int(gt["job_id"])  # Map GT job_id to DS job_id
             best_match_idx = -1
             best_wer = 0
 
             for idx, ds in enumerate(ds_dataset):
-                if ds["job_id"] != mapped_job_id or idx in used_ds_indices:
-                    continue
-
                 iou_score = self.iou(
-                    float(gt["start"]), float(gt["end"]), float(ds["start"]), float(ds["end"])
+                    float(gt["start"] - offset),
+                    float(gt["end"] - offset),
+                    float(ds["start"]),
+                    float(ds["end"]),
                 )
                 if iou_score < 0.6:
                     continue
@@ -718,9 +704,6 @@ class AudinoDatasetComparator:
             if best_match_idx != -1:
                 matched_annotations += 1
                 matched_wers.append(best_wer)
-                used_ds_indices.add(best_match_idx)
-            else:
-                dataset_failed_gts.add(gt["job_id"])
 
         total_relevant_annotations = 2 * max(len(gt_samples_filtered), len(ds_dataset))
         if total_relevant_annotations > 0:
@@ -730,8 +713,6 @@ class AudinoDatasetComparator:
                 accuracy *= average_wer  # Scale accuracy by average WER score
         else:
             accuracy = 0.0
-
-        self.failed_gts = dataset_failed_gts
 
         return max(accuracy, 0.0)
 
