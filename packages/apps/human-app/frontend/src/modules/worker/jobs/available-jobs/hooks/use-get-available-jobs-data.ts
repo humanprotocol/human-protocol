@@ -6,7 +6,7 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { createPaginationSchema } from '@/shared/helpers/pagination';
-import { type JobsFilterStoreProps, useJobsFilterStore } from '../hooks';
+import { type JobsFilterStoreProps, useJobsFilterStore } from '../../hooks';
 
 const availableJobSchema = z.object({
   escrow_address: z.string(),
@@ -58,7 +58,7 @@ export function useGetAvailableJobsData() {
   });
 }
 
-export function useInfiniteAvailableJobsQuery() {
+export function useInifiniteGetAvailableJobsData() {
   const { filterParams } = useJobsFilterStore();
   const { address: oracleAddress } = useParams<{ address: string }>();
 

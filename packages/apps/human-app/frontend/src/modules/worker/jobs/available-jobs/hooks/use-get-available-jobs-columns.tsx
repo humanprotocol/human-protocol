@@ -3,7 +3,6 @@ import type { MRT_ColumnDef } from 'material-react-table';
 import { t } from 'i18next';
 import { Grid } from '@mui/material';
 import { useMemo } from 'react';
-import { useAssignJobMutation } from '@/modules/worker/jobs/available-jobs/hooks/use-assign-job';
 import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 import { Chip } from '@/shared/components/ui/chip';
 import { TableButton } from '@/shared/components/ui/table-button';
@@ -13,8 +12,9 @@ import { AvailableJobsRewardAmountSort } from '@/modules/worker/jobs/available-j
 import { AvailableJobsJobTypeFilter } from '@/modules/worker/jobs/available-jobs/components/available-jobs-job-type-filter';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useJobsNotifications } from '../../hooks';
-import { type AvailableJob } from '../available-jobs-data';
 import { EvmAddress, RewardAmount } from '../../components';
+import { type AvailableJob } from './use-get-available-jobs-data';
+import { useAssignJobMutation } from './use-assign-job';
 
 const COL_SIZE = 100;
 const COL_SIZE_LG = 200;

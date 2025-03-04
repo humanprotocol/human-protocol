@@ -8,16 +8,16 @@ import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 import { Loader } from '@/shared/components/ui/loader';
 import { Chip } from '@/shared/components/ui/chip';
 import { ListItem } from '@/shared/components/ui/list-item';
-import { AvailableJobsAssignJobButtonMobile } from '@/modules/worker/jobs/available-jobs/components/mobile/available-jobs-assign-job-button-mobile';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useCombinePages, useJobsFilterStore } from '../../../hooks';
 import {
-  useInfiniteAvailableJobsQuery,
+  useInifiniteGetAvailableJobsData,
   type AvailableJob,
-} from '../../available-jobs-data';
+} from '../../hooks/use-get-available-jobs-data';
 import { EvmAddress, RewardAmount } from '../../../components';
+import { AvailableJobsAssignJobButtonMobile } from './available-jobs-assign-job-button-mobile';
 
 export function AvailableJobsTableJobsListMobile() {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export function AvailableJobsTableJobsListMobile() {
     error: tableError,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteAvailableJobsQuery();
+  } = useInifiniteGetAvailableJobsData();
 
   const allPages = useCombinePages<AvailableJob>(tableData);
 

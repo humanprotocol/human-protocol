@@ -1,16 +1,16 @@
 import { t } from 'i18next';
+import { TableButton } from '@/shared/components/ui/table-button';
+import { useJobsNotifications } from '../../../hooks';
 import {
   type AssignJobBody,
   useAssignJobMutation,
-} from '@/modules/worker/jobs/available-jobs/hooks/use-assign-job';
-import { TableButton } from '@/shared/components/ui/table-button';
-import { useJobsNotifications } from '../../../hooks';
+} from '../../hooks/use-assign-job';
 
 export function AvailableJobsAssignJobButtonMobile({
   assignJobPayload,
-}: {
+}: Readonly<{
   assignJobPayload: AssignJobBody;
-}) {
+}>) {
   const { onJobAssignmentError, onJobAssignmentSuccess } =
     useJobsNotifications();
 
