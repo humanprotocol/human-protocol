@@ -17,7 +17,6 @@ const mockAuthConfigService = {
 
 describe('NDAService', () => {
   let service: NDAService;
-  let user: Pick<UserEntity, 'id' | 'email' | 'ndaSignedUrl'>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,12 +28,6 @@ describe('NDAService', () => {
     }).compile();
 
     service = module.get<NDAService>(NDAService);
-
-    user = {
-      id: faker.number.int(),
-      email: faker.internet.email(),
-      ndaSignedUrl: undefined,
-    };
   });
 
   afterEach(() => {
@@ -44,6 +37,11 @@ describe('NDAService', () => {
   describe('signNDA', () => {
     const nda: NDASignatureDto = {
       url: validNdaUrl,
+    };
+    const user: Pick<UserEntity, 'id' | 'email' | 'ndaSignedUrl'> = {
+      id: faker.number.int(),
+      email: faker.internet.email(),
+      ndaSignedUrl: undefined,
     };
 
     it('should sign the NDA if the URL is valid and the user has not signed it yet', async () => {

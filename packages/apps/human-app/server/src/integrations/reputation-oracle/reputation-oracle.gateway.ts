@@ -76,6 +76,13 @@ import {
   SigninOperatorData,
   SigninOperatorResponse,
 } from '../../modules/user-operator/model/operator-signin.model';
+import {
+  GetNDACommand,
+  GetNDAResponse,
+  SignNDACommand,
+  SignNDAData,
+  SignNDAResponse,
+} from '../../modules/nda/model/nda.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -327,6 +334,25 @@ export class ReputationOracleGateway {
       data,
     );
     return this.handleRequestToReputationOracle<TokenRefreshResponse>(options);
+  }
+
+  async getLatestNDA(command: GetNDACommand) {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.GET_LATEST_NDA,
+      undefined,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<GetNDAResponse>(options);
+  }
+
+  async sendSignedNDA(command: SignNDACommand) {
+    const data = this.mapper.map(command, SignNDACommand, SignNDAData);
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.SIGN_NDA,
+      data,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<SignNDAResponse>(options);
   }
 
   sendKycOnChain(token: string) {
