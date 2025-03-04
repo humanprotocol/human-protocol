@@ -70,7 +70,6 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
-import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
   HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
@@ -122,6 +121,7 @@ import { ModuleRef } from '@nestjs/core';
 import { QualificationService } from '../qualification/qualification.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { UserEntity } from '../user/user.entity';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 
 @Injectable()
 export class JobService {
