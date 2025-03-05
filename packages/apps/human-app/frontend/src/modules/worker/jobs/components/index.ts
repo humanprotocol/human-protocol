@@ -1,4 +1,3 @@
-export * from './text-header-with-icon';
 export * from './evm-address';
 export * from './jobs-tab-panel';
 export * from './my-jobs-data';
@@ -7,4 +6,3 @@ export * from './escrow-address-search-form';
 export * from './reject-button';
 export * from './reward-amount';
 export * from './sorting';
-export * from './text-header-with-icon';
