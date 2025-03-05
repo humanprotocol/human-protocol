@@ -321,22 +321,46 @@ export class StatsService implements OnModuleInit {
       return cachedHmtPrice;
     }
 
+    const headers = this.envConfigService.hmtPriceSourceApiKey
+      ? { 'x-cg-demo-api-key': this.envConfigService.hmtPriceSourceApiKey }
+      : {};
+
     const { data } = await lastValueFrom(
-      this.httpService.get(this.envConfigService.hmtPriceSource, {
-        headers: {
-          'x-cg-demo-api-key': this.envConfigService.hmtPriceSourceApiKey,
-        },
-      }),
+      this.httpService.get(this.envConfigService.hmtPriceSource, { headers }),
     );
-    const hmtPrice =
-      data[this.envConfigService.hmtPriceFromKey][
-        this.envConfigService.hmtPriceToKey
-      ];
+
+    let hmtPrice: number;
+
+    if (this.envConfigService.hmtPriceSource.includes('coingecko')) {
+      if (
+        !data ||
+        !data[this.envConfigService.hmtPriceFromKey] ||
+        !data[this.envConfigService.hmtPriceFromKey][
+          this.envConfigService.hmtPriceToKey
+        ]
+      ) {
+        throw new Error('Failed to fetch HMT price from CoinGecko API');
+      }
+      hmtPrice = parseFloat(
+        data[this.envConfigService.hmtPriceFromKey][
+          this.envConfigService.hmtPriceToKey
+        ],
+      );
+    } else if (this.envConfigService.hmtPriceSource.includes('coinlore')) {
+      if (!data || !data[0] || !data[0].price_usd) {
+        throw new Error('Failed to fetch HMT price from Coinlore API');
+      }
+      hmtPrice = parseFloat(data[0].price_usd);
+    } else {
+      throw new Error('Unsupported HMT price source');
+    }
+
     await this.cacheManager.set(
       this.redisConfigService.hmtPriceCacheKey,
       hmtPrice,
       this.redisConfigService.cacheHmtPriceTTL,
     );
+
     return hmtPrice;
   }
 
