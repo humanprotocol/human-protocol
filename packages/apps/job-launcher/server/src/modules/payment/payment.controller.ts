@@ -38,7 +38,7 @@ import { PaymentService } from './payment.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ControlledError } from '../../common/errors/controlled';
 import { ServerConfigService } from '../../common/config/server-config.service';
-import { RateService } from './rate.service';
+import { RateService } from '../rate/rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
 import { Web3Env } from '../../common/enums/web3';

@@ -18,6 +18,7 @@ import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
 import { RoutingProtocolModule } from '../routing-protocol/routing-protocol.module';
+import { RateModule } from '../rate/rate.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { RoutingProtocolModule } from '../routing-protocol/routing-protocol.modu
     QualificationModule,
     WhitelistModule,
     RoutingProtocolModule,
+    RateModule,
   ],
   controllers: [JobController],
   providers: [

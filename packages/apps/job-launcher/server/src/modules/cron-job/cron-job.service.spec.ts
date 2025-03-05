@@ -49,7 +49,7 @@ import { PGPConfigService } from '../../common/config/pgp-config.service';
 import { ErrorCronJob } from '../../common/constants/errors';
 import { ControlledError } from '../../common/errors/controlled';
 import { HttpStatus } from '@nestjs/common';
-import { RateService } from '../payment/rate.service';
+import { RateService } from '../rate/rate.service';
 import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
 import { ethers } from 'ethers';
 import { NetworkConfigService } from '../../common/config/network-config.service';

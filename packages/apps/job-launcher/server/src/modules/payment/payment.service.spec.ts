@@ -39,7 +39,7 @@ import { DatabaseError } from '../../common/errors/database';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { ControlledError } from '../../common/errors/controlled';
-import { RateService } from './rate.service';
+import { RateService } from '../rate/rate.service';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { GetPaymentsDto } from './payment.dto';
