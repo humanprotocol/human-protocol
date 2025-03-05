@@ -35,6 +35,7 @@ describe('JobService', () => {
   let jobService: JobService,
     paymentService: PaymentService,
     jobRepository: JobRepository,
+    paymentRepository: PaymentRepository,
     rateService: RateService;
 
   beforeAll(async () => {
@@ -106,6 +107,7 @@ describe('JobService', () => {
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     rateService = moduleRef.get<RateService>(RateService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
+    paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
   });
 
   describe('createJob', () => {
@@ -116,12 +118,6 @@ describe('JobService', () => {
 
     describe('Fortune', () => {
       describe('Successful job creation', () => {
-        beforeAll(() => {
-          jest
-            .spyOn(paymentService, 'getUserBalanceByCurrency')
-            .mockResolvedValue(100000000);
-        });
-
         afterEach(() => {
           jest.clearAllMocks();
         });
@@ -158,7 +154,6 @@ describe('JobService', () => {
 
           expect(paymentService.createWithdrawalPayment).toHaveBeenCalledWith(
             userMock.id,
-            jobEntityMock.id,
             expect.any(Number),
             fortuneJobDto.paymentCurrency,
             await rateService.getRate(
@@ -174,14 +169,14 @@ describe('JobService', () => {
             requestType: JobRequestType.FORTUNE,
             fee: expect.any(Number),
             fundAmount: fortuneJobDto.paymentAmount,
-            status: JobStatus.PENDING,
+            status: JobStatus.PAID,
             waitUntil: expect.any(Date),
             token: fortuneJobDto.escrowFundToken,
             exchangeOracle: fortuneJobDto.exchangeOracle,
             recordingOracle: fortuneJobDto.recordingOracle,
             reputationOracle: fortuneJobDto.reputationOracle,
           });
-          expect(jobRepository.updateOne).toHaveBeenCalledTimes(1);
+          expect(paymentRepository.updateOne).toHaveBeenCalledTimes(1);
         });
 
         it('should create a Fortune job successfully paid and funded with different currencies', async () => {
@@ -226,7 +221,6 @@ describe('JobService', () => {
 
           expect(paymentService.createWithdrawalPayment).toHaveBeenCalledWith(
             userMock.id,
-            jobEntityMock.id,
             expect.any(Number),
             fortuneJobDto.paymentCurrency,
             paymentToUsdRate,
@@ -242,14 +236,14 @@ describe('JobService', () => {
               mul(fortuneJobDto.paymentAmount, paymentToUsdRate),
               usdToTokenRate,
             ),
-            status: JobStatus.PENDING,
+            status: JobStatus.PAID,
             waitUntil: expect.any(Date),
             token: fortuneJobDto.escrowFundToken,
             exchangeOracle: fortuneJobDto.exchangeOracle,
             recordingOracle: fortuneJobDto.recordingOracle,
             reputationOracle: fortuneJobDto.reputationOracle,
           });
-          expect(jobRepository.updateOne).toHaveBeenCalledTimes(1);
+          expect(paymentRepository.updateOne).toHaveBeenCalledTimes(1);
         });
       });
     });

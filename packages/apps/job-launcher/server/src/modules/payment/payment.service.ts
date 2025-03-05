@@ -33,7 +33,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { div, eq, mul, add } from '../../common/utils/decimal';
+import { div, eq, mul, add, lt } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
@@ -520,14 +520,21 @@ export class PaymentService {
 
   public async createWithdrawalPayment(
     userId: number,
-    jobId: number,
     amount: number,
     currency: string,
     rate: number,
-  ): Promise<void> {
+  ): Promise<PaymentEntity> {
+    // Check if the user has enough balance
+    const userBalance = await this.getUserBalanceByCurrency(userId, currency);
+    if (lt(userBalance, amount)) {
+      throw new ControlledError(
+        ErrorPayment.NotEnoughFunds,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const paymentEntity = new PaymentEntity();
     paymentEntity.userId = userId;
-    paymentEntity.jobId = jobId;
     paymentEntity.source = PaymentSource.BALANCE;
     paymentEntity.type = PaymentType.WITHDRAWAL;
     paymentEntity.amount = -amount; // In the currency used for the payment.
@@ -535,7 +542,7 @@ export class PaymentService {
     paymentEntity.rate = rate;
     paymentEntity.status = PaymentStatus.SUCCEEDED;
 
-    await this.paymentRepository.createUnique(paymentEntity);
+    return this.paymentRepository.createUnique(paymentEntity);
   }
 
   async listUserPaymentMethods(user: UserEntity): Promise<CardDto[]> {
