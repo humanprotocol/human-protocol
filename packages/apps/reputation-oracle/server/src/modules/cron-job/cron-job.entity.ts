@@ -1,10 +1,11 @@
 import { BeforeInsert, Column, Entity, Index } from 'typeorm';
 
 import { BaseEntity } from '../../database/base.entity';
+import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { ICronJob } from '../../common/interfaces/cron-job';
 import { CronJobType } from '../../common/enums/cron-job';
 
-@Entity({ name: 'cron-jobs' })
+@Entity({ schema: DATABASE_SCHEMA_NAME, name: 'cron-jobs' })
 @Index(['cronJobType'], { unique: true })
 export class CronJobEntity extends BaseEntity implements ICronJob {
   @Column({

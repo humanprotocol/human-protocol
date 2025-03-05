@@ -19,8 +19,6 @@ import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-pa
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 
-export const DATABASE_SCHEMA_NAME = 'hmt';
-
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -54,7 +52,6 @@ export const DATABASE_SCHEMA_NAME = 'hmt';
               }),
           ssl: databaseConfigService.ssl,
 
-          schema: DATABASE_SCHEMA_NAME,
           namingStrategy: new SnakeNamingStrategy(),
           /**
            * Schema synchronization should be done

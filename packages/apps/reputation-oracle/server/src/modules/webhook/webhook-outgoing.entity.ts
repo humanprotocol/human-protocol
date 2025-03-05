@@ -1,9 +1,10 @@
 import { Column, Entity, Index } from 'typeorm';
 
+import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { WebhookOutgoingStatus } from '../../common/enums';
 
-@Entity({ name: 'webhook_outgoing' })
+@Entity({ schema: DATABASE_SCHEMA_NAME, name: 'webhook_outgoing' })
 @Index(['hash'], { unique: true })
 export class WebhookOutgoingEntity extends BaseEntity {
   @Column({ type: 'jsonb' })
