@@ -35,7 +35,7 @@ import {
   EditExistingKeysSuccessPage,
   SetUpOperatorPage,
 } from '@/modules/signup/operator';
-import { JobsPage } from '@/modules/worker/jobs/available-jobs';
+import { JobsPage } from '@/modules/worker/jobs';
 
 export const unprotectedRoutes: RouteProps[] = [
   {

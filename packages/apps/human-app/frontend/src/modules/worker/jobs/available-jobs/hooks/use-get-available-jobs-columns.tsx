@@ -7,12 +7,14 @@ import { getNetworkName } from '@/modules/smart-contracts/get-network-name';
 import { Chip } from '@/shared/components/ui/chip';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { TableHeaderCell } from '@/shared/components/ui/table/table-header-cell';
-import { AvailableJobsNetworkFilter } from '@/modules/worker/jobs/available-jobs/components/available-jobs-network-filter';
-import { AvailableJobsRewardAmountSort } from '@/modules/worker/jobs/available-jobs/components/available-jobs-reward-amount-sort';
-import { AvailableJobsJobTypeFilter } from '@/modules/worker/jobs/available-jobs/components/available-jobs-job-type-filter';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useJobsNotifications } from '../../hooks';
 import { EvmAddress, RewardAmount } from '../../components';
+import {
+  AvailableJobsNetworkFilter,
+  AvailableJobsRewardAmountSort,
+  AvailableJobsJobTypeFilter,
+} from '../components';
 import { type AvailableJob } from './use-get-available-jobs-data';
 import { useAssignJobMutation } from './use-assign-job';
 

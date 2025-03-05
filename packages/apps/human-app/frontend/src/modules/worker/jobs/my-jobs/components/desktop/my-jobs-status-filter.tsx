@@ -1,9 +1,9 @@
 import capitalize from 'lodash/capitalize';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
-import { useMyJobsFilterStore } from '../../hooks';
-import { MyJobStatus } from '../../types';
+import { useMyJobsFilterStore } from '../../../hooks';
+import { MyJobStatus } from '../../../types';
 
-export function MyJobsStatusFilterMobile() {
+export function MyJobsStatusFilter() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
   return (
@@ -12,7 +12,6 @@ export function MyJobsStatusFilterMobile() {
         setFilterParams({
           ...filterParams,
           status: undefined,
-          page: 0,
         });
       }}
       filteringOptions={Object.values(MyJobStatus).map((status) => ({
@@ -24,7 +23,6 @@ export function MyJobsStatusFilterMobile() {
         setFilterParams({
           ...filterParams,
           status,
-          page: 0,
         });
       }}
     />

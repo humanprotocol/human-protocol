@@ -6,7 +6,7 @@ import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { env } from '@/shared/env';
 import { MainnetChains, TestnetChains } from '@/modules/smart-contracts/chains';
-import { useJobsTypesOraclesFilter } from '../../jobs/hooks';
+import { useJobsTypesOraclesFilter } from '../jobs/hooks';
 
 const OracleSchema = z.object({
   address: z.string(),
