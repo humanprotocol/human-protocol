@@ -1,10 +1,7 @@
 import React, { forwardRef, useState } from 'react';
 import Popover from '@mui/material/Popover';
 import type { TableCellBaseProps } from '@mui/material/TableCell/TableCell';
-import {
-  type IconType,
-  TextHeaderWithIcon,
-} from '@/modules/worker/jobs/components';
+import { type IconType, TextHeaderWithIcon } from '../text-header-with-icon';
 
 type CommonProps = TableCellBaseProps & {
   popoverContent: React.ReactElement;

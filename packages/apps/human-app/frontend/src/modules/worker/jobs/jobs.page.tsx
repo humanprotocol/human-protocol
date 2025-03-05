@@ -7,10 +7,10 @@ import { TableQueryContextProvider } from '@/shared/components/ui/table/table-qu
 import { Modal } from '@/shared/components/ui/modal/modal';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { NoRecords } from '@/shared/components/ui/no-records';
 import { PageCardLoader } from '@/shared/components/ui/page-card';
 import { useGetOracles } from '../hooks';
+import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
 import { useGetUiConfig } from './hooks';
 import { TabPanel } from './components';
 import {
