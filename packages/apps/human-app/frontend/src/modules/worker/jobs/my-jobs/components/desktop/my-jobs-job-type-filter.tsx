@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
 import { JOB_TYPES } from '@/shared/consts';
-import { useMyJobsFilterStore } from '../../hooks';
+import { useMyJobsFilterStore } from '../../../hooks';
 
 export function MyJobsJobTypeFilter() {
   const { t } = useTranslation();

@@ -1,23 +1,23 @@
 /* eslint-disable camelcase --- ... */
 import { t } from 'i18next';
 import { Sorting } from '@/shared/components/ui/table/table-header-menu.tsx/sorting';
-import { useMyJobsFilterStore } from '../../hooks';
+import { useMyJobsFilterStore } from '../../../hooks';
 
-export function MyJobsExpiresAtSort() {
+export function MyJobsRewardAmountSort() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
 
-  const sortAscExpiresAt = () => {
+  const sortAscRewardAmount = () => {
     setFilterParams({
       ...filterParams,
-      sort_field: 'expires_at',
+      sort_field: 'reward_amount',
       sort: 'asc',
     });
   };
 
-  const sortDescExpiresAt = () => {
+  const sortDescRewardAmount = () => {
     setFilterParams({
       ...filterParams,
-      sort_field: 'expires_at',
+      sort_field: 'reward_amount',
       sort: 'desc',
     });
   };
@@ -33,12 +33,12 @@ export function MyJobsExpiresAtSort() {
       }}
       sortingOptions={[
         {
-          label: t('worker.jobs.sortDirection.closestToNow'),
-          sortCallback: sortAscExpiresAt,
+          label: t('worker.jobs.sortDirection.fromHighest'),
+          sortCallback: sortDescRewardAmount,
         },
         {
-          label: t('worker.jobs.sortDirection.furthestToNow'),
-          sortCallback: sortDescExpiresAt,
+          label: t('worker.jobs.sortDirection.fromLowest'),
+          sortCallback: sortAscRewardAmount,
         },
       ]}
     />

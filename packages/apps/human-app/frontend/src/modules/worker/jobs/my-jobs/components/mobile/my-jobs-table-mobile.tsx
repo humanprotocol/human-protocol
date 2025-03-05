@@ -16,20 +16,20 @@ import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { formatDate } from '@/shared/helpers/date';
 import {
-  useCombinePages,
-  useJobsFilterStore,
-  useMyJobsFilterStore,
-} from '../../hooks';
-import { getChipStatusColor } from '../utils/get-chip-status-color';
-import { useRefreshTasksMutation } from '../hooks';
-import {
   useInfiniteGetMyJobsData,
   type MyJob,
   EscrowAddressSearchForm,
   EvmAddress,
   RewardAmount,
   MyJobsTableActions,
-} from '../../components';
+} from '../../../components';
+import {
+  useMyJobsFilterStore,
+  useJobsFilterStore,
+  useCombinePages,
+} from '../../../hooks';
+import { useRefreshTasksMutation } from '../../hooks';
+import { getChipStatusColor } from '../../utils';
 
 interface MyJobsTableMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;

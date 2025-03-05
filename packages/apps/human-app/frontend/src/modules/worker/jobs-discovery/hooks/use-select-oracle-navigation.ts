@@ -3,8 +3,8 @@ import { useCallback, useMemo } from 'react';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
 import { shouldNavigateToRegistration, isHCaptchaOracle } from '../helpers';
+import { type Oracle } from '../../hooks';
 import { useGetRegistrationDataInOracles } from './use-get-registration-data-oracles';
-import { type Oracle } from './use-get-oracles';
 
 const getHCaptchaPagePath = (siteKey: string | null | undefined): string =>
   siteKey

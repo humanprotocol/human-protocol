@@ -34,7 +34,7 @@ import { WorkerProfilePage } from '@/modules/worker/profile';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { OperatorProfilePage } from '@/modules/operator/profile';
 import { HomePage } from '@/modules/homepage';
-import { JobsPage } from '@/modules/worker/jobs/available-jobs';
+import { JobsPage } from '@/modules/worker/jobs';
 
 export const unprotectedRoutes: RouteProps[] = [
   {

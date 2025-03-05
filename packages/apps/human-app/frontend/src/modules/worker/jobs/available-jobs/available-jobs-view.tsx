@@ -1,16 +1,16 @@
-import { AvailableJobsTableMobile } from '@/modules/worker/jobs/available-jobs/components/mobile';
-import { AvailableJobsTableDesktop } from '@/modules/worker/jobs/available-jobs/components/desktop';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
+import { AvailableJobsTableDesktop } from './components/desktop';
+import { AvailableJobsTableMobile } from './components/mobile';
 
-interface AvailableJobsTableProps {
+interface AvailableJobsTableView {
   handleOpenMobileFilterDrawer: () => void;
   chainIdsEnabled: number[];
 }
 
-export function AvailableJobsTable({
+export function AvailableJobsView({
   handleOpenMobileFilterDrawer,
   chainIdsEnabled,
-}: AvailableJobsTableProps) {
+}: AvailableJobsTableView) {
   const isMobile = useIsMobile();
 
   return isMobile ? (

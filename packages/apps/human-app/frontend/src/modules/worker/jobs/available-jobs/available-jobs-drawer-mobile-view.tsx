@@ -8,18 +8,20 @@ import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { AvailableJobsNetworkFilter } from '../available-jobs-network-filter';
-import { AvailableJobsJobTypeFilter } from '../available-jobs-job-type-filter';
-import { AvailableJobsRewardAmountSortMobile } from './available-jobs-reward-amount-sort-mobile';
+import {
+  AvailableJobsNetworkFilter,
+  AvailableJobsJobTypeFilter,
+} from './components';
+import { AvailableJobsRewardAmountSortMobile } from './components/mobile';
 
-interface DrawerMobileProps {
+interface DrawerMobileViewProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
   chainIdsEnabled: number[];
 }
-export function AvailableJobsDrawerMobile({
+export function AvailableJobsDrawerMobileView({
   setIsMobileFilterDrawerOpen,
   chainIdsEnabled,
-}: Readonly<DrawerMobileProps>) {
+}: Readonly<DrawerMobileViewProps>) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();

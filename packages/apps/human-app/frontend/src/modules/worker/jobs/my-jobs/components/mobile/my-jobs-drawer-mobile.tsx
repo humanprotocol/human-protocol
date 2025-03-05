@@ -7,12 +7,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoIcon } from '@/shared/components/ui/icons';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { MyJobsRewardAmountSortMobile } from '@/modules/worker/jobs/my-jobs/mobile/my-jobs-reward-amount-sort-mobile';
-import { MyJobsExpiresAtSortMobile } from '@/modules/worker/jobs/my-jobs/mobile/my-jobs-expires-at-sort-mobile';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
 import { MyJobsNetworkFilterMobile } from './my-jobs-network-filter-mobile';
 import { MyJobsJobTypeFilterMobile } from './my-jobs-job-type-filter-mobile';
 import { MyJobsStatusFilterMobile } from './my-jobs-status-filter-mobile';
+import { MyJobsExpiresAtSortMobile } from './my-jobs-expires-at-sort-mobile';
+import { MyJobsRewardAmountSortMobile } from './my-jobs-reward-amount-sort-mobile';
 
 interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
@@ -21,7 +21,7 @@ interface DrawerMobileProps {
 export function MyJobsDrawerMobile({
   setIsMobileFilterDrawerOpen,
   chainIdsEnabled,
-}: DrawerMobileProps) {
+}: Readonly<DrawerMobileProps>) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();

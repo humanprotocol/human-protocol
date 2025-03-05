@@ -1,1 +1,2 @@
-export * from './jobs.page';
+export * from './available-jobs-view';
+export * from './available-jobs-drawer-mobile-view';

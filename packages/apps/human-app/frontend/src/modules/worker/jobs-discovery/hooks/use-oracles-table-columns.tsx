@@ -6,7 +6,7 @@ import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { EvmAddress } from '../../jobs/components';
-import { type Oracle } from './use-get-oracles';
+import { type Oracle } from '../../hooks';
 import { useSelectOracleNavigation } from './use-select-oracle-navigation';
 
 export const useOraclesTableColumns = (): MRT_ColumnDef<Oracle>[] => {
