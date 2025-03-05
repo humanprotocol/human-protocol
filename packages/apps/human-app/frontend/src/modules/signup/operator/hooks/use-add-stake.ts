@@ -10,7 +10,7 @@ import { hmTokenApprove } from '@/modules/smart-contracts/HMToken/hm-token-appro
 import type { ContractCallArguments } from '@/modules/smart-contracts/types';
 import { routerPaths } from '@/router/router-paths';
 import { hmTokenAllowance } from '@/modules/smart-contracts/HMToken/hm-token-allowance';
-import { useHMTokenDecimals } from '@/modules/operator/hooks/use-human-token-decimals';
+import { useHMTokenDecimals } from './use-human-token-decimals';
 
 type AmountValidation = z.ZodEffects<
   z.ZodEffects<z.ZodString, string, string>,

@@ -8,15 +8,19 @@ import {
   PageCard,
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError, jsonRpcErrorHandler } from '@/shared/errors';
-import type { EditEthKVStoreValuesMutationData } from '@/modules/operator/hooks/use-edit-existing-keys';
-import { useEditExistingKeysMutationState } from '@/modules/operator/hooks/use-edit-existing-keys';
-import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
-import { useGetKeys } from '@/modules/operator/hooks/use-get-keys';
 import { routerPaths } from '@/router/router-paths';
-import { ExistingKeysForm } from '@/modules/operator/components/sign-up/add-keys/existing-keys-form';
-import { PendingKeysForm } from '@/modules/operator/components/sign-up/add-keys/pending-keys-form';
 import { Button } from '@/shared/components/ui/button';
 import { Alert } from '@/shared/components/ui/alert';
+import {
+  type GetEthKVStoreValuesSuccessResponse,
+  useGetKeys,
+} from '@/modules/operator/hooks';
+import {
+  type EditEthKVStoreValuesMutationData,
+  useEditExistingKeysMutationState,
+} from '../hooks';
+import { PendingKeysForm } from '../components/add-keys';
+import { ExistingKeysForm } from '../components/add-keys/existing-keys-form';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -60,9 +64,9 @@ export function AddKeysOperatorPage() {
 
 export function Form({
   keysData,
-}: {
+}: Readonly<{
   keysData: GetEthKVStoreValuesSuccessResponse;
-}) {
+}>) {
   const hasSomeNotEmptyKeys =
     Object.values(keysData).filter(Boolean).length > 0;
   const hasSomePendingKeys =

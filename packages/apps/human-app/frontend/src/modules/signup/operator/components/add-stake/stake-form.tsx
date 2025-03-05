@@ -5,25 +5,25 @@ import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
 import { z } from 'zod';
-import {
-  addStakeAmountCallArgumentsSchema,
-  useAddStakeMutation,
-  type AddStakeCallArguments,
-} from '@/modules/operator/hooks/use-add-stake';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { Input } from '@/shared/components/data-entry/input';
 import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HumanCurrencyInputMask } from '@/shared/components/data-entry/input-masks';
+import {
+  addStakeAmountCallArgumentsSchema,
+  type AddStakeCallArguments,
+  useAddStakeMutation,
+} from '../../hooks';
 
 export function StakeForm({
   decimals,
   stakedAmount,
-}: {
+}: Readonly<{
   decimals: number;
   stakedAmount?: bigint;
-}) {
+}>) {
   const addStakeMutation = useAddStakeMutation();
 
   const methods = useForm<AddStakeCallArguments>({

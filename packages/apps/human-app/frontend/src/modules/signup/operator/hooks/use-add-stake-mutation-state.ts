@@ -3,7 +3,7 @@ import { useMutationState } from '@tanstack/react-query';
 import type { MutationState } from '@tanstack/react-query';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import type { ResponseError } from '@/shared/types/global.type';
-import { type AddStakeCallArguments } from '@/modules/operator/hooks/use-add-stake';
+import { type AddStakeCallArguments } from './use-add-stake';
 
 export function useAddStakeMutationState() {
   const { address } = useConnectedWallet();

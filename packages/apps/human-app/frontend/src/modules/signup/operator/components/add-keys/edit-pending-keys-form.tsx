@@ -10,11 +10,8 @@ import { Select } from '@/shared/components/data-entry/select';
 import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
-import {
-  order,
-  sortFormKeys,
-} from '@/modules/operator/components/sign-up/add-keys/sort-form';
 import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
+import { STORE_KEYS_ORDER, sortFormKeys } from './sort-form';
 
 const OPTIONS = [
   Role.EXCHANGE_ORACLE,
@@ -78,12 +75,12 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
 
 export function EditPendingKeysForm({
   existingKeysInitialState,
-}: {
+}: Readonly<{
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
-}) {
+}>) {
   const sortedKeys = sortFormKeys(
     Object.keys(existingKeysInitialState) as EthKVStoreKeyValues[],
-    order
+    STORE_KEYS_ORDER
   );
 
   return (

@@ -11,11 +11,8 @@ import { EmptyPlaceholder } from '@/shared/components/ui/empty-placeholder';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { Chips } from '@/shared/components/ui/chips';
 import { Chip } from '@/shared/components/ui/chip';
-import {
-  order,
-  sortFormKeys,
-} from '@/modules/operator/components/sign-up/add-keys/sort-form';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { STORE_KEYS_ORDER, sortFormKeys } from './sort-form';
 
 const existingKeysConfig: Record<
   EthKVStoreKeyValues,
@@ -84,17 +81,17 @@ const existingKeysConfig: Record<
 export function ExistingKeys({
   openEditMode,
   existingKeysInitialState,
-}: {
+}: Readonly<{
   openEditMode: () => void;
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
-}) {
+}>) {
   const { colorPalette } = useColorMode();
   const { getValues } = useFormContext<GetEthKVStoreValuesSuccessResponse>();
   const formValues = getValues();
 
   const sortedKeys = sortFormKeys(
     Object.keys(existingKeysInitialState) as EthKVStoreKeyValues[],
-    order
+    STORE_KEYS_ORDER
   );
 
   return (

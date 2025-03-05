@@ -14,11 +14,8 @@ import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import {
-  order,
-  sortFormKeys,
-} from '@/modules/operator/components/sign-up/add-keys/sort-form';
 import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
+import { STORE_KEYS_ORDER, sortFormKeys } from './sort-form';
 
 const OPTIONS = [
   Role.EXCHANGE_ORACLE,
@@ -82,17 +79,17 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
 export function EditExistingKeysForm({
   existingKeysInitialState,
   formButtonProps,
-}: {
+}: Readonly<{
   existingKeysInitialState: GetEthKVStoreValuesSuccessResponse;
   formButtonProps: CustomButtonProps;
-}) {
+}>) {
   const { colorPalette } = useColorMode();
   const { errors } = useFormState();
   const noChangesError = errors.form?.message as string;
 
   const sortedKeys = sortFormKeys(
     Object.keys(existingKeysInitialState) as EthKVStoreKeyValues[],
-    order
+    STORE_KEYS_ORDER
   );
 
   return (
