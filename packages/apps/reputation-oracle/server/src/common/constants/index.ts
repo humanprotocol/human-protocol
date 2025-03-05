@@ -1,4 +1,4 @@
-export const NS = 'hmt';
+export const DATABASE_SCHEMA_NAME = 'hmt';
 export const INITIAL_REPUTATION = 0;
 export const JWT_STRATEGY_NAME = 'jwt-http';
 

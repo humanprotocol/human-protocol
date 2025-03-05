@@ -313,7 +313,6 @@ describe('ReputationService', () => {
         address,
         reputationPoints: 1,
         type: ReputationEntityType.RECORDING_ORACLE,
-        save: jest.fn(),
       };
 
       jest
@@ -326,7 +325,7 @@ describe('ReputationService', () => {
         address,
       );
       expect(reputationEntity.reputationPoints).toBe(2);
-      expect(reputationEntity.save).toHaveBeenCalled();
+      expect(reputationRepository.updateOne).toHaveBeenCalled();
     });
   });
 
@@ -359,7 +358,6 @@ describe('ReputationService', () => {
         address,
         reputationPoints: 1,
         type: ReputationEntityType.RECORDING_ORACLE,
-        save: jest.fn(),
       };
 
       jest
@@ -372,7 +370,7 @@ describe('ReputationService', () => {
         address,
       );
       expect(reputationEntity.reputationPoints).toBe(0);
-      expect(reputationEntity.save).toHaveBeenCalled();
+      expect(reputationRepository.updateOne).toHaveBeenCalled();
     });
 
     it('should return if called for Reputation Oracle itself', async () => {
@@ -380,7 +378,6 @@ describe('ReputationService', () => {
         address,
         reputationPoints: 701,
         type: ReputationEntityType.RECORDING_ORACLE,
-        save: jest.fn(),
       };
 
       jest
@@ -397,7 +394,7 @@ describe('ReputationService', () => {
         address,
       );
       expect(reputationEntity.reputationPoints).toBe(701);
-      expect(reputationEntity.save).toHaveBeenCalledTimes(0);
+      expect(reputationRepository.updateOne).toHaveBeenCalledTimes(0);
     });
   });
 

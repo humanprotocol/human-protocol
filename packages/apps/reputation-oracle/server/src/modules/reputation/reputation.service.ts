@@ -258,10 +258,9 @@ export class ReputationService {
       return;
     }
 
-    Object.assign(reputationEntity, {
-      reputationPoints: reputationEntity.reputationPoints + 1,
-    });
-    reputationEntity.save();
+    reputationEntity.reputationPoints += 1;
+
+    await this.reputationRepository.updateOne(reputationEntity);
   }
 
   /**
@@ -301,10 +300,9 @@ export class ReputationService {
       return;
     }
 
-    Object.assign(reputationEntity, {
-      reputationPoints: reputationEntity.reputationPoints - 1,
-    });
-    reputationEntity.save();
+    reputationEntity.reputationPoints -= 1;
+
+    await this.reputationRepository.updateOne(reputationEntity);
   }
 
   /**

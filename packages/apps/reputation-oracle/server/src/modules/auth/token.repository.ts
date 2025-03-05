@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
-import { DataSource, DeleteResult } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { TokenEntity, TokenType } from './token.entity';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
     super(TokenEntity, dataSource);
   }
 
-  public async findOneByUuidAndType(
+  async findOneByUuidAndType(
     uuid: string,
     type: TokenType,
   ): Promise<TokenEntity | null> {
@@ -22,7 +22,7 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
     });
   }
 
-  public async findOneByUserIdAndType(
+  async findOneByUserIdAndType(
     userId: number,
     type: TokenType,
   ): Promise<TokenEntity | null> {
@@ -35,10 +35,10 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
     });
   }
 
-  public async deleteOneByTypeAndUserId(
+  async deleteOneByTypeAndUserId(
     type: TokenType,
     userId: number,
-  ): Promise<DeleteResult> {
-    return this.delete({ type, userId });
+  ): Promise<void> {
+    await this.delete({ type, userId });
   }
 }

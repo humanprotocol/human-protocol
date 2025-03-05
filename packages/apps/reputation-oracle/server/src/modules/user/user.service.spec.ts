@@ -162,7 +162,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       const mockLabelerData = { sitekeys: [{ sitekey: 'site_key' }] };
@@ -193,7 +192,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       await expect(
@@ -213,7 +211,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.REVIEW,
         },
-        save: jest.fn(),
       };
 
       await expect(
@@ -242,7 +239,6 @@ describe('UserService', () => {
           status: KycStatus.APPROVED,
         },
         siteKeys: [siteKeyEntity],
-        save: jest.fn(),
       };
 
       hcaptchaService.registerLabeler = jest.fn();
@@ -265,7 +261,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
@@ -290,7 +285,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(true);
@@ -315,7 +309,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       hcaptchaService.registerLabeler = jest.fn().mockResolvedValueOnce(false);
@@ -348,7 +341,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       const signature = await signMessage(
@@ -485,7 +477,6 @@ describe('UserService', () => {
           country: 'FR',
           status: KycStatus.APPROVED,
         },
-        save: jest.fn(),
       };
 
       const address = '0x123';
