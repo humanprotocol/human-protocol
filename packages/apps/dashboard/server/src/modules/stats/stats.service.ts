@@ -347,7 +347,7 @@ export class StatsService implements OnModuleInit {
         ],
       );
     } else if (this.envConfigService.hmtPriceSource.includes('coinlore')) {
-      if (!data || !data[0] || !data[0].price_usd) {
+      if (!data || !data[0] || !data[0].price_usd || data[0].symbol !== 'HMT') {
         throw new Error('Failed to fetch HMT price from Coinlore API');
       }
       hmtPrice = parseFloat(data[0].price_usd);
