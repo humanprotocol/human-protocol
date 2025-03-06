@@ -22,7 +22,7 @@ import {
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
@@ -46,6 +46,7 @@ import {
   PaymentMethodIdDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
+import { ErrorPayment } from 'src/common/constants/errors';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -471,24 +472,28 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Tokens retrieved successfully',
-    type: [String],
+    type: [Object],
   })
   @ApiResponse({
     status: 400,
     description: 'Bad Request. Invalid chainId.',
   })
-  @Get('/tokens/:chainId')
+  @Get('/fund-tokens/:chainId')
   public async getTokens(
     @Param('chainId') chainId: ChainId,
-  ): Promise<string[]> {
+  ): Promise<{ [key: string]: string }> {
     const tokens = TOKEN_ADDRESSES[chainId];
     if (!tokens) {
-      throw new ControlledError('Invalid chainId', HttpStatus.BAD_REQUEST);
+      throw new ControlledError(
+        ErrorPayment.InvalidChainId,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    return [
-      EscrowFundToken.HMT,
-      ...Object.keys(TOKEN_ADDRESSES[chainId] || {}),
-    ];
+    const hmtAddress = NETWORKS[chainId]?.hmtAddress;
+    return {
+      ...(hmtAddress ? { [EscrowFundToken.HMT]: hmtAddress } : {}),
+      ...TOKEN_ADDRESSES[chainId],
+    };
   }
 }
