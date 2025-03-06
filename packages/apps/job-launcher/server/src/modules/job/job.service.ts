@@ -906,14 +906,12 @@ export class JobService {
     jobEntity.requestType = requestType;
     jobEntity.fee = fundTokenFee; // Fee in the token used to funding the escrow
     jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
+    jobEntity.payments = [paymentEntity];
     jobEntity.token = dto.escrowFundToken;
     jobEntity.status = JobStatus.PAID;
     jobEntity.waitUntil = new Date();
 
-    jobEntity = await this.jobRepository.createUnique(jobEntity);
-
-    paymentEntity.jobId = jobEntity.id;
-    await this.paymentRepository.updateOne(paymentEntity);
+    jobEntity = await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
   }
