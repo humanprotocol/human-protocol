@@ -10,7 +10,6 @@ import {
 } from 'class-validator';
 import {
   FiatCurrency,
-  PaymentCurrency,
   PaymentSortField,
   PaymentSource,
   PaymentStatus,
@@ -82,7 +81,7 @@ export class GetRateDto {
 
 export class PaymentRefund {
   public refundAmount: number;
-  public refundCurrency: PaymentCurrency;
+  public refundCurrency: string;
   public userId: number;
   public jobId: number;
 }
