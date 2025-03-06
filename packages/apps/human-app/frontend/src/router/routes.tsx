@@ -14,7 +14,6 @@ import {
   WorkHeaderIcon,
 } from '@/shared/components/ui/icons';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
-import { Playground } from '@/modules/playground/views/playground.page';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
@@ -42,10 +41,6 @@ export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.homePage,
     element: <HomePage />,
-  },
-  {
-    path: routerPaths.playground,
-    element: <Playground />,
   },
   {
     path: routerPaths.worker.signIn,
