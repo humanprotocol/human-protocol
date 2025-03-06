@@ -5,11 +5,11 @@ import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
+import { useEditExistingKeysMutation } from '../../hooks';
 import {
   type EditEthKVStoreValuesMutationData,
   getEditEthKVStoreValuesMutationSchema,
-  useEditExistingKeysMutation,
-} from '../../hooks';
+} from '../../utils';
 import { EditExistingKeysForm } from './edit-existing-keys-form';
 import { ExistingKeys } from './existing-keys';
 

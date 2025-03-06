@@ -11,11 +11,11 @@ import { routerPaths } from '@/router/router-paths';
 import { Button } from '@/shared/components/ui/button';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HumanCurrencyInputMask } from '@/shared/components/data-entry/input-masks';
+import { useAddStake } from '../../hooks';
 import {
-  addStakeAmountCallArgumentsSchema,
   type AddStakeCallArguments,
-  useAddStakeMutation,
-} from '../../hooks';
+  addStakeAmountCallArgumentsSchema,
+} from '../../utils';
 
 export function StakeForm({
   decimals,
@@ -24,7 +24,7 @@ export function StakeForm({
   decimals: number;
   stakedAmount?: bigint;
 }>) {
-  const addStakeMutation = useAddStakeMutation();
+  const addStakeMutation = useAddStake();
 
   const methods = useForm<AddStakeCallArguments>({
     defaultValues: {

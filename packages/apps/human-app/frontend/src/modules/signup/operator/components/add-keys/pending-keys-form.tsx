@@ -4,11 +4,11 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Button } from '@/shared/components/ui/button';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
+import { useEditExistingKeysMutation } from '../../hooks';
 import {
   type EditEthKVStoreValuesMutationData,
   setEthKVStoreValuesMutationSchema,
-  useEditExistingKeysMutation,
-} from '../../hooks';
+} from '../../utils';
 import { EditPendingKeysForm } from './edit-pending-keys-form';
 
 export function PendingKeysForm({

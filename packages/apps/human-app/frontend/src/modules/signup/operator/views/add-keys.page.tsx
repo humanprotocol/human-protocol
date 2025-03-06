@@ -15,12 +15,10 @@ import {
   type GetEthKVStoreValuesSuccessResponse,
   useGetKeys,
 } from '@/modules/operator/hooks';
-import {
-  type EditEthKVStoreValuesMutationData,
-  useEditExistingKeysMutationState,
-} from '../hooks';
 import { PendingKeysForm } from '../components/add-keys';
 import { ExistingKeysForm } from '../components/add-keys/existing-keys-form';
+import { useEditExistingKeysMutationState } from '../hooks';
+import { type EditEthKVStoreValuesMutationData } from '../utils';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -57,12 +55,12 @@ export function AddKeysOperatorPage() {
 
   return (
     <PageCard alert={errorAlert} title={t('operator.addKeysPage.title')}>
-      <Form keysData={keysData} />
+      <AddKeysForm keysData={keysData} />
     </PageCard>
   );
 }
 
-export function Form({
+function AddKeysForm({
   keysData,
 }: Readonly<{
   keysData: GetEthKVStoreValuesSuccessResponse;
