@@ -17,6 +17,7 @@ type AmountValidation = z.ZodEffects<
   string,
   string
 >;
+
 type AmountField = z.infer<AmountValidation>;
 
 export const addStakeAmountCallArgumentsSchema = (

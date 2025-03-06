@@ -11,7 +11,7 @@ import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
-import { STORE_KEYS_ORDER, sortFormKeys } from './sort-form';
+import { sortFormKeys, STORE_KEYS_ORDER } from '../../utils';
 
 const OPTIONS = [
   Role.EXCHANGE_ORACLE,

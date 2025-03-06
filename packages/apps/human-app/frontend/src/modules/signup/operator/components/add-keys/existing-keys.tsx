@@ -12,7 +12,7 @@ import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hook
 import { Chips } from '@/shared/components/ui/chips';
 import { Chip } from '@/shared/components/ui/chip';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { STORE_KEYS_ORDER, sortFormKeys } from './sort-form';
+import { sortFormKeys, STORE_KEYS_ORDER } from '../../utils';
 
 const existingKeysConfig: Record<
   EthKVStoreKeyValues,

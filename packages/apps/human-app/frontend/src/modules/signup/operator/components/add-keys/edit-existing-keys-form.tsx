@@ -15,7 +15,7 @@ import { JOB_TYPES } from '@/shared/consts';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { PercentsInputMask } from '@/shared/components/data-entry/input-masks';
-import { STORE_KEYS_ORDER, sortFormKeys } from './sort-form';
+import { sortFormKeys, STORE_KEYS_ORDER } from '../../utils';
 
 const OPTIONS = [
   Role.EXCHANGE_ORACLE,
@@ -76,6 +76,7 @@ const formInputsConfig: Record<EthKVStoreKeyValues, React.ReactElement> = {
     />
   ),
 };
+
 export function EditExistingKeysForm({
   existingKeysInitialState,
   formButtonProps,

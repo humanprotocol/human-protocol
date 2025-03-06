@@ -12,12 +12,12 @@ import { Alert } from '@/shared/components/ui/alert';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import {
-  stakedAmountFormatter,
   useAddStakeMutationState,
   useGetStakedAmount,
   useHMTokenDecimals,
 } from '../hooks';
 import { StakeForm, Buttons } from '../components/add-stake';
+import { stakedAmountFormatter } from '../utils';
 
 export function AddStakeOperatorPage() {
   const { colorPalette, isDarkMode } = useColorMode();
