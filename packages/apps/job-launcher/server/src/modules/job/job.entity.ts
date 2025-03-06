@@ -10,6 +10,7 @@ import {
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { PaymentEntity } from '../payment/payment.entity';
+import { ContentModerationRequestEntity } from '../content-moderation/content-moderation-request.entity';
 
 @Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
@@ -70,6 +71,13 @@ export class JobEntity extends BaseEntity implements IJob {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.job)
   public payment: PaymentEntity;
+
+  @OneToMany(
+    () => ContentModerationRequestEntity,
+    (contentModerationRequest) => contentModerationRequest.job,
+    { cascade: ['insert'] },
+  )
+  public contentModerationRequests: ContentModerationRequestEntity[];
 
   @Column({ type: 'int', default: 0 })
   public retriesCount: number;

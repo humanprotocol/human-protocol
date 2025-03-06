@@ -70,11 +70,11 @@ describe('Google Cloud Storage utils', () => {
     it('should convert a valid GCS HTTP URL without an object path to a gs:// bucket path', () => {
       expect(
         convertToGCSPath('https://valid-bucket.storage.googleapis.com'),
-      ).toBe('gs://valid-bucket/');
+      ).toBe('gs://valid-bucket');
 
       expect(
         convertToGCSPath('https://valid-bucket.storage.googleapis.com/'),
-      ).toBe('gs://valid-bucket/');
+      ).toBe('gs://valid-bucket');
     });
 
     it('should throw a Error for an invalid GCS URL', () => {

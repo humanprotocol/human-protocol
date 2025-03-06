@@ -18,7 +18,6 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { MutexManagerService } from '../mutex/mutex-manager.service';
 import { QualificationModule } from '../qualification/qualification.module';
 import { WhitelistModule } from '../whitelist/whitelist.module';
-import { JobModerationService } from './job-moderation.service';
 
 @Module({
   imports: [
@@ -38,11 +37,10 @@ import { JobModerationService } from './job-moderation.service';
     Logger,
     JobService,
     JobRepository,
-    JobModerationService,
     RoutingProtocolService,
     WebhookRepository,
     MutexManagerService,
   ],
-  exports: [JobService, JobModerationService, RoutingProtocolService],
+  exports: [JobService, RoutingProtocolService],
 })
 export class JobModule {}

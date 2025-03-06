@@ -105,10 +105,6 @@ describe('JobService', () => {
           provide: RoutingProtocolService,
           useValue: createMock<RoutingProtocolService>(),
         },
-        {
-          provide: JobModerationService,
-          useValue: createMock<JobModerationService>(),
-        },
       ],
     }).compile();
 
