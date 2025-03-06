@@ -19,7 +19,6 @@ import { EditExistingKeysSuccessPage } from '@/modules/operator/views/sign-up/ed
 import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.page';
 import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
 import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
-import { Playground } from '@/modules/playground/views/playground.page';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
@@ -40,10 +39,6 @@ export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.homePage,
     element: <HomePage />,
-  },
-  {
-    path: routerPaths.playground,
-    element: <Playground />,
   },
   {
     path: routerPaths.worker.signIn,
