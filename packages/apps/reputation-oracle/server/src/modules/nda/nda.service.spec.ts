@@ -36,7 +36,7 @@ describe('NDAService', () => {
 
   describe('signNDA', () => {
     let user: Pick<UserEntity, 'id' | 'email' | 'ndaSignedUrl'>;
-    beforeEach(async () => {
+    beforeEach(() => {
       user = {
         id: faker.number.int(),
         email: faker.internet.email(),
