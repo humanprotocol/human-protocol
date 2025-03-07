@@ -7,7 +7,8 @@ export const sortFormKeys = (
 ): EthKVStoreKeyValues[] => {
   return keys.sort((a, b) => order.indexOf(a) - order.indexOf(b));
 };
-export const order: EthKVStoreKeyValues[] = [
+
+export const STORE_KEYS_ORDER: EthKVStoreKeyValues[] = [
   EthKVStoreKeys.Fee,
   EthKVStoreKeys.PublicKey,
   EthKVStoreKeys.Url,

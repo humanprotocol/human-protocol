@@ -8,17 +8,16 @@ import {
   PageCard,
 } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
-import { Buttons } from '@/modules/operator/components/sign-up/add-stake/buttons';
-import { StakeForm } from '@/modules/operator/components/sign-up/add-stake/stake-form';
 import { Alert } from '@/shared/components/ui/alert';
-import {
-  stakedAmountFormatter,
-  useGetStakedAmount,
-} from '@/modules/operator/hooks/use-get-stacked-amount';
-import { useAddStakeMutationState } from '@/modules/operator/hooks/use-add-stake-mutation-state';
-import { useHMTokenDecimals } from '@/modules/operator/hooks/use-human-token-decimals';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
+import {
+  useAddStakeMutationState,
+  useGetStakedAmount,
+  useHMTokenDecimals,
+} from '../hooks';
+import { StakeForm, Buttons } from '../components/add-stake';
+import { stakedAmountFormatter } from '../utils';
 
 export function AddStakeOperatorPage() {
   const { colorPalette, isDarkMode } = useColorMode();
@@ -29,7 +28,9 @@ export function AddStakeOperatorPage() {
     error: getStackedAmountError,
     isPending: isGetStakedAmountPending,
   } = useGetStakedAmount();
+
   const addStakeMutationState = useAddStakeMutationState();
+
   const {
     data: decimalsData,
     error: decimalsDataError,
@@ -37,14 +38,16 @@ export function AddStakeOperatorPage() {
   } = useHMTokenDecimals();
 
   const getAlert = () => {
-    switch (true) {
-      case Boolean(addStakeMutationState?.error):
+    if (!addStakeMutationState) return undefined;
+
+    switch (addStakeMutationState.status) {
+      case 'error':
         return (
           <Alert color="error" severity="error">
-            {getErrorMessageForError(addStakeMutationState?.error)}
+            {getErrorMessageForError(addStakeMutationState.error)}
           </Alert>
         );
-      case addStakeMutationState?.status === 'success':
+      case 'success':
         return (
           <Alert color="success" severity="success">
             {t('operator.stakeForm.successAlert', {

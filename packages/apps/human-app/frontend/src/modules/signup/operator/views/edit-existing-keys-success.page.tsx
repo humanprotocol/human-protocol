@@ -7,7 +7,6 @@ import {
 } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useWeb3SignUp } from '@/modules/operator/hooks/use-web3-signup';
 import type { SignatureData } from '@/api/hooks/use-prepare-signature';
 import {
   PrepareSignatureType,
@@ -15,6 +14,7 @@ import {
 } from '@/api/hooks/use-prepare-signature';
 import { Alert } from '@/shared/components/ui/alert';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
+import { useWeb3SignUp } from '../hooks';
 
 export function EditExistingKeysSuccessPage() {
   const { address, signMessage } = useConnectedWallet();

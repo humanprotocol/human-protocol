@@ -3,15 +3,15 @@ import { Grid } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { EditEthKVStoreValuesMutationData } from '@/modules/operator/hooks/use-edit-existing-keys';
-import {
-  getEditEthKVStoreValuesMutationSchema,
-  useEditExistingKeysMutation,
-} from '@/modules/operator/hooks/use-edit-existing-keys';
-import { ExistingKeys } from '@/modules/operator/components/sign-up/add-keys/existing-keys';
-import { EditExistingKeysForm } from '@/modules/operator/components/sign-up/add-keys/edit-existing-keys-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
+import { useEditExistingKeysMutation } from '../../hooks';
+import {
+  type EditEthKVStoreValuesMutationData,
+  getEditEthKVStoreValuesMutationSchema,
+} from '../../schema';
+import { EditExistingKeysForm } from './edit-existing-keys-form';
+import { ExistingKeys } from './existing-keys';
 
 export type UseFormResult = UseFormReturn<
   GetEthKVStoreValuesSuccessResponse,
@@ -20,9 +20,9 @@ export type UseFormResult = UseFormReturn<
 
 export function ExistingKeysForm({
   keysData,
-}: {
+}: Readonly<{
   keysData: GetEthKVStoreValuesSuccessResponse;
-}) {
+}>) {
   const [editMode, setEditMode] = useState(false);
   const existingKeysMutation = useEditExistingKeysMutation();
   const pendingKeysMutation = useEditExistingKeysMutation();

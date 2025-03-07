@@ -1,6 +1,4 @@
-import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { t } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { stakingStake } from '@/modules/smart-contracts/Staking/staking-stake';
@@ -10,37 +8,8 @@ import { hmTokenApprove } from '@/modules/smart-contracts/HMToken/hm-token-appro
 import type { ContractCallArguments } from '@/modules/smart-contracts/types';
 import { routerPaths } from '@/router/router-paths';
 import { hmTokenAllowance } from '@/modules/smart-contracts/HMToken/hm-token-allowance';
-import { useHMTokenDecimals } from '@/modules/operator/hooks/use-human-token-decimals';
-
-type AmountValidation = z.ZodEffects<
-  z.ZodEffects<z.ZodString, string, string>,
-  string,
-  string
->;
-type AmountField = z.infer<AmountValidation>;
-
-export const addStakeAmountCallArgumentsSchema = (
-  decimals: number
-): AmountValidation =>
-  z
-    .string()
-    .refine((amount) => !amount.startsWith('-'))
-    .refine(
-      (amount) => {
-        const decimalPart = amount.toString().split('.')[1];
-        if (!decimalPart) return true;
-        return decimalPart.length <= decimals;
-      },
-      {
-        message: t('operator.stakeForm.invalidDecimals', {
-          decimals,
-        }),
-      }
-    );
-
-export interface AddStakeCallArguments {
-  amount: AmountField;
-}
+import { type AddStakeCallArguments } from '../schema';
+import { useHMTokenDecimals } from './use-human-token-decimals';
 
 async function addStakeMutationFn(
   data: AddStakeCallArguments & {
@@ -85,7 +54,7 @@ async function addStakeMutationFn(
   return data;
 }
 
-export function useAddStakeMutation() {
+export function useAddStake() {
   const {
     chainId,
     address,

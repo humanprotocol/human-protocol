@@ -8,10 +8,10 @@ import { routerPaths } from '@/router/router-paths';
 export function Buttons({
   openForm,
   stakedAmount,
-}: {
+}: Readonly<{
   openForm: () => void;
   stakedAmount?: bigint;
-}) {
+}>) {
   const isStaked = stakedAmount ? stakedAmount > BigInt(0) : false;
   return (
     <Grid
