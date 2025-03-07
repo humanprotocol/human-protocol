@@ -1,9 +1,9 @@
 import {
-  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import {
   Body,
@@ -18,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 import { TokenRepository } from './token.repository';
@@ -147,7 +146,7 @@ export class AuthController {
     description: 'Verification email resent successfully',
   })
   @ApiBearerAuth()
-  @UseGuards(HCaptchaGuard, JwtAuthGuard)
+  @UseGuards(HCaptchaGuard)
   @Post('/web2/resend-verification-email')
   @HttpCode(200)
   async resendEmailVerification(
@@ -223,7 +222,6 @@ export class AuthController {
     description: 'User logged out successfully',
   })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post('/logout')
   @HttpCode(200)
   async logout(@Req() request: RequestWithUser): Promise<void> {

@@ -7,7 +7,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user';
 import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { IBase } from '../../common/interfaces/base';

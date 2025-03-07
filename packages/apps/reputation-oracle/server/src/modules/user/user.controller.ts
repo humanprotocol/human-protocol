@@ -17,7 +17,6 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import { Public } from '../../common/decorators';
-import { JwtAuthGuard } from '../../common/guards';
 import { SignatureType } from '../../common/enums/web3';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Web3ConfigService } from '../../config/web3-config.service';
@@ -47,9 +46,9 @@ import { UserErrorFilter } from './user.error.filter';
  * 2) Move "prepare-signature" out of this module
  */
 @ApiTags('User')
+@ApiBearerAuth()
 @Controller('/user')
 @UseFilters(UserErrorFilter)
-@ApiBearerAuth()
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -66,7 +65,6 @@ export class UserController {
     description: 'Labeler registered successfully',
     type: RegisterLabelerResponseDto,
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/register-labeler')
   @HttpCode(200)
   async registerLabeler(
@@ -90,7 +88,6 @@ export class UserController {
     status: 409,
     description: 'Provided address already registered',
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/register-address')
   @HttpCode(200)
   async registerAddress(
@@ -109,7 +106,6 @@ export class UserController {
     status: 200,
     description: 'Operator enabled succesfully',
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/enable-operator')
   @HttpCode(200)
   async enableOperator(
@@ -128,7 +124,6 @@ export class UserController {
     status: 200,
     description: 'Operator disabled succesfully',
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/disable-operator')
   @HttpCode(200)
   async disableOperator(
@@ -181,7 +176,7 @@ export class UserController {
     description: 'Oracle registered successfully',
     type: RegistrationInExchangeOracleDto,
   })
-  @UseGuards(HCaptchaGuard, JwtAuthGuard)
+  @UseGuards(HCaptchaGuard)
   @Post('/exchange-oracle-registration')
   @HttpCode(200)
   async registrationInExchangeOracle(
@@ -210,7 +205,6 @@ export class UserController {
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  @UseGuards(JwtAuthGuard)
   @Get('/exchange-oracle-registration')
   async getRegistrationInExchangeOracles(
     @Req() request: RequestWithUser,

@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { KycStatus } from '../../common/enums/user';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'kycs' })
 export class KycEntity extends BaseEntity {
