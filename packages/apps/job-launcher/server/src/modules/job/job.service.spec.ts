@@ -118,6 +118,7 @@ describe('JobService', () => {
   describe('createJob', () => {
     const userMock: any = {
       id: 1,
+      whitlisted: true,
       stripeCustomerId: 'stripeTest',
     };
 
