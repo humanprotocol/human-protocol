@@ -12,7 +12,7 @@ import {
   useGetKeys,
 } from '@/modules/operator/hooks';
 import { useEditExistingKeysMutationState } from '../hooks';
-import { type EditEthKVStoreValuesMutationData } from '../utils';
+import { type EditEthKVStoreValuesMutationData } from '../schema';
 import { AddKeysForm } from '../components/add-keys';
 
 export type UseFormResult = UseFormReturn<
