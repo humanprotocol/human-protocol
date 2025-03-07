@@ -8,7 +8,7 @@ import { hmTokenApprove } from '@/modules/smart-contracts/HMToken/hm-token-appro
 import type { ContractCallArguments } from '@/modules/smart-contracts/types';
 import { routerPaths } from '@/router/router-paths';
 import { hmTokenAllowance } from '@/modules/smart-contracts/HMToken/hm-token-allowance';
-import { type AddStakeCallArguments } from '../utils';
+import { type AddStakeCallArguments } from '../schema';
 import { useHMTokenDecimals } from './use-human-token-decimals';
 
 async function addStakeMutationFn(

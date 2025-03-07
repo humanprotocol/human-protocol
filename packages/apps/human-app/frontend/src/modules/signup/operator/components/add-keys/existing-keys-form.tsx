@@ -9,7 +9,7 @@ import { useEditExistingKeysMutation } from '../../hooks';
 import {
   type EditEthKVStoreValuesMutationData,
   getEditEthKVStoreValuesMutationSchema,
-} from '../../utils';
+} from '../../schema';
 import { EditExistingKeysForm } from './edit-existing-keys-form';
 import { ExistingKeys } from './existing-keys';
 

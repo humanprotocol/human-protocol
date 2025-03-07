@@ -10,7 +10,7 @@ import { routerPaths } from '@/router/router-paths';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { ethKvStoreSetBulk } from '@/modules/smart-contracts/EthKVStore/eth-kv-store-set-bulk';
 import { getContractAddress } from '@/modules/smart-contracts/get-contract-address';
-import { type EditEthKVStoreValuesMutationData } from '../utils';
+import { type EditEthKVStoreValuesMutationData } from '../schema';
 
 function editExistingKeysMutationFn(
   formData: EditEthKVStoreValuesMutationData,

@@ -15,7 +15,7 @@ import { useAddStake } from '../../hooks';
 import {
   type AddStakeCallArguments,
   addStakeAmountCallArgumentsSchema,
-} from '../../utils';
+} from '../../schema';
 
 export function StakeForm({
   decimals,

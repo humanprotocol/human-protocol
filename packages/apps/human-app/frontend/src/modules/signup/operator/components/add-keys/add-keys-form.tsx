@@ -12,21 +12,19 @@ export function AddKeysForm({
 }: Readonly<{
   keysData: GetEthKVStoreValuesSuccessResponse;
 }>) {
-  const hasSomeNotEmptyKeys =
-    Object.values(keysData).filter(Boolean).length > 0;
-  const hasSomePendingKeys =
-    Object.values(keysData).filter((value) => {
-      /**
-       * This check is necessary because TS can't infer
-       * "undefined" from optional object's property
-       */
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (value === undefined) {
-        return false;
-      }
+  const hasSomeNotEmptyKeys = Object.values(keysData).some(Boolean);
+  const hasSomePendingKeys = Object.values(keysData).some((value) => {
+    /**
+     * This check is necessary because TS can't infer
+     * "undefined" from optional object's property
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (value === undefined) {
+      return false;
+    }
 
-      return value.length === 0;
-    }).length > 0;
+    return value.length === 0;
+  });
 
   return (
     <Grid container gap="2rem">

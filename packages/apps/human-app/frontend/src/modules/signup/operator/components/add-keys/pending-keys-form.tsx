@@ -8,7 +8,7 @@ import { useEditExistingKeysMutation } from '../../hooks';
 import {
   type EditEthKVStoreValuesMutationData,
   setEthKVStoreValuesMutationSchema,
-} from '../../utils';
+} from '../../schema';
 import { EditPendingKeysForm } from './edit-pending-keys-form';
 
 export function PendingKeysForm({

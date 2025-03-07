@@ -24,23 +24,21 @@ export function ConnectWalletOperatorPage() {
   } = useWalletConnect();
 
   const getAlert = () => {
-    switch (true) {
-      case web3ProviderStatus === 'error':
-        return (
-          <Alert color="error" severity="error" sx={{ width: '100%' }}>
-            {getErrorMessageForError(web3ProviderError)}
-          </Alert>
-        );
-      case isConnected:
-        return (
-          <Alert color="success" severity="success" sx={{ width: '100%' }}>
-            {t('operator.connectWallet.successAlert')}
-          </Alert>
-        );
+    if (web3ProviderStatus === 'error')
+      return (
+        <Alert color="error" severity="error" sx={{ width: '100%' }}>
+          {getErrorMessageForError(web3ProviderError)}
+        </Alert>
+      );
 
-      default:
-        return undefined;
-    }
+    if (isConnected)
+      return (
+        <Alert color="success" severity="success" sx={{ width: '100%' }}>
+          {t('operator.connectWallet.successAlert')}
+        </Alert>
+      );
+
+    return undefined;
   };
 
   if (isConnected) {

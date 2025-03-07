@@ -28,7 +28,9 @@ export function AddStakeOperatorPage() {
     error: getStackedAmountError,
     isPending: isGetStakedAmountPending,
   } = useGetStakedAmount();
+
   const addStakeMutationState = useAddStakeMutationState();
+
   const {
     data: decimalsData,
     error: decimalsDataError,
@@ -36,14 +38,16 @@ export function AddStakeOperatorPage() {
   } = useHMTokenDecimals();
 
   const getAlert = () => {
-    switch (true) {
-      case Boolean(addStakeMutationState?.error):
+    if (!addStakeMutationState) return undefined;
+
+    switch (addStakeMutationState.status) {
+      case 'error':
         return (
           <Alert color="error" severity="error">
-            {getErrorMessageForError(addStakeMutationState?.error)}
+            {getErrorMessageForError(addStakeMutationState.error)}
           </Alert>
         );
-      case addStakeMutationState?.status === 'success':
+      case 'success':
         return (
           <Alert color="success" severity="success">
             {t('operator.stakeForm.successAlert', {
