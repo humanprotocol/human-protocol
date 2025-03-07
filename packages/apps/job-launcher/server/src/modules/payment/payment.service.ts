@@ -42,8 +42,8 @@ import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
-import { TOKEN_ADDRESSES } from 'src/common/constants/tokens';
-import { EscrowFundToken } from 'src/common/enums/job';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { EscrowFundToken } from '../../common/enums/job';
 
 @Injectable()
 export class PaymentService {
