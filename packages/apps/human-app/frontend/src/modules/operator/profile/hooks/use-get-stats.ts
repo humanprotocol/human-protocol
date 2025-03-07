@@ -14,10 +14,6 @@ const operatorStatsSuccessResponseSchema = z.object({
   escrows_cancelled: z.number(),
 });
 
-export type OperatorStatsSuccessResponse = z.infer<
-  typeof operatorStatsSuccessResponseSchema
->;
-
 const failedResponse = {
   workers_total: '-',
   assignments_completed: '-',
@@ -27,6 +23,16 @@ const failedResponse = {
   escrows_active: '-',
   escrows_cancelled: '-',
 };
+
+type OperatorStatsSuccessResponse = z.infer<
+  typeof operatorStatsSuccessResponseSchema
+>;
+
+type OperatorStatsFailedResponse = typeof failedResponse;
+
+export type OperatorStatsResponse =
+  | OperatorStatsSuccessResponse
+  | OperatorStatsFailedResponse;
 
 export function useGetOperatorStats() {
   const { data: keysData } = useGetKeys();
