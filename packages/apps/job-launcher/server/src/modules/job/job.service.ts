@@ -41,7 +41,6 @@ import {
 import { FiatCurrency } from '../../common/enums/payment';
 import { parseUrl } from '../../common/utils';
 import { add, div, mul, max } from '../../common/utils/decimal';
-import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -129,7 +128,6 @@ export class JobService {
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
-    private readonly paymentRepository: PaymentRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,

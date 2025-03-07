@@ -35,7 +35,6 @@ describe('JobService', () => {
   let jobService: JobService,
     paymentService: PaymentService,
     jobRepository: JobRepository,
-    paymentRepository: PaymentRepository,
     rateService: RateService;
 
   beforeAll(async () => {
@@ -107,7 +106,6 @@ describe('JobService', () => {
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     rateService = moduleRef.get<RateService>(RateService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
-    paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
   });
 
   describe('createJob', () => {
@@ -161,7 +159,7 @@ describe('JobService', () => {
               PaymentCurrency.USD,
             ),
           );
-          expect(jobRepository.createUnique).toHaveBeenCalledWith({
+          expect(jobRepository.updateOne).toHaveBeenCalledWith({
             chainId: fortuneJobDto.chainId,
             userId: userMock.id,
             manifestUrl: MOCK_FILE_URL,
@@ -175,8 +173,8 @@ describe('JobService', () => {
             exchangeOracle: fortuneJobDto.exchangeOracle,
             recordingOracle: fortuneJobDto.recordingOracle,
             reputationOracle: fortuneJobDto.reputationOracle,
+            payments: expect.any(Array),
           });
-          expect(paymentRepository.updateOne).toHaveBeenCalledTimes(1);
         });
 
         it('should create a Fortune job successfully paid and funded with different currencies', async () => {
@@ -225,7 +223,7 @@ describe('JobService', () => {
             fortuneJobDto.paymentCurrency,
             paymentToUsdRate,
           );
-          expect(jobRepository.createUnique).toHaveBeenCalledWith({
+          expect(jobRepository.updateOne).toHaveBeenCalledWith({
             chainId: fortuneJobDto.chainId,
             userId: userMock.id,
             manifestUrl: MOCK_FILE_URL,
@@ -242,8 +240,8 @@ describe('JobService', () => {
             exchangeOracle: fortuneJobDto.exchangeOracle,
             recordingOracle: fortuneJobDto.recordingOracle,
             reputationOracle: fortuneJobDto.reputationOracle,
+            payments: expect.any(Array),
           });
-          expect(paymentRepository.updateOne).toHaveBeenCalledTimes(1);
         });
       });
     });
