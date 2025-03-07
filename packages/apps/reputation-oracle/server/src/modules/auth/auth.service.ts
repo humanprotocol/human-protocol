@@ -155,6 +155,8 @@ export class AuthService {
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
+      nda_signed:
+        userEntity.ndaSignedUrl === this.authConfigService.latestNdaUrl,
       reputation_network: operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(

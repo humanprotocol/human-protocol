@@ -23,6 +23,7 @@ import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
 import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/module';
+import { NDAModule } from './modules/nda/nda.module';
 import { StorageModule } from './modules/storage/storage.module';
 import Environment from './utils/environment';
 
@@ -62,6 +63,8 @@ import Environment from './utils/environment';
     AuthModule,
     CronJobModule,
     EmailModule,
+    UserModule,
+    NDAModule,
     EscrowCompletionModule,
     HealthModule,
     KycModule,
