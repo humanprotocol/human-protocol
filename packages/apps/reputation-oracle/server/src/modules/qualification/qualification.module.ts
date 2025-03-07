@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user';
 
 import { QualificationService } from './qualification.service';
 import { QualificationRepository } from './qualification.repository';

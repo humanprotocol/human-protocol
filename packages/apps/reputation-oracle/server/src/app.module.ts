@@ -26,7 +26,7 @@ import { QualificationModule } from './modules/qualification/qualification.modul
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
-import { UserModule } from './modules/user/user.module';
+import { UserModule } from './modules/user';
 import { EmailModule } from './modules/email/module';
 import { NDAModule } from './modules/nda/nda.module';
 import { StorageModule } from './modules/storage/storage.module';

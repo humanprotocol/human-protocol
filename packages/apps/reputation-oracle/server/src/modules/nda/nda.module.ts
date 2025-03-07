@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { NDAController } from './nda.controller';
 import { NDAService } from './nda.service';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user';
 
 @Module({
   imports: [UserModule],
