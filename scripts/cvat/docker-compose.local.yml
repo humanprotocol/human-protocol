@@ -245,7 +245,6 @@ services:
       PORT: *backend_apps_internal_port
       POSTGRES_DATABASE: reputation-oracle
       S3_BUCKET: *bucket_name_rep_o
-      KYC_API_PRIVATE_KEY: ${KYC_API_PRIVATE_KEY:-none}
       HUMAN_APP_EMAIL: *human_app_email
       # It is accessed by user, not from container
       # so put here exposed port, not internal
