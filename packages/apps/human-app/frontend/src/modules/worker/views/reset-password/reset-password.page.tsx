@@ -18,7 +18,7 @@ import {
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { routerPaths } from '@/router/router-paths';
-import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 
 export function ResetPasswordWorkerPage() {

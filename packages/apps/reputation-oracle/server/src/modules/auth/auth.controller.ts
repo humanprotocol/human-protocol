@@ -19,8 +19,8 @@ import {
 import { Public } from '../../common/decorators';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
-import { HCaptchaGuard } from '../../common/guards/hcaptcha';
 import { RequestWithUser } from '../../common/interfaces/request';
+import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
 import { TokenRepository } from './token.repository';
 import { TokenType } from './token.entity';
 import { AuthControllerErrorsFilter } from './auth.error.filter';
@@ -40,7 +40,7 @@ import {
 @ApiTags('Auth')
 @Controller('/auth')
 @UseFilters(AuthControllerErrorsFilter)
-export class AuthJwtController {
+export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenRepository: TokenRepository,

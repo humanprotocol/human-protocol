@@ -1,30 +1,29 @@
 import {
-  BaseEntity as OrmBaseEntity,
   BeforeInsert,
   BeforeUpdate,
   Column,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export abstract class BaseEntity extends OrmBaseEntity {
+export abstract class BaseEntity {
   @PrimaryGeneratedColumn()
-  public id: number;
+  id: number;
 
   @Column({ type: 'timestamptz' })
-  public createdAt: Date;
+  createdAt: Date;
 
   @Column({ type: 'timestamptz' })
-  public updatedAt: Date;
+  updatedAt: Date;
 
   @BeforeInsert()
-  public beforeInsert(): void {
+  protected beforeInsert(): void {
     const date = new Date();
     this.createdAt = date;
     this.updatedAt = date;
   }
 
   @BeforeUpdate()
-  public beforeUpdate(): void {
+  protected beforeUpdate(): void {
     const date = new Date();
     this.updatedAt = date;
   }

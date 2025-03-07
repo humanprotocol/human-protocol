@@ -16,13 +16,15 @@ import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
 import { PayoutModule } from './modules/payout/payout.module';
 import { EnvConfigModule } from './config/config.module';
-import { HCaptchaModule } from './integrations/hcaptcha/hcaptcha.module';
 import { ExceptionFilter } from './common/filters/exception.filter';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
+import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/module';
+import { NDAModule } from './modules/nda/nda.module';
+import { StorageModule } from './modules/storage/storage.module';
 import Environment from './utils/environment';
 
 @Module({
@@ -42,21 +44,6 @@ import Environment from './utils/environment';
   ],
   imports: [
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot({
-      /**
-       * First value found takes precendece
-       */
-      envFilePath: [`.env.${Environment.name}`, '.env'],
-      validationSchema: envValidator,
-    }),
-    DatabaseModule,
-    HealthModule,
-    ReputationModule,
-    WebhookIncomingModule,
-    WebhookOutgoingModule,
-    Web3Module,
-    AuthModule,
-    KycModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
@@ -64,13 +51,31 @@ import Environment from './utils/environment';
         'node_modules/swagger-ui-dist',
       ),
     }),
-    CronJobModule,
-    PayoutModule,
+    ConfigModule.forRoot({
+      /**
+       * First value found takes precendece
+       */
+      envFilePath: [`.env.${Environment.name}`, '.env'],
+      validationSchema: envValidator,
+    }),
     EnvConfigModule,
-    HCaptchaModule,
-    QualificationModule,
-    EscrowCompletionModule,
+    DatabaseModule,
+    AuthModule,
+    CronJobModule,
     EmailModule,
+    UserModule,
+    NDAModule,
+    EscrowCompletionModule,
+    HealthModule,
+    KycModule,
+    PayoutModule,
+    QualificationModule,
+    ReputationModule,
+    StorageModule,
+    UserModule,
+    Web3Module,
+    WebhookIncomingModule,
+    WebhookOutgoingModule,
   ],
 })
 export class AppModule {}

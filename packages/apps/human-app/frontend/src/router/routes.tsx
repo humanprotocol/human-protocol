@@ -5,34 +5,38 @@ import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-rese
 import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
 import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/send-reset-link.page';
 import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-password/reset-password-success.page';
-import { JobsDiscoveryPage } from '@/modules/worker/views/jobs-discovery/jobs-discovery.page';
 import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
-import { WorkerProfilePage } from '@/modules/worker/components/profile/profile.page';
 import {
   HandIcon,
   ProfileIcon,
   WorkHeaderIcon,
 } from '@/shared/components/ui/icons';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
-import { SetUpOperatorPage } from '@/modules/operator/views/sign-up/set-up-operator.page';
-import { EditExistingKeysSuccessPage } from '@/modules/operator/views/sign-up/edit-existing-keys-success.page';
-import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.page';
-import { VerifyEmailWorkerPage } from '@/modules/worker/views/email-verification/verify-email.page';
-import { EmailVerificationWorkerPage } from '@/modules/worker/views/email-verification/email-verification.page';
-import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
-import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
-import { OperatorProfilePage } from '@/modules/operator/views/profile/profile.page';
 import { Playground } from '@/modules/playground/views/playground.page';
-import { HomePage } from '@/modules/homepage/views/home.page';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
   EnableLabelerPage,
 } from '@/modules/worker/hcaptcha-labeling';
-import { SignUpWorkerPage } from '@/modules/signup/worker';
+import {
+  WorkerEmailVerificationProcessPage,
+  WorkerVerifyEmailPage,
+} from '@/modules/worker/email-verification';
 import { SignInWorkerPage } from '@/modules/signin/worker';
+import { JobsDiscoveryPage } from '@/modules/worker/jobs-discovery';
+import { WorkerProfilePage } from '@/modules/worker/profile';
+import { SignUpWorkerPage } from '@/modules/signup/worker';
+import { OperatorProfilePage } from '@/modules/operator/profile';
+import { HomePage } from '@/modules/homepage';
+import {
+  AddKeysOperatorPage,
+  AddStakeOperatorPage,
+  ConnectWalletOperatorPage,
+  EditExistingKeysSuccessPage,
+  SetUpOperatorPage,
+} from '@/modules/signup/operator';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
@@ -57,11 +61,11 @@ export const unprotectedRoutes: RouteProps[] = [
   },
   {
     path: routerPaths.worker.emailVerification,
-    element: <EmailVerificationWorkerPage />,
+    element: <WorkerEmailVerificationProcessPage />,
   },
   {
     path: routerPaths.worker.verifyEmail,
-    element: <VerifyEmailWorkerPage />,
+    element: <WorkerVerifyEmailPage />,
   },
   {
     path: routerPaths.worker.sendResetLink,

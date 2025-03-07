@@ -154,7 +154,10 @@
     "emailVerification": {
       "title": "Email Verified",
       "description": "You are ready to go. Your email has been successfully verified!",
-      "btn": "Sign In"
+      "btn": "Sign In",
+      "errors": {
+        "noToken": "No token provided."
+      }
     },
     "sendResetLinkForm": {
       "fields": {
@@ -173,7 +176,8 @@
       "paragraph3": "<1>Can't find our email?</1> Please check your spam folder, or click below and we will send you a new one.",
       "btn": "Resend Email",
       "btnAfterSend": "Resend Email",
-      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>"
+      "paragraph4": "<1>Having trouble?</1> Please <2>Contact Support</2>",
+      "successResent": "Verification email has been successfully resent."
     },
     "resetPassword": {
       "fields": {
@@ -217,7 +221,10 @@
       "oracleAddress": "Oracle address",
       "jobTypes": "Task types",
       "seeJobs": "See Tasks",
-      "allJobs": "All tasks"
+      "allJobs": "All tasks",
+      "error": {
+        "gettingOracles": "There was an error while fetching oracles, please try again later."
+      }
     },
     "registrationInExchangeOracle": {
       "requiredMessage": "This oracle requires a registration process. Click on the button below to see the registration tutorial:",
@@ -335,7 +342,7 @@
     },
     "connectWallet": {
       "title": "Setup Operator",
-      "description": "Please use the button bellow to connect your wallet and sign up as an operator.",
+      "description": "Please use the button below to connect your wallet and sign up as an operator.",
       "connect": "Connect Wallet",
       "disconnect": "Disconnect",
       "successAlert": "Wallet successfully connected",
@@ -345,7 +352,7 @@
       "title": "Setup Operator",
       "formHeader": "Stake",
       "label": "Staked amount",
-      "description": "Please add bellow the amount to stake",
+      "description": "Please add the amount to stake below",
       "actionBtn": "Add Stake",
       "nextBtn": "Next",
       "skipBtn": "Skip"
@@ -355,7 +362,7 @@
       "skipBtn": "Skip",
       "nextBtn": "Next",
       "label": "Stake amount",
-      "description": "Please add bellow the amount to stake",
+      "description": "Please add the amount to stake below",
       "successAlert": "You have successfully staked {{amount}} HMT",
       "invalidDecimals": "Incorrect decimal expansion. HMT token has {{decimals}} decimals"
     },

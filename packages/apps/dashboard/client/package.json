@@ -7,7 +7,6 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "test": "vitest -u",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
@@ -17,7 +16,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@human-protocol/sdk": "*",
-    "@mui/icons-material": "^6.2.0",
+    "@mui/icons-material": "^6.4.6",
     "@mui/material": "^5.15.18",
     "@mui/styled-engine-sc": "6.4.0",
     "@mui/x-data-grid": "^7.23.2",
@@ -54,7 +53,7 @@
     "sass": "^1.85.0",
     "stylelint-prettier": "^5.0.0",
     "typescript": "^5.6.3",
-    "vite": "^5.4.7",
+    "vite": "^6.2.0",
     "vite-plugin-svgr": "^4.2.0"
   }
 }

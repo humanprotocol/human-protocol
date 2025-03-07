@@ -1,5 +1,3 @@
-import { Web3Env } from '../src/common/enums/web3';
-
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
 export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
@@ -98,6 +96,7 @@ export const MOCK_WEB3_RPC_URL = 'http://localhost:8545';
 export const MOCK_QUALIFICATION_MIN_VALIDITY = 100;
 export const MOCK_FE_URL = 'http://localhost:3001';
 export const MOCK_KYC_API_PRIVATE_KEY = 'api-private-key';
+export const MOCK_NDA_URL = 'https://staging.humanprotocol.org/nda';
 
 export const mockConfig: any = {
   S3_ACCESS_KEY: MOCK_S3_ACCESS_KEY,
@@ -118,7 +117,7 @@ export const mockConfig: any = {
   SENDGRID_API_KEY: MOCK_SENDGRID_API_KEY,
   SENDGRID_FROM_EMAIL: MOCK_SENDGRID_FROM_EMAIL,
   SENDGRID_FROM_NAME: MOCK_SENDGRID_FROM_NAME,
-  WEB3_ENV: Web3Env.TESTNET,
+  WEB3_ENV: 'testnet',
   QUALIFICATION_MIN_VALIDITY: 1,
   FE_URL: MOCK_FE_URL,
   HCAPTCHA_SITE_KEY: MOCK_HCAPTCHA_SITE_KEY,
@@ -128,6 +127,7 @@ export const mockConfig: any = {
   HCAPTCHA_LABELING_URL: MOCK_HCAPTCHA_LABELING_URL,
   HCAPTCHA_DEFAULT_LABELER_LANG: MOCK_HCAPTCHA_DEFAULT_LABELER_LANG,
   KYC_API_PRIVATE_KEY: MOCK_KYC_API_PRIVATE_KEY,
+  NDA_URL: MOCK_NDA_URL,
 };
 
 export const MOCK_BACKOFF_INTERVAL_SECONDS = 120;

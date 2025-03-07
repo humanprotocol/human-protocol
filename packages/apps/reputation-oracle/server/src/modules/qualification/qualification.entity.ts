@@ -1,9 +1,9 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
-import { NS } from '../../common/constants';
+import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
 
-@Entity({ schema: NS, name: 'qualifications' })
+@Entity({ schema: DATABASE_SCHEMA_NAME, name: 'qualifications' })
 @Index(['reference'], { unique: true })
 export class QualificationEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true })

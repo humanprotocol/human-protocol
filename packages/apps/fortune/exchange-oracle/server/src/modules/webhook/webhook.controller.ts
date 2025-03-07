@@ -56,9 +56,7 @@ export class WebhookController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  public async processWebhook(
-    @Body() body: WebhookDto,
-  ): Promise<void> {
+  public async processWebhook(@Body() body: WebhookDto): Promise<void> {
     return this.webhookService.handleWebhook(body);
   }
 }

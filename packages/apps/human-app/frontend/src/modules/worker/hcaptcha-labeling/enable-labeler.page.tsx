@@ -4,13 +4,13 @@ import { t } from 'i18next';
 import Typography from '@mui/material/Typography';
 import { Navigate } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { useEnableHCaptchaLabelingMutation } from '@/modules/worker/services/enable-hcaptcha-labeling';
 import { Button } from '@/shared/components/ui/button';
 import { PageCardError } from '@/shared/components/ui/page-card';
 import { getErrorMessageForError } from '@/shared/errors';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { routerPaths } from '@/router/router-paths';
+import { useEnableHCaptchaLabelingMutation } from './hooks';
 
 export function EnableLabelerPage() {
   const isMobile = useIsMobile();
