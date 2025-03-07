@@ -91,7 +91,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
       where: {
         userId,
         status: Not(In([JobStatus.COMPLETED, JobStatus.CANCELED])),
-        payment: {
+        payments: {
           source: paymentSource,
         },
       },
@@ -106,12 +106,7 @@ export class JobRepository extends BaseRepository<JobEntity> {
 
     switch (data.status) {
       case JobStatusFilter.PENDING:
-        statusFilter = [
-          JobStatus.PENDING,
-          JobStatus.PAID,
-          JobStatus.CREATED,
-          JobStatus.FUNDED,
-        ];
+        statusFilter = [JobStatus.PAID, JobStatus.CREATED, JobStatus.FUNDED];
         break;
       case JobStatusFilter.CANCELED:
         statusFilter = [JobStatus.TO_CANCEL, JobStatus.CANCELED];

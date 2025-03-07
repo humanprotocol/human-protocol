@@ -69,7 +69,7 @@ export class JobEntity extends BaseEntity implements IJob {
   public userId: number;
 
   @OneToMany(() => PaymentEntity, (payment) => payment.job)
-  public payment: PaymentEntity;
+  public payments: PaymentEntity[];
 
   @Column({ type: 'int', default: 0 })
   public retriesCount: number;
