@@ -620,8 +620,8 @@ class AudinoDatasetComparator:
 
     def word_error_rate(self, gt_sentence: str, ds_sentence: str) -> float:
         """Calculate Word Error Rate (WER)."""
-        gt_words = gt_sentence.split()
-        ds_words = ds_sentence.split()
+        gt_words = str(gt_sentence).split()
+        ds_words = str(ds_sentence).split()
 
         # Dynamic programming approach for WER calculation
         dp = [[0] * (len(ds_words) + 1) for _ in range(len(gt_words) + 1)]

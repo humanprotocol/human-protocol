@@ -9,7 +9,6 @@ import datumaro as dm
 
 class TaskMetaLayout:
     GT_FILENAME = "gt.json"
-    AUDINO_GT_FILENAME = "gt.tsv"
 
 
 class TaskMetaSerializer:
