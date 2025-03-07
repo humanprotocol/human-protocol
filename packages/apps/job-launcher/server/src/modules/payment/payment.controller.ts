@@ -477,7 +477,7 @@ export class PaymentController {
     status: 400,
     description: 'Bad Request. Invalid chainId.',
   })
-  @Get('/fund-tokens/:chainId')
+  @Get('/tokens/:chainId')
   public async getTokens(
     @Param('chainId') chainId: ChainId,
   ): Promise<{ [key: string]: string }> {

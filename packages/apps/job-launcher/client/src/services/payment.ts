@@ -71,7 +71,7 @@ export const getFee = async () => {
 };
 
 export const getTokensAvailable = async (chainId: ChainId) => {
-  const { data } = await api.get(`/payment/fund-tokens/${chainId}`);
+  const { data } = await api.get(`/payment/tokens/${chainId}`);
 
   return data;
 };
