@@ -13,7 +13,7 @@ import { PageCard } from '@/shared/components/ui/page-card';
 import { env } from '@/shared/env';
 import { getErrorMessageForError } from '@/shared/errors';
 import { Alert } from '@/shared/components/ui/alert';
-import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
+import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { FetchError } from '@/api/fetcher';
 import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';

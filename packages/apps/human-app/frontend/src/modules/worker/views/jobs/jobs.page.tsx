@@ -10,7 +10,7 @@ import { MyJobsTableMobile } from '@/modules/worker/components/jobs/my-jobs/mobi
 import { AvailableJobsTable } from '@/modules/worker/components/jobs/available-jobs/desktop/available-jobs-table';
 import { MyJobsDrawerMobile } from '@/modules/worker/components/jobs/my-jobs/mobile/my-jobs-drawer-mobile';
 import { AvailableJobsDrawerMobile } from '@/modules/worker/components/jobs/available-jobs/mobile/available-jobs-drawer-mobile';
-import { useGetOracles } from '@/modules/worker/services/oracles';
+import { useGetOracles } from '@/modules/worker/jobs-discovery';
 import { useGetUiConfig } from '@/modules/worker/services/get-ui-config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';

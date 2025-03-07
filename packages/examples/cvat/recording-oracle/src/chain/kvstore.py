@@ -13,7 +13,7 @@ def get_exchange_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     escrow = get_escrow(chain_id, escrow_address)
 
-    return OperatorUtils.get_leader(ChainId(chain_id), escrow.exchange_oracle).webhook_url
+    return OperatorUtils.get_operator(ChainId(chain_id), escrow.exchange_oracle).webhook_url
 
 
 def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
@@ -22,7 +22,7 @@ def get_reputation_oracle_url(chain_id: int, escrow_address: str) -> str:
 
     escrow = get_escrow(chain_id, escrow_address)
 
-    return OperatorUtils.get_leader(ChainId(chain_id), escrow.reputation_oracle).webhook_url
+    return OperatorUtils.get_operator(ChainId(chain_id), escrow.reputation_oracle).webhook_url
 
 
 def register_in_kvstore() -> None:

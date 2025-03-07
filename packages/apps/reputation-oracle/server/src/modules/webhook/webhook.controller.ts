@@ -15,10 +15,10 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
+import { AuthSignatureRole, SignatureAuthGuard } from '../../common/guards';
+
 import { WebhookIncomingService } from './webhook-incoming.service';
-import { AuthSignatureRole } from '../../common/enums/role';
 import { IncomingWebhookDto } from './webhook.dto';
 import { IncomingWebhookErrorFilter } from './webhook.error.filter';
 
@@ -45,7 +45,7 @@ export class WebhookController {
     status: 202,
     description: 'Incoming webhook accepted successfully',
   })
-  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.Recording]))
+  @UseGuards(new SignatureAuthGuard([AuthSignatureRole.RECORDING_ORACLE]))
   @Post('/')
   @HttpCode(202)
   public async createIncomingWebhook(

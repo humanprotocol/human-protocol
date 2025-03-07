@@ -70,7 +70,6 @@ import {
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
-import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
   HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
@@ -114,7 +113,7 @@ import {
 import { WebhookEntity } from '../webhook/webhook.entity';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { ControlledError } from '../../common/errors/controlled';
-import { RateService } from '../payment/rate.service';
+import { RateService } from '../rate/rate.service';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { CronJobType } from '../../common/enums/cron-job';
 import { CronJobRepository } from '../cron-job/cron-job.repository';
@@ -122,6 +121,7 @@ import { ModuleRef } from '@nestjs/core';
 import { QualificationService } from '../qualification/qualification.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { UserEntity } from '../user/user.entity';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 
 @Injectable()
 export class JobService {

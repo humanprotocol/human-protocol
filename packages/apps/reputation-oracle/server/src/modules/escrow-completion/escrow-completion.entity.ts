@@ -1,11 +1,11 @@
 import { Column, Entity, Index } from 'typeorm';
 
-import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
+import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { EscrowCompletionStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
-@Entity({ schema: NS, name: 'escrow_completion_tracking' })
+@Entity({ schema: DATABASE_SCHEMA_NAME, name: 'escrow_completion_tracking' })
 @Index(['escrowAddress', 'chainId'], { unique: true })
 export class EscrowCompletionEntity extends BaseEntity {
   @Column({ type: 'int' })

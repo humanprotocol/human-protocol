@@ -5,7 +5,7 @@ import { handleErrorMessage } from '@services/handle-error-message';
 import CircularProgress from '@mui/material/CircularProgress';
 import { EscrowsTableBodyContainer } from '@pages/SearchResults/RoleDetails/RoleDetailsEscrows/tableComponents/EscrowsTableBodyContainer';
 import { useEscrowDetails } from '@services/api/use-escrows-details';
-import { AddressDetailsLeader } from '@services/api/use-address-details';
+import { AddressDetailsOperator } from '@services/api/use-address-details';
 import { useEscrowDetailsDto } from '@utils/hooks/use-escrows-details-dto';
 import { useWalletSearch } from '@utils/hooks/use-wallet-search';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ import Link from '@mui/material/Link';
 export const EscrowsTableBody = ({
   role,
 }: {
-  role: AddressDetailsLeader['role'];
+  role: AddressDetailsOperator['role'];
 }) => {
   const navigate = useNavigate();
   const { filterParams } = useWalletSearch();

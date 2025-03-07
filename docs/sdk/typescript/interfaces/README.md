@@ -6,20 +6,16 @@
 
 # interfaces
 
-## Index
-
-### Interfaces
+## Interfaces
 
 - [IEscrowConfig](interfaces/IEscrowConfig.md)
 - [IEscrowsFilter](interfaces/IEscrowsFilter.md)
 - [IHMTHoldersParams](interfaces/IHMTHoldersParams.md)
 - [IKeyPair](interfaces/IKeyPair.md)
 - [IKVStore](interfaces/IKVStore.md)
-- [ILeader](interfaces/ILeader.md)
-- [ILeadersFilter](interfaces/ILeadersFilter.md)
-- [ILeaderSubgraph](interfaces/ILeaderSubgraph.md)
 - [InternalTransaction](interfaces/InternalTransaction.md)
 - [IOperator](interfaces/IOperator.md)
+- [IOperatorsFilter](interfaces/IOperatorsFilter.md)
 - [IOperatorSubgraph](interfaces/IOperatorSubgraph.md)
 - [IPagination](interfaces/IPagination.md)
 - [IPayoutFilter](interfaces/IPayoutFilter.md)

@@ -43,6 +43,8 @@ import { EnvironmentConfigService } from './common/config/environment-config.ser
 import { ForbidUnauthorizedHostMiddleware } from './common/middleware/host-check.middleware';
 import { HealthModule } from './modules/health/health.module';
 import { UiConfigurationModule } from './modules/ui-configuration/ui-configuration.module';
+import { NDAModule } from './modules/nda/nda.module';
+import { NDAController } from './modules/nda/nda.controller';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -125,6 +127,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     CronJobModule,
     HealthModule,
     UiConfigurationModule,
+    NDAModule,
   ],
   controllers: [
     AppController,
@@ -137,6 +140,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     HCaptchaController,
     RegisterAddressController,
     TokenRefreshController,
+    NDAController,
   ],
   exports: [HttpModule],
   providers: [EnvironmentConfigService],

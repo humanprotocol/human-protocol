@@ -3,11 +3,6 @@ import crypto from 'crypto';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
-import { Injectable } from '@nestjs/common';
-import { EscrowCompletionStatus, EventType } from '../../common/enums';
-import { ServerConfigService } from '../../config/server-config.service';
-import { EscrowCompletionRepository } from './escrow-completion.repository';
-import { EscrowCompletionEntity } from './escrow-completion.entity';
 import {
   ESCROW_BULK_PAYOUT_MAX_ITEMS,
   ChainId,
@@ -15,12 +10,16 @@ import {
   EscrowStatus,
   OperatorUtils,
 } from '@human-protocol/sdk';
+import { Injectable } from '@nestjs/common';
+import { EscrowCompletionStatus, EventType } from '../../common/enums';
+import { ServerConfigService } from '../../config/server-config.service';
+import { EscrowCompletionRepository } from './escrow-completion.repository';
+import { EscrowCompletionEntity } from './escrow-completion.entity';
 import { calculateExponentialBackoffMs } from '../../utils/backoff';
 import {
   BACKOFF_INTERVAL_SECONDS,
   DEFAULT_BULK_PAYOUT_TX_ID,
 } from '../../common/constants';
-import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { PayoutService } from '../payout/payout.service';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
@@ -34,7 +33,7 @@ import logger from '../../logger';
 @Injectable()
 export class EscrowCompletionService {
   private readonly logger = logger.child({
-    context: WebhookIncomingService.name,
+    context: EscrowCompletionService.name,
   });
 
   constructor(
@@ -226,7 +225,7 @@ export class EscrowCompletionService {
         let allWebhooksCreated = true;
 
         for (const oracleAddress of oracleAddresses) {
-          const oracleData = await OperatorUtils.getLeader(
+          const oracleData = await OperatorUtils.getOperator(
             chainId,
             oracleAddress,
           );

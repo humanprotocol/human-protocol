@@ -40,7 +40,7 @@ export const MainnetChainsIds = [
 export type TestnetNarrow = Exclude<ChainId, (typeof MainnetChainsIds)[number]>;
 export type MainnetNarrow = Exclude<ChainId, (typeof TestnetChainsIds)[number]>;
 
-export const TestnetChains: ChainWithAddresses[] = [
+export const TestnetChains: readonly ChainWithAddresses[] = [
   {
     chainId: 80002,
     name: 'Amoy',
@@ -50,7 +50,7 @@ export const TestnetChains: ChainWithAddresses[] = [
   },
 ];
 
-export const MainnetChains: ChainWithAddresses[] = [
+export const MainnetChains: readonly ChainWithAddresses[] = [
   {
     chainId: 137,
     name: 'Polygon',

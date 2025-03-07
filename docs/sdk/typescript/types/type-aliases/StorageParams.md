@@ -8,6 +8,8 @@
 
 > **StorageParams**: `object`
 
+Defined in: [types.ts:54](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L54)
+
 ## Type declaration
 
 ### ~~endPoint~~
@@ -37,7 +39,3 @@ Enable secure (HTTPS) access. Default value set to false
 ## Deprecated
 
 StorageClient is deprecated. Use Minio.Client directly.
-
-## Defined in
-
-[types.ts:54](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/types.ts#L54)

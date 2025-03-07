@@ -1,4 +1,5 @@
 import * as Joi from 'joi';
+import { Web3Network } from './web3-config.service';
 
 export const envValidator = Joi.object({
   // General
@@ -7,6 +8,7 @@ export const envValidator = Joi.object({
   FE_URL: Joi.string(),
   MAX_RETRY_COUNT: Joi.number(),
   QUALIFICATION_MIN_VALIDITY: Joi.number(),
+  NDA_URL: Joi.string().required(),
   // Auth
   JWT_PRIVATE_KEY: Joi.string().required(),
   JWT_PUBLIC_KEY: Joi.string().required(),
@@ -14,6 +16,7 @@ export const envValidator = Joi.object({
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.number(),
   VERIFY_EMAIL_TOKEN_EXPIRES_IN: Joi.number(),
   FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number(),
+  // hCaptcha
   HCAPTCHA_SITE_KEY: Joi.string().required(),
   HCAPTCHA_SECRET: Joi.string().required(),
   HCAPTCHA_PROTECTION_URL: Joi.string().description(
@@ -34,7 +37,7 @@ export const envValidator = Joi.object({
   POSTGRES_URL: Joi.string(),
   POSTGRES_LOGGING: Joi.string(),
   // Web3
-  WEB3_ENV: Joi.string(),
+  WEB3_ENV: Joi.string().valid(...Object.values(Web3Network)),
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number(),
   RPC_URL_SEPOLIA: Joi.string(),

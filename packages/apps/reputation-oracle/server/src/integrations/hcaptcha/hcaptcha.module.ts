@@ -1,10 +1,13 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { HCaptchaService } from './hcaptcha.service';
 import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
+import { HCaptchaService } from './hcaptcha.service';
 
 @Module({
-  imports: [ConfigModule, HttpModule],
+  imports: [
+    HttpModule.register({
+      validateStatus: () => true,
+    }),
+  ],
   providers: [HCaptchaService],
   exports: [HCaptchaService],
 })

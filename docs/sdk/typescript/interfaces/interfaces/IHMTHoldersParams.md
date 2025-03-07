@@ -6,6 +6,8 @@
 
 # Interface: IHMTHoldersParams
 
+Defined in: [interfaces.ts:102](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L102)
+
 ## Extends
 
 - [`IPagination`](IPagination.md)
@@ -16,9 +18,7 @@
 
 > `optional` **address**: `string`
 
-#### Defined in
-
-[interfaces.ts:107](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L107)
+Defined in: [interfaces.ts:103](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L103)
 
 ***
 
@@ -26,13 +26,11 @@
 
 > `optional` **first**: `number`
 
+Defined in: [interfaces.ts:153](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L153)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`first`](IPagination.md#first)
-
-#### Defined in
-
-[interfaces.ts:157](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L157)
 
 ***
 
@@ -40,13 +38,11 @@
 
 > `optional` **orderDirection**: [`OrderDirection`](../../enums/enumerations/OrderDirection.md)
 
+Defined in: [interfaces.ts:155](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L155)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`orderDirection`](IPagination.md#orderdirection)
-
-#### Defined in
-
-[interfaces.ts:159](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L159)
 
 ***
 
@@ -54,10 +50,8 @@
 
 > `optional` **skip**: `number`
 
+Defined in: [interfaces.ts:154](https://github.com/humanprotocol/human-protocol/blob/06afdec15d4185a13ccdd98fd231f6651db0e480/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L154)
+
 #### Inherited from
 
 [`IPagination`](IPagination.md).[`skip`](IPagination.md#skip)
-
-#### Defined in
-
-[interfaces.ts:158](https://github.com/humanprotocol/human-protocol/blob/b718aa9d178d605c5b27fec98a4e6afa6f1db599/packages/sdk/typescript/human-protocol-sdk/src/interfaces.ts#L158)

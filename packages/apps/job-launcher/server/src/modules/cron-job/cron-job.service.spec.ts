@@ -48,11 +48,10 @@ import { CvatManifestDto } from '../job/job.dto';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
 import { JobService } from '../job/job.service';
-import { RoutingProtocolService } from '../job/routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
-import { RateService } from '../payment/rate.service';
 import { QualificationService } from '../qualification/qualification.service';
+import { RateService } from '../rate/rate.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookEntity } from '../webhook/webhook.entity';
@@ -62,6 +61,7 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobService } from './cron-job.service';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),

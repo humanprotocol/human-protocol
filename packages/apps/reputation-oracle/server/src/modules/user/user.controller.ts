@@ -16,6 +16,13 @@ import {
   Get,
   UseFilters,
 } from '@nestjs/common';
+import { Public } from '../../common/decorators';
+import { JwtAuthGuard } from '../../common/guards';
+import { SignatureType } from '../../common/enums/web3';
+import { RequestWithUser } from '../../common/interfaces/request';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
+import { prepareSignatureBody } from '../../utils/web3';
 import {
   DisableOperatorDto,
   PrepareSignatureDto,
@@ -27,16 +34,8 @@ import {
   RegistrationInExchangeOraclesDto,
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
-import { JwtAuthGuard } from '../../common/guards';
-import { HCaptchaGuard } from '../../common/guards/hcaptcha';
-import { RequestWithUser } from '../../common/interfaces/request';
-import { prepareSignatureBody } from '../../utils/web3';
 import { UserService } from './user.service';
-import { Public } from '../../common/decorators';
-import { KycSignedAddressDto } from '../kyc/kyc.dto';
-import { Web3Service } from '../web3/web3.service';
 import { UserRepository } from './user.repository';
-import { SignatureType } from '../../common/enums/web3';
 import { UserErrorFilter } from './user.error.filter';
 
 /**
@@ -54,7 +53,7 @@ import { UserErrorFilter } from './user.error.filter';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly web3Service: Web3Service,
+    private readonly web3ConfigService: Web3ConfigService,
     private readonly userRepository: UserRepository,
   ) {}
 
@@ -86,7 +85,6 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Blockchain address registered successfully',
-    type: KycSignedAddressDto,
   })
   @ApiResponse({
     status: 409,
@@ -98,12 +96,8 @@ export class UserController {
   async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
-  ): Promise<KycSignedAddressDto> {
-    const registrationResult = await this.userService.registerAddress(
-      request.user,
-      data,
-    );
-    return registrationResult;
+  ): Promise<void> {
+    await this.userService.registerAddress(request.user, data);
   }
 
   @ApiOperation({
@@ -168,7 +162,7 @@ export class UserController {
 
     const preparedSignatureBody = await prepareSignatureBody({
       from: data.address,
-      to: this.web3Service.getOperatorAddress(),
+      to: this.web3ConfigService.operatorAddress,
       contents: data.type,
       nonce,
     });
