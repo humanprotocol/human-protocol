@@ -6,8 +6,6 @@ import {
 } from './gcstorage';
 import { ErrorBucket } from '../constants/errors';
 
-jest.mock('axios');
-
 describe('Google Cloud Storage utils', () => {
   describe('isGCSBucketUrl', () => {
     it('should return true for a valid GCS HTTP URL', () => {

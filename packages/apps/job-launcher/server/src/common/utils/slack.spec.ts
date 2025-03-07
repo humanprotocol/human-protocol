@@ -5,13 +5,6 @@ export const MOCK_SLACK_ABUSE_NOTIFICATION_WEBHOOK_URL =
   'https://slack.com/webhook';
 
 jest.mock('axios');
-jest.mock('@nestjs/common', () => ({
-  Logger: jest.fn().mockImplementation(() => ({
-    log: jest.fn(),
-    error: jest.fn(),
-  })),
-}));
-
 describe('sendSlackNotification', () => {
   beforeEach(() => {
     jest.clearAllMocks();

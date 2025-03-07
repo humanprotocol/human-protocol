@@ -30,6 +30,7 @@ import { ContentModerationRequestEntity } from './content-moderation-request.ent
 import { ContentModerationRequestRepository } from './content-moderation-request.repository';
 import { IContentModeratorService } from './content-moderation.interface';
 import { ModerationResultDto } from './content-moderation.dto';
+import NodeCache from 'node-cache';
 
 @Injectable()
 export class GCVContentModerationService implements IContentModeratorService {
@@ -42,7 +43,7 @@ export class GCVContentModerationService implements IContentModeratorService {
    * Cache of GCS object listings by dataUrl
    * Key: dataUrl string, Value: array of valid file names
    */
-  private bucketListCache = new Map<string, string[]>();
+  private bucketListCache: NodeCache;
 
   constructor(
     private readonly jobRepository: JobRepository,
@@ -65,6 +66,12 @@ export class GCVContentModerationService implements IContentModeratorService {
         private_key: this.visionConfigService.privateKey,
         client_email: this.visionConfigService.clientEmail,
       },
+    });
+
+    // Initialize cache with expiration time of 1 hour and check period of 30 minutes
+    this.bucketListCache = new NodeCache({
+      stdTTL: 60 * 60,
+      checkperiod: 30 * 60,
     });
   }
 
@@ -159,10 +166,11 @@ export class GCVContentModerationService implements IContentModeratorService {
    */
   private async processModerationRequests(jobEntity: JobEntity): Promise<void> {
     try {
-      const requests = await this.getRequests(
-        jobEntity,
-        ContentModerationRequestStatus.PENDING,
-      );
+      const requests =
+        await this.contentModerationRequestRepository.findByJobIdAndStatus(
+          jobEntity.id,
+          ContentModerationRequestStatus.PENDING,
+        );
       await Promise.all(
         requests.map(async (requestEntity) => {
           try {
@@ -192,10 +200,11 @@ export class GCVContentModerationService implements IContentModeratorService {
    */
   private async parseModerationRequests(jobEntity: JobEntity): Promise<void> {
     try {
-      const requests = await this.getRequests(
-        jobEntity,
-        ContentModerationRequestStatus.PROCESSED,
-      );
+      const requests =
+        await this.contentModerationRequestRepository.findByJobIdAndStatus(
+          jobEntity.id,
+          ContentModerationRequestStatus.PROCESSED,
+        );
 
       await Promise.all(
         requests.map(async (requestEntity) => {
@@ -474,35 +483,18 @@ export class GCVContentModerationService implements IContentModeratorService {
   }
 
   /**
-   * Helper to retrieve requests from memory if loaded, or from DB if not
-   */
-  private async getRequests(
-    jobEntity: JobEntity,
-    status: ContentModerationRequestStatus,
-  ): Promise<ContentModerationRequestEntity[]> {
-    if (jobEntity.contentModerationRequests?.length) {
-      return jobEntity.contentModerationRequests.filter(
-        (r) => r.status === status,
-      );
-    }
-
-    return this.contentModerationRequestRepository.findByJobIdAndStatus(
-      jobEntity.id,
-      status,
-    );
-  }
-
-  /**
    * Caches GCS object listings so we don't repeatedly call listObjectsInBucket for the same dataUrl
    */
   private async getValidFiles(dataUrl: string): Promise<string[]> {
-    if (this.bucketListCache.has(dataUrl)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return this.bucketListCache.get(dataUrl)!;
+    const cacheEntry = this.bucketListCache.get<string[]>(dataUrl);
+    if (cacheEntry) {
+      return cacheEntry;
     }
+
     const allFiles = await listObjectsInBucket(new URL(dataUrl));
     const validFiles = allFiles.filter((f) => f && !f.endsWith('/'));
     this.bucketListCache.set(dataUrl, validFiles);
+
     return validFiles;
   }
 }
