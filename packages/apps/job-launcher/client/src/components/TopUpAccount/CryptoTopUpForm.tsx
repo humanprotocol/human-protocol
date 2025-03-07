@@ -15,7 +15,7 @@ import React, { useMemo, useState } from 'react';
 import { Address } from 'viem';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
-import { NETWORK_TOKENS, SUPPORTED_CHAIN_IDS } from '../../constants/chains';
+import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
@@ -27,18 +27,24 @@ export const CryptoTopUpForm = () => {
   const { isConnected, chain } = useAccount();
   const dispatch = useAppDispatch();
   const [tokenAddress, setTokenAddress] = useState<string>();
+  const [tokenSymbol, setTokenSymbol] = useState<string>();
   const [amount, setAmount] = useState<string>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const publicClient = usePublicClient();
   const { data: signer } = useWalletClient();
-  const { data: rate } = useTokenRate('hmt', 'usd');
+  const { data: rate } = useTokenRate(tokenSymbol || 'hmt', 'usd');
   const { showError } = useSnackbar();
 
   const totalAmount = useMemo(() => {
-    if (!amount) return 0;
+    if (!amount || !rate) return 0;
     return parseFloat(amount) * rate;
   }, [amount, rate]);
+
+  const handleTokenChange = (symbol: string, address: string) => {
+    setTokenSymbol(symbol);
+    setTokenAddress(address);
+  };
 
   const handleTopUpAccount = async () => {
     if (!signer || !chain || !tokenAddress || !amount) return;
@@ -115,15 +121,8 @@ export const CryptoTopUpForm = () => {
             )}
             <TokenSelect
               chainId={chain?.id}
-              value={tokenAddress}
-              onChange={(e) => {
-                const symbol = e.target.value as string;
-                setTokenAddress(
-                  NETWORK_TOKENS[chain?.id as keyof typeof NETWORK_TOKENS]?.[
-                    symbol.toLowerCase()
-                  ],
-                );
-              }}
+              value={tokenSymbol}
+              onTokenChange={handleTokenChange}
             />
             <FormControl fullWidth>
               <TextField
@@ -154,7 +153,9 @@ export const CryptoTopUpForm = () => {
                   justifyContent="space-between"
                   alignItems="center"
                 >
-                  <Typography color="text.secondary">HMT Price</Typography>
+                  <Typography color="text.secondary">
+                    {tokenSymbol?.toUpperCase()} Price
+                  </Typography>
                   <Typography color="text.secondary">
                     {rate?.toFixed(2)} USD
                   </Typography>

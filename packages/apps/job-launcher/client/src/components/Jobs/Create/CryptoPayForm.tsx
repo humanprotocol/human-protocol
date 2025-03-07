@@ -25,7 +25,6 @@ import {
   usePublicClient,
 } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
-import { NETWORK_TOKENS } from '../../../constants/chains';
 import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
@@ -55,7 +54,7 @@ export const CryptoPayForm = ({
   const { data: signer } = useWalletClient();
   const publicClient = usePublicClient();
   const { user } = useAppSelector((state) => state.auth);
-  const { data: rate } = useTokenRate('hmt', 'usd');
+  const { data: rate } = useTokenRate(tokenSymbol || 'hmt', 'usd');
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -102,6 +101,11 @@ export const CryptoPayForm = ({
     if (totalAmount < accountAmount) return 0;
     return totalAmount - accountAmount;
   }, [payWithAccountBalance, totalAmount, accountAmount]);
+
+  const handleTokenChange = (symbol: string, address: string) => {
+    setTokenSymbol(symbol);
+    setTokenAddress(address);
+  };
 
   const handlePay = async () => {
     if (signer && tokenAddress && amount && jobRequest.chainId && tokenSymbol) {
@@ -225,16 +229,8 @@ export const CryptoPayForm = ({
             )}
             <TokenSelect
               chainId={chain?.id}
-              value={tokenAddress}
-              onChange={(e) => {
-                const symbol = e.target.value as string;
-                setTokenSymbol(symbol);
-                setTokenAddress(
-                  NETWORK_TOKENS[
-                    jobRequest.chainId! as keyof typeof NETWORK_TOKENS
-                  ]?.[symbol.toLowerCase()],
-                );
-              }}
+              value={tokenSymbol}
+              onTokenChange={handleTokenChange}
             />
             <FormControl fullWidth>
               <TextField

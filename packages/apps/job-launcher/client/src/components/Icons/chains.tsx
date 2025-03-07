@@ -2,6 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { ReactElement } from 'react';
 
 import { BinanceSmartChainIcon } from './BinanceSmartChainIcon';
+import { DollarSignIcon } from './DollarSignIcon';
 import { EthereumIcon } from './EthereumIcon';
 import { HumanIcon } from './HumanIcon';
 import { PolygonIcon } from './PolygonIcon';
@@ -18,4 +19,6 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
 
 export const TOKEN_ICONS: Record<string, ReactElement> = {
   HMT: <HumanIcon />,
+  USDC: <DollarSignIcon />,
+  USDT: <DollarSignIcon />,
 };

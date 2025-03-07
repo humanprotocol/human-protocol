@@ -1,4 +1,4 @@
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Web3Env } from '../enums/web3';
@@ -8,13 +8,9 @@ import {
   TESTNET_CHAIN_IDS,
 } from '../constants';
 
-export interface TokensList {
-  [key: string]: string | undefined;
-}
 export interface NetworkDto {
   chainId: number;
   rpcUrl?: string;
-  tokens: TokensList;
 }
 
 interface NetworkMapDto {
@@ -34,10 +30,6 @@ export class NetworkConfigService {
            * The RPC URL for the Sepolia network.
            */
           rpcUrl: this.configService.get<string>('RPC_URL_SEPOLIA'),
-          tokens: {
-            hmt: NETWORKS[ChainId.SEPOLIA]?.hmtAddress,
-            usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-          },
         },
       }),
       ...(this.configService.get<string>('RPC_URL_POLYGON') && {
@@ -47,10 +39,6 @@ export class NetworkConfigService {
            * The RPC URL for the Polygon network.
            */
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON'),
-          tokens: {
-            hmt: NETWORKS[ChainId.POLYGON]?.hmtAddress,
-            usdt: '0x170a18b9190669cda08965562745a323c907e5ec',
-          },
         },
       }),
       ...(this.configService.get<string>('RPC_URL_POLYGON_AMOY') && {
@@ -60,9 +48,6 @@ export class NetworkConfigService {
            * The RPC URL for the Polygon Amoy network.
            */
           rpcUrl: this.configService.get<string>('RPC_URL_POLYGON_AMOY'),
-          tokens: {
-            hmt: NETWORKS[ChainId.POLYGON_AMOY]?.hmtAddress,
-          },
         },
       }),
       ...(this.configService.get<string>('RPC_URL_BSC_MAINNET') && {
@@ -72,10 +57,6 @@ export class NetworkConfigService {
            * The RPC URL for the BSC Mainnet network.
            */
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_MAINNET'),
-          tokens: {
-            hmt: NETWORKS[ChainId.BSC_MAINNET]?.hmtAddress,
-            usdt: '0x55d398326f99059fF775485246999027B3197955',
-          },
         },
       }),
       ...(this.configService.get<string>('RPC_URL_BSC_TESTNET') && {
@@ -85,9 +66,6 @@ export class NetworkConfigService {
            * The RPC URL for the BSC Testnet network.
            */
           rpcUrl: this.configService.get<string>('RPC_URL_BSC_TESTNET'),
-          tokens: {
-            hmt: NETWORKS[ChainId.BSC_TESTNET]?.hmtAddress,
-          },
         },
       }),
       ...(this.configService.get<string>('RPC_URL_LOCALHOST') && {
@@ -97,9 +75,6 @@ export class NetworkConfigService {
            * The RPC URL for the Localhost network.
            */
           rpcUrl: this.configService.get<string>('RPC_URL_LOCALHOST'),
-          tokens: {
-            hmt: NETWORKS[ChainId.LOCALHOST]?.hmtAddress,
-          },
         },
       }),
     };
