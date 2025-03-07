@@ -7,13 +7,8 @@ import {
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import {
-  OperatorStatus,
-  Role as UserRole,
-  UserStatus,
-} from '../../common/enums/user';
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
+import { OperatorStatus } from '../../common/enums/user';
+import { UserStatus, UserRole, UserEntity, UserService } from '../user';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../utils/web3';

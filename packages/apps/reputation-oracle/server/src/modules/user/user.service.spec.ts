@@ -1,15 +1,16 @@
-import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
+import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
+
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+import { DeepPartial } from 'typeorm';
+
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { RegistrationInExchangeOracleDto } from './user.dto';
-import { UserEntity } from './user.entity';
-import {
-  KycStatus,
-  OperatorStatus,
-  UserStatus,
-  Role,
-} from '../../common/enums/user';
+import { UserStatus, Role, UserEntity } from './user.entity';
+import { KycStatus, OperatorStatus } from '../../common/enums/user';
 import { signMessage, prepareSignatureBody } from '../../utils/web3';
 import {
   MOCK_ADDRESS,
@@ -17,9 +18,6 @@ import {
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
-import { DeepPartial } from 'typeorm';
-import { ChainId, KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
-import { ConfigService } from '@nestjs/config';
 import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../config/web3-config.service';
@@ -27,7 +25,6 @@ import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyEntity } from './site-key.entity';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
-import { HttpService } from '@nestjs/axios';
 import {
   UserError,
   UserErrorMessage,

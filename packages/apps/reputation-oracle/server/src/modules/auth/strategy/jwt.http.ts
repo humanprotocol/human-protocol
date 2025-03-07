@@ -2,14 +2,12 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
 
-import { UserEntity } from '../../user/user.entity';
 import {
   JWT_STRATEGY_NAME,
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
 } from '../../../common/constants';
-import { UserStatus } from '../../../common/enums/user';
-import { UserRepository } from '../../user/user.repository';
+import { UserEntity, UserStatus, UserRepository } from '../../user';
 import { AuthConfigService } from '../../../config/auth-config.service';
 import { TokenRepository } from '../token.repository';
 import { TokenType } from '../token.entity';

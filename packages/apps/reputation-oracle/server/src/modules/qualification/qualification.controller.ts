@@ -27,7 +27,7 @@ import { QualificationErrorFilter } from './qualification.error.filter';
 import { JwtAuthGuard, RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
 import { Roles } from '../../common/decorators';
-import { Role } from '../../common/enums/user';
+import { UserRole } from '../user';
 
 @ApiTags('Qualification')
 @Controller('qualifications')
@@ -44,7 +44,7 @@ export class QualificationController {
     type: QualificationDto,
   })
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
-  @Roles(Role.ADMIN)
+  @Roles(UserRole.ADMIN)
   @Post()
   @HttpCode(201)
   /**
@@ -87,7 +87,7 @@ export class QualificationController {
     description: 'Cannot delete qualification',
   })
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
-  @Roles(Role.ADMIN)
+  @Roles(UserRole.ADMIN)
   @Delete('/:reference')
   @HttpCode(204)
   async deleteQualification(
@@ -104,7 +104,7 @@ export class QualificationController {
   })
   @ApiResponse({ status: 422, description: 'No users found for operation' })
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
-  @Roles(Role.ADMIN)
+  @Roles(UserRole.ADMIN)
   @Post('/:reference/assign')
   @HttpCode(200)
   async assign(
@@ -125,7 +125,7 @@ export class QualificationController {
   })
   @ApiResponse({ status: 422, description: 'No users found for operation' })
   @UseGuards(JwtAuthGuard, RolesAuthGuard)
-  @Roles(Role.ADMIN)
+  @Roles(UserRole.ADMIN)
   @Post('/:reference/unassign')
   @HttpCode(200)
   async unassign(

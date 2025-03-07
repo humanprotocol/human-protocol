@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateQualificationDto, QualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { QualificationRepository } from './qualification.repository';
-import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
-import { UserStatus, Role } from '../../common/enums/user';
+import { UserEntity, UserRepository, UserStatus, UserRole } from '../user';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { ServerConfigService } from '../../config/server-config.service';
 import {
@@ -184,7 +182,7 @@ export class QualificationService {
   public async getWorkers(addresses: string[]): Promise<UserEntity[]> {
     const users = await this.userRepository.findByAddress(
       addresses,
-      Role.WORKER,
+      UserRole.WORKER,
       UserStatus.ACTIVE,
     );
 
