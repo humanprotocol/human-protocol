@@ -27,8 +27,8 @@ jobs:
       max-parallel: 3
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4 
         name: Set up Node.js
-      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
       - name: Filter Networks
