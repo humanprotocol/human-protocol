@@ -2879,7 +2879,7 @@ class AudinoTaskBuilder:
         data_filenames = data_bucket_client.list_files(prefix=data_bucket.path)
         data_filenames = filter_audio_files(data_filenames)
 
-        gt_file_data = gt_bucket_client.download_file('latest_gt/gt.json')
+        gt_file_data = gt_bucket_client.download_file(gt_bucket.path)
 
         # Validate and parse GT
         # gt_dataset = self._parse_gt_dataset(gt_file_data, add_prefix=data_bucket.path)
