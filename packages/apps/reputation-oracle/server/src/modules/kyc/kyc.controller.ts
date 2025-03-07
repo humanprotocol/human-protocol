@@ -16,7 +16,7 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards';
+import { Public } from '../../common/decorators';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycService } from './kyc.service';
@@ -39,7 +39,6 @@ export class KycController {
     type: KycSessionDto,
   })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post('/start')
   @HttpCode(200)
   async startKyc(@Req() request: RequestWithUser): Promise<KycSessionDto> {
@@ -72,6 +71,7 @@ export class KycController {
     status: 200,
     description: 'Kyc status updated successfully',
   })
+  @Public()
   @Post('/update')
   @UseGuards(KycWebhookAuthGuard)
   @HttpCode(200)
@@ -89,7 +89,6 @@ export class KycController {
     type: KycSignedAddressDto,
   })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get('/on-chain')
   @HttpCode(200)
   async getSignedAddress(

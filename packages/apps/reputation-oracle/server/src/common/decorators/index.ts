@@ -1,8 +1,11 @@
-import { SetMetadata } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { UserRole } from '../../modules/user';
 
-export const Public = (): ((target: any, key?: any, descriptor?: any) => any) =>
-  SetMetadata('isPublic', true);
+export const Public = Reflector.createDecorator<boolean>({
+  key: 'isPublic',
+  transform: () => true,
+});
 
-export const ROLES_KEY = 'roles';
-export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
+export const Roles = Reflector.createDecorator<UserRole[]>({
+  key: 'roles',
+});

@@ -20,7 +20,7 @@ export class JwtHttpStrategy extends PassportStrategy(
   constructor(
     private readonly userRepository: UserRepository,
     private readonly tokenRepository: TokenRepository,
-    private readonly authConfigService: AuthConfigService,
+    authConfigService: AuthConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -30,7 +30,7 @@ export class JwtHttpStrategy extends PassportStrategy(
     });
   }
 
-  public async validate(
+  async validate(
     @Req() request: any,
     payload: { userId: number },
   ): Promise<UserEntity> {

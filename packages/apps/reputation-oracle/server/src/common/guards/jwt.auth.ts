@@ -1,5 +1,4 @@
 import {
-  CanActivate,
   ExecutionContext,
   HttpException,
   HttpStatus,
@@ -8,30 +7,45 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { JWT_STRATEGY_NAME } from '../constants';
+import { Public } from '../decorators';
 
 @Injectable()
-export class JwtAuthGuard
-  extends AuthGuard(JWT_STRATEGY_NAME)
-  implements CanActivate
-{
+export class JwtAuthGuard extends AuthGuard(JWT_STRATEGY_NAME) {
   constructor(private readonly reflector: Reflector) {
     super();
   }
 
-  public async canActivate(context: ExecutionContext): Promise<boolean> {
-    // `super` has to be called to set `user` on `request`
-    // see https://github.com/nestjs/passport/blob/master/lib/auth.guard.ts
-    return (super.canActivate(context) as Promise<boolean>).catch((_error) => {
-      const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
-        context.getHandler(),
-        context.getClass(),
-      ]);
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride(Public, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
-      if (isPublic) {
-        return true;
-      }
+    if (isPublic) {
+      return true;
+    }
 
+    return super.canActivate(context);
+  }
+
+  handleRequest(error: any, user: any) {
+    if (error) {
+      /**
+       * Error happened while "validate" in "passport" strategy
+       */
+      throw error;
+    }
+
+    /**
+     * There is no error and user in different cases, e.g.:
+     * - jwt is not provided - strategy does not validate it
+     * - token is expired
+     * - etc.
+     */
+    if (!user) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    });
+    }
+
+    return user;
   }
 }
