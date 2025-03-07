@@ -22,12 +22,11 @@ import {
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { ChainId } from '@human-protocol/sdk';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
-import { EscrowFundToken } from '../../common/enums/job';
 import { Web3Env } from '../../common/enums/web3';
 import { ControlledError } from '../../common/errors/controlled';
 import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
@@ -490,10 +489,6 @@ export class PaymentController {
       );
     }
 
-    const hmtAddress = NETWORKS[chainId]?.hmtAddress;
-    return {
-      ...(hmtAddress ? { [EscrowFundToken.HMT]: hmtAddress } : {}),
-      ...TOKEN_ADDRESSES[chainId],
-    };
+    return tokens;
   }
 }
