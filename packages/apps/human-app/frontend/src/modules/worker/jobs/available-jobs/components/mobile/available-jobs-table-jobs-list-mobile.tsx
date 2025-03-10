@@ -11,7 +11,8 @@ import { ListItem } from '@/shared/components/ui/list-item';
 import { type JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { getErrorMessageForError } from '@/shared/errors';
-import { useCombinePages, useJobsFilterStore } from '../../../hooks';
+import { useCombinePages } from '@/shared/hooks';
+import { useJobsFilterStore } from '../../../hooks';
 import {
   useInifiniteGetAvailableJobsData,
   type AvailableJob,
