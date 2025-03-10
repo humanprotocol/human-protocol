@@ -7,27 +7,20 @@ import {
   ValidationPipeOptions,
 } from '@nestjs/common';
 
-// TODO: Revisit validation options
 @Injectable()
 export class HttpValidationPipe extends ValidationPipe {
   constructor(options?: ValidationPipeOptions) {
     super({
       exceptionFactory: (errors: ValidationError[]) => {
-        const errorMessages = errors
-          .map(
-            (error) =>
-              Object.values((error as any).constraints) as unknown as string,
-          )
-          .flat();
+        const flattenErrors = this.flattenValidationErrors(errors);
 
         return new HttpException(
-          errorMessages.join(', '),
+          { validationErrors: flattenErrors, message: 'Validation error' },
           HttpStatus.BAD_REQUEST,
         );
       },
       transform: true,
       whitelist: true,
-      forbidUnknownValues: true,
       ...options,
     });
   }
