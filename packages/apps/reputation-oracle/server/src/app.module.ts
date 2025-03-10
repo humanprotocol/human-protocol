@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -43,9 +43,20 @@ import Environment from './utils/environment';
       provide: APP_PIPE,
       useClass: HttpValidationPipe,
     },
+    /**
+     * Interceptors are called:
+     * - for request: in direct order
+     * - for response: in reverse order
+     *
+     * So order matters here for serialization.
+     */
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
     },
     {
       provide: APP_FILTER,
