@@ -1,6 +1,9 @@
 export enum JobStatus {
   PENDING = 'pending',
   PAID = 'paid',
+  UNDER_MODERATION = 'under_moderation',
+  MODERATION_PASSED = 'moderation_passed',
+  POSSIBLE_ABUSE_IN_REVIEW = 'possible_abuse_in_review',
   CREATED = 'created',
   FUNDED = 'funded',
   LAUNCHED = 'launched',
