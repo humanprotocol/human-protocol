@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuthConfigService } from '../../config/auth-config.service';
-import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
+import { UserEntity, UserRepository } from '../user';
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';
 
