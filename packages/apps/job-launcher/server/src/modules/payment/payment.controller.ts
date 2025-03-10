@@ -1,27 +1,36 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Headers,
+  HttpStatus,
+  Param,
+  Patch,
   Post,
   Query,
   Request,
   UseGuards,
-  Headers,
-  HttpStatus,
-  Patch,
-  Delete,
-  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
   ApiBody,
+  ApiOperation,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
+import { ChainId } from '@human-protocol/sdk';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { ControlledError } from '../../common/errors/controlled';
+import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
+import { PageDto } from '../../common/pagination/pagination.dto';
+import { RateService } from '../rate/rate.service';
 import {
   BillingInfoDto,
   BillingInfoUpdateDto,
@@ -35,13 +44,7 @@ import {
   PaymentMethodIdDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { ControlledError } from '../../common/errors/controlled';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { RateService } from '../rate/rate.service';
-import { PageDto } from '../../common/pagination/pagination.dto';
-import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { ErrorPayment } from 'src/common/constants/errors';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -397,5 +400,34 @@ export class PaymentController {
     @Request() req: RequestWithUser,
   ) {
     return this.paymentService.getReceipt(paymentId, req.user);
+  }
+
+  @ApiOperation({
+    summary: 'Get available tokens for a network',
+    description:
+      'Endpoint to get available tokens for a given network by chainId.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens retrieved successfully',
+    type: [Object],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid chainId.',
+  })
+  @Get('/tokens/:chainId')
+  public async getTokens(
+    @Param('chainId') chainId: ChainId,
+  ): Promise<{ [key: string]: string }> {
+    const tokens = TOKEN_ADDRESSES[chainId];
+    if (!tokens) {
+      throw new ControlledError(
+        ErrorPayment.InvalidChainId,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return tokens;
   }
 }

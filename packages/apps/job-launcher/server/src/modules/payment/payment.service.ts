@@ -42,6 +42,8 @@ import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { EscrowFundToken } from '../../common/enums/job';
 
 @Injectable()
 export class PaymentService {
@@ -353,7 +355,8 @@ export class PaymentService {
     const amount = Number(ethers.formatEther(transaction.logs[0].data));
 
     if (
-      network?.tokens[tokenId] != tokenAddress ||
+      TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken] !==
+        tokenAddress ||
       !CoingeckoTokenId[tokenId]
     ) {
       throw new ControlledError(
