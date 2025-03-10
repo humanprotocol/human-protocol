@@ -84,7 +84,11 @@ export const FiatPayForm = ({
   const [accountAmount] = useState(
     user?.balance ? Number(user?.balance?.amount) : 0,
   );
-  const [tokenAddress, setTokenAddress] = useState<string>();
+  const [tokenSymbol, setTokenSymbol] = useState<string>();
+
+  const handleTokenChange = (symbol: string, address: string) => {
+    setTokenSymbol(symbol);
+  };
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -183,7 +187,7 @@ export const FiatPayForm = ({
       return;
     }
 
-    if (!tokenAddress) {
+    if (!tokenSymbol) {
       onError('Please select a token.');
       return;
     }
@@ -224,7 +228,7 @@ export const FiatPayForm = ({
           fortuneRequest,
           CURRENCY.usd,
           fundAmount,
-          tokenAddress,
+          tokenSymbol,
         );
       } else if (jobType === JobType.CVAT && cvatRequest) {
         await createCvatJob(
@@ -232,7 +236,7 @@ export const FiatPayForm = ({
           cvatRequest,
           CURRENCY.usd,
           fundAmount,
-          tokenAddress,
+          tokenSymbol,
         );
       } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
         await createHCaptchaJob(chainId, hCaptchaRequest);
@@ -337,10 +341,8 @@ export const FiatPayForm = ({
                     )}
                     <TokenSelect
                       chainId={jobRequest.chainId!}
-                      value={tokenAddress}
-                      onChange={(e) =>
-                        setTokenAddress(e.target.value as string)
-                      }
+                      value={tokenSymbol}
+                      onTokenChange={handleTokenChange}
                     />
                   </FormControl>
                 </Grid>
@@ -449,7 +451,7 @@ export const FiatPayForm = ({
                   !amount ||
                   (!payWithAccountBalance && !selectedCard) ||
                   hasError ||
-                  !tokenAddress
+                  !tokenSymbol
                 }
               >
                 Pay now

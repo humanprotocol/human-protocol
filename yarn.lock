@@ -6039,10 +6039,10 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.66.0.tgz#163f670b3b4e3b3cdbff6698ad44b2edfcaed185"
   integrity sha512-J+JeBtthiKxrpzUu7rfIPDzhscXF2p5zE/hVdrqkACBP8Yu0M96mwJ5m/8cPPYQE9aRNvXztXHlNwIh4FEeMZw==
 
-"@tanstack/query-core@5.66.4":
-  version "5.66.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.66.4.tgz#44b87bff289466adbfa0de8daa5756cbd2d61c61"
-  integrity sha512-skM/gzNX4shPkqmdTCSoHtJAPMTtmIJNS0hE+xwTTUVYwezArCT34NMermABmBVUg5Ls5aiUXEDXfqwR1oVkcA==
+"@tanstack/query-core@5.67.2":
+  version "5.67.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.67.2.tgz#3d59a7dd3613321465925975510c0bb8e603a064"
+  integrity sha512-+iaFJ/pt8TaApCk6LuZ0WHS/ECVfTzrxDOEL9HH9Dayyb5OVuomLzDXeSaI2GlGT/8HN7bDGiRXDts3LV+u6ww==
 
 "@tanstack/query-devtools@5.65.0":
   version "5.65.0"
@@ -6056,12 +6056,12 @@
   dependencies:
     "@tanstack/query-core" "5.66.0"
 
-"@tanstack/query-persist-client-core@5.66.4":
-  version "5.66.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-persist-client-core/-/query-persist-client-core-5.66.4.tgz#5c0802d5e88ee5e372d7cbb82e51f8f92261d8c6"
-  integrity sha512-OAw98P8DhrZyxZ60Tz4Eq8KyEAKPWIf3tuSStzS0F3jovW42/RpFy7wmgg3SrOgI7/kVKspBvPQDQn6ymcpwCg==
+"@tanstack/query-persist-client-core@5.67.2":
+  version "5.67.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-persist-client-core/-/query-persist-client-core-5.67.2.tgz#7a3f5859784b09f88e83ea801a46ac97b52d56ca"
+  integrity sha512-Kaon0gIERkuhFV27lEcrlLataqRHT66rOX0d559tCZKDVGHnQ7n4CsRCvmiOLAwqWf7aS0o0owmPNjNJWq+ZLQ==
   dependencies:
-    "@tanstack/query-core" "5.66.4"
+    "@tanstack/query-core" "5.67.2"
 
 "@tanstack/query-sync-storage-persister@^5.59.0":
   version "5.66.0"
@@ -6078,12 +6078,12 @@
   dependencies:
     "@tanstack/query-devtools" "5.65.0"
 
-"@tanstack/react-query-persist-client@^5.66.9":
-  version "5.66.9"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query-persist-client/-/react-query-persist-client-5.66.9.tgz#0aa8f92c185cb96fd5517f4eaf4cb52f6df2ae01"
-  integrity sha512-ipuTUUKqbO2F6QHKlxvKO62ar1I13JrxyPYb4Je6jEPlrm7vh8hhfmXmqIdsyle9aRQsJCe6VGPj9igATDhMlA==
+"@tanstack/react-query-persist-client@^5.67.2":
+  version "5.67.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-persist-client/-/react-query-persist-client-5.67.2.tgz#d79d622dda4f8998e7d3bd6a36c2c03122343639"
+  integrity sha512-aRs7XENnXMzDQPsq/GKnFpEqcwj1/mtN85wzKczLHoVyvLiOt4uMYrVibQGV/z+XfBl1uR1442uACkiecYPCzw==
   dependencies:
-    "@tanstack/query-persist-client-core" "5.66.4"
+    "@tanstack/query-persist-client-core" "5.67.2"
 
 "@tanstack/react-query@^5.48.0", "@tanstack/react-query@^5.60.5", "@tanstack/react-query@^5.61.0":
   version "5.66.0"
@@ -16077,6 +16077,19 @@ ox@0.6.7:
     abitype "^1.0.6"
     eventemitter3 "5.0.1"
 
+ox@0.6.9:
+  version "0.6.9"
+  resolved "https://registry.yarnpkg.com/ox/-/ox-0.6.9.tgz#da1ee04fa10de30c8d04c15bfb80fe58b1f554bd"
+  integrity sha512-wi5ShvzE4eOcTwQVsIPdFr+8ycyX+5le/96iAJutaZAvCes1J0+RvpEPg5QDPDiaR0XQQAvZVl7AwqQcINuUug==
+  dependencies:
+    "@adraffy/ens-normalize" "^1.10.1"
+    "@noble/curves" "^1.6.0"
+    "@noble/hashes" "^1.5.0"
+    "@scure/bip32" "^1.5.0"
+    "@scure/bip39" "^1.4.0"
+    abitype "^1.0.6"
+    eventemitter3 "5.0.1"
+
 p-defer@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/p-defer/-/p-defer-3.0.0.tgz#d1dceb4ee9b2b604b1d94ffec83760175d4e6f83"
@@ -19814,9 +19827,9 @@ victory-vendor@^36.6.8:
     d3-timer "^3.0.1"
 
 viem@2.7.14, viem@^2.15.1:
-  version "2.23.5"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.23.5.tgz#50fb9ea0701d58e6a7a1714ecaa5edfa100bb391"
-  integrity sha512-cUfBHdFQHmBlPW0loFXda0uZcoU+uJw3NRYQRwYgkrpH6PgovH8iuVqDn6t1jZk82zny4wQL54c9dCX2W9kLMg==
+  version "2.23.9"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.23.9.tgz#b28a77aa0f0c7ab1db0cb82eed95e6dbf7a19397"
+  integrity sha512-y8VLPfKukrstZKTerS9bm45ajZ22wUyStF+VquK3I2OovWLOyXSbQmJWei8syMFhp1uwhxh1tb0fAdx0WSRZWg==
   dependencies:
     "@noble/curves" "1.8.1"
     "@noble/hashes" "1.7.1"
@@ -19824,8 +19837,8 @@ viem@2.7.14, viem@^2.15.1:
     "@scure/bip39" "1.5.4"
     abitype "1.0.8"
     isows "1.0.6"
-    ox "0.6.7"
-    ws "8.18.0"
+    ox "0.6.9"
+    ws "8.18.1"
 
 viem@2.x, viem@^2.1.1, viem@^2.21.44:
   version "2.23.2"
@@ -20582,6 +20595,11 @@ ws@8.17.1, ws@~8.17.1:
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.17.1.tgz#9293da530bb548febc95371d90f9c878727d919b"
   integrity sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==
+
+ws@8.18.1:
+  version "8.18.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.1.tgz#ea131d3784e1dfdff91adb0a4a116b127515e3cb"
+  integrity sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==
 
 xdeployer@3.1.6:
   version "3.1.6"

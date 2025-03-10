@@ -6,7 +6,7 @@ import {
   IsLowercasedEnum,
   IsValidWeb3Signature,
 } from '../../../common/validators';
-import { Role } from '../../../common/enums/user';
+import { UserRole } from '../../user';
 
 export class Web2SignUpDto {
   @ApiProperty()
@@ -28,10 +28,10 @@ export class Web3SignUpDto {
   public signature: string;
 
   @ApiProperty({
-    enum: Role,
+    enum: UserRole,
   })
-  @IsLowercasedEnum(Role)
-  public type: Role;
+  @IsLowercasedEnum(UserRole)
+  public type: UserRole;
 
   @ApiProperty()
   @IsEthereumAddress()

@@ -107,6 +107,7 @@ export enum ErrorPayment {
   UnsupportedToken = 'Unsupported token',
   InvalidRecipient = 'Invalid recipient',
   ChainIdMissing = 'ChainId is missing',
+  InvalidChainId = 'Invalid chain id',
 }
 
 /**

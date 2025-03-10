@@ -8,6 +8,7 @@ import {
 import { Request, Response } from 'express';
 import { DatabaseError } from '../errors/database';
 import logger from '../../logger';
+import { transformKeysFromCamelToSnake } from '../../utils/case-converters';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -33,8 +34,24 @@ export class ExceptionFilter implements IExceptionFilter {
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'string') {
         responseBody.message = exceptionResponse;
+      } else if (
+        'error' in exceptionResponse &&
+        exceptionResponse.error === exception.message
+      ) {
+        /**
+         * This is the case for "sugar" exception classes
+         * (e.g. UnauthorizedException) that have custom message
+         */
+        responseBody.message = exceptionResponse.error;
       } else {
-        Object.assign(responseBody, exceptionResponse);
+        /**
+         * Exception filters called after interceptors,
+         * so it's just a safety belt
+         */
+        Object.assign(
+          responseBody,
+          transformKeysFromCamelToSnake(exceptionResponse),
+        );
       }
     } else {
       this.logger.error('Unhandled exception', exception);

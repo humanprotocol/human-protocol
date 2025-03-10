@@ -1,16 +1,3 @@
-export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  PENDING = 'pending',
-}
-
-export enum Role {
-  OPERATOR = 'operator',
-  WORKER = 'worker',
-  HUMAN_APP = 'human_app',
-  ADMIN = 'admin',
-}
-
 export enum KycStatus {
   NONE = 'none',
   APPROVED = 'approved',

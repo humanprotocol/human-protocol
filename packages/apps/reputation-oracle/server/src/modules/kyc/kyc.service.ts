@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user';
 import { HttpService } from '@nestjs/axios';
 import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
 import { KycRepository } from './kyc.repository';

@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { IS_MAINNET } from './constants/chains';
 import './index.css';
 import Layout from './layouts';
 import Dashboard from './pages/Dashboard';
@@ -74,18 +73,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          {!IS_MAINNET && (
-            <>
-              <Route
-                path="/profile/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-            </>
-          )}
+          <>
+            <Route
+              path="/profile/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+          </>
           <Route path="*" element={<Navigate to="/" />} />
         </Route>
       </Routes>

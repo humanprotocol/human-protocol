@@ -37,6 +37,7 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  EscrowFundToken,
 } from '../../common/enums/job';
 import {
   FiatCurrency,
@@ -122,6 +123,7 @@ import { QualificationService } from '../qualification/qualification.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { UserEntity } from '../user/user.entity';
 import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 
 @Injectable()
 export class JobService {
@@ -1017,7 +1019,9 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     const escrowAddress = await escrowClient.createEscrow(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+        jobEntity.token as EscrowFundToken
+      ]!,
       getTrustedHandlers(),
       jobEntity.userId.toString(),
       {

@@ -1,6 +1,10 @@
 import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
+/**
+ * TODO: Leave fix follow-up refactoring
+ * Importing from '../user' causes circular import error here.
+ */
 import { UserEntity } from './user.entity';
 import { SiteKeyType } from '../../common/enums';
 
