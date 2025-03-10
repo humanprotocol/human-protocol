@@ -70,7 +70,9 @@ export class RegistrationInExchangeOracleDto {
     name: 'oracle_address',
     description: 'Ethereum address of the oracle',
   })
-  @IsEthereumAddress()
+  @IsEthereumAddress({
+    message: 'oracle_address must be an Ethereum address',
+  })
   public oracleAddress: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
