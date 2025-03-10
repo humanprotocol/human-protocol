@@ -6085,12 +6085,12 @@
   dependencies:
     "@tanstack/query-persist-client-core" "5.67.2"
 
-"@tanstack/react-query@^5.48.0", "@tanstack/react-query@^5.60.5", "@tanstack/react-query@^5.61.0":
-  version "5.66.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.66.0.tgz#9f7aa1b3e844ea6a0ad2ee61fccaed76e614b865"
-  integrity sha512-z3sYixFQJe8hndFnXgWu7C79ctL+pI0KAelYyW+khaNJ1m22lWrhJU2QrsTcRKMuVPtoZvfBYrTStIdKo+x0Xw==
+"@tanstack/react-query@^5.67.2":
+  version "5.67.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.67.2.tgz#70ef113dcd80500700a99658134dc3c6d0c1c65e"
+  integrity sha512-6Sa+BVNJWhAV4QHvIqM73norNeGRWGC3ftN0Ix87cmMvI215I1wyJ44KUTt/9a0V9YimfGcg25AITaYVel71Og==
   dependencies:
-    "@tanstack/query-core" "5.66.0"
+    "@tanstack/query-core" "5.67.2"
 
 "@tanstack/react-table@8.20.5":
   version "8.20.5"
