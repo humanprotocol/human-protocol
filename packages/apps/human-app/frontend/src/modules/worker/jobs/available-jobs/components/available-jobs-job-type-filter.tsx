@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
 import { JOB_TYPES } from '@/shared/consts';
-import { useFilterUpdates } from '../../hooks';
+import { useJobsFilterStore } from '../../hooks';
 
 export function AvailableJobsJobTypeFilter({ isMobile = false }) {
   const { t } = useTranslation();
-  const { filterParams, updateFilterParams } = useFilterUpdates({ isMobile });
+  const { setFilterParams, filterParams } = useJobsFilterStore();
 
   const filteringOptions = useMemo(
     () =>
@@ -19,11 +19,11 @@ export function AvailableJobsJobTypeFilter({ isMobile = false }) {
   );
 
   const handleClear = () => {
-    updateFilterParams({ job_type: undefined });
+    setFilterParams({ job_type: undefined });
   };
 
   const handleFilterChange = (jobType: string) => {
-    updateFilterParams({ job_type: jobType });
+    setFilterParams({ job_type: jobType });
   };
 
   return (

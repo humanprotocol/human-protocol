@@ -1,4 +1,3 @@
-export * from './use-filter-updates';
 export * from './use-get-all-networks';
 export * from './use-jobs-notifications';
 export * from './use-job-types-oracles-table';

@@ -1,6 +1,6 @@
 /* eslint-disable camelcase --- ... */
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
-import { useFilterUpdates, useGetAllNetworks } from '../../hooks';
+import { useGetAllNetworks, useJobsFilterStore } from '../../hooks';
 
 interface AvailableJobsNetworkFilterProps {
   chainIdsEnabled: number[];
@@ -11,15 +11,15 @@ export function AvailableJobsNetworkFilter({
   chainIdsEnabled,
   isMobile = false,
 }: Readonly<AvailableJobsNetworkFilterProps>) {
-  const { filterParams, updateFilterParams } = useFilterUpdates({ isMobile });
+  const { setFilterParams, filterParams } = useJobsFilterStore();
   const { allNetworks } = useGetAllNetworks(chainIdsEnabled);
 
   const handleClear = () => {
-    updateFilterParams({ chain_id: undefined });
+    setFilterParams({ chain_id: undefined });
   };
 
   const handleFilterChange = (chainId: number) => {
-    updateFilterParams({ chain_id: chainId });
+    setFilterParams({ chain_id: chainId });
   };
 
   return (

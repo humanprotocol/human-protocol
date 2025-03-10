@@ -108,11 +108,7 @@ export function MyJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.network')}
         </Typography>
-        <Stack
-          alignItems="center"
-          flexDirection="row"
-          key={crypto.randomUUID()}
-        >
+        <Stack alignItems="center" flexDirection="row">
           <MyJobsNetworkFilterMobile chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
@@ -125,11 +121,7 @@ export function MyJobsDrawerMobile({
         <Typography variant="mobileHeaderMid">
           {t('worker.jobs.jobType')}
         </Typography>
-        <Stack
-          alignItems="center"
-          flexDirection="row"
-          key={crypto.randomUUID()}
-        >
+        <Stack alignItems="center" flexDirection="row">
           <MyJobsJobTypeFilterMobile />
         </Stack>
         <Divider
