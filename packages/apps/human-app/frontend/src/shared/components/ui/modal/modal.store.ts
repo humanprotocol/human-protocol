@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import type { DialogProps as DialogMuiProps } from '@mui/material/Dialog';
 
 export enum ModalType {
-  MODAL_EXAMPLE = 'MODAL_EXAMPLE',
   WALLET_CONNECT = 'WALLET_CONNECT',
   EXPIRATION_MODAL = 'EXPIRATION_MODAL',
 }

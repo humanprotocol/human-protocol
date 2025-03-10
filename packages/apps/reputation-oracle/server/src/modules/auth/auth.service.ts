@@ -7,20 +7,20 @@ import {
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
+import { OperatorStatus } from '../../common/enums/user';
 import {
-  OperatorStatus,
-  Role as UserRole,
   UserStatus,
-} from '../../common/enums/user';
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
+  UserRole,
+  UserEntity,
+  UserRepository,
+  UserService,
+} from '../user';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
 import { SignatureType } from '../../common/enums/web3';
 import { prepareSignatureBody } from '../../utils/web3';
-import { UserRepository } from '../user/user.repository';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
@@ -155,6 +155,8 @@ export class AuthService {
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
+      nda_signed:
+        userEntity.ndaSignedUrl === this.authConfigService.latestNdaUrl,
       reputation_network: operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(

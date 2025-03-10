@@ -110,6 +110,16 @@ export class GatewayConfigService {
               method: HttpMethod.GET,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.GET_LATEST_NDA]: {
+              endpoint: '/nda/latest',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.SIGN_NDA]: {
+              endpoint: '/nda/sign',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },
         [ExternalApiName.HCAPTCHA_LABELING_STATS]: {

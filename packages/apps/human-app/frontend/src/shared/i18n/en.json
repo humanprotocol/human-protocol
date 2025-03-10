@@ -342,7 +342,7 @@
     },
     "connectWallet": {
       "title": "Setup Operator",
-      "description": "Please use the button bellow to connect your wallet and sign up as an operator.",
+      "description": "Please use the button below to connect your wallet and sign up as an operator.",
       "connect": "Connect Wallet",
       "disconnect": "Disconnect",
       "successAlert": "Wallet successfully connected",
@@ -352,7 +352,7 @@
       "title": "Setup Operator",
       "formHeader": "Stake",
       "label": "Staked amount",
-      "description": "Please add bellow the amount to stake",
+      "description": "Please add the amount to stake below",
       "actionBtn": "Add Stake",
       "nextBtn": "Next",
       "skipBtn": "Skip"
@@ -362,7 +362,7 @@
       "skipBtn": "Skip",
       "nextBtn": "Next",
       "label": "Stake amount",
-      "description": "Please add bellow the amount to stake",
+      "description": "Please add the amount to stake below",
       "successAlert": "You have successfully staked {{amount}} HMT",
       "invalidDecimals": "Incorrect decimal expansion. HMT token has {{decimals}} decimals"
     },

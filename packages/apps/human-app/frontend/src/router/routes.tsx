@@ -14,12 +14,6 @@ import {
   WorkHeaderIcon,
 } from '@/shared/components/ui/icons';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
-import { SetUpOperatorPage } from '@/modules/operator/views/sign-up/set-up-operator.page';
-import { EditExistingKeysSuccessPage } from '@/modules/operator/views/sign-up/edit-existing-keys-success.page';
-import { AddKeysOperatorPage } from '@/modules/operator/views/sign-up/add-keys.page';
-import { AddStakeOperatorPage } from '@/modules/operator/views/sign-up/add-stake.page';
-import { ConnectWalletOperatorPage } from '@/modules/operator/views/sign-up/connect-wallet.page';
-import { Playground } from '@/modules/playground/views/playground.page';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
@@ -35,15 +29,18 @@ import { WorkerProfilePage } from '@/modules/worker/profile';
 import { SignUpWorkerPage } from '@/modules/signup/worker';
 import { OperatorProfilePage } from '@/modules/operator/profile';
 import { HomePage } from '@/modules/homepage';
+import {
+  AddKeysOperatorPage,
+  AddStakeOperatorPage,
+  ConnectWalletOperatorPage,
+  EditExistingKeysSuccessPage,
+  SetUpOperatorPage,
+} from '@/modules/signup/operator';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.homePage,
     element: <HomePage />,
-  },
-  {
-    path: routerPaths.playground,
-    element: <Playground />,
   },
   {
     path: routerPaths.worker.signIn,

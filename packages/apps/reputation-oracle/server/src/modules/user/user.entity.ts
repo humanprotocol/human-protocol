@@ -2,16 +2,27 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { UserStatus, Role } from '../../common/enums/user';
-import { IUser } from '../../common/interfaces/user';
 import { BaseEntity } from '../../database/base.entity';
 import { TokenEntity } from '../auth/token.entity';
 import { KycEntity } from '../kyc/kyc.entity';
 import { SiteKeyEntity } from './site-key.entity';
 import { UserQualificationEntity } from '../qualification/user-qualification.entity';
 
+export enum UserStatus {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  INACTIVE = 'inactive',
+}
+
+export enum Role {
+  OPERATOR = 'operator',
+  WORKER = 'worker',
+  HUMAN_APP = 'human_app',
+  ADMIN = 'admin',
+}
+
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'users' })
-export class UserEntity extends BaseEntity implements IUser {
+export class UserEntity extends BaseEntity {
   @Exclude()
   @Column({ type: 'varchar', nullable: true })
   public password: string;
@@ -48,4 +59,7 @@ export class UserEntity extends BaseEntity implements IUser {
     (userQualification) => userQualification.user,
   )
   public userQualifications: UserQualificationEntity[];
+
+  @Column({ type: 'varchar', nullable: true })
+  public ndaSignedUrl?: string;
 }
