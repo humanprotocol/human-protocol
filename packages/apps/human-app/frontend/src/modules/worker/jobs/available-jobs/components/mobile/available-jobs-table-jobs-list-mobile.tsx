@@ -33,7 +33,7 @@ export function AvailableJobsTableJobsListMobile() {
     hasNextPage,
   } = useInifiniteGetAvailableJobsData();
 
-  const allPages = useCombinePages<AvailableJob>(tableData);
+  const allPages = useCombinePages<AvailableJob>(tableData, filterParams.page);
 
   useEffect(() => {
     return () => {

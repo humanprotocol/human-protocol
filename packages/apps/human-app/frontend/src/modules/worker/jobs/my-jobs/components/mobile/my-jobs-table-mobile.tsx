@@ -57,7 +57,7 @@ export function MyJobsTableMobile({
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
-  const allPages = useCombinePages<MyJob>(tableData);
+  const allPages = useCombinePages<MyJob>(tableData, filterParams.page);
 
   useEffect(() => {
     return () => {
