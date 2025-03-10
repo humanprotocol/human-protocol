@@ -3,6 +3,10 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { KycStatus } from '../../common/enums/user';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
+/**
+ * TODO: Leave fix follow-up refactoring
+ * Importing from '../user' causes circular import error here.
+ */
 import { UserEntity } from '../user/user.entity';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'kycs' })
