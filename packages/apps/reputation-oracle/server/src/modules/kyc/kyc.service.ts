@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 import { UserEntity } from '../user';
 import { HttpService } from '@nestjs/axios';
-import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
+import {
+  StartSessionResponseDto,
+  KycSignedAddressDto,
+  UpdateKycStatusDto,
+} from './kyc.dto';
 import { KycRepository } from './kyc.repository';
 import { KycStatus } from '../../common/enums/user';
 import { firstValueFrom } from 'rxjs';
@@ -23,7 +27,9 @@ export class KycService {
     private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
-  public async initSession(userEntity: UserEntity): Promise<KycSessionDto> {
+  public async initSession(
+    userEntity: UserEntity,
+  ): Promise<StartSessionResponseDto> {
     if (userEntity.kyc?.sessionId) {
       if (userEntity.kyc.status === KycStatus.APPROVED) {
         throw new KycError(KycErrorMessage.ALREADY_APPROVED, userEntity.id);
@@ -82,7 +88,7 @@ export class KycService {
     };
   }
 
-  public async updateKycStatus(data: KycStatusDto): Promise<void> {
+  public async updateKycStatus(data: UpdateKycStatusDto): Promise<void> {
     const { status, reason, id: sessionId } = data.verification;
     const { country } = data.verification.document;
 

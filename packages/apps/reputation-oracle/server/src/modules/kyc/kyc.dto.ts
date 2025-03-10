@@ -6,22 +6,24 @@ import {
   IsString,
   IsUrl,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { KycStatus } from '../../common/enums/user';
 
-export class KycSessionDto {
+export class StartSessionResponseDto {
   @ApiProperty({ name: 'url' })
   @IsUrl()
   public url: string;
 }
 
-export class KycDocumentDto {
+export class DocumentData {
   @ApiProperty()
   @IsString()
   public country: string;
 }
 
-export class KycVerificationDto {
+export class VerificationData {
   @ApiProperty()
   @IsUUID()
   public id: string;
@@ -41,28 +43,21 @@ export class KycVerificationDto {
 
   @ApiProperty()
   @IsObject()
-  public document: KycDocumentDto;
+  @ValidateNested()
+  @Type(() => DocumentData)
+  public document: DocumentData;
 }
 
-export class TechnicalDataDto {
-  @ApiProperty({ nullable: true })
-  @IsString()
-  @IsOptional()
-  public ip: string | null;
-}
-
-export class KycStatusDto {
+export class UpdateKycStatusDto {
   @ApiProperty()
   @IsString()
   public status: string;
 
-  @ApiProperty({ type: KycVerificationDto })
+  @ApiProperty({ type: VerificationData })
   @IsObject()
-  public verification: KycVerificationDto;
-
-  @ApiProperty({ type: TechnicalDataDto })
-  @IsObject()
-  public technicalData: TechnicalDataDto;
+  @ValidateNested()
+  @Type(() => VerificationData)
+  public verification: VerificationData;
 }
 
 export class KycSignedAddressDto {
