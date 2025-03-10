@@ -15,6 +15,7 @@ import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { formatDate } from '@/shared/helpers/date';
+import { useCombinePages } from '@/shared/hooks';
 import {
   useInfiniteGetMyJobsData,
   type MyJob,
@@ -23,11 +24,7 @@ import {
   RewardAmount,
   MyJobsTableActions,
 } from '../../../components';
-import {
-  useMyJobsFilterStore,
-  useJobsFilterStore,
-  useCombinePages,
-} from '../../../hooks';
+import { useMyJobsFilterStore, useJobsFilterStore } from '../../../hooks';
 import { useRefreshTasksMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
 
