@@ -1016,16 +1016,12 @@ export class JobService {
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const tokenAddress =
-      jobEntity.token === 'HMT'
-        ? NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress
-        : (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
-            jobEntity.token as EscrowFundToken
-          ]!;
     const escrowClient = await EscrowClient.build(signer);
 
     const escrowAddress = await escrowClient.createEscrow(
-      tokenAddress,
+      (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+        jobEntity.token as EscrowFundToken
+      ]!,
       getTrustedHandlers(),
       jobEntity.userId.toString(),
       {
