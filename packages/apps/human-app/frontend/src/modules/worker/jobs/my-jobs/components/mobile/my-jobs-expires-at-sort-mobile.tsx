@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { Sorting } from '../../../components';
 import { useMyJobsFilterStore } from '../../../hooks';
-import { SortField } from '../../../types';
+import { SortDirection, SortField } from '../../../types';
 
 export function MyJobsExpiresAtSortMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
@@ -19,21 +19,21 @@ export function MyJobsExpiresAtSortMobile() {
       }
       fromHighestSelected={
         filterParams.sort_field === SortField.EXPIRES_AT &&
-        filterParams.sort === 'desc'
+        filterParams.sort === SortDirection.DESC
       }
       sortFromHighest={() => {
         setFilterParams({
-          sort: 'desc',
+          sort: SortDirection.DESC,
           sort_field: SortField.EXPIRES_AT,
         });
       }}
       fromLowestSelected={
         filterParams.sort_field === SortField.EXPIRES_AT &&
-        filterParams.sort === 'asc'
+        filterParams.sort === SortDirection.ASC
       }
       sortFromLowest={() => {
         setFilterParams({
-          sort: 'asc',
+          sort: SortDirection.ASC,
           sort_field: SortField.EXPIRES_AT,
         });
       }}

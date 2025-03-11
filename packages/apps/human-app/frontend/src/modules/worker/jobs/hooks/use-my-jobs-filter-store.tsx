@@ -1,7 +1,7 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-import { SortField, type SortDirection, type MyJobStatus } from '../types';
+import { SortDirection, SortField, type MyJobStatus } from '../types';
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
@@ -30,7 +30,7 @@ const initialFiltersState = {
   page: 0,
   page_size: 5,
   sort_field: SortField.CREATED_AT,
-  sort: 'desc',
+  sort: SortDirection.DESC,
 } as const;
 
 export const useMyJobsFilterStore = create<MyJobsFilterStoreProps>((set) => ({

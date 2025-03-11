@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useJobsFilterStore } from '../../../hooks';
 import { Sorting } from '../../../components';
-import { SortField } from '../../../types';
+import { SortDirection, SortField } from '../../../types';
 
 export function AvailableJobsRewardAmountSortMobile() {
   const { setFilterParams, filterParams } = useJobsFilterStore();
@@ -19,21 +19,21 @@ export function AvailableJobsRewardAmountSortMobile() {
       }
       fromHighestSelected={
         filterParams.sort_field === SortField.REWARD_AMOUNT &&
-        filterParams.sort === 'desc'
+        filterParams.sort === SortDirection.DESC
       }
       sortFromHighest={() => {
         setFilterParams({
-          sort: 'desc',
+          sort: SortDirection.DESC,
           sort_field: SortField.REWARD_AMOUNT,
         });
       }}
       fromLowestSelected={
         filterParams.sort_field === SortField.REWARD_AMOUNT &&
-        filterParams.sort === 'asc'
+        filterParams.sort === SortDirection.ASC
       }
       sortFromLowest={() => {
         setFilterParams({
-          sort: 'asc',
+          sort: SortDirection.ASC,
           sort_field: SortField.REWARD_AMOUNT,
         });
       }}

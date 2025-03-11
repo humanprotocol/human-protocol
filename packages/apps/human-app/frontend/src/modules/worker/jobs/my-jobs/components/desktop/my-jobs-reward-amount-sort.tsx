@@ -2,7 +2,7 @@
 import { t } from 'i18next';
 import { Sorting } from '@/shared/components/ui/table/table-header-menu.tsx/sorting';
 import { useMyJobsFilterStore } from '../../../hooks';
-import { SortField } from '../../../types';
+import { SortDirection, SortField } from '../../../types';
 
 export function MyJobsRewardAmountSort() {
   const { setFilterParams } = useMyJobsFilterStore();
@@ -10,14 +10,14 @@ export function MyJobsRewardAmountSort() {
   const sortAscRewardAmount = () => {
     setFilterParams({
       sort_field: SortField.REWARD_AMOUNT,
-      sort: 'asc',
+      sort: SortDirection.ASC,
     });
   };
 
   const sortDescRewardAmount = () => {
     setFilterParams({
       sort_field: SortField.REWARD_AMOUNT,
-      sort: 'desc',
+      sort: SortDirection.DESC,
     });
   };
 
