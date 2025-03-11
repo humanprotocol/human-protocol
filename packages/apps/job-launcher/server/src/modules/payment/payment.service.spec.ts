@@ -42,10 +42,9 @@ import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../rate/rate.service';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
-import { GetPaymentsDto } from './payment.dto';
+import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
 import { SortDirection } from '../../common/enums/collection';
 import { Country } from '../../common/enums/job';
-import { UserBalanceDto } from '../user/user.dto';
 
 jest.mock('@human-protocol/sdk');
 

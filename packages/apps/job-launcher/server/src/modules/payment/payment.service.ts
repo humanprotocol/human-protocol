@@ -9,12 +9,14 @@ import {
   BillingInfoDto,
   CardConfirmDto,
   CardDto,
+  CurrencyBalanceDto,
   GetPaymentsDto,
   PaymentCryptoCreateDto,
   PaymentDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentRefund,
+  UserBalanceDto,
 } from './payment.dto';
 import {
   FiatCurrency,
@@ -45,7 +47,6 @@ import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { EscrowFundToken } from '../../common/enums/job';
-import { CurrencyBalanceDto, UserBalanceDto } from '../user/user.dto';
 
 @Injectable()
 export class PaymentService {

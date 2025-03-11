@@ -34,19 +34,3 @@ export class UserUpdateDto {
   @IsEnumCaseInsensitive(UserStatus)
   public status?: UserStatus;
 }
-
-export class CurrencyBalanceDto {
-  @ApiProperty()
-  currency: string;
-
-  @ApiProperty()
-  amount: number;
-}
-
-export class UserBalanceDto {
-  @ApiProperty({ type: [CurrencyBalanceDto] })
-  balances: CurrencyBalanceDto[];
-
-  @ApiProperty({ name: 'total_usd_amount' })
-  totalUsdAmount: number;
-}

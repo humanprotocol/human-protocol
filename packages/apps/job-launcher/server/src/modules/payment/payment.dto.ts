@@ -226,3 +226,19 @@ export class PaymentDto {
   @IsString()
   public createdAt: string;
 }
+
+export class CurrencyBalanceDto {
+  @ApiProperty()
+  currency: string;
+
+  @ApiProperty()
+  amount: number;
+}
+
+export class UserBalanceDto {
+  @ApiProperty({ type: [CurrencyBalanceDto] })
+  balances: CurrencyBalanceDto[];
+
+  @ApiProperty({ name: 'total_usd_amount' })
+  totalUsdAmount: number;
+}
