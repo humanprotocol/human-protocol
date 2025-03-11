@@ -45,6 +45,7 @@ import { JobRepository } from '../job/job.repository';
 import { GetPaymentsDto } from './payment.dto';
 import { SortDirection } from '../../common/enums/collection';
 import { Country } from '../../common/enums/job';
+import { UserBalanceDto } from '../user/user.dto';
 
 jest.mock('@human-protocol/sdk');
 
@@ -1499,6 +1500,68 @@ describe('PaymentService', () => {
       await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
         new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
       );
+    });
+  });
+
+  describe('getUserBalance', () => {
+    it('should return the correct balance with currency for a user', async () => {
+      const userId = 1;
+      const expectedBalance: UserBalanceDto = {
+        balances: [
+          { currency: PaymentCurrency.USD, amount: 100 },
+          { currency: PaymentCurrency.HMT, amount: 50 },
+          { currency: PaymentCurrency.USDT, amount: 0 },
+          { currency: PaymentCurrency.USDC, amount: 0 },
+        ],
+        totalUsdAmount: 150,
+      };
+
+      jest
+        .spyOn(paymentService, 'getUserBalanceByCurrency')
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        .mockResolvedValue(0);
+      jest
+        .spyOn(paymentService, 'convertToUSD')
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        .mockResolvedValue(0);
+
+      const balance = await paymentService.getUserBalance(userId);
+
+      expect(balance).toEqual(expectedBalance);
+      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
+      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
+    });
+
+    it('should return zero balance for new users', async () => {
+      const userId = 1;
+      const expectedBalance: UserBalanceDto = {
+        balances: [
+          { currency: PaymentCurrency.USD, amount: 0 },
+          { currency: PaymentCurrency.HMT, amount: 0 },
+          { currency: PaymentCurrency.USDT, amount: 0 },
+          { currency: PaymentCurrency.USDC, amount: 0 },
+        ],
+        totalUsdAmount: 0,
+      };
+
+      jest
+        .spyOn(paymentService, 'getUserBalanceByCurrency')
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(0);
+      jest
+        .spyOn(paymentService, 'convertToUSD')
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(0);
+
+      const balance = await paymentService.getUserBalance(userId);
+
+      expect(balance).toEqual(expectedBalance);
+      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
+      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
     });
   });
 });

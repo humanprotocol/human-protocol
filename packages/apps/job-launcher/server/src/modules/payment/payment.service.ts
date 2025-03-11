@@ -18,6 +18,7 @@ import {
 } from './payment.dto';
 import {
   FiatCurrency,
+  PaymentCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
@@ -44,6 +45,7 @@ import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { EscrowFundToken } from '../../common/enums/job';
+import { CurrencyBalanceDto, UserBalanceDto } from '../user/user.dto';
 
 @Injectable()
 export class PaymentService {
@@ -714,5 +716,22 @@ export class PaymentService {
     }
 
     return charge.receipt_url;
+  }
+
+  public async getUserBalance(userId: number): Promise<UserBalanceDto> {
+    const balances: CurrencyBalanceDto[] = [];
+    let totalUSDAmount = 0;
+
+    for (const currency of Object.values(PaymentCurrency)) {
+      const amount = await this.getUserBalanceByCurrency(userId, currency);
+      const amountInUSD = await this.convertToUSD(amount, currency);
+      totalUSDAmount = add(totalUSDAmount, amountInUSD);
+      balances.push({ currency, amount });
+    }
+
+    return {
+      balances,
+      totalUsdAmount: totalUSDAmount,
+    };
   }
 }
