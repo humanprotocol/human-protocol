@@ -9,15 +9,18 @@ import {
   BillingInfoDto,
   CardConfirmDto,
   CardDto,
+  CurrencyBalanceDto,
   GetPaymentsDto,
   PaymentCryptoCreateDto,
   PaymentDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentRefund,
+  UserBalanceDto,
 } from './payment.dto';
 import {
   FiatCurrency,
+  PaymentCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
@@ -396,31 +399,6 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserUSDBalance(userId: number): Promise<number> {
-    const paymentEntities =
-      await this.paymentRepository.getUserBalancePayments(userId);
-
-    const uniqueTokens = Array.from(
-      new Set(paymentEntities.map((payment) => payment.currency)),
-    );
-
-    let totalBalance = 0;
-
-    for (const token of uniqueTokens) {
-      const tokenAmountSum = paymentEntities
-        .filter((payment) => payment.currency === token)
-        .reduce((sum, payment) => add(sum, Number(payment.amount)), 0);
-
-      const rate =
-        token === FiatCurrency.USD
-          ? 1
-          : await this.rateService.getRate(token, FiatCurrency.USD);
-      totalBalance += mul(tokenAmountSum, rate);
-    }
-
-    return totalBalance;
-  }
-
   public async getUserBalanceByCurrency(
     userId: number,
     currency: string,
@@ -456,6 +434,14 @@ export class PaymentService {
       status: PaymentStatus.SUCCEEDED,
     });
     await this.paymentRepository.createUnique(paymentEntity);
+  }
+
+  public async convertToUSD(amount: number, currency: string): Promise<number> {
+    if (currency === FiatCurrency.USD) {
+      return amount;
+    }
+    const rate = await this.rateService.getRate(currency, FiatCurrency.USD);
+    return mul(amount, rate);
   }
 
   // public async createSlash(job: JobEntity): Promise<void> {
@@ -758,5 +744,22 @@ export class PaymentService {
     }
 
     return charge.receipt_url;
+  }
+
+  public async getUserBalance(userId: number): Promise<UserBalanceDto> {
+    const balances: CurrencyBalanceDto[] = [];
+    let totalUSDAmount = 0;
+
+    for (const currency of Object.values(PaymentCurrency)) {
+      const amount = await this.getUserBalanceByCurrency(userId, currency);
+      const amountInUSD = await this.convertToUSD(amount, currency);
+      totalUSDAmount = add(totalUSDAmount, amountInUSD);
+      balances.push({ currency, amount });
+    }
+
+    return {
+      balances,
+      totalUsdAmount: totalUSDAmount,
+    };
   }
 }

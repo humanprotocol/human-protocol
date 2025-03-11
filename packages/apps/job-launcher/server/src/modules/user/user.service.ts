@@ -3,19 +3,14 @@ import * as bcrypt from 'bcrypt';
 
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
-import { UserBalanceDto, UserCreateDto } from './user.dto';
+import { UserCreateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { PaymentService } from '../payment/payment.service';
-import { FiatCurrency } from '../../common/enums/payment';
 
 @Injectable()
 export class UserService {
   private HASH_ROUNDS = 12;
-  constructor(
-    private userRepository: UserRepository,
-    private readonly paymentService: PaymentService,
-  ) {}
+  constructor(private userRepository: UserRepository) {}
 
   public async create(dto: UserCreateDto): Promise<UserEntity> {
     const newUser = new UserEntity();
@@ -46,12 +41,5 @@ export class UserService {
   ): Promise<UserEntity> {
     userEntity.password = bcrypt.hashSync(data.password, this.HASH_ROUNDS);
     return this.userRepository.updateOne(userEntity);
-  }
-
-  public async getTotalUSDBalance(userId: number): Promise<UserBalanceDto> {
-    return {
-      amount: await this.paymentService.getUserUSDBalance(userId),
-      currency: FiatCurrency.USD,
-    };
   }
 }

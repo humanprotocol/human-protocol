@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { Decimal } from 'decimal.js';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { Address } from 'viem';
@@ -19,12 +20,13 @@ import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
-import { useAppDispatch } from '../../state';
+import { useAppDispatch, useAppSelector } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
 import { TopUpSuccess } from './TopUpSuccess';
 
 export const CryptoTopUpForm = () => {
   const { isConnected, chain } = useAccount();
+  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [tokenSymbol, setTokenSymbol] = useState<string>();
@@ -36,9 +38,17 @@ export const CryptoTopUpForm = () => {
   const { data: rate } = useTokenRate(tokenSymbol || 'hmt', 'usd');
   const { showError } = useSnackbar();
 
+  const currentBalance = useMemo(() => {
+    return (
+      user?.balance?.balances.find(
+        (balance) => balance.currency === tokenSymbol,
+      )?.amount ?? 0
+    );
+  }, [user, tokenSymbol]);
+
   const totalAmount = useMemo(() => {
-    if (!amount || !rate) return 0;
-    return parseFloat(amount) * rate;
+    if (!amount || !rate) return new Decimal(0);
+    return new Decimal(amount).mul(rate);
   }, [amount, rate]);
 
   const handleTokenChange = (symbol: string, address: string) => {
@@ -122,6 +132,7 @@ export const CryptoTopUpForm = () => {
             <TokenSelect
               chainId={chain?.id}
               value={tokenSymbol}
+              label={'Payment token'}
               onTokenChange={handleTokenChange}
             />
             <FormControl fullWidth>
@@ -153,6 +164,17 @@ export const CryptoTopUpForm = () => {
                   justifyContent="space-between"
                   alignItems="center"
                 >
+                  <Typography color="text.secondary">Balance</Typography>
+                  <Typography color="text.secondary">
+                    {currentBalance} {tokenSymbol?.toUpperCase()} (~
+                    {((currentBalance ?? 0) * rate).toFixed(2)} USD)
+                  </Typography>
+                </Stack>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Typography color="text.secondary">
                     {tokenSymbol?.toUpperCase()} Price
                   </Typography>
@@ -168,7 +190,10 @@ export const CryptoTopUpForm = () => {
                 sx={{ py: 2 }}
               >
                 <Typography>You receive</Typography>
-                <Typography>{totalAmount.toFixed(2)} USD</Typography>
+                <Typography>
+                  {amount} {tokenSymbol?.toUpperCase()} (~
+                  {totalAmount.toFixed(2)} USD)
+                </Typography>
               </Stack>
             </Box>
           </Box>

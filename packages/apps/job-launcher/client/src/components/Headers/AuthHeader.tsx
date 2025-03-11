@@ -137,9 +137,6 @@ export const AuthHeader = () => {
           >
             <AccountCircleFilledIcon sx={{ fontSize: '48px' }} />
             <Box>
-              {/* <Typography variant="body1" lineHeight={1.5}>
-                Tony Wen
-              </Typography> */}
               <Typography variant="body1">{user?.email}</Typography>
             </Box>
           </Box>
@@ -158,8 +155,8 @@ export const AuthHeader = () => {
                 Balance
               </Typography>
               <Typography variant="body1" lineHeight={1.5}>
-                {user?.balance?.amount || 0}{' '}
-                {user?.balance?.currency?.toUpperCase()}
+                ~{user?.balance?.totalUsdAmount.toFixed(2) || 0}
+                {' USD'}
               </Typography>
             </Box>
           </Box>

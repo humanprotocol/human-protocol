@@ -42,7 +42,7 @@ import { ControlledError } from '../../common/errors/controlled';
 import { RateService } from '../rate/rate.service';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
-import { GetPaymentsDto } from './payment.dto';
+import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
 import { SortDirection } from '../../common/enums/collection';
 import { Country } from '../../common/enums/job';
 
@@ -807,59 +807,31 @@ describe('PaymentService', () => {
     });
   });
 
-  describe('getUserUSDBalance', () => {
-    it('should return the correct balance for a user', async () => {
-      const userId = 1;
-      const expectedBalance = 220;
-      const paymentsMock: Partial<PaymentEntity>[] = [
-        {
-          amount: 500,
-          rate: 1,
-          type: PaymentType.DEPOSIT,
-          status: PaymentStatus.SUCCEEDED,
-          currency: PaymentCurrency.HMT,
-        },
-        {
-          amount: 150,
-          rate: 1,
-          type: PaymentType.DEPOSIT,
-          status: PaymentStatus.SUCCEEDED,
-          currency: PaymentCurrency.USD,
-        },
-        {
-          amount: -180,
-          rate: 1,
-          type: PaymentType.WITHDRAWAL,
-          status: PaymentStatus.SUCCEEDED,
-          currency: PaymentCurrency.USD,
-        },
-      ];
-      jest
-        .spyOn(paymentRepository, 'getUserBalancePayments')
-        .mockResolvedValue(paymentsMock as PaymentEntity[]);
-      jest.spyOn(rateService, 'getRate').mockResolvedValue(0.5);
+  describe('convertToUSD', () => {
+    it('should convert the given amount to USD correctly', async () => {
+      const amount = 100;
+      const currency = PaymentCurrency.HMT;
+      const rate = 0.5;
 
-      const balance = await paymentService.getUserUSDBalance(userId);
+      jest.spyOn(rateService, 'getRate').mockResolvedValue(rate);
 
-      expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
-        userId,
+      const result = await paymentService.convertToUSD(amount, currency);
+
+      expect(result).toEqual(amount * rate);
+      expect(rateService.getRate).toHaveBeenCalledWith(
+        currency,
+        PaymentCurrency.USD,
       );
     });
 
-    it('should return 0 balance for a user with no payment entities', async () => {
-      const userId = 1;
+    it('should return the same amount if the currency is already USD', async () => {
+      const amount = 100;
+      const currency = PaymentCurrency.USD;
 
-      jest
-        .spyOn(paymentRepository, 'getUserBalancePayments')
-        .mockResolvedValue([]);
+      const result = await paymentService.convertToUSD(amount, currency);
 
-      const balance = await paymentService.getUserUSDBalance(userId);
-
-      expect(balance).toEqual(0);
-      expect(paymentRepository.getUserBalancePayments).toHaveBeenCalledWith(
-        userId,
-      );
+      expect(result).toEqual(amount);
+      expect(rateService.getRate).not.toHaveBeenCalled();
     });
   });
 
@@ -1527,6 +1499,68 @@ describe('PaymentService', () => {
       await expect(paymentService.getReceipt(paymentId, user)).rejects.toThrow(
         new ControlledError(ErrorPayment.NotFound, HttpStatus.NOT_FOUND),
       );
+    });
+  });
+
+  describe('getUserBalance', () => {
+    it('should return the correct balance with currency for a user', async () => {
+      const userId = 1;
+      const expectedBalance: UserBalanceDto = {
+        balances: [
+          { currency: PaymentCurrency.USD, amount: 100 },
+          { currency: PaymentCurrency.HMT, amount: 50 },
+          { currency: PaymentCurrency.USDT, amount: 0 },
+          { currency: PaymentCurrency.USDC, amount: 0 },
+        ],
+        totalUsdAmount: 150,
+      };
+
+      jest
+        .spyOn(paymentService, 'getUserBalanceByCurrency')
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        .mockResolvedValue(0);
+      jest
+        .spyOn(paymentService, 'convertToUSD')
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        .mockResolvedValue(0);
+
+      const balance = await paymentService.getUserBalance(userId);
+
+      expect(balance).toEqual(expectedBalance);
+      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
+      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
+    });
+
+    it('should return zero balance for new users', async () => {
+      const userId = 1;
+      const expectedBalance: UserBalanceDto = {
+        balances: [
+          { currency: PaymentCurrency.USD, amount: 0 },
+          { currency: PaymentCurrency.HMT, amount: 0 },
+          { currency: PaymentCurrency.USDT, amount: 0 },
+          { currency: PaymentCurrency.USDC, amount: 0 },
+        ],
+        totalUsdAmount: 0,
+      };
+
+      jest
+        .spyOn(paymentService, 'getUserBalanceByCurrency')
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(0);
+      jest
+        .spyOn(paymentService, 'convertToUSD')
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(0);
+
+      const balance = await paymentService.getUserBalance(userId);
+
+      expect(balance).toEqual(expectedBalance);
+      expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
+      expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
     });
   });
 

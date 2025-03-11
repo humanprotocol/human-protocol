@@ -23,10 +23,12 @@ import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
 import { ChainId } from '@human-protocol/sdk';
+import { ErrorPayment } from 'src/common/constants/errors';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { ApiKey } from '../../common/decorators';
 import { ControlledError } from '../../common/errors/controlled';
 import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
 import { PageDto } from '../../common/pagination/pagination.dto';
@@ -42,9 +44,9 @@ import {
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentMethodIdDto,
+  UserBalanceDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
-import { ErrorPayment } from 'src/common/constants/errors';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -57,6 +59,34 @@ export class PaymentController {
     private readonly rateService: RateService,
     private readonly web3ConfigService: Web3ConfigService,
   ) {}
+
+  @ApiOperation({
+    summary: 'Get user balance',
+    description: 'Endpoint to retrieve the balance of the authenticated user.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User balance retrieved successfully',
+    type: UserBalanceDto,
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Unprocessable Entity. User balance could not be retrieved.',
+  })
+  @ApiKey()
+  @Get('/balance')
+  public async getBalance(
+    @Request() req: RequestWithUser,
+  ): Promise<UserBalanceDto> {
+    try {
+      return this.paymentService.getUserBalance(req.user.id);
+    } catch {
+      throw new ControlledError(
+        ErrorPayment.BalanceCouldNotBeRetrieved,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+  }
 
   @ApiOperation({
     summary: 'Create a crypto payment',
