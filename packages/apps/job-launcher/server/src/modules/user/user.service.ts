@@ -3,11 +3,12 @@ import * as bcrypt from 'bcrypt';
 
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
-import { UserBalanceDto, UserCreateDto } from './user.dto';
+import { UserBalanceDto, UserCreateDto, CurrencyBalanceDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { PaymentService } from '../payment/payment.service';
-import { FiatCurrency } from '../../common/enums/payment';
+import { PaymentCurrency } from '../../common/enums/payment';
+import { add } from '../../common/utils/decimal';
 
 @Injectable()
 export class UserService {
@@ -48,10 +49,26 @@ export class UserService {
     return this.userRepository.updateOne(userEntity);
   }
 
-  public async getTotalUSDBalance(userId: number): Promise<UserBalanceDto> {
+  public async getBalance(userId: number): Promise<UserBalanceDto> {
+    const balances: CurrencyBalanceDto[] = [];
+    let totalUSDAmount = 0;
+
+    for (const currency of Object.values(PaymentCurrency)) {
+      const amount = await this.paymentService.getUserBalanceByCurrency(
+        userId,
+        currency,
+      );
+      const amountInUSD = await this.paymentService.convertToUSD(
+        amount,
+        currency,
+      );
+      totalUSDAmount = add(totalUSDAmount, amountInUSD);
+      balances.push({ currency, amount });
+    }
+
     return {
-      amount: await this.paymentService.getUserUSDBalance(userId),
-      currency: FiatCurrency.USD,
+      balances,
+      totalUsdAmount: totalUSDAmount,
     };
   }
 }

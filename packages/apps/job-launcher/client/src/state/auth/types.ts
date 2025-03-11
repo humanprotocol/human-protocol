@@ -1,6 +1,11 @@
-export type UserBalance = {
-  amount: number;
+export type CurrencyBalance = {
   currency: string;
+  amount: number;
+};
+
+export type UserBalance = {
+  balances: CurrencyBalance[];
+  totalUsdAmount: number;
 };
 
 export enum UserStatus {

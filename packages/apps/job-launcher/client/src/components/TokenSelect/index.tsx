@@ -32,11 +32,13 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
 
   return (
     <FormControl fullWidth>
-      <InputLabel id="token-select-label">Funding token</InputLabel>
+      <InputLabel id="token-select-label">
+        {props.label ?? 'Funding token'}
+      </InputLabel>
       <Select
         labelId="token-select-label"
         id="token-select"
-        label={props?.label ?? 'Funding token'}
+        label={props.label ?? 'Funding token'}
         sx={{
           '.MuiSelect-select': {
             display: 'flex',
