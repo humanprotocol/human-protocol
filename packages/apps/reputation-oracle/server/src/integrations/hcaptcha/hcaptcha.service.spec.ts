@@ -172,6 +172,7 @@ describe('hCaptchaService', () => {
       await hcaptchaService.registerLabeler({
         email: faker.internet.email(),
         evmAddress: generateEthWallet().address,
+        country: null,
       });
 
       expect(mockHttpService.post).toHaveBeenCalledTimes(1);
@@ -194,6 +195,7 @@ describe('hCaptchaService', () => {
       const result = await hcaptchaService.registerLabeler({
         email: faker.internet.email(),
         evmAddress: generateEthWallet().address,
+        country: null,
       });
       expect(result).toBe(false);
     });
@@ -206,6 +208,7 @@ describe('hCaptchaService', () => {
       const result = await hcaptchaService.registerLabeler({
         email: faker.internet.email(),
         evmAddress: generateEthWallet().address,
+        country: null,
       });
 
       expect(result).toBe(false);
@@ -251,6 +254,7 @@ describe('hCaptchaService', () => {
       const result = await hcaptchaService.registerLabeler({
         email: testEmail,
         evmAddress: testEvmAddress,
+        country: null,
         ip: testIp,
       });
 
@@ -278,6 +282,7 @@ describe('hCaptchaService', () => {
       const result = await hcaptchaService.registerLabeler({
         email: faker.internet.email(),
         evmAddress: testEvmAddress,
+        country: null,
       });
 
       expect(result).toBe(true);
