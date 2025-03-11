@@ -6,17 +6,14 @@ import { useTranslation } from 'react-i18next';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Input } from '@/shared/components/data-entry/input';
 import { Button } from '@/shared/components/ui/button';
-import type { SendResetLinkDto } from '@/modules/worker/services/send-reset-link';
-import {
-  sendResetLinkDtoSchema,
-  useSendResetLinkMutation,
-} from '@/modules/worker/services/send-reset-link';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
+import { useSendResetLinkMutation } from './hooks';
+import { type SendResetLinkDto, sendResetLinkDtoSchema } from './types';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
