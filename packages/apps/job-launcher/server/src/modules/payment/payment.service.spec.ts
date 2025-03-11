@@ -1531,15 +1531,17 @@ describe('PaymentService', () => {
   });
 
   describe('createWithdrawalPayment', () => {
-    it('should create a withdrawal payment successfully', async () => {
-      const userId = 1;
-      const amount = 100;
-      const currency = PaymentCurrency.USD;
-      const rate = 1;
+    const userId = 1;
+    const amount = 100;
+    const currency = PaymentCurrency.USD;
+    const rate = 1;
 
+    it('should create a withdrawal payment successfully', async () => {
       jest
-        .spyOn(paymentService, 'getUserBalanceByCurrency')
-        .mockResolvedValue(100000000);
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue([
+          { amount: 100000000, currency },
+        ] as PaymentEntity[]);
       jest
         .spyOn(paymentRepository, 'createUnique')
         .mockResolvedValueOnce(undefined as any);
@@ -1560,32 +1562,11 @@ describe('PaymentService', () => {
     });
 
     it('should throw an error if the payment creation fails', async () => {
-      const userId = 1;
-      const amount = 100;
-      const currency = PaymentCurrency.USD;
-      const rate = 1;
-
       jest
-        .spyOn(paymentService, 'getUserBalanceByCurrency')
-        .mockResolvedValueOnce(100000000);
-      jest
-        .spyOn(paymentRepository, 'createUnique')
-        .mockRejectedValueOnce(new Error('Database error'));
-
-      await expect(
-        paymentService.createWithdrawalPayment(userId, amount, currency, rate),
-      ).rejects.toThrow('Database error');
-    });
-
-    it('should throw an error if the payment creation fails', async () => {
-      const userId = 1;
-      const amount = 100;
-      const currency = PaymentCurrency.USD;
-      const rate = 1;
-
-      jest
-        .spyOn(paymentService, 'getUserBalanceByCurrency')
-        .mockResolvedValueOnce(100000000);
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue([
+          { amount: 100000000, currency },
+        ] as PaymentEntity[]);
       jest
         .spyOn(paymentRepository, 'createUnique')
         .mockRejectedValueOnce(new Error('Database error'));
@@ -1596,14 +1577,9 @@ describe('PaymentService', () => {
     });
 
     it('should throw an error if the user does not have enough balance', async () => {
-      const userId = 1;
-      const amount = 100;
-      const currency = PaymentCurrency.USD;
-      const rate = 1;
-
       jest
-        .spyOn(paymentService, 'getUserBalanceByCurrency')
-        .mockResolvedValueOnce(0);
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue([{ amount: 0, currency }] as PaymentEntity[]);
 
       await expect(
         paymentService.createWithdrawalPayment(userId, amount, currency, rate),
