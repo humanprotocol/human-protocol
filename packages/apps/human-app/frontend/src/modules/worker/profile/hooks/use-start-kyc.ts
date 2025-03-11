@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useKycStartMutation } from '@/modules/worker/services/get-kyc-session-id';
 import { useKycErrorNotifications } from '@/modules/worker/hooks/use-kyc-notification';
 import { FetchError } from '@/api/fetcher';
+import { useKycStartMutation } from './use-start-kyc-mutation';
 
 export function useStartKyc() {
   const [isKYCInProgress, setIsKYCInProgress] = useState(false);
