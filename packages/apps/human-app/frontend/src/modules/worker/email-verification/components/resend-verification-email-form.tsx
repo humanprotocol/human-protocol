@@ -4,10 +4,10 @@ import Typography from '@mui/material/Typography';
 import { Trans, useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/shared/components/ui/button';
-import type { ResendEmailVerificationDto } from '@/modules/worker/services/resend-email-verification';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { env } from '@/shared/env';
+import { type ResendEmailVerificationDto } from '../types';
 
 interface ResendVerificationEmailFormProps {
   methods: UseFormReturn<Pick<ResendEmailVerificationDto, 'h_captcha_token'>>;

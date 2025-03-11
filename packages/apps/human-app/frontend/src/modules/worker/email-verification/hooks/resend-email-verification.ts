@@ -1,35 +1,10 @@
-/* eslint-disable camelcase -- ...*/
 import { z } from 'zod';
-import type { MutationState } from '@tanstack/react-query';
-import {
-  useMutation,
-  useMutationState,
-  useQueryClient,
-} from '@tanstack/react-query';
-import last from 'lodash/last';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
-import type { ResponseError } from '@/shared/types/global.type';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-
-export const resendEmailVerificationHcaptchaSchema = z.object({
-  h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
-});
-
-export type ResendEmailVerificationHcaptchaDto = z.infer<
-  typeof resendEmailVerificationHcaptchaSchema
->;
-export const resendEmailVerificationEmailSchema = z.object({
-  email: z.string().email(),
-});
-
-export type ResendEmailVerificationEmailDto = z.infer<
-  typeof resendEmailVerificationEmailSchema
->;
-
-export type ResendEmailVerificationDto = ResendEmailVerificationHcaptchaDto &
-  ResendEmailVerificationEmailDto;
+import { type ResendEmailVerificationDto } from '../types';
 
 const ResendEmailVerificationSuccessResponseSchema = z.unknown();
 
@@ -66,15 +41,4 @@ export function useResendEmailVerificationWorkerMutation() {
     },
     mutationKey: [resendEmailVerificationKey],
   });
-}
-
-export function useResendEmailVerificationWorkerMutationState() {
-  const state = useMutationState({
-    filters: { mutationKey: [resendEmailVerificationKey] },
-    select: (mutation) => mutation.state,
-  });
-
-  return last(state) as
-    | MutationState<unknown, ResponseError, ResendEmailVerificationDto>
-    | undefined;
 }

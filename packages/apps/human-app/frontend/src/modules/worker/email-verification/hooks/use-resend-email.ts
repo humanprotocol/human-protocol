@@ -1,12 +1,12 @@
 /* eslint-disable camelcase -- ...*/
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  useResendEmailVerificationWorkerMutation,
-  resendEmailVerificationHcaptchaSchema,
-} from '@/modules/worker/services/resend-email-verification';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import type { ResendEmailVerificationDto } from '@/modules/worker/services/resend-email-verification';
+import {
+  type ResendEmailVerificationDto,
+  resendEmailVerificationHcaptchaSchema,
+} from '../types';
+import { useResendEmailVerificationWorkerMutation } from './resend-email-verification';
 
 export function useResendEmail(email: string) {
   const {
