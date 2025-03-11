@@ -39,15 +39,9 @@ import {
   JobCaptchaShapeType,
   EscrowFundToken,
 } from '../../common/enums/job';
-import {
-  FiatCurrency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-} from '../../common/enums/payment';
+import { FiatCurrency } from '../../common/enums/payment';
 import { parseUrl } from '../../common/utils';
-import { add, div, lt, mul, max } from '../../common/utils/decimal';
-import { PaymentRepository } from '../payment/payment.repository';
+import { add, div, mul, max } from '../../common/utils/decimal';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -99,7 +93,6 @@ import {
   listObjectsInBucket,
 } from '../../common/utils/storage';
 import { WebhookDataDto } from '../webhook/webhook.dto';
-import { PaymentEntity } from '../payment/payment.entity';
 import {
   ManifestAction,
   EscrowAction,
@@ -137,7 +130,6 @@ export class JobService {
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
-    private readonly paymentRepository: PaymentRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,
@@ -813,18 +805,6 @@ export class JobService {
     );
     const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
 
-    const userBalance = await this.paymentService.getUserBalanceByCurrency(
-      user.id,
-      dto.paymentCurrency,
-    );
-
-    if (lt(userBalance, totalPaymentAmount)) {
-      throw new ControlledError(
-        ErrorJob.NotEnoughFunds,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     const fundTokenFee =
       dto.paymentCurrency === dto.escrowFundToken
         ? paymentCurrencyFee
@@ -873,6 +853,13 @@ export class JobService {
       });
     }
 
+    const paymentEntity = await this.paymentService.createWithdrawalPayment(
+      user.id,
+      totalPaymentAmount,
+      dto.paymentCurrency,
+      paymentCurrencyRate,
+    );
+
     const { createManifest } = this.createJobSpecificActions[requestType];
 
     let jobEntity = new JobEntity();
@@ -919,26 +906,12 @@ export class JobService {
     jobEntity.requestType = requestType;
     jobEntity.fee = fundTokenFee; // Fee in the token used to funding the escrow
     jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
+    jobEntity.payments = [paymentEntity];
     jobEntity.token = dto.escrowFundToken;
-    jobEntity.status = JobStatus.PENDING;
+    jobEntity.status = JobStatus.PAID;
     jobEntity.waitUntil = new Date();
 
-    jobEntity = await this.jobRepository.createUnique(jobEntity);
-
-    const paymentEntity = new PaymentEntity();
-    paymentEntity.userId = user.id;
-    paymentEntity.jobId = jobEntity.id;
-    paymentEntity.source = PaymentSource.BALANCE;
-    paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -totalPaymentAmount; // In the currency used for the payment.
-    paymentEntity.currency = dto.paymentCurrency;
-    paymentEntity.rate = paymentCurrencyRate;
-    paymentEntity.status = PaymentStatus.SUCCEEDED;
-
-    await this.paymentRepository.createUnique(paymentEntity);
-
-    jobEntity.status = JobStatus.PAID;
-    await this.jobRepository.updateOne(jobEntity);
+    jobEntity = await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
   }
@@ -1169,8 +1142,6 @@ export class JobService {
 
     let status = JobStatus.CANCELED;
     switch (jobEntity.status) {
-      case JobStatus.PENDING:
-        break;
       case JobStatus.PAID:
         if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
           status = JobStatus.FAILED;

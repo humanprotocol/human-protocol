@@ -961,7 +961,7 @@ describe('CronJobService', () => {
         id: 1,
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
+        status: JobStatus.PAID,
       };
 
       escrowEventMock = {

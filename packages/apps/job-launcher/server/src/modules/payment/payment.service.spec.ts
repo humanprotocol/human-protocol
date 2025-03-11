@@ -1529,4 +1529,66 @@ describe('PaymentService', () => {
       );
     });
   });
+
+  describe('createWithdrawalPayment', () => {
+    const userId = 1;
+    const amount = 100;
+    const currency = PaymentCurrency.USD;
+    const rate = 1;
+
+    it('should create a withdrawal payment successfully', async () => {
+      jest
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue([
+          { amount: 100000000, currency },
+        ] as PaymentEntity[]);
+      jest
+        .spyOn(paymentRepository, 'createUnique')
+        .mockResolvedValueOnce(undefined as any);
+
+      await expect(
+        paymentService.createWithdrawalPayment(userId, amount, currency, rate),
+      ).resolves.not.toThrow();
+
+      expect(paymentRepository.createUnique).toHaveBeenCalledWith({
+        userId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        amount: -amount,
+        currency,
+        rate,
+        status: PaymentStatus.SUCCEEDED,
+      });
+    });
+
+    it('should throw an error if the payment creation fails', async () => {
+      jest
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue([
+          { amount: 100000000, currency },
+        ] as PaymentEntity[]);
+      jest
+        .spyOn(paymentRepository, 'createUnique')
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      await expect(
+        paymentService.createWithdrawalPayment(userId, amount, currency, rate),
+      ).rejects.toThrow('Database error');
+    });
+
+    it('should throw an error if the user does not have enough balance', async () => {
+      jest
+        .spyOn(paymentRepository, 'getUserBalancePayments')
+        .mockResolvedValue([{ amount: 0, currency }] as PaymentEntity[]);
+
+      await expect(
+        paymentService.createWithdrawalPayment(userId, amount, currency, rate),
+      ).rejects.toThrow(
+        new ControlledError(
+          ErrorPayment.NotEnoughFunds,
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+  });
 });
