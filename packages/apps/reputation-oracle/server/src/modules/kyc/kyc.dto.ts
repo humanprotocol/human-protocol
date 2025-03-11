@@ -9,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { KycStatus } from '../../common/enums/user';
+import { KycStatus } from './constants';
 
 export class StartSessionResponseDto {
   @ApiProperty({ name: 'url' })
@@ -18,9 +18,10 @@ export class StartSessionResponseDto {
 }
 
 export class DocumentData {
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
-  public country: string;
+  @IsOptional()
+  public country: string | null;
 }
 
 export class VerificationData {

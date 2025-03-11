@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
-import { UserEntity } from '../user';
 import { HttpService } from '@nestjs/axios';
 import {
   StartSessionResponseDto,
@@ -8,17 +6,24 @@ import {
   UpdateKycStatusDto,
 } from './kyc.dto';
 import { KycRepository } from './kyc.repository';
-import { KycStatus } from '../../common/enums/user';
-import { firstValueFrom } from 'rxjs';
+import { KycStatus } from './constants';
+import { catchError, firstValueFrom } from 'rxjs';
 import { KycConfigService } from '../../config/kyc-config.service';
 import { Web3ConfigService } from '../..//config/web3-config.service';
 import { KycEntity } from './kyc.entity';
 import { Web3Service } from '../web3/web3.service';
+import { UserEntity } from '../user';
 
 import { KycErrorMessage, KycError } from './kyc.error';
 
+import logger from '../../logger';
+import { AxiosError } from 'axios';
+import { formatAxiosError } from '../../utils/format-axios-error';
+
 @Injectable()
 export class KycService {
+  private readonly logger = logger.child({ context: KycService.name });
+
   constructor(
     private kycRepository: KycRepository,
     private readonly httpService: HttpService,
@@ -51,21 +56,33 @@ export class KycService {
       };
     }
 
+    const body = {
+      verification: {
+        vendorData: `${userEntity.id}`,
+      },
+    };
+
     const { data } = await firstValueFrom(
-      await this.httpService.post(
-        'sessions',
-        {
-          verification: {
-            vendorData: `${userEntity.id}`,
-          },
-        },
-        {
+      this.httpService
+        .post('sessions', body, {
           baseURL: this.kycConfigService.baseUrl,
           headers: {
             'X-AUTH-CLIENT': this.kycConfigService.apiKey,
           },
-        },
-      ),
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            const formattedError = formatAxiosError(error);
+            this.logger.error(
+              'Error occurred during initializing KYC session',
+              {
+                error: formattedError,
+                userId: userEntity.id,
+              },
+            );
+            throw new Error('Error occurred during initializing KYC session');
+          }),
+        ),
     );
 
     if (data?.status !== 'success' || !data?.verification?.url) {
@@ -101,12 +118,21 @@ export class KycService {
       );
     }
 
-    if (!country) {
-      throw new KycError(KycErrorMessage.COUNTRY_NOT_SET, kycEntity.userId);
+    // Since veriff doesn't guarantee a webhook delivery order we need to make sure that we update only kycs in intermediate status
+    if (
+      kycEntity.status !== KycStatus.RESUBMISSION_REQUESTED &&
+      kycEntity.status !== KycStatus.NONE
+    ) {
+      return;
+    }
+    if (status === KycStatus.APPROVED) {
+      if (!country) {
+        throw new KycError(KycErrorMessage.COUNTRY_NOT_SET, kycEntity.userId);
+      }
+      kycEntity.country = country;
     }
 
     kycEntity.status = status;
-    kycEntity.country = country;
     kycEntity.message = reason;
 
     await this.kycRepository.updateOne(kycEntity);

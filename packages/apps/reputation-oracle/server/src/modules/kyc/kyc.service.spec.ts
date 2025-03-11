@@ -7,7 +7,7 @@ import { DeepPartial } from 'typeorm';
 import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { KycConfigService } from '../../config/kyc-config.service';
-import { KycStatus } from '../../common/enums/user';
+import { KycStatus } from '../kyc/constants';
 import { Web3Service } from '../web3/web3.service';
 import { KycEntity } from './kyc.entity';
 import { KycRepository } from './kyc.repository';
