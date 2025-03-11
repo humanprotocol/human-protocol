@@ -55,8 +55,8 @@ export class UserEntity extends BaseEntity {
     () => UserQualificationEntity,
     (userQualification) => userQualification.user,
   )
-  userQualifications: UserQualificationEntity[];
+  userQualifications?: UserQualificationEntity[];
 
   @Column({ type: 'varchar', nullable: true })
-  ndaSignedUrl?: string;
+  ndaSignedUrl: string | null;
 }
