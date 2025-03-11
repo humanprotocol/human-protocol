@@ -3,7 +3,6 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { TokenEntity } from '../auth/token.entity';
 import { KycEntity } from '../kyc/kyc.entity';
 import { SiteKeyEntity } from './site-key.entity';
 import { UserQualificationEntity } from '../qualification/user-qualification.entity';
@@ -25,41 +24,39 @@ export enum Role {
 export class UserEntity extends BaseEntity {
   @Exclude()
   @Column({ type: 'varchar', nullable: true })
-  public password: string;
+  password: string;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
-  public email: string;
+  email: string;
 
   @Column({ type: 'enum', enum: Role })
-  public role: Role;
+  role: Role;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
-  public evmAddress: string;
+  evmAddress: string;
 
+  @Exclude()
   @Column({ type: 'varchar', nullable: true })
-  public nonce: string;
+  nonce: string;
 
   @Column({
     type: 'enum',
     enum: UserStatus,
   })
-  public status: UserStatus;
-
-  @OneToOne(() => TokenEntity)
-  public token: TokenEntity;
+  status: UserStatus;
 
   @OneToOne(() => KycEntity, (kyc) => kyc.user)
-  public kyc?: KycEntity;
+  kyc?: KycEntity;
 
   @OneToMany(() => SiteKeyEntity, (siteKey) => siteKey.user)
-  public siteKeys?: SiteKeyEntity[];
+  siteKeys?: SiteKeyEntity[];
 
   @OneToMany(
     () => UserQualificationEntity,
     (userQualification) => userQualification.user,
   )
-  public userQualifications: UserQualificationEntity[];
+  userQualifications: UserQualificationEntity[];
 
   @Column({ type: 'varchar', nullable: true })
-  public ndaSignedUrl?: string;
+  ndaSignedUrl?: string;
 }
