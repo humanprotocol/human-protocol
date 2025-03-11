@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -54,7 +54,6 @@ export function JobsPage() {
   const [isMobileFilterDrawerOpen, setIsMobileFilterDrawerOpen] =
     useState(false);
   const { onError } = useGetOraclesNotifications();
-  const onErrorRef = useRef(onError);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -72,9 +71,9 @@ export function JobsPage() {
 
   useEffect(() => {
     if (error) {
-      onErrorRef.current(error);
+      onError(error);
     }
-  }, [error]);
+  }, [error, onError]);
 
   const oracleName = data?.find(
     ({ address }) => address === oracle_address
