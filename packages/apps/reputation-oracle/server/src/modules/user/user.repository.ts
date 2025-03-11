@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, FindManyOptions } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
 import { Role, UserStatus, UserEntity } from './user.entity';
+
+type FindOptions = {
+  relations?: FindManyOptions<UserEntity>['relations'];
+};
 
 @Injectable()
 export class UserRepository extends BaseRepository<UserEntity> {
@@ -9,10 +13,13 @@ export class UserRepository extends BaseRepository<UserEntity> {
     super(UserEntity, dataSource);
   }
 
-  async findById(id: number): Promise<UserEntity | null> {
+  async findOneById(
+    id: number,
+    options: FindOptions = {},
+  ): Promise<UserEntity | null> {
     return this.findOne({
       where: { id },
-      relations: { kyc: true, siteKeys: true },
+      relations: options.relations,
     });
   }
 

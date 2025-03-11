@@ -34,7 +34,12 @@ export class JwtHttpStrategy extends PassportStrategy(
     @Req() request: any,
     payload: { userId: number },
   ): Promise<UserEntity> {
-    const user = await this.userRepository.findById(payload.userId);
+    const user = await this.userRepository.findOneById(payload.userId, {
+      relations: {
+        kyc: true,
+        siteKeys: true,
+      },
+    });
 
     if (!user) {
       throw new UnauthorizedException('User not found');

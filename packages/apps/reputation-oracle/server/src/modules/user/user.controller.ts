@@ -218,7 +218,7 @@ export class UserController {
 
   @Get('/me')
   async me(@Req() request: RequestWithUser) {
-    const user = await this.userRepository.findById(request.user.id);
+    const user = await this.userRepository.findOneById(request.user.id);
     logger.debug('/me endpoint user from repository', user);
     return user;
   }
