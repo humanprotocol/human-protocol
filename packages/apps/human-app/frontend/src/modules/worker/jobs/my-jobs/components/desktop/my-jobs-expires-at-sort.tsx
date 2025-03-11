@@ -2,6 +2,7 @@
 import { t } from 'i18next';
 import { Sorting } from '@/shared/components/ui/table/table-header-menu.tsx/sorting';
 import { useMyJobsFilterStore } from '../../../hooks';
+import { SortField } from '../../../types';
 
 export function MyJobsExpiresAtSort() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
@@ -9,7 +10,7 @@ export function MyJobsExpiresAtSort() {
   const sortAscExpiresAt = () => {
     setFilterParams({
       ...filterParams,
-      sort_field: 'expires_at',
+      sort_field: SortField.EXPIRES_AT,
       sort: 'asc',
     });
   };
@@ -17,7 +18,7 @@ export function MyJobsExpiresAtSort() {
   const sortDescExpiresAt = () => {
     setFilterParams({
       ...filterParams,
-      sort_field: 'expires_at',
+      sort_field: SortField.EXPIRES_AT,
       sort: 'desc',
     });
   };

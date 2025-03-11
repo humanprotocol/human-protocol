@@ -4,6 +4,7 @@ import { t } from 'i18next';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { Sorting } from '../../../components';
 import { useMyJobsFilterStore } from '../../../hooks';
+import { SortField } from '../../../types';
 
 export function MyJobsRewardAmountSortMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
@@ -17,25 +18,25 @@ export function MyJobsRewardAmountSortMobile() {
         </Typography>
       }
       fromHighestSelected={
-        filterParams.sort_field === 'reward_amount' &&
+        filterParams.sort_field === SortField.REWARD_AMOUNT &&
         filterParams.sort === 'desc'
       }
       sortFromHighest={() => {
         setFilterParams({
           ...filterParams,
           sort: 'desc',
-          sort_field: 'reward_amount',
+          sort_field: SortField.REWARD_AMOUNT,
         });
       }}
       fromLowestSelected={
-        filterParams.sort_field === 'reward_amount' &&
+        filterParams.sort_field === SortField.REWARD_AMOUNT &&
         filterParams.sort === 'asc'
       }
       sortFromLowest={() => {
         setFilterParams({
           ...filterParams,
           sort: 'asc',
-          sort_field: 'reward_amount',
+          sort_field: SortField.REWARD_AMOUNT,
         });
       }}
       clear={() => {

@@ -1,17 +1,12 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-import { type MyJobStatus } from '../types';
+import { SortField, type SortDirection, type MyJobStatus } from '../types';
 
 export interface MyJobsFilterStoreProps {
   filterParams: {
-    sort?: 'asc' | 'desc';
-    sort_field?:
-      | 'chain_id'
-      | 'job_type'
-      | 'reward_amount'
-      | 'expires_at'
-      | 'created_at';
+    sort?: SortDirection;
+    sort_field?: SortField;
     job_type?: string;
     status?: MyJobStatus;
     escrow_address?: string;
@@ -34,7 +29,7 @@ const initialFiltersState = {
   escrow_address: '',
   page: 0,
   page_size: 5,
-  sort_field: 'created_at',
+  sort_field: SortField.CREATED_AT,
   sort: 'desc',
 } as const;
 

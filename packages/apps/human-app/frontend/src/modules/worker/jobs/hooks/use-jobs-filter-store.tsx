@@ -1,17 +1,12 @@
 /* eslint-disable camelcase -- api params*/
 import { create } from 'zustand';
 import type { PageSize } from '@/shared/types/entity.type';
-import { MyJobStatus } from '../types';
+import { MyJobStatus, type SortDirection, type SortField } from '../types';
 
 export interface JobsFilterStoreProps {
   filterParams: {
-    sort?: 'asc' | 'desc';
-    sort_field?:
-      | 'chain_id'
-      | 'job_type'
-      | 'reward_amount'
-      | 'created_at'
-      | 'escrow_address';
+    sort?: SortDirection;
+    sort_field?: SortField;
     network?: 'MATIC' | 'POLYGON';
     // TODO add allowed job types
     job_type?: string;
