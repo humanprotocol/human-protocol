@@ -6,7 +6,7 @@ import { Loader } from '@/shared/components/ui/loader';
 import { NoRecords } from '@/shared/components/ui/no-records';
 import { useGetOraclesNotifications } from '@/modules/worker/hooks/use-get-oracles-notifications';
 import { PageCardError } from '@/shared/components/ui/page-card';
-import { useGetOracles } from '../hooks';
+import { useGetOracles } from '../../hooks';
 import { OraclesTableItemMobile } from './oracles-table-item-mobile';
 import { OraclesTableDesktop } from './oracles-table-desktop';
 
