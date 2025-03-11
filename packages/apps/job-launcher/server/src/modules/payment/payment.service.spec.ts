@@ -1561,6 +1561,8 @@ describe('PaymentService', () => {
       expect(balance).toEqual(expectedBalance);
       expect(paymentService.getUserBalanceByCurrency).toHaveBeenCalledTimes(4);
       expect(paymentService.convertToUSD).toHaveBeenCalledTimes(4);
+    });
+  });
 
   describe('createWithdrawalPayment', () => {
     const userId = 1;
