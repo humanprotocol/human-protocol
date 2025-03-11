@@ -10,16 +10,16 @@ import queryString from 'query-string';
 import { Button } from '@/shared/components/ui/button';
 import { Password } from '@/shared/components/data-entry/password/password';
 import { PageCard } from '@/shared/components/ui/page-card';
-import type { ResetPasswordDto } from '@/modules/worker/services/reset-password';
-import {
-  resetPasswordDtoSchema,
-  useResetPasswordMutation,
-} from '@/modules/worker/services/reset-password';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { routerPaths } from '@/router/router-paths';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
+import {
+  type ResetPasswordDto,
+  resetPasswordDtoSchema,
+  useResetPasswordMutation,
+} from './hooks';
 
 export function ResetPasswordWorkerPage() {
   const location = useLocation();
