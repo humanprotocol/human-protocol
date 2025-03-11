@@ -2,12 +2,12 @@ import { Grid, Paper, type SxProps, Typography } from '@mui/material';
 import { t } from 'i18next';
 import { Chips } from '@/shared/components/ui/chips';
 import { TableButton } from '@/shared/components/ui/table-button';
-import { EvmAddress } from '@/modules/worker/components/jobs/evm-address';
 import { ListItem } from '@/shared/components/ui/list-item';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { type Oracle } from '../hooks';
 import { useSelectOracleNavigation } from '../hooks/use-select-oracle-navigation';
+import { EvmAddress } from '../../jobs/components';
+import { type Oracle } from '../../hooks';
 
 interface OraclesTableItemMobileProps {
   oracle: Oracle;

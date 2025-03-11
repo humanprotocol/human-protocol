@@ -10,7 +10,6 @@ import { breakpoints } from '@/shared/styles/breakpoints';
 import { Counter } from '@/shared/components/ui/counter';
 import { getErrorMessageForError } from '@/shared/errors';
 import { getTomorrowDate } from '@/shared/helpers/date';
-import { useSolveHCaptchaMutation } from '@/modules/worker/services/solve-hcaptcha';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useHCaptchaLabelingNotifications } from '@/modules/worker/hooks/use-hcaptcha-labeling-notifications';
 import { useColorMode } from '@/shared/contexts/color-mode';
@@ -20,7 +19,11 @@ import {
   PageCardLoader,
   PageCardError,
 } from '@/shared/components/ui/page-card';
-import { useHCaptchaUserStats, useDailyHmtSpent } from './hooks';
+import {
+  useHCaptchaUserStats,
+  useDailyHmtSpent,
+  useSolveHCaptchaMutation,
+} from './hooks';
 
 export function HcaptchaLabelingPage() {
   const { colorPalette, isDarkMode } = useColorMode();
