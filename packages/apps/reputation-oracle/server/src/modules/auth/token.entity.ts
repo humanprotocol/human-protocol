@@ -13,7 +13,6 @@ import {
 import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { IBase } from '../../common/interfaces/base';
 
 export enum TokenType {
   EMAIL = 'EMAIL',
@@ -21,14 +20,9 @@ export enum TokenType {
   REFRESH = 'REFRESH',
 }
 
-export interface IToken extends IBase {
-  uuid: string;
-  type: TokenType;
-}
-
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'tokens' })
 @Index(['type', 'userId'], { unique: true })
-export class TokenEntity extends BaseEntity implements IToken {
+export class TokenEntity extends BaseEntity {
   @Column({ type: 'uuid', unique: true })
   @Generated('uuid')
   public uuid: string;
