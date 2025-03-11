@@ -5,11 +5,10 @@ import { useMyJobsFilterStore } from '../../../hooks';
 import { SortField } from '../../../types';
 
 export function MyJobsRewardAmountSort() {
-  const { setFilterParams, filterParams } = useMyJobsFilterStore();
+  const { setFilterParams } = useMyJobsFilterStore();
 
   const sortAscRewardAmount = () => {
     setFilterParams({
-      ...filterParams,
       sort_field: SortField.REWARD_AMOUNT,
       sort: 'asc',
     });
@@ -17,7 +16,6 @@ export function MyJobsRewardAmountSort() {
 
   const sortDescRewardAmount = () => {
     setFilterParams({
-      ...filterParams,
       sort_field: SortField.REWARD_AMOUNT,
       sort: 'desc',
     });
@@ -27,7 +25,6 @@ export function MyJobsRewardAmountSort() {
     <Sorting
       clear={() => {
         setFilterParams({
-          ...filterParams,
           sort_field: undefined,
           sort: undefined,
         });

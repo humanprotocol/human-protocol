@@ -23,7 +23,6 @@ export function MyJobsExpiresAtSortMobile() {
       }
       sortFromHighest={() => {
         setFilterParams({
-          ...filterParams,
           sort: 'desc',
           sort_field: SortField.EXPIRES_AT,
         });
@@ -34,14 +33,12 @@ export function MyJobsExpiresAtSortMobile() {
       }
       sortFromLowest={() => {
         setFilterParams({
-          ...filterParams,
           sort: 'asc',
           sort_field: SortField.EXPIRES_AT,
         });
       }}
       clear={() => {
         setFilterParams({
-          ...filterParams,
           sort: undefined,
           sort_field: undefined,
         });

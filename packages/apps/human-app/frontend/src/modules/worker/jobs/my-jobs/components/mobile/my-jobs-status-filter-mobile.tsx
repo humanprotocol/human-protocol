@@ -10,7 +10,6 @@ export function MyJobsStatusFilterMobile() {
     <Filtering
       clear={() => {
         setFilterParams({
-          ...filterParams,
           status: undefined,
           page: 0,
         });
@@ -22,7 +21,6 @@ export function MyJobsStatusFilterMobile() {
       isChecked={(status) => status === filterParams.status}
       setFiltering={(status) => {
         setFilterParams({
-          ...filterParams,
           status,
           page: 0,
         });

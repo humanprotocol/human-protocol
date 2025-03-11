@@ -16,7 +16,6 @@ export function MyJobsNetworkFilterMobile({
     <Filtering
       clear={() => {
         setFilterParams({
-          ...filterParams,
           chain_id: undefined,
           page: 0,
         });
@@ -26,7 +25,6 @@ export function MyJobsNetworkFilterMobile({
       isMobile={false}
       setFiltering={(chainId) => {
         setFilterParams({
-          ...filterParams,
           chain_id: chainId,
           page: 0,
         });

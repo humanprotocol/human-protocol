@@ -12,7 +12,6 @@ export function MyJobsJobTypeFilterMobile() {
     <Filtering
       clear={() => {
         setFilterParams({
-          ...filterParams,
           job_type: undefined,
           page: 0,
         });
@@ -25,7 +24,6 @@ export function MyJobsJobTypeFilterMobile() {
       isMobile={false}
       setFiltering={(jobType) => {
         setFilterParams({
-          ...filterParams,
           job_type: jobType,
           page: 0,
         });

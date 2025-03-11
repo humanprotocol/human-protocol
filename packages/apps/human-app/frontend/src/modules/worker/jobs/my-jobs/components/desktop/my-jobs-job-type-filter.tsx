@@ -12,7 +12,6 @@ export function MyJobsJobTypeFilter() {
     <Filtering
       clear={() => {
         setFilterParams({
-          ...filterParams,
           job_type: undefined,
         });
       }}
@@ -23,7 +22,6 @@ export function MyJobsJobTypeFilter() {
       isChecked={(option) => option === filterParams.job_type}
       setFiltering={(jobType) => {
         setFilterParams({
-          ...filterParams,
           job_type: jobType,
         });
       }}

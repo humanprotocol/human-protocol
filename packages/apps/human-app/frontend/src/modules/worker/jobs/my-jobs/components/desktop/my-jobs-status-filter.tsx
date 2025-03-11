@@ -10,7 +10,6 @@ export function MyJobsStatusFilter() {
     <Filtering
       clear={() => {
         setFilterParams({
-          ...filterParams,
           status: undefined,
         });
       }}
@@ -21,7 +20,6 @@ export function MyJobsStatusFilter() {
       isChecked={(status) => status === filterParams.status}
       setFiltering={(status) => {
         setFilterParams({
-          ...filterParams,
           status,
         });
       }}

@@ -23,7 +23,6 @@ export function MyJobsRewardAmountSortMobile() {
       }
       sortFromHighest={() => {
         setFilterParams({
-          ...filterParams,
           sort: 'desc',
           sort_field: SortField.REWARD_AMOUNT,
         });
@@ -34,14 +33,12 @@ export function MyJobsRewardAmountSortMobile() {
       }
       sortFromLowest={() => {
         setFilterParams({
-          ...filterParams,
           sort: 'asc',
           sort_field: SortField.REWARD_AMOUNT,
         });
       }}
       clear={() => {
         setFilterParams({
-          ...filterParams,
           sort: undefined,
           sort_field: undefined,
         });

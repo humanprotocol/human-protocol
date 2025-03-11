@@ -16,7 +16,6 @@ export function MyJobsNetworkFilter({
     <Filtering
       clear={() => {
         setFilterParams({
-          ...filterParams,
           chain_id: undefined,
         });
       }}
@@ -24,7 +23,6 @@ export function MyJobsNetworkFilter({
       isChecked={(option) => option === filterParams.chain_id}
       setFiltering={(chainId) => {
         setFilterParams({
-          ...filterParams,
           chain_id: chainId,
         });
       }}
