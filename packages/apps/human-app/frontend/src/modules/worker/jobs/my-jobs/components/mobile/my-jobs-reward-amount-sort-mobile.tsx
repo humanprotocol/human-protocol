@@ -9,6 +9,8 @@ import { SortDirection, SortField } from '../../../types';
 export function MyJobsRewardAmountSortMobile() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
   const { colorPalette } = useColorMode();
+  const isRewardAmountSortSelected =
+    filterParams.sort_field === SortField.REWARD_AMOUNT;
 
   return (
     <Sorting
@@ -18,8 +20,7 @@ export function MyJobsRewardAmountSortMobile() {
         </Typography>
       }
       fromHighestSelected={
-        filterParams.sort_field === SortField.REWARD_AMOUNT &&
-        filterParams.sort === SortDirection.DESC
+        isRewardAmountSortSelected && filterParams.sort === SortDirection.DESC
       }
       sortFromHighest={() => {
         setFilterParams({
@@ -28,8 +29,7 @@ export function MyJobsRewardAmountSortMobile() {
         });
       }}
       fromLowestSelected={
-        filterParams.sort_field === SortField.REWARD_AMOUNT &&
-        filterParams.sort === SortDirection.ASC
+        isRewardAmountSortSelected && filterParams.sort === SortDirection.ASC
       }
       sortFromLowest={() => {
         setFilterParams({
