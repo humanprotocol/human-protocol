@@ -6,7 +6,7 @@ import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { env } from '@/shared/env';
 import { MainnetChains, TestnetChains } from '@/modules/smart-contracts/chains';
-import { useJobsTypesOraclesFilter } from '../jobs/hooks';
+import { useJobsTypesOraclesFilterStore } from '../jobs/hooks';
 
 const OracleSchema = z.object({
   address: z.string(),
@@ -94,7 +94,7 @@ async function getOracles({
 }
 
 export function useGetOracles() {
-  const { selected_job_types } = useJobsTypesOraclesFilter();
+  const { selected_job_types } = useJobsTypesOraclesFilterStore();
   return useQuery({
     queryFn: ({ signal }) => getOracles({ selected_job_types, signal }),
     queryKey: ['oracles', selected_job_types],

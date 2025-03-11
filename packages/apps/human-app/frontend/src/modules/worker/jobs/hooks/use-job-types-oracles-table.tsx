@@ -6,8 +6,8 @@ export interface JobsTypesOraclesFilterStore {
   selectJobType: (jobType: string[]) => void;
 }
 
-export const useJobsTypesOraclesFilter = create<JobsTypesOraclesFilterStore>(
-  (set) => ({
+export const useJobsTypesOraclesFilterStore =
+  create<JobsTypesOraclesFilterStore>((set) => ({
     selected_job_types: [],
     selectJobType: (jobTypes: string[]) => {
       set((state) => ({
@@ -15,5 +15,4 @@ export const useJobsTypesOraclesFilter = create<JobsTypesOraclesFilterStore>(
         selected_job_types: jobTypes,
       }));
     },
-  })
-);
+  }));

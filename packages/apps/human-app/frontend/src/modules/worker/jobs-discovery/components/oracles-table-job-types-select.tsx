@@ -5,11 +5,11 @@ import { Grid } from '@mui/material';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { MultiSelect } from '@/shared/components/data-entry/multi-select';
 import { JOB_TYPES } from '@/shared/consts';
-import { useJobsTypesOraclesFilter } from '../../jobs/hooks';
+import { useJobsTypesOraclesFilterStore } from '../../jobs/hooks';
 
 export function OraclesTableJobTypesSelect() {
   const isMobile = useIsMobile();
-  const { selectJobType } = useJobsTypesOraclesFilter();
+  const { selectJobType } = useJobsTypesOraclesFilterStore();
   const methods = useForm<{ jobType: string[] }>({
     defaultValues: {
       jobType: [],
