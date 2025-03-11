@@ -1,8 +1,6 @@
 import type { RouteProps } from 'react-router-dom';
 import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
-import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-reset-link/send-reset-link-success.page';
-import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/send-reset-link.page';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import {
@@ -38,6 +36,10 @@ import {
   ResetPasswordWorkerPage,
   ResetPasswordWorkerSuccessPage,
 } from '@/modules/worker/reset-password';
+import {
+  SendResetLinkWorkerPage,
+  SendResetLinkWorkerSuccessPage,
+} from '@/modules/worker/send-reset-link';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
