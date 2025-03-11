@@ -68,10 +68,10 @@ export class GCVContentModerationService implements IContentModeratorService {
       },
     });
 
-    // Initialize cache with expiration time of 1 hour and check period of 30 minutes
+    // Initialize cache with expiration time of 60 minutes and check period of 15 minutes
     this.bucketListCache = new NodeCache({
-      stdTTL: 60 * 60,
-      checkperiod: 30 * 60,
+      stdTTL: 30 * 60,
+      checkperiod: 15 * 60,
     });
   }
 
