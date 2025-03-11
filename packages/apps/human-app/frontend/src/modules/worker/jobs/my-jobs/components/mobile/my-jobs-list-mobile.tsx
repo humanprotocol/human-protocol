@@ -28,13 +28,13 @@ import { useMyJobsFilterStore, useJobsFilterStore } from '../../../hooks';
 import { useRefreshTasksMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
 
-interface MyJobsTableMobileProps {
+interface MyJobsListMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export function MyJobsTableMobile({
+export function MyJobsListMobile({
   setIsMobileFilterDrawerOpen,
-}: Readonly<MyJobsTableMobileProps>) {
+}: Readonly<MyJobsListMobileProps>) {
   const { colorPalette } = useColorMode();
   const { filterParams, setPageParams, resetFilterParams } =
     useMyJobsFilterStore();

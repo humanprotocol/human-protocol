@@ -13,15 +13,12 @@ import { useGetOracles } from '../hooks';
 import { useGetOraclesNotifications } from '../hooks/use-get-oracles-notifications';
 import { useGetUiConfig } from './hooks';
 import { TabPanel } from './components';
-import {
-  MyJobsDrawerMobile,
-  MyJobsTableMobile,
-} from './my-jobs/components/mobile';
-import { MyJobsTable } from './my-jobs/components/desktop';
+import { MyJobsDrawerMobileView } from './my-jobs/components/mobile';
 import {
   AvailableJobsView,
   AvailableJobsDrawerMobileView,
 } from './available-jobs';
+import { MyJobsView } from './my-jobs/my-jobs-view';
 
 function generateTabA11yProps(index: number) {
   return {
@@ -97,7 +94,7 @@ export function JobsPage() {
           />
         )}
         {selectedTab === 'myJobs' && uiConfigData && (
-          <MyJobsDrawerMobile
+          <MyJobsDrawerMobileView
             chainIdsEnabled={uiConfigData.chainIdsEnabled}
             setIsMobileFilterDrawerOpen={setIsMobileFilterDrawerOpen}
           />
@@ -171,19 +168,12 @@ export function JobsPage() {
                     {isError ? (
                       <NoRecords />
                     ) : (
-                      <>
-                        {isMobile ? (
-                          <MyJobsTableMobile
-                            setIsMobileFilterDrawerOpen={
-                              setIsMobileFilterDrawerOpen
-                            }
-                          />
-                        ) : (
-                          <MyJobsTable
-                            chainIdsEnabled={uiConfigData.chainIdsEnabled}
-                          />
-                        )}
-                      </>
+                      <MyJobsView
+                        chainIdsEnabled={uiConfigData.chainIdsEnabled}
+                        setIsMobileFilterDrawerOpen={
+                          setIsMobileFilterDrawerOpen
+                        }
+                      />
                     )}
                   </TabPanel>
                 </Box>

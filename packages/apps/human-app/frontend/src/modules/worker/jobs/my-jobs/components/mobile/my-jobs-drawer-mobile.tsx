@@ -18,7 +18,7 @@ interface DrawerMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;
   chainIdsEnabled: number[];
 }
-export function MyJobsDrawerMobile({
+export function MyJobsDrawerMobileView({
   setIsMobileFilterDrawerOpen,
   chainIdsEnabled,
 }: Readonly<DrawerMobileProps>) {

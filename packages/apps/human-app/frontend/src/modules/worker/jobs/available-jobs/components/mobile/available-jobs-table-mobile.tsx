@@ -3,7 +3,7 @@ import { Button } from '@/shared/components/ui/button';
 import { FiltersButtonIcon } from '@/shared/components/ui/icons';
 import { useJobsFilterStore } from '../../../hooks';
 import { EscrowAddressSearchForm } from '../../../components';
-import { AvailableJobsTableJobsListMobile } from './available-jobs-table-jobs-list-mobile';
+import { AvailableJobsListMobile } from './available-jobs-list-mobile';
 
 interface AvailableJobsTableMobileProps {
   handleOpenMobileFilterDrawer: () => void;
@@ -36,7 +36,7 @@ export function AvailableJobsTableMobile({
         {t('worker.jobs.mobileFilterDrawer.filters')}
         <FiltersButtonIcon />
       </Button>
-      <AvailableJobsTableJobsListMobile />
+      <AvailableJobsListMobile />
     </>
   );
 }

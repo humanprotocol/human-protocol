@@ -20,7 +20,7 @@ import {
 import { EvmAddress, RewardAmount } from '../../../components';
 import { AvailableJobsAssignJobButtonMobile } from './available-jobs-assign-job-button-mobile';
 
-export function AvailableJobsTableJobsListMobile() {
+export function AvailableJobsListMobile() {
   const { t } = useTranslation();
   const { colorPalette } = useColorMode();
   const { filterParams, setPageParams, resetFilterParams } =

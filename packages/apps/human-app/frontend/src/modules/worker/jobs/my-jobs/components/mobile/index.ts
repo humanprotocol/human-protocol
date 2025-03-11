@@ -1,2 +1,2 @@
 export * from './my-jobs-drawer-mobile';
-export * from './my-jobs-table-mobile';
+export * from './my-jobs-list-mobile';
