@@ -114,7 +114,7 @@ export class UserService {
     const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
       evmAddress: user.evmAddress,
-      country: user.kyc.country,
+      country: user.kyc.country as string,
     });
 
     if (!registeredLabeler) {
