@@ -90,7 +90,7 @@ export class AuthService {
     if (storedUser) {
       throw new DuplicatedUserEmailError(data.email);
     }
-    const userEntity = await this.userService.create(data);
+    const userEntity = await this.userService.createWorkerUser(data);
 
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.EMAIL;
@@ -388,7 +388,7 @@ export class AuthService {
       from: data.address,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.SIGNIN,
-      nonce: (await this.userRepository.findOneByAddress(data.address))?.nonce,
+      nonce: userEntity.nonce ?? undefined,
     });
     const verified = verifySignature(preSigninData, data.signature, [
       data.address,

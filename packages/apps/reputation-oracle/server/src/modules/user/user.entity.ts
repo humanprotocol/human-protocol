@@ -23,21 +23,42 @@ export enum Role {
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'users' })
 export class UserEntity extends BaseEntity {
   @Exclude()
-  @Column({ type: 'varchar', nullable: true })
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
   password: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+    unique: true,
+  })
   email: string;
 
-  @Column({ type: 'enum', enum: Role })
+  @Column({
+    type: 'enum',
+    enum: Role,
+  })
   role: Role;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+    unique: true,
+  })
   evmAddress: string;
 
   @Exclude()
-  @Column({ type: 'varchar', nullable: true })
-  nonce: string;
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  nonce: string | null;
 
   @Column({
     type: 'enum',
@@ -57,6 +78,10 @@ export class UserEntity extends BaseEntity {
   )
   userQualifications?: UserQualificationEntity[];
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
   ndaSignedUrl: string | null;
 }

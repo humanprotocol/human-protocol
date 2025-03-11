@@ -1,7 +1,6 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { OperatorStatus } from '../../common/enums/user';
 import { KycStatus } from '../kyc/constants';
@@ -28,15 +27,12 @@ import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  private readonly HASH_ROUNDS = 12;
-
   constructor(
-    private userRepository: UserRepository,
-    private siteKeyRepository: SiteKeyRepository,
+    private readonly userRepository: UserRepository,
+    private readonly siteKeyRepository: SiteKeyRepository,
     private readonly web3Service: Web3Service,
     private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {}
 
   static checkPasswordMatchesHash(
@@ -46,16 +42,23 @@ export class UserService {
     return bcrypt.compareSync(password, passwordHash);
   }
 
-  public async create({
+  private hashPassword(password: string): string {
+    const SALT_GENERATION_ROUNDS = 12;
+    return bcrypt.hashSync(password, SALT_GENERATION_ROUNDS);
+  }
+
+  async createWorkerUser({
     email,
     password,
   }: Pick<UserEntity, 'email' | 'password'>): Promise<UserEntity> {
     const newUser = new UserEntity();
     newUser.email = email;
-    newUser.password = bcrypt.hashSync(password, this.HASH_ROUNDS);
+    newUser.password = this.hashPassword(password);
     newUser.role = Role.WORKER;
     newUser.status = UserStatus.PENDING;
+
     await this.userRepository.createUnique(newUser);
+
     return newUser;
   }
 
@@ -63,7 +66,7 @@ export class UserService {
     userEntity: UserEntity,
     newPassword: string,
   ): Promise<UserEntity> {
-    userEntity.password = bcrypt.hashSync(newPassword, this.HASH_ROUNDS);
+    userEntity.password = this.hashPassword(newPassword);
     return this.userRepository.updateOne(userEntity);
   }
 

@@ -151,9 +151,10 @@ export class UserController {
   async prepareSignature(
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
-    let nonce;
+    let nonce: string | undefined;
     if (data.type === SignatureType.SIGNIN) {
-      nonce = (await this.userRepository.findOneByAddress(data.address))?.nonce;
+      const user = await this.userRepository.findOneByAddress(data.address);
+      nonce = user?.nonce ?? undefined;
     }
 
     const preparedSignatureBody = await prepareSignatureBody({
