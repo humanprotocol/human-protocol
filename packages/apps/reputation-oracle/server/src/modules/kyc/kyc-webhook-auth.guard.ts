@@ -5,8 +5,9 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { createHmac } from 'crypto';
+import { Request } from 'express';
+
 import { KycConfigService } from '../../config/kyc-config.service';
 
 @Injectable()

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsObject,
@@ -8,7 +9,7 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+
 import { KycStatus } from './constants';
 
 export class StartSessionResponseDto {

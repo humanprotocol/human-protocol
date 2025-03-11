@@ -1,12 +1,4 @@
 import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiHeader,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import {
   Body,
   Controller,
   Get,
@@ -16,6 +8,15 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+
 import { Public } from '../../common/decorators';
 import { RequestWithUser } from '../../common/interfaces/request';
 import {
@@ -23,9 +24,9 @@ import {
   KycSignedAddressDto,
   UpdateKycStatusDto,
 } from './kyc.dto';
+import { KycErrorFilter } from './kyc.error.filter';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
-import { KycErrorFilter } from './kyc.error.filter';
 
 @ApiTags('KYC')
 @Controller('/kyc')

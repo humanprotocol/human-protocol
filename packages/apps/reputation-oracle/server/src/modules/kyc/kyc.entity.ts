@@ -1,8 +1,9 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
-import { KycStatus } from './constants';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
+import { KycStatus } from './constants';
+
 /**
  * TODO: Leave fix follow-up refactoring
  * Importing from '../user' causes circular import error here.

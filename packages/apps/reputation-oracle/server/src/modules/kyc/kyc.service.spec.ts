@@ -4,16 +4,17 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { DeepPartial } from 'typeorm';
-import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
+
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { KycConfigService } from '../../config/kyc-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { KycStatus } from '../kyc/constants';
+import { MOCK_ADDRESS, mockConfig } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { KycEntity } from './kyc.entity';
+import { KycError, KycErrorMessage } from './kyc.error';
 import { KycRepository } from './kyc.repository';
 import { KycService } from './kyc.service';
-import { KycError, KycErrorMessage } from './kyc.error';
-import { Web3ConfigService } from '../../config/web3-config.service';
 
 describe('Kyc Service', () => {
   let kycService: KycService;

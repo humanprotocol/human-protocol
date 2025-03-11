@@ -1,24 +1,23 @@
-import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { AxiosError } from 'axios';
+import { catchError, firstValueFrom } from 'rxjs';
+
+import { KycConfigService } from '../../config/kyc-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
+import logger from '../../logger';
+import { UserEntity } from '../user';
+import { formatAxiosError } from '../../utils/format-axios-error';
+import { Web3Service } from '../web3/web3.service';
+import { KycStatus } from './constants';
 import {
   StartSessionResponseDto,
   KycSignedAddressDto,
   UpdateKycStatusDto,
 } from './kyc.dto';
-import { KycRepository } from './kyc.repository';
-import { KycStatus } from './constants';
-import { catchError, firstValueFrom } from 'rxjs';
-import { KycConfigService } from '../../config/kyc-config.service';
-import { Web3ConfigService } from '../..//config/web3-config.service';
 import { KycEntity } from './kyc.entity';
-import { Web3Service } from '../web3/web3.service';
-import { UserEntity } from '../user';
-
 import { KycErrorMessage, KycError } from './kyc.error';
-
-import logger from '../../logger';
-import { AxiosError } from 'axios';
-import { formatAxiosError } from '../../utils/format-axios-error';
+import { KycRepository } from './kyc.repository';
 
 @Injectable()
 export class KycService {
