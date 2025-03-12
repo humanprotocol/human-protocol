@@ -2,7 +2,7 @@ import { type z } from 'zod';
 import {
   type signInDtoSchema,
   type signInSuccessResponseSchema,
-} from './schema';
+} from '../schemas';
 
 export type SignInDto = z.infer<typeof signInDtoSchema>;
 

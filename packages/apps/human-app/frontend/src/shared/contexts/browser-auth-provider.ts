@@ -1,6 +1,6 @@
 /* eslint-disable camelcase -- ...*/
-import { type SignInSuccessResponse } from '@/modules/worker/services/sign-in/types';
 import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
+import { type SignInSuccessResponse } from '../types';
 
 const accessTokenKey = btoa('access_token');
 const refreshTokenKey = btoa('refresh_token');

@@ -3,12 +3,12 @@ import { useState, createContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
-import type { SignInSuccessResponse } from '@/modules/worker/services/sign-in/types';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import {
   ModalType,
   useModalStore,
 } from '@/shared/components/ui/modal/modal.store';
+import { type SignInSuccessResponse } from '@/shared/types';
 
 const web3userDataSchema = z.object({
   userId: z.number(),

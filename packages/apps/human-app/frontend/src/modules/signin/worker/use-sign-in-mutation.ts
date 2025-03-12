@@ -4,8 +4,8 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { type SignInDto } from './types';
-import { signInSuccessResponseSchema } from './schema';
+import { signInSuccessResponseSchema } from '@/shared/schemas';
+import { type SignInDto } from '@/shared/types';
 
 function signInMutationFn(data: SignInDto) {
   return apiClient(apiPaths.worker.signIn.path, {
