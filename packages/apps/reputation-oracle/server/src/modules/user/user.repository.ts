@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, FindManyOptions } from 'typeorm';
+import { DataSource, FindManyOptions, In } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
-import { Role, UserStatus, UserEntity } from './user.entity';
+import { Role, UserEntity } from './user.entity';
 
 type FindOptions = {
   relations?: FindManyOptions<UserEntity>['relations'];
@@ -45,25 +45,16 @@ export class UserRepository extends BaseRepository<UserEntity> {
     });
   }
 
-  async findByAddress(
-    addresses: string[],
-    role?: Role,
-    status?: UserStatus,
-  ): Promise<UserEntity[]> {
-    const whereConditions = addresses.map((address) => {
-      const condition: any = { evmAddress: address.toLowerCase() };
-      if (role) {
-        condition.role = role;
-      }
-      if (status) {
-        condition.status = status;
-      }
-      return condition;
-    });
+  async findWorkersByAddresses(addresses: string[]): Promise<UserEntity[]> {
+    const lowercasedAddresses = addresses.map((address) =>
+      address.toLowerCase(),
+    );
 
     return this.find({
-      where: whereConditions,
-      relations: { kyc: true, siteKeys: true },
+      where: {
+        role: Role.WORKER,
+        evmAddress: In(lowercasedAddresses),
+      },
     });
   }
 }

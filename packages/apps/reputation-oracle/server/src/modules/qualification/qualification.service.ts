@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateQualificationDto, QualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
 import { QualificationRepository } from './qualification.repository';
-import { UserEntity, UserRepository, UserStatus, UserRole } from '../user';
+import { UserRepository, UserStatus } from '../user';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { ServerConfigService } from '../../config/server-config.service';
 import {
@@ -23,7 +23,7 @@ export class QualificationService {
     private readonly serverConfigService: ServerConfigService,
   ) {}
 
-  public async createQualification(
+  async createQualification(
     createQualificationDto: CreateQualificationDto,
   ): Promise<QualificationDto> {
     const newQualification = new QualificationEntity();
@@ -67,7 +67,7 @@ export class QualificationService {
     };
   }
 
-  public async getQualifications(): Promise<QualificationDto[]> {
+  async getQualifications(): Promise<QualificationDto[]> {
     try {
       const qualificationEntities =
         await this.qualificationRepository.getQualifications();
@@ -107,10 +107,7 @@ export class QualificationService {
     await this.qualificationRepository.deleteOne(qualificationEntity);
   }
 
-  public async assign(
-    reference: string,
-    workerAddresses: string[],
-  ): Promise<void> {
+  async assign(reference: string, workerAddresses: string[]): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
@@ -121,7 +118,8 @@ export class QualificationService {
       );
     }
 
-    const users = await this.getWorkers(workerAddresses);
+    const users =
+      await this.userRepository.findWorkersByAddresses(workerAddresses);
 
     if (users.length === 0) {
       throw new QualificationError(
@@ -131,12 +129,21 @@ export class QualificationService {
     }
 
     const newUserQualifications = users
-      .filter(
-        (user) =>
-          !qualificationEntity.userQualifications.some(
+      .filter((user) => {
+        if (user.status !== UserStatus.ACTIVE) {
+          return false;
+        }
+
+        const hasDesiredQualification =
+          qualificationEntity.userQualifications.some(
             (uq) => uq.user.id === user.id,
-          ),
-      )
+          );
+        if (hasDesiredQualification) {
+          return false;
+        }
+
+        return true;
+      })
       .map((user) => {
         const userQualification = new UserQualificationEntity();
         userQualification.user = user;
@@ -149,10 +156,7 @@ export class QualificationService {
     );
   }
 
-  public async unassign(
-    reference: string,
-    workerAddresses: string[],
-  ): Promise<void> {
+  async unassign(reference: string, workerAddresses: string[]): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
@@ -163,7 +167,8 @@ export class QualificationService {
       );
     }
 
-    const users = await this.getWorkers(workerAddresses);
+    const users =
+      await this.userRepository.findWorkersByAddresses(workerAddresses);
 
     if (users.length === 0) {
       throw new QualificationError(
@@ -176,16 +181,5 @@ export class QualificationService {
       users,
       qualificationEntity,
     );
-  }
-
-  // TODO: Move this method to the `user` module.
-  public async getWorkers(addresses: string[]): Promise<UserEntity[]> {
-    const users = await this.userRepository.findByAddress(
-      addresses,
-      UserRole.WORKER,
-      UserStatus.ACTIVE,
-    );
-
-    return users;
   }
 }
