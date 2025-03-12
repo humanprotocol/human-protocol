@@ -26,14 +26,12 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     nullable: true,
-    default: null,
   })
   password: string | null;
 
   @Column({
     type: 'varchar',
     nullable: true,
-    default: null,
     unique: true,
   })
   email: string | null;
@@ -47,7 +45,6 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     nullable: true,
-    default: null,
     unique: true,
   })
   evmAddress: string | null;
@@ -56,7 +53,6 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     nullable: true,
-    default: null,
   })
   nonce: string | null;
 
@@ -81,7 +77,6 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     nullable: true,
-    default: null,
   })
   ndaSignedUrl: string | null;
 }
