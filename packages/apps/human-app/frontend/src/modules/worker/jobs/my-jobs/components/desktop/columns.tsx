@@ -9,13 +9,13 @@ import { Button } from '@/shared/components/ui/button';
 import { Chip } from '@/shared/components/ui/chip';
 import type { JobType } from '@/modules/smart-contracts/EthKVStore/config';
 import { formatDate } from '@/shared/helpers/date';
-import { StatusChip } from '../status-chip';
 import {
   type MyJob,
   EvmAddress,
   RewardAmount,
   MyJobsTableActions,
 } from '../../../components';
+import { StatusChip } from './status-chip';
 import { MyJobsExpiresAtSort } from './my-jobs-expires-at-sort';
 import { MyJobsJobTypeFilter } from './my-jobs-job-type-filter';
 import { MyJobsNetworkFilter } from './my-jobs-network-filter';

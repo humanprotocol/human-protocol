@@ -114,19 +114,17 @@ export function JobsPage() {
               backgroundColor: isMobile ? 'transparent' : undefined,
             }}
           >
-            <div>
-              {!isError && (
-                <Box
-                  sx={{
-                    padding: '8px 42px',
-                    backgroundColor: isDarkMode ? '#CDC7FF14' : '#1406B20A',
-                    display: 'inline-block',
-                  }}
-                >
-                  <Typography variant="h6">{oracleName}</Typography>
-                </Box>
-              )}
-            </div>
+            {!isError && (
+              <Box
+                sx={{
+                  padding: '8px 42px',
+                  backgroundColor: isDarkMode ? '#CDC7FF14' : '#1406B20A',
+                  display: 'inline-block',
+                }}
+              >
+                <Typography variant="h6">{oracleName}</Typography>
+              </Box>
+            )}
             <Stack>
               <TableQueryContextProvider>
                 <Box sx={{ width: '100%' }}>
