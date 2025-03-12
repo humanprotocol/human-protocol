@@ -5,7 +5,7 @@ import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors
 import {
   type ResendEmailVerificationDto,
   resendEmailVerificationHcaptchaSchema,
-} from '../types';
+} from '../schemas';
 import { useResendEmailVerificationWorkerMutation } from './resend-email-verification';
 
 export function useResendEmail(email: string) {

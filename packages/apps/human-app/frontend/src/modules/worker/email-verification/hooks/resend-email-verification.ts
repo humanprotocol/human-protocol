@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { type ResendEmailVerificationDto } from '../types';
+import { type ResendEmailVerificationDto } from '../schemas';
 
 const ResendEmailVerificationSuccessResponseSchema = z.unknown();
 

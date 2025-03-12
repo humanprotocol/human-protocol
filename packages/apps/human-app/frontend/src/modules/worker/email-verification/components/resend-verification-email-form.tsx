@@ -7,7 +7,7 @@ import { Button } from '@/shared/components/ui/button';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { env } from '@/shared/env';
-import { type ResendEmailVerificationDto } from '../types';
+import { type ResendEmailVerificationDto } from '../schemas';
 
 interface ResendVerificationEmailFormProps {
   methods: UseFormReturn<Pick<ResendEmailVerificationDto, 'h_captcha_token'>>;
