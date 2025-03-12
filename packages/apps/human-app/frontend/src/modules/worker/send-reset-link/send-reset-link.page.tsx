@@ -13,7 +13,7 @@ import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useSendResetLinkMutation } from './hooks';
-import { type SendResetLinkDto, sendResetLinkDtoSchema } from './types';
+import { type SendResetLinkDto, sendResetLinkDtoSchema } from './schemas';
 
 export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();

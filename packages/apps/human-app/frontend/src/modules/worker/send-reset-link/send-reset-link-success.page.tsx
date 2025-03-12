@@ -19,7 +19,7 @@ import { useSendResetLinkMutation } from './hooks';
 import {
   sendResetLinkHcaptchaDtoSchema,
   type SendResetLinkHcaptcha,
-} from './types';
+} from './schemas';
 
 export function SendResetLinkWorkerSuccessPage() {
   const { colorPalette, isDarkMode } = useColorMode();

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
-import { type SendResetLinkDto } from '../types';
+import { type SendResetLinkDto } from '../schemas';
 
 const SendResetLinkSuccessResponseSchema = z.unknown();
 
