@@ -45,7 +45,7 @@ export function DrawerNavigation({
   topMenuItems,
   bottomMenuItems,
   signOut,
-}: DrawerNavigationProps) {
+}: Readonly<DrawerNavigationProps>) {
   const { isDarkMode } = useColorMode();
   const navigate = useNavigate();
   const isMobile = useIsMobile();

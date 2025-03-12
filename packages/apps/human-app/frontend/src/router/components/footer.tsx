@@ -10,7 +10,10 @@ interface FooterProps {
   displayChatIcon?: boolean;
   isProtected?: boolean;
 }
-export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
+export function Footer({
+  isProtected,
+  displayChatIcon = true,
+}: Readonly<FooterProps>) {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile('md');

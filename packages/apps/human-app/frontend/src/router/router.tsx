@@ -1,6 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout as LayoutProtected } from '@/router/components/layout/protected/layout';
-import { Layout as LayoutUnprotected } from '@/router/components/layout/unprotected/layout';
 import {
   protectedRoutes,
   walletConnectRoutes,
@@ -11,27 +9,29 @@ import { RequireAuth } from '@/modules/auth/providers/require-auth';
 import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
 import { DrawerNavigation } from '@/router/components/layout/protected/drawer-navigation';
-import {
-  workerDrawerTopMenuItems,
-  workerDrawerBottomMenuItems,
-} from '@/router/components/drawer-menu-items/drawer-menu-items-worker';
 import { operatorDrawerBottomMenuItems } from '@/router/components/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
 import { routerPaths } from './router-paths';
+import {
+  ProtectedLayout,
+  UnprotectedLayout,
+  workerDrawerBottomMenuItems,
+  workerDrawerTopMenuItems,
+} from './components';
 
 export function Router() {
   const { user } = useAuth();
 
   return (
     <Routes>
-      <Route element={<LayoutUnprotected />}>
+      <Route element={<UnprotectedLayout />}>
         {unprotectedRoutes.map((route) => (
           <Route element={route.element} key={route.path} path={route.path} />
         ))}
       </Route>
-      <Route element={<LayoutUnprotected />}>
+      <Route element={<UnprotectedLayout />}>
         {walletConnectRoutes.map((route) => (
           <Route
             element={
@@ -49,7 +49,7 @@ export function Router() {
           <Route
             element={
               <RequireAuth>
-                <LayoutProtected
+                <ProtectedLayout
                   pageHeaderProps={pageHeaderProps}
                   renderDrawer={(open, setDrawerOpen) => (
                     <DrawerNavigation
@@ -85,7 +85,7 @@ export function Router() {
           element={
             <RequireWalletConnect>
               <RequireWeb3Auth>
-                <LayoutProtected
+                <ProtectedLayout
                   pageHeaderProps={pageHeaderProps}
                   renderDrawer={(open, setDrawerOpen) => (
                     <DrawerNavigation

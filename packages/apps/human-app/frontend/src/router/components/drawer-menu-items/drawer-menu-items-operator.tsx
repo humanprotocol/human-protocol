@@ -1,8 +1,8 @@
 import { t } from 'i18next';
-import type { BottomMenuItem } from '@/router/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon } from '@/shared/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
+import { type BottomMenuItem } from '../layout/protected';
 
 export const operatorDrawerBottomMenuItems: BottomMenuItem[] = [
   {

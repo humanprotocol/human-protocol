@@ -23,7 +23,7 @@ export function Navbar({
   open,
   userStatsDrawerOpen,
   toggleUserStatsDrawer,
-}: NavbarProps) {
+}: Readonly<NavbarProps>) {
   const handleMainNavIconClick = useHandleMainNavIconClick();
   const { colorPalette } = useColorMode();
   const isMobile = useIsMobile();

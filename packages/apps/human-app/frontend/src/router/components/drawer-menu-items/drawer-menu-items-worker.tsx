@@ -1,16 +1,13 @@
 import { t } from 'i18next';
-import type {
-  BottomMenuItem,
-  TopMenuItem,
-} from '@/router/components/layout/protected/drawer-navigation';
 import {
   HelpIcon,
   UserOutlinedIcon,
   WorkIcon,
 } from '@/shared/components/ui/icons';
-import { routerPaths } from '@/router/router-paths';
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
 import type { UserData } from '@/modules/auth/context/auth-context';
+import { routerPaths } from '@/router/router-paths';
+import { type BottomMenuItem, type TopMenuItem } from '../layout/protected';
 
 export const workerDrawerTopMenuItems = (
   user: UserData | null
