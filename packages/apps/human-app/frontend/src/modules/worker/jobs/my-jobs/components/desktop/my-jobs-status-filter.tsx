@@ -1,10 +1,12 @@
 import capitalize from 'lodash/capitalize';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
+import { useIsMobile } from '@/shared/hooks';
 import { useMyJobsFilterStore } from '../../../hooks';
 import { MyJobStatus } from '../../../types';
 
 export function MyJobsStatusFilter() {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
+  const isMobile = useIsMobile();
 
   return (
     <Filtering
@@ -23,6 +25,7 @@ export function MyJobsStatusFilter() {
           status,
         });
       }}
+      isMobile={isMobile}
     />
   );
 }

@@ -24,13 +24,13 @@ export function Filtering<T>({
   isChecked,
   setFiltering,
   clear,
-  isMobile = true,
-}: FilteringProps<T>) {
+  isMobile,
+}: Readonly<FilteringProps<T>>) {
   const { colorPalette } = useColorMode();
 
   return (
     <List sx={{ padding: 0 }}>
-      {isMobile ? (
+      {isMobile ? null : (
         <Typography
           color={colorPalette.text.secondary}
           sx={{ padding: '0.5rem' }}
@@ -38,7 +38,7 @@ export function Filtering<T>({
         >
           {t('components.table.filter')}
         </Typography>
-      ) : null}
+      )}
       {filteringOptions.map(({ option, name }) => {
         return (
           <ListItem component="span" key={name} sx={{ padding: '0 0.5rem' }}>
@@ -67,7 +67,7 @@ export function Filtering<T>({
           </ListItem>
         );
       })}
-      {isMobile ? (
+      {isMobile ? null : (
         <>
           <Divider component="li" variant="fullWidth" />
           <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>
@@ -82,7 +82,7 @@ export function Filtering<T>({
             </Typography>
           </ListItem>
         </>
-      ) : null}
+      )}
     </List>
   );
 }

@@ -25,6 +25,7 @@ export function MyJobsStatusFilterMobile() {
           page: 0,
         });
       }}
+      isMobile
     />
   );
 }

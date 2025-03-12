@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
 import { JOB_TYPES } from '@/shared/consts';
+import { useIsMobile } from '@/shared/hooks';
 import { useMyJobsFilterStore } from '../../../hooks';
 
 export function MyJobsJobTypeFilter() {
@@ -16,6 +17,7 @@ export function MyJobsJobTypeFilter() {
       })),
     [t]
   );
+  const isMobile = useIsMobile();
 
   return (
     <Filtering
@@ -31,6 +33,7 @@ export function MyJobsJobTypeFilter() {
           job_type: jobType,
         });
       }}
+      isMobile={isMobile}
     />
   );
 }
