@@ -5,7 +5,6 @@ import {
   IsObject,
   IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
   ValidateNested,
 } from 'class-validator';
@@ -13,53 +12,52 @@ import {
 import { KycStatus } from './constants';
 
 export class StartSessionResponseDto {
-  @ApiProperty({ name: 'url' })
-  @IsUrl()
-  public url: string;
+  @ApiProperty()
+  url: string;
 }
 
-export class DocumentData {
+class DocumentData {
   @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
-  public country: string | null;
+  country: string | null;
 }
 
-export class VerificationData {
+class VerificationData {
   @ApiProperty()
   @IsUUID()
-  public id: string;
+  id: string;
 
+  // We are using vendorData to store userId
   @ApiProperty()
   @IsString()
-  public vendorData: string;
+  vendorData: string;
 
   @ApiProperty()
   @IsEnum(KycStatus)
-  public status: KycStatus;
+  status: KycStatus;
 
   @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
-  public reason: string | null;
+  reason: string | null;
 
   @ApiProperty()
-  @IsObject()
   @ValidateNested()
   @Type(() => DocumentData)
-  public document: DocumentData;
+  document: DocumentData;
 }
 
 export class UpdateKycStatusDto {
   @ApiProperty()
   @IsString()
-  public status: string;
+  status: string;
 
   @ApiProperty({ type: VerificationData })
   @IsObject()
   @ValidateNested()
   @Type(() => VerificationData)
-  public verification: VerificationData;
+  verification: VerificationData;
 }
 
 export class KycSignedAddressDto {
