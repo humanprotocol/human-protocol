@@ -13,7 +13,6 @@ import { HCaptchaJobRequestForm } from './HCaptchaJobRequestForm';
 export const CreateJob = () => {
   const { payMethod, jobRequest, updateJobRequest } = useCreateJobPageUI();
   const { chainId } = jobRequest;
-  console.log(jobRequest);
   const { chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
 

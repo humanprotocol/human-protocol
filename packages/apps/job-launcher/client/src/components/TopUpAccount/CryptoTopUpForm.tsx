@@ -10,35 +10,51 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { Decimal } from 'decimal.js';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { Address } from 'viem';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
-import { NETWORK_TOKENS, SUPPORTED_CHAIN_IDS } from '../../constants/chains';
+import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
-import { useAppDispatch } from '../../state';
+import { useAppDispatch, useAppSelector } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
 import { TopUpSuccess } from './TopUpSuccess';
 
 export const CryptoTopUpForm = () => {
   const { isConnected, chain } = useAccount();
+  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [tokenAddress, setTokenAddress] = useState<string>();
+  const [tokenSymbol, setTokenSymbol] = useState<string>();
   const [amount, setAmount] = useState<string>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const publicClient = usePublicClient();
   const { data: signer } = useWalletClient();
-  const { data: rate } = useTokenRate('hmt', 'usd');
+  const { data: rate } = useTokenRate(tokenSymbol || 'hmt', 'usd');
   const { showError } = useSnackbar();
 
+  const currentBalance = useMemo(() => {
+    return (
+      user?.balance?.balances.find(
+        (balance) => balance.currency === tokenSymbol,
+      )?.amount ?? 0
+    );
+  }, [user, tokenSymbol]);
+
   const totalAmount = useMemo(() => {
-    if (!amount) return 0;
-    return parseFloat(amount) * rate;
+    if (!amount || !rate) return new Decimal(0);
+    return new Decimal(amount).mul(rate);
   }, [amount, rate]);
+
+  const handleTokenChange = (symbol: string, address: string) => {
+    setTokenSymbol(symbol);
+    setTokenAddress(address);
+  };
 
   const handleTopUpAccount = async () => {
     if (!signer || !chain || !tokenAddress || !amount) return;
@@ -115,15 +131,9 @@ export const CryptoTopUpForm = () => {
             )}
             <TokenSelect
               chainId={chain?.id}
-              value={tokenAddress}
-              onChange={(e) => {
-                const symbol = e.target.value as string;
-                setTokenAddress(
-                  NETWORK_TOKENS[chain?.id as keyof typeof NETWORK_TOKENS]?.[
-                    symbol.toLowerCase()
-                  ],
-                );
-              }}
+              value={tokenSymbol}
+              label={'Payment token'}
+              onTokenChange={handleTokenChange}
             />
             <FormControl fullWidth>
               <TextField
@@ -154,7 +164,20 @@ export const CryptoTopUpForm = () => {
                   justifyContent="space-between"
                   alignItems="center"
                 >
-                  <Typography color="text.secondary">HMT Price</Typography>
+                  <Typography color="text.secondary">Balance</Typography>
+                  <Typography color="text.secondary">
+                    {currentBalance} {tokenSymbol?.toUpperCase()} (~
+                    {((currentBalance ?? 0) * rate).toFixed(2)} USD)
+                  </Typography>
+                </Stack>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography color="text.secondary">
+                    {tokenSymbol?.toUpperCase()} Price
+                  </Typography>
                   <Typography color="text.secondary">
                     {rate?.toFixed(2)} USD
                   </Typography>
@@ -167,7 +190,10 @@ export const CryptoTopUpForm = () => {
                 sx={{ py: 2 }}
               >
                 <Typography>You receive</Typography>
-                <Typography>{totalAmount.toFixed(2)} USD</Typography>
+                <Typography>
+                  {amount} {tokenSymbol?.toUpperCase()} (~
+                  {totalAmount.toFixed(2)} USD)
+                </Typography>
               </Stack>
             </Box>
           </Box>

@@ -1,6 +1,5 @@
 export const routerPaths = {
   homePage: '/',
-  playground: '/playground',
   worker: {
     signIn: '/worker/sign-in',
     signUp: '/worker/sign-up',
@@ -12,7 +11,7 @@ export const routerPaths = {
     verifyEmail: '/worker/verify-email',
     profile: '/worker/profile',
     jobsDiscovery: '/worker/jobs-discovery',
-    jobs: '/worker/jobs',
+    jobs: '/worker/jobs-discovery',
     HcaptchaLabeling: '/worker/hcaptcha-labeling',
     enableLabeler: '/worker/enable-labeler',
     registrationInExchangeOracle: '/worker/registration-in-exchange-oracle',

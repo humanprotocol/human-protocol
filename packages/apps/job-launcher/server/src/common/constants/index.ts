@@ -34,7 +34,6 @@ export const CVAT_JOB_TYPES = [
 ];
 
 export const CANCEL_JOB_STATUSES = [
-  JobStatus.PENDING,
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,

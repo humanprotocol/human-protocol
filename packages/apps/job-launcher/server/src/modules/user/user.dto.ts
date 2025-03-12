@@ -3,7 +3,6 @@ import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { FiatCurrency } from '../../common/enums/payment';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 
 export class UserCreateDto extends ValidatePasswordDto {
@@ -34,15 +33,4 @@ export class UserUpdateDto {
   })
   @IsEnumCaseInsensitive(UserStatus)
   public status?: UserStatus;
-}
-
-export class UserBalanceDto {
-  @ApiProperty({ description: 'Amount of the user balance', type: Number })
-  amount: number;
-
-  @ApiProperty({
-    description: 'Currency of the user balance',
-    enum: FiatCurrency,
-  })
-  currency: FiatCurrency;
 }

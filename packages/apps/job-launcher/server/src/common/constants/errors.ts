@@ -4,7 +4,6 @@
 export enum ErrorJob {
   NotFound = 'Job not found',
   NotCreated = 'Job has not been created',
-  NotEnoughFunds = 'Not enough funds',
   NotActiveCard = 'Credit card not found',
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
@@ -73,7 +72,6 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found.',
   AccountCannotBeRegistered = 'Account cannot be registered.',
-  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
   InvalidCredentials = 'Invalid credentials.',
   UserNotActive = 'User not active.',
   DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
@@ -108,6 +106,7 @@ export enum ErrorPayment {
   NotFound = 'Payment not found',
   InvoiceNotFound = 'Invoice not found',
   NotSuccess = 'Unsuccessful payment',
+  NotEnoughFunds = 'Not enough funds',
   IntentNotCreated = 'Payment intent not created',
   CardNotAssigned = 'Card not assigned',
   SetupNotFound = 'Setup not found',
@@ -124,6 +123,8 @@ export enum ErrorPayment {
   UnsupportedToken = 'Unsupported token',
   InvalidRecipient = 'Invalid recipient',
   ChainIdMissing = 'ChainId is missing',
+  InvalidChainId = 'Invalid chain id',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
 }
 
 /**

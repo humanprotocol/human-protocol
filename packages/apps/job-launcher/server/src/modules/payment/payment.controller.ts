@@ -1,27 +1,38 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Headers,
+  HttpStatus,
+  Param,
+  Patch,
   Post,
   Query,
   Request,
   UseGuards,
-  Headers,
-  HttpStatus,
-  Patch,
-  Delete,
-  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
   ApiBody,
+  ApiOperation,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
+import { ChainId } from '@human-protocol/sdk';
+import { ErrorPayment } from 'src/common/constants/errors';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { ApiKey } from '../../common/decorators';
+import { ControlledError } from '../../common/errors/controlled';
+import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
+import { PageDto } from '../../common/pagination/pagination.dto';
+import { RateService } from '../rate/rate.service';
 import {
   BillingInfoDto,
   BillingInfoUpdateDto,
@@ -33,16 +44,9 @@ import {
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentMethodIdDto,
+  UserBalanceDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
-import { ControlledError } from '../../common/errors/controlled';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { RateService } from '../rate/rate.service';
-import { PageDto } from '../../common/pagination/pagination.dto';
-import { WhitelistAuthGuard } from '../../common/guards/whitelist.auth';
-import { Web3Env } from '../../common/enums/web3';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -55,6 +59,34 @@ export class PaymentController {
     private readonly rateService: RateService,
     private readonly web3ConfigService: Web3ConfigService,
   ) {}
+
+  @ApiOperation({
+    summary: 'Get user balance',
+    description: 'Endpoint to retrieve the balance of the authenticated user.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User balance retrieved successfully',
+    type: UserBalanceDto,
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Unprocessable Entity. User balance could not be retrieved.',
+  })
+  @ApiKey()
+  @Get('/balance')
+  public async getBalance(
+    @Request() req: RequestWithUser,
+  ): Promise<UserBalanceDto> {
+    try {
+      return this.paymentService.getUserBalance(req.user.id);
+    } catch {
+      throw new ControlledError(
+        ErrorPayment.BalanceCouldNotBeRetrieved,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+  }
 
   @ApiOperation({
     summary: 'Create a crypto payment',
@@ -167,12 +199,6 @@ export class PaymentController {
   })
   @Post('/fiat/setup-card')
   public async assignCard(@Request() req: RequestWithUser): Promise<string> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     return this.paymentService.createCustomerAndAssignCard(req.user);
   }
 
@@ -204,12 +230,6 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: CardConfirmDto,
   ): Promise<boolean> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     return this.paymentService.confirmCard(req.user, data);
   }
 
@@ -240,12 +260,6 @@ export class PaymentController {
     @Body() data: PaymentFiatCreateDto,
     @Request() req: RequestWithUser,
   ): Promise<string> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     return this.paymentService.createFiatPayment(req.user, data);
   }
 
@@ -276,12 +290,6 @@ export class PaymentController {
     @Body() data: PaymentFiatConfirmDto,
     @Request() req: RequestWithUser,
   ): Promise<boolean> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     return this.paymentService.confirmFiatPayment(req.user.id, data);
   }
 
@@ -296,12 +304,6 @@ export class PaymentController {
   })
   @Get('/fiat/cards')
   public async listPaymentMethods(@Request() req: RequestWithUser) {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     return this.paymentService.listUserPaymentMethods(req.user);
   }
 
@@ -323,12 +325,6 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Query() data: PaymentMethodIdDto,
   ): Promise<void> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     await this.paymentService.deletePaymentMethod(
       req.user,
       data.paymentMethodId,
@@ -348,12 +344,6 @@ export class PaymentController {
   public async getBillingInfo(
     @Request() req: RequestWithUser,
   ): Promise<BillingInfoDto | null> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     return this.paymentService.getUserBillingInfo(req.user);
   }
 
@@ -371,12 +361,6 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: BillingInfoUpdateDto,
   ): Promise<void> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     await this.paymentService.updateUserBillingInfo(req.user, data);
   }
 
@@ -399,12 +383,6 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: PaymentMethodIdDto,
   ): Promise<void> {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
-      throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
-      );
-    }
     await this.paymentService.changeDefaultPaymentMethod(
       req.user,
       data.paymentMethodId,
@@ -451,12 +429,35 @@ export class PaymentController {
     @Param('paymentId') paymentId: string,
     @Request() req: RequestWithUser,
   ) {
-    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+    return this.paymentService.getReceipt(paymentId, req.user);
+  }
+
+  @ApiOperation({
+    summary: 'Get available tokens for a network',
+    description:
+      'Endpoint to get available tokens for a given network by chainId.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens retrieved successfully',
+    type: [Object],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid chainId.',
+  })
+  @Get('/tokens/:chainId')
+  public async getTokens(
+    @Param('chainId') chainId: ChainId,
+  ): Promise<{ [key: string]: string }> {
+    const tokens = TOKEN_ADDRESSES[chainId];
+    if (!tokens) {
       throw new ControlledError(
-        'Temporally disabled',
-        HttpStatus.METHOD_NOT_ALLOWED,
+        ErrorPayment.InvalidChainId,
+        HttpStatus.BAD_REQUEST,
       );
     }
-    return this.paymentService.getReceipt(paymentId, req.user);
+
+    return tokens;
   }
 }

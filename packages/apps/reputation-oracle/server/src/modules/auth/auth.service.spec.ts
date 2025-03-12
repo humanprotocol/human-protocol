@@ -27,7 +27,6 @@ import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { JobRequestType } from '../../common/enums';
-import { Role, UserStatus } from '../../common/enums/user';
 import { SignatureType } from '../../common/enums/web3';
 import {
   generateNonce,
@@ -37,9 +36,13 @@ import {
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyRepository } from '../user/site-key.repository';
 import { PrepareSignatureDto } from '../user/user.dto';
-import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
-import { UserService } from '../user/user.service';
+import {
+  UserStatus,
+  UserRole,
+  UserEntity,
+  UserRepository,
+  UserService,
+} from '../user';
 import { Web3Service } from '../web3/web3.service';
 import {
   AuthError,
@@ -730,7 +733,7 @@ describe('AuthService', () => {
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
-            type: Role.WORKER,
+            type: UserRole.WORKER,
             signature,
           });
 
@@ -754,7 +757,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
@@ -769,7 +772,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorRoleError(''));
@@ -784,7 +787,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorFeeError(''));
@@ -800,7 +803,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorUrlError(''));
@@ -817,7 +820,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorJobTypesError(''));

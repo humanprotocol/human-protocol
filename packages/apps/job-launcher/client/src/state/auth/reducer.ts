@@ -19,7 +19,7 @@ export const fetchUserBalanceAsync = createAsyncThunk<
   void,
   { state: AppState }
 >('auth/fetchUserBalanceAsync', async () => {
-  const { data } = await api.get<UserBalance>(`/user/balance`);
+  const { data } = await api.get<UserBalance>(`/payment/balance`);
   return data;
 });
 

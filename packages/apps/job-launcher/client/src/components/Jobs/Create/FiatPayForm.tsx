@@ -16,8 +16,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useElements, useStripe } from '@stripe/react-stripe-js';
+import { Decimal } from 'decimal.js';
 import { useEffect, useMemo, useState } from 'react';
-
 import { Address } from 'viem';
 import { useReadContract } from 'wagmi';
 import AddCardModal from '../../../components/CreditCard/AddCardModal';
@@ -40,6 +40,7 @@ import {
   getOperatorAddress,
   getUserBillingInfo,
   getUserCards,
+  getRate,
 } from '../../../services/payment';
 import { useAppDispatch, useAppSelector } from '../../../state';
 import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
@@ -81,10 +82,30 @@ export const FiatPayForm = ({
   const [totalAmount, setTotalAmount] = useState(0);
   const [balancePayAmount, setBalancePayAmount] = useState(0);
   const [creditCardPayAmount, setCreditCardPayAmount] = useState(0);
-  const [accountAmount] = useState(
-    user?.balance ? Number(user?.balance?.amount) : 0,
-  );
-  const [tokenAddress, setTokenAddress] = useState<string>();
+  const [tokenSymbol, setTokenSymbol] = useState<string>();
+  const [tokenRate, setTokenRate] = useState<number>(0);
+
+  const currentBalance = useMemo(() => {
+    return (
+      user?.balance?.balances.find((balance) => balance.currency === 'usd')
+        ?.amount ?? 0
+    );
+  }, [user]);
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      if (tokenSymbol) {
+        const rate = await getRate(tokenSymbol, 'usd');
+        setTokenRate(rate);
+      }
+    };
+
+    fetchRates();
+  }, [tokenSymbol]);
+
+  const handleTokenChange = (symbol: string, address: string) => {
+    setTokenSymbol(symbol);
+  };
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -121,6 +142,7 @@ export const FiatPayForm = ({
     }
     setLoadingInitialData(false);
   };
+
   const {
     data: jobLauncherFee,
     error,
@@ -148,28 +170,41 @@ export const FiatPayForm = ({
   }, [isError, error, showError]);
 
   useMemo(() => {
-    setFundAmount(amount ? Number(amount) : 0);
-    if (Number(jobLauncherFee) >= 0)
-      setFeeAmount(
-        Math.max(minFee, fundAmount * (Number(jobLauncherFee) / 100)),
-      );
-    setTotalAmount(fundAmount + feeAmount);
-    if (!payWithAccountBalance) setBalancePayAmount(0);
-    else if (totalAmount < accountAmount) setBalancePayAmount(totalAmount);
-    else setBalancePayAmount(accountAmount);
+    const amountDecimal = new Decimal(amount || 0);
+    const tokenRateDecimal = new Decimal(tokenRate || 0);
+    const jobLauncherFeeDecimal = new Decimal(
+      (jobLauncherFee as string) || 0,
+    ).div(100);
+    const minFeeDecimal = new Decimal(minFee || 0);
 
-    if (!payWithAccountBalance) setCreditCardPayAmount(totalAmount);
-    else if (totalAmount < accountAmount) setCreditCardPayAmount(0);
-    else setCreditCardPayAmount(totalAmount - accountAmount);
+    const fundAmountDecimal = amountDecimal.mul(tokenRateDecimal);
+    setFundAmount(fundAmountDecimal.toNumber());
+
+    const feeAmountDecimal = Decimal.max(
+      minFeeDecimal,
+      amountDecimal.mul(jobLauncherFeeDecimal),
+    );
+    setFeeAmount(feeAmountDecimal.toNumber());
+
+    const totalAmountDecimal = amountDecimal.plus(feeAmountDecimal);
+    setTotalAmount(totalAmountDecimal.toNumber());
+
+    const balancePayAmountDecimal = payWithAccountBalance
+      ? Decimal.min(totalAmountDecimal, new Decimal(currentBalance))
+      : new Decimal(0);
+    setBalancePayAmount(balancePayAmountDecimal.toNumber());
+
+    const creditCardPayAmountDecimal = totalAmountDecimal.minus(
+      balancePayAmountDecimal,
+    );
+    setCreditCardPayAmount(creditCardPayAmountDecimal.toNumber());
   }, [
-    accountAmount,
+    currentBalance,
     amount,
-    feeAmount,
-    fundAmount,
     jobLauncherFee,
     minFee,
     payWithAccountBalance,
-    totalAmount,
+    tokenRate,
   ]);
 
   const handleSuccessAction = (message: string) => {
@@ -183,7 +218,7 @@ export const FiatPayForm = ({
       return;
     }
 
-    if (!tokenAddress) {
+    if (!tokenSymbol) {
       onError('Please select a token.');
       return;
     }
@@ -223,16 +258,16 @@ export const FiatPayForm = ({
           chainId,
           fortuneRequest,
           CURRENCY.usd,
-          fundAmount,
-          tokenAddress,
+          amount,
+          tokenSymbol,
         );
       } else if (jobType === JobType.CVAT && cvatRequest) {
         await createCvatJob(
           chainId,
           cvatRequest,
           CURRENCY.usd,
-          fundAmount,
-          tokenAddress,
+          amount,
+          tokenSymbol,
         );
       } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
         await createHCaptchaJob(chainId, hCaptchaRequest);
@@ -337,10 +372,8 @@ export const FiatPayForm = ({
                     )}
                     <TokenSelect
                       chainId={jobRequest.chainId!}
-                      value={tokenAddress}
-                      onChange={(e) =>
-                        setTokenAddress(e.target.value as string)
-                      }
+                      value={tokenSymbol}
+                      onTokenChange={handleTokenChange}
                     />
                   </FormControl>
                 </Grid>
@@ -369,29 +402,52 @@ export const FiatPayForm = ({
                   <Typography>Account Balance</Typography>
                   {user?.balance && (
                     <Typography color="text.secondary">
-                      ~ {user?.balance?.amount?.toFixed(2)} USD
+                      {currentBalance.toFixed(2)} USD
                     </Typography>
                   )}
                 </Box>
                 <Box
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
                     py: 2,
                     borderBottom: '1px solid #E5E7EB',
                   }}
                 >
-                  <Typography>Fees</Typography>
-                  <Typography color="text.secondary">
-                    (
-                    {Number(jobLauncherFee) >= 0
-                      ? `${Number(jobLauncherFee)}%`
-                      : 'loading...'}
-                    ) {feeAmount.toFixed(2)} USD
-                  </Typography>
+                  <Stack direction="column" spacing={1}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography>Amount</Typography>
+                      <Typography color="text.secondary">
+                        {amount} HMT
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography>Fee</Typography>
+                      <Typography color="text.secondary">
+                        (
+                        {Number(jobLauncherFee) >= 0
+                          ? `${Number(jobLauncherFee)}%`
+                          : 'loading...'}
+                        ) {feeAmount.toFixed(2)} USD
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography>Total payment</Typography>
+                      <Typography>{totalAmount.toFixed(2)} USD</Typography>
+                    </Stack>
+                  </Stack>
                 </Box>
-                <Box sx={{ py: 1.5 }}>
+                <Box sx={{ py: 2, borderBottom: '1px solid #E5E7EB' }}>
                   <Typography mb={2}>Payment method</Typography>
                   <Stack direction="column" spacing={1}>
                     <Stack
@@ -416,15 +472,21 @@ export const FiatPayForm = ({
                         {creditCardPayAmount.toFixed(2)} USD
                       </Typography>
                     </Stack>
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Typography>Total</Typography>
-                      <Typography>{totalAmount.toFixed(2)} USD</Typography>
-                    </Stack>
                   </Stack>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    py: 2,
+                  }}
+                >
+                  <Typography>Fund Amount</Typography>
+                  <Typography color="text.secondary">
+                    {fundAmount} {tokenSymbol?.toUpperCase() ?? 'HMT'}
+                  </Typography>
                 </Box>
               </Box>
             </Grid>
@@ -449,7 +511,7 @@ export const FiatPayForm = ({
                   !amount ||
                   (!payWithAccountBalance && !selectedCard) ||
                   hasError ||
-                  !tokenAddress
+                  !tokenSymbol
                 }
               >
                 Pay now

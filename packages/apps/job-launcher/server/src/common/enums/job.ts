@@ -1,5 +1,4 @@
 export enum JobStatus {
-  PENDING = 'pending',
   PAID = 'paid',
   UNDER_MODERATION = 'under_moderation',
   MODERATION_PASSED = 'moderation_passed',
@@ -432,4 +431,5 @@ export enum WorkerBrowser {
 export enum EscrowFundToken {
   HMT = 'hmt',
   USDT = 'usdt',
+  USDC = 'usdc',
 }
