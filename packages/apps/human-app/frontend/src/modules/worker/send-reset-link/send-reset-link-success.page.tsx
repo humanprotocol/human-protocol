@@ -8,11 +8,6 @@ import { PageCard } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
 import { env } from '@/shared/env';
-import type { SendResetLinkHcaptcha } from '@/modules/worker/services/send-reset-link';
-import {
-  sendResetLinkHcaptchaDtoSchema,
-  useSendResetLinkMutation,
-} from '@/modules/worker/services/send-reset-link';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
@@ -20,6 +15,11 @@ import { MailTo } from '@/shared/components/ui/mail-to';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
+import { useSendResetLinkMutation } from './hooks';
+import {
+  sendResetLinkHcaptchaDtoSchema,
+  type SendResetLinkHcaptcha,
+} from './schemas';
 
 export function SendResetLinkWorkerSuccessPage() {
   const { colorPalette, isDarkMode } = useColorMode();

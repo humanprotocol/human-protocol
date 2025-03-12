@@ -1,34 +1,10 @@
-/* eslint-disable camelcase -- ... */
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { t } from 'i18next';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
-
-export const sendResetLinkEmailDtoSchema = z.object({
-  email: z
-    .string()
-    .min(1, t('worker.sendResetLinkForm.noEmailError'))
-    .email(t('worker.sendResetLinkForm.invalidEmailError')),
-});
-
-export type SendResetLinkEmail = z.infer<typeof sendResetLinkEmailDtoSchema>;
-
-export const sendResetLinkHcaptchaDtoSchema = z.object({
-  h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
-});
-
-export type SendResetLinkHcaptcha = z.infer<
-  typeof sendResetLinkHcaptchaDtoSchema
->;
-
-export const sendResetLinkDtoSchema = sendResetLinkEmailDtoSchema.merge(
-  sendResetLinkHcaptchaDtoSchema
-);
-
-export type SendResetLinkDto = SendResetLinkEmail & SendResetLinkHcaptcha;
+import { type SendResetLinkDto } from '../schemas';
 
 const SendResetLinkSuccessResponseSchema = z.unknown();
 
