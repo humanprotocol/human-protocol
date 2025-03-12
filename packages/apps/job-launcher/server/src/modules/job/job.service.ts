@@ -908,8 +908,13 @@ export class JobService {
     jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
     jobEntity.payments = [paymentEntity];
     jobEntity.token = dto.escrowFundToken;
-    jobEntity.status = JobStatus.PAID;
     jobEntity.waitUntil = new Date();
+
+    if (user.whitelist) {
+      jobEntity.status = JobStatus.MODERATION_PASSED;
+    } else {
+      jobEntity.status = JobStatus.PAID;
+    }
 
     jobEntity = await this.jobRepository.updateOne(jobEntity);
 

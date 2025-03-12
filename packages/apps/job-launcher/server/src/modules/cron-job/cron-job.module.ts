@@ -12,12 +12,14 @@ import { WebhookRepository } from '../webhook/webhook.repository';
 import { JobEntity } from '../job/job.entity';
 import { JobRepository } from '../job/job.repository';
 import { ConfigModule } from '@nestjs/config';
+import { ContentModerationModule } from '../content-moderation/content-moderation.module';
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([CronJobEntity, JobEntity]),
     ConfigModule,
+    ContentModerationModule,
     JobModule,
     PaymentModule,
     Web3Module,
