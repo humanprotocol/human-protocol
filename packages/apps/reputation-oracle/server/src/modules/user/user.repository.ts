@@ -33,10 +33,15 @@ export class UserRepository extends BaseRepository<UserEntity> {
     });
   }
 
-  async findOneByAddress(address: string): Promise<UserEntity | null> {
+  async findOneByAddress(
+    address: string,
+    options: FindOptions = {},
+  ): Promise<UserEntity | null> {
     return this.findOne({
-      where: { evmAddress: address.toLowerCase() },
-      relations: { kyc: true, siteKeys: true },
+      where: {
+        evmAddress: address.toLowerCase(),
+      },
+      relations: options.relations,
     });
   }
 
