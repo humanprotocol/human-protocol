@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import type { BottomMenuItem } from '@/shared/components/layout/protected/drawer-navigation';
+import type { BottomMenuItem } from '@/router/components/layout/protected/drawer-navigation';
 import { HelpIcon, UserOutlinedIcon } from '@/shared/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';

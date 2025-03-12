@@ -4,7 +4,7 @@ import { useBackgroundContext } from '@/shared/contexts/background';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { Footer } from '../footer';
+import { Footer } from '../../footer';
 import { Navbar } from './navbar';
 
 interface LayoutProps {

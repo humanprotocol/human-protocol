@@ -2,7 +2,7 @@ import { t } from 'i18next';
 import type {
   BottomMenuItem,
   TopMenuItem,
-} from '@/shared/components/layout/protected/drawer-navigation';
+} from '@/router/components/layout/protected/drawer-navigation';
 import {
   HelpIcon,
   UserOutlinedIcon,

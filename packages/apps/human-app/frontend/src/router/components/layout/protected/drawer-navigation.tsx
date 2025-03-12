@@ -12,11 +12,11 @@ import type { Dispatch, SetStateAction } from 'react';
 import { HumanLogoNavbarIcon } from '@/shared/components/ui/icons';
 import { Button } from '@/shared/components/ui/button';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
-import { NAVBAR_PADDING } from '@/shared/components/layout/protected/navbar';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useHandleMainNavIconClick } from '@/shared/hooks/use-handle-main-nav-icon-click';
+import { NAVBAR_PADDING } from './navbar';
 
 const drawerWidth = 240;
 

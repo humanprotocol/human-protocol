@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout as LayoutProtected } from '@/shared/components/layout/protected/layout';
-import { Layout as LayoutUnprotected } from '@/shared/components/layout/unprotected/layout';
+import { Layout as LayoutProtected } from '@/router/components/layout/protected/layout';
+import { Layout as LayoutUnprotected } from '@/router/components/layout/unprotected/layout';
 import {
   protectedRoutes,
   walletConnectRoutes,
@@ -10,12 +10,12 @@ import {
 import { RequireAuth } from '@/modules/auth/providers/require-auth';
 import { RequireWalletConnect } from '@/shared/contexts/wallet-connect';
 import { RequireWeb3Auth } from '@/modules/auth-web3/providers/require-web3-auth';
-import { DrawerNavigation } from '@/shared/components/layout/protected/drawer-navigation';
+import { DrawerNavigation } from '@/router/components/layout/protected/drawer-navigation';
 import {
   workerDrawerTopMenuItems,
   workerDrawerBottomMenuItems,
-} from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-worker';
-import { operatorDrawerBottomMenuItems } from '@/shared/components/layout/drawer-menu-items/drawer-menu-items-operator';
+} from '@/router/components/drawer-menu-items/drawer-menu-items-worker';
+import { operatorDrawerBottomMenuItems } from '@/router/components/drawer-menu-items/drawer-menu-items-operator';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { UserStatsDrawer } from '@/modules/worker/hcaptcha-labeling';
