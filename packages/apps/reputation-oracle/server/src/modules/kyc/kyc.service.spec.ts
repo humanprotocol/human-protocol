@@ -63,10 +63,6 @@ describe('Kyc Service', () => {
     kycService = moduleRef.get<KycService>(KycService);
     kycRepository = moduleRef.get<KycRepository>(KycRepository);
     kycConfigService = moduleRef.get<KycConfigService>(KycConfigService);
-
-    jest
-      .spyOn(KycConfigService.prototype, 'apiKey', 'get')
-      .mockReturnValue('test');
   });
 
   afterEach(() => {
