@@ -4,8 +4,6 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { useTranslation, Trans } from 'react-i18next';
-import type { SignUpDto } from '@/modules/worker/services/sign-up';
-import { signUpDtoSchema } from '@/modules/worker/services/sign-up';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/data-entry/input';
 import { Password } from '@/shared/components/data-entry/password/password';
@@ -17,6 +15,7 @@ import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { FetchError } from '@/api/fetcher';
 import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
+import { signUpDtoSchema, type SignUpDto } from '../schema';
 
 export function SignUpWorkerPage() {
   const { t } = useTranslation();
