@@ -1,68 +1,61 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsEnum,
-  IsObject,
   IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
-import { KycStatus } from '../../common/enums/user';
 
-export class KycSessionDto {
-  @ApiProperty({ name: 'url' })
-  @IsUrl()
-  public url: string;
-}
+import { KycStatus } from './constants';
 
-export class KycDocumentDto {
+export class StartSessionResponseDto {
   @ApiProperty()
-  @IsString()
-  public country: string;
+  url: string;
 }
 
-export class KycVerificationDto {
+class DocumentData {
+  @ApiProperty({ nullable: true })
+  @IsString()
+  @IsOptional()
+  country: string | null;
+}
+
+class VerificationData {
   @ApiProperty()
   @IsUUID()
-  public id: string;
+  id: string;
 
+  // We are using vendorData to store userId
   @ApiProperty()
   @IsString()
-  public vendorData: string;
+  vendorData: string;
 
   @ApiProperty()
   @IsEnum(KycStatus)
-  public status: KycStatus;
+  status: KycStatus;
 
   @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
-  public reason: string | null;
+  reason: string | null;
 
   @ApiProperty()
-  @IsObject()
-  public document: KycDocumentDto;
+  @ValidateNested()
+  @Type(() => DocumentData)
+  document: DocumentData;
 }
 
-export class TechnicalDataDto {
-  @ApiProperty({ nullable: true })
-  @IsString()
-  @IsOptional()
-  public ip: string | null;
-}
-
-export class KycStatusDto {
+export class UpdateKycStatusDto {
   @ApiProperty()
   @IsString()
-  public status: string;
+  status: string;
 
-  @ApiProperty({ type: KycVerificationDto })
-  @IsObject()
-  public verification: KycVerificationDto;
-
-  @ApiProperty({ type: TechnicalDataDto })
-  @IsObject()
-  public technicalData: TechnicalDataDto;
+  @ApiProperty({ type: VerificationData })
+  @ValidateNested()
+  @Type(() => VerificationData)
+  verification: VerificationData;
 }
 
 export class KycSignedAddressDto {

@@ -13,7 +13,7 @@ export type SiteverifyResponse = {
 export type RegisterLabelerData = {
   email: string;
   evmAddress: string;
-  country?: string;
+  country: string;
   ip?: string;
 };
 
@@ -29,7 +29,7 @@ export type RegisterLabelerBody = {
   email: string;
   eth_addr: string;
   language: string;
-  country?: string;
+  country: string;
 };
 
 export type GetLabelerQueryParams = LabelingDefaultQueryParams & {

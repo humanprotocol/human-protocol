@@ -3,7 +3,8 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { KycStatus, OperatorStatus } from '../../common/enums/user';
+import { OperatorStatus } from '../../common/enums/user';
+import { KycStatus } from '../kyc/constants';
 import { SignatureType } from '../../common/enums/web3';
 import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
@@ -113,7 +114,7 @@ export class UserService {
     const registeredLabeler = await this.hcaptchaService.registerLabeler({
       email: user.email,
       evmAddress: user.evmAddress,
-      country: user.kyc.country,
+      country: user.kyc.country as string,
     });
 
     if (!registeredLabeler) {

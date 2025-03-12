@@ -10,7 +10,8 @@ import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { RegistrationInExchangeOracleDto } from './user.dto';
 import { UserStatus, Role, UserEntity } from './user.entity';
-import { KycStatus, OperatorStatus } from '../../common/enums/user';
+import { OperatorStatus } from '../../common/enums/user';
+import { KycStatus } from '../kyc/constants';
 import { signMessage, prepareSignatureBody } from '../../utils/web3';
 import {
   MOCK_ADDRESS,

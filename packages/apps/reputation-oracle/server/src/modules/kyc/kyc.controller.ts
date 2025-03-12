@@ -1,12 +1,4 @@
 import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiHeader,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import {
   Body,
   Controller,
   Get,
@@ -16,12 +8,25 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+
 import { Public } from '../../common/decorators';
 import { RequestWithUser } from '../../common/interfaces/request';
-import { KycSessionDto, KycSignedAddressDto, KycStatusDto } from './kyc.dto';
+import {
+  StartSessionResponseDto,
+  KycSignedAddressDto,
+  UpdateKycStatusDto,
+} from './kyc.dto';
+import { KycErrorFilter } from './kyc.error.filter';
 import { KycService } from './kyc.service';
 import { KycWebhookAuthGuard } from './kyc-webhook-auth.guard';
-import { KycErrorFilter } from './kyc.error.filter';
 
 @ApiTags('KYC')
 @Controller('/kyc')
@@ -36,14 +41,15 @@ export class KycController {
   @ApiResponse({
     status: 200,
     description: 'KYC session started successfully',
-    type: KycSessionDto,
+    type: StartSessionResponseDto,
   })
   @ApiBearerAuth()
   @Post('/start')
   @HttpCode(200)
-  async startKyc(@Req() request: RequestWithUser): Promise<KycSessionDto> {
-    const kycSessionData = await this.kycService.initSession(request.user);
-    return kycSessionData;
+  async startKyc(
+    @Req() request: RequestWithUser,
+  ): Promise<StartSessionResponseDto> {
+    return await this.kycService.initSession(request.user);
   }
 
   @ApiOperation({
@@ -66,7 +72,7 @@ export class KycController {
       type: 'string',
     },
   })
-  @ApiBody({ type: KycStatusDto })
+  @ApiBody({ type: UpdateKycStatusDto })
   @ApiResponse({
     status: 200,
     description: 'Kyc status updated successfully',
@@ -75,7 +81,7 @@ export class KycController {
   @Post('/update')
   @UseGuards(KycWebhookAuthGuard)
   @HttpCode(200)
-  async updateKycStatus(@Body() data: KycStatusDto): Promise<void> {
+  async updateKycStatus(@Body() data: UpdateKycStatusDto): Promise<void> {
     await this.kycService.updateKycStatus(data);
   }
 

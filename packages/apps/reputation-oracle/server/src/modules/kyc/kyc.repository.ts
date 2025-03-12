@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+
 import { BaseRepository } from '../../database/base.repository';
 import { KycEntity } from './kyc.entity';
 
 @Injectable()
 export class KycRepository extends BaseRepository<KycEntity> {
-  constructor(private dataSource: DataSource) {
+  constructor(dataSource: DataSource) {
     super(KycEntity, dataSource);
   }
 
