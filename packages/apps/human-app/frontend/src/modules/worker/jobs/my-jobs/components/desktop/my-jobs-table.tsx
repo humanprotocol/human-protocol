@@ -8,8 +8,8 @@ import {
 } from 'material-react-table';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
-import { useGetMyJobsData, EscrowAddressSearchForm } from '../../../components';
-import { useMyJobsFilterStore } from '../../../hooks';
+import { EscrowAddressSearchForm } from '../../../components';
+import { useGetMyJobsData, useMyJobsFilterStore } from '../../../hooks';
 import { useRefreshTasksMutation } from '../../hooks';
 import { getColumnsDefinition } from './columns';
 
