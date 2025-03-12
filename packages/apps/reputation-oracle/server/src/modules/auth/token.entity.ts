@@ -25,21 +25,21 @@ export enum TokenType {
 export class TokenEntity extends BaseEntity {
   @Column({ type: 'uuid', unique: true })
   @Generated('uuid')
-  public uuid: string;
+  uuid: string;
 
   @Column({
     type: 'enum',
     enum: TokenType,
   })
-  public type: TokenType;
+  type: TokenType;
 
   @Column({ type: 'timestamptz' })
-  public expiresAt: Date;
+  expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne(() => UserEntity, { eager: true })
-  public user: UserEntity;
+  @ManyToOne(() => UserEntity)
+  user?: UserEntity;
 
   @Column({ type: 'int' })
-  public userId: number;
+  userId: number;
 }

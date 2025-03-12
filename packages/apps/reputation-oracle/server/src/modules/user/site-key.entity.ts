@@ -23,4 +23,7 @@ export class SiteKeyEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.siteKeys)
   @JoinColumn()
   user: UserEntity;
+
+  @Column({ type: 'int' })
+  userId: number;
 }

@@ -23,44 +23,19 @@ export class UserRepository extends BaseRepository<UserEntity> {
     });
   }
 
-  async findOneByEmail(email: string): Promise<UserEntity | null> {
+  async findOneByEmail(
+    email: string,
+    options: FindOptions = {},
+  ): Promise<UserEntity | null> {
     return this.findOne({
       where: { email },
-      relations: {
-        kyc: true,
-        siteKeys: true,
-        userQualifications: {
-          qualification: true,
-        },
-      },
+      relations: options.relations,
     });
   }
 
   async findOneByAddress(address: string): Promise<UserEntity | null> {
     return this.findOne({
       where: { evmAddress: address.toLowerCase() },
-      relations: { kyc: true, siteKeys: true },
-    });
-  }
-
-  async findByEmail(
-    emails: string[],
-    role?: Role,
-    status?: UserStatus,
-  ): Promise<UserEntity[]> {
-    const whereConditions = emails.map((email) => {
-      const condition: any = { email };
-      if (role) {
-        condition.role = role;
-      }
-      if (status) {
-        condition.status = status;
-      }
-      return condition;
-    });
-
-    return this.find({
-      where: whereConditions,
       relations: { kyc: true, siteKeys: true },
     });
   }

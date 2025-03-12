@@ -24,6 +24,8 @@ import {
   InvalidWeb3SignatureError,
 } from './user.error';
 import { UserRepository } from './user.repository';
+import { OperatorUserEntity, Web2UserEntity } from './types';
+import { UserRole } from '.';
 
 @Injectable()
 export class UserService {
@@ -42,40 +44,72 @@ export class UserService {
     return bcrypt.compareSync(password, passwordHash);
   }
 
+  static isWeb2UserRole(userRole: string): boolean {
+    return [UserRole.ADMIN, UserRole.HUMAN_APP, UserRole.WORKER].includes(
+      userRole as UserRole,
+    );
+  }
+
   private hashPassword(password: string): string {
     const SALT_GENERATION_ROUNDS = 12;
     return bcrypt.hashSync(password, SALT_GENERATION_ROUNDS);
   }
 
-  async createWorkerUser({
-    email,
-    password,
-  }: Pick<UserEntity, 'email' | 'password'>): Promise<UserEntity> {
+  async createWorkerUser(data: {
+    email: string;
+    password: string;
+  }): Promise<Web2UserEntity> {
     const newUser = new UserEntity();
-    newUser.email = email;
-    newUser.password = this.hashPassword(password);
+    newUser.email = data.email;
+    newUser.password = this.hashPassword(data.password);
     newUser.role = Role.WORKER;
     newUser.status = UserStatus.PENDING;
 
     await this.userRepository.createUnique(newUser);
 
-    return newUser;
+    return newUser as unknown as Web2UserEntity;
   }
 
-  public updatePassword(
-    userEntity: UserEntity,
+  async findWeb2UserByEmail(email: string): Promise<Web2UserEntity | null> {
+    const userEntity = await this.userRepository.findOneByEmail(email, {
+      relations: {
+        kyc: true,
+        siteKeys: true,
+        userQualifications: {
+          qualification: true,
+        },
+      },
+    });
+
+    if (userEntity && UserService.isWeb2UserRole(userEntity.role)) {
+      return userEntity as unknown as Web2UserEntity;
+    }
+
+    return null;
+  }
+
+  async updatePassword(
+    userId: number,
     newPassword: string,
-  ): Promise<UserEntity> {
+  ): Promise<Web2UserEntity> {
+    const userEntity = await this.userRepository.findOneById(userId);
+
+    if (!userEntity) {
+      throw new Error('User not found');
+    }
+
+    if (!UserService.isWeb2UserRole(userEntity.role)) {
+      throw new Error('Only web2 users can have password');
+    }
+
     userEntity.password = this.hashPassword(newPassword);
-    return this.userRepository.updateOne(userEntity);
+
+    await this.userRepository.updateOne(userEntity);
+
+    return userEntity as unknown as Web2UserEntity;
   }
 
-  public activate(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.status = UserStatus.ACTIVE;
-    return this.userRepository.updateOne(userEntity);
-  }
-
-  public async createWeb3User(address: string): Promise<UserEntity> {
+  async createOperatorUser(address: string): Promise<OperatorUserEntity> {
     const newUser = new UserEntity();
     newUser.evmAddress = address.toLowerCase();
     newUser.nonce = generateNonce();
@@ -83,15 +117,42 @@ export class UserService {
     newUser.status = UserStatus.ACTIVE;
 
     await this.userRepository.createUnique(newUser);
-    return newUser;
+
+    return newUser as unknown as OperatorUserEntity;
   }
 
-  public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.nonce = generateNonce();
-    return this.userRepository.updateOne(userEntity);
+  async findOperatorUser(address: string): Promise<OperatorUserEntity | null> {
+    const userEntity = await this.userRepository.findOneByAddress(address);
+
+    if (userEntity && userEntity.role === UserRole.OPERATOR) {
+      return userEntity as unknown as OperatorUserEntity;
+    }
+
+    return null;
   }
 
-  public async registerLabeler(user: UserEntity): Promise<string> {
+  async makeUserActive(userId: number): Promise<void> {
+    const userEntity = await this.userRepository.findOneById(userId);
+    if (!userEntity) {
+      throw new Error('User not found');
+    }
+
+    userEntity.status = UserStatus.ACTIVE;
+
+    await this.userRepository.updateOne(userEntity);
+  }
+
+  async updateNonce(userEntity: OperatorUserEntity): Promise<UserEntity> {
+    /**
+     * Creating from repository to satisfy types and keep before/after hooks.
+     * Later should use common repository.update method with partial update
+     */
+    const _userEntity = this.userRepository.create(userEntity);
+    _userEntity.nonce = generateNonce();
+    return this.userRepository.updateOne(_userEntity);
+  }
+
+  async registerLabeler(user: Web2UserEntity): Promise<string> {
     if (user.role !== Role.WORKER) {
       throw new UserError(UserErrorMessage.INVALID_ROLE, user.id);
     }
@@ -134,7 +195,7 @@ export class UserService {
 
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = siteKey;
-    newSiteKey.user = user;
+    newSiteKey.userId = user.id;
     newSiteKey.type = SiteKeyType.HCAPTCHA;
 
     await this.siteKeyRepository.createUnique(newSiteKey);
@@ -142,7 +203,7 @@ export class UserService {
     return siteKey;
   }
 
-  public async registerAddress(
+  async registerAddress(
     user: UserEntity,
     data: RegisterAddressRequestDto,
   ): Promise<void> {
@@ -180,8 +241,8 @@ export class UserService {
     await this.userRepository.updateOne(user);
   }
 
-  public async enableOperator(
-    user: UserEntity,
+  async enableOperator(
+    user: OperatorUserEntity,
     signature: string,
   ): Promise<void> {
     const signedData = prepareSignatureBody({
@@ -212,8 +273,8 @@ export class UserService {
     await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.ACTIVE);
   }
 
-  public async disableOperator(
-    user: UserEntity,
+  async disableOperator(
+    user: OperatorUserEntity,
     signature: string,
   ): Promise<void> {
     const signedData = prepareSignatureBody({
@@ -245,12 +306,12 @@ export class UserService {
     await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.INACTIVE);
   }
 
-  public async registrationInExchangeOracle(
-    user: UserEntity,
+  async registrationInExchangeOracle(
+    user: Web2UserEntity,
     oracleAddress: string,
   ): Promise<SiteKeyEntity> {
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
-      user,
+      user.id,
       oracleAddress,
       SiteKeyType.REGISTRATION,
     );
@@ -259,7 +320,7 @@ export class UserService {
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = oracleAddress;
     newSiteKey.type = SiteKeyType.REGISTRATION;
-    newSiteKey.user = user;
+    newSiteKey.userId = user.id;
 
     return await this.siteKeyRepository.createUnique(newSiteKey);
   }
@@ -268,7 +329,7 @@ export class UserService {
     user: UserEntity,
   ): Promise<string[]> {
     const siteKeys = await this.siteKeyRepository.findByUserAndType(
-      user,
+      user.id,
       SiteKeyType.REGISTRATION,
     );
     return siteKeys.map((siteKey) => siteKey.siteKey);

@@ -28,7 +28,7 @@ export class UserEntity extends BaseEntity {
     nullable: true,
     default: null,
   })
-  password: string;
+  password: string | null;
 
   @Column({
     type: 'varchar',
@@ -36,7 +36,7 @@ export class UserEntity extends BaseEntity {
     default: null,
     unique: true,
   })
-  email: string;
+  email: string | null;
 
   @Column({
     type: 'enum',
@@ -50,7 +50,7 @@ export class UserEntity extends BaseEntity {
     default: null,
     unique: true,
   })
-  evmAddress: string;
+  evmAddress: string | null;
 
   @Exclude()
   @Column({
