@@ -6,5 +6,4 @@ export enum KycStatus {
   REVIEW = 'review',
   EXPIRED = 'expired',
   ABANDONED = 'abandoned',
-  TEST = 'test',
 }
