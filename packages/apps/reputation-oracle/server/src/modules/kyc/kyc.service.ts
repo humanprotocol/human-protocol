@@ -63,8 +63,7 @@ export class KycService {
 
     const { data } = await firstValueFrom(
       this.httpService
-        .post('sessions', body, {
-          baseURL: this.kycConfigService.baseUrl,
+        .post(`${this.kycConfigService.baseUrl}/sessions`, body, {
           headers: {
             'X-AUTH-CLIENT': this.kycConfigService.apiKey,
           },
