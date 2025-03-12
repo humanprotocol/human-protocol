@@ -1,9 +1,7 @@
 import { useCallback } from 'react';
-import {
-  type RegistrationInExchangeOracleDto,
-  useExchangeOracleRegistrationMutation,
-} from '@/modules/worker/oracle-registration/sevices';
 import { useRegisteredOracles } from '@/shared/contexts/registered-oracles';
+import { type RegistrationInExchangeOracleDto } from '../schema';
+import { useExchangeOracleRegistrationMutation } from './use-exchange-oracle-registration-mutation';
 
 export function useOracleRegistration(oracleAddress: string | undefined) {
   const { setRegisteredOracles } = useRegisteredOracles();
