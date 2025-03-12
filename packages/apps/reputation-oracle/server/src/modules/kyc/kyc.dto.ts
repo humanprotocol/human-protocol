@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
-  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -54,7 +53,6 @@ export class UpdateKycStatusDto {
   status: string;
 
   @ApiProperty({ type: VerificationData })
-  @IsObject()
   @ValidateNested()
   @Type(() => VerificationData)
   verification: VerificationData;
