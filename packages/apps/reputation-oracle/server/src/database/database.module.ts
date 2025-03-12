@@ -38,6 +38,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
         return {
           name: 'default-connection',
           type: 'postgres',
+          useUTC: true,
 
           ...(databaseConfigService.url
             ? {

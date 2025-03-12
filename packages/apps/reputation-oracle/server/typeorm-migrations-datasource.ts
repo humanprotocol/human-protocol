@@ -14,6 +14,7 @@ const connectionUrl = process.env.POSTGRES_URL;
 
 export default new DataSource({
   type: 'postgres',
+  useUTC: true,
   ...(connectionUrl
     ? {
         url: connectionUrl,
