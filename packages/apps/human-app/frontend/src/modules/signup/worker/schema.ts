@@ -17,10 +17,7 @@ export const signUpDtoSchema = z
           .string()
           .min(8, t('validation.min'))
           .max(50, t('validation.max', { count: 50 })),
-        confirmPassword: z
-          .string()
-          .min(1, t('validation.required'))
-          .max(50, t('validation.max', { count: 50 })),
+        confirmPassword: z.string().min(1, t('validation.required')),
       })
       .refine(({ password, confirmPassword }) => confirmPassword === password, {
         message: t('validation.passwordMismatch'),
