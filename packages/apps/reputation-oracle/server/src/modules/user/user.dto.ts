@@ -5,64 +5,63 @@ import { IsLowercasedEnum } from '../../common/validators';
 
 export class RegisterLabelerResponseDto {
   @ApiProperty({ name: 'site_key' })
-  @IsString()
-  public siteKey: string;
+  siteKey: string;
 }
 
 export class RegisterAddressRequestDto {
   @ApiProperty()
   @IsString()
-  public address: string;
+  address: string;
 
   @ApiProperty()
   @IsString()
-  public signature: string;
+  signature: string;
 }
 
 export class EnableOperatorDto {
   @ApiProperty()
   @IsString()
-  public signature: string;
+  signature: string;
 }
 
 export class DisableOperatorDto {
   @ApiProperty()
   @IsString()
-  public signature: string;
+  signature: string;
 }
 
 export class SignatureBodyDto {
   @ApiProperty()
   @IsString()
   @IsEthereumAddress()
-  public from: string;
+  from: string;
 
   @ApiProperty()
   @IsString()
   @IsEthereumAddress()
-  public to: string;
+  to: string;
 
   @ApiProperty()
   @IsString()
-  public contents: string;
+  contents: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  public nonce?: string | undefined;
+  nonce?: string | undefined;
 }
 
 export class PrepareSignatureDto {
   @ApiProperty()
   @IsString()
   @IsEthereumAddress()
-  public address: string;
+  address: string;
 
   @ApiProperty({
     enum: SignatureType,
   })
   @IsLowercasedEnum(SignatureType)
-  public type: SignatureType;
+  type: SignatureType;
 }
 
 export class RegistrationInExchangeOracleDto {
@@ -73,19 +72,19 @@ export class RegistrationInExchangeOracleDto {
   @IsEthereumAddress({
     message: 'oracle_address must be an Ethereum address',
   })
-  public oracleAddress: string;
+  oracleAddress: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  hCaptchaToken: string;
 }
 
 export class RegistrationInExchangeOracleResponseDto {
   @ApiProperty({ name: 'oracle_address' })
-  public oracleAddress: string;
+  oracleAddress: string;
 }
 
 export class RegistrationInExchangeOraclesDto {
   @ApiProperty({ name: 'oracle_addresses' })
-  public oracleAddresses: string[];
+  oracleAddresses: string[];
 }
