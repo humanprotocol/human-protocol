@@ -32,6 +32,7 @@ import { NDAModule } from './modules/nda/nda.module';
 import { StorageModule } from './modules/storage/storage.module';
 
 import Environment from './utils/environment';
+import { AppController } from './app.controller';
 
 @Module({
   providers: [
@@ -98,5 +99,6 @@ import Environment from './utils/environment';
     WebhookIncomingModule,
     WebhookOutgoingModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
