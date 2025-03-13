@@ -26,7 +26,7 @@ export class KycEntity extends BaseEntity {
 
   @JoinColumn()
   @OneToOne('UserEntity', (user: UserEntity) => user.kyc)
-  user: UserEntity;
+  user?: UserEntity;
 
   @Column({ type: 'int' })
   userId: number;
