@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
 import { SignatureType } from '../../common/enums/web3';
-import { IsLowercasedEnum } from '../../common/validators';
+import {
+  IsLowercasedEnum,
+  IsValidWeb3Signature,
+} from '../../common/validators';
 
 export class RegisterLabelerResponseDto {
   @ApiProperty({ name: 'site_key' })
@@ -14,19 +17,19 @@ export class RegisterAddressRequestDto {
   address: string;
 
   @ApiProperty()
-  @IsString()
+  @IsValidWeb3Signature()
   signature: string;
 }
 
 export class EnableOperatorDto {
   @ApiProperty()
-  @IsString()
+  @IsValidWeb3Signature()
   signature: string;
 }
 
 export class DisableOperatorDto {
   @ApiProperty()
-  @IsString()
+  @IsValidWeb3Signature()
   signature: string;
 }
 

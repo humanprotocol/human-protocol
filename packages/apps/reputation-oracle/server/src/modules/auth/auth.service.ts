@@ -393,6 +393,11 @@ export class AuthService {
 
     const userEntity = await this.userService.createOperatorUser(data.address);
 
+    /**
+     * TODO: revisit if we want to make it active by default
+     * since we have `enableOperator` functionality and
+     * they might not have enough tokens, which should not impact signup
+     */
     await kvstore.set(data.address.toLowerCase(), OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);

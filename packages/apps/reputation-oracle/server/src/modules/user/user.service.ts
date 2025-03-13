@@ -201,9 +201,9 @@ export class UserService {
       throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
-    const dbUser =
+    const userWithSameAddress =
       await this.userRepository.findOneByAddress(lowercasedAddress);
-    if (dbUser) {
+    if (userWithSameAddress) {
       throw new DuplicatedWalletAddressError(user.id, lowercasedAddress);
     }
 
@@ -309,9 +309,7 @@ export class UserService {
     return await this.siteKeyRepository.createUnique(newSiteKey);
   }
 
-  public async getRegistrationInExchangeOracles(
-    user: UserEntity,
-  ): Promise<string[]> {
+  async getRegistrationInExchangeOracles(user: UserEntity): Promise<string[]> {
     const siteKeys = await this.siteKeyRepository.findByUserAndType(
       user.id,
       SiteKeyType.REGISTRATION,
