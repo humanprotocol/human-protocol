@@ -31,7 +31,7 @@ import {
   RegisterLabelerResponseDto,
   EnableOperatorDto,
   RegistrationInExchangeOracleDto,
-  RegistrationInExchangeOraclesDto,
+  RegistrationInExchangeOraclesResponseDto,
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
 import { UserService } from './user.service';
@@ -201,7 +201,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'List of registered oracles retrieved successfully',
-    type: RegistrationInExchangeOraclesDto,
+    type: RegistrationInExchangeOraclesResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -210,7 +210,7 @@ export class UserController {
   @Get('/exchange-oracle-registration')
   async getRegistrationInExchangeOracles(
     @Req() request: RequestWithUser,
-  ): Promise<RegistrationInExchangeOraclesDto> {
+  ): Promise<RegistrationInExchangeOraclesResponseDto> {
     const oracleAddresses =
       await this.userService.getRegistrationInExchangeOracles(request.user);
 

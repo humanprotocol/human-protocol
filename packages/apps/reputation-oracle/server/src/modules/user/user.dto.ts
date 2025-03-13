@@ -13,7 +13,7 @@ export class RegisterLabelerResponseDto {
 
 export class RegisterAddressRequestDto {
   @ApiProperty()
-  @IsString()
+  @IsEthereumAddress()
   address: string;
 
   @ApiProperty()
@@ -35,12 +35,10 @@ export class DisableOperatorDto {
 
 export class SignatureBodyDto {
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
   from: string;
 
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
   to: string;
 
@@ -56,7 +54,6 @@ export class SignatureBodyDto {
 
 export class PrepareSignatureDto {
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
   address: string;
 
@@ -87,7 +84,7 @@ export class RegistrationInExchangeOracleResponseDto {
   oracleAddress: string;
 }
 
-export class RegistrationInExchangeOraclesDto {
+export class RegistrationInExchangeOraclesResponseDto {
   @ApiProperty({ name: 'oracle_addresses' })
   oracleAddresses: string[];
 }
