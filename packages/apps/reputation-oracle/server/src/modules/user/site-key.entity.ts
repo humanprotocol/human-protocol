@@ -1,11 +1,7 @@
 import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-/**
- * TODO: Leave fix follow-up refactoring
- * Importing from '../user' causes circular import error here.
- */
-import { UserEntity } from './user.entity';
+import type { UserEntity } from './user.entity';
 import { SiteKeyType } from '../../common/enums';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'site_keys' })
@@ -20,7 +16,7 @@ export class SiteKeyEntity extends BaseEntity {
   })
   type: SiteKeyType;
 
-  @ManyToOne(() => UserEntity, (user) => user.siteKeys)
+  @ManyToOne('UserEntity', (user: UserEntity) => user.siteKeys)
   @JoinColumn()
   user: UserEntity;
 

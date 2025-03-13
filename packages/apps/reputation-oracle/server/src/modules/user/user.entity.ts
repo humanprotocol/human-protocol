@@ -3,9 +3,9 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { KycEntity } from '../kyc/kyc.entity';
-import { SiteKeyEntity } from './site-key.entity';
-import { UserQualificationEntity } from '../qualification/user-qualification.entity';
+import type { KycEntity } from '../kyc/kyc.entity';
+import type { SiteKeyEntity } from './site-key.entity';
+import type { UserQualificationEntity } from '../qualification/user-qualification.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -62,15 +62,15 @@ export class UserEntity extends BaseEntity {
   })
   status: UserStatus;
 
-  @OneToOne(() => KycEntity, (kyc) => kyc.user)
+  @OneToOne('KycEntity', (kyc: KycEntity) => kyc.user)
   kyc?: KycEntity;
 
-  @OneToMany(() => SiteKeyEntity, (siteKey) => siteKey.user)
+  @OneToMany('SiteKeyEntity', (siteKey: SiteKeyEntity) => siteKey.user)
   siteKeys?: SiteKeyEntity[];
 
   @OneToMany(
-    () => UserQualificationEntity,
-    (userQualification) => userQualification.user,
+    'UserQualificationEntity',
+    (userQualification: UserQualificationEntity) => userQualification.user,
   )
   userQualifications?: UserQualificationEntity[];
 
