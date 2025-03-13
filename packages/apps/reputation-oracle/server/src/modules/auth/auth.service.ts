@@ -283,7 +283,9 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
-    await this.userService.makeUserActive(tokenEntity.userId);
+    await this.userRepository.updateOneById(tokenEntity.userId, {
+      status: UserStatus.ACTIVE,
+    });
   }
 
   public async resendEmailVerification(

@@ -131,17 +131,6 @@ export class UserService {
     return null;
   }
 
-  async makeUserActive(userId: number): Promise<void> {
-    const userEntity = await this.userRepository.findOneById(userId);
-    if (!userEntity) {
-      throw new Error('User not found');
-    }
-
-    userEntity.status = UserStatus.ACTIVE;
-
-    await this.userRepository.updateOne(userEntity);
-  }
-
   async updateNonce(userEntity: OperatorUserEntity): Promise<UserEntity> {
     userEntity.nonce = generateNonce();
     return this.userRepository.updateOne(userEntity);
