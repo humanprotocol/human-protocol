@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
@@ -11,19 +11,11 @@ export class CronJobEntity extends BaseEntity {
     type: 'enum',
     enum: CronJobType,
   })
-  public cronJobType: CronJobType;
+  cronJobType: CronJobType;
 
   @Column({ type: 'timestamptz' })
-  public startedAt: Date;
+  startedAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  public completedAt?: Date | null;
-
-  @BeforeInsert()
-  public beforeInsert(): void {
-    const date = new Date();
-    this.startedAt = date;
-    this.createdAt = date;
-    this.updatedAt = date;
-  }
+  completedAt?: Date | null;
 }

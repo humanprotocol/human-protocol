@@ -67,7 +67,7 @@ export class UserService {
 
     await this.userRepository.createUnique(newUser);
 
-    return newUser as unknown as Web2UserEntity;
+    return newUser as Web2UserEntity;
   }
 
   async findWeb2UserByEmail(email: string): Promise<Web2UserEntity | null> {
@@ -82,7 +82,7 @@ export class UserService {
     });
 
     if (userEntity && UserService.isWeb2UserRole(userEntity.role)) {
-      return userEntity as unknown as Web2UserEntity;
+      return userEntity as Web2UserEntity;
     }
 
     return null;
@@ -106,7 +106,7 @@ export class UserService {
 
     await this.userRepository.updateOne(userEntity);
 
-    return userEntity as unknown as Web2UserEntity;
+    return userEntity as Web2UserEntity;
   }
 
   async createOperatorUser(address: string): Promise<OperatorUserEntity> {
@@ -118,14 +118,14 @@ export class UserService {
 
     await this.userRepository.createUnique(newUser);
 
-    return newUser as unknown as OperatorUserEntity;
+    return newUser as OperatorUserEntity;
   }
 
   async findOperatorUser(address: string): Promise<OperatorUserEntity | null> {
     const userEntity = await this.userRepository.findOneByAddress(address);
 
     if (userEntity && userEntity.role === UserRole.OPERATOR) {
-      return userEntity as unknown as OperatorUserEntity;
+      return userEntity as OperatorUserEntity;
     }
 
     return null;
@@ -143,13 +143,8 @@ export class UserService {
   }
 
   async updateNonce(userEntity: OperatorUserEntity): Promise<UserEntity> {
-    /**
-     * Creating from repository to satisfy types and keep before/after hooks.
-     * Later should use common repository.update method with partial update
-     */
-    const _userEntity = this.userRepository.create(userEntity);
-    _userEntity.nonce = generateNonce();
-    return this.userRepository.updateOne(_userEntity);
+    userEntity.nonce = generateNonce();
+    return this.userRepository.updateOne(userEntity);
   }
 
   async registerLabeler(user: Web2UserEntity): Promise<string> {
