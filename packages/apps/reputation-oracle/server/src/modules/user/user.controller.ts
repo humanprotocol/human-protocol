@@ -21,7 +21,6 @@ import { SignatureType } from '../../common/enums/web3';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
-import logger from '../../logger';
 import { prepareSignatureBody } from '../../utils/web3';
 import {
   DisableOperatorDto,
@@ -215,14 +214,5 @@ export class UserController {
       await this.userService.getRegistrationInExchangeOracles(request.user);
 
     return { oracleAddresses };
-  }
-
-  @Get('/me')
-  async me(@Req() request: RequestWithUser) {
-    const user = await this.userRepository.findOneById(request.user.id);
-    logger.debug('/me endpoint user from repository', {
-      user,
-    });
-    return user;
   }
 }
