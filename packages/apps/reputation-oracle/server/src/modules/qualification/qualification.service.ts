@@ -148,6 +148,14 @@ export class QualificationService {
         const userQualification = new UserQualificationEntity();
         userQualification.user = user;
         userQualification.qualification = qualificationEntity;
+
+        /**
+         * TODO: remove this when using base repository
+         */
+        const date = new Date();
+        userQualification.createdAt = date;
+        userQualification.updatedAt = date;
+
         return userQualification;
       });
 
