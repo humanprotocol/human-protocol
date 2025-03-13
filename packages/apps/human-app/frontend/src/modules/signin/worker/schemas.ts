@@ -11,9 +11,4 @@ export const signInDtoSchema = z.object({
   h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
 });
 
-export const signInSuccessResponseSchema = z.object({
-  // eslint-disable-next-line camelcase -- data from api
-  access_token: z.string(),
-  // eslint-disable-next-line camelcase -- data from api
-  refresh_token: z.string(),
-});
+export type SignInDto = z.infer<typeof signInDtoSchema>;

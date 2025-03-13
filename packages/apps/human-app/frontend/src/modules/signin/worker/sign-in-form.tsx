@@ -8,10 +8,9 @@ import { Input } from '@/shared/components/data-entry/input';
 import { Button } from '@/shared/components/ui/button';
 import { Password } from '@/shared/components/data-entry/password/password';
 import { routerPaths } from '@/router/router-paths';
-import { type SignInDto } from '@/modules/worker/services/sign-in/types';
-import { signInDtoSchema } from '@/modules/worker/services/sign-in/schema';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
+import { type SignInDto, signInDtoSchema } from './schemas';
 
 interface SignInFormProps {
   onSubmit: (data: SignInDto) => void;

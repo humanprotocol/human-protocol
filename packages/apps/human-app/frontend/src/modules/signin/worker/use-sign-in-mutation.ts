@@ -4,12 +4,12 @@ import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { type SignInDto } from './types';
-import { signInSuccessResponseSchema } from './schema';
+import { authTokensSuccessResponseSchema } from '@/shared/schemas';
+import { type SignInDto } from './schemas';
 
 function signInMutationFn(data: SignInDto) {
   return apiClient(apiPaths.worker.signIn.path, {
-    successSchema: signInSuccessResponseSchema,
+    successSchema: authTokensSuccessResponseSchema,
     options: {
       method: 'POST',
       body: JSON.stringify(data),
