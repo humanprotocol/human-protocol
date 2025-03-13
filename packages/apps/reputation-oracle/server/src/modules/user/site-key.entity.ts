@@ -2,7 +2,11 @@ import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import type { UserEntity } from './user.entity';
-import { SiteKeyType } from '../../common/enums';
+
+export enum SiteKeyType {
+  HCAPTCHA = 'hcaptcha',
+  REGISTRATION = 'registration',
+}
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'site_keys' })
 @Unique(['siteKey', 'type', 'user'])

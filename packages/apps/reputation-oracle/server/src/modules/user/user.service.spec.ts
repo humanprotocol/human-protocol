@@ -23,7 +23,7 @@ import { SignatureBodyDto } from '../user/user.dto';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyRepository } from './site-key.repository';
-import { SiteKeyEntity } from './site-key.entity';
+import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import {
@@ -32,7 +32,6 @@ import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from '../../modules/user/user.error';
-import { SiteKeyType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),

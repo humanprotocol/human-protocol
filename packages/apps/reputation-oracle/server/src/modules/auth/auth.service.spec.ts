@@ -227,7 +227,7 @@ describe('AuthService', () => {
     let createUserMock: any;
 
     beforeEach(() => {
-      createUserMock = jest.spyOn(userService, 'create');
+      createUserMock = jest.spyOn(userService, 'createWorkerUser');
 
       createUserMock.mockResolvedValue(userEntity);
 
@@ -241,7 +241,7 @@ describe('AuthService', () => {
     it('should create a new user and return the user entity', async () => {
       const result = await authService.signup(userCreateDto);
 
-      expect(userService.create).toHaveBeenCalledWith(userCreateDto);
+      expect(userService.createWorkerUser).toHaveBeenCalledWith(userCreateDto);
       expect(tokenRepository.createUnique).toHaveBeenCalledWith({
         type: TokenType.EMAIL,
         user: userEntity,
@@ -264,7 +264,7 @@ describe('AuthService', () => {
         .mockResolvedValue(userEntity as any);
 
       await expect(authService.signup(userCreateDto)).rejects.toThrow(
-        new DuplicatedUserEmailError(userEntity.email),
+        new DuplicatedUserEmailError(userEntity.email as string),
       );
 
       expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
@@ -707,7 +707,7 @@ describe('AuthService', () => {
         let createUserMock: any;
 
         beforeEach(() => {
-          createUserMock = jest.spyOn(userService, 'createWeb3User');
+          createUserMock = jest.spyOn(userService, 'createOperatorUser');
 
           createUserMock.mockResolvedValue(userEntity);
 
@@ -743,7 +743,7 @@ describe('AuthService', () => {
             signature,
           });
 
-          expect(userService.createWeb3User).toHaveBeenCalledWith(
+          expect(userService.createOperatorUser).toHaveBeenCalledWith(
             web3PreSignUpDto.address,
           );
 

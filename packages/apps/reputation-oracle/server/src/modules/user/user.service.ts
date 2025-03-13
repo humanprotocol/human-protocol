@@ -5,7 +5,6 @@ import { Web3ConfigService } from '../../config/web3-config.service';
 import { OperatorStatus } from '../../common/enums/user';
 import { KycStatus } from '../kyc/constants';
 import { SignatureType } from '../../common/enums/web3';
-import { SiteKeyType } from '../../common/enums';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import {
   generateNonce,
@@ -13,7 +12,7 @@ import {
   prepareSignatureBody,
 } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
-import { SiteKeyEntity } from './site-key.entity';
+import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { RegisterAddressRequestDto } from './user.dto';
 import { Role, UserStatus, UserEntity } from './user.entity';

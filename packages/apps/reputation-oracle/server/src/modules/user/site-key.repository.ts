@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../../database/base.repository';
-import { SiteKeyEntity } from './site-key.entity';
-import { SiteKeyType } from '../../common/enums';
+import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 
 @Injectable()
 export class SiteKeyRepository extends BaseRepository<SiteKeyEntity> {

@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { OperatorStatus } from '../../common/enums/user';
 import {
+  SiteKeyType,
   UserStatus,
   UserRole,
   UserEntity,
@@ -27,7 +28,6 @@ import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,
   AuthErrorMessage,
