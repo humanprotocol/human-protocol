@@ -1,6 +1,6 @@
 import type { Web3UserData } from '@/modules/auth-web3/context/web3-auth-context';
 import type { UserData } from '@/modules/auth/context/auth-context';
-import { type SignInSuccessResponse } from './sign-in-types';
+import { type AuthTokensSuccessResponse } from '../schemas';
 
 export type AuthType = 'web2' | 'web3';
 type SubscriptionCallback = () => void;
@@ -8,7 +8,7 @@ export interface BrowserAuthProvider {
   isAuthenticated: boolean;
   authType: AuthType;
   signIn: (
-    singInSuccessData: SignInSuccessResponse,
+    singInSuccessData: AuthTokensSuccessResponse,
     authType: AuthType,
     signOutSubscription?: SubscriptionCallback
   ) => void;

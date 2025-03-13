@@ -4,7 +4,7 @@ import type { ResponseError } from '@/shared/types/global.type';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
 import { env } from '@/shared/env';
 import { normalizeBaseUrl } from '@/shared/helpers/url';
-import { type SignInSuccessResponse } from '@/shared/types';
+import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 import { fetchTokenRefresh } from './fetch-refresh-token';
 
 const appendHeader = (
@@ -66,7 +66,7 @@ export type FetcherOptions<SuccessInput, SuccessOutput> =
 
 export type FetcherUrl = string | URL;
 
-let refreshPromise: Promise<SignInSuccessResponse | null> | null = null;
+let refreshPromise: Promise<AuthTokensSuccessResponse | null> | null = null;
 
 export async function refreshToken(): Promise<{
   access_token: string;

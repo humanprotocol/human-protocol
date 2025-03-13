@@ -8,7 +8,7 @@ import {
   ModalType,
   useModalStore,
 } from '@/shared/components/ui/modal/modal.store';
-import { type SignInSuccessResponse } from '@/shared/types';
+import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 
 const extendableUserDataSchema = z.object({
   site_key: z.string().optional().nullable(),
@@ -35,7 +35,7 @@ export interface AuthenticatedUserContextType {
   user: UserData;
   status: AuthStatus;
   signOut: (throwExpirationModal?: boolean) => void;
-  signIn: (singIsSuccess: SignInSuccessResponse) => void;
+  signIn: (singIsSuccess: AuthTokensSuccessResponse) => void;
   updateUserData: (updateUserDataPayload: UpdateUserDataPayload) => void;
 }
 
@@ -43,7 +43,7 @@ interface UnauthenticatedUserContextType {
   user: null;
   status: AuthStatus;
   signOut: (throwExpirationModal?: boolean) => void;
-  signIn: (singIsSuccess: SignInSuccessResponse) => void;
+  signIn: (singIsSuccess: AuthTokensSuccessResponse) => void;
 }
 
 export const AuthContext = createContext<
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = (singIsSuccess: SignInSuccessResponse) => {
+  const signIn = (singIsSuccess: AuthTokensSuccessResponse) => {
     browserAuthProvider.signIn(singIsSuccess, 'web2');
     handleSignIn();
   };

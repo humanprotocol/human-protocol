@@ -10,8 +10,7 @@ import { Password } from '@/shared/components/data-entry/password/password';
 import { routerPaths } from '@/router/router-paths';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
-import { signInDtoSchema } from '@/shared/schemas';
-import { type SignInDto } from '@/shared/types';
+import { type SignInDto, signInDtoSchema } from './schemas';
 
 interface SignInFormProps {
   onSubmit: (data: SignInDto) => void;

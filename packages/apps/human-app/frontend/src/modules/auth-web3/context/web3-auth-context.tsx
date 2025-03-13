@@ -8,7 +8,7 @@ import {
   ModalType,
   useModalStore,
 } from '@/shared/components/ui/modal/modal.store';
-import { type SignInSuccessResponse } from '@/shared/types';
+import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 
 const web3userDataSchema = z.object({
   userId: z.number(),
@@ -25,7 +25,7 @@ export interface Web3AuthenticatedUserContextType {
   user: Web3UserData;
   status: AuthStatus;
   signOut: (throwExpirationModal?: boolean) => void;
-  signIn: (singIsSuccess: SignInSuccessResponse) => void;
+  signIn: (singIsSuccess: AuthTokensSuccessResponse) => void;
   updateUserData: (updateUserDataPayload: Partial<Web3UserData>) => void;
 }
 
@@ -33,7 +33,7 @@ interface Web3UnauthenticatedUserContextType {
   user: null;
   status: AuthStatus;
   signOut: (throwExpirationModal?: boolean) => void;
-  signIn: (singIsSuccess: SignInSuccessResponse) => void;
+  signIn: (singIsSuccess: AuthTokensSuccessResponse) => void;
 }
 
 export const Web3AuthContext = createContext<
@@ -97,7 +97,7 @@ export function Web3AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = (singIsSuccess: SignInSuccessResponse) => {
+  const signIn = (singIsSuccess: AuthTokensSuccessResponse) => {
     browserAuthProvider.signIn(singIsSuccess, 'web3');
     handleSignIn();
   };

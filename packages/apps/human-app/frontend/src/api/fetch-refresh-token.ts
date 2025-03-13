@@ -1,6 +1,6 @@
 import { apiPaths } from '@/api/api-paths';
 import { browserAuthProvider } from '@/shared/contexts/browser-auth-provider';
-import { signInSuccessResponseSchema } from '@/shared/schemas';
+import { authTokensSuccessResponseSchema } from '@/shared/schemas';
 
 export const fetchTokenRefresh = async (baseUrl: string) => {
   const response = await fetch(
@@ -23,7 +23,7 @@ export const fetchTokenRefresh = async (baseUrl: string) => {
 
   const data: unknown = await response.json();
 
-  const refetchAccessTokenSuccess = signInSuccessResponseSchema.parse(data);
+  const refetchAccessTokenSuccess = authTokensSuccessResponseSchema.parse(data);
 
   return refetchAccessTokenSuccess;
 };
