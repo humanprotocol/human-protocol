@@ -70,6 +70,7 @@ describe('CronJobService', () => {
       );
       expect(cronJobRepository.createUnique).toHaveBeenCalledWith({
         cronJobType: CronJobType.ProcessPendingIncomingWebhook,
+        startedAt: expect.any(Date),
       });
       expect(result).toBeInstanceOf(CronJobEntity);
     });
