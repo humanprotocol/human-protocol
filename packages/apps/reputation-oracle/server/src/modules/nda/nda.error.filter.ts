@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { NDAError } from './nda.error';
 import logger from '../../logger';
+import { NDAError } from './nda.error';
 
 @Catch(NDAError)
 export class NDAErrorFilter implements ExceptionFilter {

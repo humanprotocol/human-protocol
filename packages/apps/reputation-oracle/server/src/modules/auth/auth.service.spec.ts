@@ -23,6 +23,7 @@ import {
   mockConfig,
 } from '../../../test/constants';
 import { AuthConfigService } from '../../config/auth-config.service';
+import { NDAConfigService } from '../../config/nda-config.service';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
@@ -75,6 +76,10 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
 }));
 
+const mockNdaConfigService = {
+  latestNdaUrl: faker.internet.url(),
+};
+
 describe('AuthService', () => {
   let authService: AuthService;
   let tokenRepository: TokenRepository;
@@ -108,6 +113,7 @@ describe('AuthService', () => {
         AuthService,
         UserService,
         AuthConfigService,
+        { provide: NDAConfigService, useValue: mockNdaConfigService },
         ServerConfigService,
         Web3ConfigService,
         HCaptchaService,

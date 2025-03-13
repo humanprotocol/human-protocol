@@ -2,7 +2,6 @@ import { BaseError } from '../../common/errors/base';
 
 export enum NDAErrorMessage {
   INVALID_NDA = 'Invalid NDA URL',
-  NDA_EXISTS = 'User has already signed the NDA',
 }
 
 export class NDAError extends BaseError {

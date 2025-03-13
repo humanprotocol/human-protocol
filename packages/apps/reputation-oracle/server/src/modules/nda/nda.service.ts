@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { AuthConfigService } from '../../config/auth-config.service';
+
 import { UserEntity, UserRepository } from '../user';
+import { NDAConfigService } from '../../config/nda-config.service';
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';
 
@@ -8,15 +9,15 @@ import { NDAError, NDAErrorMessage } from './nda.error';
 export class NDAService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly authConfigService: AuthConfigService,
+    private readonly ndaConfigService: NDAConfigService,
   ) {}
 
   async signNDA(user: UserEntity, nda: NDASignatureDto) {
-    const ndaUrl = this.authConfigService.latestNdaUrl;
-    if (nda.url !== ndaUrl) {
+    const latestNdaUrl = this.ndaConfigService.latestNdaUrl;
+    if (nda.url !== latestNdaUrl) {
       throw new NDAError(NDAErrorMessage.INVALID_NDA, user.id);
     }
-    if (user.ndaSignedUrl === ndaUrl) {
+    if (user.ndaSignedUrl === latestNdaUrl) {
       return;
     }
 
