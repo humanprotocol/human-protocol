@@ -38,7 +38,7 @@ describe('NDAService', () => {
       const user = {
         id: faker.number.int(),
         email: faker.internet.email(),
-        ndaSignedUrl: undefined,
+        ndaSignedUrl: null,
       };
 
       const nda: NDASignatureDto = {
