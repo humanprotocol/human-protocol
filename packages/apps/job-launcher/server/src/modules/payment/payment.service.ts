@@ -30,6 +30,7 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { NetworkConfigService } from '../../common/config/network-config.service';
 import { StripeConfigService } from '../../common/config/stripe-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
 import {
   HMToken,
   HMToken__factory,
@@ -47,6 +48,7 @@ import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
 import { EscrowFundToken } from '../../common/enums/job';
+import { JobEntity } from '../job/job.entity';
 
 @Injectable()
 export class PaymentService {
@@ -60,6 +62,7 @@ export class PaymentService {
     private readonly userRepository: UserRepository,
     private readonly jobRepository: JobRepository,
     private stripeConfigService: StripeConfigService,
+    private serverConfigService: ServerConfigService,
     private rateService: RateService,
   ) {
     this.stripe = new Stripe(this.stripeConfigService.secretKey, {
@@ -444,68 +447,105 @@ export class PaymentService {
     return mul(amount, rate);
   }
 
-  // public async createSlash(job: JobEntity): Promise<void> {
-  //   const amount = this.serverConfigService.abuseAmount,
-  //     currency = Currency.USD;
+  public async createSlash(job: JobEntity): Promise<void> {
+    const amount = this.serverConfigService.abuseAmount,
+      currency = PaymentCurrency.USD;
 
-  //   const user = await this.userRepository.findById(job.userId);
-  //   if (!user) {
-  //     this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
-  //     throw new ControlledError(
-  //       ErrorPayment.CustomerNotFound,
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
+    const user = await this.userRepository.findById(job.userId);
+    if (!user) {
+      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
+      throw new ControlledError(
+        ErrorPayment.CustomerNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-  //   const amountInCents = Math.ceil(mul(amount, 100));
-  //   const params: Stripe.PaymentIntentCreateParams = {
-  //     amount: amountInCents,
-  //     currency: currency,
-  //     customer: user.stripeCustomerId,
-  //     off_session: true,
-  //     confirm: true,
-  //   };
+    const amountInCents = Math.ceil(mul(amount, 100));
+    let invoice = await this.stripe.invoices.create({
+      customer: user.stripeCustomerId,
+      currency: currency,
+      auto_advance: false,
+      payment_settings: {
+        payment_method_types: ['card'],
+      },
+    });
 
-  //   const paymentIntent = await this.stripe.paymentIntents.create(params);
+    await this.stripe.invoiceItems.create({
+      customer: user.stripeCustomerId,
+      amount: amountInCents,
+      invoice: invoice.id,
+      description: 'Slash Job Id ' + job.id,
+    });
 
-  //   if (!paymentIntent?.client_secret) {
-  //     this.logger.log(
-  //       ErrorPayment.ClientSecretDoesNotExist,
-  //       PaymentService.name,
-  //     );
-  //     throw new ControlledError(
-  //       ErrorPayment.ClientSecretDoesNotExist,
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
+    // Finalize the invoice to prepare it for payment.
+    invoice = await this.stripe.invoices.finalizeInvoice(invoice.id);
 
-  //   const newPaymentEntity = new PaymentEntity();
-  //   Object.assign(newPaymentEntity, {
-  //     userId: job.user.id,
-  //     source: PaymentSource.FIAT,
-  //     type: PaymentType.DEPOSIT,
-  //     amount: div(amountInCents, 100),
-  //     currency,
-  //     rate: 1,
-  //     transaction: paymentIntent.id,
-  //     status: PaymentStatus.SUCCEEDED,
-  //   });
-  //   await this.paymentRepository.createUnique(newPaymentEntity);
+    if (!invoice.payment_intent) {
+      throw new ControlledError(
+        ErrorPayment.IntentNotCreated,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    const paymentIntent = await this.stripe.paymentIntents.retrieve(
+      invoice.payment_intent as string,
+    );
+    const defaultPaymentMethod = await this.getDefaultPaymentMethod(
+      user.stripeCustomerId,
+    );
 
-  //   Object.assign(newPaymentEntity, {
-  //     userId: job.user.id,
-  //     source: PaymentSource.FIAT,
-  //     type: PaymentType.SLASH,
-  //     amount: div(-amountInCents, 100),
-  //     currency,
-  //     rate: 1,
-  //     transaction: null,
-  //     status: PaymentStatus.SUCCEEDED,
-  //   });
-  //   await this.paymentRepository.createUnique(newPaymentEntity);
+    if (!defaultPaymentMethod) {
+      throw new ControlledError(
+        ErrorPayment.NotDefaultPaymentMethod,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
-  //   return;
-  // }
+    try {
+      // Associate the payment method with the payment intent.
+      await this.stripe.paymentIntents.confirm(paymentIntent.id, {
+        payment_method: defaultPaymentMethod,
+        off_session: true,
+      });
+    } catch {
+      throw new ControlledError(
+        ErrorPayment.PaymentMethodAssociationFailed,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    if (!paymentIntent?.client_secret) {
+      throw new ControlledError(
+        ErrorPayment.ClientSecretDoesNotExist,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const newPaymentEntity = new PaymentEntity();
+    Object.assign(newPaymentEntity, {
+      userId: job.userId,
+      source: PaymentSource.FIAT,
+      type: PaymentType.DEPOSIT,
+      amount: div(amountInCents, 100),
+      currency,
+      rate: 1,
+      transaction: paymentIntent.id,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    await this.paymentRepository.createUnique(newPaymentEntity);
+
+    Object.assign(newPaymentEntity, {
+      userId: job.userId,
+      source: PaymentSource.BALANCE,
+      type: PaymentType.SLASH,
+      amount: div(-amountInCents, 100),
+      currency,
+      rate: 1,
+      transaction: null,
+      status: PaymentStatus.SUCCEEDED,
+      jobId: job.id,
+    });
+    await this.paymentRepository.createUnique(newPaymentEntity);
+  }
 
   public async createWithdrawalPayment(
     userId: number,
@@ -720,6 +760,7 @@ export class PaymentService {
         status: payment.status,
         transaction: payment.transaction,
         createdAt: payment.createdAt.toISOString(),
+        jobId: payment.job ? payment.jobId : undefined,
         escrowAddress: payment.job ? payment.job.escrowAddress : undefined,
       };
     });
