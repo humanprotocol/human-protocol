@@ -1,7 +1,7 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { UserQualificationEntity } from './user-qualification.entity';
+import type { UserQualificationEntity } from './user-qualification.entity';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'qualifications' })
 @Index(['reference'], { unique: true })
@@ -19,8 +19,9 @@ export class QualificationEntity extends BaseEntity {
   public expiresAt?: Date | null;
 
   @OneToMany(
-    () => UserQualificationEntity,
-    (userQualification) => userQualification.qualification,
+    'UserQualificationEntity',
+    (userQualification: UserQualificationEntity) =>
+      userQualification.qualification,
   )
   public userQualifications: UserQualificationEntity[];
 }

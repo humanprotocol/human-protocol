@@ -6,11 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-/**
- * TODO: Leave fix follow-up refactoring
- * Importing from '../user' causes circular import error here.
- */
-import { UserEntity } from '../user/user.entity';
+import type { UserEntity } from '../user';
 import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 
@@ -37,7 +33,7 @@ export class TokenEntity extends BaseEntity {
   expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne(() => UserEntity)
+  @ManyToOne('UserEntity')
   user?: UserEntity;
 
   @Column({ type: 'int' })

@@ -4,11 +4,7 @@ import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { KycStatus } from './constants';
 
-/**
- * TODO: Leave fix follow-up refactoring
- * Importing from '../user' causes circular import error here.
- */
-import { UserEntity } from '../user/user.entity';
+import type { UserEntity } from '../user';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'kycs' })
 export class KycEntity extends BaseEntity {
@@ -29,7 +25,7 @@ export class KycEntity extends BaseEntity {
   message: string | null;
 
   @JoinColumn()
-  @OneToOne(() => UserEntity, (user) => user.kyc)
+  @OneToOne('UserEntity', (user: UserEntity) => user.kyc)
   user: UserEntity;
 
   @Column({ type: 'int' })
