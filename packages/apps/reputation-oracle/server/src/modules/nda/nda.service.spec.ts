@@ -52,10 +52,10 @@ describe('NDAService', () => {
     });
 
     it('should throw an error if the NDA URL is invalid', async () => {
-      const user = {
+      const user: Pick<UserEntity, 'id' | 'email' | 'ndaSignedUrl'> = {
         id: faker.number.int(),
         email: faker.internet.email(),
-        ndaSignedUrl: undefined,
+        ndaSignedUrl: null,
       };
 
       const invalidNda: NDASignatureDto = {
