@@ -1,28 +1,13 @@
+import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
-import { FeeData, JsonRpcProvider } from 'ethers';
+import { FeeData, JsonRpcProvider, Provider } from 'ethers';
 import { faker } from '@faker-js/faker';
 import { WalletWithProvider, Web3Service } from './web3.service';
-import {
-  Web3ConfigService,
-  Web3Network,
-} from '../../config/web3-config.service';
-import {
-  generateEthWallet,
-  generateTestnetChainId,
-} from '../../../test/fixtures/web3';
-import { createMockProvider } from '../../../test/mock-creators/web3';
+import { Web3ConfigService } from '../../config/web3-config.service';
 
-const testWallet = generateEthWallet();
+import { generateTestnetChainId } from '../../../test/fixtures/web3';
 
-const mockRpcUrl = faker.internet.url();
-
-const mockWeb3ConfigService = {
-  privateKey: testWallet.privateKey,
-  operatorAddress: testWallet.address,
-  network: Web3Network.TESTNET,
-  gasPriceMultiplier: faker.number.int({ min: 1, max: 42 }),
-  getRpcUrlByChainId: () => mockRpcUrl,
-};
+import { mockWeb3ConfigService } from './fixtures';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;
@@ -55,8 +40,8 @@ describe('Web3Service', () => {
 
       const signer = web3Service.getSigner(validChainId);
       expect(signer).toBeDefined();
-      expect(signer.address).toEqual(testWallet.address);
-      expect(signer.privateKey).toEqual(testWallet.privateKey);
+      expect(signer.address).toEqual(mockWeb3ConfigService.operatorAddress);
+      expect(signer.privateKey).toEqual(mockWeb3ConfigService.privateKey);
       expect(signer.provider).toBeInstanceOf(JsonRpcProvider);
     });
 
@@ -70,7 +55,7 @@ describe('Web3Service', () => {
   });
 
   describe('calculateGasPrice', () => {
-    const mockProvider = createMockProvider();
+    const mockProvider = createMock<Provider>();
     let spyOnGetSigner: jest.SpyInstance;
 
     beforeAll(() => {

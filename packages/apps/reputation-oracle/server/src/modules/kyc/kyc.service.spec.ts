@@ -1,22 +1,18 @@
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { ethers } from 'ethers';
 
 import { KycConfigService } from '../../config/kyc-config.service';
-import {
-  Web3ConfigService,
-  Web3Network,
-} from '../../config/web3-config.service';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { KycStatus } from '../kyc/constants';
-import { generateEthWallet } from '../../../test/fixtures/web3';
 import {
   createHttpServiceMock,
   createHttpServiceResponse,
 } from '../../../test/mock-creators/nest';
 import { UserEntity } from '../user';
+import { mockWeb3ConfigService } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
 import { UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';
@@ -33,8 +29,6 @@ const mockKycConfigService = {
   baseUrl: faker.internet.url(),
 };
 
-const operatorWallet = generateEthWallet();
-
 describe('Kyc Service', () => {
   let kycService: KycService;
   let httpService: HttpService;
@@ -49,13 +43,7 @@ describe('Kyc Service', () => {
         { provide: KycRepository, useValue: mockKycRepository },
         {
           provide: Web3ConfigService,
-          useValue: {
-            operatorAddress: operatorWallet.address,
-            privateKey: operatorWallet.privateKey,
-            network: Web3Network.TESTNET,
-            reputationNetworkChainId: ChainId.POLYGON_AMOY,
-            getRpcUrlByChainId: () => faker.internet.url(),
-          },
+          useValue: mockWeb3ConfigService,
         },
         Web3Service,
       ],
@@ -300,13 +288,13 @@ describe('Kyc Service', () => {
         mockUserEntity as UserEntity,
       );
 
-      const wallet = new ethers.Wallet(operatorWallet.privateKey);
+      const wallet = new ethers.Wallet(mockWeb3ConfigService.privateKey);
       const signedUserAddressWithOperatorPrivateKey = await wallet.signMessage(
         mockUserEntity.evmAddress,
       );
 
       expect(result).toEqual({
-        key: `KYC-${operatorWallet.address}`,
+        key: `KYC-${mockWeb3ConfigService.operatorAddress}`,
         value: signedUserAddressWithOperatorPrivateKey,
       });
     });
