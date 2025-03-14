@@ -5,8 +5,10 @@ import { Test } from '@nestjs/testing';
 import { generateEthWallet } from '../../../test/fixtures/web3';
 
 import { Web3ConfigService } from '../../config/web3-config.service';
+import { SignatureType } from '../../common/enums/web3';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as securityUtils from '../../utils/security';
+import * as web3Utils from '../../utils/web3';
 
 import { generateKycEntity } from '../kyc/fixtures';
 import { mockWeb3ConfigService } from '../web3/fixtures';
@@ -18,7 +20,12 @@ import {
   generateWorkerUser,
 } from './fixtures';
 import { Role, UserStatus } from './user.entity';
-import { UserError, UserErrorMessage } from './user.error';
+import {
+  DuplicatedWalletAddressError,
+  InvalidWeb3SignatureError,
+  UserError,
+  UserErrorMessage,
+} from './user.error';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { SiteKeyRepository } from './site-key.repository';
@@ -122,6 +129,8 @@ describe('UserService', () => {
           faker.internet.password(),
         ),
       ).rejects.toThrow('User not found');
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
     });
 
     it('should throw if not web2 user', async () => {
@@ -134,6 +143,8 @@ describe('UserService', () => {
           faker.internet.password(),
         ),
       ).rejects.toThrow('Only web2 users can have password');
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
     });
 
     it('should update password for requested user', async () => {
@@ -191,6 +202,11 @@ describe('UserService', () => {
   });
 
   describe('registerLabeler', () => {
+    beforeEach(() => {
+      mockHCaptchaService.registerLabeler.mockResolvedValue(false);
+      mockHCaptchaService.getLabelerData.mockResolvedValue(null);
+    });
+
     it('should throw if not worker user', async () => {
       const user = generateWorkerUser();
       user.role = Role.ADMIN;
@@ -198,6 +214,8 @@ describe('UserService', () => {
       await expect(userService.registerLabeler(user)).rejects.toThrow(
         new UserError(UserErrorMessage.INVALID_ROLE, user.id),
       );
+
+      expect(mockHCaptchaService.registerLabeler).toHaveBeenCalledTimes(0);
     });
 
     it('should throw if worker does not have evm address', async () => {
@@ -206,6 +224,8 @@ describe('UserService', () => {
       await expect(userService.registerLabeler(user)).rejects.toThrow(
         new UserError(UserErrorMessage.MISSING_ADDRESS, user.id),
       );
+
+      expect(mockHCaptchaService.registerLabeler).toHaveBeenCalledTimes(0);
     });
 
     it('should throw if kyc is not approved', async () => {
@@ -215,6 +235,8 @@ describe('UserService', () => {
       await expect(userService.registerLabeler(user)).rejects.toThrow(
         new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id),
       );
+
+      expect(mockHCaptchaService.registerLabeler).toHaveBeenCalledTimes(0);
     });
 
     it('should return existing sitekey if already registered', async () => {
@@ -230,6 +252,32 @@ describe('UserService', () => {
       const result = await userService.registerLabeler(user);
 
       expect(result).toBe(existingSitekey.siteKey);
+
+      expect(mockHCaptchaService.registerLabeler).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw LabelingEnableFailed if registering labeler fails', async () => {
+      const user = generateWorkerUser({ withAddress: true });
+      user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
+
+      mockHCaptchaService.registerLabeler.mockResolvedValueOnce(false);
+
+      await expect(userService.registerLabeler(user)).rejects.toThrow(
+        new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id),
+      );
+    });
+
+    it('should throw LabelingEnableFailed if retrieving labeler data fails', async () => {
+      const user = generateWorkerUser({ withAddress: true });
+      user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
+
+      mockHCaptchaService.registerLabeler.mockResolvedValueOnce(true);
+
+      mockHCaptchaService.getLabelerData.mockResolvedValueOnce(null);
+
+      await expect(userService.registerLabeler(user)).rejects.toThrow(
+        new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id),
+      );
     });
 
     it('should register labeler if not already registered', async () => {
@@ -271,29 +319,114 @@ describe('UserService', () => {
         type: SiteKeyType.HCAPTCHA,
       });
     });
+  });
 
-    it('should throw LabelingEnableFailed if registering labeler fails', async () => {
-      const user = generateWorkerUser({ withAddress: true });
-      user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
+  describe('registerAddress', () => {
+    let addressToRegister: string;
+    let privateKey: string;
 
-      mockHCaptchaService.registerLabeler.mockResolvedValueOnce(false);
+    beforeEach(() => {
+      ({ address: addressToRegister, privateKey } = generateEthWallet());
 
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
-        new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id),
-      );
+      mockUserRepository.findOneByAddress.mockResolvedValue(null);
     });
 
-    it('should throw LabelingEnableFailed if retrieving labeler data fails', async () => {
+    it('should throw if already registered', async () => {
       const user = generateWorkerUser({ withAddress: true });
+
+      await expect(
+        userService.registerAddress(
+          user,
+          addressToRegister,
+          faker.string.alphanumeric(),
+        ),
+      ).rejects.toThrow(
+        new UserError(UserErrorMessage.ADDRESS_EXISTS, user.id),
+      );
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw if kyc is not approved', async () => {
+      const user = generateWorkerUser({ withAddress: false });
+      user.kyc = generateKycEntity(user.id, KycStatus.NONE);
+
+      await expect(
+        userService.registerAddress(
+          user,
+          addressToRegister,
+          faker.string.alphanumeric(),
+        ),
+      ).rejects.toThrow(
+        new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id),
+      );
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw if same address already exists', async () => {
+      const user = generateWorkerUser({ withAddress: false });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
-      mockHCaptchaService.registerLabeler.mockResolvedValueOnce(true);
+      mockUserRepository.findOneByAddress.mockImplementationOnce(
+        async (address: string) => {
+          if (address === addressToRegister.toLowerCase()) {
+            return user;
+          }
 
-      mockHCaptchaService.getLabelerData.mockResolvedValueOnce(null);
-
-      await expect(userService.registerLabeler(user)).rejects.toThrow(
-        new UserError(UserErrorMessage.LABELING_ENABLE_FAILED, user.id),
+          return null;
+        },
       );
+
+      await expect(
+        userService.registerAddress(
+          user,
+          addressToRegister,
+          faker.string.alphanumeric(),
+        ),
+      ).rejects.toThrow(
+        new DuplicatedWalletAddressError(user.id, addressToRegister),
+      );
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw if invalid signature', async () => {
+      const user = generateWorkerUser({ withAddress: false });
+      user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
+
+      await expect(
+        userService.registerAddress(
+          user,
+          addressToRegister,
+          faker.string.alphanumeric(),
+        ),
+      ).rejects.toThrow(
+        new InvalidWeb3SignatureError(user.id, addressToRegister),
+      );
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
+    });
+
+    it('should register evm address for user', async () => {
+      const user = generateWorkerUser({ withAddress: false });
+      user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
+
+      const signature = await web3Utils.signMessage(
+        web3Utils.prepareSignatureBody({
+          from: addressToRegister,
+          to: mockWeb3ConfigService.operatorAddress,
+          contents: SignatureType.REGISTER_ADDRESS,
+        }),
+        privateKey,
+      );
+
+      await userService.registerAddress(user, addressToRegister, signature);
+
+      expect(user.evmAddress).toBe(addressToRegister.toLowerCase());
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.updateOne).toHaveBeenCalledWith(user);
     });
   });
 });

@@ -188,13 +188,14 @@ export class UserService {
 
     const userWithSameAddress =
       await this.userRepository.findOneByAddress(lowercasedAddress);
+
     if (userWithSameAddress) {
-      throw new DuplicatedWalletAddressError(user.id, lowercasedAddress);
+      throw new DuplicatedWalletAddressError(user.id, address);
     }
 
     // Prepare signed data and verify the signature
     const signedData = web3Utils.prepareSignatureBody({
-      from: lowercasedAddress,
+      from: address,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.REGISTER_ADDRESS,
     });
@@ -203,7 +204,7 @@ export class UserService {
     ]);
 
     if (!verified) {
-      throw new InvalidWeb3SignatureError(user.id, lowercasedAddress);
+      throw new InvalidWeb3SignatureError(user.id, address);
     }
 
     user.evmAddress = lowercasedAddress;
