@@ -1,21 +1,20 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { OperatorStatus } from '../../common/enums/user';
-import { KycStatus } from '../kyc/constants';
 import { SignatureType } from '../../common/enums/web3';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import {
-  generateNonce,
-  verifySignature,
-  prepareSignatureBody,
-} from '../../utils/web3';
+import * as web3Utils from '../../utils/web3';
+import * as securityUtils from '../../utils/security';
+
+import { KycStatus } from '../kyc/constants';
 import { Web3Service } from '../web3/web3.service';
+
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { RegisterAddressRequestDto } from './user.dto';
-import { Role, UserStatus, UserEntity } from './user.entity';
+import { Role as UserRole, UserStatus, UserEntity } from './user.entity';
 import {
   UserError,
   UserErrorMessage,
@@ -24,7 +23,6 @@ import {
 } from './user.error';
 import { UserRepository } from './user.repository';
 import { OperatorUserEntity, Web2UserEntity } from './types';
-import { UserRole } from '.';
 
 @Injectable()
 export class UserService {
@@ -36,22 +34,10 @@ export class UserService {
     private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
-  static checkPasswordMatchesHash(
-    password: string,
-    passwordHash: string,
-  ): boolean {
-    return bcrypt.compareSync(password, passwordHash);
-  }
-
   static isWeb2UserRole(userRole: string): boolean {
     return [UserRole.ADMIN, UserRole.HUMAN_APP, UserRole.WORKER].includes(
       userRole as UserRole,
     );
-  }
-
-  private hashPassword(password: string): string {
-    const SALT_GENERATION_ROUNDS = 12;
-    return bcrypt.hashSync(password, SALT_GENERATION_ROUNDS);
   }
 
   async createWorkerUser(data: {
@@ -60,8 +46,8 @@ export class UserService {
   }): Promise<Web2UserEntity> {
     const newUser = new UserEntity();
     newUser.email = data.email;
-    newUser.password = this.hashPassword(data.password);
-    newUser.role = Role.WORKER;
+    newUser.password = securityUtils.hashPassword(data.password);
+    newUser.role = UserRole.WORKER;
     newUser.status = UserStatus.PENDING;
 
     await this.userRepository.createUnique(newUser);
@@ -101,7 +87,7 @@ export class UserService {
       throw new Error('Only web2 users can have password');
     }
 
-    userEntity.password = this.hashPassword(newPassword);
+    userEntity.password = securityUtils.hashPassword(newPassword);
 
     await this.userRepository.updateOne(userEntity);
 
@@ -111,8 +97,8 @@ export class UserService {
   async createOperatorUser(address: string): Promise<OperatorUserEntity> {
     const newUser = new UserEntity();
     newUser.evmAddress = address.toLowerCase();
-    newUser.nonce = generateNonce();
-    newUser.role = Role.OPERATOR;
+    newUser.nonce = web3Utils.generateNonce();
+    newUser.role = UserRole.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
 
     await this.userRepository.createUnique(newUser);
@@ -131,12 +117,12 @@ export class UserService {
   }
 
   async updateNonce(userEntity: OperatorUserEntity): Promise<UserEntity> {
-    userEntity.nonce = generateNonce();
+    userEntity.nonce = web3Utils.generateNonce();
     return this.userRepository.updateOne(userEntity);
   }
 
   async registerLabeler(user: Web2UserEntity): Promise<string> {
-    if (user.role !== Role.WORKER) {
+    if (user.role !== UserRole.WORKER) {
       throw new UserError(UserErrorMessage.INVALID_ROLE, user.id);
     }
 
@@ -207,12 +193,12 @@ export class UserService {
     }
 
     // Prepare signed data and verify the signature
-    const signedData = prepareSignatureBody({
+    const signedData = web3Utils.prepareSignatureBody({
       from: lowercasedAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.REGISTER_ADDRESS,
     });
-    const verified = verifySignature(signedData, data.signature, [
+    const verified = web3Utils.verifySignature(signedData, data.signature, [
       lowercasedAddress,
     ]);
 
@@ -228,13 +214,15 @@ export class UserService {
     user: OperatorUserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = prepareSignatureBody({
+    const signedData = web3Utils.prepareSignatureBody({
       from: user.evmAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.ENABLE_OPERATOR,
     });
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+    const verified = web3Utils.verifySignature(signedData, signature, [
+      user.evmAddress,
+    ]);
 
     if (!verified) {
       throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
@@ -260,13 +248,15 @@ export class UserService {
     user: OperatorUserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = prepareSignatureBody({
+    const signedData = web3Utils.prepareSignatureBody({
       from: user.evmAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.DISABLE_OPERATOR,
     });
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+    const verified = web3Utils.verifySignature(signedData, signature, [
+      user.evmAddress,
+    ]);
 
     if (!verified) {
       throw new InvalidWeb3SignatureError(user.id, user.evmAddress);

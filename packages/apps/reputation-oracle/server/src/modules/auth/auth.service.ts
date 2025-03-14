@@ -24,6 +24,7 @@ import { verifySignature } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
 import { SignatureType } from '../../common/enums/web3';
 import { prepareSignatureBody } from '../../utils/web3';
+import * as securityUtils from '../../utils/security';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
@@ -80,7 +81,7 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
-    if (!UserService.checkPasswordMatchesHash(password, userEntity.password)) {
+    if (!securityUtils.comparePasswordWithHash(password, userEntity.password)) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
