@@ -2,6 +2,8 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 
+import { generateEthWallet } from '../../../test/fixtures/web3';
+
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as securityUtils from '../../utils/security';
@@ -156,6 +158,26 @@ describe('UserService', () => {
         expectedUserData,
       );
 
+      expect(result).toEqual(expectedUserData);
+    });
+  });
+
+  describe('createOperatorUser', () => {
+    it('should create operator user and return the created entity', async () => {
+      const newOperatorAddress = generateEthWallet().address;
+
+      const expectedUserData = {
+        evmAddress: newOperatorAddress.toLowerCase(),
+        nonce: expect.any(String),
+        role: Role.OPERATOR,
+        status: UserStatus.ACTIVE,
+      };
+
+      const result = await userService.createOperatorUser(newOperatorAddress);
+
+      expect(mockUserRepository.createUnique).toHaveBeenCalledWith(
+        expectedUserData,
+      );
       expect(result).toEqual(expectedUserData);
     });
   });
