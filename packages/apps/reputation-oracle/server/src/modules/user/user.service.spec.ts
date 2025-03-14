@@ -13,6 +13,7 @@ import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 import { SiteKeyRepository } from './site-key.repository';
 import { Role, UserStatus } from './user.entity';
+import { generateOperator, generateWorkerUser } from './fixtures';
 
 const mockUserRepository = createMock<UserRepository>();
 const mockSiteKeyRepository = createMock<SiteKeyRepository>();
@@ -56,6 +57,10 @@ describe('UserService', () => {
     userService = moduleRef.get<UserService>(UserService);
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('isWeb2UserRole', () => {
     it.each(
       Object.values(Role).map((role) => ({
@@ -94,6 +99,64 @@ describe('UserService', () => {
           result.password,
         ),
       ).toBe(true);
+    });
+  });
+
+  describe('updatePassword', () => {
+    it('should throw if user not found', async () => {
+      mockUserRepository.findOneById.mockResolvedValueOnce(null);
+
+      await expect(
+        userService.updatePassword(
+          faker.number.int(),
+          faker.internet.password(),
+        ),
+      ).rejects.toThrow('User not found');
+    });
+
+    it('should throw if not web2 user', async () => {
+      const mockUserEntity = generateOperator();
+      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
+
+      await expect(
+        userService.updatePassword(
+          faker.number.int(),
+          faker.internet.password(),
+        ),
+      ).rejects.toThrow('Only web2 users can have password');
+    });
+
+    it('should update password for requested user', async () => {
+      const mockUserEntity = generateWorkerUser();
+      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
+
+      const newPassword = faker.internet.password();
+
+      const result = await userService.updatePassword(
+        mockUserEntity.id,
+        newPassword,
+      );
+
+      expect(
+        securityUtils.comparePasswordWithHash(newPassword, result.password),
+      ).toBe(true);
+
+      expect(mockUserRepository.findOneById).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.findOneById).toHaveBeenCalledWith(
+        mockUserEntity.id,
+      );
+
+      const expectedUserData = {
+        ...mockUserEntity,
+        password: expect.not.stringMatching(mockUserEntity.password),
+      };
+
+      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.updateOne).toHaveBeenCalledWith(
+        expectedUserData,
+      );
+
+      expect(result).toEqual(expectedUserData);
     });
   });
 });
