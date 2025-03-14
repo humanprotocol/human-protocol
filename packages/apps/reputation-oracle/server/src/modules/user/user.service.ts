@@ -284,20 +284,22 @@ export class UserService {
   async registrationInExchangeOracle(
     user: Web2UserEntity,
     oracleAddress: string,
-  ): Promise<SiteKeyEntity> {
+  ): Promise<void> {
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
       user.id,
       oracleAddress,
       SiteKeyType.REGISTRATION,
     );
-    if (siteKey) return siteKey;
+    if (siteKey) {
+      return;
+    }
 
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = oracleAddress;
     newSiteKey.type = SiteKeyType.REGISTRATION;
     newSiteKey.userId = user.id;
 
-    return await this.siteKeyRepository.createUnique(newSiteKey);
+    await this.siteKeyRepository.createUnique(newSiteKey);
   }
 
   async getRegistrationInExchangeOracles(user: UserEntity): Promise<string[]> {

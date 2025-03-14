@@ -442,4 +442,47 @@ describe('UserService', () => {
       expect(result).toEqual([siteKey.siteKey]);
     });
   });
+
+  describe('registrationInExchangeOracle', () => {
+    it('should not create sitekey if already registered', async () => {
+      const user = generateWorkerUser();
+      const siteKey = generateSiteKeyEntity(user.id, SiteKeyType.REGISTRATION);
+      const oracleAddress = siteKey.siteKey;
+
+      mockSiteKeyRepository.findByUserSiteKeyAndType.mockImplementationOnce(
+        async (userId, sitekey, type) => {
+          if (
+            userId === user.id &&
+            sitekey === oracleAddress &&
+            type === SiteKeyType.REGISTRATION
+          ) {
+            return siteKey;
+          }
+          return null;
+        },
+      );
+
+      await userService.registrationInExchangeOracle(user, oracleAddress);
+
+      expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledTimes(0);
+    });
+
+    it('should create a new registration for oracle', async () => {
+      const user = generateWorkerUser();
+      const oracleAddress = generateEthWallet().address;
+
+      mockSiteKeyRepository.findByUserSiteKeyAndType.mockResolvedValueOnce(
+        null,
+      );
+
+      await userService.registrationInExchangeOracle(user, oracleAddress);
+
+      expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledTimes(1);
+      expect(mockSiteKeyRepository.createUnique).toHaveBeenCalledWith({
+        userId: user.id,
+        siteKey: oracleAddress,
+        type: SiteKeyType.REGISTRATION,
+      });
+    });
+  });
 });
