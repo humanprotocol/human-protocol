@@ -13,7 +13,6 @@ import { Web3Service } from '../web3/web3.service';
 
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
-import { RegisterAddressRequestDto } from './user.dto';
 import { Role as UserRole, UserStatus, UserEntity } from './user.entity';
 import {
   UserError,
@@ -174,9 +173,10 @@ export class UserService {
 
   async registerAddress(
     user: UserEntity,
-    data: RegisterAddressRequestDto,
+    address: string,
+    signature: string,
   ): Promise<void> {
-    const lowercasedAddress = data.address.toLocaleLowerCase();
+    const lowercasedAddress = address.toLocaleLowerCase();
 
     if (user.evmAddress) {
       throw new UserError(UserErrorMessage.ADDRESS_EXISTS, user.id);
@@ -198,7 +198,7 @@ export class UserService {
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.REGISTER_ADDRESS,
     });
-    const verified = web3Utils.verifySignature(signedData, data.signature, [
+    const verified = web3Utils.verifySignature(signedData, signature, [
       lowercasedAddress,
     ]);
 

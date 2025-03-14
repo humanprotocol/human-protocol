@@ -94,7 +94,11 @@ export class UserController {
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
   ): Promise<void> {
-    await this.userService.registerAddress(request.user, data);
+    await this.userService.registerAddress(
+      request.user,
+      data.address,
+      data.signature,
+    );
   }
 
   @ApiOperation({
