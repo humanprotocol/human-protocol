@@ -184,6 +184,7 @@ export class AuthService {
         : [],
     };
 
+    // TODO: load sitekeys from repository instead of user entity in request
     if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
       const existingHcaptchaSiteKey = userEntity.siteKeys.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,

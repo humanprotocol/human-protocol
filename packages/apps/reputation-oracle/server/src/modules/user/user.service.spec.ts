@@ -429,4 +429,17 @@ describe('UserService', () => {
       expect(mockUserRepository.updateOne).toHaveBeenCalledWith(user);
     });
   });
+
+  describe('getRegistrationInExchangeOracles', () => {
+    it('should return a list of registered sitekeys', async () => {
+      const user = generateWorkerUser();
+      const siteKey = generateSiteKeyEntity(user.id, SiteKeyType.REGISTRATION);
+
+      mockSiteKeyRepository.findByUserAndType.mockResolvedValueOnce([siteKey]);
+
+      const result = await userService.getRegistrationInExchangeOracles(user);
+
+      expect(result).toEqual([siteKey.siteKey]);
+    });
+  });
 });

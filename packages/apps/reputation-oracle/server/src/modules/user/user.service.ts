@@ -133,6 +133,7 @@ export class UserService {
       throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
+    // TODO: load sitekeys from repository instead of user entity in request
     if (user.siteKeys && user.siteKeys.length > 0) {
       const existingHcaptchaSiteKey = user.siteKeys?.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
