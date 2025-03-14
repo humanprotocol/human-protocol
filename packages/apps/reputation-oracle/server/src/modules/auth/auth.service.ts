@@ -22,6 +22,7 @@ import { Web3Service } from '../web3/web3.service';
 import { SignatureType } from '../../common/enums/web3';
 import { prepareSignatureBody } from '../../utils/web3';
 import { AuthConfigService } from '../../config/auth-config.service';
+import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { SiteKeyType } from '../../common/enums';
@@ -61,6 +62,7 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
+    private readonly ndaConfigService: NDAConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly emailService: EmailService,
     private readonly web3Service: Web3Service,
@@ -156,7 +158,7 @@ export class AuthService {
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       nda_signed:
-        userEntity.ndaSignedUrl === this.authConfigService.latestNdaUrl,
+        userEntity.ndaSignedUrl === this.ndaConfigService.latestNdaUrl,
       reputation_network: operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
