@@ -2,7 +2,6 @@ import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { OperatorStatus } from '../../common/enums/user';
 import { SignatureType } from '../../common/enums/web3';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as web3Utils from '../../utils/web3';
@@ -22,6 +21,11 @@ import {
 } from './user.error';
 import { UserRepository } from './user.repository';
 import { OperatorUserEntity, Web2UserEntity } from './types';
+
+export enum OperatorStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
 
 @Injectable()
 export class UserService {
@@ -243,7 +247,7 @@ export class UserService {
       throw new UserError(UserErrorMessage.OPERATOR_ALREADY_ACTIVE, user.id);
     }
 
-    await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.ACTIVE);
+    await kvstore.set(user.evmAddress, OperatorStatus.ACTIVE);
   }
 
   async disableOperator(
@@ -278,7 +282,7 @@ export class UserService {
       throw new UserError(UserErrorMessage.OPERATOR_NOT_ACTIVE, user.id);
     }
 
-    await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.INACTIVE);
+    await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
   }
 
   async registrationInExchangeOracle(

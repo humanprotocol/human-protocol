@@ -1,5 +1,8 @@
+jest.mock('@human-protocol/sdk');
+
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
+import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
 import { generateEthWallet } from '../../../test/fixtures/web3';
@@ -27,15 +30,17 @@ import {
   UserErrorMessage,
 } from './user.error';
 import { UserRepository } from './user.repository';
-import { UserService } from './user.service';
+import { UserService, OperatorStatus } from './user.service';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from './site-key.entity';
 import { KycStatus } from '../kyc/constants';
 
 const mockUserRepository = createMock<UserRepository>();
 const mockSiteKeyRepository = createMock<SiteKeyRepository>();
-const mockWeb3Service = createMock<Web3Service>();
 const mockHCaptchaService = createMock<HCaptchaService>();
+
+const mockedKVStoreClient = jest.mocked(KVStoreClient);
+const mockedKVStoreUtils = jest.mocked(KVStoreUtils);
 
 describe('UserService', () => {
   let userService: UserService;
@@ -56,10 +61,7 @@ describe('UserService', () => {
           provide: SiteKeyRepository,
           useValue: mockSiteKeyRepository,
         },
-        {
-          provide: Web3Service,
-          useValue: mockWeb3Service,
-        },
+        Web3Service,
         {
           provide: HCaptchaService,
           useValue: mockHCaptchaService,
@@ -495,6 +497,154 @@ describe('UserService', () => {
         siteKey: oracleAddress,
         type: SiteKeyType.REGISTRATION,
       });
+    });
+  });
+
+  describe('enableOperator', () => {
+    const mockedKVStoreSet = jest.fn();
+
+    beforeEach(() => {
+      mockedKVStoreClient.build.mockResolvedValueOnce({
+        set: mockedKVStoreSet,
+      } as unknown as KVStoreClient);
+    });
+
+    it('should throw if signature is not verified', async () => {
+      const privateKey = generateEthWallet().privateKey;
+      const user = generateOperator();
+
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: user.evmAddress,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.ENABLE_OPERATOR,
+      });
+      const signature = await web3Utils.signMessage(signatureBody, privateKey);
+
+      await expect(userService.enableOperator(user, signature)).rejects.toThrow(
+        new InvalidWeb3SignatureError(user.id, user.evmAddress),
+      );
+      expect(mockedKVStoreSet).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw if operator already enabled', async () => {
+      const privateKey = generateEthWallet().privateKey;
+      const user = generateOperator({ privateKey });
+
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: user.evmAddress,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.ENABLE_OPERATOR,
+      });
+      const signature = await web3Utils.signMessage(signatureBody, privateKey);
+
+      mockedKVStoreUtils.get.mockResolvedValueOnce(OperatorStatus.ACTIVE);
+
+      await expect(userService.enableOperator(user, signature)).rejects.toThrow(
+        new UserError(UserErrorMessage.OPERATOR_ALREADY_ACTIVE, user.id),
+      );
+      expect(mockedKVStoreUtils.get).toHaveBeenCalledTimes(1);
+      expect(mockedKVStoreUtils.get).toHaveBeenCalledWith(
+        mockWeb3ConfigService.reputationNetworkChainId,
+        mockWeb3ConfigService.operatorAddress,
+        user.evmAddress,
+      );
+      expect(mockedKVStoreSet).toHaveBeenCalledTimes(0);
+    });
+
+    it('should enable operator', async () => {
+      const privateKey = generateEthWallet().privateKey;
+      const user = generateOperator({ privateKey });
+
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: user.evmAddress,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.ENABLE_OPERATOR,
+      });
+      const signature = await web3Utils.signMessage(signatureBody, privateKey);
+
+      await userService.enableOperator(user, signature);
+
+      expect(mockedKVStoreSet).toHaveBeenCalledTimes(1);
+      expect(mockedKVStoreSet).toHaveBeenCalledWith(
+        user.evmAddress,
+        OperatorStatus.ACTIVE,
+      );
+    });
+  });
+
+  describe('disableOperator', () => {
+    const mockedKVStoreSet = jest.fn();
+
+    beforeEach(() => {
+      mockedKVStoreClient.build.mockResolvedValueOnce({
+        set: mockedKVStoreSet,
+      } as unknown as KVStoreClient);
+    });
+
+    it('should throw if signature is not verified', async () => {
+      const privateKey = generateEthWallet().privateKey;
+      const user = generateOperator();
+
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: user.evmAddress,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.DISABLE_OPERATOR,
+      });
+      const signature = await web3Utils.signMessage(signatureBody, privateKey);
+
+      await expect(
+        userService.disableOperator(user, signature),
+      ).rejects.toThrow(
+        new InvalidWeb3SignatureError(user.id, user.evmAddress),
+      );
+      expect(mockedKVStoreSet).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw if operator already enabled', async () => {
+      const privateKey = generateEthWallet().privateKey;
+      const user = generateOperator({ privateKey });
+
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: user.evmAddress,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.DISABLE_OPERATOR,
+      });
+      const signature = await web3Utils.signMessage(signatureBody, privateKey);
+
+      mockedKVStoreUtils.get.mockResolvedValueOnce(OperatorStatus.INACTIVE);
+
+      await expect(
+        userService.disableOperator(user, signature),
+      ).rejects.toThrow(
+        new UserError(UserErrorMessage.OPERATOR_NOT_ACTIVE, user.id),
+      );
+      expect(mockedKVStoreUtils.get).toHaveBeenCalledTimes(1);
+      expect(mockedKVStoreUtils.get).toHaveBeenCalledWith(
+        mockWeb3ConfigService.reputationNetworkChainId,
+        mockWeb3ConfigService.operatorAddress,
+        user.evmAddress,
+      );
+      expect(mockedKVStoreSet).toHaveBeenCalledTimes(0);
+    });
+
+    it('should disable operator', async () => {
+      const privateKey = generateEthWallet().privateKey;
+      const user = generateOperator({ privateKey });
+
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: user.evmAddress,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.DISABLE_OPERATOR,
+      });
+      const signature = await web3Utils.signMessage(signatureBody, privateKey);
+
+      await userService.disableOperator(user, signature);
+
+      expect(mockedKVStoreSet).toHaveBeenCalledTimes(1);
+      expect(mockedKVStoreSet).toHaveBeenCalledWith(
+        user.evmAddress,
+        OperatorStatus.INACTIVE,
+      );
     });
   });
 });

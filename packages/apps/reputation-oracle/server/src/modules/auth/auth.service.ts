@@ -7,7 +7,6 @@ import {
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { OperatorStatus } from '../../common/enums/user';
 import {
   SiteKeyType,
   UserStatus,
@@ -15,6 +14,7 @@ import {
   UserEntity,
   UserRepository,
   UserService,
+  OperatorStatus,
   type Web2UserEntity,
   type OperatorUserEntity,
 } from '../user';
