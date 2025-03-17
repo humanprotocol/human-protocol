@@ -35,7 +35,7 @@ export const envValidator = Joi.object({
     .description('Account api key at hcaptcha foundation'),
   HCAPTCHA_DEFAULT_LABELER_LANG: Joi.string(),
   // Database
-  POSTGRES_HOST: Joi.number().integer(),
+  POSTGRES_HOST: Joi.string(),
   POSTGRES_USER: Joi.string(),
   POSTGRES_PASSWORD: Joi.string(),
   POSTGRES_DATABASE: Joi.string(),
