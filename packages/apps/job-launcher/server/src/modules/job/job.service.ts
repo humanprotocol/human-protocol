@@ -1283,6 +1283,7 @@ export class JobService {
           escrowAddress: job.escrowAddress,
           network: NETWORKS[job.chainId as ChainId]!.title,
           fundAmount: job.fundAmount,
+          currency: job.token as EscrowFundToken,
           status: job.status,
         };
       });
@@ -1615,6 +1616,7 @@ export class JobService {
         manifestHash,
         balance: Number(ethers.formatEther(escrow?.balance || 0)),
         paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
+        currency: jobEntity.token as EscrowFundToken,
         status: jobEntity.status,
         failedReason: jobEntity.failedReason,
       },

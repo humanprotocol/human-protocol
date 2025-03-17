@@ -263,6 +263,7 @@ export type JobDetailsResponse = {
     manifestHash: string;
     balance: number;
     paidOut: number;
+    currency?: string;
     status: string;
   };
   manifest: {

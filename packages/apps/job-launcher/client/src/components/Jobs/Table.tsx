@@ -62,7 +62,8 @@ export const JobTable = ({
         {
           id: 'fundAmount',
           label: 'Fund Amount',
-          render: ({ fundAmount }) => `${fundAmount} HMT`,
+          render: ({ fundAmount, currency }) =>
+            `${Number(fundAmount)} ${currency.toUpperCase()}`,
         },
         { id: 'status', label: 'Status' },
         {

@@ -329,6 +329,12 @@ export class CommonDetails {
   public paidOut: number;
 
   @ApiProperty({
+    description: 'Currency of the job',
+  })
+  @IsEnumCaseInsensitive(EscrowFundToken)
+  public currency?: EscrowFundToken;
+
+  @ApiProperty({
     description: 'Number of tasks (optional)',
     name: 'amount_of_tasks',
   })
@@ -476,6 +482,9 @@ export class JobListDto {
 
   @ApiProperty({ name: 'fund_amount' })
   public fundAmount: number;
+
+  @ApiProperty()
+  public currency: EscrowFundToken;
 
   @ApiProperty()
   public status: JobStatus;

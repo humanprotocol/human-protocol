@@ -133,11 +133,11 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Balance"
-                  value={`${data.details.balance} HMT`}
+                  value={`${data.details.balance} ${(data.details.currency ?? '').toUpperCase()}`}
                 />
                 <CardTextRow
-                  label="Paid Out HMT"
-                  value={`${data.details.paidOut.toString()} HMT`}
+                  label="Paid Out"
+                  value={`${data.details.paidOut.toString()} ${data.details.currency ?? ''.toUpperCase()}`}
                 />
               </Stack>
             </CardContainer>
@@ -180,7 +180,7 @@ export default function JobDetail() {
                     />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${data.manifest.fundAmount.toString()} HMT`}
+                      value={`${data.manifest.fundAmount.toString()} ${data.details.currency ?? ''.toUpperCase()}`}
                     />
                   </Stack>
                 </Grid>
