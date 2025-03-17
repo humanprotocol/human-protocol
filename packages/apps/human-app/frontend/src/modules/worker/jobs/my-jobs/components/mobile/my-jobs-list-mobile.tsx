@@ -17,16 +17,19 @@ import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-pal
 import { formatDate } from '@/shared/helpers/date';
 import { useCombinePages } from '@/shared/hooks';
 import {
-  useInfiniteGetMyJobsData,
-  type MyJob,
   EscrowAddressSearchForm,
   EvmAddress,
   RewardAmount,
   MyJobsTableActions,
 } from '../../../components';
-import { useMyJobsFilterStore, useJobsFilterStore } from '../../../hooks';
+import {
+  useMyJobsFilterStore,
+  useJobsFilterStore,
+  useInfiniteGetMyJobsData,
+} from '../../../hooks';
 import { useRefreshTasksMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
+import { type MyJob } from '../../schemas';
 
 interface MyJobsListMobileProps {
   setIsMobileFilterDrawerOpen: Dispatch<SetStateAction<boolean>>;

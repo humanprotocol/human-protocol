@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { TableButton } from '@/shared/components/ui/table-button';
 import { useRejectTaskMutation } from '../my-jobs/hooks';
 import { MyJobStatus } from '../types';
-import { type MyJob } from './my-jobs-data';
+import { type MyJob } from '../my-jobs/schemas';
 import { RejectButton } from './reject-button';
 
 interface MyJobsTableRejectActionProps {

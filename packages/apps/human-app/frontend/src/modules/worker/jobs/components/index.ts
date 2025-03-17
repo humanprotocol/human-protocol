@@ -1,6 +1,5 @@
 export * from './evm-address';
 export * from './jobs-tab-panel';
-export * from './my-jobs-data';
 export * from './my-jobs-table-actions';
 export * from './escrow-address-search-form';
 export * from './reject-button';

@@ -1,41 +1,14 @@
-/* eslint-disable camelcase -- api response*/
+/* eslint-disable camelcase */
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 import { useParams } from 'react-router-dom';
 import { apiClient } from '@/api/api-client';
 import { apiPaths } from '@/api/api-paths';
 import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
-import { createPaginationSchema } from '@/shared/helpers/pagination';
-import { MyJobStatus, UNKNOWN_JOB_STATUS } from '../types';
-import { type MyJobsFilterStoreProps, useMyJobsFilterStore } from '../hooks';
-
-const myJobSchema = z.object({
-  assignment_id: z.string(),
-  escrow_address: z.string(),
-  chain_id: z.number(),
-  job_type: z.string(),
-  status: z.string().transform((value) => {
-    try {
-      return z.nativeEnum(MyJobStatus).parse(value.toUpperCase());
-    } catch (error) {
-      return UNKNOWN_JOB_STATUS;
-    }
-  }),
-  reward_amount: z.string(),
-  reward_token: z.string(),
-  created_at: z.string(),
-  expires_at: z.string(),
-  url: z.string().optional().nullable(),
-});
-
-const myJobsSuccessResponseSchema = createPaginationSchema(myJobSchema);
-
-export type MyJob = z.infer<typeof myJobSchema>;
-export type MyJobsSuccessResponse = z.infer<typeof myJobsSuccessResponseSchema>;
-export interface MyJobsWithJobTypes {
-  jobTypes: string[];
-  jobs: MyJobsSuccessResponse;
-}
+import { myJobsSuccessResponseSchema } from '../my-jobs/schemas';
+import {
+  useMyJobsFilterStore,
+  type MyJobsFilterStoreProps,
+} from './use-my-jobs-filter-store';
 
 type GetMyJobTableDataDto = MyJobsFilterStoreProps['filterParams'] & {
   oracle_address: string;
