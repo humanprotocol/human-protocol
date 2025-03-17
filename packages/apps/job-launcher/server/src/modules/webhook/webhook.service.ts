@@ -151,7 +151,7 @@ export class WebhookService {
     }
   }
 
-  public async createIncomingWebhook(webhook: WebhookDataDto): Promise<void> {
+  private async createIncomingWebhook(webhook: WebhookDataDto): Promise<void> {
     const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
       webhook.chainId,
       webhook.escrowAddress,

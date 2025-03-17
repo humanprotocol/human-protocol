@@ -163,36 +163,15 @@ export class PaymentService {
     user: UserEntity,
     dto: PaymentFiatCreateDto,
   ): Promise<string> {
-    // Creates an invoice for fiat currency and associates it with a payment intent.
-    const { amount, currency } = dto;
-
+    const { amount, currency, paymentMethodId } = dto;
     const amountInCents = Math.ceil(mul(amount, 100));
 
-    let invoice = await this.stripe.invoices.create({
-      customer: user.stripeCustomerId,
-      currency: currency,
-      auto_advance: false,
-      payment_settings: {
-        payment_method_types: ['card'],
-      },
-    });
-
-    await this.stripe.invoiceItems.create({
-      customer: user.stripeCustomerId,
-      amount: amountInCents,
-      invoice: invoice.id,
-      description: 'Top up',
-    });
-
-    // Finalize the invoice to prepare it for payment.
-    invoice = await this.stripe.invoices.finalizeInvoice(invoice.id);
-
-    if (!invoice.payment_intent) {
-      throw new ControlledError(
-        ErrorPayment.IntentNotCreated,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const invoice = await this.createInvoice(
+      user.stripeCustomerId,
+      amountInCents,
+      currency,
+      'Top up',
+    );
 
     const paymentIntent = await this.stripe.paymentIntents.retrieve(
       invoice.payment_intent as string,
@@ -201,7 +180,7 @@ export class PaymentService {
     try {
       // Associate the payment method with the payment intent.
       await this.stripe.paymentIntents.update(paymentIntent.id, {
-        payment_method: dto.paymentMethodId,
+        payment_method: paymentMethodId,
       });
     } catch {
       throw new ControlledError(
@@ -447,22 +426,14 @@ export class PaymentService {
     return mul(amount, rate);
   }
 
-  public async createSlash(job: JobEntity): Promise<void> {
-    const amount = this.serverConfigService.abuseAmount,
-      currency = PaymentCurrency.USD;
-
-    const user = await this.userRepository.findById(job.userId);
-    if (!user) {
-      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
-      throw new ControlledError(
-        ErrorPayment.CustomerNotFound,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const amountInCents = Math.ceil(mul(amount, 100));
+  private async createInvoice(
+    customerId: string,
+    amountInCents: number,
+    currency: string,
+    description: string,
+  ): Promise<Stripe.Invoice> {
     let invoice = await this.stripe.invoices.create({
-      customer: user.stripeCustomerId,
+      customer: customerId,
       currency: currency,
       auto_advance: false,
       payment_settings: {
@@ -471,10 +442,10 @@ export class PaymentService {
     });
 
     await this.stripe.invoiceItems.create({
-      customer: user.stripeCustomerId,
+      customer: customerId,
       amount: amountInCents,
       invoice: invoice.id,
-      description: 'Slash Job Id ' + job.id,
+      description: description,
     });
 
     // Finalize the invoice to prepare it for payment.
@@ -486,6 +457,31 @@ export class PaymentService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    return invoice;
+  }
+
+  public async createSlash(job: JobEntity): Promise<void> {
+    const amount = this.serverConfigService.abuseAmount;
+    const currency = PaymentCurrency.USD;
+
+    const user = await this.userRepository.findById(job.userId);
+    if (!user) {
+      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
+      throw new ControlledError(
+        ErrorPayment.CustomerNotFound,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const amountInCents = Math.ceil(mul(amount, 100));
+    const invoice = await this.createInvoice(
+      user.stripeCustomerId,
+      amountInCents,
+      currency,
+      'Slash Job Id ' + job.id,
+    );
+
     const paymentIntent = await this.stripe.paymentIntents.retrieve(
       invoice.payment_intent as string,
     );

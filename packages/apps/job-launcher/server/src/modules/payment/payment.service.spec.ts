@@ -45,6 +45,7 @@ import { JobRepository } from '../job/job.repository';
 import { GetPaymentsDto, UserBalanceDto } from './payment.dto';
 import { SortDirection } from '../../common/enums/collection';
 import { Country } from '../../common/enums/job';
+import { faker } from '@faker-js/faker/.';
 
 jest.mock('@human-protocol/sdk');
 
@@ -1027,21 +1028,24 @@ describe('PaymentService', () => {
 
   describe('createSlash', () => {
     const user = {
-      id: 1,
-      email: 'test@hmt.ai',
-      stripeCustomerId: 'cus_123',
+      id: faker.number.int(),
+      email: faker.internet.email(),
+      stripeCustomerId: faker.word.sample(),
     };
 
     const jobEntity = {
-      id: 1,
+      id: faker.number.int(),
       user: user,
       userId: user.id,
     };
 
     const paymentIntent = {
-      id: 'pi_123',
-      client_secret: 'clientSecret123',
+      id: faker.word.sample(),
+      client_secret: faker.word.sample(),
     };
+
+    const invoiceId = faker.word.sample();
+    const paymentMethodId = faker.word.sample();
 
     it('should charge user credit card and create slash payments successfully', async () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValue(user as any);
@@ -1053,20 +1057,20 @@ describe('PaymentService', () => {
         .mockResolvedValue(paymentIntent as any);
       jest
         .spyOn(stripe.invoices, 'create')
-        .mockResolvedValue({ id: 'inv_123' } as any);
+        .mockResolvedValue({ id: invoiceId } as any);
       jest.spyOn(stripe.invoiceItems, 'create').mockResolvedValue({} as any);
       jest
         .spyOn(stripe.invoices, 'finalizeInvoice')
-        .mockResolvedValue({ payment_intent: 'pi_123' } as any);
-      jest
-        .spyOn(paymentService as any, 'getDefaultPaymentMethod')
-        .mockResolvedValue('pm_123');
+        .mockResolvedValue({ payment_intent: paymentIntent.id } as any);
+      jest.spyOn(stripe.customers, 'retrieve').mockResolvedValue({
+        invoice_settings: { default_payment_method: paymentMethodId },
+      } as any);
 
       const result = await paymentService.createSlash(jobEntity as any);
 
       expect(result).toBe(undefined);
       expect(stripe.invoices.create).toHaveBeenCalledWith({
-        customer: 'cus_123',
+        customer: user.stripeCustomerId,
         currency: PaymentCurrency.USD,
         auto_advance: false,
         payment_settings: {
@@ -1074,16 +1078,19 @@ describe('PaymentService', () => {
         },
       });
       expect(stripe.invoiceItems.create).toHaveBeenCalledWith({
-        customer: 'cus_123',
+        customer: user.stripeCustomerId,
         amount: expect.any(Number),
-        invoice: 'inv_123',
-        description: 'Slash Job Id 1',
+        invoice: invoiceId,
+        description: 'Slash Job Id ' + jobEntity.id,
       });
-      expect(stripe.invoices.finalizeInvoice).toHaveBeenCalledWith('inv_123');
-      expect(stripe.paymentIntents.confirm).toHaveBeenCalledWith('pi_123', {
-        payment_method: 'pm_123',
-        off_session: true,
-      });
+      expect(stripe.invoices.finalizeInvoice).toHaveBeenCalledWith(invoiceId);
+      expect(stripe.paymentIntents.confirm).toHaveBeenCalledWith(
+        paymentIntent.id,
+        {
+          payment_method: paymentMethodId,
+          off_session: true,
+        },
+      );
       expect(paymentRepository.createUnique).toHaveBeenCalledTimes(2);
     });
 
@@ -1101,14 +1108,14 @@ describe('PaymentService', () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValue(user as any);
       jest
         .spyOn(stripe.invoices, 'create')
-        .mockResolvedValue({ id: 'inv_123' } as any);
+        .mockResolvedValue({ id: invoiceId } as any);
       jest.spyOn(stripe.invoiceItems, 'create').mockResolvedValue({} as any);
       jest
         .spyOn(stripe.invoices, 'finalizeInvoice')
-        .mockResolvedValue({ payment_intent: 'pi_123' } as any);
-      jest
-        .spyOn(paymentService as any, 'getDefaultPaymentMethod')
-        .mockResolvedValue('pm_123');
+        .mockResolvedValue({ payment_intent: paymentIntent.id } as any);
+      jest.spyOn(stripe.customers, 'retrieve').mockResolvedValue({
+        invoice_settings: { default_payment_method: paymentMethodId },
+      } as any);
       jest
         .spyOn(stripe.paymentIntents, 'confirm')
         .mockRejectedValue(new Error());

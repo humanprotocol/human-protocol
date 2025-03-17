@@ -365,7 +365,7 @@ export class CronJobService {
     await this.completeCronJob(cronJob);
   }
 
-  @Cron('*/2 * * * *')
+  @Cron('*/5 * * * *')
   /**
    * Process an abuse webhook.
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
@@ -405,6 +405,9 @@ export class CronJobService {
             jobEntity.status !== JobStatus.CANCELED
           ) {
             await this.jobService.processEscrowCancellation(jobEntity);
+          }
+
+          if (jobEntity.status !== JobStatus.CANCELED) {
             jobEntity.status = JobStatus.CANCELED;
             await this.jobRepository.updateOne(jobEntity);
           }

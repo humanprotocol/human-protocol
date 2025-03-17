@@ -349,13 +349,28 @@ describe('WebhookService', () => {
         eventType: EventType.ABUSE_DETECTED,
       };
 
-      jest.spyOn(webhookService, 'createIncomingWebhook');
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({ requestType: JobRequestType.FORTUNE } as any);
+      jest
+        .spyOn(jobService, 'getOracleType')
+        .mockReturnValue(OracleType.FORTUNE);
+      jest.spyOn(webhookService as any, 'createIncomingWebhook');
 
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
-
-      expect(webhookService.createIncomingWebhook).toHaveBeenCalledWith(
-        webhook,
-      );
+      expect(
+        (webhookService as any).createIncomingWebhook,
+      ).toHaveBeenCalledWith(webhook);
+      expect(webhookRepository.createUnique).toHaveBeenCalledWith({
+        chainId: chainId,
+        escrowAddress: escrowAddress,
+        hasSignature: false,
+        oracleType: OracleType.FORTUNE,
+        retriesCount: 0,
+        status: WebhookStatus.PENDING,
+        waitUntil: expect.any(Date),
+        eventType: EventType.ABUSE_DETECTED,
+      });
     });
 
     it('should return an error when the event type is invalid', async () => {
@@ -387,7 +402,9 @@ describe('WebhookService', () => {
       jest
         .spyOn(jobService, 'getOracleType')
         .mockReturnValue(OracleType.FORTUNE);
-      const result = await webhookService.createIncomingWebhook(dto as any);
+      const result = await (webhookService as any).createIncomingWebhook(
+        dto as any,
+      );
 
       expect(result).toBe(undefined);
       expect(webhookRepository.createUnique).toHaveBeenCalledWith({
@@ -412,7 +429,7 @@ describe('WebhookService', () => {
         .mockResolvedValue(undefined as any);
 
       await expect(
-        webhookService.createIncomingWebhook(dto as any),
+        (webhookService as any).createIncomingWebhook(dto as any),
       ).rejects.toThrow(ErrorWebhook.InvalidEscrow);
     });
   });
