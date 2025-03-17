@@ -4,9 +4,9 @@ import { Web3Network } from './web3-config.service';
 export const envValidator = Joi.object({
   // General
   HOST: Joi.string(),
-  PORT: Joi.string(),
+  PORT: Joi.number().integer(),
   FE_URL: Joi.string(),
-  MAX_RETRY_COUNT: Joi.number().integer().min(1),
+  MAX_RETRY_COUNT: Joi.number().integer().min(0),
   QUALIFICATION_MIN_VALIDITY: Joi.number()
     .integer()
     .min(1)
@@ -35,11 +35,11 @@ export const envValidator = Joi.object({
     .description('Account api key at hcaptcha foundation'),
   HCAPTCHA_DEFAULT_LABELER_LANG: Joi.string(),
   // Database
-  POSTGRES_HOST: Joi.string(),
+  POSTGRES_HOST: Joi.number().integer(),
   POSTGRES_USER: Joi.string(),
   POSTGRES_PASSWORD: Joi.string(),
   POSTGRES_DATABASE: Joi.string(),
-  POSTGRES_PORT: Joi.string(),
+  POSTGRES_PORT: Joi.number().integer(),
   POSTGRES_SSL: Joi.string().valid('true', 'false'),
   POSTGRES_URL: Joi.string(),
   POSTGRES_LOGGING: Joi.string(),
@@ -58,7 +58,7 @@ export const envValidator = Joi.object({
   RPC_URL_LOCALHOST: Joi.string(),
   // S3
   S3_ENDPOINT: Joi.string(),
-  S3_PORT: Joi.number(),
+  S3_PORT: Joi.number().integer(),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string(),
@@ -73,7 +73,7 @@ export const envValidator = Joi.object({
   // Encryption
   PGP_PRIVATE_KEY: Joi.string(),
   PGP_PASSPHRASE: Joi.string(),
-  PGP_ENCRYPT: Joi.string(),
+  PGP_ENCRYPT: Joi.string().valid('true', 'false'),
   // Kyc
   KYC_API_KEY: Joi.string(),
   KYC_API_PRIVATE_KEY: Joi.string().required(),
