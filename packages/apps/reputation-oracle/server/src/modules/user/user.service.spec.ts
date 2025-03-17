@@ -219,7 +219,7 @@ describe('UserService', () => {
     });
 
     it('should throw if worker does not have evm address', async () => {
-      const user = generateWorkerUser({ withAddress: false });
+      const user = generateWorkerUser();
 
       await expect(userService.registerLabeler(user)).rejects.toThrow(
         new UserError(UserErrorMessage.MISSING_ADDRESS, user.id),
@@ -229,7 +229,9 @@ describe('UserService', () => {
     });
 
     it('should throw if kyc is not approved', async () => {
-      const user = generateWorkerUser({ withAddress: true });
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       user.kyc = generateKycEntity(user.id, KycStatus.NONE);
 
       await expect(userService.registerLabeler(user)).rejects.toThrow(
@@ -240,7 +242,9 @@ describe('UserService', () => {
     });
 
     it('should return existing sitekey if already registered', async () => {
-      const user = generateWorkerUser({ withAddress: true });
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
       const existingSitekey = generateSiteKeyEntity(
@@ -257,7 +261,9 @@ describe('UserService', () => {
     });
 
     it('should throw LabelingEnableFailed if registering labeler fails', async () => {
-      const user = generateWorkerUser({ withAddress: true });
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
       mockHCaptchaService.registerLabeler.mockResolvedValueOnce(false);
@@ -268,7 +274,9 @@ describe('UserService', () => {
     });
 
     it('should throw LabelingEnableFailed if retrieving labeler data fails', async () => {
-      const user = generateWorkerUser({ withAddress: true });
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
       mockHCaptchaService.registerLabeler.mockResolvedValueOnce(true);
@@ -281,7 +289,9 @@ describe('UserService', () => {
     });
 
     it('should register labeler if not already registered', async () => {
-      const user = generateWorkerUser({ withAddress: true });
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
       user.siteKeys = [
         generateSiteKeyEntity(user.id, SiteKeyType.REGISTRATION),
@@ -332,7 +342,9 @@ describe('UserService', () => {
     });
 
     it('should throw if already registered', async () => {
-      const user = generateWorkerUser({ withAddress: true });
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
 
       await expect(
         userService.registerAddress(
@@ -348,7 +360,7 @@ describe('UserService', () => {
     });
 
     it('should throw if kyc is not approved', async () => {
-      const user = generateWorkerUser({ withAddress: false });
+      const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.NONE);
 
       await expect(
@@ -365,7 +377,7 @@ describe('UserService', () => {
     });
 
     it('should throw if same address already exists', async () => {
-      const user = generateWorkerUser({ withAddress: false });
+      const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
       mockUserRepository.findOneByAddress.mockImplementationOnce(
@@ -392,7 +404,7 @@ describe('UserService', () => {
     });
 
     it('should throw if invalid signature', async () => {
-      const user = generateWorkerUser({ withAddress: false });
+      const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
       await expect(
@@ -409,7 +421,7 @@ describe('UserService', () => {
     });
 
     it('should register evm address for user', async () => {
-      const user = generateWorkerUser({ withAddress: false });
+      const user = generateWorkerUser();
       user.kyc = generateKycEntity(user.id, KycStatus.APPROVED);
 
       const signature = await web3Utils.signMessage(

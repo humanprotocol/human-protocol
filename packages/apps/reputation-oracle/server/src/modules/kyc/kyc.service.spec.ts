@@ -7,6 +7,7 @@ import { ethers } from 'ethers';
 import { KycConfigService } from '../../config/kyc-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 
+import { generateEthWallet } from '../../../test/fixtures/web3';
 import {
   createHttpServiceMock,
   createHttpServiceResponse,
@@ -233,7 +234,7 @@ describe('Kyc Service', () => {
 
   describe('getSignedAddress', () => {
     it('Should throw an error if the user has no wallet address registered', async () => {
-      const mockUserEntity = generateWorkerUser({ withAddress: false });
+      const mockUserEntity = generateWorkerUser();
 
       await expect(
         kycService.getSignedAddress(mockUserEntity as UserEntity),
@@ -246,7 +247,9 @@ describe('Kyc Service', () => {
     });
 
     it('Should throw an error if the user KYC status is not approved', async () => {
-      const mockUserEntity = generateWorkerUser({ withAddress: true });
+      const mockUserEntity = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       mockUserEntity.kyc = generateKycEntity(mockUserEntity.id, KycStatus.NONE);
 
       await expect(
@@ -257,7 +260,9 @@ describe('Kyc Service', () => {
     });
 
     it('Should return the signed address', async () => {
-      const mockUserEntity = generateWorkerUser({ withAddress: true });
+      const mockUserEntity = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
       mockUserEntity.kyc = generateKycEntity(
         mockUserEntity.id,
         KycStatus.APPROVED,
