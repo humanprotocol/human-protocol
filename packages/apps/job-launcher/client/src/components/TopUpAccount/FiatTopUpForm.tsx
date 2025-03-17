@@ -145,7 +145,12 @@ export const FiatTopUpForm = () => {
                   variant="outlined"
                   value={amount}
                   type="number"
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    if (/^\d*\.?\d{0,6}$/.test(value)) {
+                      setAmount(value);
+                    }
+                  }}
                   sx={{ mb: 2 }}
                 />
                 {selectedCard ? (

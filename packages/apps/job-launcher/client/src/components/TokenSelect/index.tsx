@@ -13,12 +13,15 @@ import * as paymentService from '../../services/payment';
 
 type TokenSelectProps = SelectProps & {
   chainId: ChainId;
-  onTokenChange: (symbol: string, address: string) => void;
+  onTokenChange: (symbol: string, address: string, decimals: number) => void;
 };
 
 export const TokenSelect: FC<TokenSelectProps> = (props) => {
   const [availableTokens, setAvailableTokens] = useState<{
-    [key: string]: string;
+    [key: string]: {
+      address: string;
+      decimals: number;
+    };
   }>({});
 
   useEffect(() => {
@@ -52,8 +55,11 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
         {...props}
         onChange={(e) => {
           const symbol = e.target.value as string;
-          const address = availableTokens[symbol];
-          props.onTokenChange(symbol, address);
+          props.onTokenChange(
+            symbol,
+            availableTokens[symbol].address,
+            availableTokens[symbol].decimals,
+          );
         }}
       >
         {Object.keys(availableTokens).map((symbol) => {

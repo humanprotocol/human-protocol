@@ -12,7 +12,6 @@ export async function sendSlackNotification(
   };
 
   if (!webhookUrl || webhookUrl === 'disabled') {
-    logger.log('Slack notification (mocked):', payload);
     return true; // Simulate success to avoid unnecessary errors
   }
 

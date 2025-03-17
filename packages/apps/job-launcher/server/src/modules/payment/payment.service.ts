@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
-import { ethers } from 'ethers';
+import { ethers, formatUnits } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -355,18 +355,18 @@ export class PaymentService {
     }
 
     const tokenId = (await tokenContract.symbol()).toLowerCase();
-    const amount = Number(ethers.formatEther(transaction.logs[0].data));
+    const token = TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken];
 
-    if (
-      TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken] !==
-        tokenAddress ||
-      !CoingeckoTokenId[tokenId]
-    ) {
+    if (token?.address !== tokenAddress || !CoingeckoTokenId[tokenId]) {
       throw new ControlledError(
         ErrorPayment.UnsupportedToken,
         HttpStatus.CONFLICT,
       );
     }
+
+    const amount = Number(
+      formatUnits(transaction.logs[0].data, token.decimals),
+    );
 
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
       transaction.hash,

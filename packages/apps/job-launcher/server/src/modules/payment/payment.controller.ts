@@ -447,9 +447,12 @@ export class PaymentController {
     description: 'Bad Request. Invalid chainId.',
   })
   @Get('/tokens/:chainId')
-  public async getTokens(
-    @Param('chainId') chainId: ChainId,
-  ): Promise<{ [key: string]: string }> {
+  public async getTokens(@Param('chainId') chainId: ChainId): Promise<{
+    [key: string]: {
+      address: string;
+      decimals: number;
+    };
+  }> {
     const tokens = TOKEN_ADDRESSES[chainId];
     if (!tokens) {
       throw new ControlledError(

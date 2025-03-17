@@ -37,6 +37,7 @@ export const CryptoTopUpForm = () => {
   const { data: signer } = useWalletClient();
   const { data: rate } = useTokenRate(tokenSymbol || 'hmt', 'usd');
   const { showError } = useSnackbar();
+  const [tokenDecimals, setTokenDecimals] = useState<number>(18);
 
   const currentBalance = useMemo(() => {
     return (
@@ -51,9 +52,14 @@ export const CryptoTopUpForm = () => {
     return new Decimal(amount).mul(rate);
   }, [amount, rate]);
 
-  const handleTokenChange = (symbol: string, address: string) => {
+  const handleTokenChange = (
+    symbol: string,
+    address: string,
+    decimals: number,
+  ) => {
     setTokenSymbol(symbol);
     setTokenAddress(address);
+    setTokenDecimals(decimals);
   };
 
   const handleTopUpAccount = async () => {
@@ -68,7 +74,7 @@ export const CryptoTopUpForm = () => {
         functionName: 'transfer',
         args: [
           await paymentService.getOperatorAddress(),
-          ethers.parseUnits(amount, 18),
+          ethers.parseUnits(amount.toString(), tokenDecimals),
         ],
       });
 
@@ -140,7 +146,12 @@ export const CryptoTopUpForm = () => {
                 placeholder="Amount"
                 type="number"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  if (/^\d*\.?\d{0,6}$/.test(value)) {
+                    setAmount(value);
+                  }
+                }}
               />
             </FormControl>
           </Box>
@@ -166,8 +177,11 @@ export const CryptoTopUpForm = () => {
                 >
                   <Typography color="text.secondary">Balance</Typography>
                   <Typography color="text.secondary">
-                    {currentBalance} {tokenSymbol?.toUpperCase()} (~
-                    {((currentBalance ?? 0) * rate).toFixed(2)} USD)
+                    {tokenSymbol
+                      ? `${Number(currentBalance.toFixed(6))} ${tokenSymbol?.toUpperCase()} (~
+                    ${Number(((currentBalance ?? 0) * rate).toFixed(2))}
+                    USD)`
+                      : ''}
                   </Typography>
                 </Stack>
                 <Stack
@@ -179,7 +193,7 @@ export const CryptoTopUpForm = () => {
                     {tokenSymbol?.toUpperCase()} Price
                   </Typography>
                   <Typography color="text.secondary">
-                    {rate?.toFixed(2)} USD
+                    {rate ? `${rate.toFixed(2)} USD` : ''}
                   </Typography>
                 </Stack>
               </Stack>
@@ -191,8 +205,10 @@ export const CryptoTopUpForm = () => {
               >
                 <Typography>You receive</Typography>
                 <Typography>
-                  {amount} {tokenSymbol?.toUpperCase()} (~
-                  {totalAmount.toFixed(2)} USD)
+                  {amount && tokenSymbol
+                    ? `${amount} ${tokenSymbol?.toUpperCase()} (~
+                  ${totalAmount.toFixed(2)} USD)`
+                    : ''}
                 </Typography>
               </Stack>
             </Box>
