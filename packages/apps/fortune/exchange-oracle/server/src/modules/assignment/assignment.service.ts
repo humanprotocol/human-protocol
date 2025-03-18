@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { AssignmentStatus, JobType } from '../../common/enums/job';
+import { AssignmentStatus, JobStatus, JobType } from '../../common/enums/job';
 import { JwtUser } from '../../common/types/jwt';
 import { JobRepository } from '../job/job.repository';
 import {
@@ -13,7 +13,7 @@ import { PageDto } from '../../common/pagination/pagination.dto';
 import { JobService } from '../job/job.service';
 import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
-import { ErrorAssignment } from '../../common/constant/errors';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { ServerConfigService } from '../../common/config/server-config.service';
 
 @Injectable()
@@ -40,6 +40,9 @@ export class AssignmentService {
     if (!jobEntity) {
       this.logger.log(ErrorAssignment.JobNotFound, AssignmentService.name);
       throw new BadRequestException(ErrorAssignment.JobNotFound);
+    } else if (jobEntity.status !== JobStatus.ACTIVE) {
+      this.logger.log(ErrorJob.InvalidStatus, AssignmentService.name);
+      throw new BadRequestException(ErrorJob.InvalidStatus);
     } else if (jobEntity.reputationNetwork !== jwtUser.reputationNetwork) {
       this.logger.log(
         ErrorAssignment.ReputationNetworkMismatch,
