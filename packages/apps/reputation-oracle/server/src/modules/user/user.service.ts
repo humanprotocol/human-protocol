@@ -1,23 +1,19 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
-import { Web3ConfigService } from '../../config/web3-config.service';
-import { OperatorStatus } from '../../common/enums/user';
-import { KycStatus } from '../kyc/constants';
+
 import { SignatureType } from '../../common/enums/web3';
-import { SiteKeyType } from '../../common/enums';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import {
-  generateNonce,
-  verifySignature,
-  prepareSignatureBody,
-} from '../../utils/web3';
+import * as securityUtils from '../../utils/security';
+import * as web3Utils from '../../utils/web3';
+
+import { KycStatus } from '../kyc/constants';
 import { Web3Service } from '../web3/web3.service';
-import { SiteKeyEntity } from './site-key.entity';
+
+import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
-import { RegisterAddressRequestDto } from './user.dto';
-import { Role, UserStatus, UserEntity } from './user.entity';
+import { OperatorUserEntity, Web2UserEntity } from './types';
+import { Role as UserRole, UserStatus, UserEntity } from './user.entity';
 import {
   UserError,
   UserErrorMessage,
@@ -26,70 +22,110 @@ import {
 } from './user.error';
 import { UserRepository } from './user.repository';
 
+export enum OperatorStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
 @Injectable()
 export class UserService {
-  private readonly HASH_ROUNDS = 12;
-
   constructor(
-    private userRepository: UserRepository,
-    private siteKeyRepository: SiteKeyRepository,
+    private readonly userRepository: UserRepository,
+    private readonly siteKeyRepository: SiteKeyRepository,
     private readonly web3Service: Web3Service,
     private readonly hcaptchaService: HCaptchaService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly hcaptchaConfigService: HCaptchaConfigService,
   ) {}
 
-  static checkPasswordMatchesHash(
-    password: string,
-    passwordHash: string,
-  ): boolean {
-    return bcrypt.compareSync(password, passwordHash);
+  static isWeb2UserRole(userRole: string): boolean {
+    return [UserRole.ADMIN, UserRole.HUMAN_APP, UserRole.WORKER].includes(
+      userRole as UserRole,
+    );
   }
 
-  public async create({
-    email,
-    password,
-  }: Pick<UserEntity, 'email' | 'password'>): Promise<UserEntity> {
+  async createWorkerUser(data: {
+    email: string;
+    password: string;
+  }): Promise<Web2UserEntity> {
     const newUser = new UserEntity();
-    newUser.email = email;
-    newUser.password = bcrypt.hashSync(password, this.HASH_ROUNDS);
-    newUser.role = Role.WORKER;
+    newUser.email = data.email;
+    newUser.password = securityUtils.hashPassword(data.password);
+    newUser.role = UserRole.WORKER;
     newUser.status = UserStatus.PENDING;
+
     await this.userRepository.createUnique(newUser);
-    return newUser;
+
+    return newUser as Web2UserEntity;
   }
 
-  public updatePassword(
-    userEntity: UserEntity,
+  async findWeb2UserByEmail(email: string): Promise<Web2UserEntity | null> {
+    const userEntity = await this.userRepository.findOneByEmail(email, {
+      relations: {
+        kyc: true,
+        siteKeys: true,
+        userQualifications: {
+          qualification: true,
+        },
+      },
+    });
+
+    if (userEntity && UserService.isWeb2UserRole(userEntity.role)) {
+      return userEntity as Web2UserEntity;
+    }
+
+    return null;
+  }
+
+  async updatePassword(
+    userId: number,
     newPassword: string,
-  ): Promise<UserEntity> {
-    userEntity.password = bcrypt.hashSync(newPassword, this.HASH_ROUNDS);
-    return this.userRepository.updateOne(userEntity);
+  ): Promise<Web2UserEntity> {
+    const userEntity = await this.userRepository.findOneById(userId);
+
+    if (!userEntity) {
+      throw new Error('User not found');
+    }
+
+    if (!UserService.isWeb2UserRole(userEntity.role)) {
+      throw new Error('Only web2 users can have password');
+    }
+
+    userEntity.password = securityUtils.hashPassword(newPassword);
+
+    await this.userRepository.updateOne(userEntity);
+
+    return userEntity as Web2UserEntity;
   }
 
-  public activate(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.status = UserStatus.ACTIVE;
-    return this.userRepository.updateOne(userEntity);
-  }
-
-  public async createWeb3User(address: string): Promise<UserEntity> {
+  async createOperatorUser(address: string): Promise<OperatorUserEntity> {
     const newUser = new UserEntity();
     newUser.evmAddress = address.toLowerCase();
-    newUser.nonce = generateNonce();
-    newUser.role = Role.OPERATOR;
+    newUser.nonce = web3Utils.generateNonce();
+    newUser.role = UserRole.OPERATOR;
     newUser.status = UserStatus.ACTIVE;
 
     await this.userRepository.createUnique(newUser);
-    return newUser;
+
+    return newUser as OperatorUserEntity;
   }
 
-  public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
-    userEntity.nonce = generateNonce();
+  async findOperatorUser(address: string): Promise<OperatorUserEntity | null> {
+    const userEntity = await this.userRepository.findOneByAddress(address);
+
+    if (userEntity && userEntity.role === UserRole.OPERATOR) {
+      return userEntity as OperatorUserEntity;
+    }
+
+    return null;
+  }
+
+  async updateNonce(userEntity: OperatorUserEntity): Promise<UserEntity> {
+    userEntity.nonce = web3Utils.generateNonce();
     return this.userRepository.updateOne(userEntity);
   }
 
-  public async registerLabeler(user: UserEntity): Promise<string> {
-    if (user.role !== Role.WORKER) {
+  async registerLabeler(user: Web2UserEntity): Promise<string> {
+    if (user.role !== UserRole.WORKER) {
       throw new UserError(UserErrorMessage.INVALID_ROLE, user.id);
     }
 
@@ -101,6 +137,7 @@ export class UserService {
       throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
+    // TODO: load sitekeys from repository instead of user entity in request
     if (user.siteKeys && user.siteKeys.length > 0) {
       const existingHcaptchaSiteKey = user.siteKeys?.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
@@ -131,7 +168,7 @@ export class UserService {
 
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = siteKey;
-    newSiteKey.user = user;
+    newSiteKey.userId = user.id;
     newSiteKey.type = SiteKeyType.HCAPTCHA;
 
     await this.siteKeyRepository.createUnique(newSiteKey);
@@ -139,11 +176,12 @@ export class UserService {
     return siteKey;
   }
 
-  public async registerAddress(
+  async registerAddress(
     user: UserEntity,
-    data: RegisterAddressRequestDto,
+    address: string,
+    signature: string,
   ): Promise<void> {
-    const lowercasedAddress = data.address.toLocaleLowerCase();
+    const lowercasedAddress = address.toLocaleLowerCase();
 
     if (user.evmAddress) {
       throw new UserError(UserErrorMessage.ADDRESS_EXISTS, user.id);
@@ -153,41 +191,44 @@ export class UserService {
       throw new UserError(UserErrorMessage.KYC_NOT_APPROVED, user.id);
     }
 
-    const dbUser =
+    const userWithSameAddress =
       await this.userRepository.findOneByAddress(lowercasedAddress);
-    if (dbUser) {
-      throw new DuplicatedWalletAddressError(user.id, lowercasedAddress);
+
+    if (userWithSameAddress) {
+      throw new DuplicatedWalletAddressError(user.id, address);
     }
 
     // Prepare signed data and verify the signature
-    const signedData = prepareSignatureBody({
-      from: lowercasedAddress,
+    const signedData = web3Utils.prepareSignatureBody({
+      from: address,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.REGISTER_ADDRESS,
     });
-    const verified = verifySignature(signedData, data.signature, [
+    const verified = web3Utils.verifySignature(signedData, signature, [
       lowercasedAddress,
     ]);
 
     if (!verified) {
-      throw new InvalidWeb3SignatureError(user.id, lowercasedAddress);
+      throw new InvalidWeb3SignatureError(user.id, address);
     }
 
     user.evmAddress = lowercasedAddress;
     await this.userRepository.updateOne(user);
   }
 
-  public async enableOperator(
-    user: UserEntity,
+  async enableOperator(
+    user: OperatorUserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = prepareSignatureBody({
+    const signedData = web3Utils.prepareSignatureBody({
       from: user.evmAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.ENABLE_OPERATOR,
     });
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+    const verified = web3Utils.verifySignature(signedData, signature, [
+      user.evmAddress,
+    ]);
 
     if (!verified) {
       throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
@@ -206,20 +247,22 @@ export class UserService {
       throw new UserError(UserErrorMessage.OPERATOR_ALREADY_ACTIVE, user.id);
     }
 
-    await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.ACTIVE);
+    await kvstore.set(user.evmAddress, OperatorStatus.ACTIVE);
   }
 
-  public async disableOperator(
-    user: UserEntity,
+  async disableOperator(
+    user: OperatorUserEntity,
     signature: string,
   ): Promise<void> {
-    const signedData = prepareSignatureBody({
+    const signedData = web3Utils.prepareSignatureBody({
       from: user.evmAddress,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.DISABLE_OPERATOR,
     });
 
-    const verified = verifySignature(signedData, signature, [user.evmAddress]);
+    const verified = web3Utils.verifySignature(signedData, signature, [
+      user.evmAddress,
+    ]);
 
     if (!verified) {
       throw new InvalidWeb3SignatureError(user.id, user.evmAddress);
@@ -239,33 +282,33 @@ export class UserService {
       throw new UserError(UserErrorMessage.OPERATOR_NOT_ACTIVE, user.id);
     }
 
-    await kvstore.set(user.evmAddress.toLowerCase(), OperatorStatus.INACTIVE);
+    await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
   }
 
-  public async registrationInExchangeOracle(
-    user: UserEntity,
+  async registrationInExchangeOracle(
+    user: Web2UserEntity,
     oracleAddress: string,
-  ): Promise<SiteKeyEntity> {
+  ): Promise<void> {
     const siteKey = await this.siteKeyRepository.findByUserSiteKeyAndType(
-      user,
+      user.id,
       oracleAddress,
       SiteKeyType.REGISTRATION,
     );
-    if (siteKey) return siteKey;
+    if (siteKey) {
+      return;
+    }
 
     const newSiteKey = new SiteKeyEntity();
     newSiteKey.siteKey = oracleAddress;
     newSiteKey.type = SiteKeyType.REGISTRATION;
-    newSiteKey.user = user;
+    newSiteKey.userId = user.id;
 
-    return await this.siteKeyRepository.createUnique(newSiteKey);
+    await this.siteKeyRepository.createUnique(newSiteKey);
   }
 
-  public async getRegistrationInExchangeOracles(
-    user: UserEntity,
-  ): Promise<string[]> {
+  async getRegistrationInExchangeOracles(user: UserEntity): Promise<string[]> {
     const siteKeys = await this.siteKeyRepository.findByUserAndType(
-      user,
+      user.id,
       SiteKeyType.REGISTRATION,
     );
     return siteKeys.map((siteKey) => siteKey.siteKey);

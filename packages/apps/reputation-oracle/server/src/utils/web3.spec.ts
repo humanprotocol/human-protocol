@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import { generateEthWallet } from '../../test/fixtures/web3';
 
-import { verifySignature, recoverSignerAddress, signMessage } from './web3';
+import * as web3Utils from './web3';
 
 const PERMANENT_PRIVATE_KEY =
   '0x85dc77260240f78982bdfdfc0a0cb241a85d2f9833468fae7ec362ec7829ce3a';
@@ -25,7 +25,7 @@ describe('Web3 utilities', () => {
     it('should sign message when it is a string', async () => {
       const message = faker.lorem.words();
 
-      const signature = await signMessage(message, privateKey);
+      const signature = await web3Utils.signMessage(message, privateKey);
 
       expect(signature).toMatch(signatureRegex);
     });
@@ -35,13 +35,13 @@ describe('Web3 utilities', () => {
         [faker.string.sample()]: new Date(),
       };
 
-      const signature = await signMessage(message, privateKey);
+      const signature = await web3Utils.signMessage(message, privateKey);
 
       expect(signature).toMatch(signatureRegex);
     });
 
     it('should return exact signature', async () => {
-      const signature = await signMessage(
+      const signature = await web3Utils.signMessage(
         PERMANENT_MESSAGE,
         PERMANENT_PRIVATE_KEY,
       );
@@ -52,9 +52,11 @@ describe('Web3 utilities', () => {
 
   describe('verifySignature', () => {
     it('should return true for valid exact signature', async () => {
-      const result = verifySignature(PERMANENT_MESSAGE, PERMANENT_SIGNATURE, [
-        PERMANENT_ADDRESS,
-      ]);
+      const result = web3Utils.verifySignature(
+        PERMANENT_MESSAGE,
+        PERMANENT_SIGNATURE,
+        [PERMANENT_ADDRESS],
+      );
 
       expect(result).toBe(true);
     });
@@ -62,9 +64,9 @@ describe('Web3 utilities', () => {
     it('should return true for valid signature', async () => {
       const message = faker.lorem.words();
 
-      const signature = await signMessage(message, privateKey);
+      const signature = await web3Utils.signMessage(message, privateKey);
 
-      const result = verifySignature(message, signature, [address]);
+      const result = web3Utils.verifySignature(message, signature, [address]);
 
       expect(result).toBe(true);
     });
@@ -73,7 +75,9 @@ describe('Web3 utilities', () => {
       const message = faker.lorem.words();
       const invalidSignature = '0xInvalidSignature';
 
-      const result = verifySignature(message, invalidSignature, [address]);
+      const result = web3Utils.verifySignature(message, invalidSignature, [
+        address,
+      ]);
 
       expect(result).toBe(false);
     });
@@ -81,10 +85,10 @@ describe('Web3 utilities', () => {
     it('should return false when signature not verified', async () => {
       const message = faker.lorem.words();
 
-      const signature = await signMessage(message, privateKey);
+      const signature = await web3Utils.signMessage(message, privateKey);
 
       const { address: anotherSignerAddress } = generateEthWallet();
-      const result = verifySignature(message, signature, [
+      const result = web3Utils.verifySignature(message, signature, [
         anotherSignerAddress,
       ]);
 
@@ -94,7 +98,7 @@ describe('Web3 utilities', () => {
 
   describe('recoverSignerAddress', () => {
     it('should recover the exact signer', async () => {
-      const result = recoverSignerAddress(
+      const result = web3Utils.recoverSignerAddress(
         PERMANENT_MESSAGE,
         PERMANENT_SIGNATURE,
       );
@@ -104,9 +108,9 @@ describe('Web3 utilities', () => {
 
     it('should recover the correct signer', async () => {
       const message = faker.lorem.words();
-      const signature = await signMessage(message, privateKey);
+      const signature = await web3Utils.signMessage(message, privateKey);
 
-      const result = recoverSignerAddress(message, signature);
+      const result = web3Utils.recoverSignerAddress(message, signature);
 
       expect(result).toBe(address);
     });
@@ -115,7 +119,7 @@ describe('Web3 utilities', () => {
       const message = faker.lorem.words();
       const invalidSignature = '0xInvalidSignature';
 
-      const signer = recoverSignerAddress(message, invalidSignature);
+      const signer = web3Utils.recoverSignerAddress(message, invalidSignature);
 
       expect(signer).toBe(null);
     });
@@ -124,11 +128,55 @@ describe('Web3 utilities', () => {
       const message = {
         [faker.string.sample()]: new Date(),
       };
-      const signature = await signMessage(message, privateKey);
+      const signature = await web3Utils.signMessage(message, privateKey);
 
-      const recoveredAddress = recoverSignerAddress(message, signature);
+      const recoveredAddress = web3Utils.recoverSignerAddress(
+        message,
+        signature,
+      );
 
       expect(recoveredAddress).toBe(address);
+    });
+  });
+
+  describe('prepareSignatureBody', () => {
+    it('should prepare proper signature body', () => {
+      const from = generateEthWallet().address;
+      const to = generateEthWallet().address;
+      const contents = faker.string.alphanumeric();
+      const nonce = faker.string.alphanumeric();
+
+      const preparedSignatureBody = web3Utils.prepareSignatureBody({
+        from,
+        to,
+        contents,
+        nonce,
+      });
+
+      expect(preparedSignatureBody).toEqual({
+        from: from.toLowerCase(),
+        to: to.toLowerCase(),
+        contents,
+        nonce,
+      });
+    });
+
+    it('should not have nonce if not provided', () => {
+      const from = generateEthWallet().address;
+      const to = generateEthWallet().address;
+      const contents = faker.string.alphanumeric();
+
+      const preparedSignatureBody = web3Utils.prepareSignatureBody({
+        from,
+        to,
+        contents,
+      });
+
+      expect(preparedSignatureBody).toEqual({
+        from: from.toLowerCase(),
+        to: to.toLowerCase(),
+        contents,
+      });
     });
   });
 });

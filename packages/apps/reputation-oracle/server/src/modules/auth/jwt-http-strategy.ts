@@ -6,11 +6,11 @@ import {
   JWT_STRATEGY_NAME,
   LOGOUT_PATH,
   RESEND_EMAIL_VERIFICATION_PATH,
-} from '../../../common/constants';
-import { UserEntity, UserStatus, UserRepository } from '../../user';
-import { AuthConfigService } from '../../../config/auth-config.service';
-import { TokenRepository } from '../token.repository';
-import { TokenType } from '../token.entity';
+} from '../../common/constants';
+import { UserEntity, UserStatus, UserRepository } from '../user';
+import { AuthConfigService } from '../../config/auth-config.service';
+import { TokenRepository } from './token.repository';
+import { TokenType } from './token.entity';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(
@@ -34,7 +34,12 @@ export class JwtHttpStrategy extends PassportStrategy(
     @Req() request: any,
     payload: { userId: number },
   ): Promise<UserEntity> {
-    const user = await this.userRepository.findById(payload.userId);
+    const user = await this.userRepository.findOneById(payload.userId, {
+      relations: {
+        kyc: true,
+        siteKeys: true,
+      },
+    });
 
     if (!user) {
       throw new UnauthorizedException('User not found');

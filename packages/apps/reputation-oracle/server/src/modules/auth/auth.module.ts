@@ -7,7 +7,7 @@ import { EmailModule } from '../email/module';
 import { UserModule } from '../user';
 import { Web3Module } from '../web3/web3.module';
 
-import { JwtHttpStrategy } from './strategy';
+import { JwtHttpStrategy } from './jwt-http-strategy';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TokenRepository } from './token.repository';

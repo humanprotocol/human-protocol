@@ -1,68 +1,68 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
+
 import { SignatureType } from '../../common/enums/web3';
-import { IsLowercasedEnum } from '../../common/validators';
+import {
+  IsLowercasedEnum,
+  IsValidWeb3Signature,
+} from '../../common/validators';
 
 export class RegisterLabelerResponseDto {
   @ApiProperty({ name: 'site_key' })
-  @IsString()
-  public siteKey: string;
+  siteKey: string;
 }
 
 export class RegisterAddressRequestDto {
   @ApiProperty()
-  @IsString()
-  public address: string;
+  @IsEthereumAddress()
+  address: string;
 
   @ApiProperty()
-  @IsString()
-  public signature: string;
+  @IsValidWeb3Signature()
+  signature: string;
 }
 
 export class EnableOperatorDto {
   @ApiProperty()
-  @IsString()
-  public signature: string;
+  @IsValidWeb3Signature()
+  signature: string;
 }
 
 export class DisableOperatorDto {
   @ApiProperty()
-  @IsString()
-  public signature: string;
+  @IsValidWeb3Signature()
+  signature: string;
 }
 
 export class SignatureBodyDto {
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
-  public from: string;
+  from: string;
+
+  @ApiProperty()
+  @IsEthereumAddress()
+  to: string;
 
   @ApiProperty()
   @IsString()
-  @IsEthereumAddress()
-  public to: string;
-
-  @ApiProperty()
-  @IsString()
-  public contents: string;
+  contents: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  public nonce?: string | undefined;
+  nonce?: string | undefined;
 }
 
 export class PrepareSignatureDto {
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
-  public address: string;
+  address: string;
 
   @ApiProperty({
     enum: SignatureType,
   })
   @IsLowercasedEnum(SignatureType)
-  public type: SignatureType;
+  type: SignatureType;
 }
 
 export class RegistrationInExchangeOracleDto {
@@ -70,20 +70,22 @@ export class RegistrationInExchangeOracleDto {
     name: 'oracle_address',
     description: 'Ethereum address of the oracle',
   })
-  @IsEthereumAddress()
-  public oracleAddress: string;
+  @IsEthereumAddress({
+    message: 'oracle_address must be an Ethereum address',
+  })
+  oracleAddress: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  hCaptchaToken: string;
 }
 
 export class RegistrationInExchangeOracleResponseDto {
   @ApiProperty({ name: 'oracle_address' })
-  public oracleAddress: string;
+  oracleAddress: string;
 }
 
-export class RegistrationInExchangeOraclesDto {
+export class RegistrationInExchangeOraclesResponseDto {
   @ApiProperty({ name: 'oracle_addresses' })
-  public oracleAddresses: string[];
+  oracleAddresses: string[];
 }

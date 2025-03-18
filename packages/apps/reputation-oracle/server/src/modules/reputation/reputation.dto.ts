@@ -95,7 +95,6 @@ export class ReputationGetAllQueryDto {
 
 export class ReputationGetParamsDto {
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
   public address: string;
 }
@@ -112,7 +111,6 @@ export class ReputationDto {
   chainId: ChainId;
 
   @ApiProperty()
-  @IsString()
   @IsEthereumAddress()
   address: string;
 

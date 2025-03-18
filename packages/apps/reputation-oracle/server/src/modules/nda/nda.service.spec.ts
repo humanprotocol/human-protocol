@@ -1,18 +1,18 @@
-import { faker } from '@faker-js/faker/.';
+import { createMock } from '@golevelup/ts-jest';
+import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { UserEntity, UserRepository } from '../user';
 import { NDAConfigService } from '../../config/nda-config.service';
+
+import { generateWorkerUser } from '../user/fixtures';
+import { UserEntity, UserRepository } from '../user';
+
 import { NDASignatureDto } from './nda.dto';
 import { NDAError, NDAErrorMessage } from './nda.error';
 import { NDAService } from './nda.service';
+import { mockNdaConfigService } from './fixtures';
 
-const mockUserRepository = {
-  updateOne: jest.fn(),
-};
-const mockNdaConfigService = {
-  latestNdaUrl: faker.internet.url(),
-};
+const mockUserRepository = createMock<UserRepository>();
 
 describe('NDAService', () => {
   let service: NDAService;
@@ -35,28 +35,20 @@ describe('NDAService', () => {
 
   describe('signNDA', () => {
     it('should sign the NDA if the URL is valid and the user has not signed it yet', async () => {
-      const user = {
-        id: faker.number.int(),
-        email: faker.internet.email(),
-        ndaSignedUrl: undefined,
-      };
+      const user = generateWorkerUser();
 
       const nda: NDASignatureDto = {
         url: mockNdaConfigService.latestNdaUrl,
       };
 
-      await service.signNDA(user as UserEntity, nda);
+      await service.signNDA(user, nda);
 
       expect(user.ndaSignedUrl).toBe(mockNdaConfigService.latestNdaUrl);
       expect(mockUserRepository.updateOne).toHaveBeenCalledWith(user);
     });
 
     it('should throw an error if the NDA URL is invalid', async () => {
-      const user = {
-        id: faker.number.int(),
-        email: faker.internet.email(),
-        ndaSignedUrl: undefined,
-      };
+      const user = generateWorkerUser();
 
       const invalidNda: NDASignatureDto = {
         url: faker.internet.url(),
@@ -68,11 +60,8 @@ describe('NDAService', () => {
     });
 
     it('should return ok if the user has already signed the NDA', async () => {
-      const user = {
-        id: faker.number.int(),
-        email: faker.internet.email(),
-        ndaSignedUrl: mockNdaConfigService.latestNdaUrl,
-      };
+      const user = generateWorkerUser();
+      user.ndaSignedUrl = mockNdaConfigService.latestNdaUrl;
 
       const nda: NDASignatureDto = {
         url: mockNdaConfigService.latestNdaUrl,

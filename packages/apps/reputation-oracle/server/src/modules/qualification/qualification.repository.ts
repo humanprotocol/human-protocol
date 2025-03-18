@@ -39,6 +39,7 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
   async saveUserQualifications(
     userQualifications: UserQualificationEntity[],
   ): Promise<void> {
+    // TODO: use base repository method for that
     await this.dataSource
       .getRepository(UserQualificationEntity)
       .save(userQualifications);

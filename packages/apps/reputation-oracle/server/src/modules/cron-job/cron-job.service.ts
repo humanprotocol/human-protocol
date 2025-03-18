@@ -34,6 +34,7 @@ export class CronJobService {
     if (!cronJob) {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
+      cronJobEntity.startedAt = new Date();
       return this.cronJobRepository.createUnique(cronJobEntity);
     }
     cronJob.startedAt = new Date();

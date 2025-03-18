@@ -13,12 +13,12 @@ export class KycRepository extends BaseRepository<KycEntity> {
   public async findOneBySessionId(
     sessionId: string,
   ): Promise<KycEntity | null> {
-    const userEntity = await this.findOne({
+    const kycEntity = await this.findOne({
       where: {
         sessionId: sessionId,
       },
     });
 
-    return userEntity;
+    return kycEntity;
   }
 }

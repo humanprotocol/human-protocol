@@ -69,7 +69,8 @@ describe('SignatureAuthGuard', () => {
         const guard = new SignatureAuthGuard([role]);
 
         const { privateKey, address } = generateEthWallet();
-        EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+
+        (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
           [name]: address,
         });
 
@@ -99,7 +100,7 @@ describe('SignatureAuthGuard', () => {
       const guard = new SignatureAuthGuard([AuthSignatureRole.JOB_LAUNCHER]);
 
       const { privateKey, address } = generateEthWallet();
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
         launcher: address,
       });
       const signature = await signMessage(
@@ -136,7 +137,7 @@ describe('SignatureAuthGuard', () => {
       ]);
 
       const { privateKey, address } = generateEthWallet();
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
         launcher: address,
         exchangeOracle: address,
       });
@@ -172,7 +173,7 @@ describe('SignatureAuthGuard', () => {
       ]);
 
       const { privateKey } = generateEthWallet();
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      (EscrowUtils.getEscrow as jest.Mock).mockResolvedValueOnce({
         launcher: '',
         exchangeOracle: '',
         recordingOracle: '',
