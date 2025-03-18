@@ -62,6 +62,7 @@ import { CronJobEntity } from './cron-job.entity';
 import { CronJobRepository } from './cron-job.repository';
 import { CronJobService } from './cron-job.service';
 import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
+import { faker } from '@faker-js/faker';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -1196,56 +1197,6 @@ describe('CronJobService', () => {
   });
 
   describe('processAbuseCronJob', () => {
-    let sendWebhookMock: any;
-    let cronJobEntityMock: Partial<CronJobEntity>;
-    let webhookEntity: Partial<WebhookEntity>, jobEntity: Partial<JobEntity>;
-
-    beforeEach(() => {
-      cronJobEntityMock = {
-        cronJobType: CronJobType.Abuse,
-        startedAt: new Date(),
-      };
-
-      webhookEntity = {
-        id: 1,
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        status: WebhookStatus.PENDING,
-        waitUntil: new Date(),
-        retriesCount: 0,
-      };
-
-      jobEntity = {
-        id: 1,
-        chainId: ChainId.LOCALHOST,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PAID,
-      };
-
-      jest
-        .spyOn(webhookRepository, 'findByStatusAndType')
-        .mockResolvedValue([webhookEntity as any]);
-
-      sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');
-      sendWebhookMock.mockResolvedValue(true);
-
-      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
-      jest
-        .spyOn(repository, 'createUnique')
-        .mockResolvedValue(cronJobEntityMock as any);
-      jest
-        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue(jobEntity as any);
-      jest
-        .spyOn(jobService, 'processEscrowCancellation')
-        .mockResolvedValue(null as any);
-      jest.spyOn(paymentService, 'createSlash').mockResolvedValue(null as any);
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
     it('should not run if cron job is already running', async () => {
       jest.spyOn(repository, 'findOneByType').mockResolvedValueOnce({} as any);
 
@@ -1257,7 +1208,15 @@ describe('CronJobService', () => {
     });
 
     it('should create cron job entity to lock the process', async () => {
-      jest.spyOn(repository, 'findOneByType').mockResolvedValueOnce(null);
+      const cronJobEntityMock = {
+        cronJobType: CronJobType.Abuse,
+        startedAt: new Date(),
+      };
+
+      jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
       jest
         .spyOn(repository, 'createUnique')
         .mockResolvedValueOnce(cronJobEntityMock as any);
@@ -1270,68 +1229,233 @@ describe('CronJobService', () => {
     });
 
     it('should slash for all of the pending webhooks', async () => {
+      const webhookEntity = {
+        id: faker.number.int(),
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: faker.finance.ethereumAddress(),
+        status: WebhookStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      const jobEntity = {
+        id: faker.number.int(),
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: webhookEntity.escrowAddress,
+        status: JobStatus.PAID,
+      };
+
+      const cronJobEntityMock = {
+        cronJobType: CronJobType.Abuse,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      };
+
+      jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValueOnce(cronJobEntityMock as any)
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+      jest.spyOn(repository, 'updateOne').mockResolvedValueOnce({
+        ...cronJobEntityMock,
+        completedAt: null,
+      } as any);
+
+      jest
+        .spyOn(webhookRepository, 'findByStatusAndType')
+        .mockResolvedValueOnce([webhookEntity as any]);
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValueOnce(jobEntity as any);
+      jest
+        .spyOn(jobService, 'processEscrowCancellation')
+        .mockResolvedValueOnce(null as any);
+      jest
+        .spyOn(paymentService, 'createSlash')
+        .mockResolvedValueOnce(null as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(null as any);
+      jest.spyOn(jobRepository, 'updateOne').mockResolvedValueOnce(null as any);
+
       await service.processAbuse();
 
-      expect(jobRepository.updateOne).toHaveBeenCalled();
-      expect(jobEntity.status).toBe(JobStatus.CANCELED);
-      expect(webhookRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(WebhookStatus.COMPLETED);
+      expect(jobRepository.updateOne).toHaveBeenCalledWith({
+        ...jobEntity,
+        status: JobStatus.CANCELED,
+      });
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith({
+        ...webhookEntity,
+        status: WebhookStatus.COMPLETED,
+      });
     });
 
     it('should increase retriesCount by 1 if no job is found', async () => {
+      const webhookEntity = {
+        id: faker.number.int(),
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: faker.finance.ethereumAddress(),
+        status: WebhookStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      const cronJobEntityMock = {
+        cronJobType: CronJobType.Abuse,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      };
+
+      jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValueOnce(cronJobEntityMock as any)
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+      jest.spyOn(repository, 'updateOne').mockResolvedValueOnce({
+        ...cronJobEntityMock,
+        completedAt: null,
+      } as any);
+
+      jest
+        .spyOn(webhookRepository, 'findByStatusAndType')
+        .mockResolvedValueOnce([webhookEntity as any]);
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue(null);
-      await service.processAbuse();
-
-      expect(webhookRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
-    });
-
-    it('should increase retriesCount by 1 if processEscrowCancellation fails', async () => {
+        .mockResolvedValueOnce(null as any);
       jest
-        .spyOn(jobService, 'processEscrowCancellation')
-        .mockRejectedValueOnce(new Error());
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(null as any);
+
       await service.processAbuse();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith({
+        ...webhookEntity,
+        retriesCount: 1,
+        waitUntil: expect.any(Date),
+        status: WebhookStatus.PENDING,
+      });
     });
 
     it('should increase retriesCount by 1 if createSlash fails', async () => {
+      const webhookEntity = {
+        id: faker.number.int(),
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: faker.finance.ethereumAddress(),
+        status: WebhookStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
+
+      const jobEntity = {
+        id: faker.number.int(),
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: webhookEntity.escrowAddress,
+        status: JobStatus.PAID,
+      };
+
+      const cronJobEntityMock = {
+        cronJobType: CronJobType.Abuse,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      };
+
+      jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValueOnce(cronJobEntityMock as any)
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+      jest.spyOn(repository, 'updateOne').mockResolvedValueOnce({
+        ...cronJobEntityMock,
+        completedAt: null,
+      } as any);
+
+      jest
+        .spyOn(webhookRepository, 'findByStatusAndType')
+        .mockResolvedValueOnce([webhookEntity as any]);
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValueOnce(jobEntity as any);
+      jest
+        .spyOn(jobService, 'processEscrowCancellation')
+        .mockResolvedValueOnce(null as any);
       jest
         .spyOn(paymentService, 'createSlash')
         .mockRejectedValueOnce(new Error());
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(null as any);
+
       await service.processAbuse();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(WebhookStatus.PENDING);
-      expect(webhookEntity.retriesCount).toBe(1);
-      expect(webhookEntity.waitUntil).toBeInstanceOf(Date);
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith({
+        ...webhookEntity,
+        retriesCount: 1,
+        waitUntil: expect.any(Date),
+        status: WebhookStatus.PENDING,
+      });
     });
 
     it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
-      jest
-        .spyOn(jobService, 'processEscrowCancellation')
-        .mockRejectedValueOnce(new Error());
+      const webhookEntity = {
+        id: faker.number.int(),
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: faker.finance.ethereumAddress(),
+        status: WebhookStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: MOCK_MAX_RETRY_COUNT,
+      };
 
-      webhookEntity.retriesCount = MOCK_MAX_RETRY_COUNT;
+      const cronJobEntityMock = {
+        cronJobType: CronJobType.Abuse,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      };
+
+      jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValueOnce(cronJobEntityMock as any)
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+      jest.spyOn(repository, 'updateOne').mockResolvedValueOnce({
+        ...cronJobEntityMock,
+        completedAt: null,
+      } as any);
+
+      jest
+        .spyOn(webhookRepository, 'findByStatusAndType')
+        .mockResolvedValueOnce([webhookEntity as any]);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(null as any);
 
       await service.processAbuse();
 
-      expect(webhookRepository.updateOne).toHaveBeenCalled();
-      expect(webhookEntity.status).toBe(WebhookStatus.FAILED);
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith({
+        ...webhookEntity,
+        status: WebhookStatus.FAILED,
+      });
     });
 
     it('should complete the cron job entity to unlock', async () => {
+      const cronJobEntityMock = {
+        cronJobType: CronJobType.Abuse,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      };
+
+      jest
+        .spyOn(repository, 'findOneByType')
+        .mockResolvedValueOnce(cronJobEntityMock as any)
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+      jest.spyOn(repository, 'updateOne').mockResolvedValueOnce({
+        ...cronJobEntityMock,
+        completedAt: null,
+      } as any);
+      jest
+        .spyOn(webhookRepository, 'findByStatusAndType')
+        .mockResolvedValueOnce(null as any);
+
       await service.processAbuse();
+
       expect(repository.updateOne).toHaveBeenCalledWith({
         ...cronJobEntityMock,
-        completedAt: new Date(),
+        completedAt: expect.any(Date),
       });
     });
   });

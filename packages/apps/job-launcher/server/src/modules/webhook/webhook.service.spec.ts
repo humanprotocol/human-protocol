@@ -30,6 +30,7 @@ import { Web3ConfigService } from '../../common/config/web3-config.service';
 import { ControlledError } from '../../common/errors/controlled';
 import { JobRepository } from '../job/job.repository';
 import { JobRequestType } from '../../common/enums/job';
+import { faker } from '@faker-js/faker/.';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -351,10 +352,10 @@ describe('WebhookService', () => {
 
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue({ requestType: JobRequestType.FORTUNE } as any);
+        .mockResolvedValueOnce({ requestType: JobRequestType.FORTUNE } as any);
       jest
         .spyOn(jobService, 'getOracleType')
-        .mockReturnValue(OracleType.FORTUNE);
+        .mockReturnValueOnce(OracleType.FORTUNE);
       jest.spyOn(webhookService as any, 'createIncomingWebhook');
 
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
@@ -393,15 +394,15 @@ describe('WebhookService', () => {
     it('should create a new incoming webhook', async () => {
       const dto = {
         chainId: ChainId.LOCALHOST,
-        escrowAddress: '',
+        escrowAddress: faker.finance.ethereumAddress(),
       };
 
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue({ requestType: JobRequestType.FORTUNE } as any);
+        .mockResolvedValueOnce({ requestType: JobRequestType.FORTUNE } as any);
       jest
         .spyOn(jobService, 'getOracleType')
-        .mockReturnValue(OracleType.FORTUNE);
+        .mockReturnValueOnce(OracleType.FORTUNE);
       const result = await (webhookService as any).createIncomingWebhook(
         dto as any,
       );
@@ -409,7 +410,7 @@ describe('WebhookService', () => {
       expect(result).toBe(undefined);
       expect(webhookRepository.createUnique).toHaveBeenCalledWith({
         chainId: ChainId.LOCALHOST,
-        escrowAddress: '',
+        escrowAddress: dto.escrowAddress,
         hasSignature: false,
         oracleType: OracleType.FORTUNE,
         retriesCount: 0,
@@ -421,12 +422,12 @@ describe('WebhookService', () => {
     it('should create a new incoming webhook', async () => {
       const dto = {
         chainId: ChainId.LOCALHOST,
-        escrowAddress: '',
+        escrowAddress: faker.finance.ethereumAddress(),
       };
 
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
-        .mockResolvedValue(undefined as any);
+        .mockResolvedValueOnce(undefined as any);
 
       await expect(
         (webhookService as any).createIncomingWebhook(dto as any),
