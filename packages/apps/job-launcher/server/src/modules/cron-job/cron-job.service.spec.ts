@@ -1229,8 +1229,6 @@ describe('CronJobService', () => {
       sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');
       sendWebhookMock.mockResolvedValue(true);
 
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
-
       jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
       jest
         .spyOn(repository, 'createUnique')
@@ -1249,7 +1247,7 @@ describe('CronJobService', () => {
     });
 
     it('should not run if cron job is already running', async () => {
-      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
+      jest.spyOn(repository, 'findOneByType').mockResolvedValueOnce({} as any);
 
       const startCronJobMock = jest.spyOn(service, 'startCronJob');
 
@@ -1259,13 +1257,16 @@ describe('CronJobService', () => {
     });
 
     it('should create cron job entity to lock the process', async () => {
+      jest.spyOn(repository, 'findOneByType').mockResolvedValueOnce(null);
       jest
-        .spyOn(service, 'startCronJob')
+        .spyOn(repository, 'createUnique')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await service.processAbuse();
 
-      expect(service.startCronJob).toHaveBeenCalledWith(CronJobType.Abuse);
+      expect(repository.createUnique).toHaveBeenCalledWith({
+        cronJobType: CronJobType.Abuse,
+      });
     });
 
     it('should slash for all of the pending webhooks', async () => {
@@ -1327,15 +1328,11 @@ describe('CronJobService', () => {
     });
 
     it('should complete the cron job entity to unlock', async () => {
-      jest
-        .spyOn(service, 'completeCronJob')
-        .mockResolvedValueOnce(cronJobEntityMock as any);
-
       await service.processAbuse();
-
-      expect(service.completeCronJob).toHaveBeenCalledWith(
-        cronJobEntityMock as any,
-      );
+      expect(repository.updateOne).toHaveBeenCalledWith({
+        ...cronJobEntityMock,
+        completedAt: new Date(),
+      });
     });
   });
 });

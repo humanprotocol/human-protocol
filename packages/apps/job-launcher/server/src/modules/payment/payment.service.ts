@@ -173,30 +173,13 @@ export class PaymentService {
       'Top up',
     );
 
-    const paymentIntent = await this.stripe.paymentIntents.retrieve(
+    const paymentIntent = await this.handleStripePaymentIntent(
       invoice.payment_intent as string,
+      paymentMethodId,
+      false, // on-session payment
     );
 
-    try {
-      // Associate the payment method with the payment intent.
-      await this.stripe.paymentIntents.update(paymentIntent.id, {
-        payment_method: paymentMethodId,
-      });
-    } catch {
-      throw new ControlledError(
-        ErrorPayment.PaymentMethodAssociationFailed,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-
-    if (!paymentIntent?.client_secret) {
-      throw new ControlledError(
-        ErrorPayment.ClientSecretDoesNotExist,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    // Check if the transaction already exists to prevent duplicates.
+    // Check if the transaction already exists to prevent duplicates
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
       paymentIntent.id,
     );
@@ -221,7 +204,7 @@ export class PaymentService {
     });
     await this.paymentRepository.createUnique(newPaymentEntity);
 
-    return paymentIntent.client_secret;
+    return paymentIntent.client_secret!;
   }
 
   public async confirmFiatPayment(
@@ -461,6 +444,44 @@ export class PaymentService {
     return invoice;
   }
 
+  private async handleStripePaymentIntent(
+    paymentIntentId: string,
+    paymentMethodId: string,
+    offSession: boolean,
+  ): Promise<Stripe.PaymentIntent> {
+    try {
+      if (offSession) {
+        // Use confirm for off-session payments
+        await this.stripe.paymentIntents.confirm(paymentIntentId, {
+          payment_method: paymentMethodId,
+          off_session: true,
+        });
+      } else {
+        // Use update for on-session payments
+        await this.stripe.paymentIntents.update(paymentIntentId, {
+          payment_method: paymentMethodId,
+        });
+      }
+    } catch {
+      throw new ControlledError(
+        ErrorPayment.PaymentMethodAssociationFailed,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const paymentIntent =
+      await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (!paymentIntent?.client_secret) {
+      throw new ControlledError(
+        ErrorPayment.ClientSecretDoesNotExist,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return paymentIntent;
+  }
+
   public async createSlash(job: JobEntity): Promise<void> {
     const amount = this.serverConfigService.abuseAmount;
     const currency = PaymentCurrency.USD;
@@ -482,9 +503,6 @@ export class PaymentService {
       'Slash Job Id ' + job.id,
     );
 
-    const paymentIntent = await this.stripe.paymentIntents.retrieve(
-      invoice.payment_intent as string,
-    );
     const defaultPaymentMethod = await this.getDefaultPaymentMethod(
       user.stripeCustomerId,
     );
@@ -496,25 +514,11 @@ export class PaymentService {
       );
     }
 
-    try {
-      // Associate the payment method with the payment intent.
-      await this.stripe.paymentIntents.confirm(paymentIntent.id, {
-        payment_method: defaultPaymentMethod,
-        off_session: true,
-      });
-    } catch {
-      throw new ControlledError(
-        ErrorPayment.PaymentMethodAssociationFailed,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-
-    if (!paymentIntent?.client_secret) {
-      throw new ControlledError(
-        ErrorPayment.ClientSecretDoesNotExist,
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    const paymentIntent = await this.handleStripePaymentIntent(
+      invoice.payment_intent as string,
+      defaultPaymentMethod,
+      true, // off-session payment
+    );
 
     const newPaymentEntity = new PaymentEntity();
     Object.assign(newPaymentEntity, {
