@@ -1,0 +1,26 @@
+---
+source: src/graphql/staking_leaders_query.rs
+expression: query.query
+---
+query GetLeadersQuery($role: [String!]) {
+  leaders(where: {role_in: $role, }) {
+    id
+    address
+    amountStaked
+    amountAllocated
+    amountLocked
+    lockedUntilTimestamp
+    amountWithdrawn
+    amountSlashed
+    reputation
+    reward
+    amountJobsLaunched
+    role
+    fee
+    publicKey
+    webhookUrl
+    url
+  }
+}
+
+
