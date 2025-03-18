@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { paginateAndSortResults } from '../../common/utils/pagination.utils';
 import {
+  DiscoveredJob,
   JobsDiscoveryParamsCommand,
   JobsDiscoveryResponse,
-  JobsDiscoveryResponseItem,
 } from './model/jobs-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -31,15 +31,15 @@ export class JobsDiscoveryService {
       filteredJobs,
       command.data.page,
       command.data.pageSize,
-      command.data.sortField as keyof JobsDiscoveryResponseItem,
+      command.data.sortField as keyof DiscoveredJob,
       command.data.sort,
     );
   }
 
   private applyFilters(
-    jobs: JobsDiscoveryResponseItem[],
+    jobs: DiscoveredJob[],
     filters: JobsDiscoveryParamsCommand['data'],
-  ): JobsDiscoveryResponseItem[] {
+  ): DiscoveredJob[] {
     const difference = Object.values(JobDiscoveryFieldName).filter(
       (value) => !filters.fields?.includes(value),
     );
@@ -92,21 +92,19 @@ export class JobsDiscoveryService {
     return `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`;
   }
 
-  async getCachedJobs(
-    oracleAddress: string,
-  ): Promise<JobsDiscoveryResponseItem[]> {
+  async getCachedJobs(oracleAddress: string): Promise<DiscoveredJob[]> {
     const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
 
-    const cachedJobs = await this.cacheManager.get<
-      JobsDiscoveryResponseItem[] | undefined
-    >(cacheKey);
+    const cachedJobs = await this.cacheManager.get<DiscoveredJob[] | undefined>(
+      cacheKey,
+    );
 
     return cachedJobs || [];
   }
 
   async setCachedJobs(
     oracleAddress: string,
-    jobs: JobsDiscoveryResponseItem[],
+    jobs: DiscoveredJob[],
   ): Promise<void> {
     const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
     await this.cacheManager.set(cacheKey, jobs);

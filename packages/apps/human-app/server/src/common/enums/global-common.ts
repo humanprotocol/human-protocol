@@ -3,7 +3,7 @@ export enum JobDiscoveryFieldName {
   RewardAmount = 'reward_amount',
   RewardToken = 'reward_token',
   CreatedAt = 'created_at',
-  Qualifications = 'qualifications',
+  UpdatedAt = 'updated_at',
 }
 
 export enum JobStatus {
