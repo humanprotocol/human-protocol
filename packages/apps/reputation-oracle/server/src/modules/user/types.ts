@@ -10,7 +10,7 @@ import { UserEntity } from './user.entity';
  * - Web2User - is "Worker", admin user and HUMAN App; they always
  * have email & password, but might not have evmAddress
  *
- * Until we split the DB model - we differentiate them in code using differen types.
+ * Until we split the DB model - we differentiate them in code using different types.
  */
 
 export type Web2UserEntity = SetNonNullable<UserEntity, 'email' | 'password'>;
