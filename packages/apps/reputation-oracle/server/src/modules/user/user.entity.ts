@@ -3,9 +3,11 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
+
 import type { KycEntity } from '../kyc/kyc.entity';
-import type { SiteKeyEntity } from './site-key.entity';
 import type { UserQualificationEntity } from '../qualification/user-qualification.entity';
+
+import type { SiteKeyEntity } from './site-key.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',

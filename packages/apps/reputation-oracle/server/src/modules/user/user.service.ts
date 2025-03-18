@@ -1,17 +1,18 @@
 import { KVStoreClient, KVStoreUtils } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 
-import { Web3ConfigService } from '../../config/web3-config.service';
 import { SignatureType } from '../../common/enums/web3';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as web3Utils from '../../utils/web3';
 import * as securityUtils from '../../utils/security';
+import * as web3Utils from '../../utils/web3';
 
 import { KycStatus } from '../kyc/constants';
 import { Web3Service } from '../web3/web3.service';
 
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
+import { OperatorUserEntity, Web2UserEntity } from './types';
 import { Role as UserRole, UserStatus, UserEntity } from './user.entity';
 import {
   UserError,
@@ -20,7 +21,6 @@ import {
   InvalidWeb3SignatureError,
 } from './user.error';
 import { UserRepository } from './user.repository';
-import { OperatorUserEntity, Web2UserEntity } from './types';
 
 export enum OperatorStatus {
   ACTIVE = 'active',

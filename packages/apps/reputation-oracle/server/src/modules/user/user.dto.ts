@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
+
 import { SignatureType } from '../../common/enums/web3';
 import {
   IsLowercasedEnum,

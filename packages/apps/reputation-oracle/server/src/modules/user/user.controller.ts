@@ -16,12 +16,14 @@ import {
   Get,
   UseFilters,
 } from '@nestjs/common';
+
 import { Public } from '../../common/decorators';
 import { SignatureType } from '../../common/enums/web3';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
-import { prepareSignatureBody } from '../../utils/web3';
+import * as web3Utils from '../../utils/web3';
+
 import {
   DisableOperatorDto,
   PrepareSignatureDto,
@@ -33,9 +35,9 @@ import {
   RegistrationInExchangeOraclesResponseDto,
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
-import { UserService } from './user.service';
-import { UserRepository } from './user.repository';
 import { UserErrorFilter } from './user.error.filter';
+import { UserRepository } from './user.repository';
+import { UserService } from './user.service';
 
 /**
  * TODO:
@@ -160,7 +162,7 @@ export class UserController {
       nonce = user?.nonce;
     }
 
-    const preparedSignatureBody = await prepareSignatureBody({
+    const preparedSignatureBody = await web3Utils.prepareSignatureBody({
       from: data.address,
       to: this.web3ConfigService.operatorAddress,
       contents: data.type,

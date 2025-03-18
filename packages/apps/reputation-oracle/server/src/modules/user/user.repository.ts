@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, In } from 'typeorm';
+
 import { BaseRepository } from '../../database/base.repository';
+
 import { Role, UserEntity } from './user.entity';
 
 type FindOptions = {

@@ -1,4 +1,5 @@
 import { SetNonNullable } from 'type-fest';
+
 import { UserEntity } from './user.entity';
 
 /**

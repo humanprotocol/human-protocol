@@ -7,12 +7,13 @@ import { Test } from '@nestjs/testing';
 
 import { generateEthWallet } from '../../../test/fixtures/web3';
 
-import { Web3ConfigService } from '../../config/web3-config.service';
 import { SignatureType } from '../../common/enums/web3';
+import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';
 
+import { KycStatus } from '../kyc/constants';
 import { generateKycEntity } from '../kyc/fixtures';
 import { mockWeb3ConfigService } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
@@ -22,6 +23,8 @@ import {
   generateOperator,
   generateWorkerUser,
 } from './fixtures';
+import { SiteKeyRepository } from './site-key.repository';
+import { SiteKeyType } from './site-key.entity';
 import { Role, UserStatus } from './user.entity';
 import {
   DuplicatedWalletAddressError,
@@ -31,9 +34,6 @@ import {
 } from './user.error';
 import { UserRepository } from './user.repository';
 import { UserService, OperatorStatus } from './user.service';
-import { SiteKeyRepository } from './site-key.repository';
-import { SiteKeyType } from './site-key.entity';
-import { KycStatus } from '../kyc/constants';
 
 const mockUserRepository = createMock<UserRepository>();
 const mockSiteKeyRepository = createMock<SiteKeyRepository>();
