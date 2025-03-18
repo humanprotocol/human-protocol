@@ -312,6 +312,15 @@ export const CryptoPayForm = ({
                 setPaymentTokenSymbol(symbol);
                 setPaymentTokenAddress(address);
                 setTokenDecimals(decimals);
+                if (amount) {
+                  const maxDecimals = Math.min(decimals, 6);
+                  const [integerPart, decimalPart] = amount.split('.');
+                  if (decimalPart && decimalPart.length > maxDecimals) {
+                    setAmount(
+                      `${integerPart}.${decimalPart.slice(0, maxDecimals)}`,
+                    );
+                  }
+                }
               }}
             />
             <FormControl fullWidth>
@@ -320,7 +329,8 @@ export const CryptoPayForm = ({
                 type="number"
                 onChange={(e) => {
                   let value = e.target.value;
-                  if (/^\d*\.?\d{0,6}$/.test(value)) {
+                  const regex = new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`);
+                  if (regex.test(value)) {
                     setAmount(value);
                   }
                 }}

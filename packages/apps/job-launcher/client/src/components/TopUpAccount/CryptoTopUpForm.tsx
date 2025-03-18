@@ -60,6 +60,14 @@ export const CryptoTopUpForm = () => {
     setTokenSymbol(symbol);
     setTokenAddress(address);
     setTokenDecimals(decimals);
+
+    if (amount) {
+      const maxDecimals = Math.min(decimals, 6);
+      const [integerPart, decimalPart] = amount.split('.');
+      if (decimalPart && decimalPart.length > maxDecimals) {
+        setAmount(`${integerPart}.${decimalPart.slice(0, maxDecimals)}`);
+      }
+    }
   };
 
   const handleTopUpAccount = async () => {
@@ -148,7 +156,9 @@ export const CryptoTopUpForm = () => {
                 value={amount}
                 onChange={(e) => {
                   let value = e.target.value;
-                  if (/^\d*\.?\d{0,6}$/.test(value)) {
+                  const maxDecimals = Math.min(tokenDecimals, 6);
+                  const regex = new RegExp(`^\\d*\\.?\\d{0,${maxDecimals}}$`);
+                  if (regex.test(value)) {
                     setAmount(value);
                   }
                 }}

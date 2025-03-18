@@ -147,7 +147,7 @@ export const FiatTopUpForm = () => {
                   type="number"
                   onChange={(e) => {
                     let value = e.target.value;
-                    if (/^\d*\.?\d{0,6}$/.test(value)) {
+                    if (/^\d*\.?\d{0,2}$/.test(value)) {
                       setAmount(value);
                     }
                   }}

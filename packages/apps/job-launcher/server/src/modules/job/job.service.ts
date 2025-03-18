@@ -117,6 +117,7 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { UserEntity } from '../user/user.entity';
 import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { getTokenDecimals } from '../../common/utils/tokens';
 
 @Injectable()
 export class JobService {
@@ -799,21 +800,14 @@ export class JobService {
       dto.escrowFundToken,
     );
 
-    const paymentTokenDecimals = Math.min(
-      (
-        TOKEN_ADDRESSES[chainId]?.[dto.paymentCurrency as EscrowFundToken] ?? {
-          decimals: 6,
-        }
-      ).decimals,
-      6,
+    const paymentTokenDecimals = getTokenDecimals(
+      chainId,
+      dto.paymentCurrency as EscrowFundToken,
     );
-    const fundTokenDecimals = Math.min(
-      (
-        TOKEN_ADDRESSES[chainId]?.[dto.escrowFundToken as EscrowFundToken] ?? {
-          decimals: 6,
-        }
-      ).decimals,
-      6,
+
+    const fundTokenDecimals = getTokenDecimals(
+      chainId,
+      dto.escrowFundToken as EscrowFundToken,
     );
 
     const paymentCurrencyFee = Number(
