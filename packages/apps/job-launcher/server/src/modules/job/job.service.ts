@@ -117,6 +117,7 @@ import { WhitelistService } from '../whitelist/whitelist.service';
 import { UserEntity } from '../user/user.entity';
 import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { getTokenDecimals } from '../../common/utils/tokens';
 
 @Injectable()
 export class JobService {
@@ -799,20 +800,44 @@ export class JobService {
       dto.escrowFundToken,
     );
 
-    const paymentCurrencyFee = max(
-      div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
-      mul(div(feePercentage, 100), dto.paymentAmount),
+    const paymentTokenDecimals = getTokenDecimals(
+      chainId,
+      dto.paymentCurrency as EscrowFundToken,
     );
-    const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
+
+    const fundTokenDecimals = getTokenDecimals(
+      chainId,
+      dto.escrowFundToken as EscrowFundToken,
+    );
+
+    const paymentCurrencyFee = Number(
+      max(
+        div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
+        mul(div(feePercentage, 100), dto.paymentAmount),
+      ).toFixed(paymentTokenDecimals),
+    );
+    const totalPaymentAmount = Number(
+      add(dto.paymentAmount, paymentCurrencyFee).toFixed(paymentTokenDecimals),
+    );
 
     const fundTokenFee =
       dto.paymentCurrency === dto.escrowFundToken
         ? paymentCurrencyFee
-        : mul(mul(paymentCurrencyFee, paymentCurrencyRate), fundTokenRate);
+        : Number(
+            mul(
+              mul(paymentCurrencyFee, paymentCurrencyRate),
+              fundTokenRate,
+            ).toFixed(fundTokenDecimals),
+          );
     const fundTokenAmount =
       dto.paymentCurrency === dto.escrowFundToken
         ? dto.paymentAmount
-        : mul(mul(dto.paymentAmount, paymentCurrencyRate), fundTokenRate);
+        : Number(
+            mul(
+              mul(dto.paymentAmount, paymentCurrencyRate),
+              fundTokenRate,
+            ).toFixed(fundTokenDecimals),
+          );
 
     // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
@@ -999,7 +1024,7 @@ export class JobService {
     const escrowAddress = await escrowClient.createEscrow(
       (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
         jobEntity.token as EscrowFundToken
-      ]!,
+      ]!.address,
       getTrustedHandlers(),
       jobEntity.userId.toString(),
       {
@@ -1067,9 +1092,13 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
+    const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+      jobEntity.token as EscrowFundToken
+    ]!;
+
     const weiAmount = ethers.parseUnits(
       jobEntity.fundAmount.toString(),
-      'ether',
+      token.decimals,
     );
     await escrowClient.fund(jobEntity.escrowAddress, weiAmount, {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),

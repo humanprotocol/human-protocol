@@ -57,6 +57,8 @@ export const CryptoPayForm = ({
   const { user } = useAppSelector((state) => state.auth);
   const [paymentTokenRate, setPaymentTokenRate] = useState<number>(0);
   const [fundTokenRate, setFundTokenRate] = useState<number>(0);
+  const [decimals, setDecimals] = useState<number>(6);
+  const [tokenDecimals, setTokenDecimals] = useState<number>(18);
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -91,6 +93,19 @@ export const CryptoPayForm = ({
     fetchRates();
   }, [paymentTokenSymbol, fundTokenSymbol]);
 
+  useEffect(() => {
+    if (amount) {
+      const [integerPart, decimalPart] = amount.split('.');
+      if (decimalPart && decimalPart.length > decimals) {
+        setAmount(`${integerPart}.${decimalPart.slice(0, decimals)}`);
+      }
+    }
+  }, [decimals, amount]);
+
+  useEffect(() => {
+    setDecimals(Math.min(tokenDecimals, 6));
+  }, [tokenDecimals]);
+
   const { data: jobLauncherFee } = useReadContract({
     address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
     abi: KVStoreABI,
@@ -113,13 +128,17 @@ export const CryptoPayForm = ({
     if (!amount) return 0;
     const amountDecimal = new Decimal(amount);
     const feeDecimal = new Decimal(jobLauncherFee as string).div(100);
-    return Decimal.max(minFeeToken, amountDecimal.mul(feeDecimal)).toNumber();
-  }, [amount, minFeeToken, jobLauncherFee]);
+    return Number(
+      Decimal.max(minFeeToken, amountDecimal.mul(feeDecimal)).toFixed(decimals),
+    );
+  }, [amount, jobLauncherFee, minFeeToken, decimals]);
 
   const totalAmount = useMemo(() => {
     if (!amount) return 0;
-    return new Decimal(amount).plus(feeAmount).toNumber();
-  }, [amount, feeAmount]);
+    return Number(
+      new Decimal(amount).plus(feeAmount).toNumber().toFixed(decimals),
+    );
+  }, [amount, decimals, feeAmount]);
 
   const totalUSDAmount = useMemo(() => {
     if (!totalAmount || !paymentTokenRate) return 0;
@@ -135,7 +154,7 @@ export const CryptoPayForm = ({
 
   const fundAmount = useMemo(() => {
     if (!amount || !conversionRate) return 0;
-    return new Decimal(amount).mul(conversionRate).toNumber();
+    return Number(new Decimal(amount).mul(conversionRate));
   }, [amount, conversionRate]);
 
   const currentBalance = useMemo(() => {
@@ -146,24 +165,19 @@ export const CryptoPayForm = ({
     );
   }, [user, paymentTokenSymbol]);
 
-  const accountAmount = useMemo(
-    () => new Decimal(currentBalance),
-    [currentBalance],
-  );
-
   const balancePayAmount = useMemo(() => {
-    if (!payWithAccountBalance) return new Decimal(0);
+    if (!payWithAccountBalance) return 0;
     const totalAmountDecimal = new Decimal(totalAmount);
-    if (totalAmountDecimal.lessThan(accountAmount)) return totalAmountDecimal;
-    return accountAmount;
-  }, [payWithAccountBalance, totalAmount, accountAmount]);
+    if (totalAmountDecimal.lessThan(currentBalance)) return totalAmountDecimal;
+    return currentBalance;
+  }, [payWithAccountBalance, totalAmount, currentBalance]);
 
   const walletPayAmount = useMemo(() => {
-    if (!payWithAccountBalance) return new Decimal(totalAmount);
+    if (!payWithAccountBalance) return totalAmount;
     const totalAmountDecimal = new Decimal(totalAmount);
-    if (totalAmountDecimal.lessThan(accountAmount)) return new Decimal(0);
-    return totalAmountDecimal.minus(accountAmount);
-  }, [payWithAccountBalance, totalAmount, accountAmount]);
+    if (totalAmountDecimal.lessThan(currentBalance)) return 0;
+    return Number(totalAmountDecimal.minus(currentBalance));
+  }, [payWithAccountBalance, totalAmount, currentBalance]);
 
   const handlePay = async () => {
     if (
@@ -176,14 +190,14 @@ export const CryptoPayForm = ({
     ) {
       setIsLoading(true);
       try {
-        if (walletPayAmount.greaterThan(0)) {
+        if (walletPayAmount > 0) {
           const hash = await signer.writeContract({
             address: paymentTokenAddress as Address,
             abi: HMTokenABI,
             functionName: 'transfer',
             args: [
               jobLauncherAddress,
-              ethers.parseUnits(walletPayAmount.toString(), 18),
+              ethers.parseUnits(walletPayAmount.toString(), tokenDecimals),
             ],
           });
 
@@ -294,16 +308,32 @@ export const CryptoPayForm = ({
               value={paymentTokenSymbol}
               label={'Payment token'}
               labelId={'payment-token'}
-              onTokenChange={(symbol, address) => {
+              onTokenChange={(symbol, address, decimals) => {
                 setPaymentTokenSymbol(symbol);
                 setPaymentTokenAddress(address);
+                setTokenDecimals(decimals);
+                if (amount) {
+                  const maxDecimals = Math.min(decimals, 6);
+                  const [integerPart, decimalPart] = amount.split('.');
+                  if (decimalPart && decimalPart.length > maxDecimals) {
+                    setAmount(
+                      `${integerPart}.${decimalPart.slice(0, maxDecimals)}`,
+                    );
+                  }
+                }
               }}
             />
             <FormControl fullWidth>
               <TextField
                 value={amount}
                 type="number"
-                onChange={(e) => setAmount(e.target.value as string)}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  const regex = new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`);
+                  if (regex.test(value)) {
+                    setAmount(value);
+                  }
+                }}
                 placeholder="Amount"
               />
             </FormControl>
@@ -333,8 +363,9 @@ export const CryptoPayForm = ({
             >
               <Typography>Balance</Typography>
               <Typography color="text.secondary">
-                ~ {currentBalance?.toFixed(2) ?? '0'}{' '}
-                {paymentTokenSymbol?.toUpperCase() ?? 'HMT'}
+                {paymentTokenSymbol
+                  ? `${Number(currentBalance?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                  : ''}
               </Typography>
             </Box>
             <Box
@@ -351,7 +382,9 @@ export const CryptoPayForm = ({
                 >
                   <Typography>Amount</Typography>
                   <Typography color="text.secondary">
-                    {amount} {paymentTokenSymbol?.toUpperCase() ?? 'HMT'}
+                    {paymentTokenSymbol
+                      ? `${amount} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Stack>
                 <Stack
@@ -361,8 +394,10 @@ export const CryptoPayForm = ({
                 >
                   <Typography>Fee</Typography>
                   <Typography color="text.secondary">
-                    ({Number(jobLauncherFee)}%) {feeAmount}{' '}
-                    {paymentTokenSymbol?.toUpperCase() ?? 'HMT'}
+                    ({Number(jobLauncherFee)}%){' '}
+                    {paymentTokenSymbol
+                      ? `${Number(feeAmount.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Stack>
                 <Stack
@@ -372,8 +407,9 @@ export const CryptoPayForm = ({
                 >
                   <Typography>Total payment</Typography>
                   <Typography>
-                    {totalAmount} {paymentTokenSymbol?.toUpperCase() ?? 'HMT'}{' '}
-                    {`(~${totalUSDAmount.toFixed(2)} USD)`}
+                    {paymentTokenSymbol
+                      ? `${Number(totalAmount?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()} (~${totalUSDAmount.toFixed(2)} USD)`
+                      : ''}
                   </Typography>
                 </Stack>
               </Stack>
@@ -388,8 +424,9 @@ export const CryptoPayForm = ({
                 >
                   <Typography color="text.secondary">Balance</Typography>
                   <Typography color="text.secondary">
-                    {balancePayAmount.toString()}{' '}
-                    {paymentTokenSymbol?.toUpperCase() ?? 'HMT'}
+                    {paymentTokenSymbol
+                      ? `${Number(balancePayAmount?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Stack>
                 <Stack
@@ -399,8 +436,9 @@ export const CryptoPayForm = ({
                 >
                   <Typography color="text.secondary">Crypto Wallet</Typography>
                   <Typography color="text.secondary">
-                    {walletPayAmount.toString()}{' '}
-                    {paymentTokenSymbol?.toUpperCase() ?? 'HMT'}
+                    {paymentTokenSymbol
+                      ? `${Number(walletPayAmount?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Stack>
               </Stack>
@@ -415,7 +453,9 @@ export const CryptoPayForm = ({
             >
               <Typography>Fund Amount</Typography>
               <Typography color="text.secondary">
-                {fundAmount} {fundTokenSymbol?.toUpperCase() ?? 'HMT'}
+                {fundTokenSymbol && fundAmount
+                  ? `${Number(fundAmount?.toFixed(6))} ${fundTokenSymbol?.toUpperCase()}`
+                  : ''}
               </Typography>
             </Box>
           </Box>

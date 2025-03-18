@@ -44,9 +44,11 @@ import {
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentMethodIdDto,
+  TokensResponseDto,
   UserBalanceDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
+import { TokenDto } from './payment.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -440,7 +442,7 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Tokens retrieved successfully',
-    type: [Object],
+    type: [TokenDto],
   })
   @ApiResponse({
     status: 400,
@@ -449,7 +451,7 @@ export class PaymentController {
   @Get('/tokens/:chainId')
   public async getTokens(
     @Param('chainId') chainId: ChainId,
-  ): Promise<{ [key: string]: string }> {
+  ): Promise<TokensResponseDto> {
     const tokens = TOKEN_ADDRESSES[chainId];
     if (!tokens) {
       throw new ControlledError(

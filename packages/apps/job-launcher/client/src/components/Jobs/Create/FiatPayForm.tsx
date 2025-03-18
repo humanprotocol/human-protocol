@@ -95,7 +95,7 @@ export const FiatPayForm = ({
   useEffect(() => {
     const fetchRates = async () => {
       if (tokenSymbol) {
-        const rate = await getRate(tokenSymbol, 'usd');
+        const rate = await getRate('usd', tokenSymbol);
         setTokenRate(rate);
       }
     };
@@ -176,7 +176,6 @@ export const FiatPayForm = ({
       (jobLauncherFee as string) || 0,
     ).div(100);
     const minFeeDecimal = new Decimal(minFee || 0);
-
     const fundAmountDecimal = amountDecimal.mul(tokenRateDecimal);
     setFundAmount(fundAmountDecimal.toNumber());
 
@@ -329,7 +328,12 @@ export const FiatPayForm = ({
                       variant="outlined"
                       value={amount}
                       type="number"
-                      onChange={(e) => setAmount(e.target.value)}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (/^\d*\.?\d{0,2}$/.test(value)) {
+                          setAmount(value);
+                        }
+                      }}
                       sx={{ mb: 2 }}
                     />
                     {selectedCard ? (
@@ -402,7 +406,7 @@ export const FiatPayForm = ({
                   <Typography>Account Balance</Typography>
                   {user?.balance && (
                     <Typography color="text.secondary">
-                      {currentBalance.toFixed(2)} USD
+                      {Number(currentBalance.toFixed(6))} USD
                     </Typography>
                   )}
                 </Box>
@@ -420,7 +424,9 @@ export const FiatPayForm = ({
                     >
                       <Typography>Amount</Typography>
                       <Typography color="text.secondary">
-                        {amount} HMT
+                        {amount
+                          ? `${Number(Number(amount)?.toFixed(6))} USD`
+                          : ''}
                       </Typography>
                     </Stack>
                     <Stack
@@ -434,7 +440,10 @@ export const FiatPayForm = ({
                         {Number(jobLauncherFee) >= 0
                           ? `${Number(jobLauncherFee)}%`
                           : 'loading...'}
-                        ) {feeAmount.toFixed(2)} USD
+                        ){' '}
+                        {amount && feeAmount
+                          ? `${Number(feeAmount?.toFixed(6))} USD`
+                          : ''}
                       </Typography>
                     </Stack>
                     <Stack
@@ -443,7 +452,11 @@ export const FiatPayForm = ({
                       alignItems="center"
                     >
                       <Typography>Total payment</Typography>
-                      <Typography>{totalAmount.toFixed(2)} USD</Typography>
+                      <Typography>
+                        {amount && totalAmount
+                          ? `${Number(totalAmount?.toFixed(6))} USD`
+                          : ''}
+                      </Typography>
                     </Stack>
                   </Stack>
                 </Box>
@@ -457,7 +470,9 @@ export const FiatPayForm = ({
                     >
                       <Typography color="text.secondary">Balance</Typography>
                       <Typography color="text.secondary">
-                        {balancePayAmount.toFixed(2)} USD
+                        {amount
+                          ? `${Number(balancePayAmount?.toFixed(6))} USD`
+                          : ''}
                       </Typography>
                     </Stack>
                     <Stack
@@ -469,7 +484,9 @@ export const FiatPayForm = ({
                         Credit Card
                       </Typography>
                       <Typography color="text.secondary">
-                        {creditCardPayAmount.toFixed(2)} USD
+                        {amount && creditCardPayAmount
+                          ? `${Number(creditCardPayAmount?.toFixed(6))} USD`
+                          : ''}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -485,7 +502,9 @@ export const FiatPayForm = ({
                 >
                   <Typography>Fund Amount</Typography>
                   <Typography color="text.secondary">
-                    {fundAmount} {tokenSymbol?.toUpperCase() ?? 'HMT'}
+                    {tokenSymbol && fundAmount
+                      ? `${Number(fundAmount?.toFixed(6))} ${tokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Box>
               </Box>

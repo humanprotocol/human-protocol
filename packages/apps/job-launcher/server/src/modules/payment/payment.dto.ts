@@ -242,3 +242,21 @@ export class UserBalanceDto {
   @ApiProperty({ name: 'total_usd_amount' })
   totalUsdAmount: number;
 }
+
+export class TokenDto {
+  @ApiProperty({
+    description: 'The address of the token contract',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  address: string;
+
+  @ApiProperty({
+    description: 'The number of decimals used by the token',
+    example: 18,
+  })
+  decimals: number;
+}
+
+export class TokensResponseDto {
+  [key: string]: TokenDto;
+}

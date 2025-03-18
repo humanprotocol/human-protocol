@@ -231,9 +231,11 @@ describe('JobService', () => {
             manifestHash: MOCK_FILE_HASH,
             requestType: JobRequestType.FORTUNE,
             fee: expect.any(Number),
-            fundAmount: mul(
-              mul(fortuneJobDto.paymentAmount, paymentToUsdRate),
-              usdToTokenRate,
+            fundAmount: Number(
+              mul(
+                mul(fortuneJobDto.paymentAmount, paymentToUsdRate),
+                usdToTokenRate,
+              ).toFixed(6),
             ),
             status: JobStatus.PAID,
             waitUntil: expect.any(Date),
