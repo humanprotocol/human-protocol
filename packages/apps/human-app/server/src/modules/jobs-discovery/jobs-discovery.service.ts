@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { paginateAndSortResults } from '../../common/utils/pagination.utils';
+import {
+  Iteratee,
+  paginateAndSortResults,
+} from '../../common/utils/pagination.utils';
 import {
   DiscoveredJob,
   JobsDiscoveryParamsCommand,
@@ -13,6 +16,7 @@ import {
   JobDiscoveryFieldName,
   JobDiscoverySortField,
 } from '../../common/enums/global-common';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class JobsDiscoveryService {
@@ -30,11 +34,21 @@ export class JobsDiscoveryService {
       this.configService.chainIdsEnabled.includes(job.chain_id),
     );
 
+    const sortField =
+      command.data.sortField || JobDiscoverySortField.CREATED_AT;
+
+    let iteratee: JobDiscoverySortField | Iteratee<DiscoveredJob>;
+    if (sortField === JobDiscoverySortField.REWARD_AMOUNT) {
+      iteratee = (job: DiscoveredJob) => ethers.parseUnits(job[sortField], 18);
+    } else {
+      iteratee = sortField;
+    }
+
     return paginateAndSortResults(
       filteredJobs,
       command.data.page,
       command.data.pageSize,
-      command.data.sortField || JobDiscoverySortField.CREATED_AT,
+      iteratee,
       command.data.sort,
     );
   }
