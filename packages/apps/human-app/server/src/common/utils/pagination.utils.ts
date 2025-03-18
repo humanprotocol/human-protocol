@@ -4,7 +4,7 @@ export function paginateAndSortResults<T>(
   data: T[],
   page = 0,
   pageSize = 10,
-  sortField: keyof T | undefined = 'created_at' as keyof T,
+  sortField: keyof T,
   sortOrder = SortOrder.DESC,
 ): {
   results: T[];
@@ -15,10 +15,6 @@ export function paginateAndSortResults<T>(
 } {
   let results = data;
 
-  // Sorting
-  if (!sortField) {
-    sortField = 'created_at' as keyof T;
-  }
   results = results.sort((a, b) => {
     if (sortOrder === SortOrder.DESC) {
       return a[sortField] < b[sortField] ? 1 : -1;

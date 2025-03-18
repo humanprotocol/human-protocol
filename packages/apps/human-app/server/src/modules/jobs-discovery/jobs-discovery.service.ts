@@ -9,7 +9,10 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
-import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import {
+  JobDiscoveryFieldName,
+  JobDiscoverySortField,
+} from '../../common/enums/global-common';
 
 @Injectable()
 export class JobsDiscoveryService {
@@ -31,7 +34,7 @@ export class JobsDiscoveryService {
       filteredJobs,
       command.data.page,
       command.data.pageSize,
-      command.data.sortField as keyof DiscoveredJob,
+      command.data.sortField || JobDiscoverySortField.CREATED_AT,
       command.data.sort,
     );
   }

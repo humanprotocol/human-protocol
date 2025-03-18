@@ -14,6 +14,7 @@ import {
   ResignJobCommand,
 } from './model/job-assignment.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
+import { AssignmentSortField } from '../../common/enums/global-common';
 import { paginateAndSortResults } from '../../common/utils/pagination.utils';
 import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
 
@@ -105,7 +106,7 @@ export class JobAssignmentService {
         this.applyFilters(cachedData, command.data),
         command.data.page,
         command.data.pageSize,
-        command.data.sortField as keyof JobsFetchResponseItem,
+        command.data.sortField || AssignmentSortField.CREATED_AT,
         command.data.sort,
       );
     }
