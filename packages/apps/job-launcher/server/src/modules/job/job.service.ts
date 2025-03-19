@@ -878,13 +878,6 @@ export class JobService {
       });
     }
 
-    const paymentEntity = await this.paymentService.createWithdrawalPayment(
-      user.id,
-      totalPaymentAmount,
-      dto.paymentCurrency,
-      paymentCurrencyRate,
-    );
-
     const { createManifest } = this.createJobSpecificActions[requestType];
 
     let jobEntity = new JobEntity();
@@ -922,6 +915,13 @@ export class JobService {
       jobEntity.manifestUrl = url;
       jobEntity.manifestHash = hash;
     }
+
+    const paymentEntity = await this.paymentService.createWithdrawalPayment(
+      user.id,
+      totalPaymentAmount,
+      dto.paymentCurrency,
+      paymentCurrencyRate,
+    );
 
     jobEntity.chainId = chainId;
     jobEntity.reputationOracle = reputationOracle;
