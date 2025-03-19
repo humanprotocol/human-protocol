@@ -4,7 +4,7 @@
 export enum ErrorJob {
   NotFound = 'Job not found',
   NotCreated = 'Job has not been created',
-  NotActiveCard = 'Credit card not found',
+  NotActiveCard = 'Credit card not found. Please, add a credit card to your account.',
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
   ResultNotFound = 'Result not found',
