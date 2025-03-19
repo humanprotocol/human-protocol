@@ -16,7 +16,6 @@ export function MyJobsJobTypeFilter() {
       })),
     [t]
   );
-
   return (
     <Filtering
       clear={() => {
@@ -31,6 +30,8 @@ export function MyJobsJobTypeFilter() {
           job_type: jobType,
         });
       }}
+      showClearButton
+      showTitle
     />
   );
 }

@@ -21,7 +21,6 @@ export function MyJobsJobTypeFilterMobile() {
         option: jobType,
       }))}
       isChecked={(option) => option === filterParams.job_type}
-      isMobile={false}
       setFiltering={(jobType) => {
         setFilterParams({
           job_type: jobType,

@@ -23,6 +23,8 @@ export function MyJobsStatusFilter() {
           status,
         });
       }}
+      showClearButton
+      showTitle
     />
   );
 }

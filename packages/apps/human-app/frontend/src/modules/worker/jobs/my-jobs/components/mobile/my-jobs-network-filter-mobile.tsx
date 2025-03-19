@@ -22,7 +22,6 @@ export function MyJobsNetworkFilterMobile({
       }}
       filteringOptions={allNetworks}
       isChecked={(option) => option === filterParams.chain_id}
-      isMobile={false}
       setFiltering={(chainId) => {
         setFilterParams({
           chain_id: chainId,

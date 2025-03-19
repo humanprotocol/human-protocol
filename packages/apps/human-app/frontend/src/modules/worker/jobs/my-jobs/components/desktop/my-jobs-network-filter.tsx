@@ -26,6 +26,8 @@ export function MyJobsNetworkFilter({
           chain_id: chainId,
         });
       }}
+      showClearButton
+      showTitle
     />
   );
 }
