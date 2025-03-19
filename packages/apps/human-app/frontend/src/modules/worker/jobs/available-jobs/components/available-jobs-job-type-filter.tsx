@@ -5,7 +5,10 @@ import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/fi
 import { JOB_TYPES } from '@/shared/consts';
 import { useJobsFilterStore } from '../../hooks';
 
-export function AvailableJobsJobTypeFilter({ isMobile = false }) {
+export function AvailableJobsJobTypeFilter({
+  showClearButton = false,
+  showTitle = false,
+}) {
   const { t } = useTranslation();
   const { setFilterParams, filterParams } = useJobsFilterStore();
 
@@ -31,8 +34,9 @@ export function AvailableJobsJobTypeFilter({ isMobile = false }) {
       clear={handleClear}
       filteringOptions={filteringOptions}
       isChecked={(option) => option === filterParams.job_type}
-      isMobile={isMobile}
       setFiltering={handleFilterChange}
+      showClearButton={showClearButton}
+      showTitle={showTitle}
     />
   );
 }

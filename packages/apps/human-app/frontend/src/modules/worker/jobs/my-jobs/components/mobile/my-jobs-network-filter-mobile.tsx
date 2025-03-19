@@ -28,7 +28,6 @@ export function MyJobsNetworkFilterMobile({
           page: 0,
         });
       }}
-      isMobile
     />
   );
 }

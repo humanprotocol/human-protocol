@@ -105,10 +105,7 @@ export function AvailableJobsDrawerMobileView({
           {t('worker.jobs.network')}
         </Typography>
         <Stack alignItems="center" flexDirection="row">
-          <AvailableJobsNetworkFilter
-            chainIdsEnabled={chainIdsEnabled}
-            isMobile
-          />
+          <AvailableJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
         </Stack>
 
         <Divider
@@ -121,7 +118,7 @@ export function AvailableJobsDrawerMobileView({
           {t('worker.jobs.jobType')}
         </Typography>
         <Stack alignItems="center" flexDirection="row">
-          <AvailableJobsJobTypeFilter isMobile />
+          <AvailableJobsJobTypeFilter />
         </Stack>
       </Drawer>
     </Box>

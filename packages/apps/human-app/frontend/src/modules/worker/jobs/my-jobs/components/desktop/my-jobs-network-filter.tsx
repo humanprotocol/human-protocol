@@ -1,6 +1,5 @@
 /* eslint-disable camelcase --- ... */
 import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
-import { useIsMobile } from '@/shared/hooks';
 import { useMyJobsFilterStore, useGetAllNetworks } from '../../../hooks';
 
 interface MyJobsNetworkFilterProps {
@@ -12,7 +11,6 @@ export function MyJobsNetworkFilter({
 }: Readonly<MyJobsNetworkFilterProps>) {
   const { setFilterParams, filterParams } = useMyJobsFilterStore();
   const { allNetworks } = useGetAllNetworks(chainIdsEnabled);
-  const isMobile = useIsMobile();
 
   return (
     <Filtering
@@ -28,7 +26,8 @@ export function MyJobsNetworkFilter({
           chain_id: chainId,
         });
       }}
-      isMobile={isMobile}
+      showClearButton
+      showTitle
     />
   );
 }

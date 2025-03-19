@@ -27,7 +27,6 @@ export function MyJobsJobTypeFilterMobile() {
           page: 0,
         });
       }}
-      isMobile
     />
   );
 }
