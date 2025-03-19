@@ -697,7 +697,7 @@ export class PaymentService {
           userId,
           PaymentSource.FIAT,
         )
-      ).length == 0
+      ).length > 0
     );
   }
 
