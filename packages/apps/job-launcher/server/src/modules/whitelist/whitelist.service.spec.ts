@@ -37,16 +37,16 @@ describe('WhitelistService', () => {
       expect(result).toBe(true);
     });
 
-    // it('should return false if user is not whitelisted', async () => {
-    //   const userId = 2;
-    //   jest
-    //     .spyOn(whitelistRepository, 'findOneByUserId')
-    //     .mockResolvedValue(null);
+    it('should return false if user is not whitelisted', async () => {
+      const userId = 2;
+      jest
+        .spyOn(whitelistRepository, 'findOneByUserId')
+        .mockResolvedValue(null);
 
-    //   const result = await whitelistService.isUserWhitelisted(userId);
+      const result = await whitelistService.isUserWhitelisted(userId);
 
-    //   expect(whitelistRepository.findOneByUserId).toHaveBeenCalledWith(userId);
-    //   expect(result).toBe(false);
-    // });
+      expect(whitelistRepository.findOneByUserId).toHaveBeenCalledWith(userId);
+      expect(result).toBe(false);
+    });
   });
 });
