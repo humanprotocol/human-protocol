@@ -1,11 +1,10 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../user';
 import { Web3Module } from '../web3/web3.module';
-
-import { KycService } from './kyc.service';
 import { KycController } from './kyc.controller';
+import { KycService } from './kyc.service';
 import { KycRepository } from './kyc.repository';
 
 @Module({

@@ -2,21 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { CronJobType } from '../../common/enums/cron-job';
 
-import { CronJobService } from './cron-job.service';
-import { CronJobRepository } from './cron-job.repository';
-import { CronJobEntity } from './cron-job.entity';
 import { createMock } from '@golevelup/ts-jest';
-import { JobEntity } from '../job/job.entity';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
-import {
-  MOCK_ADDRESS,
-  MOCK_EXCHANGE_ORACLE_ADDRESS,
-  MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
-  MOCK_FILE_HASH,
-  MOCK_FILE_URL,
-  MOCK_MAX_RETRY_COUNT,
-  MOCK_TRANSACTION_HASH,
-} from '../../../test/constants';
 import {
   ChainId,
   Encryption,
@@ -26,35 +12,56 @@ import {
   KVStoreUtils,
   NETWORKS,
 } from '@human-protocol/sdk';
-import { JobService } from '../job/job.service';
+import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
+import { HttpService } from '@nestjs/axios';
+import { HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ethers } from 'ethers';
 import { DeepPartial } from 'typeorm';
+import {
+  MOCK_ADDRESS,
+  MOCK_EXCHANGE_ORACLE_ADDRESS,
+  MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
+  MOCK_FILE_HASH,
+  MOCK_FILE_URL,
+  MOCK_MAX_RETRY_COUNT,
+  MOCK_TRANSACTION_HASH,
+} from '../../../test/constants';
+import { AuthConfigService } from '../../common/config/auth-config.service';
+import { CvatConfigService } from '../../common/config/cvat-config.service';
+import { NetworkConfigService } from '../../common/config/network-config.service';
+import { PGPConfigService } from '../../common/config/pgp-config.service';
+import { ServerConfigService } from '../../common/config/server-config.service';
+import { SlackConfigService } from '../../common/config/slack-config.service';
+import { VisionConfigService } from '../../common/config/vision-config.service';
+import { Web3ConfigService } from '../../common/config/web3-config.service';
+import {
+  ErrorContentModeration,
+  ErrorCronJob,
+} from '../../common/constants/errors';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { WebhookStatus } from '../../common/enums/webhook';
+import { ControlledError } from '../../common/errors/controlled';
+import { ContentModerationRequestRepository } from '../content-moderation/content-moderation-request.repository';
+import { GCVContentModerationService } from '../content-moderation/gcv-content-moderation.service';
 import { CvatManifestDto } from '../job/job.dto';
-import { WebhookService } from '../webhook/webhook.service';
+import { JobEntity } from '../job/job.entity';
+import { JobRepository } from '../job/job.repository';
+import { JobService } from '../job/job.service';
+import { PaymentRepository } from '../payment/payment.repository';
+import { PaymentService } from '../payment/payment.service';
+import { QualificationService } from '../qualification/qualification.service';
+import { RateService } from '../rate/rate.service';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
-import { PaymentService } from '../payment/payment.service';
-import { JobRepository } from '../job/job.repository';
-import { PaymentRepository } from '../payment/payment.repository';
-import { ConfigService } from '@nestjs/config';
-import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 import { WebhookEntity } from '../webhook/webhook.entity';
-import { WebhookStatus } from '../../common/enums/webhook';
 import { WebhookRepository } from '../webhook/webhook.repository';
-import { HttpService } from '@nestjs/axios';
-import { ServerConfigService } from '../../common/config/server-config.service';
-import { AuthConfigService } from '../../common/config/auth-config.service';
-import { Web3ConfigService } from '../../common/config/web3-config.service';
-import { CvatConfigService } from '../../common/config/cvat-config.service';
-import { PGPConfigService } from '../../common/config/pgp-config.service';
-import { ErrorCronJob } from '../../common/constants/errors';
-import { ControlledError } from '../../common/errors/controlled';
-import { HttpStatus } from '@nestjs/common';
-import { RateService } from '../rate/rate.service';
-import { StatusEvent } from '@human-protocol/sdk/dist/graphql';
-import { ethers } from 'ethers';
-import { NetworkConfigService } from '../../common/config/network-config.service';
-import { QualificationService } from '../qualification/qualification.service';
+import { WebhookService } from '../webhook/webhook.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
+import { CronJobEntity } from './cron-job.entity';
+import { CronJobRepository } from './cron-job.repository';
+import { CronJobService } from './cron-job.service';
+import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -80,7 +87,7 @@ describe('CronJobService', () => {
     webhookRepository: WebhookRepository,
     storageService: StorageService,
     jobService: JobService,
-    // paymentService: PaymentService,
+    contentModerationService: GCVContentModerationService,
     jobRepository: JobRepository;
 
   const signerMock = {
@@ -114,6 +121,7 @@ describe('CronJobService', () => {
           },
         },
         JobService,
+        GCVContentModerationService,
         WebhookService,
         Encryption,
         ServerConfigService,
@@ -122,6 +130,17 @@ describe('CronJobService', () => {
         CvatConfigService,
         PGPConfigService,
         NetworkConfigService,
+        {
+          provide: VisionConfigService,
+          useValue: {
+            projectId: 'test-project-id',
+            privateKey: 'test-private-key',
+            clientEmail: 'test-client-email',
+            tempAsyncResultsBucket: 'test-temp-bucket',
+            moderationResultsBucket: 'test-moderation-results-bucket',
+          },
+        },
+        SlackConfigService,
         QualificationService,
         {
           provide: NetworkConfigService,
@@ -130,6 +149,10 @@ describe('CronJobService', () => {
           },
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
+        {
+          provide: ContentModerationRequestRepository,
+          useValue: createMock<ContentModerationRequestRepository>(),
+        },
         {
           provide: PaymentRepository,
           useValue: createMock<PaymentRepository>(),
@@ -156,6 +179,9 @@ describe('CronJobService', () => {
 
     service = module.get<CronJobService>(CronJobService);
     // paymentService = module.get<PaymentService>(PaymentService);
+    contentModerationService = module.get<GCVContentModerationService>(
+      GCVContentModerationService,
+    );
     jobService = module.get<JobService>(JobService);
     jobRepository = module.get<JobRepository>(JobRepository);
     repository = module.get<CronJobRepository>(CronJobRepository);
@@ -946,6 +972,113 @@ describe('CronJobService', () => {
       );
     });
   });
+
+  describe('moderateContentCronJob', () => {
+    let contentModerationMock: any;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntity1: Partial<JobEntity>, jobEntity2: Partial<JobEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.ContentModeration,
+        startedAt: new Date(),
+      };
+
+      jobEntity1 = {
+        id: 1,
+        status: JobStatus.PAID,
+      };
+
+      jobEntity2 = {
+        id: 2,
+        status: JobStatus.PAID,
+      };
+
+      jest
+        .spyOn(jobRepository, 'findByStatus')
+        .mockResolvedValue([jobEntity1 as any, jobEntity2 as any]);
+
+      contentModerationMock = jest.spyOn(
+        contentModerationService,
+        'moderateJob',
+      );
+      contentModerationMock.mockResolvedValue(true);
+
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValue(false);
+
+      jest.spyOn(repository, 'findOneByType').mockResolvedValue(null);
+      jest
+        .spyOn(repository, 'createUnique')
+        .mockResolvedValue(cronJobEntityMock as any);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if cron job is already running', async () => {
+      jest.spyOn(service, 'isCronJobRunning').mockResolvedValueOnce(true);
+
+      const startCronJobMock = jest.spyOn(service, 'startCronJob');
+
+      await service.moderateContentCronJob();
+
+      expect(startCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should create a cron job entity to lock the process', async () => {
+      jest
+        .spyOn(service, 'startCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.moderateContentCronJob();
+
+      expect(service.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ContentModeration,
+      );
+    });
+
+    it('should process all jobs with status PAID', async () => {
+      await service.moderateContentCronJob();
+
+      expect(contentModerationMock).toHaveBeenCalledTimes(2);
+      expect(contentModerationMock).toHaveBeenCalledWith(jobEntity1);
+      expect(contentModerationMock).toHaveBeenCalledWith(jobEntity2);
+    });
+
+    it('should handle failed moderation attempts', async () => {
+      const error = new Error('Moderation failed');
+      contentModerationMock.mockRejectedValueOnce(error);
+
+      const handleFailureMock = jest.spyOn(
+        jobService,
+        'handleProcessJobFailure',
+      );
+
+      await service.moderateContentCronJob();
+
+      expect(handleFailureMock).toHaveBeenCalledTimes(1);
+      expect(handleFailureMock).toHaveBeenCalledWith(
+        jobEntity1,
+        expect.stringContaining(ErrorContentModeration.ResultsParsingFailed),
+      );
+      expect(handleFailureMock).not.toHaveBeenCalledWith(
+        jobEntity2,
+        expect.anything(),
+      );
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      jest
+        .spyOn(service, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await service.moderateContentCronJob();
+
+      expect(service.completeCronJob).toHaveBeenCalledWith(cronJobEntityMock);
+    });
+  });
+
   describe('syncJobStuses Cron Job', () => {
     let cronJobEntityMock: Partial<CronJobEntity>;
     let jobEntityMock: Partial<JobEntity>;
@@ -961,7 +1094,7 @@ describe('CronJobService', () => {
         id: 1,
         chainId: ChainId.LOCALHOST,
         escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
+        status: JobStatus.PAID,
       };
 
       escrowEventMock = {

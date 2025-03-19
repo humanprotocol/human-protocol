@@ -47,13 +47,13 @@ describe('TransformEnumInterceptor', () => {
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue({
           body: {
-            status: 'PENDING',
+            status: 'PAID',
             userType: 'OPERATOR',
             amount: 5,
             address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
           },
           query: {
-            status: 'PENDING',
+            status: 'PAID',
             userType: 'OPERATOR',
           },
         }),
@@ -97,9 +97,9 @@ describe('TransformEnumInterceptor', () => {
 
     // Expectations
     expect(request.query.userType).toBe('operator');
-    expect(request.query.status).toBe('pending');
+    expect(request.query.status).toBe('paid');
     expect(request.query).toEqual({
-      status: 'pending',
+      status: 'paid',
       userType: 'operator',
     });
     expect(callHandler.handle).toBeCalled(); // Ensure the handler is called
@@ -136,9 +136,9 @@ describe('TransformEnumInterceptor', () => {
 
     // Expectations
     expect(request.body.userType).toBe('operator'); // Should be transformed to lowercase
-    expect(request.body.status).toBe('pending'); // Should be transformed to lowercase
+    expect(request.body.status).toBe('paid'); // Should be transformed to lowercase
     expect(request.body).toEqual({
-      status: 'pending',
+      status: 'paid',
       userType: 'operator',
       amount: 5,
       address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
@@ -191,7 +191,7 @@ describe('TransformEnumInterceptor', () => {
       getRequest: jest.fn().mockReturnValue({
         body: {
           transaction: {
-            status: 'PENDING',
+            status: 'PAID',
             userType: 'OPERATOR',
             address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
           },
@@ -208,11 +208,11 @@ describe('TransformEnumInterceptor', () => {
     const request = executionContext.switchToHttp().getRequest();
 
     // Expectations
-    expect(request.body.transaction.status).toBe('pending'); // Nested enum should be transformed
+    expect(request.body.transaction.status).toBe('paid'); // Nested enum should be transformed
     expect(request.body.transaction.userType).toBe('operator');
     expect(request.body).toEqual({
       transaction: {
-        status: 'pending',
+        status: 'paid',
         userType: 'operator',
         address: '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
       },

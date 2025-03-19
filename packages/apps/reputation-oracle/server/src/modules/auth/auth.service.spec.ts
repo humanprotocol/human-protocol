@@ -23,11 +23,11 @@ import {
   mockConfig,
 } from '../../../test/constants';
 import { AuthConfigService } from '../../config/auth-config.service';
+import { NDAConfigService } from '../../config/nda-config.service';
 import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { JobRequestType } from '../../common/enums';
-import { Role, UserStatus } from '../../common/enums/user';
 import { SignatureType } from '../../common/enums/web3';
 import {
   generateNonce,
@@ -37,9 +37,14 @@ import {
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
 import { SiteKeyRepository } from '../user/site-key.repository';
 import { PrepareSignatureDto } from '../user/user.dto';
-import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
-import { UserService } from '../user/user.service';
+import {
+  UserStatus,
+  UserRole,
+  UserEntity,
+  UserRepository,
+  UserService,
+  type OperatorUserEntity,
+} from '../user';
 import { Web3Service } from '../web3/web3.service';
 import {
   AuthError,
@@ -71,6 +76,10 @@ jest.mock('@human-protocol/sdk', () => ({
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
 }));
+
+const mockNdaConfigService = {
+  latestNdaUrl: faker.internet.url(),
+};
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -105,6 +114,7 @@ describe('AuthService', () => {
         AuthService,
         UserService,
         AuthConfigService,
+        { provide: NDAConfigService, useValue: mockNdaConfigService },
         ServerConfigService,
         Web3ConfigService,
         HCaptchaService,
@@ -160,6 +170,7 @@ describe('AuthService', () => {
       email: signInDto.email,
       password: MOCK_HASHED_PASSWORD,
       status: UserStatus.ACTIVE,
+      role: UserRole.WORKER,
     };
 
     let findOneByEmailMock: any;
@@ -182,7 +193,15 @@ describe('AuthService', () => {
 
       const result = await authService.signin(signInDto);
 
-      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email);
+      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email, {
+        relations: {
+          kyc: true,
+          siteKeys: true,
+          userQualifications: {
+            qualification: true,
+          },
+        },
+      });
       expect(authService.auth).toHaveBeenCalledWith(userEntity);
       expect(result).toStrictEqual({
         accessToken: MOCK_ACCESS_TOKEN,
@@ -197,7 +216,15 @@ describe('AuthService', () => {
         new AuthError(AuthErrorMessage.INVALID_CREDENTIALS),
       );
 
-      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email);
+      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email, {
+        relations: {
+          kyc: true,
+          siteKeys: true,
+          userQualifications: {
+            qualification: true,
+          },
+        },
+      });
     });
   });
 
@@ -213,12 +240,13 @@ describe('AuthService', () => {
       id: 1,
       email: userCreateDto.email,
       password: MOCK_HASHED_PASSWORD,
+      role: UserRole.WORKER,
     };
 
     let createUserMock: any;
 
     beforeEach(() => {
-      createUserMock = jest.spyOn(userService, 'create');
+      createUserMock = jest.spyOn(userService, 'createWorkerUser');
 
       createUserMock.mockResolvedValue(userEntity);
 
@@ -230,15 +258,14 @@ describe('AuthService', () => {
     });
 
     it('should create a new user and return the user entity', async () => {
-      const result = await authService.signup(userCreateDto);
+      await authService.signup(userCreateDto);
 
-      expect(userService.create).toHaveBeenCalledWith(userCreateDto);
+      expect(userService.createWorkerUser).toHaveBeenCalledWith(userCreateDto);
       expect(tokenRepository.createUnique).toHaveBeenCalledWith({
         type: TokenType.EMAIL,
-        user: userEntity,
+        userId: userEntity.id,
         expiresAt: expect.any(Date),
       });
-      expect(result).toBe(userEntity);
     });
 
     it("should call emailService sendEmail if user's email is valid", async () => {
@@ -255,7 +282,7 @@ describe('AuthService', () => {
         .mockResolvedValue(userEntity as any);
 
       await expect(authService.signup(userCreateDto)).rejects.toThrow(
-        new DuplicatedUserEmailError(userEntity.email),
+        new DuplicatedUserEmailError(userEntity.email as string),
       );
 
       expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
@@ -408,7 +435,7 @@ describe('AuthService', () => {
       const tokenEntity: Partial<TokenEntity> = {
         uuid: v4(),
         type: TokenType.EMAIL,
-        user: userEntity as UserEntity,
+        userId: userEntity.id,
       };
 
       let findTokenMock: any;
@@ -456,7 +483,9 @@ describe('AuthService', () => {
           new Date().setDate(new Date().getDate() + 1),
         );
         findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
-        userService.updatePassword = jest.fn();
+        userService.updatePassword = jest
+          .fn()
+          .mockResolvedValueOnce(userEntity);
         emailService.sendEmail = jest.fn();
 
         const updatePasswordMock = jest.spyOn(userService, 'updatePassword');
@@ -482,7 +511,7 @@ describe('AuthService', () => {
       const tokenEntity: Partial<TokenEntity> = {
         uuid: v4(),
         type: TokenType.EMAIL,
-        user: userEntity as UserEntity,
+        userId: userEntity.id,
       };
 
       let findTokenMock: any;
@@ -503,6 +532,7 @@ describe('AuthService', () => {
           new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN),
         );
       });
+
       it('should throw an error if token is expired', () => {
         tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
         findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
@@ -518,12 +548,16 @@ describe('AuthService', () => {
           new Date().setDate(new Date().getDate() + 1),
         );
         findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
-        userRepository.updateOne = jest.fn();
+        userRepository.updateOneById = jest.fn();
 
         await authService.emailVerification({ token: 'token' });
 
-        expect(userRepository.updateOne).toHaveBeenCalled();
-        expect(tokenEntity.user?.status).toBe(UserStatus.ACTIVE);
+        expect(userRepository.updateOneById).toHaveBeenCalledWith(
+          userEntity.id,
+          {
+            status: UserStatus.ACTIVE,
+          },
+        );
       });
     });
 
@@ -606,20 +640,18 @@ describe('AuthService', () => {
           nonce,
         };
 
-        let getByAddressMock: any;
         let updateNonceMock: any;
 
         beforeEach(() => {
-          getByAddressMock = jest.spyOn(userRepository, 'findOneByAddress');
+          jest
+            .spyOn(userService, 'findOperatorUser')
+            .mockResolvedValue(userEntity as OperatorUserEntity);
           updateNonceMock = jest.spyOn(userService, 'updateNonce');
 
           jest.spyOn(authService, 'auth').mockResolvedValue({
             accessToken: MOCK_ACCESS_TOKEN,
             refreshToken: MOCK_REFRESH_TOKEN,
           });
-          jest
-            .spyOn(userRepository, 'findOneByAddress')
-            .mockResolvedValue({ nonce: nonce } as any);
         });
 
         afterEach(() => {
@@ -627,7 +659,6 @@ describe('AuthService', () => {
         });
 
         it('should sign in the user, reset nonce and return the JWT', async () => {
-          getByAddressMock.mockResolvedValue(userEntity as UserEntity);
           updateNonceMock.mockResolvedValue({
             ...userEntity,
             nonce: nonce1,
@@ -646,7 +677,7 @@ describe('AuthService', () => {
             signature,
           });
 
-          expect(userRepository.findOneByAddress).toHaveBeenCalledWith(
+          expect(userService.findOperatorUser).toHaveBeenCalledWith(
             MOCK_ADDRESS,
           );
           expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
@@ -698,7 +729,7 @@ describe('AuthService', () => {
         let createUserMock: any;
 
         beforeEach(() => {
-          createUserMock = jest.spyOn(userService, 'createWeb3User');
+          createUserMock = jest.spyOn(userService, 'createOperatorUser');
 
           createUserMock.mockResolvedValue(userEntity);
 
@@ -730,11 +761,11 @@ describe('AuthService', () => {
 
           const result = await authService.web3Signup({
             address: web3PreSignUpDto.address,
-            type: Role.WORKER,
+            type: UserRole.WORKER,
             signature,
           });
 
-          expect(userService.createWeb3User).toHaveBeenCalledWith(
+          expect(userService.createOperatorUser).toHaveBeenCalledWith(
             web3PreSignUpDto.address,
           );
 
@@ -754,7 +785,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: invalidSignature,
             }),
           ).rejects.toThrow(
@@ -769,7 +800,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorRoleError(''));
@@ -784,7 +815,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorFeeError(''));
@@ -800,7 +831,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorUrlError(''));
@@ -817,7 +848,7 @@ describe('AuthService', () => {
           await expect(
             authService.web3Signup({
               ...web3PreSignUpDto,
-              type: Role.WORKER,
+              type: UserRole.WORKER,
               signature: signature,
             }),
           ).rejects.toThrow(new InvalidOperatorJobTypesError(''));

@@ -16,13 +16,14 @@ import {
   Get,
   UseFilters,
 } from '@nestjs/common';
+
 import { Public } from '../../common/decorators';
-import { JwtAuthGuard } from '../../common/guards';
 import { SignatureType } from '../../common/enums/web3';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaGuard } from '../../integrations/hcaptcha/hcaptcha.guard';
-import { prepareSignatureBody } from '../../utils/web3';
+import * as web3Utils from '../../utils/web3';
+
 import {
   DisableOperatorDto,
   PrepareSignatureDto,
@@ -31,12 +32,12 @@ import {
   RegisterLabelerResponseDto,
   EnableOperatorDto,
   RegistrationInExchangeOracleDto,
-  RegistrationInExchangeOraclesDto,
+  RegistrationInExchangeOraclesResponseDto,
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
-import { UserService } from './user.service';
-import { UserRepository } from './user.repository';
 import { UserErrorFilter } from './user.error.filter';
+import { UserRepository } from './user.repository';
+import { UserService } from './user.service';
 
 /**
  * TODO:
@@ -47,9 +48,9 @@ import { UserErrorFilter } from './user.error.filter';
  * 2) Move "prepare-signature" out of this module
  */
 @ApiTags('User')
+@ApiBearerAuth()
 @Controller('/user')
 @UseFilters(UserErrorFilter)
-@ApiBearerAuth()
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -66,7 +67,6 @@ export class UserController {
     description: 'Labeler registered successfully',
     type: RegisterLabelerResponseDto,
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/register-labeler')
   @HttpCode(200)
   async registerLabeler(
@@ -90,14 +90,17 @@ export class UserController {
     status: 409,
     description: 'Provided address already registered',
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/register-address')
   @HttpCode(200)
   async registerAddress(
     @Req() request: RequestWithUser,
     @Body() data: RegisterAddressRequestDto,
   ): Promise<void> {
-    await this.userService.registerAddress(request.user, data);
+    await this.userService.registerAddress(
+      request.user,
+      data.address,
+      data.signature,
+    );
   }
 
   @ApiOperation({
@@ -109,7 +112,6 @@ export class UserController {
     status: 200,
     description: 'Operator enabled succesfully',
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/enable-operator')
   @HttpCode(200)
   async enableOperator(
@@ -128,7 +130,6 @@ export class UserController {
     status: 200,
     description: 'Operator disabled succesfully',
   })
-  @UseGuards(JwtAuthGuard)
   @Post('/disable-operator')
   @HttpCode(200)
   async disableOperator(
@@ -155,12 +156,13 @@ export class UserController {
   async prepareSignature(
     @Body() data: PrepareSignatureDto,
   ): Promise<SignatureBodyDto> {
-    let nonce;
+    let nonce: string | undefined;
     if (data.type === SignatureType.SIGNIN) {
-      nonce = (await this.userRepository.findOneByAddress(data.address))?.nonce;
+      const user = await this.userService.findOperatorUser(data.address);
+      nonce = user?.nonce;
     }
 
-    const preparedSignatureBody = await prepareSignatureBody({
+    const preparedSignatureBody = await web3Utils.prepareSignatureBody({
       from: data.address,
       to: this.web3ConfigService.operatorAddress,
       contents: data.type,
@@ -181,7 +183,7 @@ export class UserController {
     description: 'Oracle registered successfully',
     type: RegistrationInExchangeOracleDto,
   })
-  @UseGuards(HCaptchaGuard, JwtAuthGuard)
+  @UseGuards(HCaptchaGuard)
   @Post('/exchange-oracle-registration')
   @HttpCode(200)
   async registrationInExchangeOracle(
@@ -204,17 +206,16 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'List of registered oracles retrieved successfully',
-    type: RegistrationInExchangeOraclesDto,
+    type: RegistrationInExchangeOraclesResponseDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized. Missing or invalid credentials.',
   })
-  @UseGuards(JwtAuthGuard)
   @Get('/exchange-oracle-registration')
   async getRegistrationInExchangeOracles(
     @Req() request: RequestWithUser,
-  ): Promise<RegistrationInExchangeOraclesDto> {
+  ): Promise<RegistrationInExchangeOraclesResponseDto> {
     const oracleAddresses =
       await this.userService.getRegistrationInExchangeOracles(request.user);
 

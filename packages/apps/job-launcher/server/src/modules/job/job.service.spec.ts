@@ -3,12 +3,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { Encryption } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import {
-  PaymentCurrency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-} from '../../common/enums/payment';
+import { PaymentCurrency } from '../../common/enums/payment';
 import {
   JobRequestType,
   JobStatus,
@@ -39,7 +34,6 @@ import { mul } from '../../common/utils/decimal';
 describe('JobService', () => {
   let jobService: JobService,
     paymentService: PaymentService,
-    paymentRepository: PaymentRepository,
     jobRepository: JobRepository,
     rateService: RateService;
 
@@ -110,7 +104,6 @@ describe('JobService', () => {
 
     jobService = moduleRef.get<JobService>(JobService);
     paymentService = moduleRef.get<PaymentService>(PaymentService);
-    paymentRepository = moduleRef.get<PaymentRepository>(PaymentRepository);
     rateService = moduleRef.get<RateService>(RateService);
     jobRepository = moduleRef.get<JobRepository>(JobRepository);
   });
@@ -118,17 +111,12 @@ describe('JobService', () => {
   describe('createJob', () => {
     const userMock: any = {
       id: 1,
+      whitlisted: true,
       stripeCustomerId: 'stripeTest',
     };
 
     describe('Fortune', () => {
       describe('Successful job creation', () => {
-        beforeAll(() => {
-          jest
-            .spyOn(paymentService, 'getUserBalanceByCurrency')
-            .mockResolvedValue(100000000);
-        });
-
         afterEach(() => {
           jest.clearAllMocks();
         });
@@ -163,20 +151,16 @@ describe('JobService', () => {
             fortuneJobDto,
           );
 
-          expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-            userId: userMock.id,
-            jobId: jobEntityMock.id,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.WITHDRAWAL,
-            currency: fortuneJobDto.paymentCurrency,
-            amount: expect.any(Number),
-            rate: await rateService.getRate(
+          expect(paymentService.createWithdrawalPayment).toHaveBeenCalledWith(
+            userMock.id,
+            expect.any(Number),
+            fortuneJobDto.paymentCurrency,
+            await rateService.getRate(
               fortuneJobDto.paymentCurrency,
               PaymentCurrency.USD,
             ),
-            status: PaymentStatus.SUCCEEDED,
-          });
-          expect(jobRepository.createUnique).toHaveBeenCalledWith({
+          );
+          expect(jobRepository.updateOne).toHaveBeenCalledWith({
             chainId: fortuneJobDto.chainId,
             userId: userMock.id,
             manifestUrl: MOCK_FILE_URL,
@@ -184,14 +168,14 @@ describe('JobService', () => {
             requestType: JobRequestType.FORTUNE,
             fee: expect.any(Number),
             fundAmount: fortuneJobDto.paymentAmount,
-            status: JobStatus.PENDING,
+            status: JobStatus.PAID,
             waitUntil: expect.any(Date),
             token: fortuneJobDto.escrowFundToken,
             exchangeOracle: fortuneJobDto.exchangeOracle,
             recordingOracle: fortuneJobDto.recordingOracle,
             reputationOracle: fortuneJobDto.reputationOracle,
+            payments: expect.any(Array),
           });
-          expect(jobRepository.updateOne).toHaveBeenCalledTimes(1);
         });
 
         it('should create a Fortune job successfully paid and funded with different currencies', async () => {
@@ -234,35 +218,33 @@ describe('JobService', () => {
             fortuneJobDto,
           );
 
-          expect(paymentRepository.createUnique).toHaveBeenCalledWith({
-            userId: userMock.id,
-            jobId: jobEntityMock.id,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.WITHDRAWAL,
-            currency: fortuneJobDto.paymentCurrency,
-            amount: expect.any(Number),
-            rate: paymentToUsdRate,
-            status: PaymentStatus.SUCCEEDED,
-          });
-          expect(jobRepository.createUnique).toHaveBeenCalledWith({
+          expect(paymentService.createWithdrawalPayment).toHaveBeenCalledWith(
+            userMock.id,
+            expect.any(Number),
+            fortuneJobDto.paymentCurrency,
+            paymentToUsdRate,
+          );
+          expect(jobRepository.updateOne).toHaveBeenCalledWith({
             chainId: fortuneJobDto.chainId,
             userId: userMock.id,
             manifestUrl: MOCK_FILE_URL,
             manifestHash: MOCK_FILE_HASH,
             requestType: JobRequestType.FORTUNE,
             fee: expect.any(Number),
-            fundAmount: mul(
-              mul(fortuneJobDto.paymentAmount, paymentToUsdRate),
-              usdToTokenRate,
+            fundAmount: Number(
+              mul(
+                mul(fortuneJobDto.paymentAmount, paymentToUsdRate),
+                usdToTokenRate,
+              ).toFixed(6),
             ),
-            status: JobStatus.PENDING,
+            status: JobStatus.PAID,
             waitUntil: expect.any(Date),
             token: fortuneJobDto.escrowFundToken,
             exchangeOracle: fortuneJobDto.exchangeOracle,
             recordingOracle: fortuneJobDto.recordingOracle,
             reputationOracle: fortuneJobDto.reputationOracle,
+            payments: expect.any(Array),
           });
-          expect(jobRepository.updateOne).toHaveBeenCalledTimes(1);
         });
       });
     });

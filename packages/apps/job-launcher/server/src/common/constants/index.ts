@@ -34,7 +34,6 @@ export const CVAT_JOB_TYPES = [
 ];
 
 export const CANCEL_JOB_STATUSES = [
-  JobStatus.PENDING,
   JobStatus.PAID,
   JobStatus.FAILED,
   JobStatus.LAUNCHED,
@@ -68,3 +67,7 @@ export const RESEND_EMAIL_VERIFICATION_PATH = '/auth/resend-email-verification';
 export const LOGOUT_PATH = '/auth/logout';
 
 export const MUTEX_TIMEOUT = 2000; //ms
+
+export const GS_PROTOCOL = 'gs://';
+export const GCV_CONTENT_MODERATION_ASYNC_BATCH_SIZE = 100;
+export const GCV_CONTENT_MODERATION_BATCH_SIZE_PER_TASK = 2000;

@@ -1,9 +1,4 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, PrimaryGeneratedColumn } from 'typeorm';
 
 export abstract class BaseEntity {
   @PrimaryGeneratedColumn()
@@ -14,17 +9,4 @@ export abstract class BaseEntity {
 
   @Column({ type: 'timestamptz' })
   updatedAt: Date;
-
-  @BeforeInsert()
-  protected beforeInsert(): void {
-    const date = new Date();
-    this.createdAt = date;
-    this.updatedAt = date;
-  }
-
-  @BeforeUpdate()
-  protected beforeUpdate(): void {
-    const date = new Date();
-    this.updatedAt = date;
-  }
 }

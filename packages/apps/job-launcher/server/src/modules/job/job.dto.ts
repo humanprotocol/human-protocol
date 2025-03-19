@@ -38,6 +38,7 @@ import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import { PaymentCurrency } from '../../common/enums/payment';
+import { IsValidToken } from '../../common/validators/tokens';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -84,7 +85,7 @@ export class JobDto {
   public paymentAmount: number;
 
   @ApiProperty({ enum: EscrowFundToken, name: 'escrow_fund_token' })
-  @IsEnumCaseInsensitive(EscrowFundToken)
+  @IsValidToken()
   public escrowFundToken: EscrowFundToken;
 }
 
@@ -328,6 +329,12 @@ export class CommonDetails {
   public paidOut: number;
 
   @ApiProperty({
+    description: 'Currency of the job',
+  })
+  @IsEnumCaseInsensitive(EscrowFundToken)
+  public currency?: EscrowFundToken;
+
+  @ApiProperty({
     description: 'Number of tasks (optional)',
     name: 'amount_of_tasks',
   })
@@ -475,6 +482,9 @@ export class JobListDto {
 
   @ApiProperty({ name: 'fund_amount' })
   public fundAmount: number;
+
+  @ApiProperty()
+  public currency: EscrowFundToken;
 
   @ApiProperty()
   public status: JobStatus;

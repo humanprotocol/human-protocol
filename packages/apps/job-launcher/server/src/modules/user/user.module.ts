@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
-import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
 import { PaymentModule } from '../payment/payment.module';
 import { AuthModule } from '../auth/auth.module';
@@ -16,7 +15,6 @@ import { AuthModule } from '../auth/auth.module';
     PaymentModule,
     forwardRef(() => AuthModule),
   ],
-  controllers: [UserController],
   providers: [Logger, UserService, UserRepository],
   exports: [UserService],
 })

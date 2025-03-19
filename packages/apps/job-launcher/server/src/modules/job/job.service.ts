@@ -37,16 +37,11 @@ import {
   JobCaptchaMode,
   JobCaptchaRequestType,
   JobCaptchaShapeType,
+  EscrowFundToken,
 } from '../../common/enums/job';
-import {
-  FiatCurrency,
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-} from '../../common/enums/payment';
+import { FiatCurrency } from '../../common/enums/payment';
 import { parseUrl } from '../../common/utils';
-import { add, div, lt, mul, max } from '../../common/utils/decimal';
-import { PaymentRepository } from '../payment/payment.repository';
+import { add, div, mul, max } from '../../common/utils/decimal';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -98,7 +93,6 @@ import {
   listObjectsInBucket,
 } from '../../common/utils/storage';
 import { WebhookDataDto } from '../webhook/webhook.dto';
-import { PaymentEntity } from '../payment/payment.entity';
 import {
   ManifestAction,
   EscrowAction,
@@ -122,6 +116,8 @@ import { QualificationService } from '../qualification/qualification.service';
 import { WhitelistService } from '../whitelist/whitelist.service';
 import { UserEntity } from '../user/user.entity';
 import { RoutingProtocolService } from '../routing-protocol/routing-protocol.service';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { getTokenDecimals } from '../../common/utils/tokens';
 
 @Injectable()
 export class JobService {
@@ -135,7 +131,6 @@ export class JobService {
     private readonly jobRepository: JobRepository,
     private readonly webhookRepository: WebhookRepository,
     private readonly paymentService: PaymentService,
-    private readonly paymentRepository: PaymentRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
     private readonly web3ConfigService: Web3ConfigService,
@@ -805,32 +800,44 @@ export class JobService {
       dto.escrowFundToken,
     );
 
-    const paymentCurrencyFee = max(
-      div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
-      mul(div(feePercentage, 100), dto.paymentAmount),
-    );
-    const totalPaymentAmount = add(dto.paymentAmount, paymentCurrencyFee);
-
-    const userBalance = await this.paymentService.getUserBalanceByCurrency(
-      user.id,
-      dto.paymentCurrency,
+    const paymentTokenDecimals = getTokenDecimals(
+      chainId,
+      dto.paymentCurrency as EscrowFundToken,
     );
 
-    if (lt(userBalance, totalPaymentAmount)) {
-      throw new ControlledError(
-        ErrorJob.NotEnoughFunds,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const fundTokenDecimals = getTokenDecimals(
+      chainId,
+      dto.escrowFundToken as EscrowFundToken,
+    );
+
+    const paymentCurrencyFee = Number(
+      max(
+        div(this.serverConfigService.minimumFeeUsd, paymentCurrencyRate),
+        mul(div(feePercentage, 100), dto.paymentAmount),
+      ).toFixed(paymentTokenDecimals),
+    );
+    const totalPaymentAmount = Number(
+      add(dto.paymentAmount, paymentCurrencyFee).toFixed(paymentTokenDecimals),
+    );
 
     const fundTokenFee =
       dto.paymentCurrency === dto.escrowFundToken
         ? paymentCurrencyFee
-        : mul(mul(paymentCurrencyFee, paymentCurrencyRate), fundTokenRate);
+        : Number(
+            mul(
+              mul(paymentCurrencyFee, paymentCurrencyRate),
+              fundTokenRate,
+            ).toFixed(fundTokenDecimals),
+          );
     const fundTokenAmount =
       dto.paymentCurrency === dto.escrowFundToken
         ? dto.paymentAmount
-        : mul(mul(dto.paymentAmount, paymentCurrencyRate), fundTokenRate);
+        : Number(
+            mul(
+              mul(dto.paymentAmount, paymentCurrencyRate),
+              fundTokenRate,
+            ).toFixed(fundTokenDecimals),
+          );
 
     // Select oracles
     if (!reputationOracle || !exchangeOracle || !recordingOracle) {
@@ -870,6 +877,13 @@ export class JobService {
         }
       });
     }
+
+    const paymentEntity = await this.paymentService.createWithdrawalPayment(
+      user.id,
+      totalPaymentAmount,
+      dto.paymentCurrency,
+      paymentCurrencyRate,
+    );
 
     const { createManifest } = this.createJobSpecificActions[requestType];
 
@@ -917,26 +931,17 @@ export class JobService {
     jobEntity.requestType = requestType;
     jobEntity.fee = fundTokenFee; // Fee in the token used to funding the escrow
     jobEntity.fundAmount = fundTokenAmount; // Amount in the token used to funding the escrow
+    jobEntity.payments = [paymentEntity];
     jobEntity.token = dto.escrowFundToken;
-    jobEntity.status = JobStatus.PENDING;
     jobEntity.waitUntil = new Date();
 
-    jobEntity = await this.jobRepository.createUnique(jobEntity);
+    if (user.whitelist) {
+      jobEntity.status = JobStatus.MODERATION_PASSED;
+    } else {
+      jobEntity.status = JobStatus.PAID;
+    }
 
-    const paymentEntity = new PaymentEntity();
-    paymentEntity.userId = user.id;
-    paymentEntity.jobId = jobEntity.id;
-    paymentEntity.source = PaymentSource.BALANCE;
-    paymentEntity.type = PaymentType.WITHDRAWAL;
-    paymentEntity.amount = -totalPaymentAmount; // In the currency used for the payment.
-    paymentEntity.currency = dto.paymentCurrency;
-    paymentEntity.rate = paymentCurrencyRate;
-    paymentEntity.status = PaymentStatus.SUCCEEDED;
-
-    await this.paymentRepository.createUnique(paymentEntity);
-
-    jobEntity.status = JobStatus.PAID;
-    await this.jobRepository.updateOne(jobEntity);
+    jobEntity = await this.jobRepository.updateOne(jobEntity);
 
     return jobEntity.id;
   }
@@ -1017,7 +1022,9 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     const escrowAddress = await escrowClient.createEscrow(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+        jobEntity.token as EscrowFundToken
+      ]!.address,
       getTrustedHandlers(),
       jobEntity.userId.toString(),
       {
@@ -1085,9 +1092,13 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
+    const token = (TOKEN_ADDRESSES[jobEntity.chainId as ChainId] ?? {})[
+      jobEntity.token as EscrowFundToken
+    ]!;
+
     const weiAmount = ethers.parseUnits(
       jobEntity.fundAmount.toString(),
-      'ether',
+      token.decimals,
     );
     await escrowClient.fund(jobEntity.escrowAddress, weiAmount, {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
@@ -1165,8 +1176,6 @@ export class JobService {
 
     let status = JobStatus.CANCELED;
     switch (jobEntity.status) {
-      case JobStatus.PENDING:
-        break;
       case JobStatus.PAID:
         if (await this.isCronJobRunning(CronJobType.CreateEscrow)) {
           status = JobStatus.FAILED;
@@ -1303,6 +1312,7 @@ export class JobService {
           escrowAddress: job.escrowAddress,
           network: NETWORKS[job.chainId as ChainId]!.title,
           fundAmount: job.fundAmount,
+          currency: job.token as EscrowFundToken,
           status: job.status,
         };
       });
@@ -1635,6 +1645,7 @@ export class JobService {
         manifestHash,
         balance: Number(ethers.formatEther(escrow?.balance || 0)),
         paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
+        currency: jobEntity.token as EscrowFundToken,
         status: jobEntity.status,
         failedReason: jobEntity.failedReason,
       },

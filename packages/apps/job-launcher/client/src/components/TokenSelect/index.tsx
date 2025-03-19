@@ -7,32 +7,41 @@ import {
   Select,
   SelectProps,
 } from '@mui/material';
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { TOKEN_ICONS } from '../../components/Icons/chains';
-import { SUPPORTED_TOKEN_SYMBOLS } from '../../constants';
-import { NETWORK_TOKENS } from '../../constants/chains';
+import * as paymentService from '../../services/payment';
 
 type TokenSelectProps = SelectProps & {
   chainId: ChainId;
+  onTokenChange: (symbol: string, address: string, decimals: number) => void;
 };
 
 export const TokenSelect: FC<TokenSelectProps> = (props) => {
-  const availableTokens = useMemo(() => {
-    return SUPPORTED_TOKEN_SYMBOLS.filter(
-      (symbol) =>
-        NETWORK_TOKENS[props.chainId as keyof typeof NETWORK_TOKENS]?.[
-          symbol.toLowerCase()
-        ],
-    );
+  const [availableTokens, setAvailableTokens] = useState<{
+    [key: string]: {
+      address: string;
+      decimals: number;
+    };
+  }>({});
+
+  useEffect(() => {
+    const fetchTokensData = async () => {
+      const tokens = await paymentService.getTokensAvailable(props.chainId);
+      setAvailableTokens(tokens);
+    };
+
+    fetchTokensData();
   }, [props.chainId]);
 
   return (
     <FormControl fullWidth>
-      <InputLabel id="token-select-label">Funding token</InputLabel>
+      <InputLabel id="token-select-label">
+        {props.label ?? 'Funding token'}
+      </InputLabel>
       <Select
         labelId="token-select-label"
         id="token-select"
-        label={props?.label ?? 'Funding token'}
+        label={props.label ?? 'Funding token'}
         sx={{
           '.MuiSelect-select': {
             display: 'flex',
@@ -44,9 +53,17 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
           },
         }}
         {...props}
+        onChange={(e) => {
+          const symbol = e.target.value as string;
+          props.onTokenChange(
+            symbol,
+            availableTokens[symbol].address,
+            availableTokens[symbol].decimals,
+          );
+        }}
       >
-        {availableTokens.map((symbol) => {
-          const IconComponent = TOKEN_ICONS[symbol];
+        {Object.keys(availableTokens).map((symbol) => {
+          const IconComponent = TOKEN_ICONS[symbol.toUpperCase()];
           return (
             <MenuItem value={symbol} key={symbol}>
               {IconComponent && (
@@ -54,7 +71,7 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
                   {IconComponent}
                 </ListItemIcon>
               )}
-              {symbol}
+              {symbol.toUpperCase()}
             </MenuItem>
           );
         })}

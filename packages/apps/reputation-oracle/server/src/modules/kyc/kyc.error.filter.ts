@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { KycError } from './kyc.error';
 import logger from '../../logger';
+import { KycError } from './kyc.error';
 
 @Catch(KycError)
 export class KycErrorFilter implements ExceptionFilter {

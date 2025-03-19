@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
-import {
-  registrationInExchangeOracleDtoSchema,
-  type RegistrationInExchangeOracleDto,
-} from './sevices';
 import { useOracleRegistrationFlow } from './hooks';
+import {
+  type RegistrationInExchangeOracleDto,
+  registrationInExchangeOracleDtoSchema,
+} from './schema';
 
 function useRegistrationForm(address: string) {
   return useForm<RegistrationInExchangeOracleDto>({

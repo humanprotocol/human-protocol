@@ -15,6 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { Decimal } from 'decimal.js';
 import { ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
@@ -25,8 +26,6 @@ import {
   usePublicClient,
 } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
-import { NETWORK_TOKENS } from '../../../constants/chains';
-import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
@@ -45,8 +44,9 @@ export const CryptoPayForm = ({
   const { isConnected } = useAccount();
   const { chain } = useAccount();
   const { jobRequest, goToPrevStep } = useCreateJobPageUI();
-  const [tokenAddress, setTokenAddress] = useState<string>();
-  const [tokenSymbol, setTokenSymbol] = useState<string>();
+  const [paymentTokenAddress, setPaymentTokenAddress] = useState<string>();
+  const [paymentTokenSymbol, setPaymentTokenSymbol] = useState<string>();
+  const [fundTokenSymbol, setFundTokenSymbol] = useState<string>();
   const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +55,10 @@ export const CryptoPayForm = ({
   const { data: signer } = useWalletClient();
   const publicClient = usePublicClient();
   const { user } = useAppSelector((state) => state.auth);
-  const { data: rate } = useTokenRate('hmt', 'usd');
+  const [paymentTokenRate, setPaymentTokenRate] = useState<number>(0);
+  const [fundTokenRate, setFundTokenRate] = useState<number>(0);
+  const [decimals, setDecimals] = useState<number>(6);
+  const [tokenDecimals, setTokenDecimals] = useState<number>(18);
 
   useEffect(() => {
     const fetchJobLauncherData = async () => {
@@ -67,6 +70,41 @@ export const CryptoPayForm = ({
 
     fetchJobLauncherData();
   }, []);
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      if (paymentTokenSymbol && fundTokenSymbol) {
+        if (paymentTokenSymbol === fundTokenSymbol) {
+          const rate = await paymentService.getRate(paymentTokenSymbol, 'usd');
+          setPaymentTokenRate(rate);
+          setFundTokenRate(rate);
+        } else {
+          const paymentRate = await paymentService.getRate(
+            paymentTokenSymbol,
+            'usd',
+          );
+          const fundRate = await paymentService.getRate(fundTokenSymbol, 'usd');
+          setPaymentTokenRate(paymentRate);
+          setFundTokenRate(fundRate);
+        }
+      }
+    };
+
+    fetchRates();
+  }, [paymentTokenSymbol, fundTokenSymbol]);
+
+  useEffect(() => {
+    if (amount) {
+      const [integerPart, decimalPart] = amount.split('.');
+      if (decimalPart && decimalPart.length > decimals) {
+        setAmount(`${integerPart}.${decimalPart.slice(0, decimals)}`);
+      }
+    }
+  }, [decimals, amount]);
+
+  useEffect(() => {
+    setDecimals(Math.min(tokenDecimals, 6));
+  }, [tokenDecimals]);
 
   const { data: jobLauncherFee } = useReadContract({
     address: NETWORKS[jobRequest.chainId!]?.kvstoreAddress as Address,
@@ -80,44 +118,86 @@ export const CryptoPayForm = ({
     },
   });
 
-  const fundAmount = useMemo(() => {
-    if (amount && rate) return Number(amount) * rate;
+  const minFeeToken = useMemo(() => {
+    if (minFee && paymentTokenRate)
+      return new Decimal(minFee).div(paymentTokenRate).toNumber();
     return 0;
-  }, [amount, rate]);
-  const feeAmount =
-    fundAmount === 0
-      ? 0
-      : Math.max(minFee, fundAmount * (Number(jobLauncherFee) / 100));
-  const totalAmount = fundAmount + feeAmount;
-  const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
+  }, [minFee, paymentTokenRate]);
+
+  const feeAmount = useMemo(() => {
+    if (!amount) return 0;
+    const amountDecimal = new Decimal(amount);
+    const feeDecimal = new Decimal(jobLauncherFee as string).div(100);
+    return Number(
+      Decimal.max(minFeeToken, amountDecimal.mul(feeDecimal)).toFixed(decimals),
+    );
+  }, [amount, jobLauncherFee, minFeeToken, decimals]);
+
+  const totalAmount = useMemo(() => {
+    if (!amount) return 0;
+    return Number(
+      new Decimal(amount).plus(feeAmount).toNumber().toFixed(decimals),
+    );
+  }, [amount, decimals, feeAmount]);
+
+  const totalUSDAmount = useMemo(() => {
+    if (!totalAmount || !paymentTokenRate) return 0;
+    return new Decimal(totalAmount).mul(paymentTokenRate).toNumber();
+  }, [totalAmount, paymentTokenRate]);
+
+  const conversionRate = useMemo(() => {
+    if (paymentTokenRate && fundTokenRate) {
+      return new Decimal(paymentTokenRate).div(fundTokenRate).toNumber();
+    }
+    return 1;
+  }, [paymentTokenRate, fundTokenRate]);
+
+  const fundAmount = useMemo(() => {
+    if (!amount || !conversionRate) return 0;
+    return Number(new Decimal(amount).mul(conversionRate));
+  }, [amount, conversionRate]);
+
+  const currentBalance = useMemo(() => {
+    return (
+      user?.balance?.balances.find(
+        (balance) => balance.currency === paymentTokenSymbol,
+      )?.amount ?? 0
+    );
+  }, [user, paymentTokenSymbol]);
 
   const balancePayAmount = useMemo(() => {
     if (!payWithAccountBalance) return 0;
-    if (totalAmount < accountAmount) return totalAmount;
-    return accountAmount;
-  }, [payWithAccountBalance, totalAmount, accountAmount]);
+    const totalAmountDecimal = new Decimal(totalAmount);
+    if (totalAmountDecimal.lessThan(currentBalance)) return totalAmountDecimal;
+    return currentBalance;
+  }, [payWithAccountBalance, totalAmount, currentBalance]);
 
   const walletPayAmount = useMemo(() => {
     if (!payWithAccountBalance) return totalAmount;
-    if (totalAmount < accountAmount) return 0;
-    return totalAmount - accountAmount;
-  }, [payWithAccountBalance, totalAmount, accountAmount]);
+    const totalAmountDecimal = new Decimal(totalAmount);
+    if (totalAmountDecimal.lessThan(currentBalance)) return 0;
+    return Number(totalAmountDecimal.minus(currentBalance));
+  }, [payWithAccountBalance, totalAmount, currentBalance]);
 
   const handlePay = async () => {
-    if (signer && tokenAddress && amount && jobRequest.chainId && tokenSymbol) {
+    if (
+      signer &&
+      paymentTokenAddress &&
+      amount &&
+      jobRequest.chainId &&
+      paymentTokenSymbol &&
+      fundTokenSymbol
+    ) {
       setIsLoading(true);
       try {
         if (walletPayAmount > 0) {
-          // send HMT token to operator and retrieve transaction hash
-          const tokenAmount = walletPayAmount / rate;
-
           const hash = await signer.writeContract({
-            address: tokenAddress as Address,
+            address: paymentTokenAddress as Address,
             abi: HMTokenABI,
             functionName: 'transfer',
             args: [
               jobLauncherAddress,
-              ethers.parseUnits(tokenAmount.toString(), 18),
+              ethers.parseUnits(walletPayAmount.toString(), tokenDecimals),
             ],
           });
 
@@ -146,17 +226,17 @@ export const CryptoPayForm = ({
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,
-            tokenSymbol,
+            paymentTokenSymbol,
             Number(amount),
-            tokenSymbol,
+            fundTokenSymbol,
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(
             chainId,
             cvatRequest,
-            tokenSymbol,
+            paymentTokenSymbol,
             Number(amount),
-            tokenSymbol,
+            fundTokenSymbol,
           );
         } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
           await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
@@ -225,25 +305,47 @@ export const CryptoPayForm = ({
             )}
             <TokenSelect
               chainId={chain?.id}
-              value={tokenAddress}
-              onChange={(e) => {
-                const symbol = e.target.value as string;
-                setTokenSymbol(symbol);
-                setTokenAddress(
-                  NETWORK_TOKENS[
-                    jobRequest.chainId! as keyof typeof NETWORK_TOKENS
-                  ]?.[symbol.toLowerCase()],
-                );
+              value={paymentTokenSymbol}
+              label={'Payment token'}
+              labelId={'payment-token'}
+              onTokenChange={(symbol, address, decimals) => {
+                setPaymentTokenSymbol(symbol);
+                setPaymentTokenAddress(address);
+                setTokenDecimals(decimals);
+                if (amount) {
+                  const maxDecimals = Math.min(decimals, 6);
+                  const [integerPart, decimalPart] = amount.split('.');
+                  if (decimalPart && decimalPart.length > maxDecimals) {
+                    setAmount(
+                      `${integerPart}.${decimalPart.slice(0, maxDecimals)}`,
+                    );
+                  }
+                }
               }}
             />
             <FormControl fullWidth>
               <TextField
                 value={amount}
                 type="number"
-                onChange={(e) => setAmount(e.target.value as string)}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  const regex = new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`);
+                  if (regex.test(value)) {
+                    setAmount(value);
+                  }
+                }}
                 placeholder="Amount"
               />
             </FormControl>
+            <TokenSelect
+              chainId={chain?.id}
+              value={fundTokenSymbol}
+              label={'Fund token'}
+              labelId={'fund-token'}
+              onTokenChange={(symbol) => {
+                setFundTokenSymbol(symbol);
+              }}
+            />
           </Box>
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
@@ -259,41 +361,60 @@ export const CryptoPayForm = ({
                 borderBottom: '1px solid #E5E7EB',
               }}
             >
-              <Typography>Account Balance</Typography>
+              <Typography>Balance</Typography>
               <Typography color="text.secondary">
-                ~ {user?.balance?.amount?.toFixed(2) ?? '0'}{' '}
-                {user?.balance?.currency?.toUpperCase() ?? 'USD'}
+                {paymentTokenSymbol
+                  ? `${Number(currentBalance?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                  : ''}
               </Typography>
             </Box>
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
                 py: 2,
                 borderBottom: '1px solid #E5E7EB',
               }}
             >
-              <Typography>Fund Amount</Typography>
-              <Typography color="text.secondary">
-                ~ {fundAmount?.toFixed(2)} USD
-              </Typography>
+              <Stack direction="column" spacing={1}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography>Amount</Typography>
+                  <Typography color="text.secondary">
+                    {paymentTokenSymbol
+                      ? `${amount} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
+                  </Typography>
+                </Stack>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography>Fee</Typography>
+                  <Typography color="text.secondary">
+                    ({Number(jobLauncherFee)}%){' '}
+                    {paymentTokenSymbol
+                      ? `${Number(feeAmount.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
+                  </Typography>
+                </Stack>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography>Total payment</Typography>
+                  <Typography>
+                    {paymentTokenSymbol
+                      ? `${Number(totalAmount?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()} (~${totalUSDAmount.toFixed(2)} USD)`
+                      : ''}
+                  </Typography>
+                </Stack>
+              </Stack>
             </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                py: 2,
-                borderBottom: '1px solid #E5E7EB',
-              }}
-            >
-              <Typography>Fees</Typography>
-              <Typography color="text.secondary">
-                ({Number(jobLauncherFee)}%) {feeAmount?.toFixed(2)} USD
-              </Typography>
-            </Box>
-            <Box sx={{ py: 1.5 }}>
+            <Box sx={{ py: 1.5, borderBottom: '1px solid #E5E7EB' }}>
               <Typography mb={2}>Payment method</Typography>
               <Stack direction="column" spacing={1}>
                 <Stack
@@ -303,7 +424,9 @@ export const CryptoPayForm = ({
                 >
                   <Typography color="text.secondary">Balance</Typography>
                   <Typography color="text.secondary">
-                    {balancePayAmount.toFixed(2)} USD
+                    {paymentTokenSymbol
+                      ? `${Number(balancePayAmount?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Stack>
                 <Stack
@@ -313,26 +436,27 @@ export const CryptoPayForm = ({
                 >
                   <Typography color="text.secondary">Crypto Wallet</Typography>
                   <Typography color="text.secondary">
-                    {walletPayAmount.toFixed(2)} USD
+                    {paymentTokenSymbol
+                      ? `${Number(walletPayAmount?.toFixed(6))} ${paymentTokenSymbol?.toUpperCase()}`
+                      : ''}
                   </Typography>
                 </Stack>
-                {/* <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography color="text.secondary">Fees</Typography>
-                  <Typography color="text.secondary">(3.1%) 9.3 USD</Typography>
-                </Stack> */}
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography>Total</Typography>
-                  <Typography>{totalAmount?.toFixed(2)} USD</Typography>
-                </Stack>
               </Stack>
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                py: 2,
+              }}
+            >
+              <Typography>Fund Amount</Typography>
+              <Typography color="text.secondary">
+                {fundTokenSymbol && fundAmount
+                  ? `${Number(fundAmount?.toFixed(6))} ${fundTokenSymbol?.toUpperCase()}`
+                  : ''}
+              </Typography>
             </Box>
           </Box>
         </Grid>
@@ -354,8 +478,8 @@ export const CryptoPayForm = ({
             onClick={handlePay}
             disabled={
               !isConnected ||
-              !tokenAddress ||
-              !tokenSymbol ||
+              !paymentTokenAddress ||
+              !fundTokenSymbol ||
               !amount ||
               jobRequest.chainId !== chain?.id
             }

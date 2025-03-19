@@ -4,7 +4,6 @@
 export enum ErrorJob {
   NotFound = 'Job not found',
   NotCreated = 'Job has not been created',
-  NotEnoughFunds = 'Not enough funds',
   NotActiveCard = 'Credit card not found',
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
@@ -23,6 +22,23 @@ export enum ErrorJob {
   DataNotExist = 'Data does not exist',
   ImageConsistency = 'Ground Truth images not found in dataset',
   CancelWhileProcessing = 'Your job is being processed and cannot be canceled at this moment. Please, wait a few seconds and try again.',
+}
+
+/**
+ * Represents error messages associated with a job moderation.
+ */
+export enum ErrorContentModeration {
+  ErrorProcessingDataset = 'Error processing dataset',
+  InappropriateContent = 'Job cannot be processed due to inappropriate content',
+  ContentModerationFailed = 'Job cannot be processed due to failure in content moderation',
+  NoDestinationURIFound = 'No destination URI found in the response',
+  InvalidBucketUrl = 'Invalid bucket URL',
+  DataMustBeStoredInGCS = 'Data must be stored in Google Cloud Storage',
+  NoResultsFound = 'No results found',
+  ResultsParsingFailed = 'Results parsing failed',
+  JobModerationFailed = 'Job moderation failed',
+  ProcessContentModerationRequestFailed = 'Process content moderation request failed',
+  CompleteContentModerationFailed = 'Complete content moderation failed',
 }
 
 /**
@@ -56,7 +72,6 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found.',
   AccountCannotBeRegistered = 'Account cannot be registered.',
-  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
   InvalidCredentials = 'Invalid credentials.',
   UserNotActive = 'User not active.',
   DuplicatedEmail = 'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
@@ -91,6 +106,7 @@ export enum ErrorPayment {
   NotFound = 'Payment not found',
   InvoiceNotFound = 'Invoice not found',
   NotSuccess = 'Unsuccessful payment',
+  NotEnoughFunds = 'Not enough funds',
   IntentNotCreated = 'Payment intent not created',
   CardNotAssigned = 'Card not assigned',
   SetupNotFound = 'Setup not found',
@@ -107,6 +123,8 @@ export enum ErrorPayment {
   UnsupportedToken = 'Unsupported token',
   InvalidRecipient = 'Invalid recipient',
   ChainIdMissing = 'ChainId is missing',
+  InvalidChainId = 'Invalid chain id',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved.',
 }
 
 /**
@@ -128,6 +146,8 @@ export enum ErrorBucket {
   InvalidRegion = 'Invalid region for the storage provider',
   EmptyBucket = 'bucketName cannot be empty',
   FailedToFetchBucketContents = 'Failed to fetch bucket contents',
+  InvalidGCSUrl = 'Invalid Google Cloud Storage URL',
+  UrlParsingError = 'URL format is valid but cannot be parsed',
 }
 
 /**

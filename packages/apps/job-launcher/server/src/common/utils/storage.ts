@@ -6,6 +6,10 @@ import { JobRequestType } from '../enums/job';
 import axios from 'axios';
 import { parseString } from 'xml2js';
 import { ControlledError } from '../errors/controlled';
+import {
+  GCS_HTTP_REGEX_SUBDOMAIN,
+  GCS_HTTP_REGEX_PATH_BASED,
+} from './gcstorage';
 
 export function generateBucketUrl(
   storageData: StorageDataDto,
@@ -18,6 +22,7 @@ export function generateBucketUrl(
       jobType === JobRequestType.IMAGE_BOXES_FROM_POINTS ||
       jobType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES) &&
     storageData.provider != StorageProviders.AWS &&
+    storageData.provider != StorageProviders.GCS &&
     storageData.provider != StorageProviders.LOCAL
   ) {
     throw new ControlledError(
@@ -28,6 +33,7 @@ export function generateBucketUrl(
   if (!storageData.bucketName) {
     throw new ControlledError(ErrorBucket.EmptyBucket, HttpStatus.BAD_REQUEST);
   }
+
   switch (storageData.provider) {
     case StorageProviders.AWS:
       if (!storageData.region) {
@@ -85,6 +91,17 @@ export async function listObjectsInBucket(url: URL): Promise<string[]> {
           const pathname = url.pathname.replace(/^\//, '');
           const [bucketName, ...folderParts] = pathname.split('/');
 
+          requestUrl += `/${bucketName}?list-type=2`;
+
+          const folderPrefix = folderParts.join('/');
+          if (folderPrefix) {
+            requestUrl += `&prefix=${folderPrefix}`;
+          }
+        } else if (GCS_HTTP_REGEX_SUBDOMAIN.test(url.href)) {
+          requestUrl += `?list-type=2&prefix=${url.pathname.replace(/^\//, '')}`;
+        } else if (GCS_HTTP_REGEX_PATH_BASED.test(url.href)) {
+          const pathname = url.pathname.replace(/^\//, '');
+          const [bucketName, ...folderParts] = pathname.split('/');
           requestUrl += `/${bucketName}?list-type=2`;
 
           const folderPrefix = folderParts.join('/');

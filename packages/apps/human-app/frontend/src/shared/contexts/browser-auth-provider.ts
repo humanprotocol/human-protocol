@@ -1,6 +1,6 @@
 /* eslint-disable camelcase -- ...*/
-import { type SignInSuccessResponse } from '@/modules/worker/services/sign-in/types';
 import type { BrowserAuthProvider } from '@/shared/types/browser-auth-provider';
+import { type AuthTokensSuccessResponse } from '../schemas';
 
 const accessTokenKey = btoa('access_token');
 const refreshTokenKey = btoa('refresh_token');
@@ -11,7 +11,7 @@ const browserAuthProvider: BrowserAuthProvider = {
   isAuthenticated: false,
   authType: 'web2',
   signIn(
-    { access_token, refresh_token }: SignInSuccessResponse,
+    { access_token, refresh_token }: AuthTokensSuccessResponse,
     authType,
     signOutSubscription
   ) {

@@ -9,7 +9,6 @@ import {
 } from './qualification.error';
 import { CreateQualificationDto } from './qualification.dto';
 import { QualificationEntity } from './qualification.entity';
-import { UserEntity } from '../user/user.entity';
 import { UserQualificationEntity } from './user-qualification.entity';
 import { ServerConfigService } from '../../config/server-config.service';
 import { ConfigService } from '@nestjs/config';
@@ -238,7 +237,7 @@ describe('QualificationService', () => {
       qualificationRepository.findByReference = jest
         .fn()
         .mockResolvedValue(qualificationEntity);
-      qualificationService.getWorkers = jest
+      userRepository.findWorkersByAddresses = jest
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
@@ -261,7 +260,7 @@ describe('QualificationService', () => {
       qualificationRepository.findByReference = jest
         .fn()
         .mockResolvedValue(qualificationEntity);
-      qualificationService.getWorkers = jest
+      userRepository.findWorkersByAddresses = jest
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
@@ -301,7 +300,7 @@ describe('QualificationService', () => {
       qualificationRepository.findByReference = jest
         .fn()
         .mockResolvedValue(qualificationEntity);
-      qualificationService.getWorkers = jest
+      userRepository.findWorkersByAddresses = jest
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
@@ -326,7 +325,7 @@ describe('QualificationService', () => {
       qualificationRepository.findByReference = jest
         .fn()
         .mockResolvedValue(qualificationEntity);
-      qualificationService.getWorkers = jest
+      userRepository.findWorkersByAddresses = jest
         .fn()
         .mockResolvedValue([{ id: 1 }]);
 
@@ -345,19 +344,6 @@ describe('QualificationService', () => {
       await expect(qualificationService.unassign('ref1', [])).rejects.toThrow(
         new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
       );
-    });
-  });
-
-  describe('getWorkers', () => {
-    it('should return workers by addresses', async () => {
-      const addresses = ['address1'];
-      const users = [{ id: 1 } as UserEntity];
-
-      userRepository.findByAddress = jest.fn().mockResolvedValue(users);
-
-      const result = await qualificationService.getWorkers(addresses);
-
-      expect(result).toEqual(users);
     });
   });
 });

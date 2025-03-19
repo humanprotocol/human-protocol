@@ -1,25 +1,31 @@
 import { Entity, Column, JoinColumn, ManyToOne, Unique } from 'typeorm';
+
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { UserEntity } from './user.entity';
-import { SiteKeyType } from '../../common/enums';
 
-// TypeORM doesn't natively support partial unique indices.
-// To ensure a user can only have one record in the site_keys table with the type 'hcaptcha',
-// we enforce a partial unique index at the database level.
+import type { UserEntity } from './user.entity';
+
+export enum SiteKeyType {
+  HCAPTCHA = 'hcaptcha',
+  REGISTRATION = 'registration',
+}
+
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'site_keys' })
 @Unique(['siteKey', 'type', 'user'])
 export class SiteKeyEntity extends BaseEntity {
   @Column({ type: 'varchar' })
-  public siteKey: string;
+  siteKey: string;
 
   @Column({
     type: 'enum',
     enum: SiteKeyType,
   })
-  public type: SiteKeyType;
+  type: SiteKeyType;
 
-  @ManyToOne(() => UserEntity, (user) => user.siteKeys)
+  @ManyToOne('UserEntity', (user: UserEntity) => user.siteKeys)
   @JoinColumn()
-  public user: UserEntity;
+  user?: UserEntity;
+
+  @Column({ type: 'int' })
+  userId: number;
 }

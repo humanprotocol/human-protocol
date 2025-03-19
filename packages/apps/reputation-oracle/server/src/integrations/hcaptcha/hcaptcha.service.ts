@@ -69,13 +69,6 @@ export class HCaptchaService {
     const { email, evmAddress, country, ip } = data;
 
     try {
-      if (!country) {
-        this.logger.warn(`Country is not set for the user`, {
-          email,
-          evmAddress,
-        });
-      }
-
       const queryParams: RegisterLabelerQueryParams = {
         api_key: this.hcaptchaConfigService.apiKey,
       };

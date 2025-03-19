@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../database/base.repository';
 import { DataSource, In, IsNull, MoreThan } from 'typeorm';
 import { QualificationEntity } from './qualification.entity';
-import { UserEntity } from '../user/user.entity';
+import { UserEntity } from '../user';
 import { UserQualificationEntity } from './user-qualification.entity';
 
 @Injectable()
@@ -39,6 +39,7 @@ export class QualificationRepository extends BaseRepository<QualificationEntity>
   async saveUserQualifications(
     userQualifications: UserQualificationEntity[],
   ): Promise<void> {
+    // TODO: use base repository method for that
     await this.dataSource
       .getRepository(UserQualificationEntity)
       .save(userQualifications);

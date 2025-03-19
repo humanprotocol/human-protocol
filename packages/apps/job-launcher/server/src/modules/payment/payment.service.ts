@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
-import { ethers } from 'ethers';
+import { ethers, formatUnits } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -9,15 +9,18 @@ import {
   BillingInfoDto,
   CardConfirmDto,
   CardDto,
+  CurrencyBalanceDto,
   GetPaymentsDto,
   PaymentCryptoCreateDto,
   PaymentDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
   PaymentRefund,
+  UserBalanceDto,
 } from './payment.dto';
 import {
   FiatCurrency,
+  PaymentCurrency,
   PaymentSource,
   PaymentStatus,
   PaymentType,
@@ -33,7 +36,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
-import { div, eq, mul, add } from '../../common/utils/decimal';
+import { div, eq, mul, add, lt } from '../../common/utils/decimal';
 import { verifySignature } from '../../common/utils/signature';
 import { PaymentEntity } from './payment.entity';
 import { ControlledError } from '../../common/errors/controlled';
@@ -42,6 +45,8 @@ import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 import { JobRepository } from '../job/job.repository';
 import { PageDto } from '../../common/pagination/pagination.dto';
+import { TOKEN_ADDRESSES } from '../../common/constants/tokens';
+import { EscrowFundToken } from '../../common/enums/job';
 
 @Injectable()
 export class PaymentService {
@@ -350,17 +355,18 @@ export class PaymentService {
     }
 
     const tokenId = (await tokenContract.symbol()).toLowerCase();
-    const amount = Number(ethers.formatEther(transaction.logs[0].data));
+    const token = TOKEN_ADDRESSES[dto.chainId]?.[tokenId as EscrowFundToken];
 
-    if (
-      network?.tokens[tokenId] != tokenAddress ||
-      !CoingeckoTokenId[tokenId]
-    ) {
+    if (token?.address !== tokenAddress || !CoingeckoTokenId[tokenId]) {
       throw new ControlledError(
         ErrorPayment.UnsupportedToken,
         HttpStatus.CONFLICT,
       );
     }
+
+    const amount = Number(
+      formatUnits(transaction.logs[0].data, token.decimals),
+    );
 
     const paymentEntity = await this.paymentRepository.findOneByTransaction(
       transaction.hash,
@@ -391,31 +397,6 @@ export class PaymentService {
     await this.paymentRepository.createUnique(newPaymentEntity);
 
     return true;
-  }
-
-  public async getUserUSDBalance(userId: number): Promise<number> {
-    const paymentEntities =
-      await this.paymentRepository.getUserBalancePayments(userId);
-
-    const uniqueTokens = Array.from(
-      new Set(paymentEntities.map((payment) => payment.currency)),
-    );
-
-    let totalBalance = 0;
-
-    for (const token of uniqueTokens) {
-      const tokenAmountSum = paymentEntities
-        .filter((payment) => payment.currency === token)
-        .reduce((sum, payment) => add(sum, Number(payment.amount)), 0);
-
-      const rate =
-        token === FiatCurrency.USD
-          ? 1
-          : await this.rateService.getRate(token, FiatCurrency.USD);
-      totalBalance += mul(tokenAmountSum, rate);
-    }
-
-    return totalBalance;
   }
 
   public async getUserBalanceByCurrency(
@@ -453,6 +434,14 @@ export class PaymentService {
       status: PaymentStatus.SUCCEEDED,
     });
     await this.paymentRepository.createUnique(paymentEntity);
+  }
+
+  public async convertToUSD(amount: number, currency: string): Promise<number> {
+    if (currency === FiatCurrency.USD) {
+      return amount;
+    }
+    const rate = await this.rateService.getRate(currency, FiatCurrency.USD);
+    return mul(amount, rate);
   }
 
   // public async createSlash(job: JobEntity): Promise<void> {
@@ -517,6 +506,33 @@ export class PaymentService {
 
   //   return;
   // }
+
+  public async createWithdrawalPayment(
+    userId: number,
+    amount: number,
+    currency: string,
+    rate: number,
+  ): Promise<PaymentEntity> {
+    // Check if the user has enough balance
+    const userBalance = await this.getUserBalanceByCurrency(userId, currency);
+    if (lt(userBalance, amount)) {
+      throw new ControlledError(
+        ErrorPayment.NotEnoughFunds,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const paymentEntity = new PaymentEntity();
+    paymentEntity.userId = userId;
+    paymentEntity.source = PaymentSource.BALANCE;
+    paymentEntity.type = PaymentType.WITHDRAWAL;
+    paymentEntity.amount = -amount; // In the currency used for the payment.
+    paymentEntity.currency = currency;
+    paymentEntity.rate = rate;
+    paymentEntity.status = PaymentStatus.SUCCEEDED;
+
+    return this.paymentRepository.createUnique(paymentEntity);
+  }
 
   async listUserPaymentMethods(user: UserEntity): Promise<CardDto[]> {
     const cards: CardDto[] = [];
@@ -728,5 +744,22 @@ export class PaymentService {
     }
 
     return charge.receipt_url;
+  }
+
+  public async getUserBalance(userId: number): Promise<UserBalanceDto> {
+    const balances: CurrencyBalanceDto[] = [];
+    let totalUSDAmount = 0;
+
+    for (const currency of Object.values(PaymentCurrency)) {
+      const amount = await this.getUserBalanceByCurrency(userId, currency);
+      const amountInUSD = await this.convertToUSD(amount, currency);
+      totalUSDAmount = add(totalUSDAmount, amountInUSD);
+      balances.push({ currency, amount });
+    }
+
+    return {
+      balances,
+      totalUsdAmount: totalUSDAmount,
+    };
   }
 }

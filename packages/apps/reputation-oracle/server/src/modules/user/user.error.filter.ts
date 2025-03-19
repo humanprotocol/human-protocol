@@ -6,12 +6,13 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import logger from '../../logger';
+
 import {
   UserError,
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
 } from './user.error';
-import logger from '../../logger';
 
 type UserControllerError =
   | UserError

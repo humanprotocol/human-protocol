@@ -6,11 +6,9 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-
-import { UserEntity } from '../user/user.entity';
+import type { UserEntity } from '../user';
 import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
-import { IBase } from '../../common/interfaces/base';
 
 export enum TokenType {
   EMAIL = 'EMAIL',
@@ -18,31 +16,26 @@ export enum TokenType {
   REFRESH = 'REFRESH',
 }
 
-export interface IToken extends IBase {
-  uuid: string;
-  type: TokenType;
-}
-
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'tokens' })
 @Index(['type', 'userId'], { unique: true })
-export class TokenEntity extends BaseEntity implements IToken {
+export class TokenEntity extends BaseEntity {
   @Column({ type: 'uuid', unique: true })
   @Generated('uuid')
-  public uuid: string;
+  uuid: string;
 
   @Column({
     type: 'enum',
     enum: TokenType,
   })
-  public type: TokenType;
+  type: TokenType;
 
   @Column({ type: 'timestamptz' })
-  public expiresAt: Date;
+  expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne(() => UserEntity, { eager: true })
-  public user: UserEntity;
+  @ManyToOne('UserEntity')
+  user?: UserEntity;
 
   @Column({ type: 'int' })
-  public userId: number;
+  userId: number;
 }

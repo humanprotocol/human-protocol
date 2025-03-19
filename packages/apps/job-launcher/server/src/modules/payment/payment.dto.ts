@@ -10,7 +10,6 @@ import {
 } from 'class-validator';
 import {
   FiatCurrency,
-  PaymentCurrency,
   PaymentSortField,
   PaymentSource,
   PaymentStatus,
@@ -82,7 +81,7 @@ export class GetRateDto {
 
 export class PaymentRefund {
   public refundAmount: number;
-  public refundCurrency: PaymentCurrency;
+  public refundCurrency: string;
   public userId: number;
   public jobId: number;
 }
@@ -226,4 +225,38 @@ export class PaymentDto {
   })
   @IsString()
   public createdAt: string;
+}
+
+export class CurrencyBalanceDto {
+  @ApiProperty()
+  currency: string;
+
+  @ApiProperty()
+  amount: number;
+}
+
+export class UserBalanceDto {
+  @ApiProperty({ type: [CurrencyBalanceDto] })
+  balances: CurrencyBalanceDto[];
+
+  @ApiProperty({ name: 'total_usd_amount' })
+  totalUsdAmount: number;
+}
+
+export class TokenDto {
+  @ApiProperty({
+    description: 'The address of the token contract',
+    example: '0x1234567890abcdef1234567890abcdef12345678',
+  })
+  address: string;
+
+  @ApiProperty({
+    description: 'The number of decimals used by the token',
+    example: 18,
+  })
+  decimals: number;
+}
+
+export class TokensResponseDto {
+  [key: string]: TokenDto;
 }

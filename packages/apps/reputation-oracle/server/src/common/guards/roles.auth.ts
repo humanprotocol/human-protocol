@@ -6,30 +6,34 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '../enums/user';
-import { ROLES_KEY } from '../decorators';
+import { Roles } from '../decorators';
 
 @Injectable()
 export class RolesAuthGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+    const allowedRoles = this.reflector.getAllAndOverride(Roles, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (!requiredRoles) {
-      return true;
+    /**
+     * We don't use this guard globally, only on specific routes,
+     * so it's just a safety belt
+     */
+    if (!allowedRoles?.length) {
+      throw new Error(
+        'Allowed roles must be specified when using RolesAuthGuard',
+      );
     }
 
     const { user } = context.switchToHttp().getRequest();
-    const isAllowed = requiredRoles.some((role) => user.role === role);
 
-    if (isAllowed) {
+    if (allowedRoles.includes(user.role)) {
       return true;
     }
 
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
 }

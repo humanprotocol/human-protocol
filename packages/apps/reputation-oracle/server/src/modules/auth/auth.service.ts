@@ -8,23 +8,27 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import {
-  OperatorStatus,
-  Role as UserRole,
+  SiteKeyType,
   UserStatus,
-} from '../../common/enums/user';
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
+  UserRole,
+  UserEntity,
+  UserRepository,
+  UserService,
+  OperatorStatus,
+  type Web2UserEntity,
+  type OperatorUserEntity,
+} from '../user';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { verifySignature } from '../../utils/web3';
 import { Web3Service } from '../web3/web3.service';
 import { SignatureType } from '../../common/enums/web3';
 import { prepareSignatureBody } from '../../utils/web3';
-import { UserRepository } from '../user/user.repository';
+import * as securityUtils from '../../utils/security';
 import { AuthConfigService } from '../../config/auth-config.service';
+import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { SiteKeyType } from '../../common/enums';
 import {
   AuthError,
   AuthErrorMessage,
@@ -61,6 +65,7 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
+    private readonly ndaConfigService: NDAConfigService,
     private readonly web3ConfigService: Web3ConfigService,
     private readonly emailService: EmailService,
     private readonly web3Service: Web3Service,
@@ -71,28 +76,28 @@ export class AuthService {
     email,
     password,
   }: Web2SignInDto): Promise<SuccessAuthDto> {
-    const userEntity = await this.userRepository.findOneByEmail(email);
+    const userEntity = await this.userService.findWeb2UserByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
-    if (!UserService.checkPasswordMatchesHash(password, userEntity.password)) {
+    if (!securityUtils.comparePasswordWithHash(password, userEntity.password)) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
     return this.auth(userEntity);
   }
 
-  public async signup(data: Web2SignUpDto): Promise<UserEntity> {
+  public async signup(data: Web2SignUpDto): Promise<void> {
     const storedUser = await this.userRepository.findOneByEmail(data.email);
     if (storedUser) {
       throw new DuplicatedUserEmailError(data.email);
     }
-    const userEntity = await this.userService.create(data);
+    const userEntity = await this.userService.createWorkerUser(data);
 
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.EMAIL;
-    tokenEntity.user = userEntity;
+    tokenEntity.userId = userEntity.id;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
       date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
@@ -102,8 +107,6 @@ export class AuthService {
     await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
       url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
-
-    return userEntity;
   }
 
   public async refresh(data: RefreshDto): Promise<SuccessAuthDto> {
@@ -120,10 +123,26 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
-    return this.auth(tokenEntity.user);
+    const userEntity = await this.userRepository.findOneById(
+      tokenEntity.userId,
+      {
+        relations: {
+          kyc: true,
+          siteKeys: true,
+        },
+      },
+    );
+
+    if (!userEntity) {
+      throw new Error('User not found');
+    }
+
+    return this.auth(userEntity);
   }
 
-  public async auth(userEntity: UserEntity): Promise<SuccessAuthDto> {
+  public async auth(
+    userEntity: Web2UserEntity | OperatorUserEntity | UserEntity,
+  ): Promise<SuccessAuthDto> {
     const refreshTokenEntity =
       await this.tokenRepository.findOneByUserIdAndType(
         userEntity.id,
@@ -156,7 +175,7 @@ export class AuthService {
       role: userEntity.role,
       kyc_status: userEntity.kyc?.status,
       nda_signed:
-        userEntity.ndaSignedUrl === this.authConfigService.latestNdaUrl,
+        userEntity.ndaSignedUrl === this.ndaConfigService.latestNdaUrl,
       reputation_network: operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
@@ -165,6 +184,7 @@ export class AuthService {
         : [],
     };
 
+    // TODO: load sitekeys from repository instead of user entity in request
     if (userEntity.siteKeys && userEntity.siteKeys.length > 0) {
       const existingHcaptchaSiteKey = userEntity.siteKeys.find(
         (key) => key.type === SiteKeyType.HCAPTCHA,
@@ -183,7 +203,7 @@ export class AuthService {
     }
 
     const newRefreshTokenEntity = new TokenEntity();
-    newRefreshTokenEntity.user = userEntity;
+    newRefreshTokenEntity.userId = userEntity.id;
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
@@ -213,7 +233,7 @@ export class AuthService {
 
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.PASSWORD;
-    tokenEntity.user = userEntity;
+    tokenEntity.userId = userEntity.id;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
       date.getTime() + this.authConfigService.forgotPasswordExpiresIn * 1000,
@@ -239,9 +259,12 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
-    await this.userService.updatePassword(tokenEntity.user, data.password);
+    const userEntity = await this.userService.updatePassword(
+      tokenEntity.userId,
+      data.password,
+    );
     await this.emailService.sendEmail(
-      tokenEntity.user.email,
+      userEntity.email,
       EmailAction.PASSWORD_CHANGED,
     );
 
@@ -262,8 +285,9 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
     }
 
-    tokenEntity.user.status = UserStatus.ACTIVE;
-    await this.userRepository.updateOne(tokenEntity.user);
+    await this.userRepository.updateOneById(tokenEntity.userId, {
+      status: UserStatus.ACTIVE,
+    });
   }
 
   public async resendEmailVerification(
@@ -285,7 +309,7 @@ export class AuthService {
 
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.EMAIL;
-    tokenEntity.user = userEntity;
+    tokenEntity.userId = userEntity.id;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
       date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
@@ -368,15 +392,21 @@ export class AuthService {
     if (user) {
       throw new DuplicatedUserAddressError(data.address);
     }
-    const userEntity = await this.userService.createWeb3User(data.address);
 
+    const userEntity = await this.userService.createOperatorUser(data.address);
+
+    /**
+     * TODO: revisit if we want to make it active by default
+     * since we have `enableOperator` functionality and
+     * they might not have enough tokens, which should not impact signup
+     */
     await kvstore.set(data.address.toLowerCase(), OperatorStatus.ACTIVE);
 
     return this.auth(userEntity);
   }
 
   public async web3Signin(data: Web3SignInDto): Promise<SuccessAuthDto> {
-    const userEntity = await this.userRepository.findOneByAddress(data.address);
+    const userEntity = await this.userService.findOperatorUser(data.address);
 
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_ADDRESS);
@@ -386,7 +416,7 @@ export class AuthService {
       from: data.address,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.SIGNIN,
-      nonce: (await this.userRepository.findOneByAddress(data.address))?.nonce,
+      nonce: userEntity.nonce,
     });
     const verified = verifySignature(preSigninData, data.signature, [
       data.address,

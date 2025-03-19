@@ -144,9 +144,6 @@ MINIMUM_FEE_USD="0.01"
 ### The time (in seconds) for which rate information will be cached. Default: 30
 RATE_CACHE_TIME="30"
 
-### The API key for accessing CoinMarketCap data.
-COINMARKETCAP_API_KEY=
-
 ### The API key for accessing CoinGecko data.
 COINGECKO_API_KEY=
 

@@ -1,11 +1,6 @@
 import type { RouteProps } from 'react-router-dom';
 import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
-import { SendResetLinkWorkerSuccessPage } from '@/modules/worker/views/send-reset-link/send-reset-link-success.page';
-import { ResetPasswordWorkerPage } from '@/modules/worker/views/reset-password/reset-password.page';
-import { SendResetLinkWorkerPage } from '@/modules/worker/views/send-reset-link/send-reset-link.page';
-import { ResetPasswordWorkerSuccessPage } from '@/modules/worker/views/reset-password/reset-password-success.page';
-import { JobsPage } from '@/modules/worker/views/jobs/jobs.page';
 import { env } from '@/shared/env';
 import { RegistrationPage } from '@/modules/worker/oracle-registration';
 import {
@@ -14,7 +9,6 @@ import {
   WorkHeaderIcon,
 } from '@/shared/components/ui/icons';
 import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
-import { Playground } from '@/modules/playground/views/playground.page';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
@@ -37,15 +31,20 @@ import {
   EditExistingKeysSuccessPage,
   SetUpOperatorPage,
 } from '@/modules/signup/operator';
+import { JobsPage } from '@/modules/worker/jobs';
+import {
+  ResetPasswordWorkerPage,
+  ResetPasswordWorkerSuccessPage,
+} from '@/modules/worker/reset-password';
+import {
+  SendResetLinkWorkerPage,
+  SendResetLinkWorkerSuccessPage,
+} from '@/modules/worker/send-reset-link';
 
 export const unprotectedRoutes: RouteProps[] = [
   {
     path: routerPaths.homePage,
     element: <HomePage />,
-  },
-  {
-    path: routerPaths.playground,
-    element: <Playground />,
   },
   {
     path: routerPaths.worker.signIn,

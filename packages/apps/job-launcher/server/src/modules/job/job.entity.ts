@@ -2,14 +2,11 @@ import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';
-import {
-  EscrowFundToken,
-  JobRequestType,
-  JobStatus,
-} from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { PaymentEntity } from '../payment/payment.entity';
+import { ContentModerationRequestEntity } from '../content-moderation/content-moderation-request.entity';
 
 @Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
@@ -35,11 +32,8 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: 'decimal', precision: 30, scale: 18 })
   public fundAmount: number;
 
-  @Column({
-    type: 'enum',
-    enum: EscrowFundToken,
-  })
-  public token: EscrowFundToken;
+  @Column({ type: 'varchar' })
+  public token: string;
 
   @Column({ type: 'varchar' })
   public manifestUrl: string;
@@ -69,7 +63,14 @@ export class JobEntity extends BaseEntity implements IJob {
   public userId: number;
 
   @OneToMany(() => PaymentEntity, (payment) => payment.job)
-  public payment: PaymentEntity;
+  public payments: PaymentEntity[];
+
+  @OneToMany(
+    () => ContentModerationRequestEntity,
+    (contentModerationRequest) => contentModerationRequest.job,
+    { cascade: ['insert'] },
+  )
+  public contentModerationRequests: ContentModerationRequestEntity[];
 
   @Column({ type: 'int', default: 0 })
   public retriesCount: number;

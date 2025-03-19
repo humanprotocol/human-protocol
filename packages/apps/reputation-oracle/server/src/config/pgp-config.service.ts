@@ -10,7 +10,7 @@ export class PGPConfigService {
    * Default: false
    */
   get encrypt(): boolean {
-    return this.configService.get<boolean>('PGP_ENCRYPT', false);
+    return this.configService.get<string>('PGP_ENCRYPT', 'false') === 'true';
   }
 
   /**

@@ -70,6 +70,6 @@ export function prepareSignatureBody({
     from: from.toLowerCase(),
     to: to.toLowerCase(),
     contents,
-    nonce: nonce ?? undefined,
+    nonce,
   };
 }

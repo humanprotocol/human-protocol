@@ -1,14 +1,12 @@
 import {
+  Body,
   Controller,
   Get,
+  HttpCode,
   Post,
-  Body,
   Req,
   UseFilters,
-  UseGuards,
-  HttpCode,
 } from '@nestjs/common';
-import { NDAService } from './nda.service';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -16,21 +14,22 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/interfaces/request';
-import { NDAErrorFilter } from './nda.error.filter';
-import { AuthConfigService } from 'src/config/auth-config.service';
+
+import { RequestWithUser } from '../../common/interfaces/request';
+import { NDAConfigService } from '../../config/nda-config.service';
+
 import { NDASignatureDto } from './nda.dto';
+import { NDAErrorFilter } from './nda.error.filter';
+import { NDAService } from './nda.service';
 
 @ApiTags('NDA')
-@UseFilters(NDAErrorFilter)
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseFilters(NDAErrorFilter)
 @Controller('nda')
 export class NDAController {
   constructor(
     private readonly ndaService: NDAService,
-    private readonly authConfigService: AuthConfigService,
+    private readonly ndaConfigService: NDAConfigService,
   ) {}
 
   @ApiOperation({
@@ -45,7 +44,7 @@ export class NDAController {
   })
   @Get('latest')
   getLatestNDA() {
-    return this.authConfigService.latestNdaUrl;
+    return this.ndaConfigService.latestNdaUrl;
   }
 
   @ApiOperation({

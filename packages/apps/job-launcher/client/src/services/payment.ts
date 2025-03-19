@@ -1,5 +1,5 @@
+import { ChainId } from '@human-protocol/sdk';
 import { WalletClient } from 'viem';
-
 import { PAYMENT_SIGNATURE_KEY } from '../constants/payment';
 import {
   BillingInfo,
@@ -66,6 +66,12 @@ export const getRate = async (from: string, to: string) => {
 
 export const getFee = async () => {
   const { data } = await api.get('/payment/min-fee');
+
+  return data;
+};
+
+export const getTokensAvailable = async (chainId: ChainId) => {
+  const { data } = await api.get(`/payment/tokens/${chainId}`);
 
   return data;
 };

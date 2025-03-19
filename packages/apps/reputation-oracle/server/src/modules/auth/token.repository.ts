@@ -5,7 +5,7 @@ import { TokenEntity, TokenType } from './token.entity';
 
 @Injectable()
 export class TokenRepository extends BaseRepository<TokenEntity> {
-  constructor(private dataSource: DataSource) {
+  constructor(dataSource: DataSource) {
     super(TokenEntity, dataSource);
   }
 
@@ -18,7 +18,6 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
         uuid,
         type,
       },
-      relations: ['user', 'user.kyc', 'user.siteKeys'],
     });
   }
 
@@ -31,7 +30,6 @@ export class TokenRepository extends BaseRepository<TokenEntity> {
         userId,
         type,
       },
-      relations: ['user'],
     });
   }
 
