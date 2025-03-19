@@ -150,9 +150,10 @@ export class AuthController {
   @Post('/web2/resend-verification-email')
   @HttpCode(200)
   async resendEmailVerification(
+    @Req() request: RequestWithUser,
     @Body() data: ResendVerificationEmailDto,
   ): Promise<void> {
-    await this.authService.resendEmailVerification(data);
+    await this.authService.resendEmailVerification(request.user, data);
   }
 
   @ApiOperation({

@@ -76,33 +76,33 @@ export class UserService {
     return null;
   }
 
-  async updatePassword(
-    userId: number,
-    newPassword: string,
-  ): Promise<Web2UserEntity> {
-    const userEntity = await this.userRepository.findOneById(userId);
+  // async updatePassword(
+  //   userId: number,
+  //   newPassword: string,
+  // ): Promise<Web2UserEntity> {
+  //   const userEntity = await this.userRepository.findOneById(userId);
 
-    if (!userEntity) {
-      throw new Error('User not found');
-    }
+  //   if (!userEntity) {
+  //     throw new Error('User not found');
+  //   }
 
-    if (!UserService.isWeb2UserRole(userEntity.role)) {
-      throw new Error('Only web2 users can have password');
-    }
+  //   if (!UserService.isWeb2UserRole(userEntity.role)) {
+  //     throw new Error('Only web2 users can have password');
+  //   }
 
-    userEntity.password = securityUtils.hashPassword(newPassword);
+  //   userEntity.password = securityUtils.hashPassword(newPassword);
 
-    await this.userRepository.updateOne(userEntity);
+  //   await this.userRepository.updateOne(userEntity);
 
-    return userEntity as Web2UserEntity;
-  }
+  //   return userEntity as Web2UserEntity;
+  // }
 
   async createOperatorUser(address: string): Promise<OperatorUserEntity> {
     const newUser = new UserEntity();
     newUser.evmAddress = address.toLowerCase();
     newUser.nonce = web3Utils.generateNonce();
     newUser.role = UserRole.OPERATOR;
-    newUser.status = UserStatus.ACTIVE;
+    newUser.status = UserStatus.PENDING;
 
     await this.userRepository.createUnique(newUser);
 
@@ -117,11 +117,6 @@ export class UserService {
     }
 
     return null;
-  }
-
-  async updateNonce(userEntity: OperatorUserEntity): Promise<UserEntity> {
-    userEntity.nonce = web3Utils.generateNonce();
-    return this.userRepository.updateOne(userEntity);
   }
 
   async registerLabeler(user: Web2UserEntity): Promise<string> {

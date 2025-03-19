@@ -11,7 +11,7 @@ import {
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 
 const web3userDataSchema = z.object({
-  userId: z.number(),
+  user_id: z.number(),
   wallet_address: z.string(),
   reputation_network: z.string(),
   exp: z.number(),

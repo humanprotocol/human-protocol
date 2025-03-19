@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength } from 'class-validator';
+
 import { IsLowercasedEmail } from '../../../common/validators';
 
 export function ValidPassword() {

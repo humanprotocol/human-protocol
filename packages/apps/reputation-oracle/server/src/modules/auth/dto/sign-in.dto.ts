@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEthereumAddress, IsOptional, IsString } from 'class-validator';
+
 import {
   IsLowercasedEmail,
   IsValidWeb3Signature,

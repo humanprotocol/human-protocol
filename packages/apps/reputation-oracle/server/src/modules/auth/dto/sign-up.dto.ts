@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEthereumAddress, IsString } from 'class-validator';
-import { ValidPassword } from './password.dto';
+
 import {
   IsLowercasedEmail,
   IsLowercasedEnum,
   IsValidWeb3Signature,
 } from '../../../common/validators';
 import { UserRole } from '../../user';
+import { ValidPassword } from './password.dto';
 
 export class Web2SignUpDto {
   @ApiProperty()

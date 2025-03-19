@@ -2,7 +2,7 @@ import { AutoMap } from '@automapper/classes';
 
 export class JwtUserData {
   @AutoMap()
-  userId: string;
+  user_id: string;
   @AutoMap()
   wallet_address: string;
   @AutoMap()
