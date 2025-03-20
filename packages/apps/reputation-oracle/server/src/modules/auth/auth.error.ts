@@ -19,7 +19,7 @@ export class AuthError extends BaseError {
 }
 
 export class InvalidOperatorSignupDataError extends BaseError {
-  constructor(public readonly detail: string) {
+  constructor(readonly detail: string) {
     super('Invalid operator signup data');
   }
 }
@@ -49,7 +49,7 @@ export class InvalidOperatorJobTypesError extends InvalidOperatorSignupDataError
 }
 
 export class DuplicatedUserEmailError extends BaseError {
-  constructor(public readonly email: string) {
+  constructor(readonly email: string) {
     super(
       'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
     );
@@ -57,7 +57,7 @@ export class DuplicatedUserEmailError extends BaseError {
 }
 
 export class DuplicatedUserAddressError extends BaseError {
-  constructor(public readonly address: string) {
+  constructor(readonly address: string) {
     super(
       'The address you are trying to use already exists. Please, use a different address.',
     );

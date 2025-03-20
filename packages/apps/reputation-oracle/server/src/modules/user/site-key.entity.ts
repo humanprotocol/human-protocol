@@ -22,7 +22,9 @@ export class SiteKeyEntity extends BaseEntity {
   })
   type: SiteKeyType;
 
-  @ManyToOne('UserEntity', (user: UserEntity) => user.siteKeys)
+  @ManyToOne('UserEntity', (user: UserEntity) => user.siteKeys, {
+    persistence: false,
+  })
   @JoinColumn()
   user?: UserEntity;
 

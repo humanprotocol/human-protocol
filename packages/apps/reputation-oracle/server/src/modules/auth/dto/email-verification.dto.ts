@@ -6,15 +6,15 @@ import { IsLowercasedEmail } from '../../../common/validators';
 export class ResendVerificationEmailDto {
   @ApiProperty()
   @IsLowercasedEmail()
-  public email: string;
+  email: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  hCaptchaToken: string;
 }
 
 export class VerifyEmailDto {
   @ApiProperty()
   @IsUUID()
-  public token: string;
+  token: string;
 }

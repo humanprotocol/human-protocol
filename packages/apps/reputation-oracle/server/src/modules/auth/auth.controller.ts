@@ -64,7 +64,7 @@ export class AuthController {
   @Post('/web2/signup')
   @HttpCode(200)
   async signup(@Body() data: Web2SignUpDto): Promise<void> {
-    await this.authService.signup(data);
+    await this.authService.signup(data.email, data.password);
   }
 
   @ApiOperation({
@@ -85,7 +85,10 @@ export class AuthController {
   @Post('/web3/signup')
   @HttpCode(200)
   async web3SignUp(@Body() data: Web3SignUpDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.web3Signup(data);
+    const authTokens = await this.authService.web3Signup(
+      data.signature,
+      data.address,
+    );
     return authTokens;
   }
 
@@ -104,7 +107,7 @@ export class AuthController {
   @Post('/web2/signin')
   @HttpCode(200)
   async signin(@Body() data: Web2SignInDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.signin(data);
+    const authTokens = await this.authService.signin(data.email, data.password);
     return authTokens;
   }
 
@@ -122,7 +125,10 @@ export class AuthController {
   @Post('/web3/signin')
   @HttpCode(200)
   async web3SignIn(@Body() data: Web3SignInDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.web3Signin(data);
+    const authTokens = await this.authService.web3Signin(
+      data.address,
+      data.signature,
+    );
     return authTokens;
   }
 
@@ -140,7 +146,7 @@ export class AuthController {
   @Post('/refresh')
   @HttpCode(200)
   async refreshToken(@Body() data: RefreshDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.refresh(data);
+    const authTokens = await this.authService.refresh(data.refreshToken);
     return authTokens;
   }
 
@@ -158,7 +164,7 @@ export class AuthController {
   @Post('/web2/forgot-password')
   @HttpCode(200)
   async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
-    await this.authService.forgotPassword(data);
+    await this.authService.forgotPassword(data.email);
   }
 
   @ApiOperation({
@@ -175,7 +181,7 @@ export class AuthController {
   @Post('/web2/restore-password')
   @HttpCode(200)
   async restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
-    await this.authService.restorePassword(data);
+    await this.authService.restorePassword(data.password, data.token);
   }
 
   @ApiOperation({
@@ -191,7 +197,7 @@ export class AuthController {
   @Post('/web2/verify-email')
   @HttpCode(200)
   async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
-    await this.authService.emailVerification(data);
+    await this.authService.emailVerification(data.token);
   }
 
   @ApiOperation({
@@ -211,7 +217,7 @@ export class AuthController {
     @Req() request: RequestWithUser,
     @Body() data: ResendVerificationEmailDto,
   ): Promise<void> {
-    await this.authService.resendEmailVerification(request.user, data);
+    await this.authService.resendEmailVerification(request.user, data.email);
   }
 
   @ApiOperation({

@@ -32,9 +32,18 @@ export class JwtHttpStrategy extends PassportStrategy(
 
   async validate(
     @Req() request: any,
-    payload: { userId: number },
+    payload: { user_id: number },
   ): Promise<UserEntity> {
-    const user = await this.userRepository.findOneById(payload.userId, {
+    const token = await this.tokenRepository.findOneByUserIdAndType(
+      payload.user_id,
+      TokenType.REFRESH,
+    );
+
+    if (!token) {
+      throw new UnauthorizedException('User is not authorized');
+    }
+
+    const user = await this.userRepository.findOneById(payload.user_id, {
       relations: {
         kyc: true,
         siteKeys: true,
@@ -51,15 +60,6 @@ export class JwtHttpStrategy extends PassportStrategy(
       request.url !== LOGOUT_PATH
     ) {
       throw new UnauthorizedException('User not active');
-    }
-
-    const token = await this.tokenRepository.findOneByUserIdAndType(
-      user.id,
-      TokenType.REFRESH,
-    );
-
-    if (!token) {
-      throw new UnauthorizedException('User is not authorized');
     }
 
     return user;

@@ -33,20 +33,13 @@ import {
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
-import {
-  ForgotPasswordDto,
-  SuccessAuthDto,
-  RefreshDto,
-  Web2SignUpDto,
-  Web2SignInDto,
-  Web3SignInDto,
-  Web3SignUpDto,
-  RestorePasswordDto,
-  VerifyEmailDto,
-  ResendVerificationEmailDto,
-} from './dto';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
+
+type AuthTokens = {
+  accessToken: string;
+  refreshToken: string;
+};
 
 @Injectable()
 export class AuthService {
@@ -66,15 +59,15 @@ export class AuthService {
     private readonly siteKeyRepository: SiteKeyRepository,
   ) {}
 
-  async signup(data: Web2SignUpDto): Promise<void> {
-    const storedUser = await this.userRepository.findOneByEmail(data.email);
+  async signup(email: string, password: string): Promise<void> {
+    const storedUser = await this.userRepository.findOneByEmail(email);
     if (storedUser) {
-      throw new DuplicatedUserEmailError(data.email);
+      throw new DuplicatedUserEmailError(email);
     }
 
     const newUser = new UserEntity();
-    newUser.email = data.email;
-    newUser.password = securityUtils.hashPassword(data.password);
+    newUser.email = email;
+    newUser.password = securityUtils.hashPassword(password);
     newUser.role = UserRole.WORKER;
     newUser.status = UserStatus.PENDING;
 
@@ -85,33 +78,31 @@ export class AuthService {
     tokenEntity.userId = userEntity.id;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-    await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
+    await this.emailService.sendEmail(email, EmailAction.SIGNUP, {
       url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
   }
 
-  async web3Signup(
-    data: Web3SignUpDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
-    const user = await this.userRepository.findOneByAddress(data.address);
+  async web3Signup(signature: string, address: string): Promise<AuthTokens> {
+    const user = await this.userRepository.findOneByAddress(address);
     if (user) {
-      throw new DuplicatedUserAddressError(data.address);
+      throw new DuplicatedUserAddressError(address);
     }
 
     const preSignUpData = web3Utils.prepareSignatureBody({
-      from: data.address,
+      from: address,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.SIGNUP,
     });
 
     const isValidSignature = web3Utils.verifySignature(
       preSignUpData,
-      data.signature,
-      [data.address],
+      signature,
+      [address],
     );
 
     if (!isValidSignature) {
@@ -119,11 +110,7 @@ export class AuthService {
     }
 
     const chainId = this.web3ConfigService.reputationNetworkChainId;
-    const role = await KVStoreUtils.get(
-      chainId,
-      data.address,
-      KVStoreKeys.role,
-    );
+    const role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
 
     // We need to exclude ReputationOracle role
     const isValidRole = [
@@ -136,19 +123,19 @@ export class AuthService {
       throw new InvalidOperatorRoleError(role);
     }
 
-    const fee = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.fee);
+    const fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
     if (!fee) {
       throw new InvalidOperatorFeeError(fee);
     }
 
-    const url = await KVStoreUtils.get(chainId, data.address, KVStoreKeys.url);
+    const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     if (!url) {
       throw new InvalidOperatorUrlError(url);
     }
 
     const jobTypes = await KVStoreUtils.get(
       chainId,
-      data.address,
+      address,
       KVStoreKeys.jobTypes,
     );
     if (!jobTypes) {
@@ -156,7 +143,7 @@ export class AuthService {
     }
 
     const newUser = new UserEntity();
-    newUser.evmAddress = data.address.toLowerCase();
+    newUser.evmAddress = address.toLowerCase();
     newUser.nonce = web3Utils.generateNonce();
     newUser.role = UserRole.OPERATOR;
     newUser.status = UserStatus.PENDING;
@@ -166,10 +153,7 @@ export class AuthService {
     return this.web3Auth(userEntity);
   }
 
-  async signin({
-    email,
-    password,
-  }: Web2SignInDto): Promise<{ accessToken: string; refreshToken: string }> {
+  async signin(email: string, password: string): Promise<AuthTokens> {
     const userEntity = await this.userService.findWeb2UserByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
@@ -182,23 +166,23 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  async web3Signin(data: Web3SignInDto): Promise<SuccessAuthDto> {
-    const userEntity = await this.userService.findOperatorUser(data.address);
+  async web3Signin(address: string, signature: string): Promise<AuthTokens> {
+    const userEntity = await this.userService.findOperatorUser(address);
 
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_ADDRESS);
     }
 
     const preSigninData = web3Utils.prepareSignatureBody({
-      from: data.address,
+      from: address,
       to: this.web3ConfigService.operatorAddress,
       contents: SignatureType.SIGNIN,
       nonce: userEntity.nonce,
     });
     const isValidSignature = web3Utils.verifySignature(
       preSigninData,
-      data.signature,
-      [data.address],
+      signature,
+      [address],
     );
 
     if (!isValidSignature) {
@@ -211,17 +195,15 @@ export class AuthService {
     return this.web3Auth(userEntity);
   }
 
-  async auth(
-    userEntity: Web2UserEntity | UserEntity,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
-    let siteKey: string | undefined;
-    const hCaptchaSiteKey = await this.siteKeyRepository.findByUserAndType(
+  async auth(userEntity: Web2UserEntity | UserEntity): Promise<AuthTokens> {
+    let hCaptchaSiteKey: string | undefined;
+    const hCaptchaSiteKeys = await this.siteKeyRepository.findByUserAndType(
       userEntity.id,
       SiteKeyType.HCAPTCHA,
     );
-    if (hCaptchaSiteKey && hCaptchaSiteKey.length > 0) {
+    if (hCaptchaSiteKeys && hCaptchaSiteKeys.length > 0) {
       // We know for sure that only one hcaptcha sitekey might exist
-      siteKey = hCaptchaSiteKey[0].siteKey;
+      hCaptchaSiteKey = hCaptchaSiteKeys[0].siteKey;
     }
 
     const jwtPayload = {
@@ -239,15 +221,15 @@ export class AuthService {
             (userQualification) => userQualification.qualification.reference,
           )
         : [],
-      site_key: siteKey,
+      site_key: hCaptchaSiteKey,
     };
 
-    return await this.generateTokens(userEntity.id, jwtPayload);
+    return this.generateTokens(userEntity.id, jwtPayload);
   }
 
   async web3Auth(
     userEntity: OperatorUserEntity | UserEntity,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<AuthTokens> {
     const jwtPayload = {
       status: userEntity.status,
       user_id: userEntity.id,
@@ -255,13 +237,13 @@ export class AuthService {
       role: userEntity.role,
       reputation_network: this.web3ConfigService.operatorAddress,
     };
-    return await this.generateTokens(userEntity.id, jwtPayload);
+    return this.generateTokens(userEntity.id, jwtPayload);
   }
 
   async generateTokens(
     userId: number,
     jwtPayload: Record<string, unknown>,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<AuthTokens> {
     const refreshTokenEntity =
       await this.tokenRepository.findOneByUserIdAndType(
         userId,
@@ -277,7 +259,7 @@ export class AuthService {
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.refreshTokenExpiresIn * 1000,
+      date.getTime() + this.authConfigService.refreshTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(newRefreshTokenEntity);
@@ -289,9 +271,9 @@ export class AuthService {
     return { accessToken, refreshToken: newRefreshTokenEntity.uuid };
   }
 
-  async refresh(data: RefreshDto): Promise<SuccessAuthDto> {
+  async refresh(refreshToken: string): Promise<AuthTokens> {
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
-      data.refreshToken,
+      refreshToken,
       TokenType.REFRESH,
     );
 
@@ -323,8 +305,8 @@ export class AuthService {
     return this.auth(userEntity);
   }
 
-  async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-    const userEntity = await this.userRepository.findOneByEmail(data.email);
+  async forgotPassword(email: string): Promise<void> {
+    const userEntity = await this.userRepository.findOneByEmail(email);
 
     if (!userEntity) {
       return;
@@ -344,18 +326,18 @@ export class AuthService {
     tokenEntity.userId = userEntity.id;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.forgotPasswordExpiresIn * 1000,
+      date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-    await this.emailService.sendEmail(data.email, EmailAction.RESET_PASSWORD, {
+    await this.emailService.sendEmail(email, EmailAction.RESET_PASSWORD, {
       url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
     });
   }
 
-  async restorePassword(data: RestorePasswordDto): Promise<void> {
+  async restorePassword(password: string, token: string): Promise<void> {
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
-      data.token,
+      token,
       TokenType.PASSWORD,
       {
         relations: {
@@ -372,7 +354,7 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.PASSWORD_TOKEN_EXPIRED);
     }
 
-    const hashedPassword = securityUtils.hashPassword(data.password);
+    const hashedPassword = securityUtils.hashPassword(password);
 
     const isPasswordChanged = await this.userRepository.updateOneById(
       tokenEntity.userId,
@@ -391,9 +373,9 @@ export class AuthService {
     }
   }
 
-  async emailVerification(data: VerifyEmailDto): Promise<void> {
+  async emailVerification(token: string): Promise<void> {
     const tokenEntity = await this.tokenRepository.findOneByUuidAndType(
-      data.token,
+      token,
       TokenType.EMAIL,
     );
 
@@ -412,7 +394,7 @@ export class AuthService {
 
   async resendEmailVerification(
     user: Web2UserEntity,
-    data: ResendVerificationEmailDto,
+    email: string,
   ): Promise<void> {
     if (user.status !== UserStatus.PENDING) {
       return;
@@ -432,11 +414,11 @@ export class AuthService {
     tokenEntity.userId = user.id;
     const date = new Date();
     tokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn * 1000,
+      date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
     await this.tokenRepository.createUnique(tokenEntity);
-    await this.emailService.sendEmail(data.email, EmailAction.SIGNUP, {
+    await this.emailService.sendEmail(email, EmailAction.SIGNUP, {
       url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
     });
   }

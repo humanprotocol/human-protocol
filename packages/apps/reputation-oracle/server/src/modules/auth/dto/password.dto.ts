@@ -16,23 +16,23 @@ export function ValidPassword() {
 export class ForgotPasswordDto {
   @ApiProperty()
   @IsLowercasedEmail()
-  public email: string;
+  email: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  hCaptchaToken: string;
 }
 
 export class RestorePasswordDto {
   @ApiProperty()
   @ValidPassword()
-  public password: string;
+  password: string;
 
   @ApiProperty()
   @IsString()
-  public token: string;
+  token: string;
 
   @ApiProperty({ name: 'h_captcha_token' })
   @IsString()
-  public hCaptchaToken: string;
+  hCaptchaToken: string;
 }

@@ -9,34 +9,34 @@ import {
 export class Web2SignInDto {
   @ApiProperty()
   @IsLowercasedEmail()
-  public email: string;
+  email: string;
 
   @ApiProperty()
   @IsString()
-  public password: string;
+  password: string;
 
   @ApiPropertyOptional({ name: 'h_captcha_token' })
   @IsOptional()
   @IsString()
-  public hCaptchaToken?: string;
+  hCaptchaToken?: string;
 }
 
 export class Web3SignInDto {
   @ApiProperty()
   @IsEthereumAddress()
-  public address: string;
+  address: string;
 
   @ApiProperty()
   @IsValidWeb3Signature()
-  public signature: string;
+  signature: string;
 }
 
 export class SuccessAuthDto {
   @ApiProperty({ name: 'access_token' })
   @IsString()
-  public accessToken: string;
+  accessToken: string;
 
   @ApiProperty({ name: 'refresh_token' })
   @IsString()
-  public refreshToken: string;
+  refreshToken: string;
 }
