@@ -77,18 +77,24 @@ export const responseItemFixture1: JobsDiscoveryResponseItem = {
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: JobStatus.ACTIVE,
+  created_at: '2025-03-18T03:00:00.000Z',
+  qualifications: [],
 };
 export const responseItemFixture2: JobsDiscoveryResponseItem = {
   escrow_address: ESCROW_ADDRESS2,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: JobStatus.COMPLETED,
+  created_at: '2025-03-18T02:00:00.000Z',
+  qualifications: [],
 };
 export const responseItemFixture3: JobsDiscoveryResponseItem = {
   escrow_address: ESCROW_ADDRESS3,
   chain_id: CHAIN_ID,
   job_type: JOB_TYPE,
   status: JobStatus.ACTIVE,
+  created_at: '2025-03-18T01:00:00.000Z',
+  qualifications: [],
 };
 export const responseItemsFixture: JobsDiscoveryResponseItem[] = [
   responseItemFixture1,

@@ -1,15 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { paginateAndSortResults } from '../../common/utils/pagination.utils';
 import {
+  Iteratee,
+  paginateAndSortResults,
+} from '../../common/utils/pagination.utils';
+import {
+  DiscoveredJob,
   JobsDiscoveryParamsCommand,
   JobsDiscoveryResponse,
-  JobsDiscoveryResponseItem,
 } from './model/jobs-discovery.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { JOB_DISCOVERY_CACHE_KEY } from '../../common/constants/cache';
-import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import {
+  JobDiscoveryFieldName,
+  JobDiscoverySortField,
+} from '../../common/enums/global-common';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class JobsDiscoveryService {
@@ -27,19 +34,29 @@ export class JobsDiscoveryService {
       this.configService.chainIdsEnabled.includes(job.chain_id),
     );
 
+    const sortField =
+      command.data.sortField || JobDiscoverySortField.CREATED_AT;
+
+    let iteratee: JobDiscoverySortField | Iteratee<DiscoveredJob>;
+    if (sortField === JobDiscoverySortField.REWARD_AMOUNT) {
+      iteratee = (job: DiscoveredJob) => ethers.parseUnits(job[sortField], 18);
+    } else {
+      iteratee = sortField;
+    }
+
     return paginateAndSortResults(
       filteredJobs,
       command.data.page,
       command.data.pageSize,
-      command.data.sortField as keyof JobsDiscoveryResponseItem,
+      iteratee,
       command.data.sort,
     );
   }
 
   private applyFilters(
-    jobs: JobsDiscoveryResponseItem[],
+    jobs: DiscoveredJob[],
     filters: JobsDiscoveryParamsCommand['data'],
-  ): JobsDiscoveryResponseItem[] {
+  ): DiscoveredJob[] {
     const difference = Object.values(JobDiscoveryFieldName).filter(
       (value) => !filters.fields?.includes(value),
     );
@@ -92,21 +109,19 @@ export class JobsDiscoveryService {
     return `${JOB_DISCOVERY_CACHE_KEY}:${oracleAddress}`;
   }
 
-  async getCachedJobs(
-    oracleAddress: string,
-  ): Promise<JobsDiscoveryResponseItem[]> {
+  async getCachedJobs(oracleAddress: string): Promise<DiscoveredJob[]> {
     const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
 
-    const cachedJobs = await this.cacheManager.get<
-      JobsDiscoveryResponseItem[] | undefined
-    >(cacheKey);
+    const cachedJobs = await this.cacheManager.get<DiscoveredJob[] | undefined>(
+      cacheKey,
+    );
 
     return cachedJobs || [];
   }
 
   async setCachedJobs(
     oracleAddress: string,
-    jobs: JobsDiscoveryResponseItem[],
+    jobs: DiscoveredJob[],
   ): Promise<void> {
     const cacheKey = JobsDiscoveryService.makeCacheKeyForOracle(oracleAddress);
     await this.cacheManager.set(cacheKey, jobs);
