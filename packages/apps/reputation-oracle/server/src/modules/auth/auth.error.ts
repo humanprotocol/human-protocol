@@ -4,6 +4,10 @@ export enum AuthErrorMessage {
   INVALID_CREDENTIALS = 'Invalid email or password',
   INVALID_REFRESH_TOKEN = 'Refresh token is not valid',
   REFRESH_TOKEN_EXPIRED = 'Refresh token expired',
+  PASSWORD_TOKEN_EXPIRED = 'Password token expired',
+  INVALID_PASSWORD_TOKEN = 'Password token is not valid',
+  EMAIL_TOKEN_EXPIRED = 'Email token expired',
+  INVALID_EMAIL_TOKEN = 'Email token is not valid',
   INVALID_WEB3_SIGNATURE = 'Invalid signature',
   INVALID_ADDRESS = 'Invalid address',
 }

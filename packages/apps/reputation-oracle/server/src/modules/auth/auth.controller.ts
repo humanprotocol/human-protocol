@@ -68,6 +68,28 @@ export class AuthController {
   }
 
   @ApiOperation({
+    summary: 'Web3 user signup',
+    description: 'Endpoint for Web3 user registration',
+  })
+  @ApiBody({ type: Web3SignUpDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User registered successfully',
+    type: SuccessAuthDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User with provided address already registered',
+  })
+  @Public()
+  @Post('/web3/signup')
+  @HttpCode(200)
+  async web3SignUp(@Body() data: Web3SignUpDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.web3Signup(data);
+    return authTokens;
+  }
+
+  @ApiOperation({
     summary: 'User signin',
     description: 'Endpoint for user authentication',
   })
@@ -83,6 +105,42 @@ export class AuthController {
   @HttpCode(200)
   async signin(@Body() data: Web2SignInDto): Promise<SuccessAuthDto> {
     const authTokens = await this.authService.signin(data);
+    return authTokens;
+  }
+
+  @ApiOperation({
+    summary: 'Web3 user signin',
+    description: 'Endpoint for Web3 user authentication',
+  })
+  @ApiBody({ type: Web3SignInDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User authenticated successfully',
+    type: SuccessAuthDto,
+  })
+  @Public()
+  @Post('/web3/signin')
+  @HttpCode(200)
+  async web3SignIn(@Body() data: Web3SignInDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.web3Signin(data);
+    return authTokens;
+  }
+
+  @ApiBody({ type: RefreshDto })
+  @ApiOperation({
+    summary: 'Refresh token',
+    description: 'Endpoint to refresh the authentication token.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: SuccessAuthDto,
+  })
+  @Public()
+  @Post('/refresh')
+  @HttpCode(200)
+  async refreshToken(@Body() data: RefreshDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.refresh(data);
     return authTokens;
   }
 
@@ -154,64 +212,6 @@ export class AuthController {
     @Body() data: ResendVerificationEmailDto,
   ): Promise<void> {
     await this.authService.resendEmailVerification(request.user, data);
-  }
-
-  @ApiOperation({
-    summary: 'Web3 user signup',
-    description: 'Endpoint for Web3 user registration',
-  })
-  @ApiBody({ type: Web3SignUpDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User registered successfully',
-    type: SuccessAuthDto,
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User with provided address already registered',
-  })
-  @Public()
-  @Post('/web3/signup')
-  @HttpCode(200)
-  async web3SignUp(@Body() data: Web3SignUpDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.web3Signup(data);
-    return authTokens;
-  }
-
-  @ApiOperation({
-    summary: 'Web3 user signin',
-    description: 'Endpoint for Web3 user authentication',
-  })
-  @ApiBody({ type: Web3SignInDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User authenticated successfully',
-    type: SuccessAuthDto,
-  })
-  @Public()
-  @Post('/web3/signin')
-  @HttpCode(200)
-  async web3SignIn(@Body() data: Web3SignInDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.web3Signin(data);
-    return authTokens;
-  }
-
-  @ApiBody({ type: RefreshDto })
-  @ApiOperation({
-    summary: 'Refresh token',
-    description: 'Endpoint to refresh the authentication token.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Token refreshed successfully',
-    type: SuccessAuthDto,
-  })
-  @Public()
-  @Post('/refresh')
-  @HttpCode(200)
-  async refreshToken(@Body() data: RefreshDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.refresh(data);
-    return authTokens;
   }
 
   @ApiOperation({

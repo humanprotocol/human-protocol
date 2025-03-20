@@ -15,10 +15,11 @@ import logger from '../../logger';
 import {
   SiteKeyRepository,
   SiteKeyType,
-  UserStatus,
   UserEntity,
   UserRepository,
+  UserRole,
   UserService,
+  UserStatus,
   type OperatorUserEntity,
   type Web2UserEntity,
 } from '../user';
@@ -70,7 +71,14 @@ export class AuthService {
     if (storedUser) {
       throw new DuplicatedUserEmailError(data.email);
     }
-    const userEntity = await this.userService.createWorkerUser(data);
+
+    const newUser = new UserEntity();
+    newUser.email = data.email;
+    newUser.password = securityUtils.hashPassword(data.password);
+    newUser.role = UserRole.WORKER;
+    newUser.status = UserStatus.PENDING;
+
+    const userEntity = await this.userRepository.createUnique(newUser);
 
     const tokenEntity = new TokenEntity();
     tokenEntity.type = TokenType.EMAIL;
@@ -147,7 +155,13 @@ export class AuthService {
       throw new InvalidOperatorJobTypesError(jobTypes);
     }
 
-    const userEntity = await this.userService.createOperatorUser(data.address);
+    const newUser = new UserEntity();
+    newUser.evmAddress = data.address.toLowerCase();
+    newUser.nonce = web3Utils.generateNonce();
+    newUser.role = UserRole.OPERATOR;
+    newUser.status = UserStatus.PENDING;
+
+    const userEntity = await this.userRepository.createUnique(newUser);
 
     return this.web3Auth(userEntity);
   }
@@ -198,7 +212,7 @@ export class AuthService {
   }
 
   async auth(
-    userEntity: Web2UserEntity | OperatorUserEntity | UserEntity,
+    userEntity: Web2UserEntity | UserEntity,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     let siteKey: string | undefined;
     const hCaptchaSiteKey = await this.siteKeyRepository.findByUserAndType(
@@ -206,12 +220,10 @@ export class AuthService {
       SiteKeyType.HCAPTCHA,
     );
     if (hCaptchaSiteKey && hCaptchaSiteKey.length > 0) {
-      // TODO: Revisit
       // We know for sure that only one hcaptcha sitekey might exist
       siteKey = hCaptchaSiteKey[0].siteKey;
     }
 
-    // TODO: DRY
     const jwtPayload = {
       email: userEntity.email,
       status: userEntity.status,
@@ -230,37 +242,12 @@ export class AuthService {
       site_key: siteKey,
     };
 
-    const refreshTokenEntity =
-      await this.tokenRepository.findOneByUserIdAndType(
-        userEntity.id,
-        TokenType.REFRESH,
-      );
-
-    if (refreshTokenEntity) {
-      await this.tokenRepository.deleteOne(refreshTokenEntity);
-    }
-
-    const newRefreshTokenEntity = new TokenEntity();
-    newRefreshTokenEntity.userId = userEntity.id;
-    newRefreshTokenEntity.type = TokenType.REFRESH;
-    const date = new Date();
-    newRefreshTokenEntity.expiresAt = new Date(
-      date.getTime() + this.authConfigService.refreshTokenExpiresIn * 1000,
-    );
-
-    await this.tokenRepository.createUnique(newRefreshTokenEntity);
-
-    const accessToken = await this.jwtService.signAsync(jwtPayload, {
-      expiresIn: this.authConfigService.accessTokenExpiresIn,
-    });
-
-    return { accessToken, refreshToken: newRefreshTokenEntity.uuid };
+    return await this.generateTokens(userEntity.id, jwtPayload);
   }
 
   async web3Auth(
     userEntity: OperatorUserEntity | UserEntity,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    // TODO: DRY
     const jwtPayload = {
       status: userEntity.status,
       user_id: userEntity.id,
@@ -268,9 +255,16 @@ export class AuthService {
       role: userEntity.role,
       reputation_network: this.web3ConfigService.operatorAddress,
     };
+    return await this.generateTokens(userEntity.id, jwtPayload);
+  }
+
+  async generateTokens(
+    userId: number,
+    jwtPayload: Record<string, unknown>,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const refreshTokenEntity =
       await this.tokenRepository.findOneByUserIdAndType(
-        userEntity.id,
+        userId,
         TokenType.REFRESH,
       );
 
@@ -279,7 +273,7 @@ export class AuthService {
     }
 
     const newRefreshTokenEntity = new TokenEntity();
-    newRefreshTokenEntity.userId = userEntity.id;
+    newRefreshTokenEntity.userId = userId;
     newRefreshTokenEntity.type = TokenType.REFRESH;
     const date = new Date();
     newRefreshTokenEntity.expiresAt = new Date(
@@ -371,11 +365,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
+      throw new AuthError(AuthErrorMessage.INVALID_PASSWORD_TOKEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
+      throw new AuthError(AuthErrorMessage.PASSWORD_TOKEN_EXPIRED);
     }
 
     const hashedPassword = securityUtils.hashPassword(data.password);
@@ -404,11 +398,11 @@ export class AuthService {
     );
 
     if (!tokenEntity) {
-      throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
+      throw new AuthError(AuthErrorMessage.INVALID_EMAIL_TOKEN);
     }
 
     if (new Date() > tokenEntity.expiresAt) {
-      throw new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED);
+      throw new AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED);
     }
 
     await this.userRepository.updateOneById(tokenEntity.userId, {

@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';
 
 import { KycStatus } from '../kyc/constants';
@@ -13,7 +12,7 @@ import { Web3Service } from '../web3/web3.service';
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { OperatorUserEntity, Web2UserEntity } from './types';
-import { Role as UserRole, UserStatus, UserEntity } from './user.entity';
+import { Role as UserRole, UserEntity } from './user.entity';
 import {
   UserError,
   UserErrorMessage,
@@ -43,21 +42,6 @@ export class UserService {
     );
   }
 
-  async createWorkerUser(data: {
-    email: string;
-    password: string;
-  }): Promise<Web2UserEntity> {
-    const newUser = new UserEntity();
-    newUser.email = data.email;
-    newUser.password = securityUtils.hashPassword(data.password);
-    newUser.role = UserRole.WORKER;
-    newUser.status = UserStatus.PENDING;
-
-    await this.userRepository.createUnique(newUser);
-
-    return newUser as Web2UserEntity;
-  }
-
   async findWeb2UserByEmail(email: string): Promise<Web2UserEntity | null> {
     const userEntity = await this.userRepository.findOneByEmail(email, {
       relations: {
@@ -74,39 +58,6 @@ export class UserService {
     }
 
     return null;
-  }
-
-  // async updatePassword(
-  //   userId: number,
-  //   newPassword: string,
-  // ): Promise<Web2UserEntity> {
-  //   const userEntity = await this.userRepository.findOneById(userId);
-
-  //   if (!userEntity) {
-  //     throw new Error('User not found');
-  //   }
-
-  //   if (!UserService.isWeb2UserRole(userEntity.role)) {
-  //     throw new Error('Only web2 users can have password');
-  //   }
-
-  //   userEntity.password = securityUtils.hashPassword(newPassword);
-
-  //   await this.userRepository.updateOne(userEntity);
-
-  //   return userEntity as Web2UserEntity;
-  // }
-
-  async createOperatorUser(address: string): Promise<OperatorUserEntity> {
-    const newUser = new UserEntity();
-    newUser.evmAddress = address.toLowerCase();
-    newUser.nonce = web3Utils.generateNonce();
-    newUser.role = UserRole.OPERATOR;
-    newUser.status = UserStatus.PENDING;
-
-    await this.userRepository.createUnique(newUser);
-
-    return newUser as OperatorUserEntity;
   }
 
   async findOperatorUser(address: string): Promise<OperatorUserEntity | null> {
