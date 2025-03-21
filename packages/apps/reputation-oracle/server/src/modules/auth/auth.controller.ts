@@ -215,9 +215,8 @@ export class AuthController {
   @HttpCode(200)
   async resendEmailVerification(
     @Req() request: RequestWithUser,
-    @Body() data: ResendVerificationEmailDto,
   ): Promise<void> {
-    await this.authService.resendEmailVerification(request.user, data.email);
+    await this.authService.resendEmailVerification(request.user);
   }
 
   @ApiOperation({

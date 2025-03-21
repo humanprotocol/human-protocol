@@ -1,6 +1,7 @@
 import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { isURL } from 'validator';
 
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../config/auth-config.service';
@@ -29,7 +30,6 @@ import {
   DuplicatedUserAddressError,
   DuplicatedUserEmailError,
   InvalidOperatorFeeError,
-  InvalidOperatorJobTypesError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
 } from './auth.error';
@@ -47,16 +47,16 @@ export class AuthService {
     context: AuthService.name,
   });
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly userService: UserService,
-    private readonly tokenRepository: TokenRepository,
-    private readonly serverConfigService: ServerConfigService,
     private readonly authConfigService: AuthConfigService,
-    private readonly ndaConfigService: NDAConfigService,
-    private readonly web3ConfigService: Web3ConfigService,
     private readonly emailService: EmailService,
-    private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
+    private readonly ndaConfigService: NDAConfigService,
+    private readonly serverConfigService: ServerConfigService,
     private readonly siteKeyRepository: SiteKeyRepository,
+    private readonly tokenRepository: TokenRepository,
+    private readonly userRepository: UserRepository,
+    private readonly userService: UserService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   async signup(email: string, password: string): Promise<void> {
@@ -81,9 +81,9 @@ export class AuthService {
       date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
-    await this.tokenRepository.createUnique(tokenEntity);
+    const token = await this.tokenRepository.createUnique(tokenEntity);
     await this.emailService.sendEmail(email, EmailAction.SIGNUP, {
-      url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+      url: `${this.serverConfigService.feURL}/verify?token=${token.uuid}`,
     });
   }
 
@@ -129,17 +129,8 @@ export class AuthService {
     }
 
     const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    if (!url) {
+    if (!url || !isURL(url)) {
       throw new InvalidOperatorUrlError(url);
-    }
-
-    const jobTypes = await KVStoreUtils.get(
-      chainId,
-      address,
-      KVStoreKeys.jobTypes,
-    );
-    if (!jobTypes) {
-      throw new InvalidOperatorJobTypesError(jobTypes);
     }
 
     const newUser = new UserEntity();
@@ -329,9 +320,9 @@ export class AuthService {
       date.getTime() + this.authConfigService.forgotPasswordExpiresIn,
     );
 
-    await this.tokenRepository.createUnique(tokenEntity);
+    const token = await this.tokenRepository.createUnique(tokenEntity);
     await this.emailService.sendEmail(email, EmailAction.RESET_PASSWORD, {
-      url: `${this.serverConfigService.feURL}/reset-password?token=${tokenEntity.uuid}`,
+      url: `${this.serverConfigService.feURL}/reset-password?token=${token.uuid}`,
     });
   }
 
@@ -392,10 +383,7 @@ export class AuthService {
     });
   }
 
-  async resendEmailVerification(
-    user: Web2UserEntity,
-    email: string,
-  ): Promise<void> {
+  async resendEmailVerification(user: Web2UserEntity): Promise<void> {
     if (user.status !== UserStatus.PENDING) {
       return;
     }
@@ -417,9 +405,9 @@ export class AuthService {
       date.getTime() + this.authConfigService.verifyEmailTokenExpiresIn,
     );
 
-    await this.tokenRepository.createUnique(tokenEntity);
-    await this.emailService.sendEmail(email, EmailAction.SIGNUP, {
-      url: `${this.serverConfigService.feURL}/verify?token=${tokenEntity.uuid}`,
+    const token = await this.tokenRepository.createUnique(tokenEntity);
+    await this.emailService.sendEmail(user.email, EmailAction.SIGNUP, {
+      url: `${this.serverConfigService.feURL}/verify?token=${token.uuid}`,
     });
   }
 }

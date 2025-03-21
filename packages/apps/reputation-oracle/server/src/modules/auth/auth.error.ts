@@ -42,12 +42,6 @@ export class InvalidOperatorUrlError extends InvalidOperatorSignupDataError {
   }
 }
 
-export class InvalidOperatorJobTypesError extends InvalidOperatorSignupDataError {
-  constructor(url: string) {
-    super(`Invalid job types: ${url}`);
-  }
-}
-
 export class DuplicatedUserEmailError extends BaseError {
   constructor(readonly email: string) {
     super(
