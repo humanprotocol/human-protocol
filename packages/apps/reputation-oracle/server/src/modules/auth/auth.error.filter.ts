@@ -6,14 +6,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import logger from '../../logger';
+
 import {
   AuthError,
   DuplicatedUserAddressError,
   DuplicatedUserEmailError,
   InvalidOperatorSignupDataError,
 } from './auth.error';
-
-import logger from '../../logger';
 
 type AuthControllerError =
   | AuthError

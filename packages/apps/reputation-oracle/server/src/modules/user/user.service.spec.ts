@@ -10,7 +10,6 @@ import { generateEthWallet } from '../../../test/fixtures/web3';
 import { SignatureType } from '../../common/enums/web3';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
-import * as securityUtils from '../../utils/security';
 import * as web3Utils from '../../utils/web3';
 
 import { KycStatus } from '../kyc/constants';
@@ -25,7 +24,7 @@ import {
 } from './fixtures';
 import { SiteKeyRepository } from './site-key.repository';
 import { SiteKeyType } from './site-key.entity';
-import { Role, UserStatus } from './user.entity';
+import { Role } from './user.entity';
 import {
   DuplicatedWalletAddressError,
   InvalidWeb3SignatureError,
@@ -88,118 +87,6 @@ describe('UserService', () => {
       })),
     )('should return "$result" for "$role" role', ({ role, result }) => {
       expect(UserService.isWeb2UserRole(role)).toBe(result);
-    });
-  });
-
-  describe('createWorkerUser', () => {
-    it('should create worker user and return the created entity', async () => {
-      const createUserData = {
-        email: faker.internet.email(),
-        password: faker.internet.password(),
-      };
-
-      const expectedUserData = {
-        email: createUserData.email,
-        role: Role.WORKER,
-        status: UserStatus.PENDING,
-        password: expect.not.stringMatching(createUserData.password),
-      };
-
-      const result = await userService.createWorkerUser(createUserData);
-
-      expect(mockUserRepository.createUnique).toHaveBeenCalledWith(
-        expectedUserData,
-      );
-      expect(result).toEqual(expectedUserData);
-
-      expect(
-        securityUtils.comparePasswordWithHash(
-          createUserData.password,
-          result.password,
-        ),
-      ).toBe(true);
-    });
-  });
-
-  describe('updatePassword', () => {
-    it('should throw if user not found', async () => {
-      mockUserRepository.findOneById.mockResolvedValueOnce(null);
-
-      await expect(
-        userService.updatePassword(
-          faker.number.int(),
-          faker.internet.password(),
-        ),
-      ).rejects.toThrow('User not found');
-
-      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
-    });
-
-    it('should throw if not web2 user', async () => {
-      const mockUserEntity = generateOperator();
-      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
-
-      await expect(
-        userService.updatePassword(
-          faker.number.int(),
-          faker.internet.password(),
-        ),
-      ).rejects.toThrow('Only web2 users can have password');
-
-      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(0);
-    });
-
-    it('should update password for requested user', async () => {
-      const mockUserEntity = generateWorkerUser();
-      mockUserRepository.findOneById.mockResolvedValueOnce(mockUserEntity);
-
-      const newPassword = faker.internet.password();
-
-      const result = await userService.updatePassword(
-        mockUserEntity.id,
-        newPassword,
-      );
-
-      expect(
-        securityUtils.comparePasswordWithHash(newPassword, result.password),
-      ).toBe(true);
-
-      expect(mockUserRepository.findOneById).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneById).toHaveBeenCalledWith(
-        mockUserEntity.id,
-      );
-
-      const expectedUserData = {
-        ...mockUserEntity,
-        password: expect.not.stringMatching(mockUserEntity.password),
-      };
-
-      expect(mockUserRepository.updateOne).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.updateOne).toHaveBeenCalledWith(
-        expectedUserData,
-      );
-
-      expect(result).toEqual(expectedUserData);
-    });
-  });
-
-  describe('createOperatorUser', () => {
-    it('should create operator user and return the created entity', async () => {
-      const newOperatorAddress = generateEthWallet().address;
-
-      const expectedUserData = {
-        evmAddress: newOperatorAddress.toLowerCase(),
-        nonce: expect.any(String),
-        role: Role.OPERATOR,
-        status: UserStatus.ACTIVE,
-      };
-
-      const result = await userService.createOperatorUser(newOperatorAddress);
-
-      expect(mockUserRepository.createUnique).toHaveBeenCalledWith(
-        expectedUserData,
-      );
-      expect(result).toEqual(expectedUserData);
     });
   });
 

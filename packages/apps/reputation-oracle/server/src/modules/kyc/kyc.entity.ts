@@ -25,7 +25,9 @@ export class KycEntity extends BaseEntity {
   message: string | null;
 
   @JoinColumn()
-  @OneToOne('UserEntity', (user: UserEntity) => user.kyc)
+  @OneToOne('UserEntity', (user: UserEntity) => user.kyc, {
+    persistence: false,
+  })
   user?: UserEntity;
 
   @Column({ type: 'int' })

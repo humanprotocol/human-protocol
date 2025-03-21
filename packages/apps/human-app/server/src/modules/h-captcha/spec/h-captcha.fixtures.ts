@@ -70,7 +70,7 @@ const EARNINGS_DATA_2 = {
 };
 const SUCCESSFULLY_ENABLED = 'Enabled labeling for this account successfully';
 export const jwtUserDataFixture: JwtUserData = {
-  userId: ID,
+  user_id: ID,
   wallet_address: POLYGON_WALLET_ADDR,
   email: EMAIL,
   kyc_status: 'approved',

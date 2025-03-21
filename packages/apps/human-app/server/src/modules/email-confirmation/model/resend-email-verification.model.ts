@@ -1,12 +1,8 @@
 import { AutoMap } from '@automapper/classes';
-import { IsEmail, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ResendEmailVerificationDto {
-  @AutoMap()
-  @IsEmail()
-  @ApiProperty({ example: 'string' })
-  email: string;
   @AutoMap()
   @IsString()
   @ApiProperty({ example: 'string' })
@@ -14,8 +10,6 @@ export class ResendEmailVerificationDto {
 }
 
 export class ResendEmailVerificationParams {
-  @AutoMap()
-  email: string;
   @AutoMap()
   hCaptchaToken: string;
 }
@@ -26,8 +20,6 @@ export class ResendEmailVerificationCommand {
 }
 
 export class ResendEmailVerificationData {
-  @AutoMap()
-  email: string;
   @AutoMap()
   h_captcha_token: string;
 }

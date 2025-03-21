@@ -19,6 +19,9 @@ export class UserRepository extends BaseRepository<UserEntity> {
     id: number,
     options: FindOptions = {},
   ): Promise<UserEntity | null> {
+    if (!id) {
+      throw new Error('Invalid arguments');
+    }
     return this.findOne({
       where: { id },
       relations: options.relations,
@@ -29,6 +32,9 @@ export class UserRepository extends BaseRepository<UserEntity> {
     email: string,
     options: FindOptions = {},
   ): Promise<UserEntity | null> {
+    if (!email) {
+      throw new Error('Invalid arguments');
+    }
     return this.findOne({
       where: { email },
       relations: options.relations,
@@ -39,6 +45,9 @@ export class UserRepository extends BaseRepository<UserEntity> {
     address: string,
     options: FindOptions = {},
   ): Promise<UserEntity | null> {
+    if (!address) {
+      throw new Error('Invalid arguments');
+    }
     return this.findOne({
       where: {
         evmAddress: address.toLowerCase(),

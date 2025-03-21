@@ -16,9 +16,7 @@ export function EmailVerificationFormContainer() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const routerState = useResendEmailRouterParams();
-  const { methods, handleResend, isError, error, isSuccess } = useResendEmail(
-    routerState?.email ?? ''
-  );
+  const { methods, handleResend, isError, error, isSuccess } = useResendEmail();
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const isAuthenticated = Boolean(user);

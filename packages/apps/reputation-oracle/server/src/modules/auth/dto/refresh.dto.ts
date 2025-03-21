@@ -4,5 +4,5 @@ import { IsUUID } from 'class-validator';
 export class RefreshDto {
   @ApiProperty({ name: 'refresh_token' })
   @IsUUID()
-  public refreshToken: string;
+  refreshToken: string;
 }

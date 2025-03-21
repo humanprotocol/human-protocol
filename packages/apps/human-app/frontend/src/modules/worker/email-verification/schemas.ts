@@ -6,17 +6,6 @@ export const resendEmailVerificationHcaptchaSchema = z.object({
   h_captcha_token: z.string().min(1, t('validation.captcha')).default('token'),
 });
 
-type ResendEmailVerificationHcaptchaDto = z.infer<
+export type ResendEmailVerificationDto = z.infer<
   typeof resendEmailVerificationHcaptchaSchema
 >;
-
-const resendEmailVerificationEmailSchema = z.object({
-  email: z.string().email(),
-});
-
-type ResendEmailVerificationEmailDto = z.infer<
-  typeof resendEmailVerificationEmailSchema
->;
-
-export type ResendEmailVerificationDto = ResendEmailVerificationHcaptchaDto &
-  ResendEmailVerificationEmailDto;
