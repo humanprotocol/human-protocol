@@ -589,8 +589,17 @@ def get_task_upload_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
 
     with get_api_client() as api_client:
         try:
-            (status, _) = api_client.tasks_api.retrieve_status(cvat_id)
-            return UploadStatus(status.state.value), status.message
+            results = api_client.requests_api.list(task_id=cvat_id, action="create", page_size=1)[
+                0
+            ].results
+            if not results:
+                status = None
+                reason = f"Task #{cvat_id} creation request not found"
+            else:
+                status = UploadStatus(results[0].status.value.capitalize())
+                reason = results[0].message
+
+            return status, reason
         except exceptions.ApiException as e:
             if e.status == 404:
                 return None, e.body
