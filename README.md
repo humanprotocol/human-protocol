@@ -27,10 +27,7 @@ HUMAN Protocol is a permissionless infrastructure that facilitates the exchange 
 
 Current use cases include:
 
-* [Data Labeling](https://app.humanprotocol.org/) - Over 20M images labeled monthly
-* [IMOO](https://www.humanprotocol.org/imoo) - Decentralized prediction market oracle
-* [POH](https://www.humanprotocol.org/proof-of-humanity) - On-chain bot detection
-* [Fortune](https://fortune.humanprotocol.org/) - Decentralized data labeling platform
+* [Data Labeling](https://app.humanprotocol.org/) 
 
 ## Quick Start
 
