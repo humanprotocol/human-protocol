@@ -8,12 +8,12 @@ import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import logger from '../../logger';
-import * as web3Utils from '../../utils/web3';
+import * as httpUtils from '../../utils/http';
 import * as securityUtils from '../../utils/security';
+import * as web3Utils from '../../utils/web3';
 
 import { EmailAction } from '../email/constants';
 import { EmailService } from '../email/email.service';
-import { StorageService } from '../storage/storage.service';
 import {
   OperatorStatus,
   SiteKeyRepository,
@@ -142,7 +142,7 @@ export class AuthService {
     try {
       url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
     } catch (noop) {}
-    if (!url || !StorageService.isValidUrl(url)) {
+    if (!url || !httpUtils.isValidHttpUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
 

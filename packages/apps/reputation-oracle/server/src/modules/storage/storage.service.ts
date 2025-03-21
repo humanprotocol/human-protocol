@@ -5,28 +5,25 @@ import {
   EscrowClient,
   KVStoreUtils,
 } from '@human-protocol/sdk';
-import { HttpStatus, Injectable } from '@nestjs/common';
-import axios from 'axios';
-import * as Minio from 'minio';
+import { Injectable } from '@nestjs/common';
 import crypto from 'crypto';
-import { UploadedFile } from '../../common/interfaces/s3';
-import { Web3Service } from '../web3/web3.service';
-import { FortuneFinalResult } from '../../common/interfaces/job-result';
-import { S3ConfigService } from '../../config/s3-config.service';
-import { PGPConfigService } from '../../config/pgp-config.service';
+import * as Minio from 'minio';
+
 import { isNotFoundError } from '../../common/errors/minio';
-import {
-  FileDownloadError,
-  FileNotFoundError,
-  InvalidFileUrl,
-} from './storage.errors';
+import { UploadedFile } from '../../common/interfaces/s3';
+import { FortuneFinalResult } from '../../common/interfaces/job-result';
+import { PGPConfigService } from '../../config/pgp-config.service';
+import { S3ConfigService } from '../../config/s3-config.service';
 import logger from '../../logger';
+import * as httpUtils from '../../utils/http';
+
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class StorageService {
   private readonly logger = logger.child({ context: StorageService.name });
 
-  public readonly minioClient: Minio.Client;
+  readonly minioClient: Minio.Client;
 
   constructor(
     public readonly s3ConfigService: S3ConfigService,
@@ -42,7 +39,7 @@ export class StorageService {
     });
   }
 
-  public getUrl(key: string): string {
+  getUrl(key: string): string {
     return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
       this.s3ConfigService.endpoint
     }:${this.s3ConfigService.port}/${this.s3ConfigService.bucket}/${key}`;
@@ -98,37 +95,9 @@ export class StorageService {
     return Buffer.from(decryptedData);
   }
 
-  public static isValidUrl(maybeUrl: string): boolean {
+  async downloadJsonLikeData(url: string): Promise<any> {
     try {
-      const url = new URL(maybeUrl);
-      return ['http:', 'https:'].includes(url.protocol);
-    } catch (_error) {
-      return false;
-    }
-  }
-
-  public static async downloadFileFromUrl(url: string): Promise<Buffer> {
-    if (!this.isValidUrl(url)) {
-      throw new InvalidFileUrl(url);
-    }
-
-    try {
-      const { data } = await axios.get(url, {
-        responseType: 'arraybuffer',
-      });
-
-      return Buffer.from(data);
-    } catch (error) {
-      if (error.response?.status === HttpStatus.NOT_FOUND) {
-        throw new FileNotFoundError(url);
-      }
-      throw new FileDownloadError(url, error.cause || error.message);
-    }
-  }
-
-  public async downloadJsonLikeData(url: string): Promise<any> {
-    try {
-      let fileContent = await StorageService.downloadFileFromUrl(url);
+      let fileContent = await httpUtils.downloadFile(url);
 
       fileContent = await this.maybeDecryptFile(fileContent);
 
@@ -147,7 +116,7 @@ export class StorageService {
     }
   }
 
-  public async uploadJobSolutions(
+  async uploadJobSolutions(
     escrowAddress: string,
     chainId: ChainId,
     solutions: FortuneFinalResult[],
@@ -205,13 +174,13 @@ export class StorageService {
    * @param {string} url - URL of the source file
    * @returns {Promise<UploadedFile>} - Uploaded file with key/hash
    */
-  public async copyFileFromURLToBucket(
+  async copyFileFromURLToBucket(
     escrowAddress: string,
     chainId: ChainId,
     url: string,
   ): Promise<UploadedFile> {
     try {
-      let fileContent = await StorageService.downloadFileFromUrl(url);
+      let fileContent = await httpUtils.downloadFile(url);
       fileContent = await this.maybeDecryptFile(fileContent);
       // Encrypt for job launcher
       const content = await this.encryptFile(
