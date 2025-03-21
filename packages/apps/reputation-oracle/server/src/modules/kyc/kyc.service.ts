@@ -6,9 +6,10 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { KycConfigService } from '../../config/kyc-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import logger from '../../logger';
+import * as httpUtils from '../../utils/http';
 import { UserEntity } from '../user';
-import { formatAxiosError } from '../../utils/format-axios-error';
 import { Web3Service } from '../web3/web3.service';
+
 import { KycStatus } from './constants';
 import { KycSignedAddressDto, UpdateKycStatusDto } from './kyc.dto';
 import { KycEntity } from './kyc.entity';
@@ -76,7 +77,7 @@ export class KycService {
         )
         .pipe(
           catchError((error: AxiosError) => {
-            const formattedError = formatAxiosError(error);
+            const formattedError = httpUtils.formatAxiosError(error);
             const errorMessage =
               'Error occurred while initializing KYC session';
             this.logger.error(errorMessage, {
