@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBody,
   ApiResponse,
@@ -56,6 +56,7 @@ export class WebhookController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
+  @HttpCode(200)
   public async processWebhook(@Body() body: WebhookDto): Promise<void> {
     return this.webhookService.handleWebhook(body);
   }
