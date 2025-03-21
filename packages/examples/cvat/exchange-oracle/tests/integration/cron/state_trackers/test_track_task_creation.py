@@ -112,4 +112,4 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.job_creation_failed
+        assert webhook.event_type == ExchangeOracleEventTypes.escrow_failed
