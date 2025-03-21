@@ -640,6 +640,28 @@ class AudinoDatasetComparator:
                     )
         return dp[len(gt_words)][len(ds_words)] / max(len(gt_words), 1)
 
+    def character_error_rate(self, gt_sentence: str, ds_sentence: str) -> float:
+        """Calculate Character Error Rate (CER)."""
+        gt_chars = str(gt_sentence)
+        ds_chars = str(ds_sentence)
+
+        # Dynamic programming approach for CER calculation
+        dp = [[0] * (len(ds_chars) + 1) for _ in range(len(gt_chars) + 1)]
+        for i in range(len(gt_chars) + 1):
+            for j in range(len(ds_chars) + 1):
+                if i == 0:
+                    dp[i][j] = j
+                elif j == 0:
+                    dp[i][j] = i
+                else:
+                    cost = 0 if gt_chars[i - 1] == ds_chars[j - 1] else 1
+                    dp[i][j] = min(
+                        dp[i - 1][j] + 1,  # Deletion
+                        dp[i][j - 1] + 1,  # Insertion
+                        dp[i - 1][j - 1] + cost,  # Substitution
+                    )
+        return dp[len(gt_chars)][len(ds_chars)] / max(len(gt_chars), 1)
+
     def compare(
         self,
         gt_dataset: list[dict[str, str]],
@@ -661,8 +683,6 @@ class AudinoDatasetComparator:
         - offset: The cumulative length (in seconds) of gt job processed before the current job.
         - job_duration: The duration (in seconds) of the current job that overlaps with the gt job.
         """
-        matched_annotations = 0
-        matched_wers = []
 
         start_time = offset
         end_time = start_time + job_duration
@@ -675,46 +695,23 @@ class AudinoDatasetComparator:
         ]
 
         # Filtering ds_dataset to include only those within intersecting region of GT
-        ds_dataset = [ds_ann for ds_ann in ds_dataset if ds_ann["end"] <= job_duration]
+        ds_samples_filtered = [
+            ds_ann for ds_ann in ds_dataset if ds_ann["end"] <= (job_duration + 1.5)
+        ]
 
         # if gt_samples_filtered is None:
         #     raise TooFewGtError
 
-        for gt in gt_samples_filtered:
-            best_match_idx = -1
-            best_wer = 0
+        gt_samples_filtered.sort(key=lambda ann: ann["start"])
+        ds_samples_filtered.sort(key=lambda ann: ann["start"])
 
-            for idx, ds in enumerate(ds_dataset):
-                iou_score = self.iou(
-                    float(gt["start"] - offset),
-                    float(gt["end"] - offset),
-                    float(ds["start"]),
-                    float(ds["end"]),
-                )
-                if iou_score < 0.6:
-                    continue
+        gt_transcriptions = " ".join([gt.get("sentence", "") for gt in gt_samples_filtered])
+        ds_transcriptions = " ".join([ds.get("sentence", "") for ds in ds_samples_filtered])
 
-                wer_score = max(
-                    0, 1 - self.word_error_rate(gt.get("sentence", ""), ds.get("sentence", ""))
-                )
-                if wer_score > 0.6:
-                    best_match_idx = idx
-                    best_wer = wer_score
+        wer = min(max(self.word_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
+        cer = min(max(self.character_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
 
-            if best_match_idx != -1:
-                matched_annotations += 1
-                matched_wers.append(best_wer)
-
-        total_relevant_annotations = 2 * max(len(gt_samples_filtered), len(ds_dataset))
-        if total_relevant_annotations > 0:
-            accuracy = (2 * matched_annotations) / total_relevant_annotations
-            if matched_wers:
-                average_wer = sum(matched_wers) / len(matched_wers)
-                accuracy *= average_wer  # Scale accuracy by average WER score
-        else:
-            accuracy = 0.0
-
-        return max(accuracy, 0.0)
+        return min(max((1 - wer + 1 - cer) / 2.0, 0.0), 1.0)
 
 
 @dataclass
