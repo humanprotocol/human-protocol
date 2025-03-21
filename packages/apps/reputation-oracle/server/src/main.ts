@@ -8,16 +8,20 @@ import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
 import { ServerConfigService } from './config/server-config.service';
 import logger, { nestLoggerOverride } from './logger';
+import { getBodyParserOptions } from '@nestjs/platform-express/adapters/utils/get-body-parser-options.util';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
     logger: nestLoggerOverride,
+    bodyParser: false,
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.use(json({ limit: '5mb' }));
-  app.use(urlencoded({ limit: '5mb', extended: true }));
+  app.use(json(getBodyParserOptions(true, { limit: '5mb' })));
+  app.use(
+    urlencoded(getBodyParserOptions(true, { limit: '5mb', extended: true })),
+  );
 
   const config = new DocumentBuilder()
     .addBearerAuth()

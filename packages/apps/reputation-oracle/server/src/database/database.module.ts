@@ -18,6 +18,7 @@ import { EscrowCompletionEntity } from '../modules/escrow-completion/escrow-comp
 import { EscrowPayoutsBatchEntity } from '../modules/escrow-completion/escrow-payouts-batch.entity';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
+import { AbuseEntity } from 'src/modules/abuse/abuse.entity';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
           synchronize: false,
           migrationsRun: false,
           entities: [
+            AbuseEntity,
             WebhookIncomingEntity,
             WebhookOutgoingEntity,
             EscrowCompletionEntity,
