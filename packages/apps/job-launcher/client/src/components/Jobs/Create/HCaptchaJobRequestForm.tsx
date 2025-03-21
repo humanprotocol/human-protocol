@@ -252,13 +252,7 @@ export const HCaptchaJobRequestForm = () => {
                     >
                       Unsure what job type to choose?
                     </Typography>
-                    <Button
-                      href="https://escrow-dashboard-git-feat-escrow-dashboard-ba2730-humanprotocol.vercel.app/launchpad/explore-jobs"
-                      target="_blank"
-                      sx={{ ml: 2 }}
-                    >
-                      Explore jobs
-                    </Button>
+                    <Button sx={{ ml: 2 }}>Explore jobs</Button>
                   </Box>
                 </Box>
               </Grid>
