@@ -190,7 +190,7 @@ describe('Storage tests', () => {
     });
 
     test('should fail URL validation', async () => {
-      expect(StorageClient.downloadFileFromUrl(FAKE_URL)).rejects.toThrow(
+      await expect(StorageClient.downloadFileFromUrl(FAKE_URL)).rejects.toThrow(
         ErrorInvalidUrl
       );
     });
