@@ -45,9 +45,9 @@ yarn install
 - Ethereum Mainnet
 - Polygon
 - BSC
-- Moonbeam
 - Goerli (testnet)
 - Mumbai (testnet)
+- BSC (testnet)
 
 ## All work on-chain
 
