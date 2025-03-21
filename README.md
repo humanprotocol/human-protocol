@@ -23,7 +23,6 @@ HUMAN Protocol is a permissionless infrastructure that facilitates the exchange 
 
 - **Task Creators** can create and distribute work
 - **Workers** can complete tasks and earn rewards
-- **Validators** can verify work quality
 - **Operators** can run network infrastructure
 
 Current use cases include:
