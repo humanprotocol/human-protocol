@@ -213,6 +213,14 @@ export class PaymentDto {
   public transaction?: string;
 
   @ApiProperty({
+    name: 'job_id',
+    description: 'Job ID associated with the payment',
+  })
+  @IsNumber()
+  @IsOptional()
+  public jobId?: number;
+
+  @ApiProperty({
     name: 'escrow_address',
     description: 'Escrow address associated with the payment (if applicable)',
   })
