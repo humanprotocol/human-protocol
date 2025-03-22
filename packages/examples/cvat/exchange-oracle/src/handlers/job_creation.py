@@ -195,12 +195,12 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         # into oracle bucket
         pass
 
-    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+    def _wait_task_creation(self, task_id: int) -> cvat_api.RequestStatus:
         # TODO: add a timeout or
         # save gt datasets in the oracle bucket and upload in track_task_creation()
         while True:
             task_status, _ = cvat_api.get_task_upload_status(task_id)
-            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+            if task_status not in [cvat_api.RequestStatus.STARTED, cvat_api.RequestStatus.QUEUED]:
                 return task_status
 
             sleep(Config.cvat_config.task_creation_check_interval)
@@ -209,7 +209,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
     ) -> None:
         task_status = self._wait_task_creation(task_id)
-        if task_status != cvat_api.UploadStatus.FINISHED:
+        if task_status != cvat_api.RequestStatus.FINISHED:
             return  # will be handled in state_trackers.py::track_task_creation
 
         dm_format_to_cvat_format = {

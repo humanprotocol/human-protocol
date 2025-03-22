@@ -33,7 +33,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         with patch(
             "src.crons.cvat.state_trackers.cvat_api.get_task_upload_status"
         ) as mock_get_task_upload_status:
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FAILED, "Failed")
+            mock_get_task_upload_status.return_value = (cvat_api.RequestStatus.FAILED, "Failed")
 
             track_task_creation()
 
@@ -60,7 +60,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             ) as mock_get_task_upload_status,
             patch("src.crons.cvat.state_trackers.cvat_api.fetch_task_jobs") as mock_fetch_task_jobs,
         ):
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, "Finished")
+            mock_get_task_upload_status.return_value = (cvat_api.RequestStatus.FINISHED, "Finished")
             mock_cvat_job_1 = Mock()
             mock_cvat_job_1.id = cvat_job.cvat_id
             mock_cvat_job_1.start_frame = 0
@@ -104,7 +104,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 side_effect=cvat_api.exceptions.ApiException("Error"),
             ),
         ):
-            mock_get_task_upload_status.return_value = (cvat_api.UploadStatus.FINISHED, "Finished")
+            mock_get_task_upload_status.return_value = (cvat_api.RequestStatus.FINISHED, "Finished")
 
             track_task_creation()
 
@@ -112,4 +112,4 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         webhook = self.session.query(Webhook).filter_by(escrow_address=escrow_address).first()
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.job_creation_failed
+        assert webhook.event_type == ExchangeOracleEventTypes.escrow_failed
