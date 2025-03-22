@@ -18,6 +18,7 @@ from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
 from cvat_sdk.api_client.api_client import Endpoint
 from cvat_sdk.core.helpers import get_paginated_collection
 from cvat_sdk.core.uploading import AnnotationUploader
+from httpx import URL
 
 from src.core.config import Config
 from src.utils.enums import BetterEnumMeta
@@ -30,33 +31,37 @@ class CVATException(Exception):
     """Indicates that CVAT API returned unexpected response"""
 
 
-def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> bool:
+class RequestStatus(str, Enum, metaclass=BetterEnumMeta):
+    QUEUED = "Queued"
+    STARTED = "Started"
+    FINISHED = "Finished"
+    FAILED = "Failed"
+
+
+def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> str:
     """
     Requests annotations export.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
-    while not _request_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    _get_annotations(...)
+    request_id = _request_annotations(...)
+    _get_annotations(request_id, ...)
     """
 
     (_, response) = endpoint.call_with_http_info(
         id=cvat_id,
         format=format_name,
+        save_images=False,
         _parse_response=False,
     )
 
     assert response.status in [HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
-    return response.status == HTTPStatus.CREATED
+    return response.json()["rq_id"]
 
 
 def _get_annotations(
-    endpoint: Endpoint,
+    api_client: ApiClient,
+    request_id: str,
     *,
-    cvat_id: int,
-    format_name: str,
     attempt_interval: int = 5,
     timeout: int | None = _NOTSET,
 ) -> io.RawIOBase:
@@ -64,14 +69,8 @@ def _get_annotations(
     Downloads annotations.
     The dataset preparation can take some time (e.g. 10 min), so it should be used like this:
 
-    while not _request_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    _get_annotations(...)
-
-
-    It still can be used as 1 call, but the result can be unreliable.
+    request_id = _request_annotations(...)
+    _get_annotations(request_id, ...)
     """
 
     time_begin = utcnow()
@@ -80,13 +79,13 @@ def _get_annotations(
         timeout = Config.cvat_config.export_timeout
 
     while True:
-        (_, response) = endpoint.call_with_http_info(
-            id=cvat_id,
-            action="download",
-            format=format_name,
-            _parse_response=False,
-        )
-        if response.status == HTTPStatus.OK:
+        request_info = api_client.requests_api.retrieve(request_id)[0]
+        if request_info.status.value == models.RequestStatus.allowed_values[("value",)]["FAILED"]:
+            raise Exception(
+                f"Failed to export annotations for {request_id=}: {request_info.message}"
+            )
+
+        if request_info.status.value == models.RequestStatus.allowed_values[("value",)]["FINISHED"]:
             break
 
         if timeout is not None and timedelta(seconds=timeout) < (utcnow() - time_begin):
@@ -94,6 +93,19 @@ def _get_annotations(
 
         sleep(attempt_interval)
 
+    result_url = URL(request_info.result_url)
+    query_params = result_url.params
+    headers = api_client.get_common_headers()
+    api_client.update_params_for_auth(
+        headers=headers,
+        queries=query_params,
+        auth_settings=[""],
+        resource_path="",
+        method="GET",
+        request_auths=list(api_client.configuration.auth_settings().values()),
+        body="",
+    )
+    response = api_client.rest_client.GET(request_info.result_url, headers=headers)
     file_buffer = io.BytesIO(response.data)
     assert zipfile.is_zipfile(file_buffer)
     file_buffer.seek(0)
@@ -231,23 +243,20 @@ def create_project(
             raise
 
 
-def request_project_annotations(cvat_id: int, format_name: str) -> bool:
+def request_project_annotations(cvat_id: int, format_name: str) -> str:
     """
     Requests annotations export.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
-    while not request_project_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    get_project_annotations(...)
+    request_id = request_project_annotations(...):
+    get_project_annotations(request_id, ...)
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
             return _request_annotations(
-                api_client.projects_api.retrieve_annotations_endpoint,
+                api_client.projects_api.create_dataset_export_endpoint,
                 cvat_id=cvat_id,
                 format_name=format_name,
             )
@@ -256,32 +265,19 @@ def request_project_annotations(cvat_id: int, format_name: str) -> bool:
             raise
 
 
-def get_project_annotations(
-    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
-) -> io.RawIOBase:
+def get_project_annotations(request_id: str, *, timeout: int | None = _NOTSET) -> io.RawIOBase:
     """
     Downloads annotations.
     The dataset preparation can take some time (e.g. 10 min), so it should be used like this:
 
-    while not request_project_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    get_project_annotations(...)
-
-
-    It still can be used as 1 call, but the result can be unreliable.
+    request_id = request_project_annotations(...):
+    get_project_annotations(request_id, ...)
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            return _get_annotations(
-                api_client.projects_api.retrieve_annotations_endpoint,
-                cvat_id=cvat_id,
-                format_name=format_name,
-                timeout=timeout,
-            )
+            return _get_annotations(api_client, request_id=request_id, timeout=timeout)
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling ProjectApi.retrieve_annotations: {e}\n")
             raise
@@ -418,23 +414,20 @@ def put_task_data(
             raise
 
 
-def request_task_annotations(cvat_id: int, format_name: str) -> bool:
+def request_task_annotations(cvat_id: int, format_name: str) -> str:
     """
     Requests annotations export.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
-    while not request_task_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    get_task_annotations(...)
+    request_id = request_task_annotations(...):
+    get_task_annotations(request_id, ...)
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
             return _request_annotations(
-                api_client.tasks_api.retrieve_annotations_endpoint,
+                api_client.tasks_api.create_dataset_export_endpoint,
                 cvat_id=cvat_id,
                 format_name=format_name,
             )
@@ -443,32 +436,19 @@ def request_task_annotations(cvat_id: int, format_name: str) -> bool:
             raise
 
 
-def get_task_annotations(
-    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
-) -> io.RawIOBase:
+def get_task_annotations(request_id: str, *, timeout: int | None = _NOTSET) -> io.RawIOBase:
     """
     Downloads annotations.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
-    while not request_task_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    get_task_annotations(...)
-
-
-    It still can be used as 1 call, but the result can be unreliable.
+    request_id = request_task_annotations(...):
+    get_task_annotations(request_id, ...)
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            return _get_annotations(
-                api_client.tasks_api.retrieve_annotations_endpoint,
-                cvat_id=cvat_id,
-                format_name=format_name,
-                timeout=timeout,
-            )
+            return _get_annotations(api_client, request_id=request_id, timeout=timeout)
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling TasksApi.retrieve_annotations: {e}\n")
             raise
@@ -488,23 +468,20 @@ def fetch_task_jobs(task_id: int) -> list[models.JobRead]:
             raise
 
 
-def request_job_annotations(cvat_id: int, format_name: str) -> bool:
+def request_job_annotations(cvat_id: int, format_name: str) -> str:
     """
     Requests annotations export.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
-    while not request_job_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    get_job_annotations(...)
+    request_id = request_job_annotations(...):
+    get_job_annotations(request_id, ...)
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
             return _request_annotations(
-                api_client.jobs_api.retrieve_annotations_endpoint,
+                api_client.jobs_api.create_dataset_export_endpoint,
                 cvat_id=cvat_id,
                 format_name=format_name,
             )
@@ -513,32 +490,19 @@ def request_job_annotations(cvat_id: int, format_name: str) -> bool:
             raise
 
 
-def get_job_annotations(
-    cvat_id: int, format_name: str, *, timeout: int | None = _NOTSET
-) -> io.RawIOBase:
+def get_job_annotations(request_id: str, *, timeout: int | None = _NOTSET) -> io.RawIOBase:
     """
     Downloads annotations.
     The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
 
-    while not request_job_annotations(...):
-        # some waiting like
-        sleep(1)
-
-    get_job_annotations(...)
-
-
-    It still can be used as 1 call, but the result can be unreliable.
+    request_id = request_job_annotations(...):
+    get_job_annotations(request_id, ...)
     """
 
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
         try:
-            return _get_annotations(
-                api_client.jobs_api.retrieve_annotations_endpoint,
-                cvat_id=cvat_id,
-                format_name=format_name,
-                timeout=timeout,
-            )
+            return _get_annotations(api_client, request_id=request_id, timeout=timeout)
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
             raise
@@ -577,14 +541,7 @@ def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
             raise
 
 
-class UploadStatus(str, Enum, metaclass=BetterEnumMeta):
-    QUEUED = "Queued"
-    STARTED = "Started"
-    FINISHED = "Finished"
-    FAILED = "Failed"
-
-
-def get_task_upload_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
+def get_task_upload_status(cvat_id: int) -> tuple[RequestStatus | None, str]:
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -596,7 +553,7 @@ def get_task_upload_status(cvat_id: int) -> tuple[UploadStatus | None, str]:
                 status = None
                 reason = f"Task #{cvat_id} creation request not found"
             else:
-                status = UploadStatus(results[0].status.value.capitalize())
+                status = RequestStatus(results[0].status.value.capitalize())
                 reason = results[0].message
 
             return status, reason

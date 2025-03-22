@@ -159,7 +159,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
     for upload in uploads:
         status, reason = cvat_api.get_task_upload_status(upload.task_id)
         project = upload.task.project
-        if not status or status == cvat_api.UploadStatus.FAILED:
+        if not status or status == cvat_api.RequestStatus.FAILED:
             # TODO: add retries if 5xx
             failed.append(upload)
 
@@ -170,7 +170,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                 type=OracleWebhookTypes.job_launcher,
                 event=ExchangeOracleEvent_EscrowFailed(reason=reason),
             )
-        elif status == cvat_api.UploadStatus.FINISHED:
+        elif status == cvat_api.RequestStatus.FINISHED:
             try:
                 cvat_jobs = cvat_api.fetch_task_jobs(upload.task_id)
 
