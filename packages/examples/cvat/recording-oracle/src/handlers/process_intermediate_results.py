@@ -523,7 +523,7 @@ class _AudinoTaskValidator:
 
                 if job_mean_accuracy < min_quality:
                     self._gt_stats[val_job_name].failed_attempts += 1
-                    rejected_jobs[job_cvat_id] = TooFewGtError()
+                    rejected_jobs[job_cvat_id] = LowAccuracyError()
                 else:
                     self._gt_stats[val_job_name].accepted_attempts += 1
 
