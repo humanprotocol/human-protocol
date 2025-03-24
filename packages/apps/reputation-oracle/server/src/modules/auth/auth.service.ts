@@ -7,11 +7,13 @@ import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
+import logger from '../../logger';
 import * as web3Utils from '../../utils/web3';
 import * as securityUtils from '../../utils/security';
+
 import { EmailAction } from '../email/constants';
 import { EmailService } from '../email/email.service';
-import logger from '../../logger';
+import { StorageService } from '../storage/storage.service';
 import {
   SiteKeyRepository,
   SiteKeyType,
@@ -23,6 +25,7 @@ import {
   type OperatorUserEntity,
   type Web2UserEntity,
 } from '../user';
+
 import {
   AuthError,
   AuthErrorMessage,
@@ -128,7 +131,7 @@ export class AuthService {
     }
 
     const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    if (!url) {
+    if (!url || !StorageService.isValidUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
 
