@@ -173,48 +173,54 @@ def _upload_annotations(
 def _download_project_annotations(
     logger: logging.Logger, annotation_format: str, project_cvat_id: int
 ) -> io.RawIOBase:
-    cvat_api.request_project_annotations(project_cvat_id, format_name=annotation_format)
+    export_ids = []
+
+    def _request_export(cvat_id: int):
+        request_id = cvat_api.request_project_annotations(cvat_id, format_name=annotation_format)
+        export_ids.append(request_id)
+        return request_id
+
+    def _download_export():
+        request_id = export_ids.pop(0)
+        return cvat_api.get_project_annotations(request_id=request_id)
+
+    _request_export(project_cvat_id)
+
     return _download_with_retries(
         logger,
-        download_callback=partial(
-            cvat_api.get_project_annotations,
-            project_cvat_id,
-            format_name=annotation_format,
-        ),
-        retry_callback=partial(
-            cvat_api.request_project_annotations,
-            project_cvat_id,
-            format_name=annotation_format,
-        ),
+        download_callback=_download_export,
+        retry_callback=partial(_request_export, project_cvat_id),
     )
 
 
 def _download_job_annotations(
     logger: logging.Logger, annotation_format: str, jobs: Sequence[Job]
 ) -> dict[int, FileDescriptor]:
-    job_annotations: dict[int, FileDescriptor] = {}
     # Collect raw annotations from CVAT, validate and convert them
     # into a recording oracle suitable format
+    job_annotations: dict[int, FileDescriptor] = {}
+
+    export_ids: list[tuple[Job, str]] = []
+
+    def _request_export(job: Job):
+        request_id = cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
+        export_ids.append((job, request_id))
+        return request_id
+
     for jobs_batch in take_by(
         jobs, count=CronConfig.track_completed_escrows_jobs_downloading_batch_size
     ):
         # Request jobs before downloading for faster batch downloading
         for job in jobs_batch:
-            cvat_api.request_job_annotations(job.cvat_id, format_name=annotation_format)
+            _request_export(job)
 
-        for job in jobs_batch:
+        while export_ids:
+            (job, request_id) = export_ids.pop(0)
+
             job_annotations_file = _download_with_retries(
                 logger,
-                download_callback=partial(
-                    cvat_api.get_job_annotations,
-                    job.cvat_id,
-                    format_name=annotation_format,
-                ),
-                retry_callback=partial(
-                    cvat_api.request_job_annotations,
-                    job.cvat_id,
-                    format_name=annotation_format,
-                ),
+                download_callback=partial(cvat_api.get_job_annotations, request_id=request_id),
+                retry_callback=partial(_request_export, job),
             )
 
             job_assignment = job.latest_assignment
@@ -228,6 +234,7 @@ def _download_job_annotations(
                 ),
                 file=job_annotations_file,
             )
+
     return job_annotations
 
 
