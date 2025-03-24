@@ -1465,6 +1465,10 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             categories=self._gt_dataset.categories(), media_type=dm.Image
         )
 
+        roi_info_by_point_id: dict[int, skeletons_from_boxes_task.RoiInfo] = {
+            roi_info.point_id: roi_info for roi_info in self._rois
+        }
+
         for sample in self._gt_dataset:
             for gt_bbox in sample.annotations:
                 assert isinstance(gt_bbox, dm.Bbox)
@@ -1474,10 +1478,15 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     self.escrow_address, self.chain_id, self._roi_filenames[point_id]
                 )
 
+                # update gt bbox coordinates to match RoI shift
+                roi_info = roi_info_by_point_id[point_id]
+                new_x = gt_bbox.points[0] - roi_info.roi_x
+                new_y = gt_bbox.points[1] - roi_info.roi_y
+
                 self._gt_roi_dataset.put(
                     sample.wrap(
                         id=os.path.splitext(gt_roi_filename)[0],
-                        annotations=[gt_bbox],
+                        annotations=[gt_bbox.wrap(x=new_x, y=new_y)],
                         media=dm.Image(path=gt_roi_filename, size=sample.media_as(dm.Image).size),
                         attributes=filter_dict(sample.attributes, exclude_keys=["id"]),
                     )
