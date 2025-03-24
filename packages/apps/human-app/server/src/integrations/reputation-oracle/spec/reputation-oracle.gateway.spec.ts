@@ -58,7 +58,7 @@ import {
 import {
   DisableOperatorCommand,
   DisableOperatorData,
-} from '../../../modules/disable-operator/model/disable-operator.model';
+} from '../../../modules/user-operator/model/disable-operator.model';
 import { EnableLabelingCommand } from '../../../modules/h-captcha/model/enable-labeling.model';
 import {
   enableLabelingCommandFixture,

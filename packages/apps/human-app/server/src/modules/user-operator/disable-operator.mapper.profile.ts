@@ -6,7 +6,7 @@ import {
   DisableOperatorData,
   DisableOperatorDto,
   DisableOperatorParams,
-} from './model/disable-operator.model';
+} from '../user-operator/model/disable-operator.model';
 
 @Injectable()
 export class DisableOperatorProfile extends AutomapperProfile {

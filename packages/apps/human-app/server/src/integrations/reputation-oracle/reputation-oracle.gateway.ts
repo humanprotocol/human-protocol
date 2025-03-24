@@ -55,7 +55,7 @@ import {
   DisableOperatorCommand,
   DisableOperatorData,
   DisableOperatorParams,
-} from '../../modules/disable-operator/model/disable-operator.model';
+} from '../../modules/user-operator/model/disable-operator.model';
 import { KycProcedureStartResponse } from '../../modules/kyc-procedure/model/kyc-start.model';
 import {
   EnableLabelingCommand,

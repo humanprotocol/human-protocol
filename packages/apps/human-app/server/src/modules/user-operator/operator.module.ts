@@ -1,11 +1,14 @@
-import { OperatorService } from './operator.service';
-import { ReputationOracleModule } from '../../integrations/reputation-oracle/reputation-oracle.module';
-import { OperatorProfile } from './operator.mapper.profile';
 import { Module } from '@nestjs/common';
+
+import { ReputationOracleModule } from '../../integrations/reputation-oracle/reputation-oracle.module';
+
+import { DisableOperatorProfile } from './disable-operator.mapper.profile';
+import { OperatorService } from './operator.service';
+import { OperatorProfile } from './operator.mapper.profile';
 
 @Module({
   imports: [ReputationOracleModule],
-  providers: [OperatorService, OperatorProfile],
+  providers: [OperatorService, OperatorProfile, DisableOperatorProfile],
   exports: [OperatorService],
 })
 export class OperatorModule {}
