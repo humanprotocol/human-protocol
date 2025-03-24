@@ -1,7 +1,6 @@
 import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { isURL } from 'validator';
 
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../config/auth-config.service';
@@ -129,7 +128,7 @@ export class AuthService {
     }
 
     const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    if (!url || !isURL(url)) {
+    if (!url) {
       throw new InvalidOperatorUrlError(url);
     }
 
