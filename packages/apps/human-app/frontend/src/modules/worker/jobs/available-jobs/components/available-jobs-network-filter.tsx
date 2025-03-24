@@ -1,15 +1,17 @@
 /* eslint-disable camelcase --- ... */
-import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
+import { Filtering } from '@/shared/components/ui/table/table-header-menu/filtering';
 import { useGetAllNetworks, useJobsFilterStore } from '../../hooks';
 
 interface AvailableJobsNetworkFilterProps {
   chainIdsEnabled: number[];
-  isMobile?: boolean;
+  showClearButton?: boolean;
+  showTitle?: boolean;
 }
 
 export function AvailableJobsNetworkFilter({
   chainIdsEnabled,
-  isMobile = false,
+  showClearButton = false,
+  showTitle = false,
 }: Readonly<AvailableJobsNetworkFilterProps>) {
   const { setFilterParams, filterParams } = useJobsFilterStore();
   const { allNetworks } = useGetAllNetworks(chainIdsEnabled);
@@ -27,8 +29,9 @@ export function AvailableJobsNetworkFilter({
       clear={handleClear}
       filteringOptions={allNetworks}
       isChecked={(option) => option === filterParams.chain_id}
-      isMobile={isMobile}
       setFiltering={handleFilterChange}
+      showClearButton={showClearButton}
+      showTitle={showTitle}
     />
   );
 }
