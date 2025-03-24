@@ -1,6 +1,6 @@
 /* eslint-disable camelcase --- ... */
 import { t } from 'i18next';
-import { Sorting } from '@/shared/components/ui/table/table-header-menu.tsx/sorting';
+import { Sorting } from '@/shared/components/ui/table/table-header-menu/sorting';
 import { useJobsFilterStore } from '../../hooks';
 import { SortDirection, SortField } from '../../types';
 

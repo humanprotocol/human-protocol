@@ -1,5 +1,5 @@
 /* eslint-disable camelcase --- ... */
-import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
+import { Filtering } from '@/shared/components/ui/table/table-header-menu/filtering';
 import { useMyJobsFilterStore, useGetAllNetworks } from '../../../hooks';
 
 interface MyJobsNetworkFilterProps {

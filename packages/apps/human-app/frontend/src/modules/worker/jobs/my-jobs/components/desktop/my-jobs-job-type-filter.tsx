@@ -1,7 +1,7 @@
 /* eslint-disable camelcase --- ... */
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
-import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
+import { Filtering } from '@/shared/components/ui/table/table-header-menu/filtering';
 import { JOB_TYPES } from '@/shared/consts';
 import { useMyJobsFilterStore } from '../../../hooks';
 
