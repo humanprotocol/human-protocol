@@ -30,13 +30,13 @@ import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
-from src.core.storage import compose_data_bucket_filename
+from src.core.storage import compose_data_bucket_filename, compose_data_bucket_prefix
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
-from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
+from src.services.cloud.utils import BucketAccessInfo
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, format_sequence, get_function_logger
@@ -396,11 +396,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                 manifest.annotation.type,
                 escrow_address,
                 chain_id,
-                compose_bucket_url(
-                    data_bucket.bucket_name,
-                    bucket_host=data_bucket.host_url,
-                    provider=data_bucket.provider,
-                ),
+                data_bucket.to_url(),
                 cvat_webhook_id=cvat_webhook.id,
             )
 
@@ -1495,7 +1491,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         assert self._label_configuration is not _unset
         assert self._gt_roi_dataset is not _unset
 
-        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
@@ -1535,11 +1530,9 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 self.manifest.annotation.type,
                 self.escrow_address,
                 self.chain_id,
-                compose_bucket_url(
-                    input_data_bucket.bucket_name,
-                    bucket_host=input_data_bucket.host_url,
-                    provider=input_data_bucket.provider,
-                ),
+                oracle_bucket.to_url().rstrip("/")
+                + "/"
+                + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                 cvat_webhook_id=cvat_webhook.id,
             )
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
@@ -2635,7 +2628,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
         }
 
-        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
@@ -2714,11 +2706,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         self.manifest.annotation.type,
                         self.escrow_address,
                         self.chain_id,
-                        compose_bucket_url(
-                            input_data_bucket.bucket_name,
-                            bucket_host=input_data_bucket.host_url,
-                            provider=input_data_bucket.provider,
-                        ),
+                        oracle_bucket.to_url().rstrip("/")
+                        + "/"
+                        + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                         cvat_webhook_id=cvat_webhook.id,
                     )
                     created_projects.append(project_id)
