@@ -84,11 +84,11 @@ const BillingDetailsModal = ({
       }
     });
 
-    if (!formData?.vat) {
-      newErrors.vat = 'Tax ID required';
+    if (formData?.vat && !formData?.vatType) {
+      newErrors.vatType = 'Tax ID Type is required';
     }
-    if (!formData?.vatType) {
-      newErrors.vatType = 'Tax ID type required';
+    if (formData?.vatType && !formData?.vat) {
+      newErrors.vat = 'Tax ID is required';
     }
 
     setErrors(newErrors);
@@ -100,8 +100,16 @@ const BillingDetailsModal = ({
     if (validateForm()) {
       setIsLoading(true);
       try {
+        if (formData.vat === '') {
+          delete formData.vat;
+        }
+        if (formData.vatType === '') {
+          delete formData.vatType;
+        }
+
         const email = formData?.email;
         delete formData?.email;
+
         await editUserBillingInfo(formData);
         setBillingInfo({ ...formData, email });
       } catch (err: any) {
@@ -217,6 +225,7 @@ const BillingDetailsModal = ({
                 error={!!errors.vatType}
                 helperText={errors.vatType || ''}
               >
+                <MenuItem value="">None</MenuItem>
                 {Object.entries(vatTypeOptions).map(([key, label]) => (
                   <MenuItem key={key} value={key}>
                     {label}
