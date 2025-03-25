@@ -54,7 +54,7 @@ import {
 import {
   disableOperatorCommandFixture,
   disableOperatorDataFixture,
-} from '../../../modules/disable-operator/spec/disable-operator.fixtures';
+} from '../../../modules/user-operator/spec/disable-operator.fixtures';
 import {
   DisableOperatorCommand,
   DisableOperatorData,
