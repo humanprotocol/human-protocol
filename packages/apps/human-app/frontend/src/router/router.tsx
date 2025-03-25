@@ -24,6 +24,14 @@ import {
 export function Router() {
   const { user } = useAuth();
 
+  const handleSignOut = () => {
+    browserAuthProvider.signOut({
+      callback: () => {
+        window.location.reload();
+      },
+    });
+  };
+
   return (
     <Routes>
       <Route element={<UnprotectedLayout />}>
@@ -56,13 +64,7 @@ export function Router() {
                       bottomMenuItems={workerDrawerBottomMenuItems}
                       open={open}
                       setDrawerOpen={setDrawerOpen}
-                      signOut={() => {
-                        browserAuthProvider.signOut({
-                          callback: () => {
-                            window.location.reload();
-                          },
-                        });
-                      }}
+                      signOut={handleSignOut}
                       topMenuItems={workerDrawerTopMenuItems(user)}
                     />
                   )}
@@ -92,13 +94,7 @@ export function Router() {
                       bottomMenuItems={operatorDrawerBottomMenuItems}
                       open={open}
                       setDrawerOpen={setDrawerOpen}
-                      signOut={() => {
-                        browserAuthProvider.signOut({
-                          callback: () => {
-                            window.location.reload();
-                          },
-                        });
-                      }}
+                      signOut={handleSignOut}
                     />
                   )}
                 />
