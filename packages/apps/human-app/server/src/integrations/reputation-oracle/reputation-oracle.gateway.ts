@@ -56,6 +56,11 @@ import {
   DisableOperatorData,
   DisableOperatorParams,
 } from '../../modules/user-operator/model/disable-operator.model';
+import {
+  EnableOperatorCommand,
+  EnableOperatorData,
+  EnableOperatorParams,
+} from '../../modules/user-operator/model/enable-operator.model';
 import { KycProcedureStartResponse } from '../../modules/kyc-procedure/model/kyc-start.model';
 import {
   EnableLabelingCommand,
@@ -279,6 +284,20 @@ export class ReputationOracleGateway {
       ReputationOracleEndpoints.DISABLE_OPERATOR,
       disableOperatorData,
       disableOperatorCommand.token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async sendEnableOperator(enableOperatorCommand: EnableOperatorCommand) {
+    const enableOperatorData = this.mapper.map(
+      enableOperatorCommand.data,
+      EnableOperatorParams,
+      EnableOperatorData,
+    );
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.ENABLE_OPERATOR,
+      enableOperatorData,
+      enableOperatorCommand.token,
     );
     return this.handleRequestToReputationOracle<void>(options);
   }

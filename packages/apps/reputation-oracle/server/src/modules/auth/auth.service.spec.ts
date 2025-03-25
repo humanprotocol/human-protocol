@@ -210,7 +210,7 @@ describe('AuthService', () => {
           evmAddress: ethWallet.address.toLowerCase(),
           nonce: expect.any(String),
           role: UserRole.OPERATOR,
-          status: UserStatus.PENDING,
+          status: UserStatus.ACTIVE,
         }),
       );
 
@@ -515,6 +515,7 @@ describe('AuthService', () => {
         wallet_address: operator.evmAddress,
         role: operator.role,
         reputation_network: mockWeb3ConfigService.operatorAddress,
+        operator_status: 'active',
       };
 
       const spyOnGenerateTokens = jest
@@ -524,6 +525,14 @@ describe('AuthService', () => {
         accessToken: faker.string.alpha(),
         refreshToken: faker.string.uuid(),
       });
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === operator.evmAddress) {
+            return 'active';
+          }
+          return '';
+        },
+      );
 
       await service.web3Auth(operator);
 
@@ -586,7 +595,7 @@ describe('AuthService', () => {
   });
 
   describe('refresh', () => {
-    it('should generate tokens', async () => {
+    it('should generate tokens for worker', async () => {
       const user = generateWorkerUser();
       const uuid = faker.string.uuid();
 
@@ -609,6 +618,33 @@ describe('AuthService', () => {
       expect(service.auth).toHaveBeenCalledWith(user);
 
       spyOnAuth.mockRestore();
+    });
+
+    it('should generate tokens for operator', async () => {
+      const operator = generateOperator();
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.future(),
+      } as TokenEntity);
+
+      mockUserRepository.findOneById.mockResolvedValueOnce(operator);
+
+      const spyOnWeb3Auth = jest
+        .spyOn(service, 'web3Auth')
+        .mockImplementation();
+      spyOnWeb3Auth.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+
+      await service.refresh(uuid);
+
+      expect(service.web3Auth).toHaveBeenCalledTimes(1);
+      expect(service.web3Auth).toHaveBeenCalledWith(operator);
+
+      spyOnWeb3Auth.mockRestore();
     });
 
     it('should throw AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN) if token not found', async () => {

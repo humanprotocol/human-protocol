@@ -3,6 +3,7 @@ import { InjectMapper } from '@automapper/nestjs';
 import {
   Body,
   Controller,
+  HttpCode,
   Post,
   UsePipes,
   ValidationPipe,
@@ -25,6 +26,10 @@ import {
   DisableOperatorCommand,
   DisableOperatorDto,
 } from './model/disable-operator.model';
+import {
+  EnableOperatorCommand,
+  EnableOperatorDto,
+} from './model/enable-operator.model';
 
 @Controller()
 export class OperatorController {
@@ -34,6 +39,7 @@ export class OperatorController {
   ) {}
   @ApiTags('User-Operator')
   @Post('/auth/web3/signup')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Operator signup' })
   @UsePipes(new ValidationPipe())
   async signupOperator(
@@ -44,11 +50,12 @@ export class OperatorController {
       SignupOperatorDto,
       SignupOperatorCommand,
     );
-    return this.service.signupOperator(signupOperatorCommand);
+    await this.service.signupOperator(signupOperatorCommand);
   }
 
   @ApiTags('User-Operator')
   @Post('/auth/web3/signin')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Operator signin' })
   @UsePipes(new ValidationPipe())
   async signinOperator(
@@ -64,6 +71,7 @@ export class OperatorController {
 
   @ApiTags('User-Operator')
   @Post('/disable-operator')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Endpoint to disable an operator',
   })
@@ -79,6 +87,27 @@ export class OperatorController {
       DisableOperatorCommand,
     );
     disableOperatorCommand.token = token;
-    return this.service.processDisableOperator(disableOperatorCommand);
+    await this.service.disableOperator(disableOperatorCommand);
+  }
+
+  @ApiTags('User-Operator')
+  @Post('/enable-operator')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Endpoint to enable an operator',
+  })
+  @ApiBearerAuth()
+  @UsePipes(new ValidationPipe())
+  async enable(
+    @Body() enableOperatorDto: EnableOperatorDto,
+    @Authorization() token: string,
+  ): Promise<void> {
+    const enableOperatorCommand = this.mapper.map(
+      enableOperatorDto,
+      EnableOperatorDto,
+      EnableOperatorCommand,
+    );
+    enableOperatorCommand.token = token;
+    await this.service.enableOperator(enableOperatorCommand);
   }
 }

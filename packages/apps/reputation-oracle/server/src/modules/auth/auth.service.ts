@@ -15,6 +15,7 @@ import { EmailAction } from '../email/constants';
 import { EmailService } from '../email/email.service';
 import { StorageService } from '../storage/storage.service';
 import {
+  OperatorStatus,
   SiteKeyRepository,
   SiteKeyType,
   UserEntity,
@@ -139,11 +140,11 @@ export class AuthService {
     newUser.evmAddress = address.toLowerCase();
     newUser.nonce = web3Utils.generateNonce();
     newUser.role = UserRole.OPERATOR;
-    newUser.status = UserStatus.PENDING;
+    newUser.status = UserStatus.ACTIVE;
 
     const userEntity = await this.userRepository.createUnique(newUser);
 
-    return this.web3Auth(userEntity);
+    return this.web3Auth(userEntity as OperatorUserEntity);
   }
 
   async signin(email: string, password: string): Promise<AuthTokens> {
@@ -220,15 +221,20 @@ export class AuthService {
     return this.generateTokens(userEntity.id, jwtPayload);
   }
 
-  async web3Auth(
-    userEntity: OperatorUserEntity | UserEntity,
-  ): Promise<AuthTokens> {
+  async web3Auth(userEntity: OperatorUserEntity): Promise<AuthTokens> {
+    const operatorStatus = await KVStoreUtils.get(
+      this.web3ConfigService.reputationNetworkChainId,
+      this.web3ConfigService.operatorAddress,
+      userEntity.evmAddress,
+    );
+
     const jwtPayload = {
       status: userEntity.status,
       user_id: userEntity.id,
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       reputation_network: this.web3ConfigService.operatorAddress,
+      operator_status: operatorStatus || OperatorStatus.INACTIVE,
     };
     return this.generateTokens(userEntity.id, jwtPayload);
   }
@@ -295,7 +301,11 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
     }
 
-    return this.auth(userEntity);
+    if (userEntity.role === UserRole.OPERATOR) {
+      return this.web3Auth(userEntity as OperatorUserEntity);
+    } else {
+      return this.auth(userEntity);
+    }
   }
 
   async forgotPassword(email: string): Promise<void> {

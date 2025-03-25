@@ -5,6 +5,7 @@ import { ReputationOracleGateway } from '../../integrations/reputation-oracle/re
 import { SigninOperatorCommand } from './model/operator-signin.model';
 import { SignupOperatorCommand } from './model/operator-registration.model';
 import { DisableOperatorCommand } from './model/disable-operator.model';
+import { EnableOperatorCommand } from './model/enable-operator.model';
 
 @Injectable()
 export class OperatorService {
@@ -18,7 +19,11 @@ export class OperatorService {
     return this.gateway.sendOperatorSignin(command);
   }
 
-  processDisableOperator(command: DisableOperatorCommand): Promise<void> {
-    return this.gateway.sendDisableOperator(command);
+  async disableOperator(command: DisableOperatorCommand): Promise<void> {
+    await this.gateway.sendDisableOperator(command);
+  }
+
+  async enableOperator(command: EnableOperatorCommand): Promise<void> {
+    await this.gateway.sendEnableOperator(command);
   }
 }
