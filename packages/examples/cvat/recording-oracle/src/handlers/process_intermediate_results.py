@@ -266,7 +266,7 @@ class _TaskValidator:
                     item = item.wrap(id=item.id[len(self._prefix) :])
                 return item
 
-        prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.lstrip("/\\") + "/"
+        prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.strip("/\\") + "/"
 
         # Remove prefixes if it can be done safely
         sample_ids = {sample.id for sample in merged_dataset}
