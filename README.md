@@ -8,6 +8,44 @@
 | [![Core NPM Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml) | [![Python SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml) | [![Node.js SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml) | [![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml) |
 
 
+## Table of Contents
+- [Overview](#overview)
+- [Quick Start](#quick-start) 
+- [Documentation](#documentation)
+- [Project Structure](#project-structure)
+- [Smart Contracts](#smart-contracts)
+- [Contributing](#contributing-to-this-repository)
+- [Legal Notice](#legal-notice)
+
+## Overview
+
+HUMAN Protocol is a permissionless infrastructure that facilitates the exchange of HUMAN work, knowledge, and contribution. The protocol enables the creation of decentralized job markets where:
+
+- **Task Creators** can create and distribute work
+- **Workers** can complete tasks and earn rewards
+- **Operators** can run network infrastructure
+
+Current use cases include:
+
+* [Data Labeling](https://app.humanprotocol.org/) 
+
+## Quick Start
+
+1. **Install Dependencies**
+```bash
+npm install
+# or
+yarn install
+```
+
+2. **Supported Networks**
+- Ethereum Mainnet
+- Polygon
+- BSC
+- Goerli (testnet)
+- Mumbai (testnet)
+- BSC (testnet)
+
 ## All work on-chain
 
 Tokenized, verified, rewarded.
