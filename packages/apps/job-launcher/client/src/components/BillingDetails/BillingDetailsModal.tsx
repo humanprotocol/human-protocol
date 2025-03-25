@@ -100,8 +100,16 @@ const BillingDetailsModal = ({
     if (validateForm()) {
       setIsLoading(true);
       try {
+        if (formData.vat === '') {
+          delete formData.vat;
+        }
+        if (formData.vatType === '') {
+          delete formData.vatType;
+        }
+
         const email = formData?.email;
         delete formData?.email;
+
         await editUserBillingInfo(formData);
         setBillingInfo({ ...formData, email });
       } catch (err: any) {
@@ -217,6 +225,7 @@ const BillingDetailsModal = ({
                 error={!!errors.vatType}
                 helperText={errors.vatType || ''}
               >
+                <MenuItem value="">None</MenuItem>
                 {Object.entries(vatTypeOptions).map(([key, label]) => (
                   <MenuItem key={key} value={key}>
                     {label}

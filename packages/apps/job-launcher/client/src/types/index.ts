@@ -317,8 +317,8 @@ export type BillingInfo = {
   name: string;
   email?: string;
   address: Address;
-  vat: string;
-  vatType: string;
+  vat?: string;
+  vatType?: string;
 };
 
 type Address = {
