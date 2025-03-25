@@ -2543,10 +2543,10 @@
     web3-eth-abi "4.4.1"
     yaml "2.6.1"
 
-"@graphprotocol/graph-ts@^0.37.0":
-  version "0.37.0"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.37.0.tgz#ad5e9bc24a099db336e6488e37d5bd5283501a39"
-  integrity sha512-3xp/sO8zFDBkX44ydGB87ow5Cyrfr/SAm/cWzIRzUVL7ROw0KUyFBG1xj4KKlMnAod7/RL99zChYquC15H4Oqg==
+"@graphprotocol/graph-ts@^0.38.0":
+  version "0.38.0"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.38.0.tgz#a73cba73bf7931af1c603563416ed6779c4311d7"
+  integrity sha512-fx9IpqbXHWMskl6wLDstKLy0VeszTQg6K5xsUEHXPkpOtceDkWAiDE8FyqsGF0IVTmE2Pxafw4t6+rEG8lVfyw==
   dependencies:
     assemblyscript "0.27.31"
 
