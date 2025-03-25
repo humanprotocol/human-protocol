@@ -84,11 +84,11 @@ const BillingDetailsModal = ({
       }
     });
 
-    if (!formData?.vat) {
-      newErrors.vat = 'Tax ID required';
+    if (formData?.vat && !formData?.vatType) {
+      newErrors.vatType = 'Tax ID Type is required';
     }
-    if (!formData?.vatType) {
-      newErrors.vatType = 'Tax ID type required';
+    if (formData?.vatType && !formData?.vat) {
+      newErrors.vat = 'Tax ID is required';
     }
 
     setErrors(newErrors);
