@@ -35,7 +35,6 @@ export function generateWorkerUser<T extends GenerateUserOptions>(
     status: options?.status || UserStatus.ACTIVE,
     createdAt: faker.date.recent(),
     updatedAt: new Date(),
-    abuses: [],
 
     nonce: null,
   };
@@ -64,7 +63,6 @@ export function generateOperator(
     nonce: web3Utils.generateNonce(),
     createdAt: faker.date.recent(),
     updatedAt: new Date(),
-    abuses: [],
 
     email: null,
     password: null,

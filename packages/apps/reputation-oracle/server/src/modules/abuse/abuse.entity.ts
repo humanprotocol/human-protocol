@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
@@ -31,7 +31,8 @@ export class AbuseEntity extends BaseEntity {
   @Column({ type: 'decimal', precision: 30, scale: 18, nullable: true })
   public amount?: number;
 
-  @ManyToOne('UserEntity', (user: UserEntity) => user.abuses)
+  @JoinColumn()
+  @ManyToOne('UserEntity')
   public user: UserEntity;
 
   @Column({ type: 'int' })
