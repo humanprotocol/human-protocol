@@ -5,7 +5,7 @@ import {
   StorageProviders,
   GCSRegions,
   AWSRegions,
-} from 'src/types';
+} from '../../../types';
 
 export const mapCvatFormValues = (
   jobRequest: JobRequest,
@@ -58,7 +58,7 @@ export const mapFortuneFormValues = (
   const { fortuneRequest } = jobRequest;
   return {
     title: fortuneRequest?.title || '',
-    fortunesRequested: fortuneRequest?.fortunesRequested || undefined,
+    fortunesRequested: fortuneRequest?.fortunesRequested || 0,
     description: fortuneRequest?.description || '',
     qualifications: fortuneRequest?.qualifications
       ? qualificationsOptions.filter((q: Qualification) =>

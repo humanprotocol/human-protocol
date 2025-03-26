@@ -30,7 +30,7 @@ export const LaunchJobProgress = ({
   goToPrevStep,
 }: {
   isPayingFailed: boolean;
-  goToPrevStep?: () => void;
+  goToPrevStep: () => void;
 }) => {
   return (
     <Box
