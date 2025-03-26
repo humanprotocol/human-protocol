@@ -6,11 +6,11 @@ import { AbuseStatus } from '../../common/enums/abuse';
 export class ReportAbuseDto {
   @ApiProperty({ name: 'chain_id' })
   @IsEnum(ChainId)
-  public chainId: ChainId;
+  chainId: ChainId;
 
   @ApiProperty({ name: 'escrow_address' })
   @IsString()
-  public escrowAddress: string;
+  escrowAddress: string;
 }
 
 export class AbuseResponseDto {

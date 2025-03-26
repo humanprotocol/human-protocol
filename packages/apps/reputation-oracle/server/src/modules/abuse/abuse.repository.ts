@@ -1,18 +1,27 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { DataSource, IsNull, LessThanOrEqual, Not } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import {
+  DataSource,
+  FindManyOptions,
+  IsNull,
+  LessThanOrEqual,
+  Not,
+} from 'typeorm';
 
+import { ChainId } from '@human-protocol/sdk';
+import { AbuseStatus } from '../../common/enums/abuse';
 import { ServerConfigService } from '../../config/server-config.service';
 import { BaseRepository } from '../../database/base.repository';
 import { AbuseEntity } from './abuse.entity';
-import { ChainId } from '@human-protocol/sdk';
-import { AbuseStatus } from '../../common/enums/abuse';
+
+type FindOptions = {
+  relations?: FindManyOptions<AbuseEntity>['relations'];
+};
 
 @Injectable()
 export class AbuseRepository extends BaseRepository<AbuseEntity> {
-  private readonly logger = new Logger(AbuseRepository.name);
   constructor(
-    private dataSource: DataSource,
-    public readonly serverConfigService: ServerConfigService,
+    dataSource: DataSource,
+    private readonly serverConfigService: ServerConfigService,
   ) {
     super(AbuseEntity, dataSource);
   }
@@ -43,7 +52,7 @@ export class AbuseRepository extends BaseRepository<AbuseEntity> {
     });
   }
 
-  async findClassified(): Promise<AbuseEntity[]> {
+  async findClassified(options: FindOptions = {}): Promise<AbuseEntity[]> {
     return this.find({
       where: {
         status: AbuseStatus.NOTIFIED,
@@ -54,7 +63,7 @@ export class AbuseRepository extends BaseRepository<AbuseEntity> {
       order: {
         createdAt: 'DESC',
       },
-      relations: ['user'],
+      relations: options.relations,
     });
   }
   async findByUserId(userId: number): Promise<AbuseEntity[]> {

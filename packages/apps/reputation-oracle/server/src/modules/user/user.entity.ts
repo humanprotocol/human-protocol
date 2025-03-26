@@ -8,7 +8,7 @@ import type { KycEntity } from '../kyc/kyc.entity';
 import type { UserQualificationEntity } from '../qualification/user-qualification.entity';
 
 import type { SiteKeyEntity } from './site-key.entity';
-import { AbuseEntity } from '../abuse/abuse.entity';
+import type { AbuseEntity } from '../abuse/abuse.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -68,8 +68,8 @@ export class UserEntity extends BaseEntity {
   @OneToOne('KycEntity', (kyc: KycEntity) => kyc.user)
   kyc?: KycEntity;
 
-  @OneToMany(() => AbuseEntity, (abuse) => abuse.user)
-  public abuse: AbuseEntity[];
+  @OneToMany('AbuseEntity', (abuse: AbuseEntity) => abuse.user)
+  public abuses: AbuseEntity[];
 
   @OneToMany('SiteKeyEntity', (siteKey: SiteKeyEntity) => siteKey.user)
   siteKeys?: SiteKeyEntity[];

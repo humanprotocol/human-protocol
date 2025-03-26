@@ -1,18 +1,15 @@
 import {
   ChainId,
-  EscrowClient,
+  EscrowUtils,
   OperatorUtils,
   StakingClient,
 } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { firstValueFrom } from 'rxjs';
 import { EventType, ReputationEntityType } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
 import { ServerConfigService } from '../../config/server-config.service';
-import { SlackConfigService } from '../../config/slack-config.service';
 import logger from '../../logger';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
@@ -21,21 +18,20 @@ import { ReportAbuseDto, AbuseResponseDto } from './abuse.dto';
 import { AbuseEntity } from './abuse.entity';
 import { AbuseError, AbuseErrorMessage } from './abuse.error';
 import { AbuseRepository } from './abuse.repository';
+import { SlackService } from '../slack/slack.service';
 
 @Injectable()
 export class AbuseService {
-  [x: string]: any;
   private readonly logger = logger.child({
     context: AbuseService.name,
   });
   private localStorage: { [key: string]: string } = {};
 
   constructor(
-    private abuseRepository: AbuseRepository,
-    private readonly httpService: HttpService,
+    private readonly slackService: SlackService,
+    private readonly abuseRepository: AbuseRepository,
     private readonly web3Service: Web3Service,
     private readonly serverConfigService: ServerConfigService,
-    private readonly slackConfigService: SlackConfigService,
     private readonly reputationService: ReputationService,
     private readonly webhookOutgoingService: WebhookOutgoingService,
   ) {}
@@ -51,158 +47,96 @@ export class AbuseService {
   }
 
   private async sendSlackNotification(abuseEntity: AbuseEntity): Promise<void> {
-    const signer = this.web3Service.getSigner(abuseEntity.chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const manifestUrl = await escrowClient.getManifestUrl(
+    const escrow = await EscrowUtils.getEscrow(
+      abuseEntity.chainId,
       abuseEntity.escrowAddress,
     );
-    if (!manifestUrl) {
-      throw new AbuseError(
-        AbuseErrorMessage.ManifestUrlDoesNotExist,
-        abuseEntity.escrowAddress,
-        abuseEntity.chainId,
-      );
-    }
 
-    await firstValueFrom(
-      await this.httpService.post(this.slackConfigService.webhookUrl, {
-        text: 'New abuse report received!',
-        attachments: [
-          {
-            title: 'Escrow',
-            fields: [
-              {
-                title: 'Address',
-                value: abuseEntity.escrowAddress,
+    const message = {
+      text: 'New abuse report received!',
+      attachments: [
+        {
+          title: 'Escrow',
+          fields: [
+            { title: 'Address', value: abuseEntity.escrowAddress },
+            { title: 'ChainId', value: abuseEntity.chainId },
+            { title: 'Manifest', value: escrow.manifestUrl },
+          ],
+        },
+        {
+          fallback: 'Actions',
+          title: 'Actions',
+          callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
+          color: '#3AA3E3',
+          attachment_type: 'default',
+          actions: [
+            {
+              name: 'accept',
+              text: 'Slash',
+              type: 'button',
+              style: 'primary',
+              value: AbuseDecision.ACCEPTED,
+            },
+            {
+              name: 'reject',
+              text: 'Reject',
+              type: 'button',
+              style: 'danger',
+              value: AbuseDecision.REJECTED,
+              confirm: {
+                title: 'Cancel abuse',
+                text: `Are you sure you want to cancel slash for escrow ${abuseEntity.escrowAddress}?`,
+                ok_text: 'Yes',
+                dismiss_text: 'No',
               },
-              {
-                title: 'ChainId',
-                value: abuseEntity.chainId,
-              },
-              {
-                title: 'Manifest',
-                value: manifestUrl,
-              },
-            ],
-          },
-          {
-            fallback: 'Actions',
-            title: 'Actions',
-            callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
-            color: '#3AA3E3',
-            attachment_type: 'default',
-            actions: [
-              {
-                name: 'accept',
-                text: 'Slash',
-                type: 'button',
-                style: 'primary',
-                value: AbuseDecision.ACCEPTED,
-              },
-              {
-                name: 'reject',
-                text: 'Reject',
-                type: 'button',
-                style: 'danger',
-                value: AbuseDecision.REJECTED,
-                confirm: {
-                  title: 'Cancel abuse',
-                  text: `Are you sure you want to cancel slash for escrow ${abuseEntity.escrowAddress}?`,
-                  ok_text: 'Yes',
-                  dismiss_text: 'No',
-                },
-              },
-            ],
-          },
-        ],
-      }),
+            },
+          ],
+        },
+      ],
+    };
+
+    await this.slackService.sendNotification(message);
+  }
+
+  private async sendAbuseReportModal(abuseEntity: any, triggerId: string) {
+    const escrow = await EscrowUtils.getEscrow(
+      abuseEntity.chainId,
+      abuseEntity.escrowAddress,
     );
-  }
+    const maxAmount = (
+      await OperatorUtils.getOperator(abuseEntity.chainId, escrow.launcher)
+    ).amountStaked;
 
-  private async sendAbuseReportModal(abuseEntity: any, trigger_id: string) {
-    try {
-      const signer = this.web3Service.getSigner(abuseEntity.chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
-        abuseEntity.escrowAddress,
-      );
-      const maxAmount = (
-        await OperatorUtils.getOperator(abuseEntity.chainId, jobLauncherAddress)
-      ).amountStaked;
-
-      const result = await firstValueFrom(
-        this.httpService.post(
-          'https://slack.com/api/views.open',
-          {
-            trigger_id: trigger_id,
-            view: {
-              type: 'modal',
-              callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
-              title: {
-                type: 'plain_text',
-                text: 'Confirm slash',
-              },
-              blocks: [
-                {
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `Max amount: ${maxAmount}`,
-                  },
-                },
-                {
-                  type: 'input',
-                  block_id: 'quantity_input',
-                  element: {
-                    action_id: 'quantity',
-                    type: 'number_input',
-                    is_decimal_allowed: true,
-                    min_value: '0',
-                    max_value: maxAmount,
-                  },
-                  label: {
-                    type: 'plain_text',
-                    text: 'Please enter the quantity (in HMT):',
-                  },
-                },
-              ],
-              submit: {
-                type: 'plain_text',
-                text: 'Submit',
-              },
-              close: {
-                type: 'plain_text',
-                text: 'Cancel',
-              },
-            },
+    const modalView = {
+      type: 'modal',
+      callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
+      title: { type: 'plain_text', text: 'Confirm slash' },
+      blocks: [
+        {
+          type: 'section',
+          text: { type: 'mrkdwn', text: `Max amount: ${maxAmount}` },
+        },
+        {
+          type: 'input',
+          block_id: 'quantity_input',
+          element: {
+            action_id: 'quantity',
+            type: 'number_input',
+            is_decimal_allowed: true,
+            min_value: '0',
+            max_value: maxAmount,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${this.slackConfigService.oauthToken}`,
-              'Content-Type': 'application/json',
-            },
+          label: {
+            type: 'plain_text',
+            text: 'Please enter the quantity (in HMT):',
           },
-        ),
-      );
-      if (!result.data.ok) {
-        this.logger.error('Error sending abuse report modal:', result.data);
-      }
-    } catch (error) {
-      this.logger.error('Error sending abuse report modal:', error);
-    }
-  }
+        },
+      ],
+      submit: { type: 'plain_text', text: 'Submit' },
+      close: { type: 'plain_text', text: 'Cancel' },
+    };
 
-  private async updateInteractiveMessage(responseUrl: string, text: string) {
-    try {
-      await firstValueFrom(
-        this.httpService.post(responseUrl, {
-          text: text,
-        }),
-      );
-    } catch (error) {
-      this.logger.error('Error updating interactive message:', error);
-    }
+    await this.slackService.openModal(triggerId, modalView);
   }
 
   private async slashAccount(
@@ -225,7 +159,7 @@ export class AbuseService {
     );
   }
 
-  async receiveSlackInteraction(data: any): Promise<string> {
+  async receiveInteractions(data: any): Promise<string> {
     const callback_id = data.callback_id
       ? data.callback_id
       : data.view.callback_id;
@@ -240,7 +174,7 @@ export class AbuseService {
       );
     if (!abuseEntity)
       throw new AbuseError(
-        AbuseErrorMessage.AbuseNotFound,
+        AbuseErrorMessage.ABUSE_NOT_FOUND,
         escrowAddress,
         chainId,
       );
@@ -256,7 +190,7 @@ export class AbuseService {
       abuseEntity.decision = AbuseDecision.ACCEPTED;
       abuseEntity.amount = data.view.state.values.quantity_input.quantity.value;
       abuseEntity.retriesCount = 0;
-      await this.updateInteractiveMessage(
+      await this.slackService.updateMessage(
         this.localStorage[callback_id],
         `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${escrowAddress}, ChainId: ${chainId}, Slashed amount: ${abuseEntity.amount} HMT`,
       );
@@ -295,29 +229,22 @@ export class AbuseService {
 
     for (const abuseEntity of abuseEntities) {
       try {
-        const signer = this.web3Service.getSigner(abuseEntity.chainId);
-        const escrowClient = await EscrowClient.build(signer);
-        const webhookPayload = {
-          chainId: abuseEntity.chainId,
-          escrowAddress: abuseEntity.escrowAddress,
-          eventType: EventType.ABUSE,
-        };
+        const escrow = await EscrowUtils.getEscrow(
+          abuseEntity.chainId,
+          abuseEntity.escrowAddress,
+        );
         const webhookUrl = (
           await OperatorUtils.getOperator(
             abuseEntity.chainId,
-            await escrowClient.getExchangeOracleAddress(
-              abuseEntity.escrowAddress,
-            ),
+            escrow.exchangeOracle as string,
           )
-        ).webhookUrl;
+        ).webhookUrl as string;
 
-        if (!webhookUrl) {
-          throw new AbuseError(
-            AbuseErrorMessage.UrlNotFound,
-            abuseEntity.escrowAddress,
-            abuseEntity.chainId,
-          );
-        }
+        const webhookPayload = {
+          chainId: abuseEntity.chainId,
+          escrowAddress: abuseEntity.escrowAddress,
+          eventType: EventType.ABUSE_REPORTED,
+        };
 
         try {
           await this.webhookOutgoingService.createOutgoingWebhook(
@@ -346,40 +273,34 @@ export class AbuseService {
   }
 
   async processClassifiedAbuses(): Promise<void> {
-    const abuseEntities = await this.abuseRepository.findClassified();
+    const abuseEntities = await this.abuseRepository.findClassified({
+      relations: { user: true },
+    });
 
     for (const abuseEntity of abuseEntities) {
       try {
         const { chainId, escrowAddress } = abuseEntity;
-        const signer = this.web3Service.getSigner(chainId);
-        const escrowClient = await EscrowClient.build(signer);
+        const escrow = await EscrowUtils.getEscrow(
+          abuseEntity.chainId,
+          abuseEntity.escrowAddress,
+        );
 
         if (abuseEntity.decision === AbuseDecision.ACCEPTED) {
-          const jobLauncherAddress =
-            await escrowClient.getJobLauncherAddress(escrowAddress);
-
           this.slashAccount(
             abuseEntity.user.evmAddress as string,
-            jobLauncherAddress,
+            escrow.launcher,
             abuseEntity.chainId,
             abuseEntity.escrowAddress,
             abuseEntity.amount as number,
           );
           const webhookUrl = (
-            await OperatorUtils.getOperator(chainId, jobLauncherAddress)
-          ).webhookUrl;
+            await OperatorUtils.getOperator(chainId, escrow.launcher)
+          ).webhookUrl as string;
           const webhookPayload = {
             chainId,
             escrowAddress,
-            eventType: EventType.ABUSE,
+            eventType: EventType.ABUSE_REPORTED,
           };
-          if (!webhookUrl) {
-            throw new AbuseError(
-              AbuseErrorMessage.UrlNotFound,
-              abuseEntity.escrowAddress,
-              abuseEntity.chainId,
-            );
-          }
 
           try {
             await this.webhookOutgoingService.createOutgoingWebhook(
@@ -409,22 +330,14 @@ export class AbuseService {
           const webhookPayload = {
             chainId: chainId,
             escrowAddress: escrowAddress,
-            eventType: EventType.RESUME_ABUSE,
+            eventType: EventType.RESUME_REPORTED_ABUSE,
           };
           const webhookUrl = (
             await OperatorUtils.getOperator(
               chainId,
-              await escrowClient.getExchangeOracleAddress(escrowAddress),
+              escrow.exchangeOracle as string,
             )
-          ).webhookUrl;
-
-          if (!webhookUrl) {
-            throw new AbuseError(
-              AbuseErrorMessage.UrlNotFound,
-              abuseEntity.escrowAddress,
-              abuseEntity.chainId,
-            );
-          }
+          ).webhookUrl as string;
 
           try {
             await this.webhookOutgoingService.createOutgoingWebhook(

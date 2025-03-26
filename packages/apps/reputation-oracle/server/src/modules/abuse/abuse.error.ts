@@ -2,9 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { BaseError } from '../../common/errors/base';
 
 export enum AbuseErrorMessage {
-  AbuseNotFound = 'Received abuse not found',
-  ManifestUrlDoesNotExist = 'Manifest url does not exist',
-  UrlNotFound = 'Webhook url not found',
+  ABUSE_NOT_FOUND = 'Received abuse not found',
 }
 
 export class AbuseError extends BaseError {

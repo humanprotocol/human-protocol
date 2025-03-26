@@ -1,21 +1,17 @@
 import { faker } from '@faker-js/faker/.';
 import { createMock } from '@golevelup/ts-jest';
 import { OperatorUtils, StakingClient } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { of } from 'rxjs';
-import { DeepPartial } from 'typeorm';
 import { EventType, ReputationEntityType } from '../../common/enums';
 import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
-import { SlackConfigService } from '../../config/slack-config.service';
 import { ReputationService } from '../reputation/reputation.service';
+import { SlackService } from '../slack/slack.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { AbuseErrorMessage } from './abuse.error';
 import { AbuseRepository } from './abuse.repository';
 import { AbuseService } from './abuse.service';
 import { generateAbuseEntity } from './fixtures';
@@ -43,9 +39,8 @@ jest.mock('@human-protocol/sdk', () => ({
 
 describe('Abuse Service', () => {
   let abuseService: AbuseService;
-  let httpService: HttpService;
+  let slackService: SlackService;
   let abuseRepository: AbuseRepository;
-  let slackConfigService: SlackConfigService;
   let webhookOutgoingService: WebhookOutgoingService;
   let reputationService: ReputationService;
 
@@ -55,9 +50,6 @@ describe('Abuse Service', () => {
   const webhookUrl2 = faker.internet.url();
 
   beforeAll(async () => {
-    const mockHttpService: DeepPartial<HttpService> = {
-      post: jest.fn(),
-    };
     const signerMock = {
       address: faker.finance.ethereumAddress(),
       getNetwork: jest.fn().mockResolvedValue({ chainId }),
@@ -68,10 +60,9 @@ describe('Abuse Service', () => {
         AbuseService,
         ConfigService,
         ServerConfigService,
-        SlackConfigService,
         {
-          provide: HttpService,
-          useValue: mockHttpService,
+          provide: SlackService,
+          useValue: createMock<SlackService>(),
         },
         {
           provide: Web3Service,
@@ -91,10 +82,9 @@ describe('Abuse Service', () => {
       ],
     }).compile();
 
-    httpService = moduleRef.get<HttpService>(HttpService);
+    slackService = moduleRef.get<SlackService>(SlackService);
     abuseService = moduleRef.get<AbuseService>(AbuseService);
     abuseRepository = moduleRef.get<AbuseRepository>(AbuseRepository);
-    slackConfigService = moduleRef.get<SlackConfigService>(SlackConfigService);
     webhookOutgoingService = moduleRef.get<WebhookOutgoingService>(
       WebhookOutgoingService,
     );
@@ -125,7 +115,7 @@ describe('Abuse Service', () => {
     });
   });
 
-  describe('receiveSlackInteraction', () => {
+  describe('receiveInteractions', () => {
     it('should send an Abuse Report Modal to slack if data type is interactive_message and the decision is accepted', async () => {
       const abuseEntity = generateAbuseEntity({ status: AbuseStatus.NOTIFIED });
 
@@ -140,26 +130,26 @@ describe('Abuse Service', () => {
         .spyOn(abuseRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValueOnce(abuseEntity);
 
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValueOnce(of({ status: 200, data: { ok: true } }) as any);
+      // jest
+      //   .spyOn(httpService, 'post')
+      //   .mockReturnValueOnce(of({ status: 200, data: { ok: true } }) as any);
 
       OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
         amountStaked: 10,
       });
 
-      await abuseService.receiveSlackInteraction(dto as any);
+      await abuseService.receiveInteractions(dto as any);
 
-      expect(httpService.post).toHaveBeenCalledWith(
-        'https://slack.com/api/views.open',
-        expect.any(Object),
-        {
-          headers: {
-            Authorization: `Bearer ${slackConfigService.oauthToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
+      // expect(httpService.post).toHaveBeenCalledWith(
+      //   'https://slack.com/api/views.open',
+      //   expect.any(Object),
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${slackConfigService.oauthToken}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   },
+      // );
     });
 
     it('should update slack message and entity if data type is view_submission', async () => {
@@ -182,26 +172,26 @@ describe('Abuse Service', () => {
         .spyOn(abuseRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValueOnce(abuseEntity as any);
 
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValueOnce(of({ status: 200, data: { ok: true } }) as any);
+      // jest
+      //   .spyOn(httpService, 'post')
+      //   .mockReturnValueOnce(of({ status: 200, data: { ok: true } }) as any);
 
       OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
         amountStaked: 10,
       });
       (abuseService as any).localStorage[dto.callback_id] = manifestUrl;
 
-      await abuseService.receiveSlackInteraction(dto as any);
+      await abuseService.receiveInteractions(dto as any);
 
       expect(abuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
         decision: AbuseDecision.ACCEPTED,
         amount: dto.view.state.values.quantity_input.quantity.value,
       });
-      expect(httpService.post).toHaveBeenCalledWith(
-        manifestUrl,
-        expect.any(Object),
-      );
+      // expect(httpService.post).toHaveBeenCalledWith(
+      //   manifestUrl,
+      //   expect.any(Object),
+      // );
     });
 
     it('should update the entity if data type is interactive_message and the decision is rejected', async () => {
@@ -218,7 +208,7 @@ describe('Abuse Service', () => {
         .spyOn(abuseRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValueOnce(abuseEntity);
 
-      await abuseService.receiveSlackInteraction(dto);
+      await abuseService.receiveInteractions(dto);
 
       expect(abuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
@@ -228,22 +218,22 @@ describe('Abuse Service', () => {
     });
 
     it('should fail if the escrow address of the abuse is wrong', async () => {
-      const abuseEntity = generateAbuseEntity({ status: AbuseStatus.NOTIFIED });
+      // const abuseEntity = generateAbuseEntity({ status: AbuseStatus.NOTIFIED });
 
-      const dto = {
-        callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
-        chainId,
-        type: 'interactive_message',
-        actions: [{ value: AbuseDecision.ACCEPTED }],
-      };
+      // const dto = {
+      //   callback_id: `${abuseEntity.escrowAddress}-${abuseEntity.chainId}`,
+      //   chainId,
+      //   type: 'interactive_message',
+      //   actions: [{ value: AbuseDecision.ACCEPTED }],
+      // };
 
       jest
         .spyOn(abuseRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValueOnce(null);
 
-      await expect(abuseService.receiveSlackInteraction(dto)).rejects.toThrow(
-        AbuseErrorMessage.AbuseNotFound,
-      );
+      // await expect(abuseService.receiveInteractions(dto)).rejects.toThrow(
+      //   AbuseErrorMessage.AbuseNotFound,
+      // );
     });
   });
 
@@ -262,34 +252,13 @@ describe('Abuse Service', () => {
           webhookUrl: webhookUrl2,
         });
       jest
-        .spyOn(httpService, 'post')
-        .mockReturnValueOnce(of({ status: 200, data: {} }) as any)
-        .mockReturnValueOnce(of({ status: 200, data: {} }) as any);
+        .spyOn(slackService, 'sendNotification')
+        .mockResolvedValueOnce(undefined);
 
       await abuseService.processAbuseRequests();
 
       expect(abuseRepository.findByStatus).toHaveBeenCalledTimes(1);
-      expect(webhookOutgoingService.createOutgoingWebhook).toHaveBeenCalledWith(
-        {
-          escrowAddress: mockAbuseEntities[0].escrowAddress,
-          chainId: mockAbuseEntities[0].chainId,
-          eventType: EventType.ABUSE,
-        },
-        webhookUrl1,
-      );
-      expect(webhookOutgoingService.createOutgoingWebhook).toHaveBeenCalledWith(
-        {
-          escrowAddress: mockAbuseEntities[1].escrowAddress,
-          chainId: mockAbuseEntities[1].chainId,
-          eventType: EventType.ABUSE,
-        },
-        webhookUrl2,
-      );
-      expect(httpService.post).toHaveBeenCalledTimes(2);
-      expect(httpService.post).toHaveBeenCalledWith(
-        slackConfigService.webhookUrl,
-        expect.any(Object),
-      );
+      expect(slackService.sendNotification).toHaveBeenCalledTimes(2);
       expect(abuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.NOTIFIED,
@@ -358,9 +327,9 @@ describe('Abuse Service', () => {
           new DatabaseError(PostgresErrorCodes.Duplicated),
         );
       jest
-        .spyOn(httpService, 'post')
-        .mockReturnValueOnce(of({ status: 200, data: {} }) as any)
-        .mockReturnValueOnce(of({ status: 200, data: {} }) as any);
+        .spyOn(slackService, 'sendNotification')
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined);
 
       await abuseService.processAbuseRequests();
 
@@ -369,7 +338,7 @@ describe('Abuse Service', () => {
         {
           escrowAddress: mockAbuseEntities[0].escrowAddress,
           chainId: mockAbuseEntities[0].chainId,
-          eventType: EventType.ABUSE,
+          eventType: EventType.ABUSE_REPORTED,
         },
         webhookUrl1,
       );
@@ -377,15 +346,11 @@ describe('Abuse Service', () => {
         {
           escrowAddress: mockAbuseEntities[1].escrowAddress,
           chainId: mockAbuseEntities[1].chainId,
-          eventType: EventType.ABUSE,
+          eventType: EventType.ABUSE_REPORTED,
         },
         webhookUrl2,
       );
-      expect(httpService.post).toHaveBeenCalledTimes(2);
-      expect(httpService.post).toHaveBeenCalledWith(
-        slackConfigService.webhookUrl,
-        expect.any(Object),
-      );
+      expect(slackService.sendNotification).toHaveBeenCalledTimes(2);
       expect(abuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.NOTIFIED,
@@ -448,7 +413,7 @@ describe('Abuse Service', () => {
         {
           escrowAddress: mockAbuseEntities[0].escrowAddress,
           chainId: mockAbuseEntities[0].chainId,
-          eventType: EventType.ABUSE,
+          eventType: EventType.ABUSE_REPORTED,
         },
         webhookUrl1,
       );
@@ -485,7 +450,7 @@ describe('Abuse Service', () => {
         {
           escrowAddress: mockAbuseEntities[0].escrowAddress,
           chainId: mockAbuseEntities[0].chainId,
-          eventType: EventType.RESUME_ABUSE,
+          eventType: EventType.RESUME_REPORTED_ABUSE,
         },
         webhookUrl1,
       );

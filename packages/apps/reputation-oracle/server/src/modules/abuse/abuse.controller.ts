@@ -14,12 +14,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards';
 import { AbuseResponseDto, ReportAbuseDto } from './abuse.dto';
 import { AbuseService } from './abuse.service';
 import { SlackAuthGuard } from '../../common/guards/slack.auth';
 import { RequestWithUser } from '../../common/interfaces/request';
-import { Public } from 'src/common/decorators';
+import { Public } from '../../common/decorators';
 
 @ApiTags('Abuse')
 @Controller('/abuse')
@@ -27,7 +26,6 @@ export class AbuseController {
   constructor(private readonly abuseService: AbuseService) {}
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
   @HttpCode(200)
   @ApiOperation({
@@ -48,7 +46,6 @@ export class AbuseController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get('/user')
   @HttpCode(200)
   @ApiOperation({
@@ -68,7 +65,7 @@ export class AbuseController {
 
   @Public()
   @UseGuards(SlackAuthGuard)
-  @Post('/slack')
+  @Post('/interactions')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Receive slack interactions',
@@ -79,7 +76,7 @@ export class AbuseController {
     description: 'Interaction successfully received',
   })
   @HttpCode(200)
-  async receiveSlackInteraction(@Body() data: any): Promise<string> {
-    return this.abuseService.receiveSlackInteraction(JSON.parse(data.payload));
+  async receiveInteractions(@Body() data: any): Promise<string> {
+    return this.abuseService.receiveInteractions(JSON.parse(data.payload));
   }
 }

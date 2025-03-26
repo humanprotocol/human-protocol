@@ -81,7 +81,9 @@ export const envValidator = Joi.object({
   // Human App
   HUMAN_APP_EMAIL: Joi.string().email().required(),
   // Slack notifications
-  SLACK_WEBHOOK_URL: Joi.string().required(),
+  SLACK_WEBHOOK_URL: Joi.string()
+    .uri({ scheme: ['http', 'https'] })
+    .required(),
   SLACK_SIGNING_SECRET: Joi.string().required(),
   SLACK_OAUTH_TOKEN: Joi.string().required(),
 });
