@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Accordion,
   AccordionDetails,
@@ -21,22 +21,18 @@ import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFill
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { getQualifications } from '../../../services/qualification';
 import { Qualification } from '../../../types';
+import { mapFortuneFormValues } from './helpers';
 import { FortuneJobRequestValidationSchema } from './schema';
 
 export const FortuneJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
     useCreateJobPageUI();
-  const [expanded, setExpanded] = useState<string | false>('panel1');
+  const [isExpanded, setIsExpanded] = useState(true);
   const [qualificationsOptions, setQualificationsOptions] = useState<
     Qualification[]
   >([]);
 
-  const initialValues = {
-    title: '',
-    fortunesRequested: undefined,
-    description: '',
-    qualifications: [],
-  };
+  const initialValues = mapFortuneFormValues(jobRequest, qualificationsOptions);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +40,6 @@ export const FortuneJobRequestForm = () => {
         try {
           setQualificationsOptions(await getQualifications(jobRequest.chainId));
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('Error fetching data:', error);
         }
       }
@@ -53,17 +48,12 @@ export const FortuneJobRequestForm = () => {
     fetchData();
   }, [jobRequest.chainId]);
 
-  const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
-    };
-
   const handleNext = ({
     title,
     fortunesRequested,
     description,
     qualifications,
-  }: any) => {
+  }: ReturnType<typeof mapFortuneFormValues>) => {
     updateJobRequest?.({
       ...jobRequest,
       fortuneRequest: {
@@ -97,8 +87,8 @@ export const FortuneJobRequestForm = () => {
         }) => (
           <form onSubmit={handleSubmit}>
             <Accordion
-              expanded={expanded === 'panel1'}
-              onChange={handleChange('panel1')}
+              expanded={isExpanded}
+              onChange={() => setIsExpanded((prevState) => !prevState)}
             >
               <AccordionSummary
                 aria-controls="panel1d-content"

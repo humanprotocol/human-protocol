@@ -96,7 +96,7 @@ export enum HCaptchaJobType {
 
 export type FortuneRequest = {
   title: string;
-  fortunesRequested: number;
+  fortunesRequested?: number;
   description: string;
   qualifications?: string[];
 };

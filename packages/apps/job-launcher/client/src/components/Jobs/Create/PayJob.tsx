@@ -9,22 +9,28 @@ import { CryptoPayForm } from './CryptoPayForm';
 import { FiatPayForm } from './FiatPayForm';
 import { LaunchJobProgress } from './LaunchJobProgress';
 
+type PayingStatus = 'idle' | 'pending' | 'success' | 'error';
+
 export const PayJob = () => {
-  const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
-  const [isPaying, setIsPaying] = useState(false);
+  const { payMethod, changePayMethod, goToNextStep, goToPrevStep } =
+    useCreateJobPageUI();
+  const [payingStatus, setPayingStatus] = useState<PayingStatus>('idle');
   const { showError } = useSnackbar();
   const { user } = useAppSelector((state) => state.auth);
 
+  const isIdle = payingStatus === 'idle';
+
   const handleStart = () => {
-    setIsPaying(true);
+    setPayingStatus('pending');
   };
 
   const handleFinish = () => {
-    setIsPaying(false);
+    setPayingStatus('success');
     goToNextStep?.();
   };
 
   const handleError = (err: any) => {
+    setPayingStatus('error');
     if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
       showError('Insufficient token amount or the gas limit is too low');
     } else if (err.code === 'ACTION_REJECTED') {
@@ -34,7 +40,7 @@ export const PayJob = () => {
     }
   };
 
-  return !isPaying ? (
+  return isIdle ? (
     <Box
       sx={{
         mx: 'auto',
@@ -99,6 +105,9 @@ export const PayJob = () => {
       </Box>
     </Box>
   ) : (
-    <LaunchJobProgress />
+    <LaunchJobProgress
+      isPayingFailed={payingStatus === 'error'}
+      goToPrevStep={goToPrevStep}
+    />
   );
 };
