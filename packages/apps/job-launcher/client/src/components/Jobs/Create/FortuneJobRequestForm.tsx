@@ -54,7 +54,7 @@ export const FortuneJobRequestForm = () => {
     description,
     qualifications,
   }: ReturnType<typeof mapFortuneFormValues>) => {
-    updateJobRequest?.({
+    updateJobRequest({
       ...jobRequest,
       fortuneRequest: {
         title,
@@ -65,7 +65,7 @@ export const FortuneJobRequestForm = () => {
         ),
       },
     });
-    goToNextStep?.();
+    goToNextStep();
   };
 
   return (
@@ -222,8 +222,8 @@ export const FortuneJobRequestForm = () => {
               <Button
                 variant="outlined"
                 onClick={() => {
-                  goToPrevStep?.();
-                  updateJobRequest?.({
+                  goToPrevStep();
+                  updateJobRequest({
                     ...jobRequest,
                     chainId: undefined,
                   });

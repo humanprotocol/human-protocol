@@ -129,7 +129,7 @@ export const CvatJobRequestForm = () => {
       return { name: name };
     });
 
-    updateJobRequest?.({
+    updateJobRequest({
       ...jobRequest,
       cvatRequest: {
         labels: labelArray,
@@ -157,7 +157,7 @@ export const CvatJobRequestForm = () => {
         accuracyTarget,
       },
     });
-    goToNextStep?.();
+    goToNextStep();
   };
 
   const {
@@ -844,8 +844,8 @@ export const CvatJobRequestForm = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              goToPrevStep?.();
-              updateJobRequest?.({
+              goToPrevStep();
+              updateJobRequest({
                 ...jobRequest,
                 chainId: undefined,
               });

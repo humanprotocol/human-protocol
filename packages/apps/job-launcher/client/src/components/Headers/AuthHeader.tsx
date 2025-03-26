@@ -106,7 +106,7 @@ export const AuthHeader = () => {
             variant="contained"
             sx={{ mr: 1 }}
             onClick={() => {
-              reset?.();
+              reset();
               navigate('/jobs/create');
             }}
           >

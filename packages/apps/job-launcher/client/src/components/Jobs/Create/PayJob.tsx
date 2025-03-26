@@ -4,33 +4,33 @@ import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import { useAppSelector } from '../../../state';
-import { PayMethod } from '../../../types';
+import { PayingStatus, PayMethod } from '../../../types';
 import { CryptoPayForm } from './CryptoPayForm';
 import { FiatPayForm } from './FiatPayForm';
 import { LaunchJobProgress } from './LaunchJobProgress';
 
-type PayingStatus = 'idle' | 'pending' | 'success' | 'error';
-
 export const PayJob = () => {
   const { payMethod, changePayMethod, goToNextStep, goToPrevStep } =
     useCreateJobPageUI();
-  const [payingStatus, setPayingStatus] = useState<PayingStatus>('idle');
+  const [payingStatus, setPayingStatus] = useState<PayingStatus>(
+    PayingStatus.Idle,
+  );
   const { showError } = useSnackbar();
   const { user } = useAppSelector((state) => state.auth);
 
-  const isIdle = payingStatus === 'idle';
+  const isIdle = payingStatus === PayingStatus.Idle;
 
   const handleStart = () => {
-    setPayingStatus('pending');
+    setPayingStatus(PayingStatus.Pending);
   };
 
   const handleFinish = () => {
-    setPayingStatus('success');
-    goToNextStep?.();
+    setPayingStatus(PayingStatus.Success);
+    goToNextStep();
   };
 
   const handleError = (err: any) => {
-    setPayingStatus('error');
+    setPayingStatus(PayingStatus.Error);
     if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
       showError('Insufficient token amount or the gas limit is too low');
     } else if (err.code === 'ACTION_REJECTED') {
@@ -52,7 +52,7 @@ export const PayJob = () => {
     >
       <StyledTabs
         value={payMethod}
-        onChange={(e, newValue) => changePayMethod?.(newValue)}
+        onChange={(e, newValue) => changePayMethod(newValue)}
         sx={{
           '& .MuiTabs-indicator': {
             display: 'none',
@@ -106,7 +106,7 @@ export const PayJob = () => {
     </Box>
   ) : (
     <LaunchJobProgress
-      isPayingFailed={payingStatus === 'error'}
+      isPayingFailed={payingStatus === PayingStatus.Error}
       goToPrevStep={goToPrevStep}
     />
   );

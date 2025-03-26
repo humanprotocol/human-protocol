@@ -63,7 +63,7 @@ export const CreateJobPageUIProvider = ({
   };
 
   const goToNextStep = () => {
-    if (step < CreateJobStep.PayJob) {
+    if (step < CreateJobStep.Launch) {
       setStep((prev) => prev + 1);
     }
   };

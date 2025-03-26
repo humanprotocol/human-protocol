@@ -540,7 +540,7 @@ export const FiatPayForm = ({
                 variant="outlined"
                 sx={{ width: '240px', ml: 4 }}
                 size="large"
-                onClick={() => goToPrevStep?.()}
+                onClick={goToPrevStep}
               >
                 Cancel
               </Button>

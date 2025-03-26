@@ -103,11 +103,11 @@ export const HCaptchaJobRequestForm = () => {
     if (data.completionDate) {
       hCaptchaRequest['completionDate'] = data.completionDate;
     }
-    updateJobRequest?.({
+    updateJobRequest({
       ...jobRequest,
       hCaptchaRequest,
     });
-    goToNextStep?.();
+    goToNextStep();
   };
 
   const {
@@ -723,8 +723,8 @@ export const HCaptchaJobRequestForm = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              goToPrevStep?.();
-              updateJobRequest?.({
+              goToPrevStep();
+              updateJobRequest({
                 ...jobRequest,
                 chainId: undefined,
               });
