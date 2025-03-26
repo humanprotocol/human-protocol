@@ -8,7 +8,7 @@ import { PageCardLoader } from '@/shared/components/ui/page-card';
 export const AuthenticatedUserContext =
   createContext<AuthenticatedUserContextType | null>(null);
 
-export function RequireAuth({ children }: { children: JSX.Element }) {
+export function RequireAuth({ children }: Readonly<{ children: JSX.Element }>) {
   const auth = useAuth();
   const location = useLocation();
 
@@ -19,6 +19,16 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   if (!auth.user) {
     return (
       <Navigate replace state={{ from: location }} to={routerPaths.homePage} />
+    );
+  }
+
+  if (auth.user.status !== 'active') {
+    return (
+      <Navigate
+        replace
+        state={{ from: location }}
+        to={routerPaths.worker.verifyEmail}
+      />
     );
   }
 
