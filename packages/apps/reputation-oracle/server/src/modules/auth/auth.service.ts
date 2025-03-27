@@ -222,6 +222,12 @@ export class AuthService {
   }
 
   async web3Auth(userEntity: OperatorUserEntity): Promise<AuthTokens> {
+    /**
+     * NOTE
+     * In case if operator recently activated/deactivated itself
+     * and subgraph does not have the actual value yet,
+     * the status can be outdated
+     */
     const operatorStatus = await KVStoreUtils.get(
       this.web3ConfigService.reputationNetworkChainId,
       this.web3ConfigService.operatorAddress,
