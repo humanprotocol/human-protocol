@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { BaseRepository } from '../../database/base.repository';
-import { DataSource, LessThanOrEqual } from 'typeorm';
+import { DataSource, In, LessThanOrEqual } from 'typeorm';
 import { ServerConfigService } from '../../common/config/server-config.service';
 import { EventType, WebhookStatus } from '../../common/enums/webhook';
 import { WebhookEntity } from './webhook.entity';
@@ -17,12 +17,13 @@ export class WebhookRepository extends BaseRepository<WebhookEntity> {
   }
   public findByStatusAndType(
     status: WebhookStatus,
-    type: EventType,
+    type: EventType | EventType[],
   ): Promise<WebhookEntity[]> {
+    const typeClause = !Array.isArray(type) ? [type] : type;
     return this.find({
       where: {
         status: status,
-        eventType: type,
+        eventType: In(typeClause),
         retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },
