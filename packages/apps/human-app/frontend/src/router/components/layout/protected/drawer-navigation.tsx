@@ -44,9 +44,9 @@ export function DrawerNavigation({
   const handleMainNavIconClick = useHandleMainNavIconClick();
 
   const handleItemClick = ({ disabled, href, link, onClick }: DrawerItem) => {
-    if (isMobile) setDrawerOpen(false);
-
     if (disabled) return;
+
+    if (isMobile) setDrawerOpen(false);
 
     if (onClick) {
       onClick();

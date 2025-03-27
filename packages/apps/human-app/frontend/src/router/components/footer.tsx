@@ -18,7 +18,7 @@ export function Footer({
   const { t } = useTranslation();
   const isMobile = useIsMobile('md');
 
-  const parseLeftPadding = () => {
+  const getLeftPadding = () => {
     if (isMobile) {
       return '0';
     }
@@ -34,7 +34,7 @@ export function Footer({
       container
       sx={{
         pr: 0,
-        pl: parseLeftPadding(),
+        pl: getLeftPadding(),
         pb: isMobile ? 0 : '32px',
         [breakpoints.mobile]: {
           pr: 0,
