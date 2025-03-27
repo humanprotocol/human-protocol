@@ -4,13 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useBackgroundContext } from '@/shared/contexts/background';
-import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
-import { PageHeader } from '@/shared/components/layout/protected/page-header';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useIsHCaptchaLabelingPage } from '@/shared/hooks/use-is-hcaptcha-labeling-page';
 import { GovernanceBanner } from '@/modules/governance-banner/components/governance-banner';
-import { Footer } from '../footer';
+import { Footer } from '../../footer';
 import { Navbar } from './navbar';
+import { type PageHeaderProps, PageHeader } from './page-header';
 
 const Main = styled('main', {
   shouldForwardProp: (prop) => prop !== 'open' && prop !== 'isMobile',
@@ -34,12 +33,12 @@ const Main = styled('main', {
   }),
 }));
 
-export function Layout({
+export function ProtectedLayout({
   pageHeaderProps,
   renderDrawer,
   renderHCaptchaStatisticsDrawer,
   renderGovernanceBanner,
-}: {
+}: Readonly<{
   pageHeaderProps: PageHeaderProps;
   renderDrawer: (
     open: boolean,
@@ -47,7 +46,7 @@ export function Layout({
   ) => JSX.Element;
   renderHCaptchaStatisticsDrawer?: (isOpen: boolean) => JSX.Element;
   renderGovernanceBanner?: boolean;
-}) {
+}>) {
   const layoutElementRef = useRef<HTMLDivElement>();
   const isHCaptchaLabelingPage = useIsHCaptchaLabelingPage();
   const isMobile = useIsMobile();
