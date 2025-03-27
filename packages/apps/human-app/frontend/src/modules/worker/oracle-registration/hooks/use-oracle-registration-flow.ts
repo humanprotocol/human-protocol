@@ -2,11 +2,10 @@ import { useOracleInstructions } from './use-oracle-instructions';
 import { useOracleRegistration } from './use-oracle-registration';
 
 export function useOracleRegistrationFlow(
-  address: string,
   oracleInstructions?: string | URL | null | undefined
 ) {
   const { handleRegistration, isRegistrationPending, registrationError } =
-    useOracleRegistration(address);
+    useOracleRegistration();
 
   const { hasViewedInstructions, handleInstructionsView } =
     useOracleInstructions(oracleInstructions);

@@ -37,7 +37,7 @@ export function RegistrationForm({
     handleRegistration,
     isRegistrationPending: isLoading,
     registrationError: error,
-  } = useOracleRegistrationFlow(address, oracleInstructions);
+  } = useOracleRegistrationFlow(oracleInstructions);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     void methods.handleSubmit(handleRegistration)(event);

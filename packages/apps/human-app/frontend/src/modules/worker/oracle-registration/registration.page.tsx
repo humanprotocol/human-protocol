@@ -19,10 +19,6 @@ export function RegistrationPage() {
 
   const oracleData = data?.find((o) => o.address === oracleAddress);
 
-  if (oracleData === undefined || !isAddress(oracleAddress)) {
-    return <Navigate to={routerPaths.worker.jobsDiscovery} />;
-  }
-
   if (isAlreadyRegistered) {
     return (
       <Navigate
@@ -30,6 +26,10 @@ export function RegistrationPage() {
         state={oracleAddress}
       />
     );
+  }
+
+  if ((!isLoading && oracleData === undefined) || !isAddress(oracleAddress)) {
+    return <Navigate to={routerPaths.worker.jobsDiscovery} />;
   }
 
   return (
@@ -52,15 +52,17 @@ export function RegistrationPage() {
             {isLoading ? (
               <Loader />
             ) : (
-              <>
-                <Box>
-                  {t('worker.registrationInExchangeOracle.requiredMessage')}
-                </Box>
-                <RegistrationForm
-                  address={oracleAddress}
-                  oracleInstructions={oracleData.registrationInstructions}
-                />
-              </>
+              oracleData && (
+                <>
+                  <Box>
+                    {t('worker.registrationInExchangeOracle.requiredMessage')}
+                  </Box>
+                  <RegistrationForm
+                    address={oracleAddress}
+                    oracleInstructions={oracleData.registrationInstructions}
+                  />
+                </>
+              )
             )}
           </Stack>
         </Paper>
