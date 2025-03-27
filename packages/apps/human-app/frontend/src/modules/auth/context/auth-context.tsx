@@ -20,7 +20,7 @@ const extendableUserDataSchema = z.object({
 const userDataSchema = z
   .object({
     email: z.string(),
-    userId: z.number(),
+    user_id: z.number(),
     reputation_network: z.string(),
     email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
     exp: z.number(),
