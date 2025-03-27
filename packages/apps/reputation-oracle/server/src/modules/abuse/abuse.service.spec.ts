@@ -4,7 +4,7 @@ import { OperatorUtils, StakingClient } from '@human-protocol/sdk';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { EventType, ReputationEntityType } from '../../common/enums';
-import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
+import { AbuseDecision, AbuseStatus } from './common';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
@@ -138,7 +138,7 @@ describe('Abuse Service', () => {
         amountStaked: 10,
       });
 
-      await abuseService.receiveInteractions(dto as any);
+      await abuseService.processSlackInteraction(dto as any);
 
       // expect(httpService.post).toHaveBeenCalledWith(
       //   'https://slack.com/api/views.open',
@@ -181,7 +181,7 @@ describe('Abuse Service', () => {
       });
       (abuseService as any).localStorage[dto.callback_id] = manifestUrl;
 
-      await abuseService.receiveInteractions(dto as any);
+      await abuseService.processSlackInteraction(dto as any);
 
       expect(abuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
@@ -208,7 +208,7 @@ describe('Abuse Service', () => {
         .spyOn(abuseRepository, 'findOneByChainIdAndEscrowAddress')
         .mockResolvedValueOnce(abuseEntity);
 
-      await abuseService.receiveInteractions(dto);
+      await abuseService.processSlackInteraction(dto);
 
       expect(abuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
@@ -450,7 +450,7 @@ describe('Abuse Service', () => {
         {
           escrowAddress: mockAbuseEntities[0].escrowAddress,
           chainId: mockAbuseEntities[0].chainId,
-          eventType: EventType.RESUME_REPORTED_ABUSE,
+          eventType: EventType.ABUSE_COMPLAINT_DISMISSED,
         },
         webhookUrl1,
       );

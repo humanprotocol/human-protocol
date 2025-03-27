@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { generateTestnetChainId } from '../../../test/fixtures/web3';
-import { AbuseStatus } from '../../common/enums/abuse';
+import { AbuseStatus } from './constants';
 import { generateWorkerUser } from '../user/fixtures';
 import { AbuseEntity } from './abuse.entity';
 
@@ -17,7 +17,8 @@ export function generateAbuseEntity(
     user: user,
     retriesCount: faker.number.int({ min: 0, max: 4 }),
     status: AbuseStatus.PENDING,
-    decision: undefined,
+    decision: null,
+    amount: null,
     waitUntil: faker.date.future(),
     createdAt: faker.date.recent(),
     updatedAt: new Date(),

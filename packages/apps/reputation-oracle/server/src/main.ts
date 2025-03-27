@@ -8,6 +8,15 @@ import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
 import { ServerConfigService } from './config/server-config.service';
 import logger, { nestLoggerOverride } from './logger';
+import { IncomingMessage, ServerResponse } from 'http';
+
+function rawBodyMiddleware(
+  req: any,
+  _res: ServerResponse<IncomingMessage>,
+  buf: Buffer<ArrayBufferLike>,
+): void {
+  req.rawBody = buf.toString();
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -19,18 +28,14 @@ async function bootstrap() {
   app.use(
     json({
       limit: '5mb',
-      verify: (req: any, _res, buf) => {
-        req.rawBody = buf.toString();
-      },
+      verify: rawBodyMiddleware,
     }),
   );
   app.use(
     urlencoded({
       limit: '5mb',
       extended: true,
-      verify: (req: any, _res, buf) => {
-        req.rawBody = buf.toString();
-      },
+      verify: rawBodyMiddleware,
     }),
   );
 

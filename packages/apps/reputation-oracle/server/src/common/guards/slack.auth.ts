@@ -6,14 +6,12 @@ import {
 } from '@nestjs/common';
 import { SlackConfigService } from '../../config/slack-config.service';
 import { isValidSlackRequest } from '@slack/bolt';
-import logger from '../../logger';
 
 @Injectable()
 export class SlackAuthGuard implements CanActivate {
-  private readonly logger = logger.child({ context: SlackAuthGuard.name });
   constructor(private readonly slackConfigService: SlackConfigService) {}
 
-  public async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     if (
       isValidSlackRequest({
@@ -29,6 +27,6 @@ export class SlackAuthGuard implements CanActivate {
       return true;
     }
 
-    throw new UnauthorizedException('Unauthorized');
+    throw new UnauthorizedException();
   }
 }

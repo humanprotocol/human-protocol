@@ -14,19 +14,27 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AbuseResponseDto, ReportAbuseDto } from './abuse.dto';
+import {
+  AbuseResponseDto,
+  ReportAbuseDto,
+  SlackInteractionDto,
+} from './abuse.dto';
 import { AbuseService } from './abuse.service';
 import { SlackAuthGuard } from '../../common/guards/slack.auth';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Public } from '../../common/decorators';
+import { AbuseRepository } from './abuse.repository';
 
 @ApiTags('Abuse')
 @Controller('/abuse')
 export class AbuseController {
-  constructor(private readonly abuseService: AbuseService) {}
+  constructor(
+    private readonly abuseService: AbuseService,
+    private readonly abuseRepository: AbuseRepository,
+  ) {}
 
   @ApiBearerAuth()
-  @Post()
+  @Post('/report')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Report abuse',
@@ -41,12 +49,15 @@ export class AbuseController {
     @Req() request: RequestWithUser,
     @Body() data: ReportAbuseDto,
   ): Promise<void> {
-    await this.abuseService.createAbuse(data, request.user.id);
-    return;
+    await this.abuseService.reportAbuse({
+      escrowAddress: data.escrowAddress,
+      chainId: data.chainId,
+      userId: request.user.id,
+    });
   }
 
   @ApiBearerAuth()
-  @Get('/user')
+  @Get('/reports')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get all abuse reports by user',
@@ -60,12 +71,22 @@ export class AbuseController {
   async getUserAbuseReports(
     @Req() request: RequestWithUser,
   ): Promise<AbuseResponseDto[]> {
-    return this.abuseService.getAbuseReportsByUser(request.user.id);
+    const abuseEntities = await this.abuseRepository.findByUserId(
+      request.user.id,
+    );
+    return abuseEntities.map((abuseEntity) => {
+      return {
+        id: abuseEntity.id,
+        escrowAddress: abuseEntity.escrowAddress,
+        chainId: abuseEntity.chainId,
+        status: abuseEntity.status,
+      };
+    });
   }
 
   @Public()
   @UseGuards(SlackAuthGuard)
-  @Post('/interactions')
+  @Post('/slack-interactions')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Receive slack interactions',
@@ -76,7 +97,9 @@ export class AbuseController {
     description: 'Interaction successfully received',
   })
   @HttpCode(200)
-  async receiveInteractions(@Body() data: any): Promise<string> {
-    return this.abuseService.receiveInteractions(JSON.parse(data.payload));
+  async receiveInteractions(
+    @Body() data: SlackInteractionDto,
+  ): Promise<string> {
+    return this.abuseService.processSlackInteraction(JSON.parse(data.payload));
   }
 }

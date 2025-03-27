@@ -242,7 +242,7 @@ export class CronJobService {
     try {
       await this.abuseService.processAbuseRequests();
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error('Error processing abuse requests', e);
     }
 
     this.logger.info('Process Abuse STOP');
@@ -269,7 +269,7 @@ export class CronJobService {
     try {
       await this.abuseService.processClassifiedAbuses();
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error('Error processing classified abuse requests', e);
     }
 
     this.logger.info('Process classified abuses STOP');

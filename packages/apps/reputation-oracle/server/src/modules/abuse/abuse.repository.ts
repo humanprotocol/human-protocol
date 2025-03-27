@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { ChainId } from '@human-protocol/sdk';
-import { AbuseStatus } from '../../common/enums/abuse';
+import { AbuseStatus } from './constants';
 import { ServerConfigService } from '../../config/server-config.service';
 import { BaseRepository } from '../../database/base.repository';
 import { AbuseEntity } from './abuse.entity';
@@ -66,7 +66,12 @@ export class AbuseRepository extends BaseRepository<AbuseEntity> {
       relations: options.relations,
     });
   }
+
   async findByUserId(userId: number): Promise<AbuseEntity[]> {
     return this.find({ where: { userId } });
+  }
+
+  async findOneById(id: number): Promise<AbuseEntity | null> {
+    return this.findOne({ where: { id } });
   }
 }

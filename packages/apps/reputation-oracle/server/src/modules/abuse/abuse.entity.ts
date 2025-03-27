@@ -4,43 +4,43 @@ import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 import { ChainId } from '@human-protocol/sdk';
-import { AbuseDecision, AbuseStatus } from '../../common/enums/abuse';
+import { AbuseDecision, AbuseStatus } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'abuses' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
 export class AbuseEntity extends BaseEntity {
   @Column({ type: 'int' })
-  public chainId: ChainId;
+  chainId: ChainId;
 
   @Column({ type: 'varchar' })
-  public escrowAddress: string;
+  escrowAddress: string;
 
   @Column({
     type: 'enum',
     enum: AbuseStatus,
   })
-  public status = AbuseStatus.PENDING;
+  status: AbuseStatus;
 
   @Column({
     type: 'enum',
     enum: AbuseDecision,
     nullable: true,
   })
-  public decision?: AbuseDecision;
+  decision: AbuseDecision | null;
 
   @Column({ type: 'decimal', precision: 30, scale: 18, nullable: true })
-  public amount?: number;
+  amount?: number | null;
 
   @JoinColumn()
-  @ManyToOne('UserEntity')
-  public user: UserEntity;
+  @ManyToOne('UserEntity', { nullable: false })
+  user?: UserEntity;
 
   @Column({ type: 'int' })
-  public userId: number;
+  userId: number;
 
   @Column({ type: 'int' })
-  public retriesCount = 0;
+  retriesCount = 0;
 
   @Column({ type: 'timestamptz' })
-  public waitUntil = new Date();
+  waitUntil = new Date();
 }
