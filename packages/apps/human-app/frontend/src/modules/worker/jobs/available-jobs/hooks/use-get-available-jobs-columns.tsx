@@ -58,8 +58,9 @@ export const useGetAvailableJobsColumns = (
                 iconType="filter"
                 popoverContent={
                   <AvailableJobsNetworkFilter
-                    isMobile
                     chainIdsEnabled={chainIdsEnabled}
+                    showClearButton
+                    showTitle
                   />
                 }
               />
@@ -108,7 +109,9 @@ export const useGetAvailableJobsColumns = (
                 {...props}
                 headerText={t('worker.jobs.jobType')}
                 iconType="filter"
-                popoverContent={<AvailableJobsJobTypeFilter isMobile />}
+                popoverContent={
+                  <AvailableJobsJobTypeFilter showClearButton showTitle />
+                }
               />
             );
           },

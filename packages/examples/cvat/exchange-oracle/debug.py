@@ -3,7 +3,7 @@ import json
 from collections.abc import Generator
 from contextlib import ExitStack, contextmanager
 from logging import Logger
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 from unittest import mock
 
@@ -62,7 +62,9 @@ def _mock_get_manifests_from_minio(logger: Logger) -> Generator[None, None, None
         minio_manifests = minio_client.list_files(bucket="manifests")
         logger.debug(f"DEV: Local manifests: {format_sequence(minio_manifests)}")
 
-        candidate_files = [fn for fn in minio_manifests if f"{escrow_address}.json" in fn]
+        candidate_files = [
+            fn for fn in minio_manifests if PurePosixPath(fn).name == f"{escrow_address}.json"
+        ]
         if not candidate_files:
             return original_get_escrow(ChainId(chain_id), escrow_address)
         elif len(candidate_files) != 1:

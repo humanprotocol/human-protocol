@@ -21,7 +21,7 @@ from src.crons.webhooks.job_launcher import (
     process_incoming_job_launcher_webhooks,
     process_outgoing_job_launcher_webhooks,
 )
-from src.cvat.api_calls import UploadStatus
+from src.cvat.api_calls import RequestStatus
 from src.db import SessionLocal
 from src.models.cvat import EscrowCreation, Project
 from src.models.webhook import Webhook
@@ -80,7 +80,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
             mock_cvat_api.create_cvat_webhook.return_value = mock_cvat_object
             mock_cvat_api.create_cloudstorage.return_value = mock_cvat_object
-            mock_cvat_api.get_task_upload_status.return_value = (UploadStatus.FINISHED, "Finished")
+            mock_cvat_api.get_task_upload_status.return_value = (RequestStatus.FINISHED, "Finished")
 
             gt_filenames = ["image1.jpg", "image2.png"]
             gt_dataset = build_gt_dataset(gt_filenames).encode()
@@ -195,7 +195,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
         assert new_webhook.status == OracleWebhookStatuses.pending.value
-        assert new_webhook.event_type == ExchangeOracleEventTypes.job_creation_failed
+        assert new_webhook.event_type == ExchangeOracleEventTypes.escrow_failed
         assert new_webhook.attempts == 0
         assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),
@@ -214,7 +214,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         outgoing_webhook = outgoing_webhooks[0]
 
         assert outgoing_webhook.type == OracleWebhookTypes.job_launcher
-        assert outgoing_webhook.event_type == ExchangeOracleEventTypes.job_creation_failed
+        assert outgoing_webhook.event_type == ExchangeOracleEventTypes.escrow_failed
 
         assert mock_storage_client.remove_files.mock_calls == [
             call(prefix=compose_data_bucket_prefix(escrow_address, chain_id)),

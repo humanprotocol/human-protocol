@@ -30,13 +30,13 @@ import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
-from src.core.storage import compose_data_bucket_filename
+from src.core.storage import compose_data_bucket_filename, compose_data_bucket_prefix
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
-from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
+from src.services.cloud.utils import BucketAccessInfo
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, format_sequence, get_function_logger
@@ -195,12 +195,12 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         # into oracle bucket
         pass
 
-    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+    def _wait_task_creation(self, task_id: int) -> cvat_api.RequestStatus:
         # TODO: add a timeout or
         # save gt datasets in the oracle bucket and upload in track_task_creation()
         while True:
             task_status, _ = cvat_api.get_task_upload_status(task_id)
-            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+            if task_status not in [cvat_api.RequestStatus.STARTED, cvat_api.RequestStatus.QUEUED]:
                 return task_status
 
             sleep(Config.cvat_config.task_creation_check_interval)
@@ -209,7 +209,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
     ) -> None:
         task_status = self._wait_task_creation(task_id)
-        if task_status != cvat_api.UploadStatus.FINISHED:
+        if task_status != cvat_api.RequestStatus.FINISHED:
             return  # will be handled in state_trackers.py::track_task_creation
 
         dm_format_to_cvat_format = {
@@ -396,11 +396,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                 manifest.annotation.type,
                 escrow_address,
                 chain_id,
-                compose_bucket_url(
-                    data_bucket.bucket_name,
-                    bucket_host=data_bucket.host_url,
-                    provider=data_bucket.provider,
-                ),
+                data_bucket.to_url(),
                 cvat_webhook_id=cvat_webhook.id,
             )
 
@@ -1469,6 +1465,10 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             categories=self._gt_dataset.categories(), media_type=dm.Image
         )
 
+        roi_info_by_point_id: dict[int, skeletons_from_boxes_task.RoiInfo] = {
+            roi_info.point_id: roi_info for roi_info in self._rois
+        }
+
         for sample in self._gt_dataset:
             for gt_bbox in sample.annotations:
                 assert isinstance(gt_bbox, dm.Bbox)
@@ -1478,10 +1478,15 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     self.escrow_address, self.chain_id, self._roi_filenames[point_id]
                 )
 
+                # update gt bbox coordinates to match RoI shift
+                roi_info = roi_info_by_point_id[point_id]
+                new_x = gt_bbox.points[0] - roi_info.roi_x
+                new_y = gt_bbox.points[1] - roi_info.roi_y
+
                 self._gt_roi_dataset.put(
                     sample.wrap(
                         id=os.path.splitext(gt_roi_filename)[0],
-                        annotations=[gt_bbox],
+                        annotations=[gt_bbox.wrap(x=new_x, y=new_y)],
                         media=dm.Image(path=gt_roi_filename, size=sample.media_as(dm.Image).size),
                         attributes=filter_dict(sample.attributes, exclude_keys=["id"]),
                     )
@@ -1495,7 +1500,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         assert self._label_configuration is not _unset
         assert self._gt_roi_dataset is not _unset
 
-        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
@@ -1535,11 +1539,9 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 self.manifest.annotation.type,
                 self.escrow_address,
                 self.chain_id,
-                compose_bucket_url(
-                    input_data_bucket.bucket_name,
-                    bucket_host=input_data_bucket.host_url,
-                    provider=input_data_bucket.provider,
-                ),
+                oracle_bucket.to_url().rstrip("/")
+                + "/"
+                + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                 cvat_webhook_id=cvat_webhook.id,
             )
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
@@ -2635,7 +2637,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
         }
 
-        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
@@ -2714,11 +2715,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         self.manifest.annotation.type,
                         self.escrow_address,
                         self.chain_id,
-                        compose_bucket_url(
-                            input_data_bucket.bucket_name,
-                            bucket_host=input_data_bucket.host_url,
-                            provider=input_data_bucket.provider,
-                        ),
+                        oracle_bucket.to_url().rstrip("/")
+                        + "/"
+                        + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                         cvat_webhook_id=cvat_webhook.id,
                     )
                     created_projects.append(project_id)

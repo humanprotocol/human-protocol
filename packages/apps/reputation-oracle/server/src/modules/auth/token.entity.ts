@@ -6,14 +6,15 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
+
 import type { UserEntity } from '../user';
-import { BaseEntity } from '../../database/base.entity';
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
+import { BaseEntity } from '../../database/base.entity';
 
 export enum TokenType {
-  EMAIL = 'EMAIL',
-  PASSWORD = 'PASSWORD',
-  REFRESH = 'REFRESH',
+  EMAIL = 'email',
+  PASSWORD = 'password',
+  REFRESH = 'refresh',
 }
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'tokens' })
@@ -33,7 +34,7 @@ export class TokenEntity extends BaseEntity {
   expiresAt: Date;
 
   @JoinColumn()
-  @ManyToOne('UserEntity')
+  @ManyToOne('UserEntity', { persistence: false })
   user?: UserEntity;
 
   @Column({ type: 'int' })

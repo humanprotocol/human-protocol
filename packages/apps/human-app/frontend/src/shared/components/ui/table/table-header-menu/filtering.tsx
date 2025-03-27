@@ -16,7 +16,8 @@ interface FilteringProps<T> {
   isChecked: (option: T) => boolean;
   setFiltering: (option: T) => void;
   clear: () => void;
-  isMobile?: boolean;
+  showTitle?: boolean;
+  showClearButton?: boolean;
 }
 
 export function Filtering<T>({
@@ -24,13 +25,14 @@ export function Filtering<T>({
   isChecked,
   setFiltering,
   clear,
-  isMobile = true,
-}: FilteringProps<T>) {
+  showTitle = false,
+  showClearButton = false,
+}: Readonly<FilteringProps<T>>) {
   const { colorPalette } = useColorMode();
 
   return (
     <List sx={{ padding: 0 }}>
-      {isMobile ? (
+      {showTitle ? (
         <Typography
           color={colorPalette.text.secondary}
           sx={{ padding: '0.5rem' }}
@@ -67,7 +69,7 @@ export function Filtering<T>({
           </ListItem>
         );
       })}
-      {isMobile ? (
+      {showClearButton ? (
         <>
           <Divider component="li" variant="fullWidth" />
           <ListItem sx={{ padding: '0.5rem', cursor: 'pointer' }}>

@@ -8,7 +8,7 @@ import {
   ProfileIcon,
   WorkHeaderIcon,
 } from '@/shared/components/ui/icons';
-import type { PageHeaderProps } from '@/shared/components/layout/protected/page-header';
+import type { PageHeaderProps } from '@/router/components/layout/protected/page-header';
 import {
   HcaptchaLabelingPage,
   UserStatsAccordion,
