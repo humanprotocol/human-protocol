@@ -94,5 +94,9 @@ export const apiPaths = {
       path: '/disable-operator',
       withAuthRetry: true,
     },
+    enableOperator: {
+      path: '/enable-operator',
+      withAuthRetry: true,
+    },
   },
 } as const;

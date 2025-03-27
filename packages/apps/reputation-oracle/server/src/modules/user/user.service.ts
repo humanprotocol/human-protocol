@@ -12,7 +12,7 @@ import { Web3Service } from '../web3/web3.service';
 import { SiteKeyEntity, SiteKeyType } from './site-key.entity';
 import { SiteKeyRepository } from './site-key.repository';
 import { OperatorUserEntity, Web2UserEntity } from './types';
-import { Role as UserRole, UserEntity, UserStatus } from './user.entity';
+import { Role as UserRole, UserEntity } from './user.entity';
 import {
   UserError,
   UserErrorMessage,
@@ -193,9 +193,6 @@ export class UserService {
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.ACTIVE);
-    await this.userRepository.updateOneById(user.id, {
-      status: UserStatus.ACTIVE,
-    });
   }
 
   async disableOperator(
@@ -231,9 +228,6 @@ export class UserService {
     }
 
     await kvstore.set(user.evmAddress, OperatorStatus.INACTIVE);
-    await this.userRepository.updateOneById(user.id, {
-      status: UserStatus.INACTIVE,
-    });
   }
 
   async registrationInExchangeOracle(

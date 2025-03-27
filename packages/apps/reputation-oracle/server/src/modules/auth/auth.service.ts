@@ -1,19 +1,21 @@
 import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { isURL } from 'validator';
 
 import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
+import logger from '../../logger';
 import * as web3Utils from '../../utils/web3';
 import * as securityUtils from '../../utils/security';
+
 import { EmailAction } from '../email/constants';
 import { EmailService } from '../email/email.service';
-import logger from '../../logger';
+import { StorageService } from '../storage/storage.service';
 import {
+  OperatorStatus,
   SiteKeyRepository,
   SiteKeyType,
   UserEntity,
@@ -24,6 +26,7 @@ import {
   type OperatorUserEntity,
   type Web2UserEntity,
 } from '../user';
+
 import {
   AuthError,
   AuthErrorMessage,
@@ -129,7 +132,7 @@ export class AuthService {
     }
 
     const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
-    if (!url || !isURL(url)) {
+    if (!url || !StorageService.isValidUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
 
@@ -137,11 +140,11 @@ export class AuthService {
     newUser.evmAddress = address.toLowerCase();
     newUser.nonce = web3Utils.generateNonce();
     newUser.role = UserRole.OPERATOR;
-    newUser.status = UserStatus.PENDING;
+    newUser.status = UserStatus.ACTIVE;
 
     const userEntity = await this.userRepository.createUnique(newUser);
 
-    return this.web3Auth(userEntity);
+    return this.web3Auth(userEntity as OperatorUserEntity);
   }
 
   async signin(email: string, password: string): Promise<AuthTokens> {
@@ -218,15 +221,26 @@ export class AuthService {
     return this.generateTokens(userEntity.id, jwtPayload);
   }
 
-  async web3Auth(
-    userEntity: OperatorUserEntity | UserEntity,
-  ): Promise<AuthTokens> {
+  async web3Auth(userEntity: OperatorUserEntity): Promise<AuthTokens> {
+    /**
+     * NOTE
+     * In case if operator recently activated/deactivated itself
+     * and subgraph does not have the actual value yet,
+     * the status can be outdated
+     */
+    const operatorStatus = await KVStoreUtils.get(
+      this.web3ConfigService.reputationNetworkChainId,
+      this.web3ConfigService.operatorAddress,
+      userEntity.evmAddress,
+    );
+
     const jwtPayload = {
       status: userEntity.status,
       user_id: userEntity.id,
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       reputation_network: this.web3ConfigService.operatorAddress,
+      operator_status: operatorStatus || OperatorStatus.INACTIVE,
     };
     return this.generateTokens(userEntity.id, jwtPayload);
   }
@@ -293,7 +307,11 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN);
     }
 
-    return this.auth(userEntity);
+    if (userEntity.role === UserRole.OPERATOR) {
+      return this.web3Auth(userEntity as OperatorUserEntity);
+    } else {
+      return this.auth(userEntity);
+    }
   }
 
   async forgotPassword(email: string): Promise<void> {
