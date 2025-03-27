@@ -11,12 +11,13 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
-import { type DrawerItem, type TopMenuItem } from './drawer-navigation';
+import { isDrawerItem } from '../helpers';
+import { type DrawerItem, type MenuItem } from './drawer-navigation';
 import { NAVBAR_PADDING } from './navbar';
 
 interface MenuItemListProps {
   handleItemClick: (item: DrawerItem) => void;
-  items?: TopMenuItem[];
+  items?: MenuItem[];
 }
 
 export function TopMenuItemsList({
@@ -34,9 +35,9 @@ export function TopMenuItemsList({
       }}
     >
       {items?.map((item, index) => {
-        if (!('label' in item)) {
+        if (!isDrawerItem(item)) {
           return (
-            <ListItem key={crypto.randomUUID()}>
+            <ListItem key={`list-item-${item.key}`}>
               <Stack
                 direction="row"
                 sx={{
@@ -50,12 +51,12 @@ export function TopMenuItemsList({
         }
 
         const { link, label, disabled, icon } = item;
-        const isActive = Boolean(link && location.pathname === link);
+        const isActive = location.pathname === link;
 
         return (
           <ListItem
             disablePadding
-            key={link}
+            key={label}
             sx={{ padding: '0 8px', borderRadius: '4px' }}
           >
             <ListItemButton

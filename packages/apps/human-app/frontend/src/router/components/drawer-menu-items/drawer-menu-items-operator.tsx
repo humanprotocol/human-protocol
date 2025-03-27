@@ -2,9 +2,9 @@ import { t } from 'i18next';
 import { HelpIcon, UserOutlinedIcon } from '@/shared/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
-import { type BottomMenuItem } from '../layout/protected';
+import { type MenuItem } from '../layout/protected';
 
-export const operatorDrawerBottomMenuItems: BottomMenuItem[] = [
+export const operatorDrawerBottomMenuItems: MenuItem[] = [
   {
     label: t('components.DrawerNavigation.profile'),
     link: routerPaths.operator.profile,

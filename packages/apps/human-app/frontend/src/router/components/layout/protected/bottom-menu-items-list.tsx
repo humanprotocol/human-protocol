@@ -11,16 +11,17 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 import { useIsMobile } from '@/shared/hooks';
 import { colorPalette } from '@/shared/styles/color-palette';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
-import { type DrawerItem, type TopMenuItem } from './drawer-navigation';
+import { isDrawerItem } from '../helpers';
+import { type MenuItem, type DrawerItem } from './drawer-navigation';
 import { NAVBAR_PADDING } from './navbar';
 
 interface MenuItemListProps {
   handleItemClick: (item: DrawerItem) => void;
-  items?: TopMenuItem[];
+  items?: MenuItem[];
 }
 export function BottomMenuItemsList({
   handleItemClick,
-  items,
+  items = [],
 }: Readonly<MenuItemListProps>) {
   const { isDarkMode } = useColorMode();
   const isMobile = useIsMobile();
@@ -28,10 +29,10 @@ export function BottomMenuItemsList({
 
   return (
     <List>
-      {items?.map((item) => {
-        if (!('label' in item)) {
+      {items.map((item) => {
+        if (!isDrawerItem(item)) {
           return (
-            <ListItem key={crypto.randomUUID()}>
+            <ListItem key={`list-item-${item.key}`}>
               <Stack
                 direction="row"
                 sx={{

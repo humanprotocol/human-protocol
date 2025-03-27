@@ -23,13 +23,12 @@ export interface DrawerItem {
   onClick?: () => void;
 }
 
-export type TopMenuItem = DrawerItem | JSX.Element;
-export type BottomMenuItem = DrawerItem | JSX.Element;
+export type MenuItem = DrawerItem | JSX.Element;
 interface DrawerNavigationProps {
   open: boolean;
   setDrawerOpen: Dispatch<SetStateAction<boolean>>;
-  topMenuItems?: TopMenuItem[];
-  bottomMenuItems?: BottomMenuItem[];
+  topMenuItems?: MenuItem[];
+  bottomMenuItems?: MenuItem[];
   signOut: () => void;
 }
 
@@ -45,21 +44,21 @@ export function DrawerNavigation({
   const handleMainNavIconClick = useHandleMainNavIconClick();
 
   const handleItemClick = ({ disabled, href, link, onClick }: DrawerItem) => {
+    if (isMobile) setDrawerOpen(false);
+
+    if (disabled) return;
+
     if (onClick) {
       onClick();
       return;
     }
-    if (disabled) return;
-    if (isMobile) setDrawerOpen(false);
+
     if (href) {
-      const element = document.createElement('a');
-      element.href = href;
-      element.target = '_blank';
-      document.body.appendChild(element);
-      element.click();
+      window.open(href, '_blank', 'noreferrer');
       return;
     }
-    if (link && !href) {
+
+    if (link) {
       navigate(link);
     }
   };
