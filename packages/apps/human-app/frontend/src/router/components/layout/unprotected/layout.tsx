@@ -1,9 +1,9 @@
 import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { useBackgroundContext } from '@/shared/contexts/background';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { useHomePageState } from '@/shared/contexts/homepage-state';
 import { Footer } from '../../footer';
 import { Navbar } from './navbar';
 
@@ -15,13 +15,19 @@ export function UnprotectedLayout({
   withNavigation = true,
 }: Readonly<LayoutProps>) {
   const { colorPalette, isDarkMode } = useColorMode();
-  const { backgroundColor } = useBackgroundContext();
   const isMobile = useIsMobile();
+  const { isMainPage } = useHomePageState();
+
   const layoutBackgroundColor = (() => {
     if (isDarkMode) {
       return colorPalette.backgroundColor;
     }
-    return isMobile ? colorPalette.white : backgroundColor;
+
+    if (isMainPage || isMobile) {
+      return colorPalette.white;
+    }
+
+    return colorPalette.paper.main;
   })();
 
   return (
