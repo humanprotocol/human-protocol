@@ -19,17 +19,20 @@ export function RegistrationPage() {
 
   const oracleData = data?.find((o) => o.address === oracleAddress);
 
-  if (isAlreadyRegistered) {
+  if ((!isLoading && oracleData === undefined) || !isAddress(oracleAddress)) {
+    return <Navigate to={routerPaths.worker.jobsDiscovery} />;
+  }
+
+  if (
+    isAlreadyRegistered ||
+    (!isLoading && oracleData?.registrationNeeded === false)
+  ) {
     return (
       <Navigate
         to={`${routerPaths.worker.jobs}/${oracleAddress}`}
         state={oracleAddress}
       />
     );
-  }
-
-  if ((!isLoading && oracleData === undefined) || !isAddress(oracleAddress)) {
-    return <Navigate to={routerPaths.worker.jobsDiscovery} />;
   }
 
   return (
