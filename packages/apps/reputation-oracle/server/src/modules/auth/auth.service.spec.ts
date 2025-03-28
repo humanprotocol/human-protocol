@@ -190,7 +190,8 @@ describe('AuthService', () => {
           if (key === KVStoreKeys.url) {
             return faker.internet.url();
           }
-          return '';
+
+          throw new Error('Invalid key');
         },
       );
 
@@ -254,7 +255,7 @@ describe('AuthService', () => {
       );
     });
 
-    it('should throw InvalidOperatorRoleError', async () => {
+    it('should throw InvalidOperatorRoleError for invalid role', async () => {
       const ethWallet = generateEthWallet();
       const signatureBody = web3Utils.prepareSignatureBody({
         from: ethWallet.address,
@@ -273,7 +274,8 @@ describe('AuthService', () => {
           if (key === KVStoreKeys.role) {
             return mockedRole;
           }
-          return '';
+
+          throw new Error('Invalid key');
         },
       );
 
@@ -282,7 +284,30 @@ describe('AuthService', () => {
       ).rejects.toThrow(new AuthErrors.InvalidOperatorRoleError(mockedRole));
     });
 
-    it('should throw InvalidOperatorFeeError', async () => {
+    it('should throw InvalidOperatorRoleError when role is not set', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      const mockedRole = faker.string.alpha();
+      mockKVStoreUtils.get.mockImplementation(async () => {
+        throw new Error('Invalid key');
+      });
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorRoleError(mockedRole));
+    });
+
+    it('should throw InvalidOperatorFeeError for invalid fee', async () => {
       const ethWallet = generateEthWallet();
       const signatureBody = web3Utils.prepareSignatureBody({
         from: ethWallet.address,
@@ -303,7 +328,8 @@ describe('AuthService', () => {
           if (key === KVStoreKeys.fee) {
             return '';
           }
-          return '';
+
+          throw new Error('Invalid key');
         },
       );
 
@@ -312,8 +338,40 @@ describe('AuthService', () => {
       ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
     });
 
-    it.each(['', faker.string.alpha()])(
-      'should throw InvalidOperatorUrlError [%#]',
+    it('should throw InvalidOperatorFeeError when fee is not set', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return Role.ExchangeOracle;
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
+    });
+
+    it.each([
+      '',
+      `${faker.string.alpha()}.test`,
+      `ftp://${faker.string.alpha()}.test`,
+    ])(
+      'should throw InvalidOperatorUrlError for invalid url [%#]',
       async (invalidUrl) => {
         const ethWallet = generateEthWallet();
         const signatureBody = web3Utils.prepareSignatureBody({
@@ -338,7 +396,8 @@ describe('AuthService', () => {
             if (key === KVStoreKeys.url) {
               return invalidUrl;
             }
-            return '';
+
+            throw new Error('Invalid key');
           },
         );
 
@@ -347,6 +406,37 @@ describe('AuthService', () => {
         ).rejects.toThrow(new AuthErrors.InvalidOperatorUrlError(invalidUrl));
       },
     );
+
+    it('should throw InvalidOperatorFeeError when url is not set', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return Role.ExchangeOracle;
+          }
+          if (key === KVStoreKeys.fee) {
+            return String(faker.number.int({ min: 1, max: 50 }));
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
+    });
   });
 
   describe('signin', () => {
@@ -509,13 +599,14 @@ describe('AuthService', () => {
     it('should generate jwt payload for operator', async () => {
       const operator = generateOperator();
 
+      const mockedOperatorStatus = 'active';
       const expectedJwtPayload = {
         status: operator.status,
         user_id: operator.id,
         wallet_address: operator.evmAddress,
         role: operator.role,
         reputation_network: mockWeb3ConfigService.operatorAddress,
-        operator_status: 'active',
+        operator_status: mockedOperatorStatus,
       };
 
       const spyOnGenerateTokens = jest
@@ -528,11 +619,46 @@ describe('AuthService', () => {
       mockKVStoreUtils.get.mockImplementation(
         async (_chainId, _address, key) => {
           if (key === operator.evmAddress) {
-            return 'active';
+            return mockedOperatorStatus;
           }
-          return '';
+
+          throw new Error('Invalid key');
         },
       );
+
+      await service.web3Auth(operator);
+
+      expect(service.generateTokens).toHaveBeenCalledTimes(1);
+      expect(service.generateTokens).toHaveBeenCalledWith(
+        operator.id,
+        expectedJwtPayload,
+      );
+
+      spyOnGenerateTokens.mockRestore();
+    });
+
+    it('should generate jwt payload for operator when status is not set', async () => {
+      const operator = generateOperator();
+
+      const expectedJwtPayload = {
+        status: operator.status,
+        user_id: operator.id,
+        wallet_address: operator.evmAddress,
+        role: operator.role,
+        reputation_network: mockWeb3ConfigService.operatorAddress,
+        operator_status: 'inactive',
+      };
+
+      const spyOnGenerateTokens = jest
+        .spyOn(service, 'generateTokens')
+        .mockImplementation();
+      spyOnGenerateTokens.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+      mockKVStoreUtils.get.mockImplementation(async () => {
+        throw new Error('Invalid key');
+      });
 
       await service.web3Auth(operator);
 
