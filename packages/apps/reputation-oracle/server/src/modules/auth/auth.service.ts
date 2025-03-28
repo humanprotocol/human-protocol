@@ -32,6 +32,7 @@ import {
   AuthErrorMessage,
   DuplicatedUserAddressError,
   DuplicatedUserEmailError,
+  InactiveUserError,
   InvalidOperatorFeeError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
@@ -162,6 +163,10 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
 
+    if (userEntity.status === UserStatus.INACTIVE) {
+      throw new InactiveUserError(userEntity.id);
+    }
+
     if (!securityUtils.comparePasswordWithHash(password, userEntity.password)) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
     }
@@ -174,6 +179,10 @@ export class AuthService {
 
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_ADDRESS);
+    }
+
+    if (userEntity.status === UserStatus.INACTIVE) {
+      throw new InactiveUserError(userEntity.id);
     }
 
     const preSigninData = web3Utils.prepareSignatureBody({

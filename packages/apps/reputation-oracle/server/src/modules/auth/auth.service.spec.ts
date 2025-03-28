@@ -485,6 +485,20 @@ describe('AuthService', () => {
         ),
       );
     });
+
+    it('should throw InactiveUserError if user status is `inactive`', async () => {
+      const password = faker.string.alphanumeric();
+      const user = generateWorkerUser({
+        password,
+        status: UserStatus.INACTIVE,
+      });
+
+      mockUserService.findWeb2UserByEmail.mockResolvedValueOnce(user);
+
+      await expect(service.signin(user.email, password)).rejects.toThrow(
+        new AuthErrors.InactiveUserError(user.id),
+      );
+    });
   });
 
   describe('web3Signin', () => {
@@ -550,6 +564,30 @@ describe('AuthService', () => {
           AuthErrors.AuthErrorMessage.INVALID_WEB3_SIGNATURE,
         ),
       );
+    });
+
+    it('should throw InactiveUserError if operator status in DB is `inactive`', async () => {
+      const ethWallet = generateEthWallet();
+      const operator = generateOperator({
+        privateKey: ethWallet.privateKey,
+        status: UserStatus.INACTIVE,
+      });
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNIN,
+        nonce: operator.nonce,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserService.findOperatorUser.mockResolvedValueOnce(operator);
+
+      await expect(
+        service.web3Signin(operator.evmAddress, signature),
+      ).rejects.toThrow(new AuthErrors.InactiveUserError(operator.id));
     });
   });
 
