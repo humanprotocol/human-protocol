@@ -21,7 +21,7 @@ const web3userDataSchema = z.object({
   reputation_network: z.string(),
   operator_status: z.nativeEnum(OperatorStatus),
   exp: z.number(),
-  status: z.enum(['active', 'inactive', 'pending']).nullable().optional(),
+  status: z.enum(['active', 'inactive']).nullable().optional(),
 });
 
 export type Web3UserData = z.infer<typeof web3userDataSchema>;

@@ -24,7 +24,7 @@ export function RequireWeb3Auth({
     );
   }
 
-  if (web3Auth.user.status !== 'active' || web3Auth.status !== 'success') {
+  if (web3Auth.status !== 'success') {
     return (
       <Navigate
         replace
