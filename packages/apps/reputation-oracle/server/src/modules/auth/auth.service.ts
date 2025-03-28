@@ -113,7 +113,10 @@ export class AuthService {
     }
 
     const chainId = this.web3ConfigService.reputationNetworkChainId;
-    const role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
+    let role = '';
+    try {
+      role = await KVStoreUtils.get(chainId, address, KVStoreKeys.role);
+    } catch (noop) {}
 
     // We need to exclude ReputationOracle role
     const isValidRole = [
@@ -126,12 +129,18 @@ export class AuthService {
       throw new InvalidOperatorRoleError(role);
     }
 
-    const fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
+    let fee = '';
+    try {
+      fee = await KVStoreUtils.get(chainId, address, KVStoreKeys.fee);
+    } catch (noop) {}
     if (!fee) {
       throw new InvalidOperatorFeeError(fee);
     }
 
-    const url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
+    let url = '';
+    try {
+      url = await KVStoreUtils.get(chainId, address, KVStoreKeys.url);
+    } catch (noop) {}
     if (!url || !StorageService.isValidUrl(url)) {
       throw new InvalidOperatorUrlError(url);
     }
@@ -228,11 +237,14 @@ export class AuthService {
      * and subgraph does not have the actual value yet,
      * the status can be outdated
      */
-    const operatorStatus = await KVStoreUtils.get(
-      this.web3ConfigService.reputationNetworkChainId,
-      this.web3ConfigService.operatorAddress,
-      userEntity.evmAddress,
-    );
+    let operatorStatus = OperatorStatus.INACTIVE;
+    try {
+      operatorStatus = (await KVStoreUtils.get(
+        this.web3ConfigService.reputationNetworkChainId,
+        this.web3ConfigService.operatorAddress,
+        userEntity.evmAddress,
+      )) as OperatorStatus;
+    } catch (noop) {}
 
     const jwtPayload = {
       status: userEntity.status,
@@ -240,7 +252,7 @@ export class AuthService {
       wallet_address: userEntity.evmAddress,
       role: userEntity.role,
       reputation_network: this.web3ConfigService.operatorAddress,
-      operator_status: operatorStatus || OperatorStatus.INACTIVE,
+      operator_status: operatorStatus,
     };
     return this.generateTokens(userEntity.id, jwtPayload);
   }
