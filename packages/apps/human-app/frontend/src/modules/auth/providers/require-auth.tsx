@@ -26,7 +26,7 @@ export function RequireAuth({ children }: Readonly<{ children: JSX.Element }>) {
     return (
       <Navigate
         replace
-        state={{ from: location }}
+        state={{ routerState: { email: auth.user.email } }}
         to={routerPaths.worker.verifyEmail}
       />
     );
