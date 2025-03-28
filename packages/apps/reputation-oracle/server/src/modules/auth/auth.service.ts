@@ -32,6 +32,7 @@ import {
   AuthErrorMessage,
   DuplicatedUserAddressError,
   DuplicatedUserEmailError,
+  InactiveUserError,
   InvalidOperatorFeeError,
   InvalidOperatorRoleError,
   InvalidOperatorUrlError,
@@ -151,6 +152,10 @@ export class AuthService {
     const userEntity = await this.userService.findWeb2UserByEmail(email);
     if (!userEntity) {
       throw new AuthError(AuthErrorMessage.INVALID_CREDENTIALS);
+    }
+
+    if (userEntity.status === UserStatus.INACTIVE) {
+      throw new InactiveUserError(userEntity.id);
     }
 
     if (!securityUtils.comparePasswordWithHash(password, userEntity.password)) {

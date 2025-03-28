@@ -10,6 +10,7 @@ export enum AuthErrorMessage {
   INVALID_EMAIL_TOKEN = 'Email token is not valid',
   INVALID_WEB3_SIGNATURE = 'Invalid signature',
   INVALID_ADDRESS = 'Invalid address',
+  INACTIVE_USER = 'User is in inactive status',
 }
 
 export class AuthError extends BaseError {
@@ -55,5 +56,11 @@ export class DuplicatedUserAddressError extends BaseError {
     super(
       'The address you are trying to use already exists. Please, use a different address.',
     );
+  }
+}
+
+export class InactiveUserError extends BaseError {
+  constructor(readonly userId: number) {
+    super('User is in inactive status. Login forbidden.');
   }
 }

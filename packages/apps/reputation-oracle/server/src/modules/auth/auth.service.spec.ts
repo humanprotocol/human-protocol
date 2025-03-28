@@ -395,6 +395,20 @@ describe('AuthService', () => {
         ),
       );
     });
+
+    it('should throw InactiveUserError if user status is `inactive`', async () => {
+      const password = faker.string.alphanumeric();
+      const user = generateWorkerUser({
+        password,
+        status: UserStatus.INACTIVE,
+      });
+
+      mockUserService.findWeb2UserByEmail.mockResolvedValueOnce(user);
+
+      await expect(service.signin(user.email, password)).rejects.toThrow(
+        new AuthErrors.InactiveUserError(user.id),
+      );
+    });
   });
 
   describe('web3Signin', () => {
