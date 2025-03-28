@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import logoImg from '../../assets/logo.svg';
 import { useAccount } from 'wagmi';
 import { Account } from '../Account';
+import { ConnectWallet } from '../Wallet/ConnectWallet';
 
 export const DefaultHeader: FC = () => {
   const { isConnected } = useAccount();
@@ -56,6 +57,9 @@ export const DefaultHeader: FC = () => {
           >
             Dashboard
           </MuiLink>
+
+          {!isConnected && <ConnectWallet />}
+
           <MuiLink
             sx={{ fontSize: '14px', fontWeight: 600, mx: 2 }}
             href="https://humanprotocol.org"

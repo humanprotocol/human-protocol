@@ -31,7 +31,7 @@ const WithdrawableAmountCard: React.FC = () => {
       elevation={3}
       sx={{
         p: 3,
-        height: '200px',
+        height: '112px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',

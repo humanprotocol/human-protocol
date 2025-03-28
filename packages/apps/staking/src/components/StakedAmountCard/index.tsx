@@ -18,7 +18,7 @@ const StakedAmountCard: React.FC<Props> = ({ onStakeOpen, onUnstakeOpen }) => {
       elevation={3}
       sx={{
         p: 3,
-        height: '200px',
+        height: '248px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
