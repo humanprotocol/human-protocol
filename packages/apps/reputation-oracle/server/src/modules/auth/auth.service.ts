@@ -172,6 +172,10 @@ export class AuthService {
       throw new AuthError(AuthErrorMessage.INVALID_ADDRESS);
     }
 
+    if (userEntity.status === UserStatus.INACTIVE) {
+      throw new InactiveUserError(userEntity.id);
+    }
+
     const preSigninData = web3Utils.prepareSignatureBody({
       from: address,
       to: this.web3ConfigService.operatorAddress,
