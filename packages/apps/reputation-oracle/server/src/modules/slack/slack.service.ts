@@ -26,7 +26,7 @@ export class SlackService {
     }
   }
 
-  async openModal(triggerId: string, modalView: any): Promise<void> {
+  private async openModal(triggerId: string, modalView: any): Promise<void> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(
