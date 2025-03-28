@@ -32,7 +32,10 @@ export const FortuneJobRequestForm = () => {
     Qualification[]
   >([]);
 
-  const initialValues = mapFortuneFormValues(jobRequest, qualificationsOptions);
+  const persistedFormValues = mapFortuneFormValues(
+    jobRequest,
+    qualificationsOptions,
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +74,7 @@ export const FortuneJobRequestForm = () => {
   return (
     <Box sx={{ mt: '42px' }}>
       <Formik
-        initialValues={initialValues}
+        initialValues={persistedFormValues}
         validationSchema={FortuneJobRequestValidationSchema}
         onSubmit={handleNext}
       >
