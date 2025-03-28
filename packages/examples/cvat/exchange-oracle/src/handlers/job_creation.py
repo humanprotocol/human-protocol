@@ -5,11 +5,13 @@ import os
 import random
 import uuid
 from abc import ABCMeta, abstractmethod
+from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
 from math import ceil
 from pathlib import Path
+from queue import Queue
 from tempfile import TemporaryDirectory
 from time import sleep
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -40,6 +42,7 @@ from src.services.cloud.utils import BucketAccessInfo
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, format_sequence, get_function_logger
+from src.utils.roi_uploader import BufferedRoiImageUploader
 from src.utils.zip_archive import write_dir_to_zip_archive
 
 if TYPE_CHECKING:
@@ -183,7 +186,18 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
+        extra_args = {}
+
+        if bucket_info.provider == CloudProviders.aws:
+            import boto3.session
+
+            extra_args["config"] = boto3.session.Config(
+                max_pool_connections=Config.features.max_data_storage_connections
+            )
+        elif bucket_info.provider == CloudProviders.gcs:
+            pass  # TODO: test and add connections if needed
+
+        return cloud_service.make_client(bucket_info, **extra_args)
 
     def _save_cvat_gt_dataset_to_oracle_bucket(  # noqa: B027
         self,
@@ -1394,11 +1408,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         )
 
     def _extract_and_upload_rois(self):
-        # TODO: maybe optimize via splitting into separate
-        #  threads (downloading, uploading, processing)
-
-        # Watch for the memory used, as the whole dataset can be quite big (gigabytes, terabytes)
-        # Consider also packing RoIs cut into archives
         assert self._points_dataset is not _unset
         assert self._rois is not _unset
         assert self._data_filenames is not _unset
@@ -1425,13 +1434,10 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             for image_id, g in groupby(sorted(self._rois, key=_roi_key), key=_roi_key)
         }
 
-        for filename in self._data_filenames:
+        def process_file(filename: str, image_pixels: np.ndarray):
             image_roi_infos = rois_by_image.get(filename, [])
             if not image_roi_infos:
-                continue
-
-            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
-            image_pixels = decode_image(image_bytes)
+                return
 
             sample = filename_to_sample[filename]
             if tuple(sample.image.size) != tuple(image_pixels.shape[:2]):
@@ -1459,6 +1465,34 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, roi_filename),
                     roi_bytes,
                 )
+
+        def download_and_decode(key: str):
+            image_bytes = src_client.download_file(key)
+            return decode_image(image_bytes)
+
+        pool_size = Config.features.max_data_storage_connections
+        download_queue_size = 4 * pool_size
+        download_queue = Queue[tuple[str, Future[np.ndarray]]](download_queue_size)
+        roi_uploader = BufferedRoiImageUploader(queue=download_queue)
+        with ThreadPoolExecutor(pool_size) as pool:
+
+            def put_callback(filename: str):
+                image_roi_infos = rois_by_image.get(filename, [])
+                if not image_roi_infos:
+                    return None
+
+                return (
+                    filename,
+                    pool.submit(download_and_decode, os.path.join(src_prefix, filename)),
+                )
+
+            def process_callback(result: tuple[str, Future]):
+                filename, task = result
+                process_file(filename, task.result())
+
+            roi_uploader.process_all(
+                self._data_filenames, put_callback=put_callback, process_callback=process_callback
+            )
 
     def _prepare_gt_roi_dataset(self):
         self._gt_roi_dataset = dm.Dataset(
@@ -2511,13 +2545,10 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             if isinstance(bbox, dm.Bbox)
         }
 
-        for filename in self._data_filenames:
+        def process_file(filename: str, image_pixels: np.ndarray):
             image_roi_infos = roi_info_by_image.get(filename, [])
             if not image_roi_infos:
-                continue
-
-            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
-            image_pixels = decode_image(image_bytes)
+                return
 
             sample = filename_to_sample[filename]
             if tuple(sample.image.size) != tuple(image_pixels.shape[:2]):
@@ -2541,6 +2572,34 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                     data=roi_bytes,
                 )
+
+        def download_and_decode(key: str):
+            image_bytes = src_client.download_file(key)
+            return decode_image(image_bytes)
+
+        pool_size = Config.features.max_data_storage_connections
+        download_queue_size = 4 * pool_size
+        download_queue = Queue[tuple[str, Future[np.ndarray]]](download_queue_size)
+        roi_uploader = BufferedRoiImageUploader(queue=download_queue)
+        with ThreadPoolExecutor(pool_size) as pool:
+
+            def put_callback(filename: str):
+                image_roi_infos = roi_info_by_image.get(filename, [])
+                if not image_roi_infos:
+                    return None
+
+                return (
+                    filename,
+                    pool.submit(download_and_decode, os.path.join(src_prefix, filename)),
+                )
+
+            def process_callback(result: tuple[str, Future]):
+                filename, task = result
+                process_file(filename, task.result())
+
+            roi_uploader.process_all(
+                self._data_filenames, put_callback=put_callback, process_callback=process_callback
+            )
 
     def _prepare_gt_dataset_for_skeleton_point(
         self,
