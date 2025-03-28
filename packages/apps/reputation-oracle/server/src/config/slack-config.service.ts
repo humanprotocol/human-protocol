@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class SlackConfigService {
   constructor(private configService: ConfigService) {}
-  get webhookUrl(): string {
-    return this.configService.getOrThrow<string>('SLACK_WEBHOOK_URL');
+  get abuseWebhookUrl(): string {
+    return this.configService.getOrThrow<string>('ABUSE_SLACK_WEBHOOK_URL');
   }
-  get signingSecret(): string {
-    return this.configService.getOrThrow<string>('SLACK_SIGNING_SECRET');
+  get abuseSigningSecret(): string {
+    return this.configService.getOrThrow<string>('ABUSE_SLACK_SIGNING_SECRET');
   }
-  get oauthToken(): string {
-    return this.configService.getOrThrow<string>('SLACK_OAUTH_TOKEN');
+  get abuseOauthToken(): string {
+    return this.configService.getOrThrow<string>('ABUSE_SLACK_OAUTH_TOKEN');
   }
 }

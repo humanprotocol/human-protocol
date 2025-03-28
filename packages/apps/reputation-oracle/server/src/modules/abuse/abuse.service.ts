@@ -11,7 +11,6 @@ import { isDuplicatedError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
 import { ReputationService } from '../reputation/reputation.service';
-import { SlackService } from '../slack/slack.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { AbuseEntity } from './abuse.entity';
@@ -23,6 +22,7 @@ import {
   ReportAbuseInput,
   SlackInteraction,
 } from './types';
+import { AbuseSlackBot } from './abuse.slack-bot';
 
 @Injectable()
 export class AbuseService {
@@ -31,7 +31,7 @@ export class AbuseService {
   });
 
   constructor(
-    private readonly slackService: SlackService,
+    private readonly abuseSlackBot: AbuseSlackBot,
     private readonly abuseRepository: AbuseRepository,
     private readonly web3Service: Web3Service,
     private readonly serverConfigService: ServerConfigService,
@@ -44,9 +44,10 @@ export class AbuseService {
     abuseEntity.escrowAddress = data.escrowAddress;
     abuseEntity.chainId = data.chainId;
     abuseEntity.userId = data.userId;
+    abuseEntity.status = AbuseStatus.PENDING;
+    abuseEntity.retriesCount = 0;
 
     await this.abuseRepository.createUnique(abuseEntity);
-    return;
   }
 
   private async slashAccount(data: {
@@ -94,10 +95,19 @@ export class AbuseService {
       isInteractiveMessage(data) &&
       data.actions[0].value === AbuseDecision.ACCEPTED
     ) {
-      await this.slackService.sendAbuseReportModal({
+      const escrow = await EscrowUtils.getEscrow(
+        abuseEntity.chainId,
+        abuseEntity.escrowAddress,
+      );
+      const maxAmount = Number(
+        (await OperatorUtils.getOperator(abuseEntity.chainId, escrow.launcher))
+          .amountStaked,
+      );
+      await this.abuseSlackBot.triggerAbuseReportModal({
         abuseId: abuseEntity.id,
         escrowAddress: abuseEntity.escrowAddress,
         chainId: abuseEntity.chainId,
+        maxAmount: maxAmount,
         triggerId: data.trigger_id,
         responseUrl: data.response_url,
       });
@@ -109,9 +119,9 @@ export class AbuseService {
       abuseEntity.amount = data.view.state.values.quantity_input.quantity.value;
       abuseEntity.retriesCount = 0;
 
-      await this.slackService.updateMessage(
+      await this.abuseSlackBot.updateMessage(
         responseUrl,
-        `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${abuseEntity.escrowAddress}, ChainId: ${abuseEntity.chainId}, Slashed amount: ${abuseEntity.amount} HMT`,
+        `Abuse ${abuseEntity.decision.toLowerCase()}. Escrow: ${abuseEntity.escrowAddress}, ChainId: ${abuseEntity.chainId}, Slashed amount: ${abuseEntity.amount} HMT`,
       );
       await this.abuseRepository.updateOne(abuseEntity);
       return '';
@@ -119,7 +129,7 @@ export class AbuseService {
       abuseEntity.decision = data.actions[0].value as AbuseDecision;
       abuseEntity.retriesCount = 0;
       await this.abuseRepository.updateOne(abuseEntity);
-      return `Abuse ${(abuseEntity.decision as string).toLowerCase()}. Escrow: ${abuseEntity.escrowAddress}, ChainId: ${abuseEntity.chainId}`;
+      return `Abuse ${abuseEntity.decision.toLowerCase()}. Escrow: ${abuseEntity.escrowAddress}, ChainId: ${abuseEntity.chainId}`;
     }
   }
 
@@ -138,11 +148,11 @@ export class AbuseService {
       abuseEntity.retriesCount = abuseEntity.retriesCount + 1;
     }
 
-    this.abuseRepository.updateOne(abuseEntity);
+    await this.abuseRepository.updateOne(abuseEntity);
   }
 
   async processAbuseRequests(): Promise<void> {
-    const abuseEntities = await this.abuseRepository.findByStatus(
+    const abuseEntities = await this.abuseRepository.findToClassify(
       AbuseStatus.PENDING,
     );
 
@@ -162,7 +172,7 @@ export class AbuseService {
         const webhookPayload = {
           chainId: abuseEntity.chainId,
           escrowAddress: abuseEntity.escrowAddress,
-          eventType: EventType.ABUSE_REPORTED,
+          eventType: EventType.ABUSE_DETECTED,
         };
 
         try {
@@ -181,10 +191,12 @@ export class AbuseService {
             continue;
           }
         }
-        await this.slackService.sendAbuseNotification({
+
+        await this.abuseSlackBot.sendAbuseNotification({
           abuseId: abuseEntity.id,
           chainId: abuseEntity.chainId,
           escrowAddress: abuseEntity.escrowAddress,
+          manifestUrl: escrow.manifestUrl as string,
         });
         abuseEntity.status = AbuseStatus.NOTIFIED;
         await this.abuseRepository.updateOne(abuseEntity);
@@ -209,7 +221,7 @@ export class AbuseService {
         );
 
         if (abuseEntity.decision === AbuseDecision.ACCEPTED) {
-          this.slashAccount({
+          await this.slashAccount({
             slasher: abuseEntity?.user?.evmAddress as string,
             staker: escrow.launcher,
             chainId: abuseEntity.chainId,
@@ -222,7 +234,7 @@ export class AbuseService {
           const webhookPayload = {
             chainId,
             escrowAddress,
-            eventType: EventType.ABUSE_REPORTED,
+            eventType: EventType.ABUSE_DETECTED,
           };
 
           try {
@@ -253,7 +265,7 @@ export class AbuseService {
           const webhookPayload = {
             chainId: chainId,
             escrowAddress: escrowAddress,
-            eventType: EventType.ABUSE_REPORT_DISMISSED,
+            eventType: EventType.ABUSE_DISMISSED,
           };
           const webhookUrl = (
             await OperatorUtils.getOperator(

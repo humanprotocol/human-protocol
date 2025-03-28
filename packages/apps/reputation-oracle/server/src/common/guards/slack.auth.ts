@@ -15,7 +15,7 @@ export class SlackAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     if (
       isValidSlackRequest({
-        signingSecret: this.slackConfigService.signingSecret,
+        signingSecret: this.slackConfigService.abuseSigningSecret,
         body: request.rawBody,
         headers: {
           'x-slack-signature': request.headers['x-slack-signature'],

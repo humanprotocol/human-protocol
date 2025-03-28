@@ -38,16 +38,15 @@ export class AbuseRepository extends BaseRepository<AbuseEntity> {
     });
   }
 
-  async findByStatus(status: AbuseStatus): Promise<AbuseEntity[]> {
+  async findToClassify(status: AbuseStatus): Promise<AbuseEntity[]> {
     return this.find({
       where: {
         status: status,
         retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },
-
       order: {
-        createdAt: 'DESC',
+        createdAt: 'ASC',
       },
     });
   }
@@ -61,7 +60,7 @@ export class AbuseRepository extends BaseRepository<AbuseEntity> {
         waitUntil: LessThanOrEqual(new Date()),
       },
       order: {
-        createdAt: 'DESC',
+        createdAt: 'ASC',
       },
       relations: options.relations,
     });

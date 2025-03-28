@@ -1,78 +1,28 @@
+import { ChainId } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
 import { SlackConfigService } from '../../config/slack-config.service';
-import logger from '../../logger';
-import { AbuseDecision } from '../abuse/constants';
-import { ChainId, EscrowUtils, OperatorUtils } from '@human-protocol/sdk';
+import { SlackBotApp } from '../../integrations/slack-bot-app/slack-bot-app';
+import { AbuseDecision } from './constants';
 
 @Injectable()
-export class SlackService {
-  private readonly logger = logger.child({ context: SlackService.name });
-
+export class AbuseSlackBot extends SlackBotApp {
   constructor(
-    private readonly httpService: HttpService,
+    httpService: HttpService,
     private readonly slackConfigService: SlackConfigService,
-  ) {}
-
-  private async sendNotification(message: any): Promise<void> {
-    try {
-      await firstValueFrom(
-        this.httpService.post(this.slackConfigService.webhookUrl, message),
-      );
-    } catch (error) {
-      this.logger.error('Error sending Slack notification:', error);
-      throw error;
-    }
-  }
-
-  private async openModal(triggerId: string, modalView: any): Promise<void> {
-    try {
-      const response = await firstValueFrom(
-        this.httpService.post(
-          'https://slack.com/api/views.open',
-          {
-            trigger_id: triggerId,
-            view: modalView,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${this.slackConfigService.oauthToken}`,
-              'Content-Type': 'application/json',
-            },
-          },
-        ),
-      );
-
-      if (!response.data.ok) {
-        this.logger.error('Error opening Slack modal:', response.data);
-        throw new Error('Failed to open Slack modal');
-      }
-    } catch (error) {
-      this.logger.error('Error opening Slack modal:', error);
-      throw error;
-    }
-  }
-
-  async updateMessage(responseUrl: string, text: string): Promise<void> {
-    try {
-      await firstValueFrom(this.httpService.post(responseUrl, { text }));
-    } catch (error) {
-      this.logger.error('Error updating Slack message:', error);
-      throw error;
-    }
+  ) {
+    super(httpService, {
+      webhookUrl: slackConfigService.abuseWebhookUrl,
+      oauthToken: slackConfigService.abuseOauthToken,
+    });
   }
 
   async sendAbuseNotification(data: {
     abuseId: number;
     chainId: ChainId;
     escrowAddress: string;
+    manifestUrl: string;
   }): Promise<void> {
-    const escrow = await EscrowUtils.getEscrow(
-      data.chainId,
-      data.escrowAddress,
-    );
-
     const message = {
       text: 'New abuse report received!',
       attachments: [
@@ -81,7 +31,7 @@ export class SlackService {
           fields: [
             { title: 'Address', value: data.escrowAddress },
             { title: 'ChainId', value: data.chainId },
-            { title: 'Manifest', value: escrow.manifestUrl },
+            { title: 'Manifest', value: data.manifestUrl },
           ],
         },
         {
@@ -116,24 +66,17 @@ export class SlackService {
       ],
     };
 
-    await this.sendNotification(message);
+    await this.sendNotification(this.config.webhookUrl, message);
   }
 
-  async sendAbuseReportModal(data: {
+  async triggerAbuseReportModal(data: {
     abuseId: number;
     chainId: ChainId;
     escrowAddress: string;
+    maxAmount: number;
     triggerId: string;
     responseUrl: string;
-  }) {
-    const escrow = await EscrowUtils.getEscrow(
-      data.chainId,
-      data.escrowAddress,
-    );
-    const maxAmount = (
-      await OperatorUtils.getOperator(data.chainId, escrow.launcher)
-    ).amountStaked;
-
+  }): Promise<void> {
     const modalView = {
       type: 'modal',
       callback_id: `${data.abuseId}`,
@@ -142,7 +85,7 @@ export class SlackService {
       blocks: [
         {
           type: 'section',
-          text: { type: 'mrkdwn', text: `Max amount: ${maxAmount}` },
+          text: { type: 'mrkdwn', text: `Max amount: ${data.maxAmount}` },
         },
         {
           type: 'input',
@@ -152,7 +95,7 @@ export class SlackService {
             type: 'number_input',
             is_decimal_allowed: true,
             min_value: '0',
-            max_value: maxAmount,
+            max_value: data.maxAmount,
           },
           label: {
             type: 'plain_text',

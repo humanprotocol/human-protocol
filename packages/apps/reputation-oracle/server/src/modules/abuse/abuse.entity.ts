@@ -29,7 +29,7 @@ export class AbuseEntity extends BaseEntity {
   decision: AbuseDecision | null;
 
   @Column({ type: 'decimal', precision: 30, scale: 18, nullable: true })
-  amount?: number | null;
+  amount: number | null;
 
   @JoinColumn()
   @ManyToOne('UserEntity', { nullable: false })
@@ -39,8 +39,8 @@ export class AbuseEntity extends BaseEntity {
   userId: number;
 
   @Column({ type: 'int' })
-  retriesCount = 0;
+  retriesCount: number;
 
   @Column({ type: 'timestamptz' })
-  waitUntil = new Date();
+  waitUntil: Date;
 }
