@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { useState } from 'react';
 import Popover from '@mui/material/Popover';
 import type { TableCellBaseProps } from '@mui/material/TableCell/TableCell';
 import { type IconType, TextHeaderWithIcon } from '../text-header-with-icon';
@@ -18,18 +18,18 @@ type PropsWithoutIcon = CommonProps & {
 
 type HeaderCellProps = PropsWithoutIcon | PropsWithIcon;
 
-export const TableHeaderCell = forwardRef<
-  HTMLTableDataCellElement,
-  HeaderCellProps
->(function TableHeaderCell(
-  { popoverContent, headerText, iconType, ...rest },
-  ref
-) {
-  const [anchorEl, setAnchorEl] = useState<HTMLTableDataCellElement | null>(
-    null
-  );
+export function TableHeaderCell({
+  popoverContent,
+  headerText,
+  iconType,
+}: HeaderCellProps) {
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLTableDataCellElement>) => {
+  const handleClick = (
+    event:
+      | React.MouseEvent<HTMLDivElement>
+      | React.KeyboardEvent<HTMLDivElement>
+  ) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -42,12 +42,31 @@ export const TableHeaderCell = forwardRef<
 
   const getHeader = () => {
     if (!iconType) {
-      return <td onClick={handleClick} {...rest} />;
+      return (
+        <div
+          role="button"
+          onClick={handleClick}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleClick(e);
+          }}
+        >
+          {headerText}
+        </div>
+      );
     }
+
     return (
-      <td onClick={handleClick} {...rest}>
+      <div
+        role="button"
+        onClick={handleClick}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') handleClick(e);
+        }}
+      >
         <TextHeaderWithIcon iconType={iconType} text={headerText} />
-      </td>
+      </div>
     );
   };
 
@@ -63,12 +82,11 @@ export const TableHeaderCell = forwardRef<
         id={id}
         onClose={handleClose}
         open={open}
-        ref={ref}
       >
         {popoverContent}
       </Popover>
     </>
   );
-});
+}
 
 TableHeaderCell.displayName = 'TableHeaderCell';
