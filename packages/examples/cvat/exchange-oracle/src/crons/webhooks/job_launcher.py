@@ -92,7 +92,12 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
                     db_session, webhook.escrow_address
                 )
 
-                cleanup_escrow(webhook.escrow_address, Networks(webhook.chain_id), projects)
+                cleanup_escrow(
+                    webhook.escrow_address,
+                    Networks(webhook.chain_id),
+                    projects=projects,
+                    session=db_session,
+                )
                 cvat_db_service.delete_projects(
                     db_session, webhook.escrow_address, webhook.chain_id
                 )
