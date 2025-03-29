@@ -139,7 +139,12 @@ def handle_job_launcher_event(webhook: Webhook, *, db_session: Session, logger: 
             cvat_db_service.update_project_statuses_by_escrow_address(
                 db_session, webhook.escrow_address, webhook.chain_id, ProjectStatuses.canceled
             )
-            cleanup_escrow(webhook.escrow_address, Networks(webhook.chain_id), projects)
+            cleanup_escrow(
+                webhook.escrow_address,
+                Networks(webhook.chain_id),
+                projects=projects,
+                session=db_session,
+            )
 
             oracle_db_service.outbox.create_webhook(
                 session=db_session,
