@@ -302,7 +302,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(cvat_project)
 
         project_images = [
-            Image(id=str(uuid.uuid4()), project_id=project_id, filename=f"image_{i}.jpg")
+            Image(id=str(uuid.uuid4()), cvat_project_id=cvat_project.id, filename=f"image_{i}.jpg")
             for i in range(3)
         ]
         self.session.add_all(project_images)
