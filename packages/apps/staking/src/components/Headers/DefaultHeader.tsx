@@ -7,67 +7,81 @@ import {
   IconButton,
   Drawer,
   Typography,
+  styled,
+  Button,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { Link } from 'react-router-dom';
-import logoImg from '../../assets/logo.svg';
 import { useAccount } from 'wagmi';
-import { Account } from '../Account';
-import { ConnectWallet } from '../Wallet/ConnectWallet';
 
-export const DefaultHeader: FC = () => {
-  const { isConnected } = useAccount();
+import Account from '../Account';
+import ConnectWallet from '../Wallet/ConnectWallet';
+import StakeModal from '../modals/StakeModal';
+import logoImg from '../../assets/logo.svg';
+import { colorPalette } from '../../assets/styles/color-palette';
+
+const NavLink = styled(MuiLink)({
+  color: colorPalette.primary.main,
+  padding: '6px 8px',
+  fontSize: '14px',
+  lineHeight: '150%',
+  letterSpacing: '0.1px',
+  fontWeight: 600,
+  textDecoration: 'none',
+  cursor: 'pointer',
+});
+
+const DefaultHeader: FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [stakeModalOpen, setStakeModalOpen] = useState(false);
+  const { isConnected } = useAccount();
 
   const toggleDrawer = (open: boolean) => {
     setMobileMenuOpen(open);
   };
 
   return (
-    <AppBar
-      position="static"
-      sx={{ background: '#fff', boxShadow: 'none', px: 2 }}
-    >
+    <AppBar position="static" sx={{ background: '#fff', boxShadow: 'none' }}>
       <Toolbar
-        sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '100%',
+          height: 82,
+        }}
       >
         <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <img src={logoImg} alt="Staking Dashboard" style={{ width: 250 }} />
-            <Typography
-              sx={{
-                fontSize: '14px',
-                fontWeight: 400,
-                ml: 1,
-                display: { xs: 'none', sm: 'block' },
-                marginLeft: '-100px',
-              }}
-            >
-              Staking Dashboard
-            </Typography>
-          </Box>
+          <img
+            src={logoImg}
+            alt="Staking Dashboard"
+            style={{ width: 118, height: 28 }}
+          />
+          <Typography
+            variant="body1"
+            ml={1.5}
+            display={{ xs: 'none', sm: 'block' }}
+          >
+            Staking
+          </Typography>
         </Link>
-
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
-          <MuiLink
-            sx={{ fontSize: '14px', fontWeight: 600, mx: 2 }}
-            href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
-            underline="none"
-          >
+        <Box display={{ xs: 'none', md: 'flex' }} alignItems="center" gap={2}>
+          <NavLink href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}>
+            Staking Overview
+          </NavLink>
+          <NavLink href="/kvstore">KV Store</NavLink>
+          <NavLink href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}>
             Dashboard
-          </MuiLink>
-
-          {!isConnected && <ConnectWallet />}
-
-          <MuiLink
-            sx={{ fontSize: '14px', fontWeight: 600, mx: 2 }}
-            href="https://humanprotocol.org"
-            underline="none"
+          </NavLink>
+          <NavLink href="https://humanprotocol.org">HUMAN Website</NavLink>
+          <Button
+            size="medium"
+            variant="outlined"
+            onClick={() => setStakeModalOpen(true)}
           >
-            HUMAN Website
-          </MuiLink>
-
+            Stake HMT
+          </Button>
+          {!isConnected && <ConnectWallet />}
           {isConnected && <Account />}
         </Box>
 
@@ -130,6 +144,10 @@ export const DefaultHeader: FC = () => {
           </Box>
         </Drawer>
       </Toolbar>
+      <StakeModal
+        open={stakeModalOpen}
+        onClose={() => setStakeModalOpen(false)}
+      />
     </AppBar>
   );
 };

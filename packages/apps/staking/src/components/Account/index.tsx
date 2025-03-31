@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import {
   Avatar,
   Box,
@@ -8,7 +9,9 @@ import {
 } from '@mui/material';
 import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 
-export function Account() {
+import { formatAddress } from '../../utils/string';
+
+const Account: FC = () => {
   const { address, connector } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
@@ -77,9 +80,6 @@ export function Account() {
       </Button>
     </Box>
   );
-}
+};
 
-function formatAddress(address?: string) {
-  if (!address) return '';
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
-}
+export default Account;

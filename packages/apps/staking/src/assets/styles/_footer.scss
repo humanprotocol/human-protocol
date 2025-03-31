@@ -1,8 +1,9 @@
 @use 'const';
 
-footer{
+footer {
   min-height: 124px;
   margin-top: auto;
+
   @media(max-width: 1100px) {
     padding: 0 24px;
     flex-direction: column-reverse;
@@ -46,9 +47,10 @@ footer{
     }
   }
 
-  .footer-link, .footer-icon{
+  .footer-link, .footer-icon {
     display: flex;
     flex-wrap: wrap;
+
     span {
       cursor: pointer;
       font-size: 12px;
@@ -60,14 +62,14 @@ footer{
   }
 
   @media (max-width: 1100px) {
-    .footer-link-wrapper{
-      .footer-link{
+    .footer-link-wrapper {
+      .footer-link {
         flex-direction: column;
       }
     }
   }
 
-  .footer-link, .footer-icon{
+  .footer-link, .footer-icon {
     justify-content: flex-start;
     align-items: flex-start;
   }

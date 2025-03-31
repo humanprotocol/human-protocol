@@ -23,6 +23,7 @@ const CardWrapper: FC<PropsWithChildren<Props>> = ({
         borderRadius: '20px',
         boxShadow: 'none',
         position: 'relative',
+        border: '1px solid #DADCE8',
       }}
     >
       {children}

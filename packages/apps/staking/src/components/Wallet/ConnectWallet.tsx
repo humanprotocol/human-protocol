@@ -4,7 +4,7 @@ import { useAccount } from 'wagmi';
 
 import WalletModal from './WalletModal';
 
-export const ConnectWallet = () => {
+const ConnectWallet = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const { isConnected } = useAccount();
 
@@ -25,11 +25,11 @@ export const ConnectWallet = () => {
       <Button
         variant="contained"
         color="primary"
-        size="large"
-        sx={{ mb: 2, borderRadius: '10px' }}
+        size="medium"
+        sx={{ borderRadius: '4px', boxShadow: 'none' }}
         onClick={handleClickCrypto}
       >
-        Connect
+        Connect Wallet
       </Button>
       <WalletModal
         open={walletModalOpen}
@@ -38,3 +38,5 @@ export const ConnectWallet = () => {
     </>
   );
 };
+
+export default ConnectWallet;
