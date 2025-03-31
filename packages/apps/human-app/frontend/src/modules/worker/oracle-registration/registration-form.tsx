@@ -1,26 +1,16 @@
+/* eslint-disable camelcase */
 import { Box, Stack } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
-import { useOracleRegistrationFlow } from './hooks';
+import { useOracleInstructions } from './hooks/use-oracle-instructions';
+import { useExchangeOracleRegistrationMutation } from './hooks/use-exchange-oracle-registration-mutation';
 import {
-  type RegistrationInExchangeOracleDto,
-  registrationInExchangeOracleDtoSchema,
+  oracleRegistrationFormSchema,
+  type OracleRegistrationFormValues,
 } from './schema';
-
-function useRegistrationForm(address: string) {
-  return useForm<RegistrationInExchangeOracleDto>({
-    defaultValues: {
-      // eslint-disable-next-line camelcase
-      oracle_address: address,
-      // eslint-disable-next-line camelcase
-      h_captcha_token: '',
-    },
-    resolver: zodResolver(registrationInExchangeOracleDtoSchema),
-  });
-}
 
 export function RegistrationForm({
   address,
@@ -30,18 +20,33 @@ export function RegistrationForm({
   oracleInstructions: string | URL | null | undefined;
 }>) {
   const { t } = useTranslation();
-  const methods = useRegistrationForm(address);
+
+  const { hasViewedInstructions, handleInstructionsView } =
+    useOracleInstructions(oracleInstructions);
+
   const {
-    hasViewedInstructions,
-    handleInstructionsView,
-    handleRegistration,
-    isRegistrationPending: isLoading,
-    registrationError: error,
-  } = useOracleRegistrationFlow(oracleInstructions);
+    mutate: registerInOracle,
+    isPending: isLoading,
+    error,
+  } = useExchangeOracleRegistrationMutation();
+
+  const methods = useForm<OracleRegistrationFormValues>({
+    defaultValues: {
+      h_captcha_token: '',
+    },
+    resolver: zodResolver(oracleRegistrationFormSchema),
+  });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    void methods.handleSubmit(handleRegistration)(event);
+    void methods.handleSubmit((formData: OracleRegistrationFormValues) => {
+      registerInOracle({
+        h_captcha_token: formData.h_captcha_token,
+        oracle_address: address,
+      });
+    })(event);
   };
+
+  const disabled = !hasViewedInstructions || isLoading;
 
   return (
     <>
@@ -54,7 +59,7 @@ export function RegistrationForm({
           <Stack alignItems="center" spacing={2}>
             <HCaptchaForm error={error} name="h_captcha_token" />
             <Button
-              disabled={!hasViewedInstructions}
+              disabled={disabled}
               fullWidth
               loading={isLoading}
               type="submit"

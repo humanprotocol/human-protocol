@@ -7,6 +7,18 @@ import { routerPaths } from '@/router/router-paths';
 import { useGetOracles } from '../hooks';
 import { useIsAlreadyRegistered } from './hooks';
 
+const styles = {
+  height: '100%',
+  minHeight: '70vh',
+  width: '100%',
+  boxShadow: 'none',
+  padding: '40px',
+  borderRadius: '20px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+};
+
 function isAddress(address: string | undefined): address is string {
   return address !== undefined && address.length > 0;
 }
@@ -18,7 +30,11 @@ export function RegistrationPage() {
   const isAlreadyRegistered = useIsAlreadyRegistered(oracleAddress);
 
   if (isLoading) {
-    return <Loader />;
+    return (
+      <Paper sx={styles}>
+        <Loader />
+      </Paper>
+    );
   }
 
   const oracleData = data?.find((o) => o.address === oracleAddress);
@@ -39,19 +55,7 @@ export function RegistrationPage() {
   return (
     <Grid alignItems="center" container justifyContent="center">
       <Grid item xs={12}>
-        <Paper
-          sx={{
-            height: '100%',
-            minHeight: '70vh',
-            width: '100%',
-            boxShadow: 'none',
-            padding: '40px',
-            borderRadius: '20px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        <Paper sx={styles}>
           <Stack maxWidth="350px" spacing={2}>
             <Box>
               {t('worker.registrationInExchangeOracle.requiredMessage')}
