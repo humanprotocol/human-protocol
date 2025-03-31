@@ -705,8 +705,8 @@ class AudinoDatasetComparator:
         gt_samples_filtered.sort(key=lambda ann: ann["start"])
         ds_samples_filtered.sort(key=lambda ann: ann["start"])
 
-        gt_transcriptions = " ".join([gt.get("sentence", "") for gt in gt_samples_filtered])
-        ds_transcriptions = " ".join([ds.get("sentence", "") for ds in ds_samples_filtered])
+        gt_transcriptions = " ".join([gt.get("sentence", "") for gt in gt_samples_filtered]).lower()
+        ds_transcriptions = " ".join([ds.get("sentence", "") for ds in ds_samples_filtered]).lower()
 
         wer = min(max(self.word_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
         cer = min(max(self.character_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
