@@ -7,7 +7,11 @@ export const IS_TESTNET = !IS_MAINNET;
 let initialSupportedChainIds: ChainId[];
 switch (import.meta.env.VITE_APP_ENVIRONMENT.toLowerCase()) {
   case 'mainnet':
-    initialSupportedChainIds = [ChainId.POLYGON];
+    initialSupportedChainIds = [
+      ChainId.POLYGON,
+      ChainId.MAINNET,
+      ChainId.BSC_MAINNET,
+    ];
     break;
   case 'testnet':
     initialSupportedChainIds = [
