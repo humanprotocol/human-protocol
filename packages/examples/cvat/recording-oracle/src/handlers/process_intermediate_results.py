@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import csv
 import io
+import json
 import logging
 import os
+import zipfile
 from collections import Counter
+from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
+from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import datumaro as dm
 import numpy as np
@@ -85,6 +90,14 @@ class _ValidationResult:
     task_id_to_honeypots_mapping: _TaskIdToHoneypotsMapping
     task_id_to_frame_names: _TaskIdToFrameNames
     task_id_to_labels: _TaskIdToLabels
+
+
+@dataclass
+class _AudinoValidationResult:
+    job_results: _JobResults
+    rejected_jobs: _RejectedJobs
+    updated_merged_dataset: io.BytesIO
+    gt_stats: GtStats
 
 
 T = TypeVar("T")
@@ -379,6 +392,326 @@ class _TaskValidator:
             task_id_to_frame_names=self._require_field(self._task_id_to_sequence_of_frame_names),
             task_id_to_labels=self._require_field(self._task_id_to_labels),
         )
+
+
+class _AudinoTaskValidator:
+    UNKNOWN_QUALITY = -1
+    "The value to be used when job quality cannot be computed (e.g. no GT images available)"
+
+    def __init__(
+        self,
+        escrow_address: str,
+        chain_id: int,
+        manifest: TaskManifest,
+        *,
+        merged_annotations: io.IOBase,
+        meta: AnnotationMeta,
+        gt_stats: GtStats | None = None,
+    ) -> None:
+        self.escrow_address = escrow_address
+        self.chain_id = chain_id
+        self.manifest = manifest
+
+        self._gt_stats: GtStats = gt_stats or {}
+        self._merged_annotations: io.IOBase = merged_annotations
+        self._job_annotations: dict[int, list[dict[str, Any]]] | None = None
+
+        self._updated_merged_dataset_archive: io.IOBase | None = None
+        self._job_results: _JobResults | None = None
+        self._rejected_jobs: _RejectedJobs | None = None
+
+        self._temp_dir: Path | None = None
+        self._input_gt_dataset = None
+        self._meta: AnnotationMeta = meta
+        self._base_job_id: int
+        self._time_stamps: list[float]
+
+    def _require_field(self, field: T | None) -> T:
+        assert field is not None
+        return field
+
+    def _parse_merged_annotations(self) -> dict[int, list[dict[str, Any]]]:
+        """Parses task annotations from self.merged_annotations,
+        extracting and organizing them by job_id"""
+
+        if self._merged_annotations is None:
+            return {}
+
+        job_annotations: dict[int, list[dict[str, Any]]] = {
+            job.job_id: [] for job in self._meta.jobs
+        }
+
+        with zipfile.ZipFile(io.BytesIO(self._merged_annotations.getvalue())) as archive:
+            if "annotations.json" not in archive.namelist():
+                return {}
+
+            with archive.open("annotations.json") as json_file:
+                annotations = json.load(json_file)
+
+            for annotation in annotations:
+                job_id = annotation.get("job_id")
+                if job_id is not None:
+                    if job_id not in job_annotations:
+                        job_annotations[job_id] = []
+                    job_annotations[job_id].append(annotation)
+
+        return dict(sorted(job_annotations.items()))
+
+    def _parse_audino_gt_annotations(self, gt_dataset_data: bytes, path: str):
+        _, ext = os.path.splitext(path)
+        ext = ext.lower()
+
+        def convert_value(value: str):
+            """Converts a string value to int, float, or keeps it as string."""
+            value = value.strip()
+            if not value:
+                return ""
+            try:
+                f = float(value)
+                if f.is_integer():
+                    return int(f)
+                return f
+            except ValueError:
+                return value
+
+        if ext == ".json":
+            data = json.loads(gt_dataset_data.decode("utf-8"))
+            self._time_stamps = data["time_stamps"]
+            return data["annotations"]
+        if ext == ".tsv":
+            decoded_data = gt_dataset_data.decode("utf-8")
+            data_io = StringIO(decoded_data)
+            reader = csv.DictReader(data_io, delimiter="\t")
+            return [{key: convert_value(value) for key, value in row.items()} for row in reader]
+        return []
+
+    def _load_gt_dataset(self):
+        input_gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        gt_bucket_client = make_cloud_client(input_gt_bucket)
+        gt_data = gt_bucket_client.download_file(input_gt_bucket.path)
+        self._input_gt_dataset = self._parse_audino_gt_annotations(gt_data, input_gt_bucket.path)
+
+    def _validate_jobs(self):
+        manifest = self._require_field(self.manifest)
+        gt_dataset = self._require_field(self._input_gt_dataset)
+
+        job_results: _JobResults = {}
+        rejected_jobs: _RejectedJobs = {}
+
+        min_quality = manifest.validation.min_quality
+
+        comparator = AudinoDatasetComparator(
+            min_similarity_threshold=min_quality,
+        )
+
+        self._job_annotations = self._parse_merged_annotations()
+
+        self._base_job_id = min(self._job_annotations.keys(), default=0)
+        offset = 0.0
+
+        for idx, (job_cvat_id, job_dataset) in enumerate(self._job_annotations.items()):
+            try:
+                job_mean_accuracy = comparator.compare(
+                    gt_dataset, job_dataset, offset, (self._time_stamps[2 * idx + 1] / 1000)
+                )
+
+                job_results[job_cvat_id] = job_mean_accuracy
+
+                val_job_name = GtKey(filename=str(job_cvat_id))  # labels=task_labels
+                self._gt_stats.setdefault(val_job_name, ValidationFrameStats())
+                self._gt_stats[val_job_name].accumulated_quality += job_mean_accuracy
+
+                if job_mean_accuracy < min_quality:
+                    self._gt_stats[val_job_name].failed_attempts += 1
+                    rejected_jobs[job_cvat_id] = LowAccuracyError()
+                else:
+                    self._gt_stats[val_job_name].accepted_attempts += 1
+
+                offset += self._time_stamps[2 * idx + 1] / 1000
+
+            except TooFewGtError as e:
+                job_results[job_cvat_id] = self.UNKNOWN_QUALITY
+                rejected_jobs[job_cvat_id] = e
+                continue
+
+        for gt_stat in self._gt_stats.values():
+            gt_stat.total_uses = max(
+                gt_stat.total_uses,
+                gt_stat.failed_attempts + gt_stat.accepted_attempts,
+                # at the first iteration we have no information on total uses
+                # from previous iterations, so we derive it from the validation results
+            )
+
+        self._job_results = job_results
+        self._rejected_jobs = rejected_jobs
+
+    def _prepare_merged_dataset(self):
+        tempdir = self._require_field(self._temp_dir)
+        gt_dataset = deepcopy(self._require_field(self._input_gt_dataset))
+
+        # for gt_sample in gt_dataset:
+        #     gt_sample["job_id"] = int(gt_sample["job_id"]) + self._base_job_id
+
+        gt_annotations_json = json.dumps(gt_dataset, indent=4).encode("utf-8")
+
+        updated_merged_dataset_path = tempdir / "merged_annotations"
+        updated_merged_dataset_path.mkdir(parents=True, exist_ok=True)
+
+        updated_merged_dataset_archive = io.BytesIO()
+
+        with zipfile.ZipFile(updated_merged_dataset_archive, "w") as archive:
+            with zipfile.ZipFile(
+                io.BytesIO(self._merged_annotations.getvalue())
+            ) as original_archive:
+                with original_archive.open("annotations.json") as annotations_file:
+                    annotations_data = json.load(annotations_file)
+
+                    # Modify start and end for each annotation to make time stamps absolute
+                    # FIXME: Need to be changed
+                    # for annotation in annotations_data:
+                    #     job_id = annotation.get("job_id")
+                    #     if job_id is not None:
+                    #         job_time_offset = (
+                    #             (int(job_id) - self._base_job_id)
+                    #             * self.manifest.annotation.segment_duration
+                    #             / 1000
+                    #         )
+
+                    #         annotation["start"] += job_time_offset
+                    #         annotation["end"] += job_time_offset
+
+                archive.writestr("annotations.json", json.dumps(annotations_data, indent=4))
+
+                for file in original_archive.namelist():
+                    if file.startswith("clips/"):
+                        archive.writestr(file, original_archive.read(file))
+
+            archive.writestr("gt_annotations.json", gt_annotations_json)
+
+        updated_merged_dataset_archive.seek(0)
+
+        self._updated_merged_dataset_archive = updated_merged_dataset_archive
+
+    def validate(self) -> _AudinoValidationResult:
+        with TemporaryDirectory() as tempdir:
+            self._temp_dir = Path(tempdir)
+
+            self._load_gt_dataset()
+            self._validate_jobs()
+            self._prepare_merged_dataset()
+
+        return _AudinoValidationResult(
+            job_results=self._require_field(self._job_results),
+            rejected_jobs=self._require_field(self._rejected_jobs),
+            updated_merged_dataset=self._require_field(self._updated_merged_dataset_archive),
+            gt_stats=self._require_field(self._gt_stats),
+        )
+
+
+class AudinoDatasetComparator:
+    def __init__(self, min_similarity_threshold: float):
+        self._min_similarity_threshold = min_similarity_threshold
+
+    def iou(self, start1: float, end1: float, start2: float, end2: float) -> float:
+        """Calculate IoU for time intervals."""
+        intersection = max(0, min(end1, end2) - max(start1, start2))
+        union = (end1 - start1) + (end2 - start2) - intersection
+        return intersection / union if union > 0 else 0.0
+
+    def word_error_rate(self, gt_sentence: str, ds_sentence: str) -> float:
+        """Calculate Word Error Rate (WER)."""
+        gt_words = str(gt_sentence).split()
+        ds_words = str(ds_sentence).split()
+
+        # Dynamic programming approach for WER calculation
+        dp = [[0] * (len(ds_words) + 1) for _ in range(len(gt_words) + 1)]
+        for i in range(len(gt_words) + 1):
+            for j in range(len(ds_words) + 1):
+                if i == 0:
+                    dp[i][j] = j
+                elif j == 0:
+                    dp[i][j] = i
+                else:
+                    cost = 0 if gt_words[i - 1] == ds_words[j - 1] else 1
+                    dp[i][j] = min(
+                        dp[i - 1][j] + 1,  # Deletion
+                        dp[i][j - 1] + 1,  # Insertion
+                        dp[i - 1][j - 1] + cost,  # Substitution
+                    )
+        return dp[len(gt_words)][len(ds_words)] / max(len(gt_words), 1)
+
+    def character_error_rate(self, gt_sentence: str, ds_sentence: str) -> float:
+        """Calculate Character Error Rate (CER)."""
+        gt_chars = str(gt_sentence)
+        ds_chars = str(ds_sentence)
+
+        # Dynamic programming approach for CER calculation
+        dp = [[0] * (len(ds_chars) + 1) for _ in range(len(gt_chars) + 1)]
+        for i in range(len(gt_chars) + 1):
+            for j in range(len(ds_chars) + 1):
+                if i == 0:
+                    dp[i][j] = j
+                elif j == 0:
+                    dp[i][j] = i
+                else:
+                    cost = 0 if gt_chars[i - 1] == ds_chars[j - 1] else 1
+                    dp[i][j] = min(
+                        dp[i - 1][j] + 1,  # Deletion
+                        dp[i][j - 1] + 1,  # Insertion
+                        dp[i - 1][j - 1] + cost,  # Substitution
+                    )
+        return dp[len(gt_chars)][len(ds_chars)] / max(len(gt_chars), 1)
+
+    def compare(
+        self,
+        gt_dataset: list[dict[str, str]],
+        ds_dataset: list[dict[str, str]],
+        offset: float,
+        job_duration: float,
+    ) -> float:
+        """
+        Compare ground truth (gt_dataset) and dataset (ds_dataset) annotations and return accuracy.
+        Incorporates WER average into final accuracy.
+
+        wer_score: Defines the percentage of words matched between two transcriptions.
+        It is calculated as (1 - WER), where WER is the word error rate, which measures
+        the errors (insertions, deletions, and substitutions) between two transcriptions.
+
+        Args:
+        - gt_dataset: List of ground truth annotations (job_id is 0-based index).
+        - ds_dataset: List of dataset annotations (job_id is actual index).
+        - offset: The cumulative length (in seconds) of gt job processed before the current job.
+        - job_duration: The duration (in seconds) of the current job that overlaps with the gt job.
+        """
+
+        start_time = offset
+        end_time = start_time + job_duration
+
+        # Filter gt_dataset to include only those within the job's time bounds
+        gt_samples_filtered = [
+            gt_ann
+            for gt_ann in gt_dataset
+            if start_time <= gt_ann["start"] and gt_ann["end"] <= end_time
+        ]
+
+        # Filtering ds_dataset to include only those within intersecting region of GT
+        ds_samples_filtered = [
+            ds_ann for ds_ann in ds_dataset if ds_ann["end"] <= (job_duration + 1.5)
+        ]
+
+        # if gt_samples_filtered is None:
+        #     raise TooFewGtError
+
+        gt_samples_filtered.sort(key=lambda ann: ann["start"])
+        ds_samples_filtered.sort(key=lambda ann: ann["start"])
+
+        gt_transcriptions = " ".join([gt.get("sentence", "") for gt in gt_samples_filtered]).lower()
+        ds_transcriptions = " ".join([ds.get("sentence", "") for ds in ds_samples_filtered]).lower()
+
+        wer = min(max(self.word_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
+        cer = min(max(self.character_error_rate(gt_transcriptions, ds_transcriptions), 0.0), 1.0)
+
+        return min(max((1 - wer + 1 - cer) / 2.0, 0.0), 1.0)
 
 
 @dataclass
@@ -755,7 +1088,12 @@ def process_intermediate_results(  # noqa: PLR0912
         for gt_stat in db_service.get_task_gt_stats(session, task.id)
     }
 
-    validator = _TaskValidator(
+    if manifest.annotation.type == TaskTypes.audio_transcription:
+        validator_type = _AudinoTaskValidator
+    else:
+        validator_type = _TaskValidator
+
+    validator = validator_type(
         escrow_address=escrow_address,
         chain_id=chain_id,
         manifest=manifest,
@@ -776,8 +1114,6 @@ def process_intermediate_results(  # noqa: PLR0912
             ", ".join(f"{k}: {v:.2f}" for k, v in job_results.items()),
         )
 
-    gt_stats = validation_result.gt_stats
-
     if (Config.validation.max_escrow_iterations > 0) and (
         Config.validation.max_escrow_iterations <= task.iteration
     ):
@@ -786,7 +1122,10 @@ def process_intermediate_results(  # noqa: PLR0912
             f" too many iterations, stopping annotation"
         )
         should_complete = True
-    elif rejected_jobs and gt_stats:
+
+    gt_stats = validation_result.gt_stats
+
+    if rejected_jobs and gt_stats and manifest.annotation.type != TaskTypes.audio_transcription:
         honeypot_manager = _TaskHoneypotManager(
             task,
             manifest,
