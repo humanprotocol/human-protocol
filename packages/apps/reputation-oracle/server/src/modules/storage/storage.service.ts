@@ -9,8 +9,6 @@ import { Injectable } from '@nestjs/common';
 import crypto from 'crypto';
 import * as Minio from 'minio';
 
-import { isNotFoundError } from '../../common/errors/minio';
-import { UploadedFile } from '../../common/interfaces/s3';
 import { FortuneFinalResult } from '../../common/interfaces/job-result';
 import { PGPConfigService } from '../../config/pgp-config.service';
 import { S3ConfigService } from '../../config/s3-config.service';
@@ -18,16 +16,22 @@ import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 
 import { Web3Service } from '../web3/web3.service';
+import { MinioErrorCodes } from './minio.constants';
+
+type UploadedFile = {
+  url: string;
+  hash: string;
+};
 
 @Injectable()
 export class StorageService {
   private readonly logger = logger.child({ context: StorageService.name });
 
-  readonly minioClient: Minio.Client;
+  private readonly minioClient: Minio.Client;
 
   constructor(
-    public readonly s3ConfigService: S3ConfigService,
-    public readonly pgpConfigService: PGPConfigService,
+    private readonly s3ConfigService: S3ConfigService,
+    private readonly pgpConfigService: PGPConfigService,
     private readonly web3Service: Web3Service,
   ) {
     this.minioClient = new Minio.Client({
@@ -39,16 +43,32 @@ export class StorageService {
     });
   }
 
-  getUrl(key: string): string {
+  private getUrl(key: string): string {
     return `${this.s3ConfigService.useSSL ? 'https' : 'http'}://${
       this.s3ConfigService.endpoint
     }:${this.s3ConfigService.port}/${this.s3ConfigService.bucket}/${key}`;
   }
 
+  private async checkFileExists(key: string): Promise<boolean> {
+    try {
+      await this.minioClient.statObject(this.s3ConfigService.bucket, key);
+      return true;
+    } catch (error) {
+      if (error?.code === MinioErrorCodes.NotFound) {
+        return false;
+      }
+      this.logger.error('Failed to check if file exists', {
+        fileKey: key,
+        error,
+      });
+      throw new Error('Error accessing storage');
+    }
+  }
+
   private async encryptFile(
     escrowAddress: string,
     chainId: ChainId,
-    content: any,
+    content: string | Buffer,
   ) {
     if (!this.pgpConfigService.encrypt) {
       return content;
@@ -60,13 +80,11 @@ export class StorageService {
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const reputationOraclePublicKey = await KVStoreUtils.getPublicKey(
-      chainId,
-      signer.address,
-    );
-    const jobLauncherPublicKey = await KVStoreUtils.getPublicKey(
-      chainId,
-      jobLauncherAddress,
+    const [reputationOraclePublicKey, jobLauncherPublicKey] = await Promise.all(
+      [
+        KVStoreUtils.getPublicKey(chainId, signer.address),
+        KVStoreUtils.getPublicKey(chainId, jobLauncherAddress),
+      ],
     );
 
     if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
@@ -86,8 +104,8 @@ export class StorageService {
     }
 
     const encryption = await Encryption.build(
-      this.pgpConfigService.privateKey!,
-      this.pgpConfigService.passphrase,
+      this.pgpConfigService.privateKey as string,
+      this.pgpConfigService.passphrase as string,
     );
 
     const decryptedData = await encryption.decrypt(contentAsString);
@@ -104,7 +122,7 @@ export class StorageService {
       let jsonLikeData = fileContent.toString();
       try {
         jsonLikeData = JSON.parse(jsonLikeData);
-      } catch (_noop) {}
+      } catch (noop) {}
 
       return jsonLikeData;
     } catch (error) {
@@ -121,8 +139,12 @@ export class StorageService {
     chainId: ChainId,
     solutions: FortuneFinalResult[],
   ): Promise<UploadedFile> {
-    if (!(await this.minioClient.bucketExists(this.s3ConfigService.bucket))) {
-      throw new Error('Bucket not found');
+    const isConfiguredBucketExists = await this.minioClient.bucketExists(
+      this.s3ConfigService.bucket,
+    );
+
+    if (!isConfiguredBucketExists) {
+      throw new Error("Can't find configured bucket");
     }
 
     try {
@@ -134,22 +156,11 @@ export class StorageService {
 
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `${hash}.json`;
+      const url = this.getUrl(key);
 
-      // Check if the file already exists in the bucket
-      try {
-        await this.minioClient.statObject(this.s3ConfigService.bucket, key);
-        this.logger.info('File already exist. Skipping upload', {
-          fileKey: key,
-        });
-        return { url: this.getUrl(key), hash };
-      } catch (error) {
-        if (!isNotFoundError(error)) {
-          this.logger.error('Error checking if file exists', {
-            error,
-            fileKey: key,
-          });
-          throw new Error('Error accessing storage');
-        }
+      const isAlreadyUploaded = await this.checkFileExists(key);
+      if (isAlreadyUploaded) {
+        return { url, hash };
       }
 
       await this.minioClient.putObject(
@@ -162,8 +173,13 @@ export class StorageService {
         },
       );
 
-      return { url: this.getUrl(key), hash };
-    } catch (noop) {
+      return { url, hash };
+    } catch (error) {
+      this.logger.error('Failed to upload job solutions', {
+        error,
+        escrowAddress,
+        chainId,
+      });
       throw new Error('File not uploaded');
     }
   }
@@ -177,10 +193,10 @@ export class StorageService {
   async copyFileFromURLToBucket(
     escrowAddress: string,
     chainId: ChainId,
-    url: string,
+    originalFileUrl: string,
   ): Promise<UploadedFile> {
     try {
-      let fileContent = await httpUtils.downloadFile(url);
+      let fileContent = await httpUtils.downloadFile(originalFileUrl);
       fileContent = await this.maybeDecryptFile(fileContent);
       // Encrypt for job launcher
       const content = await this.encryptFile(
@@ -189,25 +205,13 @@ export class StorageService {
         fileContent,
       );
 
-      // Upload the encrypted file to the bucket
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
+      const copiedFileurl = this.getUrl(key);
 
-      // Check if the file already exists in the bucket
-      try {
-        await this.minioClient.statObject(this.s3ConfigService.bucket, key);
-        this.logger.info('File already exist. Skipping upload', {
-          fileKey: key,
-        });
-        return { url: this.getUrl(key), hash };
-      } catch (error) {
-        if (!isNotFoundError(error)) {
-          this.logger.error('Error checking if file exists', {
-            error,
-            fileKey: key,
-          });
-          throw new Error('Error accessing storage');
-        }
+      const isAlreadyCopied = await this.checkFileExists(key);
+      if (isAlreadyCopied) {
+        return { url: copiedFileurl, hash };
       }
 
       await this.minioClient.putObject(
@@ -220,18 +224,15 @@ export class StorageService {
         },
       );
 
-      return {
-        url: this.getUrl(key),
-        hash,
-      };
+      return { url: copiedFileurl, hash };
     } catch (error) {
       this.logger.error('Error copying file', {
         error,
-        url,
+        originalFileUrl,
         escrowAddress,
         chainId,
       });
-      throw new Error('File not uploaded');
+      throw new Error('File not copied');
     }
   }
 }
