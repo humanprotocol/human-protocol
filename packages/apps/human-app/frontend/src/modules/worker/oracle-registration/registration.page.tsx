@@ -7,6 +7,18 @@ import { routerPaths } from '@/router/router-paths';
 import { useGetOracles } from '../hooks';
 import { useIsAlreadyRegistered } from './hooks';
 
+const styles = {
+  height: '100%',
+  minHeight: '70vh',
+  width: '100%',
+  boxShadow: 'none',
+  padding: '40px',
+  borderRadius: '20px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+};
+
 function isAddress(address: string | undefined): address is string {
   return address !== undefined && address.length > 0;
 }
@@ -17,13 +29,21 @@ export function RegistrationPage() {
   const { data, isLoading } = useGetOracles();
   const isAlreadyRegistered = useIsAlreadyRegistered(oracleAddress);
 
+  if (isLoading) {
+    return (
+      <Paper sx={styles}>
+        <Loader />
+      </Paper>
+    );
+  }
+
   const oracleData = data?.find((o) => o.address === oracleAddress);
 
   if (oracleData === undefined || !isAddress(oracleAddress)) {
     return <Navigate to={routerPaths.worker.jobsDiscovery} />;
   }
 
-  if (isAlreadyRegistered) {
+  if (isAlreadyRegistered || !oracleData.registrationNeeded) {
     return (
       <Navigate
         to={`${routerPaths.worker.jobs}/${oracleAddress}`}
@@ -35,33 +55,15 @@ export function RegistrationPage() {
   return (
     <Grid alignItems="center" container justifyContent="center">
       <Grid item xs={12}>
-        <Paper
-          sx={{
-            height: '100%',
-            minHeight: '70vh',
-            width: '100%',
-            boxShadow: 'none',
-            padding: '40px',
-            borderRadius: '20px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        <Paper sx={styles}>
           <Stack maxWidth="350px" spacing={2}>
-            {isLoading ? (
-              <Loader />
-            ) : (
-              <>
-                <Box>
-                  {t('worker.registrationInExchangeOracle.requiredMessage')}
-                </Box>
-                <RegistrationForm
-                  address={oracleAddress}
-                  oracleInstructions={oracleData.registrationInstructions}
-                />
-              </>
-            )}
+            <Box>
+              {t('worker.registrationInExchangeOracle.requiredMessage')}
+            </Box>
+            <RegistrationForm
+              address={oracleAddress}
+              oracleInstructions={oracleData.registrationInstructions}
+            />
           </Stack>
         </Paper>
       </Grid>

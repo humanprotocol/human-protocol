@@ -8,7 +8,9 @@ import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 export const Web3AuthenticatedUserContext =
   createContext<Web3AuthenticatedUserContextType | null>(null);
 
-export function RequireWeb3Auth({ children }: { children: JSX.Element }) {
+export function RequireWeb3Auth({
+  children,
+}: Readonly<{ children: JSX.Element }>) {
   const web3Auth = useWeb3Auth();
   const location = useLocation();
 
@@ -19,6 +21,16 @@ export function RequireWeb3Auth({ children }: { children: JSX.Element }) {
   if (!web3Auth.user) {
     return (
       <Navigate replace state={{ from: location }} to={routerPaths.homePage} />
+    );
+  }
+
+  if (web3Auth.status !== 'success') {
+    return (
+      <Navigate
+        replace
+        state={{ from: location }}
+        to={routerPaths.operator.connectWallet}
+      />
     );
   }
 
