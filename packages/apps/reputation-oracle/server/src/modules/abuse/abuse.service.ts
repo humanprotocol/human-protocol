@@ -46,6 +46,7 @@ export class AbuseService {
     abuseEntity.userId = data.userId;
     abuseEntity.status = AbuseStatus.PENDING;
     abuseEntity.retriesCount = 0;
+    abuseEntity.waitUntil = new Date();
 
     await this.abuseRepository.createUnique(abuseEntity);
   }

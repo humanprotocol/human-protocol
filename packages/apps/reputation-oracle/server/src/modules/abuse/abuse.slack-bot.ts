@@ -95,7 +95,7 @@ export class AbuseSlackBot extends SlackBotApp {
             type: 'number_input',
             is_decimal_allowed: true,
             min_value: '0',
-            max_value: data.maxAmount,
+            max_value: data.maxAmount.toString(),
           },
           label: {
             type: 'plain_text',

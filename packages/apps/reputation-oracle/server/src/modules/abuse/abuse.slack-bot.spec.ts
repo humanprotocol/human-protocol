@@ -165,7 +165,7 @@ describe('AbuseSlackBot', () => {
                   type: 'number_input',
                   is_decimal_allowed: true,
                   min_value: '0',
-                  max_value: maxAmount,
+                  max_value: maxAmount.toString(),
                 },
                 label: {
                   type: 'plain_text',

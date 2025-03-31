@@ -104,6 +104,7 @@ describe('AbuseService', () => {
         userId: userId,
         retriesCount: 0,
         status: AbuseStatus.PENDING,
+        waitUntil: expect.any(Date),
       });
     });
   });
