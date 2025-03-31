@@ -55,11 +55,11 @@ export class WebhookService {
         await this.jobService.processInvalidJobSolution(webhook);
         break;
 
-      case EventType.ABUSE:
+      case EventType.ABUSE_DETECTED:
         await this.jobService.pauseJob(webhook);
         break;
 
-      case EventType.RESUME_ABUSE:
+      case EventType.ABUSE_DISMISSED:
         await this.jobService.resumeJob(webhook);
         break;
 

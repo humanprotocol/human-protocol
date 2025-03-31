@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class PauseJobs1742310067718 implements MigrationInterface {
-  name = 'PauseJobs1742310067718';
+export class HandleAbuse1743412274647 implements MigrationInterface {
+  name = 'HandleAbuse1743412274647';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -16,8 +16,8 @@ export class PauseJobs1742310067718 implements MigrationInterface {
                 'escrow_failed',
                 'submission_rejected',
                 'submission_in_review',
-                'abuse',
-                'resume_abuse'
+                'abuse_detected',
+                'abuse_dismissed'
             )
         `);
     await queryRunner.query(`

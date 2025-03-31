@@ -672,7 +672,7 @@ describe('JobService', () => {
     const webhook: WebhookDto = {
       chainId,
       escrowAddress,
-      eventType: EventType.ABUSE,
+      eventType: EventType.ABUSE_DETECTED,
     };
 
     it('should create a new job in the database', async () => {

@@ -5,8 +5,8 @@ export enum EventType {
   ESCROW_FAILED = 'escrow_failed',
   SUBMISSION_REJECTED = 'submission_rejected',
   SUBMISSION_IN_REVIEW = 'submission_in_review',
-  ABUSE = 'abuse',
-  RESUME_ABUSE = 'resume_abuse',
+  ABUSE_DETECTED = 'abuse_detected',
+  ABUSE_DISMISSED = 'abuse_dismissed',
 }
 
 export enum WebhookStatus {

@@ -172,7 +172,7 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.ABUSE,
+        eventType: EventType.ABUSE_DETECTED,
       };
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
     });
@@ -182,7 +182,7 @@ describe('WebhookService', () => {
       const webhook: WebhookDto = {
         chainId,
         escrowAddress,
-        eventType: EventType.RESUME_ABUSE,
+        eventType: EventType.ABUSE_DISMISSED,
       };
       expect(await webhookService.handleWebhook(webhook)).toBe(undefined);
     });
