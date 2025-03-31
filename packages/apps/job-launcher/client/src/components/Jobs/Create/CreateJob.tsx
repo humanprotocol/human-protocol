@@ -55,7 +55,7 @@ export const CreateJob = () => {
             }}
             value={jobRequest.jobType}
             onChange={(e) =>
-              updateJobRequest?.({
+              updateJobRequest({
                 ...jobRequest,
                 jobType: e.target.value as JobType,
               })
@@ -74,7 +74,7 @@ export const CreateJob = () => {
           label="Choose Network"
           value={jobRequest.chainId}
           onChange={(e) =>
-            updateJobRequest?.({
+            updateJobRequest({
               ...jobRequest,
               chainId: e.target.value as ChainId,
             })

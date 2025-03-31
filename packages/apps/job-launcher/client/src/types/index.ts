@@ -72,6 +72,13 @@ export enum PayMethod {
   Fiat,
 }
 
+export enum PayingStatus {
+  Idle,
+  Pending,
+  Success,
+  Error,
+}
+
 export enum JobType {
   Fortune,
   CVAT,

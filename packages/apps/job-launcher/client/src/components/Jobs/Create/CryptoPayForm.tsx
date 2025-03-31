@@ -256,7 +256,7 @@ export const CryptoPayForm = ({
           You are on wrong network, please switch to{' '}
           {NETWORKS[jobRequest.chainId!]?.title}.
         </Typography>
-        <Button variant="outlined" onClick={() => goToPrevStep?.()}>
+        <Button variant="outlined" onClick={goToPrevStep}>
           Back
         </Button>
       </Box>
@@ -492,7 +492,7 @@ export const CryptoPayForm = ({
             variant="outlined"
             sx={{ width: '240px', ml: 4 }}
             size="large"
-            onClick={() => goToPrevStep?.()}
+            onClick={goToPrevStep}
           >
             Cancel
           </Button>

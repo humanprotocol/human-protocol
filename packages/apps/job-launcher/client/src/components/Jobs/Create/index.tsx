@@ -18,10 +18,10 @@ export const CreateJobView = () => {
     const supportedJobTypes = ['fortune', 'cvat', 'hcaptcha'];
 
     if (jobType && supportedJobTypes.includes(jobType.toLowerCase())) {
-      changePayMethod?.(PayMethod.Fiat);
+      changePayMethod(PayMethod.Fiat);
       setStep(CreateJobStep.CreateJob);
 
-      updateJobRequest?.({
+      updateJobRequest({
         jobType:
           jobType === 'fortune'
             ? JobType.Fortune
