@@ -6,8 +6,6 @@ import {
   LessThanOrEqual,
   Not,
 } from 'typeorm';
-
-import { ChainId } from '@human-protocol/sdk';
 import { AbuseStatus } from './constants';
 import { ServerConfigService } from '../../config/server-config.service';
 import { BaseRepository } from '../../database/base.repository';
@@ -26,22 +24,10 @@ export class AbuseRepository extends BaseRepository<AbuseEntity> {
     super(AbuseEntity, dataSource);
   }
 
-  async findOneByChainIdAndEscrowAddress(
-    chainId: ChainId,
-    escrowAddress: string,
-  ): Promise<AbuseEntity | null> {
-    return this.findOne({
-      where: {
-        chainId,
-        escrowAddress,
-      },
-    });
-  }
-
-  async findToClassify(status: AbuseStatus): Promise<AbuseEntity[]> {
+  async findToClassify(): Promise<AbuseEntity[]> {
     return this.find({
       where: {
-        status: status,
+        status: AbuseStatus.PENDING,
         retriesCount: LessThanOrEqual(this.serverConfigService.maxRetryCount),
         waitUntil: LessThanOrEqual(new Date()),
       },

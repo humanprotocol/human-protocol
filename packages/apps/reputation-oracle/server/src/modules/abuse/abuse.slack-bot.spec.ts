@@ -65,16 +65,15 @@ describe('AbuseSlackBot', () => {
               title: 'Escrow',
               fields: [
                 { title: 'Address', value: escrowAddress },
-                { title: 'ChainId', value: chainId },
+                { title: 'ChainId', value: chainId.toString() },
                 { title: 'Manifest', value: manifestUrl },
               ],
             },
             {
               fallback: 'Actions',
               title: 'Actions',
-              callback_id: abuseId,
+              callback_id: abuseId.toString(),
               color: '#3AA3E3',
-              attachment_type: 'default',
               actions: [
                 {
                   name: 'accept',
@@ -115,7 +114,7 @@ describe('AbuseSlackBot', () => {
           escrowAddress: faker.finance.ethereumAddress(),
           manifestUrl: faker.internet.url(),
         }),
-      ).rejects.toThrow('Network error');
+      ).rejects.toThrow('Error sending Slack notification');
     });
   });
 
@@ -202,7 +201,7 @@ describe('AbuseSlackBot', () => {
           triggerId: faker.word.sample(),
           responseUrl: faker.internet.url(),
         }),
-      ).rejects.toThrow('Failed to open Slack modal');
+      ).rejects.toThrow('Error opening Slack modal');
     });
   });
 });

@@ -4,12 +4,14 @@ import { Injectable } from '@nestjs/common';
 import { SlackConfigService } from '../../config/slack-config.service';
 import { SlackBotApp } from '../../integrations/slack-bot-app/slack-bot-app';
 import { AbuseDecision } from './constants';
+import { View } from '@slack/web-api';
+import { IncomingWebhookSendArguments } from '@slack/webhook';
 
 @Injectable()
 export class AbuseSlackBot extends SlackBotApp {
   constructor(
     httpService: HttpService,
-    private readonly slackConfigService: SlackConfigService,
+    slackConfigService: SlackConfigService,
   ) {
     super(httpService, {
       webhookUrl: slackConfigService.abuseWebhookUrl,
@@ -23,23 +25,22 @@ export class AbuseSlackBot extends SlackBotApp {
     escrowAddress: string;
     manifestUrl: string;
   }): Promise<void> {
-    const message = {
+    const message: IncomingWebhookSendArguments = {
       text: 'New abuse report received!',
       attachments: [
         {
           title: 'Escrow',
           fields: [
             { title: 'Address', value: data.escrowAddress },
-            { title: 'ChainId', value: data.chainId },
+            { title: 'ChainId', value: data.chainId.toString() },
             { title: 'Manifest', value: data.manifestUrl },
           ],
         },
         {
           fallback: 'Actions',
           title: 'Actions',
-          callback_id: data.abuseId,
+          callback_id: data.abuseId.toString(),
           color: '#3AA3E3',
-          attachment_type: 'default',
           actions: [
             {
               name: 'accept',
@@ -66,7 +67,7 @@ export class AbuseSlackBot extends SlackBotApp {
       ],
     };
 
-    await this.sendNotification(this.config.webhookUrl, message);
+    await this.sendNotification(message);
   }
 
   async triggerAbuseReportModal(data: {
@@ -77,7 +78,7 @@ export class AbuseSlackBot extends SlackBotApp {
     triggerId: string;
     responseUrl: string;
   }): Promise<void> {
-    const modalView = {
+    const modalView: View = {
       type: 'modal',
       callback_id: `${data.abuseId}`,
       title: { type: 'plain_text', text: 'Confirm slash' },

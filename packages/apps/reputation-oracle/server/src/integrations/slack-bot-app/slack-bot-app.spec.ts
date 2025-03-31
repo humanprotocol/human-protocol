@@ -30,7 +30,7 @@ describe('SlackBotApp', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('sendNotification', () => {
@@ -39,7 +39,7 @@ describe('SlackBotApp', () => {
       const message = { text: 'Test notification' };
 
       await expect(
-        slackBotApp.sendNotification(config.webhookUrl, message),
+        slackBotApp.sendNotification(message),
       ).resolves.not.toThrow();
 
       expect(httpService.post).toHaveBeenCalledWith(config.webhookUrl, message);
@@ -49,10 +49,9 @@ describe('SlackBotApp', () => {
       jest
         .spyOn(httpService, 'post')
         .mockReturnValue(throwError(() => new Error('Network error')));
-
       await expect(
-        slackBotApp.sendNotification(config.webhookUrl, { text: 'Test' }),
-      ).rejects.toThrow('Network error');
+        slackBotApp.sendNotification({ text: 'Test' }),
+      ).rejects.toThrow('Error sending Slack notification');
     });
   });
 
@@ -63,7 +62,7 @@ describe('SlackBotApp', () => {
         .mockReturnValue(of({ data: { ok: true } }) as any);
 
       const triggerId = faker.word.sample();
-      const modalView = {
+      const modalView: any = {
         type: 'modal',
         title: { type: 'plain_text', text: 'Test' },
       };
@@ -95,13 +94,13 @@ describe('SlackBotApp', () => {
         );
 
       const triggerId = faker.word.sample();
-      const modalView = {
+      const modalView: any = {
         type: 'modal',
         title: { type: 'plain_text', text: 'Test' },
       };
 
       await expect(slackBotApp.openModal(triggerId, modalView)).rejects.toThrow(
-        'Failed to open Slack modal',
+        'Error opening Slack modal',
       );
     });
   });
@@ -129,7 +128,7 @@ describe('SlackBotApp', () => {
 
       await expect(
         slackBotApp.updateMessage(responseUrl, text),
-      ).rejects.toThrow('Network error');
+      ).rejects.toThrow('Error updating Slack message');
     });
   });
 });

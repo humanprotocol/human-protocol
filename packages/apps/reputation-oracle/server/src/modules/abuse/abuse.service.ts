@@ -153,9 +153,7 @@ export class AbuseService {
   }
 
   async processAbuseRequests(): Promise<void> {
-    const abuseEntities = await this.abuseRepository.findToClassify(
-      AbuseStatus.PENDING,
-    );
+    const abuseEntities = await this.abuseRepository.findToClassify();
 
     for (const abuseEntity of abuseEntities) {
       try {

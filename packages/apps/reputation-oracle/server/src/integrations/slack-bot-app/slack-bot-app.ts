@@ -1,6 +1,9 @@
 import { HttpService } from '@nestjs/axios';
+import { View, ViewsOpenResponse } from '@slack/web-api';
+import { IncomingWebhookSendArguments } from '@slack/webhook';
 import { firstValueFrom } from 'rxjs';
 import logger from '../../logger';
+import { formatAxiosError } from '../../utils/format-axios-error';
 
 export class SlackBotApp {
   private readonly logger = logger.child({ context: SlackBotApp.name });
@@ -9,19 +12,25 @@ export class SlackBotApp {
     protected readonly config: { webhookUrl: string; oauthToken: string },
   ) {}
 
-  async sendNotification(webhookUrl: string, message: any): Promise<void> {
+  async sendNotification(message: IncomingWebhookSendArguments): Promise<void> {
     try {
-      await firstValueFrom(this.httpService.post(webhookUrl, message));
+      await firstValueFrom(
+        this.httpService.post(this.config.webhookUrl, message),
+      );
     } catch (error) {
-      this.logger.error('Error sending Slack notification:', error);
-      throw error;
+      const formattedError = formatAxiosError(error);
+      const errorMessage = 'Error sending Slack notification';
+      this.logger.error(errorMessage, {
+        error: formattedError,
+      });
+      throw new Error(errorMessage);
     }
   }
 
-  async openModal(triggerId: string, modalView: any): Promise<void> {
+  async openModal(triggerId: string, modalView: View): Promise<void> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(
+        this.httpService.post<ViewsOpenResponse>(
           'https://slack.com/api/views.open',
           {
             trigger_id: triggerId,
@@ -38,11 +47,15 @@ export class SlackBotApp {
 
       if (!response.data.ok) {
         this.logger.error('Error opening Slack modal:', response.data);
-        throw new Error('Failed to open Slack modal');
+        throw new Error('Error opening Slack modal');
       }
     } catch (error) {
-      this.logger.error('Error opening Slack modal:', error);
-      throw error;
+      const formattedError = formatAxiosError(error);
+      const errorMessage = 'Error opening Slack modal';
+      this.logger.error(errorMessage, {
+        error: formattedError,
+      });
+      throw new Error(errorMessage);
     }
   }
 
@@ -50,8 +63,12 @@ export class SlackBotApp {
     try {
       await firstValueFrom(this.httpService.post(responseUrl, { text }));
     } catch (error) {
-      this.logger.error('Error updating Slack message:', error);
-      throw error;
+      const formattedError = formatAxiosError(error);
+      const errorMessage = 'Error updating Slack message';
+      this.logger.error(errorMessage, {
+        error: formattedError,
+      });
+      throw new Error(errorMessage);
     }
   }
 }

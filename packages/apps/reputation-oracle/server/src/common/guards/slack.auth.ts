@@ -13,17 +13,21 @@ export class SlackAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (
+    const secrets = this.slackConfigService.signingSecrets;
+
+    const isValid = secrets.some((secret) =>
       isValidSlackRequest({
-        signingSecret: this.slackConfigService.abuseSigningSecret,
+        signingSecret: secret,
         body: request.rawBody,
         headers: {
           'x-slack-signature': request.headers['x-slack-signature'],
           'x-slack-request-timestamp':
             request.headers['x-slack-request-timestamp'],
         },
-      })
-    ) {
+      }),
+    );
+
+    if (isValid) {
       return true;
     }
 
