@@ -22,7 +22,7 @@ export function RequireAuth({ children }: Readonly<{ children: JSX.Element }>) {
     );
   }
 
-  if (auth.user.status !== 'active') {
+  if (auth.user.status === 'pending') {
     return (
       <Navigate
         replace

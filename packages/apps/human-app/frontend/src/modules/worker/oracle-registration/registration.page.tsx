@@ -17,16 +17,17 @@ export function RegistrationPage() {
   const { data, isLoading } = useGetOracles();
   const isAlreadyRegistered = useIsAlreadyRegistered(oracleAddress);
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
   const oracleData = data?.find((o) => o.address === oracleAddress);
 
-  if ((!isLoading && oracleData === undefined) || !isAddress(oracleAddress)) {
+  if (oracleData === undefined || !isAddress(oracleAddress)) {
     return <Navigate to={routerPaths.worker.jobsDiscovery} />;
   }
 
-  if (
-    isAlreadyRegistered ||
-    (!isLoading && oracleData?.registrationNeeded === false)
-  ) {
+  if (isAlreadyRegistered || !oracleData.registrationNeeded) {
     return (
       <Navigate
         to={`${routerPaths.worker.jobs}/${oracleAddress}`}
@@ -52,21 +53,13 @@ export function RegistrationPage() {
           }}
         >
           <Stack maxWidth="350px" spacing={2}>
-            {isLoading ? (
-              <Loader />
-            ) : (
-              oracleData && (
-                <>
-                  <Box>
-                    {t('worker.registrationInExchangeOracle.requiredMessage')}
-                  </Box>
-                  <RegistrationForm
-                    address={oracleAddress}
-                    oracleInstructions={oracleData.registrationInstructions}
-                  />
-                </>
-              )
-            )}
+            <Box>
+              {t('worker.registrationInExchangeOracle.requiredMessage')}
+            </Box>
+            <RegistrationForm
+              address={oracleAddress}
+              oracleInstructions={oracleData.registrationInstructions}
+            />
           </Stack>
         </Paper>
       </Grid>
