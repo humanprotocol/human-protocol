@@ -4,10 +4,10 @@ import PolygonIcon from './Icons/PolygonIcon';
 import MoonbeamIcon from './Icons/MoonbeamIcon';
 import MoonbaseAlphaIcon from './Icons/MoonbaseAlphaIcon';
 import { XLayerIcon } from './Icons/XLayerIcon';
-import HumanIcon from './Icons/HumanIcon';
+// import HumanIcon from './Icons/HumanIcon';
 import { AvalancheIcon } from './Icons/AvalancheIcon';
 
-export const NetworkIcon = ({ chainId }: { chainId: number }) => {
+export const NetworkIcon = ({ chainId }: { chainId?: number }) => {
   const icon = (() => {
     switch (chainId) {
       case 1:
@@ -33,7 +33,7 @@ export const NetworkIcon = ({ chainId }: { chainId: number }) => {
       case 43114:
         return <AvalancheIcon />;
       default:
-        return <HumanIcon />;
+        return <PolygonIcon />;
     }
   })();
 

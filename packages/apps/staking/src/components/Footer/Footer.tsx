@@ -1,11 +1,24 @@
 import { FC } from 'react';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
-import DiscordIcon from '../../assets/DiscordIcon';
+import { styled } from '@mui/material/styles';
+
 import { colorPalette } from '../../assets/styles/color-palette';
+import DiscordIcon from '../../assets/DiscordIcon';
+
+const SocialMediaIconButton = styled(IconButton)({
+  padding: 0,
+  color: colorPalette.sky.main,
+
+  '&:hover': {
+    background: 'none',
+    color: 'inherit',
+  },
+});
 
 const Footer: FC = () => {
   const handleClick = (url: string) => {
@@ -50,42 +63,46 @@ const Footer: FC = () => {
           </Typography>
         </div>
         <div className="footer-icon">
-          <GitHubIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          <SocialMediaIconButton
+            aria-label="GitHub"
             onClick={() => handleClick(import.meta.env.VITE_FOOTER_LINK_GITHUB)}
-          />
-          <DiscordIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <GitHubIcon />
+          </SocialMediaIconButton>
+
+          <SocialMediaIconButton
+            aria-label="Discord"
             onClick={() =>
               handleClick(import.meta.env.VITE_FOOTER_LINK_DISCORD)
             }
-          />
-          <TwitterIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <DiscordIcon />
+          </SocialMediaIconButton>
+
+          <SocialMediaIconButton
+            aria-label="X"
             onClick={() => handleClick(import.meta.env.VITE_FOOTER_LINK_X)}
-          />
-          <TelegramIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <TwitterIcon />
+          </SocialMediaIconButton>
+
+          <SocialMediaIconButton
+            aria-label="Telegram"
             onClick={() =>
               handleClick(import.meta.env.VITE_FOOTER_LINK_TELEGRAM)
             }
-          />
-          <LinkedInIcon
-            style={{
-              color: colorPalette.sky.main,
-            }}
+          >
+            <TelegramIcon />
+          </SocialMediaIconButton>
+
+          <SocialMediaIconButton
+            aria-label="LinkedIn"
             onClick={() =>
               handleClick(import.meta.env.VITE_FOOTER_LINK_LINKEDIN)
             }
-          />
+          >
+            <LinkedInIcon />
+          </SocialMediaIconButton>
         </div>
       </div>
     </footer>

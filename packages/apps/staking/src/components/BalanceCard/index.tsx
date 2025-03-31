@@ -1,46 +1,42 @@
+import { FC } from 'react';
+import { Box, Divider, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Box, Paper, Typography } from '@mui/material';
-import React from 'react';
+import { useAccount } from 'wagmi';
+
 import { useStakeContext } from '../../contexts/stake';
 import { colorPalette } from '../../assets/styles/color-palette';
 import CustomTooltip from '../CustomTooltip';
+import CardWrapper from '../CardWrapper';
+import NetworkStatus from '../NetworkStatus';
+import Amount from '../Amount';
 
-const BalanceCard: React.FC = () => {
+const BalanceCard: FC = () => {
   const { tokenBalance } = useStakeContext();
+  const { isConnected } = useAccount();
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        p: 3,
-        height: '248px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        borderRadius: '20px',
-        boxShadow: 'none',
-        position: 'relative',
-      }}
-    >
-      <Box sx={{ position: 'absolute', top: 30, right: 30 }}>
+    <CardWrapper size="lg">
+      <Box display="flex" gap={1}>
         <CustomTooltip title="Total balance available in your wallet" arrow>
           <HelpOutlineIcon
-            fontSize="small"
+            fontSize="medium"
             sx={{ color: colorPalette.sky.main }}
           />
         </CustomTooltip>
+        <Box display="flex" flexDirection="column" alignItems="flex-start">
+          <Typography variant="body1" color="primary">
+            Wallet Balance
+          </Typography>
+          <Amount size="lg" amount={tokenBalance} isConnected={isConnected} />
+        </Box>
       </Box>
-      <Box display="flex" alignItems="center" gap={1} mb={1}>
-        <Typography variant="h6" color="primary">
-          Wallet Balance
-        </Typography>
-      </Box>
-
-      <Typography variant="h4" fontWeight="bold" fontSize={30}>
-        {tokenBalance} HMT
-      </Typography>
-    </Paper>
+      <Divider
+        component="div"
+        sx={{ width: '100%', mt: 2, mb: 3 }}
+        color={colorPalette.secondary.main}
+      />
+      <NetworkStatus />
+    </CardWrapper>
   );
 };
 
