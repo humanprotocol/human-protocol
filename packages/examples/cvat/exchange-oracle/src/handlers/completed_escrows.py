@@ -135,8 +135,8 @@ def _export_escrow_annotations(
     )
     logger.debug(f"Uploading annotations for the escrow ({escrow_address=})")
 
-    _upload_annotations(
-        annotation_files=(
+    _upload_escrow_results(
+        files=(
             resulting_annotations_file_desc,
             *job_annotations.values(),
             prepare_annotation_metafile(jobs=jobs),
@@ -174,8 +174,8 @@ def _request_escrow_validation(
 
     logger.debug(f"Uploading assignment info for the escrow ({escrow_address=})")
 
-    _upload_annotations(
-        annotation_files=(prepare_annotation_metafile(jobs=jobs),),
+    _upload_escrow_results(
+        files=[prepare_annotation_metafile(jobs=jobs)],
         chain_id=chain_id,
         escrow_address=escrow_address,
     )
@@ -191,8 +191,8 @@ def _request_escrow_validation(
     logger.info(f"The escrow ({escrow_address=}) annotation is finished, " f"requesting validation")
 
 
-def _upload_annotations(
-    annotation_files: Sequence[FileDescriptor], chain_id: int, escrow_address: str
+def _upload_escrow_results(
+    files: Sequence[FileDescriptor], chain_id: int, escrow_address: str
 ) -> None:
     storage_info = BucketAccessInfo.parse_obj(StorageConfig)
     storage_client = cloud_service.make_client(storage_info)
@@ -205,7 +205,8 @@ def _upload_annotations(
             trim_prefix=True,
         )
     ) - {ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE}
-    for file_descriptor in annotation_files:
+
+    for file_descriptor in files:
         if file_descriptor.filename in existing_storage_files:
             continue
 
