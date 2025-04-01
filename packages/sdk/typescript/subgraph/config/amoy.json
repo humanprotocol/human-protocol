@@ -30,8 +30,5 @@
     "address": "0xd866bCEFf6D0F77E1c3EAE28230AE6C79b03fDa7",
     "startBlock": 5773007,
     "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
-  },
-  "LegacyEscrow": {
-    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
   }
 }

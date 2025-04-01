@@ -25,8 +25,5 @@
     "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
     "startBlock": 6,
     "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
-  },
-  "LegacyEscrow": {
-    "abi": "../../../../node_modules/@human-protocol/core/abis/legacy/Escrow.json"
   }
 }
