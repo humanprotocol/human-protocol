@@ -14,7 +14,10 @@ import src.services.webhook as oracle_db_service
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, RESULTING_ANNOTATIONS_FILE
 from src.core.config import CronConfig, StorageConfig
-from src.core.oracle_events import ExchangeOracleEvent_JobFinished
+from src.core.oracle_events import (
+    ExchangeOracleEvent_EscrowRecorded,
+    ExchangeOracleEvent_JobFinished,
+)
 from src.core.storage import compose_results_bucket_filename
 from src.core.types import EscrowValidationStatuses, OracleWebhookTypes, TaskTypes
 from src.db import SessionLocal
@@ -68,9 +71,23 @@ def _export_escrow_annotations(
 ) -> None:
     manifest = parse_manifest(get_escrow_manifest(chain_id, escrow_address))
 
-    logger.debug(f"Downloading results for the escrow ({escrow_address=})")
+    escrow_creation = cvat_service.get_escrow_creation_by_escrow_address(
+        session,
+        escrow_address,
+        chain_id,
+        active=False,
+    )
+    if not escrow_creation:
+        raise AssertionError(f"Can't find escrow creation for escrow '{escrow_address}'")
 
     jobs = cvat_service.get_jobs_by_escrow_address(session, escrow_address, chain_id)
+    if len(jobs) != escrow_creation.total_jobs:
+        raise AssertionError(
+            f"Unexpected number of jobs fetched for escrow "
+            f"'{escrow_address}': {len(jobs)}, expected {escrow_creation.total_jobs}"
+        )
+
+    logger.debug(f"Downloading results for the escrow ({escrow_address=})")
 
     annotation_format = CVAT_EXPORT_FORMAT_MAPPING[manifest.annotation.type]
     # FUTURE-TODO: probably can be removed in the future since
@@ -79,7 +96,7 @@ def _export_escrow_annotations(
 
     if manifest.annotation.type == TaskTypes.image_skeletons_from_boxes.value:
         # we'll have to merge annotations ourselves for skeletons
-        # might want to make this the only behaviour in the future
+        # might want to make this the only behavior in the future
         project_annotations_file = None
         project_images = None
     else:
@@ -116,14 +133,49 @@ def _export_escrow_annotations(
         manifest=manifest,
         project_images=project_images,
     )
-    logger.debug(f"Uploading results for the escrow ({escrow_address=})")
+    logger.debug(f"Uploading annotations for the escrow ({escrow_address=})")
 
     _upload_annotations(
         annotation_files=(
             resulting_annotations_file_desc,
             *job_annotations.values(),
-            prepare_annotation_metafile(jobs=jobs, job_annotations=job_annotations),
+            prepare_annotation_metafile(jobs=jobs),
         ),
+        chain_id=chain_id,
+        escrow_address=escrow_address,
+    )
+
+    oracle_db_service.outbox.create_webhook(
+        session,
+        escrow_address=escrow_address,
+        chain_id=chain_id,
+        type=OracleWebhookTypes.recording_oracle,
+        event=ExchangeOracleEvent_EscrowRecorded(),
+    )
+
+    logger.info(
+        f"The escrow ({escrow_address=}) is completed, "
+        f"resulting annotations are processed successfully"
+    )
+
+
+def _request_escrow_validation(
+    logger: logging.Logger,
+    chain_id: int,
+    escrow_address: str,
+    escrow_projects: Sequence[Project],
+    session: Session,
+) -> None:
+    # TODO: lock escrow once there is such a DB object
+    assert escrow_projects  # unused, but must hold a lock
+
+    # TODO: maybe upload only current iteration jobs
+    jobs = cvat_service.get_jobs_by_escrow_address(session, escrow_address, chain_id)
+
+    logger.debug(f"Uploading assignment info for the escrow ({escrow_address=})")
+
+    _upload_annotations(
+        annotation_files=(prepare_annotation_metafile(jobs=jobs),),
         chain_id=chain_id,
         escrow_address=escrow_address,
     )
@@ -136,10 +188,7 @@ def _export_escrow_annotations(
         event=ExchangeOracleEvent_JobFinished(),
     )
 
-    logger.info(
-        f"The escrow ({escrow_address=}) is completed, "
-        f"resulting annotations are processed successfully"
-    )
+    logger.info(f"The escrow ({escrow_address=}) annotation is finished, " f"requesting validation")
 
 
 def _upload_annotations(
@@ -249,7 +298,7 @@ def _handle_escrow_validation(
     escrow_projects = cvat_service.get_projects_by_escrow_address(
         session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
     )
-    _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)
+    _request_escrow_validation(logger, chain_id, escrow_address, escrow_projects, session)
 
 
 def handle_escrows_validations(logger: logging.Logger) -> None:
@@ -281,3 +330,17 @@ def handle_escrows_validations(logger: logging.Logger) -> None:
                 increase_attempts=True,  # increase attempts always to allow escrow rotation
                 **update_kwargs,
             )
+
+
+def handle_escrow_export(
+    logger: logging.Logger,
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+):
+    validate_escrow(chain_id, escrow_address)
+
+    escrow_projects = cvat_service.get_projects_by_escrow_address(
+        session, escrow_address, limit=None, for_update=ForUpdateParams(nowait=True)
+    )
+    _export_escrow_annotations(logger, chain_id, escrow_address, escrow_projects, session)

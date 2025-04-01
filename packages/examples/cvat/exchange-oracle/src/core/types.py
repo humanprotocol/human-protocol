@@ -65,6 +65,7 @@ class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     escrow_failed = "escrow_failed"
     job_finished = "job_finished"
     escrow_cleaned = "escrow_cleaned"
+    escrow_recorded = "escrow_recorded"
 
 
 class JobLauncherEventTypes(str, Enum, metaclass=BetterEnumMeta):
@@ -78,7 +79,6 @@ class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
 
 
 class ReputationOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
-    # TODO: rename to ReputationOracleEventType
     escrow_completed = "escrow_completed"
 
 
