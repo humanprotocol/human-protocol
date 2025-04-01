@@ -556,6 +556,14 @@ def get_task_upload_status(cvat_id: int) -> tuple[RequestStatus | None, str]:
                 status = RequestStatus(results[0].status.value.capitalize())
                 reason = results[0].message
 
+            if status is None:
+                # Double check task status - the request can be removed already
+                # TODO: remove this workaround when there is a stable replacement
+                task = api_client.tasks_api.retrieve(cvat_id)[0]
+                if task.size > 0:
+                    status = RequestStatus.FINISHED
+                    reason = ""
+
             return status, reason
         except exceptions.ApiException as e:
             if e.status == 404:

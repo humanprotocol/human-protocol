@@ -1,36 +1,13 @@
 import { t } from 'i18next';
-import type {
-  BottomMenuItem,
-  TopMenuItem,
-} from '@/shared/components/layout/protected/drawer-navigation';
-import {
-  HelpIcon,
-  UserOutlinedIcon,
-  WorkIcon,
-} from '@/shared/components/ui/icons';
+import { HelpIcon, UserOutlinedIcon } from '@/shared/components/ui/icons';
 import { routerPaths } from '@/router/router-paths';
 import { DarkModeSwitch } from '@/shared/components/ui/dark-mode-switch';
-import type { UserData } from '@/modules/auth/context/auth-context';
+import { type MenuItem } from '../layout/protected';
 
-export const workerDrawerTopMenuItems = (
-  user: UserData | null
-): TopMenuItem[] => {
-  return [
-    ...[
-      {
-        label: t('components.DrawerNavigation.jobs'),
-        icon: <WorkIcon />,
-        link: routerPaths.worker.jobsDiscovery,
-        disabled: !user?.wallet_address || user.kyc_status !== 'approved',
-      },
-    ],
-  ];
-};
-
-export const workerDrawerBottomMenuItems: BottomMenuItem[] = [
+export const operatorDrawerBottomMenuItems: MenuItem[] = [
   {
     label: t('components.DrawerNavigation.profile'),
-    link: routerPaths.worker.profile,
+    link: routerPaths.operator.profile,
     icon: <UserOutlinedIcon />,
   },
   {

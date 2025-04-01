@@ -3,7 +3,6 @@ import {
   BigInt,
   Bytes,
   dataSource,
-  log,
   Value,
 } from '@graphprotocol/graph-ts';
 import { DataSaved } from '../../generated/KVStore/KVStore';
@@ -74,12 +73,6 @@ export function createOrUpdateKVStore(event: DataSaved): void {
 }
 
 export function handleDataSaved(event: DataSaved): void {
-  // Log the event details
-  log.info('DataSaved event received:', []);
-  log.info('Sender: {}', [event.params.sender.toHexString()]);
-  log.info('Key: {}', [event.params.key]);
-  log.info('Value: {}', [event.params.value]);
-
   createTransaction(event, 'set', event.transaction.from, dataSource.address());
   // Create KVStoreSetEvent entity
   const eventEntity = new KVStoreSetEvent(toEventId(event));

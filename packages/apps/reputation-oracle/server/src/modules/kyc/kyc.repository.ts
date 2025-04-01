@@ -10,9 +10,7 @@ export class KycRepository extends BaseRepository<KycEntity> {
     super(KycEntity, dataSource);
   }
 
-  public async findOneBySessionId(
-    sessionId: string,
-  ): Promise<KycEntity | null> {
+  async findOneBySessionId(sessionId: string): Promise<KycEntity | null> {
     const kycEntity = await this.findOne({
       where: {
         sessionId: sessionId,

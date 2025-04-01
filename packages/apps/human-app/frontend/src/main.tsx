@@ -18,7 +18,6 @@ import { Web3AuthProvider } from '@/modules/auth-web3/context/web3-auth-context'
 import { JWTExpirationCheck } from '@/shared/contexts/jwt-expiration-check';
 import { ColorModeProvider } from '@/shared/contexts/color-mode';
 import { HomePageStateProvider } from '@/shared/contexts/homepage-state';
-import { RegisteredOraclesProvider } from '@/shared/contexts/registered-oracles';
 import { NotificationProvider } from '@/shared/providers/notifications-provider';
 
 const root = document.getElementById('root');
@@ -44,9 +43,7 @@ createRoot(root).render(
                   <AuthProvider>
                     <DisplayModal />
                     <JWTExpirationCheck>
-                      <RegisteredOraclesProvider>
-                        <Router />
-                      </RegisteredOraclesProvider>
+                      <Router />
                     </JWTExpirationCheck>
                   </AuthProvider>
                 </Web3AuthProvider>

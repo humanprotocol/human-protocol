@@ -13,7 +13,7 @@ export function PageHeader({
   headerIcon,
   headerText,
   headerItem,
-}: PageHeaderProps) {
+}: Readonly<PageHeaderProps>) {
   const isMobile = useIsMobile();
   return (
     <Grid

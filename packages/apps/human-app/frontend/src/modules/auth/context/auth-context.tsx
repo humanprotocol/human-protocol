@@ -14,13 +14,13 @@ const extendableUserDataSchema = z.object({
   site_key: z.string().optional().nullable(),
   kyc_status: z.string().optional().nullable(),
   wallet_address: z.string().optional().nullable(),
-  status: z.string().optional().nullable(),
+  status: z.enum(['active', 'pending']),
 });
 
 const userDataSchema = z
   .object({
     email: z.string(),
-    userId: z.number(),
+    user_id: z.number(),
     reputation_network: z.string(),
     email_notifications: z.boolean().optional(), // TODO that should be verified when email notifications feature is done
     exp: z.number(),

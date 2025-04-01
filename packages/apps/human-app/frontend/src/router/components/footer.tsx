@@ -10,12 +10,15 @@ interface FooterProps {
   displayChatIcon?: boolean;
   isProtected?: boolean;
 }
-export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
+export function Footer({
+  isProtected,
+  displayChatIcon = true,
+}: Readonly<FooterProps>) {
   const { colorPalette } = useColorMode();
   const { t } = useTranslation();
   const isMobile = useIsMobile('md');
 
-  const parseLeftPadding = () => {
+  const getLeftPadding = () => {
     if (isMobile) {
       return '0';
     }
@@ -31,7 +34,7 @@ export function Footer({ isProtected, displayChatIcon = true }: FooterProps) {
       container
       sx={{
         pr: 0,
-        pl: parseLeftPadding(),
+        pl: getLeftPadding(),
         pb: isMobile ? 0 : '32px',
         [breakpoints.mobile]: {
           pr: 0,

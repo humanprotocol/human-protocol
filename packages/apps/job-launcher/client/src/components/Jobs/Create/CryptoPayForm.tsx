@@ -205,6 +205,8 @@ export const CryptoPayForm = ({
             hash,
             confirmations:
               Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
+            retryCount: 10,
+            retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
           });
 
           // create crypto payment record
@@ -256,7 +258,7 @@ export const CryptoPayForm = ({
           You are on wrong network, please switch to{' '}
           {NETWORKS[jobRequest.chainId!]?.title}.
         </Typography>
-        <Button variant="outlined" onClick={() => goToPrevStep?.()}>
+        <Button variant="outlined" onClick={goToPrevStep}>
           Back
         </Button>
       </Box>
@@ -492,7 +494,7 @@ export const CryptoPayForm = ({
             variant="outlined"
             sx={{ width: '240px', ml: 4 }}
             size="large"
-            onClick={() => goToPrevStep?.()}
+            onClick={goToPrevStep}
           >
             Cancel
           </Button>

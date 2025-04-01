@@ -8,7 +8,7 @@ import {
 } from '../schemas';
 import { useResendEmailVerificationWorkerMutation } from './resend-email-verification';
 
-export function useResendEmail(email: string) {
+export function useResendEmail() {
   const {
     isError,
     error,
@@ -28,12 +28,7 @@ export function useResendEmail(email: string) {
   const handleResend = (
     data: Pick<ResendEmailVerificationDto, 'h_captcha_token'>
   ) => {
-    if (!email) {
-      return;
-    }
-
     resendEmailVerificationMutation({
-      email,
       h_captcha_token: data.h_captcha_token,
     });
   };

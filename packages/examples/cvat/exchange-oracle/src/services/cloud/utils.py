@@ -6,10 +6,9 @@ from src.services.cloud.types import BucketAccessInfo, CloudProviders
 
 def make_client(
     bucket_info: BucketAccessInfo,
+    **kwargs,
 ) -> StorageClient:
-    client_kwargs = {
-        "bucket": bucket_info.bucket_name,
-    }
+    client_kwargs = {"bucket": bucket_info.bucket_name, **kwargs}
 
     match bucket_info.provider:
         case CloudProviders.aws:

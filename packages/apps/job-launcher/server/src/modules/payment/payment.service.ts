@@ -669,20 +669,17 @@ export class PaymentService {
       );
     }
     // If the VAT or VAT type has changed, update it in Stripe
+    const existingTaxIds = await this.stripe.customers.listTaxIds(
+      user.stripeCustomerId,
+    );
+
+    // Delete any existing tax IDs before adding the new one
+    for (const taxId of existingTaxIds.data) {
+      await this.stripe.customers.deleteTaxId(user.stripeCustomerId, taxId.id);
+    }
+
+    // Create the new VAT tax ID
     if (updateBillingInfoDto.vat && updateBillingInfoDto.vatType) {
-      const existingTaxIds = await this.stripe.customers.listTaxIds(
-        user.stripeCustomerId,
-      );
-
-      // Delete any existing tax IDs before adding the new one
-      for (const taxId of existingTaxIds.data) {
-        await this.stripe.customers.deleteTaxId(
-          user.stripeCustomerId,
-          taxId.id,
-        );
-      }
-
-      // Create the new VAT tax ID
       await this.stripe.customers.createTaxId(user.stripeCustomerId, {
         type: updateBillingInfoDto.vatType,
         value: updateBillingInfoDto.vat,

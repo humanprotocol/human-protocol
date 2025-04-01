@@ -19,7 +19,7 @@ interface NavbarProps {
   withNavigation: boolean;
 }
 
-export function Navbar({ withNavigation }: NavbarProps) {
+export function Navbar({ withNavigation }: Readonly<NavbarProps>) {
   const { isMainPage } = useHomePageState();
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

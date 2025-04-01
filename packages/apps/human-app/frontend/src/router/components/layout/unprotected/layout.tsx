@@ -1,25 +1,29 @@
 import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { useBackgroundContext } from '@/shared/contexts/background';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { breakpoints } from '@/shared/styles/breakpoints';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { Footer } from '../footer';
+import { useHomePageState } from '@/shared/contexts/homepage-state';
+import { Footer } from '../../footer';
 import { Navbar } from './navbar';
 
 interface LayoutProps {
   withNavigation?: boolean;
 }
 
-export function Layout({ withNavigation = true }: LayoutProps) {
+export function UnprotectedLayout({
+  withNavigation = true,
+}: Readonly<LayoutProps>) {
   const { colorPalette, isDarkMode } = useColorMode();
-  const { backgroundColor } = useBackgroundContext();
+  const { isMainPage } = useHomePageState();
+
   const isMobile = useIsMobile();
   const layoutBackgroundColor = (() => {
-    if (isDarkMode) {
+    if (isDarkMode || isMobile || isMainPage) {
       return colorPalette.backgroundColor;
     }
-    return isMobile ? colorPalette.white : backgroundColor;
+
+    return colorPalette.paper.main;
   })();
 
   return (
