@@ -35,6 +35,7 @@ class ExchangeOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):
     escrow_failed = "escrow_failed"
     job_finished = "job_finished"
     escrow_cleaned = "escrow_cleaned"
+    escrow_recorded = "escrow_recorded"
 
 
 class RecordingOracleEventTypes(str, Enum, metaclass=BetterEnumMeta):

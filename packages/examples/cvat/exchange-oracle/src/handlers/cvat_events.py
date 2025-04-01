@@ -142,6 +142,7 @@ def handle_create_job_event(payload: dict) -> None:
                 session,
                 escrow_address=project.escrow_address,
                 chain_id=project.chain_id,
+                active=True,
                 for_update=True,
             )
 

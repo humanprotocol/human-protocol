@@ -43,9 +43,7 @@ class FileDescriptor:
     file: io.RawIOBase | None
 
 
-def prepare_annotation_metafile(
-    jobs: list[Job], job_annotations: dict[int, FileDescriptor]
-) -> FileDescriptor:
+def prepare_annotation_metafile(jobs: list[Job]) -> FileDescriptor:
     """
     Prepares a task/project annotation descriptor file with annotator mapping.
     """
@@ -54,7 +52,6 @@ def prepare_annotation_metafile(
         jobs=[
             JobMeta(
                 job_id=job.cvat_id,
-                annotation_filename=job_annotations[job.cvat_id].filename,
                 annotator_wallet_address=job.latest_assignment.user_wallet_address,
                 assignment_id=job.latest_assignment.id,
                 task_id=job.cvat_task_id,

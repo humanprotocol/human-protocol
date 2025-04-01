@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from collections.abc import Sequence
 from enum import Enum
 
 from attrs import define
@@ -91,9 +92,15 @@ class OracleWebhookQueue:
         session: Session,
         type: OracleWebhookTypes,
         *,
+        event_type_in: Sequence[str] | None = None,
+        event_type_not_in: Sequence[str] | None = None,
         limit: int = 10,
         for_update: bool | ForUpdateParams = False,
     ) -> list[Webhook]:
+        assert not (
+            event_type_in and event_type_not_in
+        ), f"{event_type_in} and {event_type_not_in} cannot be used together"
+
         return (
             _maybe_for_update(session.query(Webhook), enable=for_update)
             .where(
@@ -101,6 +108,8 @@ class OracleWebhookQueue:
                 Webhook.type == type.value,
                 Webhook.status == OracleWebhookStatuses.pending.value,
                 Webhook.wait_until <= utcnow(),
+                *([Webhook.event_type.in_(event_type_in)] if event_type_in else []),
+                *([Webhook.event_type.not_in(event_type_not_in)] if event_type_not_in else []),
             )
             .limit(limit)
             .all()

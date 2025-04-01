@@ -11,6 +11,7 @@ from src.core.types import ExchangeOracleEventTypes, OracleWebhookTypes
 from src.crons._utils import cron_job, handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
 from src.handlers.cleanup import clean_escrow
+from src.handlers.completion import export_results
 from src.handlers.validation import validate_results
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
@@ -23,6 +24,29 @@ def process_incoming_exchange_oracle_webhooks(logger: logging.Logger, session: S
     webhooks = oracle_db_service.inbox.get_pending_webhooks(
         session,
         OracleWebhookTypes.exchange_oracle,
+        event_type_not_in=[ExchangeOracleEventTypes.escrow_recorded],
+        limit=Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
+        for_update=ForUpdateParams(skip_locked=True),
+    )
+
+    for webhook in webhooks:
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
+            handle_exchange_oracle_event(webhook, db_session=session)
+
+
+@cron_job(module_logger_name)
+def process_incoming_exchange_oracle_webhook_escrow_recorded(
+    logger: logging.Logger, session: Session
+):
+    """
+    Process incoming oracle webhooks of type escrow_recorded
+    We do it in a separate job as this is a long operation that should not block
+    other message handling.
+    """
+    webhooks = oracle_db_service.inbox.get_pending_webhooks(
+        session,
+        OracleWebhookTypes.exchange_oracle,
+        event_type_in=[ExchangeOracleEventTypes.escrow_recorded],
         limit=Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
         for_update=ForUpdateParams(skip_locked=True),
     )
@@ -40,6 +64,14 @@ def handle_exchange_oracle_event(webhook: Webhook, *, db_session: Session):
             validate_escrow(webhook.chain_id, webhook.escrow_address)
 
             validate_results(
+                escrow_address=webhook.escrow_address,
+                chain_id=webhook.chain_id,
+                db_session=db_session,
+            )
+        case ExchangeOracleEventTypes.escrow_recorded:
+            validate_escrow(webhook.chain_id, webhook.escrow_address)
+
+            export_results(
                 escrow_address=webhook.escrow_address,
                 chain_id=webhook.chain_id,
                 db_session=db_session,
