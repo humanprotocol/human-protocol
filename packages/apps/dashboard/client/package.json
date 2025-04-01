@@ -53,7 +53,7 @@
     "sass": "^1.85.0",
     "stylelint-prettier": "^5.0.0",
     "typescript": "^5.6.3",
-    "vite": "^6.2.3",
+    "vite": "^6.2.4",
     "vite-plugin-svgr": "^4.2.0"
   }
 }
