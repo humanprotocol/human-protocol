@@ -69,7 +69,13 @@ const DefaultHeader: FC = () => {
             Staking
           </Typography>
         </Link>
-        <Box display={{ xs: 'none', md: 'flex' }} alignItems="center" gap={2}>
+        <Box
+          display={{ xs: 'none', md: 'flex' }}
+          paddingY={{ sm: 0, md: 2.5 }}
+          height="100%"
+          alignItems="center"
+          gap={2}
+        >
           <NavLink href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}>
             Staking Overview
           </NavLink>
@@ -81,6 +87,7 @@ const DefaultHeader: FC = () => {
           <Button
             size="medium"
             variant="outlined"
+            sx={{ height: '100%' }}
             onClick={() => setStakeModalOpen(true)}
           >
             Stake HMT

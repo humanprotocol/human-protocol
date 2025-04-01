@@ -1,18 +1,35 @@
 import { FC } from 'react';
+import { Box, Typography, useTheme } from '@mui/material';
+
 import PageWrapper from '../../components/PageWrapper';
-import { Box, Container } from '@mui/material';
-import KVStoreTable from 'src/components/Tables/kvstore';
-import { KVStoreIcon } from 'src/icons';
+import KVStoreTable from '../../components/Tables/kvstore';
+import { KVStoreIcon } from '../../icons';
 
 const KVStore: FC = () => {
+  const theme = useTheme();
+
   return (
     <PageWrapper>
-      <Container maxWidth={false}>
-        <Box mt={8}>
+      <Box
+        paddingX={8}
+        pt={3}
+        pb={8}
+        bgcolor="#f6f7fe"
+        borderRadius="20px"
+        minHeight="calc(100dvh - 210px)"
+      >
+        <Box display="flex" alignItems="center" gap={2} mb={4}>
           <KVStoreIcon sx={{ width: 66, height: 66 }} />
-          <KVStoreTable />
+          <Typography
+            variant="h1"
+            fontSize={28}
+            color={theme.palette.primary.main}
+          >
+            KV Store
+          </Typography>
         </Box>
-      </Container>
+        <KVStoreTable />
+      </Box>
     </PageWrapper>
   );
 };
