@@ -2811,10 +2811,12 @@
     "@babel/runtime" "^7.17.9"
     "@hcaptcha/loader" "^1.2.1"
 
-"@hookform/resolvers@^3.3.4":
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-3.10.0.tgz#7bfd18113daca4e57e27e1205b7d5a2d371aa59a"
-  integrity sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==
+"@hookform/resolvers@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-5.0.0.tgz#7ed8e5f3d01115a7c0ac330b855d2231f180f0c6"
+  integrity sha512-3w/nL/GcafcBnehyvOGzrhFACAQoLAEVzJjRJrBpedEiD+dPvu/K+UL51wVOB4toZq8p6UkTfkd4aoAW+LOpRQ==
+  dependencies:
+    "@standard-schema/utils" "^0.3.0"
 
 "@humanwhocodes/config-array@^0.13.0":
   version "0.13.0"
@@ -5872,6 +5874,11 @@
     "@stablelib/keyagreement" "^1.0.1"
     "@stablelib/random" "^1.0.2"
     "@stablelib/wipe" "^1.0.1"
+
+"@standard-schema/utils@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
+  integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
 "@stripe/react-stripe-js@^3.0.0":
   version "3.1.1"
@@ -19788,9 +19795,9 @@ victory-vendor@^36.6.8:
     d3-timer "^3.0.1"
 
 viem@2.7.14, viem@^2.15.1:
-  version "2.24.2"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.24.2.tgz#68aac43c35e8d73587bbdab2c547579dd60ebb80"
-  integrity sha512-lUGoTHhMYlR4ktQiOrbTPmYvrMn3jKUdn2PSmB9QLICxnsQJxMkSCeGRoJFq7hi7K6PCMQgAyLMR/9J1key5cg==
+  version "2.24.3"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.24.3.tgz#e34f686eed9d19caa2e8a162a29a85bee4efc21e"
+  integrity sha512-FAoW0hqqpGOlZvfL6GbizDNUd6ZvUyNYYF8HouXbGATrO0RLLh28MOElFNF63hg++uZi2R/EcISs0bvY185z8g==
   dependencies:
     "@noble/curves" "1.8.1"
     "@noble/hashes" "1.7.1"
