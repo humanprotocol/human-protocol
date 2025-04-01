@@ -11,10 +11,13 @@ import src.services.cloud as cloud_service
 from src.core.config import Config
 from src.core.storage import compose_data_bucket_prefix, compose_results_bucket_prefix
 from src.log import get_logger_name
+from src.services import cvat as cvat_db_service
 from src.services.cloud.utils import BucketAccessInfo
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+    from sqlalchemy.orm import Session
 
     from src.models.cvat import Project
 
@@ -47,7 +50,7 @@ def _cleanup_cvat(projects: list[Project]) -> None:
         if project.cvat_id is not None:
             with (
                 _log_error(
-                    errors, f"Encountered error while deliting CVAT project {project.cvat_id}"
+                    errors, f"Encountered error while deleting CVAT project {project.cvat_id}"
                 ),
                 contextlib.suppress(NotFoundException),
             ):
@@ -80,7 +83,15 @@ def _cleanup_storage(escrow_address: str, chain_id: int) -> None:
     )
 
 
-def cleanup_escrow(escrow_address: str, chain_id: int, projects: list[Project]) -> None:
+def _cleanup_db(session: Session, escrow_address: str, chain_id: int) -> None:
+    cvat_db_service.remove_escrow_images(
+        session=session, escrow_address=escrow_address, chain_id=chain_id
+    )
+
+
+def cleanup_escrow(
+    escrow_address: str, chain_id: int, projects: list[Project], session: Session
+) -> None:
     """
     Cleans up CVAT resources and storage related to the given escrow.
     """
@@ -90,3 +101,4 @@ def cleanup_escrow(escrow_address: str, chain_id: int, projects: list[Project]) 
         # in case both _cleanup_cvat and _cleanup_storage raise an exception,
         # both will be in the traceback
         _cleanup_storage(escrow_address, chain_id)
+        _cleanup_db(session, escrow_address, chain_id)
