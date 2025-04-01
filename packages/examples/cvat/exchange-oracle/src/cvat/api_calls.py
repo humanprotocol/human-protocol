@@ -541,7 +541,7 @@ def fetch_projects(assignee: str = "") -> list[models.ProjectRead]:
             raise
 
 
-def get_task_upload_status(cvat_id: int) -> tuple[RequestStatus | None, str]:
+def get_task_upload_status(cvat_id: int) -> tuple[RequestStatus, str]:
     logger = logging.getLogger("app")
 
     with get_api_client() as api_client:
@@ -563,12 +563,12 @@ def get_task_upload_status(cvat_id: int) -> tuple[RequestStatus | None, str]:
                 if task.size > 0:
                     status = RequestStatus.FINISHED
                     reason = ""
+                else:
+                    status = RequestStatus.QUEUED
+                    reason = ""
 
             return status, reason
         except exceptions.ApiException as e:
-            if e.status == 404:
-                return None, e.body
-
             logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
             raise
 
