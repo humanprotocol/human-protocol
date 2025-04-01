@@ -14,47 +14,57 @@ const Dashboard: FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <PageWrapper violetHeader>
-      <Box display="flex" flexDirection="column" sx={{ mx: 6 }}>
+    <PageWrapper>
+      <Box className="violet-header" flex={1}>
         <Box
-          sx={{
-            mt: 3,
-            mb: 5,
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            alignItems: isMobile ? 'flex-start' : 'center',
-            gap: 2,
-          }}
+          display="flex"
+          flexDirection="column"
+          sx={{ mx: isMobile ? 4 : 6 }}
         >
-          <OverviewIcon sx={{ width: 66, height: 66 }} />
-          <Typography
-            variant="h1"
-            fontWeight="bold"
-            color={theme.palette.white.main}
+          <Box
+            sx={{
+              mt: 3,
+              mb: 5,
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: 2,
+            }}
           >
-            Staking Overview
-          </Typography>
-        </Box>
-        <Grid container columnSpacing={3}>
-          <Grid item xs={12} sm={6} md={4} pl={0}>
-            <BalanceCard />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <StakedAmountCard />
-          </Grid>
+            <OverviewIcon sx={{ width: 66, height: 66 }} />
+            <Typography
+              variant="h1"
+              fontWeight="bold"
+              color={theme.palette.white.main}
+            >
+              Staking Overview
+            </Typography>
+          </Box>
           <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            display="flex"
-            flexDirection="column"
-            gap={3}
+            container
+            columnSpacing={isMobile ? 0 : 3}
+            rowSpacing={isMobile ? 4 : 0}
           >
-            <LockedAmountCard />
-            <WithdrawableAmountCard />
+            <Grid item xs={12} sm={6} md={4} pl={0}>
+              <BalanceCard />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <StakedAmountCard />
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              display="flex"
+              flexDirection="column"
+              gap={3}
+            >
+              <LockedAmountCard />
+              <WithdrawableAmountCard />
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Box>
     </PageWrapper>
   );

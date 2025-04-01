@@ -42,7 +42,11 @@ const DefaultHeader: FC = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ background: '#fff', boxShadow: 'none' }}>
+    <AppBar
+      className="container"
+      position="static"
+      sx={{ background: '#fff', boxShadow: 'none' }}
+    >
       <Toolbar
         sx={{
           display: 'flex',
@@ -107,34 +111,31 @@ const DefaultHeader: FC = () => {
               height: '100%',
               alignItems: 'center',
               textAlign: 'center',
+              gap: 2,
+              fontSize: '18px',
+              fontWeight: 600,
             }}
           >
-            <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
-              <IconButton
-                onClick={() => toggleDrawer(false)}
-                sx={{ color: 'primary.main' }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-
-            {isConnected && (
-              <Box mb={2}>
-                <Account />
-              </Box>
-            )}
-
+            <IconButton
+              onClick={() => toggleDrawer(false)}
+              sx={{
+                color: 'primary.main',
+                position: 'absolute',
+                top: 10,
+                right: 10,
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            {isConnected && <Account />}
             <MuiLink
-              sx={{ fontSize: '18px', fontWeight: 600, my: 2 }}
               href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
               underline="none"
               onClick={() => toggleDrawer(false)}
             >
               Dashboard
             </MuiLink>
-
             <MuiLink
-              sx={{ fontSize: '18px', fontWeight: 600, my: 2 }}
               href="https://humanprotocol.org"
               underline="none"
               onClick={() => toggleDrawer(false)}

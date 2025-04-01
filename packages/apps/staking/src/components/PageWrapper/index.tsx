@@ -1,29 +1,13 @@
 import { FC, PropsWithChildren } from 'react';
-import clsx from 'clsx';
 
-import DefaultHeader from '../Headers/DefaultHeader';
+import DefaultHeader from '../Header';
 import Footer from '../Footer';
 
-type Props = {
-  violetHeader?: boolean;
-  className?: string;
-};
-
-const PageWrapper: FC<PropsWithChildren<Props>> = ({
-  violetHeader,
-  className,
-  children,
-}) => {
+const PageWrapper: FC<PropsWithChildren> = ({ children }) => {
   return (
     <div className="layout">
       <DefaultHeader />
-      <div
-        className={clsx(className, {
-          'violet-header': violetHeader,
-        })}
-      >
-        <div className="container">{children}</div>
-      </div>
+      <main className="container">{children}</main>
       <Footer />
     </div>
   );

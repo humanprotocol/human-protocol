@@ -8,7 +8,7 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import { styled } from '@mui/material/styles';
 
 import { colorPalette } from '../../assets/styles/color-palette';
-import DiscordIcon from '../../assets/DiscordIcon';
+import { DiscordIcon } from '../../icons';
 
 const SocialMediaIconButton = styled(IconButton)({
   padding: 0,
@@ -26,7 +26,7 @@ const Footer: FC = () => {
   };
 
   return (
-    <footer>
+    <footer className="container">
       <div className="footer-wrapper">
         <div className="footer-link-wrapper">
           <div className="footer-link">
