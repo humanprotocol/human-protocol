@@ -62,7 +62,7 @@ export const CreateJob = () => {
             }
           >
             {!IS_MAINNET && (
-              <MenuItem value={JobType.Fortune}>Fortune</MenuItem>
+              <MenuItem value={JobType.FORTUNE}>Fortune</MenuItem>
             )}
             <MenuItem value={JobType.CVAT}>CVAT</MenuItem>
             {/* {!IS_MAINNET && (
@@ -81,7 +81,7 @@ export const CreateJob = () => {
           }
         />
       </Box>
-      {jobRequest.jobType === JobType.Fortune && <FortuneJobRequestForm />}
+      {jobRequest.jobType === JobType.FORTUNE && <FortuneJobRequestForm />}
       {jobRequest.jobType === JobType.CVAT && <CvatJobRequestForm />}
       {jobRequest.jobType === JobType.HCAPTCHA && <HCaptchaJobRequestForm />}
     </Box>

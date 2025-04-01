@@ -80,9 +80,9 @@ export enum PayingStatus {
 }
 
 export enum JobType {
-  Fortune,
-  CVAT,
-  HCAPTCHA,
+  FORTUNE = 'fortune',
+  CVAT = 'cvat',
+  HCAPTCHA = 'hcaptcha',
 }
 
 export enum CvatJobType {

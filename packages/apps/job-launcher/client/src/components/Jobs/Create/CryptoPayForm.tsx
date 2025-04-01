@@ -222,7 +222,7 @@ export const CryptoPayForm = ({
           cvatRequest,
           hCaptchaRequest,
         } = jobRequest;
-        if (jobType === JobType.Fortune && fortuneRequest) {
+        if (jobType === JobType.FORTUNE && fortuneRequest) {
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,

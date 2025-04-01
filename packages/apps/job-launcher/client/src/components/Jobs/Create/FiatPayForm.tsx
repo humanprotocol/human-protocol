@@ -252,7 +252,7 @@ export const FiatPayForm = ({
         jobRequest;
       if (!chainId) return;
 
-      if (jobType === JobType.Fortune && fortuneRequest) {
+      if (jobType === JobType.FORTUNE && fortuneRequest) {
         await createFortuneJob(
           chainId,
           fortuneRequest,
