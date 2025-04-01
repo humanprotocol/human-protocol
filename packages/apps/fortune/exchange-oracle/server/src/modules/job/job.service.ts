@@ -225,6 +225,8 @@ export class JobService {
 
     if (assignment.status !== AssignmentStatus.ACTIVE) {
       throw new BadRequestException(ErrorAssignment.InvalidStatus);
+    } else if (assignment.job.status !== JobStatus.ACTIVE) {
+      throw new BadRequestException(ErrorJob.InvalidStatus);
     }
 
     await this.addSolution(
@@ -381,5 +383,35 @@ export class JobService {
     }
 
     return manifest;
+  }
+
+  public async pauseJob(webhook: WebhookDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
+    );
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+    if (jobEntity.status !== JobStatus.ACTIVE) {
+      throw new BadRequestException(ErrorJob.InvalidStatus);
+    }
+    jobEntity.status = JobStatus.PAUSED;
+    await this.jobRepository.updateOne(jobEntity);
+  }
+
+  public async resumeJob(webhook: WebhookDto): Promise<void> {
+    const jobEntity = await this.jobRepository.findOneByChainIdAndEscrowAddress(
+      webhook.chainId,
+      webhook.escrowAddress,
+    );
+    if (!jobEntity) {
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+    if (jobEntity.status !== JobStatus.PAUSED) {
+      throw new BadRequestException(ErrorJob.InvalidStatus);
+    }
+    jobEntity.status = JobStatus.ACTIVE;
+    await this.jobRepository.updateOne(jobEntity);
   }
 }

@@ -8,25 +8,27 @@ export type CreateJobPageUIType = {
   step: CreateJobStep;
   payMethod: PayMethod;
   jobRequest: JobRequest;
-  reset?: () => void;
-  changePayMethod?: (method: PayMethod) => void;
-  updateJobRequest?: (jobRequest: JobRequest) => void;
-  goToPrevStep?: () => void;
-  goToNextStep?: () => void;
+  reset: () => void;
+  changePayMethod: (method: PayMethod) => void;
+  updateJobRequest: (jobRequest: JobRequest) => void;
+  goToPrevStep: () => void;
+  goToNextStep: () => void;
   setStep: (step: CreateJobStep) => void;
 };
 
-const initialData: Omit<
-  CreateJobPageUIType,
-  'changePayMethod' | 'goToNextStep'
-> = {
+const initialData: CreateJobPageUIType = {
   step: CreateJobStep.FundingMethod,
   payMethod: PayMethod.Crypto,
   jobRequest: {
     jobType: JobType.Fortune,
     chainId: undefined,
   },
-  setStep: () => {},
+  reset: () => {},
+  changePayMethod: (_) => {},
+  updateJobRequest: (_) => {},
+  goToPrevStep: () => {},
+  goToNextStep: () => {},
+  setStep: (_) => {},
 };
 
 export const CreateJobPageUIContext =
@@ -55,11 +57,15 @@ export const CreateJobPageUIProvider = ({
   });
 
   const goToPrevStep = () => {
-    setStep((prev) => prev - 1);
+    if (step > CreateJobStep.FundingMethod) {
+      setStep((prev) => prev - 1);
+    }
   };
 
   const goToNextStep = () => {
-    setStep((prev) => prev + 1);
+    if (step < CreateJobStep.Launch) {
+      setStep((prev) => prev + 1);
+    }
   };
 
   const changePayMethod = (method: PayMethod) => setPayMethod(method);

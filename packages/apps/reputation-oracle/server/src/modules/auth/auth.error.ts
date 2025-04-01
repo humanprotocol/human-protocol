@@ -57,3 +57,9 @@ export class DuplicatedUserAddressError extends BaseError {
     );
   }
 }
+
+export class InactiveUserError extends BaseError {
+  constructor(readonly userId: number) {
+    super('User is in inactive status. Login forbidden.');
+  }
+}
