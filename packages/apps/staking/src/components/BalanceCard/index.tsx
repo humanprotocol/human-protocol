@@ -25,7 +25,7 @@ const BalanceCard: FC = () => {
         </CustomTooltip>
         <Box display="flex" flexDirection="column" alignItems="flex-start">
           <Typography variant="body1" color="primary">
-            Wallet Balance
+            Wallet Balance <strong>HMT</strong>
           </Typography>
           <Amount size="lg" amount={tokenBalance} isConnected={isConnected} />
         </Box>

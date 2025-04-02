@@ -34,7 +34,7 @@ const StakedAmountCard: FC = () => {
           >
             <Box display="flex" flexDirection="column" alignItems="flex-start">
               <Typography variant="body1" color="primary">
-                Staked Amount
+                Staked Amount <strong>HMT</strong>
               </Typography>
               <Amount
                 size="lg"
@@ -46,14 +46,16 @@ const StakedAmountCard: FC = () => {
               <Button
                 size="medium"
                 variant="contained"
-                onClick={() => setStakeModalOpen(true)}
+                disabled={!isConnected}
+                onClick={() => isConnected && setStakeModalOpen(true)}
               >
                 Stake HMT
               </Button>
               <Button
                 size="medium"
                 variant="outlined"
-                onClick={() => setUnstakeModalOpen(true)}
+                disabled={!isConnected}
+                onClick={() => isConnected && setUnstakeModalOpen(true)}
               >
                 Unstake
               </Button>

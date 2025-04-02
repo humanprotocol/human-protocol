@@ -33,11 +33,10 @@ const NetworkStatus: React.FC = () => {
           }
           label={
             <Typography
-              variant="h6"
+              variant="h3"
               sx={{
                 padding: 0,
                 fontWeight: 400,
-                fontSize: 28,
                 lineHeight: 1.5,
                 color: theme.palette.primary.main,
                 marginLeft: 1,

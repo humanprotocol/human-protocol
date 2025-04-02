@@ -200,3 +200,25 @@ export const AvatarIcon: FC<SvgIconProps> = (props) => {
     </SvgIcon>
   );
 };
+
+export const SuccessIcon: FC<SvgIconProps> = (props) => {
+  return (
+    <SvgIcon {...props} viewBox="0 0 34 34" fill="none">
+      <path
+        fill="currentColor"
+        d="M12.5486 22.3822L6.75689 16.5905L4.78467 18.5489L12.5486 26.3127L29.2152 9.64608L27.2569 7.68774L12.5486 22.3822Z"
+      />
+    </SvgIcon>
+  );
+};
+
+export const CloseIcon: FC<SvgIconProps> = (props) => {
+  return (
+    <SvgIcon {...props} viewBox="0 0 34 34" fill="none">
+      <path
+        fill="currentColor"
+        d="M26.7228 9.23568L24.7644 7.27734L17.0005 15.0412L9.23665 7.27734L7.27832 9.23568L15.0422 16.9996L7.27832 24.7635L9.23665 26.7218L17.0005 18.9579L24.7644 26.7218L26.7228 24.7635L18.9589 16.9996L26.7228 9.23568Z"
+      />
+    </SvgIcon>
+  );
+};

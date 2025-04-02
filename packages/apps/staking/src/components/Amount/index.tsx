@@ -1,5 +1,7 @@
 import { FC } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+
+import { formatHmtAmount } from '../../utils/string';
 
 type Props = {
   amount: string | number;
@@ -21,18 +23,13 @@ const Amount: FC<Props> = ({ amount, isConnected, size = 'sm' }) => {
   }
 
   return (
-    <Box display="flex" gap={1.5} alignItems="baseline">
-      <Typography
-        variant="h3"
-        fontWeight={size === 'sm' ? 400 : 600}
-        fontSize={size === 'sm' ? 24 : 48}
-      >
-        {amount}
-      </Typography>
-      <Typography component="span" fontSize={size === 'sm' ? 20 : 34}>
-        HMT
-      </Typography>
-    </Box>
+    <Typography
+      variant="h3"
+      fontWeight={size === 'sm' ? 400 : 600}
+      fontSize={size === 'sm' ? 24 : 48}
+    >
+      {formatHmtAmount(amount)}
+    </Typography>
   );
 };
 

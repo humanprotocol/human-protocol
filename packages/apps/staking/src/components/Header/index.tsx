@@ -52,7 +52,7 @@ const DefaultHeader: FC = () => {
           display: 'flex',
           justifyContent: 'space-between',
           width: '100%',
-          height: 82,
+          height: { xs: 64, md: 82 },
         }}
       >
         <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
@@ -76,19 +76,20 @@ const DefaultHeader: FC = () => {
           alignItems="center"
           gap={2}
         >
-          <NavLink href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}>
-            Staking Overview
-          </NavLink>
+          <NavLink href="/">Staking Overview</NavLink>
           <NavLink href="/kvstore">KV Store</NavLink>
-          <NavLink href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}>
+          <NavLink href="https://dashboard.humanprotocol.org" target="_blank">
             Dashboard
           </NavLink>
-          <NavLink href="https://humanprotocol.org">HUMAN Website</NavLink>
+          <NavLink href="https://humanprotocol.org" target="_blank">
+            HUMAN Website
+          </NavLink>
           <Button
             size="medium"
             variant="outlined"
+            disabled={!isConnected}
             sx={{ height: '100%' }}
-            onClick={() => setStakeModalOpen(true)}
+            onClick={() => isConnected && setStakeModalOpen(true)}
           >
             Stake HMT
           </Button>
@@ -135,6 +136,7 @@ const DefaultHeader: FC = () => {
               <CloseIcon />
             </IconButton>
             {isConnected && <Account />}
+            {!isConnected && <ConnectWallet />}
             <MuiLink
               href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
               underline="none"

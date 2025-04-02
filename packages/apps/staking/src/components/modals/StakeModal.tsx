@@ -1,83 +1,178 @@
+import { FC, ChangeEvent, useState } from 'react';
 import {
+  Box,
   Button,
-  CircularProgress,
   InputAdornment,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
-import { useStakeContext } from '../../contexts/stake';
+import { parseUnits } from 'ethers';
+
 import BaseModal from './BaseModal';
+import { ModalError, ModalLoading, ModalSuccess } from '../ModalState';
+import { useStakeContext } from '../../contexts/stake';
+import {
+  useModalRequestStatus,
+  ModalRequestStatus,
+} from '../../hooks/useModalRequestStatus';
 
 type Props = {
   open: boolean;
   onClose: () => void;
 };
 
-const StakeModal: React.FC<Props> = ({ open, onClose }) => {
-  const { handleStake, tokenBalance } = useStakeContext();
+const StakeModal: FC<Props> = ({ open, onClose }) => {
   const [amount, setAmount] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [amountError, setAmountError] = useState('');
+  const { handleStake, tokenBalance } = useStakeContext();
+  const { changeStatus, isIdle, isLoading, isSuccess, isError } =
+    useModalRequestStatus();
 
-  const handleStakeAction = async () => {
-    setLoading(true);
-    try {
-      await handleStake(amount);
-      onClose();
-      setAmount('');
-    } catch (error) {
-      console.error('Error during staking:', error);
-    } finally {
-      setLoading(false);
+  const isStakeDisabled = !!amountError || !amount || isLoading;
+
+  const handleClose = () => {
+    setAmount('');
+    setAmountError('');
+    changeStatus(ModalRequestStatus.Idle);
+    onClose();
+  };
+
+  const handleModalAction = async () => {
+    if (isError) {
+      changeStatus(ModalRequestStatus.Idle);
+      return;
+    } else if (isSuccess) {
+      handleClose();
+      return;
+    } else {
+      if (isStakeDisabled) return;
+
+      changeStatus(ModalRequestStatus.Loading);
+      try {
+        await handleStake(amount);
+        changeStatus(ModalRequestStatus.Success);
+        return;
+      } catch (error) {
+        console.error('Error during staking:', error);
+        changeStatus(ModalRequestStatus.Error);
+        return;
+      }
     }
   };
 
-  const handleMaxClick = () => {
-    setAmount(tokenBalance.toString());
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setAmount(value);
+
+    const valueInWei = parseUnits(value || '0', 'ether');
+    const balanceInWei = parseUnits(tokenBalance.toString(), 'ether');
+
+    if (valueInWei <= balanceInWei) {
+      setAmountError('');
+    } else {
+      setAmountError('Amount exceeds available balance');
+    }
+  };
+
+  const handleMaxClick = () => setAmount(tokenBalance.toString());
+
+  const renderIdleState = () => {
+    return (
+      <>
+        <Typography variant="subtitle2" color="primary" mb={2} py={1}>
+          Available amount: {tokenBalance} HMT
+        </Typography>
+
+        <TextField
+          autoFocus
+          fullWidth
+          label="Amount to stake"
+          type="number"
+          value={amount}
+          onChange={handleInputChange}
+          error={!!amountError}
+          helperText={amountError || ' '}
+          inputProps={{ max: tokenBalance, min: 0 }}
+          FormHelperTextProps={{
+            sx: {
+              marginTop: 0,
+              height: 16,
+            },
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleMaxClick}
+                  sx={{
+                    fontSize: '0.75rem',
+                    padding: '4px 10px',
+                    minWidth: 'unset',
+                  }}
+                >
+                  Max
+                </Button>
+              </InputAdornment>
+            ),
+          }}
+        />
+      </>
+    );
+  };
+
+  const renderSuccessState = () => {
+    return (
+      <ModalSuccess>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          py={1}
+        >
+          <Typography variant="subtitle2" color="primary">
+            You have successfully staked
+          </Typography>
+          <Typography variant="h6" color="primary">
+            {amount} HMT
+          </Typography>
+        </Box>
+      </ModalSuccess>
+    );
   };
 
   return (
-    <BaseModal open={open} onClose={onClose}>
-      <Typography variant="h6" mb={2}>
+    <BaseModal
+      open={open}
+      onClose={handleClose}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography component="h2" variant="h1" mb={2} py={1}>
         Add Stake
       </Typography>
 
-      <Typography variant="body2" color="textSecondary" mb={1}>
-        Available amount: {tokenBalance} HMT
-      </Typography>
-
-      <TextField
-        fullWidth
-        label="Amount"
-        type="number"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        inputProps={{ max: tokenBalance, min: 0 }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <Button
-                variant="contained"
-                size="large"
-                onClick={handleMaxClick}
-                sx={{ fontSize: '0.75rem', padding: '2px 8px' }}
-              >
-                MAX
-              </Button>
-            </InputAdornment>
-          ),
-        }}
-      />
+      {isIdle && renderIdleState()}
+      {isLoading && <ModalLoading />}
+      {isSuccess && renderSuccessState()}
+      {isError && <ModalError />}
 
       <Button
         variant="contained"
         size="large"
         fullWidth
-        sx={{ mt: 2 }}
-        onClick={handleStakeAction}
-        disabled={!amount || Number(amount) <= 0 || loading}
+        sx={{ mt: isIdle ? 2 : 4, width: '185px' }}
+        onClick={handleModalAction}
+        disabled={isStakeDisabled}
       >
-        {loading ? <CircularProgress size={24} color="inherit" /> : 'Stake'}
+        {(isLoading || isSuccess) && 'Close'}
+        {(isIdle || isError) && 'Add Stake'}
       </Button>
     </BaseModal>
   );

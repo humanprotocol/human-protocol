@@ -14,7 +14,8 @@ const WithdrawableAmountCard: FC = () => {
   const { isConnected } = useAccount();
   const [loading, setLoading] = useState(false);
 
-  const isWithdrawalDisabled = loading || Number(withdrawableAmount) <= 0;
+  const isWithdrawalDisabled =
+    !isConnected || loading || Number(withdrawableAmount) <= 0;
 
   const handleWithdrawClick = async () => {
     if (isWithdrawalDisabled) return;
@@ -40,9 +41,13 @@ const WithdrawableAmountCard: FC = () => {
         </CustomTooltip>
         <Box display="flex" flexDirection="column" flex={1}>
           <Typography variant="body1" color="primary" mb={1}>
-            Withdrawable Amount
+            Withdrawable Amount <strong>HMT</strong>
           </Typography>
-          <Box display="flex" justifyContent="space-between">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Amount
               amount={withdrawableAmount}
               isConnected={isConnected}

@@ -115,6 +115,7 @@ export const useStake = () => {
       }
     } catch (error) {
       showError(parseErrorMessage(error));
+      throw error;
     }
   };
 
@@ -134,6 +135,7 @@ export const useStake = () => {
       }
     } catch (error) {
       showError(parseErrorMessage(error));
+      throw error;
     }
   };
 
@@ -152,6 +154,7 @@ export const useStake = () => {
       }
     } catch (error) {
       showError(parseErrorMessage(error));
+      throw error;
     }
   };
 

@@ -21,18 +21,14 @@ type Props = {
   onClose: () => void;
 };
 
-const UnstakeModal: FC<Props> = ({ open, onClose }) => {
+const WithdrawModal: FC<Props> = ({ open, onClose }) => {
   const [amount, setAmount] = useState('');
   const [amountError, setAmountError] = useState('');
-  const { stakedAmount, lockedAmount, withdrawableAmount, handleUnstake } =
-    useStakeContext();
+  const { withdrawableAmount, handleWithdraw } = useStakeContext();
   const { changeStatus, isIdle, isLoading, isSuccess, isError } =
     useModalRequestStatus();
 
-  const availableAmount =
-    Number(stakedAmount) - Number(lockedAmount) - Number(withdrawableAmount);
-
-  const isUnstakeDisabled = !!amountError || !amount || isLoading;
+  const isWithdrawalDisabled = !!amountError || !amount || isLoading;
 
   const handleClose = () => {
     setAmount('');
@@ -41,26 +37,7 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
     onClose();
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setAmount(value);
-
-    const valueInWei = parseUnits(value || '0', 'ether');
-    const availableAmountInWei = parseUnits(
-      availableAmount.toString(),
-      'ether'
-    );
-
-    if (valueInWei <= availableAmountInWei) {
-      setAmountError('');
-    } else {
-      setAmountError('Amount exceeds available balance');
-    }
-  };
-
-  const handleMaxClick = () => setAmount(availableAmount.toString());
-
-  const handleUnstakeClick = async () => {
+  const handleModalAction = async () => {
     if (isError) {
       changeStatus(ModalRequestStatus.Idle);
       return;
@@ -68,38 +45,57 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
       handleClose();
       return;
     } else {
-      if (isUnstakeDisabled) return;
+      if (isWithdrawalDisabled) return;
 
       changeStatus(ModalRequestStatus.Loading);
       try {
-        await handleUnstake(amount);
+        await handleWithdraw();
         changeStatus(ModalRequestStatus.Success);
         return;
       } catch (error) {
-        console.error('Error during unstaking:', error);
+        console.error('Error during withdrawal:', error);
         changeStatus(ModalRequestStatus.Error);
         return;
       }
     }
   };
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setAmount(value);
+
+    const valueInWei = parseUnits(value || '0', 'ether');
+    const withdrawableAmountInWei = parseUnits(
+      withdrawableAmount.toString(),
+      'ether'
+    );
+
+    if (valueInWei <= withdrawableAmountInWei) {
+      setAmountError('');
+    } else {
+      setAmountError('Amount exceeds available balance');
+    }
+  };
+
+  const handleMaxClick = () => setAmount(withdrawableAmount.toString());
+
   const renderIdleState = () => {
     return (
       <>
         <Typography variant="subtitle2" color="primary" mb={2} py={1}>
-          Available Amount: {availableAmount} HMT
+          Available amount: {withdrawableAmount} HMT
         </Typography>
 
         <TextField
           autoFocus
           fullWidth
-          label="Amount to unstake"
+          label="Amount to withdraw"
           type="number"
           value={amount}
           onChange={handleInputChange}
           error={!!amountError}
           helperText={amountError || ' '}
-          inputProps={{ max: availableAmount, min: 0 }}
+          inputProps={{ max: withdrawableAmount, min: 0 }}
           FormHelperTextProps={{
             sx: {
               marginTop: 0,
@@ -140,7 +136,7 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
           py={1}
         >
           <Typography variant="subtitle2" color="primary">
-            You have successfully unstaked
+            You have successfully withdrawn
           </Typography>
           <Typography variant="h6" color="primary">
             {amount} HMT
@@ -162,7 +158,7 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
       }}
     >
       <Typography component="h2" variant="h1" mb={2} py={1}>
-        Unstake
+        Withdraw
       </Typography>
 
       {isIdle && renderIdleState()}
@@ -175,14 +171,14 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
         size="large"
         fullWidth
         sx={{ mt: isIdle ? 2 : 4, width: '185px' }}
-        onClick={handleUnstakeClick}
-        disabled={isUnstakeDisabled}
+        onClick={handleModalAction}
+        disabled={isWithdrawalDisabled}
       >
         {(isLoading || isSuccess) && 'Close'}
-        {(isIdle || isError) && 'Unstake'}
+        {(isIdle || isError) && 'Withdraw'}
       </Button>
     </BaseModal>
   );
 };
 
-export default UnstakeModal;
+export default WithdrawModal;

@@ -26,7 +26,7 @@ const ConnectWallet = () => {
         variant="contained"
         color="primary"
         size="medium"
-        sx={{ borderRadius: '4px', boxShadow: 'none' }}
+        sx={{ borderRadius: '4px', boxShadow: 'none', height: '42px' }}
         onClick={handleClickCrypto}
       >
         Connect Wallet

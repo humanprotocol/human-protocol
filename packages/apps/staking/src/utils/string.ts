@@ -24,3 +24,11 @@ export const formatAddress = (address?: string) => {
   if (!address) return '';
   return `${address.slice(0, 6)}…${address.slice(-5)}`;
 };
+
+export const formatHmtAmount = (amount: string | number): string | number => {
+  if (+amount >= 1000) {
+    return Math.round(+amount);
+  } else {
+    return Number(amount).toFixed(3);
+  }
+};

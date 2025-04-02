@@ -27,7 +27,7 @@ const LockedAmountCard: FC = () => {
         </CustomTooltip>
         <Box display="flex" flexDirection="column">
           <Typography variant="body1" color="primary" mb={1}>
-            Locked Amount
+            Locked Amount <strong>HMT</strong>
           </Typography>
           <Amount size="sm" amount={lockedAmount} isConnected={isConnected} />
         </Box>

@@ -204,6 +204,12 @@ const theme: ThemeOptions = createTheme({
         root: {
           fontWeight: 600,
           textTransform: 'none',
+
+          '&:disabled': {
+            backgroundColor: '#FBFBFE',
+            color: 'rgba(203, 207, 232, 0.86)',
+            border: 'none',
+          },
         },
       },
     },
