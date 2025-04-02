@@ -1005,7 +1005,10 @@ export class JobService {
     jobEntity.token = dto.escrowFundToken;
     jobEntity.waitUntil = new Date();
 
-    if (user.whitelist) {
+    if (
+      user.whitelist ||
+      [JobRequestType.AUDIO_TRANSCRIPTION].includes(requestType)
+    ) {
       jobEntity.status = JobStatus.MODERATION_PASSED;
     } else {
       jobEntity.status = JobStatus.PAID;
