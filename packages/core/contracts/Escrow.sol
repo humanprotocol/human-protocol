@@ -296,65 +296,58 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status != EscrowStatuses.Cancelled,
             'Invalid status'
         );
-
-        uint256 aggregatedBulkAmount = 0;
-        uint256 cachedRemainingFunds = remainingFunds;
-
-        for (uint256 i = 0; i < _amounts.length; i++) {
-            uint256 amount = _amounts[i];
-            require(amount > 0, 'Amount should be greater than zero');
-            aggregatedBulkAmount += amount;
-        }
-        require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
         require(
-            aggregatedBulkAmount <= cachedRemainingFunds,
-            'Not enough balance'
+            bytes(_url).length != 0 && bytes(_hash).length != 0,
+            'URL or hash is empty'
         );
 
-        cachedRemainingFunds -= aggregatedBulkAmount;
+        uint256 totalBulkAmount = 0;
+        uint256 totalReputationOracleFee = 0;
+        uint256 totalRecordingOracleFee = 0;
+        uint256 totalExchangeOracleFee = 0;
 
-        require(bytes(_url).length != 0, "URL can't be empty");
-        require(bytes(_hash).length != 0, "Hash can't be empty");
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            uint256 amount = _amounts[i];
+            require(amount > 0, 'Amount should be greater than zero');
+            uint256 reputationOracleFee = (reputationOracleFeePercentage *
+                amount) / 100;
+            totalReputationOracleFee += reputationOracleFee;
+            uint256 recordingOracleFee = (recordingOracleFeePercentage *
+                amount) / 100;
+            totalRecordingOracleFee += recordingOracleFee;
+            uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
+                100;
+            totalExchangeOracleFee += exchangeOracleFee;
+            totalBulkAmount += amount;
+            _safeTransfer(
+                token,
+                _recipients[i],
+                amount -
+                    reputationOracleFee -
+                    recordingOracleFee -
+                    exchangeOracleFee
+            );
+        }
+
+        require(totalBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
+        require(totalBulkAmount <= remainingFunds, 'Not enough balance');
+
+        // Transfer oracle fees
+        if (reputationOracleFeePercentage > 0) {
+            _safeTransfer(token, reputationOracle, totalReputationOracleFee);
+        }
+        if (recordingOracleFeePercentage > 0) {
+            _safeTransfer(token, recordingOracle, totalRecordingOracleFee);
+        }
+        if (exchangeOracleFeePercentage > 0) {
+            _safeTransfer(token, exchangeOracle, totalExchangeOracleFee);
+        }
+        remainingFunds -= totalBulkAmount;
 
         finalResultsUrl = _url;
         finalResultsHash = _hash;
 
-        uint256 totalFeePercentage = reputationOracleFeePercentage +
-            recordingOracleFeePercentage +
-            exchangeOracleFeePercentage;
-
-        for (uint256 i = 0; i < _recipients.length; i++) {
-            uint256 amount = _amounts[i];
-            uint256 amountFee = (totalFeePercentage * amount) / 100;
-            _safeTransfer(token, _recipients[i], amount - amountFee);
-        }
-
-        // Transfer oracle fees
-        if (reputationOracleFeePercentage > 0) {
-            _safeTransfer(
-                token,
-                reputationOracle,
-                (reputationOracleFeePercentage * aggregatedBulkAmount) / 100
-            );
-        }
-        if (recordingOracleFeePercentage > 0) {
-            _safeTransfer(
-                token,
-                recordingOracle,
-                (recordingOracleFeePercentage * aggregatedBulkAmount) / 100
-            );
-        }
-        if (exchangeOracleFeePercentage > 0) {
-            _safeTransfer(
-                token,
-                exchangeOracle,
-                (exchangeOracleFeePercentage * aggregatedBulkAmount) / 100
-            );
-        }
-
-        remainingFunds = cachedRemainingFunds;
-
-        if (cachedRemainingFunds == 0 || forceComplete) {
+        if (remainingFunds == 0 || forceComplete) {
             emit BulkTransferV2(
                 _txId,
                 _recipients,
