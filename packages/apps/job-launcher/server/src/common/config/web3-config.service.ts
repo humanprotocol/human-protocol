@@ -123,7 +123,7 @@ export class Web3ConfigService {
   }
 
   /**
-   * Address of the Audino recording oracle contract.
+   * Address of the Audino recording oracle.
    */
   get audinoRecordingOracleAddress(): string {
     return this.configService.getOrThrow<string>(

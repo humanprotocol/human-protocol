@@ -209,6 +209,18 @@ export class JobCvatDto extends JobDto {
   public type: JobRequestType;
 }
 
+class AudinoLabel {
+  @ApiProperty()
+  @IsString()
+  public name: string;
+}
+
+class AudinoDataDto {
+  @ApiProperty()
+  @IsObject()
+  public dataset: StorageDataDto;
+}
+
 export class JobAudinoDto extends JobDto {
   @ApiProperty({ name: 'requester_description' })
   @IsString()
@@ -216,12 +228,12 @@ export class JobAudinoDto extends JobDto {
 
   @ApiProperty()
   @IsObject()
-  public data: CvatDataDto;
+  public data: AudinoDataDto;
 
-  @ApiProperty({ type: [Label] })
+  @ApiProperty({ type: [AudinoLabel] })
   @IsArray()
   @ArrayMinSize(1)
-  public labels: Label[];
+  public labels: AudinoLabel[];
 
   @ApiProperty({ name: 'min_quality' })
   @IsNumber()
