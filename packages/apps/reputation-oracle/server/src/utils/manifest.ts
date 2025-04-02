@@ -1,14 +1,21 @@
-import { CvatManifest, FortuneManifest } from '../common/interfaces/manifest';
+import {
+  AudinoManifest,
+  CvatManifest,
+  FortuneManifest,
+} from '../common/interfaces/manifest';
 import { JobRequestType } from '../common/enums';
 import { UnsupportedManifestTypeError } from '../common/errors/manifest';
 
 export function getRequestType(
-  manifest: FortuneManifest | CvatManifest,
+  manifest: FortuneManifest | CvatManifest | AudinoManifest,
 ): JobRequestType {
-  const requestType =
-    (manifest as FortuneManifest).requestType ||
-    ((manifest as CvatManifest).annotation &&
-      (manifest as CvatManifest).annotation.type);
+  let requestType: JobRequestType | undefined;
+
+  if ('requestType' in manifest) {
+    requestType = manifest.requestType;
+  } else if ('annotation' in manifest) {
+    requestType = manifest.annotation.type;
+  }
 
   if (!requestType) {
     throw new UnsupportedManifestTypeError(requestType);

@@ -8,27 +8,25 @@ import { FundingMethod } from './FundingMethod';
 import { LaunchSuccess } from './LaunchSuccess';
 import { PayJob } from './PayJob';
 
+const supportedJobTypes = Object.values(JobType);
+
+function isSupportedJobType(jobType: string): jobType is JobType {
+  return supportedJobTypes.includes(jobType as JobType);
+}
+
 export const CreateJobView = () => {
   const { step, changePayMethod, setStep, updateJobRequest } =
     useCreateJobPageUI();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const jobType = searchParams.get('jobType');
-    const supportedJobTypes = ['fortune', 'cvat', 'hcaptcha'];
+    const jobType = searchParams.get('jobType') || '';
 
-    if (jobType && supportedJobTypes.includes(jobType.toLowerCase())) {
+    if (isSupportedJobType(jobType)) {
       changePayMethod(PayMethod.Fiat);
       setStep(CreateJobStep.CreateJob);
 
-      updateJobRequest({
-        jobType:
-          jobType === 'fortune'
-            ? JobType.Fortune
-            : jobType === 'cvat'
-              ? JobType.CVAT
-              : JobType.HCAPTCHA,
-      });
+      updateJobRequest({ jobType });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

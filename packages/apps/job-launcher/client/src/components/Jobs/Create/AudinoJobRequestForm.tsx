@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import {
   Accordion,
   AccordionDetails,
@@ -27,29 +26,33 @@ import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFill
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { getQualifications } from '../../../services/qualification';
 import {
+  AudinoJobType,
   AWSRegions,
-  CvatJobType,
   GCSRegions,
-  Label,
   Qualification,
   StorageProviders,
 } from '../../../types';
-import { mapCvatFormValues } from './helpers';
-import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
+import { mapAudinoFormValues } from './helpers';
+import { AudinoJobRequestValidationSchema } from './schema';
 
-export const CvatJobRequestForm = () => {
+export const AudinoJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
     useCreateJobPageUI();
-  const [searchParams] = useSearchParams();
   const [expanded, setExpanded] = useState<string[]>(['panel1']);
   const [qualificationsOptions, setQualificationsOptions] = useState<
     Qualification[]
   >([]);
-  const [updatedValidationSchema, setUpdatedValidationSchema] = useState(
-    CvatJobRequestValidationSchema,
-  );
 
-  const persistedFormValues = mapCvatFormValues(
+  const handleChange =
+    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      if (newExpanded) {
+        setExpanded([...expanded, panel]);
+      } else {
+        setExpanded(expanded.filter((item) => item !== panel));
+      }
+    };
+
+  const persistedFormValues = mapAudinoFormValues(
     jobRequest,
     qualificationsOptions,
   );
@@ -70,69 +73,28 @@ export const CvatJobRequestForm = () => {
     fetchData();
   }, [jobRequest.chainId]);
 
-  const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      if (newExpanded) {
-        setExpanded([...expanded, panel]);
-      } else {
-        setExpanded(expanded.filter((item) => item !== panel));
-      }
-    };
-
   const handleNext = ({
-    labels,
-    nodes,
     type,
+    labels,
     description,
     qualifications,
     dataProvider,
     dataRegion,
     dataBucketName,
     dataPath,
-    bpProvider,
-    bpRegion,
-    bpBucketName,
-    bpPath,
     gtProvider,
     gtRegion,
     gtBucketName,
     gtPath,
     userGuide,
     accuracyTarget,
-  }: ReturnType<typeof mapCvatFormValues>) => {
-    let bp = undefined;
-    if (type === CvatJobType.IMAGE_BOXES_FROM_POINTS) {
-      bp = {
-        points: {
-          provider: bpProvider,
-          region: bpRegion,
-          bucketName: bpBucketName,
-          path: bpPath,
-        },
-      };
-    } else if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES) {
-      bp = {
-        boxes: {
-          provider: bpProvider,
-          region: bpRegion,
-          bucketName: bpBucketName,
-          path: bpPath,
-        },
-      };
-    }
-
-    const labelArray: Label[] = labels.map((name: string) => {
-      if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES) {
-        return { name, nodes };
-      }
-
-      return { name };
-    });
-
+    audioDuration,
+    segmentDuration,
+  }: ReturnType<typeof mapAudinoFormValues>) => {
     updateJobRequest({
       ...jobRequest,
-      cvatRequest: {
-        labels: labelArray,
+      audinoRequest: {
+        labels: labels.map((name: string) => ({ name })),
         type,
         description,
         qualifications: (qualifications as Qualification[]).map(
@@ -145,7 +107,6 @@ export const CvatJobRequestForm = () => {
             bucketName: dataBucketName,
             path: dataPath,
           },
-          ...bp,
         },
         groundTruth: {
           provider: gtProvider,
@@ -155,6 +116,8 @@ export const CvatJobRequestForm = () => {
         },
         userGuide,
         accuracyTarget,
+        audioDuration,
+        segmentDuration,
       },
     });
     goToNextStep();
@@ -171,25 +134,14 @@ export const CvatJobRequestForm = () => {
     setFieldValue,
   } = useFormik({
     initialValues,
-    validationSchema: updatedValidationSchema,
+    validationSchema: AudinoJobRequestValidationSchema,
     onSubmit: handleNext,
     validateOnChange: true,
     validateOnMount: true,
   });
 
-  useEffect(() => {
-    const type = searchParams.get('type');
-    if (type && Object.values(CvatJobType).includes(type as CvatJobType)) {
-      setFieldValue('type', type);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const dataRegions =
     values.dataProvider === StorageProviders.AWS ? AWSRegions : GCSRegions;
-
-  const bpRegions =
-    values.bpProvider === StorageProviders.AWS ? AWSRegions : GCSRegions;
 
   const gtRegions =
     values.gtProvider === StorageProviders.AWS ? AWSRegions : GCSRegions;
@@ -220,28 +172,13 @@ export const CvatJobRequestForm = () => {
                     label="Type of job"
                     value={values.type}
                     onChange={(e) => {
-                      setUpdatedValidationSchema(
-                        CvatJobRequestValidationSchema.concat(
-                          dataValidationSchema(e.target.value as CvatJobType),
-                        ),
-                      );
                       setFieldValue('type', e.target.value);
                     }}
                     error={touched.type && Boolean(errors.type)}
                     onBlur={handleBlur}
                   >
-                    <MenuItem value={CvatJobType.IMAGE_POINTS}>Points</MenuItem>
-                    <MenuItem value={CvatJobType.IMAGE_POLYGONS}>
-                      Polygons
-                    </MenuItem>
-                    <MenuItem value={CvatJobType.IMAGE_BOXES}>
-                      Bounding Boxes
-                    </MenuItem>
-                    <MenuItem value={CvatJobType.IMAGE_BOXES_FROM_POINTS}>
-                      Bounding Boxes from points
-                    </MenuItem>
-                    <MenuItem value={CvatJobType.IMAGE_SKELETONS_FROM_BOXES}>
-                      Skeletons from Bounding Boxes
+                    <MenuItem value={AudinoJobType.AUDIO_TRANSCRIPTION}>
+                      Audio transcription
                     </MenuItem>
                   </Select>
                 </FormControl>
@@ -297,62 +234,6 @@ export const CvatJobRequestForm = () => {
                   )}
                 </FormControl>
               </Grid>
-              {values.type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES && (
-                <Grid item xs={12} sm={12}>
-                  <FormControl fullWidth>
-                    <Autocomplete
-                      multiple
-                      freeSolo
-                      options={[]}
-                      value={values.nodes}
-                      onChange={(event, newValues) => {
-                        const updatedNodes = (newValues as string[]).map(
-                          (node: string) =>
-                            node.startsWith('Add: ')
-                              ? node.replace('Add: ', '')
-                              : node,
-                        );
-                        setFieldValue('nodes', updatedNodes);
-                      }}
-                      filterOptions={(options: any, params) => {
-                        const filtered = options;
-                        const { inputValue } = params;
-                        if (
-                          inputValue !== '' &&
-                          !options.includes(inputValue)
-                        ) {
-                          filtered.push('Add: ' + inputValue);
-                        }
-                        return filtered;
-                      }}
-                      selectOnFocus
-                      onBlur={handleBlur}
-                      handleHomeEndKeys
-                      renderTags={(value, getTagProps) =>
-                        value.map((option, index) => (
-                          <Chip label={option} {...getTagProps({ index })} />
-                        ))
-                      }
-                      renderInput={(params) => (
-                        <Box display="flex" alignItems="center" width="100%">
-                          <TextField
-                            {...params}
-                            label="Nodes"
-                            variant="outlined"
-                            onBlur={handleBlur}
-                            fullWidth
-                          />
-                        </Box>
-                      )}
-                    />
-                    {errors.nodes && (
-                      <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
-                        {errors.nodes}
-                      </FormHelperText>
-                    )}
-                  </FormControl>
-                </Grid>
-              )}
               <Grid item xs={12}>
                 <FormControl fullWidth>
                   <TextField
@@ -371,7 +252,6 @@ export const CvatJobRequestForm = () => {
                   />
                 </FormControl>
               </Grid>
-
               <Grid item container xs={12} mt={0} spacing={2}>
                 <Grid item xs={12}>
                   <Box display="flex">
@@ -545,119 +425,6 @@ export const CvatJobRequestForm = () => {
                   </FormControl>
                 </Grid>
               </Grid>
-              {[
-                CvatJobType.IMAGE_BOXES_FROM_POINTS,
-                CvatJobType.IMAGE_SKELETONS_FROM_BOXES,
-              ].includes(values.type) && (
-                <Grid item container xs={12} spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" fontWeight={700}>
-                      {values.type === CvatJobType.IMAGE_BOXES_FROM_POINTS
-                        ? 'Points'
-                        : 'Boxes'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={6}>
-                    <FormControl variant="outlined" fullWidth>
-                      <InputLabel id="cvat-bp-storage-provider-select-label">
-                        Storage Provider
-                      </InputLabel>
-                      <Select
-                        labelId="cvat-bp-storage-provider-select-label"
-                        id="cvat-bp-storage-provider-select"
-                        label="Storage Provider"
-                        value={values.bpProvider}
-                        onChange={(e) =>
-                          setFieldValue('bpProvider', e.target.value)
-                        }
-                        error={touched.bpProvider && Boolean(errors.bpProvider)}
-                        onBlur={handleBlur}
-                      >
-                        {Object.values(StorageProviders).map((provider) => (
-                          <MenuItem key={provider} value={provider}>
-                            {provider.toUpperCase()}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={6}>
-                    <FormControl variant="outlined" fullWidth>
-                      <InputLabel id="cvat-bp-storage-provider-select-label">
-                        Region
-                      </InputLabel>
-                      <Select
-                        labelId="cvat-bp-storage-provider-select-label"
-                        id="cvat-bp-storage-provider-select"
-                        label="Region"
-                        value={values.bpRegion}
-                        onChange={(e) =>
-                          setFieldValue('bpRegion', e.target.value)
-                        }
-                        error={touched.bpRegion && Boolean(errors.bpRegion)}
-                        onBlur={handleBlur}
-                      >
-                        {Object.values(bpRegions).map((region) => (
-                          <MenuItem key={`bpset-${region}`} value={region}>
-                            {region}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {errors.bpRegion && (
-                        <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
-                          {errors.bpRegion}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={6}>
-                    <FormControl fullWidth>
-                      <TextField
-                        name="bpBucketName"
-                        label="Bucket Name"
-                        placeholder="Bucket Name"
-                        value={values.bpBucketName}
-                        onBlur={handleBlur}
-                        onChange={(e) =>
-                          setFieldValue('bpBucketName', e.target.value)
-                        }
-                        error={
-                          touched.bpBucketName && Boolean(errors.bpBucketName)
-                        }
-                        helperText={errors.bpBucketName}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={6}>
-                    <FormControl fullWidth>
-                      <TextField
-                        name="bpPath"
-                        label="Path"
-                        placeholder="Path"
-                        value={values.bpPath}
-                        onBlur={handleBlur}
-                        onChange={(e) =>
-                          setFieldValue('bpPath', e.target.value)
-                        }
-                        error={touched.bpPath && Boolean(errors.bpPath)}
-                        helperText={errors.bpPath}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <Tooltip title="This field should contain the relative path to the data, excluding protocol symbols like '://'. For example, if the full URL is 'https://bucket.com/annotations/points.json', the input should only include 'annotations/points.json'.">
-                                <HelpOutlineIcon
-                                  color="secondary"
-                                  sx={{ cursor: 'pointer' }}
-                                />
-                              </Tooltip>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </FormControl>
-                  </Grid>
-                </Grid>
-              )}
               <Grid item container xs={12} spacing={2}>
                 <Grid item xs={12}>
                   <Box display="flex">
@@ -819,6 +586,70 @@ export const CvatJobRequestForm = () => {
                         endAdornment: (
                           <InputAdornment position="end">
                             <Tooltip title="Result accuracy tooltip here.">
+                              <HelpOutlineIcon
+                                color="secondary"
+                                sx={{ cursor: 'pointer' }}
+                              />
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
+              <Grid item container xs={12} spacing={2}>
+                <Grid item xs={12} sm={12} md={6}>
+                  <FormControl fullWidth>
+                    <TextField
+                      name="audioDuration"
+                      value={values.audioDuration}
+                      onChange={(e) =>
+                        setFieldValue('audioDuration', e.target.value)
+                      }
+                      onBlur={handleBlur}
+                      placeholder="Audio duration"
+                      label="Audio duration (seconds)"
+                      error={
+                        touched.audioDuration && Boolean(errors.audioDuration)
+                      }
+                      helperText={errors.audioDuration}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title="This field should contain total audio duration in seconds. This value will be used later to calculate job bounty">
+                              <HelpOutlineIcon
+                                color="secondary"
+                                sx={{ cursor: 'pointer' }}
+                              />
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={12} md={6}>
+                  <FormControl fullWidth>
+                    <TextField
+                      name="segmentDuration"
+                      label="Segment duration (ms)"
+                      placeholder="Segment duration"
+                      type="number"
+                      value={values.segmentDuration}
+                      onChange={(e) =>
+                        setFieldValue('segmentDuration', e.target.value)
+                      }
+                      onBlur={handleBlur}
+                      error={
+                        touched.segmentDuration &&
+                        Boolean(errors.segmentDuration)
+                      }
+                      helperText={errors.segmentDuration}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title="Duration of one audio segment in milliseconds. This value will be used later to calculate job bounty">
                               <HelpOutlineIcon
                                 color="secondary"
                                 sx={{ cursor: 'pointer' }}
