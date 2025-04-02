@@ -1533,6 +1533,8 @@ export class JobService {
       return OracleType.FORTUNE;
     } else if (requestType === JobRequestType.HCAPTCHA) {
       return OracleType.HCAPTCHA;
+    } else if (requestType === JobRequestType.AUDIO_TRANSCRIPTION) {
+      return OracleType.AUDINO;
     } else {
       return OracleType.CVAT;
     }
