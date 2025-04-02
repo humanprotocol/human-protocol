@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 import datumaro as dm
+import pytest
 from sqlalchemy import select
 
 from src.core.types import (
@@ -25,7 +26,17 @@ from src.core.types import (
 from src.crons import track_completed_escrows
 from src.crons.cvat.state_trackers import track_escrow_validations
 from src.db import SessionLocal
-from src.models.cvat import Assignment, EscrowValidation, Image, Job, Project, Task, User
+from src.handlers.completed_escrows import handle_escrow_export
+from src.models.cvat import (
+    Assignment,
+    EscrowCreation,
+    EscrowValidation,
+    Image,
+    Job,
+    Project,
+    Task,
+    User,
+)
 from src.models.webhook import Webhook
 from src.services.cvat import create_escrow_validations
 
@@ -172,7 +183,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert self.session.query(EscrowValidation).count() == 0
 
-    def test_retrieve_annotations(self):
+    def test_can_request_validation(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost
 
@@ -252,34 +263,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
             patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
         ):
-            manifest = json.load(data)
-            mock_get_manifest.return_value = manifest
-
-            dummy_zip_file = io.BytesIO()
-            with zipfile.ZipFile(dummy_zip_file, "w") as archive, TemporaryDirectory() as tempdir:
-                mock_dataset = dm.Dataset(
-                    media_type=dm.Image,
-                    categories={
-                        dm.AnnotationType.label: dm.LabelCategories.from_iterable(["cat", "dog"])
-                    },
-                )
-                for image_filename in project_images:
-                    mock_dataset.put(dm.DatasetItem(id=os.path.splitext(image_filename)[0]))
-                mock_dataset.export(tempdir, format="coco_instances")
-
-                for filename in list(glob(os.path.join(tempdir, "**/*"), recursive=True)):
-                    archive.write(filename, os.path.relpath(filename, tempdir))
-            dummy_zip_file.seek(0)
-
-            mock_cvat_api.get_job_annotations.return_value = dummy_zip_file
-            mock_cvat_api.get_project_annotations.return_value = dummy_zip_file
-
             mock_storage_client = Mock()
             mock_storage_client.create_file = Mock()
             mock_storage_client.list_files = Mock(return_value=[])
@@ -306,119 +292,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert db_validation.status == EscrowValidationStatuses.in_progress
         assert db_validation.attempts == 1
 
-    def test_retrieve_annotations_error_getting_annotations(self):
-        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.localhost
-
-        cvat_project_id = 1
-        project_id = str(uuid.uuid4())
-        cvat_project = Project(
-            id=project_id,
-            cvat_id=cvat_project_id,
-            cvat_cloudstorage_id=1,
-            status=ProjectStatuses.validation,
-            job_type=TaskTypes.image_label_binary,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            bucket_url="https://test.storage.googleapis.com/",
-        )
-        self.session.add(cvat_project)
-
-        cvat_task_id = 1
-        cvat_task = Task(
-            id=str(uuid.uuid4()),
-            cvat_id=cvat_task_id,
-            cvat_project_id=cvat_project_id,
-            status=TaskStatuses.completed,
-        )
-        self.session.add(cvat_task)
-
-        cvat_job = Job(
-            id=str(uuid.uuid4()),
-            cvat_id=1,
-            cvat_project_id=cvat_project_id,
-            cvat_task_id=cvat_task_id,
-            status=JobStatuses.completed,
-            start_frame=0,
-            stop_frame=1,
-        )
-        self.session.add(cvat_job)
-        wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        user = User(
-            wallet_address=wallet_address,
-            cvat_email="test@hmt.ai",
-            cvat_id=1,
-        )
-        self.session.add(user)
-
-        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
-        user = User(
-            wallet_address=wallet_address_2,
-            cvat_email="test2@hmt.ai",
-            cvat_id=2,
-        )
-        self.session.add(user)
-        assignment = Assignment(
-            id=str(uuid.uuid4()),
-            user_wallet_address=wallet_address,
-            cvat_job_id=cvat_job.cvat_id,
-            expires_at=datetime.now() + timedelta(days=1),
-        )
-        self.session.add(assignment)
-
-        validation_id = str(uuid.uuid4())
-        validation = EscrowValidation(
-            id=validation_id,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            status=EscrowValidationStatuses.awaiting,
-        )
-        self.session.add(validation)
-
-        self.session.commit()
-
-        with (
-            open("tests/utils/manifest.json") as data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
-            patch("src.handlers.completed_escrows.validate_escrow"),
-            patch(
-                "src.handlers.completed_escrows.cvat_api.request_job_annotations"
-            ) as mock_request_job_annotations,
-            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
-        ):
-            manifest = json.load(data)
-            mock_get_manifest.return_value = manifest
-
-            mock_create_file = Mock()
-            mock_storage_client = Mock()
-            mock_storage_client.create_file = mock_create_file
-            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
-
-            mock_request_job_annotations.side_effect = _TestException()
-
-            track_escrow_validations()
-
-            mock_request_job_annotations.assert_called()
-
-        webhook = (
-            self.session.query(Webhook)
-            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
-            .first()
-        )
-        assert webhook is None
-
-        db_project = self.session.query(Project).filter_by(id=project_id).first()
-        assert db_project.status == ProjectStatuses.validation
-
-        db_validation = (
-            self.session.query(EscrowValidation)
-            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
-            .first()
-        )
-        assert db_validation.status == EscrowValidationStatuses.awaiting
-        assert db_validation.attempts == 1
-
-    def test_retrieve_annotations_error_uploading_files(self):
+    def test_request_validation_error_in_file_uploading_increases_attempts(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         chain_id = Networks.localhost
 
@@ -499,33 +373,10 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
-            open("tests/utils/manifest.json") as data,
-            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
-            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
             patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
             patch("src.services.cloud.make_client"),
         ):
-            manifest = json.load(data)
-            mock_get_manifest.return_value = manifest
-            dummy_zip_file = io.BytesIO()
-            with zipfile.ZipFile(dummy_zip_file, "w") as archive, TemporaryDirectory() as tempdir:
-                mock_dataset = dm.Dataset(
-                    media_type=dm.Image,
-                    categories={
-                        dm.AnnotationType.label: dm.LabelCategories.from_iterable(["cat", "dog"])
-                    },
-                )
-                for image_filename in project_images:
-                    mock_dataset.put(dm.DatasetItem(id=os.path.splitext(image_filename)[0]))
-                mock_dataset.export(tempdir, format="coco_instances")
-
-                for filename in list(glob(os.path.join(tempdir, "**/*"), recursive=True)):
-                    archive.write(filename, os.path.relpath(filename, tempdir))
-            dummy_zip_file.seek(0)
-
-            mock_cvat_api.get_job_annotations.return_value = dummy_zip_file
-            mock_cvat_api.get_project_annotations.return_value = dummy_zip_file
             mock_cloud_service.make_client.return_value.create_file.side_effect = _TestException()
 
             track_escrow_validations()
@@ -550,7 +401,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert db_validation.status == EscrowValidationStatuses.awaiting
         assert db_validation.attempts == 1
 
-    def test_retrieve_annotations_multiple_projects_per_escrow_all_completed(self):
+    def test_can_request_validation_multiple_projects_per_escrow_all_completed(self):
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         project1, task1, job1 = create_project_task_and_job(self.session, escrow_address, 1)
         project2, task2, job2 = create_project_task_and_job(self.session, escrow_address, 2)
@@ -615,6 +466,488 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         with (
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+        ):
+            mock_storage_client = Mock()
+            mock_storage_client.create_file = Mock()
+            mock_storage_client.list_files = Mock(return_value=[])
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
+
+            track_escrow_validations()
+
+        webhook = (
+            self.session.query(Webhook)
+            .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost)
+            .first()
+        )
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
+
+        self.session.refresh(project1)
+        self.session.refresh(project2)
+        self.session.refresh(project3)
+        for db_project in project1, project2, project3:
+            assert db_project.status == ProjectStatuses.validation
+
+    def test_can_export_escrow(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        chain_id = Networks.localhost
+
+        cvat_project_id = 1
+        project_id = str(uuid.uuid4())
+        cvat_project = Project(
+            id=project_id,
+            cvat_id=cvat_project_id,
+            cvat_cloudstorage_id=1,
+            status=ProjectStatuses.validation,
+            job_type=TaskTypes.image_label_binary,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url="https://test.storage.googleapis.com/",
+        )
+        self.session.add(cvat_project)
+
+        project_images = ["sample1.jpg", "sample2.png"]
+        for image_filename in project_images:
+            self.session.add(
+                Image(
+                    id=str(uuid.uuid4()), cvat_project_id=cvat_project_id, filename=image_filename
+                )
+            )
+
+        cvat_task_id = 1
+        cvat_task = Task(
+            id=str(uuid.uuid4()),
+            cvat_id=cvat_task_id,
+            cvat_project_id=cvat_project_id,
+            status=TaskStatuses.completed,
+        )
+        self.session.add(cvat_task)
+
+        cvat_job = Job(
+            id=str(uuid.uuid4()),
+            cvat_id=1,
+            cvat_project_id=cvat_project_id,
+            cvat_task_id=cvat_task_id,
+            status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
+        )
+        self.session.add(cvat_job)
+        wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        user = User(
+            wallet_address=wallet_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
+        user = User(
+            wallet_address=wallet_address_2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user)
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=wallet_address,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=datetime.now() + timedelta(days=1),
+        )
+        self.session.add(assignment)
+
+        creation_id = str(uuid.uuid4())
+        creation = EscrowCreation(
+            id=creation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            created_at=datetime.now(),
+            finished_at=datetime.now(),
+            total_jobs=1,
+        )
+        self.session.add(creation)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+
+            dummy_zip_file = io.BytesIO()
+            with zipfile.ZipFile(dummy_zip_file, "w") as archive, TemporaryDirectory() as tempdir:
+                mock_dataset = dm.Dataset(
+                    media_type=dm.Image,
+                    categories={
+                        dm.AnnotationType.label: dm.LabelCategories.from_iterable(["cat", "dog"])
+                    },
+                )
+                for image_filename in project_images:
+                    mock_dataset.put(dm.DatasetItem(id=os.path.splitext(image_filename)[0]))
+                mock_dataset.export(tempdir, format="coco_instances")
+
+                for filename in list(glob(os.path.join(tempdir, "**/*"), recursive=True)):
+                    archive.write(filename, os.path.relpath(filename, tempdir))
+            dummy_zip_file.seek(0)
+
+            mock_cvat_api.get_job_annotations.return_value = dummy_zip_file
+            mock_cvat_api.get_project_annotations.return_value = dummy_zip_file
+
+            mock_storage_client = Mock()
+            mock_storage_client.create_file = Mock()
+            mock_storage_client.list_files = Mock(return_value=[])
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
+
+            handle_escrow_export(
+                logger=Mock(),
+                session=self.session,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+            )
+
+        webhook = (
+            self.session.query(Webhook)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
+            .first()
+        )
+        assert webhook is not None
+        assert webhook.event_type == ExchangeOracleEventTypes.escrow_recorded
+
+        assert (
+            mock_cvat_api.get_job_annotations.call_count
+            or mock_cvat_api.get_project_annotations.call_count
+        )
+        assert mock_storage_client.create_file.call_count == 3  # meta + merged + per job anns
+
+    def test_can_export_escrow_error_getting_annotations(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        chain_id = Networks.localhost
+
+        cvat_project_id = 1
+        project_id = str(uuid.uuid4())
+        cvat_project = Project(
+            id=project_id,
+            cvat_id=cvat_project_id,
+            cvat_cloudstorage_id=1,
+            status=ProjectStatuses.validation,
+            job_type=TaskTypes.image_label_binary,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url="https://test.storage.googleapis.com/",
+        )
+        self.session.add(cvat_project)
+
+        cvat_task_id = 1
+        cvat_task = Task(
+            id=str(uuid.uuid4()),
+            cvat_id=cvat_task_id,
+            cvat_project_id=cvat_project_id,
+            status=TaskStatuses.completed,
+        )
+        self.session.add(cvat_task)
+
+        cvat_job = Job(
+            id=str(uuid.uuid4()),
+            cvat_id=1,
+            cvat_project_id=cvat_project_id,
+            cvat_task_id=cvat_task_id,
+            status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
+        )
+        self.session.add(cvat_job)
+        wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        user = User(
+            wallet_address=wallet_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
+        user = User(
+            wallet_address=wallet_address_2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user)
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=wallet_address,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=datetime.now() + timedelta(days=1),
+        )
+        self.session.add(assignment)
+
+        creation_id = str(uuid.uuid4())
+        creation = EscrowCreation(
+            id=creation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            created_at=datetime.now(),
+            finished_at=datetime.now(),
+            total_jobs=1,
+        )
+        self.session.add(creation)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch(
+                "src.handlers.completed_escrows.cvat_api.request_job_annotations"
+            ) as mock_request_job_annotations,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+
+            mock_create_file = Mock()
+            mock_storage_client = Mock()
+            mock_storage_client.create_file = mock_create_file
+            mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
+
+            mock_request_job_annotations.side_effect = _TestException()
+
+            with pytest.raises(_TestException):
+                handle_escrow_export(
+                    logger=Mock(),
+                    session=self.session,
+                    escrow_address=escrow_address,
+                    chain_id=chain_id,
+                )
+
+            mock_request_job_annotations.assert_called()
+
+        webhook = (
+            self.session.query(Webhook)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
+            .first()
+        )
+        assert webhook is None
+
+        mock_storage_client.create_file.assert_not_called()
+
+        db_project = self.session.query(Project).filter_by(id=project_id).first()
+        assert db_project.status == ProjectStatuses.validation
+
+    def test_can_export_escrow_error_uploading_files(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        chain_id = Networks.localhost
+
+        cvat_project_id = 1
+        project_id = str(uuid.uuid4())
+        cvat_project = Project(
+            id=project_id,
+            cvat_id=cvat_project_id,
+            cvat_cloudstorage_id=1,
+            status=ProjectStatuses.validation,
+            job_type=TaskTypes.image_label_binary,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            bucket_url="https://test.storage.googleapis.com/",
+        )
+        self.session.add(cvat_project)
+
+        cvat_task_id = 1
+        cvat_task = Task(
+            id=str(uuid.uuid4()),
+            cvat_id=cvat_task_id,
+            cvat_project_id=cvat_project_id,
+            status=TaskStatuses.completed,
+        )
+        self.session.add(cvat_task)
+
+        cvat_job = Job(
+            id=str(uuid.uuid4()),
+            cvat_id=1,
+            cvat_project_id=cvat_project_id,
+            cvat_task_id=cvat_task_id,
+            status=JobStatuses.completed,
+            start_frame=0,
+            stop_frame=1,
+        )
+        self.session.add(cvat_job)
+        wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        user = User(
+            wallet_address=wallet_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
+        user = User(
+            wallet_address=wallet_address_2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user)
+        assignment = Assignment(
+            id=str(uuid.uuid4()),
+            user_wallet_address=wallet_address,
+            cvat_job_id=cvat_job.cvat_id,
+            expires_at=datetime.now() + timedelta(days=1),
+        )
+        project_images = ["sample1.jpg", "sample2.png"]
+
+        for image_filename in project_images:
+            self.session.add(
+                Image(
+                    id=str(uuid.uuid4()), cvat_project_id=cvat_project_id, filename=image_filename
+                )
+            )
+
+        self.session.add(assignment)
+
+        creation_id = str(uuid.uuid4())
+        creation = EscrowCreation(
+            id=creation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            created_at=datetime.now(),
+            finished_at=datetime.now(),
+            total_jobs=1,
+        )
+        self.session.add(creation)
+
+        self.session.commit()
+
+        with (
+            open("tests/utils/manifest.json") as data,
+            patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
+            patch("src.handlers.completed_escrows.validate_escrow"),
+            patch("src.handlers.completed_escrows.cvat_api") as mock_cvat_api,
+            patch("src.handlers.completed_escrows.cloud_service") as mock_cloud_service,
+            patch("src.services.cloud.make_client"),
+        ):
+            manifest = json.load(data)
+            mock_get_manifest.return_value = manifest
+            dummy_zip_file = io.BytesIO()
+            with zipfile.ZipFile(dummy_zip_file, "w") as archive, TemporaryDirectory() as tempdir:
+                mock_dataset = dm.Dataset(
+                    media_type=dm.Image,
+                    categories={
+                        dm.AnnotationType.label: dm.LabelCategories.from_iterable(["cat", "dog"])
+                    },
+                )
+                for image_filename in project_images:
+                    mock_dataset.put(dm.DatasetItem(id=os.path.splitext(image_filename)[0]))
+                mock_dataset.export(tempdir, format="coco_instances")
+
+                for filename in list(glob(os.path.join(tempdir, "**/*"), recursive=True)):
+                    archive.write(filename, os.path.relpath(filename, tempdir))
+            dummy_zip_file.seek(0)
+
+            mock_cvat_api.get_job_annotations.return_value = dummy_zip_file
+            mock_cvat_api.get_project_annotations.return_value = dummy_zip_file
+            mock_cloud_service.make_client.return_value.create_file.side_effect = _TestException()
+
+            with pytest.raises(_TestException):
+                handle_escrow_export(
+                    logger=Mock(),
+                    session=self.session,
+                    escrow_address=escrow_address,
+                    chain_id=chain_id,
+                )
+
+        mock_cloud_service.make_client.return_value.create_file.assert_called()
+
+        webhook = (
+            self.session.query(Webhook)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
+            .first()
+        )
+        assert webhook is None
+
+        db_project = self.session.query(Project).filter_by(id=project_id).first()
+        assert db_project.status == ProjectStatuses.validation
+
+    def test_can_export_multiple_projects_per_escrow(self):
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        chain_id = Networks.localhost
+
+        project1, task1, job1 = create_project_task_and_job(self.session, escrow_address, 1)
+        project2, task2, job2 = create_project_task_and_job(self.session, escrow_address, 2)
+        project3, task3, job3 = create_project_task_and_job(self.session, escrow_address, 3)
+
+        project1.job_type = TaskTypes.image_skeletons_from_boxes
+        project2.job_type = TaskTypes.image_skeletons_from_boxes
+        project3.job_type = TaskTypes.image_skeletons_from_boxes
+        project1.status = ProjectStatuses.validation
+        project2.status = ProjectStatuses.validation
+        project3.status = ProjectStatuses.validation
+        task1.status = TaskStatuses.completed
+        task2.status = TaskStatuses.completed
+        task3.status = TaskStatuses.completed
+        job1.status = JobStatuses.completed
+        job2.status = JobStatuses.completed
+        job3.status = JobStatuses.completed
+
+        project_images = ["sample1.jpg", "sample2.png"]
+        for project in [project1, project2, project3]:
+            for image_filename in project_images:
+                self.session.add(
+                    Image(
+                        id=str(uuid.uuid4()),
+                        cvat_project_id=project.cvat_id,
+                        filename=image_filename,
+                    )
+                )
+
+        self.session.add_all([project1, task1, job1, project2, task2, job2, project3, task3, job3])
+
+        wallet_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        user = User(
+            wallet_address=wallet_address,
+            cvat_email="test@hmt.ai",
+            cvat_id=1,
+        )
+        self.session.add(user)
+
+        wallet_address_2 = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
+        user = User(
+            wallet_address=wallet_address_2,
+            cvat_email="test2@hmt.ai",
+            cvat_id=2,
+        )
+        self.session.add(user)
+
+        now = datetime.now()
+        for job in [job1, job2, job3]:
+            assignment = Assignment(
+                id=str(uuid.uuid4()),
+                user_wallet_address=wallet_address,
+                cvat_job_id=job.cvat_id,
+                expires_at=now + timedelta(days=1),
+                completed_at=now - timedelta(hours=1),
+                status=AssignmentStatuses.completed,
+            )
+            self.session.add(assignment)
+
+        creation_id = str(uuid.uuid4())
+        creation = EscrowCreation(
+            id=creation_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            created_at=now,
+            finished_at=now,
+            total_jobs=3,
+        )
+        self.session.add(creation)
+
+        self.session.commit()
+
+        with (
             open("tests/utils/manifest.json") as manifest_data,
             patch("src.handlers.completed_escrows.get_escrow_manifest") as mock_get_manifest,
             patch("src.handlers.completed_escrows.validate_escrow"),
@@ -674,18 +1007,21 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_storage_client.list_files = Mock(return_value=[])
             mock_cloud_service.make_client = Mock(return_value=mock_storage_client)
 
-            track_escrow_validations()
+            handle_escrow_export(
+                logger=Mock(),
+                session=self.session,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+            )
 
         webhook = (
             self.session.query(Webhook)
-            .filter_by(escrow_address=escrow_address, chain_id=Networks.localhost)
+            .filter_by(escrow_address=escrow_address, chain_id=chain_id)
             .first()
         )
         assert webhook is not None
-        assert webhook.event_type == ExchangeOracleEventTypes.job_finished
+        assert webhook.event_type == ExchangeOracleEventTypes.escrow_recorded
 
-        self.session.refresh(project1)
-        self.session.refresh(project2)
-        self.session.refresh(project3)
-        for db_project in project1, project2, project3:
-            assert db_project.status == ProjectStatuses.validation
+        assert mock_cvat_api.get_job_annotations.call_count >= 3
+        assert mock_cvat_api.get_project_annotations.call_count == 0
+        assert mock_storage_client.create_file.call_count == 5  # meta + jobs + merged

@@ -1,5 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import {
+  AudinoManifest,
   CvatManifest,
   FortuneManifest,
 } from '../../common/interfaces/manifest';
@@ -31,7 +32,7 @@ export type CalculatedPayout = {
 
 export interface RequestAction {
   calculatePayouts: (
-    manifest: FortuneManifest | CvatManifest,
+    manifest: FortuneManifest | CvatManifest | AudinoManifest,
     data: CalculatePayoutsInput,
   ) => Promise<CalculatedPayout[]>;
   saveResults: (

@@ -1453,8 +1453,15 @@ describe('CronJobService', () => {
 
       await service.processAbuse();
 
+      expect(repository.updateOne).toHaveBeenCalledTimes(2);
       expect(repository.updateOne).toHaveBeenCalledWith({
-        ...cronJobEntityMock,
+        cronJobType: CronJobType.Abuse,
+        startedAt: expect.any(Date),
+        completedAt: null,
+      });
+      expect(repository.updateOne).toHaveBeenCalledWith({
+        cronJobType: CronJobType.Abuse,
+        startedAt: expect.any(Date),
         completedAt: expect.any(Date),
       });
     });

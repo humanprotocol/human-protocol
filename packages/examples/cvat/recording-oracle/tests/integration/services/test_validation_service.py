@@ -24,7 +24,10 @@ from src.core.validation_errors import TooSlowAnnotationError
 from src.core.validation_results import ValidationFailure, ValidationSuccess
 from src.cvat import api_calls as cvat_api
 from src.db import SessionLocal
-from src.handlers.process_intermediate_results import process_intermediate_results
+from src.handlers.process_intermediate_results import (
+    process_final_results,
+    process_intermediate_results,
+)
 from src.services.validation import (
     create_job,
     create_task,
@@ -128,15 +131,6 @@ class TestManifestChange:
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
             )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
-            )
 
             common_lock_es.enter_context(
                 mock.patch("src.core.config.ValidationConfig.min_warmup_progress", 0),
@@ -174,22 +168,11 @@ class TestManifestChange:
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
-            def patched_prepare_merged_dataset(self):
-                self._updated_merged_dataset_archive = io.BytesIO()
-
-            common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
-                    patched_prepare_merged_dataset,
-                )
-            )
-
             annotation_meta = AnnotationMeta(
                 jobs=[
                     JobMeta(
                         job_id=cvat_job_id,
                         task_id=cvat_task_id,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment1_id,
                         start_frame=0,
@@ -237,7 +220,6 @@ class TestManifestChange:
                     escrow_address=escrow_address,
                     chain_id=chain_id,
                     meta=annotation_meta,
-                    merged_annotations=io.BytesIO(),
                     manifest=manifest,
                     logger=logger,
                 )
@@ -283,7 +265,6 @@ class TestManifestChange:
                     escrow_address=escrow_address,
                     chain_id=chain_id,
                     meta=annotation_meta,
-                    merged_annotations=io.BytesIO(),
                     manifest=manifest,
                     logger=logger,
                 )
@@ -354,15 +335,6 @@ class TestValidationLogic:
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
             )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
-            )
 
             mock_make_cloud_client = common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
@@ -397,22 +369,11 @@ class TestValidationLogic:
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
-            def patched_prepare_merged_dataset(self):
-                self._updated_merged_dataset_archive = io.BytesIO()
-
-            common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
-                    patched_prepare_merged_dataset,
-                )
-            )
-
             annotation_meta = AnnotationMeta(
                 jobs=[
                     JobMeta(
                         job_id=1 + i,
                         task_id=cvat_task_id,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment1_id,
                         start_frame=job_start,
@@ -468,7 +429,6 @@ class TestValidationLogic:
                     escrow_address=escrow_address,
                     chain_id=chain_id,
                     meta=annotation_meta,
-                    merged_annotations=io.BytesIO(),
                     manifest=manifest,
                     logger=logger,
                 )
@@ -610,15 +570,6 @@ class TestValidationLogic:
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
             )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
-            )
 
             mock_make_cloud_client = common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
@@ -652,22 +603,11 @@ class TestValidationLogic:
             )
             mock_get_task_labels.return_value = [label.name for label in manifest.annotation.labels]
 
-            def patched_prepare_merged_dataset(self):
-                self._updated_merged_dataset_archive = io.BytesIO()
-
-            common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
-                    patched_prepare_merged_dataset,
-                )
-            )
-
             annotation_meta = AnnotationMeta(
                 jobs=[
                     JobMeta(
                         job_id=cvat_job_id,
                         task_id=cvat_task_id,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment1_id,
                         start_frame=0,
@@ -718,7 +658,6 @@ class TestValidationLogic:
                         escrow_address=escrow_address,
                         chain_id=chain_id,
                         meta=annotation_meta,
-                        merged_annotations=io.BytesIO(),
                         manifest=manifest,
                         logger=logger,
                     )
@@ -747,15 +686,6 @@ class TestValidationLogic:
 
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -797,22 +727,11 @@ class TestValidationLogic:
                 )
             )
 
-            def patched_prepare_merged_dataset(self):
-                self._updated_merged_dataset_archive = io.BytesIO()
-
-            common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
-                    patched_prepare_merged_dataset,
-                )
-            )
-
             annotation_meta = AnnotationMeta(
                 jobs=[
                     JobMeta(
                         job_id=cvat_task_id1,
                         task_id=cvat_task_id1,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment1_id,
                         start_frame=0,
@@ -821,7 +740,6 @@ class TestValidationLogic:
                     JobMeta(
                         job_id=cvat_task_id2,
                         task_id=cvat_task_id2,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment2_id,
                         start_frame=0,
@@ -887,7 +805,6 @@ class TestValidationLogic:
                     escrow_address=escrow_address,
                     chain_id=chain_id,
                     meta=annotation_meta,
-                    merged_annotations=io.BytesIO(),
                     manifest=manifest,
                     logger=logger,
                 )
@@ -951,15 +868,6 @@ class TestValidationLogic:
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
             )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
-            )
 
             mock_make_cloud_client = common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.make_cloud_client")
@@ -1000,22 +908,11 @@ class TestValidationLogic:
                 )
             )
 
-            def patched_prepare_merged_dataset(self):
-                self._updated_merged_dataset_archive = io.BytesIO()
-
-            common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
-                    patched_prepare_merged_dataset,
-                )
-            )
-
             annotation_meta = AnnotationMeta(
                 jobs=[
                     JobMeta(
                         job_id=cvat_task_id1,
                         task_id=cvat_task_id1,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment1_id,
                         start_frame=0,
@@ -1024,7 +921,6 @@ class TestValidationLogic:
                     JobMeta(
                         job_id=cvat_task_id2,
                         task_id=cvat_task_id2,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment2_id,
                         start_frame=0,
@@ -1090,7 +986,6 @@ class TestValidationLogic:
                     escrow_address=escrow_address,
                     chain_id=chain_id,
                     meta=annotation_meta,
-                    merged_annotations=io.BytesIO(),
                     manifest=manifest,
                     logger=logger,
                 )
@@ -1126,15 +1021,6 @@ class TestValidationLogic:
 
             common_lock_es.enter_context(
                 mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.extract_zip_archive")
-            )
-            common_lock_es.enter_context(
-                mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive")
             )
 
             mock_make_cloud_client = common_lock_es.enter_context(
@@ -1176,22 +1062,11 @@ class TestValidationLogic:
                 )
             )
 
-            def patched_prepare_merged_dataset(self):
-                self._updated_merged_dataset_archive = io.BytesIO()
-
-            common_lock_es.enter_context(
-                mock.patch(
-                    "src.handlers.process_intermediate_results._TaskValidator._prepare_merged_dataset",
-                    patched_prepare_merged_dataset,
-                )
-            )
-
             annotation_meta = AnnotationMeta(
                 jobs=[
                     JobMeta(
                         job_id=cvat_task_id,
                         task_id=cvat_task_id,
-                        annotation_filename="",
                         annotator_wallet_address=annotator1,
                         assignment_id=assignment1_id,
                         start_frame=0,
@@ -1249,7 +1124,6 @@ class TestValidationLogic:
                     escrow_address=escrow_address,
                     chain_id=chain_id,
                     meta=annotation_meta,
-                    merged_annotations=io.BytesIO(),
                     manifest=manifest,
                     logger=logger,
                 )
@@ -1258,3 +1132,100 @@ class TestValidationLogic:
             assert any("Too few validation frames left in the task" in m for m in caplog.messages)
 
             mock_update_task_validation_layout.assert_not_called()
+
+
+class TestAnnotationMerging:
+    def test_can_prepare_final_results_in_validated_escrow(self, session: Session):
+        escrow_address = ESCROW_ADDRESS
+        chain_id = Networks.localhost.value
+
+        task1_id = create_task(session, escrow_address=escrow_address, chain_id=chain_id)
+
+        job1_id = create_job(session, job_cvat_id=1, task_id=task1_id)
+
+        job2_id = create_job(session, job_cvat_id=2, task_id=task1_id)
+
+        assignment_id1 = str(uuid.uuid4())
+        annotator1 = WALLET_ADDRESS1
+        vr1 = models.ValidationResult(
+            id=str(uuid.uuid4()),
+            job_id=job1_id,
+            assignment_id=assignment_id1,
+            annotator_wallet_address=annotator1,
+            annotation_quality=0.8,
+        )
+        session.add(vr1)
+
+        assignment_id2 = str(uuid.uuid4())
+        vr2 = models.ValidationResult(
+            id=str(uuid.uuid4()),
+            job_id=job2_id,
+            assignment_id=assignment_id2,
+            annotator_wallet_address=annotator1,
+            annotation_quality=0.6,
+        )
+        session.add(vr2)
+
+        session.commit()
+
+        manifest = generate_manifest(min_quality=0.4)
+
+        def patched_prepare_merged_dataset(self):
+            self._updated_merged_dataset_archive = io.BytesIO(b"test")
+
+        with (
+            mock.patch("src.handlers.process_intermediate_results.BucketAccessInfo.parse_obj"),
+            mock.patch(
+                "src.handlers.process_intermediate_results.make_cloud_client"
+            ) as mock_make_cloud_client,
+            mock.patch("src.handlers.process_intermediate_results.dm.Dataset.import_from"),
+            mock.patch("src.handlers.process_intermediate_results.extract_zip_archive"),
+            mock.patch("src.handlers.process_intermediate_results.write_dir_to_zip_archive"),
+            mock.patch(
+                "src.handlers.process_intermediate_results._TaskAnnotationMerger._prepare_merged_dataset",
+                patched_prepare_merged_dataset,
+            ),
+        ):
+            mock_make_cloud_client.return_value.download_file = mock.Mock(return_value=b"")
+
+            annotation_meta = AnnotationMeta(
+                jobs=[
+                    JobMeta(
+                        job_id=1,
+                        task_id=1,
+                        annotator_wallet_address=annotator1,
+                        assignment_id=assignment_id1,
+                        start_frame=0,
+                        stop_frame=manifest.annotation.job_size + manifest.validation.val_size,
+                    ),
+                    JobMeta(
+                        job_id=2,
+                        task_id=1,
+                        annotator_wallet_address=annotator1,
+                        assignment_id=assignment_id2,
+                        start_frame=0,
+                        stop_frame=manifest.annotation.job_size + manifest.validation.val_size,
+                    ),
+                ]
+            )
+
+            final_result = process_final_results(
+                session=session,
+                escrow_address=escrow_address,
+                chain_id=chain_id,
+                meta=annotation_meta,
+                manifest=manifest,
+                merged_annotations=io.BytesIO(),
+                logger=mock.Mock(Logger),
+            )
+
+        assert mock_make_cloud_client.return_value.download_file.call_count == 1  # gt
+
+        assert final_result.average_quality == 0.7
+        assert final_result.resulting_annotations == b"test"
+        assert final_result.job_results == {
+            1: 0.8,
+            2: 0.6,
+        }
+        assert len(final_result.validation_meta.jobs) == 2
+        assert len(final_result.validation_meta.results) == 2

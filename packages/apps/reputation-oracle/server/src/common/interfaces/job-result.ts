@@ -22,3 +22,20 @@ export interface CvatAnnotationMeta {
   jobs: CvatAnnotationMetaJobs[];
   results: CvatAnnotationMetaResults[];
 }
+
+interface AudinoAnnotationMetaJob {
+  job_id: number;
+  final_result_id: number;
+}
+
+export interface AudinoAnnotationMetaResult {
+  id: number;
+  job_id: number;
+  annotator_wallet_address: string;
+  annotation_quality: number;
+}
+
+export interface AudinoAnnotationMeta {
+  jobs: AudinoAnnotationMetaJob[];
+  results: AudinoAnnotationMetaResult[];
+}

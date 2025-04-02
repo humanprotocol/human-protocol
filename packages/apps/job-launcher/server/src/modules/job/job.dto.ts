@@ -18,6 +18,7 @@ import {
   IsDefined,
   IsNotEmptyObject,
   ArrayMinSize,
+  Equals,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
@@ -206,6 +207,61 @@ export class JobCvatDto extends JobDto {
   @ApiProperty({ enum: JobRequestType })
   @IsEnumCaseInsensitive(JobRequestType)
   public type: JobRequestType;
+}
+
+class AudinoLabel {
+  @ApiProperty()
+  @IsString()
+  public name: string;
+}
+
+class AudinoDataDto {
+  @ApiProperty()
+  @IsObject()
+  public dataset: StorageDataDto;
+}
+
+export class JobAudinoDto extends JobDto {
+  @ApiProperty({ name: 'requester_description' })
+  @IsString()
+  public requesterDescription: string;
+
+  @ApiProperty()
+  @IsObject()
+  public data: AudinoDataDto;
+
+  @ApiProperty({ type: [AudinoLabel] })
+  @IsArray()
+  @ArrayMinSize(1)
+  public labels: AudinoLabel[];
+
+  @ApiProperty({ name: 'min_quality' })
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  public minQuality: number;
+
+  @ApiProperty({ name: 'ground_truth' })
+  @IsObject()
+  public groundTruth: StorageDataDto;
+
+  @ApiProperty({ name: 'user_guide' })
+  @IsUrl()
+  public userGuide: string;
+
+  @ApiProperty({ enum: JobRequestType })
+  @IsEnumCaseInsensitive(JobRequestType)
+  public type: JobRequestType;
+
+  @ApiProperty({ name: 'audio_duration' })
+  @IsNumber()
+  @IsPositive()
+  public audioDuration: number;
+
+  @ApiProperty({ name: 'segment_duration' })
+  @IsNumber()
+  @IsPositive()
+  public segmentDuration: number;
 }
 
 export class JobCancelDto {
@@ -448,6 +504,58 @@ export class CvatManifestDto {
 
   @IsObject()
   public validation: Validation;
+
+  @IsString()
+  public job_bounty: string;
+}
+
+class AudinoData {
+  @IsUrl()
+  public data_url: string;
+}
+
+class AudinoAnnotation {
+  @IsArray()
+  public labels: Array<{ name: string }>;
+
+  @IsString()
+  public description: string;
+
+  @IsString()
+  @IsUrl()
+  public user_guide: string;
+
+  @Equals(JobRequestType.AUDIO_TRANSCRIPTION)
+  public type: JobRequestType.AUDIO_TRANSCRIPTION;
+
+  @IsNumber()
+  @IsPositive()
+  public segment_duration: number;
+
+  @IsArray()
+  @IsOptional()
+  public qualifications?: string[];
+}
+
+class AudinoValidation {
+  @IsNumber()
+  @IsPositive()
+  public min_quality: number;
+
+  @IsString()
+  @IsUrl()
+  public gt_url: string;
+}
+
+export class AudinoManifestDto {
+  @IsObject()
+  public data: AudinoData;
+
+  @IsObject()
+  public annotation: AudinoAnnotation;
+
+  @IsObject()
+  public validation: AudinoValidation;
 
   @IsString()
   public job_bounty: string;

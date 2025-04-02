@@ -33,20 +33,27 @@ class ExchangeOracleEvent_JobFinished(OracleEvent):
     pass  # escrow is enough for now
 
 
+class ExchangeOracleEvent_EscrowExported(OracleEvent):
+    pass  # escrow is enough for now
+
+
 class ExchangeOracleEvent_EscrowCleaned(OracleEvent):
     pass
 
 
 _event_type_map = {
+    # TODO: make sender-dependent
     RecordingOracleEventTypes.job_completed: RecordingOracleEvent_JobCompleted,
     RecordingOracleEventTypes.submission_rejected: RecordingOracleEvent_SubmissionRejected,
     ExchangeOracleEventTypes.escrow_failed: ExchangeOracleEvent_EscrowFailed,
     ExchangeOracleEventTypes.job_finished: ExchangeOracleEvent_JobFinished,
     ExchangeOracleEventTypes.escrow_cleaned: ExchangeOracleEvent_EscrowCleaned,
+    ExchangeOracleEventTypes.escrow_recorded: ExchangeOracleEvent_EscrowExported,
 }
 
 
 def get_class_for_event_type(event_type: str) -> type[OracleEvent]:
+    # TODO: make sender-dependent
     event_class = next((v for k, v in _event_type_map.items() if k == event_type), None)
 
     if not event_class:

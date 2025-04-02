@@ -31,6 +31,7 @@ import {
   JobQuickLaunchDto,
   JobCancelDto,
   GetJobsDto,
+  JobAudinoDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType } from '../../common/enums/job';
@@ -167,6 +168,46 @@ export class JobController {
     @Body() data: JobCvatDto,
     @Request() req: RequestWithUser,
   ): Promise<number> {
+    return await this.mutexManagerService.runExclusive(
+      { id: `user${req.user.id}` },
+      MUTEX_TIMEOUT,
+      async () => {
+        return await this.jobService.createJob(req.user, data.type, data);
+      },
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Create an Audino job',
+    description: 'Endpoint to create a new Audino job.',
+  })
+  @ApiBody({ type: JobAudinoDto })
+  @ApiResponse({
+    status: 201,
+    description: 'ID of the created Audino job.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. Conflict with the current state of the server.',
+  })
+  @Post('/audino')
+  public async createAudinoJob(
+    @Body() data: JobAudinoDto,
+    @Request() req: RequestWithUser,
+  ): Promise<number> {
+    if (this.web3ConfigService.env === Web3Env.MAINNET) {
+      throw new ControlledError('Disabled', HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
     return await this.mutexManagerService.runExclusive(
       { id: `user${req.user.id}` },
       MUTEX_TIMEOUT,
