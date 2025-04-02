@@ -62,6 +62,8 @@ import {
   CvatDataDto,
   StorageDataDto,
   GetJobsDto,
+  JobAudinoDto,
+  AudinoManifestDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -370,6 +372,41 @@ export class JobService {
     }
   }
 
+  public async createAudinoManifest(
+    dto: JobAudinoDto,
+    requestType: JobRequestType,
+    tokenFundAmount: number,
+  ): Promise<any> {
+    const { generateUrls } = this.createManifestActions[requestType];
+    const urls = generateUrls(dto.data, dto.groundTruth);
+    const totalSegments = Math.ceil(
+      (dto.audioDuration * 1000) / dto.segmentDuration,
+    );
+
+    const jobBounty =
+      ethers.parseUnits(tokenFundAmount.toString(), 'ether') /
+      BigInt(totalSegments);
+
+    return {
+      annotation: {
+        description: dto.requesterDescription,
+        labels: dto.labels,
+        qualifications: dto.qualifications || [],
+        type: requestType,
+        user_guide: dto.userGuide,
+        segment_duration: dto.segmentDuration,
+      },
+      data: {
+        data_url: urls.dataUrl.href,
+      },
+      job_bounty: ethers.formatEther(jobBounty),
+      validation: {
+        gt_url: urls.gtUrl.href,
+        min_quality: dto.minQuality,
+      },
+    };
+  }
+
   private buildHCaptchaRestrictedAudience(advanced: JobCaptchaAdvancedDto) {
     const restrictedAudience: RestrictedAudience = {};
 
@@ -486,6 +523,13 @@ export class JobService {
         fundAmount: number,
       ) => this.createCvatManifest(dto, requestType, fundAmount),
     },
+    [JobRequestType.AUDIO_TRANSCRIPTION]: {
+      createManifest: (
+        dto: JobAudinoDto,
+        requestType: JobRequestType,
+        fundAmount: number,
+      ) => this.createAudinoManifest(dto, requestType, fundAmount),
+    },
   };
 
   private createEscrowSpecificActions: Record<JobRequestType, EscrowAction> = {
@@ -508,6 +552,9 @@ export class JobService {
       getTrustedHandlers: () => [],
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
+      getTrustedHandlers: () => [],
+    },
+    [JobRequestType.AUDIO_TRANSCRIPTION]: {
       getTrustedHandlers: () => [],
     },
   };
@@ -661,6 +708,20 @@ export class JobService {
         };
       },
     },
+    [JobRequestType.AUDIO_TRANSCRIPTION]: {
+      getElementsCount: async () => 0,
+      generateUrls: (
+        data: CvatDataDto,
+        groundTruth: StorageDataDto,
+      ): GenerateUrls => {
+        const requestType = JobRequestType.AUDIO_TRANSCRIPTION;
+
+        return {
+          dataUrl: generateBucketUrl(data.dataset, requestType),
+          gtUrl: generateBucketUrl(groundTruth, requestType),
+        };
+      },
+    },
   };
 
   private getOraclesSpecificActions: Record<JobRequestType, OracleAction> = {
@@ -732,6 +793,15 @@ export class JobService {
         const reputationOracle = this.web3ConfigService.reputationOracleAddress;
 
         return { exchangeOracle, recordingOracle, reputationOracle };
+      },
+    },
+    [JobRequestType.AUDIO_TRANSCRIPTION]: {
+      getOracleAddresses: (): OracleAddresses => {
+        return {
+          exchangeOracle: this.web3ConfigService.audinoExchangeOracleAddress,
+          recordingOracle: this.web3ConfigService.audinoRecordingOracleAddress,
+          reputationOracle: this.web3ConfigService.reputationOracleAddress,
+        };
       },
     },
   };
@@ -1269,6 +1339,8 @@ export class JobService {
     } else if (requestType === JobRequestType.HCAPTCHA) {
       return true;
       dtoCheck = new HCaptchaManifestDto();
+    } else if (requestType === JobRequestType.AUDIO_TRANSCRIPTION) {
+      dtoCheck = new AudinoManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
     }

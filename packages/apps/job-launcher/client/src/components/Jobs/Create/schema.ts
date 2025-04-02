@@ -89,3 +89,38 @@ export const HCaptchaJobRequesteValidationSchema = Yup.object().shape({
   images: Yup.array().of(Yup.string().url('Invalid Image URL')),
   qualifications: Yup.array().of(Yup.object()),
 });
+
+export const AudinoJobRequestValidationSchema = Yup.object().shape({
+  labels: Yup.array().of(Yup.string()).min(1, 'At least one label is required'),
+  description: Yup.string().required('Description is required'),
+  dataProvider: Yup.string().required('Provider is required'),
+  dataRegion: Yup.string().required('Region is required'),
+  dataBucketName: Yup.string().required('Bucket name is required'),
+  dataPath: Yup.string().optional(),
+  gtProvider: Yup.string().required('Provider is required'),
+  gtRegion: Yup.string().required('Region is required'),
+  gtBucketName: Yup.string().required('Bucket name is required'),
+  gtPath: Yup.string().optional(),
+  userGuide: Yup.string()
+    .required('User Guide URL is required')
+    .url('Invalid URL'),
+  accuracyTarget: Yup.number()
+    .required('Accuracy target is required')
+    .moreThan(0, 'Accuracy target must be greater than 0')
+    .max(100, 'Accuracy target must be less than or equal to 100'),
+  qualifications: Yup.array().of(Yup.object()),
+
+  audioDuration: Yup.number()
+    .required('Audio duration is required')
+    .moreThan(0, 'Audio duration must be greater than 0')
+    .max(31536000, 'Audio duration must be less than or equal to 31536000'), // one year in seconds
+  segmentDuration: Yup.number()
+    .required('Segment duration is required')
+    .moreThan(0, 'Segment duration must be greater than 0')
+    .when('$audioDuration', ([audioDuration], schema) => {
+      return schema.max(
+        audioDuration * 1000,
+        'Segment duration should not exceed audio duration',
+      );
+    }),
+});

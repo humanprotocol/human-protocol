@@ -221,6 +221,7 @@ export const CryptoPayForm = ({
           fortuneRequest,
           cvatRequest,
           hCaptchaRequest,
+          audinoRequest,
         } = jobRequest;
         if (jobType === JobType.FORTUNE && fortuneRequest) {
           await jobService.createFortuneJob(
@@ -240,6 +241,14 @@ export const CryptoPayForm = ({
           );
         } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
           await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
+        } else if (jobType === JobType.AUDINO && audinoRequest) {
+          await jobService.createAudinoJob(
+            chainId,
+            audinoRequest,
+            paymentTokenSymbol,
+            Number(amount),
+            fundTokenSymbol,
+          );
         }
         onFinish();
       } catch (err) {

@@ -112,4 +112,22 @@ export class Web3ConfigService {
   get hCaptchaOracleAddress(): string {
     return this.configService.getOrThrow<string>('HCAPTCHA_ORACLE_ADDRESS');
   }
+
+  /**
+   * Address of the Audino exchange oracle.
+   */
+  get audinoExchangeOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'AUDINO_EXCHANGE_ORACLE_ADDRESS',
+    );
+  }
+
+  /**
+   * Address of the Audino recording oracle contract.
+   */
+  get audinoRecordingOracleAddress(): string {
+    return this.configService.getOrThrow<string>(
+      'AUDINO_RECORDING_ORACLE_ADDRESS',
+    );
+  }
 }

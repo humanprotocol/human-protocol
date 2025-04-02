@@ -29,6 +29,7 @@ import { CURRENCY } from '../../../constants/payment';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import {
+  createAudinoJob,
   createCvatJob,
   createFortuneJob,
   createHCaptchaJob,
@@ -248,8 +249,14 @@ export const FiatPayForm = ({
       }
 
       // create job
-      const { jobType, chainId, fortuneRequest, cvatRequest, hCaptchaRequest } =
-        jobRequest;
+      const {
+        jobType,
+        chainId,
+        fortuneRequest,
+        cvatRequest,
+        hCaptchaRequest,
+        audinoRequest,
+      } = jobRequest;
       if (!chainId) return;
 
       if (jobType === JobType.FORTUNE && fortuneRequest) {
@@ -270,6 +277,14 @@ export const FiatPayForm = ({
         );
       } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
         await createHCaptchaJob(chainId, hCaptchaRequest);
+      } else if (jobType === JobType.AUDINO && audinoRequest) {
+        await createAudinoJob(
+          chainId,
+          audinoRequest,
+          CURRENCY.usd,
+          amount,
+          tokenSymbol,
+        );
       }
 
       // Update balance and finish payment

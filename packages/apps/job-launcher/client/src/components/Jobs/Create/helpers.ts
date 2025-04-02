@@ -5,6 +5,7 @@ import {
   StorageProviders,
   GCSRegions,
   AWSRegions,
+  AudinoJobType,
 } from '../../../types';
 
 export const mapCvatFormValues = (
@@ -65,5 +66,42 @@ export const mapFortuneFormValues = (
           fortuneRequest?.qualifications?.includes(q.reference),
         )
       : [],
+  };
+};
+
+export const mapAudinoFormValues = (
+  jobRequest: JobRequest,
+  qualificationsOptions: Qualification[],
+) => {
+  const { audinoRequest } = jobRequest;
+
+  return {
+    type: audinoRequest?.type || AudinoJobType.AUDIO_TRANSCRIPTION,
+    labels: audinoRequest?.labels?.map((label) => label.name) || [],
+    description: audinoRequest?.description || '',
+    qualifications: audinoRequest?.qualifications
+      ? qualificationsOptions.filter((q: Qualification) =>
+          audinoRequest?.qualifications?.includes(q.reference),
+        )
+      : [],
+
+    dataProvider:
+      audinoRequest?.data?.dataset?.provider || StorageProviders.AWS,
+    dataRegion:
+      (audinoRequest?.data?.dataset?.region as AWSRegions | GCSRegions) || '',
+    dataBucketName: audinoRequest?.data?.dataset?.bucketName || '',
+    dataPath: audinoRequest?.data?.dataset?.path || '',
+
+    gtProvider: audinoRequest?.groundTruth?.provider || StorageProviders.AWS,
+    gtRegion:
+      (audinoRequest?.groundTruth?.region as AWSRegions | GCSRegions) || '',
+    gtBucketName: audinoRequest?.groundTruth?.bucketName || '',
+    gtPath: audinoRequest?.groundTruth?.path || '',
+
+    userGuide: audinoRequest?.userGuide || '',
+    accuracyTarget: audinoRequest?.accuracyTarget || 50,
+
+    audioDuration: audinoRequest?.audioDuration || 0,
+    segmentDuration: audinoRequest?.segmentDuration || 0,
   };
 };
