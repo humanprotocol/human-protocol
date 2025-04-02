@@ -1,8 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
-import { EscrowUtils, OperatorUtils, StakingClient } from '@human-protocol/sdk';
+import {
+  EscrowUtils,
+  IOperator,
+  OperatorUtils,
+  StakingClient,
+} from '@human-protocol/sdk';
+import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { generateTestnetChainId } from '../../../test/fixtures/web3';
 import { EventType, ReputationEntityType } from '../../common/enums';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
@@ -16,31 +23,25 @@ import { AbuseSlackBot } from './abuse.slack-bot';
 import { AbuseDecision, AbuseStatus } from './constants';
 import { generateAbuseEntity } from './fixtures';
 
+jest.mock('@human-protocol/sdk');
+
 const fakeAddress = faker.finance.ethereumAddress();
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  StakingClient: {
-    build: jest.fn().mockImplementation(() => ({
-      slash: jest.fn(),
-    })),
-  },
-  OperatorUtils: {
-    getOperator: jest.fn(),
-  },
-  EscrowUtils: {
-    getEscrow: jest.fn(),
-  },
-}));
+
+const mockAbuseRepository = createMock<AbuseRepository>();
+const mockAbuseSlackBot = createMock<AbuseSlackBot>();
+const mockReputationService = createMock<ReputationService>();
+const mockWeb3Service = createMock<Web3Service>();
+const mockWebhookOutgoingService = createMock<WebhookOutgoingService>();
+
+const mockedStakingClient = jest.mocked(StakingClient);
+const mockedOperatorUtils = jest.mocked(OperatorUtils);
+const mockedEscrowUtils = jest.mocked(EscrowUtils);
 
 describe('AbuseService', () => {
   let abuseService: AbuseService;
-  let abuseSlackBot: AbuseSlackBot;
-  let abuseRepository: AbuseRepository;
-  let webhookOutgoingService: WebhookOutgoingService;
-  let reputationService: ReputationService;
 
   const escrowAddress = faker.finance.ethereumAddress();
-  const chainId = faker.number.int({ max: 100000 });
+  const chainId = generateTestnetChainId();
   const webhookUrl1 = faker.internet.url();
   const webhookUrl2 = faker.internet.url();
 
@@ -52,36 +53,25 @@ describe('AbuseService', () => {
         ServerConfigService,
         {
           provide: AbuseSlackBot,
-          useValue: createMock<AbuseSlackBot>(),
+          useValue: mockAbuseSlackBot,
         },
         {
           provide: Web3Service,
-          useValue: {
-            getSigner: jest.fn().mockReturnValue({
-              address: faker.finance.ethereumAddress(),
-              getNetwork: jest.fn().mockResolvedValue({ chainId }),
-            }),
-          },
+          useValue: mockWeb3Service,
         },
-        { provide: AbuseRepository, useValue: createMock<AbuseRepository>() },
+        { provide: AbuseRepository, useValue: mockAbuseRepository },
         {
           provide: ReputationService,
-          useValue: createMock<ReputationService>(),
+          useValue: mockReputationService,
         },
         {
           provide: WebhookOutgoingService,
-          useValue: createMock<WebhookOutgoingService>(),
+          useValue: mockWebhookOutgoingService,
         },
       ],
     }).compile();
 
-    abuseSlackBot = moduleRef.get<AbuseSlackBot>(AbuseSlackBot);
     abuseService = moduleRef.get<AbuseService>(AbuseService);
-    abuseRepository = moduleRef.get<AbuseRepository>(AbuseRepository);
-    webhookOutgoingService = moduleRef.get<WebhookOutgoingService>(
-      WebhookOutgoingService,
-    );
-    reputationService = moduleRef.get<ReputationService>(ReputationService);
   });
 
   beforeEach(() => {
@@ -90,7 +80,7 @@ describe('AbuseService', () => {
 
   describe('reportAbuse', () => {
     it('should create a new abuse entity', async () => {
-      const userId = 1;
+      const userId = faker.number.int();
 
       await abuseService.reportAbuse({
         escrowAddress,
@@ -98,7 +88,7 @@ describe('AbuseService', () => {
         userId,
       });
 
-      expect(abuseRepository.createUnique).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.createUnique).toHaveBeenCalledWith({
         escrowAddress: escrowAddress,
         chainId: chainId,
         userId: userId,
@@ -122,21 +112,21 @@ describe('AbuseService', () => {
         response_url: faker.internet.url(),
       };
 
-      jest
-        .spyOn(abuseRepository, 'findOneById')
-        .mockResolvedValueOnce(abuseEntity);
-
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
-      });
+      } as EscrowData);
       const amount = faker.number.int();
-      OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
-        amountStaked: amount,
-      });
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
+        amountStaked: BigInt(amount),
+      } as IOperator);
 
       await abuseService.processSlackInteraction(dto as any);
 
-      expect(abuseSlackBot.triggerAbuseReportModal).toHaveBeenCalledWith({
+      expect(mockAbuseSlackBot.triggerAbuseReportModal).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockAbuseSlackBot.triggerAbuseReportModal).toHaveBeenCalledWith({
         abuseId: abuseEntity.id,
         escrowAddress: abuseEntity.escrowAddress,
         chainId: abuseEntity.chainId,
@@ -165,17 +155,16 @@ describe('AbuseService', () => {
         },
       };
 
-      jest
-        .spyOn(abuseRepository, 'findOneById')
-        .mockResolvedValueOnce(abuseEntity);
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
 
       await abuseService.processSlackInteraction(dto as any);
 
-      expect(abuseSlackBot.updateMessage).toHaveBeenCalledWith(
+      expect(mockAbuseSlackBot.updateMessage).toHaveBeenCalledTimes(1);
+      expect(mockAbuseSlackBot.updateMessage).toHaveBeenCalledWith(
         JSON.parse(dto.view.private_metadata).responseUrl,
         `Abuse accepted. Escrow: ${abuseEntity.escrowAddress}, ChainId: ${abuseEntity.chainId}, Slashed amount: 10 HMT`,
       );
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
         decision: AbuseDecision.ACCEPTED,
         amount: 10,
@@ -193,13 +182,11 @@ describe('AbuseService', () => {
         actions: [{ value: AbuseDecision.REJECTED }],
       };
 
-      jest
-        .spyOn(abuseRepository, 'findOneById')
-        .mockResolvedValueOnce(abuseEntity);
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(abuseEntity);
 
       await abuseService.processSlackInteraction(dto as any);
 
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...abuseEntity,
         decision: AbuseDecision.REJECTED,
         retriesCount: 0,
@@ -214,7 +201,7 @@ describe('AbuseService', () => {
         actions: [{ value: AbuseDecision.ACCEPTED }],
       };
 
-      jest.spyOn(abuseRepository, 'findOneById').mockResolvedValueOnce(null);
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(null);
 
       await expect(
         abuseService.processSlackInteraction(dto as any),
@@ -228,7 +215,7 @@ describe('AbuseService', () => {
         actions: [{ value: AbuseDecision.ACCEPTED }],
       };
 
-      jest.spyOn(abuseRepository, 'findOneById').mockResolvedValueOnce(null);
+      mockAbuseRepository.findOneById.mockResolvedValueOnce(null);
 
       await expect(
         abuseService.processSlackInteraction(dto as any),
@@ -242,39 +229,36 @@ describe('AbuseService', () => {
     it('should process pending abuse requests and send notifications', async () => {
       const mockAbuseEntities = [generateAbuseEntity(), generateAbuseEntity()];
 
-      jest
-        .spyOn(abuseRepository, 'findToClassify')
-        .mockResolvedValueOnce(mockAbuseEntities);
-      EscrowUtils.getEscrow = jest
-        .fn()
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
+      mockedEscrowUtils.getEscrow
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        })
+        } as EscrowData)
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        });
-      OperatorUtils.getOperator = jest
-        .fn()
+        } as EscrowData);
+      mockedOperatorUtils.getOperator
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl1,
-        })
+        } as IOperator)
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl2,
-        });
-      jest
-        .spyOn(abuseSlackBot, 'sendAbuseNotification')
+        } as IOperator);
+      mockAbuseSlackBot.sendAbuseNotification
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined);
 
       await abuseService.processAbuseRequests();
 
-      expect(abuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(abuseSlackBot.sendAbuseNotification).toHaveBeenCalledTimes(2);
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseSlackBot.sendAbuseNotification).toHaveBeenCalledTimes(2);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.NOTIFIED,
       });
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[1],
         status: AbuseStatus.NOTIFIED,
       });
@@ -283,23 +267,24 @@ describe('AbuseService', () => {
     it('should handle errors when sending notifications fails', async () => {
       const mockAbuseEntities = [generateAbuseEntity({ retriesCount: 0 })];
 
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      });
-      OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
+      } as EscrowData);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
-      });
-      jest
-        .spyOn(abuseRepository, 'findToClassify')
-        .mockResolvedValueOnce(mockAbuseEntities);
-      jest
-        .spyOn(abuseSlackBot, 'sendAbuseNotification')
-        .mockRejectedValueOnce(new Error('Slack error'));
+      } as IOperator);
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
+
+      mockAbuseSlackBot.sendAbuseNotification.mockRejectedValueOnce(
+        new Error(),
+      );
 
       await abuseService.processAbuseRequests();
 
-      expect(abuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         retriesCount: 1,
       });
@@ -308,24 +293,24 @@ describe('AbuseService', () => {
     it('should handle errors when createOutgoingWebhook fails', async () => {
       const mockAbuseEntities = [generateAbuseEntity({ retriesCount: 0 })];
 
-      jest
-        .spyOn(abuseRepository, 'findToClassify')
-        .mockResolvedValueOnce(mockAbuseEntities);
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      });
-      OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
+      } as EscrowData);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
-      });
+      } as IOperator);
 
-      jest
-        .spyOn(webhookOutgoingService, 'createOutgoingWebhook')
-        .mockRejectedValueOnce(new DatabaseError('Failed to create webhook'));
+      mockWebhookOutgoingService.createOutgoingWebhook.mockRejectedValueOnce(
+        new DatabaseError('Failed to create webhook'),
+      );
 
       await abuseService.processAbuseRequests();
 
-      expect(abuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         retriesCount: 1,
       });
@@ -334,40 +319,36 @@ describe('AbuseService', () => {
     it('should continue if createOutgoingWebhook throws a duplicated error', async () => {
       const mockAbuseEntities = [generateAbuseEntity(), generateAbuseEntity()];
 
-      jest
-        .spyOn(abuseRepository, 'findToClassify')
-        .mockResolvedValueOnce(mockAbuseEntities);
-      EscrowUtils.getEscrow = jest
-        .fn()
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
+      mockedEscrowUtils.getEscrow
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        })
+        } as EscrowData)
         .mockResolvedValueOnce({
           exchangeOracle: fakeAddress,
-        });
-      OperatorUtils.getOperator = jest
-        .fn()
+        } as EscrowData);
+      mockedOperatorUtils.getOperator
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl1,
-        })
+        } as IOperator)
         .mockResolvedValueOnce({
           webhookUrl: webhookUrl2,
-        });
+        } as IOperator);
 
-      jest
-        .spyOn(webhookOutgoingService, 'createOutgoingWebhook')
-        .mockRejectedValueOnce(
-          new DatabaseError(PostgresErrorCodes.Duplicated),
-        );
+      mockWebhookOutgoingService.createOutgoingWebhook.mockRejectedValueOnce(
+        new DatabaseError(PostgresErrorCodes.Duplicated),
+      );
 
       await abuseService.processAbuseRequests();
 
-      expect(abuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.NOTIFIED,
       });
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[1],
         status: AbuseStatus.NOTIFIED,
       });
@@ -376,14 +357,14 @@ describe('AbuseService', () => {
     it('should set abuse status to failed after exceeding 5 retry attempts', async () => {
       const mockAbuseEntities = [generateAbuseEntity({ retriesCount: 5 })];
 
-      jest
-        .spyOn(abuseRepository, 'findToClassify')
-        .mockResolvedValueOnce(mockAbuseEntities);
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
 
       await abuseService.processAbuseRequests();
 
-      expect(abuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         retriesCount: 5,
         status: AbuseStatus.FAILED,
@@ -391,13 +372,13 @@ describe('AbuseService', () => {
     });
 
     it('should handle empty results from findToClassify', async () => {
-      jest.spyOn(abuseRepository, 'findToClassify').mockResolvedValueOnce([]);
+      mockAbuseRepository.findToClassify.mockResolvedValueOnce([]);
 
       await abuseService.processAbuseRequests();
 
-      expect(abuseRepository.findToClassify).toHaveBeenCalledTimes(1);
-      expect(abuseSlackBot.sendAbuseNotification).not.toHaveBeenCalled();
-      expect(abuseRepository.updateOne).not.toHaveBeenCalled();
+      expect(mockAbuseRepository.findToClassify).toHaveBeenCalledTimes(1);
+      expect(mockAbuseSlackBot.sendAbuseNotification).not.toHaveBeenCalled();
+      expect(mockAbuseRepository.updateOne).not.toHaveBeenCalled();
     });
   });
 
@@ -407,26 +388,26 @@ describe('AbuseService', () => {
         generateAbuseEntity({ decision: AbuseDecision.ACCEPTED }),
       ];
 
-      jest
-        .spyOn(abuseRepository, 'findClassified')
-        .mockResolvedValueOnce(mockAbuseEntities);
+      mockAbuseRepository.findClassified.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
       const slashMock = jest.fn();
-      StakingClient.build = jest.fn().mockImplementationOnce(() => ({
+      mockedStakingClient.build.mockResolvedValueOnce({
         slash: slashMock,
-      }));
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      } as unknown as StakingClient);
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         launcher: fakeAddress,
-      });
-      OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
+      } as EscrowData);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
-      });
-      jest
-        .spyOn(webhookOutgoingService, 'createOutgoingWebhook')
-        .mockResolvedValueOnce(undefined);
+      } as IOperator);
+      mockWebhookOutgoingService.createOutgoingWebhook.mockResolvedValueOnce(
+        undefined,
+      );
 
       await abuseService.processClassifiedAbuses();
 
-      expect(abuseRepository.findClassified).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
       // expect(slashMock).toHaveBeenCalledWith(
       //   expect.any(String),
       //   expect.any(String),
@@ -434,7 +415,9 @@ describe('AbuseService', () => {
       //   escrowAddress,
       //   expect.any(Number),
       // );
-      expect(webhookOutgoingService.createOutgoingWebhook).toHaveBeenCalledWith(
+      expect(
+        mockWebhookOutgoingService.createOutgoingWebhook,
+      ).toHaveBeenCalledWith(
         {
           escrowAddress: mockAbuseEntities[0].escrowAddress,
           chainId: mockAbuseEntities[0].chainId,
@@ -442,7 +425,7 @@ describe('AbuseService', () => {
         },
         expect.any(String),
       );
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.COMPLETED,
       });
@@ -453,43 +436,41 @@ describe('AbuseService', () => {
         generateAbuseEntity({ decision: AbuseDecision.REJECTED }),
       ];
 
-      jest
-        .spyOn(abuseRepository, 'findClassified')
-        .mockResolvedValueOnce(mockAbuseEntities);
-      EscrowUtils.getEscrow = jest.fn().mockResolvedValueOnce({
+      mockAbuseRepository.findClassified.mockResolvedValueOnce(
+        mockAbuseEntities,
+      );
+      mockedEscrowUtils.getEscrow.mockResolvedValueOnce({
         exchangeOracle: fakeAddress,
-      });
-      OperatorUtils.getOperator = jest.fn().mockResolvedValueOnce({
+      } as EscrowData);
+      mockedOperatorUtils.getOperator.mockResolvedValueOnce({
         webhookUrl: webhookUrl1,
-      });
-      jest
-        .spyOn(reputationService, 'decreaseReputation')
-        .mockResolvedValueOnce(undefined);
+      } as IOperator);
+      mockReputationService.decreaseReputation.mockResolvedValueOnce(undefined);
 
       await abuseService.processClassifiedAbuses();
 
-      expect(abuseRepository.findClassified).toHaveBeenCalledTimes(1);
-      expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
+      expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
+      expect(mockReputationService.decreaseReputation).toHaveBeenCalledWith(
         mockAbuseEntities[0].chainId,
         mockAbuseEntities[0].user?.evmAddress,
         ReputationEntityType.WORKER,
       );
-      expect(abuseRepository.updateOne).toHaveBeenCalledWith({
+      expect(mockAbuseRepository.updateOne).toHaveBeenCalledWith({
         ...mockAbuseEntities[0],
         status: AbuseStatus.COMPLETED,
       });
     });
 
     it('should handle empty results from findClassified', async () => {
-      jest.spyOn(abuseRepository, 'findClassified').mockResolvedValueOnce([]);
+      mockAbuseRepository.findClassified.mockResolvedValueOnce([]);
 
       await abuseService.processClassifiedAbuses();
 
-      expect(abuseRepository.findClassified).toHaveBeenCalledTimes(1);
+      expect(mockAbuseRepository.findClassified).toHaveBeenCalledTimes(1);
       expect(
-        webhookOutgoingService.createOutgoingWebhook,
+        mockWebhookOutgoingService.createOutgoingWebhook,
       ).not.toHaveBeenCalled();
-      expect(abuseRepository.updateOne).not.toHaveBeenCalled();
+      expect(mockAbuseRepository.updateOne).not.toHaveBeenCalled();
     });
   });
 });

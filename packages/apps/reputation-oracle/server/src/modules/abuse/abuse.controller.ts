@@ -20,10 +20,10 @@ import {
   SlackInteractionDto,
 } from './abuse.dto';
 import { AbuseService } from './abuse.service';
-import { SlackAuthGuard } from '../../common/guards/slack.auth';
 import { RequestWithUser } from '../../common/interfaces/request';
 import { Public } from '../../common/decorators';
 import { AbuseRepository } from './abuse.repository';
+import { AbuseSlackAuthGuard } from './abuse.slack-auth.guard';
 
 @ApiTags('Abuse')
 @Controller('/abuse')
@@ -85,7 +85,7 @@ export class AbuseController {
   }
 
   @Public()
-  @UseGuards(SlackAuthGuard)
+  @UseGuards(AbuseSlackAuthGuard)
   @Post('/slack-interactions')
   @HttpCode(200)
   @ApiOperation({

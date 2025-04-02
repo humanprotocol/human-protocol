@@ -7,10 +7,16 @@ import { Web3Module } from '../web3/web3.module';
 import { ReputationModule } from '../reputation/reputation.module';
 import { WebhookOutgoingModule } from '../webhook/webhook-outgoing.module';
 import { AbuseController } from './abuse.controller';
+import { AbuseSlackAuthGuard } from './abuse.slack-auth.guard';
 
 @Module({
   imports: [HttpModule, Web3Module, ReputationModule, WebhookOutgoingModule],
-  providers: [AbuseRepository, AbuseService, AbuseSlackBot],
+  providers: [
+    AbuseRepository,
+    AbuseService,
+    AbuseSlackBot,
+    AbuseSlackAuthGuard,
+  ],
   exports: [AbuseService],
   controllers: [AbuseController],
 })

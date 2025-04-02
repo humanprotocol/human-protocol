@@ -1,12 +1,17 @@
 import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { SlackBotApp } from './slack-bot-app';
-import { of, throwError } from 'rxjs';
 import { faker } from '@faker-js/faker';
+import {
+  createHttpServiceMock,
+  createHttpServiceRequestError,
+  createHttpServiceResponse,
+} from '../../../test/mock-creators/nest';
+
+const mockHttpService = createHttpServiceMock();
 
 describe('SlackBotApp', () => {
   let slackBotApp: SlackBotApp;
-  let httpService: HttpService;
 
   const config = {
     webhookUrl: faker.internet.url(),
@@ -18,15 +23,15 @@ describe('SlackBotApp', () => {
       providers: [
         {
           provide: HttpService,
-          useValue: {
-            post: jest.fn(),
-          },
+          useValue: mockHttpService,
         },
       ],
     }).compile();
 
-    httpService = moduleRef.get<HttpService>(HttpService);
-    slackBotApp = new SlackBotApp(httpService, config);
+    slackBotApp = new SlackBotApp(
+      moduleRef.get<HttpService>(HttpService),
+      config,
+    );
   });
 
   afterEach(() => {
@@ -35,20 +40,23 @@ describe('SlackBotApp', () => {
 
   describe('sendNotification', () => {
     it('should send a notification successfully', async () => {
-      jest.spyOn(httpService, 'post').mockReturnValue(of({} as any));
+      mockHttpService.post.mockReturnValueOnce(createHttpServiceResponse(200));
       const message = { text: 'Test notification' };
 
       await expect(
         slackBotApp.sendNotification(message),
       ).resolves.not.toThrow();
 
-      expect(httpService.post).toHaveBeenCalledWith(config.webhookUrl, message);
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        config.webhookUrl,
+        message,
+      );
     });
 
     it('should throw an error if sending the notification fails', async () => {
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(throwError(() => new Error('Network error')));
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceRequestError(new Error()),
+      );
       await expect(
         slackBotApp.sendNotification({ text: 'Test' }),
       ).rejects.toThrow('Error sending Slack notification');
@@ -57,9 +65,11 @@ describe('SlackBotApp', () => {
 
   describe('openModal', () => {
     it('should open a modal successfully', async () => {
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(of({ data: { ok: true } }) as any);
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceResponse(200, {
+          ok: true,
+        }),
+      );
 
       const triggerId = faker.word.sample();
       const modalView: any = {
@@ -71,7 +81,7 @@ describe('SlackBotApp', () => {
         slackBotApp.openModal(triggerId, modalView),
       ).resolves.not.toThrow();
 
-      expect(httpService.post).toHaveBeenCalledWith(
+      expect(mockHttpService.post).toHaveBeenCalledWith(
         'https://slack.com/api/views.open',
         {
           trigger_id: triggerId,
@@ -87,11 +97,12 @@ describe('SlackBotApp', () => {
     });
 
     it('should throw an error if opening the modal fails', async () => {
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(
-          of({ data: { ok: false, error: 'invalid_trigger' } }) as any,
-        );
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceResponse(200, {
+          ok: false,
+          error: 'invalid_trigger',
+        }),
+      );
 
       const triggerId = faker.word.sample();
       const modalView: any = {
@@ -107,7 +118,7 @@ describe('SlackBotApp', () => {
 
   describe('updateMessage', () => {
     it('should update a message successfully', async () => {
-      jest.spyOn(httpService, 'post').mockReturnValue(of({} as any));
+      mockHttpService.post.mockReturnValueOnce(createHttpServiceResponse(200));
       const responseUrl = faker.internet.url();
       const text = faker.lorem.sentence();
 
@@ -115,13 +126,13 @@ describe('SlackBotApp', () => {
         slackBotApp.updateMessage(responseUrl, text),
       ).resolves.not.toThrow();
 
-      expect(httpService.post).toHaveBeenCalledWith(responseUrl, { text });
+      expect(mockHttpService.post).toHaveBeenCalledWith(responseUrl, { text });
     });
 
     it('should throw an error if updating the message fails', async () => {
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(throwError(() => new Error('Network error')));
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceRequestError(new Error()),
+      );
 
       const responseUrl = faker.internet.url();
       const text = faker.lorem.sentence();

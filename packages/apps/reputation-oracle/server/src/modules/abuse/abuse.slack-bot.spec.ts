@@ -2,13 +2,18 @@ import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { SlackConfigService } from '../../config/slack-config.service';
 import { AbuseSlackBot } from './abuse.slack-bot';
-import { of, throwError } from 'rxjs';
 import { faker } from '@faker-js/faker';
 import { AbuseDecision } from './constants';
+import {
+  createHttpServiceMock,
+  createHttpServiceRequestError,
+  createHttpServiceResponse,
+} from '../../../test/mock-creators/nest';
+
+const mockHttpService = createHttpServiceMock();
 
 describe('AbuseSlackBot', () => {
   let abuseSlackBot: AbuseSlackBot;
-  let httpService: HttpService;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -16,9 +21,7 @@ describe('AbuseSlackBot', () => {
         AbuseSlackBot,
         {
           provide: HttpService,
-          useValue: {
-            post: jest.fn(),
-          },
+          useValue: mockHttpService,
         },
         {
           provide: SlackConfigService,
@@ -31,7 +34,6 @@ describe('AbuseSlackBot', () => {
     }).compile();
 
     abuseSlackBot = moduleRef.get<AbuseSlackBot>(AbuseSlackBot);
-    httpService = moduleRef.get<HttpService>(HttpService);
   });
 
   afterEach(() => {
@@ -45,7 +47,7 @@ describe('AbuseSlackBot', () => {
       const escrowAddress = faker.finance.ethereumAddress();
       const manifestUrl = faker.internet.url();
 
-      jest.spyOn(httpService, 'post').mockReturnValue(of({} as any));
+      mockHttpService.post.mockReturnValueOnce(createHttpServiceResponse(200));
 
       await expect(
         abuseSlackBot.sendAbuseNotification({
@@ -56,7 +58,7 @@ describe('AbuseSlackBot', () => {
         }),
       ).resolves.not.toThrow();
 
-      expect(httpService.post).toHaveBeenCalledWith(
+      expect(mockHttpService.post).toHaveBeenCalledWith(
         abuseSlackBot['config'].webhookUrl,
         {
           text: 'New abuse report received!',
@@ -103,9 +105,9 @@ describe('AbuseSlackBot', () => {
     });
 
     it('should throw an error if sending the notification fails', async () => {
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(throwError(() => new Error('Network error')));
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceRequestError(new Error()),
+      );
 
       await expect(
         abuseSlackBot.sendAbuseNotification({
@@ -127,9 +129,9 @@ describe('AbuseSlackBot', () => {
       const responseUrl = faker.internet.url();
       const maxAmount = faker.number.int({ min: 1, max: 1000 });
 
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(of({ data: { ok: true } }) as any);
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceResponse(200, { ok: true }),
+      );
 
       await expect(
         abuseSlackBot.triggerAbuseReportModal({
@@ -142,7 +144,7 @@ describe('AbuseSlackBot', () => {
         }),
       ).resolves.not.toThrow();
 
-      expect(httpService.post).toHaveBeenCalledWith(
+      expect(mockHttpService.post).toHaveBeenCalledWith(
         'https://slack.com/api/views.open',
         {
           trigger_id: triggerId,
@@ -186,11 +188,9 @@ describe('AbuseSlackBot', () => {
     });
 
     it('should throw an error if opening the modal fails', async () => {
-      jest
-        .spyOn(httpService, 'post')
-        .mockReturnValue(
-          of({ data: { ok: false, error: 'invalid_trigger' } }) as any,
-        );
+      mockHttpService.post.mockReturnValueOnce(
+        createHttpServiceResponse(200, { ok: false, error: 'invalid_trigger' }),
+      );
 
       await expect(
         abuseSlackBot.triggerAbuseReportModal({

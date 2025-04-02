@@ -85,5 +85,5 @@ export const envValidator = Joi.object({
     .uri({ scheme: ['http', 'https'] })
     .required(),
   ABUSE_SLACK_OAUTH_TOKEN: Joi.string().required(),
-  SLACK_SIGNING_SECRETS: Joi.string().required(),
+  ABUSE_SLACK_SIGNING_SECRET: Joi.string().required(),
 });
