@@ -19,7 +19,7 @@ describe('SlackBotApp', () => {
   };
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    await Test.createTestingModule({
       providers: [
         {
           provide: HttpService,
@@ -29,7 +29,7 @@ describe('SlackBotApp', () => {
     }).compile();
 
     slackBotApp = new SlackBotApp(
-      moduleRef.get<HttpService>(HttpService),
+      mockHttpService as unknown as HttpService,
       config,
     );
   });

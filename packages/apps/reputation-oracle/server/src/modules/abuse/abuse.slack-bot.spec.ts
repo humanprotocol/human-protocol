@@ -4,11 +4,7 @@ import { SlackConfigService } from '../../config/slack-config.service';
 import { AbuseSlackBot } from './abuse.slack-bot';
 import { faker } from '@faker-js/faker';
 import { AbuseDecision } from './constants';
-import {
-  createHttpServiceMock,
-  createHttpServiceRequestError,
-  createHttpServiceResponse,
-} from '../../../test/mock-creators/nest';
+import { createHttpServiceMock } from '../../../test/mock-creators/nest';
 
 const mockHttpService = createHttpServiceMock();
 
@@ -37,17 +33,27 @@ describe('AbuseSlackBot', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('sendAbuseNotification', () => {
+    let spyOnSendNotification: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnSendNotification = jest
+        .spyOn(abuseSlackBot, 'sendNotification')
+        .mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnSendNotification.mockRestore();
+    });
+
     it('should send a notification with the correct payload', async () => {
       const abuseId = faker.number.int();
       const chainId = faker.number.int();
       const escrowAddress = faker.finance.ethereumAddress();
       const manifestUrl = faker.internet.url();
-
-      mockHttpService.post.mockReturnValueOnce(createHttpServiceResponse(200));
 
       await expect(
         abuseSlackBot.sendAbuseNotification({
@@ -58,55 +64,52 @@ describe('AbuseSlackBot', () => {
         }),
       ).resolves.not.toThrow();
 
-      expect(mockHttpService.post).toHaveBeenCalledWith(
-        abuseSlackBot['config'].webhookUrl,
-        {
-          text: 'New abuse report received!',
-          attachments: [
-            {
-              title: 'Escrow',
-              fields: [
-                { title: 'Address', value: escrowAddress },
-                { title: 'ChainId', value: chainId.toString() },
-                { title: 'Manifest', value: manifestUrl },
-              ],
-            },
-            {
-              fallback: 'Actions',
-              title: 'Actions',
-              callback_id: abuseId.toString(),
-              color: '#3AA3E3',
-              actions: [
-                {
-                  name: 'accept',
-                  text: 'Slash',
-                  type: 'button',
-                  style: 'primary',
-                  value: AbuseDecision.ACCEPTED,
+      expect(spyOnSendNotification).toHaveBeenCalledWith({
+        text: 'New abuse report received!',
+        attachments: [
+          {
+            title: 'Escrow',
+            fields: [
+              { title: 'Address', value: escrowAddress },
+              { title: 'ChainId', value: chainId.toString() },
+              { title: 'Manifest', value: manifestUrl },
+            ],
+          },
+          {
+            fallback: 'Actions',
+            title: 'Actions',
+            callback_id: abuseId.toString(),
+            color: '#3AA3E3',
+            actions: [
+              {
+                name: 'accept',
+                text: 'Slash',
+                type: 'button',
+                style: 'primary',
+                value: AbuseDecision.ACCEPTED,
+              },
+              {
+                name: 'reject',
+                text: 'Reject',
+                type: 'button',
+                style: 'danger',
+                value: AbuseDecision.REJECTED,
+                confirm: {
+                  title: 'Cancel abuse',
+                  text: `Are you sure you want to cancel slash for escrow ${escrowAddress}?`,
+                  ok_text: 'Yes',
+                  dismiss_text: 'No',
                 },
-                {
-                  name: 'reject',
-                  text: 'Reject',
-                  type: 'button',
-                  style: 'danger',
-                  value: AbuseDecision.REJECTED,
-                  confirm: {
-                    title: 'Cancel abuse',
-                    text: `Are you sure you want to cancel slash for escrow ${escrowAddress}?`,
-                    ok_text: 'Yes',
-                    dismiss_text: 'No',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      );
+              },
+            ],
+          },
+        ],
+      });
     });
 
     it('should throw an error if sending the notification fails', async () => {
-      mockHttpService.post.mockReturnValueOnce(
-        createHttpServiceRequestError(new Error()),
+      spyOnSendNotification.mockRejectedValueOnce(
+        new Error('Error sending Slack notification'),
       );
 
       await expect(
@@ -121,75 +124,71 @@ describe('AbuseSlackBot', () => {
   });
 
   describe('triggerAbuseReportModal', () => {
+    let spyOnOpenModal: jest.SpyInstance;
+
+    beforeAll(() => {
+      spyOnOpenModal = jest
+        .spyOn(abuseSlackBot, 'openModal')
+        .mockImplementation();
+    });
+
+    afterAll(() => {
+      spyOnOpenModal.mockRestore();
+    });
+
     it('should open a modal with the correct payload', async () => {
       const abuseId = faker.number.int();
       const chainId = faker.number.int();
       const escrowAddress = faker.finance.ethereumAddress();
-      const triggerId = faker.word.sample();
+      const triggerId = faker.string.uuid();
       const responseUrl = faker.internet.url();
       const maxAmount = faker.number.int({ min: 1, max: 1000 });
-
-      mockHttpService.post.mockReturnValueOnce(
-        createHttpServiceResponse(200, { ok: true }),
-      );
 
       await expect(
         abuseSlackBot.triggerAbuseReportModal({
           abuseId,
           chainId,
-          maxAmount,
           escrowAddress,
+          maxAmount,
           triggerId,
           responseUrl,
         }),
       ).resolves.not.toThrow();
 
-      expect(mockHttpService.post).toHaveBeenCalledWith(
-        'https://slack.com/api/views.open',
-        {
-          trigger_id: triggerId,
-          view: {
-            type: 'modal',
-            callback_id: `${abuseId}`,
-            title: { type: 'plain_text', text: 'Confirm slash' },
-            private_metadata: JSON.stringify({ responseUrl }),
-            blocks: [
-              {
-                type: 'section',
-                text: { type: 'mrkdwn', text: `Max amount: ${maxAmount}` },
-              },
-              {
-                type: 'input',
-                block_id: 'quantity_input',
-                element: {
-                  action_id: 'quantity',
-                  type: 'number_input',
-                  is_decimal_allowed: true,
-                  min_value: '0',
-                  max_value: maxAmount.toString(),
-                },
-                label: {
-                  type: 'plain_text',
-                  text: 'Please enter the quantity (in HMT):',
-                },
-              },
-            ],
-            submit: { type: 'plain_text', text: 'Submit' },
-            close: { type: 'plain_text', text: 'Cancel' },
+      expect(spyOnOpenModal).toHaveBeenCalledWith(triggerId, {
+        type: 'modal',
+        callback_id: `${abuseId}`,
+        title: { type: 'plain_text', text: 'Confirm slash' },
+        private_metadata: JSON.stringify({ responseUrl }),
+        blocks: [
+          {
+            type: 'section',
+            text: { type: 'mrkdwn', text: `Max amount: ${maxAmount}` },
           },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${abuseSlackBot['config'].oauthToken}`,
-            'Content-Type': 'application/json',
+          {
+            type: 'input',
+            block_id: 'quantity_input',
+            element: {
+              action_id: 'quantity',
+              type: 'number_input',
+              is_decimal_allowed: true,
+              min_value: '0',
+              max_value: maxAmount.toString(),
+            },
+            label: {
+              type: 'plain_text',
+              text: 'Please enter the quantity (in HMT):',
+            },
           },
-        },
-      );
+        ],
+        submit: { type: 'plain_text', text: 'Submit' },
+        close: { type: 'plain_text', text: 'Cancel' },
+      });
     });
 
     it('should throw an error if opening the modal fails', async () => {
-      mockHttpService.post.mockReturnValueOnce(
-        createHttpServiceResponse(200, { ok: false, error: 'invalid_trigger' }),
+      spyOnOpenModal.mockRejectedValueOnce(
+        new Error('Error opening Slack modal'),
       );
 
       await expect(
@@ -198,7 +197,7 @@ describe('AbuseSlackBot', () => {
           chainId: faker.number.int(),
           escrowAddress: faker.finance.ethereumAddress(),
           maxAmount: faker.number.int(),
-          triggerId: faker.word.sample(),
+          triggerId: faker.string.uuid(),
           responseUrl: faker.internet.url(),
         }),
       ).rejects.toThrow('Error opening Slack modal');

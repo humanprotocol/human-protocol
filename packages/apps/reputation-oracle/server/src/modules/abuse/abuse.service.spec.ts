@@ -1,3 +1,5 @@
+jest.mock('@human-protocol/sdk');
+
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import {
@@ -22,8 +24,6 @@ import { AbuseService } from './abuse.service';
 import { AbuseSlackBot } from './abuse.slack-bot';
 import { AbuseDecision, AbuseStatus } from './constants';
 import { generateAbuseEntity } from './fixtures';
-
-jest.mock('@human-protocol/sdk');
 
 const fakeAddress = faker.finance.ethereumAddress();
 
@@ -75,7 +75,7 @@ describe('AbuseService', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('reportAbuse', () => {
