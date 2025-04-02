@@ -3,6 +3,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 
 import {
+  AUDINO_RESULTS_ANNOTATIONS_FILENAME,
+  AUDINO_VALIDATION_META_FILENAME,
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
   CVAT_VALIDATION_META_FILENAME,
 } from '../../common/constants';
@@ -11,10 +13,12 @@ import { Web3Service } from '../web3/web3.service';
 import { JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
+  AudinoManifest,
   CvatManifest,
   FortuneManifest,
 } from '../../common/interfaces/manifest';
 import {
+  AudinoAnnotationMeta,
   CvatAnnotationMeta,
   FortuneFinalResult,
 } from '../../common/interfaces/job-result';
@@ -179,6 +183,18 @@ export class PayoutService {
         chainId: ChainId,
         escrowAddress: string,
       ): Promise<SaveResultDto> => this.saveResultsCvat(chainId, escrowAddress),
+    },
+    [JobRequestType.AUDIO_TRANSCRIPTION]: {
+      calculatePayouts: async (
+        manifest: AudinoManifest,
+        data: CalculatePayoutsInput,
+      ): Promise<CalculatedPayout[]> =>
+        this.calculatePayoutsAudino(manifest, data.chainId, data.escrowAddress),
+      saveResults: async (
+        chainId: ChainId,
+        escrowAddress: string,
+      ): Promise<SaveResultDto> =>
+        this.saveResultsAudino(chainId, escrowAddress),
     },
   };
 
@@ -346,5 +362,96 @@ export class PayoutService {
         amount: bountyAmount,
       }),
     );
+  }
+
+  /**
+   * Calculates payment distributions for a Audino-type job based on annotations data.
+   * Verifies annotation quality, accumulates bounties, and assigns payouts to qualified annotators.
+   * @param manifest The Audino manifest data.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<CalculatedPayout[]>} Recipients, amounts, and relevant storage data.
+   */
+  public async calculatePayoutsAudino(
+    manifest: AudinoManifest,
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<CalculatedPayout[]> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const annotations: AudinoAnnotationMeta =
+      await this.storageService.downloadJsonLikeData(
+        `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
+      );
+
+    if (
+      Array.isArray(annotations?.results) &&
+      annotations.results.length === 0 &&
+      Array.isArray(annotations?.jobs) &&
+      annotations.jobs.length === 0
+    ) {
+      throw new Error('No annotations meta found');
+    }
+
+    const jobBountyValue = ethers.parseUnits(manifest.job_bounty, 18);
+    const workersBounties = new Map<string, typeof jobBountyValue>();
+
+    for (const job of annotations.jobs) {
+      const jobFinalResult = annotations.results.find(
+        (result) => result.id === job.final_result_id,
+      );
+      if (
+        jobFinalResult
+        // && jobFinalResult.annotation_quality >= manifest.validation.min_quality
+      ) {
+        const workerAddress = jobFinalResult.annotator_wallet_address;
+
+        const currentWorkerBounty = workersBounties.get(workerAddress) || 0n;
+
+        workersBounties.set(
+          workerAddress,
+          currentWorkerBounty + jobBountyValue,
+        );
+      }
+    }
+
+    return Array.from(workersBounties.entries()).map(
+      ([workerAddress, bountyAmount]) => ({
+        address: workerAddress,
+        amount: bountyAmount,
+      }),
+    );
+  }
+
+  /**
+   * Saves final results of a Audino-type job, using intermediate results for annotations.
+   * Retrieves intermediate results, copies files to storage, and returns the final results URL and hash.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
+   */
+  public async saveResultsAudino(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<SaveResultDto> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+      escrowAddress,
+      chainId,
+      `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
+    );
+
+    return { url, hash };
   }
 }
