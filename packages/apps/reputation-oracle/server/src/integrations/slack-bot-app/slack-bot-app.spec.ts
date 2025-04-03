@@ -1,4 +1,3 @@
-import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { SlackBotApp } from './slack-bot-app';
 import { faker } from '@faker-js/faker';
@@ -19,15 +18,6 @@ describe('SlackBotApp', () => {
   };
 
   beforeAll(async () => {
-    await Test.createTestingModule({
-      providers: [
-        {
-          provide: HttpService,
-          useValue: mockHttpService,
-        },
-      ],
-    }).compile();
-
     slackBotApp = new SlackBotApp(
       mockHttpService as unknown as HttpService,
       config,
