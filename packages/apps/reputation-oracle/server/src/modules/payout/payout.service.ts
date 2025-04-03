@@ -16,6 +16,7 @@ import { Web3Service } from '../web3/web3.service';
 import { ContentType, JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
+  JobManifest,
   AudinoManifest,
   CvatManifest,
   FortuneManifest,
@@ -65,7 +66,7 @@ export class PayoutService {
     }
 
     const manifest =
-      await this.storageService.downloadJsonLikeData(manifestUrl);
+      await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
     const requestType = getRequestType(manifest).toLowerCase();
 
@@ -73,7 +74,7 @@ export class PayoutService {
 
     const { saveResults } = this.createPayoutSpecificActions[requestType];
 
-    const results = await saveResults(chainId, escrowAddress, manifest);
+    const results = await saveResults(chainId, escrowAddress, manifest as any);
 
     return results;
   }
@@ -102,7 +103,7 @@ export class PayoutService {
     }
 
     const manifest =
-      await this.storageService.downloadJsonLikeData(manifestUrl);
+      await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
     const requestType = getRequestType(manifest).toLowerCase();
 
@@ -222,9 +223,9 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const intermediateResults = (await this.storageService.downloadJsonLikeData(
-      intermediateResultsUrl,
-    )) as FortuneFinalResult[];
+    const intermediateResults = await this.storageService.downloadJsonLikeData<
+      FortuneFinalResult[]
+    >(intermediateResultsUrl);
 
     if (intermediateResults.length === 0) {
       throw new Error('No intermediate results found');
@@ -313,9 +314,10 @@ export class PayoutService {
     manifest: FortuneManifest,
     finalResultsUrl: string,
   ): Promise<CalculatedPayout[]> {
-    const finalResults = (await this.storageService.downloadJsonLikeData(
-      finalResultsUrl,
-    )) as FortuneFinalResult[];
+    const finalResults =
+      await this.storageService.downloadJsonLikeData<FortuneFinalResult[]>(
+        finalResultsUrl,
+      );
 
     const recipients = finalResults
       .filter((result) => !result.error)
@@ -351,8 +353,8 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: CvatAnnotationMeta =
-      await this.storageService.downloadJsonLikeData(
+    const annotations =
+      await this.storageService.downloadJsonLikeData<CvatAnnotationMeta>(
         `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
       );
 
@@ -419,8 +421,8 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: AudinoAnnotationMeta =
-      await this.storageService.downloadJsonLikeData(
+    const annotations =
+      await this.storageService.downloadJsonLikeData<AudinoAnnotationMeta>(
         `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
       );
 

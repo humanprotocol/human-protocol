@@ -53,25 +53,21 @@ export class StorageService {
     }
   }
 
-  async downloadJsonLikeData(url: string): Promise<any> {
+  async downloadJsonLikeData<T>(url: string): Promise<T> {
     try {
       let fileContent = await httpUtils.downloadFile(url);
 
       fileContent =
         await this.pgpEncryptionService.maybeDecryptFile(fileContent);
 
-      let jsonLikeData = fileContent.toString();
-      try {
-        jsonLikeData = JSON.parse(jsonLikeData);
-      } catch (noop) {}
-
-      return jsonLikeData;
+      return JSON.parse(fileContent.toString());
     } catch (error) {
-      this.logger.error('Error downloading json like data', {
+      const errorMessage = 'Error downloading json like data';
+      this.logger.error(errorMessage, {
         error,
         url,
       });
-      return [];
+      throw new Error(errorMessage);
     }
   }
 
