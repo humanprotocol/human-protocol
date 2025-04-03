@@ -20,7 +20,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
-    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event TrustedHandlerAdded(address _handler);
@@ -374,7 +373,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             );
         }
 
-        require(totalBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
         require(totalBulkAmount <= remainingFunds, 'Not enough balance');
 
         // Transfer oracle fees
