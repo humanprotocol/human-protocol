@@ -24,6 +24,9 @@ def compose_assignment_url(task_id: int, job_id: int, *, project: Project) -> st
     if project.job_type == TaskTypes.image_skeletons_from_boxes:
         query_params += "&defaultPointsCount=1"
 
+    if project.job_type == TaskTypes.audio_transcription:
+        query_params += "?org=" + Config.cvat_config.org_slug
+
     return urljoin("https://app.audino.in", f"/annotate/{task_id}/{job_id}{query_params}")
 
 
