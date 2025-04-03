@@ -1,20 +1,14 @@
-import {
-  ChainId,
-  Encryption,
-  EncryptionUtils,
-  EscrowClient,
-  KVStoreUtils,
-} from '@human-protocol/sdk';
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import crypto from 'crypto';
 import * as Minio from 'minio';
 
 import { FortuneFinalResult } from '../../common/interfaces/job-result';
-import { PGPConfigService } from '../../config/pgp-config.service';
 import { S3ConfigService } from '../../config/s3-config.service';
 import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 
+import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
 import { Web3Service } from '../web3/web3.service';
 import { MinioErrorCodes } from './minio.constants';
 
@@ -31,8 +25,8 @@ export class StorageService {
 
   constructor(
     private readonly s3ConfigService: S3ConfigService,
-    private readonly pgpConfigService: PGPConfigService,
     private readonly web3Service: Web3Service,
+    private readonly pgpEncryptionService: PgpEncryptionService,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3ConfigService.endpoint,
@@ -65,59 +59,28 @@ export class StorageService {
     }
   }
 
-  private async encryptFile(
+  private async encryptJobSolutionsData(
     escrowAddress: string,
     chainId: ChainId,
     content: string | Buffer,
   ) {
-    if (!this.pgpConfigService.encrypt) {
-      return content;
-    }
-
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
-    const [reputationOraclePublicKey, jobLauncherPublicKey] = await Promise.all(
-      [
-        KVStoreUtils.getPublicKey(chainId, signer.address),
-        KVStoreUtils.getPublicKey(chainId, jobLauncherAddress),
-      ],
-    );
-
-    if (!reputationOraclePublicKey || !jobLauncherPublicKey) {
-      throw new Error('Missing public key');
-    }
-
-    return await EncryptionUtils.encrypt(content, [
-      reputationOraclePublicKey,
-      jobLauncherPublicKey,
+    return this.pgpEncryptionService.encrypt(content, chainId, [
+      jobLauncherAddress,
     ]);
-  }
-
-  private async maybeDecryptFile(fileContent: Buffer): Promise<Buffer> {
-    const contentAsString = fileContent.toString();
-    if (!EncryptionUtils.isEncrypted(contentAsString)) {
-      return fileContent;
-    }
-
-    const encryption = await Encryption.build(
-      this.pgpConfigService.privateKey as string,
-      this.pgpConfigService.passphrase as string,
-    );
-
-    const decryptedData = await encryption.decrypt(contentAsString);
-
-    return Buffer.from(decryptedData);
   }
 
   async downloadJsonLikeData(url: string): Promise<any> {
     try {
       let fileContent = await httpUtils.downloadFile(url);
 
-      fileContent = await this.maybeDecryptFile(fileContent);
+      fileContent =
+        await this.pgpEncryptionService.maybeDecryptFile(fileContent);
 
       let jsonLikeData = fileContent.toString();
       try {
@@ -148,7 +111,7 @@ export class StorageService {
     }
 
     try {
-      const content = await this.encryptFile(
+      const content = await this.encryptJobSolutionsData(
         escrowAddress,
         chainId,
         JSON.stringify(solutions),
@@ -184,22 +147,17 @@ export class StorageService {
     }
   }
 
-  /**
-   * **Copy file from a URL to cloud storage**
-   *
-   * @param {string} url - URL of the source file
-   * @returns {Promise<UploadedFile>} - Uploaded file with key/hash
-   */
-  async copyFileFromURLToBucket(
+  async copyJobSolutions(
     escrowAddress: string,
     chainId: ChainId,
     originalFileUrl: string,
   ): Promise<UploadedFile> {
     try {
       let fileContent = await httpUtils.downloadFile(originalFileUrl);
-      fileContent = await this.maybeDecryptFile(fileContent);
+      fileContent =
+        await this.pgpEncryptionService.maybeDecryptFile(fileContent);
       // Encrypt for job launcher
-      const content = await this.encryptFile(
+      const content = await this.encryptJobSolutionsData(
         escrowAddress,
         chainId,
         fileContent,

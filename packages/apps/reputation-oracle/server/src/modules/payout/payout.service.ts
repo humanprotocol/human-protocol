@@ -258,7 +258,7 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+    const { url, hash } = await this.storageService.copyJobSolutions(
       escrowAddress,
       chainId,
       `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
@@ -446,7 +446,7 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+    const { url, hash } = await this.storageService.copyJobSolutions(
       escrowAddress,
       chainId,
       `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
