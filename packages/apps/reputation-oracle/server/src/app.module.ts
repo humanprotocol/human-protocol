@@ -17,19 +17,15 @@ import { HttpValidationPipe } from './common/pipes';
 
 import { HealthModule } from './modules/health/health.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
-import { Web3Module } from './modules/web3/web3.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { KycModule } from './modules/kyc/kyc.module';
 import { CronJobModule } from './modules/cron-job/cron-job.module';
-import { PayoutModule } from './modules/payout/payout.module';
 import { QualificationModule } from './modules/qualification/qualification.module';
 import { EscrowCompletionModule } from './modules/escrow-completion/escrow-completion.module';
 import { WebhookIncomingModule } from './modules/webhook/webhook-incoming.module';
 import { WebhookOutgoingModule } from './modules/webhook/webhook-outgoing.module';
 import { UserModule } from './modules/user';
-import { EmailModule } from './modules/email/module';
 import { NDAModule } from './modules/nda/nda.module';
-import { StorageModule } from './modules/storage/storage.module';
 
 import Environment from './utils/environment';
 import { AppController } from './app.controller';
@@ -86,18 +82,14 @@ import { AbuseModule } from './modules/abuse/abuse.module';
     AbuseModule,
     AuthModule,
     CronJobModule,
-    EmailModule,
     UserModule,
     NDAModule,
     EscrowCompletionModule,
     HealthModule,
     KycModule,
-    PayoutModule,
     QualificationModule,
     ReputationModule,
-    StorageModule,
     UserModule,
-    Web3Module,
     WebhookIncomingModule,
     WebhookOutgoingModule,
   ],
