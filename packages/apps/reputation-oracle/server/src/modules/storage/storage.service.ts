@@ -1,21 +1,15 @@
-import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import crypto from 'crypto';
 import * as Minio from 'minio';
 
-import { FortuneFinalResult } from '../../common/interfaces/job-result';
+import { ContentType } from '../../common/enums';
 import { S3ConfigService } from '../../config/s3-config.service';
 import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 
 import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
 import { Web3Service } from '../web3/web3.service';
-import { MinioErrorCodes } from './minio.constants';
 
-type UploadedFile = {
-  url: string;
-  hash: string;
-};
+import { MinioErrorCodes } from './minio.constants';
 
 @Injectable()
 export class StorageService {
@@ -59,22 +53,6 @@ export class StorageService {
     }
   }
 
-  private async encryptJobSolutionsData(
-    escrowAddress: string,
-    chainId: ChainId,
-    content: string | Buffer,
-  ) {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-
-    const jobLauncherAddress =
-      await escrowClient.getJobLauncherAddress(escrowAddress);
-
-    return this.pgpEncryptionService.encrypt(content, chainId, [
-      jobLauncherAddress,
-    ]);
-  }
-
   async downloadJsonLikeData(url: string): Promise<any> {
     try {
       let fileContent = await httpUtils.downloadFile(url);
@@ -97,11 +75,11 @@ export class StorageService {
     }
   }
 
-  async uploadJobSolutions(
-    escrowAddress: string,
-    chainId: ChainId,
-    solutions: FortuneFinalResult[],
-  ): Promise<UploadedFile> {
+  async uploadData(
+    content: string | Buffer,
+    fileName: string,
+    contentType: ContentType,
+  ): Promise<string> {
     const isConfiguredBucketExists = await this.minioClient.bucketExists(
       this.s3ConfigService.bucket,
     );
@@ -111,86 +89,31 @@ export class StorageService {
     }
 
     try {
-      const content = await this.encryptJobSolutionsData(
-        escrowAddress,
-        chainId,
-        JSON.stringify(solutions),
-      );
+      const fileUrl = this.getUrl(fileName);
 
-      const hash = crypto.createHash('sha1').update(content).digest('hex');
-      const key = `${hash}.json`;
-      const url = this.getUrl(key);
-
-      const isAlreadyUploaded = await this.checkFileExists(key);
+      const isAlreadyUploaded = await this.checkFileExists(fileName);
       if (isAlreadyUploaded) {
-        return { url, hash };
+        return fileUrl;
       }
 
       await this.minioClient.putObject(
         this.s3ConfigService.bucket,
-        key,
+        fileName,
         content,
         {
-          'Content-Type': 'application/json',
+          'Content-Type': contentType,
           'Cache-Control': 'no-store',
         },
       );
 
-      return { url, hash };
+      return fileUrl;
     } catch (error) {
-      this.logger.error('Failed to upload job solutions', {
+      this.logger.error('Failed to upload data', {
         error,
-        escrowAddress,
-        chainId,
+        fileName,
+        contentType,
       });
-      throw new Error('File not uploaded');
-    }
-  }
-
-  async copyJobSolutions(
-    escrowAddress: string,
-    chainId: ChainId,
-    originalFileUrl: string,
-  ): Promise<UploadedFile> {
-    try {
-      let fileContent = await httpUtils.downloadFile(originalFileUrl);
-      fileContent =
-        await this.pgpEncryptionService.maybeDecryptFile(fileContent);
-      // Encrypt for job launcher
-      const content = await this.encryptJobSolutionsData(
-        escrowAddress,
-        chainId,
-        fileContent,
-      );
-
-      const hash = crypto.createHash('sha1').update(content).digest('hex');
-      const key = `s3${hash}.zip`;
-      const copiedFileurl = this.getUrl(key);
-
-      const isAlreadyCopied = await this.checkFileExists(key);
-      if (isAlreadyCopied) {
-        return { url: copiedFileurl, hash };
-      }
-
-      await this.minioClient.putObject(
-        this.s3ConfigService.bucket,
-        key,
-        content,
-        {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'no-store',
-        },
-      );
-
-      return { url: copiedFileurl, hash };
-    } catch (error) {
-      this.logger.error('Error copying file', {
-        error,
-        originalFileUrl,
-        escrowAddress,
-        chainId,
-      });
-      throw new Error('File not copied');
+      throw new Error('Data not uploaded');
     }
   }
 }

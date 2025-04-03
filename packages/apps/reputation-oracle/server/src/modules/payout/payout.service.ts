@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
+
+import crypto from 'crypto';
+import { ethers } from 'ethers';
 
 import {
   AUDINO_RESULTS_ANNOTATIONS_FILENAME,
@@ -8,9 +11,9 @@ import {
   CVAT_RESULTS_ANNOTATIONS_FILENAME,
   CVAT_VALIDATION_META_FILENAME,
 } from '../../common/constants';
-import { ethers } from 'ethers';
+import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
 import { Web3Service } from '../web3/web3.service';
-import { JobRequestType } from '../../common/enums';
+import { ContentType, JobRequestType } from '../../common/enums';
 import { StorageService } from '../storage/storage.service';
 import {
   AudinoManifest,
@@ -28,6 +31,7 @@ import {
   RequestAction,
   SaveResultDto,
 } from './payout.interface';
+import * as httpUtils from '../../utils/http';
 import { getRequestType } from '../../utils/manifest';
 import { assertValidJobRequestType } from '../../utils/type-guards';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
@@ -35,9 +39,9 @@ import { MissingManifestUrlError } from '../../common/errors/manifest';
 @Injectable()
 export class PayoutService {
   constructor(
-    @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly web3Service: Web3Service,
+    private readonly pgpEncryptionService: PgpEncryptionService,
   ) {}
 
   /**
@@ -231,10 +235,23 @@ export class PayoutService {
       throw new Error('Not all required solutions have been sent');
     }
 
-    const { url, hash } = await this.storageService.uploadJobSolutions(
-      escrowAddress,
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
+
+    const encryptedResults = await this.pgpEncryptionService.encrypt(
+      JSON.stringify(intermediateResults),
       chainId,
-      intermediateResults,
+      [jobLauncherAddress],
+    );
+    const hash = crypto
+      .createHash('sha1')
+      .update(encryptedResults)
+      .digest('hex');
+
+    const url = await this.storageService.uploadData(
+      encryptedResults,
+      `${hash}.json`,
+      ContentType.PLAIN_TEXT,
     );
 
     return { url, hash };
@@ -258,10 +275,28 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const { url, hash } = await this.storageService.copyJobSolutions(
-      escrowAddress,
-      chainId,
+    let fileContent = await httpUtils.downloadFile(
       `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
+    );
+    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
+
+    const encryptedResults = await this.pgpEncryptionService.encrypt(
+      fileContent,
+      chainId,
+      [jobLauncherAddress],
+    );
+    const hash = crypto
+      .createHash('sha1')
+      .update(encryptedResults)
+      .digest('hex');
+
+    const url = await this.storageService.uploadData(
+      encryptedResults,
+      `s3${hash}.zip`,
+      ContentType.BINARY,
     );
 
     return { url, hash };
@@ -446,10 +481,28 @@ export class PayoutService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const { url, hash } = await this.storageService.copyJobSolutions(
-      escrowAddress,
-      chainId,
+    let fileContent = await httpUtils.downloadFile(
       `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
+    );
+    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
+
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
+
+    const encryptedResults = await this.pgpEncryptionService.encrypt(
+      fileContent,
+      chainId,
+      [jobLauncherAddress],
+    );
+    const hash = crypto
+      .createHash('sha1')
+      .update(encryptedResults)
+      .digest('hex');
+
+    const url = await this.storageService.uploadData(
+      encryptedResults,
+      `s3${hash}.zip`,
+      ContentType.BINARY,
     );
 
     return { url, hash };

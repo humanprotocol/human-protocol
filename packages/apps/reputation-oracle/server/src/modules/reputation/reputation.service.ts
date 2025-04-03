@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 import {
   AUDINO_VALIDATION_META_FILENAME,
@@ -36,7 +36,6 @@ import { ReputationError, ReputationErrorMessage } from './reputation.error';
 @Injectable()
 export class ReputationService {
   constructor(
-    @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly reputationRepository: ReputationRepository,
     private readonly reputationConfigService: ReputationConfigService,
