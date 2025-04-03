@@ -71,8 +71,8 @@ export const envValidator = Joi.object({
   REPUTATION_LEVEL_LOW: Joi.number(),
   REPUTATION_LEVEL_HIGH: Joi.number(),
   // Encryption
-  PGP_PRIVATE_KEY: Joi.string(),
-  PGP_PASSPHRASE: Joi.string(),
+  PGP_PRIVATE_KEY: Joi.string().required(),
+  PGP_PASSPHRASE: Joi.string().required(),
   PGP_ENCRYPT: Joi.string().valid('true', 'false'),
   // Kyc
   KYC_API_KEY: Joi.string(),
