@@ -6,8 +6,8 @@ import { EventLog, Signer } from 'ethers';
 import { Escrow, HMToken } from '../typechain-types';
 import { faker } from '@faker-js/faker';
 
-const MOCK_URL = 'http://google.com/fake';
-const MOCK_HASH = 'kGKmnj9BRf';
+const MOCK_URL = faker.internet.url();
+const MOCK_HASH = faker.string.alphanumeric(10);
 const BULK_MAX_COUNT = 100;
 
 enum Status {
@@ -59,9 +59,12 @@ async function setupEscrow() {
     );
 }
 
-async function fundEscrow() {
-  const amount = ethers.parseEther('100');
+async function fundEscrow(): Promise<bigint> {
+  const amount = ethers.parseEther(
+    faker.number.int({ min: 50, max: 200 }).toString()
+  );
   await token.connect(owner).transfer(escrow.getAddress(), amount);
+  return amount;
 }
 
 describe('Escrow', function () {
@@ -121,7 +124,9 @@ describe('Escrow', function () {
     });
 
     it('Should topup and return the right escrow balance', async () => {
-      const amount = 1000;
+      const amount = ethers.parseEther(
+        faker.number.int({ min: 500, max: 2000 }).toString()
+      );
       await token.connect(owner).transfer(escrow.getAddress(), amount);
 
       const result = await escrow.connect(launcher).getBalance();
@@ -362,9 +367,10 @@ describe('Escrow', function () {
     });
 
     describe('Events', function () {
+      let fundAmount: bigint;
       before(async () => {
         await deployEscrow();
-        await fundEscrow();
+        fundAmount = await fundEscrow();
       });
 
       it('Should emit an event on pending', async function () {
@@ -391,7 +397,7 @@ describe('Escrow', function () {
             await exchangeOracle.getAddress()
           )
           .to.emit(escrow, 'Fund')
-          .withArgs(ethers.parseEther('100'));
+          .withArgs(fundAmount);
       });
     });
 
@@ -606,15 +612,16 @@ describe('Escrow', function () {
     });
 
     describe('Events', function () {
+      let fundAmount: bigint;
       this.beforeEach(async () => {
         await deployEscrow();
-        await fundEscrow();
+        fundAmount = await fundEscrow();
         await setupEscrow();
       });
 
       it('Should emit bulkPayOut and Completed events for complete bulkPayOut', async function () {
         const recipients = [await restAccounts[0].getAddress()];
-        const amounts = [ethers.parseEther('100')];
+        const amounts = [fundAmount];
 
         const tx = await escrow
           .connect(owner)
@@ -624,13 +631,7 @@ describe('Escrow', function () {
 
         await expect(tx)
           .to.emit(escrow, 'BulkTransferV2')
-          .withArgs(
-            anyValue,
-            recipients,
-            [ethers.parseEther('100')],
-            false,
-            MOCK_URL
-          );
+          .withArgs(anyValue, recipients, [fundAmount], false, MOCK_URL);
 
         await expect(tx).to.emit(escrow, 'Completed');
       });
@@ -670,9 +671,10 @@ describe('Escrow', function () {
       });
     });
     describe('Bulk payout for recipients', async function () {
+      let fundAmount: bigint;
       beforeEach(async () => {
         await deployEscrow();
-        await fundEscrow();
+        fundAmount = await fundEscrow();
         await setupEscrow();
       });
 
@@ -704,7 +706,7 @@ describe('Escrow', function () {
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256)'
-          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000');
+          ](recipients, amounts, faker.internet.url(), faker.string.alphanumeric(10), faker.string.numeric(3));
 
         const finalBalances = await Promise.all(
           recipients.map(async (account) =>
@@ -772,7 +774,7 @@ describe('Escrow', function () {
           .connect(reputationOracle)
           [
             'bulkPayOut(address[],uint256[],string,string,uint256,bool)'
-          ](recipients, amounts, MOCK_URL, MOCK_HASH, '000', true);
+          ](recipients, amounts, faker.internet.url(), faker.string.alphanumeric(10), faker.string.numeric(3), true);
 
         const finalBalances = await Promise.all(
           recipients.map(async (account) =>
@@ -820,9 +822,9 @@ describe('Escrow', function () {
           await restAccounts[5].getAddress(),
         ];
         const amounts = [
-          ethers.parseEther('10'),
-          ethers.parseEther('20'),
-          ethers.parseEther('70'),
+          fundAmount / 4n, //1/4
+          fundAmount / 2n, //1/2
+          fundAmount / 4n, //1/4
         ];
 
         expect(await escrow.status()).to.equal(Status.Pending);
@@ -876,9 +878,10 @@ describe('Escrow', function () {
     });
 
     describe('Complete escrow', async function () {
+      let fundAmount: bigint;
       beforeEach(async () => {
         await deployEscrow();
-        await fundEscrow();
+        fundAmount = await fundEscrow();
         await setupEscrow();
       });
 
@@ -903,7 +906,7 @@ describe('Escrow', function () {
           .balanceOf(await launcher.getAddress());
 
         const recipients = [await restAccounts[0].getAddress()];
-        const amounts = [ethers.parseEther('10')];
+        const amounts = [fundAmount / 2n];
         await escrow
           .connect(owner)
           [
@@ -916,7 +919,7 @@ describe('Escrow', function () {
           .balanceOf(await launcher.getAddress());
 
         expect(finalLauncherBalance - initialLauncherBalance).to.equal(
-          ethers.parseEther('90')
+          fundAmount - amounts[0]
         );
       });
     });
