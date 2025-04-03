@@ -47,7 +47,10 @@ export const TOKEN_ADDRESSES: {
       address: NETWORKS[ChainId.POLYGON_AMOY]!.hmtAddress,
       decimals: 18,
     },
-    // [EscrowFundToken.USDC]: { address: '0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582', decimals: 6 },
+    [EscrowFundToken.USDC]: {
+      address: '0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582',
+      decimals: 6,
+    },
   },
   [ChainId.LOCALHOST]: {
     [EscrowFundToken.HMT]: {
