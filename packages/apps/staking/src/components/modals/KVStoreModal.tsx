@@ -1,3 +1,4 @@
+import { FC, useEffect, useState, useRef } from 'react';
 import {
   IKVStore,
   KVStoreKeys,
@@ -8,7 +9,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
-  CircularProgress,
   FormControl,
   Grid,
   IconButton,
@@ -19,9 +19,15 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState, useRef } from 'react'; // <-- Importa useRef
-import { useSnackbar } from '../../providers/SnackProvider';
+
 import BaseModal from './BaseModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { ModalError, ModalLoading, ModalSuccess } from '../ModalState';
+import {
+  ModalRequestStatus,
+  useModalRequestStatus,
+} from '../../hooks/useModalRequestStatus';
+import { useSnackbar } from '../../providers/SnackProvider';
 
 type Props = {
   open: boolean;
@@ -30,21 +36,20 @@ type Props = {
   onSave: (keys: string[], values: string[]) => Promise<void>;
 };
 
-const KVStoreModal: React.FC<Props> = ({
-  open,
-  onClose,
-  initialData,
-  onSave,
-}) => {
+const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
   const [formData, setFormData] = useState<
     { key: string; value: string; isCustom?: boolean }[]
   >([]);
   const [pendingChanges, setPendingChanges] = useState<
     { key: string; value: string }[]
   >([]);
-  const [loading, setLoading] = useState(false);
-  const { showError } = useSnackbar();
+  const [itemToDeleteIndex, setItemToDeleteIndex] = useState<number | null>(
+    null
+  );
   const formContainerRef = useRef<HTMLDivElement | null>(null);
+  const { showError } = useSnackbar();
+  const { changeStatus, isIdle, isLoading, isSuccess, isError } =
+    useModalRequestStatus();
 
   useEffect(() => {
     if (open) {
@@ -56,6 +61,13 @@ const KVStoreModal: React.FC<Props> = ({
       setPendingChanges([]);
     }
   }, [open, initialData]);
+
+  const handleClose = () => {
+    setFormData([]);
+    setPendingChanges([]);
+    changeStatus(ModalRequestStatus.Idle);
+    onClose();
+  };
 
   const updatePendingChanges = (key: string, value: string) => {
     setPendingChanges((prev) => {
@@ -118,9 +130,16 @@ const KVStoreModal: React.FC<Props> = ({
   };
 
   const handleDelete = (index: number) => {
-    const updatedData = formData.filter((_, i) => i !== index);
-    updatePendingChanges(formData[index].key, '');
-    setFormData(updatedData);
+    setItemToDeleteIndex(index);
+  };
+
+  const handleConfirmDelete = () => {
+    if (itemToDeleteIndex !== null) {
+      const updatedData = formData.filter((_, i) => i !== itemToDeleteIndex);
+      updatePendingChanges(formData[itemToDeleteIndex].key, '');
+      setFormData(updatedData);
+      setItemToDeleteIndex(null);
+    }
   };
 
   const handleAddField = () => {
@@ -134,7 +153,9 @@ const KVStoreModal: React.FC<Props> = ({
   };
 
   const handleSave = async () => {
-    setLoading(true);
+    if (isLoading) return;
+
+    changeStatus(ModalRequestStatus.Loading);
     try {
       const customChanges = formData
         .filter(
@@ -156,33 +177,50 @@ const KVStoreModal: React.FC<Props> = ({
       if (finalChanges.length > 0) {
         await onSave(keys, values);
       }
-      onClose();
-    } finally {
-      setLoading(false);
+      changeStatus(ModalRequestStatus.Success);
+    } catch (error) {
+      console.error('Error during saving KV Store:', error);
+      changeStatus(ModalRequestStatus.Error);
     }
+  };
+
+  const renderSuccessState = () => {
+    return (
+      <ModalSuccess>
+        <Typography variant="subtitle2" color="primary" p={1}>
+          You have successfully edited your KV Store
+        </Typography>
+      </ModalSuccess>
+    );
   };
 
   return (
     <BaseModal
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       sx={{
-        width: '80%',
-        maxWidth: '1200px',
+        width: '100%',
+        maxWidth: '800px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <Typography variant="h6" mb={2}>
-        Edit KVStore
+      <Typography variant="h2" mb={2} p={1}>
+        Edit KV Store
       </Typography>
       <Box
         ref={formContainerRef}
         sx={{
           maxHeight: '400px',
           overflowY: 'auto',
-          display: 'flex',
+          display: isIdle ? 'flex' : 'none',
           flexDirection: 'column',
           gap: 1,
           mb: 5,
+          width: '100%',
+          px: 3,
         }}
       >
         {formData.map((item, index) => (
@@ -296,21 +334,54 @@ const KVStoreModal: React.FC<Props> = ({
           </Grid>
         ))}
       </Box>
-      <Box
-        sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, gap: 2 }}
-      >
-        <Button variant="outlined" onClick={handleAddField} fullWidth>
-          Add Field
-        </Button>
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={handleSave}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={20} /> : 'Save Changes'}
-        </Button>
+
+      {isLoading && <ModalLoading />}
+      {isSuccess && renderSuccessState()}
+      {isError && <ModalError />}
+
+      <Box display="flex" mt={2} gap={1}>
+        {isIdle && (
+          <>
+            <Button variant="outlined" size="large" onClick={handleAddField}>
+              Add Field
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleSave}
+              disabled={pendingChanges.length === 0}
+            >
+              Save
+            </Button>
+          </>
+        )}
+
+        {(isLoading || isSuccess) && (
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleClose}
+            disabled={isLoading}
+          >
+            Close
+          </Button>
+        )}
+        {isError && (
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => changeStatus(ModalRequestStatus.Idle)}
+          >
+            Edit
+          </Button>
+        )}
       </Box>
+
+      <DeleteConfirmationModal
+        open={!!itemToDeleteIndex}
+        onClose={() => setItemToDeleteIndex(null)}
+        onDelete={handleConfirmDelete}
+      />
     </BaseModal>
   );
 };

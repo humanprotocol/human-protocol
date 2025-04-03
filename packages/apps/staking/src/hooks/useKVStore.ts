@@ -83,6 +83,7 @@ export const useKVStore = () => {
     } catch (err) {
       showError(parseErrorMessage(err));
       console.error(err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -101,6 +102,7 @@ export const useKVStore = () => {
     } catch (err) {
       showError(parseErrorMessage(err));
       console.error(err);
+      throw err;
     } finally {
       setLoading(false);
     }

@@ -11,7 +11,7 @@ const KVStore: FC = () => {
   return (
     <PageWrapper>
       <Box
-        paddingX={8}
+        paddingX={{ xs: 2, md: 8 }}
         pt={3}
         pb={8}
         bgcolor="#f6f7fe"

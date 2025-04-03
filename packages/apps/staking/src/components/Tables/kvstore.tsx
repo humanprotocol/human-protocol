@@ -35,6 +35,7 @@ const KVStoreTable: FC = () => {
       }
     } catch (err) {
       console.error('Failed to update KVStore:', err);
+      throw err;
     }
   };
 
@@ -91,18 +92,15 @@ const KVStoreTable: FC = () => {
           columns={columns}
           getRowId={(row) => row.key}
           getRowHeight={() => (filteredData.length > 0 ? 'auto' : null)}
-          pageSizeOptions={[5, 10, 25]}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10 },
-            },
-          }}
           disableColumnSelector
           disableRowSelectionOnClick
           disableColumnMenu
-          hideFooterPagination={filteredData.length === 0}
+          hideFooterPagination
           sx={{
             border: 0,
+            '& .MuiDataGrid-main': {
+              maxHeight: '500px',
+            },
             '& .MuiDataGrid-cell': {
               borderTop: 'none',
               padding: '12px 16px',
@@ -113,9 +111,13 @@ const KVStoreTable: FC = () => {
             },
             '& .MuiDataGrid-row': {
               borderTop: 'none',
+              borderBottom: '1px solid rgba(99, 9, 255, 0.08)',
               '&:hover': {
                 background: 'rgba(20, 6, 178, 0.04)',
               },
+            },
+            '& .MuiDataGrid-row--lastVisible': {
+              borderBottom: 'none',
             },
             '& .MuiDataGrid-cell:focus': {
               outline: 'none',
@@ -137,7 +139,7 @@ const KVStoreTable: FC = () => {
               letterSpacing: '0.4px',
             },
             '& .MuiDataGrid-footerContainer': {
-              borderTop: '1px solid #E0E0E0',
+              border: 'none',
             },
             '& .MuiDataGrid-columnHeader:hover': {
               color: 'rgb(133, 142, 198)',
@@ -154,7 +156,6 @@ const KVStoreTable: FC = () => {
             '& .MuiDataGrid-filler': {
               display: 'none',
             },
-            '&, [class^=MuiDataGrid]': { border: 'none' },
           }}
           slots={{
             noRowsOverlay: () => (
