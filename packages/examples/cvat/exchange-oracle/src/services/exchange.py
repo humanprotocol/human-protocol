@@ -111,6 +111,9 @@ async def resign_assignment(assignment_id: str, wallet_address: str) -> None:
             raise NoAccessError
 
         cvat_service.cancel_assignment(session, assignment_id)
+        cvat_api.update_job_assignee(
+            assignment.cvat_job_id, assignee_id=None
+        )
 
         job = assignment.job
         cvat_service.touch(session, Job, [job.id])  # project|task rows are locked for update
