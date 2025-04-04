@@ -72,7 +72,7 @@ export class PgpEncryptionService implements OnModuleInit {
       ),
     );
 
-    return await EncryptionUtils.encrypt(content, publicKeys);
+    return EncryptionUtils.encrypt(content, publicKeys);
   }
 
   private async getPgpPublicKeyForOracle(
