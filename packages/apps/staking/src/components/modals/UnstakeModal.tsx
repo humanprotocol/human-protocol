@@ -32,9 +32,11 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
   const availableAmount =
     Number(stakedAmount) - Number(lockedAmount) - Number(withdrawableAmount);
 
-  const isUnstakeDisabled = !!amountError || !amount || isLoading;
+  const isUnstakeDisabled = !!amountError || Number(amount) <= 0 || isLoading;
 
   const handleClose = () => {
+    if (isLoading) return;
+
     setAmount('');
     setAmountError('');
     changeStatus(ModalRequestStatus.Idle);
@@ -100,6 +102,11 @@ const UnstakeModal: FC<Props> = ({ open, onClose }) => {
           error={!!amountError}
           helperText={amountError || ' '}
           inputProps={{ max: availableAmount, min: 0 }}
+          onKeyDown={(e) => {
+            if (e.key === '-' || e.key === 'e') {
+              e.preventDefault();
+            }
+          }}
           FormHelperTextProps={{
             sx: {
               marginTop: 0,

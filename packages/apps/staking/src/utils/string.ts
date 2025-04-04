@@ -26,9 +26,10 @@ export const formatAddress = (address?: string) => {
 };
 
 export const formatHmtAmount = (amount: string | number): string | number => {
-  if (+amount >= 1000) {
-    return Math.round(+amount);
+  const _amount = Number(amount);
+  if (_amount >= 1000) {
+    return Math.round(_amount);
   } else {
-    return Number(amount).toFixed(3);
+    return _amount.toFixed(3);
   }
 };

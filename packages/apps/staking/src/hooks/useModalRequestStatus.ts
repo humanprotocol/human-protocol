@@ -20,7 +20,6 @@ export const useModalRequestStatus = () => {
   const isError = modalRequestStatus === ModalRequestStatus.Error;
 
   return {
-    status: modalRequestStatus,
     changeStatus,
     isIdle,
     isLoading,

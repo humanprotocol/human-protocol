@@ -63,6 +63,8 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
   }, [open, initialData]);
 
   const handleClose = () => {
+    if (isLoading) return;
+
     setFormData([]);
     setPendingChanges([]);
     changeStatus(ModalRequestStatus.Idle);
@@ -71,6 +73,13 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
 
   const updatePendingChanges = (key: string, value: string) => {
     setPendingChanges((prev) => {
+      const originalItem = initialData.find((item) => item.key === key);
+      const isRevertedToOriginal = originalItem && originalItem.value === value;
+
+      if (isRevertedToOriginal) {
+        return prev.filter((change) => change.key !== key);
+      }
+
       const existingChangeIndex = prev.findIndex(
         (change) => change.key === key
       );
@@ -378,9 +387,9 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
       </Box>
 
       <DeleteConfirmationModal
-        open={!!itemToDeleteIndex}
+        open={itemToDeleteIndex !== null}
         onClose={() => setItemToDeleteIndex(null)}
-        onDelete={handleConfirmDelete}
+        onConfirm={handleConfirmDelete}
       />
     </BaseModal>
   );

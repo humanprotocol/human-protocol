@@ -28,9 +28,11 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
   const { changeStatus, isIdle, isLoading, isSuccess, isError } =
     useModalRequestStatus();
 
-  const isStakeDisabled = !!amountError || !amount || isLoading;
+  const isStakeDisabled = !!amountError || Number(amount) <= 0 || isLoading;
 
   const handleClose = () => {
+    if (isLoading) return;
+
     setAmount('');
     setAmountError('');
     changeStatus(ModalRequestStatus.Idle);
@@ -93,6 +95,11 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
           error={!!amountError}
           helperText={amountError || ' '}
           inputProps={{ max: tokenBalance, min: 0 }}
+          onKeyDown={(e) => {
+            if (e.key === '-' || e.key === 'e') {
+              e.preventDefault();
+            }
+          }}
           FormHelperTextProps={{
             sx: {
               marginTop: 0,

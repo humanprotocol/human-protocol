@@ -11,7 +11,7 @@ import { useSnackbar } from '../../providers/SnackProvider';
 import KVStoreModal from '../modals/KVStoreModal';
 
 const KVStoreTable: FC = () => {
-  const { kvStore, set, setBulk } = useKVStoreContext();
+  const { kvStore, set, setBulk, loading } = useKVStoreContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
   const { chainId } = useAccount();
@@ -88,6 +88,7 @@ const KVStoreTable: FC = () => {
     >
       <Box flexGrow={1}>
         <DataGrid
+          loading={loading}
           rows={filteredData}
           columns={columns}
           getRowId={(row) => row.key}

@@ -3,12 +3,13 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 
 import Dashboard from './pages/Dashboard';
 import KVStore from './pages/KVStore';
+import { ROUTES } from './constants';
 
 const App: FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/kvstore" element={<KVStore />} />
+      <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+      <Route path={ROUTES.KVSTORE} element={<KVStore />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

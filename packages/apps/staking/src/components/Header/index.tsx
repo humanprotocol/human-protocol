@@ -20,6 +20,7 @@ import ConnectWallet from '../Wallet/ConnectWallet';
 import StakeModal from '../modals/StakeModal';
 import logoImg from '../../assets/logo.svg';
 import { colorPalette } from '../../assets/styles/color-palette';
+import { ROUTES } from '../../constants';
 
 const NavLink = styled(MuiLink)({
   color: colorPalette.primary.main,
@@ -55,7 +56,10 @@ const DefaultHeader: FC = () => {
           height: { xs: 64, md: 82 },
         }}
       >
-        <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+        <Link
+          to={ROUTES.DASHBOARD}
+          style={{ display: 'flex', alignItems: 'center' }}
+        >
           <img
             src={logoImg}
             alt="Staking Dashboard"
@@ -76,8 +80,8 @@ const DefaultHeader: FC = () => {
           alignItems="center"
           gap={2}
         >
-          <NavLink href="/">Staking Overview</NavLink>
-          <NavLink href="/kvstore">KV Store</NavLink>
+          <NavLink href={ROUTES.DASHBOARD}>Staking Overview</NavLink>
+          <NavLink href={ROUTES.KVSTORE}>KV Store</NavLink>
           <NavLink href="https://dashboard.humanprotocol.org" target="_blank">
             Dashboard
           </NavLink>
@@ -138,7 +142,21 @@ const DefaultHeader: FC = () => {
             {isConnected && <Account />}
             {!isConnected && <ConnectWallet />}
             <MuiLink
-              href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
+              href={ROUTES.DASHBOARD}
+              underline="none"
+              onClick={() => toggleDrawer(false)}
+            >
+              Staking Overview
+            </MuiLink>
+            <MuiLink
+              href={ROUTES.KVSTORE}
+              underline="none"
+              onClick={() => toggleDrawer(false)}
+            >
+              KV Store
+            </MuiLink>
+            <MuiLink
+              href="https://dashboard.humanprotocol.org"
               underline="none"
               onClick={() => toggleDrawer(false)}
             >
@@ -151,6 +169,19 @@ const DefaultHeader: FC = () => {
             >
               HUMAN Website
             </MuiLink>
+            <Button
+              size="medium"
+              variant="outlined"
+              disabled={!isConnected}
+              onClick={() => {
+                if (isConnected) {
+                  setStakeModalOpen(true);
+                  toggleDrawer(false);
+                }
+              }}
+            >
+              Stake HMT
+            </Button>
           </Box>
         </Drawer>
       </Toolbar>

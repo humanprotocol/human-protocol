@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Chip, Typography, useTheme } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useAccount } from 'wagmi';
 
@@ -9,9 +9,6 @@ import { colorPalette } from '../../assets/styles/color-palette';
 
 const NetworkStatus: React.FC = () => {
   const { chain } = useAccount();
-  const theme = useTheme();
-
-  //if (!chain) return null;
 
   return (
     <Box display="flex" gap={1}>
@@ -38,7 +35,7 @@ const NetworkStatus: React.FC = () => {
                 padding: 0,
                 fontWeight: 400,
                 lineHeight: 1.5,
-                color: theme.palette.primary.main,
+                color: 'primary.main',
                 marginLeft: 1,
               }}
             >
@@ -46,11 +43,11 @@ const NetworkStatus: React.FC = () => {
             </Typography>
           }
           sx={{
-            backgroundColor: theme.palette.background.default,
-            color: theme.palette.primary.contrastText,
+            bgcolor: 'background.default',
+            color: 'primary.contrastText',
 
             '& .MuiChip-avatar': {
-              color: theme.palette.primary.main,
+              color: 'primary.main',
               margin: 0,
             },
             '& .MuiChip-label': {

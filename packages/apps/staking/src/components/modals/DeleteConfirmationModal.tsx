@@ -6,10 +6,10 @@ import { Button, Box, Typography } from '@mui/material';
 type Props = {
   open: boolean;
   onClose: () => void;
-  onDelete: () => void;
+  onConfirm: () => void;
 };
 
-const DeleteConfirmationModal: FC<Props> = ({ open, onClose, onDelete }) => {
+const DeleteConfirmationModal: FC<Props> = ({ open, onClose, onConfirm }) => {
   return (
     <BaseModal
       open={open}
@@ -34,13 +34,7 @@ const DeleteConfirmationModal: FC<Props> = ({ open, onClose, onDelete }) => {
         <Button variant="outlined" onClick={onClose}>
           Cancel
         </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            onDelete();
-            onClose();
-          }}
-        >
+        <Button variant="contained" onClick={onConfirm}>
           Delete
         </Button>
       </Box>
