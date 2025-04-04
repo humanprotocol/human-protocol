@@ -205,6 +205,8 @@ export const CryptoPayForm = ({
             hash,
             confirmations:
               Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
+            retryCount: 10,
+            retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
           });
 
           // create crypto payment record
@@ -221,8 +223,9 @@ export const CryptoPayForm = ({
           fortuneRequest,
           cvatRequest,
           hCaptchaRequest,
+          audinoRequest,
         } = jobRequest;
-        if (jobType === JobType.Fortune && fortuneRequest) {
+        if (jobType === JobType.FORTUNE && fortuneRequest) {
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,
@@ -240,6 +243,14 @@ export const CryptoPayForm = ({
           );
         } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
           await jobService.createHCaptchaJob(chainId, hCaptchaRequest);
+        } else if (jobType === JobType.AUDINO && audinoRequest) {
+          await jobService.createAudinoJob(
+            chainId,
+            audinoRequest,
+            paymentTokenSymbol,
+            Number(amount),
+            fundTokenSymbol,
+          );
         }
         onFinish();
       } catch (err) {
@@ -256,7 +267,7 @@ export const CryptoPayForm = ({
           You are on wrong network, please switch to{' '}
           {NETWORKS[jobRequest.chainId!]?.title}.
         </Typography>
-        <Button variant="outlined" onClick={() => goToPrevStep?.()}>
+        <Button variant="outlined" onClick={goToPrevStep}>
           Back
         </Button>
       </Box>
@@ -492,7 +503,7 @@ export const CryptoPayForm = ({
             variant="outlined"
             sx={{ width: '240px', ml: 4 }}
             size="large"
-            onClick={() => goToPrevStep?.()}
+            onClick={goToPrevStep}
           >
             Cancel
           </Button>

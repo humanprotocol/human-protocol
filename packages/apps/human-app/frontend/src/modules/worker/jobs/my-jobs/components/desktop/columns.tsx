@@ -47,20 +47,15 @@ export const getColumnsDefinition = ({
     Cell: (props) => {
       return getNetworkName(props.row.original.chain_id);
     },
-    muiTableHeadCellProps: () => ({
-      component: (props) => {
-        return (
-          <TableHeaderCell
-            {...props}
-            headerText={t('worker.jobs.network')}
-            iconType="filter"
-            popoverContent={
-              <MyJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
-            }
-          />
-        );
-      },
-    }),
+    Header: (
+      <TableHeaderCell
+        headerText={t('worker.jobs.network')}
+        iconType="filter"
+        popoverContent={
+          <MyJobsNetworkFilter chainIdsEnabled={chainIdsEnabled} />
+        }
+      />
+    ),
   },
   {
     accessorKey: 'reward_amount',
@@ -76,16 +71,13 @@ export const getColumnsDefinition = ({
         />
       );
     },
-    muiTableHeadCellProps: () => ({
-      component: (props) => (
-        <TableHeaderCell
-          {...props}
-          headerText={t('worker.jobs.rewardAmount')}
-          iconType="filter"
-          popoverContent={<MyJobsRewardAmountSort />}
-        />
-      ),
-    }),
+    Header: (
+      <TableHeaderCell
+        headerText={t('worker.jobs.rewardAmount')}
+        iconType="filter"
+        popoverContent={<MyJobsRewardAmountSort />}
+      />
+    ),
   },
   {
     accessorKey: 'job_type',
@@ -96,18 +88,13 @@ export const getColumnsDefinition = ({
       const label = t(`jobTypeLabels.${row.original.job_type as JobType}`);
       return <Chip label={label} />;
     },
-    muiTableHeadCellProps: () => ({
-      component: (props) => {
-        return (
-          <TableHeaderCell
-            {...props}
-            headerText={t('worker.jobs.jobType')}
-            iconType="filter"
-            popoverContent={<MyJobsJobTypeFilter />}
-          />
-        );
-      },
-    }),
+    Header: (
+      <TableHeaderCell
+        headerText={t('worker.jobs.jobType')}
+        iconType="filter"
+        popoverContent={<MyJobsJobTypeFilter />}
+      />
+    ),
   },
   {
     accessorKey: 'expires_at',
@@ -117,18 +104,13 @@ export const getColumnsDefinition = ({
     Cell: (props) => {
       return formatDate(props.row.original.expires_at);
     },
-    muiTableHeadCellProps: () => ({
-      component: (props) => {
-        return (
-          <TableHeaderCell
-            {...props}
-            headerText={t('worker.jobs.expiresAt')}
-            iconType="filter"
-            popoverContent={<MyJobsExpiresAtSort />}
-          />
-        );
-      },
-    }),
+    Header: (
+      <TableHeaderCell
+        headerText={t('worker.jobs.expiresAt')}
+        iconType="filter"
+        popoverContent={<MyJobsExpiresAtSort />}
+      />
+    ),
   },
   {
     accessorKey: 'status',
@@ -139,18 +121,13 @@ export const getColumnsDefinition = ({
       const status = props.row.original.status;
       return <StatusChip status={status} />;
     },
-    muiTableHeadCellProps: () => ({
-      component: (props) => {
-        return (
-          <TableHeaderCell
-            {...props}
-            headerText={t('worker.jobs.status')}
-            iconType="filter"
-            popoverContent={<MyJobsStatusFilter />}
-          />
-        );
-      },
-    }),
+    Header: (
+      <TableHeaderCell
+        headerText={t('worker.jobs.status')}
+        iconType="filter"
+        popoverContent={<MyJobsStatusFilter />}
+      />
+    ),
   },
   {
     accessorKey: 'assignment_id',
@@ -162,37 +139,31 @@ export const getColumnsDefinition = ({
         <MyJobsTableActions job={props.row.original} />
       </Grid>
     ),
-    muiTableHeadCellProps: () => ({
-      component: (props) => {
-        return (
-          <td {...props}>
-            <Grid
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                width: '100%',
-              }}
-            >
-              <Button
-                size="small"
-                sx={{
-                  paddingTop: '0.4rem',
-                  paddingBottom: '0.4rem',
-                  paddingInline: '1rem',
-                  fontSize: '13px',
-                }}
-                loading={isRefreshTasksPending}
-                type="button"
-                variant="outlined"
-                onClick={refreshData}
-              >
-                {t('worker.jobs.refresh')}
-                <RefreshIcon sx={{ marginLeft: '0.5rem' }} />
-              </Button>
-            </Grid>
-          </td>
-        );
-      },
-    }),
+    Header: (
+      <Grid
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: '100%',
+        }}
+      >
+        <Button
+          size="small"
+          sx={{
+            paddingTop: '0.4rem',
+            paddingBottom: '0.4rem',
+            paddingInline: '1rem',
+            fontSize: '13px',
+          }}
+          loading={isRefreshTasksPending}
+          type="button"
+          variant="outlined"
+          onClick={refreshData}
+        >
+          {t('worker.jobs.refresh')}
+          <RefreshIcon sx={{ marginLeft: '0.5rem' }} />
+        </Button>
+      </Grid>
+    ),
   },
 ];

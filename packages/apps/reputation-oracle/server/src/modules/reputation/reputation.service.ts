@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 import {
+  AUDINO_VALIDATION_META_FILENAME,
   CVAT_VALIDATION_META_FILENAME,
   INITIAL_REPUTATION,
 } from '../../common/constants';
@@ -18,13 +19,15 @@ import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowClient } from '@human-protocol/sdk';
 import {
+  AudinoAnnotationMeta,
+  AudinoAnnotationMetaResult,
   CvatAnnotationMeta,
   CvatAnnotationMetaResults,
   FortuneFinalResult,
 } from '../../common/interfaces/job-result';
 import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../utils/manifest';
-import { CvatManifest } from '../../common/interfaces/manifest';
+import { AudinoManifest, CvatManifest } from '../../common/interfaces/manifest';
 import { ReputationConfigService } from '../../config/reputation-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { ReputationEntity } from './reputation.entity';
@@ -151,6 +154,13 @@ export class ReputationService {
         manifest: CvatManifest,
       ): Promise<void> => this.processCvat(chainId, escrowAddress, manifest),
     },
+    [JobRequestType.AUDIO_TRANSCRIPTION]: {
+      assessWorkerReputationScores: async (
+        chainId: ChainId,
+        escrowAddress: string,
+        manifest: AudinoManifest,
+      ): Promise<void> => this.processAudino(chainId, escrowAddress, manifest),
+    },
   };
 
   private async processFortune(
@@ -206,6 +216,43 @@ export class ReputationService {
     // Decreases or increases worker reputation based on comparison annoation quality to minimum threshold.
     await Promise.all(
       annotations.results.map(async (result: CvatAnnotationMetaResults) => {
+        if (result.annotation_quality < manifest.validation.min_quality) {
+          await this.decreaseReputation(
+            chainId,
+            result.annotator_wallet_address,
+            ReputationEntityType.WORKER,
+          );
+        } else {
+          await this.increaseReputation(
+            chainId,
+            result.annotator_wallet_address,
+            ReputationEntityType.WORKER,
+          );
+        }
+      }),
+    );
+  }
+
+  private async processAudino(
+    chainId: ChainId,
+    escrowAddress: string,
+    manifest: AudinoManifest,
+  ): Promise<void> {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    const annotations: AudinoAnnotationMeta =
+      await this.storageService.downloadJsonLikeData(
+        `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
+      );
+
+    // Assess reputation scores for workers based on the annoation quality.
+    // Decreases or increases worker reputation based on comparison annoation quality to minimum threshold.
+    await Promise.all(
+      annotations.results.map(async (result: AudinoAnnotationMetaResult) => {
         if (result.annotation_quality < manifest.validation.min_quality) {
           await this.decreaseReputation(
             chainId,

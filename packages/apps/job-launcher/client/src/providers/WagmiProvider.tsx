@@ -1,7 +1,13 @@
 import { FC, PropsWithChildren } from 'react';
-import { createConfig, http, WagmiProvider as WWagmiProvider } from 'wagmi';
+import {
+  createConfig,
+  WagmiProvider as WWagmiProvider,
+  fallback,
+  http,
+  unstable_connector,
+} from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
-import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
+import { coinbaseWallet, walletConnect, metaMask } from 'wagmi/connectors';
 
 import { LOCALHOST } from '../constants/chains';
 
@@ -31,21 +37,43 @@ export const wagmiConfig = createConfig({
     coinbaseWallet({
       appName: 'human-job-launcher',
     }),
+    metaMask(),
   ],
   transports: {
-    [wagmiChains.mainnet.id]: http(),
-    [wagmiChains.sepolia.id]: http(),
-    [wagmiChains.bsc.id]: http(),
-    [wagmiChains.bscTestnet.id]: http(),
-    [wagmiChains.polygon.id]: http(),
-    [wagmiChains.polygonAmoy.id]: http(),
-    [wagmiChains.moonbeam.id]: http(),
-    [wagmiChains.moonbaseAlpha.id]: http(),
-    [wagmiChains.avalanche.id]: http(),
-    [wagmiChains.avalancheFuji.id]: http(),
-    [wagmiChains.xLayer.id]: http(),
-    [wagmiChains.xLayerTestnet.id]: http(),
-    [LOCALHOST.id]: http(LOCALHOST.rpcUrls.default.http[0]),
+    [wagmiChains.mainnet.id]: fallback([unstable_connector(metaMask), http()]),
+    [wagmiChains.sepolia.id]: fallback([unstable_connector(metaMask), http()]),
+    [wagmiChains.bsc.id]: fallback([unstable_connector(metaMask), http()]),
+    [wagmiChains.bscTestnet.id]: fallback([
+      unstable_connector(metaMask),
+      http(),
+    ]),
+    [wagmiChains.polygon.id]: fallback([unstable_connector(metaMask), http()]),
+    [wagmiChains.polygonAmoy.id]: fallback([
+      unstable_connector(metaMask),
+      http(),
+    ]),
+    [wagmiChains.moonbeam.id]: fallback([unstable_connector(metaMask), http()]),
+    [wagmiChains.moonbaseAlpha.id]: fallback([
+      unstable_connector(metaMask),
+      http(),
+    ]),
+    [wagmiChains.avalanche.id]: fallback([
+      unstable_connector(metaMask),
+      http(),
+    ]),
+    [wagmiChains.avalancheFuji.id]: fallback([
+      unstable_connector(metaMask),
+      http(),
+    ]),
+    [wagmiChains.xLayer.id]: fallback([unstable_connector(metaMask), http()]),
+    [wagmiChains.xLayerTestnet.id]: fallback([
+      unstable_connector(metaMask),
+      http(),
+    ]),
+    [LOCALHOST.id]: fallback([
+      unstable_connector(metaMask),
+      http(LOCALHOST.rpcUrls.default.http[0]),
+    ]),
   },
 });
 

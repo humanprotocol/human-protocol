@@ -15,14 +15,17 @@ from src.core.types import (
     OracleWebhookStatuses,
     OracleWebhookTypes,
 )
-from src.crons.process_exchange_oracle_webhooks import process_incoming_exchange_oracle_webhooks
+from src.crons.process_exchange_oracle_webhooks import (
+    process_incoming_exchange_oracle_webhook_escrow_recorded,
+    process_incoming_exchange_oracle_webhooks,
+)
 from src.db import SessionLocal
 from src.models.validation import Task
 from src.models.webhook import Webhook
 from src.services.cloud import StorageClient
 from src.services.webhook import OracleWebhookDirectionTags
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, SIGNATURE
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, ESCROW_ADDRESS, SIGNATURE
 from tests.utils.setup_escrow import create_escrow, fund_escrow, setup_escrow
 
 
@@ -74,7 +77,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert updated_webhook.attempts == 1
 
     def test_process_exchange_oracle_webhook_escrow_cleaned(self):
-        escrow_address = "123"
+        escrow_address = ESCROW_ADDRESS
         webhook = self.make_webhook(escrow_address, ExchangeOracleEventTypes.escrow_cleaned)
         self.session.add(webhook)
         task_id = str(uuid.uuid4())
@@ -100,6 +103,55 @@ class ServiceIntegrationTest(unittest.TestCase):
             call(prefix=compose_data_bucket_prefix(escrow_address, webhook.chain_id)),
             call(prefix=compose_results_bucket_prefix(escrow_address, webhook.chain_id)),
         ]
+
+    def test_process_exchange_oracle_webhook_escrow_recorded(self):
+        escrow_address = ESCROW_ADDRESS
+
+        webhook = self.make_webhook(escrow_address, ExchangeOracleEventTypes.escrow_recorded)
+        self.session.add(webhook)
+
+        task_id = str(uuid.uuid4())
+        task = Task(id=task_id, escrow_address=escrow_address, chain_id=webhook.chain_id)
+        self.session.add(task)
+
+        self.session.commit()
+
+        with (
+            patch("src.crons.process_exchange_oracle_webhooks.validate_escrow"),
+            patch(
+                "src.crons.process_exchange_oracle_webhooks.export_results"
+            ) as mock_export_results,
+        ):
+            process_incoming_exchange_oracle_webhook_escrow_recorded()
+
+        mock_export_results.assert_called_once()
+
+        self.session.refresh(webhook)
+        self.session.refresh(task)
+        assert webhook.status == OracleWebhookStatuses.completed
+        assert webhook.attempts == 1
+
+    def test_process_exchange_oracle_webhook_job_finished(self):
+        escrow_address = ESCROW_ADDRESS
+
+        webhook = self.make_webhook(escrow_address, ExchangeOracleEventTypes.job_finished)
+        self.session.add(webhook)
+
+        self.session.commit()
+
+        with (
+            patch("src.crons.process_exchange_oracle_webhooks.validate_escrow"),
+            patch(
+                "src.crons.process_exchange_oracle_webhooks.validate_results"
+            ) as mock_validate_results,
+        ):
+            process_incoming_exchange_oracle_webhooks()
+
+        mock_validate_results.assert_called_once()
+
+        self.session.refresh(webhook)
+        assert webhook.status == OracleWebhookStatuses.completed
+        assert webhook.attempts == 1
 
     def test_process_recording_oracle_webhooks_invalid_escrow_address(self):
         escrow_address = "invalid_address"

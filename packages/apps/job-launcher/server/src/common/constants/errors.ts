@@ -108,6 +108,7 @@ export enum ErrorPayment {
   InvoiceNotFound = 'Invoice not found',
   NotSuccess = 'Unsuccessful payment',
   NotEnoughFunds = 'Not enough funds',
+  NotDefaultPaymentMethod = 'Default payment method not found',
   IntentNotCreated = 'Payment intent not created',
   CardNotAssigned = 'Card not assigned',
   SetupNotFound = 'Setup not found',

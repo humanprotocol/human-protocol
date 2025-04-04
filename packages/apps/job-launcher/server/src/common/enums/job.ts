@@ -35,6 +35,7 @@ export enum JobRequestType {
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
   HCAPTCHA = 'hcaptcha',
   FORTUNE = 'fortune',
+  AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
 
 export enum JobCaptchaMode {

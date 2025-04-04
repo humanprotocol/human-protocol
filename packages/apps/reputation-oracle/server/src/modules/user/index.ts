@@ -1,3 +1,4 @@
+export { SiteKeyRepository } from './site-key.repository';
 export { SiteKeyType } from './site-key.entity';
 export type * from './types';
 export { UserEntity, UserStatus, Role as UserRole } from './user.entity';

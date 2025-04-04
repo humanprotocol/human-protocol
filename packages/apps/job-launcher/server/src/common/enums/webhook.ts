@@ -9,6 +9,7 @@ export enum EventType {
 export enum OracleType {
   FORTUNE = 'fortune',
   CVAT = 'cvat',
+  AUDINO = 'audino',
   HCAPTCHA = 'hcaptcha',
 }
 

@@ -1,859 +1,1125 @@
-import { createMock } from '@golevelup/ts-jest';
-import {
-  KVStoreClient,
-  KVStoreUtils,
-  Role as SDKRole,
-} from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { Test } from '@nestjs/testing';
+jest.mock('@human-protocol/sdk');
+
 import { faker } from '@faker-js/faker';
-import { v4 } from 'uuid';
-import {
-  MOCK_ACCESS_TOKEN,
-  MOCK_ADDRESS,
-  MOCK_EMAIL,
-  MOCK_FE_URL,
-  MOCK_HASHED_PASSWORD,
-  MOCK_HCAPTCHA_TOKEN,
-  MOCK_PASSWORD,
-  MOCK_PRIVATE_KEY,
-  MOCK_REFRESH_TOKEN,
-  mockConfig,
-} from '../../../test/constants';
+import { createMock } from '@golevelup/ts-jest';
+import { KVStoreKeys, KVStoreUtils, Role } from '@human-protocol/sdk';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { Test } from '@nestjs/testing';
+import { omit } from 'lodash';
+
+import { generateES256Keys } from '../../../test/fixtures/crypto';
+import { generateEthWallet } from '../../../test/fixtures/web3';
+import { SignatureType } from '../../common/enums/web3';
 import { AuthConfigService } from '../../config/auth-config.service';
 import { NDAConfigService } from '../../config/nda-config.service';
-import { HCaptchaConfigService } from '../../config/hcaptcha-config.service';
 import { ServerConfigService } from '../../config/server-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
-import { JobRequestType } from '../../common/enums';
-import { SignatureType } from '../../common/enums/web3';
-import {
-  generateNonce,
-  prepareSignatureBody,
-  signMessage,
-} from '../../utils/web3';
-import { HCaptchaService } from '../../integrations/hcaptcha/hcaptcha.service';
+import * as secutiryUtils from '../../utils/security';
 import { SiteKeyRepository } from '../user/site-key.repository';
-import { PrepareSignatureDto } from '../user/user.dto';
+import * as web3Utils from '../../utils/web3';
+import { EmailAction } from '../email/constants';
+import { EmailService } from '../email/email.service';
 import {
   UserStatus,
   UserRole,
   UserEntity,
   UserRepository,
   UserService,
-  type OperatorUserEntity,
 } from '../user';
-import { Web3Service } from '../web3/web3.service';
-import {
-  AuthError,
-  AuthErrorMessage,
-  DuplicatedUserEmailError,
-  InvalidOperatorFeeError,
-  InvalidOperatorJobTypesError,
-  InvalidOperatorRoleError,
-  InvalidOperatorUrlError,
-} from './auth.error';
+import { generateOperator, generateWorkerUser } from '../user/fixtures';
+import { mockWeb3ConfigService } from '../web3/fixtures';
+import * as AuthErrors from './auth.error';
 import { AuthService } from './auth.service';
 import { TokenEntity, TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { EmailService } from '../email/email.service';
-import { EmailAction } from '../email/constants';
 
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
-  KVStoreClient: {
-    build: jest.fn().mockImplementation(() => ({
-      set: jest.fn(),
-    })),
-  },
-  KVStoreUtils: {
-    get: jest.fn().mockResolvedValue(''),
-  },
-}));
+const mockKVStoreUtils = jest.mocked(KVStoreUtils);
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('mocked-uuid'),
-}));
+const { publicKey, privateKey } = generateES256Keys();
+const mockAuthConfigService = {
+  jwtPrivateKey: privateKey,
+  jwtPublicKey: publicKey,
+  accessTokenExpiresIn: 600000,
+  refreshTokenExpiresIn: 3600000,
+  verifyEmailTokenExpiresIn: 86400000,
+  forgotPasswordExpiresIn: 86400000,
+  humanAppEmail: faker.internet.email(),
+};
+
+const mockEmailService = createMock<EmailService>();
 
 const mockNdaConfigService = {
   latestNdaUrl: faker.internet.url(),
 };
 
+const mockServerConfigService = {
+  feURL: faker.internet.url(),
+};
+
+const mockSiteKeyRepository = createMock<SiteKeyRepository>();
+const mockTokenRepository = createMock<TokenRepository>();
+const mockUserRepository = createMock<UserRepository>();
+const mockUserService = createMock<UserService>();
+
 describe('AuthService', () => {
-  let authService: AuthService;
-  let tokenRepository: TokenRepository;
-  let userService: UserService;
-  let userRepository: UserRepository;
+  let service: AuthService;
   let jwtService: JwtService;
-  let emailService: EmailService;
-  let authConfigService: AuthConfigService;
-  let hcaptchaService: HCaptchaService;
 
   beforeAll(async () => {
-    const signerMock = {
-      address: MOCK_ADDRESS,
-      getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
-    };
-
-    const moduleRef = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
+      imports: [
+        JwtModule.registerAsync({
+          useFactory: () => ({
+            privateKey: mockAuthConfigService.jwtPrivateKey,
+            signOptions: {
+              algorithm: 'ES256',
+              expiresIn: mockAuthConfigService.accessTokenExpiresIn,
+            },
+          }),
+        }),
+      ],
       providers: [
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => mockConfig[key]),
-            getOrThrow: jest.fn((key: string) => {
-              if (!mockConfig[key]) {
-                throw new Error(`Configuration key "${key}" does not exist`);
-              }
-              return mockConfig[key];
-            }),
-          },
-        },
+        { provide: AuthConfigService, useValue: mockAuthConfigService },
         AuthService,
-        UserService,
-        AuthConfigService,
+        { provide: EmailService, useValue: mockEmailService },
         { provide: NDAConfigService, useValue: mockNdaConfigService },
-        ServerConfigService,
-        Web3ConfigService,
-        HCaptchaService,
-        HCaptchaConfigService,
-        {
-          provide: JwtService,
-          useValue: {
-            signAsync: jest.fn(),
-          },
-        },
-        { provide: TokenRepository, useValue: createMock<TokenRepository>() },
-        { provide: UserRepository, useValue: createMock<UserRepository>() },
-        {
-          provide: SiteKeyRepository,
-          useValue: createMock<SiteKeyRepository>(),
-        },
-        { provide: HttpService, useValue: createMock<HttpService>() },
-        { provide: EmailService, useValue: createMock<EmailService>() },
-        {
-          provide: Web3Service,
-          useValue: {
-            getSigner: jest.fn().mockReturnValue(signerMock),
-          },
-        },
+        { provide: ServerConfigService, useValue: mockServerConfigService },
+        { provide: SiteKeyRepository, useValue: mockSiteKeyRepository },
+        { provide: TokenRepository, useValue: mockTokenRepository },
+        { provide: UserRepository, useValue: mockUserRepository },
+        { provide: UserService, useValue: mockUserService },
+        { provide: Web3ConfigService, useValue: mockWeb3ConfigService },
       ],
     }).compile();
 
-    authService = moduleRef.get<AuthService>(AuthService);
-    tokenRepository = moduleRef.get<TokenRepository>(TokenRepository);
-    userService = moduleRef.get<UserService>(UserService);
-    userRepository = moduleRef.get<UserRepository>(UserRepository);
-    jwtService = moduleRef.get<JwtService>(JwtService);
-    emailService = moduleRef.get<EmailService>(EmailService);
-    authConfigService = moduleRef.get<AuthConfigService>(AuthConfigService);
-    hcaptchaService = moduleRef.get<HCaptchaService>(HCaptchaService);
-
-    hcaptchaService.verifyToken = jest.fn().mockReturnValue({ success: true });
+    service = module.get<AuthService>(AuthService);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  describe('signin', () => {
-    const signInDto = {
-      email: MOCK_EMAIL,
-      password: MOCK_PASSWORD,
-      hCaptchaToken: MOCK_HCAPTCHA_TOKEN,
-    };
-
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: signInDto.email,
-      password: MOCK_HASHED_PASSWORD,
-      status: UserStatus.ACTIVE,
-      role: UserRole.WORKER,
-    };
-
-    let findOneByEmailMock: any;
-
-    beforeEach(() => {
-      findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
-
-      jest.spyOn(authService, 'auth').mockResolvedValue({
-        accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
-      });
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should sign in the user and return the JWT', async () => {
-      findOneByEmailMock.mockResolvedValue(userEntity as UserEntity);
-
-      const result = await authService.signin(signInDto);
-
-      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email, {
-        relations: {
-          kyc: true,
-          siteKeys: true,
-          userQualifications: {
-            qualification: true,
-          },
-        },
-      });
-      expect(authService.auth).toHaveBeenCalledWith(userEntity);
-      expect(result).toStrictEqual({
-        accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
-      });
-    });
-
-    it('should throw if user credentials are invalid', async () => {
-      findOneByEmailMock.mockResolvedValue(undefined);
-
-      await expect(authService.signin(signInDto)).rejects.toThrow(
-        new AuthError(AuthErrorMessage.INVALID_CREDENTIALS),
-      );
-
-      expect(findOneByEmailMock).toHaveBeenCalledWith(signInDto.email, {
-        relations: {
-          kyc: true,
-          siteKeys: true,
-          userQualifications: {
-            qualification: true,
-          },
-        },
-      });
-    });
+    jest.resetAllMocks();
   });
 
   describe('signup', () => {
-    const userCreateDto = {
-      email: MOCK_EMAIL,
-      password: MOCK_PASSWORD,
-      hCaptchaToken: 'token',
-    };
+    it('should create a new user', async () => {
+      const email = faker.internet.email();
+      const password = faker.string.alphanumeric();
+      const userId = faker.number.int();
+      const tokenUuid = faker.string.uuid();
 
-    const userEntity: Partial<UserEntity> &
-      Pick<UserEntity, 'id' | 'email' | 'password'> = {
-      id: 1,
-      email: userCreateDto.email,
-      password: MOCK_HASHED_PASSWORD,
-      role: UserRole.WORKER,
-    };
+      mockUserRepository.findOneByEmail.mockResolvedValueOnce(null);
+      mockUserRepository.createUnique.mockResolvedValueOnce({
+        id: userId,
+      } as UserEntity);
+      mockTokenRepository.createUnique.mockResolvedValueOnce({
+        uuid: tokenUuid,
+      } as TokenEntity);
 
-    let createUserMock: any;
+      await service.signup(email, password);
 
-    beforeEach(() => {
-      createUserMock = jest.spyOn(userService, 'createWorkerUser');
+      expect(mockUserRepository.createUnique).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email,
+          role: UserRole.WORKER,
+          status: UserStatus.PENDING,
+        }),
+      );
 
-      createUserMock.mockResolvedValue(userEntity);
+      const user = mockUserRepository.createUnique.mock.calls[0][0];
+      expect(
+        secutiryUtils.comparePasswordWithHash(
+          password,
+          user.password as string,
+        ),
+      ).toBe(true);
 
-      jest.spyOn(userRepository, 'findOneByEmail').mockResolvedValue(null);
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should create a new user and return the user entity', async () => {
-      await authService.signup(userCreateDto);
-
-      expect(userService.createWorkerUser).toHaveBeenCalledWith(userCreateDto);
-      expect(tokenRepository.createUnique).toHaveBeenCalledWith({
+      expect(mockTokenRepository.createUnique).toHaveBeenCalledTimes(1);
+      expect(mockTokenRepository.createUnique).toHaveBeenCalledWith({
         type: TokenType.EMAIL,
-        userId: userEntity.id,
+        userId,
         expiresAt: expect.any(Date),
       });
+
+      expect(mockEmailService.sendEmail).toHaveBeenCalledTimes(1);
+      expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+        email,
+        EmailAction.SIGNUP,
+        {
+          url: `${mockServerConfigService.feURL}/verify?token=${tokenUuid}`,
+        },
+      );
     });
 
-    it("should call emailService sendEmail if user's email is valid", async () => {
-      emailService.sendEmail = jest.fn();
+    it('should throw a DuplicatedUserEmailError', async () => {
+      const email = faker.internet.email();
+      const password = faker.string.alphanumeric();
 
-      await authService.signup(userCreateDto);
+      mockUserRepository.findOneByEmail.mockResolvedValueOnce({
+        email,
+      } as UserEntity);
 
-      expect(emailService.sendEmail).toHaveBeenCalled();
+      await expect(service.signup(email, password)).rejects.toThrow(
+        new AuthErrors.DuplicatedUserEmailError(email),
+      );
+    });
+  });
+
+  describe('web3Signup', () => {
+    it('should create a new operator', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return Role.ExchangeOracle;
+          }
+          if (key === KVStoreKeys.fee) {
+            return String(faker.number.int({ min: 1, max: 50 }));
+          }
+          if (key === KVStoreKeys.url) {
+            return faker.internet.url();
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      const spyOnWeb3Auth = jest
+        .spyOn(service, 'web3Auth')
+        .mockImplementation();
+      spyOnWeb3Auth.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+
+      await service.web3Signup(signature, ethWallet.address);
+
+      expect(mockUserRepository.createUnique).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.createUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evmAddress: ethWallet.address.toLowerCase(),
+          nonce: expect.any(String),
+          role: UserRole.OPERATOR,
+          status: UserStatus.ACTIVE,
+        }),
+      );
+
+      expect(service.web3Auth).toHaveBeenCalledTimes(1);
+
+      spyOnWeb3Auth.mockRestore();
     });
 
-    it('should fail if the user already exists', async () => {
-      jest
-        .spyOn(userRepository, 'findOneByEmail')
-        .mockResolvedValue(userEntity as any);
-
-      await expect(authService.signup(userCreateDto)).rejects.toThrow(
-        new DuplicatedUserEmailError(userEntity.email as string),
+    it('should throw DuplicatedUserAddressError', async () => {
+      const ethWallet = generateEthWallet();
+      const signature = faker.string.alpha();
+      mockUserRepository.findOneByAddress.mockImplementationOnce(
+        async (address) => {
+          if (address === ethWallet.address) {
+            return {
+              evmAddress: ethWallet.address,
+            } as UserEntity;
+          }
+          return null;
+        },
       );
 
-      expect(userRepository.findOneByEmail).toHaveBeenCalledWith(
-        userEntity.email,
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(
+        new AuthErrors.DuplicatedUserAddressError(ethWallet.address),
       );
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE)', async () => {
+      const ethWallet = generateEthWallet();
+      const signature = faker.string.alpha();
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_WEB3_SIGNATURE,
+        ),
+      );
+    });
+
+    it('should throw InvalidOperatorRoleError for invalid role', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      const mockedRole = faker.string.alpha();
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return mockedRole;
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorRoleError(mockedRole));
+    });
+
+    it('should throw InvalidOperatorRoleError when role is not set', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      const mockedRole = faker.string.alpha();
+      mockKVStoreUtils.get.mockImplementation(async () => {
+        throw new Error('Invalid key');
+      });
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorRoleError(mockedRole));
+    });
+
+    it('should throw InvalidOperatorFeeError for invalid fee', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return Role.ExchangeOracle;
+          }
+          if (key === KVStoreKeys.fee) {
+            return '';
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
+    });
+
+    it('should throw InvalidOperatorFeeError when fee is not set', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return Role.ExchangeOracle;
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
+    });
+
+    it.each([
+      '',
+      `${faker.string.alpha()}.test`,
+      `ftp://${faker.string.alpha()}.test`,
+    ])(
+      'should throw InvalidOperatorUrlError for invalid url [%#]',
+      async (invalidUrl) => {
+        const ethWallet = generateEthWallet();
+        const signatureBody = web3Utils.prepareSignatureBody({
+          from: ethWallet.address,
+          to: mockWeb3ConfigService.operatorAddress,
+          contents: SignatureType.SIGNUP,
+        });
+        const signature = await web3Utils.signMessage(
+          signatureBody,
+          ethWallet.privateKey,
+        );
+
+        mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+        mockKVStoreUtils.get.mockImplementation(
+          async (_chainId, _address, key) => {
+            if (key === KVStoreKeys.role) {
+              return Role.ExchangeOracle;
+            }
+            if (key === KVStoreKeys.fee) {
+              return String(faker.number.int({ min: 1, max: 50 }));
+            }
+            if (key === KVStoreKeys.url) {
+              return invalidUrl;
+            }
+
+            throw new Error('Invalid key');
+          },
+        );
+
+        await expect(
+          service.web3Signup(signature, ethWallet.address),
+        ).rejects.toThrow(new AuthErrors.InvalidOperatorUrlError(invalidUrl));
+      },
+    );
+
+    it('should throw InvalidOperatorFeeError when url is not set', async () => {
+      const ethWallet = generateEthWallet();
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNUP,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserRepository.findOneByAddress.mockResolvedValueOnce(null);
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === KVStoreKeys.role) {
+            return Role.ExchangeOracle;
+          }
+          if (key === KVStoreKeys.fee) {
+            return String(faker.number.int({ min: 1, max: 50 }));
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await expect(
+        service.web3Signup(signature, ethWallet.address),
+      ).rejects.toThrow(new AuthErrors.InvalidOperatorFeeError(''));
+    });
+  });
+
+  describe('signin', () => {
+    it('should signin user', async () => {
+      const password = faker.string.alphanumeric();
+      const user = generateWorkerUser({ password });
+
+      mockUserService.findWeb2UserByEmail.mockResolvedValueOnce(user);
+
+      const spyOnAuth = jest.spyOn(service, 'auth').mockImplementation();
+      spyOnAuth.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+
+      await service.signin(user.email, password);
+
+      expect(service.auth).toHaveBeenCalledTimes(1);
+      expect(service.auth).toHaveBeenCalledWith(user);
+
+      spyOnAuth.mockRestore();
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_CREDENTIALS) if user not found', async () => {
+      const email = faker.internet.email();
+      const password = faker.string.alphanumeric();
+
+      mockUserService.findWeb2UserByEmail.mockResolvedValueOnce(null);
+
+      await expect(service.signin(email, password)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_CREDENTIALS,
+        ),
+      );
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_CREDENTIALS) if password does not match', async () => {
+      const invalidPassword = faker.string.alphanumeric();
+      const user = generateWorkerUser();
+
+      mockUserService.findWeb2UserByEmail.mockResolvedValueOnce(user);
+
+      await expect(service.signin(user.email, invalidPassword)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_CREDENTIALS,
+        ),
+      );
+    });
+
+    it('should throw InactiveUserError if user status is `inactive`', async () => {
+      const password = faker.string.alphanumeric();
+      const user = generateWorkerUser({
+        password,
+        status: UserStatus.INACTIVE,
+      });
+
+      mockUserService.findWeb2UserByEmail.mockResolvedValueOnce(user);
+
+      await expect(service.signin(user.email, password)).rejects.toThrow(
+        new AuthErrors.InactiveUserError(user.id),
+      );
+    });
+  });
+
+  describe('web3Signin', () => {
+    it('should signin operator', async () => {
+      const ethWallet = generateEthWallet();
+      const operator = generateOperator({ privateKey: ethWallet.privateKey });
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNIN,
+        nonce: operator.nonce,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserService.findOperatorUser.mockResolvedValueOnce(operator);
+
+      const spyOnWeb3Auth = jest
+        .spyOn(service, 'web3Auth')
+        .mockImplementation();
+      spyOnWeb3Auth.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+
+      await service.web3Signin(ethWallet.address, signature);
+
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledWith(
+        operator.id,
+        { nonce: expect.any(String) },
+      );
+      expect(service.web3Auth).toHaveBeenCalledTimes(1);
+      expect(service.web3Auth).toHaveBeenCalledWith(operator);
+
+      spyOnWeb3Auth.mockRestore();
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_ADDRESS)', async () => {
+      const ethWallet = generateEthWallet();
+      const signature = faker.string.alpha();
+
+      mockUserService.findOperatorUser.mockResolvedValueOnce(null);
+
+      await expect(
+        service.web3Signin(ethWallet.address, signature),
+      ).rejects.toThrow(
+        new AuthErrors.AuthError(AuthErrors.AuthErrorMessage.INVALID_ADDRESS),
+      );
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE)', async () => {
+      const invalidSignature = faker.string.alphanumeric();
+      const operator = generateOperator();
+
+      mockUserService.findOperatorUser.mockResolvedValueOnce(operator);
+
+      await expect(
+        service.web3Signin(operator.evmAddress, invalidSignature),
+      ).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_WEB3_SIGNATURE,
+        ),
+      );
+    });
+
+    it('should throw InactiveUserError if operator status in DB is `inactive`', async () => {
+      const ethWallet = generateEthWallet();
+      const operator = generateOperator({
+        privateKey: ethWallet.privateKey,
+        status: UserStatus.INACTIVE,
+      });
+      const signatureBody = web3Utils.prepareSignatureBody({
+        from: ethWallet.address,
+        to: mockWeb3ConfigService.operatorAddress,
+        contents: SignatureType.SIGNIN,
+        nonce: operator.nonce,
+      });
+      const signature = await web3Utils.signMessage(
+        signatureBody,
+        ethWallet.privateKey,
+      );
+
+      mockUserService.findOperatorUser.mockResolvedValueOnce(operator);
+
+      await expect(
+        service.web3Signin(operator.evmAddress, signature),
+      ).rejects.toThrow(new AuthErrors.InactiveUserError(operator.id));
     });
   });
 
   describe('auth', () => {
-    let jwtSignMock: any, findTokenMock: any;
+    it('should generate jwt payload for worker', async () => {
+      const user = generateWorkerUser();
 
-    const userEntity: Partial<UserEntity> = {
-      id: 1,
-      email: 'user@example.com',
-      status: UserStatus.ACTIVE,
-      evmAddress: MOCK_ADDRESS,
-    };
+      mockSiteKeyRepository.findByUserAndType.mockResolvedValueOnce([]);
 
-    beforeEach(() => {
-      jwtSignMock = jest
-        .spyOn(jwtService, 'signAsync')
-        .mockResolvedValueOnce(MOCK_ACCESS_TOKEN);
-    });
+      const expectedJwtPayload = {
+        email: user.email,
+        status: user.status,
+        user_id: user.id,
+        wallet_address: user.evmAddress,
+        role: user.role,
+        kyc_status: user.kyc?.status,
+        nda_signed: user.ndaSignedUrl === mockNdaConfigService.latestNdaUrl,
+        reputation_network: mockWeb3ConfigService.operatorAddress,
+        qualifications: user.userQualifications
+          ? user.userQualifications.map(
+              (userQualification) => userQualification.qualification.reference,
+            )
+          : [],
+      };
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should create authentication tokens and return them', async () => {
-      findTokenMock = jest
-        .spyOn(tokenRepository, 'findOneByUserIdAndType')
-        .mockResolvedValueOnce(null);
-
-      const result = await authService.auth(userEntity as UserEntity);
-      expect(findTokenMock).toHaveBeenCalledWith(
-        userEntity.id,
-        TokenType.REFRESH,
-      );
-      expect(jwtSignMock).toHaveBeenLastCalledWith(
-        {
-          email: userEntity.email,
-          status: userEntity.status,
-          userId: userEntity.id,
-          wallet_address: userEntity.evmAddress,
-          kyc_status: userEntity.kyc?.status,
-          reputation_network: MOCK_ADDRESS,
-          nda_signed: false,
-          qualifications: [],
-          role: userEntity.role,
-        },
-        {
-          expiresIn: authConfigService.accessTokenExpiresIn,
-        },
-      );
-      expect(result).toEqual({
-        accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: undefined,
+      const spyOnGenerateTokens = jest
+        .spyOn(service, 'generateTokens')
+        .mockImplementation();
+      spyOnGenerateTokens.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
       });
+
+      await service.auth(user);
+
+      expect(service.generateTokens).toHaveBeenCalledTimes(1);
+      expect(service.generateTokens).toHaveBeenCalledWith(
+        user.id,
+        expectedJwtPayload,
+      );
+
+      spyOnGenerateTokens.mockRestore();
+    });
+  });
+
+  describe('web3Auth', () => {
+    it('should generate jwt payload for operator', async () => {
+      const operator = generateOperator();
+
+      const mockedOperatorStatus = 'active';
+      const expectedJwtPayload = {
+        status: operator.status,
+        user_id: operator.id,
+        wallet_address: operator.evmAddress,
+        role: operator.role,
+        reputation_network: mockWeb3ConfigService.operatorAddress,
+        operator_status: mockedOperatorStatus,
+      };
+
+      const spyOnGenerateTokens = jest
+        .spyOn(service, 'generateTokens')
+        .mockImplementation();
+      spyOnGenerateTokens.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+      mockKVStoreUtils.get.mockImplementation(
+        async (_chainId, _address, key) => {
+          if (key === operator.evmAddress) {
+            return mockedOperatorStatus;
+          }
+
+          throw new Error('Invalid key');
+        },
+      );
+
+      await service.web3Auth(operator);
+
+      expect(service.generateTokens).toHaveBeenCalledTimes(1);
+      expect(service.generateTokens).toHaveBeenCalledWith(
+        operator.id,
+        expectedJwtPayload,
+      );
+
+      spyOnGenerateTokens.mockRestore();
     });
 
-    describe('forgotPassword', () => {
-      let findOneByEmailMock: any, findTokenMock: any;
-      let userEntity: Partial<UserEntity>, tokenEntity: Partial<TokenEntity>;
+    it('should generate jwt payload for operator when status is not set', async () => {
+      const operator = generateOperator();
 
-      beforeEach(() => {
-        userEntity = {
-          id: 1,
-          email: 'user@example.com',
+      const expectedJwtPayload = {
+        status: operator.status,
+        user_id: operator.id,
+        wallet_address: operator.evmAddress,
+        role: operator.role,
+        reputation_network: mockWeb3ConfigService.operatorAddress,
+        operator_status: 'inactive',
+      };
+
+      const spyOnGenerateTokens = jest
+        .spyOn(service, 'generateTokens')
+        .mockImplementation();
+      spyOnGenerateTokens.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+      mockKVStoreUtils.get.mockImplementation(async () => {
+        throw new Error('Invalid key');
+      });
+
+      await service.web3Auth(operator);
+
+      expect(service.generateTokens).toHaveBeenCalledTimes(1);
+      expect(service.generateTokens).toHaveBeenCalledWith(
+        operator.id,
+        expectedJwtPayload,
+      );
+
+      spyOnGenerateTokens.mockRestore();
+    });
+  });
+
+  describe('generateTokens', () => {
+    it.each([null, { uuid: faker.string.uuid() }])(
+      'should generate access and refresh tokens for worker [%#]',
+      async (existingRefreshToken) => {
+        const user = generateWorkerUser();
+
+        const jwtPayload = {
+          email: user.email,
+          status: user.status,
+          user_id: user.id,
+          wallet_address: user.evmAddress,
+          role: user.role,
+          kyc_status: user.kyc?.status,
+          nda_signed: user.ndaSignedUrl === mockNdaConfigService.latestNdaUrl,
+          reputation_network: mockWeb3ConfigService.operatorAddress,
+          qualifications: user.userQualifications
+            ? user.userQualifications.map(
+                (userQualification) =>
+                  userQualification.qualification.reference,
+              )
+            : [],
+        };
+
+        mockTokenRepository.findOneByUserIdAndType.mockResolvedValueOnce(
+          existingRefreshToken as TokenEntity,
+        );
+
+        const { accessToken } = await service.generateTokens(
+          user.id,
+          jwtPayload,
+        );
+
+        if (existingRefreshToken) {
+          expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+          expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(
+            existingRefreshToken as TokenEntity,
+          );
+        }
+
+        const decodedAccessToken = await jwtService.verifyAsync(accessToken, {
+          secret: mockAuthConfigService.jwtPrivateKey,
+        });
+
+        expect(omit(decodedAccessToken, ['exp', 'iat'])).toEqual(jwtPayload);
+      },
+    );
+  });
+
+  describe('refresh', () => {
+    it('should generate tokens for worker', async () => {
+      const user = generateWorkerUser();
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.future(),
+      } as TokenEntity);
+
+      mockUserRepository.findOneById.mockResolvedValueOnce(user);
+
+      const spyOnAuth = jest.spyOn(service, 'auth').mockImplementation();
+      spyOnAuth.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+
+      await service.refresh(uuid);
+
+      expect(service.auth).toHaveBeenCalledTimes(1);
+      expect(service.auth).toHaveBeenCalledWith(user);
+
+      spyOnAuth.mockRestore();
+    });
+
+    it('should generate tokens for operator', async () => {
+      const operator = generateOperator();
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.future(),
+      } as TokenEntity);
+
+      mockUserRepository.findOneById.mockResolvedValueOnce(operator);
+
+      const spyOnWeb3Auth = jest
+        .spyOn(service, 'web3Auth')
+        .mockImplementation();
+      spyOnWeb3Auth.mockResolvedValueOnce({
+        accessToken: faker.string.alpha(),
+        refreshToken: faker.string.uuid(),
+      });
+
+      await service.refresh(uuid);
+
+      expect(service.web3Auth).toHaveBeenCalledTimes(1);
+      expect(service.web3Auth).toHaveBeenCalledWith(operator);
+
+      spyOnWeb3Auth.mockRestore();
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN) if token not found', async () => {
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
+
+      await expect(service.refresh(uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_REFRESH_TOKEN,
+        ),
+      );
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN) if user not found', async () => {
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.future(),
+      } as TokenEntity);
+
+      mockUserRepository.findOneById.mockResolvedValueOnce(null);
+
+      await expect(service.refresh(uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_REFRESH_TOKEN,
+        ),
+      );
+    });
+
+    it('should throw AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED)', async () => {
+      const uuid = faker.string.uuid();
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.past(),
+      } as TokenEntity);
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
+
+      await expect(service.refresh(uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.REFRESH_TOKEN_EXPIRED,
+        ),
+      );
+    });
+  });
+
+  describe('forgotPassword', () => {
+    it.each([null, { uuid: faker.string.uuid() }])(
+      'should create a password token and send an email [%#]',
+      async (existingForgotPasswordToken) => {
+        const user = generateWorkerUser();
+        const tokenUuid = faker.string.uuid();
+
+        mockUserRepository.findOneByEmail.mockResolvedValueOnce(user);
+        mockTokenRepository.findOneByUserIdAndType.mockResolvedValueOnce(
+          existingForgotPasswordToken as TokenEntity,
+        );
+        mockTokenRepository.createUnique.mockResolvedValueOnce({
+          uuid: tokenUuid,
+        } as TokenEntity);
+
+        await service.forgotPassword(user.email);
+
+        if (existingForgotPasswordToken) {
+          expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+          expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(
+            existingForgotPasswordToken as TokenEntity,
+          );
+        }
+        expect(mockTokenRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockTokenRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: TokenType.PASSWORD,
+            userId: user.id,
+          }),
+        );
+        expect(mockEmailService.sendEmail).toHaveBeenCalledTimes(1);
+        expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+          user.email,
+          EmailAction.RESET_PASSWORD,
+          {
+            url: `${mockServerConfigService.feURL}/reset-password?token=${tokenUuid}`,
+          },
+        );
+      },
+    );
+
+    it('should do nothing if email not found', async () => {
+      const email = faker.internet.email();
+      mockUserRepository.findOneByEmail.mockResolvedValueOnce(null);
+
+      await service.forgotPassword(email);
+
+      expect(mockTokenRepository.findOneByUserIdAndType).not.toHaveBeenCalled();
+      expect(mockTokenRepository.deleteOne).not.toHaveBeenCalled();
+      expect(mockTokenRepository.createUnique).not.toHaveBeenCalled();
+      expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('restorePassword', () => {
+    it('should change password and delete password token', async () => {
+      const newPassword = faker.string.alphanumeric();
+      const mockToken = {
+        user: {
+          email: faker.internet.email(),
+        },
+        userId: faker.number.int(),
+        uuid: faker.string.uuid(),
+        expiresAt: faker.date.future(),
+      };
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(
+        mockToken as TokenEntity,
+      );
+
+      mockUserRepository.updateOneById.mockResolvedValueOnce(true);
+
+      await service.restorePassword(newPassword, mockToken.uuid);
+
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledWith(
+        mockToken.userId,
+        {
+          password: expect.any(String),
+        },
+      );
+
+      expect(mockEmailService.sendEmail).toHaveBeenCalledTimes(1);
+      expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+        mockToken.user.email,
+        EmailAction.PASSWORD_CHANGED,
+      );
+
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(mockToken);
+    });
+
+    it('should not send an email and delete password token if password change unsuccessful', async () => {
+      const newPassword = faker.string.alphanumeric();
+      const mockToken = {
+        user: {
+          email: faker.internet.email(),
+        },
+        userId: faker.number.int(),
+        uuid: faker.string.uuid(),
+        expiresAt: faker.date.future(),
+      };
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(
+        mockToken as TokenEntity,
+      );
+
+      mockUserRepository.updateOneById.mockResolvedValueOnce(false);
+
+      await service.restorePassword(newPassword, mockToken.uuid);
+
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledWith(
+        mockToken.userId,
+        {
+          password: expect.any(String),
+        },
+      );
+
+      expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
+      expect(mockTokenRepository.deleteOne).not.toHaveBeenCalled();
+    });
+
+    it('should throw AuthError(AuthErrorMessage.INVALID_PASSWORD_TOKEN) if token not found', async () => {
+      const newPassword = faker.string.alphanumeric();
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
+
+      await expect(service.restorePassword(newPassword, uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_PASSWORD_TOKEN,
+        ),
+      );
+    });
+
+    it('should throw AuthError(AuthErrorMessage.PASSWORD_TOKEN_EXPIRED)', async () => {
+      const newPassword = faker.string.alphanumeric();
+      const uuid = faker.string.uuid();
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.past(),
+      } as TokenEntity);
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
+
+      await expect(service.restorePassword(newPassword, uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.PASSWORD_TOKEN_EXPIRED,
+        ),
+      );
+    });
+  });
+
+  describe('emailVerification', () => {
+    it('should verify an email', async () => {
+      const mockToken = {
+        userId: faker.number.int(),
+        uuid: faker.string.uuid(),
+        type: TokenType.EMAIL,
+        expiresAt: faker.date.future(),
+      };
+
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(
+        mockToken as TokenEntity,
+      );
+
+      await service.emailVerification(mockToken.uuid);
+
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.updateOneById).toHaveBeenCalledWith(
+        mockToken.userId,
+        {
           status: UserStatus.ACTIVE,
-        };
-        tokenEntity = {
-          uuid: v4(),
-          type: TokenType.EMAIL,
-          user: userEntity as UserEntity,
-        };
-
-        findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
-        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
-        findOneByEmailMock.mockResolvedValue(userEntity);
-      });
-
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should exit early w/o action if user is not found', () => {
-        findOneByEmailMock.mockResolvedValue(null);
-        expect(
-          authService.forgotPassword({
-            email: 'user@example.com',
-            hCaptchaToken: 'token',
-          }),
-        ).resolves.toBeUndefined();
-
-        expect(emailService.sendEmail).not.toHaveBeenCalledWith();
-      });
-
-      it('should remove existing token if it exists', async () => {
-        findTokenMock.mockResolvedValue(tokenEntity);
-        await authService.forgotPassword({
-          email: 'user@example.com',
-          hCaptchaToken: 'token',
-        });
-
-        expect(tokenRepository.deleteOne).toHaveBeenCalled();
-      });
-
-      it('should create a new token and send email', async () => {
-        emailService.sendEmail = jest.fn();
-        const email = faker.internet.email();
-
-        await authService.forgotPassword({ email, hCaptchaToken: 'token' });
-
-        expect(emailService.sendEmail).toHaveBeenCalledWith(
-          email,
-          EmailAction.RESET_PASSWORD,
-          {
-            url: expect.stringContaining(
-              `${MOCK_FE_URL}/reset-password?token=`,
-            ),
-          },
-        );
-      });
-
-      it('should create a new token and send email if user is not active', async () => {
-        emailService.sendEmail = jest.fn();
-        userEntity.status = UserStatus.PENDING;
-        const email = faker.internet.email();
-
-        await authService.forgotPassword({ email, hCaptchaToken: 'token' });
-
-        expect(emailService.sendEmail).toHaveBeenCalledWith(
-          email,
-          EmailAction.RESET_PASSWORD,
-          {
-            url: expect.stringContaining(
-              `${MOCK_FE_URL}/reset-password?token=`,
-            ),
-          },
-        );
-      });
+        },
+      );
     });
 
-    describe('restorePassword', () => {
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email: 'user@example.com',
-      };
+    it('should throw AuthError(AuthErrorMessage.INVALID_EMAIL_TOKEN) if token not found', async () => {
+      const uuid = faker.string.uuid();
 
-      const tokenEntity: Partial<TokenEntity> = {
-        uuid: v4(),
-        type: TokenType.EMAIL,
-        userId: userEntity.id,
-      };
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
 
-      let findTokenMock: any;
-
-      beforeEach(() => {
-        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
-        emailService.sendEmail = jest.fn();
-      });
-
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should throw an error if token is not found', () => {
-        findTokenMock.mockResolvedValue(null);
-
-        expect(
-          authService.restorePassword({
-            token: 'token',
-            password: 'password',
-            hCaptchaToken: 'token',
-          }),
-        ).rejects.toThrow(
-          new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN),
-        );
-      });
-
-      it('should throw an error if token is expired', () => {
-        tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
-        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
-
-        expect(
-          authService.restorePassword({
-            token: 'token',
-            password: 'password',
-            hCaptchaToken: 'token',
-          }),
-        ).rejects.toThrow(
-          new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED),
-        );
-      });
-
-      it('should update password and send email', async () => {
-        tokenEntity.expiresAt = new Date(
-          new Date().setDate(new Date().getDate() + 1),
-        );
-        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
-        userService.updatePassword = jest
-          .fn()
-          .mockResolvedValueOnce(userEntity);
-        emailService.sendEmail = jest.fn();
-
-        const updatePasswordMock = jest.spyOn(userService, 'updatePassword');
-
-        await authService.restorePassword({
-          token: 'token',
-          password: 'password',
-          hCaptchaToken: 'token',
-        });
-
-        expect(updatePasswordMock).toHaveBeenCalled();
-        expect(emailService.sendEmail).toHaveBeenCalled();
-        expect(tokenRepository.deleteOne).toHaveBeenCalled();
-      });
+      await expect(service.emailVerification(uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.INVALID_EMAIL_TOKEN,
+        ),
+      );
     });
 
-    describe('emailVerification', () => {
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email: 'user@example.com',
-      };
+    it('should throw AuthError(AuthErrorMessage.EMAIL_TOKEN_EXPIRED)', async () => {
+      const uuid = faker.string.uuid();
 
-      const tokenEntity: Partial<TokenEntity> = {
-        uuid: v4(),
-        type: TokenType.EMAIL,
-        userId: userEntity.id,
-      };
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce({
+        uuid,
+        expiresAt: faker.date.past(),
+      } as TokenEntity);
+      mockTokenRepository.findOneByUuidAndType.mockResolvedValueOnce(null);
 
-      let findTokenMock: any;
-
-      beforeEach(() => {
-        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUuidAndType');
-      });
-
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should throw an error if token is not found', () => {
-        findTokenMock.mockResolvedValue(null);
-        expect(
-          authService.emailVerification({ token: 'token' }),
-        ).rejects.toThrow(
-          new AuthError(AuthErrorMessage.INVALID_REFRESH_TOKEN),
-        );
-      });
-
-      it('should throw an error if token is expired', () => {
-        tokenEntity.expiresAt = new Date(new Date().getDate() - 1);
-        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
-        expect(
-          authService.emailVerification({ token: 'token' }),
-        ).rejects.toThrow(
-          new AuthError(AuthErrorMessage.REFRESH_TOKEN_EXPIRED),
-        );
-      });
-
-      it('should activate user', async () => {
-        tokenEntity.expiresAt = new Date(
-          new Date().setDate(new Date().getDate() + 1),
-        );
-        findTokenMock.mockResolvedValue(tokenEntity as TokenEntity);
-        userRepository.updateOneById = jest.fn();
-
-        await authService.emailVerification({ token: 'token' });
-
-        expect(userRepository.updateOneById).toHaveBeenCalledWith(
-          userEntity.id,
-          {
-            status: UserStatus.ACTIVE,
-          },
-        );
-      });
+      await expect(service.emailVerification(uuid)).rejects.toThrow(
+        new AuthErrors.AuthError(
+          AuthErrors.AuthErrorMessage.EMAIL_TOKEN_EXPIRED,
+        ),
+      );
     });
+  });
 
-    describe('resendEmailVerification', () => {
-      let findOneByEmailMock: any,
-        findTokenMock: any,
-        createTokenMock: any,
-        userEntity: Partial<UserEntity>;
+  describe('resendEmailVerification', () => {
+    it.each([null, { uuid: faker.string.uuid() }])(
+      'should send a verification email [%#]',
+      async (existingEmailToken) => {
+        const user = generateWorkerUser({ status: UserStatus.PENDING });
+        const tokenUuid = faker.string.uuid();
 
-      beforeEach(() => {
-        userEntity = {
-          id: 1,
-          email: 'user@example.com',
-          status: UserStatus.PENDING,
-        };
-        findOneByEmailMock = jest.spyOn(userRepository, 'findOneByEmail');
-        findTokenMock = jest.spyOn(tokenRepository, 'findOneByUserIdAndType');
-        createTokenMock = jest.spyOn(tokenRepository, 'createUnique');
-      });
+        mockUserRepository.findOneByEmail.mockResolvedValueOnce(user);
+        mockTokenRepository.findOneByUserIdAndType.mockResolvedValueOnce(
+          existingEmailToken as TokenEntity,
+        );
+        mockTokenRepository.createUnique.mockResolvedValueOnce({
+          uuid: tokenUuid,
+        } as TokenEntity);
 
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
+        await service.resendEmailVerification(user);
 
-      it('should exit early w/o action if user is not found', () => {
-        findOneByEmailMock.mockResolvedValue(null);
-        expect(
-          authService.resendEmailVerification({
-            email: 'user@example.com',
-            hCaptchaToken: 'token',
+        if (existingEmailToken) {
+          expect(mockTokenRepository.deleteOne).toHaveBeenCalledTimes(1);
+          expect(mockTokenRepository.deleteOne).toHaveBeenCalledWith(
+            existingEmailToken as TokenEntity,
+          );
+        }
+        expect(mockTokenRepository.createUnique).toHaveBeenCalledTimes(1);
+        expect(mockTokenRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: TokenType.EMAIL,
+            userId: user.id,
           }),
-        ).resolves.toBeUndefined();
-
-        expect(emailService.sendEmail).not.toHaveBeenCalledWith();
-      });
-
-      it('should exit early w/o action if user is not pending', () => {
-        userEntity.status = UserStatus.ACTIVE;
-        findOneByEmailMock.mockResolvedValue(userEntity);
-        expect(
-          authService.resendEmailVerification({
-            email: 'user@example.com',
-            hCaptchaToken: 'token',
-          }),
-        ).resolves.toBeUndefined();
-
-        expect(emailService.sendEmail).not.toHaveBeenCalledWith();
-      });
-
-      it('should create token and send email', async () => {
-        findOneByEmailMock.mockResolvedValue(userEntity);
-        findTokenMock.mockResolvedValueOnce(null);
-        emailService.sendEmail = jest.fn();
-        const email = faker.internet.email();
-
-        await authService.resendEmailVerification({
-          email,
-          hCaptchaToken: faker.string.alphanumeric(),
-        });
-
-        expect(createTokenMock).toHaveBeenCalled();
-        expect(emailService.sendEmail).toHaveBeenCalledWith(
-          email,
+        );
+        expect(mockEmailService.sendEmail).toHaveBeenCalledTimes(1);
+        expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+          user.email,
           EmailAction.SIGNUP,
           {
-            url: expect.stringContaining(`${MOCK_FE_URL}/verify?token=`),
+            url: `${mockServerConfigService.feURL}/verify?token=${tokenUuid}`,
           },
         );
-      });
-    });
+      },
+    );
 
-    describe('web3auth', () => {
-      describe('signin', () => {
-        const nonce = generateNonce();
-        const nonce1 = generateNonce();
+    it.each([UserStatus.INACTIVE, UserStatus.ACTIVE])(
+      'should do nothing if user is not in PENDING status [%#]',
+      async (userStatus) => {
+        const user = generateWorkerUser({ status: userStatus });
 
-        const userEntity: Partial<UserEntity> = {
-          id: 1,
-          evmAddress: MOCK_ADDRESS,
-          nonce,
-        };
+        mockUserRepository.findOneByEmail.mockResolvedValueOnce(null);
 
-        let updateNonceMock: any;
+        await service.resendEmailVerification(user);
 
-        beforeEach(() => {
-          jest
-            .spyOn(userService, 'findOperatorUser')
-            .mockResolvedValue(userEntity as OperatorUserEntity);
-          updateNonceMock = jest.spyOn(userService, 'updateNonce');
-
-          jest.spyOn(authService, 'auth').mockResolvedValue({
-            accessToken: MOCK_ACCESS_TOKEN,
-            refreshToken: MOCK_REFRESH_TOKEN,
-          });
-        });
-
-        afterEach(() => {
-          jest.clearAllMocks();
-        });
-
-        it('should sign in the user, reset nonce and return the JWT', async () => {
-          updateNonceMock.mockResolvedValue({
-            ...userEntity,
-            nonce: nonce1,
-          } as UserEntity);
-
-          const data = {
-            from: MOCK_ADDRESS.toLowerCase(),
-            to: MOCK_ADDRESS.toLowerCase(),
-            contents: 'signin',
-            nonce: nonce,
-          };
-
-          const signature = await signMessage(data, MOCK_PRIVATE_KEY);
-          const result = await authService.web3Signin({
-            address: MOCK_ADDRESS,
-            signature,
-          });
-
-          expect(userService.findOperatorUser).toHaveBeenCalledWith(
-            MOCK_ADDRESS,
-          );
-          expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
-
-          expect(authService.auth).toHaveBeenCalledWith(userEntity);
-          expect(result).toStrictEqual({
-            accessToken: MOCK_ACCESS_TOKEN,
-            refreshToken: MOCK_REFRESH_TOKEN,
-          });
-        });
-
-        it("should throw ConflictException if signature doesn't match", async () => {
-          const invalidSignature = await signMessage(
-            'invalid message',
-            MOCK_PRIVATE_KEY,
-          );
-
-          await expect(
-            authService.web3Signin({
-              address: MOCK_ADDRESS,
-              signature: invalidSignature,
-            }),
-          ).rejects.toThrow(
-            new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE),
-          );
-        });
-      });
-
-      describe('signup', () => {
-        const web3PreSignUpDto: PrepareSignatureDto = {
-          address: MOCK_ADDRESS,
-          type: SignatureType.SIGNUP,
-        };
-
-        const nonce = generateNonce();
-
-        const userEntity: Partial<UserEntity> = {
-          id: 1,
-          evmAddress: web3PreSignUpDto.address,
-          nonce,
-        };
-
-        const preSignUpData = prepareSignatureBody({
-          from: web3PreSignUpDto.address,
-          to: MOCK_ADDRESS,
-          contents: SignatureType.SIGNUP,
-        });
-
-        let createUserMock: any;
-
-        beforeEach(() => {
-          createUserMock = jest.spyOn(userService, 'createOperatorUser');
-
-          createUserMock.mockResolvedValue(userEntity);
-
-          jest.spyOn(authService, 'auth').mockResolvedValue({
-            accessToken: MOCK_ACCESS_TOKEN,
-            refreshToken: MOCK_REFRESH_TOKEN,
-          });
-          jest
-            .spyOn(userRepository, 'findOneByAddress')
-            .mockResolvedValue(null);
-        });
-
-        afterEach(() => {
-          jest.clearAllMocks();
-        });
-
-        it('should create a new web3 user and return the token', async () => {
-          (KVStoreClient.build as any).mockImplementationOnce(() => ({
-            set: jest.fn(),
-          }));
-          KVStoreUtils.get = jest
-            .fn()
-            .mockResolvedValueOnce(SDKRole.JobLauncher)
-            .mockResolvedValueOnce('url')
-            .mockResolvedValueOnce(1)
-            .mockResolvedValueOnce(JobRequestType.FORTUNE);
-
-          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
-
-          const result = await authService.web3Signup({
-            address: web3PreSignUpDto.address,
-            type: UserRole.WORKER,
-            signature,
-          });
-
-          expect(userService.createOperatorUser).toHaveBeenCalledWith(
-            web3PreSignUpDto.address,
-          );
-
-          expect(authService.auth).toHaveBeenCalledWith(userEntity);
-          expect(result).toStrictEqual({
-            accessToken: MOCK_ACCESS_TOKEN,
-            refreshToken: MOCK_REFRESH_TOKEN,
-          });
-        });
-
-        it("should throw if signature doesn't match", async () => {
-          const invalidSignature = await signMessage(
-            'invalid message',
-            MOCK_PRIVATE_KEY,
-          );
-
-          await expect(
-            authService.web3Signup({
-              ...web3PreSignUpDto,
-              type: UserRole.WORKER,
-              signature: invalidSignature,
-            }),
-          ).rejects.toThrow(
-            new AuthError(AuthErrorMessage.INVALID_WEB3_SIGNATURE),
-          );
-        });
-        it('should throw if role is not in KVStore', async () => {
-          KVStoreUtils.get = jest.fn().mockResolvedValueOnce('');
-
-          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
-
-          await expect(
-            authService.web3Signup({
-              ...web3PreSignUpDto,
-              type: UserRole.WORKER,
-              signature: signature,
-            }),
-          ).rejects.toThrow(new InvalidOperatorRoleError(''));
-        });
-        it('should throw if fee is not in KVStore', async () => {
-          KVStoreUtils.get = jest
-            .fn()
-            .mockResolvedValueOnce(SDKRole.JobLauncher);
-
-          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
-
-          await expect(
-            authService.web3Signup({
-              ...web3PreSignUpDto,
-              type: UserRole.WORKER,
-              signature: signature,
-            }),
-          ).rejects.toThrow(new InvalidOperatorFeeError(''));
-        });
-        it('should throw if url is not in KVStore', async () => {
-          KVStoreUtils.get = jest
-            .fn()
-            .mockResolvedValueOnce(SDKRole.JobLauncher)
-            .mockResolvedValueOnce('url');
-
-          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
-
-          await expect(
-            authService.web3Signup({
-              ...web3PreSignUpDto,
-              type: UserRole.WORKER,
-              signature: signature,
-            }),
-          ).rejects.toThrow(new InvalidOperatorUrlError(''));
-        });
-        it('should throw if job type is not in KVStore', async () => {
-          KVStoreUtils.get = jest
-            .fn()
-            .mockResolvedValueOnce(SDKRole.JobLauncher)
-            .mockResolvedValueOnce('url')
-            .mockResolvedValueOnce(1);
-
-          const signature = await signMessage(preSignUpData, MOCK_PRIVATE_KEY);
-
-          await expect(
-            authService.web3Signup({
-              ...web3PreSignUpDto,
-              type: UserRole.WORKER,
-              signature: signature,
-            }),
-          ).rejects.toThrow(new InvalidOperatorJobTypesError(''));
-        });
-      });
-    });
+        expect(
+          mockTokenRepository.findOneByUserIdAndType,
+        ).not.toHaveBeenCalled();
+        expect(mockTokenRepository.deleteOne).not.toHaveBeenCalled();
+        expect(mockTokenRepository.createUnique).not.toHaveBeenCalled();
+        expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
+      },
+    );
   });
 });

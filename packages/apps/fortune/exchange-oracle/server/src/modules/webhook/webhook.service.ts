@@ -55,6 +55,14 @@ export class WebhookService {
         await this.jobService.processInvalidJobSolution(webhook);
         break;
 
+      case EventType.ABUSE_DETECTED:
+        await this.jobService.pauseJob(webhook);
+        break;
+
+      case EventType.ABUSE_DISMISSED:
+        await this.jobService.resumeJob(webhook);
+        break;
+
       default:
         throw new BadRequestException(
           `Invalid webhook event type: ${webhook.eventType}`,

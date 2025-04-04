@@ -1,5 +1,4 @@
 import io
-import os
 from collections import Counter
 from logging import Logger
 
@@ -29,7 +28,6 @@ from src.handlers.process_intermediate_results import (
 from src.log import ROOT_LOGGER_NAME
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
-from src.utils.assignments import compute_resulting_annotations_hash
 from src.utils.logging import NullLogger, get_function_logger
 
 module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
@@ -48,7 +46,6 @@ class _TaskValidator:
         self.data_bucket = BucketAccessInfo.parse_obj(Config.exchange_oracle_storage_config)
 
         self.annotation_meta: annotation.AnnotationMeta | None = None
-        self.merged_annotations: bytes | None = None
 
     def set_logger(self, logger: Logger):
         self.logger = logger
@@ -64,39 +61,19 @@ class _TaskValidator:
         annotation_metafile_data = data_bucket_client.download_file(annotation_meta_path)
         self.annotation_meta = parse_annotation_metafile(io.BytesIO(annotation_metafile_data))
 
-    def _download_annotations(self):
-        assert self.annotation_meta is not None
-
-        data_bucket_client = make_cloud_client(self.data_bucket)
-
-        exchange_oracle_merged_annotation_path = compose_annotation_results_bucket_filename(
-            self.escrow_address,
-            self.chain_id,
-            annotation.RESULTING_ANNOTATIONS_FILE,
-        )
-        merged_annotations = data_bucket_client.download_file(
-            exchange_oracle_merged_annotation_path
-        )
-
-        self.merged_annotations = merged_annotations
-
     def _download_results(self):
         self._download_results_meta()
-        self._download_annotations()
 
     ValidationResult = ValidationSuccess | ValidationFailure
 
     def _process_annotation_results(self) -> ValidationResult:
         assert self.annotation_meta is not None
-        assert self.merged_annotations is not None
 
-        # TODO: refactor further
         return process_intermediate_results(
             session=self.db_session,
             escrow_address=self.escrow_address,
             chain_id=self.chain_id,
             meta=self.annotation_meta,
-            merged_annotations=io.BytesIO(self.merged_annotations),
             manifest=self.manifest,
             logger=self.logger,
         )
@@ -127,10 +104,6 @@ class _TaskValidator:
                 f"average annotation quality is {validation_result.average_quality * 100:.2f}%"
             )
 
-            recor_merged_annotations_path = self._compose_validation_results_bucket_filename(
-                validation.RESULTING_ANNOTATIONS_FILE,
-            )
-
             recor_validation_meta_path = self._compose_validation_results_bucket_filename(
                 validation.VALIDATION_METAFILE_NAME,
             )
@@ -138,30 +111,11 @@ class _TaskValidator:
 
             storage_client = make_cloud_client(BucketAccessInfo.parse_obj(Config.storage_config))
 
-            # TODO: add encryption
-            storage_client.create_file(
-                recor_merged_annotations_path,
-                validation_result.resulting_annotations,
-            )
             storage_client.create_file(
                 recor_validation_meta_path,
                 validation_metafile,
             )
 
-            escrow.store_results(
-                chain_id,
-                escrow_address,
-                Config.storage_config.bucket_url() + os.path.dirname(recor_merged_annotations_path),  # noqa: PTH120
-                compute_resulting_annotations_hash(validation_result.resulting_annotations),
-            )
-
-            oracle_db_service.outbox.create_webhook(
-                db_session,
-                escrow_address,
-                chain_id,
-                OracleWebhookTypes.reputation_oracle,
-                event=RecordingOracleEvent_JobCompleted(),
-            )
             oracle_db_service.outbox.create_webhook(
                 db_session,
                 escrow_address,

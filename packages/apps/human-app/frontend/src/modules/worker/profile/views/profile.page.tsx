@@ -1,7 +1,6 @@
 import { Grid, Paper } from '@mui/material';
 import { useEffect } from 'react';
 import { t } from 'i18next';
-import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/shared/hooks/use-is-mobile';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
@@ -9,7 +8,6 @@ import {
   TopNotificationType,
   useNotification,
 } from '@/shared/hooks/use-notification';
-import { routerPaths } from '@/router/router-paths';
 import { ProfileData, ProfileActions } from '../components';
 
 export function WorkerProfilePage() {
@@ -18,18 +16,6 @@ export function WorkerProfilePage() {
   const { isConnected, initializing, web3ProviderMutation } =
     useWalletConnect();
   const { showNotification } = useNotification();
-  const navigate = useNavigate();
-
-  const emailVerified = user.status === 'active';
-
-  useEffect(() => {
-    if (!emailVerified) {
-      navigate(routerPaths.worker.verifyEmail, {
-        replace: true,
-        state: { routerState: { email: user.email } },
-      });
-    }
-  }, [navigate, user.email, emailVerified]);
 
   useEffect(() => {
     if (initializing) return;

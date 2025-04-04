@@ -1,25 +1,14 @@
 from src.services.cloud.client import StorageClient
-from src.services.cloud.gcs import DEFAULT_GCS_HOST, GcsClient
-from src.services.cloud.s3 import DEFAULT_S3_HOST, S3Client
+from src.services.cloud.gcs import GcsClient
+from src.services.cloud.s3 import S3Client
 from src.services.cloud.types import BucketAccessInfo, CloudProviders
-
-
-def compose_bucket_url(
-    bucket_name: str, provider: CloudProviders, *, bucket_host: str | None = None
-) -> str:
-    match provider:
-        case CloudProviders.aws:
-            return f"https://{bucket_name}.{bucket_host or DEFAULT_S3_HOST}/"
-        case CloudProviders.gcs:
-            return f"https://{bucket_name}.{bucket_host or DEFAULT_GCS_HOST}/"
 
 
 def make_client(
     bucket_info: BucketAccessInfo,
+    **kwargs,
 ) -> StorageClient:
-    client_kwargs = {
-        "bucket": bucket_info.bucket_name,
-    }
+    client_kwargs = {"bucket": bucket_info.bucket_name, **kwargs}
 
     match bucket_info.provider:
         case CloudProviders.aws:

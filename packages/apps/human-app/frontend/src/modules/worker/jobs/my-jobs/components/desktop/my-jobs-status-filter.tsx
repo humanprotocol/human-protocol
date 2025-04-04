@@ -1,5 +1,5 @@
 import capitalize from 'lodash/capitalize';
-import { Filtering } from '@/shared/components/ui/table/table-header-menu.tsx/filtering';
+import { Filtering } from '@/shared/components/ui/table/table-header-menu/filtering';
 import { useMyJobsFilterStore } from '../../../hooks';
 import { MyJobStatus } from '../../../types';
 
@@ -23,6 +23,8 @@ export function MyJobsStatusFilter() {
           status,
         });
       }}
+      showClearButton
+      showTitle
     />
   );
 }

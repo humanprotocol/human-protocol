@@ -45,6 +45,7 @@ export enum ErrorAssignment {
 export enum ErrorJob {
   AlreadyExists = 'Job already exists',
   InvalidAddress = 'Invalid address',
+  InvalidStatus = 'Invalid job status',
   NotAssigned = 'User is not assigned to the job',
   SolutionAlreadySubmitted = 'User has already submitted a solution',
   JobCompleted = 'This job has already been completed',

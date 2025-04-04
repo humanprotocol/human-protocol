@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 import boto3
+import boto3.s3
+import boto3.session
 from botocore.exceptions import ClientError
 from botocore.handlers import disable_signing
 
@@ -22,6 +24,7 @@ class S3Client(StorageClient):
         access_key: str | None = None,
         secret_key: str | None = None,
         endpoint_url: str | None = None,
+        config: boto3.session.Config | None = None,
     ) -> None:
         super().__init__(bucket)
         session = boto3.Session(
@@ -29,7 +32,9 @@ class S3Client(StorageClient):
             **({"aws_secret_access_key": secret_key} if secret_key else {}),
         )
         s3 = session.resource(
-            "s3", **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {})
+            "s3",
+            **({"endpoint_url": unquote(endpoint_url)} if endpoint_url else {}),
+            **({"config": config} if config else {}),
         )
         self.resource: S3ServiceResourceStub = s3
 

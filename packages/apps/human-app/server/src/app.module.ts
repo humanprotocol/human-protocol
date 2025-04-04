@@ -24,7 +24,6 @@ import { ExchangeOracleModule } from './integrations/exchange-oracle/exchange-or
 import { KvStoreModule } from './integrations/kv-store/kv-store.module';
 import { EmailConfirmationModule } from './modules/email-confirmation/email-confirmation.module';
 import { PasswordResetModule } from './modules/password-reset/password-reset.module';
-import { DisableOperatorModule } from './modules/disable-operator/disable-operator.module';
 import { KycProcedureModule } from './modules/kyc-procedure/kyc-procedure.module';
 import { PrepareSignatureModule } from './modules/prepare-signature/prepare-signature.module';
 import { HCaptchaModule } from './modules/h-captcha/h-captcha.module';
@@ -115,7 +114,6 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     KvStoreModule,
     EmailConfirmationModule,
     PasswordResetModule,
-    DisableOperatorModule,
     KycProcedureModule,
     PrepareSignatureModule,
     HCaptchaModule,

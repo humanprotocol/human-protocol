@@ -23,7 +23,6 @@ describe('WhitelistService', () => {
       moduleRef.get<WhitelistRepository>(WhitelistRepository);
   });
 
-  // TODO: Enable it when billing system is active
   describe('isUserWhitelisted', () => {
     it('should return true if user is whitelisted', async () => {
       const userId = 1;
@@ -33,7 +32,7 @@ describe('WhitelistService', () => {
 
       const result = await whitelistService.isUserWhitelisted(userId);
 
-      // expect(whitelistRepository.findOneByUserId).toHaveBeenCalledWith(userId);
+      expect(whitelistRepository.findOneByUserId).toHaveBeenCalledWith(userId);
       expect(result).toBe(true);
     });
 

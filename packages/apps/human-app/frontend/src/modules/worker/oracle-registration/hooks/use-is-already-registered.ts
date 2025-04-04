@@ -1,7 +1,11 @@
-import { useRegisteredOracles } from '@/shared/contexts/registered-oracles';
+import { useGetRegistrationDataInOracles } from '../../jobs-discovery';
 
 export const useIsAlreadyRegistered = (address: string | undefined) => {
-  const { registeredOracles } = useRegisteredOracles();
+  const { data } = useGetRegistrationDataInOracles();
 
-  return Boolean(address && registeredOracles?.includes(address));
+  if (!address) {
+    return false;
+  }
+
+  return (data?.oracle_addresses ?? []).includes(address);
 };

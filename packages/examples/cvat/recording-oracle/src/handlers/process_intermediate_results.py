@@ -27,7 +27,7 @@ from src.core.validation_errors import (
     TooSlowAnnotationError,
 )
 from src.core.validation_meta import JobMeta, ResultMeta, ValidationMeta
-from src.core.validation_results import ValidationFailure, ValidationSuccess
+from src.core.validation_results import FinalResult, ValidationFailure, ValidationSuccess
 from src.db.utils import ForUpdateParams
 from src.services.cloud import make_client as make_cloud_client
 from src.services.cloud.utils import BucketAccessInfo
@@ -79,7 +79,6 @@ _TaskIdToLabels = dict[int, list[str]]
 class _ValidationResult:
     job_results: _JobResults
     rejected_jobs: _RejectedJobs
-    updated_merged_dataset: io.BytesIO
     gt_stats: GtStats
     task_id_to_val_layout: _TaskIdToValidationLayout
     task_id_to_honeypots_mapping: _TaskIdToHoneypotsMapping
@@ -90,7 +89,25 @@ class _ValidationResult:
 T = TypeVar("T")
 
 
-class _TaskValidator:
+class _TaskHandler:
+    def __init__(
+        self,
+        escrow_address: str,
+        chain_id: int,
+        manifest: TaskManifest,
+    ) -> None:
+        self.escrow_address = escrow_address
+        self.chain_id = chain_id
+        self.manifest = manifest
+
+        self._temp_dir: Path | None = None
+
+    def _require_field(self, field: T | None) -> T:
+        assert field is not None
+        return field
+
+
+class _TaskValidator(_TaskHandler):
     UNKNOWN_QUALITY = -1
     "The value to be used when job quality cannot be computed (e.g. no GT images available)"
 
@@ -100,52 +117,18 @@ class _TaskValidator:
         chain_id: int,
         manifest: TaskManifest,
         *,
-        merged_annotations: io.IOBase,
         meta: AnnotationMeta,
         gt_stats: GtStats | None = None,
     ) -> None:
-        self.escrow_address = escrow_address
-        self.chain_id = chain_id
-        self.manifest = manifest
+        super().__init__(escrow_address=escrow_address, chain_id=chain_id, manifest=manifest)
 
         self._gt_stats: GtStats = gt_stats or {}
-        self._merged_annotations: io.IOBase = merged_annotations
 
-        self._updated_merged_dataset_archive: io.IOBase | None = None
         self._job_results: _JobResults | None = None
         self._rejected_jobs: _RejectedJobs | None = None
 
         self._temp_dir: Path | None = None
-        self._input_gt_dataset: dm.Dataset | None = None
         self._meta: AnnotationMeta = meta
-
-    def _require_field(self, field: T | None) -> T:
-        assert field is not None
-        return field
-
-    def _gt_key_to_sample_id(self, gt_key: str) -> str:
-        return gt_key
-
-    def _parse_gt_dataset(self, gt_file_data: bytes) -> dm.Dataset:
-        with TemporaryDirectory() as gt_temp_dir:
-            gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
-            with open(gt_filename, "wb") as f:
-                f.write(gt_file_data)
-
-            gt_dataset = dm.Dataset.import_from(
-                gt_filename,
-                format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
-            )
-
-            gt_dataset.init_cache()
-
-            return gt_dataset
-
-    def _load_gt_dataset(self):
-        input_gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
-        gt_bucket_client = make_cloud_client(input_gt_bucket)
-        gt_data = gt_bucket_client.download_file(input_gt_bucket.path)
-        self._input_gt_dataset = self._parse_gt_dataset(gt_data)
 
     def _validate_jobs(self):
         manifest = self._require_field(self.manifest)
@@ -255,6 +238,62 @@ class _TaskValidator:
         self._task_id_to_sequence_of_frame_names = task_id_to_sequence_of_frame_names
         self._task_id_to_labels = task_id_to_labels
 
+    def validate(self) -> _ValidationResult:
+        with TemporaryDirectory() as tempdir:
+            self._temp_dir = Path(tempdir)
+
+            self._validate_jobs()
+
+        return _ValidationResult(
+            job_results=self._require_field(self._job_results),
+            rejected_jobs=self._require_field(self._rejected_jobs),
+            gt_stats=self._require_field(self._gt_stats),
+            task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
+            task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
+            task_id_to_frame_names=self._require_field(self._task_id_to_sequence_of_frame_names),
+            task_id_to_labels=self._require_field(self._task_id_to_labels),
+        )
+
+
+class _TaskAnnotationMerger(_TaskHandler):
+    def __init__(
+        self,
+        escrow_address: str,
+        chain_id: int,
+        manifest: TaskManifest,
+        *,
+        merged_annotations: io.IOBase,
+    ) -> None:
+        super().__init__(escrow_address=escrow_address, chain_id=chain_id, manifest=manifest)
+
+        self._merged_annotations: io.IOBase = merged_annotations
+
+        self._updated_merged_dataset_archive: io.IOBase | None = None
+
+        self._temp_dir: Path | None = None
+        self._input_gt_dataset: dm.Dataset | None = None
+
+    def _parse_gt_dataset(self, gt_file_data: bytes) -> dm.Dataset:
+        with TemporaryDirectory() as gt_temp_dir:
+            gt_filename = os.path.join(gt_temp_dir, "gt_annotations.json")
+            with open(gt_filename, "wb") as f:
+                f.write(gt_file_data)
+
+            gt_dataset = dm.Dataset.import_from(
+                gt_filename,
+                format=DM_GT_DATASET_FORMAT_MAPPING[self.manifest.annotation.type],
+            )
+
+            gt_dataset.init_cache()
+
+            return gt_dataset
+
+    def _load_gt_dataset(self):
+        input_gt_bucket = BucketAccessInfo.parse_obj(self.manifest.validation.gt_url)
+        gt_bucket_client = make_cloud_client(input_gt_bucket)
+        gt_data = gt_bucket_client.download_file(input_gt_bucket.path)
+        self._input_gt_dataset = self._parse_gt_dataset(gt_data)
+
     def _restore_original_image_paths(self, merged_dataset: dm.Dataset) -> dm.Dataset:
         class RemoveCommonPrefix(dm.ItemTransform):
             def __init__(self, extractor: dm.IExtractor, *, prefix: str) -> None:
@@ -266,7 +305,7 @@ class _TaskValidator:
                     item = item.wrap(id=item.id[len(self._prefix) :])
                 return item
 
-        prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.lstrip("/\\") + "/"
+        prefix = BucketAccessInfo.parse_obj(self.manifest.data.data_url).path.strip("/\\") + "/"
 
         # Remove prefixes if it can be done safely
         sample_ids = {sample.id for sample in merged_dataset}
@@ -361,24 +400,14 @@ class _TaskValidator:
             case _:
                 raise AssertionError(f"Unknown task type {manifest.annotation.type}")
 
-    def validate(self) -> _ValidationResult:
+    def merge_results(self) -> io.IOBase:
         with TemporaryDirectory() as tempdir:
             self._temp_dir = Path(tempdir)
 
             self._load_gt_dataset()
-            self._validate_jobs()
             self._prepare_merged_dataset()
 
-        return _ValidationResult(
-            job_results=self._require_field(self._job_results),
-            rejected_jobs=self._require_field(self._rejected_jobs),
-            updated_merged_dataset=self._require_field(self._updated_merged_dataset_archive),
-            gt_stats=self._require_field(self._gt_stats),
-            task_id_to_val_layout=self._require_field(self._task_id_to_val_layout),
-            task_id_to_honeypots_mapping=self._require_field(self._task_id_to_honeypots_mapping),
-            task_id_to_frame_names=self._require_field(self._task_id_to_sequence_of_frame_names),
-            task_id_to_labels=self._require_field(self._task_id_to_labels),
-        )
+        return self._require_field(self._updated_merged_dataset_archive)
 
 
 @dataclass
@@ -714,7 +743,6 @@ def process_intermediate_results(  # noqa: PLR0912
     escrow_address: str,
     chain_id: int,
     meta: AnnotationMeta,
-    merged_annotations: io.RawIOBase,
     manifest: TaskManifest,
     logger: logging.Logger,
 ) -> ValidationSuccess | ValidationFailure:
@@ -759,7 +787,6 @@ def process_intermediate_results(  # noqa: PLR0912
         escrow_address=escrow_address,
         chain_id=chain_id,
         manifest=manifest,
-        merged_annotations=merged_annotations,
         meta=unchecked_jobs_meta,
         gt_stats=gt_stats,
     )
@@ -911,7 +938,103 @@ def process_intermediate_results(  # noqa: PLR0912
     return ValidationSuccess(
         job_results=job_results,
         validation_meta=validation_meta,
-        resulting_annotations=validation_result.updated_merged_dataset.getvalue(),
+        average_quality=np.mean(
+            [v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0]
+            or [0]
+        ),
+    )
+
+
+def process_final_results(
+    session: Session,
+    *,
+    escrow_address: str,
+    chain_id: int,
+    meta: AnnotationMeta,
+    merged_annotations: io.RawIOBase,
+    manifest: TaskManifest,
+    logger: logging.Logger,
+) -> FinalResult:
+    assert logger  # unused
+
+    task = db_service.get_task_by_escrow_address(
+        session,
+        escrow_address,
+        for_update=ForUpdateParams(
+            nowait=True
+        ),  # should not happen, but waiting should not block processing
+    )
+    if not task:
+        raise AssertionError(f"Validation results for escrow {escrow_address} not found")
+
+    merger = _TaskAnnotationMerger(
+        escrow_address=escrow_address,
+        chain_id=chain_id,
+        manifest=manifest,
+        merged_annotations=merged_annotations,
+    )
+
+    merged_annotations = merger.merge_results()
+
+    job_final_result_ids: dict[str, str] = {}
+
+    for job_meta in meta.jobs:
+        job = db_service.get_job_by_cvat_id(session, job_meta.job_id)
+        if not job:
+            raise AssertionError(
+                f"Can't find validation results for job " f"{job_meta.job_id} ({escrow_address=})"
+            )
+
+        assignment_validation_result = db_service.get_validation_result_by_assignment_id(
+            session, job_meta.assignment_id
+        )
+        if not assignment_validation_result:
+            raise AssertionError(
+                f"Can't find validation results for assignments "
+                f"{job_meta.assignment_id} ({escrow_address=})"
+            )
+
+        job_final_result_ids[job.id] = assignment_validation_result.id
+
+    task_jobs = task.jobs
+
+    task_validation_results = db_service.get_task_validation_results(session, task.id)
+
+    job_id_to_meta_id = {job.id: i for i, job in enumerate(task_jobs)}
+
+    validation_result_id_to_meta_id = {r.id: i for i, r in enumerate(task_validation_results)}
+
+    validation_meta = ValidationMeta(
+        jobs=[
+            JobMeta(
+                job_id=job_id_to_meta_id[job.id],
+                final_result_id=validation_result_id_to_meta_id[job_final_result_ids[job.id]],
+            )
+            for job in task_jobs
+        ],
+        results=[
+            ResultMeta(
+                id=validation_result_id_to_meta_id[r.id],
+                job_id=job_id_to_meta_id[r.job.id],
+                annotator_wallet_address=r.annotator_wallet_address,
+                annotation_quality=r.annotation_quality,
+            )
+            for r in task_validation_results
+        ],
+    )
+
+    # Include final results for all jobs
+    job_results: _JobResults = {
+        job.cvat_id: task_validation_results[
+            validation_result_id_to_meta_id[job_final_result_ids[job.id]]
+        ].annotation_quality
+        for job in task_jobs
+    }
+
+    return FinalResult(
+        job_results=job_results,
+        validation_meta=validation_meta,
+        resulting_annotations=merged_annotations.read(),
         average_quality=np.mean(
             [v for v in job_results.values() if v != _TaskValidator.UNKNOWN_QUALITY and v >= 0]
             or [0]

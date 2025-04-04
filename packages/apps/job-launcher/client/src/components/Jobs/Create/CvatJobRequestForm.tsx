@@ -34,6 +34,7 @@ import {
   Qualification,
   StorageProviders,
 } from '../../../types';
+import { mapCvatFormValues } from './helpers';
 import { CvatJobRequestValidationSchema, dataValidationSchema } from './schema';
 
 export const CvatJobRequestForm = () => {
@@ -44,28 +45,16 @@ export const CvatJobRequestForm = () => {
   const [qualificationsOptions, setQualificationsOptions] = useState<
     Qualification[]
   >([]);
+  const [updatedValidationSchema, setUpdatedValidationSchema] = useState(
+    CvatJobRequestValidationSchema,
+  );
 
-  const initialValues = {
-    labels: [],
-    nodes: [],
-    type: CvatJobType.IMAGE_BOXES,
-    description: '',
-    qualifications: [],
-    userGuide: '',
-    accuracyTarget: 80,
-    dataProvider: StorageProviders.AWS,
-    dataRegion: '',
-    dataBucketName: '',
-    dataPath: '',
-    bpProvider: StorageProviders.AWS,
-    bpRegion: '',
-    bpBucketName: '',
-    bpPath: '',
-    gtProvider: StorageProviders.AWS,
-    gtRegion: '',
-    gtBucketName: '',
-    gtPath: '',
-  };
+  const persistedFormValues = mapCvatFormValues(
+    jobRequest,
+    qualificationsOptions,
+  );
+
+  const initialValues = { ...persistedFormValues };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +62,6 @@ export const CvatJobRequestForm = () => {
         try {
           setQualificationsOptions(await getQualifications(jobRequest.chainId));
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('Error fetching data:', error);
         }
       }
@@ -111,9 +99,9 @@ export const CvatJobRequestForm = () => {
     gtPath,
     userGuide,
     accuracyTarget,
-  }: any) => {
+  }: ReturnType<typeof mapCvatFormValues>) => {
     let bp = undefined;
-    if (type === CvatJobType.IMAGE_BOXES_FROM_POINTS)
+    if (type === CvatJobType.IMAGE_BOXES_FROM_POINTS) {
       bp = {
         points: {
           provider: bpProvider,
@@ -122,7 +110,7 @@ export const CvatJobRequestForm = () => {
           path: bpPath,
         },
       };
-    else if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES)
+    } else if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES) {
       bp = {
         boxes: {
           provider: bpProvider,
@@ -131,12 +119,17 @@ export const CvatJobRequestForm = () => {
           path: bpPath,
         },
       };
+    }
+
     const labelArray: Label[] = labels.map((name: string) => {
-      if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES)
-        return { name: name, nodes: nodes };
-      else return { name: name };
+      if (type === CvatJobType.IMAGE_SKELETONS_FROM_BOXES) {
+        return { name, nodes };
+      }
+
+      return { name };
     });
-    updateJobRequest?.({
+
+    updateJobRequest({
       ...jobRequest,
       cvatRequest: {
         labels: labelArray,
@@ -164,12 +157,8 @@ export const CvatJobRequestForm = () => {
         accuracyTarget,
       },
     });
-    goToNextStep?.();
+    goToNextStep();
   };
-
-  const [updatedValidationSchema, setUpdatedValidationSchema] = useState(
-    CvatJobRequestValidationSchema,
-  );
 
   const {
     errors,
@@ -729,9 +718,9 @@ export const CvatJobRequestForm = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                    {errors.dataRegion && (
+                    {errors.gtRegion && (
                       <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
-                        {errors.dataRegion}
+                        {errors.gtRegion}
                       </FormHelperText>
                     )}
                   </FormControl>
@@ -855,8 +844,8 @@ export const CvatJobRequestForm = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              goToPrevStep?.();
-              updateJobRequest?.({
+              goToPrevStep();
+              updateJobRequest({
                 ...jobRequest,
                 chainId: undefined,
               });

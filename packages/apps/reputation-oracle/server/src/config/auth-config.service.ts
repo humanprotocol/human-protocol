@@ -22,43 +22,47 @@ export class AuthConfigService {
   }
 
   /**
-   * The expiration time (in seconds) for access tokens.
-   * Default: 600
+   * The expiration time (in ms) for access tokens.
+   * Default: 600000
    */
   get accessTokenExpiresIn(): number {
-    return +this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRES_IN', 600);
+    return (
+      +this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRES_IN', 600) * 1000
+    );
   }
 
   /**
-   * The expiration time (in seconds) for refresh tokens.
-   * Default: 3600
+   * The expiration time (in ms) for refresh tokens.
+   * Default: 3600000
    */
   get refreshTokenExpiresIn(): number {
-    return +this.configService.get<number>(
-      'JWT_REFRESH_TOKEN_EXPIRES_IN',
-      3600,
+    return (
+      +this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRES_IN', 3600) *
+      1000
     );
   }
 
   /**
-   * The expiration time (in seconds) for email verification tokens.
-   * Default: 86400
+   * The expiration time (in ms) for email verification tokens.
+   * Default: 86400000
    */
   get verifyEmailTokenExpiresIn(): number {
-    return +this.configService.get<number>(
-      'VERIFY_EMAIL_TOKEN_EXPIRES_IN',
-      86400,
+    return (
+      +this.configService.get<number>('VERIFY_EMAIL_TOKEN_EXPIRES_IN', 86400) *
+      1000
     );
   }
 
   /**
-   * The expiration time (in seconds) for forgot password tokens.
-   * Default: 86400
+   * The expiration time (in ms) for forgot password tokens.
+   * Default: 86400000
    */
   get forgotPasswordExpiresIn(): number {
-    return +this.configService.get<number>(
-      'FORGOT_PASSWORD_TOKEN_EXPIRES_IN',
-      86400,
+    return (
+      +this.configService.get<number>(
+        'FORGOT_PASSWORD_TOKEN_EXPIRES_IN',
+        86400,
+      ) * 1000
     );
   }
 

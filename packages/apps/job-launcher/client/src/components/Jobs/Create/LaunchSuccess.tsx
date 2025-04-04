@@ -34,7 +34,7 @@ export const LaunchSuccess = () => {
           variant="contained"
           color="primary"
           sx={{ width: 240 }}
-          onClick={() => reset?.()}
+          onClick={reset}
         >
           Add New Job
         </Button>

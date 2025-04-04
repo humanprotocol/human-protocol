@@ -11,7 +11,6 @@ import {
 } from '../model/email-verification.model';
 
 const TOKEN = 'test_user_token';
-const EMAIL = 'test_user@email.com';
 
 export const emailVerificationDtoFixture: EmailVerificationDto = {
   token: TOKEN,
@@ -26,12 +25,10 @@ export const emailVerificationDataFixture: EmailVerificationData = {
 
 export const emailVerificationToken = TOKEN;
 export const resendEmailVerificationDtoFixture: ResendEmailVerificationDto = {
-  email: EMAIL,
   h_captcha_token: TOKEN,
 };
 export const resendEmailVerificationParamsFixture: ResendEmailVerificationParams =
   {
-    email: EMAIL,
     hCaptchaToken: TOKEN,
   };
 export const resendEmailVerificationCommandFixture: ResendEmailVerificationCommand =
@@ -40,6 +37,5 @@ export const resendEmailVerificationCommandFixture: ResendEmailVerificationComma
     token: TOKEN,
   };
 export const resendEmailVerificationDataFixture: ResendEmailVerificationData = {
-  email: EMAIL,
   h_captcha_token: TOKEN,
 };

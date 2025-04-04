@@ -9,6 +9,7 @@ export enum ReputationOracleEndpoints {
   RESTORE_PASSWORD = 'restore_password',
   PREPARE_SIGNATURE = 'prepare_signature',
   DISABLE_OPERATOR = 'disable_operator',
+  ENABLE_OPERATOR = 'enable_operator',
   KYC_PROCEDURE_START = 'kyc_procedure_start',
   ENABLE_LABELING = 'enable_labeling',
   REGISTER_ADDRESS = 'register_address',

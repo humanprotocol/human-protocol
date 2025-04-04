@@ -16,6 +16,7 @@ from src.crons.webhooks.job_launcher import (
     process_outgoing_job_launcher_webhooks,
 )
 from src.crons.webhooks.recording_oracle import (
+    process_incoming_recording_oracle_webhook_job_completed,
     process_incoming_recording_oracle_webhooks,
     process_outgoing_recording_oracle_webhooks,
 )
@@ -38,6 +39,11 @@ def setup_cron_jobs(app: FastAPI) -> None:
         )
         scheduler.add_job(
             process_incoming_recording_oracle_webhooks,
+            "interval",
+            seconds=Config.cron_config.process_recording_oracle_webhooks_int,
+        )
+        scheduler.add_job(
+            process_incoming_recording_oracle_webhook_job_completed,
             "interval",
             seconds=Config.cron_config.process_recording_oracle_webhooks_int,
         )

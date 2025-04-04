@@ -13,6 +13,6 @@ import { UserService } from './user.service';
   imports: [Web3Module, HCaptchaModule],
   providers: [UserService, UserRepository, SiteKeyRepository],
   controllers: [UserController],
-  exports: [UserService, UserRepository],
+  exports: [SiteKeyRepository, UserService, UserRepository],
 })
 export class UserModule {}

@@ -16,7 +16,13 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mapping/EscrowFactory.ts
       entities:
-        - Launched
+        - Escrow
+        - EscrowStatusEvent
+        - EscrowStatistics
+        - EventDayData
+        - Operator
+        - Transaction
+        - InternalTransaction
       abis:
         - name: EscrowFactory
           file: '{{{ EscrowFactory.abi }}}'
@@ -37,10 +43,21 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - Approval
-        - BulkApproval
-        - BulkTransfer
-        - Transfer
+        - DailyWorker
+        - Escrow
+        - EventDayData
+        - HMTApprovalEvent
+        - HMTBulkApprovalEvent
+        - HMTBulkTransferEvent
+        - HMTTransferEvent
+        - HMTokenStatistics
+        - Holder
+        - Payout
+        - UniqueReceiver
+        - UniqueSender
+        - Worker
+        - Transaction
+        - InternalTransaction
       abis:
         - name: HMToken
           file: '{{{ HMToken.abi }}}'
@@ -66,7 +83,11 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - DataSaved
+        - KVStore
+        - KVStoreSetEvent
+        - Operator
+        - OperatorURL
+        - ReputationNetwork
       abis:
         - name: KVStore
           file: '{{{ KVStore.abi }}}'
@@ -86,10 +107,15 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - StakeDeposited
-        - StakeLocked
-        - StakeWithdrawn
-        - StakeSlashed
+        - StakeDepositedEvent
+        - StakeLockedEvent
+        - StakeWithdrawnEvent
+        - StakeSlashedEvent
+        - FeeWithdrawn
+        - Operator
+        - OperatorStatistics
+        - Transaction
+        - InternalTransaction
       abis:
         - name: Staking
           file: '{{{ Staking.abi }}}'
@@ -119,7 +145,12 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mapping/legacy/EscrowFactory.ts
       entities:
-        - Launched
+        - Escrow
+        - EscrowStatistics
+        - EventDayData
+        - Operator
+        - Transaction
+        - InternalTransaction
       abis:
         - name: EscrowFactory
           file: '{{{ LegacyEscrowFactory.abi }}}'
@@ -139,13 +170,23 @@ templates:
       language: wasm/assemblyscript
       file: ./src/mapping/Escrow.ts
       entities:
-        - ISEvent
-        - PEvent
+        - Escrow
+        - Worker
+        - EscrowStatistics
+        - EventDayData
+        - PendingEvent
+        - EscrowStatusEvent
+        - Operator
+        - StoreResultsEvent
+        - BulkPayoutEvent
+        - DailyWorker
+        - FundEvent
+        - WithdrawEvent
+        - Transaction
+        - InternalTransaction
       abis:
         - name: Escrow
           file: '{{{ Escrow.abi }}}'
-        - name: LegacyEscrow
-          file: '{{{ LegacyEscrow.abi }}}'
       eventHandlers:
         - event: IntermediateStorage(string,string)
           handler: handleIntermediateStorage
@@ -165,6 +206,7 @@ templates:
           handler: handleFund
         - event: Withdraw(address,uint256)
           handler: handleWithdraw
+{{ #LegacyEscrow }}
   - name: LegacyEscrow
     kind: ethereum/contract
     network: '{{ network }}'
@@ -176,8 +218,14 @@ templates:
       language: wasm/assemblyscript
       file: ./src/mapping/legacy/Escrow.ts
       entities:
-        - ISEvent
-        - PEvent
+        - Escrow
+        - EscrowStatistics
+        - EventDayData
+        - Escrow
+        - Transaction
+        - InternalTransaction
+        - StoreResultsEvent
+        - BulkPayoutEvent
       abis:
         - name: Escrow
           file: '{{{ LegacyEscrow.abi }}}'
@@ -188,3 +236,4 @@ templates:
           handler: handlePending
         - event: BulkTransfer(indexed uint256,uint256)
           handler: handleBulkTransfer
+{{ /LegacyEscrow }}

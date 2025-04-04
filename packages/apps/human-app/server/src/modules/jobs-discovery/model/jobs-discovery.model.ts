@@ -95,18 +95,21 @@ export class JobsDiscoveryParamsCommand {
   data: JobsDiscoveryParams;
 }
 
-export class JobsDiscoveryResponseItem {
+export type JobsDiscoveryResponseItem = {
   escrow_address: string;
   chain_id: number;
   job_type: string;
   status: JobStatus;
-  created_at?: string;
   job_description?: string;
-  reward_amount?: number;
+  reward_amount?: string;
   reward_token?: string;
-  qualifications?: string[];
-}
+  created_at?: string;
+  updated_at?: string;
+  qualifications: string[];
+};
 
 export class JobsDiscoveryResponse extends PageableResponse {
   results: JobsDiscoveryResponseItem[];
 }
+
+export type DiscoveredJob = Required<JobsDiscoveryResponseItem>;

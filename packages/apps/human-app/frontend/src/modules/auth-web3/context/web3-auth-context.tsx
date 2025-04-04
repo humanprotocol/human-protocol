@@ -10,12 +10,18 @@ import {
 } from '@/shared/components/ui/modal/modal.store';
 import { type AuthTokensSuccessResponse } from '@/shared/schemas';
 
+export enum OperatorStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
 const web3userDataSchema = z.object({
-  userId: z.number(),
+  user_id: z.number(),
   wallet_address: z.string(),
   reputation_network: z.string(),
+  operator_status: z.nativeEnum(OperatorStatus),
   exp: z.number(),
-  status: z.string().nullable().optional(),
+  status: z.literal('active'),
 });
 
 export type Web3UserData = z.infer<typeof web3userDataSchema>;

@@ -1,27 +1,37 @@
-import { Box, Typography, CircularProgress } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
+import { Box, Button, Typography, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React from 'react';
+
 import { CheckFilledIcon } from '../../../components/Icons/CheckFilledIcon';
 
 const ProgressText = styled(Typography)({
   display: 'flex',
   alignItems: 'center',
   position: 'relative',
-  paddingLeft: '30px',
-  paddingTop: 10,
 });
 
 const CheckedIcon = styled(CheckFilledIcon)({
   position: 'absolute',
-  left: '0px',
+  left: '-30px',
 });
 
 const ProgressIcon = styled(CircularProgress)({
   position: 'absolute',
-  left: '0px',
+  left: '-30px',
 });
 
-export const LaunchJobProgress = () => {
+const ErrorIcon = styled(ClearIcon)({
+  position: 'absolute',
+  left: '-30px',
+});
+
+export const LaunchJobProgress = ({
+  isPayingFailed,
+  goToPrevStep,
+}: {
+  isPayingFailed: boolean;
+  goToPrevStep: () => void;
+}) => {
   return (
     <Box
       sx={{
@@ -33,17 +43,31 @@ export const LaunchJobProgress = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        position: 'relative',
       }}
     >
-      <ProgressText>
-        <CheckedIcon /> Creating Job
-      </ProgressText>
-      <ProgressText>
-        <CheckedIcon /> Setting Up Job
-      </ProgressText>
-      <ProgressText>
-        <ProgressIcon size={20} /> Paying Job
-      </ProgressText>
+      <Box display="flex" flexDirection="column" gap={1}>
+        <ProgressText>
+          <CheckedIcon /> Creating Job
+        </ProgressText>
+        <ProgressText>
+          <CheckedIcon /> Setting Up Job
+        </ProgressText>
+        <ProgressText>
+          {isPayingFailed ? <ErrorIcon /> : <ProgressIcon size={20} />}
+          Paying Job
+        </ProgressText>
+      </Box>
+      <Button
+        disabled={!isPayingFailed}
+        color="primary"
+        variant="outlined"
+        sx={{ width: '240px', position: 'absolute', bottom: 16, right: 16 }}
+        size="large"
+        onClick={goToPrevStep}
+      >
+        Cancel
+      </Button>
     </Box>
   );
 };

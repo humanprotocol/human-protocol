@@ -16,6 +16,9 @@ export class SiteKeyRepository extends BaseRepository<SiteKeyEntity> {
     siteKey: string,
     type: SiteKeyType,
   ): Promise<SiteKeyEntity | null> {
+    if (!userId || !siteKey || !type) {
+      throw new Error('Invalid arguments');
+    }
     return this.findOne({
       where: { userId, siteKey, type },
     });

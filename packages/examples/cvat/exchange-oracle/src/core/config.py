@@ -229,8 +229,11 @@ class FeaturesConfig:
     profiling_enabled = to_bool(getenv("PROFILING_ENABLED", "0"))
     "Allow to profile specific requests"
 
-    manifest_cache_ttl = int(os.getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
+    manifest_cache_ttl = int(getenv("MANIFEST_CACHE_TTL", str(2 * 24 * 60 * 60)))
     "TTL for cached manifests"
+
+    max_data_storage_connections = int(getenv("MAX_DATA_STORAGE_CONNECTIONS", 5))
+    "Max parallel data storage connections in 1 client (job creation, ...)"
 
 
 class CoreConfig:

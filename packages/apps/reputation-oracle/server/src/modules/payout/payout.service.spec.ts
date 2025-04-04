@@ -96,6 +96,10 @@ describe('PayoutService', () => {
         calculatePayouts: jest.fn(),
         saveResults: jest.fn(),
       },
+      [JobRequestType.AUDIO_TRANSCRIPTION]: {
+        calculatePayouts: jest.fn(),
+        saveResults: jest.fn(),
+      },
     };
   });
 

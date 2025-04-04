@@ -4,6 +4,10 @@ export enum AuthErrorMessage {
   INVALID_CREDENTIALS = 'Invalid email or password',
   INVALID_REFRESH_TOKEN = 'Refresh token is not valid',
   REFRESH_TOKEN_EXPIRED = 'Refresh token expired',
+  PASSWORD_TOKEN_EXPIRED = 'Password token expired',
+  INVALID_PASSWORD_TOKEN = 'Password token is not valid',
+  EMAIL_TOKEN_EXPIRED = 'Email token expired',
+  INVALID_EMAIL_TOKEN = 'Email token is not valid',
   INVALID_WEB3_SIGNATURE = 'Invalid signature',
   INVALID_ADDRESS = 'Invalid address',
 }
@@ -15,7 +19,7 @@ export class AuthError extends BaseError {
 }
 
 export class InvalidOperatorSignupDataError extends BaseError {
-  constructor(public readonly detail: string) {
+  constructor(readonly detail: string) {
     super('Invalid operator signup data');
   }
 }
@@ -38,14 +42,8 @@ export class InvalidOperatorUrlError extends InvalidOperatorSignupDataError {
   }
 }
 
-export class InvalidOperatorJobTypesError extends InvalidOperatorSignupDataError {
-  constructor(url: string) {
-    super(`Invalid job types: ${url}`);
-  }
-}
-
 export class DuplicatedUserEmailError extends BaseError {
-  constructor(public readonly email: string) {
+  constructor(readonly email: string) {
     super(
       'The email you are trying to use already exists. Please check that the email is correct or use a different email.',
     );
@@ -53,9 +51,15 @@ export class DuplicatedUserEmailError extends BaseError {
 }
 
 export class DuplicatedUserAddressError extends BaseError {
-  constructor(public readonly address: string) {
+  constructor(readonly address: string) {
     super(
       'The address you are trying to use already exists. Please, use a different address.',
     );
+  }
+}
+
+export class InactiveUserError extends BaseError {
+  constructor(readonly userId: number) {
+    super('User is in inactive status. Login forbidden.');
   }
 }

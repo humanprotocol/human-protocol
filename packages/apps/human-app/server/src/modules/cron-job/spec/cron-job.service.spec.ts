@@ -1,3 +1,5 @@
+import { ChainId } from '@human-protocol/sdk';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CronJobService } from '../cron-job.service';
 import { ExchangeOracleGateway } from '../../../integrations/exchange-oracle/exchange-oracle.gateway';
@@ -5,14 +7,16 @@ import { OracleDiscoveryService } from '../../../modules/oracle-discovery/oracle
 import { WorkerService } from '../../../modules/user-worker/worker.service';
 import { EnvironmentConfigService } from '../../../common/config/environment-config.service';
 import {
+  DiscoveredJob,
   JobsDiscoveryParamsCommand,
+  JobsDiscoveryResponse,
   JobsDiscoveryResponseItem,
 } from '../../../modules/jobs-discovery/model/jobs-discovery.model';
 import { JobStatus } from '../../../common/enums/global-common';
 import { JobsDiscoveryService } from '../../../modules/jobs-discovery/jobs-discovery.service';
-import { SchedulerRegistry } from '@nestjs/schedule';
 import { generateOracleDiscoveryResponseBody } from '../../../modules/oracle-discovery/spec/oracle-discovery.fixture';
-import { ChainId } from '@human-protocol/sdk';
+
+import { HMT_TOKEN_SYMBOL } from '../../../common/constants/hmt';
 
 jest.mock('cron', () => {
   return {
@@ -166,9 +170,26 @@ describe('CronJobService', () => {
     const token = 'Bearer token';
 
     it('should fetch all jobs and update the cache', async () => {
-      const initialResponse = {
-        results: [{ escrow_address: '0xabc', chain_id: '1' }],
+      const now = new Date();
+      const initialResponse: JobsDiscoveryResponse = {
+        results: [
+          {
+            escrow_address: '0xabc',
+            chain_id: 1,
+            job_type: '',
+            status: JobStatus.ACTIVE,
+            job_description: 'Best job ever',
+            reward_amount: '42',
+            reward_token: HMT_TOKEN_SYMBOL,
+            created_at: now.toISOString(),
+            updated_at: now.toISOString(),
+            qualifications: [],
+          },
+        ],
         total_pages: 1,
+        page: 0,
+        page_size: 5,
+        total_results: 1,
       };
       (exchangeOracleGatewayMock.fetchJobs as jest.Mock).mockResolvedValue(
         initialResponse,
@@ -204,9 +225,26 @@ describe('CronJobService', () => {
     });
 
     it('should reset retries count after successful job fetch', async () => {
-      const initialResponse = {
-        results: [{ escrow_address: '0xabc', chain_id: '1' }],
+      const now = new Date();
+      const initialResponse: JobsDiscoveryResponse = {
+        results: [
+          {
+            escrow_address: '0xabc',
+            chain_id: 1,
+            job_type: 'test',
+            status: JobStatus.ACTIVE,
+            job_description: 'Best job ever',
+            reward_amount: '42',
+            reward_token: HMT_TOKEN_SYMBOL,
+            created_at: now.toISOString(),
+            updated_at: now.toISOString(),
+            qualifications: [],
+          },
+        ],
         total_pages: 1,
+        page: 0,
+        page_size: 5,
+        total_results: 1,
       };
       (exchangeOracleGatewayMock.fetchJobs as jest.Mock).mockResolvedValue(
         initialResponse,
@@ -226,48 +264,59 @@ describe('CronJobService', () => {
 
   describe('mergeJobs', () => {
     it('should merge jobs correctly', () => {
-      const cachedJobs: JobsDiscoveryResponseItem[] = [
+      const now = new Date();
+      const cachedJobs: DiscoveredJob[] = [
         {
           escrow_address: '0xabc',
           chain_id: 1,
           job_type: 'type1',
           status: JobStatus.ACTIVE,
+          job_description: 'Best job ever',
+          reward_amount: '42',
+          reward_token: HMT_TOKEN_SYMBOL,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+          qualifications: [],
         },
       ];
+
       const newJobs: JobsDiscoveryResponseItem[] = [
         {
           escrow_address: '0xdef',
           chain_id: 1,
           job_type: 'type2',
           status: JobStatus.CANCELED,
+          job_description: 'Greatest job',
+          reward_amount: '42',
+          reward_token: HMT_TOKEN_SYMBOL,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+          qualifications: [],
         },
       ];
 
-      const result = service['mergeJobs'](cachedJobs, newJobs);
+      const result = service['mergeJobs'](
+        cachedJobs,
+        newJobs as DiscoveredJob[],
+      );
 
-      expect(result).toEqual([
-        {
-          escrow_address: '0xabc',
-          chain_id: 1,
-          job_type: 'type1',
-          status: JobStatus.ACTIVE,
-        },
-        {
-          escrow_address: '0xdef',
-          chain_id: 1,
-          job_type: 'type2',
-          status: JobStatus.CANCELED,
-        },
-      ]);
+      expect(result).toEqual([cachedJobs[0], newJobs[0]]);
     });
 
     it('should update existing jobs with new data', () => {
-      const cachedJobs: JobsDiscoveryResponseItem[] = [
+      const now = new Date();
+      const cachedJobs: DiscoveredJob[] = [
         {
           escrow_address: '0xabc',
           chain_id: 1,
           job_type: 'type1',
           status: JobStatus.ACTIVE,
+          job_description: 'Best job ever',
+          reward_amount: '42',
+          reward_token: HMT_TOKEN_SYMBOL,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+          qualifications: [],
         },
       ];
       const newJobs: JobsDiscoveryResponseItem[] = [
@@ -276,19 +325,21 @@ describe('CronJobService', () => {
           chain_id: 1,
           job_type: 'type1',
           status: JobStatus.COMPLETED,
+          job_description: 'Nice job',
+          reward_amount: '42',
+          reward_token: HMT_TOKEN_SYMBOL,
+          created_at: now.toISOString(),
+          updated_at: new Date().toISOString(),
+          qualifications: [],
         },
       ];
 
-      const result = service['mergeJobs'](cachedJobs, newJobs);
+      const result = service['mergeJobs'](
+        cachedJobs,
+        newJobs as DiscoveredJob[],
+      );
 
-      expect(result).toEqual([
-        {
-          escrow_address: '0xabc',
-          chain_id: 1,
-          job_type: 'type1',
-          status: JobStatus.COMPLETED,
-        },
-      ]);
+      expect(result).toEqual(newJobs);
     });
   });
 

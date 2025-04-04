@@ -64,95 +64,7 @@ export class AuthController {
   @Post('/web2/signup')
   @HttpCode(200)
   async signup(@Body() data: Web2SignUpDto): Promise<void> {
-    await this.authService.signup(data);
-  }
-
-  @ApiOperation({
-    summary: 'User signin',
-    description: 'Endpoint for user authentication',
-  })
-  @ApiBody({ type: Web2SignInDto })
-  @ApiResponse({
-    status: 200,
-    description: 'User authenticated successfully',
-    type: SuccessAuthDto,
-  })
-  @Public()
-  @UseGuards(HCaptchaGuard)
-  @Post('/web2/signin')
-  @HttpCode(200)
-  async signin(@Body() data: Web2SignInDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.signin(data);
-    return authTokens;
-  }
-
-  @ApiOperation({
-    summary: 'Forgot password',
-    description: 'Endpoint to initiate the password reset process',
-  })
-  @ApiBody({ type: ForgotPasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password reset email sent successfully',
-  })
-  @Public()
-  @UseGuards(HCaptchaGuard)
-  @Post('/web2/forgot-password')
-  @HttpCode(200)
-  async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
-    await this.authService.forgotPassword(data);
-  }
-
-  @ApiOperation({
-    summary: 'Restore password',
-    description: 'Endpoint to restore the user password after reset',
-  })
-  @ApiBody({ type: RestorePasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Password restored successfully',
-  })
-  @Public()
-  @UseGuards(HCaptchaGuard)
-  @Post('/web2/restore-password')
-  @HttpCode(200)
-  async restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
-    await this.authService.restorePassword(data);
-  }
-
-  @ApiOperation({
-    summary: 'Email verification',
-    description: 'Endpoint to verify the user email address',
-  })
-  @ApiBody({ type: VerifyEmailDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Email successfully verified',
-  })
-  @Public()
-  @Post('/web2/verify-email')
-  @HttpCode(200)
-  async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
-    await this.authService.emailVerification(data);
-  }
-
-  @ApiOperation({
-    summary: 'Resend verification email',
-    description: 'Endpoint to resend the verification email',
-  })
-  @ApiBody({ type: ResendVerificationEmailDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Verification email resent successfully',
-  })
-  @ApiBearerAuth()
-  @UseGuards(HCaptchaGuard)
-  @Post('/web2/resend-verification-email')
-  @HttpCode(200)
-  async resendEmailVerification(
-    @Body() data: ResendVerificationEmailDto,
-  ): Promise<void> {
-    await this.authService.resendEmailVerification(data);
+    await this.authService.signup(data.email, data.password);
   }
 
   @ApiOperation({
@@ -173,7 +85,29 @@ export class AuthController {
   @Post('/web3/signup')
   @HttpCode(200)
   async web3SignUp(@Body() data: Web3SignUpDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.web3Signup(data);
+    const authTokens = await this.authService.web3Signup(
+      data.signature,
+      data.address,
+    );
+    return authTokens;
+  }
+
+  @ApiOperation({
+    summary: 'User signin',
+    description: 'Endpoint for user authentication',
+  })
+  @ApiBody({ type: Web2SignInDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User authenticated successfully',
+    type: SuccessAuthDto,
+  })
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/signin')
+  @HttpCode(200)
+  async signin(@Body() data: Web2SignInDto): Promise<SuccessAuthDto> {
+    const authTokens = await this.authService.signin(data.email, data.password);
     return authTokens;
   }
 
@@ -191,7 +125,10 @@ export class AuthController {
   @Post('/web3/signin')
   @HttpCode(200)
   async web3SignIn(@Body() data: Web3SignInDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.web3Signin(data);
+    const authTokens = await this.authService.web3Signin(
+      data.address,
+      data.signature,
+    );
     return authTokens;
   }
 
@@ -209,8 +146,77 @@ export class AuthController {
   @Post('/refresh')
   @HttpCode(200)
   async refreshToken(@Body() data: RefreshDto): Promise<SuccessAuthDto> {
-    const authTokens = await this.authService.refresh(data);
+    const authTokens = await this.authService.refresh(data.refreshToken);
     return authTokens;
+  }
+
+  @ApiOperation({
+    summary: 'Forgot password',
+    description: 'Endpoint to initiate the password reset process',
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent successfully',
+  })
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
+    await this.authService.forgotPassword(data.email);
+  }
+
+  @ApiOperation({
+    summary: 'Restore password',
+    description: 'Endpoint to restore the user password after reset',
+  })
+  @ApiBody({ type: RestorePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password restored successfully',
+  })
+  @Public()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/restore-password')
+  @HttpCode(200)
+  async restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
+    await this.authService.restorePassword(data.password, data.token);
+  }
+
+  @ApiOperation({
+    summary: 'Email verification',
+    description: 'Endpoint to verify the user email address',
+  })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email successfully verified',
+  })
+  @Public()
+  @Post('/web2/verify-email')
+  @HttpCode(200)
+  async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
+    await this.authService.emailVerification(data.token);
+  }
+
+  @ApiOperation({
+    summary: 'Resend verification email',
+    description: 'Endpoint to resend the verification email',
+  })
+  @ApiBody({ type: ResendVerificationEmailDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification email resent successfully',
+  })
+  @ApiBearerAuth()
+  @UseGuards(HCaptchaGuard)
+  @Post('/web2/resend-verification-email')
+  @HttpCode(200)
+  async resendEmailVerification(
+    @Req() request: RequestWithUser,
+  ): Promise<void> {
+    await this.authService.resendEmailVerification(request.user);
   }
 
   @ApiOperation({

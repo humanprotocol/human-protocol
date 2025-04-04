@@ -28,7 +28,7 @@ import {
 import {
   DisableOperatorData,
   DisableOperatorParams,
-} from '../../modules/disable-operator/model/disable-operator.model';
+} from '../../modules/user-operator/model/disable-operator.model';
 import {
   RestorePasswordCommand,
   RestorePasswordData,

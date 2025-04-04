@@ -70,7 +70,7 @@ export class ServerConfigService {
   /**
    * The amount to charge abusive users.
    */
-  // get abuseAmount(): number {
-  //   return +this.configService.get<number>('ABUSE_AMOUNT', 10000);
-  // }
+  get abuseAmount(): number {
+    return +this.configService.get<number>('ABUSE_AMOUNT', 10000);
+  }
 }

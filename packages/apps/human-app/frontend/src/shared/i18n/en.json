@@ -324,7 +324,10 @@
         "jobTypes": "Job Types",
         "publicKey": "Public Key"
       },
-      "activateBtn": "Activate",
+      "activate": {
+        "activateBtn": "Activate",
+        "cannotActivate": "Cannot activate operator"
+      },
       "disable": {
         "disableBtn": "Deactivate",
         "cannotDisable": "Cannot deactivate operator"

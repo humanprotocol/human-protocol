@@ -5,11 +5,13 @@ import os
 import random
 import uuid
 from abc import ABCMeta, abstractmethod
+from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import ExitStack
 from dataclasses import dataclass, field
 from itertools import chain, groupby
 from math import ceil
 from pathlib import Path
+from queue import Queue
 from tempfile import TemporaryDirectory
 from time import sleep
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -30,16 +32,17 @@ import src.services.cloud as cloud_service
 import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
-from src.core.storage import compose_data_bucket_filename
+from src.core.storage import compose_data_bucket_filename, compose_data_bucket_prefix
 from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
 from src.services.cloud import CloudProviders, StorageClient
-from src.services.cloud.utils import BucketAccessInfo, compose_bucket_url
+from src.services.cloud.utils import BucketAccessInfo
 from src.utils.annotations import InstanceSegmentsToBbox, ProjectLabels, is_point_in_bbox
 from src.utils.assignments import parse_manifest
 from src.utils.logging import NullLogger, format_sequence, get_function_logger
+from src.utils.roi_uploader import BufferedRoiImageUploader
 from src.utils.zip_archive import write_dir_to_zip_archive
 
 if TYPE_CHECKING:
@@ -183,7 +186,18 @@ class _TaskBuilderBase(metaclass=ABCMeta):
 
     @classmethod
     def _make_cloud_storage_client(cls, bucket_info: BucketAccessInfo) -> StorageClient:
-        return cloud_service.make_client(bucket_info)
+        extra_args = {}
+
+        if bucket_info.provider == CloudProviders.aws:
+            import boto3.session
+
+            extra_args["config"] = boto3.session.Config(
+                max_pool_connections=Config.features.max_data_storage_connections
+            )
+        elif bucket_info.provider == CloudProviders.gcs:
+            pass  # TODO: test and add connections if needed
+
+        return cloud_service.make_client(bucket_info, **extra_args)
 
     def _save_cvat_gt_dataset_to_oracle_bucket(  # noqa: B027
         self,
@@ -195,12 +209,12 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         # into oracle bucket
         pass
 
-    def _wait_task_creation(self, task_id: int) -> cvat_api.UploadStatus:
+    def _wait_task_creation(self, task_id: int) -> cvat_api.RequestStatus:
         # TODO: add a timeout or
         # save gt datasets in the oracle bucket and upload in track_task_creation()
         while True:
             task_status, _ = cvat_api.get_task_upload_status(task_id)
-            if task_status not in [cvat_api.UploadStatus.STARTED, cvat_api.UploadStatus.QUEUED]:
+            if task_status not in [cvat_api.RequestStatus.STARTED, cvat_api.RequestStatus.QUEUED]:
                 return task_status
 
             sleep(Config.cvat_config.task_creation_check_interval)
@@ -209,7 +223,7 @@ class _TaskBuilderBase(metaclass=ABCMeta):
         self, task_id: int, gt_dataset: dm.Dataset, *, dm_export_format: str = "coco"
     ) -> None:
         task_status = self._wait_task_creation(task_id)
-        if task_status != cvat_api.UploadStatus.FINISHED:
+        if task_status != cvat_api.RequestStatus.FINISHED:
             return  # will be handled in state_trackers.py::track_task_creation
 
         dm_format_to_cvat_format = {
@@ -396,11 +410,7 @@ class SimpleTaskBuilder(_TaskBuilderBase):
                 manifest.annotation.type,
                 escrow_address,
                 chain_id,
-                compose_bucket_url(
-                    data_bucket.bucket_name,
-                    bucket_host=data_bucket.host_url,
-                    provider=data_bucket.provider,
-                ),
+                data_bucket.to_url(),
                 cvat_webhook_id=cvat_webhook.id,
             )
 
@@ -1398,11 +1408,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         )
 
     def _extract_and_upload_rois(self):
-        # TODO: maybe optimize via splitting into separate
-        #  threads (downloading, uploading, processing)
-
-        # Watch for the memory used, as the whole dataset can be quite big (gigabytes, terabytes)
-        # Consider also packing RoIs cut into archives
         assert self._points_dataset is not _unset
         assert self._rois is not _unset
         assert self._data_filenames is not _unset
@@ -1429,13 +1434,10 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
             for image_id, g in groupby(sorted(self._rois, key=_roi_key), key=_roi_key)
         }
 
-        for filename in self._data_filenames:
+        def process_file(filename: str, image_pixels: np.ndarray):
             image_roi_infos = rois_by_image.get(filename, [])
             if not image_roi_infos:
-                continue
-
-            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
-            image_pixels = decode_image(image_bytes)
+                return
 
             sample = filename_to_sample[filename]
             if tuple(sample.image.size) != tuple(image_pixels.shape[:2]):
@@ -1464,10 +1466,42 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     roi_bytes,
                 )
 
+        def download_and_decode(key: str):
+            image_bytes = src_client.download_file(key)
+            return decode_image(image_bytes)
+
+        pool_size = Config.features.max_data_storage_connections
+        download_queue_size = 4 * pool_size
+        download_queue = Queue[tuple[str, Future[np.ndarray]]](download_queue_size)
+        roi_uploader = BufferedRoiImageUploader(queue=download_queue)
+        with ThreadPoolExecutor(pool_size) as pool:
+
+            def put_callback(filename: str):
+                image_roi_infos = rois_by_image.get(filename, [])
+                if not image_roi_infos:
+                    return None
+
+                return (
+                    filename,
+                    pool.submit(download_and_decode, os.path.join(src_prefix, filename)),
+                )
+
+            def process_callback(result: tuple[str, Future]):
+                filename, task = result
+                process_file(filename, task.result())
+
+            roi_uploader.process_all(
+                self._data_filenames, put_callback=put_callback, process_callback=process_callback
+            )
+
     def _prepare_gt_roi_dataset(self):
         self._gt_roi_dataset = dm.Dataset(
             categories=self._gt_dataset.categories(), media_type=dm.Image
         )
+
+        roi_info_by_point_id: dict[int, skeletons_from_boxes_task.RoiInfo] = {
+            roi_info.point_id: roi_info for roi_info in self._rois
+        }
 
         for sample in self._gt_dataset:
             for gt_bbox in sample.annotations:
@@ -1478,10 +1512,15 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                     self.escrow_address, self.chain_id, self._roi_filenames[point_id]
                 )
 
+                # update gt bbox coordinates to match RoI shift
+                roi_info = roi_info_by_point_id[point_id]
+                new_x = gt_bbox.points[0] - roi_info.roi_x
+                new_y = gt_bbox.points[1] - roi_info.roi_y
+
                 self._gt_roi_dataset.put(
                     sample.wrap(
                         id=os.path.splitext(gt_roi_filename)[0],
-                        annotations=[gt_bbox],
+                        annotations=[gt_bbox.wrap(x=new_x, y=new_y)],
                         media=dm.Image(path=gt_roi_filename, size=sample.media_as(dm.Image).size),
                         attributes=filter_dict(sample.attributes, exclude_keys=["id"]),
                     )
@@ -1495,7 +1534,6 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
         assert self._label_configuration is not _unset
         assert self._gt_roi_dataset is not _unset
 
-        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
@@ -1535,11 +1573,9 @@ class BoxesFromPointsTaskBuilder(_TaskBuilderBase):
                 self.manifest.annotation.type,
                 self.escrow_address,
                 self.chain_id,
-                compose_bucket_url(
-                    input_data_bucket.bucket_name,
-                    bucket_host=input_data_bucket.host_url,
-                    provider=input_data_bucket.provider,
-                ),
+                oracle_bucket.to_url().rstrip("/")
+                + "/"
+                + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                 cvat_webhook_id=cvat_webhook.id,
             )
             db_service.get_project_by_id(session, project_id, for_update=True)  # lock the row
@@ -2509,13 +2545,10 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             if isinstance(bbox, dm.Bbox)
         }
 
-        for filename in self._data_filenames:
+        def process_file(filename: str, image_pixels: np.ndarray):
             image_roi_infos = roi_info_by_image.get(filename, [])
             if not image_roi_infos:
-                continue
-
-            image_bytes = src_client.download_file(os.path.join(src_prefix, filename))
-            image_pixels = decode_image(image_bytes)
+                return
 
             sample = filename_to_sample[filename]
             if tuple(sample.image.size) != tuple(image_pixels.shape[:2]):
@@ -2539,6 +2572,34 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                     compose_data_bucket_filename(self.escrow_address, self.chain_id, filename),
                     data=roi_bytes,
                 )
+
+        def download_and_decode(key: str):
+            image_bytes = src_client.download_file(key)
+            return decode_image(image_bytes)
+
+        pool_size = Config.features.max_data_storage_connections
+        download_queue_size = 4 * pool_size
+        download_queue = Queue[tuple[str, Future[np.ndarray]]](download_queue_size)
+        roi_uploader = BufferedRoiImageUploader(queue=download_queue)
+        with ThreadPoolExecutor(pool_size) as pool:
+
+            def put_callback(filename: str):
+                image_roi_infos = roi_info_by_image.get(filename, [])
+                if not image_roi_infos:
+                    return None
+
+                return (
+                    filename,
+                    pool.submit(download_and_decode, os.path.join(src_prefix, filename)),
+                )
+
+            def process_callback(result: tuple[str, Future]):
+                filename, task = result
+                process_file(filename, task.result())
+
+            roi_uploader.process_all(
+                self._data_filenames, put_callback=put_callback, process_callback=process_callback
+            )
 
     def _prepare_gt_dataset_for_skeleton_point(
         self,
@@ -2635,7 +2696,6 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
             for skeleton_label_id, skeleton_label in enumerate(self.manifest.annotation.labels)
         }
 
-        input_data_bucket = BucketAccessInfo.parse_obj(self.manifest.data.data_url)
         oracle_bucket = self.oracle_data_bucket
 
         # Register cloud storage on CVAT to pass user dataset
@@ -2714,11 +2774,9 @@ class SkeletonsFromBoxesTaskBuilder(_TaskBuilderBase):
                         self.manifest.annotation.type,
                         self.escrow_address,
                         self.chain_id,
-                        compose_bucket_url(
-                            input_data_bucket.bucket_name,
-                            bucket_host=input_data_bucket.host_url,
-                            provider=input_data_bucket.provider,
-                        ),
+                        oracle_bucket.to_url().rstrip("/")
+                        + "/"
+                        + compose_data_bucket_prefix(self.escrow_address, self.chain_id),
                         cvat_webhook_id=cvat_webhook.id,
                     )
                     created_projects.append(project_id)

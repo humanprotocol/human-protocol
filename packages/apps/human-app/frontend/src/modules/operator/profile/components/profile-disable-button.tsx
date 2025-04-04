@@ -23,7 +23,7 @@ export function ProfileDisableButton() {
   const {
     mutate: disableOperatorMutation,
     isError: isDisableOperatorError,
-    isPaused: isDisableOperatorPending,
+    isPending: isDisableOperatorPending,
   } = useDisableWeb3Operator();
 
   const disableOperator = async (signaturePayload: SignatureData) => {

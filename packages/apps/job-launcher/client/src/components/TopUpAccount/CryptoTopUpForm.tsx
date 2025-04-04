@@ -89,6 +89,8 @@ export const CryptoTopUpForm = () => {
       await publicClient?.waitForTransactionReceipt({
         hash: transactionHash,
         confirmations: Number(import.meta.env.VITE_APP_MIN_CONFIRMATIONS) ?? 1,
+        retryCount: 10,
+        retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
       });
 
       // create crypto payment record

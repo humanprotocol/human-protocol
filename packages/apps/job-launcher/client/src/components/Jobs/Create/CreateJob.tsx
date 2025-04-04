@@ -6,6 +6,7 @@ import { NetworkSelect } from '../../../components/NetworkSelect';
 import { IS_MAINNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { JobType, PayMethod } from '../../../types';
+import { AudinoJobRequestForm } from './AudinoJobRequestForm';
 import { CvatJobRequestForm } from './CvatJobRequestForm';
 import { FortuneJobRequestForm } from './FortuneJobRequestForm';
 import { HCaptchaJobRequestForm } from './HCaptchaJobRequestForm';
@@ -55,35 +56,37 @@ export const CreateJob = () => {
             }}
             value={jobRequest.jobType}
             onChange={(e) =>
-              updateJobRequest?.({
+              updateJobRequest({
                 ...jobRequest,
                 jobType: e.target.value as JobType,
               })
             }
           >
             {!IS_MAINNET && (
-              <MenuItem value={JobType.Fortune}>Fortune</MenuItem>
+              <MenuItem value={JobType.FORTUNE}>Fortune</MenuItem>
             )}
             <MenuItem value={JobType.CVAT}>CVAT</MenuItem>
             {/* {!IS_MAINNET && (
               <MenuItem value={JobType.HCAPTCHA}>hCaptcha</MenuItem>
             )} */}
+            {!IS_MAINNET && <MenuItem value={JobType.AUDINO}>Audino</MenuItem>}
           </Select>
         </FormControl>
         <NetworkSelect
           label="Choose Network"
           value={jobRequest.chainId}
           onChange={(e) =>
-            updateJobRequest?.({
+            updateJobRequest({
               ...jobRequest,
               chainId: e.target.value as ChainId,
             })
           }
         />
       </Box>
-      {jobRequest.jobType === JobType.Fortune && <FortuneJobRequestForm />}
+      {jobRequest.jobType === JobType.FORTUNE && <FortuneJobRequestForm />}
       {jobRequest.jobType === JobType.CVAT && <CvatJobRequestForm />}
       {jobRequest.jobType === JobType.HCAPTCHA && <HCaptchaJobRequestForm />}
+      {jobRequest.jobType === JobType.AUDINO && <AudinoJobRequestForm />}
     </Box>
   );
 };

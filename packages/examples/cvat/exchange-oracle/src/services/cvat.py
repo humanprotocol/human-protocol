@@ -439,32 +439,26 @@ def create_escrow_creation(
     return escrow_creation_id
 
 
-def get_escrow_creation_by_id(
-    session: Session,
-    escrow_creation_id: str,
-    *,
-    for_update: bool | ForUpdateParams = False,
-) -> EscrowCreation | None:
-    return (
-        _maybe_for_update(session.query(EscrowCreation), enable=for_update)
-        .where(EscrowCreation.id == escrow_creation_id, EscrowCreation.finished_at.is_(None))
-        .first()
-    )
-
-
 def get_escrow_creation_by_escrow_address(
     session: Session,
     escrow_address: str,
     chain_id: int,
     *,
+    active: bool | None,
     for_update: bool | ForUpdateParams = False,
 ) -> EscrowCreation | None:
+    is_active_filter = []
+    if active is True:
+        is_active_filter = [EscrowCreation.finished_at.is_(None)]
+    elif active is False:
+        is_active_filter = [EscrowCreation.finished_at.is_not(None)]
+
     return (
         _maybe_for_update(session.query(EscrowCreation), enable=for_update)
         .where(
             EscrowCreation.escrow_address == escrow_address,
             EscrowCreation.chain_id == chain_id,
-            EscrowCreation.finished_at.is_(None),
+            *is_active_filter,
         )
         .first()
     )

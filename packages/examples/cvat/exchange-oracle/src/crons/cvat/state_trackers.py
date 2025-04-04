@@ -8,7 +8,7 @@ import src.services.cvat as cvat_service
 import src.services.webhook as oracle_db_service
 from src import db
 from src.core.config import CronConfig
-from src.core.oracle_events import ExchangeOracleEvent_JobCreationFailed
+from src.core.oracle_events import ExchangeOracleEvent_EscrowFailed
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses
 from src.crons._cron_job import cron_job
 from src.db import SessionLocal
@@ -159,7 +159,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
     for upload in uploads:
         status, reason = cvat_api.get_task_upload_status(upload.task_id)
         project = upload.task.project
-        if not status or status == cvat_api.UploadStatus.FAILED:
+        if not status or status == cvat_api.RequestStatus.FAILED:
             # TODO: add retries if 5xx
             failed.append(upload)
 
@@ -168,9 +168,9 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                 escrow_address=project.escrow_address,
                 chain_id=project.chain_id,
                 type=OracleWebhookTypes.job_launcher,
-                event=ExchangeOracleEvent_JobCreationFailed(reason=reason),
+                event=ExchangeOracleEvent_EscrowFailed(reason=reason),
             )
-        elif status == cvat_api.UploadStatus.FINISHED:
+        elif status == cvat_api.RequestStatus.FINISHED:
             try:
                 cvat_jobs = cvat_api.fetch_task_jobs(upload.task_id)
 
@@ -200,7 +200,7 @@ def track_task_creation(logger: logging.Logger, session: Session) -> None:
                     escrow_address=project.escrow_address,
                     chain_id=project.chain_id,
                     type=OracleWebhookTypes.job_launcher,
-                    event=ExchangeOracleEvent_JobCreationFailed(reason=str(e)),
+                    event=ExchangeOracleEvent_EscrowFailed(reason=str(e)),
                 )
 
     if completed:

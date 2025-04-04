@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { SignupOperatorCommand } from './model/operator-registration.model';
+
 import { ReputationOracleGateway } from '../../integrations/reputation-oracle/reputation-oracle.gateway';
+
 import { SigninOperatorCommand } from './model/operator-signin.model';
+import { SignupOperatorCommand } from './model/operator-registration.model';
+import { DisableOperatorCommand } from './model/disable-operator.model';
+import { EnableOperatorCommand } from './model/enable-operator.model';
 
 @Injectable()
 export class OperatorService {
@@ -13,5 +17,13 @@ export class OperatorService {
 
   signinOperator(command: SigninOperatorCommand) {
     return this.gateway.sendOperatorSignin(command);
+  }
+
+  async disableOperator(command: DisableOperatorCommand): Promise<void> {
+    await this.gateway.sendDisableOperator(command);
+  }
+
+  async enableOperator(command: EnableOperatorCommand): Promise<void> {
+    await this.gateway.sendEnableOperator(command);
   }
 }
