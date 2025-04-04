@@ -407,6 +407,7 @@ class _AudinoTaskValidator:
         merged_annotations: io.IOBase,
         meta: AnnotationMeta,
         gt_stats: GtStats | None = None,
+        job_annotations: dict[int, list[dict[str, Any]]],
     ) -> None:
         self.escrow_address = escrow_address
         self.chain_id = chain_id
@@ -414,7 +415,7 @@ class _AudinoTaskValidator:
 
         self._gt_stats: GtStats = gt_stats or {}
         self._merged_annotations: io.IOBase = merged_annotations
-        self._job_annotations: dict[int, list[dict[str, Any]]] | None = None
+        self._job_annotations = job_annotations
 
         self._updated_merged_dataset_archive: io.IOBase | None = None
         self._job_results: _JobResults | None = None
@@ -437,10 +438,6 @@ class _AudinoTaskValidator:
         if self._merged_annotations is None:
             return {}
 
-        job_annotations: dict[int, list[dict[str, Any]]] = {
-            job.job_id: [] for job in self._meta.jobs
-        }
-
         with zipfile.ZipFile(io.BytesIO(self._merged_annotations.getvalue())) as archive:
             if "annotations.json" not in archive.namelist():
                 return {}
@@ -451,11 +448,9 @@ class _AudinoTaskValidator:
             for annotation in annotations:
                 job_id = annotation.get("job_id")
                 if job_id is not None:
-                    if job_id not in job_annotations:
-                        job_annotations[job_id] = []
-                    job_annotations[job_id].append(annotation)
-
-        return dict(sorted(job_annotations.items()))
+                    if job_id not in self._job_annotations:
+                        self._job_annotations[job_id] = []
+                    self._job_annotations[job_id].append(annotation)
 
     def _parse_audino_gt_annotations(self, gt_dataset_data: bytes, path: str):
         _, ext = os.path.splitext(path)
@@ -504,7 +499,8 @@ class _AudinoTaskValidator:
             min_similarity_threshold=min_quality,
         )
 
-        self._job_annotations = self._parse_merged_annotations()
+        self._parse_merged_annotations()
+        self._job_annotations = dict(sorted(self._job_annotations.items()))
 
         self._base_job_id = min(self._job_annotations.keys(), default=0)
         offset = 0.0
@@ -686,6 +682,9 @@ class AudinoDatasetComparator:
 
         start_time = offset
         end_time = start_time + job_duration
+
+        if job_duration <= 0.0:
+            return 1
 
         # Filter gt_dataset to include only those within the job's time bounds
         gt_samples_filtered = [
@@ -1089,11 +1088,21 @@ def process_intermediate_results(  # noqa: PLR0912
     }
 
     if manifest.annotation.type == TaskTypes.audio_transcription:
-        validator_type = _AudinoTaskValidator
-    else:
-        validator_type = _TaskValidator
+        job_annotations = {}
+        for job in task.jobs:
+            job_annotations[job.cvat_id] = []
 
-    validator = validator_type(
+        validator = _AudinoTaskValidator(
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            manifest=manifest,
+            merged_annotations=merged_annotations,
+            meta=unchecked_jobs_meta,
+            gt_stats=gt_stats,
+            job_annotations=job_annotations,
+        )
+    else:
+        validator = _TaskValidator(
         escrow_address=escrow_address,
         chain_id=chain_id,
         manifest=manifest,
