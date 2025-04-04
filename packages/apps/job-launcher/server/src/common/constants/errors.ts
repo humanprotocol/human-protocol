@@ -13,6 +13,7 @@ export enum ErrorJob {
   JobParamsValidationFailed = 'Job parameters validation failed',
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
+  InvalidStatusCompletion = 'Job has an invalid status for completion',
   NotLaunched = 'Not launched',
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
