@@ -88,6 +88,11 @@ import {
   SignNDAData,
   SignNDAResponse,
 } from '../../modules/nda/model/nda.model';
+import {
+  ReportAbuseCommand,
+  ReportAbuseData,
+  ReportedAbuseResponse,
+} from '../../modules/abuse/model/abuse.model';
 
 @Injectable()
 export class ReputationOracleGateway {
@@ -394,5 +399,24 @@ export class ReputationOracleGateway {
     return this.handleRequestToReputationOracle<RegistrationInExchangeOraclesResponse>(
       options,
     );
+  }
+
+  async sendAbuseReport(command: ReportAbuseCommand) {
+    const data = this.mapper.map(command, ReportAbuseCommand, ReportAbuseData);
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.REPORT_ABUSE,
+      data,
+      command.token,
+    );
+    return this.handleRequestToReputationOracle<void>(options);
+  }
+
+  async getAbuseReports(token: string): Promise<ReportedAbuseResponse> {
+    const options = this.getEndpointOptions(
+      ReputationOracleEndpoints.GET_ABUSE_REPORTS,
+      undefined,
+      token,
+    );
+    return this.handleRequestToReputationOracle<ReportedAbuseResponse>(options);
   }
 }
