@@ -236,26 +236,14 @@ export class PayoutService {
       throw new Error('Not all required solutions have been sent');
     }
 
-    const jobLauncherAddress =
-      await escrowClient.getJobLauncherAddress(escrowAddress);
-
-    const encryptedResults = await this.pgpEncryptionService.encrypt(
+    return this.uploadJobResults(
       JSON.stringify(intermediateResults),
       chainId,
-      [jobLauncherAddress],
+      escrowAddress,
+      {
+        extension: 'json',
+      },
     );
-    const hash = crypto
-      .createHash('sha1')
-      .update(encryptedResults)
-      .digest('hex');
-
-    const url = await this.storageService.uploadData(
-      encryptedResults,
-      `${hash}.json`,
-      ContentType.PLAIN_TEXT,
-    );
-
-    return { url, hash };
   }
 
   /**
@@ -281,26 +269,39 @@ export class PayoutService {
     );
     fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
 
-    const jobLauncherAddress =
-      await escrowClient.getJobLauncherAddress(escrowAddress);
+    return this.uploadJobResults(fileContent, chainId, escrowAddress, {
+      prefix: 's3',
+      extension: 'zip',
+    });
+  }
 
-    const encryptedResults = await this.pgpEncryptionService.encrypt(
-      fileContent,
-      chainId,
-      [jobLauncherAddress],
+  /**
+   * Saves final results of a Audino-type job, using intermediate results for annotations.
+   * Retrieves intermediate results, copies files to storage, and returns the final results URL and hash.
+   * @param chainId The blockchain chain ID.
+   * @param escrowAddress The escrow contract address.
+   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
+   */
+  public async saveResultsAudino(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<SaveResultDto> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const intermediateResultsUrl =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+    let fileContent = await httpUtils.downloadFile(
+      `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
     );
-    const hash = crypto
-      .createHash('sha1')
-      .update(encryptedResults)
-      .digest('hex');
+    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
 
-    const url = await this.storageService.uploadData(
-      encryptedResults,
-      `s3${hash}.zip`,
-      ContentType.BINARY,
-    );
-
-    return { url, hash };
+    return this.uploadJobResults(fileContent, chainId, escrowAddress, {
+      prefix: 's3',
+      extension: 'zip',
+    });
   }
 
   /**
@@ -466,33 +467,27 @@ export class PayoutService {
   }
 
   /**
-   * Saves final results of a Audino-type job, using intermediate results for annotations.
-   * Retrieves intermediate results, copies files to storage, and returns the final results URL and hash.
-   * @param chainId The blockchain chain ID.
-   * @param escrowAddress The escrow contract address.
-   * @returns {Promise<SaveResultDto>} The URL and hash for the saved results.
+   * Encrypts results w/ JL and RepO PGP
+   * and uploads them to RepO storage.
    */
-  public async saveResultsAudino(
+  public async uploadJobResults(
+    resultsData: string | Buffer,
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<SaveResultDto> {
+    fileNameOptions: {
+      prefix?: string;
+      extension: string;
+    },
+  ): Promise<{ url: string; hash: string }> {
     const signer = this.web3Service.getSigner(chainId);
 
     const escrowClient = await EscrowClient.build(signer);
-
-    const intermediateResultsUrl =
-      await escrowClient.getIntermediateResultsUrl(escrowAddress);
-
-    let fileContent = await httpUtils.downloadFile(
-      `${intermediateResultsUrl}/${AUDINO_RESULTS_ANNOTATIONS_FILENAME}`,
-    );
-    fileContent = await this.pgpEncryptionService.maybeDecryptFile(fileContent);
 
     const jobLauncherAddress =
       await escrowClient.getJobLauncherAddress(escrowAddress);
 
     const encryptedResults = await this.pgpEncryptionService.encrypt(
-      fileContent,
+      resultsData,
       chainId,
       [jobLauncherAddress],
     );
@@ -501,10 +496,13 @@ export class PayoutService {
       .update(encryptedResults)
       .digest('hex');
 
+    const prefix = fileNameOptions.prefix || '';
+    const fileName = `${prefix}${hash}.${fileNameOptions.extension}`;
+
     const url = await this.storageService.uploadData(
       encryptedResults,
-      `s3${hash}.zip`,
-      ContentType.BINARY,
+      fileName,
+      ContentType.PLAIN_TEXT,
     );
 
     return { url, hash };
