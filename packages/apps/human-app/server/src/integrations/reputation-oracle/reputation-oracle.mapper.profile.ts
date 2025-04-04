@@ -58,6 +58,10 @@ import {
   SigninOperatorData,
 } from '../../modules/user-operator/model/operator-signin.model';
 import { SignNDACommand, SignNDAData } from '../../modules/nda/model/nda.model';
+import {
+  ReportAbuseCommand,
+  ReportAbuseData,
+} from '../../modules/abuse/model/abuse.model';
 
 @Injectable()
 export class ReputationOracleProfile extends AutomapperProfile {
@@ -148,6 +152,15 @@ export class ReputationOracleProfile extends AutomapperProfile {
         mapper,
         SignNDACommand,
         SignNDAData,
+        namingConventions({
+          source: new CamelCaseNamingConvention(),
+          destination: new SnakeCaseNamingConvention(),
+        }),
+      );
+      createMap(
+        mapper,
+        ReportAbuseCommand,
+        ReportAbuseData,
         namingConventions({
           source: new CamelCaseNamingConvention(),
           destination: new SnakeCaseNamingConvention(),

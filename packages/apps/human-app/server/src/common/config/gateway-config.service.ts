@@ -125,6 +125,16 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.REPORT_ABUSE]: {
+              endpoint: '/abuse/report',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
+            [ReputationOracleEndpoints.GET_ABUSE_REPORTS]: {
+              endpoint: '/abuse/reports',
+              method: HttpMethod.GET,
+              headers: this.JSON_HEADER,
+            },
           } as Record<ReputationOracleEndpoints, GatewayEndpointConfig>,
         },
         [ExternalApiName.HCAPTCHA_LABELING_STATS]: {
