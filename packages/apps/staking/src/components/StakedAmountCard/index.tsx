@@ -1,60 +1,78 @@
+import { FC, useState } from 'react';
+import { Box, Button, Typography } from '@mui/material';
+import { useAccount } from 'wagmi';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Box, Button, Paper, Typography } from '@mui/material';
-import React from 'react';
+
 import { colorPalette } from '../../assets/styles/color-palette';
 import { useStakeContext } from '../../contexts/stake';
 import CustomTooltip from '../CustomTooltip';
+import CardWrapper from '../CardWrapper';
+import Amount from '../Amount';
+import StakeModal from '../modals/StakeModal';
+import UnstakeModal from '../modals/UnstakeModal';
 
-type Props = {
-  onStakeOpen: () => void;
-  onUnstakeOpen: () => void;
-};
-
-const StakedAmountCard: React.FC<Props> = ({ onStakeOpen, onUnstakeOpen }) => {
+const StakedAmountCard: FC = () => {
+  const [stakeModalOpen, setStakeModalOpen] = useState(false);
+  const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
   const { stakedAmount } = useStakeContext();
+  const { isConnected } = useAccount();
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        p: 3,
-        height: '200px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        borderRadius: '20px',
-        boxShadow: 'none',
-        position: 'relative',
-      }}
-    >
-      <Box sx={{ position: 'absolute', top: 30, right: 30 }}>
-        <CustomTooltip title="Tokens you have staked" arrow>
-          <HelpOutlineIcon
-            fontSize="small"
-            sx={{ color: colorPalette.sky.main }}
-          />
-        </CustomTooltip>
-      </Box>
-      <Box display="flex" alignItems="center" gap={1} mb={1}>
-        <Typography variant="h6" color="primary">
-          Staked Amount
-        </Typography>
-      </Box>
+    <>
+      <CardWrapper size="lg">
+        <Box display="flex" gap={1} flex={1}>
+          <CustomTooltip title="Tokens you have staked" arrow>
+            <HelpOutlineIcon
+              fontSize="medium"
+              sx={{ color: colorPalette.sky.main }}
+            />
+          </CustomTooltip>
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+          >
+            <Box display="flex" flexDirection="column" alignItems="flex-start">
+              <Typography variant="body1" color="primary">
+                Staked Amount <strong>HMT</strong>
+              </Typography>
+              <Amount
+                size="lg"
+                amount={stakedAmount}
+                isConnected={isConnected}
+              />
+            </Box>
+            <Box display="flex" gap={1} mb={1}>
+              <Button
+                size="medium"
+                variant="contained"
+                disabled={!isConnected}
+                onClick={() => isConnected && setStakeModalOpen(true)}
+              >
+                Stake HMT
+              </Button>
+              <Button
+                size="medium"
+                variant="outlined"
+                disabled={!isConnected}
+                onClick={() => isConnected && setUnstakeModalOpen(true)}
+              >
+                Unstake
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </CardWrapper>
 
-      <Typography variant="h4" fontWeight="bold" fontSize={30}>
-        {stakedAmount} HMT
-      </Typography>
-
-      <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-        <Button variant="contained" onClick={onStakeOpen}>
-          Stake
-        </Button>
-        <Button variant="outlined" onClick={onUnstakeOpen}>
-          Unstake
-        </Button>
-      </Box>
-    </Paper>
+      <StakeModal
+        open={stakeModalOpen}
+        onClose={() => setStakeModalOpen(false)}
+      />
+      <UnstakeModal
+        open={unstakeModalOpen}
+        onClose={() => setUnstakeModalOpen(false)}
+      />
+    </>
   );
 };
 

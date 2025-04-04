@@ -10,29 +10,27 @@ import { parseUnits } from 'ethers';
 
 import BaseModal from './BaseModal';
 import { ModalError, ModalLoading, ModalSuccess } from '../ModalState';
-import { useStakeContext } from '../../contexts/stake';
 import {
-  useModalRequestStatus,
   ModalRequestStatus,
+  useModalRequestStatus,
 } from '../../hooks/useModalRequestStatus';
+import { useStakeContext } from '../../contexts/stake';
 
 type Props = {
   open: boolean;
   onClose: () => void;
 };
 
-const StakeModal: FC<Props> = ({ open, onClose }) => {
+const WithdrawModal: FC<Props> = ({ open, onClose }) => {
   const [amount, setAmount] = useState('');
   const [amountError, setAmountError] = useState('');
-  const { handleStake, tokenBalance } = useStakeContext();
+  const { withdrawableAmount, handleWithdraw } = useStakeContext();
   const { changeStatus, isIdle, isLoading, isSuccess, isError } =
     useModalRequestStatus();
 
-  const isStakeDisabled = !!amountError || Number(amount) <= 0 || isLoading;
+  const isWithdrawalDisabled = !!amountError || !amount || isLoading;
 
   const handleClose = () => {
-    if (isLoading) return;
-
     setAmount('');
     setAmountError('');
     changeStatus(ModalRequestStatus.Idle);
@@ -47,15 +45,15 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
       handleClose();
       return;
     } else {
-      if (isStakeDisabled) return;
+      if (isWithdrawalDisabled) return;
 
       changeStatus(ModalRequestStatus.Loading);
       try {
-        await handleStake(amount);
+        await handleWithdraw();
         changeStatus(ModalRequestStatus.Success);
         return;
       } catch (error) {
-        console.error('Error during staking:', error);
+        console.error('Error during withdrawal:', error);
         changeStatus(ModalRequestStatus.Error);
         return;
       }
@@ -67,39 +65,37 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
     setAmount(value);
 
     const valueInWei = parseUnits(value || '0', 'ether');
-    const balanceInWei = parseUnits(tokenBalance.toString(), 'ether');
+    const withdrawableAmountInWei = parseUnits(
+      withdrawableAmount.toString(),
+      'ether'
+    );
 
-    if (valueInWei <= balanceInWei) {
+    if (valueInWei <= withdrawableAmountInWei) {
       setAmountError('');
     } else {
       setAmountError('Amount exceeds available balance');
     }
   };
 
-  const handleMaxClick = () => setAmount(tokenBalance.toString());
+  const handleMaxClick = () => setAmount(withdrawableAmount.toString());
 
   const renderIdleState = () => {
     return (
       <>
         <Typography variant="subtitle2" color="primary" mb={2} py={1}>
-          Available amount: {tokenBalance} HMT
+          Available amount: {withdrawableAmount} HMT
         </Typography>
 
         <TextField
           autoFocus
           fullWidth
-          label="Amount to stake"
+          label="Amount to withdraw"
           type="number"
           value={amount}
           onChange={handleInputChange}
           error={!!amountError}
           helperText={amountError || ' '}
-          inputProps={{ max: tokenBalance, min: 0 }}
-          onKeyDown={(e) => {
-            if (e.key === '-' || e.key === 'e') {
-              e.preventDefault();
-            }
-          }}
+          inputProps={{ max: withdrawableAmount, min: 0 }}
           FormHelperTextProps={{
             sx: {
               marginTop: 0,
@@ -140,7 +136,7 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
           py={1}
         >
           <Typography variant="subtitle2" color="primary">
-            You have successfully staked
+            You have successfully withdrawn
           </Typography>
           <Typography variant="h6" color="primary">
             {amount} HMT
@@ -162,7 +158,7 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
       }}
     >
       <Typography component="h2" variant="h1" mb={2} py={1}>
-        Add Stake
+        Withdraw
       </Typography>
 
       {isIdle && renderIdleState()}
@@ -176,13 +172,13 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
         fullWidth
         sx={{ mt: isIdle ? 2 : 4, width: '185px' }}
         onClick={handleModalAction}
-        disabled={isStakeDisabled}
+        disabled={isWithdrawalDisabled}
       >
         {(isLoading || isSuccess) && 'Close'}
-        {(isIdle || isError) && 'Add Stake'}
+        {(isIdle || isError) && 'Withdraw'}
       </Button>
     </BaseModal>
   );
 };
 
-export default StakeModal;
+export default WithdrawModal;

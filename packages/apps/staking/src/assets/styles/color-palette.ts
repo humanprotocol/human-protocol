@@ -29,7 +29,7 @@ export const colorPalette = {
     light: '#FFD54F',
   },
   error: {
-    main: '#FFB300',
+    main: '#fa2a75',
     light: '#F20D5F',
   },
   fog: {
