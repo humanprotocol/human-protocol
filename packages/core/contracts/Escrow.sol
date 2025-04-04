@@ -8,13 +8,18 @@ import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 
 import './interfaces/IEscrow.sol';
 
+/**
+ * @title Escrow Contract
+ * @dev This contract manages the lifecycle of an escrow, including funding,
+ * setup, payouts, and completion. It supports trusted handlers and oracles
+ * for managing the escrow process.
+ */
 contract Escrow is IEscrow, ReentrancyGuard {
     bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
         bytes4(keccak256('balanceOf(address)'));
 
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
-    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event TrustedHandlerAdded(address _handler);
@@ -74,6 +79,14 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     uint256 public remainingFunds;
 
+    /**
+     * @dev Constructor to initialize the escrow contract.
+     * @param _token Address of the token used in the escrow.
+     * @param _launcher Address of the launcher (creator) of the escrow.
+     * @param _canceler Address of the canceler who can cancel the escrow.
+     * @param _duration Duration of the escrow in seconds.
+     * @param _handlers Array of trusted handler addresses.
+     */
     constructor(
         address _token,
         address _launcher,
@@ -95,6 +108,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
         _addTrustedHandlers(_handlers);
     }
 
+    /**
+     * @dev Returns the balance of the escrow contract for the main token.
+     */
     function getBalance() public view returns (uint256) {
         (bool success, bytes memory returnData) = token.staticcall(
             abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
@@ -102,6 +118,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return success ? abi.decode(returnData, (uint256)) : 0;
     }
 
+    /**
+     * @dev Returns the balance of the escrow contract for a specific token.
+     * @param _token Address of the token to check the balance for.
+     */
     function getTokenBalance(address _token) public view returns (uint256) {
         (bool success, bytes memory returnData) = _token.staticcall(
             abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
@@ -109,12 +129,20 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return success ? abi.decode(returnData, (uint256)) : 0;
     }
 
+    /**
+     * @dev Adds trusted handlers to the contract.
+     * @param _handlers Array of addresses to be added as trusted handlers.
+     */
     function addTrustedHandlers(
         address[] memory _handlers
     ) public override trusted {
         _addTrustedHandlers(_handlers);
     }
 
+    /**
+     * @dev Internal function to add trusted handlers.
+     * @param _handlers Array of addresses to be added as trusted handlers.
+     */
     function _addTrustedHandlers(address[] memory _handlers) internal {
         for (uint256 i = 0; i < _handlers.length; i++) {
             require(_handlers[i] != address(0), ERROR_ZERO_ADDRESS);
@@ -123,9 +151,17 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
     }
 
-    // The escrower puts the Token in the contract without an agentless
-    // and assigsn a reputation oracle to payout the bounty of size of the
-    // amount specified
+    /**
+     * @dev Sets up the escrow with oracles and manifest details.
+     * @param _reputationOracle Address of the reputation oracle.
+     * @param _recordingOracle Address of the recording oracle.
+     * @param _exchangeOracle Address of the exchange oracle.
+     * @param _reputationOracleFeePercentage Fee percentage for the reputation oracle.
+     * @param _recordingOracleFeePercentage Fee percentage for the recording oracle.
+     * @param _exchangeOracleFeePercentage Fee percentage for the exchange oracle.
+     * @param _url URL of the manifest.
+     * @param _hash Hash of the manifest.
+     */
     function setup(
         address _reputationOracle,
         address _recordingOracle,
@@ -183,6 +219,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit Fund(remainingFunds);
     }
 
+    /**
+     * @dev Cancels the escrow and transfers remaining funds to the canceler.
+     * @return bool indicating success of the cancellation.
+     */
     function cancel()
         public
         override
@@ -199,6 +239,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
+    /**
+     * @dev Withdraws excess funds from the escrow for a specific token.
+     * @param _token Address of the token to withdraw.
+     * @return bool indicating success of the withdrawal.
+     */
     function withdraw(
         address _token
     ) public override trusted nonReentrant returns (bool) {
@@ -217,6 +262,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
+    /**
+     * @dev Completes the escrow, transferring remaining funds to the launcher.
+     */
     function complete() external override notExpired trustedOrReputationOracle {
         require(
             status == EscrowStatuses.Paid || status == EscrowStatuses.Partial,
@@ -234,6 +282,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit Completed();
     }
 
+    /**
+     * @dev Stores intermediate results during the escrow process.
+     * @param _url URL of the intermediate results.
+     * @param _hash Hash of the intermediate results.
+     */
     function storeResults(
         string memory _url,
         string memory _hash
@@ -252,22 +305,13 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     /**
-     * @dev Performs bulk payout to multiple workers
-     * Escrow needs to be completed / cancelled, so that it can be paid out.
-     * Every recipient is paid with the amount after reputation and recording oracle fees taken out.
-     * If the amount is less than the fee, the recipient is not paid.
-     * If the fee is zero, reputation, and recording oracle are not paid.
-     * Payout will fail if any of the transaction fails.
-     * If the escrow is fully paid out, meaning that the balance of the escrow is 0, it'll set as Paid.
-     * If the escrow is partially paid out, meaning that the escrow still has remaining balance, it'll set as Partial.
-     * This contract is only callable if the contract is not broke, not launched, not paid, not expired, by trusted parties.
-     *
-     * @param _recipients Array of recipients
+     * @dev Performs bulk payout to multiple recipients with oracle fees deducted.
+     * @param _recipients Array of recipient addresses.
      * @param _amounts Array of amounts to be paid to each recipient.
-     * @param _url URL storing results as transaction details
-     * @param _hash Hash of the results
-     * @param _txId Transaction ID
-     * @param forceComplete Boolean parameter indicating if remaining balance should be transferred to the escrow creator
+     * @param _url URL storing results as transaction details.
+     * @param _hash Hash of the results.
+     * @param _txId Transaction ID.
+     * @param forceComplete Boolean indicating if remaining balance should be transferred to the launcher.
      */
     function bulkPayOut(
         address[] memory _recipients,
@@ -296,65 +340,57 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status != EscrowStatuses.Cancelled,
             'Invalid status'
         );
-
-        uint256 aggregatedBulkAmount = 0;
-        uint256 cachedRemainingFunds = remainingFunds;
-
-        for (uint256 i = 0; i < _amounts.length; i++) {
-            uint256 amount = _amounts[i];
-            require(amount > 0, 'Amount should be greater than zero');
-            aggregatedBulkAmount += amount;
-        }
-        require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
         require(
-            aggregatedBulkAmount <= cachedRemainingFunds,
-            'Not enough balance'
+            bytes(_url).length != 0 && bytes(_hash).length != 0,
+            'URL or hash is empty'
         );
 
-        cachedRemainingFunds -= aggregatedBulkAmount;
+        uint256 totalBulkAmount = 0;
+        uint256 totalReputationOracleFee = 0;
+        uint256 totalRecordingOracleFee = 0;
+        uint256 totalExchangeOracleFee = 0;
 
-        require(bytes(_url).length != 0, "URL can't be empty");
-        require(bytes(_hash).length != 0, "Hash can't be empty");
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            uint256 amount = _amounts[i];
+            require(amount > 0, 'Amount should be greater than zero');
+            uint256 reputationOracleFee = (reputationOracleFeePercentage *
+                amount) / 100;
+            totalReputationOracleFee += reputationOracleFee;
+            uint256 recordingOracleFee = (recordingOracleFeePercentage *
+                amount) / 100;
+            totalRecordingOracleFee += recordingOracleFee;
+            uint256 exchangeOracleFee = (exchangeOracleFeePercentage * amount) /
+                100;
+            totalExchangeOracleFee += exchangeOracleFee;
+            totalBulkAmount += amount;
+            _safeTransfer(
+                token,
+                _recipients[i],
+                amount -
+                    reputationOracleFee -
+                    recordingOracleFee -
+                    exchangeOracleFee
+            );
+        }
+
+        require(totalBulkAmount <= remainingFunds, 'Not enough balance');
+
+        // Transfer oracle fees
+        if (reputationOracleFeePercentage > 0) {
+            _safeTransfer(token, reputationOracle, totalReputationOracleFee);
+        }
+        if (recordingOracleFeePercentage > 0) {
+            _safeTransfer(token, recordingOracle, totalRecordingOracleFee);
+        }
+        if (exchangeOracleFeePercentage > 0) {
+            _safeTransfer(token, exchangeOracle, totalExchangeOracleFee);
+        }
+        remainingFunds -= totalBulkAmount;
 
         finalResultsUrl = _url;
         finalResultsHash = _hash;
 
-        uint256 totalFeePercentage = reputationOracleFeePercentage +
-            recordingOracleFeePercentage +
-            exchangeOracleFeePercentage;
-
-        for (uint256 i = 0; i < _recipients.length; i++) {
-            uint256 amount = _amounts[i];
-            uint256 amountFee = (totalFeePercentage * amount) / 100;
-            _safeTransfer(token, _recipients[i], amount - amountFee);
-        }
-
-        // Transfer oracle fees
-        if (reputationOracleFeePercentage > 0) {
-            _safeTransfer(
-                token,
-                reputationOracle,
-                (reputationOracleFeePercentage * aggregatedBulkAmount) / 100
-            );
-        }
-        if (recordingOracleFeePercentage > 0) {
-            _safeTransfer(
-                token,
-                recordingOracle,
-                (recordingOracleFeePercentage * aggregatedBulkAmount) / 100
-            );
-        }
-        if (exchangeOracleFeePercentage > 0) {
-            _safeTransfer(
-                token,
-                exchangeOracle,
-                (exchangeOracleFeePercentage * aggregatedBulkAmount) / 100
-            );
-        }
-
-        remainingFunds = cachedRemainingFunds;
-
-        if (cachedRemainingFunds == 0 || forceComplete) {
+        if (remainingFunds == 0 || forceComplete) {
             emit BulkTransferV2(
                 _txId,
                 _recipients,
@@ -377,13 +413,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     /**
      * @dev Overloaded function to perform bulk payout with default forceComplete set to false.
-     * Calls the main bulkPayout function with forceComplete as false.
-     *
-     * @param _recipients Array of recipients
+     * @param _recipients Array of recipient addresses.
      * @param _amounts Array of amounts to be paid to each recipient.
-     * @param _url URL storing results as transaction details
-     * @param _hash Hash of the results
-     * @param _txId Transaction ID
+     * @param _url URL storing results as transaction details.
+     * @param _hash Hash of the results.
+     * @param _txId Transaction ID.
      */
     function bulkPayOut(
         address[] memory _recipients,
@@ -395,6 +429,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         bulkPayOut(_recipients, _amounts, _url, _hash, _txId, false);
     }
 
+    /**
+     * @dev Internal function to safely transfer tokens.
+     * @param _token Address of the token to transfer.
+     * @param to Address of the recipient.
+     * @param value Amount to transfer.
+     */
     function _safeTransfer(address _token, address to, uint256 value) internal {
         SafeERC20.safeTransfer(IERC20(_token), to, value);
     }
