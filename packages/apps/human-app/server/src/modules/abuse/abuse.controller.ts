@@ -8,7 +8,12 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Authorization } from '../../common/config/params-decorators';
 import { AbuseService } from './abuse.service';
 import {
@@ -17,6 +22,7 @@ import {
   ReportAbuseDto,
 } from './model/abuse.model';
 
+@ApiBearerAuth()
 @ApiTags('Abuse')
 @Controller('/abuse')
 export class AbuseController {
@@ -29,7 +35,10 @@ export class AbuseController {
   @ApiOperation({
     summary: 'Report an identified abuse',
   })
-  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Abuse report successfully submitted',
+  })
   @UsePipes(new ValidationPipe())
   public async reportAbuse(
     @Body() AbuseDto: ReportAbuseDto,
@@ -45,9 +54,13 @@ export class AbuseController {
   }
 
   @Get('/reports')
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retrieve all abuse entities created by the authenticated user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of abuse reports',
+    type: ReportedAbuseResponse,
   })
   public async getUserAbuseReports(
     @Authorization() token: string,

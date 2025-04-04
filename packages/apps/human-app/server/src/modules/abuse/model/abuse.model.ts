@@ -1,17 +1,17 @@
 import { AutoMap } from '@automapper/classes';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsEthereumAddress, IsNumber } from 'class-validator';
 
 export class ReportAbuseDto {
   @AutoMap()
-  @IsString()
+  @IsEthereumAddress()
   @ApiProperty()
   escrow_address: string;
   @AutoMap()
   @IsNumber()
   @Type(() => Number)
-  @ApiPropertyOptional({ default: 80002 })
+  @ApiProperty()
   chain_id: number;
 }
 
