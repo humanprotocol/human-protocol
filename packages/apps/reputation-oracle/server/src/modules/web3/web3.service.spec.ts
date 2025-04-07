@@ -5,9 +5,7 @@ import { faker } from '@faker-js/faker';
 import { WalletWithProvider, Web3Service } from './web3.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 
-import { generateTestnetChainId } from '../../../test/fixtures/web3';
-
-import { mockWeb3ConfigService } from './fixtures';
+import { generateTestnetChainId, mockWeb3ConfigService } from './fixtures';
 
 describe('Web3Service', () => {
   let web3Service: Web3Service;

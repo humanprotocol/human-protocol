@@ -6,12 +6,12 @@ import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import {
   generateContractAddress,
   generateEthWallet,
-  generateTestnetChainId,
 } from '../../../test/fixtures/web3';
 import {
   createExecutionContextMock,
   ExecutionContextMock,
 } from '../../../test/mock-creators/nest';
+import { generateTestnetChainId } from '../../modules/web3/fixtures';
 import { signMessage } from '../../utils/web3';
 
 import { AuthSignatureRole, SignatureAuthGuard } from './signature.auth';

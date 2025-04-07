@@ -53,7 +53,7 @@ export class PgpEncryptionService implements OnModuleInit {
   async encrypt(
     content: string | Buffer,
     chainId: ChainId,
-    oracleAddresses: string[],
+    oracleAddresses: string[] = [],
   ): Promise<string> {
     if (!this.pgpConfigService.encrypt) {
       return content.toString();
