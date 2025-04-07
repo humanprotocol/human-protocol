@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/inter": "^5.0.17",
     "@hcaptcha/react-hcaptcha": "^0.3.6",
-    "@hookform/resolvers": "^3.3.4",
+    "@hookform/resolvers": "^5.0.1",
     "@human-protocol/sdk": "*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^5.16.7",
