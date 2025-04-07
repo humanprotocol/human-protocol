@@ -31,6 +31,11 @@ const NavLink = styled(MuiLink)({
   fontWeight: 600,
   textDecoration: 'none',
   cursor: 'pointer',
+
+  '@media (min-width: 900px) and (max-width: 1200px)': {
+    padding: '6px 4px',
+    fontSize: '12px',
+  },
 });
 
 const DefaultHeader: FC = () => {
@@ -46,7 +51,7 @@ const DefaultHeader: FC = () => {
     <AppBar
       className="container"
       position="static"
-      sx={{ background: '#fff', boxShadow: 'none' }}
+      sx={{ bgcolor: '#fff', boxShadow: 'none' }}
     >
       <Toolbar
         sx={{
@@ -69,6 +74,7 @@ const DefaultHeader: FC = () => {
             variant="body1"
             ml={1.5}
             display={{ xs: 'none', sm: 'block' }}
+            sx={{ fontSize: { md: '14px', lg: '16px' } }}
           >
             Staking
           </Typography>
@@ -78,7 +84,13 @@ const DefaultHeader: FC = () => {
           paddingY={{ sm: 0, md: 2.5 }}
           height="100%"
           alignItems="center"
-          gap={2}
+          gap={{ md: 1, lg: 2 }}
+          sx={{
+            '& .MuiButton-root': {
+              px: { md: 1, lg: 1.5, xl: 2 },
+              fontSize: { md: '12px', lg: '14px' },
+            },
+          }}
         >
           <NavLink href={ROUTES.DASHBOARD}>Staking Overview</NavLink>
           <NavLink href={ROUTES.KVSTORE}>KV Store</NavLink>
