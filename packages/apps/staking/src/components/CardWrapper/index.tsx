@@ -13,8 +13,8 @@ const CardWrapper: FC<PropsWithChildren<Props>> = ({
     <Paper
       elevation={3}
       sx={{
-        py: 3,
-        px: 4,
+        py: { xs: 3, sm: 2, md: 2, lg: 3 },
+        px: { xs: 2, sm: 2, md: 2, lg: 4 },
         height: size === 'sm' ? '112px' : '248px',
         display: 'flex',
         flexDirection: 'column',
@@ -24,6 +24,7 @@ const CardWrapper: FC<PropsWithChildren<Props>> = ({
         boxShadow: 'none',
         position: 'relative',
         border: '1px solid #DADCE8',
+        width: '100%',
       }}
     >
       {children}

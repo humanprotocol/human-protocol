@@ -26,7 +26,7 @@ const Amount: FC<Props> = ({ amount, isConnected, size = 'sm' }) => {
     <Typography
       variant="h3"
       fontWeight={size === 'sm' ? 400 : 600}
-      fontSize={size === 'sm' ? 24 : 48}
+      fontSize={size === 'sm' ? 24 : { xs: 48, sm: 32, lg: 48 }}
     >
       {formatHmtAmount(amount)}
     </Typography>

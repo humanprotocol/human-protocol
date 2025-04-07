@@ -16,11 +16,7 @@ const Dashboard: FC = () => {
   return (
     <PageWrapper>
       <Box className="violet-header" flex={1}>
-        <Box
-          display="flex"
-          flexDirection="column"
-          sx={{ mx: isMobile ? 4 : 6 }}
-        >
+        <Box mx={{ xs: 4, md: 6, lg: 8 }} display="flex" flexDirection="column">
           <Box
             sx={{
               mt: 3,
@@ -54,11 +50,12 @@ const Dashboard: FC = () => {
             <Grid
               item
               xs={12}
-              sm={6}
+              sm={12}
               md={4}
               display="flex"
-              flexDirection="column"
+              flexDirection={{ xs: 'column', sm: 'row', md: 'column' }}
               gap={3}
+              mt={{ xs: 0, sm: 4, md: 0 }}
             >
               <LockedAmountCard />
               <WithdrawableAmountCard />

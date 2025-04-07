@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useAccount } from 'wagmi';
 
@@ -22,39 +22,22 @@ const NetworkStatus: React.FC = () => {
         <Typography variant="body1" color="primary" mb={1}>
           Network
         </Typography>
-        <Chip
-          avatar={
-            <Box>
-              <NetworkIcon chainId={chain?.id} />
-            </Box>
-          }
-          label={
-            <Typography
-              variant="h3"
-              sx={{
-                padding: 0,
-                fontWeight: 400,
-                lineHeight: 1.5,
-                color: 'primary.main',
-                marginLeft: 1,
-              }}
-            >
-              {chain?.name || 'Polygon'}
-            </Typography>
-          }
-          sx={{
-            bgcolor: 'background.default',
-            color: 'primary.contrastText',
-
-            '& .MuiChip-avatar': {
-              color: 'primary.main',
-              margin: 0,
-            },
-            '& .MuiChip-label': {
+        <Box display="flex" alignItems="center">
+          <NetworkIcon chainId={chain?.id} />
+          <Typography
+            variant="h3"
+            sx={{
               padding: 0,
-            },
-          }}
-        />
+              fontSize: { xs: 24, sm: 18, lg: 24 },
+              fontWeight: 400,
+              lineHeight: 1.5,
+              color: 'primary.main',
+              marginLeft: 1,
+            }}
+          >
+            {chain?.name || 'Polygon'}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
