@@ -85,12 +85,6 @@ const DefaultHeader: FC = () => {
           height="100%"
           alignItems="center"
           gap={{ md: 1, lg: 2 }}
-          sx={{
-            '& .MuiButton-root': {
-              px: { md: 1, lg: 1.5, xl: 2 },
-              fontSize: { md: '12px', lg: '14px' },
-            },
-          }}
         >
           <NavLink href={ROUTES.DASHBOARD}>Staking Overview</NavLink>
           <NavLink href={ROUTES.KVSTORE}>KV Store</NavLink>
@@ -104,7 +98,11 @@ const DefaultHeader: FC = () => {
             size="medium"
             variant="outlined"
             disabled={!isConnected}
-            sx={{ height: '100%' }}
+            sx={{
+              px: { md: 1, lg: 2 },
+              fontSize: { md: '12px', lg: '14px' },
+              height: '100%',
+            }}
             onClick={() => isConnected && setStakeModalOpen(true)}
           >
             Stake HMT

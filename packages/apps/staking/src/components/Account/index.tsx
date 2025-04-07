@@ -35,7 +35,7 @@ const Account: FC = () => {
           bgcolor: '#f6f7fe',
           borderRadius: '4px',
           height: isMobile ? '42px' : '100%',
-          paddingX: 1,
+          paddingX: { md: 0.5, lg: 1 },
           fontWeight: 600,
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
@@ -53,7 +53,12 @@ const Account: FC = () => {
         ) : (
           <AvatarIcon />
         )}
-        <Typography variant="body2" color="textPrimary" paddingX={1}>
+        <Typography
+          variant="body2"
+          color="textPrimary"
+          paddingX={1}
+          sx={{ fontSize: { md: '12px', lg: '14px' } }}
+        >
           {formattedAddress}
         </Typography>
         <ChevronIcon
@@ -94,7 +99,8 @@ const Account: FC = () => {
           onClick={() => disconnect()}
           sx={{
             color: 'sky.main',
-            padding: 1,
+            paddingY: 1,
+            paddingX: { md: 0.5, lg: 1 },
             width: '100%',
             gap: 1,
             '&:hover': {
