@@ -473,11 +473,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         _;
     }
 
-    modifier notPaid() {
-        require(status != EscrowStatuses.Paid, 'Escrow in Paid status state');
-        _;
-    }
-
     modifier notLaunched() {
         require(
             status != EscrowStatuses.Launched,
