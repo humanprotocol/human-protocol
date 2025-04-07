@@ -2,17 +2,42 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CronJob } from 'cron';
 import { ExchangeOracleGateway } from '../../integrations/exchange-oracle/exchange-oracle.gateway';
 import {
+  DiscoveredJob,
   JobsDiscoveryParams,
   JobsDiscoveryParamsCommand,
-  JobsDiscoveryResponseItem,
+  JobsDiscoveryResponse,
 } from '../jobs-discovery/model/jobs-discovery.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
 import { OracleDiscoveryService } from '../oracle-discovery/oracle-discovery.service';
 import { DiscoveredOracle } from '../oracle-discovery/model/oracle-discovery.model';
 import { WorkerService } from '../user-worker/worker.service';
-import { JobDiscoveryFieldName } from '../../common/enums/global-common';
+import {
+  JobDiscoveryFieldName,
+  JobStatus,
+} from '../../common/enums/global-common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { JobsDiscoveryService } from '../jobs-discovery/jobs-discovery.service';
+
+function assertJobsDiscoveryResponseItemsFormat(
+  items: JobsDiscoveryResponse['results'],
+): asserts items is DiscoveredJob[] {
+  if (items.length === 0) {
+    return;
+  }
+
+  const item = items[0];
+  if (
+    [
+      item.job_description,
+      item.reward_amount,
+      item.reward_token,
+      item.created_at,
+      item.updated_at,
+    ].includes(undefined)
+  ) {
+    throw new Error('Job discovery response items missing expected fields');
+  }
+}
 
 @Injectable()
 export class CronJobService {
@@ -81,7 +106,7 @@ export class CronJobService {
 
   async updateJobsListCache(oracle: DiscoveredOracle, token: string) {
     try {
-      let allResults: JobsDiscoveryResponseItem[] = [];
+      let allResults: DiscoveredJob[] = [];
 
       // Initial fetch to determine the total number of pages
       const command = new JobsDiscoveryParamsCommand();
@@ -91,14 +116,18 @@ export class CronJobService {
       command.data.page = 0;
       command.data.pageSize = command.data.pageSize || 10; // Max value for Exchange Oracle
       command.data.fields = [
-        JobDiscoveryFieldName.CreatedAt,
         JobDiscoveryFieldName.JobDescription,
         JobDiscoveryFieldName.RewardAmount,
         JobDiscoveryFieldName.RewardToken,
-        JobDiscoveryFieldName.Qualifications,
+        JobDiscoveryFieldName.CreatedAt,
+        JobDiscoveryFieldName.UpdatedAt,
       ];
+      command.data.status = JobStatus.ACTIVE;
       const initialResponse =
         await this.exchangeOracleGateway.fetchJobs(command);
+
+      assertJobsDiscoveryResponseItemsFormat(initialResponse.results);
+
       allResults = this.mergeJobs(allResults, initialResponse.results);
 
       const totalPages = initialResponse.total_pages;
@@ -112,6 +141,7 @@ export class CronJobService {
 
       const remainingResponses = await Promise.all(pageFetches);
       for (const response of remainingResponses) {
+        assertJobsDiscoveryResponseItemsFormat(response.results);
         allResults = this.mergeJobs(allResults, response.results);
       }
 
@@ -143,10 +173,10 @@ export class CronJobService {
   }
 
   private mergeJobs(
-    cachedJobs: JobsDiscoveryResponseItem[],
-    newJobs: JobsDiscoveryResponseItem[],
-  ): JobsDiscoveryResponseItem[] {
-    const jobsMap = new Map<string, JobsDiscoveryResponseItem>();
+    cachedJobs: DiscoveredJob[],
+    newJobs: DiscoveredJob[],
+  ): DiscoveredJob[] {
+    const jobsMap = new Map<string, DiscoveredJob>();
 
     for (const job of cachedJobs) {
       jobsMap.set(job.escrow_address + '-' + job.chain_id, job);

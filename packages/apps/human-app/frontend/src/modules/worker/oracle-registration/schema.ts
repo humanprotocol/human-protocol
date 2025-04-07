@@ -16,3 +16,11 @@ export const registrationInExchangeOracleDtoSchema = z.object({
 export type RegistrationInExchangeOracleDto = z.infer<
   typeof registrationInExchangeOracleDtoSchema
 >;
+
+export const oracleRegistrationFormSchema = z.object({
+  h_captcha_token: z.string().min(1, t('validation.captcha')),
+});
+
+export type OracleRegistrationFormValues = z.infer<
+  typeof oracleRegistrationFormSchema
+>;

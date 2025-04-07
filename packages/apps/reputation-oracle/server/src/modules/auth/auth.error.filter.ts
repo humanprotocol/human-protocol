@@ -6,25 +6,28 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import logger from '../../logger';
+
 import {
   AuthError,
   DuplicatedUserAddressError,
   DuplicatedUserEmailError,
+  InactiveUserError,
   InvalidOperatorSignupDataError,
 } from './auth.error';
 
-import logger from '../../logger';
-
 type AuthControllerError =
   | AuthError
+  | DuplicatedUserAddressError
   | DuplicatedUserEmailError
-  | InvalidOperatorSignupDataError
-  | DuplicatedUserAddressError;
+  | InactiveUserError
+  | InvalidOperatorSignupDataError;
 
 @Catch(
   AuthError,
-  DuplicatedUserEmailError,
   DuplicatedUserAddressError,
+  DuplicatedUserEmailError,
+  InactiveUserError,
   InvalidOperatorSignupDataError,
 )
 export class AuthControllerErrorsFilter implements ExceptionFilter {
@@ -46,6 +49,9 @@ export class AuthControllerErrorsFilter implements ExceptionFilter {
       this.logger.error('Auth conflict', exception);
     } else if (exception instanceof InvalidOperatorSignupDataError) {
       status = HttpStatus.BAD_REQUEST;
+    } else if (exception instanceof InactiveUserError) {
+      status = HttpStatus.FORBIDDEN;
+      this.logger.error('Auth error', exception);
     }
 
     return response.status(status).json({

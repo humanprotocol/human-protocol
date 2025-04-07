@@ -8,6 +8,7 @@ from inspect import isclass
 from urllib.parse import urlparse
 
 import pydantic
+from httpx import URL
 
 from src.core import manifest
 from src.core.config import Config, StorageConfig
@@ -113,7 +114,7 @@ class BucketAccessInfo:
             )
         elif Config.features.enable_custom_cloud_host:
             # Check if netloc is an ip address
-            # or localhost with port (or its /etc/hosts aliast, e.g. minio:9000)
+            # or localhost with port (or its /etc/hosts alias, e.g. minio:9000)
             if is_ipv4(parsed_url.netloc) or re.fullmatch(r"\w+:\d{4}", parsed_url.netloc):
                 host = parsed_url.netloc
                 bucket_name, path = parsed_url.path.lstrip("/").split("/", maxsplit=1)
@@ -190,3 +191,18 @@ class BucketAccessInfo:
             return cls.from_storage_config(data)
 
         raise TypeError(f"Unsupported data type ({type(data)}) was provided")
+
+    def to_url(self) -> str:
+        url = URL(self.host_url)
+
+        if Config.features.enable_custom_cloud_host and (
+            not url.host.endswith(DEFAULT_S3_HOST) and not url.host.endswith(DEFAULT_GCS_HOST)
+        ):
+            url = url.copy_with(path="/".join(["", self.bucket_name, url.path.lstrip("/")]))
+        else:
+            url = url.copy_with(host=f"{self.bucket_name}.{url.host}")
+
+        if self.path:
+            url = url.copy_with(path="/".join(["", url.path.lstrip("/"), self.path.lstrip("/")]))
+
+        return str(url)

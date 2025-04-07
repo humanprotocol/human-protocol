@@ -3,11 +3,9 @@ import CurrencyExchangeOutlinedIcon from '@mui/icons-material/CurrencyExchangeOu
 import DownloadIcon from '@mui/icons-material/Download';
 import MoneyOffCsredOutlinedIcon from '@mui/icons-material/MoneyOffCsredOutlined';
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined';
-import { Box, Chip, IconButton, Typography } from '@mui/material';
-import copy from 'copy-to-clipboard';
+import { Box, Chip, IconButton, Link, Typography } from '@mui/material';
 import { useState } from 'react';
 import CreditCardFilledIcon from '../../assets/CreditCardFilled.svg';
-import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
 import { paymentSource, paymentType } from '../../constants/payment';
 import { usePayments } from '../../hooks/usePayments';
@@ -93,10 +91,15 @@ export const PaymentTable = ({ rows = 10 }: { rows?: number }) => {
         },
         {
           id: 'amount',
-          label: 'Amount USD',
+          label: 'Amount',
           sortable: true,
-          render: ({ amount, rate }) =>
-            `$${Number(amount) > 0 ? Number(amount * rate).toFixed(2) : (Number(amount * rate) * -1).toFixed(2)}`,
+          render: ({ amount, rate, currency }) => (
+            <Typography color={Number(amount) > 0 ? 'green' : 'red'}>
+              {currency.toUpperCase() !== 'USD'
+                ? `${Number(amount) > 0 ? '+' : ''}${Number(amount).toFixed(2)} ${currency.toUpperCase()} (${(Number(amount) * rate).toFixed(2)} USD)`
+                : `${Number(amount) > 0 ? '+' : ''}${Number(amount).toFixed(2)} ${currency.toUpperCase()}`}
+            </Typography>
+          ),
         },
         {
           id: 'type',
@@ -171,27 +174,24 @@ export const PaymentTable = ({ rows = 10 }: { rows?: number }) => {
           ),
         },
         {
-          id: 'escrowAddress',
-          label: 'Escrow Address',
+          id: 'jobId',
+          label: 'Job ID',
           sortable: false,
-          render: ({ escrowAddress }) =>
-            escrowAddress ? (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {escrowAddress}
-                <IconButton
+          render: ({ jobId }) => (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {jobId ? (
+                <Link
+                  href={`/jobs/details/${jobId}`}
                   color="primary"
-                  sx={{ ml: 3 }}
-                  onClick={() => copy(escrowAddress)}
+                  sx={{ textDecoration: 'underline' }}
                 >
-                  <CopyLinkIcon />
-                </IconButton>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {escrowAddress}
-                <Box>-</Box>
-              </Box>
-            ),
+                  {jobId}
+                </Link>
+              ) : (
+                '-'
+              )}
+            </Box>
+          ),
         },
         {
           id: 'status',

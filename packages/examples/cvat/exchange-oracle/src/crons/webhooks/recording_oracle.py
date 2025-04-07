@@ -19,6 +19,7 @@ from src.core.types import (
 from src.crons._cron_job import cron_job
 from src.crons.webhooks._common import handle_webhook, process_outgoing_webhooks
 from src.db.utils import ForUpdateParams
+from src.handlers.completed_escrows import handle_escrow_export
 from src.models.webhook import Webhook
 
 
@@ -30,6 +31,29 @@ def process_incoming_recording_oracle_webhooks(logger: logging.Logger, session: 
     webhooks = oracle_db_service.inbox.get_pending_webhooks(
         session,
         OracleWebhookTypes.recording_oracle,
+        event_type_not_in=[RecordingOracleEventTypes.job_completed],
+        limit=CronConfig.process_recording_oracle_webhooks_chunk_size,
+        for_update=ForUpdateParams(skip_locked=True),
+    )
+
+    for webhook in webhooks:
+        with handle_webhook(logger, session, webhook, queue=oracle_db_service.inbox):
+            handle_recording_oracle_event(webhook, db_session=session, logger=logger)
+
+
+@cron_job
+def process_incoming_recording_oracle_webhook_job_completed(
+    logger: logging.Logger, session: Session
+):
+    """
+    Process incoming oracle webhooks of type job_completed
+    We do it in a separate job as this is a long operation that should not block
+    other message handling.
+    """
+    webhooks = oracle_db_service.inbox.get_pending_webhooks(
+        session,
+        OracleWebhookTypes.recording_oracle,
+        event_type_in=[RecordingOracleEventTypes.job_completed],
         limit=CronConfig.process_recording_oracle_webhooks_chunk_size,
         for_update=ForUpdateParams(skip_locked=True),
     )
@@ -70,6 +94,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 )
                 return
 
+            recorded_project_cvat_ids: set[int] = set()
             chunk_size = CronConfig.process_accepted_projects_chunk_size
             for ids_chunk in take_by(project_ids, chunk_size):
                 projects_chunk = cvat_db_service.get_projects_by_cvat_ids(
@@ -89,14 +114,10 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                         )
                         return
 
-                    new_status = ProjectStatuses.recorded
-                    logger.info(
-                        "Changing project status to {} (escrow_address={}, project={})".format(
-                            new_status, webhook.escrow_address, project.cvat_id
-                        )
+                    recorded_project_cvat_ids.add(project.cvat_id)
+                    cvat_db_service.update_project_status(
+                        db_session, project.id, ProjectStatuses.recorded
                     )
-
-                    cvat_db_service.update_project_status(db_session, project.id, new_status)
 
                 cvat_db_service.touch_final_assignments(
                     db_session,
@@ -110,6 +131,27 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
                 webhook.chain_id,
                 status=EscrowValidationStatuses.completed,
             )
+
+            logger.info(
+                f"Escrow '{webhook.escrow_address}' is accepted, trying to export annotations..."
+            )
+            handle_escrow_export(
+                logger=logger,
+                session=db_session,
+                escrow_address=webhook.escrow_address,
+                chain_id=webhook.chain_id,
+            )
+
+            if recorded_project_cvat_ids:
+                # Print it after successful export so that the logs were consistent
+                # in the case of export error
+                logger.info(
+                    "Changing project statuses to {} (escrow_address={}, project={})".format(
+                        ProjectStatuses.recorded,
+                        webhook.escrow_address,
+                        sorted(recorded_project_cvat_ids),
+                    )
+                )
 
         case RecordingOracleEventTypes.submission_rejected:
             event = RecordingOracleEvent_SubmissionRejected.model_validate(webhook.event_data)

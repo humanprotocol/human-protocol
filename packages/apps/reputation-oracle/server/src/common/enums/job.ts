@@ -5,6 +5,7 @@ export enum JobRequestType {
   IMAGE_SKELETONS_FROM_BOXES = 'image_skeletons_from_boxes',
   FORTUNE = 'fortune',
   IMAGE_POLYGONS = 'image_polygons',
+  AUDIO_TRANSCRIPTION = 'audio_transcription',
 }
 
 export enum SolutionError {

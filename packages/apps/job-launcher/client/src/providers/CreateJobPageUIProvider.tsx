@@ -8,25 +8,27 @@ export type CreateJobPageUIType = {
   step: CreateJobStep;
   payMethod: PayMethod;
   jobRequest: JobRequest;
-  reset?: () => void;
-  changePayMethod?: (method: PayMethod) => void;
-  updateJobRequest?: (jobRequest: JobRequest) => void;
-  goToPrevStep?: () => void;
-  goToNextStep?: () => void;
+  reset: () => void;
+  changePayMethod: (method: PayMethod) => void;
+  updateJobRequest: (jobRequest: JobRequest) => void;
+  goToPrevStep: () => void;
+  goToNextStep: () => void;
   setStep: (step: CreateJobStep) => void;
 };
 
-const initialData: Omit<
-  CreateJobPageUIType,
-  'changePayMethod' | 'goToNextStep'
-> = {
+const initialData: CreateJobPageUIType = {
   step: CreateJobStep.FundingMethod,
   payMethod: PayMethod.Crypto,
   jobRequest: {
-    jobType: JobType.Fortune,
+    jobType: JobType.FORTUNE,
     chainId: undefined,
   },
-  setStep: () => {},
+  reset: () => {},
+  changePayMethod: (_) => {},
+  updateJobRequest: (_) => {},
+  goToPrevStep: () => {},
+  goToNextStep: () => {},
+  setStep: (_) => {},
 };
 
 export const CreateJobPageUIContext =
@@ -43,7 +45,7 @@ export const CreateJobPageUIProvider = ({
   const [step, setStep] = useState<CreateJobStep>(CreateJobStep.FundingMethod);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({
-    jobType: IS_MAINNET ? JobType.CVAT : JobType.Fortune,
+    jobType: IS_MAINNET ? JobType.CVAT : JobType.FORTUNE,
     chainId:
       chain?.id && SUPPORTED_CHAIN_IDS.includes(chain?.id)
         ? chain?.id
@@ -55,11 +57,15 @@ export const CreateJobPageUIProvider = ({
   });
 
   const goToPrevStep = () => {
-    setStep((prev) => prev - 1);
+    if (step > CreateJobStep.FundingMethod) {
+      setStep((prev) => prev - 1);
+    }
   };
 
   const goToNextStep = () => {
-    setStep((prev) => prev + 1);
+    if (step < CreateJobStep.Launch) {
+      setStep((prev) => prev + 1);
+    }
   };
 
   const changePayMethod = (method: PayMethod) => setPayMethod(method);
@@ -71,7 +77,7 @@ export const CreateJobPageUIProvider = ({
     setStep(CreateJobStep.FundingMethod);
     setPayMethod(PayMethod.Crypto);
     setJobRequest({
-      jobType: JobType.Fortune,
+      jobType: JobType.FORTUNE,
     });
   };
 

@@ -36,3 +36,30 @@ export interface FortuneManifest {
   fundAmount: number;
   requestType: JobRequestType;
 }
+
+interface AudinoData {
+  data_url: string;
+}
+
+interface AudinoLabel {
+  name: string;
+}
+
+interface AudinoValidation {
+  gt_url: string;
+  min_quality: number;
+}
+
+interface AudinoAnnotation {
+  type: JobRequestType;
+  labels: AudinoLabel[];
+  description: string;
+  segment_duration: number;
+}
+
+export interface AudinoManifest {
+  data: AudinoData;
+  annotation: AudinoAnnotation;
+  job_bounty: string;
+  validation: AudinoValidation;
+}

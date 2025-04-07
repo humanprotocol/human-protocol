@@ -76,6 +76,11 @@ export class GatewayConfigService {
               method: HttpMethod.POST,
               headers: this.JSON_HEADER,
             },
+            [ReputationOracleEndpoints.ENABLE_OPERATOR]: {
+              endpoint: '/user/enable-operator',
+              method: HttpMethod.POST,
+              headers: this.JSON_HEADER,
+            },
             [ReputationOracleEndpoints.KYC_PROCEDURE_START]: {
               endpoint: '/kyc/start',
               method: HttpMethod.POST,

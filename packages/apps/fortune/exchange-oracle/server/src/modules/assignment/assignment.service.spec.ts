@@ -6,7 +6,7 @@ import {
   MOCK_MANIFEST_URL,
   MOCK_PRIVATE_KEY,
 } from '../../../test/constants';
-import { AssignmentStatus, JobType } from '../../common/enums/job';
+import { AssignmentStatus, JobStatus, JobType } from '../../common/enums/job';
 import { AssignmentRepository } from '../assignment/assignment.repository';
 import { AssignmentService } from '../assignment/assignment.service';
 import { ManifestDto } from '../job/job.dto';
@@ -18,7 +18,7 @@ import { Escrow__factory } from '@human-protocol/core/typechain-types';
 import { AssignmentSortField } from '../../common/enums/job';
 import { SortDirection } from '../../common/enums/collection';
 import { AssignmentEntity } from './assignment.entity';
-import { ErrorAssignment } from '../../common/constant/errors';
+import { ErrorAssignment, ErrorJob } from '../../common/constant/errors';
 import { BadRequestException } from '@nestjs/common';
 import { ServerConfigService } from '../../common/config/server-config.service';
 
@@ -117,6 +117,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
@@ -140,6 +141,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         },
         workerAddress: workerAddress,
         status: AssignmentStatus.ACTIVE,
@@ -160,6 +162,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
@@ -194,6 +197,7 @@ describe('AssignmentService', () => {
         assignmentService.createAssignment(createAssignmentDto, {
           address: workerAddress,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any),
       ).rejects.toThrow('Job not found');
     });
@@ -207,6 +211,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: differentReputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
 
       await expect(
@@ -217,6 +222,24 @@ describe('AssignmentService', () => {
       ).rejects.toThrow('Requested job is not in your reputation network');
     });
 
+    it('should fail if job is not active', async () => {
+      jest
+        .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
+        .mockResolvedValue({
+          id: 1,
+          manifestUrl: MOCK_MANIFEST_URL,
+          reputationNetwork: reputationNetwork,
+          status: JobStatus.PAUSED,
+        } as any);
+
+      await expect(
+        assignmentService.createAssignment(createAssignmentDto, {
+          address: workerAddress,
+          reputationNetwork: reputationNetwork,
+        } as any),
+      ).rejects.toThrow(ErrorJob.InvalidStatus);
+    });
+
     it('should fail if user already assigned', async () => {
       jest
         .spyOn(jobRepository, 'findOneByChainIdAndEscrowAddress')
@@ -224,6 +247,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
@@ -244,6 +268,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
@@ -255,6 +280,7 @@ describe('AssignmentService', () => {
         assignmentService.createAssignment(createAssignmentDto, {
           address: workerAddress,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any),
       ).rejects.toThrow('Fully assigned job');
     });
@@ -267,6 +293,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')
@@ -291,6 +318,7 @@ describe('AssignmentService', () => {
           id: 1,
           manifestUrl: MOCK_MANIFEST_URL,
           reputationNetwork: reputationNetwork,
+          status: JobStatus.ACTIVE,
         } as any);
       jest
         .spyOn(assignmentRepository, 'findOneByJobIdAndWorker')

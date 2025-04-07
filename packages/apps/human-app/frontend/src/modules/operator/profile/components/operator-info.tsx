@@ -1,5 +1,6 @@
 import { Paper, Typography, Stack, List, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { OperatorStatus } from '@/modules/auth-web3/context/web3-auth-context';
 import { useWeb3AuthenticatedUser } from '@/modules/auth-web3/hooks/use-web3-authenticated-user';
 import { CheckmarkIcon, LockerIcon } from '@/shared/components/ui/icons';
 import { ProfileListItem } from '@/shared/components/ui/profile';
@@ -17,7 +18,7 @@ export function OperatorInfo({
   const { user } = useWeb3AuthenticatedUser();
   const isMobile = useIsMobile('lg');
 
-  const isOperatorActive = user.status === 'active';
+  const isOperatorActive = user.operator_status === OperatorStatus.ACTIVE;
 
   return (
     <Paper

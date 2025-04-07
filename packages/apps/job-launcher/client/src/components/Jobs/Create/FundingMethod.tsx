@@ -18,8 +18,8 @@ export const FundingMethod = () => {
 
   const handleClickCrypto = () => {
     if (isConnected) {
-      changePayMethod?.(PayMethod.Crypto);
-      goToNextStep?.();
+      changePayMethod(PayMethod.Crypto);
+      goToNextStep();
     } else {
       setWalletModalOpen(true);
     }
@@ -28,7 +28,7 @@ export const FundingMethod = () => {
   useEffect(() => {
     if (isConnected && walletModalOpen) {
       setWalletModalOpen(false);
-      goToNextStep?.();
+      goToNextStep();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
@@ -116,8 +116,8 @@ export const FundingMethod = () => {
                   variant="outlined"
                   sx={{ minWidth: '200px' }}
                   onClick={() => {
-                    changePayMethod?.(PayMethod.Fiat);
-                    goToNextStep?.();
+                    changePayMethod(PayMethod.Fiat);
+                    goToNextStep();
                   }}
                 >
                   Pay with Credit Card

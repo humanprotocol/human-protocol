@@ -103,11 +103,11 @@ export const HCaptchaJobRequestForm = () => {
     if (data.completionDate) {
       hCaptchaRequest['completionDate'] = data.completionDate;
     }
-    updateJobRequest?.({
+    updateJobRequest({
       ...jobRequest,
       hCaptchaRequest,
     });
-    goToNextStep?.();
+    goToNextStep();
   };
 
   const {
@@ -252,13 +252,7 @@ export const HCaptchaJobRequestForm = () => {
                     >
                       Unsure what job type to choose?
                     </Typography>
-                    <Button
-                      href="https://escrow-dashboard-git-feat-escrow-dashboard-ba2730-humanprotocol.vercel.app/launchpad/explore-jobs"
-                      target="_blank"
-                      sx={{ ml: 2 }}
-                    >
-                      Explore jobs
-                    </Button>
+                    <Button sx={{ ml: 2 }}>Explore jobs</Button>
                   </Box>
                 </Box>
               </Grid>
@@ -729,8 +723,8 @@ export const HCaptchaJobRequestForm = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              goToPrevStep?.();
-              updateJobRequest?.({
+              goToPrevStep();
+              updateJobRequest({
                 ...jobRequest,
                 chainId: undefined,
               });

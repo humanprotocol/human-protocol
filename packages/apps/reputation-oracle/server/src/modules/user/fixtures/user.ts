@@ -16,13 +16,14 @@ type GeneratedUser<T> = T extends { privateKey: string }
   : Web2UserEntity;
 
 type GenerateUserOptions = {
+  password?: string;
   privateKey?: string;
   status?: UserStatus;
 };
 export function generateWorkerUser<T extends GenerateUserOptions>(
   options?: T,
 ): GeneratedUser<T> {
-  const password = faker.internet.password();
+  const password = options?.password || faker.internet.password();
   const passwordHash = securityUtils.hashPassword(password);
 
   const generatedUser: Web2UserEntity | Web2UserWithAddress = {

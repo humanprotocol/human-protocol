@@ -7,6 +7,7 @@ export enum PrepareSignatureType {
   SIGN_UP = 'signup',
   SIGN_IN = 'signin',
   DISABLE_OPERATOR = 'disable_operator',
+  ENABLE_OPERATOR = 'enable_operator',
   REGISTER_ADDRESS = 'register_address',
 }
 

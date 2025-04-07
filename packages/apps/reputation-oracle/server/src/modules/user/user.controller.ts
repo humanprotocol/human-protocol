@@ -36,7 +36,6 @@ import {
   RegistrationInExchangeOracleResponseDto,
 } from './user.dto';
 import { UserErrorFilter } from './user.error.filter';
-import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 
 /**
@@ -55,7 +54,6 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly web3ConfigService: Web3ConfigService,
-    private readonly userRepository: UserRepository,
   ) {}
 
   @ApiOperation({

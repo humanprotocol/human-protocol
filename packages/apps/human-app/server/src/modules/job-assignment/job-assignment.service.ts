@@ -1,5 +1,6 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ethers } from 'ethers';
 import { Cache } from 'cache-manager';
 import { decode } from 'jsonwebtoken';
 import { EscrowUtilsGateway } from '../../integrations/escrow/escrow-utils-gateway.service';
@@ -14,7 +15,11 @@ import {
   ResignJobCommand,
 } from './model/job-assignment.model';
 import { EnvironmentConfigService } from '../../common/config/environment-config.service';
-import { paginateAndSortResults } from '../../common/utils/pagination.utils';
+import { AssignmentSortField } from '../../common/enums/global-common';
+import {
+  Iteratee,
+  paginateAndSortResults,
+} from '../../common/utils/pagination.utils';
 import { JOB_ASSIGNMENT_CACHE_KEY } from '../../common/constants/cache';
 
 @Injectable()
@@ -98,6 +103,16 @@ export class JobAssignmentService {
       command.oracleAddress,
     );
 
+    const sortField = command.data.sortField || AssignmentSortField.CREATED_AT;
+
+    let iteratee: AssignmentSortField | Iteratee<JobsFetchResponseItem>;
+    if (sortField === AssignmentSortField.REWARD_AMOUNT) {
+      iteratee = (job: JobsFetchResponseItem) =>
+        ethers.parseUnits(job[sortField], 18);
+    } else {
+      iteratee = sortField;
+    }
+
     const cachedData =
       await this.cacheManager.get<JobsFetchResponseItem[]>(cacheKey);
     if (cachedData && cachedData.length > 0) {
@@ -105,7 +120,7 @@ export class JobAssignmentService {
         this.applyFilters(cachedData, command.data),
         command.data.page,
         command.data.pageSize,
-        command.data.sortField as keyof JobsFetchResponseItem,
+        iteratee,
         command.data.sort,
       );
     }
@@ -117,7 +132,7 @@ export class JobAssignmentService {
       this.applyFilters(allJobsData, command.data),
       command.data.page,
       command.data.pageSize,
-      command.data.sortField as keyof JobsFetchResponseItem,
+      iteratee,
       command.data.sort,
     );
   }

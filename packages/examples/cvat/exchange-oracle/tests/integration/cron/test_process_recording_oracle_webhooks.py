@@ -20,6 +20,7 @@ from src.core.types import (
     TaskTypes,
 )
 from src.crons.webhooks.recording_oracle import (
+    process_incoming_recording_oracle_webhook_job_completed,
     process_incoming_recording_oracle_webhooks,
     process_outgoing_recording_oracle_webhooks,
 )
@@ -113,12 +114,18 @@ class ServiceIntegrationTest(unittest.TestCase):
             escrow_address=escrow_address,
             chain_id=chain_id,
             status=EscrowValidationStatuses.in_progress,
+            attempts=1,
         )
         self.session.add(validation)
 
         self.session.commit()
 
-        process_incoming_recording_oracle_webhooks()
+        with patch(
+            "src.crons.webhooks.recording_oracle.handle_escrow_export"
+        ) as mock_handle_escrow_export:
+            process_incoming_recording_oracle_webhook_job_completed()
+
+        mock_handle_escrow_export.assert_called_once()
 
         db_webhook = self.session.query(Webhook).get(webhook_id)
         assert db_webhook.status == OracleWebhookStatuses.completed.value
@@ -183,7 +190,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.commit()
 
-        process_incoming_recording_oracle_webhooks()
+        process_incoming_recording_oracle_webhook_job_completed()
 
         db_webhook = self.session.query(Webhook).get(webhook_id)
         assert db_webhook.status == OracleWebhookStatuses.completed.value
