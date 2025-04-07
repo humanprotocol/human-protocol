@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Grid } from '@mui/material';
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
 import { Button } from '@/shared/components/ui/button';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
-import { useWorkerKycStatus, useWorkerWalletRegistration } from '../hooks';
+import { useWorkerKycStatus } from '../hooks';
 import { DoneLabel } from './status-labels';
 import { WalletConnectDone } from './wallet-connect-done';
 import { RegisterAddressBtn } from './buttons';
@@ -11,8 +12,8 @@ export function WalletConnectionControl() {
   const { t } = useTranslation();
   const { user } = useAuthenticatedUser();
   const { kycApproved } = useWorkerKycStatus();
-  const { isConnected, isRegisterAddressPending, handleConnectWallet } =
-    useWorkerWalletRegistration();
+  const { open } = useAppKit();
+  const { isConnected } = useAppKitAccount();
 
   const { wallet_address: walletAddress } = user;
   const hasWalletAddress = Boolean(walletAddress);
@@ -38,8 +39,7 @@ export function WalletConnectionControl() {
     <Button
       disabled={!kycApproved}
       fullWidth
-      loading={isRegisterAddressPending}
-      onClick={handleConnectWallet}
+      onClick={() => void open()}
       variant="contained"
     >
       {t('components.wallet.connectBtn.connect')}
