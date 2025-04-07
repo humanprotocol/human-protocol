@@ -202,6 +202,7 @@ const theme: ThemeOptions = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          cursor: 'pointer',
           fontWeight: 600,
           textTransform: 'none',
 
@@ -341,6 +342,7 @@ const theme: ThemeOptions = createTheme({
     MuiLink: {
       styleOverrides: {
         root: {
+          textDecoration: 'none',
           color: colorPalette.link,
           '&:hover': {
             color: `${colorPalette.linkHover}!important`,
