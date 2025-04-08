@@ -21,6 +21,7 @@ import StakeModal from '../modals/StakeModal';
 import logoImg from '../../assets/logo.svg';
 import { colorPalette } from '../../assets/styles/color-palette';
 import { ROUTES } from '../../constants';
+import NetworkSwitcher from '../NetworkSwitcher';
 
 const NavLink = styled(MuiLink)({
   color: colorPalette.primary.main,
@@ -107,6 +108,7 @@ const DefaultHeader: FC = () => {
           >
             Stake HMT
           </Button>
+          <NetworkSwitcher />
           {!isConnected && <ConnectWallet />}
           {isConnected && <Account />}
         </Box>
@@ -149,6 +151,7 @@ const DefaultHeader: FC = () => {
             >
               <CloseIcon />
             </IconButton>
+            <NetworkSwitcher />
             {isConnected && <Account />}
             {!isConnected && <ConnectWallet />}
             <MuiLink
