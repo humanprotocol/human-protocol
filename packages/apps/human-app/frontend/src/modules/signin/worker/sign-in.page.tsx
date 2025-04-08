@@ -2,14 +2,14 @@ import { t } from 'i18next';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Alert } from '@/shared/components/ui/alert';
 import { getErrorMessageForError } from '@/shared/errors';
-import { FetchError } from '@/api/fetcher';
+import { ApiClientError } from '@/api';
 import { useSignIn } from './use-sign-in';
 import { SignInForm } from './sign-in-form';
 
 function formattedSignInErrorMessage(
   unknownError: unknown
 ): string | undefined {
-  if (unknownError instanceof FetchError && unknownError.status === 400) {
+  if (unknownError instanceof ApiClientError && unknownError.status === 401) {
     return t('worker.signInForm.errors.invalidCredentials');
   }
 }
