@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Box, Stack } from '@mui/material';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, type Resolver } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/shared/components/ui/button';
@@ -34,7 +34,9 @@ export function RegistrationForm({
     defaultValues: {
       h_captcha_token: '',
     },
-    resolver: zodResolver(oracleRegistrationFormSchema),
+    resolver: zodResolver(
+      oracleRegistrationFormSchema
+    ) as Resolver<OracleRegistrationFormValues>,
   });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

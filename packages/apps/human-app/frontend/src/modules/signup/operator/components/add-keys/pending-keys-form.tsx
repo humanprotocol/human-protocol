@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, type Resolver } from 'react-hook-form';
 import { Button } from '@/shared/components/ui/button';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -25,7 +25,9 @@ export function PendingKeysForm({
     EditEthKVStoreValuesMutationData
   >({
     defaultValues: {},
-    resolver: zodResolver(setEthKVStoreValuesMutationSchema(keysData)),
+    resolver: zodResolver(
+      setEthKVStoreValuesMutationSchema(keysData)
+    ) as Resolver<GetEthKVStoreValuesSuccessResponse>,
   });
 
   const handleEditPendingKey = (data: EditEthKVStoreValuesMutationData) => {

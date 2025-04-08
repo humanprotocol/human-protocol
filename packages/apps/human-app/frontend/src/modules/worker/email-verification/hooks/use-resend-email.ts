@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- ...*/
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import {
@@ -20,7 +20,9 @@ export function useResendEmail() {
     defaultValues: {
       h_captcha_token: '',
     },
-    resolver: zodResolver(resendEmailVerificationHcaptchaSchema),
+    resolver: zodResolver(
+      resendEmailVerificationHcaptchaSchema
+    ) as Resolver<ResendEmailVerificationDto>,
   });
 
   useResetMutationErrors(methods.watch, resendEmailVerificationMutationReset);

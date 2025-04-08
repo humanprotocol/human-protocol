@@ -1,4 +1,4 @@
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -28,7 +28,7 @@ export function SignUpWorkerPage() {
       // eslint-disable-next-line camelcase -- export vite config
       h_captcha_token: '',
     },
-    resolver: zodResolver(signUpDtoSchema),
+    resolver: zodResolver(signUpDtoSchema) as Resolver<SignUpDto>,
   });
 
   useResetMutationErrors(methods.watch, reset);

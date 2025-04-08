@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Grid } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn, Resolver } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -33,7 +33,9 @@ export function ExistingKeysForm({
     EditEthKVStoreValuesMutationData
   >({
     defaultValues: keysData,
-    resolver: zodResolver(getEditEthKVStoreValuesMutationSchema(keysData)),
+    resolver: zodResolver(
+      getEditEthKVStoreValuesMutationSchema(keysData)
+    ) as Resolver<GetEthKVStoreValuesSuccessResponse>,
   });
 
   const handleEditExistingKeys = (data: EditEthKVStoreValuesMutationData) => {

@@ -3,7 +3,7 @@ import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, type Resolver } from 'react-hook-form';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
@@ -39,7 +39,9 @@ export function SendResetLinkWorkerSuccessPage() {
     defaultValues: {
       h_captcha_token: '',
     },
-    resolver: zodResolver(sendResetLinkHcaptchaDtoSchema),
+    resolver: zodResolver(
+      sendResetLinkHcaptchaDtoSchema
+    ) as Resolver<SendResetLinkHcaptcha>,
   });
 
   useResetMutationErrors(methods.watch, reset);

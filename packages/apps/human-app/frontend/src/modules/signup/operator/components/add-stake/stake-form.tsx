@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, type Resolver } from 'react-hook-form';
 import { t } from 'i18next';
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
@@ -34,7 +34,7 @@ export function StakeForm({
     },
     resolver: zodResolver(
       z.object({ amount: addStakeAmountCallArgumentsSchema(decimals) })
-    ),
+    ) as Resolver<AddStakeCallArguments>,
   });
 
   useResetMutationErrors(methods.watch, addStakeMutation.reset);
