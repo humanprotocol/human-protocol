@@ -5,7 +5,6 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { JobDto } from 'src/modules/job/job.dto';
 import { TOKEN_ADDRESSES } from '../constants/tokens';
 import { ChainId } from '@human-protocol/sdk';
 import { EscrowFundToken } from '../enums/job';
@@ -15,15 +14,16 @@ export class IsValidTokenDecimalsConstraint
   implements ValidatorConstraintInterface
 {
   validate(value: number, args: ValidationArguments) {
-    const dto = args.object as JobDto;
-    const { paymentCurrency, chainId } = dto;
+    const [tokenProperty] = args.constraints;
+    const dto = args.object as Record<string, any>;
+    const chainId = dto.chainId as ChainId;
+    const token = dto[tokenProperty] as EscrowFundToken;
 
-    if (!chainId || !paymentCurrency) {
+    if (!chainId || !token) {
       return false;
     }
 
-    const tokenInfo =
-      TOKEN_ADDRESSES[chainId as ChainId]?.[paymentCurrency as EscrowFundToken];
+    const tokenInfo = TOKEN_ADDRESSES[chainId]?.[token];
 
     if (!tokenInfo) {
       return false;
@@ -40,24 +40,30 @@ export class IsValidTokenDecimalsConstraint
   }
 
   defaultMessage(args: ValidationArguments) {
-    const dto = args.object as JobDto;
-    const { paymentCurrency, chainId } = dto;
+    const [tokenProperty] = args.constraints;
+    const dto = args.object as Record<string, any>;
+    const chainId = dto.chainId as ChainId;
+    const token = dto[tokenProperty] as EscrowFundToken;
+    console.log('token', token);
 
-    const tokenInfo =
-      TOKEN_ADDRESSES[chainId as ChainId]?.[paymentCurrency as EscrowFundToken];
-
+    const tokenInfo = TOKEN_ADDRESSES[chainId]?.[token];
     const maxDecimals = tokenInfo?.decimals || 'unknown';
-    return `${args.property} must have at most ${maxDecimals} decimal places for the selected paymentCurrency (${paymentCurrency}) on chainId ${chainId}.`;
+    console.log('tokenInfo', tokenInfo);
+    console.log('maxDecimals', maxDecimals);
+    return `${args.property} must have at most ${maxDecimals} decimal places for the selected token (${token}) on chainId ${chainId}.`;
   }
 }
 
-export function IsValidTokenDecimals(validationOptions?: ValidationOptions) {
+export function IsValidTokenDecimals(
+  tokenProperty: string,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [],
+      constraints: [tokenProperty],
       validator: IsValidTokenDecimalsConstraint,
     });
   };

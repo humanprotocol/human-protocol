@@ -84,7 +84,7 @@ export class JobDto {
   @ApiProperty({ name: 'payment_amount' })
   @IsNumber()
   @IsPositive()
-  @IsValidTokenDecimals()
+  @IsValidTokenDecimals('paymentCurrency')
   public paymentAmount: number;
 
   @ApiProperty({ enum: EscrowFundToken, name: 'escrow_fund_token' })
