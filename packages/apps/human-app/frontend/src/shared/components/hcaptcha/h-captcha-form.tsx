@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { Typography } from '@mui/material';
 import { FetchError } from '@/api/fetcher';
 import { useColorMode } from '@/shared/contexts/color-mode';
+import { ApiClientError } from '@/api';
 import { CustomHCaptcha, type CustomHCaptchaRef } from './h-captcha';
 
 interface HCaptchaFormProps {
@@ -20,7 +21,7 @@ export function HCaptchaForm({ name, error }: Readonly<HCaptchaFormProps>) {
   }
 
   useEffect(() => {
-    if (error instanceof FetchError) {
+    if (error instanceof ApiClientError || error instanceof FetchError) {
       setValue(name, '');
       customCaptchaRef.current?.reset();
     }

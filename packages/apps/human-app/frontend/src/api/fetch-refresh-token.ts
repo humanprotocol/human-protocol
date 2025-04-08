@@ -4,7 +4,7 @@ import { authTokensSuccessResponseSchema } from '@/shared/schemas';
 
 export const fetchTokenRefresh = async (baseUrl: string) => {
   const response = await fetch(
-    `${baseUrl}${apiPaths.worker.obtainAccessToken.path}`,
+    `${baseUrl}${apiPaths.common.auth.refresh.path}`,
     {
       method: 'POST',
       headers: {
