@@ -40,6 +40,7 @@ import { PageOptionsDto } from '../../common/pagination/pagination.dto';
 import { IsEnumCaseInsensitive } from '../../common/decorators';
 import { PaymentCurrency } from '../../common/enums/payment';
 import { IsValidToken } from '../../common/validators/tokens';
+import { IsValidTokenDecimals } from '../../common/validators/token-decimals';
 
 export class JobDto {
   @ApiProperty({ enum: ChainId, required: false, name: 'chain_id' })
@@ -83,6 +84,7 @@ export class JobDto {
   @ApiProperty({ name: 'payment_amount' })
   @IsNumber()
   @IsPositive()
+  @IsValidTokenDecimals()
   public paymentAmount: number;
 
   @ApiProperty({ enum: EscrowFundToken, name: 'escrow_fund_token' })
