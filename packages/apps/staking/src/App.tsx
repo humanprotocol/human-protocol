@@ -10,7 +10,7 @@ const App: FC = () => {
     <Routes>
       <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
       <Route path={ROUTES.KVSTORE} element={<KVStore />} />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
     </Routes>
   );
 };

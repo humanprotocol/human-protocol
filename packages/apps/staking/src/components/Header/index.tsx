@@ -89,7 +89,10 @@ const DefaultHeader: FC = () => {
         >
           <NavLink href={ROUTES.DASHBOARD}>Staking Overview</NavLink>
           <NavLink href={ROUTES.KVSTORE}>KV Store</NavLink>
-          <NavLink href="https://dashboard.humanprotocol.org" target="_blank">
+          <NavLink
+            href={import.meta.env.VITE_HEADER_LINK_DASHBOARD}
+            target="_blank"
+          >
             Dashboard
           </NavLink>
           <NavLink href="https://humanprotocol.org" target="_blank">
