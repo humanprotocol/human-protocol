@@ -15,12 +15,12 @@ import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { FetchError } from '@/api/fetcher';
 import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
-import { signUpDtoSchema, type SignUpDto } from '../schema';
+import { signUpDtoSchema } from '../schema';
 
 export function SignUpWorkerPage() {
   const { t } = useTranslation();
   const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
-  const methods = useForm<SignUpDto>({
+  const methods = useForm({
     defaultValues: {
       email: '',
       password: '',
