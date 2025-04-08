@@ -44,12 +44,9 @@ export class IsValidTokenDecimalsConstraint
     const dto = args.object as Record<string, any>;
     const chainId = dto.chainId as ChainId;
     const token = dto[tokenProperty] as EscrowFundToken;
-    console.log('token', token);
-
     const tokenInfo = TOKEN_ADDRESSES[chainId]?.[token];
     const maxDecimals = tokenInfo?.decimals || 'unknown';
-    console.log('tokenInfo', tokenInfo);
-    console.log('maxDecimals', maxDecimals);
+
     return `${args.property} must have at most ${maxDecimals} decimal places for the selected token (${token}) on chainId ${chainId}.`;
   }
 }
