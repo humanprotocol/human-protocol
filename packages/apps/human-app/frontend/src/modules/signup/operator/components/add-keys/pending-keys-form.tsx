@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { Button } from '@/shared/components/ui/button';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -18,16 +18,9 @@ export function PendingKeysForm({
 }>) {
   const pendingKeysMutation = useEditExistingKeysMutation();
 
-  const pendingKeysMethods = useForm<
-    GetEthKVStoreValuesSuccessResponse,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
-    any,
-    EditEthKVStoreValuesMutationData
-  >({
+  const pendingKeysMethods = useForm({
     defaultValues: {},
-    resolver: zodResolver(
-      setEthKVStoreValuesMutationSchema(keysData)
-    ) as Resolver<GetEthKVStoreValuesSuccessResponse>,
+    resolver: zodResolver(setEthKVStoreValuesMutationSchema(keysData)),
   });
 
   const handleEditPendingKey = (data: EditEthKVStoreValuesMutationData) => {
@@ -37,14 +30,7 @@ export function PendingKeysForm({
   useResetMutationErrors(pendingKeysMethods.watch, pendingKeysMutation.reset);
 
   return (
-    <FormProvider<
-      GetEthKVStoreValuesSuccessResponse,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
-      any,
-      EditEthKVStoreValuesMutationData
-    >
-      {...pendingKeysMethods}
-    >
+    <FormProvider {...pendingKeysMethods}>
       <form
         onSubmit={(event) => {
           void pendingKeysMethods.handleSubmit(handleEditPendingKey)(event);

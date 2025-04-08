@@ -1,6 +1,6 @@
 import Search from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect } from 'react';
@@ -27,13 +27,13 @@ export function EscrowAddressSearchForm({
 }: SearchFormProps) {
   const isMobile = useIsMobile();
   const { colorPalette } = useColorMode();
-  const methods = useForm<{ searchValue: string }>({
+  const methods = useForm({
     defaultValues: {
       searchValue: '',
     },
     resolver: zodResolver(
       z.object({ searchValue: addressSchemaOrEmptyString })
-    ) as Resolver<{ searchValue: string }>,
+    ),
   });
 
   const debouncedUpdater = debounce((value: string) => {

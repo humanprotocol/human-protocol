@@ -1,4 +1,4 @@
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -15,12 +15,12 @@ import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { FetchError } from '@/api/fetcher';
 import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
-import { signUpDtoSchema, type SignUpDto } from '../schema';
+import { signUpDtoSchema } from '../schema';
 
 export function SignUpWorkerPage() {
   const { t } = useTranslation();
   const { signUp, error, isError, isLoading, reset } = useSignUpWorker();
-  const methods = useForm<SignUpDto>({
+  const methods = useForm({
     defaultValues: {
       email: '',
       password: '',
@@ -28,7 +28,7 @@ export function SignUpWorkerPage() {
       // eslint-disable-next-line camelcase -- export vite config
       h_captcha_token: '',
     },
-    resolver: zodResolver(signUpDtoSchema) as Resolver<SignUpDto>,
+    resolver: zodResolver(signUpDtoSchema),
   });
 
   useResetMutationErrors(methods.watch, reset);

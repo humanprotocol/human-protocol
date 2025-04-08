@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- ...*/
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { Box, Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
@@ -27,13 +27,13 @@ export function SignInForm({
 }: Readonly<SignInFormProps>) {
   const { t } = useTranslation();
 
-  const methods = useForm<SignInDto>({
+  const methods = useForm({
     defaultValues: {
       email: '',
       password: '',
       h_captcha_token: '',
     },
-    resolver: zodResolver(signInDtoSchema) as Resolver<SignInDto>,
+    resolver: zodResolver(signInDtoSchema),
   });
 
   useResetMutationErrors(methods.watch, resetMutation);

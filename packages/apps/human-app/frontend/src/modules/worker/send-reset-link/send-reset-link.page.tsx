@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- ...*/
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
@@ -19,12 +19,12 @@ export function SendResetLinkWorkerPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  const methods = useForm<SendResetLinkDto>({
+  const methods = useForm({
     defaultValues: {
       email: user?.email ?? '',
       h_captcha_token: '',
     },
-    resolver: zodResolver(sendResetLinkDtoSchema) as Resolver<SendResetLinkDto>,
+    resolver: zodResolver(sendResetLinkDtoSchema),
   });
 
   const {

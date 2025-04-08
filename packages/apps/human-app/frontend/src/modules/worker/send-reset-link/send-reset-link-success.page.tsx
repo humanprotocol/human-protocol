@@ -3,7 +3,7 @@ import { Grid, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { PageCard } from '@/shared/components/ui/page-card';
 import { Button } from '@/shared/components/ui/button';
 import { useLocationState } from '@/modules/worker/hooks/use-location-state';
@@ -35,13 +35,11 @@ export function SendResetLinkWorkerSuccessPage() {
     mutate({ ...dto, email: email ?? '' });
   };
 
-  const methods = useForm<SendResetLinkHcaptcha>({
+  const methods = useForm({
     defaultValues: {
       h_captcha_token: '',
     },
-    resolver: zodResolver(
-      sendResetLinkHcaptchaDtoSchema
-    ) as Resolver<SendResetLinkHcaptcha>,
+    resolver: zodResolver(sendResetLinkHcaptchaDtoSchema),
   });
 
   useResetMutationErrors(methods.watch, reset);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Grid } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { UseFormReturn, Resolver } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
@@ -26,16 +26,9 @@ export function ExistingKeysForm({
   const [editMode, setEditMode] = useState(false);
   const existingKeysMutation = useEditExistingKeysMutation();
   const pendingKeysMutation = useEditExistingKeysMutation();
-  const existingKeysMethods = useForm<
-    GetEthKVStoreValuesSuccessResponse,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
-    any,
-    EditEthKVStoreValuesMutationData
-  >({
+  const existingKeysMethods = useForm({
     defaultValues: keysData,
-    resolver: zodResolver(
-      getEditEthKVStoreValuesMutationSchema(keysData)
-    ) as Resolver<GetEthKVStoreValuesSuccessResponse>,
+    resolver: zodResolver(getEditEthKVStoreValuesMutationSchema(keysData)),
   });
 
   const handleEditExistingKeys = (data: EditEthKVStoreValuesMutationData) => {
@@ -54,14 +47,7 @@ export function ExistingKeysForm({
           gap: '3rem',
         }}
       >
-        <FormProvider<
-          GetEthKVStoreValuesSuccessResponse,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
-          any,
-          EditEthKVStoreValuesMutationData
-        >
-          {...existingKeysMethods}
-        >
+        <FormProvider {...existingKeysMethods}>
           <form
             onSubmit={(event) => {
               void existingKeysMethods.handleSubmit(handleEditExistingKeys)(

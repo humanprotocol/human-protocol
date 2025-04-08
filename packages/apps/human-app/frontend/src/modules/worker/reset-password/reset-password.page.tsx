@@ -1,5 +1,5 @@
 /* eslint-disable camelcase -- ... */
-import { FormProvider, useForm, type Resolver } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -25,13 +25,13 @@ export function ResetPasswordWorkerPage() {
   const location = useLocation();
   const { token } = queryString.parse(location.search);
 
-  const methods = useForm<ResetPasswordDto>({
+  const methods = useForm({
     defaultValues: {
       password: '',
       confirmPassword: '',
       h_captcha_token: '',
     },
-    resolver: zodResolver(resetPasswordDtoSchema) as Resolver<ResetPasswordDto>,
+    resolver: zodResolver(resetPasswordDtoSchema),
   });
 
   const {
