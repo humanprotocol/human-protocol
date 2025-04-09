@@ -41,7 +41,15 @@ export class PgpEncryptionService implements OnModuleInit {
       return fileContent;
     }
 
-    const decryptedData = await this.sdkInstance.decrypt(contentAsString);
+    return this.decrypt(contentAsString);
+  }
+
+  /**
+   * Expects some content encrypted with Reputation Oracle PGP public key
+   * in PGP message format and decrypts it
+   */
+  async decrypt(content: string): Promise<Buffer> {
+    const decryptedData = await this.sdkInstance.decrypt(content);
 
     return Buffer.from(decryptedData);
   }
