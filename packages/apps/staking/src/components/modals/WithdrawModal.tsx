@@ -14,6 +14,38 @@ type Props = {
   onClose: () => void;
 };
 
+const IdleState: FC<{ withdrawableAmount: number | string }> = ({
+  withdrawableAmount,
+}) => (
+  <>
+    <Typography variant="subtitle2" color="primary" mb={1}>
+      Withdraw amount:
+    </Typography>
+    <Typography component="p" variant="h2" color="primary">
+      {withdrawableAmount} HMT
+    </Typography>
+  </>
+);
+
+const SuccessState: FC<{ amount: number }> = ({ amount }) => (
+  <ModalSuccess>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      py={1}
+    >
+      <Typography variant="subtitle2" color="primary">
+        You have successfully withdrawn
+      </Typography>
+      <Typography variant="h6" color="primary">
+        {amount} HMT
+      </Typography>
+    </Box>
+  </ModalSuccess>
+);
+
 const WithdrawModal: FC<Props> = ({ open, onClose }) => {
   const { withdrawableAmount, handleWithdraw } = useStakeContext();
   const [amount, setAmount] = useState(0);
@@ -58,40 +90,6 @@ const WithdrawModal: FC<Props> = ({ open, onClose }) => {
     }
   };
 
-  const renderIdleState = () => {
-    return (
-      <>
-        <Typography variant="subtitle2" color="primary" mb={1}>
-          Withdraw amount:
-        </Typography>
-        <Typography component="p" variant="h2" color="primary">
-          {withdrawableAmount} HMT
-        </Typography>
-      </>
-    );
-  };
-
-  const renderSuccessState = () => {
-    return (
-      <ModalSuccess>
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          py={1}
-        >
-          <Typography variant="subtitle2" color="primary">
-            You have successfully withdrawn
-          </Typography>
-          <Typography variant="h6" color="primary">
-            {amount} HMT
-          </Typography>
-        </Box>
-      </ModalSuccess>
-    );
-  };
-
   return (
     <BaseModal
       open={open}
@@ -107,9 +105,9 @@ const WithdrawModal: FC<Props> = ({ open, onClose }) => {
         Withdraw
       </Typography>
 
-      {isIdle && renderIdleState()}
+      {isIdle && <IdleState withdrawableAmount={withdrawableAmount} />}
       {isLoading && <ModalLoading />}
-      {isSuccess && renderSuccessState()}
+      {isSuccess && <SuccessState amount={amount} />}
       {isError && <ModalError />}
 
       <Button

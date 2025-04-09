@@ -21,6 +21,25 @@ type Props = {
   onClose: () => void;
 };
 
+const SuccessState: FC<{ amount: number | string }> = ({ amount }) => (
+  <ModalSuccess>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      py={1}
+    >
+      <Typography variant="subtitle2" color="primary">
+        You have successfully staked
+      </Typography>
+      <Typography variant="h6" color="primary">
+        {amount} HMT
+      </Typography>
+    </Box>
+  </ModalSuccess>
+);
+
 const StakeModal: FC<Props> = ({ open, onClose }) => {
   const [amount, setAmount] = useState('');
   const [amountError, setAmountError] = useState('');
@@ -129,27 +148,6 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
     );
   };
 
-  const renderSuccessState = () => {
-    return (
-      <ModalSuccess>
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          py={1}
-        >
-          <Typography variant="subtitle2" color="primary">
-            You have successfully staked
-          </Typography>
-          <Typography variant="h6" color="primary">
-            {amount} HMT
-          </Typography>
-        </Box>
-      </ModalSuccess>
-    );
-  };
-
   return (
     <BaseModal
       open={open}
@@ -167,7 +165,7 @@ const StakeModal: FC<Props> = ({ open, onClose }) => {
 
       {isIdle && renderIdleState()}
       {isLoading && <ModalLoading />}
-      {isSuccess && renderSuccessState()}
+      {isSuccess && <SuccessState amount={amount} />}
       {isError && <ModalError />}
 
       <Button

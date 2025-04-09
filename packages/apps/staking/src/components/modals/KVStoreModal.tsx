@@ -42,6 +42,14 @@ type Field = {
   isCustom?: boolean;
 };
 
+const SuccessState: FC = () => (
+  <ModalSuccess>
+    <Typography variant="subtitle2" color="primary" p={1}>
+      You have successfully edited your KV Store
+    </Typography>
+  </ModalSuccess>
+);
+
 const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
   const [formData, setFormData] = useState<Field[]>([]);
   const [pendingChanges, setPendingChanges] = useState<Field[]>([]);
@@ -199,16 +207,6 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
     }
   };
 
-  const renderSuccessState = () => {
-    return (
-      <ModalSuccess>
-        <Typography variant="subtitle2" color="primary" p={1}>
-          You have successfully edited your KV Store
-        </Typography>
-      </ModalSuccess>
-    );
-  };
-
   return (
     <BaseModal
       open={open}
@@ -351,7 +349,7 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
       </Box>
 
       {isLoading && <ModalLoading />}
-      {isSuccess && renderSuccessState()}
+      {isSuccess && <SuccessState />}
       {isError && <ModalError />}
 
       <Box display="flex" mt={2} gap={1}>
