@@ -1,348 +1,337 @@
-import { Test } from '@nestjs/testing';
+import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
-import { QualificationService } from './qualification.service';
-import { QualificationRepository } from './qualification.repository';
-import { UserRepository } from '../user/user.repository';
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
+
+import { generateEthWallet } from '../../../test/fixtures/web3';
+import { ServerConfigService } from '../../config/server-config.service';
+import { UserStatus, UserRepository } from '../user';
+import { generateWorkerUser } from '../user/fixtures';
+
+import { QualificationEntity } from './qualification.entity';
 import {
   QualificationError,
   QualificationErrorMessage,
 } from './qualification.error';
-import { CreateQualificationDto } from './qualification.dto';
-import { QualificationEntity } from './qualification.entity';
+import { QualificationRepository } from './qualification.repository';
+import { QualificationService } from './qualification.service';
 import { UserQualificationEntity } from './user-qualification.entity';
-import { ServerConfigService } from '../../config/server-config.service';
-import { ConfigService } from '@nestjs/config';
-import { mockConfig } from '../../../test/constants';
+import { UserQualificationRepository } from './user-qualification.repository';
+
+const mockQualificationRepository = createMock<QualificationRepository>();
+const mockUserQualificationRepository =
+  createMock<UserQualificationRepository>();
+const mockUserRepository = createMock<UserRepository>();
 
 describe('QualificationService', () => {
-  let qualificationService: QualificationService;
-  let qualificationRepository: QualificationRepository;
-  let userRepository: UserRepository;
+  let service: QualificationService;
 
-  beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
+  beforeAll(async () => {
+    const module = await Test.createTestingModule({
       providers: [
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => mockConfig[key]),
-            getOrThrow: jest.fn((key: string) => {
-              if (!mockConfig[key]) {
-                throw new Error(`Configuration key "${key}" does not exist`);
-              }
-              return mockConfig[key];
-            }),
-          },
-        },
         QualificationService,
         {
           provide: QualificationRepository,
-          useValue: createMock<QualificationRepository>(),
+          useValue: mockQualificationRepository,
         },
-        { provide: UserRepository, useValue: createMock<UserRepository>() },
+        {
+          provide: UserQualificationRepository,
+          useValue: mockUserQualificationRepository,
+        },
+        {
+          provide: UserRepository,
+          useValue: mockUserRepository,
+        },
         ServerConfigService,
+        ConfigService,
       ],
     }).compile();
 
-    qualificationService =
-      moduleRef.get<QualificationService>(QualificationService);
-    qualificationRepository = moduleRef.get<QualificationRepository>(
-      QualificationRepository,
-    );
-    userRepository = moduleRef.get<UserRepository>(UserRepository);
+    service = module.get<QualificationService>(QualificationService);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('createQualification', () => {
-    it('should create a new qualification', async () => {
-      const createQualificationDto: CreateQualificationDto = {
-        reference: 'ref1',
-        title: 'title1',
-        description: 'desc1',
-        expiresAt: '2025-12-31T00:00:00.000Z',
-      };
+    it.each([faker.date.future({ years: 1 }), undefined])(
+      'should create a new qualification',
+      async (expiresAt) => {
+        const newQualification = {
+          title: faker.string.alpha(),
+          description: faker.string.alpha(),
+          expiresAt,
+        };
 
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = createQualificationDto.reference;
-      qualificationEntity.title = createQualificationDto.title;
-      qualificationEntity.description = createQualificationDto.description;
-      qualificationEntity.expiresAt = new Date(
-        createQualificationDto.expiresAt!,
-      );
+        mockQualificationRepository.createUnique.mockResolvedValueOnce({
+          reference: faker.string.uuid(),
+          ...newQualification,
+        } as QualificationEntity);
 
-      qualificationRepository.save = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
+        await service.createQualification(newQualification);
 
-      const result = await qualificationService.createQualification(
-        createQualificationDto,
-      );
-
-      expect(result).toEqual({
-        reference: createQualificationDto.reference,
-        title: createQualificationDto.title,
-        description: createQualificationDto.description,
-        expiresAt: createQualificationDto.expiresAt,
-      });
-    });
-
-    it('should create a new qualification without expiresAt', async () => {
-      const createQualificationDto: CreateQualificationDto = {
-        reference: 'ref1',
-        title: 'title1',
-        description: 'desc1',
-      };
-
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = createQualificationDto.reference;
-      qualificationEntity.title = createQualificationDto.title;
-      qualificationEntity.description = createQualificationDto.description;
-      qualificationEntity.expiresAt = null;
-
-      qualificationRepository.save = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
-
-      const result = await qualificationService.createQualification(
-        createQualificationDto,
-      );
-
-      expect(result).toEqual({
-        reference: createQualificationDto.reference,
-        title: createQualificationDto.title,
-        description: createQualificationDto.description,
-      });
-    });
-
-    it('should throw an error if the expiration date is in the past', async () => {
-      const createQualificationDto: CreateQualificationDto = {
-        reference: 'ref1',
-        title: 'title1',
-        description: 'desc1',
-        expiresAt: '2000-01-01T00:00:00.000Z',
-      };
-
-      const errorMessage =
-        QualificationErrorMessage.INVALID_EXPIRATION_TIME.replace(
-          '%minValidity%',
-          '1',
+        expect(mockQualificationRepository.createUnique).toHaveBeenCalledTimes(
+          1,
         );
+        expect(mockQualificationRepository.createUnique).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...newQualification,
+          }),
+        );
+      },
+    );
 
-      await expect(
-        qualificationService.createQualification(createQualificationDto),
-      ).rejects.toThrow(
-        new QualificationError(
-          errorMessage as QualificationErrorMessage,
-          'ref1',
-        ),
+    it('should throw a INVALID_EXPIRATION_TIME error', async () => {
+      const newQualification = {
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+        expiresAt: faker.date.past(),
+      };
+
+      mockQualificationRepository.createUnique.mockResolvedValueOnce({
+        reference: faker.string.uuid(),
+        ...newQualification,
+      } as QualificationEntity);
+
+      try {
+        await service.createQualification(newQualification);
+      } catch (error) {
+        expect(error).toBeInstanceOf(QualificationError);
+        expect(error.message).toContain(
+          'Qualification should be valid till at least',
+        );
+      }
+      expect(mockQualificationRepository.createUnique).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteQualification', () => {
+    it('should delete qualification by reference', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+      };
+
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
+
+      mockUserQualificationRepository.findByQualification.mockResolvedValueOnce(
+        [],
+      );
+
+      await service.deleteQualification(reference);
+
+      expect(mockQualificationRepository.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockQualificationRepository.deleteOne).toHaveBeenCalledWith(
+        qualificationEntity,
       );
     });
 
-    it('should throw an error if the qualification has not beed created', async () => {
-      const createQualificationDto: CreateQualificationDto = {
-        reference: 'ref1',
-        title: 'title1',
-        description: 'desc1',
-        expiresAt: '2025-12-31T00:00:00.000Z',
+    it('should throw NOT_FOUND error', async () => {
+      const reference = faker.string.uuid();
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(null);
+
+      await expect(service.deleteQualification(reference)).rejects.toThrow(
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, reference),
+      );
+    });
+
+    it('should throw CANNOT_DETELE_ASSIGNED_QUALIFICATION error', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
       };
 
-      qualificationRepository.createUnique = jest
-        .fn()
-        .mockRejectedValueOnce(new Error());
+      const mockUserQualificationEntity = {
+        userId: faker.number.int(),
+        qualificationId: faker.number.int(),
+      };
 
-      await expect(
-        qualificationService.createQualification(createQualificationDto),
-      ).rejects.toThrow(Error);
-    });
-  });
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
 
-  describe('getQualifications', () => {
-    it('should return a list of qualifications', async () => {
-      const qualifications = [
-        {
-          reference: 'ref1',
-          title: 'title1',
-          description: 'desc1',
-        },
-      ];
-      qualificationRepository.getQualifications = jest
-        .fn()
-        .mockResolvedValue(qualifications);
+      mockUserQualificationRepository.findByQualification.mockResolvedValueOnce(
+        [mockUserQualificationEntity] as UserQualificationEntity[],
+      );
 
-      const result = await qualificationService.getQualifications();
-
-      expect(result).toEqual(qualifications);
-    });
-
-    it('should return a list of qualifications with null expiresAt', async () => {
-      const qualifications = [
-        {
-          reference: 'ref1',
-          title: 'title1',
-          description: 'desc1',
-        },
-      ];
-      qualificationRepository.getQualifications = jest
-        .fn()
-        .mockResolvedValue(qualifications);
-
-      const result = await qualificationService.getQualifications();
-
-      expect(result).toEqual(qualifications);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete a qualification by reference', async () => {
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = 'ref1';
-      qualificationEntity.userQualifications = [];
-
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
-
-      qualificationRepository.deleteOne = jest
-        .fn()
-        .mockResolvedValue(undefined);
-
-      await expect(
-        qualificationService.delete('ref1'),
-      ).resolves.toBeUndefined();
-    });
-
-    it('should throw an error if the qualification is not found', async () => {
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(undefined);
-
-      await expect(qualificationService.delete('ref1')).rejects.toThrow(
-        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
+      await expect(service.deleteQualification(reference)).rejects.toThrow(
+        new QualificationError(
+          QualificationErrorMessage.CANNOT_DETELE_ASSIGNED_QUALIFICATION,
+          reference,
+        ),
       );
     });
   });
 
   describe('assign', () => {
-    beforeEach(() => {
-      qualificationRepository.saveUserQualifications = jest.fn();
+    it('should assign user to qualification', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+      };
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
+      mockUserRepository.findWorkersByAddresses.mockResolvedValueOnce([user]);
+
+      const result = await service.assign(reference, [
+        user.evmAddress as string,
+      ]);
+
+      expect(result).toMatchObject({
+        success: [user.evmAddress],
+        failed: [],
+      });
     });
 
-    it('should assign users to a qualification', async () => {
-      const reference = 'ref1';
-      const workerAddresses = ['address1'];
+    it('should fail to assign user not in active status', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+      };
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+        status: UserStatus.INACTIVE,
+      });
 
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = reference;
-      qualificationEntity.userQualifications = [];
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
+      mockUserRepository.findWorkersByAddresses.mockResolvedValueOnce([user]);
 
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
-      userRepository.findWorkersByAddresses = jest
-        .fn()
-        .mockResolvedValue([{ id: 1 }]);
+      const result = await service.assign(reference, [
+        user.evmAddress as string,
+      ]);
 
-      await qualificationService.assign(reference, workerAddresses);
-
-      expect(
-        qualificationRepository.saveUserQualifications,
-      ).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({
+        success: [],
+        failed: [
+          {
+            evmAddress: user.evmAddress as string,
+            reason: 'User is not in active status',
+          },
+        ],
+      });
     });
 
-    it('should assign users to a qualification with null expiresAt', async () => {
-      const reference = 'ref1';
-      const workerAddresses = ['address1'];
+    it('should throw NOT_FOUND error', async () => {
+      const reference = faker.string.uuid();
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
 
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = reference;
-      qualificationEntity.expiresAt = null;
-      qualificationEntity.userQualifications = [];
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(null);
 
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
-      userRepository.findWorkersByAddresses = jest
-        .fn()
-        .mockResolvedValue([{ id: 1 }]);
-
-      await qualificationService.assign(reference, workerAddresses);
-
-      expect(
-        qualificationRepository.saveUserQualifications,
-      ).toHaveBeenCalledTimes(1);
+      await expect(
+        service.assign(reference, [user.evmAddress as string]),
+      ).rejects.toThrow(
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, reference),
+      );
     });
 
-    it('should throw an error if the qualification is not found', async () => {
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(null);
+    it('should throw NO_WORKERS_FOUND error', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+      };
 
-      await expect(qualificationService.assign('ref1', [])).rejects.toThrow(
-        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
+
+      mockUserRepository.findWorkersByAddresses.mockResolvedValueOnce([]);
+
+      await expect(
+        service.assign(reference, [faker.finance.ethereumAddress()]),
+      ).rejects.toThrow(
+        new QualificationError(
+          QualificationErrorMessage.NO_WORKERS_FOUND,
+          reference,
+        ),
       );
     });
   });
 
   describe('unassign', () => {
-    beforeEach(() => {
-      qualificationRepository.saveUserQualifications = jest.fn();
+    it('should unassign user from a qualification', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+      };
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
+
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
+      mockUserRepository.findWorkersByAddresses.mockResolvedValueOnce([user]);
+
+      const result = await service.unassign(reference, [
+        user.evmAddress as string,
+      ]);
+
+      expect(result).toMatchObject({
+        success: [user.evmAddress],
+        failed: [],
+      });
     });
 
-    it('should unassign users from a qualification', async () => {
-      const reference = 'ref1';
-      const workerAddresses = ['address1'];
+    it('should throw NOT_FOUND error', async () => {
+      const reference = faker.string.uuid();
+      const user = generateWorkerUser({
+        privateKey: generateEthWallet().privateKey,
+      });
 
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = reference;
-      qualificationEntity.userQualifications = [
-        { id: 1 } as UserQualificationEntity,
-      ];
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(null);
 
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
-      userRepository.findWorkersByAddresses = jest
-        .fn()
-        .mockResolvedValue([{ id: 1 }]);
-
-      await qualificationService.unassign(reference, workerAddresses);
-
-      expect(
-        qualificationRepository.saveUserQualifications,
-      ).toHaveBeenCalledTimes(0);
+      await expect(
+        service.unassign(reference, [user.evmAddress as string]),
+      ).rejects.toThrow(
+        new QualificationError(QualificationErrorMessage.NOT_FOUND, reference),
+      );
     });
 
-    it('should unassign users from a qualification with null expiresAt', async () => {
-      const reference = 'ref1';
-      const workerAddresses = ['address1'];
+    it('should throw NO_WORKERS_FOUND error', async () => {
+      const reference = faker.string.uuid();
+      const qualificationEntity = {
+        reference,
+        title: faker.string.alpha(),
+        description: faker.string.alpha(),
+      };
 
-      const qualificationEntity = new QualificationEntity();
-      qualificationEntity.reference = reference;
-      qualificationEntity.expiresAt = null;
-      qualificationEntity.userQualifications = [
-        { id: 1 } as UserQualificationEntity,
-      ];
+      mockQualificationRepository.findByReference.mockResolvedValueOnce(
+        qualificationEntity as QualificationEntity,
+      );
 
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(qualificationEntity);
-      userRepository.findWorkersByAddresses = jest
-        .fn()
-        .mockResolvedValue([{ id: 1 }]);
+      mockUserRepository.findWorkersByAddresses.mockResolvedValueOnce([]);
 
-      await qualificationService.unassign(reference, workerAddresses);
-
-      expect(
-        qualificationRepository.saveUserQualifications,
-      ).toHaveBeenCalledTimes(0);
-    });
-
-    it('should throw an error if the qualification is not found', async () => {
-      qualificationRepository.findByReference = jest
-        .fn()
-        .mockResolvedValue(null);
-
-      await expect(qualificationService.unassign('ref1', [])).rejects.toThrow(
-        new QualificationError(QualificationErrorMessage.NOT_FOUND, 'ref1'),
+      await expect(
+        service.unassign(reference, [faker.finance.ethereumAddress()]),
+      ).rejects.toThrow(
+        new QualificationError(
+          QualificationErrorMessage.NO_WORKERS_FOUND,
+          reference,
+        ),
       );
     });
   });

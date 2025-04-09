@@ -68,6 +68,7 @@
     "rxjs": "^7.2.0",
     "typeorm": "^0.3.16",
     "typeorm-naming-strategies": "^4.1.0",
+    "uuid": "^11.1.0",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

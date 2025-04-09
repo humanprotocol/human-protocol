@@ -1,15 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { CreateQualificationDto, QualificationDto } from './qualification.dto';
-import { QualificationEntity } from './qualification.entity';
-import { QualificationRepository } from './qualification.repository';
-import { UserRepository, UserStatus } from '../user';
-import { UserQualificationEntity } from './user-qualification.entity';
+import { v4 as uuidV4 } from 'uuid';
+
 import { ServerConfigService } from '../../config/server-config.service';
+import logger from '../../logger';
+import { UserRepository, UserStatus } from '../user';
+
+import { QualificationEntity } from './qualification.entity';
 import {
   QualificationError,
   QualificationErrorMessage,
 } from './qualification.error';
-import logger from '../../logger';
+import { QualificationRepository } from './qualification.repository';
+import { UserQualificationEntity } from './user-qualification.entity';
+import { UserQualificationRepository } from './user-qualification.repository';
+
+type Qualification = {
+  reference: string;
+  title: string;
+  description: string;
+  expiresAt?: string;
+};
 
 @Injectable()
 export class QualificationService {
@@ -19,43 +29,36 @@ export class QualificationService {
 
   constructor(
     private readonly qualificationRepository: QualificationRepository,
+    private readonly userQualificationRepository: UserQualificationRepository,
     private readonly userRepository: UserRepository,
     private readonly serverConfigService: ServerConfigService,
   ) {}
 
-  async createQualification(
-    createQualificationDto: CreateQualificationDto,
-  ): Promise<QualificationDto> {
+  async createQualification(qualification: {
+    title: string;
+    description: string;
+    expiresAt?: Date;
+  }): Promise<Qualification> {
     const newQualification = new QualificationEntity();
-    newQualification.reference = createQualificationDto.reference;
-    newQualification.title = createQualificationDto.title;
-    newQualification.description = createQualificationDto.description;
+    newQualification.reference = uuidV4();
+    newQualification.title = qualification.title;
+    newQualification.description = qualification.description;
 
-    if (createQualificationDto.expiresAt) {
-      const providedExpirationTime = new Date(createQualificationDto.expiresAt);
-      const now = new Date();
+    if (qualification.expiresAt) {
+      const now = Date.now();
       const minimumValidUntil = new Date(
-        now.getTime() +
-          this.serverConfigService.qualificationMinValidity *
-            24 *
-            60 *
-            60 *
-            1000, // Convert days to milliseconds,
+        now + this.serverConfigService.qualificationMinValidity,
       );
 
-      if (providedExpirationTime <= minimumValidUntil) {
+      if (qualification.expiresAt <= minimumValidUntil) {
         const errorMessage =
           QualificationErrorMessage.INVALID_EXPIRATION_TIME.replace(
-            '%minValidity%',
-            this.serverConfigService.qualificationMinValidity.toString(),
+            '%minExpirationDate%',
+            minimumValidUntil.toISOString(),
           );
-        throw new QualificationError(
-          errorMessage as QualificationErrorMessage,
-          createQualificationDto.reference,
-        );
-      } else {
-        newQualification.expiresAt = providedExpirationTime;
+        throw new QualificationError(errorMessage as QualificationErrorMessage);
       }
+      newQualification.expiresAt = qualification.expiresAt;
     }
 
     await this.qualificationRepository.createUnique(newQualification);
@@ -67,10 +70,10 @@ export class QualificationService {
     };
   }
 
-  async getQualifications(): Promise<QualificationDto[]> {
+  async getQualifications(): Promise<Qualification[]> {
     try {
       const qualificationEntities =
-        await this.qualificationRepository.getQualifications();
+        await this.qualificationRepository.getActiveQualifications();
 
       return qualificationEntities.map((qualificationEntity) => {
         return {
@@ -86,7 +89,7 @@ export class QualificationService {
     }
   }
 
-  async delete(reference: string): Promise<void> {
+  async deleteQualification(reference: string): Promise<void> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
@@ -97,7 +100,11 @@ export class QualificationService {
       );
     }
 
-    if (qualificationEntity.userQualifications.length > 0) {
+    const userQualifications =
+      await this.userQualificationRepository.findByQualification(
+        qualificationEntity.id,
+      );
+    if (userQualifications.length > 0) {
       throw new QualificationError(
         QualificationErrorMessage.CANNOT_DETELE_ASSIGNED_QUALIFICATION,
         reference,
@@ -107,7 +114,13 @@ export class QualificationService {
     await this.qualificationRepository.deleteOne(qualificationEntity);
   }
 
-  async assign(reference: string, workerAddresses: string[]): Promise<void> {
+  async assign(
+    reference: string,
+    workerAddresses: string[],
+  ): Promise<{
+    success: string[];
+    failed: { evmAddress: string; reason: string }[];
+  }> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
@@ -128,43 +141,46 @@ export class QualificationService {
       );
     }
 
-    const newUserQualifications = users
-      .filter((user) => {
+    const result = {
+      success: [] as string[],
+      failed: [] as { evmAddress: string; reason: string }[],
+    };
+
+    for (const user of users) {
+      try {
         if (user.status !== UserStatus.ACTIVE) {
-          return false;
+          throw new Error('User is not in active status');
         }
-
-        const hasDesiredQualification =
-          qualificationEntity.userQualifications.some(
-            (uq) => uq.user.id === user.id,
-          );
-        if (hasDesiredQualification) {
-          return false;
-        }
-
-        return true;
-      })
-      .map((user) => {
         const userQualification = new UserQualificationEntity();
-        userQualification.user = user;
-        userQualification.qualification = qualificationEntity;
+        userQualification.qualificationId = qualificationEntity.id;
+        userQualification.userId = user.id;
 
-        /**
-         * TODO: remove this when using base repository
-         */
-        const date = new Date();
-        userQualification.createdAt = date;
-        userQualification.updatedAt = date;
+        await this.userQualificationRepository.createUnique(userQualification);
 
-        return userQualification;
-      });
+        result.success.push(user.evmAddress as string);
+      } catch (error) {
+        this.logger.error('Cannot assign user to qualification', {
+          user: user.id,
+          qualification: reference,
+          reason: error.message,
+        });
 
-    await this.qualificationRepository.saveUserQualifications(
-      newUserQualifications,
-    );
+        result.failed.push({
+          evmAddress: user.evmAddress as string,
+          reason: error.message,
+        });
+      }
+    }
+    return result;
   }
 
-  async unassign(reference: string, workerAddresses: string[]): Promise<void> {
+  async unassign(
+    reference: string,
+    workerAddresses: string[],
+  ): Promise<{
+    success: string[];
+    failed: { evmAddress: string; reason: string }[];
+  }> {
     const qualificationEntity =
       await this.qualificationRepository.findByReference(reference);
 
@@ -185,9 +201,31 @@ export class QualificationService {
       );
     }
 
-    await this.qualificationRepository.removeUserQualifications(
-      users,
-      qualificationEntity,
-    );
+    const result = {
+      success: [] as string[],
+      failed: [] as { evmAddress: string; reason: string }[],
+    };
+
+    for (const user of users) {
+      try {
+        await this.userQualificationRepository.removeByUserAndQualification(
+          user.id,
+          qualificationEntity.id,
+        );
+        result.success.push(user.evmAddress as string);
+      } catch (error) {
+        this.logger.error('Cannot unassign user from qualification', {
+          user: user.id,
+          qualification: reference,
+          reason: error.message,
+        });
+        result.failed.push({
+          evmAddress: user.evmAddress as string,
+          reason: error.message,
+        });
+      }
+    }
+
+    return result;
   }
 }

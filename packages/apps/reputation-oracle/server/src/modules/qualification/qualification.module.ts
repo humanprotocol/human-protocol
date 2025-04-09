@@ -1,14 +1,18 @@
 import { Module } from '@nestjs/common';
 
 import { UserModule } from '../user';
-
-import { QualificationService } from './qualification.service';
-import { QualificationRepository } from './qualification.repository';
 import { QualificationController } from './qualification.controller';
+import { QualificationRepository } from './qualification.repository';
+import { QualificationService } from './qualification.service';
+import { UserQualificationRepository } from './user-qualification.repository';
 
 @Module({
   imports: [UserModule],
-  providers: [QualificationService, QualificationRepository],
+  providers: [
+    QualificationService,
+    QualificationRepository,
+    UserQualificationRepository,
+  ],
   controllers: [QualificationController],
 })
 export class QualificationModule {}

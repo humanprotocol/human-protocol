@@ -50,10 +50,16 @@ export class ServerConfigService {
   }
 
   /**
-   * The minimum validity period (in days) for a qualification.
-   * Default: 1 day
+   * The minimum validity period (in ms) for a qualification.
+   * Default: 1 day (24 * 60 * 60 * 1000 ms)
    */
   get qualificationMinValidity(): number {
-    return +this.configService.get<number>('QUALIFICATION_MIN_VALIDITY', 1);
+    return (
+      +this.configService.get('QUALIFICATION_MIN_VALIDITY', 1) *
+      24 *
+      60 *
+      60 *
+      1000
+    );
   }
 }
