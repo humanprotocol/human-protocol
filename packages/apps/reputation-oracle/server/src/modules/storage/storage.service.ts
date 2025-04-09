@@ -7,7 +7,6 @@ import logger from '../../logger';
 import * as httpUtils from '../../utils/http';
 
 import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
-import { Web3Service } from '../web3/web3.service';
 
 import { MinioErrorCodes } from './minio.constants';
 
@@ -19,7 +18,6 @@ export class StorageService {
 
   constructor(
     private readonly s3ConfigService: S3ConfigService,
-    private readonly web3Service: Web3Service,
     private readonly pgpEncryptionService: PgpEncryptionService,
   ) {
     this.minioClient = new Minio.Client({
