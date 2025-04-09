@@ -21,7 +21,7 @@ class FileDownloadError extends BaseError {
   }
 }
 
-export function isValidUrl(maybeUrl: string, protocols?: string[]): boolean {
+function isValidUrl(maybeUrl: string, protocols?: string[]): boolean {
   try {
     const url = new URL(maybeUrl);
 
