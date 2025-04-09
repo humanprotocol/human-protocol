@@ -64,13 +64,7 @@ const WithdrawModal: FC<Props> = ({ open, onClose }) => {
         <Typography variant="subtitle2" color="primary" mb={1}>
           Withdraw amount:
         </Typography>
-        <Typography
-          component="p"
-          variant="h4"
-          fontSize={34}
-          fontWeight={600}
-          color="primary"
-        >
+        <Typography component="p" variant="h2" color="primary">
           {withdrawableAmount} HMT
         </Typography>
       </>
