@@ -22,13 +22,27 @@ import {
 } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
 
-import { MOCK_PGP_PUBLIC_KEY, mockPgpConfigService } from './fixtures';
 import { PgpEncryptionService } from './pgp-encryption.service';
 
 describe('PgpEncryptionService', () => {
+  let mockPgpPublicKey: string;
+  let mockPgpConfigService: Omit<PGPConfigService, 'configService'>;
   let pgpEncryptionService: PgpEncryptionService;
 
   beforeAll(async () => {
+    const pgpPassphrase = faker.internet.password();
+    const pgpKeyPairData = await EncryptionUtils.generateKeyPair(
+      faker.string.sample(),
+      faker.internet.email(),
+      pgpPassphrase,
+    );
+    mockPgpPublicKey = pgpKeyPairData.publicKey;
+    mockPgpConfigService = {
+      encrypt: true,
+      privateKey: pgpKeyPairData.privateKey,
+      passphrase: pgpKeyPairData.passphrase,
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
@@ -81,7 +95,7 @@ describe('PgpEncryptionService', () => {
     it('should return decrypted data if encrypted', async () => {
       const data = faker.lorem.words();
       const encryptedData = await EncryptionUtils.encrypt(data, [
-        MOCK_PGP_PUBLIC_KEY,
+        mockPgpPublicKey,
       ]);
 
       const decryptedData = await pgpEncryptionService.maybeDecryptFile(
