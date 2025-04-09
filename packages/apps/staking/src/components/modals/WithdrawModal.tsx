@@ -20,8 +20,7 @@ const WithdrawModal: FC<Props> = ({ open, onClose }) => {
   const { changeStatus, isIdle, isLoading, isSuccess, isError } =
     useModalRequestStatus();
 
-  const isWithdrawalDisabled =
-    isLoading || (Number(withdrawableAmount) <= 0 && !isSuccess);
+  const isWithdrawalDisabled = isLoading || !amount;
 
   useEffect(() => {
     if (withdrawableAmount && !amount) {
