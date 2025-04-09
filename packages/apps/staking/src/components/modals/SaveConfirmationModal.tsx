@@ -6,10 +6,10 @@ import { Button, Box, Typography } from '@mui/material';
 type Props = {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirmSave: () => void;
 };
 
-const DeleteConfirmationModal: FC<Props> = ({ open, onClose, onConfirm }) => {
+const SaveConfirmationModal: FC<Props> = ({ open, onClose, onConfirmSave }) => {
   return (
     <BaseModal
       open={open}
@@ -28,18 +28,19 @@ const DeleteConfirmationModal: FC<Props> = ({ open, onClose, onConfirm }) => {
       </Typography>
       <Typography variant="subtitle2" mb={4} p={1}>
         You are about to delete a Key/Value from your KV Store. <br />
-        This action can&apos;t be undone, do you want to continue?
+        After you save this action can&apos;t be undone, do you want to
+        continue?
       </Typography>
       <Box display="flex" gap={1}>
         <Button variant="outlined" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={onConfirm}>
-          Delete
+        <Button variant="contained" onClick={onConfirmSave}>
+          Save
         </Button>
       </Box>
     </BaseModal>
   );
 };
 
-export default DeleteConfirmationModal;
+export default SaveConfirmationModal;

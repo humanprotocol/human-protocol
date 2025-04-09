@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 
 import BaseModal from './BaseModal';
-import DeleteConfirmationModal from './DeleteConfirmationModal';
+import SaveConfirmationModal from './SaveConfirmationModal';
 import { ModalError, ModalLoading, ModalSuccess } from '../ModalState';
 import {
   ModalRequestStatus,
@@ -36,16 +36,16 @@ type Props = {
   onSave: (keys: string[], values: string[]) => Promise<void>;
 };
 
+type Field = {
+  key: string;
+  value: string;
+  isCustom?: boolean;
+};
+
 const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
-  const [formData, setFormData] = useState<
-    { key: string; value: string; isCustom?: boolean }[]
-  >([]);
-  const [pendingChanges, setPendingChanges] = useState<
-    { key: string; value: string }[]
-  >([]);
-  const [itemToDeleteIndex, setItemToDeleteIndex] = useState<number | null>(
-    null
-  );
+  const [formData, setFormData] = useState<Field[]>([]);
+  const [pendingChanges, setPendingChanges] = useState<Field[]>([]);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const formContainerRef = useRef<HTMLDivElement | null>(null);
   const { showError } = useSnackbar();
   const { changeStatus, isIdle, isLoading, isSuccess, isError } =
@@ -139,16 +139,9 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
   };
 
   const handleDelete = (index: number) => {
-    setItemToDeleteIndex(index);
-  };
-
-  const handleConfirmDelete = () => {
-    if (itemToDeleteIndex !== null) {
-      const updatedData = formData.filter((_, i) => i !== itemToDeleteIndex);
-      updatePendingChanges(formData[itemToDeleteIndex].key, '');
-      setFormData(updatedData);
-      setItemToDeleteIndex(null);
-    }
+    const updatedData = formData.filter((_, i) => i !== index);
+    updatePendingChanges(formData[index].key, '');
+    setFormData(updatedData);
   };
 
   const handleAddField = () => {
@@ -162,8 +155,21 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
   };
 
   const handleSave = async () => {
+    const hasDeletedItems = initialData.some(
+      (initialItem) =>
+        !formData.some((currentItem) => currentItem.key === initialItem.key)
+    );
+    if (hasDeletedItems) {
+      setShowConfirmationModal(true);
+    } else {
+      await handleConfirmSave();
+    }
+  };
+
+  const handleConfirmSave = async () => {
     if (isLoading) return;
 
+    setShowConfirmationModal(false);
     changeStatus(ModalRequestStatus.Loading);
     try {
       const customChanges = formData
@@ -385,12 +391,13 @@ const KVStoreModal: FC<Props> = ({ open, onClose, initialData, onSave }) => {
           </Button>
         )}
       </Box>
-
-      <DeleteConfirmationModal
-        open={itemToDeleteIndex !== null}
-        onClose={() => setItemToDeleteIndex(null)}
-        onConfirm={handleConfirmDelete}
-      />
+      {showConfirmationModal && (
+        <SaveConfirmationModal
+          open={showConfirmationModal}
+          onClose={() => setShowConfirmationModal(false)}
+          onConfirmSave={handleConfirmSave}
+        />
+      )}
     </BaseModal>
   );
 };
