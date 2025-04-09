@@ -23,6 +23,8 @@ import { CvatManifest } from '../../common/interfaces/manifest';
 import { CvatAnnotationMeta } from '../../common/interfaces/job-result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
+import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
+import * as httpUtils from '../../utils/http';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -65,6 +67,10 @@ describe('PayoutService', () => {
           },
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
+        {
+          provide: PgpEncryptionService,
+          useValue: createMock<PgpEncryptionService>(),
+        },
         PayoutService,
       ],
     }).compile();
@@ -342,7 +348,7 @@ describe('PayoutService', () => {
         .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(intermediateResults);
 
-      jest.spyOn(storageService, 'uploadJobSolutions').mockResolvedValue({
+      jest.spyOn(payoutService, 'uploadJobResults').mockResolvedValue({
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
       });
@@ -469,13 +475,12 @@ describe('PayoutService', () => {
         ],
       };
 
-      jest.spyOn(storageService, 'copyFileFromURLToBucket').mockResolvedValue({
+      jest.spyOn(httpUtils, 'downloadFile').mockResolvedValue(results);
+
+      jest.spyOn(payoutService, 'uploadJobResults').mockResolvedValue({
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
       });
-      jest
-        .spyOn(storageService, 'downloadJsonLikeData')
-        .mockResolvedValue(results);
 
       const result = await payoutService.saveResultsCvat(
         chainId,
