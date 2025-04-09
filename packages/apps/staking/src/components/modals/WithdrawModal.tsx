@@ -1,12 +1,5 @@
-import { FC, ChangeEvent, useState } from 'react';
-import {
-  Box,
-  Button,
-  InputAdornment,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { parseUnits } from 'ethers';
+import { FC, useState, useEffect } from 'react';
+import { Box, Button, Typography } from '@mui/material';
 
 import BaseModal from './BaseModal';
 import { ModalError, ModalLoading, ModalSuccess } from '../ModalState';
@@ -22,17 +15,22 @@ type Props = {
 };
 
 const WithdrawModal: FC<Props> = ({ open, onClose }) => {
-  const [amount, setAmount] = useState('');
-  const [amountError, setAmountError] = useState('');
   const { withdrawableAmount, handleWithdraw } = useStakeContext();
+  const [amount, setAmount] = useState(0);
   const { changeStatus, isIdle, isLoading, isSuccess, isError } =
     useModalRequestStatus();
 
-  const isWithdrawalDisabled = !!amountError || !amount || isLoading;
+  const isWithdrawalDisabled = isLoading || Number(withdrawableAmount) <= 0;
+
+  useEffect(() => {
+    if (withdrawableAmount && !amount) {
+      setAmount(Number(withdrawableAmount));
+    }
+  }, [withdrawableAmount, amount]);
 
   const handleClose = () => {
-    setAmount('');
-    setAmountError('');
+    if (isLoading) return;
+
     changeStatus(ModalRequestStatus.Idle);
     onClose();
   };
@@ -60,67 +58,21 @@ const WithdrawModal: FC<Props> = ({ open, onClose }) => {
     }
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setAmount(value);
-
-    const valueInWei = parseUnits(value || '0', 'ether');
-    const withdrawableAmountInWei = parseUnits(
-      withdrawableAmount.toString(),
-      'ether'
-    );
-
-    if (valueInWei <= withdrawableAmountInWei) {
-      setAmountError('');
-    } else {
-      setAmountError('Amount exceeds available balance');
-    }
-  };
-
-  const handleMaxClick = () => setAmount(withdrawableAmount.toString());
-
   const renderIdleState = () => {
     return (
       <>
-        <Typography variant="subtitle2" color="primary" mb={2} py={1}>
-          Available amount: {withdrawableAmount} HMT
+        <Typography variant="subtitle2" color="primary" mb={1}>
+          Withdraw amount:
         </Typography>
-
-        <TextField
-          autoFocus
-          fullWidth
-          label="Amount to withdraw"
-          type="number"
-          value={amount}
-          onChange={handleInputChange}
-          error={!!amountError}
-          helperText={amountError || ' '}
-          inputProps={{ max: withdrawableAmount, min: 0 }}
-          FormHelperTextProps={{
-            sx: {
-              marginTop: 0,
-              height: 16,
-            },
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleMaxClick}
-                  sx={{
-                    fontSize: '0.75rem',
-                    padding: '4px 10px',
-                    minWidth: 'unset',
-                  }}
-                >
-                  Max
-                </Button>
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Typography
+          component="p"
+          variant="h4"
+          fontSize={34}
+          fontWeight={600}
+          color="primary"
+        >
+          {withdrawableAmount} HMT
+        </Typography>
       </>
     );
   };
@@ -170,7 +122,7 @@ const WithdrawModal: FC<Props> = ({ open, onClose }) => {
         variant="contained"
         size="large"
         fullWidth
-        sx={{ mt: isIdle ? 2 : 4, width: '185px' }}
+        sx={{ mt: 4, width: '185px' }}
         onClick={handleModalAction}
         disabled={isWithdrawalDisabled}
       >

@@ -16,7 +16,7 @@ const KVStore: FC = () => {
         pb={8}
         bgcolor="#f6f7fe"
         borderRadius="20px"
-        minHeight="calc(100dvh - 210px)"
+        minHeight="calc(100dvh - 212px)"
       >
         <Box display="flex" alignItems="center" gap={2} mb={4}>
           <KVStoreIcon sx={{ width: 66, height: 66 }} />
