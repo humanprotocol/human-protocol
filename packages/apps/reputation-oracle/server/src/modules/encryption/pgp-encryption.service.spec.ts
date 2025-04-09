@@ -11,7 +11,7 @@ jest.mock('@human-protocol/sdk', () => {
 });
 
 import { faker } from '@faker-js/faker';
-import { EncryptionUtils } from '@human-protocol/sdk';
+import { Encryption, EncryptionUtils, KVStoreUtils } from '@human-protocol/sdk';
 import { Test } from '@nestjs/testing';
 
 import { PGPConfigService } from '../../config/pgp-config.service';
@@ -23,6 +23,8 @@ import {
 import { Web3Service } from '../web3/web3.service';
 
 import { PgpEncryptionService } from './pgp-encryption.service';
+
+const mockedKVStoreUtils = jest.mocked(KVStoreUtils);
 
 describe('PgpEncryptionService', () => {
   let mockPgpPublicKey: string;
@@ -64,22 +66,22 @@ describe('PgpEncryptionService', () => {
     await pgpEncryptionService.onModuleInit();
   });
 
-  describe('encrypt', () => {
-    it('should not encrypt if encryption disabled via config', async () => {
-      const originalConfigValue = mockPgpConfigService.encrypt;
-      (mockPgpConfigService as any).encrypt = false;
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-      const chainId = generateTestnetChainId();
-      const content = faker.lorem.words();
+  describe('decrypt', () => {
+    it('should decrypt data that encrypted for reputation oracle', async () => {
+      const data = faker.lorem.words();
+      const encryptedData = await EncryptionUtils.encrypt(data, [
+        mockPgpPublicKey,
+      ]);
 
-      const result = await pgpEncryptionService.encrypt(
-        Buffer.from(content),
-        chainId,
+      const decryptedData = await pgpEncryptionService.maybeDecryptFile(
+        Buffer.from(encryptedData),
       );
 
-      expect(result).toEqual(content);
-
-      (mockPgpConfigService as any).encrypt = originalConfigValue;
+      expect(decryptedData.toString()).toEqual(data);
     });
   });
 
@@ -92,7 +94,7 @@ describe('PgpEncryptionService', () => {
       expect(result).toEqual(data);
     });
 
-    it('should return decrypted data if encrypted', async () => {
+    it('should return decrypted data if encrypted for Reputation Oracle', async () => {
       const data = faker.lorem.words();
       const encryptedData = await EncryptionUtils.encrypt(data, [
         mockPgpPublicKey,
@@ -103,6 +105,141 @@ describe('PgpEncryptionService', () => {
       );
 
       expect(decryptedData.toString()).toEqual(data);
+    });
+  });
+
+  describe('encrypt', () => {
+    describe('when encryption disabled via config', () => {
+      let originalConfigValue: boolean;
+
+      beforeAll(() => {
+        originalConfigValue = mockPgpConfigService.encrypt;
+        (mockPgpConfigService as any).encrypt = false;
+      });
+
+      afterAll(() => {
+        (mockPgpConfigService as any).encrypt = originalConfigValue;
+      });
+
+      it('should not encrypt content', async () => {
+        const chainId = generateTestnetChainId();
+        const content = faker.lorem.words();
+
+        const result = await pgpEncryptionService.encrypt(
+          Buffer.from(content),
+          chainId,
+        );
+
+        expect(result).toEqual(content);
+      });
+    });
+
+    describe('when encryption enabled via config', () => {
+      const EXPECTED_PGP_PUBLIC_KEY_ERROR_MESSAGE =
+        'Failed to get PGP public key for oracle';
+
+      let originalConfigValue: boolean;
+
+      beforeAll(() => {
+        originalConfigValue = mockPgpConfigService.encrypt;
+        (mockPgpConfigService as any).encrypt = true;
+      });
+
+      afterAll(() => {
+        (mockPgpConfigService as any).encrypt = originalConfigValue;
+      });
+
+      it('should encrypt with reputation oracle public key as default', async () => {
+        mockedKVStoreUtils.getPublicKey.mockImplementation(
+          async (_chainId, address) => {
+            if (address === mockWeb3ConfigService.operatorAddress) {
+              return mockPgpPublicKey;
+            }
+            return '';
+          },
+        );
+
+        const chainId = generateTestnetChainId();
+        const content = faker.lorem.words();
+
+        const encryptedContent = await pgpEncryptionService.encrypt(
+          Buffer.from(content),
+          chainId,
+        );
+        expect(EncryptionUtils.isEncrypted(encryptedContent)).toBe(true);
+
+        const decryptedContent =
+          await pgpEncryptionService.decrypt(encryptedContent);
+        expect(decryptedContent.toString()).toEqual(content);
+      });
+
+      it('should throw if default public key is missing', async () => {
+        const chainId = generateTestnetChainId();
+        const content = faker.lorem.words();
+
+        await expect(
+          pgpEncryptionService.encrypt(Buffer.from(content), chainId),
+        ).rejects.toThrow(EXPECTED_PGP_PUBLIC_KEY_ERROR_MESSAGE);
+      });
+
+      it('should throw if failing to get default public key', async () => {
+        mockedKVStoreUtils.getPublicKey.mockRejectedValueOnce(
+          new Error('Ooops'),
+        );
+
+        const chainId = generateTestnetChainId();
+        const content = faker.lorem.words();
+
+        await expect(
+          pgpEncryptionService.encrypt(Buffer.from(content), chainId),
+        ).rejects.toThrow(EXPECTED_PGP_PUBLIC_KEY_ERROR_MESSAGE);
+      });
+
+      it('should encrypt for provided oracle and default reputation oracle', async () => {
+        const pgpPassphrase = faker.internet.password();
+        const pgpKeyPairData = await EncryptionUtils.generateKeyPair(
+          faker.string.sample(),
+          faker.internet.email(),
+          pgpPassphrase,
+        );
+        const otherOracleAddress = faker.finance.ethereumAddress();
+
+        mockedKVStoreUtils.getPublicKey.mockImplementation(
+          async (_chainId, address) => {
+            if (address === otherOracleAddress) {
+              return pgpKeyPairData.publicKey;
+            }
+            if (address === mockWeb3ConfigService.operatorAddress) {
+              return mockPgpPublicKey;
+            }
+            return '';
+          },
+        );
+
+        const chainId = generateTestnetChainId();
+        const content = faker.lorem.words();
+
+        const encryptedContent = await pgpEncryptionService.encrypt(
+          Buffer.from(content),
+          chainId,
+          [otherOracleAddress],
+        );
+        expect(EncryptionUtils.isEncrypted(encryptedContent)).toBe(true);
+
+        const repOracleDecryptedContent =
+          await pgpEncryptionService.decrypt(encryptedContent);
+        expect(repOracleDecryptedContent.toString()).toEqual(content);
+
+        const encryptionSdk = await Encryption.build(
+          pgpKeyPairData.privateKey,
+          pgpKeyPairData.passphrase,
+        );
+        const otherOracleDecryptedContent =
+          await encryptionSdk.decrypt(encryptedContent);
+        expect(Buffer.from(otherOracleDecryptedContent).toString()).toEqual(
+          content,
+        );
+      });
     });
   });
 });
