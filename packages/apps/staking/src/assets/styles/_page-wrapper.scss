@@ -1,51 +1,40 @@
 @use 'const';
 
-.page-wrapper {
-	margin: 0 56px;
-	min-height: calc(100vh - 206px);
-	border-bottom-left-radius: 20px;
-	border-bottom-right-radius: 20px;
-	display: flex;
-	flex-direction: column;
-	padding: 14px 0;
-	height: 100vh;
+.layout {
+	min-height: 100dvh;
 
-	@media (max-width: 1280px) {
-		border-radius: 0;
-		height: auto;
+	& .MuiToolbar-root {
+		padding: 0;
 	}
 
 	.container {
-		margin: auto;
-		padding: 30px 16px 100px;
-
-		@media (max-width: 1100px) {
-			padding: 30px 16px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 0px 56px;
+		
+		@media (min-width: 601px) and (max-width: 1200px) {
+			padding: 0px 40px;
 		}
-	}
 
-	@media (max-width: 1280px) {
-		min-height: calc(100vh - 386px);
-		margin: 0 24px;
-	}
-
-	@media (max-width: 600px) {
-		margin: 0;
+		@media (max-width: 600px) {
+			padding: 0px 24px
+		}
 	}
 }
 
 .violet-header {
-	z-index: 10;
 	border-radius: 20px;
 	background-size: 100% 100%;
-	background: linear-gradient(to bottom, const.$primary 252px, const.$maWhite 1px);
+	background: linear-gradient(to bottom, const.$primary 254px, const.$maWhite 1px);
+  min-height: calc(100dvh - 212px);
+  padding-top: 32px;
 
 	@media (max-width: 600px) {
-		border-top-left-radius: 0;
-		border-top-right-radius: 0;
+		border-radius: 0;
+		height: auto;
+    margin-left: -24px;
+    margin-right: -24px;
+    padding-top: 16px;
+    padding-bottom: 32px;
 	}
-}
-
-.standard-background {
-	background-color: const.$maWhite;
 }

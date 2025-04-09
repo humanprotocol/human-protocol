@@ -1,25 +1,29 @@
 @use 'const';
 
-footer{
-  min-height: 124px;
-  margin-top: auto;
-  @media(max-width: 1100px) {
-    padding: 0 24px;
+footer {
+
+  @media(max-width: 600px) {
     flex-direction: column-reverse;
     justify-content: center;
     align-items: center;
     background-color: const.$maWhite;
+    margin-top: 32px;
   }
 
   .footer-wrapper {
     display: flex;
-    padding: 32px 18px;
+    padding: 32px 44px;
     flex-direction: row;
     justify-content: space-between;
     align-items: stretch;
 
-    @media (max-width: 1100px) {
+    @media (min-width: 601px) and (max-width: 900px) {
+      padding: 32px 24px;
+    }
+
+    @media (max-width: 600px) {
       flex-direction: column-reverse;
+      padding: 32px 16px;
     }
   }
 
@@ -33,42 +37,17 @@ footer{
     justify-content: flex-start;
     gap: 30px;
     margin-bottom: 0;
-    align-items: flex-end;
+    align-items: center;
 
     @media (max-width: 600px) {
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 32px;
     }
-
-    @media (max-width: 1100px) {
-      margin-bottom: 32px;
-    }
   }
 
-  .footer-link, .footer-icon{
+  .footer-link, .footer-icon {
     display: flex;
     flex-wrap: wrap;
-    span {
-      cursor: pointer;
-      font-size: 12px;
-    }
-    svg {
-      font-size: 32px;
-      cursor: pointer;
-    }
-  }
-
-  @media (max-width: 1100px) {
-    .footer-link-wrapper{
-      .footer-link{
-        flex-direction: column;
-      }
-    }
-  }
-
-  .footer-link, .footer-icon{
-    justify-content: flex-start;
-    align-items: flex-start;
   }
 }
