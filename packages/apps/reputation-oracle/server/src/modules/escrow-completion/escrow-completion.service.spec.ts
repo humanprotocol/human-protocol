@@ -33,6 +33,7 @@ import { ReputationConfigService } from '../../config/reputation-config.service'
 import { PGPConfigService } from '../../config/pgp-config.service';
 import { S3ConfigService } from '../../config/s3-config.service';
 import { EscrowPayoutsBatchRepository } from './escrow-payouts-batch.repository';
+import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -168,6 +169,7 @@ describe('escrowCompletionService', () => {
         ReputationConfigService,
         S3ConfigService,
         PGPConfigService,
+        PgpEncryptionService,
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
