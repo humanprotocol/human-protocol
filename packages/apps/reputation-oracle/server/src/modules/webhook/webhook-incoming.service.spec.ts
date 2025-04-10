@@ -72,13 +72,16 @@ describe('WebhookIncomingService', () => {
         PgpEncryptionService,
         ReputationService,
         HttpService,
-        StorageService,
         ReputationConfigService,
         S3ConfigService,
         PGPConfigService,
         {
           provide: EscrowCompletionRepository,
           useValue: createMock<EscrowCompletionRepository>(),
+        },
+        {
+          provide: StorageService,
+          useValue: createMock<StorageService>(),
         },
         {
           provide: EscrowPayoutsBatchRepository,

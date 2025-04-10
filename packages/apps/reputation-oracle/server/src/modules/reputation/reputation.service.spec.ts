@@ -1,6 +1,6 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
@@ -8,12 +8,6 @@ import { ReputationEntity } from './reputation.entity';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_URL,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
   mockConfig,
 } from '../../../test/constants';
 import {
@@ -53,18 +47,6 @@ describe('ReputationService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-      ],
       providers: [
         {
           provide: ConfigService,
