@@ -69,7 +69,7 @@ export async function downloadFile<T extends DownloadFileOptions>(
     } else if (error instanceof AxiosError) {
       throw new FileDownloadError(url, formatAxiosError(error));
     } else {
-      throw new FileDownloadError(url, error.cause || error.message);
+      throw error;
     }
   }
 }
