@@ -1,26 +1,24 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
 import { type SendResetLinkDto } from '../schemas';
+import { passwordService } from '../../services/password.service';
 
-const SendResetLinkSuccessResponseSchema = z.unknown();
-
-function sendResetLinkMutationFn(data: SendResetLinkDto) {
-  return apiClient(apiPaths.worker.sendResetLink.path, {
-    successSchema: SendResetLinkSuccessResponseSchema,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
-}
+export const SendResetLinkSuccessResponseSchema = z.unknown();
 
 export function useSendResetLinkMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: sendResetLinkMutationFn,
+    mutationFn: async (data: SendResetLinkDto) => {
+      try {
+        return await passwordService.sendResetLink(data);
+      } catch (error) {
+        throw new Error('Failed to send reset link');
+      }
+    },
     onSuccess: async (_, { email }) => {
       navigate(routerPaths.worker.sendResetLinkSuccess, { state: { email } });
       await queryClient.invalidateQueries();
