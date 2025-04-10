@@ -1,35 +1,32 @@
-/* eslint-disable camelcase -- ...*/
 import { useMutation } from '@tanstack/react-query';
-import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { useWeb3Auth } from '@/modules/auth-web3/hooks/use-web3-auth';
 import { routerPaths } from '@/router/router-paths';
-
-export const web3SignInSuccessResponseSchema = z.object({
-  access_token: z.string(),
-  refresh_token: z.string(),
-});
-
-export type Web3SignInSuccessResponse = z.infer<
-  typeof web3SignInSuccessResponseSchema
->;
+import { signupService } from '@/modules/signup/services/signup.service';
+import { ApiClientError } from '@/api';
 
 export function useWeb3SignUp() {
   const { address, chainId } = useConnectedWallet();
   const { signIn } = useWeb3Auth();
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: async ({ signature }: { signature: string }) =>
-      apiClient(apiPaths.operator.web3Auth.signUp.path, {
-        successSchema: web3SignInSuccessResponseSchema,
-        options: {
-          method: 'POST',
-          body: JSON.stringify({ address, signature }),
-        },
-      }),
+    mutationFn: async ({ signature }: { signature: string }) => {
+      try {
+        const response = await signupService.operatorWeb3SignUp({
+          message: '',
+          signature,
+          address,
+        });
+        return response;
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          throw new Error(String(error.data));
+        }
+
+        throw new Error('Failed to sign up operator with web3');
+      }
+    },
     onSuccess: (successResponse) => {
       signIn(successResponse);
       navigate(routerPaths.operator.profile);
