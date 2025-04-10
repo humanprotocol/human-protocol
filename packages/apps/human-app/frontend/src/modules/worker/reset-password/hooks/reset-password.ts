@@ -1,11 +1,10 @@
-/* eslint-disable camelcase -- ... */
+/* eslint-disable camelcase */
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { routerPaths } from '@/router/router-paths';
+import { passwordService } from '../../services/password.service';
 
 export const resetPasswordDtoSchema = z
   .object({
@@ -29,23 +28,25 @@ export const resetPasswordDtoSchema = z
 
 export type ResetPasswordDto = z.infer<typeof resetPasswordDtoSchema>;
 
-const ResetPasswordSuccessResponseSchema = z.unknown();
-
-function resetPasswordMutationFn(
-  data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
-) {
-  return apiClient(apiPaths.worker.resetPassword.path, {
-    successSchema: ResetPasswordSuccessResponseSchema,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
-}
+export const ResetPasswordSuccessResponseSchema = z.unknown();
 
 export function useResetPasswordMutation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: resetPasswordMutationFn,
+    mutationFn: async (
+      data: Omit<ResetPasswordDto, 'confirmPassword'> & { token: string }
+    ) => {
+      try {
+        return await passwordService.resetPassword({
+          token: data.token,
+          password: data.password,
+        });
+      } catch (error) {
+        throw new Error('Failed to reset password');
+      }
+    },
     onSuccess: async () => {
       navigate(routerPaths.worker.resetPasswordSuccess);
       await queryClient.invalidateQueries();
