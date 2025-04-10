@@ -1,5 +1,5 @@
 import { t } from 'i18next';
-import { Typography } from '@mui/material';
+import { useEffect } from 'react';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { Button } from '@/shared/components/ui/button';
 import type { SignatureData } from '@/api/hooks/use-prepare-signature';
@@ -7,14 +7,15 @@ import {
   PrepareSignatureType,
   usePrepareSignature,
 } from '@/api/hooks/use-prepare-signature';
+import { TopNotificationType, useNotification } from '@/shared/hooks';
 import { useDisableWeb3Operator } from '../hooks';
 
 export function ProfileDisableButton() {
   const { address, signMessage } = useConnectedWallet();
   const {
     data: signatureData,
-    isError: isSignatureDataError,
     isPending: isSignatureDataPending,
+    error: signatureDataError,
   } = usePrepareSignature({
     address,
     type: PrepareSignatureType.DISABLE_OPERATOR,
@@ -22,20 +23,25 @@ export function ProfileDisableButton() {
 
   const {
     mutate: disableOperatorMutation,
-    isError: isDisableOperatorError,
+    error: disableOperatorError,
     isPending: isDisableOperatorPending,
   } = useDisableWeb3Operator();
+
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    if (Boolean(signatureDataError) || Boolean(disableOperatorError)) {
+      showNotification({
+        message: t('operator.profile.disable.cannotDisable'),
+        type: TopNotificationType.WARNING,
+      });
+    }
+  }, [signatureDataError, disableOperatorError, showNotification]);
 
   const disableOperator = async (signaturePayload: SignatureData) => {
     const signature = await signMessage(JSON.stringify(signaturePayload));
     disableOperatorMutation({ signature: signature ?? '' });
   };
-
-  if (isSignatureDataError || isDisableOperatorError) {
-    return (
-      <Typography>{t('operator.profile.disable.cannotDisable')}</Typography>
-    );
-  }
 
   return (
     <Button
