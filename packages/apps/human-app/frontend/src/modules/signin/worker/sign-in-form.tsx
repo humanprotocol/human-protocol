@@ -27,7 +27,7 @@ export function SignInForm({
 }: Readonly<SignInFormProps>) {
   const { t } = useTranslation();
 
-  const methods = useForm<SignInDto>({
+  const methods = useForm({
     defaultValues: {
       email: '',
       password: '',

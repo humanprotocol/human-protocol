@@ -12,6 +12,7 @@ import { ReputationConfigService } from './reputation-config.service';
 import { S3ConfigService } from './s3-config.service';
 import { ServerConfigService } from './server-config.service';
 import { Web3ConfigService } from './web3-config.service';
+import { SlackConfigService } from './slack-config.service';
 
 @Global()
 @Module({
@@ -27,6 +28,7 @@ import { Web3ConfigService } from './web3-config.service';
     ReputationConfigService,
     S3ConfigService,
     ServerConfigService,
+    SlackConfigService,
     Web3ConfigService,
   ],
   exports: [
@@ -40,6 +42,7 @@ import { Web3ConfigService } from './web3-config.service';
     ReputationConfigService,
     S3ConfigService,
     ServerConfigService,
+    SlackConfigService,
     Web3ConfigService,
   ],
 })

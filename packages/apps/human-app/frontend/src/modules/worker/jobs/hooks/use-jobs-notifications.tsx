@@ -16,7 +16,7 @@ export const useJobsNotifications = () => {
     });
   };
 
-  const onJobAssignmentError = (error: unknown) => {
+  const onJobAssignmentError = (error: Error) => {
     showNotification({
       message: getErrorMessageForError(error),
       type: TopNotificationType.WARNING,

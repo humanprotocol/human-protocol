@@ -3,12 +3,13 @@ import { Cron } from '@nestjs/schedule';
 
 import { CronJobType } from '../../common/enums/cron-job';
 
-import { CronJobEntity } from './cron-job.entity';
-import { CronJobRepository } from './cron-job.repository';
+import logger from '../../logger';
+import { AbuseService } from '../abuse/abuse.service';
+import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
 import { WebhookIncomingService } from '../webhook/webhook-incoming.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
-import { EscrowCompletionService } from '../escrow-completion/escrow-completion.service';
-import logger from '../../logger';
+import { CronJobEntity } from './cron-job.entity';
+import { CronJobRepository } from './cron-job.repository';
 
 @Injectable()
 export class CronJobService {
@@ -19,6 +20,7 @@ export class CronJobService {
     private readonly webhookIncomingService: WebhookIncomingService,
     private readonly webhookOutgoingService: WebhookOutgoingService,
     private readonly escrowCompletionService: EscrowCompletionService,
+    private readonly abuseService: AbuseService,
   ) {}
 
   /**
@@ -217,6 +219,60 @@ export class CronJobService {
     }
 
     this.logger.info('Awaiting payouts processing STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  /**
+   * Process a pending abuse request.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  @Cron('*/2 * * * *')
+  public async processAbuseRequests(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessRequestedAbuse,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.info('Process Abuse START');
+    const cronJob = await this.startCronJob(CronJobType.ProcessRequestedAbuse);
+
+    try {
+      await this.abuseService.processAbuseRequests();
+    } catch (e) {
+      this.logger.error('Error processing abuse requests', e);
+    }
+
+    this.logger.info('Process Abuse STOP');
+    await this.completeCronJob(cronJob);
+  }
+
+  /**
+   * Process a classified abuse.
+   * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
+   */
+  @Cron('*/2 * * * *')
+  public async processClassifiedAbuses(): Promise<void> {
+    const isCronJobRunning = await this.isCronJobRunning(
+      CronJobType.ProcessClassifiedAbuse,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.info('Process classified abuses START');
+    const cronJob = await this.startCronJob(CronJobType.ProcessClassifiedAbuse);
+
+    try {
+      await this.abuseService.processClassifiedAbuses();
+    } catch (e) {
+      this.logger.error('Error processing classified abuse requests', e);
+    }
+
+    this.logger.info('Process classified abuses STOP');
     await this.completeCronJob(cronJob);
   }
 }

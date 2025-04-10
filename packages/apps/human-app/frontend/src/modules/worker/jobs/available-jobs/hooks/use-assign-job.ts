@@ -25,7 +25,7 @@ function assignJob(data: AssignJobBody) {
 export function useAssignJobMutation(
   callbacks?: {
     onSuccess: () => void;
-    onError: (error: unknown) => void;
+    onError: (error: Error) => void;
   },
   mutationKey?: MutationKey
 ) {

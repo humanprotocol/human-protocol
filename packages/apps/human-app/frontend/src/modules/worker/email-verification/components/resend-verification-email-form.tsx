@@ -1,4 +1,5 @@
 import { FormProvider } from 'react-hook-form';
+import { type z } from 'zod';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { Trans, useTranslation } from 'react-i18next';
@@ -7,13 +8,18 @@ import { Button } from '@/shared/components/ui/button';
 import { HCaptchaForm } from '@/shared/components/hcaptcha/h-captcha-form';
 import { MailTo } from '@/shared/components/ui/mail-to';
 import { env } from '@/shared/env';
-import { type ResendEmailVerificationDto } from '../schemas';
+import {
+  type resendEmailVerificationHcaptchaSchema,
+  type ResendEmailVerificationDto,
+} from '../schemas';
 
 interface ResendVerificationEmailFormProps {
-  methods: UseFormReturn<Pick<ResendEmailVerificationDto, 'h_captcha_token'>>;
-  handleResend: (
-    data: Pick<ResendEmailVerificationDto, 'h_captcha_token'>
-  ) => void;
+  methods: UseFormReturn<
+    z.input<typeof resendEmailVerificationHcaptchaSchema>,
+    unknown,
+    ResendEmailVerificationDto
+  >;
+  handleResend: (data: ResendEmailVerificationDto) => void;
   email: string;
   isAuthenticated: boolean;
 }

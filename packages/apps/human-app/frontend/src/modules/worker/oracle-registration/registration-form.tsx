@@ -30,7 +30,7 @@ export function RegistrationForm({
     error,
   } = useExchangeOracleRegistrationMutation();
 
-  const methods = useForm<OracleRegistrationFormValues>({
+  const methods = useForm({
     defaultValues: {
       h_captcha_token: '',
     },

@@ -1027,6 +1027,18 @@ def get_project_images(
     )
 
 
+def remove_escrow_images(session: Session, escrow_address: str, chain_id: int) -> int:
+    return (
+        session.query(Image)
+        .where(
+            Image.project.has(
+                (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+            )
+        )
+        .delete()
+    )
+
+
 def touch(
     session: Session,
     cls: type["Base"],

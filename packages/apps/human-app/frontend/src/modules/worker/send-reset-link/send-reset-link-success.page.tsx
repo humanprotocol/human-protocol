@@ -35,7 +35,7 @@ export function SendResetLinkWorkerSuccessPage() {
     mutate({ ...dto, email: email ?? '' });
   };
 
-  const methods = useForm<SendResetLinkHcaptcha>({
+  const methods = useForm({
     defaultValues: {
       h_captcha_token: '',
     },

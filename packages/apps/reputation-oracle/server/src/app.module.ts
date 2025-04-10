@@ -33,6 +33,7 @@ import { StorageModule } from './modules/storage/storage.module';
 
 import Environment from './utils/environment';
 import { AppController } from './app.controller';
+import { AbuseModule } from './modules/abuse/abuse.module';
 
 @Module({
   providers: [
@@ -82,6 +83,7 @@ import { AppController } from './app.controller';
     }),
     EnvConfigModule,
     DatabaseModule,
+    AbuseModule,
     AuthModule,
     CronJobModule,
     EmailModule,

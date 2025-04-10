@@ -41,10 +41,7 @@ export function OraclesTable() {
   if (isOraclesDataError) {
     return (
       <PageCardError
-        errorMessage={
-          oraclesDataError?.message ??
-          t('worker.oraclesTable.error.gettingOracles')
-        }
+        errorMessage={t('worker.oraclesTable.error.gettingOracles')}
       />
     );
   }

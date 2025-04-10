@@ -23,7 +23,7 @@ from src.crons.webhooks.job_launcher import (
 )
 from src.cvat.api_calls import RequestStatus
 from src.db import SessionLocal
-from src.models.cvat import EscrowCreation, Project
+from src.models.cvat import EscrowCreation, Image, Project
 from src.models.webhook import Webhook
 from src.services.cloud import StorageClient
 from src.services.webhook import OracleWebhookDirectionTags
@@ -301,6 +301,16 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.session.add(cvat_project)
 
+        project_images = [
+            Image(
+                id=str(uuid.uuid4()),
+                cvat_project_id=cvat_project.cvat_id,
+                filename=f"image_{i}.jpg",
+            )
+            for i in range(3)
+        ]
+        self.session.add_all(project_images)
+
         webhok_id = str(uuid.uuid4())
         webhook = Webhook(
             id=webhok_id,
@@ -316,10 +326,15 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(webhook)
         self.session.commit()
 
+        from src.services.cvat import remove_escrow_images as original_remove_escrow_images
+
         mock_storage_client = MagicMock(spec=StorageClient)
         with (
             patch("src.chain.escrow.get_escrow") as mock_escrow,
             patch("src.services.cloud.make_client", return_value=mock_storage_client),
+            patch(
+                "src.services.cvat.remove_escrow_images", side_effect=original_remove_escrow_images
+            ) as remove_escrow_images_mock,
             patch("src.cvat.api_calls.delete_project") as delete_project_mock,
             patch("src.cvat.api_calls.delete_cloudstorage") as delete_cloudstorage_mock,
         ):
@@ -349,10 +364,26 @@ class ServiceIntegrationTest(unittest.TestCase):
             call(prefix=compose_results_bucket_prefix(escrow_address, chain_id)),
         ]
 
-        assert delete_project_mock.mock_calls == [
-            call(1),
-        ]
+        assert delete_project_mock.mock_calls == [call(1)]
         assert delete_cloudstorage_mock.mock_calls == [call(1)]
+
+        assert len(remove_escrow_images_mock.mock_calls) == 1
+        assert "session" in remove_escrow_images_mock.mock_calls[0].kwargs
+        assert {
+            k: v
+            for k, v in remove_escrow_images_mock.mock_calls[0].kwargs.items()
+            if k in ("escrow_address", "chain_id")
+        } == {"escrow_address": escrow_address, "chain_id": chain_id}
+        assert (
+            self.session.query(Image)
+            .where(
+                Image.project.has(
+                    (Project.escrow_address == escrow_address) & (Project.chain_id == chain_id)
+                )
+            )
+            .count()
+            == 0
+        )
 
         outgoing_webhooks: list[Webhook] = list(
             self.session.scalars(

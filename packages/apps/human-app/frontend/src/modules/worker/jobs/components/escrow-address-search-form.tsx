@@ -27,7 +27,7 @@ export function EscrowAddressSearchForm({
 }: SearchFormProps) {
   const isMobile = useIsMobile();
   const { colorPalette } = useColorMode();
-  const methods = useForm<{ searchValue: string }>({
+  const methods = useForm({
     defaultValues: {
       searchValue: '',
     },

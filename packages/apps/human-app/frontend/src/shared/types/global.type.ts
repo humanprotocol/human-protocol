@@ -6,7 +6,7 @@ export interface Children {
   children?: React.ReactNode;
 }
 
-export type ResponseError = FetchError | Error | ZodError | JsonRpcError | null;
+export type ResponseError = FetchError | Error | ZodError | JsonRpcError;
 
 declare module '@tanstack/react-query' {
   interface Register {

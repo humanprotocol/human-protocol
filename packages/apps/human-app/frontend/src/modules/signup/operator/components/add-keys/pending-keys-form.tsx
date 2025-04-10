@@ -18,12 +18,7 @@ export function PendingKeysForm({
 }>) {
   const pendingKeysMutation = useEditExistingKeysMutation();
 
-  const pendingKeysMethods = useForm<
-    GetEthKVStoreValuesSuccessResponse,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
-    any,
-    EditEthKVStoreValuesMutationData
-  >({
+  const pendingKeysMethods = useForm({
     defaultValues: {},
     resolver: zodResolver(setEthKVStoreValuesMutationSchema(keysData)),
   });
@@ -35,14 +30,7 @@ export function PendingKeysForm({
   useResetMutationErrors(pendingKeysMethods.watch, pendingKeysMutation.reset);
 
   return (
-    <FormProvider<
-      GetEthKVStoreValuesSuccessResponse,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- automatic inferring
-      any,
-      EditEthKVStoreValuesMutationData
-    >
-      {...pendingKeysMethods}
-    >
+    <FormProvider {...pendingKeysMethods}>
       <form
         onSubmit={(event) => {
           void pendingKeysMethods.handleSubmit(handleEditPendingKey)(event);
