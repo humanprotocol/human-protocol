@@ -1,28 +1,13 @@
-/* eslint-disable camelcase -- ..*/
-import { z } from 'zod';
+/* eslint-disable camelcase */
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
-import { stringifyUrlQueryObject } from '@/shared/helpers/transfomers';
 import { env } from '@/shared/env';
 import { MainnetChains, TestnetChains } from '@/modules/smart-contracts/chains';
 import { useJobsTypesOraclesFilterStore } from '../jobs/hooks';
-
-const OracleSchema = z.object({
-  address: z.string(),
-  chainId: z.number(),
-  role: z.string(),
-  url: z.string(),
-  jobTypes: z.array(z.string()),
-  registrationNeeded: z.boolean().optional().nullable(),
-  registrationInstructions: z.string().optional().nullable(),
-});
-
-const OraclesDiscoverySuccessSchema = z.array(OracleSchema);
-
-export type Oracle = z.infer<typeof OracleSchema> & {
-  name: string;
-};
+import {
+  type Oracle,
+  type OracleBase,
+  oraclesService,
+} from '../services/oracles.service';
 
 const OracleNameToUrls = {
   CVAT: [
@@ -51,52 +36,45 @@ const H_CAPTCHA_ORACLE: Oracle = {
   registrationNeeded: false,
 };
 
-async function getOracles({
-  selected_job_types,
-  signal,
-}: {
-  selected_job_types: string[];
-  signal: AbortSignal;
-}) {
-  let oracles: Oracle[] = [];
-  if (
-    selected_job_types.length === 0 ||
-    selected_job_types.some((selected_job_type) =>
-      H_CAPTCHA_ORACLE.jobTypes.includes(selected_job_type)
-    )
-  ) {
-    oracles.push(H_CAPTCHA_ORACLE);
-  }
-
-  if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
-    const queryParams = selected_job_types.length
-      ? `?${stringifyUrlQueryObject({ selected_job_types })}`
-      : '';
-
-    const results = await apiClient(
-      `${apiPaths.worker.oracles.path}${queryParams}`,
-      {
-        successSchema: OraclesDiscoverySuccessSchema,
-        options: { method: 'GET' },
-      },
-      signal
-    );
-
-    oracles = oracles.concat(
-      results.map((oracle) => ({
-        ...oracle,
-        name: oracleUrlToNameMap.get(oracle.url) ?? '',
-      }))
-    );
-  }
-
-  return oracles;
-}
-
 export function useGetOracles() {
   const { selected_job_types } = useJobsTypesOraclesFilterStore();
+
   return useQuery({
-    queryFn: ({ signal }) => getOracles({ selected_job_types, signal }),
+    queryFn: async () => {
+      try {
+        let oracles: Oracle[] = [];
+
+        if (
+          selected_job_types.length === 0 ||
+          selected_job_types.some((selected_job_type) =>
+            H_CAPTCHA_ORACLE.jobTypes.includes(selected_job_type)
+          )
+        ) {
+          oracles.push(H_CAPTCHA_ORACLE);
+        }
+
+        if (env.VITE_FEATURE_FLAG_JOBS_DISCOVERY) {
+          const params = selected_job_types.length
+            ? { selected_job_types }
+            : undefined;
+
+          const results = await oraclesService.getOracles(params);
+
+          if (Array.isArray(results)) {
+            oracles = oracles.concat(
+              results.map((oracle: OracleBase) => ({
+                ...oracle,
+                name: oracleUrlToNameMap.get(oracle.url) ?? '',
+              }))
+            );
+          }
+        }
+
+        return oracles;
+      } catch (error) {
+        throw new Error('Failed to get oracles');
+      }
+    },
     queryKey: ['oracles', selected_job_types],
   });
 }

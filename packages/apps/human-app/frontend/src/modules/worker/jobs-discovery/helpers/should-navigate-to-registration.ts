@@ -1,4 +1,4 @@
-import { type Oracle } from '../../hooks';
+import { type Oracle } from '../../services/oracles.service';
 
 interface RegistrationResult {
   oracle_addresses: string[];
