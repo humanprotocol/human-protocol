@@ -63,3 +63,5 @@ export interface AudinoManifest {
   job_bounty: string;
   validation: AudinoValidation;
 }
+
+export type JobManifest = FortuneManifest | CvatManifest | AudinoManifest;

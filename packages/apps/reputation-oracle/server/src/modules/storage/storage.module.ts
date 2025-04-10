@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
-import { Web3Module } from '../web3/web3.module';
+import { EncryptionModuleModule } from '../encryption/encryption.module';
 
 import { StorageService } from './storage.service';
 
 @Module({
-  imports: [Web3Module],
+  imports: [EncryptionModuleModule],
   providers: [StorageService],
   exports: [StorageService],
 })

@@ -6,7 +6,7 @@ import {
   Web3Network,
 } from '../../config/web3-config.service';
 
-const supportedChainIdsByNetwork = {
+export const supportedChainIdsByNetwork = {
   [Web3Network.MAINNET]: [ChainId.POLYGON, ChainId.BSC_MAINNET],
   [Web3Network.TESTNET]: [
     ChainId.POLYGON_AMOY,
