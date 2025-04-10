@@ -62,7 +62,9 @@ export class HttpApiClient {
       signal: abortSignal,
     });
 
-    const responseBody: unknown = await response.json();
+    const text = await response.text();
+
+    const responseBody: unknown = text.length > 0 ? JSON.parse(text) : null;
 
     if (!response.ok) {
       throw new ApiClientError(
