@@ -5,7 +5,7 @@ import {
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { useOraclesTableColumns } from '../hooks/use-oracles-table-columns';
-import { type Oracle } from '../../hooks';
+import { type Oracle } from '../../services/oracles.service';
 
 interface OraclesTableDesktopProps {
   isOraclesDataPending: boolean;
