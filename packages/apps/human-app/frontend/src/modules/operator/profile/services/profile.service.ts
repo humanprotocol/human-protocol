@@ -1,4 +1,4 @@
-import { AuthorizedHttpApiClient, HttpApiClient } from '@/api';
+import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
 import { env } from '@/shared/env';
 import { AuthService } from '@/api/auth-service';
 import { type OperatorStatsSuccessResponse } from '../types';
@@ -36,6 +36,10 @@ export class OperatorProfileService {
 
       return result;
     } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+
       throw new Error('Failed to enable operator');
     }
   }
@@ -51,6 +55,10 @@ export class OperatorProfileService {
 
       return result;
     } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+
       throw new Error('Failed to disable operator');
     }
   }
