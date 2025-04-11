@@ -1,27 +1,25 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { type ResendEmailVerificationDto } from '../schemas';
+import { emailVerificationService } from '../services/email-verification.service';
 
-const ResendEmailVerificationSuccessResponseSchema = z.unknown();
+export const ResendEmailVerificationSuccessResponseSchema = z.unknown();
 
 async function resendEmailVerificationMutationFn(
-  data: ResendEmailVerificationDto,
-  isAuthenticated: boolean
+  _data: ResendEmailVerificationDto,
+  isAuthenticated: boolean,
+  userEmail: string | undefined
 ) {
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !userEmail) {
     throw new Error(t('worker.verifyEmail.authError'));
   }
 
-  return apiClient(apiPaths.worker.resendEmailVerification.path, {
-    authenticated: true,
-    withAuthRetry: apiPaths.worker.resendEmailVerification.withAuthRetry,
-    successSchema: ResendEmailVerificationSuccessResponseSchema,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
+  return emailVerificationService.resendEmailVerification(
+    _data.h_captcha_token,
+    userEmail
+  );
 }
 
 const resendEmailVerificationKey = 'resendEmailVerification';
@@ -32,7 +30,7 @@ export function useResendEmailVerificationWorkerMutation() {
 
   return useMutation({
     mutationFn: (dto: ResendEmailVerificationDto) =>
-      resendEmailVerificationMutationFn(dto, Boolean(user)),
+      resendEmailVerificationMutationFn(dto, Boolean(user), user?.email),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },
