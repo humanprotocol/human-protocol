@@ -1,4 +1,5 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
+
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import type { UserQualificationEntity } from './user-qualification.entity';
@@ -7,21 +8,21 @@ import type { UserQualificationEntity } from './user-qualification.entity';
 @Index(['reference'], { unique: true })
 export class QualificationEntity extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
-  public reference: string;
+  reference: string;
 
-  @Column({ type: 'text' })
-  public title: string;
+  @Column({ type: 'varchar', length: 50 })
+  title: string;
 
-  @Column({ type: 'text' })
-  public description: string;
+  @Column({ type: 'varchar', length: 200 })
+  description: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  public expiresAt?: Date | null;
+  @Column({ type: 'timestamptz', nullable: true })
+  expiresAt: Date | null;
 
   @OneToMany(
     'UserQualificationEntity',
     (userQualification: UserQualificationEntity) =>
       userQualification.qualification,
   )
-  public userQualifications: UserQualificationEntity[];
+  userQualifications?: UserQualificationEntity[];
 }

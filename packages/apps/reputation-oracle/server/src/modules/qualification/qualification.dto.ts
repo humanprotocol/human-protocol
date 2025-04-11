@@ -1,49 +1,74 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
-  IsString,
-  IsOptional,
-  IsDateString,
   IsEthereumAddress,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinDate,
 } from 'class-validator';
 
-export class QualificationDto {
+export class QualificationResponseDto {
   @ApiProperty()
-  public reference: string;
+  reference: string;
+
   @ApiProperty()
-  public title: string;
+  title: string;
+
   @ApiProperty()
-  public description: string;
+  description: string;
+
   @ApiPropertyOptional({ name: 'expires_at' })
-  public expiresAt?: string;
+  expiresAt?: string;
 }
 
 export class CreateQualificationDto {
   @ApiProperty()
   @IsString()
-  public reference: string;
+  @MaxLength(50)
+  title: string;
 
   @ApiProperty()
   @IsString()
-  public title: string;
+  @MaxLength(200)
+  description: string;
 
-  @ApiProperty()
-  @IsString()
-  public description: string;
-
-  @ApiPropertyOptional({ name: 'expires_at' })
+  @ApiPropertyOptional({
+    name: 'expires_at',
+    example: '2025-04-09T15:30:00Z',
+    description: 'Expiration date in ISO 8601 format (must be a future date)',
+    format: 'date-time',
+  })
   @IsOptional()
-  @IsDateString()
-  public expiresAt?: string;
+  @MinDate(new Date())
+  @Type(() => Date)
+  expiresAt?: Date;
+}
+
+class FailedUserQualificationOperation {
+  @ApiProperty({ name: 'evm_address' })
+  evmAddress: string;
+
+  @ApiProperty()
+  reason: string;
+}
+
+export class UserQualificationOperationResponseDto {
+  @ApiProperty()
+  success: string[];
+
+  @ApiProperty()
+  failed: FailedUserQualificationOperation[];
 }
 
 export class AssignQualificationDto {
   @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
-  public workerAddresses: string[];
+  workerAddresses: string[];
 }
 
 export class UnassignQualificationDto {
   @ApiProperty({ name: 'worker_addresses' })
   @IsEthereumAddress({ each: true })
-  public workerAddresses: string[];
+  workerAddresses: string[];
 }

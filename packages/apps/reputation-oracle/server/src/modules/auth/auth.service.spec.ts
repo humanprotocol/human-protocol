@@ -608,7 +608,7 @@ describe('AuthService', () => {
         reputation_network: mockWeb3ConfigService.operatorAddress,
         qualifications: user.userQualifications
           ? user.userQualifications.map(
-              (userQualification) => userQualification.qualification.reference,
+              (userQualification) => userQualification.qualification?.reference,
             )
           : [],
       };
@@ -728,7 +728,7 @@ describe('AuthService', () => {
           qualifications: user.userQualifications
             ? user.userQualifications.map(
                 (userQualification) =>
-                  userQualification.qualification.reference,
+                  userQualification.qualification?.reference,
               )
             : [],
         };

@@ -1,16 +1,16 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import logger from '../../logger';
 import {
   QualificationError,
   QualificationErrorMessage,
 } from './qualification.error';
-import logger from '../../logger';
 
 @Catch(QualificationError)
 export class QualificationErrorFilter implements ExceptionFilter {

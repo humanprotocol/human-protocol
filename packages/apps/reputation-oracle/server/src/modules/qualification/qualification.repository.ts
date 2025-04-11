@@ -1,64 +1,34 @@
 import { Injectable } from '@nestjs/common';
+import { DataSource, FindManyOptions, IsNull, MoreThan } from 'typeorm';
+
 import { BaseRepository } from '../../database/base.repository';
-import { DataSource, In, IsNull, MoreThan } from 'typeorm';
 import { QualificationEntity } from './qualification.entity';
-import { UserEntity } from '../user';
-import { UserQualificationEntity } from './user-qualification.entity';
+
+type FindOptions = {
+  relations?: FindManyOptions<QualificationEntity>['relations'];
+};
 
 @Injectable()
 export class QualificationRepository extends BaseRepository<QualificationEntity> {
-  constructor(private dataSource: DataSource) {
+  constructor(dataSource: DataSource) {
     super(QualificationEntity, dataSource);
   }
 
   async findByReference(
     reference: string,
+    options: FindOptions = {},
   ): Promise<QualificationEntity | null> {
-    const currentDate = new Date();
-
     const qualificationEntity = await this.findOne({
-      where: [
-        { reference, expiresAt: MoreThan(currentDate) },
-        { reference, expiresAt: IsNull() },
-      ],
-      relations: ['userQualifications', 'userQualifications.user'],
+      where: { reference },
+      relations: options.relations,
     });
 
     return qualificationEntity;
   }
 
-  async getQualifications(): Promise<QualificationEntity[]> {
-    const currentDate = new Date();
+  async getActiveQualifications(): Promise<QualificationEntity[]> {
+    const now = new Date();
 
-    return this.findBy([
-      { expiresAt: MoreThan(currentDate) },
-      { expiresAt: IsNull() },
-    ]);
-  }
-
-  async saveUserQualifications(
-    userQualifications: UserQualificationEntity[],
-  ): Promise<void> {
-    // TODO: use base repository method for that
-    await this.dataSource
-      .getRepository(UserQualificationEntity)
-      .save(userQualifications);
-  }
-
-  async removeUserQualifications(
-    users: UserEntity[],
-    qualification: QualificationEntity,
-  ): Promise<void> {
-    const userQualifications = await this.dataSource
-      .getRepository(UserQualificationEntity)
-      .find({
-        where: {
-          user: { id: In(users.map((user) => user.id)) },
-          qualification: { id: qualification.id },
-        },
-      });
-    await this.dataSource
-      .getRepository(UserQualificationEntity)
-      .remove(userQualifications);
+    return this.findBy([{ expiresAt: MoreThan(now) }, { expiresAt: IsNull() }]);
   }
 }
