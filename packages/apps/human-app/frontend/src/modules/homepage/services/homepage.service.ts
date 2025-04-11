@@ -1,4 +1,4 @@
-import { HttpApiClient } from '@/api';
+import { ApiClientError, HttpApiClient } from '@/api';
 import { env } from '@/shared/env';
 import { type Web3SignInSuccessResponse } from '../hooks';
 
@@ -8,11 +8,6 @@ const apiPaths = {
   },
 };
 
-interface Web3SignInData {
-  signature?: string;
-  address?: string;
-}
-
 export class HomepageService {
   private readonly httpClient: HttpApiClient;
 
@@ -20,16 +15,20 @@ export class HomepageService {
     this.httpClient = new HttpApiClient(env.VITE_API_URL);
   }
 
-  async web3SignIn(data: Web3SignInData) {
+  async web3SignIn(data: { signature?: string; address?: string }) {
     try {
       const result = await this.httpClient.post<Web3SignInSuccessResponse>(
         apiPaths.web3Auth.signIn,
         {
-          body: { ...data },
+          body: data,
         }
       );
       return result;
     } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+
       throw new Error('Failed to log in using web3.');
     }
   }
