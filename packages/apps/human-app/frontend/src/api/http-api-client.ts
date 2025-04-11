@@ -95,11 +95,18 @@ export class HttpApiClient {
       return responseBody;
     }
 
-    if (typeof responseBody === 'object') {
-      return (
-        (responseBody as { message?: string }).message ??
-        'Unknown request error.'
-      );
+    if (typeof responseBody === 'object' && responseBody !== null) {
+      if ('message' in responseBody) {
+        if (Array.isArray(responseBody.message)) {
+          return responseBody.message.join(', ');
+        }
+
+        if (typeof responseBody.message === 'string') {
+          return responseBody.message;
+        }
+      }
+
+      return 'Unknown request error.';
     }
 
     if (statusText.length) {
