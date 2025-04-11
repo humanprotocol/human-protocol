@@ -9,9 +9,6 @@ export const apiPaths = {
     signUp: {
       path: '/auth/signup',
     },
-    obtainAccessToken: {
-      path: '/auth/refresh',
-    },
     sendResetLink: {
       path: '/password-reset/forgot-password',
     },
@@ -97,6 +94,13 @@ export const apiPaths = {
     enableOperator: {
       path: '/enable-operator',
       withAuthRetry: true,
+    },
+  },
+  common: {
+    auth: {
+      refresh: {
+        path: '/auth/refresh',
+      },
     },
   },
 } as const;
