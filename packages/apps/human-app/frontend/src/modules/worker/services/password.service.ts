@@ -21,7 +21,7 @@ export class PasswordService {
       return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
-        throw new Error(error.message);
+        throw error;
       }
 
       throw new Error('Failed to send reset link');
@@ -36,7 +36,7 @@ export class PasswordService {
       return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
-        throw new Error(error.message);
+        throw error;
       }
 
       throw new Error('Failed to reset password');

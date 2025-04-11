@@ -39,6 +39,10 @@ export class ProfileService {
         );
       return result;
     } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+
       throw new Error('Failed to start KYC process');
     }
   }
@@ -58,11 +62,7 @@ export class ProfileService {
       return result;
     } catch (error) {
       if (error instanceof ApiClientError) {
-        if (error.status === 409) {
-          throw new Error('Address already registered for another account.');
-        }
-
-        throw new Error('Failed to register address.');
+        throw error;
       }
 
       throw new Error('Failed to register address.');

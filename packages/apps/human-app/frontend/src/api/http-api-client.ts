@@ -68,11 +68,12 @@ export class HttpApiClient {
     const responseBody: unknown = text.length > 0 ? JSON.parse(text) : null;
 
     if (!response.ok) {
-      throw new ApiClientError(
-        response.statusText,
-        response.status,
-        responseBody
+      const errorMessage = this.getErrorMessageForResponse(
+        responseBody,
+        response.statusText
       );
+
+      throw new ApiClientError(errorMessage, response.status, responseBody);
     }
 
     if (successSchema) {
@@ -84,6 +85,28 @@ export class HttpApiClient {
     }
 
     return responseBody as T;
+  }
+
+  private getErrorMessageForResponse(
+    responseBody: unknown,
+    statusText: string
+  ): string {
+    if (typeof responseBody === 'string') {
+      return responseBody;
+    }
+
+    if (typeof responseBody === 'object') {
+      return (
+        (responseBody as { message?: string }).message ??
+        'Unknown request error.'
+      );
+    }
+
+    if (statusText.length) {
+      return statusText;
+    }
+
+    return 'Unknown request error.';
   }
 
   get: HttpApiClientMethod = async (path, config = {}) => {
