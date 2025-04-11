@@ -31,7 +31,7 @@ export class SignupService {
     this.httpClient = new HttpApiClient(env.VITE_API_URL);
   }
 
-  async workerSignUp(data: SignUpDto) {
+  async workerSignUp(data: Omit<SignUpDto, 'confirmPassword'>) {
     try {
       const result = await this.httpClient.post(apiPaths.worker.signUp, {
         body: data,

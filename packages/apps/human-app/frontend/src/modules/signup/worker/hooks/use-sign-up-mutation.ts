@@ -12,14 +12,13 @@ export function useSignUpMutation() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: async (data: SignUpDto) => {
+    mutationFn: async (data: Omit<SignUpDto, 'confirmPassword'>) => {
       try {
         return await signupService.workerSignUp({
           email: data.email,
           password: data.password,
           // eslint-disable-next-line camelcase
           h_captcha_token: data.h_captcha_token,
-          confirmPassword: data.confirmPassword,
         });
       } catch (error) {
         throw new Error('Failed to sign up');
