@@ -31,7 +31,7 @@ import src.services.cvat as db_service
 from src.chain.escrow import get_escrow_manifest
 from src.core.config import Config
 from src.core.storage import compose_data_bucket_filename
-from src.core.types import CvatLabelTypes, TaskStatuses, TaskTypes
+from src.core.types import AudinoTaskTypes, CvatLabelTypes, TaskStatuses, TaskTypes
 from src.db import SessionLocal
 from src.log import ROOT_LOGGER_NAME
 from src.models.cvat import Project
@@ -2940,6 +2940,7 @@ class AudinoTaskBuilder:
                     cvat_project.id,
                     escrow_address,
                     segment_duration=manifest.annotation.segment_duration,
+                    task_type=AudinoTaskTypes[manifest.annotation.type],
                 )
 
                 task_id = db_service.create_task(

@@ -1,3 +1,4 @@
+import ast
 import io
 import json
 import logging
@@ -20,6 +21,7 @@ from cvat_sdk.core.helpers import get_paginated_collection
 from cvat_sdk.core.uploading import AnnotationUploader
 
 from src.core.config import Config
+from src.core.types import AudinoTaskTypes
 from src.utils.enums import BetterEnumMeta
 from src.utils.time import utcnow
 
@@ -337,17 +339,25 @@ def create_task(
             raise
 
 
-def create_audino_task(project_id: int, name: str, *, segment_duration: int) -> models.TaskRead:
+def create_audino_task(project_id: int, name: str, *, segment_duration: int, task_type: AudinoTaskTypes) -> models.TaskRead:
     logger = logging.getLogger("app")
     with get_api_client() as api_client:
+        flags = {
+                "is_start": True,
+                "is_end": True,
+                "is_transcription": False,
+                "is_accent": False,
+                "is_age": False,
+                "is_gender": False,
+                "is_locale": False,
+                "is_emotion": False,
+            }
         task_write_request = models.TaskWriteRequest(
             name=name,
             project_id=project_id,
             overlap=0,
             segment_duration=segment_duration,
-            flags={
-                "is_commonvoice": True,
-            },
+            flags={key: (key in ast.literal_eval(task_type.value)) for key in flags}
         )
         try:
             (task_info, _) = api_client.tasks_api.create(task_write_request)

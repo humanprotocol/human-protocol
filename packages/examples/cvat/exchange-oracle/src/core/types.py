@@ -47,6 +47,9 @@ class TaskTypes(str, Enum, metaclass=BetterEnumMeta):
     image_polygons = "image_polygons"
     audio_transcription = "audio_transcription"
 
+class AudinoTaskTypes(str, Enum):
+    audio_transcription = ["is_start", "is_end", "is_transcription"]
+
 
 class CvatLabelTypes(str, Enum, metaclass=BetterEnumMeta):
     tag = "tag"

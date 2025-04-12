@@ -29,13 +29,13 @@ CVAT_EXPORT_FORMAT_MAPPING = {
     TaskTypes.image_polygons: "COCO 1.0",
     TaskTypes.image_boxes_from_points: "COCO 1.0",
     TaskTypes.image_skeletons_from_boxes: "CVAT for images 1.1",
-    TaskTypes.audio_transcription: "Common Voice",
+    TaskTypes.audio_transcription: "Audino Format",
 }
 
 CVAT_EXPORT_FORMAT_TO_DM_MAPPING = {
     "CVAT for images 1.1": "cvat",
     "COCO 1.0": "coco_instances",
-    "Common Voice": "audino",
+    "Audino Format": "audino",
 }
 
 
