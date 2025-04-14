@@ -197,6 +197,10 @@ describe('QualificationService', () => {
         success: [user.evmAddress],
         failed: [],
       });
+
+      expect(
+        mockUserQualificationRepository.createUnique,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('should fail to assign user not in active status', async () => {
@@ -220,7 +224,7 @@ describe('QualificationService', () => {
         user.evmAddress as string,
       ]);
 
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         success: [],
         failed: [
           {
@@ -229,6 +233,10 @@ describe('QualificationService', () => {
           },
         ],
       });
+
+      expect(
+        mockUserQualificationRepository.createUnique,
+      ).not.toHaveBeenCalled();
     });
 
     it('should throw NOT_FOUND error', async () => {
@@ -289,10 +297,14 @@ describe('QualificationService', () => {
         user.evmAddress as string,
       ]);
 
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         success: [user.evmAddress],
         failed: [],
       });
+
+      expect(
+        mockUserQualificationRepository.removeByUserAndQualification,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('should throw NOT_FOUND error', async () => {
