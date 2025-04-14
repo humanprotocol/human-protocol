@@ -230,7 +230,7 @@ export class AuthService {
       reputation_network: this.web3ConfigService.operatorAddress,
       qualifications: userEntity.userQualifications
         ? userEntity.userQualifications.map(
-            (userQualification) => userQualification.qualification.reference,
+            (userQualification) => userQualification.qualification?.reference,
           )
         : [],
       site_key: hCaptchaSiteKey,

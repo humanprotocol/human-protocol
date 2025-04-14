@@ -1,33 +1,34 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Delete,
   Body,
-  Param,
-  UseGuards,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
+  Param,
+  Post,
   UseFilters,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiTags,
+  ApiBody,
   ApiOperation,
   ApiResponse,
-  ApiBody,
+  ApiTags,
 } from '@nestjs/swagger';
 
+import { Public, Roles } from '../../common/decorators';
+import { RolesAuthGuard } from '../../common/guards';
+import { UserRole } from '../user';
 import {
-  CreateQualificationDto,
   AssignQualificationDto,
+  CreateQualificationDto,
+  QualificationResponseDto,
   UnassignQualificationDto,
-  QualificationDto,
+  UserQualificationOperationResponseDto,
 } from './qualification.dto';
 import { QualificationErrorFilter } from './qualification.error.filter';
-import { RolesAuthGuard } from '../../common/guards';
 import { QualificationService } from './qualification.service';
-import { Public, Roles } from '../../common/decorators';
-import { UserRole } from '../user';
 
 @ApiTags('Qualification')
 @Controller('qualifications')
@@ -40,23 +41,21 @@ export class QualificationController {
   @ApiResponse({
     status: 201,
     description: 'Qualification created successfully',
-    type: QualificationDto,
+    type: QualificationResponseDto,
   })
   @ApiBearerAuth()
   @UseGuards(RolesAuthGuard)
   @Roles([UserRole.ADMIN])
   @Post()
   @HttpCode(201)
-  /**
-   * TODO: revisit DTO validation when
-   * refactoring business logic
-   */
   async create(
     @Body() createQualificationDto: CreateQualificationDto,
-  ): Promise<QualificationDto> {
-    const qualification = await this.qualificationService.createQualification(
-      createQualificationDto,
-    );
+  ): Promise<QualificationResponseDto> {
+    const qualification = await this.qualificationService.createQualification({
+      title: createQualificationDto.title,
+      description: createQualificationDto.description,
+      expiresAt: createQualificationDto.expiresAt,
+    });
     return qualification;
   }
 
@@ -64,16 +63,13 @@ export class QualificationController {
   @ApiResponse({
     status: 200,
     description: 'List of qualifications',
-    type: QualificationDto,
+    type: QualificationResponseDto,
     isArray: true,
   })
   @Public()
   @Get()
   @HttpCode(200)
-  async getQualifications(): Promise<QualificationDto[]> {
-    /**
-     * TODO: Refactor this endpoint to support pagination
-     */
+  async getQualifications(): Promise<QualificationResponseDto[]> {
     const qualifications = await this.qualificationService.getQualifications();
     return qualifications;
   }
@@ -95,7 +91,7 @@ export class QualificationController {
   async deleteQualification(
     @Param('reference') reference: string,
   ): Promise<void> {
-    await this.qualificationService.delete(reference);
+    await this.qualificationService.deleteQualification(reference);
   }
 
   @ApiOperation({ summary: 'Assign a qualification to users' })
@@ -113,8 +109,8 @@ export class QualificationController {
   async assign(
     @Param('reference') reference: string,
     @Body() assignQualificationDto: AssignQualificationDto,
-  ): Promise<void> {
-    await this.qualificationService.assign(
+  ): Promise<UserQualificationOperationResponseDto> {
+    return await this.qualificationService.assign(
       reference,
       assignQualificationDto.workerAddresses,
     );
@@ -135,8 +131,8 @@ export class QualificationController {
   async unassign(
     @Param('reference') reference: string,
     @Body() unassignQualificationDto: UnassignQualificationDto,
-  ): Promise<void> {
-    await this.qualificationService.unassign(
+  ): Promise<UserQualificationOperationResponseDto> {
+    return await this.qualificationService.unassign(
       reference,
       unassignQualificationDto.workerAddresses,
     );
