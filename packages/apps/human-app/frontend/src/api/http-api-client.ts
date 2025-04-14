@@ -49,6 +49,17 @@ export class HttpApiClient {
 
     if (queryParams) {
       Object.entries(queryParams).forEach(([key, value]) => {
+        if (!value) return;
+
+        if (Array.isArray(value)) {
+          value
+            .filter((i) => i !== undefined)
+            .forEach((item) => {
+              url.searchParams.append(key, String(item));
+            });
+          return;
+        }
+
         url.searchParams.append(key, String(value));
       });
     }
