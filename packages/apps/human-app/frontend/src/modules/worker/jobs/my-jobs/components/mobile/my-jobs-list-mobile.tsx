@@ -29,7 +29,7 @@ import {
 } from '../../../hooks';
 import { useRefreshTasksMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
-import { type MyJob } from '../../schemas';
+import { type MyJob } from '../../../schemas';
 import { useMyJobFilterModal } from '../../hooks/use-my-jobs-filter-modal';
 
 export function MyJobsListMobile() {
