@@ -19,7 +19,6 @@ export function ExistingKeysForm({
 }>) {
   const [editMode, setEditMode] = useState(false);
   const existingKeysMutation = useEditExistingKeysMutation();
-  const pendingKeysMutation = useEditExistingKeysMutation();
   const existingKeysMethods = useForm({
     defaultValues: keysData,
     resolver: zodResolver(getEditEthKVStoreValuesMutationSchema(keysData)),
@@ -56,7 +55,7 @@ export function ExistingKeysForm({
                   loading: existingKeysMutation.isPending,
                   type: 'submit',
                   variant: 'contained',
-                  disabled: pendingKeysMutation.isPending,
+                  disabled: existingKeysMutation.isPending,
                 }}
               />
             ) : (
