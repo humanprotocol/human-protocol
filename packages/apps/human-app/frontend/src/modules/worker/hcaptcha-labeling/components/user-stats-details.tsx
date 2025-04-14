@@ -3,7 +3,7 @@ import { t } from 'i18next';
 import { RefreshIcon } from '@/shared/components/ui/icons';
 import { onlyDarkModeColor } from '@/shared/styles/dark-color-palette';
 import { useColorMode } from '@/shared/contexts/color-mode';
-import { type HCaptchaUserStatsSuccess } from '../hooks/use-hcaptcha-user-stats';
+import { type HCaptchaUserStatsSuccess } from '../types';
 
 export function UserStatsDetails({
   stats,
