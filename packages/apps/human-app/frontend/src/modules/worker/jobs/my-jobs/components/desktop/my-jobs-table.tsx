@@ -10,7 +10,7 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 import { createTableDarkMode } from '@/shared/styles/create-table-dark-mode';
 import { EscrowAddressSearchForm } from '../../../components';
 import { useGetMyJobsData, useMyJobsFilterStore } from '../../../hooks';
-import { useRefreshTasksMutation } from '../../hooks';
+import { useRefreshJobsMutation } from '../../hooks';
 import { getColumnsDefinition } from './columns';
 
 interface MyJobsTableProps {
@@ -33,7 +33,7 @@ export function MyJobsTable({ chainIdsEnabled }: Readonly<MyJobsTableProps>) {
   );
 
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
-    useRefreshTasksMutation();
+    useRefreshJobsMutation();
   const { address: oracle_address } = useParams<{ address: string }>();
 
   const [paginationState, setPaginationState] = useState({

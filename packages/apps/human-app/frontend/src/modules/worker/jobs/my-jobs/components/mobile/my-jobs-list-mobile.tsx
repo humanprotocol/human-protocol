@@ -27,7 +27,7 @@ import {
   useJobsFilterStore,
   useInfiniteGetMyJobsData,
 } from '../../../hooks';
-import { useRefreshTasksMutation } from '../../hooks';
+import { useRefreshJobsMutation } from '../../hooks';
 import { getChipStatusColor } from '../../utils';
 import { type MyJob } from '../../../schemas';
 
@@ -53,7 +53,7 @@ export function MyJobsListMobile({
   } = useInfiniteGetMyJobsData();
 
   const { mutate: refreshTasksMutation, isPending: isRefreshTasksPending } =
-    useRefreshTasksMutation();
+    useRefreshJobsMutation();
   const { setSearchEscrowAddress } = useJobsFilterStore();
   const { address: oracle_address } = useParams<{ address: string }>();
 
