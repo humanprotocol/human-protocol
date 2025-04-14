@@ -4,7 +4,7 @@ import { jobsService, type RefreshJobsBody } from '../../services/jobs.service';
 
 export const refreshTasksSchema = z.unknown();
 
-export function useRefreshTasksMutation(callbacks?: {
+export function useRefreshJobsMutation(callbacks?: {
   onSuccess?: () => Promise<void>;
   onError?: (error: unknown) => Promise<void>;
 }) {
