@@ -64,12 +64,12 @@ describe('QualificationService', () => {
           expiresAt,
         };
 
-        mockQualificationRepository.createUnique.mockResolvedValueOnce({
-          reference: faker.string.uuid(),
-          ...newQualification,
-        } as QualificationEntity);
+        mockQualificationRepository.createUnique.mockImplementationOnce(
+          async (e) => e,
+        );
 
-        await service.createQualification(newQualification);
+        const qualification =
+          await service.createQualification(newQualification);
 
         expect(mockQualificationRepository.createUnique).toHaveBeenCalledTimes(
           1,
@@ -79,6 +79,11 @@ describe('QualificationService', () => {
             ...newQualification,
           }),
         );
+        expect(qualification).toEqual({
+          ...newQualification,
+          reference: expect.any(String),
+          expiresAt: newQualification.expiresAt?.toISOString(),
+        });
       },
     );
 
@@ -89,19 +94,16 @@ describe('QualificationService', () => {
         expiresAt: faker.date.past(),
       };
 
-      mockQualificationRepository.createUnique.mockResolvedValueOnce({
-        reference: faker.string.uuid(),
-        ...newQualification,
-      } as QualificationEntity);
-
+      let thrownError;
       try {
         await service.createQualification(newQualification);
       } catch (error) {
-        expect(error).toBeInstanceOf(QualificationError);
-        expect(error.message).toContain(
-          'Qualification should be valid till at least',
-        );
+        thrownError = error;
       }
+      expect(thrownError).toBeInstanceOf(QualificationError);
+      expect(thrownError.message).toContain(
+        'Qualification should be valid till at least',
+      );
       expect(mockQualificationRepository.createUnique).not.toHaveBeenCalled();
     });
   });
@@ -191,7 +193,7 @@ describe('QualificationService', () => {
         user.evmAddress as string,
       ]);
 
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         success: [user.evmAddress],
         failed: [],
       });
@@ -231,14 +233,11 @@ describe('QualificationService', () => {
 
     it('should throw NOT_FOUND error', async () => {
       const reference = faker.string.uuid();
-      const user = generateWorkerUser({
-        privateKey: generateEthWallet().privateKey,
-      });
 
       mockQualificationRepository.findByReference.mockResolvedValueOnce(null);
 
       await expect(
-        service.assign(reference, [user.evmAddress as string]),
+        service.assign(reference, [faker.finance.ethereumAddress()]),
       ).rejects.toThrow(
         new QualificationError(QualificationErrorMessage.NOT_FOUND, reference),
       );
@@ -298,14 +297,10 @@ describe('QualificationService', () => {
 
     it('should throw NOT_FOUND error', async () => {
       const reference = faker.string.uuid();
-      const user = generateWorkerUser({
-        privateKey: generateEthWallet().privateKey,
-      });
-
       mockQualificationRepository.findByReference.mockResolvedValueOnce(null);
 
       await expect(
-        service.unassign(reference, [user.evmAddress as string]),
+        service.unassign(reference, [faker.finance.ethereumAddress()]),
       ).rejects.toThrow(
         new QualificationError(QualificationErrorMessage.NOT_FOUND, reference),
       );
