@@ -15,7 +15,7 @@ import {
   AvailableJobsRewardAmountSort,
   AvailableJobsJobTypeFilter,
 } from '../components';
-import { type AvailableJob } from './use-get-available-jobs-data';
+import { type AvailableJob } from '../../types';
 import { useAssignJobMutation } from './use-assign-job';
 
 const COL_SIZE = 100;

@@ -1,16 +1,8 @@
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
+import { jobsService, type RefreshJobsBody } from '../../services/jobs.service';
 
-function refreshTasks(data: { oracle_address: string }) {
-  return apiClient(apiPaths.worker.refreshJob.path, {
-    successSchema: z.unknown(),
-    authenticated: true,
-    withAuthRetry: true,
-    options: { method: 'PUT', body: JSON.stringify(data) },
-  });
-}
+export const refreshTasksSchema = z.unknown();
 
 export function useRefreshTasksMutation(callbacks?: {
   onSuccess?: () => Promise<void>;
@@ -19,7 +11,9 @@ export function useRefreshTasksMutation(callbacks?: {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: refreshTasks,
+    mutationFn: async (data: RefreshJobsBody) => {
+      return jobsService.refreshJobs(data);
+    },
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
         void callbacks.onSuccess();

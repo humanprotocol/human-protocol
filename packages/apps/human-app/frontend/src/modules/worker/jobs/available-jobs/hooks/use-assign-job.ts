@@ -4,23 +4,9 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { apiClient } from '@/api/api-client';
-import { apiPaths } from '@/api/api-paths';
+import { type AssignJobBody, jobsService } from '../../services/jobs.service';
 
-export interface AssignJobBody {
-  escrow_address: string;
-  chain_id: number;
-}
-
-const AssignJobBodySuccessResponseSchema = z.unknown();
-
-function assignJob(data: AssignJobBody) {
-  return apiClient(apiPaths.worker.assignJob.path, {
-    authenticated: true,
-    successSchema: AssignJobBodySuccessResponseSchema,
-    options: { method: 'POST', body: JSON.stringify(data) },
-  });
-}
+export const AssignJobBodySuccessResponseSchema = z.unknown();
 
 export function useAssignJobMutation(
   callbacks?: {
@@ -32,7 +18,9 @@ export function useAssignJobMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: assignJob,
+    mutationFn: async (data: AssignJobBody) => {
+      return jobsService.assignJob(data);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries();
       callbacks?.onSuccess();

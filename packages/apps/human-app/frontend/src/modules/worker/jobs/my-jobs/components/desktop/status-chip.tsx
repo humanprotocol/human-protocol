@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import { colorPalette as lightModeColorPalette } from '@/shared/styles/color-palette';
 import { useColorMode } from '@/shared/contexts/color-mode';
 import { getChipStatusColor } from '../../utils';
-import { type MyJob } from '../../schemas';
+import { type MyJob } from '../../../schemas';
 
 export function StatusChip({ status }: Readonly<{ status: MyJob['status'] }>) {
   const { colorPalette } = useColorMode();
