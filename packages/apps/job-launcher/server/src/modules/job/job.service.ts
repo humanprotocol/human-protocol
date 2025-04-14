@@ -84,11 +84,6 @@ import {
   HCAPTCHA_POLYGON_MIN_POINTS,
 } from '../../common/constants';
 import { EventType, OracleType } from '../../common/enums/webhook';
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
-import Decimal from 'decimal.js';
 import { StorageService } from '../storage/storage.service';
 import {
   generateBucketUrl,
@@ -157,6 +152,7 @@ export class JobService {
     dto: JobCvatDto,
     requestType: JobRequestType,
     tokenFundAmount: number,
+    decimals: number,
   ): Promise<CvatManifestDto> {
     const { generateUrls } = this.createManifestActions[requestType];
 
@@ -165,6 +161,7 @@ export class JobService {
     const jobBounty = await this.calculateJobBounty({
       requestType,
       fundAmount: tokenFundAmount,
+      decimals,
       urls,
       nodesTotal: dto.labels[0]?.nodes?.length,
     });
@@ -376,6 +373,7 @@ export class JobService {
     dto: JobAudinoDto,
     requestType: JobRequestType,
     tokenFundAmount: number,
+    decimals: number,
   ): Promise<any> {
     const { generateUrls } = this.createManifestActions[requestType];
     const urls = generateUrls(dto.data, dto.groundTruth);
@@ -384,7 +382,7 @@ export class JobService {
     );
 
     const jobBounty =
-      ethers.parseUnits(tokenFundAmount.toString(), 'ether') /
+      ethers.parseUnits(tokenFundAmount.toString(), decimals) /
       BigInt(totalSegments);
 
     return {
@@ -399,7 +397,7 @@ export class JobService {
       data: {
         data_url: urls.dataUrl.href,
       },
-      job_bounty: ethers.formatEther(jobBounty),
+      job_bounty: ethers.formatUnits(jobBounty, decimals),
       validation: {
         gt_url: urls.gtUrl.href,
         min_quality: dto.minQuality,
@@ -493,42 +491,48 @@ export class JobService {
         dto: JobCvatDto,
         requestType: JobRequestType,
         fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
+        decimals: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount, decimals),
     },
     [JobRequestType.IMAGE_BOXES]: {
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
         fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
+        decimals: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount, decimals),
     },
     [JobRequestType.IMAGE_POINTS]: {
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
         fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
+        decimals: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount, decimals),
     },
     [JobRequestType.IMAGE_BOXES_FROM_POINTS]: {
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
         fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
+        decimals: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount, decimals),
     },
     [JobRequestType.IMAGE_SKELETONS_FROM_BOXES]: {
       createManifest: (
         dto: JobCvatDto,
         requestType: JobRequestType,
         fundAmount: number,
-      ) => this.createCvatManifest(dto, requestType, fundAmount),
+        decimals: number,
+      ) => this.createCvatManifest(dto, requestType, fundAmount, decimals),
     },
     [JobRequestType.AUDIO_TRANSCRIPTION]: {
       createManifest: (
         dto: JobAudinoDto,
         requestType: JobRequestType,
         fundAmount: number,
-      ) => this.createAudinoManifest(dto, requestType, fundAmount),
+        decimals: number,
+      ) => this.createAudinoManifest(dto, requestType, fundAmount, decimals),
     },
   };
 
@@ -974,6 +978,7 @@ export class JobService {
         dto,
         requestType,
         fundTokenAmount,
+        fundTokenDecimals,
       );
 
       const { url, hash } = await this.uploadManifest(
@@ -1072,7 +1077,7 @@ export class JobService {
 
     let totalJobs: number;
 
-    // For each skeleton node CVAT creates a separate project thus increasing amount of jobs
+    // For each skeleton node CVAT creates a separate project thus increasing the number of jobs
     if (
       requestType === JobRequestType.IMAGE_SKELETONS_FROM_BOXES &&
       nodesTotal
@@ -1081,9 +1086,12 @@ export class JobService {
     } else {
       totalJobs = Math.ceil(elementsCount / jobSize);
     }
+
     const jobBounty =
-      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs);
-    return ethers.formatEther(jobBounty);
+      ethers.parseUnits(fundAmount.toString(), params.decimals) /
+      BigInt(totalJobs);
+
+    return ethers.formatUnits(jobBounty, params.decimals);
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
@@ -1647,12 +1655,19 @@ export class JobService {
       );
     }
 
+    const fundTokenDecimals = getTokenDecimals(
+      chainId,
+      jobEntity.token as EscrowFundToken,
+    );
+
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
       requesterAddress: signer.address,
       fundAmount: escrow
-        ? Number(ethers.formatEther(escrow.totalFundedAmount))
+        ? Number(
+            ethers.formatUnits(escrow.totalFundedAmount, fundTokenDecimals),
+          )
         : 0,
       exchangeOracleAddress: escrow?.exchangeOracle || ethers.ZeroAddress,
       recordingOracleAddress: escrow?.recordingOracle || ethers.ZeroAddress,
@@ -1720,61 +1735,18 @@ export class JobService {
         escrowAddress,
         manifestUrl,
         manifestHash,
-        balance: Number(ethers.formatEther(escrow?.balance || 0)),
-        paidOut: Number(ethers.formatEther(escrow?.amountPaid || 0)),
+        balance: Number(
+          ethers.formatUnits(escrow?.balance || 0, fundTokenDecimals),
+        ),
+        paidOut: Number(
+          ethers.formatUnits(escrow?.amountPaid || 0, fundTokenDecimals),
+        ),
         currency: jobEntity.token as EscrowFundToken,
         status: jobEntity.status,
         failedReason: jobEntity.failedReason,
       },
       manifest: manifestDetails,
     };
-  }
-
-  public async getTransferLogs(
-    chainId: ChainId,
-    tokenAddress: string,
-    fromBlock: number,
-    toBlock: string | number,
-  ) {
-    const signer = this.web3Service.getSigner(chainId);
-    const filter = {
-      address: tokenAddress,
-      topics: [ethers.id('Transfer(address,address,uint256)')],
-      fromBlock: fromBlock,
-      toBlock: toBlock,
-    };
-
-    return signer.provider?.getLogs(filter);
-  }
-
-  public async getPaidOutAmount(
-    chainId: ChainId,
-    tokenAddress: string,
-    escrowAddress: string,
-  ): Promise<number> {
-    const signer = this.web3Service.getSigner(chainId);
-    const tokenContract: HMToken = HMToken__factory.connect(
-      tokenAddress,
-      signer,
-    );
-
-    const logs = await this.getTransferLogs(chainId, tokenAddress, 0, 'latest');
-    let paidOutAmount = new Decimal(0);
-
-    logs?.forEach((log) => {
-      const parsedLog = tokenContract.interface.parseLog({
-        topics: log.topics as string[],
-        data: log.data,
-      });
-      const from = parsedLog?.args[0];
-      const amount = parsedLog?.args[2];
-
-      if (from === escrowAddress) {
-        paidOutAmount = paidOutAmount.add(ethers.formatEther(amount));
-      }
-    });
-
-    return Number(paidOutAmount);
   }
 
   private async getOracleFee(
