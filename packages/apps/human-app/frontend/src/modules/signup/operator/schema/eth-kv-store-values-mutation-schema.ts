@@ -3,7 +3,7 @@ import { t } from 'i18next';
 import {
   EthKVStoreKeys,
   JobType,
-  Role,
+  OPERATOR_ROLES,
 } from '@/modules/smart-contracts/EthKVStore/config';
 import { type GetEthKVStoreValuesSuccessResponse } from '@/modules/operator/hooks/use-get-keys';
 import { urlDomainSchema } from '@/shared/schemas';
@@ -12,7 +12,7 @@ const fieldsValidations = {
   [EthKVStoreKeys.PublicKey]: urlDomainSchema,
   [EthKVStoreKeys.Url]: urlDomainSchema,
   [EthKVStoreKeys.WebhookUrl]: urlDomainSchema,
-  [EthKVStoreKeys.Role]: z.nativeEnum(Role),
+  [EthKVStoreKeys.Role]: z.enum(OPERATOR_ROLES),
   [EthKVStoreKeys.JobTypes]: z.array(z.nativeEnum(JobType)).min(1),
   [EthKVStoreKeys.Fee]: z.coerce
     // eslint-disable-next-line camelcase
