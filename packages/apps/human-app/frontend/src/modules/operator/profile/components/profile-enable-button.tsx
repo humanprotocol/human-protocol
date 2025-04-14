@@ -2,24 +2,21 @@ import { t } from 'i18next';
 import { useEffect } from 'react';
 import { useConnectedWallet } from '@/shared/contexts/wallet-connect';
 import { Button } from '@/shared/components/ui/button';
-import type { SignatureData } from '@/api/hooks/use-prepare-signature';
 import {
-  PrepareSignatureType,
+  TopNotificationType,
+  useNotification,
   usePrepareSignature,
-} from '@/api/hooks/use-prepare-signature';
-import { TopNotificationType, useNotification } from '@/shared/hooks';
+} from '@/shared/hooks';
+import { PrepareSignatureType } from '@/shared/services/signature.service';
 import { useEnableWeb3Operator } from '../hooks';
 
 export function ProfileEnableButton() {
-  const { address, signMessage } = useConnectedWallet();
+  const { signMessage } = useConnectedWallet();
   const {
-    data: signatureData,
+    mutateAsync,
     error: signatureDataError,
     isPending: isSignatureDataPending,
-  } = usePrepareSignature({
-    address,
-    type: PrepareSignatureType.ENABLE_OPERATOR,
-  });
+  } = usePrepareSignature(PrepareSignatureType.ENABLE_OPERATOR);
 
   const {
     mutate: enableOperatorMutation,
@@ -38,7 +35,8 @@ export function ProfileEnableButton() {
     }
   }, [signatureDataError, enableOperatorError, showNotification]);
 
-  const enableOperator = async (signaturePayload: SignatureData) => {
+  const enableOperator = async () => {
+    const signaturePayload = await mutateAsync();
     const signature = await signMessage(JSON.stringify(signaturePayload));
     enableOperatorMutation({ signature: signature ?? '' });
   };
@@ -47,9 +45,7 @@ export function ProfileEnableButton() {
     <Button
       loading={isSignatureDataPending || isEnableOperatorPending}
       onClick={() => {
-        if (signatureData) {
-          void enableOperator(signatureData);
-        }
+        void enableOperator();
       }}
       variant="contained"
     >

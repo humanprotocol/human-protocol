@@ -3,12 +3,10 @@ import { t } from 'i18next';
 import { z } from 'zod';
 import { useAuthenticatedUser } from '@/modules/auth/hooks/use-authenticated-user';
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
-import {
-  PrepareSignatureType,
-  prepareSignature,
-} from '@/api/hooks/use-prepare-signature';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
+import { usePrepareSignature } from '@/shared/hooks';
+import { PrepareSignatureType } from '@/shared/services/signature.service';
 import { profileService } from '../profile/services/profile.service';
 
 interface RegisterAddressCallbacks {
@@ -23,18 +21,17 @@ function useRegisterAddressMutation(callbacks?: RegisterAddressCallbacks) {
   const { user } = useAuthenticatedUser();
   const { refreshAccessTokenAsync } = useAccessTokenRefresh();
   const { address, chainId, signMessage } = useWalletConnect();
+  const { mutateAsync } = usePrepareSignature(
+    PrepareSignatureType.REGISTER_ADDRESS
+  );
 
   const mutationFn = async () => {
     if (!address) {
       throw new Error(t('errors.noAddress'));
     }
 
-    const dataToSign = await prepareSignature({
-      address,
-      type: PrepareSignatureType.REGISTER_ADDRESS,
-    });
-
-    const messageToSign = JSON.stringify(dataToSign);
+    const data = await mutateAsync();
+    const messageToSign = JSON.stringify(data);
     const signature = await signMessage(messageToSign);
 
     if (!signature) {
