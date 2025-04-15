@@ -13,16 +13,12 @@ export function useSignUpMutation() {
 
   return useMutation({
     mutationFn: async (data: Omit<SignUpDto, 'confirmPassword'>) => {
-      try {
-        return await signupService.workerSignUp({
-          email: data.email,
-          password: data.password,
-          // eslint-disable-next-line camelcase
-          h_captcha_token: data.h_captcha_token,
-        });
-      } catch (error) {
-        throw new Error('Failed to sign up');
-      }
+      return signupService.workerSignUp({
+        email: data.email,
+        password: data.password,
+        // eslint-disable-next-line camelcase
+        h_captcha_token: data.h_captcha_token,
+      });
     },
     onSuccess: async (_, { email }) => {
       navigate(routerPaths.worker.verifyEmail, {
