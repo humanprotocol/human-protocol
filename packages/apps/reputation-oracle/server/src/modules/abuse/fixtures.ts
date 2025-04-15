@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { generateTestnetChainId } from '../../../test/fixtures/web3';
+import { generateTestnetChainId } from '../web3/fixtures';
 import { AbuseStatus } from './constants';
 import { generateWorkerUser } from '../user/fixtures';
 import { AbuseEntity } from './abuse.entity';

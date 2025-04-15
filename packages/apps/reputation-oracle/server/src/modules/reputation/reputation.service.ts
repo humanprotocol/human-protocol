@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ChainId } from '@human-protocol/sdk';
 import {
   AUDINO_VALIDATION_META_FILENAME,
@@ -27,7 +27,11 @@ import {
 } from '../../common/interfaces/job-result';
 import { RequestAction } from './reputation.interface';
 import { getRequestType } from '../../utils/manifest';
-import { AudinoManifest, CvatManifest } from '../../common/interfaces/manifest';
+import {
+  AudinoManifest,
+  CvatManifest,
+  JobManifest,
+} from '../../common/interfaces/manifest';
 import { ReputationConfigService } from '../../config/reputation-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
 import { ReputationEntity } from './reputation.entity';
@@ -36,7 +40,6 @@ import { ReputationError, ReputationErrorMessage } from './reputation.error';
 @Injectable()
 export class ReputationService {
   constructor(
-    @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly reputationRepository: ReputationRepository,
     private readonly reputationConfigService: ReputationConfigService,
@@ -62,7 +65,7 @@ export class ReputationService {
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
 
     const manifest =
-      await this.storageService.downloadJsonLikeData(manifestUrl);
+      await this.storageService.downloadJsonLikeData<JobManifest>(manifestUrl);
 
     const requestType = getRequestType(manifest);
 
@@ -172,12 +175,14 @@ export class ReputationService {
 
     const finalResultsUrl = await escrowClient.getResultsUrl(escrowAddress);
     const finalResults =
-      await this.storageService.downloadJsonLikeData(finalResultsUrl);
+      await this.storageService.downloadJsonLikeData<FortuneFinalResult[]>(
+        finalResultsUrl,
+      );
 
     // Assess reputation scores for workers based on the final results of a job.
     // Decreases or increases worker reputation based on the success or failure of their contributions.
     await Promise.all(
-      finalResults.map(async (result: FortuneFinalResult) => {
+      finalResults.map(async (result) => {
         if (result.error) {
           if (result.error === SolutionError.Duplicated)
             await this.decreaseReputation(
@@ -207,8 +212,8 @@ export class ReputationService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: CvatAnnotationMeta =
-      await this.storageService.downloadJsonLikeData(
+    const annotations =
+      await this.storageService.downloadJsonLikeData<CvatAnnotationMeta>(
         `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
       );
 
@@ -244,8 +249,8 @@ export class ReputationService {
     const intermediateResultsUrl =
       await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
-    const annotations: AudinoAnnotationMeta =
-      await this.storageService.downloadJsonLikeData(
+    const annotations =
+      await this.storageService.downloadJsonLikeData<AudinoAnnotationMeta>(
         `${intermediateResultsUrl}/${AUDINO_VALIDATION_META_FILENAME}`,
       );
 

@@ -11,12 +11,12 @@ import {
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { generateTestnetChainId } from '../../../test/fixtures/web3';
 import { EventType, ReputationEntityType } from '../../common/enums';
 import { PostgresErrorCodes } from '../../common/enums/database';
 import { DatabaseError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import { ReputationService } from '../reputation/reputation.service';
+import { generateTestnetChainId } from '../web3/fixtures';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';
 import { AbuseRepository } from './abuse.repository';

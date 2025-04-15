@@ -1,5 +1,4 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import {
@@ -8,12 +7,6 @@ import {
   MOCK_FILE_URL,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_S3_ACCESS_KEY,
-  MOCK_S3_BUCKET,
-  MOCK_S3_ENDPOINT,
-  MOCK_S3_PORT,
-  MOCK_S3_SECRET_KEY,
-  MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { JobRequestType } from '../../common/enums';
 import { Web3Service } from '../web3/web3.service';
@@ -23,6 +16,8 @@ import { CvatManifest } from '../../common/interfaces/manifest';
 import { CvatAnnotationMeta } from '../../common/interfaces/job-result';
 import { CalculatedPayout, SaveResultDto } from './payout.interface';
 import { MissingManifestUrlError } from '../../common/errors/manifest';
+import { PgpEncryptionService } from '../encryption/pgp-encryption.service';
+import * as httpUtils from '../../utils/http';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -45,18 +40,6 @@ describe('PayoutService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(
-          registerAs('s3', () => ({
-            accessKey: MOCK_S3_ACCESS_KEY,
-            secretKey: MOCK_S3_SECRET_KEY,
-            endPoint: MOCK_S3_ENDPOINT,
-            port: MOCK_S3_PORT,
-            useSSL: MOCK_S3_USE_SSL,
-            bucket: MOCK_S3_BUCKET,
-          })),
-        ),
-      ],
       providers: [
         {
           provide: Web3Service,
@@ -65,6 +48,10 @@ describe('PayoutService', () => {
           },
         },
         { provide: StorageService, useValue: createMock<StorageService>() },
+        {
+          provide: PgpEncryptionService,
+          useValue: createMock<PgpEncryptionService>(),
+        },
         PayoutService,
       ],
     }).compile();
@@ -342,7 +329,7 @@ describe('PayoutService', () => {
         .spyOn(storageService, 'downloadJsonLikeData')
         .mockResolvedValue(intermediateResults);
 
-      jest.spyOn(storageService, 'uploadJobSolutions').mockResolvedValue({
+      jest.spyOn(payoutService, 'uploadJobResults').mockResolvedValue({
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
       });
@@ -469,13 +456,12 @@ describe('PayoutService', () => {
         ],
       };
 
-      jest.spyOn(storageService, 'copyFileFromURLToBucket').mockResolvedValue({
+      jest.spyOn(httpUtils, 'downloadFile').mockResolvedValue(results);
+
+      jest.spyOn(payoutService, 'uploadJobResults').mockResolvedValue({
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
       });
-      jest
-        .spyOn(storageService, 'downloadJsonLikeData')
-        .mockResolvedValue(results);
 
       const result = await payoutService.saveResultsCvat(
         chainId,
