@@ -1,4 +1,4 @@
-import { AuthorizedHttpApiClient, HttpApiClient } from '@/api';
+import { ApiClientError, AuthorizedHttpApiClient, HttpApiClient } from '@/api';
 import { env } from '@/shared/env';
 import { AuthService } from '@/api/auth-service';
 import { type RegistrationInExchangeOracleDto } from '../schema';
@@ -30,6 +30,9 @@ export class OracleRegistrationService {
 
       return result;
     } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
       throw new Error('Failed to register in exchange oracle');
     }
   }

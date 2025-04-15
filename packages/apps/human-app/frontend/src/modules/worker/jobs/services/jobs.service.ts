@@ -50,85 +50,117 @@ export class JobsService {
   }
 
   async fetchAvailableJobs(args: JobsBody) {
-    return this.authorizedHttpApiClient
-      .get<AvailableJobsSuccessResponse>(apiPaths.jobs, {
-        queryParams: args.queryParams,
-        successSchema: availableJobsSuccessResponseSchema,
-        abortSignal: args.signal,
-      })
-      .catch((error: unknown) => {
-        if (error instanceof ApiClientError) {
-          throw error;
-        }
-        throw new Error('Failed to get available jobs');
-      });
+    try {
+      const result =
+        await this.authorizedHttpApiClient.get<AvailableJobsSuccessResponse>(
+          apiPaths.jobs,
+          {
+            queryParams: args.queryParams,
+            successSchema: availableJobsSuccessResponseSchema,
+            abortSignal: args.signal,
+          }
+        );
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new Error('Failed to get available jobs');
+    }
   }
 
   async fetchMyJobs(args: JobsBody) {
-    return this.authorizedHttpApiClient
-      .get<MyJobPaginationResponse>(apiPaths.myJobs, {
-        queryParams: args.queryParams,
-        successSchema: myJobsSuccessResponseSchema,
-        abortSignal: args.signal,
-      })
-      .catch((error: unknown) => {
-        if (error instanceof ApiClientError) {
-          throw error;
-        }
-        throw new Error('Failed to get my jobs');
-      });
+    try {
+      const result =
+        await this.authorizedHttpApiClient.get<MyJobPaginationResponse>(
+          apiPaths.myJobs,
+          {
+            queryParams: args.queryParams,
+            successSchema: myJobsSuccessResponseSchema,
+            abortSignal: args.signal,
+          }
+        );
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new Error('Failed to get my jobs');
+    }
   }
 
   async assignJob(data: AssignJobBody) {
-    return this.authorizedHttpApiClient
-      .post(apiPaths.assignJob, {
-        body: { ...data },
-      })
-      .catch((error: unknown) => {
-        if (error instanceof ApiClientError) {
-          throw error;
+    try {
+      const result = await this.authorizedHttpApiClient.post(
+        apiPaths.assignJob,
+        {
+          body: { ...data },
         }
-        throw new Error('Failed to assign job');
-      });
+      );
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new Error('Failed to assign job');
+    }
   }
 
   async resignJob(data: RejectTaskBody) {
-    return this.authorizedHttpApiClient
-      .post(apiPaths.resignJob, {
-        body: { ...data },
-      })
-      .catch((error: unknown) => {
-        if (error instanceof ApiClientError) {
-          throw error;
+    try {
+      const result = await this.authorizedHttpApiClient.post(
+        apiPaths.resignJob,
+        {
+          body: { ...data },
         }
-        throw new Error('Failed to resign job');
-      });
+      );
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new Error('Failed to resign job');
+    }
   }
 
   async refreshJobs(data: RefreshJobsBody) {
-    return this.authorizedHttpApiClient
-      .put(apiPaths.refreshJobs, {
-        body: { ...data },
-      })
-      .catch((error: unknown) => {
-        if (error instanceof ApiClientError) {
-          throw error;
+    try {
+      const result = await this.authorizedHttpApiClient.put(
+        apiPaths.refreshJobs,
+        {
+          body: { ...data },
         }
-        throw new Error('Failed to refresh jobs');
-      });
+      );
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new Error('Failed to refresh jobs');
+    }
   }
 
   async getUiConfig() {
-    return this.authorizedHttpApiClient
-      .get<UiConfig>(apiPaths.uiConfig, {
-        successSchema: uiConfigSchema,
-      })
-      .catch((error: unknown) => {
-        if (error instanceof ApiClientError) {
-          throw error;
+    try {
+      const result = await this.authorizedHttpApiClient.get<UiConfig>(
+        apiPaths.uiConfig,
+        {
+          successSchema: uiConfigSchema,
         }
-        throw new Error('Failed to get UI config');
-      });
+      );
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new Error('Failed to get UI config');
+    }
   }
 }
 

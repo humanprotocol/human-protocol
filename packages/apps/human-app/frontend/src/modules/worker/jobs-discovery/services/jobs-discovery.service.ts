@@ -40,7 +40,9 @@ export class JobsDiscoveryService {
 
       return result;
     } catch (error: unknown) {
-      if (error instanceof ApiClientError) throw error;
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
 
       throw new Error('Failed to get oracle registration data.');
     }

@@ -13,11 +13,7 @@ export function useSendResetLinkMutation() {
 
   return useMutation({
     mutationFn: async (data: SendResetLinkDto) => {
-      try {
-        return await passwordService.sendResetLink(data);
-      } catch (error) {
-        throw new Error('Failed to send reset link');
-      }
+      return passwordService.sendResetLink(data);
     },
     onSuccess: async (_, { email }) => {
       navigate(routerPaths.worker.sendResetLinkSuccess, { state: { email } });
