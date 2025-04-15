@@ -1,12 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Network } from 'ethers';
+import { t } from 'i18next';
+import { faker } from '@faker-js/faker';
 import { env } from '@/shared/env';
 import { MainnetChains, TestnetChains } from '@/modules/smart-contracts/chains';
-import { checkNetwork } from '../check-network';
-
-vi.mock('i18next', () => ({
-  t: (key: string, _options: Record<string, unknown>) => key,
-}));
+import { checkNetwork } from './check-network';
+import '@/shared/i18n/i18n';
 
 vi.mock('@/shared/env', () => ({
   env: {
@@ -27,14 +26,16 @@ describe('checkNetwork Function', () => {
   });
 
   it('should throw an error for unsupported testnet network', () => {
+    const networkName = faker.string.alpha(10);
+
     const network: Network = {
       chainId: BigInt(9999),
-      name: 'Unsupported Network',
+      name: networkName,
     } as Network;
 
     expect(() => {
       checkNetwork(network);
-    }).toThrow('errors.unsupportedNetworkWithName');
+    }).toThrow(t('errors.unsupportedNetworkWithName', { networkName }));
   });
 
   it('should not throw an error for supported mainnet network', () => {
@@ -52,14 +53,15 @@ describe('checkNetwork Function', () => {
 
   it('should throw an error for unsupported mainnet network', () => {
     vi.mocked(env).VITE_NETWORK = 'mainnet';
+    const networkName = faker.string.alpha(10);
 
     const network: Network = {
       chainId: BigInt(9999),
-      name: 'Unsupported Network',
+      name: networkName,
     } as Network;
 
     expect(() => {
       checkNetwork(network);
-    }).toThrow('errors.unsupportedNetworkWithName');
+    }).toThrow(t('errors.unsupportedNetworkWithName', { networkName }));
   });
 });
