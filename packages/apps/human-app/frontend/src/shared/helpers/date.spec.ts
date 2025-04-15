@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { faker } from '@faker-js/faker';
 import { formatDate, parseDate, getTomorrowDate } from './date';
 
 describe('Date Helper Functions', () => {
   describe('formatDate', () => {
     it('should correctly format a date string', () => {
-      const dateString = '2023-01-15T12:30:45Z';
+      const dateString = faker.date.anytime().toISOString();
       const formattedDate = formatDate(dateString);
       expect(formattedDate).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
     });
