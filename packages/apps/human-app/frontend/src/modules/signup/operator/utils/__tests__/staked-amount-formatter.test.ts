@@ -1,9 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { stakedAmountFormatter } from '../staked-amount-formatter';
-
-vi.mock('i18next', () => ({
-  t: (key: string) => (key === 'inputMasks.humanCurrencySuffix' ? 'HMT' : key),
-}));
+import '@/shared/i18n/i18n';
 
 describe('stakedAmountFormatter Function', () => {
   it('should format amounts with no decimal part correctly', () => {
