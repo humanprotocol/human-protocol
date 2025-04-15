@@ -14,9 +14,21 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     super(ReputationEntity, dataSource);
   }
 
-  findOneByAddress(address: string): Promise<ReputationEntity | null> {
+  findExclusive({
+    chainId,
+    address,
+    type,
+  }: {
+    chainId: number;
+    address: string;
+    type: ReputationEntityType;
+  }): Promise<ReputationEntity | null> {
     return this.findOne({
-      where: { address },
+      where: {
+        chainId,
+        address,
+        type,
+      },
     });
   }
 

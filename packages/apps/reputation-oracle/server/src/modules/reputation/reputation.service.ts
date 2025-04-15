@@ -311,8 +311,11 @@ export class ReputationService {
     address: string,
     type: ReputationEntityType,
   ): Promise<void> {
-    const reputationEntity =
-      await this.reputationRepository.findOneByAddress(address);
+    const reputationEntity = await this.reputationRepository.findExclusive({
+      chainId,
+      address,
+      type,
+    });
 
     if (!reputationEntity) {
       const reputationEntity = new ReputationEntity();
@@ -351,8 +354,11 @@ export class ReputationService {
     address: string,
     type: ReputationEntityType,
   ): Promise<void> {
-    const reputationEntity =
-      await this.reputationRepository.findOneByAddress(address);
+    const reputationEntity = await this.reputationRepository.findExclusive({
+      chainId,
+      address,
+      type,
+    });
 
     if (!reputationEntity) {
       const reputationEntity = new ReputationEntity();
