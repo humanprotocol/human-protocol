@@ -12,9 +12,8 @@ export function useSolveHCaptchaMutation(callbacks?: {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: VerifyHCaptchaLabelingBody) => {
-      return hCaptchaLabelingService.verifyHCaptchaLabeling(data);
-    },
+    mutationFn: async (data: VerifyHCaptchaLabelingBody) =>
+      hCaptchaLabelingService.verifyHCaptchaLabeling(data),
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
         await callbacks.onSuccess();

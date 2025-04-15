@@ -22,9 +22,8 @@ export function useGetMyJobsData() {
 
   return useQuery({
     queryKey: ['myJobs', queryParams],
-    queryFn: async ({ signal }) => {
-      return jobsService.fetchMyJobs({ queryParams, signal });
-    },
+    queryFn: async ({ signal }) =>
+      jobsService.fetchMyJobs({ queryParams, signal }),
   });
 }
 
@@ -39,9 +38,8 @@ export function useInfiniteGetMyJobsData() {
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['myJobsInfinite', queryParams],
-    queryFn: async ({ signal }) => {
-      return jobsService.fetchMyJobs({ queryParams, signal });
-    },
+    queryFn: async ({ signal }) =>
+      jobsService.fetchMyJobs({ queryParams, signal }),
     getNextPageParam: (pageParams: MyJobPaginationResponse) => {
       return pageParams.total_pages - 1 <= pageParams.page
         ? undefined

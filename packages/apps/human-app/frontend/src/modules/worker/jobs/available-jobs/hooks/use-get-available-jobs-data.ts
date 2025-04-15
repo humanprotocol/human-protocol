@@ -12,9 +12,8 @@ export function useGetAvailableJobsData() {
 
   return useQuery({
     queryKey: ['availableJobs', queryParams],
-    queryFn: async ({ signal }) => {
-      return jobsService.fetchAvailableJobs({ queryParams, signal });
-    },
+    queryFn: async ({ signal }) =>
+      jobsService.fetchAvailableJobs({ queryParams, signal }),
   });
 }
 
@@ -29,9 +28,8 @@ export function useInifiniteGetAvailableJobsData() {
 
   return useInfiniteQuery<AvailableJobsSuccessResponse>({
     queryKey: ['availableJobsInfinite', queryParams],
-    queryFn: async ({ signal }) => {
-      return jobsService.fetchAvailableJobs({ queryParams, signal });
-    },
+    queryFn: async ({ signal }) =>
+      jobsService.fetchAvailableJobs({ queryParams, signal }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.total_pages - 1 <= lastPage.page ? undefined : lastPage.page,

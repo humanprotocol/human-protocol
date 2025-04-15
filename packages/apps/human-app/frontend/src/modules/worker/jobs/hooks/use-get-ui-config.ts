@@ -4,9 +4,7 @@ import { jobsService } from '../services/jobs.service';
 export function useGetUiConfig() {
   return useQuery({
     queryKey: ['ui-config'],
-    queryFn: async () => {
-      return jobsService.getUiConfig();
-    },
+    queryFn: async () => jobsService.getUiConfig(),
     staleTime: Infinity,
   });
 }

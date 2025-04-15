@@ -12,9 +12,7 @@ export function useRefreshJobsMutation(callbacks?: {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: RefreshJobsBody) => {
-      return jobsService.refreshJobs(data);
-    },
+    mutationFn: async (data: RefreshJobsBody) => jobsService.refreshJobs(data),
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
         void callbacks.onSuccess();

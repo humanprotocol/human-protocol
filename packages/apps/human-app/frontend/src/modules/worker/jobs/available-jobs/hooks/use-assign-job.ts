@@ -19,9 +19,7 @@ export function useAssignJobMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: AssignJobBody) => {
-      return jobsService.assignJob(data);
-    },
+    mutationFn: async (data: AssignJobBody) => jobsService.assignJob(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
       callbacks?.onSuccess();

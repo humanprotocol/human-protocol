@@ -39,6 +39,7 @@ export function useWeb3SignIn() {
       signIn(successResponse);
       navigate(routerPaths.operator.profile);
     },
+
     mutationKey: ['web3SignIn', address, chainId],
   });
 }
