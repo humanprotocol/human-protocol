@@ -28,8 +28,10 @@ class JobMeta(BaseModel):
 
 class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
+    job_duration_without_overlap: float  # in seconds
 
     def skip_assignments(self, assignment_ids: Collection[int]) -> AnnotationMeta:
         return AnnotationMeta(
-            jobs=[job for job in self.jobs if job.assignment_id not in assignment_ids]
+            jobs=[job for job in self.jobs if job.assignment_id not in assignment_ids],
+            job_duration_without_overlap=self.job_duration_without_overlap,
         )

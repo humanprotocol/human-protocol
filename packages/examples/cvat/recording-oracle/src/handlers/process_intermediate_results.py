@@ -451,6 +451,7 @@ class _AudinoTaskValidator:
                     if job_id not in self._job_annotations:
                         self._job_annotations[job_id] = []
                     self._job_annotations[job_id].append(annotation)
+            return None
 
     def _parse_audino_gt_annotations(self, gt_dataset_data: bytes, path: str):
         _, ext = os.path.splitext(path)
@@ -563,18 +564,17 @@ class _AudinoTaskValidator:
                     annotations_data = json.load(annotations_file)
 
                     # Modify start and end for each annotation to make time stamps absolute
-                    # FIXME: Need to be changed
-                    # for annotation in annotations_data:
-                    #     job_id = annotation.get("job_id")
-                    #     if job_id is not None:
-                    #         job_time_offset = (
-                    #             (int(job_id) - self._base_job_id)
-                    #             * self.manifest.annotation.segment_duration
-                    #             / 1000
-                    #         )
+                    for annotation in annotations_data:
+                        job_id = annotation.get("job_id")
+                        if job_id is not None:
+                            job_time_offset = (
+                                int(job_id) - self._base_job_id
+                            ) * self._meta.job_duration_without_overlap
 
-                    #         annotation["start"] += job_time_offset
-                    #         annotation["end"] += job_time_offset
+                            if "start" in annotation:
+                                annotation["start"] += job_time_offset
+                            if "end" in annotation:
+                                annotation["end"] += job_time_offset
 
                 archive.writestr("annotations.json", json.dumps(annotations_data, indent=4))
 
@@ -1103,13 +1103,13 @@ def process_intermediate_results(  # noqa: PLR0912
         )
     else:
         validator = _TaskValidator(
-        escrow_address=escrow_address,
-        chain_id=chain_id,
-        manifest=manifest,
-        merged_annotations=merged_annotations,
-        meta=unchecked_jobs_meta,
-        gt_stats=gt_stats,
-    )
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            manifest=manifest,
+            merged_annotations=merged_annotations,
+            meta=unchecked_jobs_meta,
+            gt_stats=gt_stats,
+        )
 
     validation_result = validator.validate()
     job_results = validation_result.job_results

@@ -18,3 +18,4 @@ class JobMeta(BaseModel):
 
 class AnnotationMeta(BaseModel):
     jobs: list[JobMeta]
+    job_duration_without_overlap: float #in seconds

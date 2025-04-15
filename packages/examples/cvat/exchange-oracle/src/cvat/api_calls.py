@@ -889,3 +889,15 @@ def remove_user_from_org(user_id: int):
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling remove_user_from_org: {e}\n")
             raise
+
+
+def get_task(task_id: int) -> models.TaskRead:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            task, _ = api_client.tasks_api.retrieve(task_id)
+            return task
+
+        except exceptions.ApiException as ex:
+            logger.exception(f"Exception when calling TaskApi.retrieve: {ex}\n")
+            raise

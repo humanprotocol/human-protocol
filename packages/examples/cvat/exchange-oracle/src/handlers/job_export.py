@@ -11,6 +11,7 @@ from datumaro.components.dataset import Dataset
 import src.core.tasks.boxes_from_points as boxes_from_points_task
 import src.core.tasks.skeletons_from_boxes as skeletons_from_boxes_task
 import src.utils.annotations as annotation_utils
+import src.cvat.api_calls as cvat_api
 from src.core.annotation_meta import ANNOTATION_RESULTS_METAFILE_NAME, AnnotationMeta, JobMeta
 from src.core.config import Config
 from src.core.manifest import TaskManifest
@@ -52,6 +53,15 @@ def prepare_annotation_metafile(
     Prepares a task/project annotation descriptor file with annotator mapping.
     """
 
+    if jobs:
+        task = cvat_api.get_task(jobs[0].cvat_task_id)
+        overlap = task.overlap
+        overlap_in_ms = (overlap / task.segment_size) * task.segment_duration
+        job_duration_without_overlap = (task.segment_duration - overlap_in_ms) / 1000
+        job_duration_without_overlap = round(job_duration_without_overlap, 3)
+    else:
+        job_duration_without_overlap = 0.0
+
     meta = AnnotationMeta(
         jobs=[
             JobMeta(
@@ -64,7 +74,8 @@ def prepare_annotation_metafile(
                 stop_frame=job.stop_frame,
             )
             for job in jobs
-        ]
+        ],
+        job_duration_without_overlap = job_duration_without_overlap
     )
 
     return FileDescriptor(
