@@ -9,4 +9,4 @@ import { PgpEncryptionService } from './pgp-encryption.service';
   providers: [PgpEncryptionService],
   exports: [PgpEncryptionService],
 })
-export class EncryptionModuleModule {}
+export class EncryptionModule {}
