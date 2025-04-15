@@ -28,8 +28,8 @@ export class WebhookOutgoingService {
   constructor(
     private readonly httpService: HttpService,
     private readonly webhookOutgoingRepository: WebhookOutgoingRepository,
-    public readonly serverConfigService: ServerConfigService,
-    public readonly web3ConfigService: Web3ConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   /**
@@ -39,7 +39,7 @@ export class WebhookOutgoingService {
    * @param {string} hash - A hash generated from the URL and payload for unique identification.
    * @param {string} url - The destination URL for the outgoing webhook.
    */
-  public async createOutgoingWebhook(
+  async createOutgoingWebhook(
     payload: Record<string, unknown>,
     url: string,
   ): Promise<void> {
@@ -91,9 +91,7 @@ export class WebhookOutgoingService {
    * @param {object} payload - The data payload to send.
    * @throws {OutgoingWebhookError} If the webhook request fails.
    */
-  public async sendWebhook(
-    outgoingWebhook: WebhookOutgoingEntity,
-  ): Promise<void> {
+  async sendWebhook(outgoingWebhook: WebhookOutgoingEntity): Promise<void> {
     const snake_case_body = transformKeysFromCamelToSnake(
       outgoingWebhook.payload,
     ) as object;
@@ -115,7 +113,7 @@ export class WebhookOutgoingService {
     }
   }
 
-  public async processPendingOutgoingWebhooks(): Promise<void> {
+  async processPendingOutgoingWebhooks(): Promise<void> {
     const webhookEntities = await this.webhookOutgoingRepository.findByStatus(
       WebhookOutgoingStatus.PENDING,
     );

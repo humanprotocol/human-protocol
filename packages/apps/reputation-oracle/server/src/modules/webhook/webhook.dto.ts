@@ -7,18 +7,18 @@ import { IsChainId, IsLowercasedEnum } from '../../common/validators';
 export class IncomingWebhookDto {
   @ApiProperty({ name: 'chain_id' })
   @IsChainId()
-  public chainId: ChainId;
+  chainId: ChainId;
 
   @ApiProperty({ name: 'event_type' })
   @IsLowercasedEnum(EventType)
-  public eventType: EventType;
+  eventType: EventType;
 
   @ApiProperty({ name: 'escrow_address' })
   @IsEthereumAddress()
-  public escrowAddress: string;
+  escrowAddress: string;
 
   @ApiPropertyOptional({ name: 'event_data' })
   @IsOptional()
   @IsObject()
-  public eventData?: any;
+  eventData?: any;
 }

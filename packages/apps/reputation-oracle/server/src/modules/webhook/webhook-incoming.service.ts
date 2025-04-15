@@ -22,8 +22,8 @@ export class WebhookIncomingService {
   constructor(
     private readonly webhookIncomingRepository: WebhookIncomingRepository,
     private readonly escrowCompletionService: EscrowCompletionService,
-    public readonly serverConfigService: ServerConfigService,
-    public readonly web3ConfigService: Web3ConfigService,
+    private readonly serverConfigService: ServerConfigService,
+    private readonly web3ConfigService: Web3ConfigService,
   ) {}
 
   /**
@@ -32,7 +32,7 @@ export class WebhookIncomingService {
    * @param {IncomingWebhookDto} dto - Contains webhook details like chain ID and escrow address.
    * @throws {IncomingWebhookError} If the event type is invalid or the webhook cannot be created.
    */
-  public async createIncomingWebhook(dto: IncomingWebhookDto): Promise<void> {
+  async createIncomingWebhook(dto: IncomingWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.JOB_COMPLETED) {
       throw new IncomingWebhookError(
         WebhookErrorMessage.INVALID_EVENT_TYPE,
@@ -76,7 +76,7 @@ export class WebhookIncomingService {
     await this.webhookIncomingRepository.updateOne(webhookEntity);
   }
 
-  public async processPendingIncomingWebhooks(): Promise<void> {
+  async processPendingIncomingWebhooks(): Promise<void> {
     const webhookEntities = await this.webhookIncomingRepository.findByStatus(
       WebhookIncomingStatus.PENDING,
     );
