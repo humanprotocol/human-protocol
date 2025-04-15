@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { faker } from '@faker-js/faker';
 import { env } from '@/shared/env';
-import { isHCaptchaOracle } from '../is-hcaptcha-oracle';
+import { isHCaptchaOracle } from './is-hcaptcha-oracle';
 
 vi.mock('@/shared/env', () => ({
   env: {
@@ -17,9 +18,7 @@ describe('isHCaptchaOracle Helper', () => {
   });
 
   it('should return false when the address does not match the hCaptcha oracle address', () => {
-    const result = isHCaptchaOracle(
-      '0xabcdef1234567890abcdef1234567890abcdef12'
-    );
+    const result = isHCaptchaOracle(faker.finance.ethereumAddress());
     expect(result).toBe(false);
   });
 

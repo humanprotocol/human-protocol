@@ -6,6 +6,12 @@ import {
 } from '@/modules/smart-contracts/chains';
 import { getNetworkName } from './get-network-name';
 
+vi.mock('@/shared/env', () => ({
+  env: {
+    VITE_NETWORK: 'testnet',
+  },
+}));
+
 describe('getNetworkName Function', () => {
   it('should return the correct testnet chain name when VITE_NETWORK is testnet', () => {
     const chainId = AllTestnetsChains[0].chainId;
