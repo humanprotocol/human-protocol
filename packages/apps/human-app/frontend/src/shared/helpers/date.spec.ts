@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, parseDate, getTomorrowDate } from '../date';
+import { formatDate, parseDate, getTomorrowDate } from './date';
 
 describe('Date Helper Functions', () => {
   describe('formatDate', () => {
@@ -35,6 +35,13 @@ describe('Date Helper Functions', () => {
       expect(result.minutes).toBe(0);
       expect(result.seconds).toBe(0);
     });
+
+    it('should throw on negative values', () => {
+      const negativeMilliseconds = -1;
+      expect(() => parseDate(negativeMilliseconds)).toThrow(
+        'Negative values are not allowed'
+      );
+    });
   });
 
   describe('getTomorrowDate', () => {
@@ -44,10 +51,17 @@ describe('Date Helper Functions', () => {
 
       expect(tomorrow).toBeInstanceOf(Date);
 
-      const diffTime = tomorrow.getTime() - today.getTime();
-      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      const tomorrowExpected = new Date(today);
+      tomorrowExpected.setDate(tomorrowExpected.getDate() + 1);
 
-      expect(diffDays).toBeCloseTo(1, 0);
+      expect(tomorrow.getFullYear()).toBe(tomorrowExpected.getFullYear());
+      expect(tomorrow.getMonth()).toBe(tomorrowExpected.getMonth());
+      expect(tomorrow.getDate()).toBe(tomorrowExpected.getDate());
+
+      expect(tomorrow.getUTCHours()).toBe(7);
+      expect(tomorrow.getUTCMinutes()).toBe(0);
+      expect(tomorrow.getUTCSeconds()).toBe(0);
+      expect(tomorrow.getUTCMilliseconds()).toBe(0);
     });
   });
 });
