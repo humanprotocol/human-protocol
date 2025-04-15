@@ -12,9 +12,7 @@ export function useResignJobMutation(callbacks?: {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: RejectTaskBody) => {
-      return jobsService.resignJob(data);
-    },
+    mutationFn: async (data: RejectTaskBody) => jobsService.resignJob(data),
     onSuccess: async () => {
       if (callbacks?.onSuccess) {
         void callbacks.onSuccess();

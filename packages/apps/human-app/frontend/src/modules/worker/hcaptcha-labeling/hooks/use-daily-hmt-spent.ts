@@ -5,8 +5,6 @@ import { type DailyHmtSpentResponse } from '../types';
 export function useDailyHmtSpent() {
   return useQuery<DailyHmtSpentResponse>({
     queryKey: ['dailyHmtSpent'],
-    queryFn: async () => {
-      return hCaptchaLabelingService.getDailyHmtSpent();
-    },
+    queryFn: async () => hCaptchaLabelingService.getDailyHmtSpent(),
   });
 }

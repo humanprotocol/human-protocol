@@ -3,9 +3,7 @@ import { jobsDiscoveryService } from '../services/jobs-discovery.service';
 
 export function useGetRegistrationDataInOracles() {
   return useQuery({
-    queryFn: async () => {
-      return jobsDiscoveryService.getRegistrationDataOracles();
-    },
+    queryFn: async () => jobsDiscoveryService.getRegistrationDataOracles(),
     queryKey: ['getRegistrationDataInOracles'],
     refetchOnMount: false,
     refetchOnWindowFocus: false,

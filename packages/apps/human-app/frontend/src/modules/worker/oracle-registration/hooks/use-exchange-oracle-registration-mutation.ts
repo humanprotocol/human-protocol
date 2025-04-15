@@ -6,9 +6,8 @@ export function useExchangeOracleRegistrationMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: RegistrationInExchangeOracleDto) => {
-      return oracleRegistrationService.registerInExchangeOracle(data);
-    },
+    mutationFn: async (data: RegistrationInExchangeOracleDto) =>
+      oracleRegistrationService.registerInExchangeOracle(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
     },
