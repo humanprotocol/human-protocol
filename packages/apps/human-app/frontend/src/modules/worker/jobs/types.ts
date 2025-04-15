@@ -36,3 +36,22 @@ export type AvailableJob = z.infer<typeof availableJobSchema>;
 export type AvailableJobsSuccessResponse = z.infer<
   typeof availableJobsSuccessResponseSchema
 >;
+
+export interface RejectTaskBody {
+  assignment_id: string;
+  oracle_address: string;
+}
+
+export interface JobsBody {
+  queryParams?: Record<string, unknown>;
+  signal?: AbortSignal;
+}
+
+export interface AssignJobBody {
+  escrow_address: string;
+  chain_id: number;
+}
+
+export interface RefreshJobsBody {
+  oracle_address: string;
+}

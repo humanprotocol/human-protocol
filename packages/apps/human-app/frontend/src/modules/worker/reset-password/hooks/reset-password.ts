@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { t } from 'i18next';
 import { routerPaths } from '@/router/router-paths';
-import { passwordService } from '../../services/password.service';
+import { passwordService } from '../password.service';
 
 export const resetPasswordDtoSchema = z
   .object({

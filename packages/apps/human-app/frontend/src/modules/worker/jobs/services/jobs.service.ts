@@ -7,26 +7,14 @@ import {
   myJobsSuccessResponseSchema,
   uiConfigSchema,
 } from '../schemas';
-import { type AvailableJobsSuccessResponse, type UiConfig } from '../types';
-
-export interface RejectTaskBody {
-  assignment_id: string;
-  oracle_address: string;
-}
-
-export interface JobsBody {
-  queryParams?: Record<string, unknown>;
-  signal?: AbortSignal;
-}
-
-export interface AssignJobBody {
-  escrow_address: string;
-  chain_id: number;
-}
-
-export interface RefreshJobsBody {
-  oracle_address: string;
-}
+import {
+  type AssignJobBody,
+  type JobsBody,
+  type RefreshJobsBody,
+  type RejectTaskBody,
+  type AvailableJobsSuccessResponse,
+  type UiConfig,
+} from '../types';
 
 const apiPaths = {
   jobs: '/jobs',

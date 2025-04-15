@@ -4,7 +4,8 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { type AssignJobBody, jobsService } from '../../services/jobs.service';
+import { jobsService } from '../../services/jobs.service';
+import { type AssignJobBody } from '../../types';
 
 export const AssignJobBodySuccessResponseSchema = z.unknown();
 
