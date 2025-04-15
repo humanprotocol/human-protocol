@@ -4,13 +4,7 @@ import {
   AllTestnetsChains,
   AllMainnetChains,
 } from '@/modules/smart-contracts/chains';
-import { getNetworkName } from '../get-network-name';
-
-vi.mock('@/shared/env', () => ({
-  env: {
-    VITE_NETWORK: 'testnet',
-  },
-}));
+import { getNetworkName } from './get-network-name';
 
 describe('getNetworkName Function', () => {
   it('should return the correct testnet chain name when VITE_NETWORK is testnet', () => {
