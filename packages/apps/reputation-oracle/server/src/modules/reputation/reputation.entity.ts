@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { DATABASE_SCHEMA_NAME } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
@@ -6,6 +6,7 @@ import { BaseEntity } from '../../database/base.entity';
 import { ReputationEntityType } from './constants';
 
 @Entity({ schema: DATABASE_SCHEMA_NAME, name: 'reputation' })
+@Index(['chainId', 'address', 'type'], { unique: true })
 export class ReputationEntity extends BaseEntity {
   @Column({ type: 'int' })
   chainId: number;
