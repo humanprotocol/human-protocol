@@ -8,6 +8,12 @@ import { BaseRepository } from '../../database/base.repository';
 import { ReputationEntityType, ReputationOrderBy } from './constants';
 import { ReputationEntity } from './reputation.entity';
 
+export type ExclusiveReputationCriteria = {
+  chainId: number;
+  address: string;
+  type: ReputationEntityType;
+};
+
 @Injectable()
 export class ReputationRepository extends BaseRepository<ReputationEntity> {
   constructor(dataSource: DataSource) {
@@ -18,11 +24,7 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
     chainId,
     address,
     type,
-  }: {
-    chainId: number;
-    address: string;
-    type: ReputationEntityType;
-  }): Promise<ReputationEntity | null> {
+  }: ExclusiveReputationCriteria): Promise<ReputationEntity | null> {
     return this.findOne({
       where: {
         chainId,
@@ -65,5 +67,41 @@ export class ReputationRepository extends BaseRepository<ReputationEntity> {
       take: options?.first || 10,
       skip: options?.skip,
     });
+  }
+
+  async incrementReputation(
+    { chainId, address, type }: ExclusiveReputationCriteria,
+    value: number,
+  ) {
+    if (value <= 0) {
+      throw new Error('Value to increment must be positive');
+    }
+    await this.increment(
+      {
+        chainId,
+        address,
+        type,
+      },
+      'reputationPoints',
+      value,
+    );
+  }
+
+  async decrementReputation(
+    { chainId, address, type }: ExclusiveReputationCriteria,
+    value: number,
+  ) {
+    if (value <= 0) {
+      throw new Error('Value to decrement must be positive');
+    }
+    await this.decrement(
+      {
+        chainId,
+        address,
+        type,
+      },
+      'reputationPoints',
+      value,
+    );
   }
 }

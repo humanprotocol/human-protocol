@@ -5,6 +5,7 @@ import {
   CVAT_VALIDATION_META_FILENAME,
   INITIAL_REPUTATION,
 } from '../../common/constants';
+import { isDuplicatedError } from '../../common/errors/database';
 import {
   JobRequestType,
   SolutionError,
@@ -78,7 +79,7 @@ export class ReputationService {
    * @param escrowAddress The address of the escrow contract.
    * @returns {Promise<void>} A Promise indicating the completion of reputation assessment.
    */
-  public async assessReputationScores(
+  async assessReputationScores(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<void> {
@@ -299,77 +300,63 @@ export class ReputationService {
   }
 
   /**
-   * Increases the reputation points of a specified entity on a given blockchain chain.
-   * If the entity doesn't exist in the database, it creates a new entry with initial reputation points.
-   * @param chainId The ID of the blockchain chain.
-   * @param address The address of the entity.
-   * @param type The type of reputation entity.
-   * @returns {Promise<void>} A Promise indicating the completion of reputation increase.
+   * Increases the reputation points of a specified entity on a given chain.
+   * If the entity doesn't exist in the database - creates it first.
    */
-  public async increaseReputation(
+  async increaseReputation(
     chainId: ChainId,
     address: string,
     type: ReputationEntityType,
   ): Promise<void> {
-    const reputationEntity = await this.reputationRepository.findExclusive({
+    const existingEntity = await this.reputationRepository.findExclusive({
       chainId,
       address,
       type,
     });
 
-    if (!reputationEntity) {
-      const reputationEntity = new ReputationEntity();
-      reputationEntity.chainId = chainId;
-      reputationEntity.address = address;
-      reputationEntity.reputationPoints = INITIAL_REPUTATION + 1;
-      reputationEntity.type = type;
-
+    if (!existingEntity) {
+      let initialReputation = INITIAL_REPUTATION;
       if (
         type === ReputationEntityType.REPUTATION_ORACLE &&
         address === this.web3ConfigService.operatorAddress
       ) {
-        reputationEntity.reputationPoints =
-          this.reputationConfigService.highLevel;
+        initialReputation = this.reputationConfigService.highLevel;
       }
 
-      this.reputationRepository.createUnique(reputationEntity);
-      return;
+      const reputationEntity = new ReputationEntity();
+      reputationEntity.chainId = chainId;
+      reputationEntity.address = address;
+      reputationEntity.type = type;
+      reputationEntity.reputationPoints = initialReputation;
+
+      try {
+        await this.reputationRepository.createUnique(reputationEntity);
+      } catch (error) {
+        if (!isDuplicatedError(error)) {
+          throw error;
+        }
+      }
     }
 
-    reputationEntity.reputationPoints += 1;
-
-    await this.reputationRepository.updateOne(reputationEntity);
+    await this.reputationRepository.incrementReputation(
+      {
+        chainId,
+        address,
+        type,
+      },
+      1,
+    );
   }
 
   /**
-   * Decreases the reputation points of a specified entity on a given blockchain chain.
-   * If the entity doesn't exist in the database, it creates a new entry with initial reputation points.
-   * @param chainId The ID of the blockchain chain.
-   * @param address The address of the entity.
-   * @param type The type of reputation entity.
-   * @returns {Promise<void>} A Promise indicating the completion of reputation decrease.
+   * Decreases the reputation points of a specified entity on a given chain.
+   * If the entity doesn't exist in the database - creates it first.
    */
-  public async decreaseReputation(
+  async decreaseReputation(
     chainId: ChainId,
     address: string,
     type: ReputationEntityType,
   ): Promise<void> {
-    const reputationEntity = await this.reputationRepository.findExclusive({
-      chainId,
-      address,
-      type,
-    });
-
-    if (!reputationEntity) {
-      const reputationEntity = new ReputationEntity();
-      reputationEntity.chainId = chainId;
-      reputationEntity.address = address;
-      reputationEntity.reputationPoints = INITIAL_REPUTATION;
-      reputationEntity.type = type;
-      this.reputationRepository.createUnique(reputationEntity);
-      return;
-    }
-
     if (
       type === ReputationEntityType.REPUTATION_ORACLE &&
       address === this.web3ConfigService.operatorAddress
@@ -377,13 +364,36 @@ export class ReputationService {
       return;
     }
 
-    if (reputationEntity.reputationPoints === INITIAL_REPUTATION) {
-      return;
+    const existingEntity = await this.reputationRepository.findExclusive({
+      chainId,
+      address,
+      type,
+    });
+
+    if (!existingEntity) {
+      const reputationEntity = new ReputationEntity();
+      reputationEntity.chainId = chainId;
+      reputationEntity.address = address;
+      reputationEntity.type = type;
+      reputationEntity.reputationPoints = INITIAL_REPUTATION;
+
+      try {
+        await this.reputationRepository.createUnique(reputationEntity);
+      } catch (error) {
+        if (!isDuplicatedError(error)) {
+          throw error;
+        }
+      }
     }
 
-    reputationEntity.reputationPoints -= 1;
-
-    await this.reputationRepository.updateOne(reputationEntity);
+    await this.reputationRepository.decrementReputation(
+      {
+        chainId,
+        address,
+        type,
+      },
+      1,
+    );
   }
 
   /**
