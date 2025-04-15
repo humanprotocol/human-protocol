@@ -1,74 +1,57 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
-import { DataSource, ILike, In } from 'typeorm';
+import { DataSource, FindManyOptions, In } from 'typeorm';
+
+import { SortDirection } from '../../common/enums';
 import { BaseRepository } from '../../database/base.repository';
+
+import { ReputationEntityType, ReputationOrderBy } from './constants';
 import { ReputationEntity } from './reputation.entity';
-import {
-  ReputationEntityType,
-  ReputationOrderBy,
-  SortDirection,
-} from '../../common/enums';
 
 @Injectable()
 export class ReputationRepository extends BaseRepository<ReputationEntity> {
-  constructor(private dataSource: DataSource) {
+  constructor(dataSource: DataSource) {
     super(ReputationEntity, dataSource);
   }
 
-  public findOneByAddress(address: string): Promise<ReputationEntity | null> {
+  findOneByAddress(address: string): Promise<ReputationEntity | null> {
     return this.findOne({
       where: { address },
     });
   }
 
-  public findOneByAddressAndChainId(
-    address: string,
-    chainId: ChainId,
-  ): Promise<ReputationEntity | null> {
-    return this.findOne({
-      where: { address: ILike(address), chainId },
-    });
-  }
-
-  public findByChainId(chainId?: ChainId): Promise<ReputationEntity[]> {
-    return this.find({
-      where: chainId && { chainId },
-      order: {
-        createdAt: SortDirection.DESC,
-      },
-    });
-  }
-
-  public findByChainIdAndTypes(
-    chainId?: ChainId,
-    types?: ReputationEntityType[],
-    orderBy?: ReputationOrderBy,
-    orderDirection?: SortDirection,
-    first?: number,
-    skip?: number,
+  findPaginated(
+    filters: {
+      address?: string;
+      chainId?: ChainId;
+      types?: ReputationEntityType[];
+    },
+    options?: {
+      orderBy?: ReputationOrderBy;
+      orderDirection?: SortDirection;
+      first?: number;
+      skip?: number;
+    },
   ): Promise<ReputationEntity[]> {
-    const mapOrderBy = ReputationRepository.mapOrderBy(
-      orderBy || ReputationOrderBy.CREATED_AT,
-    );
+    const query: FindManyOptions<ReputationEntity>['where'] = {};
+    if (filters.chainId) {
+      query.chainId = filters.chainId;
+    }
+    if (filters.types) {
+      query.type = In(filters.types);
+    }
+    if (filters.address) {
+      query.address = filters.address;
+    }
 
     return this.find({
-      where: {
-        ...(chainId && { chainId }),
-        ...(types && types.length > 0 && { type: In(types) }),
-      },
+      where: query,
       order: {
-        [mapOrderBy]: orderDirection || SortDirection.DESC,
+        [options?.orderBy || ReputationOrderBy.CREATED_AT]:
+          options?.orderDirection || SortDirection.ASC,
       },
-      ...(skip && { skip }),
-      ...(first && { take: first }),
+      take: options?.first || 10,
+      skip: options?.skip,
     });
-  }
-
-  private static mapOrderBy(orderBy: ReputationOrderBy): string {
-    const orderByMap = {
-      [ReputationOrderBy.CREATED_AT]: 'createdAt',
-      [ReputationOrderBy.REPUTATION_POINTS]: 'reputationPoints',
-    };
-    return orderByMap[orderBy] || orderByMap[ReputationOrderBy.CREATED_AT];
   }
 }

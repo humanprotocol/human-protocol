@@ -6,10 +6,11 @@ import {
 } from '@human-protocol/sdk';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { EventType, ReputationEntityType } from '../../common/enums';
+import { EventType } from '../../common/enums';
 import { isDuplicatedError } from '../../common/errors/database';
 import { ServerConfigService } from '../../config/server-config.service';
 import logger from '../../logger';
+import { ReputationEntityType } from '../reputation/constants';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { WebhookOutgoingService } from '../webhook/webhook-outgoing.service';

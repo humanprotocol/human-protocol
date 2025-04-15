@@ -1,3 +1,9 @@
+export enum ReputationLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+}
+
 export enum ReputationEntityType {
   WORKER = 'worker',
   JOB_LAUNCHER = 'job_launcher',
@@ -6,13 +12,9 @@ export enum ReputationEntityType {
   REPUTATION_ORACLE = 'reputation_oracle',
 }
 
-export enum ReputationLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
+export enum ReputationOrderBy {
+  CREATED_AT = 'createdAt',
+  REPUTATION_POINTS = 'reputationPoints',
 }
 
-export enum ReputationOrderBy {
-  CREATED_AT = 'created_at',
-  REPUTATION_POINTS = 'reputation_points',
-}
+export const MAX_REPUTATION_ITEMS_PER_PAGE = 100;

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import {
   AUDINO_VALIDATION_META_FILENAME,
   CVAT_VALIDATION_META_FILENAME,
@@ -7,17 +7,9 @@ import {
 } from '../../common/constants';
 import {
   JobRequestType,
-  ReputationEntityType,
-  ReputationLevel,
-  ReputationOrderBy,
   SolutionError,
   SortDirection,
 } from '../../common/enums';
-import { ReputationRepository } from './reputation.repository';
-import { ReputationDto } from './reputation.dto';
-import { StorageService } from '../storage/storage.service';
-import { Web3Service } from '../web3/web3.service';
-import { EscrowClient } from '@human-protocol/sdk';
 import {
   AudinoAnnotationMeta,
   AudinoAnnotationMetaResult,
@@ -25,8 +17,6 @@ import {
   CvatAnnotationMetaResults,
   FortuneFinalResult,
 } from '../../common/interfaces/job-result';
-import { RequestAction } from './reputation.interface';
-import { getRequestType } from '../../utils/manifest';
 import {
   AudinoManifest,
   CvatManifest,
@@ -34,8 +24,26 @@ import {
 } from '../../common/interfaces/manifest';
 import { ReputationConfigService } from '../../config/reputation-config.service';
 import { Web3ConfigService } from '../../config/web3-config.service';
+import { getRequestType } from '../../utils/manifest';
+
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
+
+import {
+  ReputationEntityType,
+  ReputationLevel,
+  ReputationOrderBy,
+} from './constants';
+import { RequestAction } from './reputation.interface';
 import { ReputationEntity } from './reputation.entity';
-import { ReputationError, ReputationErrorMessage } from './reputation.error';
+import { ReputationRepository } from './reputation.repository';
+
+type ReputationData = {
+  chainId: ChainId;
+  address: string;
+  level: ReputationLevel;
+  role: ReputationEntityType;
+};
 
 @Injectable()
 export class ReputationService {
@@ -46,6 +54,21 @@ export class ReputationService {
     private readonly web3ConfigService: Web3ConfigService,
     private readonly web3Service: Web3Service,
   ) {}
+
+  /**
+   * Determines the reputation level based on the reputation points
+   */
+  private getReputationLevel(reputationPoints: number): ReputationLevel {
+    if (reputationPoints <= this.reputationConfigService.lowLevel) {
+      return ReputationLevel.LOW;
+    }
+
+    if (reputationPoints >= this.reputationConfigService.highLevel) {
+      return ReputationLevel.HIGH;
+    }
+
+    return ReputationLevel.MEDIUM;
+  }
 
   /**
    * Perform reputation assessment based on the completion status of a job and its associated entities.
@@ -358,99 +381,32 @@ export class ReputationService {
   }
 
   /**
-   * Retrieves the reputation data for a specific entity on a given blockchain chain.
-   * @param chainId The ID of the blockchain chain.
-   * @param address The address of the entity.
-   * @returns {Promise<ReputationDto>} A Promise containing the reputation data.
-   * @throws NotFoundException if the reputation data for the entity is not found.
+   * Retrieves reputation data for entities on a given chain,
+   * optionally filtered by different params.
    */
-  public async getReputation(
-    chainId: ChainId,
-    address: string,
-  ): Promise<ReputationDto> {
-    // https://github.com/humanprotocol/human-protocol/issues/1047
-    if (address === this.web3ConfigService.operatorAddress) {
-      return {
-        chainId,
-        address,
-        reputation: ReputationLevel.HIGH,
-        role: ReputationEntityType.REPUTATION_ORACLE,
-      };
-    }
-
-    const reputationEntity =
-      await this.reputationRepository.findOneByAddressAndChainId(
-        address,
-        chainId,
-      );
-
-    if (!reputationEntity) {
-      throw new ReputationError(
-        ReputationErrorMessage.NOT_FOUND,
-        chainId,
-        address,
-      );
-    }
-
-    return {
-      chainId: reputationEntity.chainId,
-      address: reputationEntity.address,
-      reputation: this.getReputationLevel(reputationEntity.reputationPoints),
-      role: reputationEntity.type,
-    };
-  }
-
-  /**
-   * Determines the reputation level based on the reputation points.
-   * @param reputationPoints The reputation points of an entity.
-   * @returns {ReputationLevel} The reputation level.
-   */
-  public getReputationLevel(reputationPoints: number): ReputationLevel {
-    if (reputationPoints <= this.reputationConfigService.lowLevel) {
-      return ReputationLevel.LOW;
-    }
-
-    if (reputationPoints >= this.reputationConfigService.highLevel) {
-      return ReputationLevel.HIGH;
-    }
-
-    return ReputationLevel.MEDIUM;
-  }
-
-  /**
-   * Retrieves reputation data for entities on a given blockchain chain, optionally filtered by chain ID and roles.
-   * Supports pagination and sorting by reputation points.
-   *
-   * @param chainId Optional. The ID of the blockchain chain.
-   * @param types Optional. An array of roles to filter by.
-   * @param orderBy Optional. The field to order the results by (e.g., reputation points).
-   * @param orderDirection Optional. The direction to sort the results (e.g., ascending or descending).
-   * @param first Number of records to retrieve.
-   * @param skip Number of records to skip.
-   * @returns A Promise containing an array of reputation data.
-   */
-  public async getReputations(
-    chainId?: ChainId,
-    types?: ReputationEntityType[],
-    orderBy?: ReputationOrderBy,
-    orderDirection?: SortDirection,
-    first?: number,
-    skip?: number,
-  ): Promise<ReputationDto[]> {
-    const reputations = await this.reputationRepository.findByChainIdAndTypes(
-      chainId,
-      types,
-      orderBy,
-      orderDirection,
-      first,
-      skip,
+  async getReputations(
+    filter: {
+      address?: string;
+      chainId?: ChainId;
+      types?: ReputationEntityType[];
+    },
+    options?: {
+      orderBy?: ReputationOrderBy;
+      orderDirection?: SortDirection;
+      first?: number;
+      skip?: number;
+    },
+  ): Promise<ReputationData[]> {
+    const reputations = await this.reputationRepository.findPaginated(
+      filter,
+      options,
     );
 
     return reputations.map((reputation) => ({
       chainId: reputation.chainId,
       address: reputation.address,
-      reputation: this.getReputationLevel(reputation.reputationPoints),
       role: reputation.type,
+      level: this.getReputationLevel(reputation.reputationPoints),
     }));
   }
 }

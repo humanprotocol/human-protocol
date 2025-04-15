@@ -1,17 +1,23 @@
 import { ChainId } from '@human-protocol/sdk';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEthereumAddress, IsOptional, Min } from 'class-validator';
+import { IsEthereumAddress, IsOptional, Max, Min } from 'class-validator';
 
-import {
-  ReputationEntityType,
-  ReputationLevel,
-  ReputationOrderBy,
-  SortDirection,
-} from '../../common/enums';
+import { SortDirection } from '../../common/enums';
 import { IsChainId, IsLowercasedEnum } from '../../common/validators';
 
-export class ReputationGetAllQueryDto {
+import {
+  MAX_REPUTATION_ITEMS_PER_PAGE,
+  ReputationEntityType,
+  ReputationLevel,
+} from './constants';
+
+export enum GetReputationQueryOrderBy {
+  CREATED_AT = 'created_at',
+  REPUTATION_POINTS = 'reputation_points',
+}
+
+export class GetReputationsQueryDto {
   @ApiPropertyOptional({
     enum: ChainId,
     name: 'chain_id',
@@ -20,15 +26,21 @@ export class ReputationGetAllQueryDto {
   @IsOptional()
   chainId?: ChainId;
 
+  @ApiPropertyOptional()
+  @IsEthereumAddress()
+  @IsOptional()
+  address?: string;
+
   @ApiPropertyOptional({
     type: [ReputationEntityType],
     enum: ReputationEntityType,
     name: 'roles',
   })
   /**
-   * NOTE: Order here matters
+   * NOTE: Order of decorators here matters
    *
-   * Query param is parsed as string if single value and array if multiple
+   * Query param is parsed as string if single value passed
+   * and as array if multiple
    */
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsLowercasedEnum(ReputationEntityType, { each: true })
@@ -36,14 +48,16 @@ export class ReputationGetAllQueryDto {
   roles?: ReputationEntityType[];
 
   @ApiPropertyOptional({
-    enum: ReputationOrderBy,
-    default: ReputationOrderBy.CREATED_AT,
+    name: 'order_by',
+    enum: GetReputationQueryOrderBy,
+    default: GetReputationQueryOrderBy.CREATED_AT,
   })
-  @IsLowercasedEnum(ReputationOrderBy)
+  @IsLowercasedEnum(GetReputationQueryOrderBy)
   @IsOptional()
-  orderBy?: ReputationOrderBy;
+  orderBy?: GetReputationQueryOrderBy;
 
   @ApiPropertyOptional({
+    name: 'order_direction',
     enum: SortDirection,
     default: SortDirection.DESC,
   })
@@ -51,9 +65,13 @@ export class ReputationGetAllQueryDto {
   @IsOptional()
   orderDirection?: SortDirection;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({
+    type: Number,
+    default: MAX_REPUTATION_ITEMS_PER_PAGE,
+  })
   @IsOptional()
   @Min(1)
+  @Max(MAX_REPUTATION_ITEMS_PER_PAGE)
   @Transform(({ value }) => Number(value))
   first?: number;
 
@@ -64,19 +82,7 @@ export class ReputationGetAllQueryDto {
   skip?: number;
 }
 
-export class ReputationGetParamsDto {
-  @ApiProperty()
-  @IsEthereumAddress()
-  address: string;
-}
-
-export class ReputationGetQueryDto {
-  @ApiProperty({ enum: ChainId, name: 'chain_id' })
-  @IsChainId()
-  chainId: ChainId;
-}
-
-export class ReputationDto {
+export class ReputationResponseDto {
   @ApiProperty({ enum: ChainId, name: 'chain_id' })
   chainId: ChainId;
 
@@ -84,7 +90,7 @@ export class ReputationDto {
   address: string;
 
   @ApiProperty({ enum: ReputationLevel })
-  reputation: ReputationLevel;
+  level: ReputationLevel;
 
   @ApiProperty({ enum: ReputationEntityType })
   role: ReputationEntityType;
