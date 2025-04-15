@@ -80,11 +80,7 @@ export class OperatorProfileService {
   }
 
   async refreshAccessToken() {
-    try {
-      await this.authService.refreshAccessToken();
-    } catch (error) {
-      throw new Error('Failed to refresh access token');
-    }
+    await this.authService.refreshAccessToken();
   }
 }
 
