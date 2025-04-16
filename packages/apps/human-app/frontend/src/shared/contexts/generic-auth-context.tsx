@@ -17,7 +17,13 @@ export type AuthStatus = 'loading' | 'error' | 'success' | 'idle';
 
 interface AuthContextType<T> {
   status: AuthStatus;
-  signOut: (throwExpirationModal?: boolean) => void;
+  signOut: ({
+    throwExpirationModal,
+    status,
+  }: {
+    throwExpirationModal?: boolean;
+    status?: AuthStatus;
+  }) => void;
   signIn: (signInSuccess: AuthTokensSuccessResponse) => void;
   updateUserData: (update: Partial<T>) => void;
 }
@@ -77,13 +83,14 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
         const validUserData = schema.parse(userDataWithSavedData);
 
         setAuthState({ user: validUserData, status: 'success' });
-        // Set the expiration modal callback
+
         browserAuthProvider.signOutSubscription = displayExpirationModal;
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Invalid JWT payload:', e);
-        browserAuthProvider.signOut({ triggerSignOutSubscriptions: true });
-        setAuthState({ user: null, status: 'error' });
+        signOut({
+          status: 'error',
+        });
       }
     };
 
@@ -92,11 +99,14 @@ export function createAuthProvider<T extends UserData | Web3UserData>(config: {
       handleSignIn();
     };
 
-    const signOut = (throwExpirationModal = true) => {
+    const signOut = ({
+      throwExpirationModal = true,
+      status = 'idle' as AuthStatus,
+    }) => {
       browserAuthProvider.signOut({
         triggerSignOutSubscriptions: throwExpirationModal,
       });
-      setAuthState({ user: null, status: 'idle' });
+      setAuthState({ user: null, status });
     };
 
     const updateUserData = (update: Partial<T>) => {
