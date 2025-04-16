@@ -169,6 +169,9 @@ export function MyJobsListMobile() {
                           <Typography
                             color={lightModeColorPalette.white}
                             variant="chip"
+                            sx={{
+                              textTransform: 'uppercase',
+                            }}
                           >
                             {d.status}
                           </Typography>
