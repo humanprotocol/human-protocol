@@ -1,15 +1,16 @@
-import React from 'react';
+import { FC } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Home from './pages/Home';
-import { useAccount } from 'wagmi';
 
-const App: React.FC = () => {
-  const { isConnected } = useAccount();
+import Dashboard from './pages/Dashboard';
+import KVStore from './pages/KVStore';
+import { ROUTES } from './constants';
+
+const App: FC = () => {
   return (
     <Routes>
-      <Route path="/" element={isConnected ? <Dashboard /> : <Home />} />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+      <Route path={ROUTES.KVSTORE} element={<KVStore />} />
+      <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
     </Routes>
   );
 };

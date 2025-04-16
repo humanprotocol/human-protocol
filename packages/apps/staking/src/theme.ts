@@ -113,6 +113,7 @@ const theme: ThemeOptions = createTheme({
     fontFamily: 'Inter, Arial, sans-serif',
     h1: {
       fontSize: 32,
+      fontWeight: 600,
     },
     h2: {
       fontSize: 34,
@@ -121,9 +122,6 @@ const theme: ThemeOptions = createTheme({
     h3: {
       fontSize: 24,
       fontWeight: 500,
-      '@media (max-width:600px)': {
-        fontSize: 20,
-      },
     },
     h4: {
       fontSize: 20,
@@ -204,16 +202,14 @@ const theme: ThemeOptions = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          cursor: 'pointer',
           fontWeight: 600,
           textTransform: 'none',
-        },
-      },
-    },
-    MuiToolbar: {
-      styleOverrides: {
-        root: {
-          '@media (min-width:1280px)': {
-            paddingX: 56,
+
+          '&:disabled': {
+            backgroundColor: '#FBFBFE',
+            color: 'rgba(203, 207, 232, 0.86)',
+            border: 'none',
           },
         },
       },
@@ -346,6 +342,7 @@ const theme: ThemeOptions = createTheme({
     MuiLink: {
       styleOverrides: {
         root: {
+          textDecoration: 'none',
           color: colorPalette.link,
           '&:hover': {
             color: `${colorPalette.linkHover}!important`,
