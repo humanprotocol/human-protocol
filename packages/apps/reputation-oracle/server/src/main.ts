@@ -8,6 +8,15 @@ import { AppModule } from './app.module';
 import { useContainer } from 'class-validator';
 import { ServerConfigService } from './config/server-config.service';
 import logger, { nestLoggerOverride } from './logger';
+import { IncomingMessage, ServerResponse } from 'http';
+
+function rawBodyMiddleware(
+  req: any,
+  _res: ServerResponse<IncomingMessage>,
+  buf: Buffer<ArrayBufferLike>,
+): void {
+  req.rawBody = buf.toString();
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -16,8 +25,19 @@ async function bootstrap() {
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.use(json({ limit: '5mb' }));
-  app.use(urlencoded({ limit: '5mb', extended: true }));
+  app.use(
+    json({
+      limit: '5mb',
+      verify: rawBodyMiddleware,
+    }),
+  );
+  app.use(
+    urlencoded({
+      limit: '5mb',
+      extended: true,
+      verify: rawBodyMiddleware,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .addBearerAuth()

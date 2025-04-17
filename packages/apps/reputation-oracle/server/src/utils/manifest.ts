@@ -1,14 +1,8 @@
-import {
-  AudinoManifest,
-  CvatManifest,
-  FortuneManifest,
-} from '../common/interfaces/manifest';
+import { JobManifest } from '../common/interfaces/manifest';
 import { JobRequestType } from '../common/enums';
 import { UnsupportedManifestTypeError } from '../common/errors/manifest';
 
-export function getRequestType(
-  manifest: FortuneManifest | CvatManifest | AudinoManifest,
-): JobRequestType {
+export function getRequestType(manifest: JobManifest): JobRequestType {
   let requestType: JobRequestType | undefined;
 
   if ('requestType' in manifest) {

@@ -44,6 +44,8 @@ import { HealthModule } from './modules/health/health.module';
 import { UiConfigurationModule } from './modules/ui-configuration/ui-configuration.module';
 import { NDAModule } from './modules/nda/nda.module';
 import { NDAController } from './modules/nda/nda.controller';
+import { AbuseController } from './modules/abuse/abuse.controller';
+import { AbuseModule } from './modules/abuse/abuse.module';
 
 const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
 
@@ -126,6 +128,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     HealthModule,
     UiConfigurationModule,
     NDAModule,
+    AbuseModule,
   ],
   controllers: [
     AppController,
@@ -139,6 +142,7 @@ const JOI_BOOLEAN_STRING_SCHEMA = Joi.string().valid('true', 'false');
     RegisterAddressController,
     TokenRefreshController,
     NDAController,
+    AbuseController,
   ],
   exports: [HttpModule],
   providers: [EnvironmentConfigService],

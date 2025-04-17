@@ -1,6 +1,8 @@
 export enum EventType {
   JOB_COMPLETED = 'job_completed',
   ESCROW_COMPLETED = 'escrow_completed',
+  ABUSE_DETECTED = 'abuse_detected',
+  ABUSE_DISMISSED = 'abuse_dismissed',
 }
 
 export enum WebhookIncomingStatus {

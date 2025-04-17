@@ -39,8 +39,8 @@ const { publicKey, privateKey } = generateES256Keys();
 const mockAuthConfigService = {
   jwtPrivateKey: privateKey,
   jwtPublicKey: publicKey,
-  accessTokenExpiresIn: 600000,
-  refreshTokenExpiresIn: 3600000,
+  accessTokenExpiresIn: 600,
+  refreshTokenExpiresIn: 3600,
   verifyEmailTokenExpiresIn: 86400000,
   forgotPasswordExpiresIn: 86400000,
   humanAppEmail: faker.internet.email(),
@@ -608,7 +608,7 @@ describe('AuthService', () => {
         reputation_network: mockWeb3ConfigService.operatorAddress,
         qualifications: user.userQualifications
           ? user.userQualifications.map(
-              (userQualification) => userQualification.qualification.reference,
+              (userQualification) => userQualification.qualification?.reference,
             )
           : [],
       };
@@ -728,7 +728,7 @@ describe('AuthService', () => {
           qualifications: user.userQualifications
             ? user.userQualifications.map(
                 (userQualification) =>
-                  userQualification.qualification.reference,
+                  userQualification.qualification?.reference,
               )
             : [],
         };
